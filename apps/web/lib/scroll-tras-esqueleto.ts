@@ -10,3 +10,17 @@ export const subirTrasEsqueleto = (
   inicio: string,
   actual: string,
 ): boolean => visible && inicio !== actual && (w.scrollTo({ top: 0, behavior: "instant" }), true);
+
+type Desplazable = { scrollTo(o: ScrollToOptions): void };
+
+/** Selector del contenido desplazable del lienzo en el marco Hilo (`data-lienzo` en `LienzoHilo`). */
+export const SELECTOR_LIENZO = "main[data-lienzo]";
+
+/**
+ * Qué se desplaza: en el marco Hilo, el lienzo (la ventana no se mueve); en el clásico, la ventana
+ * (CAR-317).
+ */
+export const contenedorDeScroll = (
+  buscarLienzo: () => Desplazable | null,
+  ventana: Desplazable,
+): Desplazable => buscarLienzo() ?? ventana;

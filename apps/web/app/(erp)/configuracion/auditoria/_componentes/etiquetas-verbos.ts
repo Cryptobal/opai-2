@@ -1,7 +1,7 @@
 /** Verbo (resto del código de la capacidad) → acción en español. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const VERBOS: Record<string, string> = {
   portal_inicio: "Portal de inicio", get: "Ver", update: "Editar", list: "Listar", invite: "Invitar",
-  remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", revoke: "Revocar", peek: "Revisar",
+  remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
   accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
   summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen",
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado", iniciar_vida: "Iniciar prueba de vida", consentir: "Dar consentimiento", habilitar: "Habilitar", textos: "Textos vigentes",
@@ -71,7 +71,7 @@ export const VERBOS: Record<string, string> = {
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
-  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
+  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", sync_servicio: "Sincronizar servicio",
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
   prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
@@ -89,4 +89,6 @@ export const VERBOS: Record<string, string> = {
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).
   plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
+  // Indicadores de gestión (CAR-305).
+  medir: "Medir",
 };

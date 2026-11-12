@@ -198,6 +198,8 @@ opai_app     | rolbypassrls = false | rolsuper = false
 
 **Nota (NÚCLEO-F · segundo factor, 26-oct-2026).** Se agrega el plugin `twoFactor` de Better Auth: TOTP con códigos de respaldo (la verificación por correo/OTP queda pendiente de diseño, ver más abajo). El secreto y los códigos de respaldo los cifra el plugin con `BETTER_AUTH_SECRET` (`symmetricEncrypt`): no hay secreto nuevo. Nuevas columnas/tablas de identidad en `core` (`users.two_factor_enabled`, `two_factor`), sin `tenant_id` ni RLS como el resto de identidad, y que solo toca `@opai/auth` (no se leen desde capacidades de negocio). El bloqueo del paso de verificar el código es por cuenta (`accountLockout`: 5 intentos, pausa de 15 min), alineado con el bloqueo de login de B1 y con su mismo aviso genérico; no reemplaza ni rompe los hooks de B1 (el conteo de contraseña y el de código van por separado). **Política (Decisión de Carlos, 26-oct-2026, chat con OPAI 2.0):** el segundo factor es obligatorio para las cuentas de plataforma (siempre) y para el `owner` y el `admin` de cada tenant; los demás roles lo activan de forma opcional o por el ajuste de tenant `core.seguridad_mfa_obligatorio_admins`. Si es obligatorio y la cuenta no lo tiene, tras la contraseña va a enrolarse antes de entrar (gate server-side en `PaginaPortal`). Las API keys y el MCP no cambian. SSO queda como P2, fuera de este PR.
 
+**Adenda (CAR-286 · MFA opcional y passkeys, 11-nov-2026, decisión de Carlos 13:08–13:10 CLT).** Cambia la política de arriba: el segundo factor **deja de ser obligatorio** para el `owner`, el `admin` y la empresa; cada usuario decide si lo usa y con qué métodos. Se retira el ajuste `core.seguridad_mfa_obligatorio_admins` (exigirlo como política de empresa queda como opción futura, apagada). Se le advirtió el riesgo (un owner o admin sin MFA que pierde su contraseña expone la empresa, incluidas la facturación y el certificado del SII) y lo mantuvo. Las cuentas de **plataforma conservan la exigencia** por instrucción del encargo; queda como pregunta abierta para Carlos (el issue de Linear proponía quitarla también). Se agregan **passkeys (WebAuthn)** con el plugin `@better-auth/passkey`: sirven para entrar sin contraseña y como segundo factor, con verificación del usuario obligatoria (biometría o PIN del dispositivo). Una cuenta tiene «segundo factor» si tiene app autenticadora (TOTP con códigos de respaldo) o al menos una passkey (`users.passkey_enabled`, derivada por trigger); con la sesión pendiente de ese factor no se pueden agregar factores nuevos. Nueva tabla de identidad `core.passkeys` (clave pública, sin secretos; sin `tenant_id` ni RLS, solo `opai_auth`). Quitar un método exige confirmar la identidad (contraseña, código o passkey) en los últimos 5 minutos y avisa si la cuenta queda solo con contraseña, sin impedirlo (salvo plataforma). Cada alta, entrada, cambio y baja de método queda en la cadena `seguridad` de la auditoría global. Paridad MCP: `core.metodos_acceso.list` y `renombrar_passkey` (sin secretos); `core.metodos_acceso.quitar` es irreversible y solo personas (excepción de paridad con motivo).
+
 **Nota (revisión del PR #65, 26-oct-2026). MFA obligatorio no desactivable para plataforma/owner/admin; decidido por el operador OPAI 2.0 con delegación de Carlos (t500u), 26-oct-2026.** El ajuste `core.seguridad_mfa_obligatorio_admins` ya no puede rebajar la exigencia de plataforma, `owner` ni `admin`: `mfaEsObligatoria` (`@opai/domain`) la fija siempre en `true` para esos tres casos, sin leer el ajuste; el ajuste solo **agrega** exigencia a los demás roles del tenant (renombrado en pantalla a «Exigir segundo factor también a los demás roles», por defecto `false`). Además, la sesión y no solo la cuenta debe acreditar el segundo factor: el login social (Google) nace con `sessions.mfa_verified = false` (migración `20261028070000_mfa_sesion`, columna de identidad sin `tenant_id` ni RLS, como el resto de `sessions`) y el plugin `opai-mfa-sesion` la marca solo tras un `verify-totp`/`verify-backup-code` exitoso de esa misma sesión; el gate de `PaginaPortal`, `resolverActor` (API con cookie) y `ejecutarComoUsuario` (Server Actions) usan ese único punto (`verificarMfaDe`/`estadoMfaDe` de `apps/web/lib/mfa.ts`), y `core.apikeys.create` rechaza si `ctx.mfa` falta o está pendiente, para que un owner/admin/plataforma sin segundo factor no pueda crear una API key y seguir sin él para siempre.
 
 **Nota (NÚCLEO-B, 26-oct-2026; Decisión de Carlos, 26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «lo que debamos hacer en el núcleo lo hagamos altiro»).** El rate limit de las rutas y acciones públicas se centralizó en Postgres (realiza en parte ADR-029 §15 «Seguridad operativa»): `core.rate_limit_consumir` (`SECURITY DEFINER`, upsert atómico) cuenta por ventana con la misma cuenta para todas las instancias de Vercel; antes era un Map en memoria por instancia, así que el tope no era real. La clave se guarda hasheada (SHA-256, sin la API key ni la IP en claro). Si la base falla, falla abierto con el límite en memoria como respaldo. El bloqueo de login real sigue persistido por cuenta (B1). La API key del MCP va siempre en `Authorization: Bearer`; la forma con la key en la URL (`/api/mcp/k/<key>`) quedó deprecada (410 Gone salvo `MCP_KEY_EN_URL_HASTA` futura), porque dejaba la key en historiales y logs. Sin secretos nuevos (no Upstash/Redis/KV). Topes iniciales fijados por Claude, a confirmar por Carlos.
@@ -1759,7 +1761,7 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 5. **Exportes de OPAI 1.** El adaptador solo lee el JSON del export que se le entrega y usa el sistema de ids `opai1`, el mismo de `comercial.importar_1_0`, para reconocer lo ya traído. Nunca consulta OPAI 1.
 6. **Quién importa.** `core:tenant.manage` (owner y admin por defecto) más el permiso de la entidad; para negocios, el módulo Comercial activo. Revertir un lote es irreversible: a un agente le pide aprobación.
 
-**Pendiente de Carlos.** Ver «Decisiones para Carlos» de CAR-279 en `ESTADO.md`.
+**Adenda (Carlos, chat del proyecto «Opai 2.0», 11-nov-2026 18:00; registra Claude, «Sesión Comercial»).** Cambia la regla 6 y precisa la 2: (a) importa quien tiene `core:importar.manage`: owner, admin y **gerente**; (b) el estado de una cuenta existente sí se completa cuando está en «prospecto» (equivale a «sin dato»): las cuentas activas en el origen quedan activas en OPAI 2; nunca se baja un cliente a prospecto; (c) los negocios ganados o perdidos no exigen fecha de cierre ni motivo; (d) las cuentas importadas no consultan el SII automáticamente; (e) Gard se trae desde OPAI 1 cuanto antes, empezando por Comercial.
 
 ## ADR-092 · `preview-e2e` reemplaza el primer vistazo visual de Carlos (CAR-285, 11-nov-2026)
 
@@ -1804,6 +1806,37 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 4. **Valores por defecto:** aprobados los del plan (atraso sobre 15 min, ausencia y pánico al canal encendidos; lo demás apagado; escalamiento a los 5 min si se enciende).
 5. **Escalamiento del pánico:** a un grupo de usuarios o a personas, configurable en cada tenant.
 
+## ADR-094 · Desempeño: indicadores publicados por los módulos y scorecard por cargo configurable por empresa (CAR-303, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente; Carlos aprobó la hoja de alcance [`diseño/alcance-desempeno.md`](diseño/alcance-desempeno.md) el 11-nov-2026 a las 16:41 · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» · **Registra:** Claude («Sesión Desempeño»).
+
+**Fuente (11-nov-2026, hora de Chile).** 15:47: Carlos pregunta cómo medir la gestión de cargos internos (vendedor, reclutador, operaciones, supervisor) cuando cada empresa tiene cargos distintos, y cómo hacerlo sin que quede obsoleto por la IA. 16:18: pide confirmar que es configurable por cada empresa y que los indicadores salen de lo que OPAI hace. 16:20: pide los tickets en Linear por módulo y la documentación en Notion y en el repositorio. 16:41: aprueba la hoja; decide que la primera versión trae el catálogo y los indicadores propios por empresa, que el resultado lo ven la persona y su jefatura («habría que configurar quién es la jefatura de un cargo»), que Desempeño se vende como módulo aparte, y pide el mockup definitivo, 100 % interactivo.
+
+**Contexto.** Toda escritura de negocio es una capacidad auditada, con el actor («agente X vía usuario Y»), y emite eventos de dominio (ADR-029, ADR-052). Los hechos para medir ya se registran; falta una forma común de convertirlos en indicadores y de que cada empresa decida qué mide en cada cargo. Hoy solo existe `core.inicio.indicadores` (CAR-182), que arma cuatro indicadores de Inicio a mano.
+
+**Decisión.**
+1. **Catálogo de indicadores como servicio del Núcleo.** Cada módulo declara sus indicadores en su manifiesto (nombre, tipo, unidad, sentido, meta sugerida, hechos de origen y cómo se atribuye a una persona), igual que declara ajustes y eventos (ADR-018, ADR-020). El Núcleo arma el catálogo desde el registro de módulos y calcula en dominio puro. Un módulo nuevo suma indicadores sin tocar el Núcleo; uno apagado no aporta.
+2. **Scorecard por cargo, por empresa.** La empresa elige qué indicadores usa cada cargo, con qué meta, qué peso y qué período. No cambia la fórmula. Los cargos son los de Personas › Cargos. Las plantillas salen de la configuración por vertical, nunca del código.
+3. **Se miden resultados, calidad y oportunidad, no cantidad de acciones.** El resultado se atribuye a la persona; la parte hecha por su agente queda a la vista.
+4. **Sin constructor de paneles.** Una pantalla fija de scorecard; los paneles a medida los arma el agente interno o una IA externa por MCP con las mismas capacidades.
+5. **Cambios auditados y sin efecto retroactivo.** Un cambio de meta, peso o indicador rige desde el período siguiente; los períodos cerrados no se recalculan.
+6. **El agente propone, una persona aprueba.** El agente nunca cambia una meta ni un scorecard por su cuenta.
+7. **Una sola Persona.** Todo usuario interno que recibe sueldo es una Persona con cargo; el usuario es solo el acceso (principio 5 del documento de arranque).
+8. **Indicadores propios por empresa, desde la primera versión** (CAR-313): sobre hechos que cada módulo declara, con cuatro formas de cálculo acotadas (contar, sumar un monto, tiempo entre dos hechos, porcentaje sobre otro hecho), vista previa obligatoria con datos reales y definición como configuración versionada evaluada en dominio (ADR-021).
+9. **Quién ve los resultados.** La persona ve el suyo; su jefatura, los de su equipo; la gerencia y quien administra el módulo, todos. Por cargo se configura la jefatura, si ve a todo el equipo o solo a las personas a su cargo, y si la persona ve su resultado y el ranking. El filtro se aplica en la consulta (ADR-022).
+10. **Jefatura por cargo en Personas** (CAR-314). Hoy el modelo no guarda a quién reporta un cargo ni una persona; se agrega en Cargos y queda disponible para otros módulos.
+11. **Desempeño se vende como módulo aparte.**
+
+**Qué no cambia.** Capacidades, permisos, RLS, auditoría y hechos regulados (ADR-023): Desempeño solo lee.
+
+**Plan.** Bloques y tareas en la hoja de alcance (CAR-304 a CAR-314, repartidas en el proyecto de Linear de cada módulo).
+
+**Adenda (11-nov-2026, 17:10, Carlos responde «ok» a las tres pendientes).** (a) El mockup de [`design/export-desempeno/`](design/export-desempeno/README.md) queda aprobado como base del diseño de las pantallas (CAR-307). (b) Si dos personas comparten el cargo que es jefatura, cada una ve solo a las personas que tiene asignadas; por cargo se puede elegir «todo el equipo». (c) El jefe del jefe ve toda su línea hacia abajo.
+
+**Hallazgo (verificado en `main` el 11-nov-2026).** Un usuario del sistema no está unido a su ficha de Persona: el responsable de un negocio es un usuario (`comercial.negocios.responsable_id`) y el cargo vive en el vínculo laboral de una Persona, sin relación entre ambos. La unión usuario–Persona entra en CAR-314, como aplicación del punto 7. Mientras no exista, cada indicador declara si se atribuye a un usuario o a una Persona.
+
+**Pendiente de Carlos.** Nada.
+
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
 
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:22, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` (sección «Decisiones de Carlos») e `INSTRUCCIONES-proyecto-claude.md`. (ADR-093 y ADR-094 están reservados por los PRs abiertos #505 y #506.)
@@ -1811,3 +1844,46 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
 
 **Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
+
+## ADR-096 · Emitir un documento lo envía al SII de inmediato (CAR-270, 11-nov-2026)
+
+**Decidió:** Carlos, 11-nov-2026 («sí» a la propuesta de la sesión de Finanzas, tras la certificación del 11-nov).
+
+**Contexto.** En 2.0 «Emitir» solo asignaba folio y firmaba; transmitir al SII era un segundo paso manual («Enviar al SII»). En la certificación del 11-nov eso confundió: documentos «Firmada, sin enviar», y una NC que anuló una factura que el SII todavía no había recibido. OPAI 1 envía al emitir.
+
+**Decisión.** Al emitir desde la pantalla (factura, nota de crédito, nota de débito y emisión en lote del cierre), el documento se envía al SII apenas termina la emisión. «Enviar al SII» queda como reintento cuando el envío falla.
+
+**Cómo.** El envío va **después** de la emisión y no dentro de ella: la pantalla ejecuta `finanzas.ventas.enviar_sii` cuando `finanzas.ventas.emitir` (o la nota, o el lote) ya quedó guardada. No se envía dentro de la capacidad de emisión porque su escritura corre en una transacción: si algo fallara después de transmitir, el SII tendría un folio que OPAI considera sin usar. Tampoco se envía con un trabajo en segundo plano: el runner tiene 45 s para todas las empresas y un envío cortado a medias no deja saber si el SII lo recibió, y reenviarlo a ciegas termina en un rechazo por documento repetido.
+
+**Consecuencias.**
+- Un envío fallido no deshace la emisión: el documento queda «Firmada, sin enviar al SII» con el aviso de cómo reintentar.
+- Por API y MCP siguen siendo dos pasos (`emitir` y luego `enviar_sii`, ambos con aprobación humana para agentes); la descripción de `finanzas.ventas.emitir` lo dice.
+- Las facturas programadas se generan como borrador; se envían al emitirlas, igual que las demás.
+- Pendiente: un marcador de «envío en curso» por documento permitiría un respaldo automático seguro para lo que quede firmado sin enviar; requiere migración.
+
+## ADR-097 · Un solo gestor de plantillas y documentos para todos los módulos (CAR-315, 11-nov-2026)
+
+**Decidió:** Carlos (chat de la sesión dueña de Personas y Documentos, 11-nov-2026, 17:56, hora de Chile) · **Registra:** Claude. **Modifica** la decisión 1 del §15 de `briefs/BRIEF-CAR-127-documentos-v4-pantallas-04-08.md` (9-nov-2026: «plantillas laborales aparte de las salidas comerciales»). (ADR-096 está reservado por el PR abierto #511.)
+
+**Contexto.** El gestor de plantillas de Documentos solo tenía plantillas laborales (contrato, anexo, recepción, carta), con variables de Persona, Vínculo, Instalación, Sueldo y Contrato. Carlos quiso crear un contrato de servicio para usarlo desde Cuentas y no encontró dónde (CAR-315).
+
+**Decisión.** Documentos es **el único lugar para las plantillas de todos los módulos**. Todo módulo tiene documentos y plantillas: Comercial (por ejemplo, contratos de servicio en las cuentas), Operaciones (por ejemplo, protocolos de seguridad y documentos que cada instalación debe cargar y revisar) y Personas (contratos, anexos y finiquitos). El texto de cada plantilla lo escribe la empresa en el editor.
+
+**Consecuencias.**
+- El gestor suma tipos de plantilla por módulo y sus variables (Cuenta, Instalación), y la generación del documento desde la ficha de cada entidad.
+- Los tipos de plantilla y de documento se configuran en Configuración › Módulos › Documentos (pantalla 10 del export `documentos-v4`), todavía sin construir.
+- Las salidas de CPQ (propuesta y cotización en PDF) siguen en CPQ mientras no se decida moverlas: esta decisión habla de plantillas de documentos, no del motor de cotización.
+- Queda fuera de este PR; se planifica en CAR-315 (parte 2) después del selector de plantilla en la ficha de persona (CAR-127 PR 4).
+
+### ADR-090 · Adenda 1 (11-nov-2026, CAR-278 y CAR-287)
+
+**Decide:** Carlos, en el chat del proyecto «Opai 2.0» (hora de Chile) · **Registra:** Claude («Sesión Hilo»), en el PR de la etapa H1.
+
+1. **Autonomía de los agentes: tres niveles por agente, para todo** (12:42 y 13:25). Cada agente está en Observa, Propone o Actúa solo, y eso rige para todo lo que hace; así lo muestra el prototipo. Marcar asistencia, registrar una ronda y firmar los hace siempre una persona. Carlos deja abierta, sin definirla, la posibilidad de autorizar cosas puntuales a un agente: «no quiero que nos enredemos con eso». No se endurece ADR-032. Se construye en la etapa H6. Responde el punto (6) de «Pendiente de Carlos».
+2. **Copia fiel, sin desvíos** (13:27): «visualmente la maqueta quede igual, igual, igual». Todo desvío respecto del export se lista en el PR con su motivo; nada se desvía en silencio.
+3. **Las pantallas por dentro llegan con el marco** (13:33): listas, fichas y formularios no pueden seguir con el estilo actual dentro del marco Hilo. La piel de las piezas comunes del DS (antes etapa H2) entra junto con H1. Carlos autoriza mejoras visuales pequeñas a criterio de la sesión (márgenes, botón del tema).
+4. **OPAI como conector interactivo de Claude, adelantado** (13:39 y 13:57). Carlos quiere trabajar en OPAI desde Claude con conectores interactivos (MCP Apps) y pide adelantarlo: estaba en la etapa H6 y pasa a ser un bloque propio, CAR-287, en paralelo con las etapas de Hilo. Como Claude exige que cada persona entre con su cuenta (OAuth) para agregar un conector propio, CAR-247 (OAuth por usuario para el MCP) se adelanta en lo que ese bloque necesite. Responde el punto (3) de «Pendiente de Carlos». El detalle técnico va en el brief y el PR de CAR-287.
+5. **El marco rige por navegador, como el Tema** (decisión técnica de la sesión). La preferencia se guarda por usuario, pero cada navegador recuerda su marco y no se sincroniza solo entre dispositivos; así una sesión no le cambia el marco a otra abierta por la misma persona.
+6. **Borde de los campos con contraste AA** (decisión técnica de la sesión, desvío declarado). El export dibuja los campos con el borde tenue de las líneas. Se mantiene el borde de control del DS (3:1), porque el contraste AA es regla del repositorio y criterio de aceptación de la piel. Si Carlos prefiere el borde del export, es un cambio de un token.
+7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
+8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.

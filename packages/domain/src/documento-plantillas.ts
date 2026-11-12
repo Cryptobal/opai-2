@@ -66,6 +66,8 @@ export const VARIABLES_PLANTILLA: readonly VariablePlantilla[] = [
   v("sueldo", "base", "Sueldo base", true),
   v("sueldo", "gratificacion", "Gratificación", true),
   v("contrato", "fecha", "Fecha del contrato"),
+  v("contrato", "motivo_cambio", "Motivo del cambio (anexos)"),
+  v("contrato", "cambios", "Detalle de los cambios (anexos)"),
 ];
 
 const CLAVES = new Set(VARIABLES_PLANTILLA.map((x) => x.clave));

@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { avisar } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { aplicarTema } from "@/lib/tema";
 
 export type Valores = { tema: string; silencio: boolean; resumen: string };
 
@@ -19,21 +20,6 @@ function mensajeReversion<K extends keyof Valores>(k: K, confirmado: Valores): s
   if (k === "tema")
     return `No pudimos guardar el tema; volvimos a ${ETIQUETA_TEMA[confirmado.tema] ?? confirmado.tema}.`;
   return "No pudimos guardar tu preferencia; la dejamos como estaba.";
-}
-
-/**
- * Aplica el tema al instante (el DS lee `data-theme` en <html>) y lo recuerda en este dispositivo
- * para el script del layout raíz, que lo aplica antes de pintar en las próximas cargas.
- */
-export function aplicarTema(t: string) {
-  const html = document.documentElement;
-  if (t === "sistema") delete html.dataset["theme"];
-  else html.dataset["theme"] = t === "oscuro" ? "dark" : "light";
-  try {
-    localStorage.setItem("opai_tema", t);
-  } catch {
-    // Sin almacenamiento (modo privado): el tema vale solo para esta pestaña.
-  }
 }
 
 /**

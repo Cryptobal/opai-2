@@ -22,7 +22,7 @@ for (const tema of ["light", "dark"] as const) {
       await expect(page.getByRole("heading", { name: "Ingresa con tu RUT" })).toBeVisible();
       await captura(page, "pin-login-vacio", p, tema);
 
-      const entrar = page.getByRole("button", { name: "Entrar" });
+      const entrar = page.getByRole("button", { name: "Entrar", exact: true });
       await expect(entrar).toBeDisabled();
       await page.getByLabel("RUT").fill("123456785");
       await expect(page.getByLabel("RUT")).toHaveValue("12.345.678-5");
@@ -52,7 +52,7 @@ test("el RUT con dígito verificador malo avisa y no deja entrar; el que termina
   page,
 }) => {
   await page.goto("/trabajador/login");
-  const entrar = page.getByRole("button", { name: "Entrar" });
+  const entrar = page.getByRole("button", { name: "Entrar", exact: true });
   const rut = page.getByLabel("RUT");
   const teclear = async () => {
     for (const d of "482915") await page.getByRole("button", { name: d, exact: true }).click();
@@ -80,7 +80,7 @@ test("datos incorrectos muestran el mismo aviso, exista o no el RUT", async ({ p
   await page.goto("/trabajador/login");
   await page.getByLabel("RUT").fill("99999999-9"); // dígito verificador válido de un RUT sin cuenta
   for (const d of "111112") await page.getByRole("button", { name: d, exact: true }).click();
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page.getByText("RUT o PIN incorrectos")).toBeVisible();
   await captura(page, "pin-login-error", info.project.name, "light");
 });

@@ -4,30 +4,48 @@ import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { telefono } from "@/lib/fechas";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
+import { identidadActual } from "@/lib/servidor";
 
-type Laboral = {
-  contacto: {
-    estadoCivil: string | null;
-    telefonoSecundario: string | null;
-    emergenciaNombre: string | null;
-    emergenciaRelacion: string | null;
-    emergenciaTelefono: string | null;
-  } | null;
-};
+import { conDatos, SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
+import { laboralDe } from "./lecturas-ficha";
+
+const TITULO = "Contacto y datos personales";
 
 export async function SeccionContactoLaboral({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
-  if (!identidad || !puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralRead)) return null;
-  const r = await ejecutarComoUsuario<Laboral>("erp", "core.personas.laboral_ver", { id: personaId });
-  if (!r.ok) return null;
+  if (!identidad) return null;
+  if (!puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralRead))
+    return <SeccionSinAcceso titulo={TITULO} />;
+  const r = await laboralDe(personaId);
+  if (!r.ok) return <SeccionError titulo={TITULO} que="el contacto" />;
   const c = r.data.contacto;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
+  const vacio = !conDatos(
+    c?.estadoCivil,
+    c?.telefonoSecundario,
+    c?.emergenciaNombre,
+    c?.emergenciaTelefono,
+  );
   return (
     <SeccionTarjeta
-      titulo="Contacto laboral"
-      {...(puede ? { accion: <BotonEditarSeccion seccion="contacto-laboral" /> } : {})}
+      titulo={TITULO}
+      {...(puede
+        ? {
+            accion: (
+              <BotonEditarSeccion
+                seccion="contacto-laboral"
+                {...(vacio ? { etiqueta: "Agregar" } : {})}
+              />
+            ),
+          }
+        : {})}
     >
+      {vacio ? (
+        <VacioSeccion
+          texto="Sin contacto de emergencia ni datos personales."
+          accion={puede ? "Agregar" : null}
+        />
+      ) : null}
       <ParesGrid
         items={[
           { etiqueta: "Estado civil", valor: c?.estadoCivil },
@@ -64,7 +82,7 @@ export async function SeccionContactoLaboral({ personaId }: { personaId: string 
 export async function ResumenContactoEmergencia({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
   if (!identidad || !puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralRead)) return null;
-  const r = await ejecutarComoUsuario<Laboral>("erp", "core.personas.laboral_ver", { id: personaId });
+  const r = await laboralDe(personaId);
   if (!r.ok || !r.data.contacto?.emergenciaNombre) return null;
   const c = r.data.contacto;
   return (

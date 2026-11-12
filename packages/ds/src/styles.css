@@ -15,6 +15,9 @@
   }
 }
 
+/* Dentro del marco «Hilo» (ADR-090): variante para lo poco que un patrón cambia según el marco. */
+@custom-variant marco-hilo (&:where([data-marco="hilo"] *));
+
 @layer base {
   html {
     font-family: var(--font-sans);
@@ -123,6 +126,46 @@
   font-size: 13px;
   line-height: 20px;
   font-variant-numeric: tabular-nums;
+}
+
+/* Marco «Hilo» (ADR-090, CAR-278): tamaños del diseño aprobado que no están en la escala base
+   (docs/2.0/design/export-base-hilo/). Solo los usa el marco; las pantallas siguen con la escala. */
+@utility t-hilo-saludo {
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+@utility t-hilo-lead {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 400;
+}
+@utility t-hilo-titulo {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+}
+@utility t-hilo-item {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+@utility t-hilo-mini {
+  font-size: 11px;
+  line-height: 14px;
+}
+/* Cabecera del hilo (CAR-317): nombre de la empresa y monograma. */
+@utility t-hilo-sujeto {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility t-hilo-monograma {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 700;
 }
 
 /* Skeleton con brillo (modo claro y oscuro) */

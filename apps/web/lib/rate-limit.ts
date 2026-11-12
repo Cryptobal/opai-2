@@ -30,12 +30,25 @@ export const LIMITES = {
   formularioWeb: { maximo: 20, ventanaMs: 60_000 },
   /** Proxy de mapas, por usuario: 30 por minuto. */
   geoMapa: { maximo: 30, ventanaMs: 60_000 },
+  /**
+   * Entrar con passkey (opciones y verificación), por IP: 200 cada 15 minutos (CAR-286). Holgado
+   * porque el login pide un desafío al cargar (autocompletado) y una oficina comparte IP; adivinar
+   * no sirve: cada intento exige el dispositivo con la clave privada.
+   */
+  passkey: { maximo: 200, ventanaMs: 15 * 60_000 },
+  /** Confirmar la identidad antes de quitar un método, por usuario: 10 cada 15 minutos. */
+  confirmarIdentidad: { maximo: 10, ventanaMs: 15 * 60_000 },
 } as const;
 
 /** Respaldo en memoria por instancia: la barrera de login y el fallo abierto del límite central. */
 const ventanas = new Map<string, { inicio: number; n: number }>();
 
-function consumirMemoria(clave: string, maximo: number, ventanaMs: number, ahora = Date.now()): boolean {
+function consumirMemoria(
+  clave: string,
+  maximo: number,
+  ventanaMs: number,
+  ahora = Date.now(),
+): boolean {
   const v = ventanas.get(clave);
   if (!v || ahora - v.inicio >= ventanaMs) {
     ventanas.set(clave, { inicio: ahora, n: 1 });
@@ -66,10 +79,14 @@ export async function permitir(
     return r.permitido;
   } catch {
     if (opciones.fallarCerrado) {
-      console.warn(`[rate-limit] base no disponible; se deniega (fallo cerrado) el ámbito "${ambito(clave)}"`);
+      console.warn(
+        `[rate-limit] base no disponible; se deniega (fallo cerrado) el ámbito "${ambito(clave)}"`,
+      );
       return false;
     }
-    console.warn(`[rate-limit] base no disponible; respaldo en memoria para el ámbito "${ambito(clave)}"`);
+    console.warn(
+      `[rate-limit] base no disponible; respaldo en memoria para el ámbito "${ambito(clave)}"`,
+    );
     return consumirMemoria(clave, maximo, ventanaMs);
   }
 }
@@ -80,7 +97,12 @@ export async function purgarVentanas(retencionS?: number): Promise<number> {
 }
 
 /** ¿La clave superó `maximo` fallos en la ventana? No cuenta nada (solo consulta). Barrera de login en memoria. */
-export function bloqueado(clave: string, maximo: number, ventanaMs: number, ahora = Date.now()): boolean {
+export function bloqueado(
+  clave: string,
+  maximo: number,
+  ventanaMs: number,
+  ahora = Date.now(),
+): boolean {
   const v = ventanas.get(clave);
   return !!v && ahora - v.inicio < ventanaMs && v.n >= maximo;
 }

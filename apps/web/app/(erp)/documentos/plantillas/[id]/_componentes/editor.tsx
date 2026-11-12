@@ -1,11 +1,10 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 
 import { envolverSeleccion, insertarEnTexto } from "@opai/domain";
-import { Alerta, Button, DetailScreen, Sheet, Skeleton } from "@opai/ds";
+import { Alerta, DetailScreen, Sheet, Skeleton } from "@opai/ds";
 
 import { fecha } from "@/lib/fechas";
 
@@ -116,10 +115,6 @@ export function EditorPlantilla({ inicial }: { inicial: PlantillaEditor }) {
             onFirmantes={e.setFirmantes}
             soloLectura={e.pendiente || e.archivada}
           />
-          <Button variant="secondary" block className="xl:hidden" onClick={() => setHoja(true)}>
-            <Plus aria-hidden className="size-4" />
-            Ver variables
-          </Button>
         </div>
       </div>
       <Sheet

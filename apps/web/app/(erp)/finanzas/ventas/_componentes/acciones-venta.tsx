@@ -9,10 +9,10 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { porTransmitir } from "./etiquetas-venta";
 import { HojaCobroManual } from "./hoja-cobro-manual";
-import { HojaNotaCredito } from "./hoja-nota-credito";
 import type { DatosBorrador, Venta } from "./tipos";
 
 // La hoja de cesión se carga al abrirla: no pesa en la ficha (presupuesto de JS, ADR-037).
+const HojaNotaCredito = dynamic(() => import("./hoja-nota-credito").then((m) => ({ default: m.HojaNotaCredito })));
 const HojaCeder = dynamic(() => import("./hoja-ceder").then((m) => ({ default: m.HojaCeder })));
 const EmitirBorradorFicha = dynamic(() => import("./emitir-borrador-ficha").then((m) => ({ default: m.EmitirBorradorFicha })));
 

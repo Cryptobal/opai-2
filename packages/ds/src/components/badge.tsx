@@ -7,6 +7,8 @@ const estilos = cva(
   [
     "inline-flex h-[22px] items-center gap-1.5 rounded-full px-2 text-xs font-medium whitespace-nowrap",
     "before:size-1.5 before:rounded-full before:bg-current before:content-['']",
+    // Marco Hilo (ADR-090): píldora sin punto, 11/14 en 600; el estado lo dice el color de fondo.
+    "marco-hilo:px-[9px] marco-hilo:t-hilo-mini marco-hilo:font-semibold marco-hilo:before:hidden",
   ],
   {
     variants: {

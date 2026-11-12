@@ -1,6 +1,7 @@
 export * from "./novedades/catalogo";
 export * from "./bloqueo-login";
 export * from "./catalogos";
+export * from "./bancos";
 export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";
 export * from "./comercial/datos-sii";
@@ -26,17 +27,24 @@ export * from "./rut";
 export * from "./terreno-pin";
 export * from "./telefono";
 export * from "./turnos";
-export { intervaloEsperado, horasEntre, horasEsperadas, type IntervaloEsperado } from "./turnos-instantes";
+export {
+  intervaloEsperado,
+  horasEntre,
+  horasEsperadas,
+  type IntervaloEsperado,
+} from "./turnos-instantes";
 export * from "./jornada-legal";
 export * from "./turnos-esperados";
 export * from "./turnos-jornada-pactada";
 export * from "./documento-plantillas";
 export * from "./documento-plantillas-texto";
+export * from "./documento-plantillas-rellenar";
 export * from "./vencimientos-grupos";
 export * from "./vigencia";
 export * from "./calendario";
 export * from "./datos-personales";
 export * from "./cumplimiento";
+export * from "./indicadores-gestion";
 export * from "./incidentes";
 export * from "./documento-subida";
 export * from "./firma";

@@ -1,8 +1,10 @@
 import { noEncontrado } from "../../errores";
 import { importadorContactos } from "./contactos";
+import { importadorContratos } from "./contratos";
 import { importadorCuentas } from "./cuentas";
 import { importadorInstalaciones } from "./instalaciones";
 import { importadorNegocios } from "./negocios";
+import { importadorPersonas } from "./personas";
 import type { Datos, Importador } from "./tipos";
 
 /** Vista sin el tipo de datos propio de cada importador, para tratarlos a todos igual en el motor. */
@@ -13,11 +15,12 @@ function generico<D extends Datos>(i: Importador<D>): Importador<Datos> {
     permiso: i.permiso,
     ...(i.modulo ? { modulo: i.modulo } : {}),
     actualizables: i.actualizables,
+    ...(i.sinDato ? { sinDato: i.sinDato } : {}),
     planificar: (ctx, filas, o) => i.planificar(ctx, filas, o),
     crear: (tx, ctx, datos) => i.crear(tx, ctx, datos as D),
-    actualizar: (tx, id, cambios) => i.actualizar(tx, id, cambios as Partial<D>),
+    actualizar: (tx, id, cambios, ctx) => i.actualizar(tx, id, cambios as Partial<D>, ctx),
     actuales: (tx, ids) => i.actuales(tx, ids),
-    bloqueos: (tx, ids) => i.bloqueos(tx, ids),
+    bloqueos: (tx, ids, ctx) => i.bloqueos(tx, ids, ctx),
     borrar: (tx, ids) => i.borrar(tx, ids),
   };
 }
@@ -31,9 +34,11 @@ export const IMPORTADORES: readonly Importador<Datos>[] = [
   generico(importadorContactos),
   generico(importadorInstalaciones),
   generico(importadorNegocios),
+  generico(importadorPersonas),
+  generico(importadorContratos),
 ];
 
-export const IDS_IMPORTADORES = ["cuentas", "contactos", "instalaciones", "negocios"] as const;
+export const IDS_IMPORTADORES = ["cuentas", "contactos", "instalaciones", "negocios", "personas", "contratos"] as const;
 
 export function importadorDe(id: string): Importador<Datos> {
   const i = IMPORTADORES.find((x) => x.def.id === id);

@@ -47,13 +47,16 @@ export type Importador<D extends Datos = Datos> = {
   modulo?: string;
   /** Campos que se guardan como texto y se pueden completar o sobrescribir en un registro existente. */
   actualizables: readonly (keyof D & string)[];
+  /** Valor que equivale a «sin dato» en un campo (estado `prospecto`): se completa como si estuviera vacío y nunca pisa a otro. */
+  sinDato?: Partial<Record<keyof D & string, Escalar>>;
   planificar(ctx: Contexto, filas: readonly FilaNormalizada[], o: OpcionesPlan): Promise<FilaPlan<D>[]>;
   crear(tx: TenantTx, ctx: Contexto, datos: D): Promise<string>;
-  actualizar(tx: TenantTx, id: string, cambios: Partial<D>): Promise<void>;
+  /** `ctx` llega siempre; lo usan los importadores que cifran campos (la cuenta bancaria de Personas). */
+  actualizar(tx: TenantTx, id: string, cambios: Partial<D>, ctx: Contexto): Promise<void>;
   /** Para revertir: estado actual de los registros que todavía existen. */
   actuales(tx: TenantTx, ids: readonly string[]): Promise<({ id: string; updatedAt: Date } & Record<string, unknown>)[]>;
   /** Para revertir: por qué no se puede borrar cada registro (tiene dependientes); sin entrada = se puede. */
-  bloqueos(tx: TenantTx, ids: readonly string[]): Promise<Map<string, string>>;
+  bloqueos(tx: TenantTx, ids: readonly string[], ctx: Contexto): Promise<Map<string, string>>;
   borrar(tx: TenantTx, ids: readonly string[]): Promise<void>;
 };
 

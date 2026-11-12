@@ -92,6 +92,16 @@ export const AJUSTES_NUCLEO = defineAjustes(
       .enum(["sistema", "claro", "oscuro"])
       .default("sistema")
       .meta({ etiqueta: "Tema", grupo: "Preferencias", ambito: "usuario", control: "seleccion" }),
+    // Marco de la aplicación (ADR-090, CAR-278): cada persona elige entre el clásico y el Hilo. Sin
+    // migración (ADR-038): va en `core.ajuste`, igual que el tema. El navegador lo recuerda en una
+    // cookie para que el servidor pinte el marco elegido sin parpadeo (`apps/web/lib/marco.ts`).
+    preferencias_marco: z.enum(["clasico", "hilo"]).default("clasico").meta({
+      etiqueta: "Diseño",
+      ayuda: "Clásico: menú lateral. Hilo: pendientes, pantalla de trabajo y barra de búsqueda.",
+      grupo: "Preferencias",
+      ambito: "usuario",
+      control: "seleccion",
+    }),
     preferencias_silencio: z.boolean().default(false).meta({
       etiqueta: "Silenciar avisos por correo",
       ayuda: "Los correos transaccionales (invitaciones, recuperación) llegan igual.",
@@ -122,14 +132,8 @@ export const AJUSTES_NUCLEO = defineAjustes(
         ambito: "plataforma",
         control: "json",
       }),
-    seguridad_mfa_obligatorio_admins: z.boolean().default(false).meta({
-      etiqueta: "Exigir segundo factor también a los demás roles",
-      ayuda:
-        "Solo agrega exigencia. Plataforma, owner y admin siempre requieren MFA y este ajuste no puede desactivarlo.",
-      grupo: "Seguridad",
-      ambito: "tenant",
-      control: "switch",
-    }),
+    // `seguridad_mfa_obligatorio_admins` se retiró (CAR-286, 11-nov-2026): el segundo factor es de
+    // cada usuario. Los valores guardados quedan inertes (el catálogo ignora claves no declaradas).
     remuneraciones_imm: z.number().int().min(1).default(553_553).meta({
       etiqueta: "Ingreso mínimo mensual (CLP)",
       ayuda: "Ley 21.830: $553.553 desde el 1-may-2026. Base del tope de gratificación legal.",

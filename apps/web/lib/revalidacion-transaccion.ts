@@ -1,4 +1,4 @@
-import { ajuste, prohibido, type Contexto } from "@opai/capabilities";
+import { prohibido, type Contexto } from "@opai/capabilities";
 import { esRolPlataforma, mfaEsObligatoria, pendienteMfa } from "@opai/domain";
 
 import type { Identidad } from "./actor";
@@ -67,9 +67,7 @@ export function conectarRevalidacion(
         pendienteMfa({
           activa: actual.mfaActiva,
           verificada: actual.mfaVerificada === true,
-          obligatoria:
-            mfaEsObligatoria(actual.usuario.platformRole, actual.actual?.rol) ||
-            (await ajuste<boolean>(ctx, "core", "seguridad_mfa_obligatorio_admins", tx)),
+          obligatoria: mfaEsObligatoria(actual.usuario.platformRole),
         }),
     )();
   };

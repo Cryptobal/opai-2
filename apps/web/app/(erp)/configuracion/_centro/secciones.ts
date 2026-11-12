@@ -125,7 +125,7 @@ export const SECCIONES: readonly Seccion[] = [
     corta: "Planillas Excel o CSV",
     icono: FileUp,
     grupo: "uso-registros",
-    permiso: PERMISOS_CORE.tenantManage,
+    permiso: PERMISOS_CORE.importarManage,
   }),
   s({
     id: "integraciones",

@@ -23,6 +23,29 @@ const co = (items) => ({ t: 'columnas', items });
 const mp = (txt) => ({ t: 'mapa', txt });
 const cm = (txt) => ({ t: 'camara', txt });
 const pg = (txt, pct) => ({ t: 'progreso', txt, pct });
+const Bbus = (ph) => ({ t: 'buscar', ph });
+const Bcon = (txt, orden) => ({ t: 'conteo', txt, orden: orden || '' });
+const Bform = (h, pref, items) => ({ t: 'formulario', h, pref, items });
+const Best = (tipo, titulo, txt, accion, cmd) => ({ t: 'estado', tipo, titulo, txt, accion: accion || '', cmd: cmd || '' });
+const Bske = (h) => ({ t: 'skeleton', h });
+const Btab = (h, cab, filas) => ({ t: 'tabla', h, cab, filas });
+const Bdia = (h, titulo, txt, si) => ({ t: 'dialogo', h, titulo, txt, si });
+const Btoa = (txt, h) => ({ t: 'toast', txt, h });
+const Beti = (h, items) => ({ t: 'etiquetas', h, items });
+const INI = (n) => n.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+const TEST = (e) => (/Cliente|Activ|Vigente|Pagad|Aprobad|Ganad|Cubiert|Complet/i.test(e) ? 'ok' : /Vencid|Rechazad|Inactiv|Perdid|Sin cobertura|Bloquead/i.test(e) ? 'bad' : /Revisi|Por vencer|Pendiente|Negocia|Borrador/i.test(e) ? 'warn' : 'mu');
+const CON_MONO = ['cuentas', 'contactos', 'personas', 'instalaciones', 'empresas', 'agentes'];
+const FID = (pref, c) => pref + '|' + ((c[3] && c[3].id) || c[0]);
+const FV = (F, pref, c) => (F['v_' + FID(pref, c)] !== undefined ? F['v_' + FID(pref, c)] : (c[2] || ''));
+const EQUIPO_OPS = ['Paula Riquelme', 'Camilo Ibarra', 'Rodrigo Soto', 'Sin asignar'];
+const FORMS = {
+  'Nueva cuenta': { sub: 'Comercial · Cuentas', campos: [['Razón social', 'texto', '', { req: 1, ph: 'Como aparece en el SII', ancho: 1 }], ['RUT', 'rut', '', { req: 1, ph: '76.123.456-7', ayuda: 'Con guion y dígito verificador.' }], ['Giro', 'texto', '', { ph: 'Actividad económica' }], ['Estado', 'select', 'Prospecto', { ops: ['Prospecto', 'Cliente', 'Inactivo'] }], ['Ejecutiva a cargo', 'select', 'Paula Riquelme', { ops: EQUIPO_OPS }], ['Dirección', 'texto', '', { ph: 'Calle, número y comuna', ancho: 1 }], ['Condición de pago', 'select', '30 días', { ops: ['Contado', '30 días', '45 días', '60 días'] }], ['Tope de crédito', 'monto', '', { ph: '$0' }], ['Facturar con orden de compra', 'switch', 0, { v: 'Pide el número de orden antes de emitir', ancho: 1 }], ['Notas', 'area', '', { ph: 'Lo que el equipo debe saber de esta cuenta', ancho: 1 }]] },
+  'Editar cuenta': { sub: 'Comercial · Cuentas', campos: [['Razón social', 'texto', 'Logística Andina SpA', { req: 1, ancho: 1 }], ['RUT', 'rut', '77.222.333-4', { req: 1, ayuda: 'Con guion y dígito verificador.' }], ['Giro', 'texto', 'Transporte y bodegaje', {}], ['Estado', 'select', 'Cliente', { ops: ['Prospecto', 'Cliente', 'Inactivo'] }], ['Ejecutiva a cargo', 'select', 'Paula Riquelme', { ops: EQUIPO_OPS }], ['Dirección', 'texto', 'Camino Lo Boza 880, Quilicura', { ancho: 1 }], ['Condición de pago', 'select', '30 días', { ops: ['Contado', '30 días', '45 días', '60 días'] }], ['Tope de crédito', 'monto', '$25.000.000', {}], ['Facturar con orden de compra', 'switch', 1, { v: 'Pide el número de orden antes de emitir', ancho: 1 }], ['Notas', 'area', 'Paga puntual. Coordinar accesos con el jefe de bodega.', { ancho: 1 }]] },
+  'Nuevo contacto': { sub: 'Comercial · Contactos', campos: [['Nombre', 'texto', '', { req: 1, ph: 'Nombre y apellido' }], ['Cargo', 'texto', '', { ph: 'Jefa de operaciones' }], ['Cuenta', 'select', 'Logística Andina SpA', { req: 1, ops: ['Logística Andina SpA', 'Alimentos del Maipo S.A.', 'Inmobiliaria Costanera'] }], ['Correo', 'texto', '', { req: 1, ph: 'nombre@empresa.cl' }], ['Teléfono', 'texto', '', { ph: '+56 9 1234 5678' }], ['Recibe las facturas', 'check', 0, { v: 'Se le copia en cada documento tributario' }], ['Puede entrar al Portal del cliente', 'switch', 0, { v: 'Se le envía una invitación por correo', ancho: 1 }]] },
+  'Nuevo negocio': { sub: 'Comercial · Negocios', campos: [['Nombre del negocio', 'texto', '', { req: 1, ph: 'Refuerzo de diciembre', ancho: 1 }], ['Cuenta', 'select', 'Logística Andina SpA', { req: 1, ops: ['Logística Andina SpA', 'Alimentos del Maipo S.A.', 'Minera Cerro Alto'] }], ['Etapa', 'select', 'Prospección', { ops: ['Prospección', 'Cotización enviada', 'Negociación', 'Cierre'] }], ['Monto mensual estimado', 'monto', '', { ph: '$0', ayuda: 'Neto, sin IVA.' }], ['Cierre esperado', 'fecha', '', { ph: 'dd-mm-aaaa' }], ['Responsable', 'select', 'Paula Riquelme', { ops: EQUIPO_OPS }], ['Próximo paso', 'area', '', { ph: 'Qué sigue y cuándo', ancho: 1 }]] },
+  'Nueva persona': { sub: 'Personas', campos: [['Nombres', 'texto', '', { req: 1 }], ['Apellidos', 'texto', '', { req: 1 }], ['RUT', 'rut', '', { req: 1, ph: '12.345.678-9' }], ['Fecha de nacimiento', 'fecha', '', { ph: 'dd-mm-aaaa' }], ['Cargo', 'select', 'Guardia', { ops: ['Guardia', 'Supervisor', 'Nochero', 'Administrativo'] }], ['Instalación', 'select', 'Planta Norte', { ops: ['Planta Norte', 'Centro de distribución Quilicura', 'Sin asignar'] }], ['Correo', 'texto', '', { ph: 'nombre@correo.cl' }], ['Teléfono', 'texto', '', { ph: '+56 9 1234 5678' }], ['Curso OS-10 vigente', 'check', 0, { v: 'Adjunta el certificado en Documentos' }], ['Recibe su liquidación por correo', 'switch', 1, { v: 'También queda en su portal', ancho: 1 }]] },
+};
+const FORM_GEN = { sub: 'Hoja', campos: [['Nombre o referencia', 'texto', '', { req: 1, ancho: 1 }], ['Responsable', 'select', 'Camilo Ibarra', { ops: EQUIPO_OPS }], ['Fecha', 'fecha', '11-11-2026', {}], ['Detalle', 'area', '', { ph: 'Lo que el equipo debe saber', ancho: 1 }]] };
 
 /* ───────── datos ficticios ───────── */
 const CU = [['c1', 'Alimentos del Maipo S.A.', 'Cliente', '76.111.222-3', 'Elaboración de alimentos', 'Av. Industrial 1450, Lampa', 'mar-2023'], ['c2', 'Logística Andina SpA', 'Cliente', '77.222.333-4', 'Transporte y bodegaje', 'Camino Lo Boza 880, Quilicura', 'ago-2022'], ['c3', 'Inmobiliaria Costanera', 'Cliente', '76.333.444-5', 'Administración de edificios', 'Av. Costanera 2200, Vitacura', 'ene-2024'], ['c4', 'Minera Cerro Alto', 'Cliente', '78.444.555-6', 'Minería', 'Av. Apoquindo 4500, Las Condes', 'jun-2024'], ['c5', 'Clínica del Valle', 'Cliente', '76.555.666-7', 'Salud', 'Av. Las Torres 310, Maipú', 'oct-2023'], ['c6', 'Puerto Sur', 'Prospecto', '77.666.777-8', 'Terminal portuario', 'Av. Portuaria 55, San Antonio', ''], ['c7', 'Colegio Los Robles', 'Prospecto', '65.777.888-9', 'Educación', 'Los Robles 1200, La Florida', ''], ['c8', 'Retail Centro', 'Prospecto', '76.888.999-0', 'Comercio', 'Paseo Estado 340, Santiago', '']]
@@ -123,14 +146,14 @@ const PORTALES = {
       ['Personas', [['Personas', 'l:personas'], ['Asistencia', 'x:asistencia:Hoy'], ['Remuneraciones', 'x:remu:Período'], ['Inventario', 'x:plan:Inventario', 1]]],
       ['Finanzas', [['Ventas', 'x:ventas:Emitidas'], ['Compras', 'l:compras'], ['Banca y conciliación', 'x:banca'], ['Flujo de caja', 'x:flujo'], ['Cobranza', 'x:cobranza'], ['Factoring', 'x:factoring'], ['Rendiciones', 'l:rendiciones'], ['Contabilidad', 'x:contab:Plan de cuentas', 1], ['Informes', 'x:informes', 1]]],
       ['Documentos', [['Explorador', 'x:documentos:Explorador'], ['Vencimientos', 'x:documentos:Vencimientos'], ['Plantillas', 'x:documentos:Plantillas'], ['Firmas', 'x:documentos:Firmas']]],
-      ['Configuración', [['Todos los ajustes', 'x:config'], ['Agentes y autonomía', 'x:equipo'], ['Cambiar de portal', 'x:portales']]]] },
+      ['Configuración', [['Todos los ajustes', 'x:config'], ['Piezas y estados del diseño', 'x:piezas'], ['Agentes y autonomía', 'x:equipo'], ['Cambiar de portal', 'x:portales']]]] },
   supervisor: { todo: 'Tus instalaciones', rol: 'Supervisora · solo sus 3 instalaciones', nombre: 'Supervisor', quien: 'Supervisores en terreno', mono: 'CM', sujeto: 'Carla Muñoz', sub: 'Supervisora · zona norte', saludo: 'Hola, Carla.', inicio: 'x:sup_hoy', dec: ['s1', 's2'],
     resumen: (n) => (n ? 'Tienes ' + n + ' pendientes en tus 3 instalaciones.' : 'Tus instalaciones están en orden.'),
     paso: [['19:40', 'Tú', 'Visitaste Planta Norte. Sin observaciones.', 0, 'x:sup_visita:hecha'], ['18:52', 'Agente Cobertura', 'Propuso cubrir la ausencia de Marco Fuentes.', 1, 'x:dec:s1']],
     viene: [['Jue 12', 'Visita programada a Centro de distribución Quilicura', '10:00', 'mu', 'x:sup_visita:nueva'], ['Jue 12', 'Vence tu curso OS-10', 'Renovación pendiente', 'warn', 'x:sup_hoy']],
     sug: [['¿Quién falta hoy?', 'x:resp:q2'], ['Rondas de esta noche', 'x:rondas'], ['Registrar una visita', 'x:sup_visita:nueva']],
     indice: [['Hoy', [['Mis instalaciones hoy', 'x:sup_hoy'], ['Alertas de la central', 'x:central:Cola']]], ['Terreno', [['Instalaciones a cargo', 'l:instalaciones'], ['Visitas de supervisión', 'x:supervision'], ['Rondas', 'x:rondas'], ['Portería', 'x:accesos:En sitio'], ['Bitácora y novedades', 'x:bitacora:todas']]], ['Gestión', [['Pauta diaria', 'x:diaria'], ['Turnos extra', 'l:turnosx'], ['Tickets', 'l:tickets'], ['Personas a cargo', 'l:personas']]], ['Cuenta', [['Cambiar de portal', 'x:portales']]]] },
-  terreno: { todo: 'Este puesto', rol: 'Dispositivo de Planta Norte · solo su instalación', nombre: 'Terreno', quien: 'Dispositivo fijo de una instalación', mono: 'PN', sujeto: 'Planta Norte', sub: 'Dispositivo de la instalación · turno noche', saludo: 'Turno noche.', inicio: 'x:ter_inicio', dec: [],
+  terreno: { todo: 'Este puesto', rol: 'Dispositivo de Planta Norte · solo su instalación', nombre: 'Terreno', quien: 'Dispositivo fijo de una instalación', mono: 'PN', sujeto: 'Planta Norte', sub: 'Terreno · turno noche', saludo: 'Turno noche.', inicio: 'x:ter_inicio', dec: [],
     resumen: () => 'Daniela Rojas en Acceso principal. Ana Pizarro en Bodega.',
     paso: [], viene: [['22:00', 'Ronda de 6 puntos', 'Programada', 'mu', 'x:ter_ronda'], ['00:00', 'Ronda de 6 puntos', 'Programada', 'mu', 'x:ter_ronda'], ['08:00', 'Entrega de turno', 'Recibe Camila Soto', 'mu', 'x:ter_libro']],
     sug: [['Registrar una entrada', 'x:reg_entrada:1'], ['Escribir una novedad', 'x:ter_libro'], ['Avisar a la central', 'x:ter_central']],
@@ -141,7 +164,7 @@ const PORTALES = {
     viene: [['Jue 12', 'Turno noche · Planta Norte', '20:00 a 08:00 · turno extra', 'mu', 'x:gua_pauta'], ['Vie 13', 'Día libre', '', 'mu', 'x:gua_pauta'], ['Sáb 14', 'Turno día · Planta Norte', '08:00 a 20:00', 'mu', 'x:gua_pauta']],
     sug: [['Mi liquidación', 'x:resp:qg1'], ['Mi pauta', 'x:gua_pauta'], ['Pedir un permiso', 'x:gua_solicitud'], ['Avisar a la central', 'x:gua_central']],
     indice: [['Mi turno', [['Inicio', 'x:gua_inicio'], ['Marcar asistencia', 'x:marcar:cam'], ['Mis marcas', 'x:gua_marcas'], ['Mi pauta', 'x:gua_pauta'], ['Rondas asignadas', 'x:gua_rondas']]], ['Mis cosas', [['Mis documentos', 'x:gua_docs'], ['Mi liquidación', 'x:gua_liq'], ['Solicitudes', 'x:gua_solicitudes'], ['Central y avisos', 'x:gua_central']]], ['Cuenta', [['Mis datos', 'x:gua_datos'], ['Privacidad', 'x:gua_privacidad'], ['Notificaciones', 'x:gua_notif'], ['Cambiar de portal', 'x:portales']]]] },
-  cliente: { todo: 'Todo tu servicio', rol: 'Contacto del cliente · solo su cuenta, sin costos internos', nombre: 'Cliente', quien: 'Contactos de la cuenta cliente', mono: 'LA', sujeto: 'Logística Andina SpA', sub: 'Servicio de Gard Security · Rodrigo Méndez', saludo: 'Buen día, Rodrigo.', inicio: 'x:cli_resumen', dec: ['c1', 'c2'],
+  cliente: { todo: 'Todo tu servicio', rol: 'Contacto del cliente · solo su cuenta, sin costos internos', nombre: 'Cliente', quien: 'Contactos de la cuenta cliente', mono: 'LA', sujeto: 'Logística Andina SpA', sub: 'Gard Security · Rodrigo Méndez', saludo: 'Buen día, Rodrigo.', inicio: 'x:cli_resumen', dec: ['c1', 'c2'],
     resumen: () => 'Tu servicio está completo hoy: 8 de 8 puestos cubiertos.',
     paso: [['06:00', 'Gard Security', 'Rondas de anoche completas: 12 de 12.', 0, 'x:resp:qc2'], ['Ayer 21:10', 'Rosa Méndez · guardia', 'Luminaria apagada en el andén 4 de Quilicura.', 0, 'x:cli_inst:i3:Novedades'], ['Ayer', 'Gard Security', 'Asistencia del día: 18 de 18 turnos.', 0, 'x:cli_inst:i3:Cobertura']],
     viene: [['Jue 12', 'Visita de supervisión', 'Carla Muñoz · Quilicura', 'mu', 'x:cli_inst:i3:Supervisión'], ['Lun 16', 'Renovación de tu contrato', 'Recibirás la propuesta esta semana', 'mu', 'x:cli_cot'], ['Mar 1-dic', 'Factura de noviembre', 'Se emite el primer día hábil', 'mu', 'x:cli_facturas']],
@@ -315,7 +338,23 @@ const X = {
     no('El límite en cada portal no es un nivel de autonomía: es el permiso y el alcance de la persona. Un guardia solo llega a lo suyo y un cliente solo a su cuenta, porque lo impone el servidor en cada consulta.'),
     li('Dónde se enciende', [['Por portal', 'Configuración › Módulos › Portal del cliente, Asistencia y Rondas', 'Abrir', '', 'ir:x:config'], ['Por rol', 'Configuración › Personas y acceso › Roles', 'Abrir', '', 'ir:x:ajuste:Roles'], ['Agentes propios del cliente', 'El cliente crea llaves de solo lectura en su portal, si tú lo permites', 'Permitido', 'ok', 'ir:x:ajuste:Portal del cliente']])] }),
   borrador: () => ({ sub: 'Borrador de OPAI', titulo: 'Correo por aprobar', bloques: [pp('Borrador de correo', [['Para: el contacto de este registro', ''], ['Asunto: Su solicitud de servicio de seguridad', ''], ['Gracias por escribirnos. Le proponemos una visita técnica esta semana para dimensionar el servicio y enviarle una cotización.', '']], 'Escrito por OPAI con los datos de la pantalla donde estabas. No se envía hasta que lo apruebes.'), ac([['Aprobar y enviar', 'log:Tú|Aprobaste y enviaste un correo redactado por OPAI.;atras', 1], ['Editar', 'ir:x:form:Editar el correo'], ['Descartar', 'atras']])] }),
-  form: (a) => ({ sub: 'Hoja', titulo: a[0], bloques: [no('En la aplicación esta hoja trae sus campos y validaciones. Toda escritura muestra una vista previa antes de guardar y queda en la auditoría.'), fo('Campos', [['Nombre o referencia', ''], ['Detalle', ''], ['Responsable', 'Camilo Ibarra']]), ac([['Guardar', 'atras', 1], ['Cancelar', 'atras']])] }),
+  form: (a, F) => { const def = FORMS[a[0]] || FORM_GEN, pref = a[0];
+    const faltan = def.campos.filter((c) => c[3] && c[3].req && c[1] !== 'switch' && c[1] !== 'check' && FV(F, pref, c) === '');
+    const salir = 'del:ferr;del:fprev;del:sel;atras';
+    if (F.fprev) return { sub: def.sub, titulo: a[0], bloques: [no('Revisa lo que se va a guardar. Nada se escribe hasta que confirmes.'), ca('Vista previa', def.campos.filter((c) => c[1] !== 'switch' && c[1] !== 'check' && FV(F, pref, c) !== '').map((c) => [c[0], '—', String(FV(F, pref, c))])), ac([['Confirmar y guardar', 'log:Tú|Guardaste: ' + a[0] + '.;' + salir, 1], ['Seguir editando', 'del:fprev']])] };
+    return { sub: def.sub, titulo: a[0], bloques: [F.ferr && faltan.length ? av(faltan.length === 1 ? 'Falta un dato obligatorio.' : 'Faltan ' + faltan.length + ' datos obligatorios.', 'bad') : null, Bform('', pref, def.campos), ac([['Guardar', faltan.length ? 'set:ferr=1' : 'del:ferr;set:fprev=1', 1], ['Cancelar', salir]])] }; },
+  piezas: (a) => { const tab = a[0] || 'Controles', T = ['Controles', 'Listas y tablas', 'Estados', 'Avisos y diálogos'];
+    const B = {
+      'Controles': [{ t: 'acciones', h: 'Botones', items: [['Guardar', '', 1], ['Cancelar', ''], ['Ver más', '', 'fant'], ['Eliminar', '', 'bad'], ['Guardando…', '', 'off']] },
+        Bform('Campos', 'piezas', [['Texto', 'texto', 'Logística Andina SpA', {}], ['Con ayuda', 'rut', '77.222.333-4', { ayuda: 'Con guion y dígito verificador.' }], ['Con error', 'texto', '', { req: 1, err: 1, ph: 'Escribe el nombre' }], ['Deshabilitado', 'texto', 'No se puede cambiar', { off: 1 }], ['Selección', 'select', '30 días', { ops: ['Contado', '30 días', '45 días'] }], ['Monto', 'monto', '$1.840.000', {}], ['Fecha', 'fecha', '11-11-2026', {}], ['Casilla', 'check', 1, { v: 'Recibe las facturas' }], ['Interruptor', 'switch', 1, { v: 'Facturar con orden de compra' }], ['Texto largo', 'area', '', { ph: 'Notas para el equipo', ancho: 1 }]]),
+        { t: 'seg', h: 'Filtros', items: [['Todos', '', 1], ['Requieren atención', ''], ['Míos', '']] }, Beti('Estados', [['Cliente', 'ok'], ['Por vencer', 'warn'], ['Vencida', 'bad'], ['Prospecto', 'mu'], ['Propuesta del agente', 'ag']])],
+      'Listas y tablas': [li('Lista', [['Logística Andina SpA', 'Cliente · Transporte y bodegaje', '2 instalaciones', '', '', '', '', '', 'LA', ['Cliente', 'ok']], ['Minera Cerro Alto', 'Prospecto · Minería', '1 instalación', '', '', '', '', '', 'MC', ['Prospecto', 'mu']], ['Bodegas Pudahuel S.A.', 'Inactivo · Bodegaje', '1 instalación', '', '', '', '', '', 'BP', ['Inactivo', 'bad']]]),
+        Btab('Tabla', [['Documento', 'left', '1.2'], ['Cliente', 'left', '2'], ['Emisión', 'left', '1'], ['Estado', 'left', '1'], ['Monto', 'right', '1']], [[['Factura 2051', 'Logística Andina SpA', '24-oct-2026', ['Vencida', 'bad'], '$6.200.000'], ''], [['Factura 2060', 'Alimentos del Maipo S.A.', '02-nov-2026', ['Por vencer', 'warn'], '$4.380.000'], ''], [['Factura 2064', 'Inmobiliaria Costanera', '08-nov-2026', ['Pagada', 'ok'], '$3.980.000'], '']]),
+        kp('Indicadores', [['Por cobrar', '$12.480.000', '3 facturas vencidas', 'bad'], ['Cobertura hoy', '98,4 %', '124 de 126 turnos', 'ok'], ['Negocios abiertos', '5', '593 UF', 'mu'], ['Tickets', '2', '1 con plazo hoy', 'warn']]), pa('Datos', [['RUT', '77.222.333-4'], ['Giro', 'Transporte y bodegaje'], ['Dirección', 'Camino Lo Boza 880, Quilicura'], ['Cliente desde', 'ago-2022']])],
+      'Estados': [Best('vacio', 'Todavía no hay cuentas', 'Crea la primera o impórtalas desde una planilla.', 'Nueva cuenta', ''), { t: 'skeleton', h: 'Cargando' }, Best('error', 'No pudimos cargar esta pantalla', 'Tus datos están a salvo. Intenta de nuevo.', 'Reintentar', ''), Best('permiso', 'No tienes permiso para ver esto', 'Pídele acceso a la persona que administra tu empresa.', '', ''), Best('red', 'Sin conexión', 'Lo que registres se guarda en el dispositivo y se envía al volver la señal.', '', '')],
+      'Avisos y diálogos': [av('Guardado. El cambio quedó en la auditoría.', 'ok'), av('El curso OS-10 de 2 personas vence esta semana.', 'warn', [['Pedir renovación', '']]), av('No se pudo emitir: falta el giro del cliente.', 'bad', [['Completar', '']]), av('El agente Cobranza preparó 3 recordatorios para que los revises.', 'ag', [['Revisar', '', 1]]),
+        Bdia('Diálogo de confirmación', '¿Anular la factura 2051?', 'Se emite una nota de crédito por el total. No se puede deshacer.', 'Anular factura'), Btoa('Preferencia guardada', 'Aviso breve'), ca('Qué cambia', [['Estado de cobranza', 'Sin gestión', 'Recordatorio 1 enviado'], ['Próximo contacto', '—', '18-nov-2026']])] };
+    return { sub: 'Diseño', titulo: 'Piezas y estados', tabs: T.map((t) => [t, 'ver:x:piezas:' + t, t === tab]), bloques: B[tab] || B.Controles }; },
   plan: (a) => ({ sub: 'Planificado en la hoja de ruta', titulo: a[0], bloques: [av('Este módulo está planificado y todavía no se construye. Usará esta misma base.', 'warn'), a[0] === 'Inventario' ? li('Alcance previsto', [['Catálogo configurable de tipos', 'Activos y ropa', 'CAR-235', 'mu'], ['Gestionar activos', 'Teléfonos, radios y otros', 'CAR-236', 'mu'], ['Gestionar ropa', 'Tallas y entregas', 'CAR-237', 'mu'], ['Asignar a una persona o instalación', '', 'CAR-238', 'mu']]) : li('Alcance previsto', [['Licitaciones públicas', 'Sobre CPQ, con índice y secciones de propuesta', 'CAR-93', 'mu']])] }),
   embudo: () => ({ sub: 'Comercial', titulo: 'Negocios', ancha: 1, bloques: [sg([['Embudo', 'ver:x:embudo', 1], ['Lista', 'ver:l:negocios']]), co(ETAPAS.map((e, i) => { const ns = NG.filter((n) => n.et === i); return [e, fm(ns.reduce((s, n) => s + n.monto, 0)), ns.map((n) => [n.n, n.nota, fm(n.monto), 'ir:f:negocios:' + n.id])]; })), ac([['Nuevo negocio', 'ir:x:form:Nuevo negocio', 1]])] }),
   pauta: (a, F) => { const i = ins(a[0]); return { sub: i.n + ' · noviembre 2026', titulo: 'Pauta mensual', ancha: 1, barra: 'pauta', bloques: [sg(IN.slice(0, 4).map((x) => [x.n, 'ver:x:pauta:' + x.id, x.id === i.id])), gr('', 'cal', 'Persona y puesto', Array.from({ length: 30 }, (_, k) => [LETRAS[k % 7] + '\n' + (k + 1), k === 10 ? 'ag' : 'mu']), pautaFilas(i.id, F)), no('D día 08 a 20 · N noche 20 a 08 · ! sin cobertura · en índigo, propuesta del agente. Toca una celda marcada para decidir.')] }; },
@@ -491,15 +530,15 @@ const CTX = {
 };
 
 class Component extends DCLogic {
-  constructor(props) { super(props); const p0 = '__PORTAL__'; this.state = { tema: null, portal: p0, seg: 'decide', pila: [PORTALES[p0].inicio], abierto: false, F: {}, log: [], texto: '', libre: '' }; }
+  constructor(props) { super(props); const p0 = '__PORTAL__'; this.state = { tema: null, portal: p0, seg: 'decide', pila: [PORTALES[p0].inicio], abierto: false, F: {}, log: [], texto: '', libre: '', q: '' }; }
   hacer(cmd) {
     if (!cmd) return;
-    const s = this.state, st = { F: Object.assign({}, s.F), pila: s.pila.slice(), log: s.log.slice(), abierto: s.abierto, portal: s.portal, seg: s.seg, libre: s.libre, tema: s.tema };
+    const s = this.state, st = { F: Object.assign({}, s.F), pila: s.pila.slice(), log: s.log.slice(), abierto: s.abierto, portal: s.portal, seg: s.seg, libre: s.libre, tema: s.tema, q: s.q };
     cmd.split(';').forEach((c) => { const i = c.indexOf(':'), k = i < 0 ? c : c.slice(0, i), v = i < 0 ? '' : c.slice(i + 1);
-      if (k === 'ir') { st.pila.push(v); st.abierto = true; } else if (k === 'ver') { st.pila[st.pila.length - 1] = v; st.abierto = true; }
+      if (k === 'ir') { st.pila.push(v); st.abierto = true; st.q = ''; } else if (k === 'ver') { st.pila[st.pila.length - 1] = v; st.abierto = true; }
       else if (k === 'set') { const j = v.indexOf('='); st.F[v.slice(0, j)] = v.slice(j + 1); } else if (k === 'del') { delete st.F[v]; }
       else if (k === 'log') { const p = v.split('|'); st.log.unshift({ p: st.portal, hora: 'Ahora', quien: p[0], txt: p[1], inst: p[2] || '' }); }
-      else if (k === 'atras') { if (st.pila.length > 1) st.pila.pop(); else st.abierto = false; }
+      else if (k === 'atras') { st.q = ''; if (st.pila.length > 1) st.pila.pop(); else st.abierto = false; }
       else if (k === 'raiz') { st.pila = [PORTALES[st.portal].inicio]; }
       else if (k === 'portal') { st.portal = v; st.pila = [PORTALES[v].inicio]; st.seg = 'decide'; st.abierto = false; }
       else if (k === 'seg') { st.seg = v; } else if (k === 'abrir') { st.abierto = true; } else if (k === 'q') { st.libre = v; } else if (k === 'tema') { const osc = s.tema ? s.tema === 'oscuro' : !!this.props.oscuro; st.tema = osc ? 'claro' : 'oscuro'; } });
@@ -507,9 +546,20 @@ class Component extends DCLogic {
   }
   vista(ruta) {
     const s = this.state, p = ruta.split(':');
-    if (p[0] === 'l') { const T = TIPOS[p[1]]; return { sub: T.area, titulo: T.nombre, bloques: [sg([['Todos', 'ver:' + ruta, 1], ['Requieren atención', 'ver:' + ruta], ['Míos', 'ver:' + ruta]]), li('', T.datos.map((r) => { const f = T.fila(r); return [f[0], f[1], f[2] || '', f[3] || '', 'ir:f:' + p[1] + ':' + r.id]; })), ac(T.nuevo ? [[T.nuevo, 'ir:x:form:' + T.nuevo, 1]] : [])] }; }
+    if (p[0] === 'l') { const T = TIPOS[p[1]], kf = 'fl_' + p[1], fl = s.F[kf] || 'Todos', q = (s.q || '').toLowerCase();
+      let filas = T.datos.map((r, i) => ({ r: r, i: i, f: T.fila(r) }));
+      if (fl === 'Requieren atención') filas = filas.filter((x) => x.f[3] === 'bad' || x.f[3] === 'warn' || x.i % 3 === 0);
+      if (fl === 'Míos') filas = filas.filter((x) => x.i % 2 === 0);
+      if (q) filas = filas.filter((x) => (x.f[0] + ' ' + x.f[1]).toLowerCase().indexOf(q) >= 0);
+      const mono = CON_MONO.indexOf(p[1]) >= 0;
+      return { sub: T.area, titulo: T.nombre, accionesCab: T.nuevo ? [[MOVIL ? 'Nuevo' : T.nuevo, 'ir:x:form:' + T.nuevo, 1]] : [],
+        bloques: [Bbus('Buscar en ' + T.nombre.toLowerCase()), sg(['Todos', 'Requieren atención', 'Míos'].map((x) => [x, 'set:' + kf + '=' + x, x === fl])), Bcon(filas.length + ' de ' + T.datos.length + ' · ' + T.nombre.toLowerCase(), 'Más recientes primero'),
+          filas.length ? li('', filas.map((x) => [x.f[0], x.f[1], x.f[2] || '', x.f[3] || '', 'ir:f:' + p[1] + ':' + x.r.id, '', '', '', mono ? INI(x.f[0]) : '', typeof x.r.est === 'string' ? [x.r.est, TEST(x.r.est)] : null]))
+            : Best('vacio', 'Nada coincide', 'Prueba con otro texto o quita el filtro.', 'Ver todo', 'del:' + kf)] }; }
     if (p[0] === 'f') { const T = TIPOS[p[1]], r = by(T.datos, p[2]), tab = p[3] && T.tabs.indexOf(p[3]) >= 0 ? p[3] : T.tabs[0];
-      return { sub: T.nombre, titulo: T.titulo(r), tabs: T.tabs.map((t) => [t, 'ver:f:' + p[1] + ':' + r.id + ':' + t, t === tab]), bloques: T.b(r, tab, s.F) || [] }; }
+      const editar = T.nuevo ? T.nuevo.replace(/^Nuev[oa]/, 'Editar') : '';
+      return { sub: T.nombre, titulo: T.titulo(r), est: typeof r.est === 'string' ? [r.est, TEST(r.est)] : null, accionesCab: editar && !MOVIL ? [['Editar', 'ir:x:form:' + editar]] : [],
+        tabs: T.tabs.map((t) => [t, 'ver:f:' + p[1] + ':' + r.id + ':' + t, t === tab]), bloques: T.b(r, tab, s.F) || [] }; }
     if (p[1] === 'ctx') { const P = PORTALES[s.portal], prev = s.pila.length > 1 ? s.pila[s.pila.length - 2] : P.inicio; const pv = prev.indexOf('x:ctx') === 0 ? { sub: '', titulo: 'esta pantalla' } : this.vista(prev); const q = prev.split(':'), ult = q[q.length - 1];
       return { sub: 'Respuesta de OPAI', titulo: s.libre || 'Tu pedido', bloques: [{ t: 'cabeza', origen: 'OPAI · con el contexto de tu pantalla', area: '', ag: 1, titulo: s.libre || 'Tu pedido', contexto: 'Sabe que lo pides desde «' + pv.titulo + '» y responde sobre lo que tienes a la vista.' },
         pa('Lo que recibe el agente junto con tu pedido', [['Pantalla', (pv.sub ? pv.sub + ' › ' : '') + pv.titulo], ['Registro abierto', q[0] === 'f' ? pv.titulo : 'Ninguno: es una lista o un tablero'], ['Pestaña o filtro', q[0] === 'f' ? (q[3] || 'Resumen') : (q.length > 2 && !/^[a-z]+\d+$/.test(ult) && !/^\d+$/.test(ult) ? ult : 'Todos')], ['Tu rol y alcance', P.rol]]),
@@ -519,13 +569,13 @@ class Component extends DCLogic {
   norm(b) {
     const H = (cmd) => () => this.hacer(cmd);
     const o = { h: b.h || '', hayH: !!b.h, _c: [] };
-    ['frase', 'nota', 'kpis', 'lista', 'pares', 'acciones', 'cambios', 'linea', 'aviso', 'campos', 'seg', 'papel', 'grilla', 'columnas', 'mapa', 'camara', 'progreso', 'cabeza', 'cifra', 'indice', 'agente'].forEach((t) => { o['es_' + t] = b.t === t; });
+    ['frase', 'nota', 'kpis', 'lista', 'pares', 'acciones', 'cambios', 'linea', 'aviso', 'campos', 'seg', 'papel', 'grilla', 'columnas', 'mapa', 'camara', 'progreso', 'cabeza', 'cifra', 'indice', 'agente', 'buscar', 'conteo', 'formulario', 'estado', 'skeleton', 'tabla', 'dialogo', 'toast', 'etiquetas'].forEach((t) => { o['es_' + t] = b.t === t; });
     const c = (cmd) => { if (cmd) o._c.push(cmd); return H(cmd || ''); };
     if (b.t === 'frase' || b.t === 'nota' || b.t === 'mapa' || b.t === 'camara') o.txt = b.txt;
     if (b.t === 'kpis') o.items = b.items.map((k) => ({ nombre: k[0], valor: k[1], nota: k[2] || '', notaFg: TONO[k[3] || 'mu'], ir: c(k[4]) }));
-    if (b.t === 'lista') { o.items = b.items.map((f) => ({ a: f[0], b: f[1] || '', v: f[2] || '', vFg: TONO[f[3] || ''], ir: c(f[4]), hora: f[5] || '', hayHora: !!f[5], flecha: !!f[4] && !f[2], accion: f[6] || '', hayAccion: !!f[6], hacer: c(f[6] ? f[7] : '') })); o.vacia = !b.items.length; o.vacio = b.vacio; }
+    if (b.t === 'lista') { o.items = b.items.map((f) => ({ a: f[0], b: f[1] || '', v: f[2] || '', vFg: TONO[f[3] || ''], ir: c(f[4]), hora: f[5] || '', hayHora: !!f[5], flecha: !!f[4] && !f[2], accion: f[6] || '', hayAccion: !!f[6], hacer: c(f[6] ? f[7] : ''), mono: f[8] || '', hayMono: !!f[8], est: f[9] ? f[9][0] : '', hayEst: !!f[9], estBg: f[9] ? AVISO[f[9][1]][0] : '', estFg: f[9] ? AVISO[f[9][1]][1] : '' })); o.vacia = !b.items.length; o.vacio = b.vacio; }
     if (b.t === 'pares' || b.t === 'campos') o.items = b.items.map((x) => ({ k: x[0], v: x[1] || '—', vFg: x[1] ? FG : MU }));
-    if (b.t === 'acciones' || b.t === 'aviso') o.items = b.items.map((x) => ({ txt: x[0], ir: c(x[1]), bg: x[2] ? FG : 'var(--surface)', fg: x[2] ? 'var(--bg)' : FG, borde: x[2] ? FG : 'var(--line)' }));
+    if (b.t === 'acciones' || b.t === 'aviso') o.items = b.items.map((x) => { const m = x[2]; return { txt: x[0], ir: c(x[1]), bg: m === 'bad' ? 'var(--bad)' : m === 'off' ? 'var(--fill)' : m === 'fant' ? 'transparent' : m ? FG : 'var(--surface)', fg: m === 'bad' ? 'var(--surface)' : m === 'off' || m === 'fant' ? MU : m ? 'var(--bg)' : FG, borde: m === 'bad' ? 'var(--bad)' : m === 'off' || m === 'fant' ? 'transparent' : m ? FG : 'var(--line)' }; });
     if (b.t === 'aviso') { o.txt = b.txt; o.bg = AVISO[b.tono][0]; o.fg = AVISO[b.tono][1]; }
     if (b.t === 'cambios') o.items = b.items.map((x) => ({ campo: x[0], antes: x[1], despues: x[2] }));
     if (b.t === 'linea') o.items = b.items.map((x) => ({ hora: x[0], quien: x[1], txt: x[2], fg: x[3] ? AG : FG }));
@@ -542,6 +592,27 @@ class Component extends DCLogic {
       o.cab = b.cab.map((x) => ({ t: x[0], fg: TONO[x[1]], w: wC, flex: fl, al: cal ? 'center' : 'right', pad: cal ? '0' : '0 10px' }));
       o.filas = b.filas.map((r, ri) => ({ nombre: r[0], sub: r[1], wN: wN, peso: !cal && ri === b.filas.length - 1 ? 700 : 500, borde: cal ? '0' : '1px solid var(--line)',
         celdas: r[2].map((x) => ({ t: x[0], bg: CELDA[x[1]][0], fg: CELDA[x[1]][1], ir: c(x[2]), w: wC, flex: fl, al: cal ? 'center' : 'right', pad: cal ? '0' : '0 10px', tam: cal ? '12px' : (x[1] === 'b' || x[1] === 'w' ? '15px' : '14px'), peso: cal || x[1] === 'b' || x[1] === 'w' ? 600 : 500, cur: x[2] ? 'pointer' : 'default' })) })); }
+    if (b.t === 'buscar') { o.ph = b.ph; o.q = this.state.q || ''; o.alEscribir = (e) => this.setState({ q: e.target.value }); o.nada = (e) => e.preventDefault(); }
+    if (b.t === 'conteo') { o.txt = b.txt; o.orden = b.orden; }
+    if (b.t === 'etiquetas') o.items = b.items.map((x) => ({ txt: x[0], bg: AVISO[x[1]][0], fg: AVISO[x[1]][1] }));
+    if (b.t === 'estado') { const tn = { vacio: 'mu', error: 'bad', permiso: 'warn', red: 'mu' }[b.tipo]; o.esVacio = b.tipo === 'vacio'; o.esError = b.tipo === 'error'; o.esPermiso = b.tipo === 'permiso'; o.esRed = b.tipo === 'red'; o.icoBg = AVISO[tn][0]; o.icoFg = AVISO[tn][1]; o.titulo = b.titulo; o.txt = b.txt; o.accion = b.accion; o.hayAccion = !!b.accion; o.ir = c(b.cmd); }
+    if (b.t === 'skeleton') o.items = [['62%', '38%'], ['48%', '55%'], ['70%', '30%'], ['54%', '44%']].map((k) => ({ a: k[0], b: k[1] }));
+    if (b.t === 'tabla') { o.minW = MOVIL ? '620px' : '0'; o.cab = b.cab.map((x) => ({ t: x[0], al: x[1] || 'left', flex: x[2] || '1' }));
+      o.filas = b.filas.map((r) => ({ ir: c(r[1]), celdas: r[0].map((x, i) => { const col = b.cab[i] || []; const t = Array.isArray(x) ? x[0] : x; const tono = Array.isArray(x) ? x[1] : ''; return { t: t, al: col[1] || 'left', flex: col[2] || '1', peso: i === 0 || col[1] === 'right' ? 600 : 400, fam: col[1] === 'right' ? "'JetBrains Mono',ui-monospace,monospace" : 'inherit', fg: tono ? TONO[tono] : (i === 0 ? FG : (col[1] === 'right' ? FG : MU)) }; }) })); }
+    if (b.t === 'dialogo') { o.titulo = b.titulo; o.txt = b.txt; o.si = b.si; }
+    if (b.t === 'toast') o.txt = b.txt;
+    if (b.t === 'formulario') { const F = this.state.F;
+      o.items = b.items.map((x) => { const tipo = x[1], op = x[3] || {}, id = FID(b.pref, x), val = FV(F, b.pref, x); const vacio = val === '' || val === 0;
+        const marca = tipo === 'switch' || tipo === 'check'; const on = marca ? (F['v_' + id] !== undefined ? F['v_' + id] === '1' : !!x[2]) : false;
+        const err = !!op.err || (!!F.ferr && !!op.req && !marca && vacio); const abierto = tipo === 'select' && F.sel === id;
+        return { k: x[0], req: op.req ? ' *' : '', col: op.ancho && !MOVIL ? '1 / -1' : 'auto', esTexto: ['texto', 'rut', 'monto', 'fecha', 'area'].indexOf(tipo) >= 0, esSelect: tipo === 'select', esSwitch: tipo === 'switch', esCheck: tipo === 'check', on: on,
+          val: marca ? '' : String(val), ph: op.ph || '', v: marca ? (op.v || '') : (vacio ? 'Elige una opción' : String(val)), vFg: vacio ? MU : FG, al: tipo === 'monto' ? 'right' : 'left', fam: tipo === 'rut' || tipo === 'monto' || tipo === 'fecha' ? "'JetBrains Mono',ui-monospace,monospace" : 'inherit',
+          minH: tipo === 'area' ? '96px' : '44px', alin: tipo === 'area' ? 'flex-start' : 'center', borde: err ? 'var(--bad)' : (op.off ? 'var(--line)' : 'var(--muted)'), bg: op.off ? 'var(--fill)' : 'var(--surface)',
+          alEscribir: (e) => { const G = Object.assign({}, this.state.F); G['v_' + id] = e.target.value; this.setState({ F: G }); },
+          ir: c(tipo === 'select' ? (abierto ? 'del:sel' : 'set:sel=' + id) : marca ? 'set:v_' + id + '=' + (on ? '0' : '1') : ''), abierto: abierto,
+          opciones: (op.ops || []).map((t) => ({ txt: t, ir: c('set:v_' + id + '=' + t + ';del:sel'), peso: t === val ? 600 : 400, bg: t === val ? 'var(--fill)' : 'transparent' })),
+          pista: on ? FG : 'var(--line)', perilla: on ? '21px' : '3px', radio: '7px', cajaBorde: on ? FG : 'var(--muted)', cajaBg: on ? FG : 'var(--surface)',
+          hayAyuda: err || !!op.ayuda, ayuda: err ? (op.errTxt || 'Este dato es obligatorio.') : (op.ayuda || ''), ayudaFg: err ? 'var(--bad)' : MU }; }); }
     return o;
   }
   renderVals() {
@@ -582,10 +653,10 @@ class Component extends DCLogic {
       sugerencias: sug.map((q) => ({ txt: q[0], ir: H(q[1]) })),
       texto: s.texto, alEscribir: (e) => this.setState({ texto: e.target.value }),
       alEnviar: (e) => { e.preventDefault(); const t = s.texto.trim(); if (!t) return; const r = buscar(t); this.setState({ texto: '', libre: t, pila: (MOVIL && !s.abierto ? [P.inicio] : s.pila).concat([r]), abierto: true }); },
-      lzSub: v.sub, lzTitulo: v.titulo, hayAtras: MOVIL || s.pila.length > 1, atras: H('atras'),
+      accionesCab: (v.accionesCab || []).map((x) => ({ txt: x[0], ir: H(x[1]), bg: x[2] ? FG : 'var(--surface)', fg: x[2] ? 'var(--bg)' : FG, borde: x[2] ? FG : 'var(--line)' })), hayEstCab: !!v.est, estCab: v.est ? v.est[0] : '', estCabBg: v.est ? AVISO[v.est[1]][0] : '', estCabFg: v.est ? AVISO[v.est[1]][1] : '', lzSub: v.sub, lzTitulo: v.titulo, hayAtras: MOVIL || s.pila.length > 1, atras: H('atras'),
       hayTabs: !!v.tabs, tabs: (v.tabs || []).map((t) => ({ nombre: t[0], ir: H(t[1]), peso: t[2] ? 600 : 500, fg: t[2] ? FG : MU, raya: t[2] ? FG : 'transparent' })),
       bloques: bloques,
-      _rutas: bloques.reduce((a, b) => a.concat(b._c), []).concat((v.tabs || []).map((t) => t[1])).concat(sug.map((q) => q[1])),
+      _rutas: bloques.reduce((a, b) => a.concat(b._c), []).concat((v.tabs || []).map((t) => t[1])).concat(sug.map((q) => q[1])).concat((v.accionesCab || []).map((x) => x[1])),
     };
   }
 }

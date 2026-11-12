@@ -40,11 +40,12 @@ describe("MFA con un usuario que solo tiene el portal Supervisor (#68)", () => {
     return identidad;
   }
 
-  it("el tenant la obliga para 'otros roles': exige enrolar aunque el rol no sea owner/admin", async () => {
+  it("la empresa ya no puede obligarla (CAR-286): sin segundo factor entra igual", async () => {
     ajusteMock.mockResolvedValue(true);
     const identidad = await identidadSupervisor(false, false);
-    expect(await estadoMfaDe(identidad)).toMatchObject({ activa: false, obligatoria: true });
-    expect(await verificarMfaDe(identidad)).toBe("enrolar");
+    expect(await estadoMfaDe(identidad)).toMatchObject({ activa: false, obligatoria: false });
+    expect(await verificarMfaDe(identidad)).toBeNull();
+    expect(ajusteMock).not.toHaveBeenCalled();
   });
 
   it("con el segundo factor activo y la sesión verificada, completa sin pedir el portal erp", async () => {
