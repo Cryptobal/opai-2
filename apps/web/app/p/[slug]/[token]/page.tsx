@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { Alerta, AuthCard, Loading } from "@opai/ds";
 
 import { fecha, pesos } from "@/lib/fechas";
-import { MENSAJE_SOLO_LECTURA } from "@/lib/solo-lectura";
 
 import { verCotizacionPublica } from "./ver";
 
@@ -23,21 +22,11 @@ async function Contenido({ params }: Props) {
       </AuthCard>
     );
   }
-  if ("soloLectura" in v) {
-    return (
-      <AuthCard titulo="Cotización">
-        <Alerta tono="warning" titulo="Módulo en solo lectura">
-          {MENSAJE_SOLO_LECTURA}
-        </Alerta>
-      </AuthCard>
-    );
-  }
   if (!v.ok) {
     return (
       <AuthCard titulo="Cotización">
         <Alerta tono="danger" titulo="Enlace no válido">
-          El enlace venció, fue revocado o no corresponde a una cotización. Pide uno nuevo a quien
-          te lo envió.
+          El enlace venció, fue revocado o no corresponde a una cotización. Pide uno nuevo a quien te lo envió.
         </Alerta>
       </AuthCard>
     );

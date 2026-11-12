@@ -1,7 +1,5 @@
 "use server";
 
-import { MENSAJE_SOLO_LECTURA } from "@/lib/solo-lectura";
-
 import { responderCorreccion } from "./ver";
 
 export type EstadoRespuesta = { estado: "inicial" } | { estado: "listo"; resultado: "aceptada" | "objetada" } | { estado: "error"; texto: string };
@@ -16,6 +14,5 @@ export async function accionResponder(slug: string, token: string, _: EstadoResp
   if (r === "ok") return { estado: "listo", resultado };
   if (r === "limitada") return { estado: "error", texto: "Demasiados intentos. Espera un minuto e inténtalo de nuevo." };
   if (r === "comentario") return { estado: "error", texto: "Para objetar escribe un comentario." };
-  if (r === "solo_lectura") return { estado: "error", texto: MENSAJE_SOLO_LECTURA };
   return { estado: "error", texto: "No pudimos confirmar tu identidad. Revisa el RUT e inténtalo de nuevo." };
 }

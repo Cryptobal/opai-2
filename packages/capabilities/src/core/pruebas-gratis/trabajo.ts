@@ -20,24 +20,6 @@ export const trabajoPruebasGratis = defineTrabajo({
   periodicidad: "diaria",
   async handler(ctx, { dia }) {
     const tenantId = ctx.tenantId;
-    // Aviso a la empresa dos días antes del último día (ADR-071, adenda 7.3). Sale solo el día exacto:
-    // el trabajo corre una vez por día, igual que el aviso de las pruebas de Plataforma.
-    const enDosDias = new Date(aFecha(dia).getTime() + DIAS_AVISO_GRATIS * 86_400_000);
-    const porVencer = await ctx.db.pruebaGratis.findMany({
-      where: { tenantId, cerradaEn: null, hasta: enDosDias },
-    });
-    for (const p of porVencer)
-      await ctx.transaccion((tx) =>
-        ctx.eventos.emitir(tx, {
-          tipo: "core.prueba_gratis.por_vencer",
-          entidadTipo: "modulo",
-          payload: {
-            moduloId: p.moduloId,
-            hasta: enDosDias.toISOString(),
-            dias: DIAS_AVISO_GRATIS,
-          },
-        }),
-      );
     const vencidas = await ctx.db.pruebaGratis.findMany({
       where: { tenantId, cerradaEn: null, hasta: { lt: aFecha(dia) } },
     });
@@ -77,6 +59,34 @@ export const trabajoPruebasGratis = defineTrabajo({
       });
       if (cerrada) cerradas.push(p.moduloId);
     }
+    // Aviso a la empresa dos días antes del último día (ADR-071, adenda 7.3). Sale solo el día exacto:
+    // va después de los cierres, para que un reintento por un cierre fallido no lo repita.
+    const enDosDias = new Date(aFecha(dia).getTime() + DIAS_AVISO_GRATIS * 86_400_000);
+    const porVencer = await ctx.db.pruebaGratis.findMany({
+      where: { tenantId, cerradaEn: null, hasta: enDosDias },
+    });
+    const conPrecio = new Set(
+      (await ctx.db.cobroCondicion.findMany({ where: { tenantId }, select: { moduloId: true } })).map(
+        (c) => c.moduloId,
+      ),
+    );
+    for (const p of porVencer)
+      await ctx.transaccion((tx) =>
+        ctx.eventos.emitir(tx, {
+          tipo: "core.prueba_gratis.por_vencer",
+          entidadTipo: "modulo",
+          payload: {
+            moduloId: p.moduloId,
+            hasta: enDosDias.toISOString(),
+            dias: DIAS_AVISO_GRATIS,
+            // Con condición de cobro fijada no queda en solo lectura al vencer (igual que el cierre).
+            pasaACobro: (esParteFinanzas(p.moduloId) || p.moduloId === MODULO_FINANZAS
+              ? [MODULO_FINANZAS, ...PARTES_FINANZAS]
+              : [p.moduloId]
+            ).some((m) => conPrecio.has(m)),
+          },
+        }),
+      );
     return { cerradas, avisadas: porVencer.map((p) => p.moduloId) };
   },
 });

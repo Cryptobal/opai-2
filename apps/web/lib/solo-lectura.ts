@@ -9,11 +9,3 @@ export async function soloLecturaDe(tenantId: string, modulo: string): Promise<s
   const estado = await fuentesReales.modulosConEstado?.(tenantId);
   return estado?.soloLectura.includes(modulo) ? [modulo] : [];
 }
-
-/** Texto para quien llega por un enlace público a un módulo en solo lectura (ADR-071, adenda 7.5). */
-export const MENSAJE_SOLO_LECTURA =
-  "Este módulo está en solo lectura: por ahora no se puede responder ni cambiar nada desde este enlace.";
-
-/** Si un rechazo viene de que el módulo está en solo lectura (lo decide `restriccion`). */
-export const esSoloLectura = (r: { ok: boolean; error?: { code: string; message: string } }) =>
-  !r.ok && r.error?.code === "FORBIDDEN" && r.error.message.includes("solo lectura");

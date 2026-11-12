@@ -9,7 +9,6 @@ import { tenantPorSlug } from "@opai/db";
 import { fuentesReales } from "@/lib/fuentes";
 import { contextoSistema } from "@/lib/medidor";
 import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
-import { esSoloLectura, soloLecturaDe } from "@/lib/solo-lectura";
 
 export type CotizacionPublica = {
   empresa: string;
@@ -30,7 +29,7 @@ export type CotizacionPublica = {
 export async function verCotizacionPublica(
   slug: string,
   token: string,
-): Promise<{ limitada: true } | { soloLectura: true } | { ok: true; data: CotizacionPublica } | { ok: false }> {
+): Promise<{ limitada: true } | { ok: true; data: CotizacionPublica } | { ok: false }> {
   // Pide el request real antes de tocar reloj o base: sin esto, Next 16 (Cache Components) evalúa el
   // rate limit durante el prerender, lanza «Date.now() while prerendering» y todo enlace parece inválido.
   await connection();
@@ -51,9 +50,7 @@ export async function verCotizacionPublica(
   const modulos = await fuentesReales.modulosActivos(tenant.id);
   if (!modulos.includes("cpq")) return { ok: false };
   // Con el registro de capacidades del proceso armado (`asegurarRegistro` dentro de `contextoSistema`).
-  // CPQ en solo lectura: el enlace (que registra la visita) no escribe y lo dice (ADR-071, adenda 7.5).
-  const ctx = contextoSistema(tenant.id, modulos, await soloLecturaDe(tenant.id, "cpq"));
+  const ctx = contextoSistema(tenant.id, modulos);
   const r: Resultado = await executeCapability(ctx, "cpq.compartir.ver", { token });
-  if (esSoloLectura(r)) return { soloLectura: true };
   return r.ok ? { ok: true, data: r.data as CotizacionPublica } : { ok: false };
 }

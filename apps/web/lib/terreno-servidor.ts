@@ -20,11 +20,7 @@ export async function ejecutarComoEquipo(
   opciones: { dryRun?: boolean } = {},
 ): Promise<Resultado> {
   // Los módulos activos de la empresa: sin ellos, una capacidad de Rondas, Acceso o Asistencia se rechazaría.
-  // Un módulo en solo lectura no recibe escrituras desde el equipo (ADR-071, adenda 7.5).
-  const estado = await fuentesReales.modulosConEstado?.(equipo.tenantId);
-  const ctx = estado
-    ? contextoSistema(equipo.tenantId, estado.activos, estado.soloLectura)
-    : contextoSistema(equipo.tenantId, await fuentesReales.modulosActivos(equipo.tenantId));
+  const ctx = contextoSistema(equipo.tenantId, await fuentesReales.modulosActivos(equipo.tenantId));
   return executeCapability(
     ctx,
     capacidad,

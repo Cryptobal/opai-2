@@ -5,7 +5,6 @@ import { type CodigoError, executeCapability, type Resultado } from "@opai/capab
 import { dispositivoActual } from "@/lib/dispositivo";
 import { contextoSistema } from "@/lib/medidor";
 import { permitir } from "@/lib/rate-limit";
-import { soloLecturaDe } from "@/lib/solo-lectura";
 
 /**
  * Asistencia en el equipo del kiosco (CAR-89 · Face ID, D-01). El equipo no tiene sesión: su cookie de dispositivo
@@ -37,7 +36,7 @@ export async function ejecutarAsistenciaEquipo(
     return falla("UNPROCESSABLE", "Demasiados intentos. Espera un momento.");
   const propio = id === "asistencia.marcas.registrar" ? { instalacionId: equipo.instalacionId, canal: "kiosco" } : {};
   const r = await executeCapability(
-    contextoSistema(equipo.tenantId, ["asistencia"], await soloLecturaDe(equipo.tenantId, "asistencia")),
+    contextoSistema(equipo.tenantId, ["asistencia"]),
     id,
     { ...entrada, ...propio, dispositivoId: equipo.dispositivoId },
     { dryRun },
