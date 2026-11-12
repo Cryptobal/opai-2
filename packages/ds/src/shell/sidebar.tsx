@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense } from "react";
+import { lazy, type ReactNode, Suspense } from "react";
 
 import type { ItemMenu } from "../components/menu";
 import type { ItemFijado } from "./fijados";
@@ -35,6 +35,8 @@ type SidebarProps = {
   onDesfijar?: ((href: string) => void) | undefined;
   areaAbierta?: string | null | undefined;
   onAreaAbierta?: ((area: string) => void) | undefined;
+  /** Diseño nuevo (ADR-109): botón de la cabecera para ocultar el menú o dejarlo fijo. */
+  boton?: ReactNode;
 };
 
 /** Desktop: acordeón D1 en ERP; secciones planas si no hay `onAreaAbierta`. */
@@ -50,12 +52,13 @@ export function Sidebar(props: SidebarProps) {
   return (
     <nav
       aria-label="Principal"
+      data-shell="sidebar"
       className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface lg:flex"
     >
       <div className="flex flex-none flex-col gap-3 px-3 pt-3.5 pb-1">
         <span className="flex items-center justify-between px-2">
           <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
-          <span className="t-caption">2.0</span>
+          {props.boton ?? <span className="t-caption">2.0</span>}
         </span>
         <PortalSwitcher
           portales={props.portales}
