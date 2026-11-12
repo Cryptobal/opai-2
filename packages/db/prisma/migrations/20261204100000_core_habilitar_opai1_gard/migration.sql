@@ -2,6 +2,7 @@
 -- Pedido de Carlos (12-nov-2026): el ajuste de plataforma no es editable por pantalla todavía.
 -- Aditiva y reversible: solo agrega el id de Gard bajo la clave «opai1»; reversa al final.
 -- Si la base no tiene la empresa «gard» (CI, entornos de prueba) no hace nada.
+BEGIN;
 SET LOCAL lock_timeout = '5s';
 
 DO $$
@@ -37,7 +38,9 @@ BEGIN
 END
 $$;
 
--- Reversa (manual, solo si hace falta): quitar a Gard de la lista.
+COMMIT;
+
+-- Reversión: quitar a Gard de la lista (manual, solo si hace falta):
 -- UPDATE core.ajustes_plataforma
 --    SET valor = jsonb_set(valor, '{opai1}', (valor -> 'opai1') - (SELECT id::text FROM core.tenants WHERE slug = 'gard'))
 --  WHERE modulo = 'core' AND clave = 'integraciones_habilitadas';
