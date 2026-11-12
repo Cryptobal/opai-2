@@ -1,4 +1,4 @@
-import { ajustesRondas, capacidadesRondas, defineModule } from "@opai/capabilities";
+import { ajustesRondas, capacidadesRondas, defineModule, indicadoresRondas } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Rondas (ADR-003, Brief 14). El núcleo deriva navegación, permisos,
@@ -49,4 +49,6 @@ export const manifest = defineModule({
     { id: "rondas.informe.cliente", descripcion: "Se generó el informe de rondas programado para el cliente." },
   ],
   capacidades: capacidadesRondas,
+  // Indicador de gestión para el catálogo del núcleo (ADR-094, CAR-310).
+  indicadores: indicadoresRondas,
 });

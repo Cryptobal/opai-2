@@ -16,6 +16,7 @@ export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta } from "./pauta";
 export { indicadoresPauta } from "./pauta/indicadores-gestion";
+export { indicadoresRondas } from "./rondas/indicadores-gestion";
 export {
   ajustesDesempeno,
   capacidadesDesempeno,
