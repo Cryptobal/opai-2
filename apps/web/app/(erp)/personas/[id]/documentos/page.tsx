@@ -1,4 +1,7 @@
-import { Upload } from "lucide-react";
+import { FileText, Upload } from "lucide-react";
+import Link from "next/link";
+
+import { cn, estilosBoton } from "@opai/ds";
 
 import { FichaDocumentos } from "@/app/_components/documentos/ficha-documentos";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
@@ -18,13 +21,22 @@ export default function DocumentosPersona(props: Props) {
       {...props}
       tab="documentos"
       acciones={(q) => (
-        <EnlaceBotonHoja
-          href={`?subir=1${consultaExtra(q)}`}
-          icono={Upload}
-          className="max-lg:hidden"
-        >
-          Subir documento
-        </EnlaceBotonHoja>
+        <>
+          <Link
+            href="generar-documento"
+            className={cn(estilosBoton({ variant: "secondary" }), "max-lg:hidden")}
+          >
+            <FileText className="size-4" aria-hidden />
+            Generar documento
+          </Link>
+          <EnlaceBotonHoja
+            href={`?subir=1${consultaExtra(q)}`}
+            icono={Upload}
+            className="max-lg:hidden"
+          >
+            Subir documento
+          </EnlaceBotonHoja>
+        </>
       )}
     >
       {(p, q) => (

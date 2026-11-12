@@ -120,3 +120,13 @@ Encargo de Carlos del 11-nov-2026 (01:22, t2112u): el texto legal de Personas (c
 **Archivos:** `packages/domain/src/documento-plantillas*.ts`, `packages/db/prisma/schema/documentos.prisma`, `packages/db/prisma/migrations/<fecha>_documento_plantillas_borrador/`, `packages/capabilities/src/core/documentos/plantillas*.ts`, `packages/capabilities/test/documento-plantillas*.test.ts`, `packages/capabilities/test/__snapshots__/herramientas-mcp.txt`, `docs/2.0/paridad/mcp-inventario.md`, `packages/ds/src/components/chip-variable.tsx` y `/ds`, `apps/web/app/(erp)/documentos/plantillas/**`, `packages/domain/src/novedades/entradas/`, `docs/2.0/ESTADO.md`.
 
 **Fuera de alcance:** selector de plantilla en Personas y generación (PR 4), importar Word o PDF (09), historial de versiones en pantalla, N3·FEA.
+
+## PR 4a · Generar documento: vista previa (sesión Personas, 11-nov-2026)
+
+**Decisión de corte:** el PR 4 se divide. **4a (este)** es la vista previa sin migración; **4b** será el PDF, su guardado por `core.documentos`, la firma (apagada) y el lote B3.
+
+**Qué entra:** capacidad de lectura `core.documento_plantillas.rellenar` (plantilla + persona + fecha → párrafos con los datos, variables faltantes con su motivo, si se puede generar y la firma de la plantilla); permiso `documentosPlantillasManage`; el sueldo exige además `estructurasReadSensible`; audita solo el id de la persona revelada. Dominio puro `rellenarPlantilla` (`documento-plantillas-rellenar.ts`). Pantalla `/personas/[id]/generar-documento` (selector de plantilla, resumen de datos, hoja con el texto; lo faltante en ámbar) y botón «Generar documento» en Personas › Documentos. Estados: sin permiso, sin plantillas, error.
+
+**Sin migración. No guarda nada.** Lo faltante nunca se inventa: queda como `{clave}` marcado.
+
+**Pendiente (4b):** PDF con marca del tenant, guardado en Documentos vinculado a la persona, firma detrás de flag, lote B3 (tope sin definir).
