@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 751 pares pantalla→capacidad · 673 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 755 pares pantalla→capacidad · 677 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -111,6 +111,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.firmas.enviar` | `core_firmas_enviar` | existe |
 | compartido | `app/_components` | `core.geo.autocompletar` | `core_geo_autocompletar` | existe |
 | compartido | `app/_components` | `core.geo.detalle` | `core_geo_detalle` | existe |
+| compartido | `app/_components` | `core.hilo.actividad` | `core_hilo_actividad` | existe |
+| compartido | `app/_components` | `core.hilo.agenda` | `core_hilo_agenda` | existe |
 | compartido | `app/_components` | `core.inicio.pendientes` | `core_inicio_pendientes` | existe |
 | compartido | `app/_components` | `core.me` | `core_me` | existe |
 | compartido | `app/_components` | `core.me.portal_inicio` | `core_me_portal_inicio` | existe |
@@ -326,6 +328,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/desempeno/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `core.indicadores_gestion.catalogo` | `core_indicadores_gestion_catalogo` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `desempeno.hechos.list` | `desempeno_hechos_list` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `desempeno.periodos.list` | `desempeno_periodos_list` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `desempeno.propios.list` | `desempeno_propios_list` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `desempeno.resultados.ver_cargo` | `desempeno_resultados_ver_cargo` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `desempeno.resultados.ver_persona` | `desempeno_resultados_ver_persona` | existe |
@@ -333,6 +336,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/desempeno/_componentes` | `desempeno.scorecards.list` | `desempeno_scorecards_list` | existe |
 | compartido | `app/(erp)/desempeno/cargos/[id]/_componentes` | `core.cargos.set_jefatura` | `core_cargos_set_jefatura` | existe |
 | compartido | `app/(erp)/desempeno/cargos/[id]/_componentes` | `desempeno.scorecards.guardar` | `desempeno_scorecards_guardar` | existe |
+| compartido | `app/(erp)/desempeno/cierres/_componentes` | `desempeno.periodos.cerrar` | `desempeno_periodos_cerrar` | existe |
 | compartido | `app/(erp)/desempeno/indicadores/_componentes` | `desempeno.propios.archivar` | `desempeno_propios_archivar` | existe |
 | compartido | `app/(erp)/desempeno/indicadores/_componentes` | `desempeno.propios.guardar` | `desempeno_propios_guardar` | existe |
 | compartido | `app/(erp)/documentos/_componentes` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
@@ -1105,8 +1109,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
-- `desempeno.periodos.cerrar`
-- `desempeno.periodos.list`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
