@@ -1,6 +1,7 @@
 import { esAreaNav, type DatoPersonalDeclarado } from "@opai/domain";
 import type { z } from "zod";
 
+import { validarHechosDelModulo, type HechoGestion } from "./hechos-gestion";
 import { validarIndicadoresDelModulo, type IndicadorGestion } from "./indicadores-gestion";
 import { registrarCapacidades } from "./registry";
 import type { Capacidad } from "./types";
@@ -59,6 +60,8 @@ export type ModuleManifest = {
   datosPersonales?: readonly DatoPersonalDeclarado[];
   /** Indicadores de gestión que publica (ADR-094). El núcleo arma el catálogo desde aquí. */
   indicadores?: readonly IndicadorGestion[];
+  /** Hechos que ofrece para que la empresa arme indicadores propios (CAR-313). */
+  hechos?: readonly HechoGestion[];
 };
 
 /** Declara un módulo validando que ids, permisos y capacidades le pertenezcan. */
@@ -125,6 +128,11 @@ export function defineModule(manifest: ModuleManifest): ModuleManifest {
   validarIndicadoresDelModulo(
     id,
     manifest.indicadores ?? [],
+    manifest.permisos.map((p) => p.id),
+  );
+  validarHechosDelModulo(
+    id,
+    manifest.hechos ?? [],
     manifest.permisos.map((p) => p.id),
   );
   for (const dato of manifest.datosPersonales ?? []) {
