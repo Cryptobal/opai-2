@@ -49,7 +49,13 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
   const salida: ResultadoPrevio[] = [];
   for (const tipo of tipos) {
     // El PDF (número interno, sin folio) va adjunto; si no se puede armar, el envío queda fallido y se reintenta.
-    const pdf = para ? await pdfDePrevio(ctx, tipo, b).catch(() => null) : null;
+    const pdf = para
+      ? await pdfDePrevio(ctx, tipo, b).catch((e: unknown) => {
+          // Solo la categoría del error: nunca datos del cliente ni del documento.
+          console.error(`[FINANZAS] PDF de ${tipo} no se pudo armar: ${e instanceof Error ? e.name : "desconocido"}`);
+          return null;
+        })
+      : null;
     const salio = para && pdf
       ? await enviarCorreo(
           { db: ctx.db, tenantId: ctx.tenantId, correo: await correoDe(ctx), urlBase: ctx.servicios.urlBase },
