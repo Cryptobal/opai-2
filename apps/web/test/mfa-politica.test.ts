@@ -3,14 +3,13 @@ import { describe, expect, it } from "vitest";
 import { mfaEsObligatoria, pendienteMfa } from "@opai/domain";
 
 describe("política MFA pura (sin Prisma ni DATABASE_URL)", () => {
-  it("plataforma/owner/admin son obligatorios aunque el tenant intente apagarlo", () => {
-    expect(mfaEsObligatoria("support", null, false)).toBe(true);
-    for (const rol of ["owner", "admin"]) expect(mfaEsObligatoria(null, rol, false)).toBe(true);
+  it("solo las cuentas de plataforma lo exigen (CAR-286)", () => {
+    expect(mfaEsObligatoria("support")).toBe(true);
+    expect(mfaEsObligatoria("owner")).toBe(true);
+    expect(mfaEsObligatoria(null)).toBe(false);
   });
-  it("el ajuste solo agrega exigencia a los demás roles", () => {
-    expect(mfaEsObligatoria(null, "viewer", false)).toBe(false);
-    expect(mfaEsObligatoria(null, "viewer", true)).toBe(true);
-    expect(mfaEsObligatoria(null, null, false)).toBe(false);
+  it("owner y admin sin segundo factor entran solo con contraseña", () => {
+    expect(pendienteMfa({ activa: false, verificada: false, obligatoria: false })).toBeNull();
   });
   it("Google u otro login con MFA activo sin marca exige verificar esta sesión", () => {
     expect(pendienteMfa({ activa: true, verificada: false, obligatoria: false })).toBe("verificar");

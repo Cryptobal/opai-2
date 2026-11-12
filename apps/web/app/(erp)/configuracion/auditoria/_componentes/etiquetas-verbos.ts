@@ -1,7 +1,7 @@
 /** Verbo (resto del código de la capacidad) → acción en español. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const VERBOS: Record<string, string> = {
   portal_inicio: "Portal de inicio", get: "Ver", update: "Editar", list: "Listar", invite: "Invitar",
-  remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", revoke: "Revocar", peek: "Revisar",
+  remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
   accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
   summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen",
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado", iniciar_vida: "Iniciar prueba de vida", consentir: "Dar consentimiento", habilitar: "Habilitar", textos: "Textos vigentes",

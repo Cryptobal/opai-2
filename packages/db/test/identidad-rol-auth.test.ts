@@ -120,7 +120,7 @@ describe.skipIf(!urlPropietario)("identidad con rol propio (CAR-43)", () => {
       expect(await t.membership.count()).toBe(1);
       return res;
     });
-    expect(ok).toEqual({ enrolamientos: 1, sesiones: 2 });
+    expect(ok).toEqual({ enrolamientos: 1, passkeys: 0, sesiones: 2 });
     expect(await e.admin.twoFactor.count({ where: { userId: conMfa } })).toBe(0);
     expect(await e.admin.session.count({ where: { userId: conMfa } })).toBe(0);
     const u = await e.admin.user.findUniqueOrThrow({ where: { id: conMfa } });

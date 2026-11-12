@@ -32,7 +32,7 @@ test("Inspector con base supervisor: menú efectivo y dirección de Empresa de s
   await page.goto("/login");
   await page.getByLabel("Correo").fill("inspector-seguimiento@opai.cl");
   await page.getByLabel("Contraseña", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await page.waitForURL((u) => u.pathname === "/");
   // Cargos salió del menú (CAR-182): el inspector llega desde Configuración › Operación.
   await page.goto("/configuracion/grupo/operacion");

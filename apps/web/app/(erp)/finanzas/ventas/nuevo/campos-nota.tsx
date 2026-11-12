@@ -1,8 +1,10 @@
 "use client";
 
-import { Campo, Input, Select } from "@opai/ds";
+import { Alerta, Campo, Input, Select } from "@opai/ds";
 
 import { pesos } from "@/lib/fechas";
+
+import { corrigeSoloTexto } from "../_componentes/monto-nota";
 
 const CODIGOS = [
   { valor: "1", etiqueta: "1 · Anula el documento" },
@@ -32,19 +34,25 @@ export function CamposNota(p: Props) {
           <Campo etiqueta="Qué hace la nota (CodRef)" htmlFor="nota-codigo">
             <Select id="nota-codigo" valor={p.codigo} onCambiar={p.setCodigo} opciones={CODIGOS} />
           </Campo>
-          <Campo
-            etiqueta="Monto (CLP)"
-            htmlFor="nota-monto"
-            ayuda="El total anula; menos corrige parcialmente. El tope acumulado lo valida el servidor."
-            error={p.monto && !p.montoOk ? `Entre 1 y ${pesos(p.total)}.` : undefined}
-          >
-            <Input
-              id="nota-monto"
-              inputMode="numeric"
-              value={p.monto}
-              onChange={(e) => p.setMonto(e.target.value.replace(/\D/g, ""))}
-            />
-          </Campo>
+          {corrigeSoloTexto(p.codigo) ? (
+            <Alerta tono="info" titulo="Sin monto">
+              Esta nota solo corrige el texto del documento. No cambia lo que el cliente debe; el SII la registra por $1 simbólico.
+            </Alerta>
+          ) : (
+            <Campo
+              etiqueta="Monto (CLP)"
+              htmlFor="nota-monto"
+              ayuda="El total anula; menos corrige parcialmente. El tope acumulado lo valida el servidor."
+              error={p.monto && !p.montoOk ? `Entre 1 y ${pesos(p.total)}.` : undefined}
+            >
+              <Input
+                id="nota-monto"
+                inputMode="numeric"
+                value={p.monto}
+                onChange={(e) => p.setMonto(e.target.value.replace(/\D/g, ""))}
+              />
+            </Campo>
+          )}
         </>
       ) : null}
       <Campo

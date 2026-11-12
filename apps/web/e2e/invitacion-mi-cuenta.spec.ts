@@ -90,14 +90,15 @@ test.describe("invitación y Mi cuenta", () => {
     await invitada.goto("/login");
     await invitada.getByLabel("Correo").fill(correo);
     await invitada.getByLabel("Contraseña", { exact: true }).fill(clave);
-    await invitada.getByRole("button", { name: "Entrar" }).click();
+    await invitada.getByRole("button", { name: "Entrar", exact: true }).click();
     await invitada.waitForURL((u) => u.pathname === "/");
     await expect(invitada.getByText("Gard Security").first()).toBeVisible();
 
-    // Mi cuenta de la invitada (viewer): el segundo factor es opcional y se puede activar.
+    // Mi cuenta de la invitada (viewer): el segundo factor es opcional y se puede activar (CAR-286).
     await abrirMiCuenta(invitada);
-    await expect(invitada.getByText("Protege tu cuenta con un segundo factor")).toBeVisible();
-    await invitada.getByRole("link", { name: "Activar segundo factor" }).click();
+    await expect(invitada.getByText("Tu cuenta entra solo con contraseña")).toBeVisible();
+    await expect(invitada.getByRole("button", { name: "Agregar passkey" })).toBeVisible();
+    await invitada.getByRole("link", { name: "Activar", exact: true }).click();
     await invitada.waitForURL(/\/activar-mfa\?next=%2Fmi-cuenta|\/activar-mfa\?next=\/mi-cuenta/);
     await expect(invitada.getByRole("link", { name: "Volver a Mi cuenta" })).toBeVisible();
 
@@ -109,14 +110,12 @@ test.describe("invitación y Mi cuenta", () => {
     await invitada.close();
   });
 
-  test("Mi cuenta del owner: segundo factor activo y obligatorio, sin desactivar", async ({
-    page,
-  }) => {
+  test("Mi cuenta de plataforma: Seguridad con la app autenticadora activa", async ({ page }) => {
     await entrar(page);
     await abrirMiCuenta(page);
-    await expect(page.getByRole("heading", { name: "Segundo factor" })).toBeVisible();
-    await expect(page.getByText("Tu cuenta está protegida con un segundo factor")).toBeVisible();
-    await expect(page.getByText("Tu rol requiere el segundo factor.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Desactivar segundo factor" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Seguridad" })).toBeVisible();
+    await expect(page.getByText("Tu cuenta tiene un segundo factor")).toBeVisible();
+    await expect(page.getByText("Activa", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Desactivar" })).toBeVisible();
   });
 });

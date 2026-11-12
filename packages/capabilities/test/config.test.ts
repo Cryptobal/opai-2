@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { contextoDePrueba, USUARIO_DE_PRUEBA } from "../src/testing";
 import { codigo, dato, reiniciar } from "./maestros-ayuda";
 import { semillaTenant } from "./semilla";
-import { mfaEsObligatoria } from "@opai/domain";
 
 beforeEach(reiniciar);
 
@@ -11,18 +10,10 @@ type Valor = { modulo: string; clave: string; valor: unknown; origen: string };
 const de = (vs: Valor[], clave: string) => vs.find((v) => v.clave === clave);
 
 describe("core.config.*", () => {
-  it("core:config.manage no puede apagar el MFA de plataforma/owner/admin", async () => {
+  it("ya no ofrece exigir el segundo factor a nivel de empresa (CAR-286)", async () => {
     const { ctx } = contextoDePrueba({ semilla: semillaTenant() });
-    await dato(ctx, "core.config.set", {
-      modulo: "core",
-      clave: "seguridad_mfa_obligatorio_admins",
-      valor: false,
-    });
     const vs = await dato<Valor[]>(ctx, "core.config.get", { modulo: "core" });
-    const exigirOtros = de(vs, "seguridad_mfa_obligatorio_admins")?.valor === true;
-    expect(mfaEsObligatoria("owner", null, exigirOtros)).toBe(true);
-    for (const rol of ["owner", "admin"])
-      expect(mfaEsObligatoria(null, rol, exigirOtros)).toBe(true);
+    expect(de(vs, "seguridad_mfa_obligatorio_admins")).toBeUndefined();
   });
   it("resuelve defecto → plataforma → tenant → usuario según el ámbito de cada ajuste", async () => {
     const { ctx, tabla } = contextoDePrueba({ semilla: semillaTenant() });

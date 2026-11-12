@@ -6,7 +6,7 @@ test("Supervisor sin ERP no obtiene datos por sesión HTTP ni entrando al ERP", 
   await page.goto("/login");
   await page.getByLabel("Correo").fill("e2e-sin-erp@opai.cl");
   await page.getByLabel("Contraseña", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await page.waitForURL((u) => !u.pathname.startsWith("/login"));
   await page.goto("/supervisor");
   // El seed no tiene instalaciones asignadas: esperar el resultado, no solo ausencia durante carga.

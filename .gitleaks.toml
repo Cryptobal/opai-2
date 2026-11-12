@@ -21,4 +21,8 @@ regexes = [
   '''otro-secreto-de-prueba-tambien-de-32-bytes-o-mas''',
   # Token ficticio del test de idempotencia (CAR-162): simula el token de 32 hex de un enlace público.
   '''0123456789abcdef0123456789abcdef''',
+  # Valores ficticios de los tests de passkeys (CAR-286): contraseña nueva rechazada por la sesión
+  # pendiente y clave pública de relleno (una passkey no guarda secretos).
+  '''otra-clave-123''',
+  '''PUBLICA-NO-SALE''',
 ]

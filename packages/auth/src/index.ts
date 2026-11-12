@@ -16,7 +16,6 @@ export { auth, type Auth } from "./auth";
 export { LOGIN_RETENCION_DIAS, purgarIntentosLogin } from "./bloqueo-login";
 export {
   confirmarSegundoFactor,
-  desactivarSegundoFactor,
   iniciarSegundoFactor,
   verificarCodigoRespaldo,
   verificarSegundoFactor,
@@ -29,6 +28,19 @@ export {
   VIGENCIA_ENLACE_SEGUNDOS,
   VIGENCIA_RECUPERACION_SEGUNDOS,
 } from "./opciones";
+export {
+  entrarConPasskey,
+  guardarPasskey,
+  opcionesEntrarConPasskey,
+  opcionesNuevaPasskey,
+  type ResultadoPasskey,
+} from "./passkey";
+export {
+  type Confirmacion,
+  confirmarIdentidad,
+  opcionesConfirmarConPasskey,
+  purgarVerificacionesVencidas,
+} from "./reautenticacion";
 export { entrarConPin, type ResultadoPin } from "./pin";
 export { correoDeRecuperacion } from "./recuperacion";
 export { getSession, requireSession, sesionDeRequest, sesionVigente, type Sesion } from "./session";
