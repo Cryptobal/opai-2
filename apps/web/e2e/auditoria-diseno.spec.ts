@@ -6,13 +6,11 @@ import { type Portal, rutasAuditables } from "./auditoria/rutas";
 import { pasarProteccionDeVercel } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
-// Auditoría de diseño y experiencia contra Hilo (DISENO-hilo.md, ADR-105, CAR-334). Recorre todas las
-// rutas de ERP, Cliente, Guardia y Terreno a 1440 y 390 px, con la empresa ficticia `qa-e2e` (nunca
-// Gard ni datos reales), y deja una captura y una medición por pantalla. El ERP se recorre en el
-// marco Hilo (cookie `opai_marco`); los otros portales aún no lo tienen (H5) y se ven en el clásico.
-// Solo escribe datos de prueba en la rama de Neon de la vista previa (la cuenta, instalación y persona de
-// `auditoria-datos.spec.ts`, un PIN y un equipo emparejado de qa-e2e; el workflow se niega a correr sin esa rama). Solo corre con `--grep @auditoria` (workflow `auditoria-diseno`), nunca en
-// `preview-e2e`: tarda decenas de minutos.
+// Auditoría de diseño (DISENO-hilo.md, ADR-105 y ADR-109, CAR-334): ERP, Cliente, Guardia y Terreno a
+// 1440 y 390 px con la empresa ficticia `qa-e2e` (nunca Gard), una captura y una medición por pantalla.
+// El ERP va en el marco predeterminado o en el que fije `MARCO` (cookie `opai_marco`). Solo escribe datos
+// de prueba en la rama de Neon de la vista previa (`auditoria-datos.spec.ts`, un PIN, un equipo). Solo con
+// `--grep @auditoria` (workflow `auditoria-diseno`), nunca en `preview-e2e`: tarda decenas de minutos.
 
 const ANCHOS = [
   { nombre: "1440", viewport: { width: 1440, height: 900 }, telefono: false },
@@ -39,7 +37,7 @@ const identidad = (portal: Portal, ancho: string, nota: string): Fila => ({
 });
 const DE_PORTAL: Portal[] = ["cliente", "guardia", "terreno", "publico"];
 
-async function contexto(browser: Browser, ancho: (typeof ANCHOS)[number], hilo: boolean) {
+async function contexto(browser: Browser, ancho: (typeof ANCHOS)[number], conMarco: boolean) {
   const ctx = await browser.newContext({
     viewport: ancho.viewport,
     isMobile: ancho.telefono,
@@ -47,10 +45,9 @@ async function contexto(browser: Browser, ancho: (typeof ANCHOS)[number], hilo: 
     locale: "es-CL",
     timezoneId: "America/Santiago",
   });
-  if (hilo) {
-    const base = process.env["BASE_URL"] ?? "http://localhost:3000";
-    await ctx.addCookies([{ name: "opai_marco", value: "hilo", url: base }]);
-  }
+  const marco = conMarco ? process.env["MARCO"] : undefined;
+  const url = process.env["BASE_URL"] ?? "http://localhost:3000";
+  if (marco) await ctx.addCookies([{ name: "opai_marco", value: marco, url }]);
   const page = await ctx.newPage();
   await pasarProteccionDeVercel(page);
   return { ctx, page };
