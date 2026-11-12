@@ -1920,3 +1920,11 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Cómo se usa.** 1) Importar **Personas** (ficha, previsión y cuenta bancaria; se reconocen por RUT, reimportar no duplica; la simulación muestra los errores fila por fila). 2) Importar **Contratos vigentes** (cargo, instalación, tipo, inicio, horas y distribución) con las personas e instalaciones ya creadas. Ambos importadores reconocen los nombres de columna de 1.0 (`firstName`, `lastName`, `hiredAt`, `contractType`…) y se revierten por lote. La cuenta bancaria importada queda como cuenta por defecto (ADR-100).
 
 **Fuera de alcance.** Anexos y finiquitos (CAR-58) y el adaptador JSON de contratos (el export de 1.0 no trae `OpsGuardia`).
+
+## Adenda ADR-099 · Gard queda habilitada para «OPAI 1 (traer datos)» (CAR-279, 12-nov-2026, pedido de Carlos)
+
+**Decisión.** Para traer los datos de Gard desde OPAI 1, la empresa Gard se agrega a `core.integraciones_habilitadas` (clave «opai1») con una migración de datos aditiva, aplicada por el bot «OPAI 2.0» con respaldo (dev y luego main). La migración no pisa otras empresas, no hace nada si la base no tiene la empresa «gard» y se puede repetir sin efecto.
+
+**Por qué.** El ajuste es de plataforma y no aparece en Plataforma › Ajustes, así que no se podía habilitar por pantalla. Arreglar esa pantalla queda para la sesión Proyecto (CAR-321).
+
+**Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.
