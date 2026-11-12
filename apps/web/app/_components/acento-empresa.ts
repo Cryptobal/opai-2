@@ -8,6 +8,8 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 type Tonos = Record<Modo, TonoAcento>;
 
+const VARIABLES = ["--ds-accent", "--ds-accent-fg", "--ds-accent-muted", "--ds-focus"] as const;
+
 const modoActual = (): Modo => {
   const tema = document.documentElement.dataset["theme"];
   if (tema === "dark") return "noche";
@@ -18,12 +20,10 @@ const modoActual = (): Modo => {
 /** Pone el acento en cada raíz de la piel nueva (<html> y el marco), con el tono del tema visible. */
 function pintar(tonos: Tonos) {
   const t = tonos[modoActual()];
-  const valores: [string, string][] = [
-    ["--ds-accent", t.acento],
-    ["--ds-accent-fg", t.texto],
-    ["--ds-accent-muted", t.suave],
-    ["--ds-focus", t.acento],
-  ];
+  const valores: [string, string][] = [t.acento, t.texto, t.suave, t.acento].map((v, i) => [
+    VARIABLES[i] ?? "",
+    v,
+  ]);
   for (const el of document.querySelectorAll<HTMLElement>('[data-marco="nuevo"]'))
     for (const [k, v] of valores) el.style.setProperty(k, v);
 }
@@ -59,6 +59,9 @@ export function useAcentoEmpresa(activo: boolean, portal: string, epoca: string)
     sistema.addEventListener("change", repintar);
     return () => {
       vivo = false;
+      // Al cambiar de empresa o de diseño no queda el color anterior en <html> (menús y diálogos).
+      for (const el of document.querySelectorAll<HTMLElement>('[data-marco="nuevo"], html'))
+        for (const k of VARIABLES) el.style.removeProperty(k);
       observador.disconnect();
       sistema.removeEventListener("change", repintar);
     };

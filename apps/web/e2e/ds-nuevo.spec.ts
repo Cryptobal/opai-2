@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { erroresDeConsola } from "./hilo-apoyo";
 import { ocultarIndicadorDev } from "./indicador-dev";
 import { capturar, EN_PREVIEW } from "./preview";
@@ -19,6 +20,9 @@ test.describe("muestra del sistema nuevo", () => {
     await expect(muestra).toHaveAttribute("data-marco", "nuevo");
     await expect(page.getByRole("heading", { name: "Sistema de diseño nuevo" })).toBeVisible();
     expect(await muestra.evaluate((el) => getComputedStyle(el).fontFamily)).toContain("Geist");
+    // Captura después de hidratar: la captura oculta el cursor de texto y, antes, React lo ve como un
+    // atributo que no coincide con el HTML del servidor.
+    await hidratado(page.getByRole("button", { name: "Amarillo" }));
     await expect(page.getByTestId("tonos-acento")).toHaveText("Día #0062d1 · Noche #1784ff");
     await capturar(page, info, "ds-nuevo-dia");
 

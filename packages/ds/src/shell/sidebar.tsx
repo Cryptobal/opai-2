@@ -81,7 +81,7 @@ export function Sidebar(props: SidebarProps) {
               onClick={p.onPlegar}
               aria-label="Ocultar el menú"
               title="Ocultar el menú"
-              className="-mr-1 flex size-9 items-center justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus"
+              className="-mr-1 hidden size-9 items-center lg:flex justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus"
             >
               <PanelLeftClose className="size-[18px]" aria-hidden />
             </button>

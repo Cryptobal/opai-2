@@ -1,8 +1,10 @@
 import { cn } from "../cn";
-import { Menu as IconoMenu, PanelLeftOpen } from "lucide-react";
+import { Menu as IconoMenu } from "lucide-react";
 import type { ItemMenu } from "../components/menu";
 import type { ItemFijado } from "./fijados";
 import { MenuMas } from "./menu-mas";
+import { BotonFijarMenu, type PlegableRiel } from "./nuevo/botones-menu";
+export type { PlegableRiel } from "./nuevo/botones-menu";
 import { Contador } from "./contador";
 import type { NavProps } from "./nav";
 import { PortalSwitcher } from "./portal-switcher";
@@ -69,8 +71,6 @@ export type RailProps = NavProps & {
   plegable?: PlegableRiel | undefined;
 };
 
-export type PlegableRiel = { plegado: boolean; onAsomar: () => void; onFijar: () => void };
-
 /**
  * iPad vertical (ShellTablet, 768–1023 px, D9 del Brief 05): riel de 80 px con el selector de
  * portal y empresa arriba (sin la marca), ítems de 80×56 y los ítems fijos (Configuración) al pie.
@@ -97,22 +97,14 @@ export function Rail({
       onPointerEnter={
         plegable ? (e) => e.pointerType === "mouse" && plegable.onAsomar() : undefined
       }
+      aria-hidden={plegable?.tapado ? true : undefined}
+      inert={plegable?.tapado ? true : undefined}
       className={cn(
         "sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex",
         !plegable?.plegado && "lg:hidden",
       )}
     >
-      {plegable?.plegado ? (
-        <button
-          type="button"
-          onClick={plegable.onFijar}
-          aria-label="Dejar el menú fijo"
-          title="Dejar el menú fijo"
-          className="mb-2 hidden size-9 items-center justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus lg:flex"
-        >
-          <PanelLeftOpen className="size-[18px]" aria-hidden />
-        </button>
-      ) : null}
+      {plegable?.plegado ? <BotonFijarMenu onFijar={plegable.onFijar} /> : null}
       <PortalSwitcher
         portales={portales}
         portalActual={portalActual}

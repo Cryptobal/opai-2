@@ -108,11 +108,7 @@ export function MarcoShell({
     [datos.navInferior, datos.iconos],
   );
   const navInferiorBase = navInferiorPreferido ?? navInferiorDefecto;
-  const { boton: pinFicha, menu: pinMenu } = pinDeFicha(
-    enErp && Boolean(esFicha),
-    fichaFijada,
-    onFijarFicha,
-  );
+  const { boton: pinFicha, menu: pinMenu } = pinDeFicha(enErp && Boolean(esFicha), fichaFijada, onFijarFicha);
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
   const bandejaPendiente = enErp && (preferencias?.bandejaPendiente ?? false);
@@ -122,9 +118,7 @@ export function MarcoShell({
     enErp,
     router,
     () => setPassword(true),
-    datos.acceso &&
-      datos.tenant &&
-      ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
+    datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
       ? () => setInicio(true)
       : undefined,
     nuevo ? "nuevo" : "clasico",
@@ -135,25 +129,12 @@ export function MarcoShell({
   const navInferiorResuelto = useMemo(
     () =>
       navInferiorBase &&
-      conContadores(
-        navInferiorBase,
-        { bandejaContador, solicitudesNuevas: 0 },
-        novedadesBandeja,
-      ).map((n) =>
-        n.href === "/"
-          ? { ...n, punto: true, alerta: bandejaPendiente }
-          : n.href === "/cotizaciones"
-            ? { ...n, corta: "Cotiz." }
-            : n,
+      conContadores(navInferiorBase, { bandejaContador, solicitudesNuevas: 0 }, novedadesBandeja).map((n) =>
+        n.href === "/" ? { ...n, punto: true, alerta: bandejaPendiente } : n.href === "/cotizaciones" ? { ...n, corta: "Cotiz." } : n,
       ),
     [navInferiorBase, bandejaPendiente, bandejaContador, novedadesBandeja],
   );
-  const conPin = (accion: ReactNode) => (
-    <>
-      {accion}
-      {pinFicha}
-    </>
-  );
+  const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
     <PinFichaContexto.Provider value={pinMenu}>
       <AppShell
@@ -185,16 +166,7 @@ export function MarcoShell({
         Link={LinkMenu}
         {...(nuevo ? { nuevo: true } : {})}
       >
-        <AccesosProveedor
-          enErp={enErp}
-          preferencias={preferencias}
-          recientes={busqueda.recientes}
-          acciones={datos.acciones}
-          ruta={rutaActual}
-          onNavegar={router.push}
-        >
-          {children}
-        </AccesosProveedor>
+        <AccesosProveedor enErp={enErp} preferencias={preferencias} recientes={busqueda.recientes} acciones={datos.acciones} ruta={rutaActual} onNavegar={router.push}>{children}</AccesosProveedor>
         {enErp ? (
           <Preferencias
             datos={datos}
