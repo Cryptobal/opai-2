@@ -2,7 +2,11 @@ import {
   ajustesComercial,
   capacidadesComercial,
   defineModule,
+<<<<<<< HEAD
   hechosComercial,
+=======
+  indicadoresComercial,
+>>>>>>> brief/car-306-scorecard-cargo
 } from "@opai/capabilities";
 
 /**
@@ -129,6 +133,11 @@ export const manifest = defineModule({
     },
   ],
   capacidades: capacidadesComercial,
+<<<<<<< HEAD
   // Hechos que la empresa puede usar para armar indicadores propios (CAR-313, ADR-094 §8).
   hechos: hechosComercial,
+=======
+  // Indicadores de gestión para el catálogo del núcleo (CAR-308, ADR-094).
+  indicadores: indicadoresComercial,
+>>>>>>> brief/car-306-scorecard-cargo
 });
