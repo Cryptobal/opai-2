@@ -103,7 +103,10 @@ export const trabajoEscalarPanicoSlack = defineTrabajo({
       a,
       await vinculados(
         ctx,
-        miembros.map((m) => m.userId),
+        await activos(
+          ctx,
+          miembros.map((m) => m.userId),
+        ),
       ),
       "Escalado: ",
     );
