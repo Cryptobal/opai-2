@@ -18,9 +18,9 @@ concurrency:
 jobs:
   auditoria-diseno:
     name: auditoria-diseno
-    if: contains(github.event.pull_request.labels.*.name, 'auditoria-diseno')
+    if: (github.event.action == 'labeled' && github.event.label.name == 'auditoria-diseno') || (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'auditoria-diseno'))
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 100
     permissions:
       contents: read
       checks: read
@@ -88,6 +88,12 @@ jobs:
             echo "::error::El check rama-neon falló: la vista previa no tiene la base de este PR lista."
             exit 1
           fi
+          # La auditoría escribe datos de prueba (PIN y emparejamiento en qa-e2e): sin la rama de Neon del
+          # PR confirmada no sigue, para no escribir en una base compartida.
+          if [ "$estado" = "sin" ]; then
+            echo "::error::No apareció el check rama-neon: la auditoría solo corre sobre la rama de Neon del PR."
+            exit 1
+          fi
           if [ "$estado" = "corriendo" ]; then
             echo "::error::rama-neon no terminó en 15 minutos."
             exit 1
@@ -141,7 +147,7 @@ jobs:
           E2E_PROSPECTO_EMAIL: ${{ secrets.E2E_PROSPECTO_EMAIL }}
           E2E_PROSPECTO_PASSWORD: ${{ secrets.E2E_PROSPECTO_PASSWORD }}
           AUDITORIA_DISENO: "1"
-        run: pnpm --filter @opai/web exec playwright test e2e/auditoria-diseno.spec.ts --grep @auditoria --project=desktop --workers=2 --retries=0 --reporter=list --output=test-results/playwright
+        run: pnpm --filter @opai/web exec playwright test e2e/auditoria-diseno.spec.ts --grep @auditoria --project=desktop --workers=4 --retries=0 --reporter=list --output=test-results/playwright
       - name: Subir las capturas
         if: ${{ always() && steps.listo.outputs.ok == 'true' }}
         uses: actions/upload-artifact@v4

@@ -41,7 +41,10 @@ describe("piel Hilo = sistema Hilo de Claude Design", () => {
   }
 
   it("los controles tienen el radio de Hilo", () => {
-    const bloques = css.split('[data-marco="hilo"] {').slice(1);
+    const bloques = css
+      .split('[data-marco="hilo"] {')
+      .slice(1)
+      .map((b) => b.slice(0, b.indexOf("}")));
     const radio = bloques.map((b) => /--ds-radius-md:\s*(\d+)px/.exec(b)?.[1]).find(Boolean);
     expect(Number(radio)).toBe(RADIOS_HILO.md);
   });

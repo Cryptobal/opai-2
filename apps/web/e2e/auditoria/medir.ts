@@ -12,7 +12,7 @@ export type Medicion = {
   desborde: number; // R10: px de scroll horizontal de la página
   ingles: string[]; // R6/R12: palabras en inglés o valores rotos visibles
   fechas: string[]; // R5: fechas fuera del formato dd-mm-aaaa
-  axe: { id: string; impacto: string; nodos: number }[]; // R11
+  axe: { id: string; impacto: string; nodos: number }[]; // R11 (id «axe-fallo» si axe no corrió)
   vacia: boolean; // la vista no muestra contenido en el área principal
 };
 
@@ -91,7 +91,7 @@ export async function axe(page: Page): Promise<Medicion["axe"]> {
     return r.violations
       .filter((v) => v.impact === "serious" || v.impact === "critical")
       .map((v) => ({ id: v.id, impacto: v.impact ?? "", nodos: v.nodes.length }));
-  } catch {
-    return [];
+  } catch (e) {
+    return [{ id: "axe-fallo", impacto: String(e).split("\n")[0]?.slice(0, 120) ?? "", nodos: 0 }];
   }
 }

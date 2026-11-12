@@ -8,6 +8,8 @@
     "apps/web/app/(erp)/configuracion/importar/asistente.tsx": 2,
     "apps/web/app/(erp)/configuracion/importar/lotes.tsx": 1,
     "apps/web/app/(erp)/configuracion/importar/vista-previa.tsx": 2,
+    "apps/web/app/(erp)/desempeno/_componentes/tipos.ts": 1,
+    "apps/web/app/(erp)/desempeno/indicadores/_componentes/textos.ts": 1,
     "apps/web/app/(erp)/finanzas/ventas/programacion/_componentes/periodo-uf.ts": 1,
     "apps/web/app/(erp)/finanzas/ventas/programacion/cierre/_componentes/pantalla-cierre.tsx": 1,
     "apps/web/app/(erp)/instalaciones/_componentes/titular-tipos.ts": 1,
