@@ -1,6 +1,6 @@
 # Referentes SaaS — la vara de OPAI 2.0
 
-**Vigente desde:** 12-nov-2026 · **Decidió:** Carlos · **Adoptado por:** [ADR-105](01-decisiones.md) · **Mantiene:** Sesión Estándares (Linear «22 · Estándares y arquitectura», CAR-348)
+**Vigente desde:** 12-nov-2026 · **Decidió:** Carlos · **Adoptado por:** [ADR-106](01-decisiones.md) · **Mantiene:** Sesión Estándares (Linear «22 · Estándares y arquitectura», CAR-348)
 
 Todo OPAI 2.0 (diseño, lógica, permisos, Núcleo y módulos) sigue el patrón de los mejores SaaS de cada capa y no reinventa la rueda. Este archivo dice, capa por capa, a quién se copia, qué patrón concreto se copia y cómo se comprueba que se cumple. Si un módulo ya construido se aparta sin motivo, se ajusta o se rehace.
 
@@ -12,7 +12,7 @@ Lo que **no** cambia con este documento: Hilo es el sistema visual oficial (ADR-
 2. **En el PR**, si toca arquitectura, permisos, modelo de datos o UX, la descripción lleva la línea «Referente seguido y en qué se aparta» (plantilla del PR y `AGENTS.md`).
 3. **Apartarse está permitido** cuando hay una razón escrita: ley chilena, regla de negocio decidida por Carlos, agent-first (ADR-034) o costo desproporcionado. Sin razón escrita, es una brecha.
 4. **La auditoría** (`docs/2.0/auditoria-estandares/`) compara cada capa contra esta vara con cuatro gravedades: crítica (riesgo de seguridad, datos o plata), alta (un cliente que viene de un SaaS serio lo nota o bloquea vender), media (fricción o deuda) y baja (pulido).
-5. **Un referente se cambia** con una adenda al ADR-105, nunca en un PR de módulo.
+5. **Un referente se cambia** con una adenda al ADR-106, nunca en un PR de módulo.
 
 Las «medidas» son comprobables: una prueba, un `grep`, un conteo o una pantalla. Si una medida no se puede comprobar, se reescribe.
 
