@@ -37,7 +37,7 @@ export function textoMensajeDirecto(m: MensajeDirecto): string {
   const partes = [`*${escaparSlack(m.titulo.slice(0, 300))}*`];
   if (m.cuerpo) partes.push(escaparSlack(m.cuerpo.slice(0, 2000)));
   if (m.enlace && /^https:\/\/[^\s|<>]+$/.test(m.enlace))
-    partes.push(`<${m.enlace}|Abrir en OPAI>`);
+    partes.push(`<${m.enlace.replace(/&/g, "&amp;")}|Abrir en OPAI>`);
   return partes.join("\n");
 }
 

@@ -137,15 +137,51 @@ describe("core.slack: vínculo de personas", () => {
 
   it("el trabajo diario solo busca a los pendientes y no hace nada sin Slack", async () => {
     const sin = ctxConGente().ctx;
-    expect(await obtenerTrabajo("core.slack.vincular_usuarios")?.ejecutar(sin, {})).toEqual({
+    expect(await obtenerTrabajo("core.slack.vincular_pendientes")?.ejecutar(sin, {})).toEqual({
       omitido: "sin_slack",
     });
     const { ctx } = await conectarSlack(ctxConGente().ctx);
-    await obtenerTrabajo("core.slack.vincular_usuarios")?.ejecutar(ctx, {});
+    await obtenerTrabajo("core.slack.vincular_pendientes")?.ejecutar(ctx, {});
     expect(buscados()).toBe(5);
     llamadas.length = 0;
-    await obtenerTrabajo("core.slack.vincular_usuarios")?.ejecutar(ctx, {});
+    await obtenerTrabajo("core.slack.vincular_pendientes")?.ejecutar(ctx, {});
     expect(buscados()).toBe(3); // los 2 vinculados ya no se buscan
+  });
+});
+
+describe("core.slack: más de 40 personas", () => {
+  const muchas = Array.from({ length: 45 }, (_, i) => persona(10 + i, `p${i}@ejemplo.cl`, ["erp"]));
+  const ctxMuchas = () =>
+    contextoDePrueba({
+      semilla: { user: muchas.map((g) => g.user), membership: muchas.map((g) => g.membership) },
+    });
+
+  it("el trabajo avanza por toda la lista y no se repite con las mismas personas", async () => {
+    const { ctx } = await conectarSlack(ctxMuchas().ctx);
+    const t = obtenerTrabajo("core.slack.vincular_pendientes");
+    const r1 = (await t?.ejecutar(ctx, {})) as { revisadas: number; quedan: number };
+    expect(r1).toEqual({ revisadas: 40, quedan: 5 });
+    const cont = (
+      await ctx.db.trabajo.findMany({ where: { tipo: "core.slack.vincular_pendientes" } })
+    )[0];
+    expect(cont?.claveUnica).toMatch(/^slack-vincular:.+:1$/);
+    llamadas.length = 0;
+    const r2 = (await t?.ejecutar(ctx, cont?.payload)) as { revisadas: number; quedan: number };
+    expect(r2).toEqual({ revisadas: 5, quedan: 0 });
+    expect(buscados()).toBe(5);
+    // Ya no queda nadie sin revisar en este ciclo: no se encola otra vuelta.
+    expect(await ctx.db.trabajo.count({ where: { tipo: "core.slack.vincular_pendientes" } })).toBe(
+      1,
+    );
+  });
+
+  it("«Buscar de nuevo» deja encolado el resto", async () => {
+    const { ctx } = await conectarSlack(ctxMuchas().ctx);
+    const v = await executeCapability(ctx, "core.slack.vincular_usuarios", {});
+    expect(v).toMatchObject({ ok: true, data: { buscadas: 40, quedan: 5 } });
+    expect(await ctx.db.trabajo.count({ where: { tipo: "core.slack.vincular_pendientes" } })).toBe(
+      1,
+    );
   });
 });
 

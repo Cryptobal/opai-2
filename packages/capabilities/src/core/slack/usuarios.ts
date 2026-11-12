@@ -14,6 +14,7 @@ import {
   MOTIVOS_SIN_VINCULO,
   type Resultado,
 } from "./vinculo";
+import { encolarVincular } from "./vinculo-trabajos";
 
 const filaSchema = z.object({
   usuarioId: z.uuid(),
@@ -85,8 +86,9 @@ export const slackVincularUsuarios = defineCapability({
     const lista = await candidatos(ctx, { usuarioId: input.usuarioId });
     if (input.usuarioId && !lista.length)
       throw reglaDeNegocio("Esa persona no es un usuario interno activo de la empresa.");
+    const inicio = new Date().toISOString();
     try {
-      return await buscarEnSlack(ctx, lista);
+      return { ...(await buscarEnSlack(ctx, lista)), inicio };
     } catch (e) {
       throw errorDeSlack(e);
     }
@@ -101,9 +103,16 @@ export const slackVincularUsuarios = defineCapability({
       const buscadas = Math.min(n, MAX_POR_CORRIDA);
       return { buscadas, vinculadas: 0, sinVincular: 0, quedan: n - buscadas };
     }
-    const p = preparado as { resultados: Resultado[]; quedan: number } | undefined;
+    const p = preparado as { resultados: Resultado[]; quedan: number; inicio: string } | undefined;
     if (!p) throw reglaDeNegocio("No se pudo consultar Slack. Intenta de nuevo.");
     const finales = await guardarVinculos(ctx, p.resultados);
+    // Más de 40: el resto lo busca el trabajo en un minuto (solo quienes no se revisaron ahora).
+    if (p.quedan > 0)
+      await ctx.transaccion((tx) =>
+        encolarVincular(ctx, tx, "", {
+          continuacion: { desde: p.inicio, vuelta: 1 },
+        }),
+      );
     const vinculadas = finales.filter((r) => r.estado === "vinculado").length;
     return {
       buscadas: p.resultados.length,

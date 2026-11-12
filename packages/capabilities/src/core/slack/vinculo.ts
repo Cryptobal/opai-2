@@ -41,25 +41,30 @@ export function decidir(userId: string, u: UsuarioSlack | null, teamId: string):
 
 export type Candidato = { userId: string; email: string; nombre: string };
 
-/** Personas internas activas de la empresa, con su correo. Con `soloPendientes`, sin las ya vinculadas. */
+/**
+ * Personas internas activas de la empresa, con su correo, en orden de búsqueda: primero las nunca
+ * revisadas y luego las revisadas hace más tiempo (así una corrida tras otra avanza por toda la lista).
+ * `soloPendientes` saca a las vinculadas; `revisadasAntesDe` saca a las ya revisadas en este ciclo.
+ */
 export async function candidatos(
   ctx: Contexto,
-  o: { usuarioId?: string | undefined; soloPendientes?: boolean } = {},
+  o: { usuarioId?: string | undefined; soloPendientes?: boolean; revisadasAntesDe?: Date } = {},
 ): Promise<Candidato[]> {
-  const [miembros, vinculados] = await Promise.all([
+  const [miembros, vinculos] = await Promise.all([
     ctx.db.membership.findMany({
       where: { estado: "activa", ...(o.usuarioId ? { userId: o.usuarioId } : {}) },
       include: { user: { select: { email: true, name: true } } },
       orderBy: { createdAt: "asc" },
     }),
-    o.soloPendientes
-      ? ctx.db.slackUsuario.findMany({ where: { estado: "vinculado" }, select: { userId: true } })
-      : Promise.resolve([] as { userId: string }[]),
+    ctx.db.slackUsuario.findMany({ select: { userId: true, estado: true, revisadoEn: true } }),
   ]);
-  const ya = new Set(vinculados.map((v) => v.userId));
+  const porId = new Map(vinculos.map((v) => [v.userId, v]));
+  const revisado = (userId: string) => porId.get(userId)?.revisadoEn.getTime() ?? 0;
   return miembros
     .filter((m) => m.portales.some((p) => (PORTALES_INTERNOS as readonly string[]).includes(p)))
-    .filter((m) => !ya.has(m.userId))
+    .filter((m) => !o.soloPendientes || porId.get(m.userId)?.estado !== "vinculado")
+    .filter((m) => !o.revisadasAntesDe || revisado(m.userId) < o.revisadasAntesDe.getTime())
+    .sort((a, b) => revisado(a.userId) - revisado(b.userId))
     .map((m) => ({ userId: m.userId, email: m.user.email, nombre: m.user.name }));
 }
 

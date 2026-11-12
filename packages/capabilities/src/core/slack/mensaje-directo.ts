@@ -28,6 +28,9 @@ const DEFINITIVOS = new Set([
   "missing_scope",
 ]);
 
+/** Errores que dicen que la cuenta de Slack de la persona ya no sirve. */
+const CUENTA_PERDIDA = new Set(["user_not_found", "user_disabled", "cannot_dm_bot"]);
+
 /**
  * Encola (en `tx`) el mensaje directo de un aviso en la app, solo si Slack está conectado, la empresa
  * no apagó los mensajes directos y la persona está vinculada. Uno por aviso (clave única).
@@ -55,6 +58,15 @@ export async function encolarMensajeDirecto(
     claveUnica: `slack-dm:${aviso.notificacionId}`,
     maxIntentos: 4,
   });
+}
+
+function enlaceAbsoluto(enlace: string | null, base: string): string | null {
+  if (!enlace) return null;
+  try {
+    return new URL(enlace, base).toString();
+  } catch {
+    return null;
+  }
 }
 
 async function registrar(
@@ -100,16 +112,29 @@ export const trabajoMensajeDirectoSlack = defineTrabajo({
       },
     });
     if (n.eventoId && yaEnviado) return { omitido: "ya_enviado" };
+    // Un enlace inválido se omite (no es motivo para reintentar el envío).
+    const enlace = enlaceAbsoluto(n.enlace, ctx.servicios.urlBase);
     try {
       await slackUsuarios().mensajeDirecto(await tokenSlack(ctx), vinculo.slackUserId, {
         titulo: n.titulo,
         cuerpo: n.cuerpo,
-        enlace: n.enlace ? new URL(n.enlace, ctx.servicios.urlBase).toString() : null,
+        enlace,
       });
     } catch (e) {
       const codigo = e instanceof ErrorSlack ? e.codigo : "error_desconocido";
       if (DEFINITIVOS.has(codigo)) {
         await registrar(ctx, n, "fallido", `Slack: ${codigo}`);
+        // La cuenta de Slack ya no sirve: el vínculo vuelve a «sin vincular» y el trabajo diario la revisa.
+        if (CUENTA_PERDIDA.has(codigo))
+          await ctx.db.slackUsuario.update({
+            where: { id: vinculo.id },
+            data: {
+              estado: "sin_vincular",
+              slackUserId: null,
+              motivo: "desactivado",
+              revisadoEn: new Date(),
+            },
+          });
         return { fallido: codigo };
       }
       // Transitorio (sin respuesta, límite de Slack): el runner reintenta con espera.
