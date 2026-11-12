@@ -37,8 +37,8 @@ export function useHilo(portal: string) {
         ejecutarCapacidad(portal, "core.resumen.contadores", {
           campos: ["notificacionesNoLeidas"],
         }),
-      actividad: () => ejecutarCapacidad(portal, "core.actividad.list", { limite: 20 }),
-      agenda: () => ejecutarCapacidad(portal, "core.actividades.tareas", { limite: 50 }),
+      actividad: () => ejecutarCapacidad(portal, "core.hilo.actividad", { limite: 20 }),
+      agenda: () => ejecutarCapacidad(portal, "core.hilo.agenda", { dias: 14 }),
     }),
     [portal],
   );
