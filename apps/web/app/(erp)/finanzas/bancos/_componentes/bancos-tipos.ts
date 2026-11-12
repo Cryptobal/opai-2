@@ -18,6 +18,9 @@ export type MovimientoBanco = {
   referencia: string | null;
   estado: string;
   origen: string;
+  /** Dónde quedó conciliado (fila del flujo, «Facturas» o «Compras») y la regla que lo hizo, si fue una. */
+  clasificacion?: string | null;
+  regla?: string | null;
 };
 
 export const PESTANAS_ESTADO_BANCO = [

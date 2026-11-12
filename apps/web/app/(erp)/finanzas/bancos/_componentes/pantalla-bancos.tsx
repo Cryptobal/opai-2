@@ -4,15 +4,15 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Badge, Button, Empty, Estado, Tabs, type EstadoPantalla } from "@opai/ds";
+import { Button, Empty, Estado, Segmentado, Tabs, type EstadoPantalla } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { fechaHora } from "@/lib/formato";
 
+import { clp } from "../../flujo/_componentes/datos";
 import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
 import { PESTANAS_ESTADO_BANCO } from "./bancos-tipos";
-import { fechaHora } from "@/lib/formato";
-import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/datos";
+import { ListaMovimientos } from "./lista-movimientos";
 
 const HojaReconocer = dynamic(() => import("./hoja-reconocer").then((m) => ({ default: m.HojaReconocer })));
 const HojaSubirCartola = dynamic(() => import("./hoja-subir-cartola").then((m) => ({ default: m.HojaSubirCartola })));
@@ -25,6 +25,7 @@ type Props = {
   cuentas: CuentaBanco[];
   cuentaId: string | null;
   estado: string;
+  tipo: "ingresos" | "egresos" | null;
   movimientos: MovimientoBanco[];
   movId: string | null;
   gestiona: boolean;
@@ -36,6 +37,7 @@ export function PantallaBancos({
   cuentas,
   cuentaId,
   estado,
+  tipo,
   movimientos,
   movId,
   gestiona,
@@ -50,10 +52,11 @@ export function PantallaBancos({
   }
 
   const cuenta = cuentas.find((c) => c.id === cuentaId) ?? cuentas[0];
-  const params = (e: string) => {
+  const params = (e: string, t: string | null = tipo) => {
     const q = new URLSearchParams();
     if (cuenta?.id) q.set("cuenta", cuenta.id);
     q.set("estado", e);
+    if (t) q.set("tipo", t);
     return `/finanzas/bancos?${q.toString()}`;
   };
   const movSeleccionado = movId ? (movimientos.find((m) => m.id === movId) ?? null) : null;
@@ -101,30 +104,17 @@ export function PantallaBancos({
               activa={estado}
               tabs={PESTANAS_ESTADO_BANCO.map((e) => ({ id: e.id, etiqueta: e.etiqueta, href: params(e.id) }))}
             />
-            {movimientos.length === 0 ? (
-              <Empty titulo="Sin movimientos en esta pestaña" descripcion="Importa una cartola o cambia el filtro de estado." />
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {movimientos.map((m) => (
-                  <li key={m.id} className="rowcard flex flex-wrap items-center gap-2 p-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="t-body-sm font-medium">{m.glosa}</p>
-                      <p className="t-caption text-fg-muted">
-                        {fechaDdMmAaaa(m.fecha)}
-                        {m.referencia ? ` · ${m.referencia}` : ""}
-                      </p>
-                    </div>
-                    <span className="t-mono t-body-sm">{clp(m.monto)}</span>
-                    <Badge tono={m.estado === "conciliado" ? "success" : "neutro"}>{m.estado}</Badge>
-                    {gestiona ? (
-                      <EnlaceBoton href={`${params(estado)}&mov=${m.id}`} variante="secondary">
-                        {m.estado === "conciliado" ? "Ver" : "Reconocer"}
-                      </EnlaceBoton>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <Segmentado
+              Link={LinkNext}
+              etiqueta="Tipo de movimiento"
+              activa={tipo ?? "todos"}
+              opciones={[
+                { id: "todos", etiqueta: "Todos", href: params(estado, null) },
+                { id: "ingresos", etiqueta: "Ingresos", href: params(estado, "ingresos") },
+                { id: "egresos", etiqueta: "Egresos", href: params(estado, "egresos") },
+              ]}
+            />
+            <ListaMovimientos movimientos={movimientos} gestiona={gestiona} hrefMov={(id) => `${params(estado)}&mov=${id}`} />
           </>
         )}
       </div>
@@ -140,7 +130,7 @@ export function PantallaBancos({
         </>
       ) : null}
       {gestiona && movSeleccionado ? (
-        <HojaReconocer movimiento={movSeleccionado} abierta onCerrar={cerrarReconocer} />
+        <HojaReconocer key={movSeleccionado.id} movimiento={movSeleccionado} abierta onCerrar={cerrarReconocer} />
       ) : null}
     </Estado>
   );

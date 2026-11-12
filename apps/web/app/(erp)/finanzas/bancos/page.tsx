@@ -3,6 +3,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarBancos } from "./_componentes/datos";
 import { PantallaBancos } from "./_componentes/pantalla-bancos";
+import { PestanasBancos } from "./_componentes/pestanas-bancos";
 
 export const metadata = { title: "Bancos" };
 
@@ -10,7 +11,12 @@ export const metadata = { title: "Bancos" };
 export default function Bancos({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal portal="erp" titulo="Bancos" ruta="/finanzas/bancos" cargar={() => cargarBancos(searchParams)}>
-      {(d) => <PantallaBancos {...d} />}
+      {(d) => (
+        <div className="flex flex-col gap-4">
+          <PestanasBancos activa="movimientos" />
+          <PantallaBancos {...d} />
+        </div>
+      )}
     </PaginaPortal>
   );
 }

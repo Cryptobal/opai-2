@@ -1,10 +1,12 @@
-import { Alerta } from "@opai/ds";
+import { Alerta, Segmentado } from "@opai/ds";
 
 import type { MovimientoBanco } from "./bancos-tipos";
 import { BuscarFactura } from "./buscar-factura";
 import { ListaSugerenciasReconocer, type SugerenciaReconocer } from "./lista-sugerencias-reconocer";
+import { PanelFilaFlujo } from "./panel-fila-flujo";
 import { PanelProrrateo } from "./panel-prorrateo";
 import { conMontoInicial, type Elegida } from "./seleccion-conciliacion";
+import type { useReconocerFila } from "./use-reconocer-fila";
 
 export function CuerpoHojaReconocer({
   movimiento,
@@ -14,6 +16,7 @@ export function CuerpoHojaReconocer({
   pendiente,
   elegidas,
   onElegidas,
+  fila,
 }: {
   movimiento: MovimientoBanco;
   esConciliado: boolean;
@@ -22,6 +25,7 @@ export function CuerpoHojaReconocer({
   pendiente: boolean;
   elegidas: Elegida[];
   onElegidas: (e: Elegida[]) => void;
+  fila: ReturnType<typeof useReconocerFila>;
 }) {
   const agregar = (e: Elegida) =>
     onElegidas(conMontoInicial(elegidas, e, Math.abs(movimiento.monto)));
@@ -32,10 +36,28 @@ export function CuerpoHojaReconocer({
         {movimiento.fecha}
         {movimiento.referencia ? ` · Ref. ${movimiento.referencia}` : ""}
       </p>
+      {esConciliado ? null : (
+        <Segmentado
+          etiqueta="Conciliar contra"
+          activa={fila.modo}
+          opciones={[
+            { id: "documentos", etiqueta: movimiento.monto > 0 ? "Facturas" : "Documentos", onClick: () => fila.setModo("documentos") },
+            { id: "fila", etiqueta: "Fila del flujo", onClick: () => fila.setModo("fila") },
+          ]}
+        />
+      )}
       {esConciliado ? (
         <Alerta tono="success" titulo="Movimiento conciliado">
           Puedes deshacer la conciliación; el cobro en ventas se revierte.
         </Alerta>
+      ) : fila.modo === "fila" ? (
+        <PanelFilaFlujo
+          esAbono={movimiento.monto > 0}
+          destinos={fila.destinos}
+          reglas={fila.reglas}
+          eleccion={fila.eleccion}
+          onEleccion={fila.setEleccion}
+        />
       ) : (
         <>
           <Alerta tono="info" titulo="Un abono puede pagar varias facturas">
