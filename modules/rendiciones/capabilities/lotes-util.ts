@@ -63,11 +63,11 @@ export async function cuentasDeSolicitantes(ctx: Contexto, userIds: readonly str
   if (userIds.length === 0) return new Map();
   const personas = await ctx.db.persona.findMany({
     where: { usuarioId: { in: [...userIds] } },
-    select: { id: true, usuarioId: true, nombres: true, apellidos: true, emailPersonal: true, pago: { select: { bancoCodigo: true, tipoCuenta: true, numeroCuenta: true, rutTitular: true, updatedAt: true } } },
+    select: { id: true, usuarioId: true, nombres: true, apellidos: true, emailPersonal: true, pagos: { where: { porDefecto: true }, select: { bancoCodigo: true, tipoCuenta: true, numeroCuenta: true, rutTitular: true, updatedAt: true } } },
   });
   const salida = new Map<string, CuentaPersona>();
   for (const p of personas) {
-    const c = p.pago;
+    const c = p.pagos[0];
     if (!p.usuarioId || !c?.bancoCodigo || !c.numeroCuenta || !c.rutTitular) continue;
     salida.set(p.usuarioId, {
       personaId: p.id, nombre: `${p.nombres} ${p.apellidos}`.trim(), rut: c.rutTitular, correo: p.emailPersonal ?? null,
@@ -79,7 +79,7 @@ export async function cuentasDeSolicitantes(ctx: Contexto, userIds: readonly str
 
 /** Número de cuenta en claro: solo para armar la nómina; nunca se guarda, se registra ni sale por MCP. */
 export async function numeroDeCuenta(ctx: Contexto, personaId: string): Promise<string> {
-  const c = await ctx.db.personaPago.findUnique({ where: { personaId }, select: { numeroCuenta: true } });
+  const c = await ctx.db.personaPago.findFirst({ where: { personaId, porDefecto: true }, select: { numeroCuenta: true } });
   if (!c?.numeroCuenta) throw reglaDeNegocio("Una persona del lote ya no tiene cuenta en su ficha.");
   return cifradoDeCampos(ctx).descifrar("personas_pago", "numero_cuenta", c.numeroCuenta);
 }

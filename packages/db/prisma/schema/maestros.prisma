@@ -311,7 +311,7 @@ model Persona {
   estructuras EstructuraSueldo[]
   anexos      AnexoContrato[]
   prevision   PersonaPrevision?
-  pago        PersonaPago?
+  pagos       PersonaPago[]
   pagoSolicitudes PersonaPagoSolicitud[]
   uniforme    PersonaUniforme?
   uniformeEntregas PersonaUniformeEntrega[]
@@ -449,15 +449,18 @@ model PersonaPrevision {
   @@schema("core")
 }
 
-/// Cuenta bancaria vigente de la persona (número cifrado en aplicación).
+/// Cuentas bancarias de la persona (número cifrado en aplicación). A lo más una es la «por defecto»
+/// (índice parcial único en la migración): la nómina de pago usa esa (CAR-275).
 model PersonaPago {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @map("tenant_id") @db.Uuid
-  personaId    String   @unique @map("persona_id") @db.Uuid
+  personaId    String   @map("persona_id") @db.Uuid
   bancoCodigo  String?  @map("banco_codigo")
   tipoCuenta   String?  @map("tipo_cuenta")
   numeroCuenta String?  @map("numero_cuenta")
   rutTitular   String?  @map("rut_titular")
+  titularNombre String? @map("titular_nombre")
+  porDefecto   Boolean  @default(false) @map("por_defecto")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -465,6 +468,7 @@ model PersonaPago {
   persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, personaId])
+  @@index([personaId], map: "personas_pago_persona_id_idx2")
   @@map("personas_pago")
   @@schema("core")
 }
@@ -478,6 +482,13 @@ model PersonaPagoSolicitud {
   tipoCuenta       String?   @map("tipo_cuenta")
   numeroCuenta     String?   @map("numero_cuenta")
   rutTitular       String?   @map("rut_titular")
+  titularNombre    String?   @map("titular_nombre")
+  /// "reemplazar" (cambia la cuenta por defecto) | "agregar" | "marcar_defecto" | "quitar" (CAR-275).
+  tipo             String    @default("reemplazar")
+  /// Cuenta a la que apunta «marcar_defecto» o «quitar».
+  cuentaId         String?   @map("cuenta_id") @db.Uuid
+  /// Con «agregar»: la cuenta nueva pasa a ser la por defecto.
+  porDefecto       Boolean   @default(false) @map("por_defecto")
   /// "pendiente" | "aprobada" | "rechazada"
   estado           String    @default("pendiente")
   solicitadoPorId  String    @map("solicitado_por_id") @db.Uuid
