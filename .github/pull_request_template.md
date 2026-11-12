@@ -16,7 +16,7 @@
 
 **Referente seguido y en qué se aparta:**
 
-<!-- Obligatorio si el PR toca arquitectura, permisos, modelo de datos o UX (ADR-105). Nombra la capa y el referente de `docs/2.0/REFERENTES-saas.md`, el patrón que se siguió y, si se aparta, por qué (ley chilena, regla de Carlos, agent-first o costo). Si no toca nada de eso: «no aplica». -->
+<!-- Obligatorio si el PR toca arquitectura, permisos, modelo de datos o UX (ADR-106). Nombra la capa y el referente de `docs/2.0/REFERENTES-saas.md`, el patrón que se siguió y, si se aparta, por qué (ley chilena, regla de Carlos, agent-first o costo). Si no toca nada de eso: «no aplica». -->
 
 ## Resumen ejecutivo para Carlos
 
@@ -39,7 +39,7 @@
 ## Definición de terminado
 
 - [ ] Cumple el brief o el encargo; las diferencias están reportadas arriba.
-- [ ] Si toca arquitectura, permisos, modelo de datos o UX: la línea «Referente seguido y en qué se aparta» está completa (ADR-105, `docs/2.0/REFERENTES-saas.md`).
+- [ ] Si toca arquitectura, permisos, modelo de datos o UX: la línea «Referente seguido y en qué se aparta» está completa (ADR-106, `docs/2.0/REFERENTES-saas.md`).
 - [ ] `secretos` en verde y todos los checks de arriba en verde en el último commit; si sube un tope de JS, la justificación está en este PR (manda el check de presupuesto; ADR-043 v3).
 - [ ] Gate local corrido antes de cada commit (`pnpm typecheck && pnpm lint && pnpm test`) y `pnpm test:db` si toca base o RLS.
 - [ ] Multi-tenant: toda tabla nueva con `tenant_id` tiene RLS y la política `tenant_isolation`; todo acceso pasa por `forTenant` o `enTransaccion`; no hay `$queryRaw` fuera de `enTransaccion`; `dbAdmin` solo en migraciones y seeds.
