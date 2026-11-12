@@ -28,6 +28,22 @@ export const AJUSTES: Record<string, Ajuste> = {
     fijas: ["vigente_desde", "cargo_id"],
     valores: (ctx) => ({ cargo_id: id(ctx, "core.cargos"), vigente_desde: "2026-11", estado: "publicado" }),
   },
+  // Desempeño (CAR-313): CHECK de sentido, meta y mes de vigencia; FK compuesta al indicador.
+  "desempeno.indicadores_propios": {
+    valores: () => ({ nombre: "Indicador de prueba" }),
+  },
+  "desempeno.indicador_propio_versiones": {
+    dependencias: ["desempeno.indicadores_propios"],
+    fijas: ["vigente_desde", "indicador_id"],
+    valores: (ctx) => ({
+      indicador_id: id(ctx, "desempeno.indicadores_propios"),
+      vigente_desde: "2026-11",
+      definicion: JSON.stringify({ forma: "contar", hecho: "core.tarea_completada" }),
+      unidad: "cantidad",
+      sentido: "mayor",
+      meta_sugerida: 10,
+    }),
+  },
   "desempeno.scorecard_indicadores": {
     dependencias: ["desempeno.scorecards"],
     fijas: ["scorecard_id"],

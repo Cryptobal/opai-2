@@ -34,6 +34,9 @@ export const manifest = defineModule({
   eventos: [
     { id: "desempeno.scorecard.guardado", descripcion: "Se guardó un borrador del scorecard de un cargo." },
     { id: "desempeno.scorecard.publicado", descripcion: "Se publicó el scorecard de un cargo." },
+    { id: "desempeno.propio.guardado", descripcion: "Se guardó un borrador de un indicador propio." },
+    { id: "desempeno.propio.publicado", descripcion: "Se publicó un indicador propio de la empresa." },
+    { id: "desempeno.propio.archivado", descripcion: "Se archivó un indicador propio de la empresa." },
   ],
   capacidades: capacidadesDesempeno,
 });

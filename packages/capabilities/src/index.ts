@@ -7,6 +7,9 @@ export {
 } from "./core/plataforma/cobros";
 export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
 export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
+export { hechosComercial } from "./comercial/hechos-gestion";
+export { defineHecho, type HechoGestion } from "./hechos-gestion";
+export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/hechos";
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
