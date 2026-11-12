@@ -21,7 +21,7 @@ for (const [ruta, etiqueta] of [["cuentas", "cuentas"], ["instalaciones", "insta
       await page.waitForURL(new RegExp(`/${ruta}/[0-9a-f-]{36}`));
       const id = page.url().match(new RegExp(`/${ruta}/([0-9a-f-]{36})`))?.[1] ?? "";
       await page.goto(`/${ruta}/${id}/generar-documento`);
-      await expect(page.getByText("Generar documento").first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText("Generar documento").filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
       await expect(page.getByText("Algo salió mal")).toHaveCount(0);
       const vacio = page.getByText(/Aún no hay plantillas de/);
       if (await vacio.isVisible()) return void (await capturar(page, info, `generar-documento-${etiqueta}-vacio`));
