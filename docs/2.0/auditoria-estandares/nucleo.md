@@ -42,6 +42,7 @@ Stripe: recursos predecibles, idempotencia, errores tipados con parámetro e ide
 ## En qué se aparta a propósito
 
 - **Avisos de Slack con su propia gestión (PR #569, abierto).** `core.slack_avisos` guarda el estado de gestión del aviso (abierto, tomado, cerrado) junto al envío. En el referente el aviso es independiente del canal. Comentado en el PR; revisar al integrar.
+- **Reglas de aprobación por empresa (PR #595, ADR-107, abierto).** Siguen al referente: regla por acción con monto mínimo, aprobador por rol o grupo y una sola cola para personas y agentes. Se apartan en que dueños y administradores aprueban lo propio (razón escrita: no trabar a una empresa chica). Mientras no llegue CAR-253 conviven otras colas de aprobación (CPQ, Rendiciones, tickets). Comentado en el PR; revisar al integrar.
 - **La API es por acción, no por recurso.** Stripe expone recursos (`/v1/invoices`); OPAI expone capacidades (`/api/v1/finanzas/ventas/emitir`). Es deliberado: la misma capacidad sirve a la pantalla, a la API y al MCP (ADR-034, ADR-055). Se mantiene. La condición es que los nombres sigan una sola convención de verbos (hoy conviven `list` y `listar`, `get` y `obtener`): conviene fijarla en `REGLAS-codigo.md`.
 
 ## Qué se mantiene tal cual
