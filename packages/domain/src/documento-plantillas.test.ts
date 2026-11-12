@@ -15,7 +15,9 @@ describe("plantillas laborales de documentos", () => {
     expect(nivelPlantillaValido("anexo_contrato", "N1")).toBe(false);
     expect(nivelPlantillaValido("recepcion_laboral", "N1")).toBe(true);
     expect(nivelPlantillaValido("carta_trabajador", "N1")).toBe(true);
-    for (const c of CLASES_PLANTILLA) expect(nivelPlantillaValido(c, "N2")).toBe(true);
+    for (const c of CLASES_PLANTILLA.filter((x) => x !== "acta")) expect(nivelPlantillaValido(c, "N2")).toBe(true);
+    expect(nivelPlantillaValido("acta", "N1")).toBe(true);
+    expect(nivelPlantillaValido("acta", "N2")).toBe(false);
   });
 
   it("extrae variables sin repetir y en orden", () => {

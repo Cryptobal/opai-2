@@ -1,4 +1,4 @@
-import { KpiTile } from "@opai/ds";
+import { cn, GRILLA_KPI_HILO, KpiTile } from "@opai/ds";
 
 import { UF_ESCALA } from "@opai/domain";
 
@@ -28,7 +28,10 @@ export async function IndicadoresInicio() {
   const tarjetas = armarIndicadores(r.data, UF_ESCALA);
   if (tarjetas.length === 0) return null;
   return (
-    <section aria-label="Indicadores" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+    <section
+      aria-label="Indicadores"
+      className={cn("grid grid-cols-2 gap-3 xl:grid-cols-4", GRILLA_KPI_HILO)}
+    >
       {tarjetas.map((t) => (
         <LinkNext
           key={t.id}

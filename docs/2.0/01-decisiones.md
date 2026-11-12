@@ -1888,6 +1888,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
 8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.
 
+### ADR-097 · Adenda 1 (12-nov-2026, CAR-315 parte 2)
+
+**Decide:** Carlos («CAR 315 parte 2, hazlo ahora», 12-nov-2026, 07:26, hora de Chile) · **Registra:** Claude («Sesión Personas y Documentos»), en el PR de CAR-315 parte 2.
+
+1. **Dos clases nuevas de plantilla: `contrato_servicio` (ámbito cuenta) y `acta` (ámbito instalación)**, reutilizando las clases de firma que ya existían. Cada clase tiene un **ámbito** (persona, cuenta o instalación) que decide qué variables valen: persona = persona, vínculo, instalación, sueldo, contrato; cuenta = cuenta, contrato; instalación = instalación, cuenta, contrato. El servidor rechaza al guardar una variable fuera del ámbito y el panel del editor solo ofrece las del ámbito.
+2. **Generación sobre la entidad:** `core.documento_plantillas.rellenar_entidad` y `generar_entidad` (vista previa, dryRun, PDF con la marca del tenant, vínculo «propietario» a la cuenta o instalación). Las capacidades de persona rechazan plantillas de otro ámbito y al revés. Pantalla «Generar documento» en la pestaña Documentos de la cuenta y de la instalación.
+3. **Sigue pendiente:** Configuración › Módulos › Documentos (tipos configurables por tenant) y el editor con más formato, ambos con diseño.
+
 ## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)
@@ -1905,6 +1913,22 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
 - La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).
 
+## ADR-100 · Varias cuentas bancarias por persona; el anticipo vive solo en Nómina (CAR-275, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026, opción A).** Una persona puede tener varias cuentas bancarias; una sola es «por defecto» y es la que lee la nómina de pago (Rendiciones). El **anticipo** no se modela en la ficha: vive únicamente en Nómina, sin cambios.
+
+**Cómo.** `core.personas_pago` pasa de 1:1 a 1:N (índice único parcial `WHERE por_defecto`, a lo más una por defecto por persona) y suma `titular_nombre`. Las solicitudes (`personas_pago_solicitudes`) suman `tipo` (`reemplazar`, `agregar`, `marcar_defecto`, `quitar`), `cuenta_id`, `titular_nombre` y `por_defecto`. Se reutiliza `core.personas.pago_solicitar_cambio` con esos campos opcionales: sin capacidades nuevas, la aprobación sigue siendo de otra persona (`pago_aprobar_cambio`, solo personas). No se puede quitar la cuenta por defecto. El número de cuenta sigue cifrado por campo. La migración es aditiva y reversible (reversión en su cabecera) y marca la cuenta actual de cada persona como por defecto con verificación de filas.
+
+**Fuera de alcance.** Que la persona valide sus cuentas desde el Portal Trabajador (B1): Carlos no lo decidió.
+
+## ADR-101 · Las personas de OPAI 1 llegan por Excel, sin tocar el exportador de 1.0 (CAR-282, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026).** La importación de personas desde OPAI 1 se hace **vía Excel**: se exporta la lista de guardias y personas desde OPAI 1 a una planilla y se carga en Configuración › Importar datos con el motor común. No se amplía el exportador de OPAI 1 (no se toca 1.0).
+
+**Cómo se usa.** 1) Importar **Personas** (ficha, previsión y cuenta bancaria; se reconocen por RUT, reimportar no duplica; la simulación muestra los errores fila por fila). 2) Importar **Contratos vigentes** (cargo, instalación, tipo, inicio, horas y distribución) con las personas e instalaciones ya creadas. Ambos importadores reconocen los nombres de columna de 1.0 (`firstName`, `lastName`, `hiredAt`, `contractType`…) y se revierten por lote. La cuenta bancaria importada queda como cuenta por defecto (ADR-100).
+
+**Fuera de alcance.** Anexos y finiquitos (CAR-58) y el adaptador JSON de contratos (el export de 1.0 no trae `OpsGuardia`).
+
 ## Adenda ADR-099 · Gard queda habilitada para «OPAI 1 (traer datos)» (CAR-279, 12-nov-2026, pedido de Carlos)
 
 **Decisión.** Para traer los datos de Gard desde OPAI 1, la empresa Gard se agrega a `core.integraciones_habilitadas` (clave «opai1») con una migración de datos aditiva, aplicada por el bot «OPAI 2.0» con respaldo (dev y luego main). La migración no pisa otras empresas, no hace nada si la base no tiene la empresa «gard» y se puede repetir sin efecto.
@@ -1912,3 +1936,42 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Por qué.** El ajuste es de plataforma y no aparece en Plataforma › Ajustes, así que no se podía habilitar por pantalla. Arreglar esa pantalla queda para la sesión Proyecto (CAR-321).
 
 **Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.
+
+## ADR-103 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 06:54, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** La programación de facturas primero genera un borrador que no se manda a nadie. Si tiene activada la proforma o el estado de pago, esos documentos se mandan a los destinatarios de la cuenta. Cuando el cliente aprueba (un OK por correo), se emite la factura y va a los mismos destinatarios. Hasta hoy, OPAI 2 mandaba a un solo destinatario principal y el resto en copia. OPAI 1 admite 10 PARA y 10 CC. El importador de facturas históricas (CAR-283) dejó abierta qué hacer con una factura que no trae el monto cobrado.
+
+**Decisión.**
+1. **Todos los destinatarios reciben por igual.** Los contactos de facturación asignados (los de la programación o, si no hay, los de la cuenta) van todos como destinatarios principales (PARA), hasta 10. El resto va en copia. Lo mismo vale para la proforma, el estado de pago y la factura con su XML.
+2. **La casilla DTE del cliente va siempre en copia.** Es la casilla que recibe el XML y el DTE. Se agrega en copia aunque no esté en la lista guardada. Si el cliente no tiene ningún contacto de facturación, va como PARA.
+3. **Facturas importadas: todas cobradas.** Toda factura importada sin monto cobrado se da por cobrada entera, porque así están las de Gard. Si alguna no lo está, Carlos lo avisa y se corrige a mano.
+
+**Consecuencias.**
+- La migración `20261130100000_finanzas_destinatarios_varios_para` quita el índice que permitía un solo PARA por documento. El tope de 10 lo valida el dominio (`MAX_PARA`).
+- El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
+- La regla por defecto del importador (#542) queda confirmada.
+- Este ADR se numeró primero como ADR-100, número que en `main` tomó antes CAR-275; el comentario de la migración `20261130100000` conserva «ADR-100» porque ya está aplicada y su checksum no puede cambiar.
+- El recordatorio de cobro de una factura vencida usa los mismos destinatarios que la factura (`destinosDeDocumento`): así el cliente recibe la cobranza en las mismas casillas que la factura, con la casilla DTE en copia.
+
+## ADR-102 · Hilo es el sistema de diseño predeterminado para todo diseño nuevo (CAR-324, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 10:57, hora de Chile) · **Registra:** Claude. (ADR-098 a ADR-101 están reservados por PRs abiertos.)
+
+**Decisión.** Todo diseño nuevo de OPAI 2.0 (Design Prompts, pantallas y piezas) se hace en Claude Design con el sistema «OPAI 2.0 Design System · Hilo». «OPAI 2.0 V2» y los sistemas anteriores quedan solo como referencia de lo ya construido; no se diseñan pantallas nuevas con ellos.
+
+**Por qué.** Hilo es la base visual que se está construyendo (ADR-090). Diseñar con un solo sistema evita mezclar dos estilos y que una pantalla aprobada en V2 tenga que rehacerse.
+
+**Consecuencias.** `DISENO.md` §3b lo deja como regla. El sistema en Claude Design se mantiene al día con `packages/ds`: si cambia la piel Hilo, se actualiza en el mismo PR o en el siguiente. Las pantallas ya construidas con la base clásica no se rediseñan por esta regla; se pasan a Hilo cuando su módulo entre en un bloque de Hilo (H3 y siguientes).
+
+## ADR-104 · Las sesiones de Claude no dependen del bot «OPAI 2.0» (12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 11:26 y 11:40, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** El bot «OPAI 2.0» (Grok) dejó de responder la noche del 11-nov y varios PR quedaron esperando que aplicara su migración (#527, #528, #537, #558).
+
+**Decisión.** Ni esta sesión ni ninguna otra sesión de Claude depende del bot «OPAI 2.0». Cada sesión aplica la migración de su propio PR con el procedimiento de siempre (respaldo de `dev` y `main`, `dev` antes que `main`, `lock_timeout` corto, verificación y aviso en el PR) y quita `migracion-pendiente`. Reemplaza en esto a ADR-054 y ADR-070.
+
+**Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
+

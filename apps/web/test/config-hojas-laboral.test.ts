@@ -96,7 +96,7 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
       );
       if (seccion === "contacto-laboral")
         valores.telefonoSecundario = valores.emergenciaTelefono = "+56912345678";
-      if (seccion === "pago") valores.rutTitular = "";
+      if (seccion === "pago" || seccion === "pago-agregar") valores.rutTitular = "";
       const input = c.armar(ID, cambiosDe(c, {}, valores));
       expect(capacidad?.input.safeParse(input).error?.issues ?? []).toEqual([]);
     },

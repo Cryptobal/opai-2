@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 730 pares pantalla→capacidad · 652 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 731 pares pantalla→capacidad · 654 con herramienta · 77 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -89,6 +89,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_revocar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimientos_listar` | `core_cumplimiento_consentimientos_listar` | existe |
 | compartido | `app/_components` | `core.cumplimiento.solicitud_crear` | — | excepción |
+| compartido | `app/_components` | `core.documento_plantillas.generar_entidad` | `core_documento_plantillas_generar_entidad` | existe |
+| compartido | `app/_components` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
+| compartido | `app/_components` | `core.documento_plantillas.rellenar_entidad` | `core_documento_plantillas_rellenar_entidad` | existe |
 | compartido | `app/_components` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | compartido | `app/_components` | `core.documentos.archive` | `core_documentos_archive` | existe |
 | compartido | `app/_components` | `core.documentos.confirmar_subida` | `core_documentos_confirmar_subida` | existe |
@@ -169,11 +172,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.config.get` | `comercial_config_get` | existe |
-| compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
-| compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
@@ -926,7 +927,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.rostro.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
-| `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
+| `comercial.importar_1_0` | sin pantalla todavía · CAR-325 · desde 2026-11-12 | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
 | `core.anexos.rechazar` | `app/_components` | no | reservada a personas |
 | `core.apikeys.create` | `/configuracion/agentes` | no | reservada a personas |
