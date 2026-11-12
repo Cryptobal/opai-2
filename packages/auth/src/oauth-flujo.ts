@@ -62,16 +62,25 @@ export async function elegirEmpresaOAuth(tenantId: string, consulta: string): Pr
 /** Acepta o rechaza la autorización; devuelve a dónde volver (la app o su aviso de rechazo). */
 export async function consentirOAuth(aceptar: boolean, consulta: string): Promise<PasoOAuth> {
   if (!(await consultaOAuthValida(consulta))) return { ok: false, motivo: "vencido" };
+  const h = await headers();
   try {
     return urlDe(
       await auth.api.oauth2Consent({
         body: { accept: aceptar, oauth_query: consulta },
-        headers: await headers(),
+        headers: h,
       }),
     );
   } catch (e) {
     if (e instanceof APIError) return { ok: false, motivo: "vencido" };
     throw e;
+  } finally {
+    // La empresa elegida vale para esta app: la siguiente vuelve a preguntar.
+    const sesion = await auth.api.getSession({ headers: h });
+    if (sesion)
+      await clienteAuth().session.update({
+        where: { id: sesion.session.id },
+        data: { oauthTenantId: null },
+      });
   }
 }
 

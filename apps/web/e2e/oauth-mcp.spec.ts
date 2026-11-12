@@ -1,34 +1,11 @@
-import { createHash, randomBytes } from "node:crypto";
+import { expect, type Page, test } from "@playwright/test";
 
-import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
-
-import { capturar, EN_PREVIEW } from "./preview";
+import { cabeceras, canjear, pedirAutorizacion, permitir } from "./oauth-apoyo";
+import { capturar } from "./preview";
 import { codigoTotp, E2E_EMAIL, E2E_PASSWORD as password } from "./sesion";
 
 // Entrar a OPAI desde una app como Claude con la cuenta propia (CAR-247, ADR-098): la app se registra
 // sola, la persona entra, elige empresa y autoriza; la app recibe un código y lo cambia por tokens.
-// El callback de la app es un origen falso que la prueba intercepta: nada sale de la máquina.
-const CALLBACK = "https://app-de-prueba.invalid/oauth/callback";
-
-const cabeceras = (): Record<string, string> => {
-  const secreto = process.env["VERCEL_AUTOMATION_BYPASS_SECRET"];
-  return EN_PREVIEW && secreto ? { "x-vercel-protection-bypass": secreto } : {};
-};
-
-async function registrarApp(request: APIRequestContext): Promise<string> {
-  const r = await request.post("/api/auth/oauth2/register", {
-    headers: cabeceras(),
-    data: {
-      client_name: "App de prueba",
-      redirect_uris: [CALLBACK],
-      token_endpoint_auth_method: "none",
-      grant_types: ["authorization_code", "refresh_token"],
-      response_types: ["code"],
-    },
-  });
-  expect(r.status()).toBe(201);
-  return ((await r.json()) as { client_id: string }).client_id;
-}
 
 /** Sigue el flujo en pantalla hasta el consentimiento, pasando por login, MFA y empresa si aparecen. */
 async function hastaAutorizar(page: Page, url: string): Promise<void> {
@@ -47,11 +24,9 @@ async function hastaAutorizar(page: Page, url: string): Promise<void> {
     await page.getByLabel(/Código/).fill(await codigoTotp());
     await page.getByRole("button", { name: "Verificar" }).click();
   }
-  const enOAuth = (u: URL) =>
-    u.pathname === "/autorizar" ||
-    (u.pathname === "/elegir-empresa" && u.searchParams.get("oauth") === "1");
+  const enOAuth = (u: URL) => u.pathname === "/autorizar" || u.pathname === "/autorizar/empresa";
   await page.waitForURL(enOAuth);
-  if (new URL(page.url()).pathname === "/elegir-empresa") {
+  if (new URL(page.url()).pathname === "/autorizar/empresa") {
     await expect(page.getByText("Elige con qué empresa entrará la app")).toBeVisible();
     await page
       .getByRole("button")
@@ -71,54 +46,17 @@ test.describe("@preview OAuth del MCP", () => {
   }, info) => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
-    const meta = await request.get("/.well-known/oauth-protected-resource/api/mcp", {
-      headers: cabeceras(),
-    });
-    const { resource } = (await meta.json()) as { resource: string };
-    const clientId = await registrarApp(request);
-    const verificador = randomBytes(32).toString("base64url");
-    const desafio = createHash("sha256").update(verificador).digest("base64url");
-    const q = new URLSearchParams({
-      response_type: "code",
-      client_id: clientId,
-      redirect_uri: CALLBACK,
-      scope: "mcp:leer mcp:escribir offline_access",
-      state: "estado-de-prueba",
-      code_challenge: desafio,
-      code_challenge_method: "S256",
-      resource,
-    });
-    await hastaAutorizar(page, `/api/auth/oauth2/authorize?${q.toString()}`);
+    const pedido = await pedirAutorizacion(request);
+    await hastaAutorizar(page, pedido.url);
     await expect(
       page.getByRole("heading", { name: "Conectar App de prueba con OPAI" }),
     ).toBeVisible();
     await expect(page.getByText("Ver lo que tú ves")).toBeVisible();
     await capturar(page, info, "oauth-autorizar");
 
-    let vuelta = "";
-    await page.route(`${CALLBACK}**`, async (ruta) => {
-      vuelta = ruta.request().url();
-      await ruta.fulfill({ status: 200, contentType: "text/plain", body: "ok" });
-    });
-    await page.getByRole("button", { name: "Permitir" }).click();
-    await expect.poll(() => vuelta).not.toBe("");
-    const respuesta = new URL(vuelta).searchParams;
-    expect(respuesta.get("state")).toBe("estado-de-prueba");
-    const codigo = respuesta.get("code") ?? "";
+    const codigo = await permitir(page);
     expect(codigo).not.toBe("");
-
-    // La app canjea el código desde su servidor, sin las cookies del navegador.
-    const token = await request.post("/api/auth/oauth2/token", {
-      headers: cabeceras(),
-      form: {
-        grant_type: "authorization_code",
-        code: codigo,
-        redirect_uri: CALLBACK,
-        client_id: clientId,
-        code_verifier: verificador,
-        resource,
-      },
-    });
+    const token = await canjear(request, pedido, codigo);
     expect(token.status(), await token.text()).toBe(200);
     const cuerpo = (await token.json()) as { access_token?: string; refresh_token?: string };
     expect(cuerpo.access_token).toBeTruthy();
@@ -154,8 +92,8 @@ test.describe("@preview OAuth del MCP", () => {
       form: {
         grant_type: "refresh_token",
         refresh_token: cuerpo.refresh_token ?? "",
-        client_id: clientId,
-        resource,
+        client_id: pedido.clientId,
+        resource: pedido.resource,
       },
     });
     expect(renovado.status(), await renovado.text()).toBe(200);

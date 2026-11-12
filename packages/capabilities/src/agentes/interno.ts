@@ -68,7 +68,8 @@ export function comoAppOAuth(
     principal: null,
     scopes: null,
     modulosSoloLectura: app.soloLectura
-      ? [...new Set([...ctx.modulosSoloLectura, ...ctx.modulosActivos])]
+      ? // `core` y `platform` son siempre activos y no vienen en `modulosActivos`.
+        [...new Set([...ctx.modulosSoloLectura, ...ctx.modulosActivos, "core", "platform"])]
       : ctx.modulosSoloLectura,
     autorizar: (permiso) => !permiso.startsWith("platform:") && ctx.autorizar(permiso),
     idempotencia: idempotenciaSobre(ctx.db, ctx.tenantId, actor),

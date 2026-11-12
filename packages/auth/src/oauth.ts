@@ -6,14 +6,18 @@ import { clienteAuth, forUser } from "@opai/db";
 import {
   ALCANCES_OAUTH,
   empresaDelConsentimiento,
+  faltaSegundoFactor,
   type MembresiaOAuth,
   necesitaElegirEmpresa,
   VIDA_ACCESO_SEGUNDOS,
   VIDA_REFRESH_SEGUNDOS,
 } from "./oauth-reglas";
 
-/** Pantalla donde la persona elige la empresa con la que conecta la app (export-acceso 05). */
-export const PAGINA_EMPRESA_OAUTH = "/elegir-empresa?oauth=1";
+/**
+ * Pantalla donde la persona elige la empresa con la que conecta la app (export-acceso 05). Sin query:
+ * el proveedor le agrega `?<consulta firmada>`.
+ */
+export const PAGINA_EMPRESA_OAUTH = "/autorizar/empresa";
 /** Pantalla de consentimiento: qué app, qué empresa y qué podrá hacer. */
 export const PAGINA_CONSENTIMIENTO_OAUTH = "/autorizar";
 
@@ -23,10 +27,11 @@ export const recursoMcp = (base = process.env["BETTER_AUTH_URL"] ?? "http://loca
 
 export async function membresiasOAuth(userId: string): Promise<MembresiaOAuth[]> {
   const filas = await forUser(userId).membership.findMany({
-    select: { tenantId: true, estado: true, tenant: { select: { estado: true } } },
+    select: { tenantId: true, rol: true, estado: true, tenant: { select: { estado: true } } },
   });
   return filas.map((m) => ({
     tenantId: m.tenantId,
+    rol: m.rol,
     estado: m.estado,
     tenantEstado: m.tenant.estado,
   }));
@@ -37,11 +42,32 @@ export async function membresiasOAuth(userId: string): Promise<MembresiaOAuth[]>
  * (`core.auth_sesion_por_token`) no trae esta columna.
  */
 export async function empresaDeSesion(session: { id: string }): Promise<string | null> {
+  return (await estadoDeSesion(session)).empresa;
+}
+
+async function estadoDeSesion(session: { id: string }) {
   const fila = await clienteAuth().session.findUnique({
     where: { id: session.id },
-    select: { oauthTenantId: true },
+    select: { oauthTenantId: true, mfaVerified: true },
   });
-  return fila?.oauthTenantId ?? null;
+  return { empresa: fila?.oauthTenantId ?? null, mfaVerificada: fila?.mfaVerified === true };
+}
+
+type UsuarioOAuth = { id: string; twoFactorEnabled?: boolean | null; platformRole?: unknown };
+
+/**
+ * Empresa del consentimiento y de los tokens. Corre antes de emitir cada código, también cuando la app
+ * ya estaba autorizada: por eso aquí se exige el segundo factor, no solo en las pantallas.
+ */
+async function empresaAutorizada(user: UsuarioOAuth, session: { id: string }): Promise<string> {
+  const membresias = await membresiasOAuth(user.id);
+  const estado = await estadoDeSesion(session);
+  const tenantId = empresaDelConsentimiento(membresias, estado.empresa);
+  const rol = membresias.find((m) => m.tenantId === tenantId)?.rol;
+  const segundo = { activo: user.twoFactorEnabled === true, verificado: estado.mfaVerificada };
+  if (faltaSegundoFactor({ ...segundo, platformRole: user.platformRole, rol }))
+    throw new Error("Falta el segundo factor.");
+  return tenantId;
 }
 
 /**
@@ -78,13 +104,10 @@ export const proveedorOAuth = () =>
         necesitaElegirEmpresa(await membresiasOAuth(user.id), await empresaDeSesion(session)),
       consentReferenceId: async ({ user, session }) => {
         try {
-          return empresaDelConsentimiento(
-            await membresiasOAuth(user.id),
-            await empresaDeSesion(session),
-          );
+          return await empresaAutorizada(user, session);
         } catch {
           throw new APIError("FORBIDDEN", {
-            message: "Elige una empresa válida para conectar la app.",
+            message: "Elige una empresa válida y verifica tu segundo factor para conectar la app.",
           });
         }
       },

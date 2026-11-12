@@ -35,9 +35,10 @@ describe("comoAppOAuth", () => {
   });
 
   it("con solo lectura deja todos los módulos en lectura", async () => {
-    const e = contextoDePrueba({ modulosActivos: ["core"] });
+    // Como en producción: `core` es siempre activo y no viene en la lista de módulos de la empresa.
+    const e = contextoDePrueba({ modulosActivos: [] });
     const ctx = comoAppOAuth(e.ctx, { clientId: "c1", soloLectura: true });
-    expect(ctx.modulosSoloLectura).toEqual(expect.arrayContaining(e.ctx.modulosActivos));
+    expect(ctx.modulosSoloLectura).toEqual(expect.arrayContaining(["core", "platform"]));
     const r = await executeCapability(
       { ...ctx, medidor: e.ctx.medidor },
       "core.config.set",

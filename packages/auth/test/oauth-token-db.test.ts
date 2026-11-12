@@ -5,12 +5,13 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import { hashTokenOAuth } from "../src/oauth-reglas";
+import type { tokenOAuthVigente as TokenVigente } from "../src/oauth-token";
 
 const RECURSO = "http://localhost:3000/api/mcp";
 
 describe.skipIf(!urlPropietario)("token OAuth del MCP contra la base (CAR-247)", () => {
   let e: Entorno;
-  let tokenOAuthVigente: typeof import("../src/oauth-token").tokenOAuthVigente;
+  let tokenOAuthVigente: typeof TokenVigente;
   let userId: string;
   const clientId = `prueba-${randomUUID()}`;
   const tenantId = randomUUID();

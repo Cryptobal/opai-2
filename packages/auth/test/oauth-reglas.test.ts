@@ -12,7 +12,12 @@ import {
 
 const A = "01a00000-0000-7000-8000-00000000000a";
 const B = "01a00000-0000-7000-8000-00000000000b";
-const activa = (tenantId: string) => ({ tenantId, estado: "activa", tenantEstado: "activo" });
+const activa = (tenantId: string) => ({
+  tenantId,
+  rol: "gerente",
+  estado: "activa",
+  tenantEstado: "activo",
+});
 const AHORA = new Date("2026-11-12T12:00:00Z");
 
 describe("OAuth del MCP · empresa del token (CAR-247)", () => {
@@ -29,9 +34,9 @@ describe("OAuth del MCP · empresa del token (CAR-247)", () => {
     const ajena = "01a00000-0000-7000-8000-0000000000ff";
     expect(necesitaElegirEmpresa([activa(A), activa(B)], ajena)).toBe(true);
     expect(() => empresaDelConsentimiento([activa(A), activa(B)], ajena)).toThrow();
-    const suspendida = { tenantId: B, estado: "activa", tenantEstado: "suspendido" };
+    const suspendida = { ...activa(B), tenantId: B, estado: "activa", tenantEstado: "suspendido" };
     expect(() => empresaDelConsentimiento([activa(A), suspendida], B)).toThrow();
-    const inactiva = { tenantId: B, estado: "suspendida", tenantEstado: "activo" };
+    const inactiva = { ...activa(B), tenantId: B, estado: "suspendida", tenantEstado: "activo" };
     expect(() => empresaDelConsentimiento([activa(A), inactiva], B)).toThrow();
   });
   it("sin empresas usables no se puede autorizar", () => {
@@ -71,8 +76,45 @@ describe("consultaParaAutorizar", () => {
       "&code_challenge_method=S256&exp=9&ba_iat=1&ba_pl=ses&ba_param=client_id&ba_param=exp&sig=abc";
     const r = new URLSearchParams(consultaParaAutorizar(q));
     expect([...r.keys()].sort()).toEqual(
-      ["client_id", "code_challenge", "code_challenge_method", "redirect_uri", "scope", "state"].sort(),
+      [
+        "client_id",
+        "code_challenge",
+        "code_challenge_method",
+        "redirect_uri",
+        "scope",
+        "state",
+      ].sort(),
     );
     expect(r.get("redirect_uri")).toBe("https://claude.ai/cb");
+  });
+});
+
+describe("faltaSegundoFactor", () => {
+  it("bloquea si la cuenta tiene segundo factor y la sesión no lo verificó", async () => {
+    const { faltaSegundoFactor } = await import("../src/oauth-reglas");
+    expect(
+      faltaSegundoFactor({ activo: true, verificado: false, platformRole: null, rol: "gerente" }),
+    ).toBe(true);
+    expect(
+      faltaSegundoFactor({ activo: true, verificado: true, platformRole: null, rol: "gerente" }),
+    ).toBe(false);
+  });
+  it("bloquea a owner, admin o plataforma sin segundo factor activo", async () => {
+    const { faltaSegundoFactor } = await import("../src/oauth-reglas");
+    for (const rol of ["owner", "admin"])
+      expect(
+        faltaSegundoFactor({ activo: false, verificado: false, platformRole: null, rol }),
+      ).toBe(true);
+    expect(
+      faltaSegundoFactor({
+        activo: false,
+        verificado: false,
+        platformRole: "owner",
+        rol: "gerente",
+      }),
+    ).toBe(true);
+    expect(
+      faltaSegundoFactor({ activo: false, verificado: false, platformRole: null, rol: "gerente" }),
+    ).toBe(false);
   });
 });

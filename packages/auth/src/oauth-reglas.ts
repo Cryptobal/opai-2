@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 
+import { mfaEsObligatoria, pendienteMfa } from "@opai/domain";
+
 // Reglas puras del OAuth del MCP (CAR-247, ADR-098), sin base ni Better Auth, para poder probarlas.
 
 /** Alcances que una app puede pedir. Nunca `platform`: Plataforma solo con API key explícita. */
@@ -9,7 +11,12 @@ export const ALCANCES_OAUTH = ["mcp:leer", "mcp:escribir", "offline_access"] as 
 export const VIDA_ACCESO_SEGUNDOS = 60 * 60;
 export const VIDA_REFRESH_SEGUNDOS = 30 * 24 * 60 * 60;
 
-export type MembresiaOAuth = { tenantId: string; estado: string; tenantEstado: string };
+export type MembresiaOAuth = {
+  tenantId: string;
+  rol: string;
+  estado: string;
+  tenantEstado: string;
+};
 
 const usables = (m: readonly MembresiaOAuth[]) =>
   m.filter((x) => x.estado === "activa" && x.tenantEstado !== "suspendido");
@@ -64,4 +71,24 @@ export function consultaParaAutorizar(consultaFirmada: string): string {
   const p = new URLSearchParams(consultaFirmada);
   for (const k of PARAMETROS_FIRMA) p.delete(k);
   return p.toString();
+}
+
+/**
+ * Conectar una app exige lo mismo que entrar a un portal (NÚCLEO-F): con segundo factor activo, que
+ * la sesión lo haya verificado; y owner, admin o plataforma deben tenerlo activo. La exigencia extra
+ * que una empresa agregue por ajuste se revisa en las pantallas de `apps/web`.
+ */
+export function faltaSegundoFactor(s: {
+  activo: boolean;
+  verificado: boolean;
+  platformRole: unknown;
+  rol: unknown;
+}): boolean {
+  return (
+    pendienteMfa({
+      activa: s.activo,
+      verificada: s.verificado,
+      obligatoria: mfaEsObligatoria(s.platformRole, s.rol),
+    }) !== null
+  );
 }

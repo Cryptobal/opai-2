@@ -64,8 +64,9 @@ function modelos(): Modelo[] {
  * columna con nombre genérico (p. ej. `value` en verifications, `payload`) no se detecta.
  */
 // Columnas meta (banderas, vencimientos) que contienen una palabra personal pero no son el dato en
-// sí: `email_verified` es un booleano, `access_token_expires_at` es una fecha. No se inventarían.
-const esMetaNoPersonal = (c: string) => /(_verified|_expires_at)$/.test(c);
+// sí: `email_verified` es un booleano, `access_token_expires_at` es una fecha y `access_token_ttl`
+// una duración (CAR-247). No se inventarían.
+const esMetaNoPersonal = (c: string) => /(_verified|_expires_at|_ttl)$/.test(c);
 
 const esColumnaPersonal = (c: string) =>
   !esMetaNoPersonal(c) &&
