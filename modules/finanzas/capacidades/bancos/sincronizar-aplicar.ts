@@ -22,7 +22,7 @@ export type MovimientoNuevo = {
  */
 export async function aplicarSincronizacion(
   ctx: Contexto,
-  p: { cuentaId: string; nuevos: MovimientoNuevo[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null },
+  p: { cuentaId: string; nuevos: MovimientoNuevo[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
 ): Promise<number> {
   return ctx.transaccion(async (tx) => {
     // Ids externos que ya existían antes de este lote: una entrega repetida no vuelve a evaluar reglas sobre ellos.
@@ -61,9 +61,8 @@ export async function aplicarSincronizacion(
     const reglas = llegados.length
       ? await aplicarReglasBanco(ctx, tx, { movimientoIds: llegados.map((m) => m.id) })
       : { conciliados: 0, sugeridos: 0 };
-    // Una entrega repetida (sin movimientos nuevos) no pisa un saldo que ya se tenía: podría ser más antiguo.
-    const previo = await tx.cuentaBancaria.findUnique({ where: { id: p.cuentaId }, select: { saldoBanco: true } });
-    const saldo = p.saldoBanco != null && (count > 0 || previo?.saldoBanco == null) ? p.saldoBanco : null;
+    const previo = await tx.cuentaBancaria.findUnique({ where: { id: p.cuentaId }, select: { saldoBanco: true, saldoBancoEn: true } });
+    const saldo = p.saldoBanco != null && saldoVigente(p, count, previo) ? p.saldoBanco : null;
     await tx.cuentaBancaria.update({
       where: { id: p.cuentaId },
       data: {
@@ -80,4 +79,19 @@ export async function aplicarSincronizacion(
     });
     return count;
   });
+}
+
+/**
+ * ¿El saldo recibido reemplaza al guardado? El saldo de la cuenta que informa el banco (`accountBalance`) manda por
+ * su fecha: entra si no había saldo o si es igual o más reciente, aunque no traiga movimientos nuevos (CAR-345). El
+ * saldo deducido del último movimiento solo entra con movimientos nuevos: una entrega repetida podría ser antigua.
+ */
+function saldoVigente(
+  p: { saldoBancoEn: Date | null; saldoExplicito?: boolean },
+  nuevos: number,
+  previo: { saldoBanco: bigint | null; saldoBancoEn: Date | null } | null,
+): boolean {
+  if (previo?.saldoBanco == null) return true;
+  if (p.saldoExplicito && p.saldoBancoEn) return !previo.saldoBancoEn || p.saldoBancoEn >= previo.saldoBancoEn;
+  return nuevos > 0;
 }
