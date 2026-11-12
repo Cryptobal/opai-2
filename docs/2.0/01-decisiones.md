@@ -1837,6 +1837,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Corrección del hallazgo (11-nov-2026, 21:10, Sesión Desempeño, CAR-314).** El hallazgo anterior estaba mal: la unión entre un usuario y su ficha de Persona **ya existe** en `main` (`core.personas.usuario_id`, 1 a 1 por empresa, índice único `personas_tenant_usuario_key` y capacidad `core.personas.vincular_usuario`). Lo cierto es más acotado: Comercial atribuye los negocios a un usuario y hoy nada obliga a que ese usuario tenga su Persona vinculada. CAR-314 no crea la unión, la usa (`personaDelUsuario`), y agrega la jefatura por cargo (`core.cargos.set_jefatura`, `core.personas.asignar_jefe`, `core.personas.a_cargo`). Los indicadores siguen declarando `sujeto` usuario o Persona; el scorecard (CAR-306) cruza ambos por esa unión.
 
+**Adenda (11-nov-2026, 22:28, Carlos confirma las dos reglas de jefatura de CAR-314, PR #528).** (a) Una persona que no tiene jefe asignado no queda invisible: la ve el nivel de arriba (un vendedor sin jefe asignado lo ve el gerente, no los jefes de venta). (b) Ser jefatura **no** amplía el alcance por filas de ADR-022: un supervisor ve, de su equipo, solo a las personas de sus instalaciones a cargo. Ambas quedan como se construyeron.
+
 **Pendiente de Carlos.** Nada.
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
