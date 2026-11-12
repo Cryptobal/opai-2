@@ -21,14 +21,22 @@ export const diferirConAfter = (tarea: () => Promise<unknown>) =>
       .catch(() => undefined),
   );
 
-/** Contexto de sistema de un tenant (crons, consumidores, despacho del outbox). */
-export function contextoSistema(tenantId: string, modulosActivos: readonly string[] = []) {
+/**
+ * Contexto de sistema de un tenant (crons, consumidores, despacho del outbox). Las entradas públicas
+ * (enlaces, equipos de terreno) pasan los módulos en solo lectura para que no escriban (ADR-071, 7.5).
+ */
+export function contextoSistema(
+  tenantId: string,
+  modulosActivos: readonly string[] = [],
+  modulosSoloLectura: readonly string[] = [],
+) {
   asegurarRegistro();
   return crearContexto({
     tenantId,
     actor: { tipo: "system" },
     portal: null,
     modulosActivos,
+    modulosSoloLectura,
     medidor: medidorEnDb,
   });
 }

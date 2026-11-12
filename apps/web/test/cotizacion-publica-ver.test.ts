@@ -25,6 +25,10 @@ vi.mock("@/lib/medidor", () => ({
     return ctxSistema;
   }),
 }));
+vi.mock("@/lib/solo-lectura", async (original) => ({
+  ...(await original<Record<string, unknown>>()),
+  soloLecturaDe: vi.fn(async () => []),
+}));
 vi.mock("@opai/db", () => ({ tenantPorSlug: vi.fn(async () => ({ id: "t1" })) }));
 vi.mock("@opai/capabilities", () => ({
   executeCapability: vi.fn(async () => ({ ok: true, data: { titulo: "Cotización" } })),
@@ -33,6 +37,7 @@ vi.mock("@opai/capabilities", () => ({
 import { executeCapability } from "@opai/capabilities";
 
 import { contextoSistema } from "@/lib/medidor";
+import { soloLecturaDe } from "@/lib/solo-lectura";
 
 import { verCotizacionPublica } from "../app/p/[slug]/[token]/ver";
 
@@ -50,10 +55,24 @@ describe("verCotizacionPublica", () => {
 
   it("arma el contexto con contextoSistema (registro del proceso) y los módulos activos", async () => {
     const r = await verCotizacionPublica("gard", "a".repeat(32));
-    expect(contextoSistema).toHaveBeenCalledWith("t1", ["cpq"]);
+    expect(contextoSistema).toHaveBeenCalledWith("t1", ["cpq"], []);
     expect(executeCapability).toHaveBeenCalledWith(ctxSistema, "cpq.compartir.ver", {
       token: "a".repeat(32),
     });
     expect(r).toEqual({ ok: true, data: { titulo: "Cotización" } });
+  });
+
+  it("con CPQ en solo lectura no escribe la visita y lo dice (ADR-071, adenda 7.5)", async () => {
+    vi.mocked(soloLecturaDe).mockResolvedValueOnce(["cpq"]);
+    vi.mocked(executeCapability).mockResolvedValueOnce({
+      ok: false,
+      error: {
+        code: "FORBIDDEN",
+        message: 'El módulo "cpq" está en solo lectura: puedes ver tus datos.',
+      },
+    });
+    const r = await verCotizacionPublica("gard", "a".repeat(32));
+    expect(contextoSistema).toHaveBeenCalledWith("t1", ["cpq"], ["cpq"]);
+    expect(r).toEqual({ soloLectura: true });
   });
 });

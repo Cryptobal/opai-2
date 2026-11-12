@@ -9,6 +9,7 @@ import { tenantPorSlug } from "@opai/db";
 import { fuentesReales } from "@/lib/fuentes";
 import { contextoSistema } from "@/lib/medidor";
 import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
+import { esSoloLectura, soloLecturaDe } from "@/lib/solo-lectura";
 
 export type CorreccionVista = {
   original: string;
@@ -34,7 +35,8 @@ export async function contextoPublico(slug: string, token: string) {
   if (!tenant) return null;
   const modulos = await fuentesReales.modulosActivos(tenant.id);
   if (!modulos.includes("asistencia")) return null;
-  return contextoSistema(tenant.id, modulos);
+  // Asistencia en solo lectura: se ve la corrección, pero no se responde (ADR-071, adenda 7.5).
+  return contextoSistema(tenant.id, modulos, await soloLecturaDe(tenant.id, "asistencia"));
 }
 
 export async function verCorreccion(
@@ -51,7 +53,7 @@ export async function verCorreccion(
 export async function responderCorreccion(
   slug: string,
   entrada: { token: string; rut: string; resultado: "aceptada" | "objetada"; comentario: string },
-): Promise<"ok" | "limitada" | "rechazada" | "comentario"> {
+): Promise<"ok" | "limitada" | "rechazada" | "comentario" | "solo_lectura"> {
   const ctx = await contextoPublico(slug, entrada.token);
   if (ctx === "limitada") return "limitada";
   if (!ctx) return "rechazada";
@@ -62,5 +64,6 @@ export async function responderCorreccion(
     ...(entrada.comentario ? { comentario: entrada.comentario } : {}),
   });
   if (r.ok) return "ok";
+  if (esSoloLectura(r)) return "solo_lectura";
   return r.error.code === "UNPROCESSABLE" ? "comentario" : "rechazada";
 }
