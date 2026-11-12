@@ -78,3 +78,22 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 - **Pantalla:** Configuración › Integraciones › Slack suma la sección «Personas vinculadas» (lista con estado y «Buscar de nuevo») y el interruptor de mensajes directos.
 
 **Archivos:** `packages/db` (esquema, migración, prueba RLS), `packages/integrations/src/slack` (API `users.lookupByEmail`, `conversations.open`, `chat.postMessage`; ajuste), `packages/capabilities/src/core/slack/*` (vínculo, consumidores, trabajos, mensaje directo), `core/aceptar.ts` (evento), `core/comunicaciones/consumidor.ts` (encolar el mensaje directo), `apps/web/.../integraciones/slack` (sección nueva), e2e `@preview`, novedad in-app y `ESTADO.md`.
+
+## F3 en detalle (CAR-293, «Sesión Núcleo», 12-nov-2026)
+
+**Objetivo:** las anomalías de terreno que la empresa activó llegan a su canal de Slack, en un hilo por instalación y día, con «Tomar» y «Ver en OPAI»; el pánico, además, por mensaje directo a los supervisores a cargo y con escalamiento.
+
+- **Tablas** (migración aditiva `20261206100000_core_slack_avisos`, RLS + FORCE, trigger `verificar_mismo_tenant`): `core.slack_avisos` (un aviso por hecho de origen, clave única; envío pendiente/enviado/fallido; gestión abierto/tomado/cerrado, que F4 usa como verdad en OPAI) y `core.slack_hilos` (mensaje padre por canal, instalación y día).
+- **Qué se avisa y de dónde sale** (consumidores del núcleo, sin tocar la lógica de otros módulos):
+  - Atraso sobre el margen y fuera de zona: `asistencia.marca.registrada`. **Punto de extensión:** el payload suma `turnoInicio`, `horaServidor` y `distanciaM` (aditivo).
+  - Ausencia: `asistencia.alerta.sin_marca_inicio`. **Punto de extensión:** el payload suma la instalación (`refs`, aditivo).
+  - Incidentes: novedades de gravedad alta que llegan desde terreno (`core.terreno.hechos_recibidos`).
+  - Pánico: evento nuevo `core.terreno.panico` (catálogo del núcleo). Lo emitirá el botón de F5b (CAR-296); F3 ya lo consume.
+- **Envío:** trabajo `core.slack.aviso_enviar` con reintentos; errores definitivos (la app no está en el canal, canal archivado, token revocado) dejan el aviso «fallido» con el motivo. El pánico manda mensajes directos a los supervisores a cargo vinculados (F2) si la empresa lo activa, y el trabajo `core.slack.panico_escalar` (a los minutos configurados) avisa al grupo elegido si nadie lo tomó.
+- **Volumen mínimo:** sin canal elegido no se avisa nada (salvo el pánico por mensaje directo); una marca normal nunca genera aviso; un hecho genera a lo más un aviso.
+
+**Queda para después (decisión o dependencia):**
+- **Resumen por turno y zona** y **canales por zona**: OPAI 2.0 no tiene hoy un concepto de «zona». Se pregunta a Carlos qué es una zona (ver CAR-293). El interruptor del resumen existe pero todavía no envía nada.
+- **Sin relevo:** no hay un evento que lo detecte; lo debe emitir Asistencia o Pauta (punto mínimo pendiente).
+- **Foto del aviso:** se deja fuera hasta definir qué foto (la de la marca es biométrica, Ley 21.719).
+- **Mensajes de guardias:** llegan con F5b.
