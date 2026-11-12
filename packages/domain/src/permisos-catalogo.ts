@@ -70,6 +70,8 @@ export const PERMISOS_CORE = {
   configManage: "core:config.manage",
   marcaManage: "core:marca.manage",
   integracionesManage: "core:integraciones.manage",
+  // Avisos de terreno en Slack (CAR-294): tomar, cerrar y pedir refuerzo. Owner, admin, gerente y supervisor.
+  avisosTerrenoGestionar: "core:avisos_terreno.gestionar",
   comunicacionesManage: "core:comunicaciones.manage",
   consumosRead: "core:consumos.read",
   aprobacionesManage: "core:aprobaciones.manage",

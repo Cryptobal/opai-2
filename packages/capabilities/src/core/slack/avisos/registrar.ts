@@ -20,6 +20,8 @@ export type TipoAviso = (typeof TIPOS_AVISO)[number];
 export const TIPO_ENVIAR_AVISO = "core.slack.aviso_enviar";
 export const TIPO_ESCALAR_PANICO = "core.slack.panico_escalar";
 export const TIPO_DIRECTO_PANICO = "core.slack.panico_directo";
+export const TIPO_ACTUALIZAR_AVISO = "core.slack.aviso_actualizar";
+export const TIPO_REFUERZO_AVISO = "core.slack.aviso_refuerzo";
 
 export type AvisoNuevo = {
   tipo: TipoAviso;

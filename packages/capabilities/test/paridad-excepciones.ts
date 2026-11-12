@@ -38,6 +38,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: canjea el código del OAuth y guarda el token del bot cifrado; nunca por API ni MCP (ADR-027, ADR-093).",
   "core.slack.desconectar":
     "Solo personas: revoca y borra el token del bot de Slack; gobierno de credenciales (ADR-027, ADR-093).",
+  "core.slack.vinculado_de":
+    "Interna: solo la ejecuta /api/integraciones/slack/acciones, tras verificar la firma de Slack, para saber qué persona de OPAI apretó un botón (CAR-294).",
+  "core.slack.efimero":
+    "Interna: solo la ejecuta /api/integraciones/slack/acciones para avisar a quien apretó un botón por qué no se hizo nada (CAR-294).",
   "core.slack.desinstalada":
     "Interna: solo la ejecuta /api/integraciones/slack/eventos, tras verificar la firma de Slack, cuando la app se desinstala o su token se revoca.",
   "finanzas.folios.cargar_caf":

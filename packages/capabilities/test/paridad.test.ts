@@ -90,6 +90,7 @@ describe("paridad: la UI solo invoca capacidades existentes y públicas", () => 
       "app/_components/asistencia/use-ejecutor.ts", // ejecutor de la pantalla de marcación: recibe el id literal de su llamador
       "lib/terreno-servidor.ts", // pasarela del equipo emparejado: recibe el id literal de sus llamadores
       "app/_components/maestros/acciones-entidad.tsx",
+      "app/api/integraciones/slack/acciones/route.ts", // botones de Slack: lista blanca literal ACCIONES_SLACK en lib/slack-clic.ts (CAR-294)
     ]);
     const nuevas = llamadas.filter((l) => l.ids.length === 0 && !conocidas.has(l.archivo));
     expect(

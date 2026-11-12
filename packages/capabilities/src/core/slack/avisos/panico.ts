@@ -21,7 +21,7 @@ type AvisoPanico = {
 };
 
 /** Solo personas con membresía activa en la empresa. */
-async function activos(ctx: Contexto, userIds: string[]) {
+export async function activos(ctx: Contexto, userIds: string[]) {
   if (!userIds.length) return [];
   const m = await ctx.db.membership.findMany({
     where: { userId: { in: userIds }, estado: "activa" },
@@ -31,7 +31,7 @@ async function activos(ctx: Contexto, userIds: string[]) {
 }
 
 /** Ids de Slack de los usuarios vinculados entre `userIds`. */
-async function vinculados(ctx: Contexto, userIds: string[]) {
+export async function vinculados(ctx: Contexto, userIds: string[]) {
   if (!userIds.length) return [];
   const filas = await ctx.db.slackUsuario.findMany({
     where: { userId: { in: userIds }, estado: "vinculado" },
@@ -44,7 +44,7 @@ async function vinculados(ctx: Contexto, userIds: string[]) {
  * Manda el mismo aviso por mensaje directo a cada destinatario y devuelve cuántos salieron. Si no salió
  * ninguno y hubo errores, lanza para que el runner reintente.
  */
-async function directos(ctx: Contexto, a: AvisoPanico, slackIds: string[], prefijo = "") {
+export async function directos(ctx: Contexto, a: AvisoPanico, slackIds: string[], prefijo = "") {
   if (!slackIds.length) return 0;
   const token = await tokenSlack(ctx);
   let enviados = 0;
