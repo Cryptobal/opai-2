@@ -4,7 +4,7 @@ import type { Tablero } from "./datos";
 
 /** Cumplimiento del tiempo objetivo de primera respuesta a solicitudes (CAR-299). */
 export function PrimeraRespuesta({ r }: { r: NonNullable<Tablero["primeraRespuesta"]> }) {
-  const horas = r.objetivoHoras === 1 ? "1 hora" : `${r.objetivoHoras} horas`;
+  const horas = r.objetivoHoras === 1 ? "1 hora hábil" : `${r.objetivoHoras} horas hábiles`;
   return (
     <SeccionTarjeta
       titulo="Primera respuesta a solicitudes"

@@ -1,6 +1,8 @@
 // Plazo de primera respuesta de una solicitud (CAR-299). Lógica pura: sin base de datos ni Next.
 import { z } from "zod";
 
+import { sumarHorasHabiles } from "./horario-habil";
+
 export const PLAZOS_PRIMERA_RESPUESTA = [
   "sin_plazo",
   "dentro",
@@ -17,10 +19,9 @@ export const plazoSchema = z.object({
 });
 export type Plazo = z.infer<typeof plazoSchema>;
 
-const HORA_MS = 3_600_000;
-
 /**
- * Dónde está una solicitud respecto del tiempo objetivo de la empresa. `horas` en 0 significa apagado.
+ * Dónde está una solicitud respecto del tiempo objetivo de la empresa. `horas` son horas hábiles (lunes a
+ * viernes, 8:00 a 18:00) y 0 significa apagado.
  * Pendiente: «dentro» o «fuera» según la hora actual. Atendida: «a_tiempo» o «tarde» según cuándo se
  * atendió. Una solicitud ya atendida antes de que existiera el registro queda «sin_dato».
  */
@@ -30,7 +31,7 @@ export function plazoPrimeraRespuesta(
   ahora: Date,
 ): Plazo {
   if (!(horas > 0)) return { estado: "sin_plazo", venceEn: null };
-  const vence = new Date(s.createdAt.getTime() + horas * HORA_MS);
+  const vence = sumarHorasHabiles(s.createdAt, horas);
   const venceEn = vence.toISOString();
   if (s.primeraRespuestaEn) {
     return { estado: s.primeraRespuestaEn <= vence ? "a_tiempo" : "tarde", venceEn };

@@ -41,9 +41,9 @@ export const ajustesComercial = z.object({
     control: "switch",
   }),
   solicitudes_primera_respuesta_horas: z.number().int().min(0).max(720).default(0).meta({
-    etiqueta: "Tiempo objetivo de primera respuesta (horas)",
+    etiqueta: "Tiempo objetivo de primera respuesta (horas hábiles)",
     ayuda:
-      "Apagado con 0 (decisión de Carlos, 11-nov-2026). Con un valor, la bandeja de Solicitudes marca cuáles están dentro o fuera del plazo y el tablero de reportes mide cuántas se atendieron a tiempo.",
+      "Apagado con 0 (decisión de Carlos, 11-nov-2026). Se cuenta en horas hábiles: lunes a viernes, de 8:00 a 18:00. Con un valor, la bandeja de Solicitudes marca cuáles están dentro o fuera del plazo y el tablero de reportes mide cuántas se atendieron a tiempo.",
     grupo: "Leads",
     ambito: "tenant",
     permiso: "comercial:config.manage",
