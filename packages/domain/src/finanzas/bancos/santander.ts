@@ -1,8 +1,9 @@
 import { claveDedupeCartola } from "./dedupe";
 import { filasConExcelJs } from "./excel-filas";
 import { fechaDesdeDdMmAaaa } from "./fechas";
-import { validarFilasCartola, validarTamanoCartola } from "./limites-cartola";
+import { ErrorCartola, validarFilasCartola, validarTamanoCartola } from "./limites-cartola";
 import { esRemuneracion } from "./remuneracion";
+import { columnasDeEncabezado, montoConSigno, type ColumnasCartola } from "./santander-columnas";
 import { leerXlsxTolerante } from "./xlsx-tolerante";
 
 export type FilaCartolaParseada = {
@@ -35,8 +36,13 @@ export async function parsearCartolaSantander(contenido: Buffer): Promise<Result
   let rows: (string | number | null)[][];
   try {
     rows = await filasConExcelJs(contenido);
-  } catch {
-    rows = await leerXlsxTolerante(contenido);
+  } catch (e) {
+    if (e instanceof ErrorCartola) throw e;
+    try {
+      rows = await leerXlsxTolerante(contenido);
+    } catch {
+      throw new ErrorCartola("No se pudo leer el archivo como cartola Santander (.xlsx). Descárgala de nuevo desde Office Banking.");
+    }
   }
   validarFilasCartola(rows.length);
   return parsearFilasSantander(rows);
@@ -47,8 +53,7 @@ export function parsearFilasSantander(rows: (string | number | null)[][]): Resul
   let fechaDesde: string | null = null;
   let fechaHasta: string | null = null;
   let saldoFinal: number | null = null;
-  let headerIdx = -1;
-  const cols: Record<string, number> = {};
+  let cols: ColumnasCartola | null = null;
   const filas: FilaCartolaParseada[] = [];
   const rechazadas: { indice: number; motivo: string }[] = [];
 
@@ -61,20 +66,10 @@ export function parsearFilasSantander(rows: (string | number | null)[][]): Resul
     }
     if (/saldos\s+diarios/i.test(texto)) break;
 
-    if (headerIdx < 0 && row.some((c) => /MONTO|DESCRIP/i.test(String(c ?? "")))) {
-      headerIdx = i;
-      row.forEach((c, j) => {
-        const k = String(c ?? "").trim().toUpperCase();
-        if (k.includes("MONTO")) cols.monto = j;
-        if (k.includes("DESCRIP")) cols.glosa = j;
-        if (k === "FECHA" || k.includes("FECHA")) cols.fecha = j;
-        if (k.includes("DOC")) cols.ref = j;
-        if (k.includes("SUCURSAL")) cols.suc = j;
-        if (k.includes("SALDO")) cols.saldo = j;
-      });
+    if (!cols) {
+      cols = columnasDeEncabezado(row);
       continue;
     }
-    if (headerIdx < 0 || i <= headerIdx) continue;
     if (row.every((c) => c == null || String(c).trim() === "")) continue;
 
     const parsed = filaDesdeRow(row, cols, i);
@@ -86,17 +81,20 @@ export function parsearFilasSantander(rows: (string | number | null)[][]): Resul
     if (parsed.fila) filas.push(parsed.fila);
   }
 
+  if (!cols && rows.length > 0) {
+    throw new ErrorCartola("No encontramos el detalle de movimientos (columnas MONTO, DESCRIPCIÓN y FECHA). Revisa que sea una cartola Santander.");
+  }
   return { fechaDesde, fechaHasta, saldoFinal, filas, rechazadas };
 }
 
 function filaDesdeRow(
   row: (string | number | null)[],
-  cols: Record<string, number>,
+  cols: ColumnasCartola,
   indice: number,
 ):
   | { ok: true; fila?: FilaCartolaParseada; saldoFinal?: number }
   | { ok: false; motivo: string } {
-  const fechaRaw = row[cols.fecha ?? -1];
+  const fechaRaw = row[cols.fecha];
   const iso =
     typeof fechaRaw === "string"
       ? fechaDesdeDdMmAaaa(fechaRaw)
@@ -104,9 +102,10 @@ function filaDesdeRow(
         ? null
         : fechaDesdeDdMmAaaa(String(fechaRaw));
   if (!iso) return { ok: false, motivo: "Fecha inválida." };
-  const monto = parseMonto(row[cols.monto ?? -1]);
-  if (monto == null || monto === 0) return { ok: false, motivo: "Monto inválido." };
-  const glosa = String(row[cols.glosa ?? -1] ?? "").trim();
+  const montoLeido = parseMonto(row[cols.monto]);
+  if (montoLeido == null || montoLeido === 0) return { ok: false, motivo: "Monto inválido." };
+  const monto = montoConSigno(montoLeido, cols.cargoAbono != null ? row[cols.cargoAbono] : null);
+  const glosa = String(row[cols.glosa] ?? "").trim();
   if (!glosa) return { ok: false, motivo: "Glosa vacía." };
   const referencia = cols.ref != null ? String(row[cols.ref] ?? "").trim() || null : null;
   const sucursal = cols.suc != null ? String(row[cols.suc] ?? "").trim() || null : null;

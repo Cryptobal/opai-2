@@ -6,9 +6,6 @@ import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 import {
   CARTOLA_MAX_BASE64,
   planificarDedupeCartola,
-  parsearCartolaSantander,
-  parsearCsvGenerico,
-  validarTamanoCartola,
   type FilaCartolaParseada,
   type MapeoColumnasGenerico,
 } from "@opai/domain";
@@ -17,6 +14,7 @@ import { filaPreviewSchema } from "./esquemas";
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { cuentaDe } from "./util";
 import { aplicarImportacionCartola } from "./cartola-importar-aplicar";
+import { leerCartola } from "./cartola-leer";
 
 const MAX_B64 = CARTOLA_MAX_BASE64;
 
@@ -59,30 +57,11 @@ export const bancosCartolaImportar = defineCapability({
     if (prevCartola && !dryRun) throw reglaDeNegocio("Importación ya aplicada con esta clave de idempotencia.");
 
     const buf = Buffer.from(input.contenidoBase64, "base64");
-    validarTamanoCartola(buf.byteLength);
-    let parsedFilas: FilaCartolaParseada[];
-    let rechazadas: { indice: number; motivo: string }[];
-    let saldoFinal: number | null;
-    let fechaDesde: string | null;
-    let fechaHasta: string | null;
-
-    if (input.formato === "santander") {
-      const r = await parsearCartolaSantander(buf);
-      parsedFilas = r.filas;
-      rechazadas = r.rechazadas;
-      saldoFinal = r.saldoFinal;
-      fechaDesde = r.fechaDesde;
-      fechaHasta = r.fechaHasta;
-    } else {
-      const mapeo = (input.mapeoColumnas ?? cuenta.mapeoColumnas ?? null) as MapeoColumnasGenerico | null;
-      if (!mapeo) throw reglaDeNegocio("Indica el mapeo de columnas o guárdalo en la cuenta.");
-      const r = parsearCsvGenerico(buf.toString("utf8"), mapeo);
-      parsedFilas = r.filas;
-      rechazadas = r.rechazadas;
-      saldoFinal = null;
-      fechaDesde = null;
-      fechaHasta = null;
-    }
+    const { filas: parsedFilas, rechazadas, saldoFinal, fechaDesde, fechaHasta } = await leerCartola(
+      buf,
+      input.formato,
+      (input.mapeoColumnas ?? cuenta.mapeoColumnas ?? null) as MapeoColumnasGenerico | null,
+    );
 
     const existentes = await ctx.db.movimientoBancario.findMany({
       where: { cuentaId: cuenta.id },
