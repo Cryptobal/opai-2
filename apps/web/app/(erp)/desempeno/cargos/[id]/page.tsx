@@ -12,7 +12,7 @@ import {
   cargarResultadoCargo,
   cargarScorecard,
 } from "../../_componentes/datos";
-import { mesCorto } from "../../_componentes/tipos";
+import { type DefinicionIndicador, mesCorto } from "../../_componentes/tipos";
 import { EditarScorecard } from "./_componentes/editar-scorecard";
 import { Equipo } from "./_componentes/equipo";
 import { Jefatura } from "./_componentes/jefatura";
@@ -57,7 +57,9 @@ export default function ScorecardCargo({ params }: Props) {
       {({ id, r, equipo, opciones, cargos, nombre, editaScorecard, editaJefatura }) => {
         const vigente = r.ok ? r.data.vigente : null;
         const pendiente = r.ok ? r.data.pendiente : null;
-        const nombres = new Map((r.ok ? r.data.definiciones : []).map((d) => [d.indicador, d]));
+        const mapa = (ds: DefinicionIndicador[]) => new Map(ds.map((d) => [d.indicador, d]));
+        const nombres = mapa(r.ok ? r.data.definiciones : []);
+        const nombresPendiente = mapa(r.ok ? r.data.definicionesPendiente : []);
         return (
           <DetailScreen
             state={estadoPantalla(r)}
@@ -100,7 +102,7 @@ export default function ScorecardCargo({ params }: Props) {
                       : `Cambio publicado, rige desde ${mesCorto(pendiente.vigenteDesde)}`
                   }
                 >
-                  <TablaScorecard scorecard={pendiente} nombres={nombres} />
+                  <TablaScorecard scorecard={pendiente} nombres={nombresPendiente} />
                 </Seccion>
               ) : null}
               {cargos ? <Jefatura cargoId={id} cargos={cargos} editable={editaJefatura} /> : null}

@@ -32,7 +32,8 @@ export function HojaScorecard({ cargoId, base, soloPublicar, opciones, onCerrar 
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [items, setItems] = useState<ItemScorecard[]>(base?.indicadores ?? []);
   const [veResultado, setVeResultado] = useState(base?.personaVeResultado ?? true);
-  const [veRanking, setVeRanking] = useState(base?.personaVeRanking ?? false);
+  // La posición en el equipo aún no se muestra en ninguna pantalla: se conserva lo guardado, sin ofrecerlo.
+  const veRanking = base?.personaVeRanking ?? false;
   const suma = items.reduce((s, i) => s + (Number.isFinite(i.peso) ? i.peso : 0), 0);
   const completos = items.every((i) => i.meta > 0 && Number.isInteger(i.peso) && i.peso >= 1);
 
@@ -85,13 +86,6 @@ export function HojaScorecard({ cargoId, base, soloPublicar, opciones, onCerrar 
             onCambiar={setVeResultado}
             etiqueta="La persona ve su resultado"
             descripcion="Cada persona de este cargo ve su puntaje y sus indicadores."
-          />
-          <Switch
-            activo={veResultado && veRanking}
-            onCambiar={setVeRanking}
-            etiqueta="La persona ve su posición en el equipo"
-            descripcion="Muestra en qué lugar queda frente a su equipo."
-            disabled={!veResultado}
           />
           {completos ? null : (
             <p className="t-caption text-warning-fg">Completa la meta y el peso de cada indicador.</p>

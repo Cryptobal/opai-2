@@ -67,6 +67,7 @@ export const cargarScorecard = (cargoId: string) =>
     vigente: Scorecard | null;
     pendiente: Scorecard | null;
     definiciones: DefinicionIndicador[];
+    definicionesPendiente: DefinicionIndicador[];
   }>("erp", "desempeno.scorecards.get", { cargoId });
 
 export const cargarResultadoCargo = (cargoId: string) =>

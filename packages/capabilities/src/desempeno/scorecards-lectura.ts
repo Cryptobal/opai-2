@@ -7,6 +7,13 @@ import { noEncontrado } from "../errores";
 import { mesesDe, periodo, PERMISOS_DESEMPENO, scorecardSchema, versionesDe, vistaScorecard } from "./comun";
 import { indicadoresPara } from "./propios-indicadores";
 
+const definicionSchema = z.object({
+  indicador: z.string(),
+  nombre: z.string(),
+  descripcion: z.string(),
+  unidad: z.string(),
+});
+
 export const scorecardsGet = defineCapability({
   id: "desempeno.scorecards.get",
   descripcion:
@@ -19,16 +26,8 @@ export const scorecardsGet = defineCapability({
     periodo: z.string(),
     vigente: scorecardSchema.nullable().describe("null = el cargo no tiene scorecard en ese mes."),
     pendiente: scorecardSchema.nullable(),
-    definiciones: z
-      .array(
-        z.object({
-          indicador: z.string(),
-          nombre: z.string(),
-          descripcion: z.string(),
-          unidad: z.string(),
-        }),
-      )
-      .describe("Nombre, qué mide y unidad de cada indicador usado en la versión vigente o pendiente."),
+    definiciones: z.array(definicionSchema).describe("Nombre, qué mide y unidad de cada indicador de la versión vigente."),
+    definicionesPendiente: z.array(definicionSchema).describe("Lo mismo para la versión pendiente, en su mes."),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -47,14 +46,29 @@ export const scorecardsGet = defineCapability({
       versiones
         .filter((v) => v.id !== vigente?.id && (v.estado === "borrador" || v.vigenteDesde > actual))
         .sort((a, b) => (a.vigenteDesde < b.vigenteDesde ? 1 : -1))[0] ?? null;
-    const usados = new Set([vigente, pendiente].flatMap((v) => v?.indicadores.map((i) => i.indicador) ?? []));
-    const hasta = [mes, actual, pendiente?.vigenteDesde ?? mes].sort().at(-1) ?? mes;
-    const catalogo = await indicadoresPara(ctx, hasta, { conArchivados: true });
-    const definiciones = [...usados].flatMap((id) => {
-      const d = catalogo.get(id);
-      return d ? [{ indicador: id, nombre: d.nombre, descripcion: d.descripcion, unidad: d.unidad }] : [];
-    });
-    return { cargoId: input.cargoId, cargo: cargo.nombre, periodo: mes, vigente, pendiente, definiciones };
+    // Cada versión se describe con los indicadores del mes en que rige: un indicador propio puede
+    // cambiar de unidad entre versiones y la meta guardada está en la unidad de su mes.
+    const mesPendiente = pendiente && pendiente.vigenteDesde > actual ? pendiente.vigenteDesde : actual;
+    const [delVigente, delPendiente] = await Promise.all([
+      vigente ? indicadoresPara(ctx, mes, { conArchivados: true }) : null,
+      pendiente ? indicadoresPara(ctx, mesPendiente, { conArchivados: true }) : null,
+    ]);
+    const describir = (v: typeof vigente, catalogo: typeof delVigente) =>
+      (v?.indicadores ?? []).flatMap(({ indicador }) => {
+        const d = catalogo?.get(indicador);
+        return d ? [{ indicador, nombre: d.nombre, descripcion: d.descripcion, unidad: d.unidad }] : [];
+      });
+    const definiciones = describir(vigente, delVigente);
+    const definicionesPendiente = describir(pendiente, delPendiente);
+    return {
+      cargoId: input.cargoId,
+      cargo: cargo.nombre,
+      periodo: mes,
+      vigente,
+      pendiente,
+      definiciones,
+      definicionesPendiente,
+    };
   },
 });
 
