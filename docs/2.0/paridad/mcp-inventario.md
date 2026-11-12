@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 731 pares pantalla→capacidad · 653 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 729 pares pantalla→capacidad · 652 con herramienta · 77 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -172,11 +172,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.config.get` | `comercial_config_get` | existe |
-| compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
-| compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
@@ -767,6 +765,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
 | `app/_acciones/mfa.ts#accionIniciarMfa` | Identidad: enrola el segundo factor propio. |
 | `app/_acciones/mfa.ts#accionVerificar` | Identidad: segundo factor de la sesión humana. |
+| `app/_acciones/oauth.ts#accionAutorizarOAuth` | Identidad: la persona autoriza a una app a entrar por OAuth con su cuenta (CAR-247). |
+| `app/_acciones/oauth.ts#accionElegirEmpresaOAuth` | Identidad: la persona elige la empresa con la que entra la app por OAuth (CAR-247). |
 | `app/_acciones/passkeys.ts#accionEntrarConPasskey` | Identidad: login con passkey, solo personas. |
 | `app/_acciones/passkeys.ts#accionGuardarPasskey` | Identidad: guarda la passkey propia verificada por el dispositivo (CAR-286). |
 | `app/_acciones/passkeys.ts#accionOpcionesEntrarPasskey` | Identidad: desafío para entrar con passkey (sesión humana). |
@@ -774,6 +774,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
+| `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
+| `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
+| `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
+| `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
@@ -927,7 +931,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.rostro.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
-| `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
+| `comercial.importar_1_0` | sin pantalla todavía · CAR-325 · desde 2026-11-12 | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
 | `core.anexos.rechazar` | `app/_components` | no | reservada a personas |
 | `core.apikeys.create` | `/configuracion/agentes` | no | reservada a personas |

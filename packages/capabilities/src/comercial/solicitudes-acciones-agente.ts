@@ -52,7 +52,7 @@ export const solicitudesAccionesAgente = defineCapability({
     });
     const keyIds = [
       ...new Set(filas.map((f) => (f.actorType === "agent" ? f.actorId : null)).filter(Boolean)),
-    ] as string[];
+    ].filter((id) => !id!.includes(":")) as string[]; // agente interno y apps OAuth no tienen key
     const userIds = [...new Set(filas.map((f) => f.viaUserId).filter(Boolean))] as string[];
     const [keys, users] = await Promise.all([
       keyIds.length

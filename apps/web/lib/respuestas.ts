@@ -16,3 +16,8 @@ export function demasiadas(reintentarEnS = 60): Response {
     { status: 429, headers: { "Retry-After": String(reintentarEnS) } },
   );
 }
+
+/** Respuesta 403 uniforme: autenticado, pero sin acceso a lo pedido. */
+export function prohibido(message: string): Response {
+  return Response.json({ ok: false, error: { code: "FORBIDDEN", message } }, { status: 403 });
+}

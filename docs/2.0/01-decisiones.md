@@ -1896,6 +1896,18 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 2. **Generación sobre la entidad:** `core.documento_plantillas.rellenar_entidad` y `generar_entidad` (vista previa, dryRun, PDF con la marca del tenant, vínculo «propietario» a la cuenta o instalación). Las capacidades de persona rechazan plantillas de otro ámbito y al revés. Pantalla «Generar documento» en la pestaña Documentos de la cuenta y de la instalación.
 3. **Sigue pendiente:** Configuración › Módulos › Documentos (tipos configurables por tenant) y el editor con más formato, ambos con diseño.
 
+## ADR-098 · Entrar a OPAI desde Claude con la cuenta propia: OAuth del MCP adelantado (CAR-247, 11-nov-2026)
+
+**Decide:** Carlos, en el chat del proyecto «Opai 2.0», 11-nov-2026 a las 20:16 (hora de Chile) · **Registra:** Claude («Sesión Hilo»).
+
+**Contexto.** El 10-nov Carlos decidió hacer OAuth para el MCP después de v1.0 (9-dic). El 11-nov pidió adelantar el conector interactivo de Claude (CAR-287), y Claude exige que cada persona entre con su cuenta para agregar un conector propio.
+
+**Decisión.**
+1. Se adelanta CAR-247: OAuth por usuario para `/api/mcp`, antes de v1.0. El token actúa como agente vía la persona (permisos, alcance, empresa y aprobaciones de ADR-032), atado a la empresa que elige después de entrar. Diseño en `briefs/BRIEF-CAR-247-oauth-mcp.md`.
+2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
+
+**Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
+
 ## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)
