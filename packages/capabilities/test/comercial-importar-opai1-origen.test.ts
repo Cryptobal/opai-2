@@ -21,8 +21,18 @@ beforeEach(() => {
   registrarCapacidades(capacidadesDelNucleo);
 });
 
+type Ctx = ReturnType<typeof contextoDePrueba>["ctx"];
+/** La integración «opai1» solo existe para empresas habilitadas por Plataforma (CAR-321). */
+async function habilitada(ctx: Ctx) {
+  await ctx.db.ajustePlataforma.create({
+    data: { modulo: "core", clave: "integraciones_habilitadas", valor: { opai1: [ctx.tenantId] }, version: 1 },
+  });
+  return ctx;
+}
+
 async function conectar(url: string) {
   const { ctx, eventos } = contextoDePrueba();
+  await habilitada(ctx);
   for (const [nombre, valor] of [["url", url], ["api_key", LLAVE]] as const) {
     const r = await executeCapability(ctx, "core.integraciones.set_secreto", { proveedor: "opai1", nombre, valor });
     expect(r.ok).toBe(true);
@@ -32,7 +42,7 @@ async function conectar(url: string) {
 
 describe("traer el export de OPAI 1 con la llave de la empresa", () => {
   it("sin la integración conectada explica dónde pegar la llave", async () => {
-    const { ctx } = contextoDePrueba();
+    const ctx = await habilitada(contextoDePrueba().ctx);
     await expect(leerExportDeOpai1(ctx, async () => VACIO)).rejects.toThrow(/Configuración › Integraciones › OPAI 1/);
   });
 

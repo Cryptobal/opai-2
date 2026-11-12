@@ -28,6 +28,14 @@ test.describe("@preview configuración: importar datos", () => {
     await expect(page.getByText(/Importación lista: 2 creados/)).toBeVisible({ timeout: 30_000 });
     const fila = page.getByRole("row").filter({ hasText: "cuentas.csv" }).filter({ hasText: "Importado" }).first();
     await expect(fila).toContainText("2 creados");
+    // «Cargas anteriores» cabe en iPad y escritorio sin desplazarse a la derecha (CAR-283): aquí la tabla siempre tiene filas.
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const desborde = await fila.evaluate((tr) => {
+        const marco = tr.closest("table")?.parentElement;
+        return marco ? marco.scrollWidth - marco.clientWidth : 0;
+      });
+      expect(desborde).toBeLessThanOrEqual(1);
+    }
     await capturar(page, info, "importar-cargas");
 
     await fila.getByRole("button", { name: "Revertir" }).click();

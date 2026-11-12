@@ -26,11 +26,13 @@ function hostDe(url: string | undefined): string | null {
 }
 
 /**
- * true solo si `OPAI_PRODUCCION_TRIBUTARIA` vale «habilitada» Y el host de `BETTER_AUTH_URL` es app.opai.cl.
- * Variable ausente, host distinto o URL ilegible: false.
+ * true solo si `OPAI_PRODUCCION_TRIBUTARIA` vale «habilitada», el despliegue es el de producción de Vercel
+ * (`VERCEL_ENV=production`, así una vista previa con las mismas variables nunca emite de verdad) Y el host de
+ * `BETTER_AUTH_URL` es app.opai.cl. Variable ausente, otro entorno, host distinto o URL ilegible: false.
  */
 export function produccionTributariaHabilitada(env: EnvTributario = process.env): boolean {
   if (env.OPAI_PRODUCCION_TRIBUTARIA !== VALOR_PRODUCCION_HABILITADA) return false;
+  if (env.VERCEL_ENV !== "production") return false;
   return hostDe(env.BETTER_AUTH_URL) === HOST_PRODUCCION_TRIBUTARIA;
 }
 

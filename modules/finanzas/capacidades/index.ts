@@ -4,6 +4,7 @@ import type { Capacidad } from "@opai/capabilities";
 import { ajustesActualizar, ajustesObtener } from "./ajustes";
 import { celdasCumplir, celdasFijar } from "./celdas";
 import { cobroEsperadoFijar } from "./cobro-esperado";
+import { cuadraturaMensualObtener } from "./cuadratura";
 import { flujoDerivadasListar } from "./derivadas";
 import { capacidadesBancos } from "./bancos";
 import { filasActualizar, filasArchivar, filasCrear } from "./filas";
@@ -27,5 +28,6 @@ export const capacidades: readonly Capacidad[] = [
   ajustesActualizar,
   flujoImportar,
   flujoDerivadasListar,
+  cuadraturaMensualObtener,
   ...capacidadesBancos,
 ];

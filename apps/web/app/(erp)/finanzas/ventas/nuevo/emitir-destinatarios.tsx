@@ -8,6 +8,7 @@ import {
   esCorreoValido,
   type DestinatarioDoc,
   type TipoDestinatario,
+  MAX_PARA,
   validarDestinatarios,
 } from "@opai/domain";
 import { avisar, Button, Card, Input } from "@opai/ds";
@@ -18,7 +19,7 @@ import { FilaDestinatario } from "./fila-destinatario";
 
 type Sugerencia = { sugeridos: DestinatarioDoc[]; guardados: DestinatarioDoc[] };
 
-/** Destinatarios del correo del DTE: sugeridos desde la cuenta, ajustables, con un PARA y copias CC/BCC; se guardan por documento. */
+/** Destinatarios del correo del DTE: sugeridos desde la cuenta, ajustables, con hasta 10 PARA y copias CC/BCC; se guardan por documento. */
 export function EmitirDestinatarios({
   documentoId,
   cuentaId,
@@ -58,7 +59,7 @@ export function EmitirDestinatarios({
 
   function agregar() {
     if (pendiente || !esCorreoValido(nuevo) || repetido) return;
-    const tipo: TipoDestinatario = lista.some((d) => d.tipo === "PARA") ? "CC" : "PARA";
+    const tipo: TipoDestinatario = lista.filter((d) => d.tipo === "PARA").length < MAX_PARA ? "PARA" : "CC";
     cambiar([...lista, { tipo, email: correo, origen: "manual" }]);
     setNuevo("");
   }
@@ -78,8 +79,8 @@ export function EmitirDestinatarios({
     <Card className="flex flex-col gap-3 p-4">
       <h2 className="t-label text-fg">Destinatarios del correo</h2>
       <p className="text-sm text-fg-muted">
-        Se sugieren la casilla DTE del cliente y sus contactos de facturación. Puedes agregar otros
-        correos; un solo PARA y el resto en copia (CC) o copia oculta (BCC).
+        Todos los contactos de facturación reciben como PARA (hasta 10) y la casilla DTE del cliente, que
+        recibe el XML, va en copia. Puedes agregar otros correos en PARA, copia (CC) o copia oculta (BCC).
       </p>
       {cargado && lista.length === 0 ? (
         <p className="text-sm text-fg-muted">

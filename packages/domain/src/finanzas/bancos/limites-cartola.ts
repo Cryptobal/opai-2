@@ -9,17 +9,17 @@ export const CARTOLA_MAX_TEXTO_UTF8 = 10 * 1024 * 1024;
 
 export function validarTamanoCartola(bytes: number): void {
   if (bytes > CARTOLA_MAX_BYTES) {
-    throw new Error("La cartola supera el máximo de 5 MB.");
+    throw new ErrorCartola("La cartola supera el máximo de 5 MB.");
   }
 }
 
 export function validarTextoCartola(texto: string): void {
   if (texto.length > CARTOLA_MAX_TEXTO_UTF8) {
-    throw new Error("La cartola descomprimida supera el máximo de 10 MB.");
+    throw new ErrorCartola("La cartola descomprimida supera el máximo de 10 MB.");
   }
   const bytes = new TextEncoder().encode(texto).byteLength;
   if (bytes > CARTOLA_MAX_TEXTO_UTF8) {
-    throw new Error("La cartola descomprimida supera el máximo de 10 MB.");
+    throw new ErrorCartola("La cartola descomprimida supera el máximo de 10 MB.");
   }
 }
 
@@ -27,6 +27,9 @@ export const CARTOLA_MAX_BASE64 = 7_000_000;
 
 export function validarFilasCartola(filas: number): void {
   if (filas > CARTOLA_MAX_FILAS) {
-    throw new Error(`La cartola supera el máximo de ${CARTOLA_MAX_FILAS} filas.`);
+    throw new ErrorCartola(`La cartola supera el máximo de ${CARTOLA_MAX_FILAS} filas.`);
   }
 }
+
+/** Falla de lectura o de forma de una cartola: se muestra al usuario como error de negocio, nunca como interno. */
+export class ErrorCartola extends Error {}
