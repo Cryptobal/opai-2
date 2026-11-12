@@ -30,6 +30,7 @@ export {
   quitarPasskey,
   renombrarPasskey,
 } from "./identidad-metodos";
+export { type AppConectada, appsConectadas, desconectarApp } from "./identidad-oauth";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
 export type {
   DatosCondicionCobro,
@@ -86,7 +87,7 @@ export {
   type TenantTx,
 } from "./transaccion";
 export { enTransaccionCapturaSii } from "./transaccion-captura-sii";
-export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
+export { consumirPresupuesto, esAgenteSinKey, periodoDeMes } from "./presupuesto";
 export type {
   ApiKey,
   AprobacionPlataforma,

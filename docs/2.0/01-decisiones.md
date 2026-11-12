@@ -1439,6 +1439,8 @@ identidad de servicio en main.
 
 **Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
 
+**Adenda del 12-nov-2026 (CAR-328, pedido de Carlos del 12-nov; registrada por la sesión de Finanzas).** Implementación: toda regla clasifica a una **fila del flujo** (obligatoria) y, opcional, a una **cuenta contable** de movimiento, con alcance abonos, cargos o ambos; la fila debe ser de la sección que corresponde al signo. Se aplica la primera regla que calce por prioridad (mayor primero). Concilia sola solo con modo «todas», monto exacto y referencia igual; lo demás queda «sugerido» y «Reconocer» ofrece la regla para confirmar con un clic. «Reconocer» permite además conciliar a mano contra una fila del flujo con su cuenta contable y crear la regla en el mismo paso. «Aplicar a lo pendiente» vuelve a evaluar los movimientos sin reconocer. Las reglas sugeridas por patrón (diseño «Reglas sugeridas», variante B) quedan fuera hasta que Carlos las apruebe.
+
 ---
 
 ## ADR-075 · El XML firmado de un DTE se maneja en ISO-8859-1, como bytes que no se transcodifican
@@ -1835,6 +1837,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Hallazgo (verificado en `main` el 11-nov-2026).** Un usuario del sistema no está unido a su ficha de Persona: el responsable de un negocio es un usuario (`comercial.negocios.responsable_id`) y el cargo vive en el vínculo laboral de una Persona, sin relación entre ambos. La unión usuario–Persona entra en CAR-314, como aplicación del punto 7. Mientras no exista, cada indicador declara si se atribuye a un usuario o a una Persona.
 
+**Corrección del hallazgo (11-nov-2026, 21:10, Sesión Desempeño, CAR-314).** El hallazgo anterior estaba mal: la unión entre un usuario y su ficha de Persona **ya existe** en `main` (`core.personas.usuario_id`, 1 a 1 por empresa, índice único `personas_tenant_usuario_key` y capacidad `core.personas.vincular_usuario`). Lo cierto es más acotado: Comercial atribuye los negocios a un usuario y hoy nada obliga a que ese usuario tenga su Persona vinculada. CAR-314 no crea la unión, la usa (`personaDelUsuario`), y agrega la jefatura por cargo (`core.cargos.set_jefatura`, `core.personas.asignar_jefe`, `core.personas.a_cargo`). Los indicadores siguen declarando `sujeto` usuario o Persona; el scorecard (CAR-306) cruza ambos por esa unión.
+
+**Adenda (11-nov-2026, 22:28, Carlos confirma las dos reglas de jefatura de CAR-314, PR #528).** (a) Una persona que no tiene jefe asignado no queda invisible: la ve el nivel de arriba (un vendedor sin jefe asignado lo ve el gerente, no los jefes de venta). (b) Ser jefatura **no** amplía el alcance por filas de ADR-022: un supervisor ve, de su equipo, solo a las personas de sus instalaciones a cargo. Ambas quedan como se construyeron.
+
+**Adenda (11-nov-2026, CAR-306, Sesión Desempeño): scorecard y resultado.** (a) El scorecard de un cargo se guarda por versiones con mes de vigencia: el primero rige desde el mes en curso y cada cambio desde el mes siguiente; un mes ya medido no cambia de reglas. (b) El puntaje va de 0 a 120 y un indicador sin hechos no cuenta como cero: queda fuera y se informa la cobertura. (c) El resultado de una persona no depende de quién lo mira: los indicadores se miden sin los permisos ni el alcance del consultante, y a quién puede ver cada uno lo decide antes la capacidad (permiso de ver a todos, o lo propio y las personas a cargo por jefatura, siempre dentro del alcance por filas). (d) Quedan para después las plantillas por vertical (hasta tener más indicadores), el cierre de período (CAR-322) y el aviso a los trabajadores de la Ley 21.719 (con las pantallas, antes de encender el módulo en una empresa real).
+
+**Adenda (12-nov-2026, CAR-313, Sesión Desempeño): indicadores propios.** (a) Un módulo ofrece **hechos** en su manifiesto (qué ocurrió, a quién se atribuye, montos sumables y atributos para filtrar); lo que no declara no se puede usar. (b) La empresa combina hechos con cuatro formas acotadas (contar, sumar, tiempo entre dos hechos de la misma entidad, porcentaje); la definición es configuración versionada por mes y se evalúa en dominio puro (ADR-021). (c) Para armar un indicador hace falta el permiso del módulo dueño de cada hecho. (d) La vista previa con datos reales va en cada guardado y es agregada: con menos de tres sujetos solo dice cuántos son. El sentido y la meta viven en la versión, así un borrador no altera un indicador publicado. (e) Un indicador propio se archiva, no se borra, y no se puede archivar mientras esté en un scorecard publicado.
+
 **Pendiente de Carlos.** Nada.
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
@@ -1844,6 +1854,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
 
 **Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
+
+**Adenda a ADR-095 (11-nov-2026, 22:56, Carlos, para la Sesión Desempeño por el resto de esa sesión).** Si no hay una decisión de Carlos pendiente, la sesión no se detiene: «Decisión tuya: ninguna, sigo» significa seguir en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una comprobación cada 5 minutos y mientras avanza con lo que no dependa de eso; al destrabarse completa lo pendiente (integrar, verificar en test.opai.cl). No responde uno por uno los avisos automáticos de GitHub: los lee y arregla lo suyo. Solo se detiene con una decisión real de Carlos o si no queda trabajo posible, y dice por qué. Copia en el proyecto de Claude: `claude/regla-no-detenerse.md`.
 
 ## ADR-096 · Emitir un documento lo envía al SII de inmediato (CAR-270, 11-nov-2026)
 
@@ -1895,6 +1907,26 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 1. **Dos clases nuevas de plantilla: `contrato_servicio` (ámbito cuenta) y `acta` (ámbito instalación)**, reutilizando las clases de firma que ya existían. Cada clase tiene un **ámbito** (persona, cuenta o instalación) que decide qué variables valen: persona = persona, vínculo, instalación, sueldo, contrato; cuenta = cuenta, contrato; instalación = instalación, cuenta, contrato. El servidor rechaza al guardar una variable fuera del ámbito y el panel del editor solo ofrece las del ámbito.
 2. **Generación sobre la entidad:** `core.documento_plantillas.rellenar_entidad` y `generar_entidad` (vista previa, dryRun, PDF con la marca del tenant, vínculo «propietario» a la cuenta o instalación). Las capacidades de persona rechazan plantillas de otro ámbito y al revés. Pantalla «Generar documento» en la pestaña Documentos de la cuenta y de la instalación.
 3. **Sigue pendiente:** Configuración › Módulos › Documentos (tipos configurables por tenant) y el editor con más formato, ambos con diseño.
+
+## ADR-098 · Entrar a OPAI desde Claude con la cuenta propia: OAuth del MCP adelantado (CAR-247, 11-nov-2026)
+
+**Decide:** Carlos, en el chat del proyecto «Opai 2.0», 11-nov-2026 a las 20:16 (hora de Chile) · **Registra:** Claude («Sesión Hilo»).
+
+**Contexto.** El 10-nov Carlos decidió hacer OAuth para el MCP después de v1.0 (9-dic). El 11-nov pidió adelantar el conector interactivo de Claude (CAR-287), y Claude exige que cada persona entre con su cuenta para agregar un conector propio.
+
+**Decisión.**
+1. Se adelanta CAR-247: OAuth por usuario para `/api/mcp`, antes de v1.0. El token actúa como agente vía la persona (permisos, alcance, empresa y aprobaciones de ADR-032), atado a la empresa que elige después de entrar. Diseño en `briefs/BRIEF-CAR-247-oauth-mcp.md`.
+2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
+
+**Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
+
+### Adenda 1 a ADR-098 · Tope de gasto de las apps conectadas (Carlos, 12-nov-2026, 07:28)
+
+Respuesta de Carlos («Opción 1») a la `DECISIÓN CARLOS:` del PR #535: las apps conectadas por OAuth (Claude u otras) **comparten el presupuesto mensual del agente de la empresa** (ajuste `agente.presupuestoMensualMicro`, el mismo del agente interno). No hay un tope por cada app. El medidor cobra su consumo en el mismo registro del agente interno (`agente-interno`); al agotarse, tanto el agente interno como las apps reciben `BUDGET_EXCEEDED` hasta el mes siguiente o hasta que suba el tope. Código: `esAgenteSinKey` en `packages/db/src/presupuesto.ts`.
+
+### Adenda a ADR-095 · «Ninguna, sigo» significa seguir (Carlos, 11-nov-2026, 22:56)
+
+Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con el trabajo en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una revisión a sí misma cada pocos minutos y avanza mientras tanto con lo que no dependa de eso. Los avisos automáticos de GitHub no se responden uno por uno. Solo se detiene por una decisión real o porque no queda trabajo posible, y dice por qué. Regla escrita en `AGENTS.md` («Decisiones de Carlos»).
 
 ## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
 

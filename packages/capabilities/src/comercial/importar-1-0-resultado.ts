@@ -57,6 +57,7 @@ export const resultadoImportar10Schema = z.object({
       instalaciones: z.number().int(),
       programaciones: z.number().int().optional(),
       negocios: z.number().int().optional(),
+      cotizaciones: z.number().int().optional(),
       correlativosCpq: z.number().int().optional(),
       omitidas: z.number().int(),
       importacionId: z.string().uuid().optional(),

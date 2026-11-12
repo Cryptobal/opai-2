@@ -2,14 +2,15 @@
 // mismo plan). No escribe: la carga real (otro PR, con el OK de Carlos) consumirá este plan.
 import { COMERCIAL_EN_MAIN, pendientesImportacion, type Pendiente } from "./comercial-pendiente";
 import { planComercial, type PlanComercial } from "./comercial-plan";
+import { etiquetasPropuestas } from "./etiquetas-propuestas";
+import { type DatosCotizacion, planCotizacionesDeNegocios } from "./cotizaciones-plan";
 import { type CorrelativoCpqPropuesto, planCorrelativosCpq } from "./correlativos-cpq";
-import { type Aviso, type Decision, ordenEstable, type Propuesta } from "./comun";
+import { type Aviso, type Decision, type Propuesta } from "./comun";
 import type { DatosContacto } from "./contactos-datos";
 import { planContactos } from "./contactos";
 import { type DatosCuenta, planCuentas, resolverCuentas } from "./cuentas";
 import type { EstadoDestino } from "./destino-tipos";
 import { type DatosInstalacion, planInstalaciones } from "./instalaciones";
-import { nombreCanonico, textoLimpio } from "./normalizar";
 import { modulosDelPlan, OPCIONES_POR_DEFECTO, type OpcionesPlan } from "./opciones";
 import type { DatosOpai1 } from "./origen";
 import type { DatosProgramacion, ResumenDestinatarios } from "./recurrentes";
@@ -31,6 +32,7 @@ export type Plan = {
   instalaciones: Decision<DatosInstalacion>[];
   programaciones: Decision<DatosProgramacion>[];
   comercial: PlanComercial;
+  cotizaciones: Decision<DatosCotizacion>[];
   destinatarios: ResumenDestinatarios;
   correlativosCpq: CorrelativoCpqPropuesto[];
   propuestas: Propuesta[];
@@ -100,6 +102,14 @@ export function calcularPlan(
     comercialOn && COMERCIAL_EN_MAIN
       ? planNegocios(origen, resolver, destino, opciones.tenantSlug ?? "gard")
       : { decisiones: [], avisos: [], etapasSinMapear: [], negociosIncompletos: [] };
+  const cotiz = planCotizacionesDeNegocios(
+    origen.cpqQuotes,
+    destino,
+    neg.decisiones,
+    (id) => (resolverInst(id) ? id : null),
+    comercialOn && COMERCIAL_EN_MAIN && modulosDelPlan(opciones).cpq,
+  );
+  comercial.cotizaciones = cotiz.decisiones;
   const avisosTrib = avisosTributariosCuentas(cuentas.decisiones);
   return {
     opciones,
@@ -108,6 +118,7 @@ export function calcularPlan(
     instalaciones: instalaciones.decisiones,
     programaciones: recurrentes.decisiones,
     comercial,
+    cotizaciones: cotiz.decisiones,
     destinatarios: recurrentes.destinatarios,
     correlativosCpq,
     propuestas: [...cuentas.propuestas, ...contactos.propuestas],
@@ -119,6 +130,7 @@ export function calcularPlan(
       ...avisosTrib,
       ...comercial.avisos,
       ...neg.avisos,
+      ...cotiz.avisos,
     ],
     etiquetas: etiquetasPropuestas(origen),
     pendientes: pendientesImportacion(origen, opciones),
@@ -131,26 +143,4 @@ export function calcularPlan(
   };
 }
 
-const GRUPOS = [
-  ["Rubro", "industry"],
-  ["Segmento", "segment"],
-  ["Tamaño", "size"],
-] as const;
-
-/** Valores distintos por grupo (agrupados por forma canónica; gana la primera escritura vista). */
-export function etiquetasPropuestas(origen: DatosOpai1): EtiquetaPropuesta[] {
-  const salida: EtiquetaPropuesta[] = [];
-  for (const [grupo, campo] of GRUPOS) {
-    const valores = new Map<string, EtiquetaPropuesta>();
-    for (const cuenta of ordenEstable(origen.accounts)) {
-      const valor = textoLimpio(cuenta[campo]);
-      if (!valor) continue;
-      const clave = nombreCanonico(valor);
-      const actual = valores.get(clave);
-      if (actual) actual.filas += 1;
-      else valores.set(clave, { grupo, valor, filas: 1 });
-    }
-    salida.push(...[...valores.values()].sort((a, b) => a.valor.localeCompare(b.valor)));
-  }
-  return salida;
-}
+export { etiquetasPropuestas } from "./etiquetas-propuestas";

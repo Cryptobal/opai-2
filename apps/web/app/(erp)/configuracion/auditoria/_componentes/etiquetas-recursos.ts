@@ -1,6 +1,6 @@
 /** Recurso (segunda parte de «modulo.recurso.verbo») → nombre de negocio. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const RECURSOS: Record<string, string> = {
-  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", bandeja: "Bandeja del aprobador", lotes: "Lotes de pago", nomina: "Nómina de pago", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", metodos_acceso: "Métodos de acceso", invitations: "Invitaciones",
+  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", bandeja: "Bandeja del aprobador", lotes: "Lotes de pago", nomina: "Nómina de pago", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", metodos_acceso: "Métodos de acceso", apps_conectadas: "Apps conectadas", invitations: "Invitaciones",
   modules: "Módulos", apikeys: "API keys", audit: "Auditoría", usage: "Uso", tenants: "Empresas",
   admins: "Administradores", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",
@@ -44,5 +44,5 @@ export const RECURSOS: Record<string, string> = {
   // Importación de datos desde planillas (CAR-279).
   importar: "Importación de datos",
   // Indicadores de gestión de las personas (CAR-305, ADR-094).
-  indicadores_gestion: "Indicadores de gestión",
+  indicadores_gestion: "Indicadores de gestión", scorecards: "Scorecards de desempeño", resultados: "Resultados de desempeño", hechos: "Hechos medibles", propios: "Indicadores propios",
 };
