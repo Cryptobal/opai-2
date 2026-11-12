@@ -42,3 +42,14 @@ export function cambiosPendientes(
   }
   return out;
 }
+
+/** Los cambios como entrada de `platform.ajustes.guardar_lote` (CAR-329): se guardan todos o ninguno. */
+export function aLote(cambios: Cambio[]) {
+  return {
+    cambios: cambios.map((c) =>
+      c.id === "platform.precios.set"
+        ? { tipo: "precio" as const, ...c.input }
+        : { tipo: "ajuste" as const, ...c.input },
+    ),
+  };
+}
