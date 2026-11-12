@@ -1,4 +1,4 @@
-import { vinculoSchema, vistaVinculo, type FilaVinculo } from "./vinculos-vista";
+import { vinculoResumenSchema, vistaVinculo, type FilaVinculo } from "./vinculos-vista";
 import { z } from "zod";
 
 import { noEncontrado } from "../../errores";
@@ -8,10 +8,6 @@ import { dondePersona } from "./alcance";
 import { dia, diaSchema, rutSchema, telefonoSchema, textoOpcional } from "./comun";
 
 export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
-
-export const vinculoResumenSchema = vinculoSchema
-  .omit({ personaId: true, estado: true, motivoTermino: true, updatedAt: true, reclutadoPorId: true })
-  .extend({ cargo: z.string(), instalacion: z.string().nullable().optional().describe("Nombre de la instalación del contrato (la cabecera de la ficha); solo en la ficha.") });
 
 export const personaSchema = z.object({
   id: z.string(),
