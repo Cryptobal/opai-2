@@ -7,12 +7,16 @@ export {
 } from "./core/plataforma/cobros";
 export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
 export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
+export { hechosComercial } from "./comercial/hechos-gestion";
+export { defineHecho, type HechoGestion } from "./hechos-gestion";
+export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/hechos";
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta } from "./pauta";
+export { capacidadesDesempeno, PERMISOS_DESEMPENO } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
