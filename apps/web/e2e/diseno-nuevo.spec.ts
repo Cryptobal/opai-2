@@ -61,7 +61,9 @@ test.describe("@preview diseño nuevo con sesión", () => {
         await captura(page, "nuevo-menu-asomado", info);
         await page.mouse.move(ancho(page) - 10, 400);
         await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
-        await fijar.click();
+        // Con el mouse sobre el riel se asoma el menú y su botón lo deja fijo.
+        await fijar.hover();
+        await page.getByRole("button", { name: "Dejar el menú fijo" }).click();
         await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
       }
       expect(errores).toEqual([]);

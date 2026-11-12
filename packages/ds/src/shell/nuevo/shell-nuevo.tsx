@@ -69,6 +69,7 @@ export function ShellNuevo(props: AppShellProps) {
             asomado,
             onPlegar: () => cambiar(true),
             onEsconder: () => setAsomado(false),
+            onFijar: () => cambiar(false),
           },
           riel: {
             plegado,

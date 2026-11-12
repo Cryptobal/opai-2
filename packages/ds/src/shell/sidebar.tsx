@@ -7,6 +7,7 @@ import { cn } from "../cn";
 
 import type { ItemMenu } from "../components/menu";
 import type { ItemFijado } from "./fijados";
+import { BotonFijarMenu } from "./nuevo/botones-menu";
 import { PortalSwitcher } from "./portal-switcher";
 import { GrupoNav } from "./sidebar-grupos";
 import { agrupar, Item, Pie } from "./sidebar-item";
@@ -48,6 +49,8 @@ export type PlegableSidebar = {
   asomado: boolean;
   onPlegar: () => void;
   onEsconder: () => void;
+  /** En el menú asomado: lo deja fijo (el botón del riel queda tapado por el menú). */
+  onFijar: () => void;
 };
 
 /** Desktop: acordeón D1 en ERP; secciones planas si no hay `onAreaAbierta`. */
@@ -85,6 +88,8 @@ export function Sidebar(props: SidebarProps) {
             >
               <PanelLeftClose className="size-[18px]" aria-hidden />
             </button>
+          ) : p?.asomado ? (
+            <BotonFijarMenu onFijar={p.onFijar} />
           ) : (
             <span className="t-caption">2.0</span>
           )}

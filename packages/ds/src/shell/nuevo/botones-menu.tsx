@@ -11,7 +11,7 @@ export type PlegableRiel = {
   onFijar: () => void;
 };
 
-/** Arriba del riel en escritorio: vuelve a dejar el menú lateral abierto. */
+/** Arriba del riel y del menú asomado, en escritorio: vuelve a dejar el menú lateral abierto. */
 export function BotonFijarMenu({ onFijar }: { onFijar: () => void }) {
   return (
     <button
@@ -19,7 +19,7 @@ export function BotonFijarMenu({ onFijar }: { onFijar: () => void }) {
       onClick={onFijar}
       aria-label="Dejar el menú fijo"
       title="Dejar el menú fijo"
-      className="mb-2 hidden size-9 items-center justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus lg:flex"
+      className="hidden size-9 items-center justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus lg:flex"
     >
       <PanelLeftOpen className="size-[18px]" aria-hidden />
     </button>

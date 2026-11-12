@@ -104,7 +104,11 @@ export function Rail({
         !plegable?.plegado && "lg:hidden",
       )}
     >
-      {plegable?.plegado ? <BotonFijarMenu onFijar={plegable.onFijar} /> : null}
+      {plegable?.plegado ? (
+        <span className="mb-2">
+          <BotonFijarMenu onFijar={plegable.onFijar} />
+        </span>
+      ) : null}
       <PortalSwitcher
         portales={portales}
         portalActual={portalActual}

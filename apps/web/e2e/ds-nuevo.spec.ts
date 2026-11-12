@@ -65,10 +65,14 @@ test.describe("muestra del marco nuevo", () => {
         .first();
       await expect(completo).toBeVisible();
       await capturar(page, info, "ds-nuevo-marco-asomado");
+      // El botón del riel queda tapado por el menú asomado: el menú trae el suyo.
+      await expect(page.getByRole("button", { name: "Dejar el menú fijo" })).toHaveCount(1);
       await page.mouse.move(900, 500);
       // El riel también tiene sus enlaces: lo que se esconde es el menú completo, con la marca OPAI.
       await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
-      await fijar.click();
+      // Con el mouse sobre el riel se asoma el menú y su botón lo deja fijo.
+      await fijar.hover();
+      await page.getByRole("button", { name: "Dejar el menú fijo" }).click();
       await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
       // El navegador recuerda la elección: vuelve fijo tras recargar.
       await page.reload();
