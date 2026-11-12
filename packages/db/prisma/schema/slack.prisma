@@ -21,3 +21,28 @@ model SlackInstalacion {
   @@map("slack_instalaciones")
   @@schema("core")
 }
+
+/// Vínculo persona de OPAI ↔ usuario de Slack de la empresa (ADR-093, CAR-292). Lo llena el núcleo
+/// buscando el correo de cada usuario interno con `users.lookupByEmail`. La FK compuesta a la
+/// membresía impide un vínculo con alguien que no es de la empresa. «sin_vincular» guarda el motivo.
+model SlackUsuario {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  /// "vinculado" | "sin_vincular"
+  estado      String
+  /// Id del usuario en Slack (U… o W…), solo si está vinculado.
+  slackUserId String?  @map("slack_user_id")
+  /// Por qué no se vinculó: "no_encontrado" | "invitado" | "desactivado" | "bot" | "otro_espacio" | "ya_ligado" | "error"
+  motivo      String?
+  revisadoEn  DateTime @map("revisado_en") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  membresia Membership @relation(fields: [tenantId, userId], references: [tenantId, userId], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@index([tenantId, estado])
+  @@map("slack_usuarios")
+  @@schema("core")
+}

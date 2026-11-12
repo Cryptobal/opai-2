@@ -28,6 +28,8 @@ model Membership {
   instalacionesACargo SupervisorInstalacion[]
   /// Grupos o equipos de autorización a los que pertenece (CAR-251).
   gruposUsuarios      GrupoUsuarioMiembro[]
+  /// Vínculo con su usuario de Slack, si la empresa conectó Slack (CAR-292).
+  slackUsuario        SlackUsuario?
 
   @@unique([tenantId, userId])
   @@index([userId])

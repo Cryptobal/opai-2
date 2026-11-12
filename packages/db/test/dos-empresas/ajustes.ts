@@ -370,6 +370,16 @@ export const AJUSTES: Record<string, Ajuste> = {
     fijas: ["team_id"],
     valores: (ctx) => ({ team_id: `T${ctx.tenant.replace(/-/g, "").toUpperCase()}` }),
   },
+  // Slack F2 (CAR-292): (tenant_id, user_id) → memberships; «vinculado» exige un id de Slack (CHECK).
+  "core.slack_usuarios": {
+    dependencias: ["core.memberships"],
+    fijas: ["user_id", "estado", "slack_user_id"],
+    valores: (ctx) => ({
+      user_id: ctx.usuario,
+      estado: "vinculado",
+      slack_user_id: `U${ctx.tenant.replace(/-/g, "").toUpperCase()}`,
+    }),
+  },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },
   "core.actividad_vinculos": {
