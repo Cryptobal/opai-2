@@ -1439,6 +1439,8 @@ identidad de servicio en main.
 
 **Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
 
+**Adenda del 12-nov-2026 (CAR-328, pedido de Carlos del 12-nov; registrada por la sesión de Finanzas).** Implementación: toda regla clasifica a una **fila del flujo** (obligatoria) y, opcional, a una **cuenta contable** de movimiento, con alcance abonos, cargos o ambos; la fila debe ser de la sección que corresponde al signo. Se aplica la primera regla que calce por prioridad (mayor primero). Concilia sola solo con modo «todas», monto exacto y referencia igual; lo demás queda «sugerido» y «Reconocer» ofrece la regla para confirmar con un clic. «Reconocer» permite además conciliar a mano contra una fila del flujo con su cuenta contable y crear la regla en el mismo paso. «Aplicar a lo pendiente» vuelve a evaluar los movimientos sin reconocer. Las reglas sugeridas por patrón (diseño «Reglas sugeridas», variante B) quedan fuera hasta que Carlos las apruebe.
+
 ---
 
 ## ADR-075 · El XML firmado de un DTE se maneja en ISO-8859-1, como bytes que no se transcodifican
