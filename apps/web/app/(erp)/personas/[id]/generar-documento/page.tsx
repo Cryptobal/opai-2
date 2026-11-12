@@ -59,6 +59,7 @@ export default function GenerarDocumentoPagina({ params, searchParams }: Props) 
         if (vista && !vista.ok && vista.error.code === "NOT_FOUND") notFound();
         return (
           <div className="flex flex-col gap-6">
+            <h2 className="t-title text-fg md:hidden">Generar documento</h2>
             <div className="max-w-md">
               <SelectorPlantilla
                 actual={plantilla}

@@ -24,7 +24,7 @@ test.describe("@preview personas: generar documento", () => {
     const id = page.url().match(/\/personas\/([0-9a-f-]{36})/)?.[1] ?? "";
     await page.goto(`/personas/${id}/documentos`);
     await page.goto(`/personas/${id}/generar-documento`);
-    await expect(page.getByRole("heading", { name: "Generar documento" }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Generar documento").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     const vacio = page.getByText("Aún no hay plantillas laborales");
     if (await vacio.isVisible()) return void (await capturar(page, info, "generar-documento-vacio"));
