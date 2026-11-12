@@ -51,6 +51,9 @@ describe("área plegada del menú", () => {
         <a href="/cuentas">Cuentas</a>
       </AreaGrupo>,
     );
-    expect(plegada).not.toContain("pb-1.5");
+    // La caja que mide la fila no tiene relleno; el relleno vive en su hijo.
+    expect(plegada).toContain(
+      '<div class="min-h-0 overflow-hidden"><div class="flex flex-col gap-0.5 pt-0.5 pb-1.5">',
+    );
   });
 });

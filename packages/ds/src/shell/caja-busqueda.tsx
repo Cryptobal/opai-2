@@ -8,7 +8,7 @@ import { AtajoBusqueda } from "../components/atajo-busqueda";
 type Props = {
   onBuscar: () => void;
   compacta?: boolean | undefined;
-  /** Texto en desktop: «Buscar» o, en el diseño nuevo, «Busca o pídele algo a OPAI». */
+  /** Texto propio (diseño nuevo: «Busca o pídele algo a OPAI») en todos los anchos de la barra. */
   texto?: string | undefined;
 };
 
@@ -28,7 +28,7 @@ export function CajaBusqueda({ onBuscar, compacta, texto }: Props) {
       >
         <Search className="size-4 flex-none" aria-hidden />
         <span className={cn("flex-1 truncate text-left xl:hidden", compacta && "hidden")}>
-          Buscar personas, clientes, folios
+          {texto ?? "Buscar personas, clientes, folios"}
         </span>
         <span className={cn("hidden flex-1 text-left xl:inline", compacta && "xl:hidden")}>
           {texto ?? "Buscar"}

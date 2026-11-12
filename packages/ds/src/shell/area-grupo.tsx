@@ -59,14 +59,9 @@ export function AreaGrupo({
           abierto ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
       >
-        {/* Plegada, sin relleno: el relleno daba alto mínimo a la fila y asomaba un trozo del contenido. */}
-        <div
-          className={cn(
-            "flex min-h-0 flex-col gap-0.5 overflow-hidden",
-            abierto && "pt-0.5 pb-1.5",
-          )}
-        >
-          {children}
+        {/* La fila plegada mide 0: el relleno va en un hijo, así se anima junto con el alto y no asoma nada. */}
+        <div className="min-h-0 overflow-hidden">
+          <div className="flex flex-col gap-0.5 pt-0.5 pb-1.5">{children}</div>
         </div>
       </div>
     </div>
