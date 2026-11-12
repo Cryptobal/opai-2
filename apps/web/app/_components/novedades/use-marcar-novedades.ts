@@ -28,15 +28,22 @@ export function useMarcarNovedades(
     const previo = datos;
     setErrorMarca(false);
     setDatos(listaComoLeida(datos));
-    void ejecutarCapacidad(portal, "core.novedades.marcar_todas", {}).then((r) => {
-      marcando.current = false;
-      if (!r.ok) {
-        setDatos(previo);
-        setErrorMarca(true);
-        return;
-      }
-      window.dispatchEvent(new Event("opai-novedades"));
-      void cargar();
-    });
+    const volver = () => {
+      setDatos(previo);
+      setErrorMarca(true);
+    };
+    void ejecutarCapacidad(portal, "core.novedades.marcar_todas", {})
+      .then((r) => {
+        if (!r.ok) {
+          volver();
+          return;
+        }
+        window.dispatchEvent(new Event("opai-novedades"));
+        void cargar();
+      })
+      .catch(volver)
+      .finally(() => {
+        marcando.current = false;
+      });
   };
 }

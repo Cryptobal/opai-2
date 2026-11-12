@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 
-import { Enlace, type EstadoLista, HiloShell, type LinkComponent, type PanelHilo, type SegmentoHilo } from "@opai/ds";
+import {
+  Enlace,
+  type EstadoLista,
+  HiloShell,
+  type LinkComponent,
+  type PanelHilo,
+  type SegmentoHilo,
+} from "@opai/ds";
 
 import { ACTIVIDAD, AGENDA, INDICE, PENDIENTES } from "./datos";
 import { PiezasHilo } from "./piezas";
@@ -38,7 +45,12 @@ const VARIANTES: readonly [string, string][] = [
   ["Barra sin agente", "/ds/hilo?agente=no"],
 ];
 
-const TITULO = { inicio: "Inicio", ancha: "Pauta", pantalla: "Cuentas", piezas: "Piezas y estados" } as const;
+const TITULO = {
+  inicio: "Inicio",
+  ancha: "Pauta",
+  pantalla: "Cuentas",
+  piezas: "Piezas y estados",
+} as const;
 const SUB = { inicio: "", ancha: "Operaciones", pantalla: "Comercial", piezas: "Diseño" } as const;
 
 /** Marco Hilo con los datos ficticios del diseño aprobado; cada estado tiene su enlace. */
@@ -67,9 +79,24 @@ export function MuestraHilo({ vista, estado, panel, segmento, agente = true }: P
       onReintentar={nada}
       indice={INDICE}
       portales={[
-        { id: "erp", etiqueta: "ERP", href: "/ds/hilo", descripcion: "Dueños, gerencia y administración" },
-        { id: "supervisor", etiqueta: "Supervisor", href: "/ds/hilo", descripcion: "Supervisores en terreno" },
-        { id: "platform", etiqueta: "Plataforma", href: "/ds/hilo", descripcion: "Operadores de OPAI" },
+        {
+          id: "erp",
+          etiqueta: "ERP",
+          href: "/ds/hilo",
+          descripcion: "Dueños, gerencia y administración",
+        },
+        {
+          id: "supervisor",
+          etiqueta: "Supervisor",
+          href: "/ds/hilo",
+          descripcion: "Supervisores en terreno",
+        },
+        {
+          id: "platform",
+          etiqueta: "Plataforma",
+          href: "/ds/hilo",
+          descripcion: "Operadores de OPAI",
+        },
       ]}
       portalActual="erp"
       empresas={[
@@ -82,7 +109,11 @@ export function MuestraHilo({ vista, estado, panel, segmento, agente = true }: P
       ]}
       barra={
         agente
-          ? { agente: true, texto: "Pide, pregunta o busca una pantalla" }
+          ? {
+              agente: true,
+              texto: "Pide, pregunta o busca una pantalla",
+              textoCorto: "Pide o busca algo en OPAI",
+            }
           : { agente: false, texto: "Busca una pantalla o un registro" }
       }
       onBuscar={nada}

@@ -101,6 +101,10 @@ export const PERMISOS_CORE = {
   // todavía no pertenecen a ninguna ficha (sin alcance que filtrar). El historial de cada ficha usa
   // `actividades.read` y el alcance de la ficha.
   correosSinAsignar: "core:correos.sin_asignar",
+  // CAR-305 (ADR-094): ver el catálogo de indicadores de gestión y medir a otras personas. Decisión de
+  // Carlos (11-nov-2026): el resultado lo ven la persona, su jefatura y la gerencia. Mientras no exista
+  // la jefatura por cargo (CAR-314) lo tienen owner, admin y gerente; viewer y supervisor no.
+  indicadoresGestionRead: "core:indicadores_gestion.read",
   // CAR-279: importar datos desde planillas. Decisión de Carlos (11-nov-2026): también el gerente;
   // supervisor y viewer no. Además se exige el permiso de cada entidad que se importa.
   importarManage: "core:importar.manage",
