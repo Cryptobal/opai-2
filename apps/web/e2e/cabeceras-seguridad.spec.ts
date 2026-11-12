@@ -56,7 +56,7 @@ test.describe("cabeceras de seguridad (núcleo P1)", () => {
     const violaciones: Violacion[] = [];
     await escuchar(page, violaciones);
     await page.goto("/login");
-    await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Entrar", exact: true })).toBeVisible();
     await entrar(page);
     // /ds solo existe fuera de producción; en un build de producción responde 404 (sin violaciones).
     for (const ruta of ["/", "/supervisor", "/ds"]) {

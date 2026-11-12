@@ -47,40 +47,44 @@ async function main(): Promise<void> {
   await db.user.update({ where: { id: user.id }, data: { twoFactorEnabled: true } });
   console.log(`${email} quedó con el segundo factor activo (secreto fijo de e2e).`);
 
-  // Usuario obligado SIN segundo factor, para el e2e del enrolamiento forzado: owner de `gard`, con
-  // contraseña (la misma que el owner, para el test) y sin MFA. Al entrar lo mandan a /activar-mfa.
+  // Owner SIN segundo factor (CAR-286: ya no es obligatorio): owner de `gard`, con
+  // contraseña (la misma que el owner, para el test) y sin MFA. Entra solo con contraseña.
   const password = process.env["SEED_OWNER_PASSWORD"];
   const tenant = await db.tenant.findUnique({ where: { slug: "gard" } });
+  // `passkeys-e2e` es otro owner sin MFA, propio del e2e de passkeys (no choca con el de MFA).
   if (password && tenant) {
-    const correoPend = "mfa-pendiente-e2e@opai.cl";
-    const pend =
-      (await db.user.findUnique({ where: { email: correoPend } })) ??
-      (await db.user.create({
-        data: { name: "MFA Pendiente", email: correoPend, emailVerified: true },
-      }));
-    const hash = await hashPassword(password);
-    const cuenta = await db.account.findFirst({
-      where: { userId: pend.id, providerId: "credential" },
-    });
-    if (cuenta) await db.account.update({ where: { id: cuenta.id }, data: { password: hash } });
-    else
-      await db.account.create({
-        data: { userId: pend.id, providerId: "credential", accountId: pend.id, password: hash },
+    const correos = [
+      { email: "mfa-pendiente-e2e@opai.cl", nombre: "MFA Pendiente" },
+      { email: "passkeys-e2e@opai.cl", nombre: "Passkeys E2E" },
+    ];
+    for (const { email: correoPend, nombre } of correos) {
+      const pend =
+        (await db.user.findUnique({ where: { email: correoPend } })) ??
+        (await db.user.create({ data: { name: nombre, email: correoPend, emailVerified: true } }));
+      const hash = await hashPassword(password);
+      const cuenta = await db.account.findFirst({
+        where: { userId: pend.id, providerId: "credential" },
       });
-    await db.membership.upsert({
-      where: { tenantId_userId: { tenantId: tenant.id, userId: pend.id } },
-      update: { rol: "owner", portales: ["erp"], estado: "activa" },
-      create: {
-        tenantId: tenant.id,
-        userId: pend.id,
-        rol: "owner",
-        portales: ["erp"],
-        estado: "activa",
-      },
-    });
-    await db.user.update({ where: { id: pend.id }, data: { twoFactorEnabled: false } });
-    await db.twoFactor.deleteMany({ where: { userId: pend.id } });
-    console.log(`${correoPend} es owner de gard SIN segundo factor (enrolamiento forzado).`);
+      if (cuenta) await db.account.update({ where: { id: cuenta.id }, data: { password: hash } });
+      else
+        await db.account.create({
+          data: { userId: pend.id, providerId: "credential", accountId: pend.id, password: hash },
+        });
+      await db.membership.upsert({
+        where: { tenantId_userId: { tenantId: tenant.id, userId: pend.id } },
+        update: { rol: "owner", portales: ["erp"], estado: "activa" },
+        create: {
+          tenantId: tenant.id,
+          userId: pend.id,
+          rol: "owner",
+          portales: ["erp"],
+          estado: "activa",
+        },
+      });
+      await db.user.update({ where: { id: pend.id }, data: { twoFactorEnabled: false } });
+      await db.twoFactor.deleteMany({ where: { userId: pend.id } });
+      console.log(`${correoPend} es owner de gard SIN segundo factor (entra solo con contraseña).`);
+    }
   }
 }
 

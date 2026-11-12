@@ -9,6 +9,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
 import { enviarAlSiiTrasEmitir } from "../_componentes/enviar-sii-tras-emitir";
+import { montoDeNotaValido, montoParaNota } from "../_componentes/monto-nota";
 import type { Venta } from "../_componentes/tipos";
 import { CamposNota } from "./campos-nota";
 
@@ -54,22 +55,20 @@ export function EmitirNota({ tipo, cuentaId }: { tipo: "61" | "56"; cuentaId: st
   }, [cuentaId, esNc, ejecutar]);
 
   const origen = docs?.find((d) => d.id === origenId);
-  const valor = Number(monto);
   const motivoOk = motivo.trim().length >= 3;
-  const montoOk =
-    !esNc || (Number.isInteger(valor) && valor > 0 && valor <= (origen?.montoTotal ?? 0));
+  const montoOk = !esNc || montoDeNotaValido(codigo, monto, origen?.montoTotal ?? 0);
   const listo = Boolean(origen) && motivoOk && montoOk;
   const input = useMemo(
     () =>
       esNc
         ? {
             documentoReferenciaId: origenId,
-            monto: valor,
+            monto: montoParaNota(codigo, monto),
             motivo: motivo.trim(),
             codigoReferencia: Number(codigo),
           }
         : { notaCreditoId: origenId, motivo: motivo.trim() },
-    [esNc, origenId, valor, motivo, codigo],
+    [esNc, origenId, monto, motivo, codigo],
   );
 
   async function revisar() {
@@ -128,7 +127,10 @@ export function EmitirNota({ tipo, cuentaId }: { tipo: "61" | "56"; cuentaId: st
           esNc={esNc}
           total={origen.montoTotal}
           codigo={codigo}
-          setCodigo={setCodigo}
+          setCodigo={(v) => {
+            setCodigo(v);
+            setVista(null);
+          }}
           monto={monto}
           setMonto={(v) => {
             setMonto(v);

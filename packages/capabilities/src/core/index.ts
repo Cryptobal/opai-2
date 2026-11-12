@@ -26,7 +26,9 @@ import { integracionesGuardarCertificadoDte } from "./integraciones-certificado-
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
 import {
-  capacidadesRemuneraciones, trabajoCapturaIndicadoresSii, trabajoCapturaPrevisional,
+  capacidadesRemuneraciones,
+  trabajoCapturaIndicadoresSii,
+  trabajoCapturaPrevisional,
 } from "./remuneraciones";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesNovedades } from "./novedades";
@@ -65,6 +67,8 @@ import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
 import { usersRestablecerMfa } from "./users-mfa";
+import { seguridadMetodos, seguridadPasskeysRenombrar } from "./seguridad/metodos";
+import { seguridadMetodosQuitar } from "./seguridad/quitar";
 import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
@@ -80,6 +84,9 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usersUpdate,
   usersRemove,
   usersRestablecerMfa,
+  seguridadMetodos,
+  seguridadPasskeysRenombrar,
+  seguridadMetodosQuitar,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,
@@ -144,7 +151,8 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
   ...capacidadesNovedades,
-  ...capacidadesAgentes, ...capacidadesTurnos,
+  ...capacidadesAgentes,
+  ...capacidadesTurnos,
   ...capacidadesPlataforma,
 ];
 
@@ -158,7 +166,8 @@ export const consumidoresDelNucleo = [
   consumidorSeguimientoAviso,
   ...consumidoresPausaSeguimiento,
   consumidorNegocioGanado,
-  consumidorCpqGanado, consumidorTurnosEsperados,
+  consumidorCpqGanado,
+  consumidorTurnosEsperados,
   consumidorRevocacionBiometria,
 ];
 
@@ -172,5 +181,6 @@ export const trabajosDelNucleo = [
   ...trabajosMaestros,
   trabajoCapturaIndicadoresSii,
   trabajoCapturaPrevisional,
-  trabajoTareasVencidas, trabajoExtenderTurnos,
+  trabajoTareasVencidas,
+  trabajoExtenderTurnos,
 ];
