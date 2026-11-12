@@ -4,6 +4,7 @@ import type { Contexto } from "@opai/capabilities";
 
 import { sinDuplicado } from "../esquemas";
 import { sincronizarAvisoSaldoBajo } from "./aviso-banco";
+import { aplicarReglasBanco } from "./reglas-aplicar";
 import { aFecha } from "./util";
 
 type CuentaRow = { id: string };
@@ -43,9 +44,10 @@ export async function aplicarImportacionCartola(
       "Importación duplicada.",
     );
 
+    const ids: string[] = [];
     for (const f of p.nuevos) {
       const estado = f.esRemuneracion ? "por_autorizar" : "pendiente";
-      await tx.movimientoBancario.create({
+      const mov = await tx.movimientoBancario.create({
         data: {
           tenantId: ctx.tenantId,
           cuentaId: p.cuenta.id,
@@ -60,16 +62,20 @@ export async function aplicarImportacionCartola(
           estado,
           origen: "cartola",
         },
+        select: { id: true },
       });
+      ids.push(mov.id);
     }
+    // Reglas del banco (ADR-074): concilian solas con monto y referencia exactos; si no, dejan sugerencia.
+    const reglas = await aplicarReglasBanco(ctx, tx, { movimientoIds: ids });
 
     await sincronizarAvisoSaldoBajo(ctx, tx, p.cuenta.id, p.saldoFinal);
     await ctx.eventos.emitir(tx, {
       tipo: "finanzas.banco.cartola_importada",
       entidadTipo: "cartolaImportada",
       entidadId: cartola.id,
-      payload: { nuevos: p.nuevos.length, duplicados: p.duplicados },
+      payload: { nuevos: p.nuevos.length, duplicados: p.duplicados, ...reglas },
     });
-    return cartola;
+    return { cartola, reglas };
   });
 }
