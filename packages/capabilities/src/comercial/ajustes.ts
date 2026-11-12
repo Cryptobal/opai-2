@@ -40,4 +40,13 @@ export const ajustesComercial = z.object({
     permiso: "comercial:canales.manage",
     control: "switch",
   }),
+  solicitudes_primera_respuesta_horas: z.number().int().min(0).max(720).default(0).meta({
+    etiqueta: "Tiempo objetivo de primera respuesta (horas)",
+    ayuda:
+      "Apagado con 0 (decisión de Carlos, 11-nov-2026). Con un valor, la bandeja de Solicitudes marca cuáles están dentro o fuera del plazo y el tablero de reportes mide cuántas se atendieron a tiempo.",
+    grupo: "Leads",
+    ambito: "tenant",
+    permiso: "comercial:config.manage",
+    control: "numero",
+  }),
 });

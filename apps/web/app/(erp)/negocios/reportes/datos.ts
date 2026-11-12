@@ -29,6 +29,7 @@ export type Tablero = {
   embudo: { etapaId: string; nombre: string; cantidad: number; montoMensualClp: number; diasPromedio: number | null; avanzaPct: number | null }[];
   perdidas: { motivos: { motivoId: string | null; nombre: string; cantidad: number }[]; competidores: { nombre: string; cantidad: number }[] };
   canales: { canal: string; solicitudes: number; negocios: number; ganados: number; conversionPct: number }[] | null;
+  primeraRespuesta: { objetivoHoras: number; atendidas: number; aTiempo: number; tarde: number; pendientesDentro: number; pendientesFuera: number; cumplimientoPct: number | null } | null;
   pronostico: { totalPonderadoClp: number; meses: { mes: string; ponderadoClp: number }[]; fueraDeRango: { cantidad: number; ponderadoClp: number } };
   responsables: { responsableId: string | null; nombre: string; abiertos: number; enCursoMensualClp: number; ponderadoClp: number; ganados: number; perdidos: number; conversionPct: number | null }[];
 };
