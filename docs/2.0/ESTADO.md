@@ -311,6 +311,7 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 **Sesión Hilo, 11-nov-2026 (CAR-247 PR 1):**
 - «Apps conectadas» (ver y desconectar apps OAuth) y limpieza de clientes registrados sin uso: PR 2 de CAR-247. Hasta entonces, una app se desconecta revocando desde la propia app o esperando el vencimiento del refresh (30 días).
 - Las apps OAuth miden su consumo pero no tienen tope mensual propio (las keys sí): sumarlo en PR 2.
+- Purga de tokens OAuth vencidos o revocados (hoy quedan como filas con hash, sin valor): sumarla en PR 2.
 - Probar con Claude real contra `test.opai.cl` cuando el bot aplique la migración y se integre.
 - Columnas `uuid` que guardan el id del actor (por ejemplo `comercial.historial_etapas.actor_id`, `creado_por_id` de documentos y CPQ): con un agente sin key (`agente-interno:` ya antes, y ahora `oauth:`) esas escrituras fallan y se revierten enteras, sin dejar datos a medias. Corregir guardando la persona (`via_user_id`) o pasando la columna a texto, en un PR propio.
 - La exigencia extra de segundo factor que una empresa agrega por ajuste se revisa en las pantallas de OAuth; el proveedor exige la de rol (owner, admin, plataforma) y la verificación de la sesión antes de cada código.
