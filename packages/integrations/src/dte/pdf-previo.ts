@@ -6,7 +6,8 @@ import { CARTA, alDerecha, ALTO, caja, centrado, GRIS, linea, MARGEN, type Recur
 import { capacidad, dibujarDetalle, medirFila, paginar } from "./pdf-detalle";
 import { cabeceraContinuacion, numeroDePagina } from "./pdf-pagina";
 import { fechaCorta, fechaLarga, pesos } from "./pdf-texto";
-import type { PdfLinea, PdfParte } from "./pdf-tipos";
+import { incrustarLogo } from "./pdf-logo";
+import type { PdfLinea, PdfLogo, PdfParte } from "./pdf-tipos";
 
 export type PdfPrevioInput = {
   tipo: "proforma" | "estado_pago";
@@ -29,6 +30,8 @@ export type PdfPrevioInput = {
   uf?: { valor: string; fecha: string; estimada: boolean };
   /** Referencias autorizadas ya visibles para el cliente, por ejemplo «OC 4500123 (801)». */
   referencias?: string[];
+  /** Logo de la empresa (Configuración › Marca, ADR-028); si falta o no se puede leer, va solo la razón social. */
+  logo?: PdfLogo;
   /** Firmas de ambas partes, solo en el estado de pago. `aprobadoPor` reemplaza la firma del cliente. */
   firmas?: { aprobadoPor?: { nombre: string; fecha: string } };
 };
@@ -38,10 +41,17 @@ const CAJA_W = 202;
 const ALTO_BLOQUE = 62;
 
 function cabecera(p: PDFPage, d: PdfPrevioInput, r: Recursos) {
-  texto(p, d.emisor.razon, MARGEN, 66, r.negrita, 11);
+  let xe = MARGEN;
+  if (r.logo) {
+    const ancho = Math.min((r.logo.width / r.logo.height) * Math.min(50, r.logo.height), 130);
+    const alto = (ancho * r.logo.height) / r.logo.width;
+    p.drawImage(r.logo, { x: xe, y: p.getHeight() - 60 - alto, width: ancho, height: alto });
+    xe += ancho + 12;
+  }
+  texto(p, d.emisor.razon, xe, 66, r.negrita, 11);
   [d.emisor.giro, d.emisor.direccion, [d.emisor.comuna, d.emisor.ciudad].filter(Boolean).join(", ")]
     .filter(Boolean)
-    .forEach((l, i) => texto(p, l as string, MARGEN, 84 + i * 12, r.normal));
+    .forEach((l, i) => texto(p, l as string, xe, 84 + i * 12, r.normal));
   const x = XFIN - CAJA_W;
   caja(p, x, 64, CAJA_W, 70, GRIS);
   centrado(p, NOMBRE[d.tipo], x + CAJA_W / 2, 76, r.negrita, 12);
@@ -105,7 +115,12 @@ export async function generarPdfPrevio(input: PdfPrevioInput): Promise<Uint8Arra
   const fechaDoc = new Date(`${input.fechaEmision || "1970-01-01"}T00:00:00Z`);
   doc.setCreationDate(fechaDoc);
   doc.setModificationDate(fechaDoc);
-  const r: Recursos = { normal: await doc.embedFont(StandardFonts.Helvetica), negrita: await doc.embedFont(StandardFonts.HelveticaBold) };
+  const logo = await incrustarLogo(doc, input.logo);
+  const r: Recursos = {
+    normal: await doc.embedFont(StandardFonts.Helvetica),
+    negrita: await doc.embedFont(StandardFonts.HelveticaBold),
+    ...(logo ? { logo } : {}),
+  };
   const filas = input.lineas.map((l, i) => medirFila(l, i + 1));
   const cabPrimera = 253 + ALTO_BLOQUE - 40;
   const paginas = paginar(filas, capacidad(cabPrimera), capacidad(70));

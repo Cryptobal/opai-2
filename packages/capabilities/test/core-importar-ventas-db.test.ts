@@ -101,4 +101,21 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     // Quedan solo la factura emitida en OPAI y la del otro lote.
     expect(folios.sort()).toEqual([9005, 9006]);
   });
+
+  it("la nota de débito que anula una nota de crédito de la misma planilla la deja anulada", async () => {
+    // Como al emitirla en OPAI: si la NC siguiera vigente, restaría del saldo de su factura (hallazgo de Codex en #542).
+    const csv = [
+      "Tipo Doc,Folio,Rut cliente,Fecha Docto,Monto Neto,Monto IVA,Monto total,Monto ya cobrado,Folio referencia,Tipo referencia,Codigo referencia",
+      "33,9200,77.777.777-7,10-10-2026,100000,19000,119000,0,,,",
+      "61,9201,77.777.777-7,11-10-2026,10000,1900,11900,,9200,33,corrige montos",
+      "56,9301,77.777.777-7,12-10-2026,10000,1900,11900,,9201,61,anula",
+    ].join("\n");
+    const r = await x.run<Salida>(x.t1, "core.importar.ejecutar", { importador: "documentos_venta", archivo: x.csv(csv) }, { modulos });
+    if (!r.ok) throw new Error(r.error.message);
+    expect(r.data.filas.find((f) => f.fila === 3)?.mensajes.join(" ")).toMatch(/nota de débito de la fila 4/);
+    const nc = await x.e.admin.documentoEmitido.findFirstOrThrow({ where: { tenantId: x.t1, tipoDte: 61, folio: 9201 } });
+    expect(nc.estadoDte).toBe("anulado_nd");
+    const nd = await x.e.admin.documentoEmitido.findFirstOrThrow({ where: { tenantId: x.t1, tipoDte: 56, folio: 9301 } });
+    expect(nd.documentoReferenciaId).toBe(nc.id);
+  });
 });
