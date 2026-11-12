@@ -1,10 +1,9 @@
-import ExcelJS from "exceljs";
-
-import { valorCeldaExcel } from "./celda-excel";
 import { claveDedupeCartola } from "./dedupe";
+import { filasConExcelJs } from "./excel-filas";
 import { fechaDesdeDdMmAaaa } from "./fechas";
 import { validarFilasCartola, validarTamanoCartola } from "./limites-cartola";
 import { esRemuneracion } from "./remuneracion";
+import { leerXlsxTolerante } from "./xlsx-tolerante";
 
 export type FilaCartolaParseada = {
   indice: number;
@@ -26,21 +25,20 @@ export type ResultadoCartola = {
   rechazadas: { indice: number; motivo: string }[];
 };
 
-/** Parser cartola Santander XLSX (columnas MONTO, DESCRIPCIÓN, FECHA, N° DOC, SUCURSAL). Carga en memoria (sin temporales). */
+/**
+ * Parser cartola Santander XLSX (columnas MONTO, DESCRIPCIÓN, FECHA, N° DOC, SUCURSAL). Carga en memoria (sin temporales).
+ * Primero intenta con ExcelJS; las exportaciones de Santander que ExcelJS no abre (relaciones absolutas, hoja
+ * `sheet.xml`, prefijo `x:`) se leen con el lector tolerante (CAR-284).
+ */
 export async function parsearCartolaSantander(contenido: Buffer): Promise<ResultadoCartola> {
   validarTamanoCartola(contenido.byteLength);
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(contenido as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
-  const hoja = workbook.worksheets[0];
-  if (!hoja) return { fechaDesde: null, fechaHasta: null, saldoFinal: null, filas: [], rechazadas: [] };
-  const rows: (string | number | null)[][] = [];
-  let filasLeidas = 0;
-  hoja.eachRow((row) => {
-    filasLeidas += 1;
-    validarFilasCartola(filasLeidas);
-    const vals = row.values as unknown[];
-    rows.push(vals.slice(1).map((c) => valorCeldaExcel(c)));
-  });
+  let rows: (string | number | null)[][];
+  try {
+    rows = await filasConExcelJs(contenido);
+  } catch {
+    rows = await leerXlsxTolerante(contenido);
+  }
+  validarFilasCartola(rows.length);
   return parsearFilasSantander(rows);
 }
 
