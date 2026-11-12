@@ -53,7 +53,7 @@ Cuatro formas de cálculo, acotadas: contar un hecho en el período, sumar un mo
 
 - La persona ve su propio resultado; su jefatura ve los de su equipo; la gerencia y quien administra el módulo ven a todos.
 - Por cargo se configura: cuál es su jefatura (el cargo al que reporta), si esa jefatura ve a todo el equipo o solo a las personas a su cargo, si la persona ve su resultado y si ve el ranking del equipo.
-- **Hoy el modelo de datos no tiene jefatura** (verificado en `main` el 11-nov-2026): ningún cargo ni persona guarda a quién reporta; solo existe el alcance por instalaciones del supervisor (ADR-022). Se agrega en Personas (CAR-314) y queda disponible para otros módulos.
+- **Jefatura en el modelo de datos (CAR-314):** cada cargo guarda a qué cargo reporta y cómo lo ven sus jefes, y cada persona puede tener un jefe directo. Queda disponible para otros módulos. Antes solo existía el alcance por instalaciones del supervisor (ADR-022), que la jefatura no amplía.
 - El filtro se aplica en la consulta, nunca en la pantalla.
 
 ## 4. Qué NO entra en la primera versión
@@ -110,4 +110,4 @@ Orden: D1, jefatura por cargo y D2; luego Comercial (el módulo con más datos h
 
 - Si todo hecho relevante guarda hoy persona, cargo y fecha, o hay que completarlo.
 - Cómo se reutiliza o reemplaza `core.inicio.indicadores` (CAR-182), que arma los indicadores de Inicio a mano.
-- **Verificado el 11-nov-2026:** un usuario no está unido a su ficha de Persona (el responsable de un negocio es un usuario; el cargo vive en el vínculo laboral de la Persona). La unión entra en CAR-314; mientras tanto cada indicador declara si se atribuye a un usuario o a una Persona.
+- **Corregido el 11-nov-2026 (21:10):** la unión entre usuario y ficha de Persona ya existe (`core.personas.vincular_usuario`); lo que falta es que cada empresa la cargue, porque el responsable de un negocio es un usuario y el cargo vive en el vínculo laboral de la Persona. CAR-314 usa esa unión y agrega la jefatura; mientras tanto cada indicador declara si se atribuye a un usuario o a una Persona.
