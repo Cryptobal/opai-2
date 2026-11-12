@@ -49,39 +49,86 @@ describe.skipIf(!urlPropietario)("indicadores de Asistencia contra Postgres real
       await e.admin.membership.create({ data: { tenantId, userId: usuaria, rol: "owner", portales: ["erp"] } });
     }
     let n = 0;
-    for (const nombre of ["ines", "jose"]) {
+    const crearPersona = async (tenantId: string, nombre: string) => {
       n += 1;
       persona[nombre] = (
         await e.admin.persona.create({
-          data: { tenantId: a, nombres: nombre, apellidos: "Prueba", rut: `${50_000_000 + n}-${sufijo.slice(0, 1)}` },
+          data: { tenantId, nombres: nombre, apellidos: "Prueba", rut: `${50_000_000 + n}-${sufijo.slice(0, 1)}` },
         })
       ).id;
-    }
-    const dia = (quien: string, fecha: string, estado: string, extra: Record<string, unknown> = {}) =>
-      e.admin.dia.create({
+    };
+    for (const nombre of ["ines", "jose"]) await crearPersona(a, nombre);
+    await crearPersona(b, "berta");
+    const lugar = async (tenantId: string) => {
+      const cuentaId = (await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente" } })).id;
+      return (await e.admin.instalacion.create({ data: { tenantId, cuentaId, nombre: "Planta" } })).id;
+    };
+    const instA = await lugar(a);
+    const instB = await lugar(b);
+    const dia = async (
+      tenantId: string,
+      quien: string,
+      fecha: string,
+      estado: string,
+      extra: Record<string, unknown> = {},
+      turno: "vigente" | "anulado" | null = "vigente",
+    ) => {
+      let turnoEsperadoId: string | null = null;
+      if (turno) {
+        turnoEsperadoId = (
+          await e.admin.turnoEsperado.create({
+            data: {
+              tenantId,
+              personaId: persona[quien] ?? "",
+              fecha: new Date(fecha),
+              inicio: new Date(`${fecha}T11:00:00Z`),
+              fin: new Date(`${fecha}T23:00:00Z`),
+              instalacionId: tenantId === a ? instA : instB,
+              origen: "manual",
+              vigente: turno === "vigente",
+            },
+          })
+        ).id;
+      }
+      await e.admin.dia.create({
         data: {
-          tenantId: a,
+          tenantId,
           personaId: persona[quien] ?? "",
           fecha: new Date(fecha),
           tipoJornada: "ordinaria",
           estado,
           calculadoEn: new Date(),
+          turnoEsperadoId,
           ...extra,
         },
       });
+    };
     const entrada = new Date("2026-10-01T11:00:00Z");
-    // Inés: 4 días con entrada (uno con atraso), 1 ausencia injustificada, 1 licencia, 1 vacaciones.
-    await dia("ines", "2026-10-01", "presente", { entrada, sigla: "J.O." });
-    await dia("ines", "2026-10-02", "presente", { entrada, sigla: "J.O." });
-    await dia("ines", "2026-10-03", "presente", { entrada, sigla: "J.O.", segundosAtraso: 300 });
-    await dia("ines", "2026-10-04", "incompleto", { entrada, sigla: "J.O." });
-    await dia("ines", "2026-10-05", "ausente", { sigla: "A.I." });
-    await dia("ines", "2026-10-06", "ausente", { sigla: "L.M." });
-    await dia("ines", "2026-10-07", "ausente", { sigla: "VAC" });
-    await dia("ines", "2026-10-08", "sin_turno");
-    // José: todos a la hora; un día con turno y sin ninguna marca cuenta como ausencia.
-    await dia("jose", "2026-10-01", "presente", { entrada, sigla: "J.O." });
-    await dia("jose", "2026-10-02", "ausente", { sigla: "S.A." });
+    // Inés: 4 días trabajados (uno con atraso); el 5 sin marca (S.A.); el 6 su turno se anuló porque
+    // registraron tarde una licencia; el 7 vacaciones; el 8 quedó «sin marca» y el turno ya terminó;
+    // el 9 una ausencia registrada en la Pauta (sin día consolidado); el 10 marcó fuera de turno.
+    await dia(a, "ines", "2026-10-01", "presente", { entrada, sigla: "J.O." });
+    await dia(a, "ines", "2026-10-02", "presente", { entrada, sigla: "J.O." });
+    await dia(a, "ines", "2026-10-03", "presente", { entrada, sigla: "J.O.", segundosAtraso: 300 });
+    await dia(a, "ines", "2026-10-04", "incompleto", { entrada, sigla: "J.O." });
+    await dia(a, "ines", "2026-10-05", "ausente", { sigla: "S.A." });
+    await dia(a, "ines", "2026-10-06", "ausente", { sigla: "S.A." }, "anulado");
+    await dia(a, "ines", "2026-10-07", "ausente", { sigla: "VAC" });
+    await dia(a, "ines", "2026-10-08", "sin_marca");
+    await dia(a, "ines", "2026-10-10", "presente", { entrada, sigla: "J.O.", segundosAtraso: 900 }, null);
+    const cargo = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Guardia" } })).id;
+    const puestoId = (
+      await e.admin.puesto.create({
+        data: { tenantId: a, instalacionId: instA, cargoId: cargo, nombre: "Portería", diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00" },
+      })
+    ).id;
+    await e.admin.excepcionPauta.create({
+      data: { tenantId: a, puestoId, fecha: new Date("2026-10-09"), tipo: "ausencia", motivo: "No llegó", personaId: persona.ines ?? null },
+    });
+    // José: a la hora y un día sin marca. Berta (otra empresa): un día sin marca.
+    await dia(a, "jose", "2026-10-01", "presente", { entrada, sigla: "J.O." });
+    await dia(a, "jose", "2026-10-02", "ausente", { sigla: "S.A." });
+    await dia(b, "berta", "2026-10-01", "ausente", { sigla: "S.A." });
   });
   afterAll(async () => {
     mod.limpiarModulos();
@@ -92,11 +139,12 @@ describe.skipIf(!urlPropietario)("indicadores de Asistencia contra Postgres real
     const medir = (indicador: string) => dato<Salida>(ctx(a), MEDIR, { indicador, periodo: "2026-10" });
     const de = (r: Salida, k: string) => r.mediciones.find((m) => m.sujetoId === persona[k])?.valor;
     const hora = await medir("asistencia.marcas_a_la_hora");
+    // La marca fuera de turno del 10 no cuenta: 3 de 4 a la hora.
     expect([de(hora, "ines"), de(hora, "jose")]).toEqual([75, 100]);
     const ausentismo = await medir("asistencia.ausentismo");
-    // Inés: 1 injustificada sobre 5 días con turno (la licencia y las vacaciones quedan fuera): 20 %.
-    expect([de(ausentismo, "ines"), de(ausentismo, "jose")]).toEqual([20, 50]);
+    // Inés: en contra el 5, el 8 y el 9 sobre 7 días con turno (la licencia del 6 y las vacaciones del 7 no cuentan).
+    expect([de(ausentismo, "ines"), de(ausentismo, "jose")]).toEqual([42.9, 50]);
     const enB = await dato<Salida>(ctx(b), MEDIR, { indicador: "asistencia.ausentismo", periodo: "2026-10" });
-    expect(enB.mediciones).toEqual([]);
+    expect(enB.mediciones).toEqual([expect.objectContaining({ sujetoId: persona.berta, valor: 100 })]);
   });
 });

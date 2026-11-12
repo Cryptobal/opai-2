@@ -9,7 +9,7 @@ Que Asistencia publique sus indicadores en el catálogo del núcleo para los sco
 ## 2 Estado actual (verificado)
 
 - Asistencia consolida cada día por persona en `asistencia.dias`: estado (`presente`, `incompleto`, `ausente`, `sin_marca`, `sin_turno`), sigla oficial de la Res. 38 (J.O., A.I., L.M., VAC…), hora de entrada y segundos de atraso.
-- Una ausencia registrada en la pauta o en RR. HH. queda como `ausente` con su sigla.
+- Hoy el consolidado no recibe la sigla de una ausencia registrada: todo día `ausente` queda como S.A. Una licencia, vacación o permiso registrado en la Pauta anula el turno esperado (`core.turnos_esperados.vigente = false`), pero no recalcula el día ya consolidado. Una ausencia registrada en la Pauta también anula el turno.
 
 ## 3 Alcance
 
@@ -19,7 +19,7 @@ Que Asistencia publique sus indicadores en el catálogo del núcleo para los sco
 
 ## 4 Arquitectura
 
-`modules/asistencia/capabilities/indicadores.ts`, declarado en el manifiesto (`indicadores`). Solo lee `asistencia.dias`; nunca marcas, cadena ni correcciones.
+`modules/asistencia/capabilities/indicadores.ts`, declarado en el manifiesto (`indicadores`). Lee `asistencia.dias`, los turnos esperados del núcleo (`core.turnos_esperados`) y las ausencias de la Pauta (`pauta.excepciones` tipo ausencia, solo lectura); nunca marcas, cadena ni correcciones. Cuenta un día solo si su turno esperado sigue vigente y ya terminó: así una licencia o vacación registrada tarde sale del cálculo aunque el día no se haya recalculado. Las ausencias de la Pauta (que también anulan el turno) se suman en contra.
 
 ## 5 Archivos
 
@@ -43,7 +43,7 @@ Todo por `ctx.db` (RLS); salida solo ids y porcentajes; no toca hechos regulados
 
 ## 10 Casos límite
 
-Solo días ya terminados (antes de hoy); `sin_marca` (día en curso) y `sin_turno` no cuentan. Una corrección aprobada recalcula el día y el indicador la refleja; el cierre del mes (CAR-322) deja fijo el resultado.
+Solo turnos ya terminados; un día `sin_marca` cuyo turno terminó cuenta como sin marca (en contra); `sin_turno` y las marcas fuera de turno no cuentan; un día con licencia y entrada no cuenta en «Marcas a la hora». Una corrección aprobada recalcula el día y el indicador la refleja; el cierre del mes (CAR-322) deja fijo el resultado.
 
 ## 11 Plan por bloques
 
@@ -51,7 +51,7 @@ Solo días ya terminados (antes de hoy); `sin_marca` (día en curso) y `sin_turn
 
 ## 12 Tests
 
-`asistencia-indicadores-db` (atraso, injustificada, licencia y vacaciones neutras, día sin marca en contra, aislamiento entre empresas).
+`asistencia-indicadores-db` (atraso; sin marca en contra; licencia registrada tarde con turno anulado y vacaciones neutras; «sin marca» de un turno ya terminado en contra; ausencia de la Pauta en contra; marca fuera de turno ignorada; otra empresa con sus propios datos sin mezclarse).
 
 ## 13 Validación
 

@@ -1,6 +1,7 @@
-// Indicadores de gestión que Asistencia publica en el catálogo del núcleo (ADR-094, CAR-311). Solo leen
-// el consolidado del día (`asistencia.dias`), nunca las marcas ni su bitácora, y no tocan el reporte
-// para la DT. Se atribuyen a la persona del día y cuentan solo días ya terminados.
+// Indicadores de gestión que Asistencia publica en el catálogo del núcleo (ADR-094, CAR-311). Leen el
+// consolidado del día (`asistencia.dias`), los turnos esperados del núcleo y las ausencias registradas en
+// la Pauta; nunca las marcas ni su bitácora, y no tocan el reporte para la DT. Se atribuyen a la persona
+// del día y cuentan solo turnos ya terminados.
 import { diaEnZona, porcentajeDe } from "@opai/domain";
 import { defineIndicador, type IndicadorGestion, type MedicionIndicador } from "@opai/capabilities";
 
@@ -13,21 +14,59 @@ const aFecha = (dia: string) => new Date(`${dia}T00:00:00Z`);
  */
 export const SIGLAS_NEUTRAS = new Set(["L.M.", "AT", "PREN.", "POSTN", "VAC", "P.G.R.", "P.S.G.R.", "A.J."]);
 
-/** Días del mes ya terminados (antes de hoy), con turno o con alguna marca. */
-async function diasDelMes(
-  ctx: Parameters<IndicadorGestion["medir"]>[0],
-  { rango, zona, ahora, sujetos }: Parameters<IndicadorGestion["medir"]>[1],
-) {
+type Medir = IndicadorGestion["medir"];
+type Dia = { personaId: string; fecha: string; estado: string; sigla: string | null; atraso: number; conEntrada: boolean };
+
+/**
+ * Días con turno del mes, ya terminados, cuyo turno esperado sigue vigente. Una licencia, vacación o
+ * permiso registrado después en la Pauta anula el turno esperado: ese día sale del cálculo aunque el
+ * consolidado no se haya recalculado. Un día `sin_marca` cuyo turno ya terminó cuenta como sin marca.
+ */
+async function diasDelMes(ctx: Parameters<Medir>[0], { rango, zona, ahora, sujetos }: Parameters<Medir>[1]) {
   const hoy = diaEnZona(ahora, zona);
   const hasta = diaEnZona(rango.hasta, zona);
-  return ctx.db.dia.findMany({
+  const desde = diaEnZona(rango.desde, zona);
+  const corte = hoy < hasta ? hoy : hasta;
+  const personas = sujetos ? { personaId: { in: [...sujetos] } } : {};
+  const filas = await ctx.db.dia.findMany({
     where: {
-      fecha: { gte: aFecha(diaEnZona(rango.desde, zona)), lt: aFecha(hoy < hasta ? hoy : hasta) },
-      estado: { in: ["presente", "incompleto", "ausente"] },
-      ...(sujetos ? { personaId: { in: [...sujetos] } } : {}),
+      fecha: { gte: aFecha(desde), lt: aFecha(hasta) },
+      turnoEsperadoId: { not: null },
+      estado: { in: ["presente", "incompleto", "ausente", "sin_marca"] },
+      ...personas,
     },
-    select: { personaId: true, estado: true, sigla: true, entrada: true, segundosAtraso: true },
+    select: { personaId: true, fecha: true, estado: true, sigla: true, entrada: true, segundosAtraso: true, turnoEsperadoId: true },
   });
+  const turnos = new Map(
+    (
+      await ctx.db.turnoEsperado.findMany({
+        where: { id: { in: filas.flatMap((f) => (f.turnoEsperadoId ? [f.turnoEsperadoId] : [])) }, vigente: true },
+        select: { id: true, fin: true },
+      })
+    ).map((t) => [t.id, t.fin]),
+  );
+  const dias: Dia[] = [];
+  for (const f of filas) {
+    const fin = f.turnoEsperadoId ? turnos.get(f.turnoEsperadoId) : undefined;
+    if (!fin || fin > ahora) continue;
+    const fecha = f.fecha.toISOString().slice(0, 10);
+    // Un día con turno que ya terminó y sigue sin marca es un día sin marca (S.A.).
+    const estado = f.estado === "sin_marca" ? "ausente" : f.estado;
+    dias.push({ personaId: f.personaId, fecha, estado, sigla: f.sigla, atraso: f.segundosAtraso, conEntrada: f.entrada !== null });
+  }
+  // Ausencias registradas en la Pauta: anulan el turno, pero cuentan en contra (A.I.).
+  const ausencias = await ctx.db.excepcionPauta.findMany({
+    where: { tipo: "ausencia", estado: "activa", fecha: { gte: aFecha(desde), lt: aFecha(corte) }, ...(sujetos ? { personaId: { in: [...sujetos] } } : { personaId: { not: null } }) },
+    select: { personaId: true, fecha: true },
+  });
+  const vistos = new Set(dias.map((d) => `${d.personaId}:${d.fecha}`));
+  for (const a of ausencias) {
+    const fecha = a.fecha.toISOString().slice(0, 10);
+    if (!a.personaId || vistos.has(`${a.personaId}:${fecha}`)) continue;
+    vistos.add(`${a.personaId}:${fecha}`);
+    dias.push({ personaId: a.personaId, fecha, estado: "ausente", sigla: "A.I.", atraso: 0, conEntrada: false });
+  }
+  return dias;
 }
 
 function porPersona<T>(filas: readonly T[], clave: (f: T) => string, suma: (f: T) => [number, number]) {
@@ -57,9 +96,9 @@ export const indicadoresAsistencia: readonly IndicadorGestion[] = [
     async medir(ctx, consulta) {
       const dias = await diasDelMes(ctx, consulta);
       return porPersona(
-        dias.filter((d) => d.entrada !== null),
+        dias.filter((d) => d.conEntrada && d.estado !== "ausente"),
         (d) => d.personaId,
-        (d) => [d.segundosAtraso === 0 ? 1 : 0, 1],
+        (d) => [d.atraso === 0 ? 1 : 0, 1],
       );
     },
   }),
