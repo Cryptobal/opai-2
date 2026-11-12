@@ -26,7 +26,7 @@
     "/(erp)/documentos/plantillas/[id]": 174,
     "/(erp)/cargos/[id]": 168,
     "/(erp)/cuentas/[id]": 172,
-    "/(erp)/cuentas/[id]/actividad": 182,
+    "/(erp)/cuentas/[id]/actividad": 184,
     "/(erp)/cuentas/[id]/contactos": 172,
     "/(erp)/cuentas/[id]/documentos": 172,
     "/(erp)/cuentas/[id]/instalaciones": 171,
