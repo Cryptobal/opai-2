@@ -4,7 +4,7 @@
 
 Todo OPAI 2.0 (diseño, lógica, permisos, Núcleo y módulos) sigue el patrón de los mejores SaaS de cada capa y no reinventa la rueda. Este archivo dice, capa por capa, a quién se copia, qué patrón concreto se copia y cómo se comprueba que se cumple. Si un módulo ya construido se aparta sin motivo, se ajusta o se rehace.
 
-Lo que **no** cambia con este documento: Hilo es el sistema visual oficial (ADR-102); las reglas duras del repositorio (`AGENTS.md`, `REGLAS-codigo.md`) siguen mandando; la normativa chilena (DT, SII, Ley 21.719) manda sobre cualquier referente.
+Lo que **no** cambia con este documento: el aspecto lo decide el sistema visual oficial vigente (Hilo según ADR-102; el diseño nuevo si se integra la propuesta ADR-109, PR #597); las reglas duras del repositorio (`AGENTS.md`, `REGLAS-codigo.md`) siguen mandando; la normativa chilena (DT, SII, Ley 21.719) manda sobre cualquier referente.
 
 ## Cómo se usa
 
@@ -27,7 +27,7 @@ Las «medidas» son comprobables: una prueba, un `grep`, un conteo o una pantall
 | Finanzas | Stripe Billing | Xero, QuickBooks | La factura es una máquina de estados; conciliar es calzar líneas del banco con reglas |
 | Personas | Rippling | Deel, BambooHR | Un registro único de la persona del que cuelga todo; cambios con fecha de vigencia y aprobación |
 | Operación en terreno | Connecteam | Deputy, ServiceTitan | Turno publicado y avisado; tablero del día; teléfono primero y sin conexión |
-| UX y navegación | Linear | Notion | Teclado, paleta de comandos, lista más detalle, respuesta inmediata; con la piel Hilo |
+| UX y navegación | Linear | Notion | Teclado, paleta de comandos, lista más detalle, respuesta inmediata; con el sistema visual oficial |
 | IA | Patrón propio de la casa | — | La IA propone, una persona aprueba en una cola, y queda registro |
 
 ## 1. Permisos y roles — GitHub · Google Workspace · Rippling
@@ -190,9 +190,9 @@ En Chile, la marcación y la jornada siguen la normativa de la Dirección del Tr
 - Toda pantalla de terreno funciona a 375 px, con objetivos táctiles de 44 px y cola sin conexión probada.
 - Las rondas y la bitácora aceptan foto, firma y ubicación.
 
-## 8. UX y navegación — Linear · Notion, con el sistema visual Hilo
+## 8. UX y navegación — Linear · Notion, con el sistema visual oficial
 
-Hilo decide cómo se ve. Linear y Notion deciden cómo se comporta.
+El sistema visual oficial vigente decide cómo se ve (hoy Hilo, ADR-102; el diseño nuevo de ADR-109 toma justamente a Vercel y Linear como referentes). Linear y Notion deciden cómo se comporta.
 
 **Patrón que se copia**
 
