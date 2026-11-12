@@ -11,7 +11,7 @@ import { trabajoRecordatoriosCobranza } from "../src/finanzas/cobranza-trabajo";
 import { registrarModuloFinanzas } from "./finanzas-modulo";
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
 
-type Envio = { estado: string; para: string | null; cc: string[] };
+type Envio = { estado: string; para: string | null; paraAdicionales: string[]; cc: string[] };
 type Job = { activo: boolean; enviados: number; omitidos: number; fallidos: number };
 
 const diasAtras = (n: number): Date => {
@@ -57,15 +57,17 @@ describe.skipIf(!urlPropietario)("Finanzas · cobranza · recordatorios (db)", (
     expect(enviados).toHaveLength(0);
   });
 
-  it("recuerda al contacto principal con copia al resto y deja la gestión", async () => {
+  it("recuerda a todos los contactos de facturación como PARA y deja la gestión (ADR-100)", async () => {
     await contacto("pagos@cliente.cl", ["facturacion"], true);
     await contacto("conta@cliente.cl", ["facturacion"]);
     await contacto("gerente@cliente.cl", ["comercial"]);
+    await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { emailDte: "dte@cliente.cl" } });
     const vista = await s.dato<Envio>("finanzas.cobranza.recordar", { documentoId: docId }, { dryRun: true });
-    expect(vista).toMatchObject({ estado: "vista_previa", para: "pagos@cliente.cl", cc: ["conta@cliente.cl"] });
+    expect(vista).toMatchObject({ estado: "vista_previa", para: "pagos@cliente.cl", paraAdicionales: ["conta@cliente.cl"], cc: ["dte@cliente.cl"] });
     const r = await s.dato<Envio>("finanzas.cobranza.recordar", { documentoId: docId });
-    expect(r).toMatchObject({ estado: "enviado", para: "pagos@cliente.cl", cc: ["conta@cliente.cl"] });
+    expect(r).toMatchObject({ estado: "enviado", para: "pagos@cliente.cl", paraAdicionales: ["conta@cliente.cl"], cc: ["dte@cliente.cl"] });
     expect(enviados).toHaveLength(1);
+    expect(enviados[0]).toMatchObject({ para: "pagos@cliente.cl", paraAdicionales: ["conta@cliente.cl"], cc: ["dte@cliente.cl"] });
     const gestiones = await s.e.admin.cobranzaGestion.findMany({ where: { documentoId: docId } });
     expect(gestiones).toMatchObject([{ canal: "correo", origen: "manual", resultado: "enviado", paso: null }]);
   });

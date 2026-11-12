@@ -7,6 +7,7 @@ import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { documentosCobrables, parametrosCobranza } from "./cobranza-datos";
 import { cuentaDe } from "./ventas-comun";
+import { destinosDeDocumento } from "./ventas-destinos";
 import { pdfDeDocumento } from "./ventas-pdf-doc";
 
 const clp = (n: number) => `$${new Intl.NumberFormat("es-CL").format(n)}`;
@@ -16,6 +17,7 @@ export type ResultadoRecordatorio = {
   documentoId: string;
   estado: "enviado" | "fallido" | "omitido" | "vista_previa";
   para: string | null;
+  paraAdicionales: string[];
   cc: string[];
 };
 
@@ -37,15 +39,12 @@ export async function enviarRecordatorio(
   if (!estaVencida(doc, p.hoy, p.plazoDefectoDias)) {
     throw reglaDeNegocio("El documento no está vencido o ya no tiene saldo: no hay nada que recordar.");
   }
-  const contactos = await ctx.db.contacto.findMany({
-    where: {
-      cuentaId: doc.cuentaId, estado: "activo", archivadoEn: null, anonimizadoEn: null,
-      email: { not: null }, roles: { has: "facturacion" },
-    },
-    orderBy: [{ esPrincipal: "desc" }, { createdAt: "asc" }],
-  });
-  const correos = [...new Set(contactos.map((c) => (c.email ?? "").trim().toLowerCase()).filter(Boolean))];
-  const [para, ...cc] = correos;
+  // Mismos destinatarios que la factura (ADR-100): todos los contactos como PARA y la casilla DTE en copia.
+  const cuenta = await cuentaDe(ctx, doc.cuentaId);
+  const destinos = await destinosDeDocumento(ctx, doc, cuenta.emailDte);
+  const para = destinos?.para ?? null;
+  const paraAdicionales = destinos?.paraAdicionales ?? [];
+  const cc = destinos ? [...destinos.cc, ...destinos.bcc] : [];
   const registrar = (resultado: "enviado" | "fallido" | "omitido", detalle: string | null) =>
     escribirConEvento(
       ctx,
@@ -59,18 +58,17 @@ export async function enviarRecordatorio(
         }),
     );
   if (!para) {
-    if (opts.dryRun) return { documentoId: doc.id, estado: "omitido", para: null, cc: [] };
+    if (opts.dryRun) return { documentoId: doc.id, estado: "omitido", para: null, paraAdicionales: [], cc: [] };
     if (opts.origen === "manual") {
       throw reglaDeNegocio("El cliente no tiene contactos con rol facturación y correo. Agrégalos en la ficha del cliente.");
     }
     await registrar("omitido", "Sin contactos de facturación con correo.");
-    return { documentoId: doc.id, estado: "omitido", para: null, cc: [] };
+    return { documentoId: doc.id, estado: "omitido", para: null, paraAdicionales: [], cc: [] };
   }
-  if (opts.dryRun) return { documentoId: doc.id, estado: "vista_previa", para, cc };
+  if (opts.dryRun) return { documentoId: doc.id, estado: "vista_previa", para, paraAdicionales, cc };
   const emitido = await ctx.db.documentoEmitido.findFirst({ where: { id: doc.id } });
   if (!emitido) throw noEncontrado("El documento");
-  const [cuenta, tenant, pdf] = await Promise.all([
-    cuentaDe(ctx, doc.cuentaId),
+  const [tenant, pdf] = await Promise.all([
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
     pdfDeDocumento(ctx, emitido),
   ]);
@@ -90,8 +88,8 @@ export async function enviarRecordatorio(
       },
       empresa: { nombre: tenant?.nombre ?? "" },
     },
-    { cc, adjuntos: [{ nombre: `factura-${doc.folio}.pdf`, contenidoBase64: Buffer.from(pdf).toString("base64"), mime: "application/pdf" }] },
+    { paraAdicionales, cc, adjuntos: [{ nombre: `factura-${doc.folio}.pdf`, contenidoBase64: Buffer.from(pdf).toString("base64"), mime: "application/pdf" }] },
   );
   await registrar(salio ? "enviado" : "fallido", salio ? null : "El correo no salió. Revisa Configuración → Comunicaciones.");
-  return { documentoId: doc.id, estado: salio ? "enviado" : "fallido", para, cc };
+  return { documentoId: doc.id, estado: salio ? "enviado" : "fallido", para, paraAdicionales, cc };
 }

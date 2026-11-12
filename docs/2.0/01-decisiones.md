@@ -1920,3 +1920,4 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - La migración `20261130100000_finanzas_destinatarios_varios_para` quita el índice que permitía un solo PARA por documento. El tope de 10 lo valida el dominio (`MAX_PARA`).
 - El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
 - La regla por defecto del importador (#542) queda confirmada.
+- El recordatorio de cobro de una factura vencida usa los mismos destinatarios que la factura (`destinosDeDocumento`): así el cliente recibe la cobranza en las mismas casillas que la factura, con la casilla DTE en copia.

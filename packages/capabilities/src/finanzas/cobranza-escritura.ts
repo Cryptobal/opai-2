@@ -9,13 +9,14 @@ import { PERMISO_VENTAS, documentoEmitidoIdSchema } from "./ventas-comun";
 export const cobranzaRecordar = defineCapability({
   id: "finanzas.cobranza.recordar",
   descripcion:
-    "Envía por correo el recordatorio de cobro de una factura vencida, con el PDF, a los contactos del cliente con rol facturación (el primero como destinatario, los demás en copia), y lo deja en el historial de gestiones del deudor.",
+    "Envía por correo el recordatorio de cobro de una factura vencida, con el PDF, a los mismos destinatarios de la factura: la lista guardada en el documento o, si no hay, los contactos de facturación del cliente, todos como destinatarios principales (hasta 10), con la casilla DTE en copia, y lo deja en el historial de gestiones del deudor.",
   permiso: PERMISO_VENTAS,
   input: z.object({ documentoId: documentoEmitidoIdSchema }),
   output: z.object({
     documentoId: z.string(),
     estado: z.enum(["enviado", "fallido", "omitido", "vista_previa"]),
     para: z.string().nullable(),
+    paraAdicionales: z.array(z.string()),
     cc: z.array(z.string()),
   }),
   efecto: "irreversible",

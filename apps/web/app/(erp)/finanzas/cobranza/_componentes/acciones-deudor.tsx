@@ -25,7 +25,7 @@ export function AccionesDeudor(p: {
 
   async function enviar(f: FacturaVencida) {
     limpiarError();
-    const r = await ejecutar<{ estado: string; para: string | null }>(
+    const r = await ejecutar<{ estado: string; para: string | null; paraAdicionales: string[] }>(
       "finanzas.cobranza.recordar",
       { documentoId: f.documentoId },
       false,
@@ -35,7 +35,7 @@ export function AccionesDeudor(p: {
     setRecordar(null);
     // Si no hubo respuesta (red/timeout) se conserva la clave: el reintento no duplica el correo.
     if (r) intento.current = crypto.randomUUID();
-    if (r?.estado === "enviado") avisar.exito(`Recordatorio enviado a ${r.para}`);
+    if (r?.estado === "enviado") avisar.exito(`Recordatorio enviado a ${[r.para, ...r.paraAdicionales].join(", ")}`);
     else if (r) avisar.error("El correo no salió. Revisa el historial de gestiones.");
   }
 
@@ -89,7 +89,7 @@ export function AccionesDeudor(p: {
         <Dialog abierto titulo={`Recordatorio · folio ${recordar.folio ?? ""}`} onCerrar={() => setRecordar(null)}>
           {para ? (
             <p className="text-sm">
-              Se enviará por correo a <strong>{para}</strong> (con copia a los demás contactos de facturación) la factura
+              Se enviará por correo a <strong>{para}</strong> y a los demás destinatarios de la factura (la casilla DTE va en copia) la factura
               folio {recordar.folio} por {pesos(recordar.saldo)}, vencida el {fecha(recordar.vencimiento)}, con el PDF adjunto.
             </p>
           ) : (
