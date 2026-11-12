@@ -3,6 +3,7 @@ import type { TenantTx } from "@opai/db";
 import { conflicto } from "../errores";
 import type { Contexto } from "../types";
 import { estadoDeTipo, segundosEntre } from "./dominio";
+import { idAutor } from "../autor";
 
 type NegocioFila = { id: string; etapaId: string; estado: string; createdAt: Date };
 type EtapaFila = { id: string; tipo: string };
@@ -43,7 +44,7 @@ export async function aplicarEtapa(
       deEtapaId: negocio.etapaId,
       aEtapaId: destino.id,
       actorTipo: ctx.actor.tipo,
-      actorId: ctx.actor.id ?? null,
+      actorId: idAutor(ctx.actor),
       motivo: opts.motivo ?? null,
       segundosEnAnterior: segundosEntre(desde, ahora),
     },

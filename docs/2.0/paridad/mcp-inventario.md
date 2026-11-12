@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 722 pares pantalla→capacidad · 644 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 729 pares pantalla→capacidad · 652 con herramienta · 77 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -36,6 +36,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
+| cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
+| cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
@@ -78,6 +81,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/_components` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/_components` | `core.config.set` | `core_config_set` | existe |
+| compartido | `app/_components` | `core.correos.asociar` | `core_correos_asociar` | existe |
 | compartido | `app/_components` | `core.correos.crear_direccion` | `core_correos_crear_direccion` | existe |
 | compartido | `app/_components` | `core.correos.direccion` | `core_correos_direccion` | existe |
 | compartido | `app/_components` | `core.correos.historial` | `core_correos_historial` | existe |
@@ -85,6 +89,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_revocar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimientos_listar` | `core_cumplimiento_consentimientos_listar` | existe |
 | compartido | `app/_components` | `core.cumplimiento.solicitud_crear` | — | excepción |
+| compartido | `app/_components` | `core.documento_plantillas.generar_entidad` | `core_documento_plantillas_generar_entidad` | existe |
+| compartido | `app/_components` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
+| compartido | `app/_components` | `core.documento_plantillas.rellenar_entidad` | `core_documento_plantillas_rellenar_entidad` | existe |
 | compartido | `app/_components` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | compartido | `app/_components` | `core.documentos.archive` | `core_documentos_archive` | existe |
 | compartido | `app/_components` | `core.documentos.confirmar_subida` | `core_documentos_confirmar_subida` | existe |
@@ -139,6 +146,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.rechazar` | `rendiciones_rendiciones_rechazar` | existe |
 | compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
+| compartido | `app/(cliente)/cliente/cotizaciones/_componentes` | `cpq.portal_cotizaciones.descargar` | `cpq_portal_cotizaciones_descargar` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
@@ -164,11 +172,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.config.get` | `comercial_config_get` | existe |
-| compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
-| compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
@@ -584,6 +590,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones` | `core.notificacion_reglas.list` | `core_notificacion_reglas_list` | existe |
+| erp | `/configuracion/correos-clientes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.asociar` | `core_correos_asociar` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.direccion` | `core_correos_direccion` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.sin_asignar` | `core_correos_sin_asignar` | existe |
@@ -758,6 +765,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
 | `app/_acciones/mfa.ts#accionIniciarMfa` | Identidad: enrola el segundo factor propio. |
 | `app/_acciones/mfa.ts#accionVerificar` | Identidad: segundo factor de la sesión humana. |
+| `app/_acciones/oauth.ts#accionAutorizarOAuth` | Identidad: la persona autoriza a una app a entrar por OAuth con su cuenta (CAR-247). |
+| `app/_acciones/oauth.ts#accionElegirEmpresaOAuth` | Identidad: la persona elige la empresa con la que entra la app por OAuth (CAR-247). |
 | `app/_acciones/passkeys.ts#accionEntrarConPasskey` | Identidad: login con passkey, solo personas. |
 | `app/_acciones/passkeys.ts#accionGuardarPasskey` | Identidad: guarda la passkey propia verificada por el dispositivo (CAR-286). |
 | `app/_acciones/passkeys.ts#accionOpcionesEntrarPasskey` | Identidad: desafío para entrar con passkey (sesión humana). |
@@ -765,6 +774,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
+| `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
+| `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
+| `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
+| `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
@@ -918,7 +931,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.rostro.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
-| `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
+| `comercial.importar_1_0` | sin pantalla todavía · CAR-325 · desde 2026-11-12 | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
 | `core.anexos.rechazar` | `app/_components` | no | reservada a personas |
 | `core.apikeys.create` | `/configuracion/agentes` | no | reservada a personas |
@@ -1058,9 +1071,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
-- `cpq.portal_cotizaciones.descargar`
-- `cpq.portal_cotizaciones.get`
-- `cpq.portal_cotizaciones.list`
 - `cpq.propuestas_html.get`
 - `cpq.propuestas_html.importar`
 - `cpq.propuestas_html.list`
@@ -1094,7 +1104,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
-- `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.reasignar`

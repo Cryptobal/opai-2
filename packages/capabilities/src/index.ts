@@ -52,6 +52,7 @@ export {
   SIN_TENANT,
   medidorEnDb,
 } from "./contexto";
+export { idAutor } from "./autor";
 export { defineCapability } from "./define";
 export { conflicto, ErrorCapacidad, noEncontrado, prohibido, reglaDeNegocio } from "./errores";
 export { aplicarEtapa } from "./comercial/transiciones-util";
@@ -121,7 +122,7 @@ export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./c
 export { camposExternos, externo } from "./externo";
 export { biometriaDe, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
-export { comoAgenteInterno } from "./agentes/interno";
+export { comoAgenteInterno, comoAppOAuth } from "./agentes/interno";
 export {
   iaElegidaDelAgente,
   modelosDelAgente,

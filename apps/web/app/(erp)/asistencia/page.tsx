@@ -1,4 +1,4 @@
-import { Badge, KpiTile, ListScreen } from "@opai/ds";
+import { Badge, cn, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
 
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -79,14 +79,14 @@ export default function AsistenciaHoy({ searchParams }: Props) {
         const h = (v: string | null) => (v ? hora.format(new Date(v)) : "—");
         return (
           <div className="flex flex-col gap-4">
-            {d ? <Kpis r={d.resumen} className="hidden grid-cols-5 gap-3 md:grid" /> : null}
+            {d ? <Kpis r={d.resumen} className={cn("hidden grid-cols-5 gap-3 md:grid", GRILLA_KPI_HILO)} /> : null}
             <ListScreen<Item>
               state={estadoPantalla(r)}
               titulo="Asistencia de hoy"
               subtitulo={d ? `${fechaLarga(d.fecha, d.zona)} · ${d.resumen.turnos} turnos` : undefined}
               filtros={
                 <div className="flex w-full flex-col gap-3">
-                  {d ? <Kpis r={d.resumen} className="grid grid-cols-2 gap-3 md:hidden" /> : null}
+                  {d ? <Kpis r={d.resumen} className={cn("grid grid-cols-2 gap-3 md:hidden", GRILLA_KPI_HILO)} /> : null}
                   <ChipsFiltro filtros={[{ param: "estado", etiqueta: "Estado", opciones: OPCIONES }]} />
                 </div>
               }
