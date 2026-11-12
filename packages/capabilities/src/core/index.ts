@@ -68,6 +68,7 @@ import { usersList, usersRemove, usersUpdate } from "./users";
 import { usersRestablecerMfa } from "./users-mfa";
 import { seguridadMetodos, seguridadPasskeysRenombrar } from "./seguridad/metodos";
 import { seguridadMetodosQuitar } from "./seguridad/quitar";
+import { appsConectadasDesconectar, appsConectadasList } from "./seguridad/apps";
 import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
@@ -86,6 +87,8 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   seguridadMetodos,
   seguridadPasskeysRenombrar,
   seguridadMetodosQuitar,
+  appsConectadasList,
+  appsConectadasDesconectar,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,

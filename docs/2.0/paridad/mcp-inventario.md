@@ -818,6 +818,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.apikeys.revoke` | Solo personas: gobierno de keys y credenciales (ADR-032). |
 | `core.apikeys.set_autonomia` | Solo personas: un agente no se da autonomía a sí mismo (ADR-032). |
 | `core.apikeys.update` | Solo personas: cambiar alcances de una key es gobernar agentes (ADR-032). |
+| `core.apps_conectadas.desconectar` | Solo personas: desconectar una app conectada por OAuth gobierna agentes; se hace en Mi cuenta (CAR-247). Listar sí va por MCP. |
 | `core.aprobaciones.aprobar` | Solo personas: lo irreversible lo aprueba un humano (ADR-032). |
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
 | `core.biometria.enrolar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4). |
@@ -912,6 +913,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apikeys.revoke` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.apikeys.set_autonomia` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
+| `core.apps_conectadas.desconectar` | — | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.biometria.enrolar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
@@ -995,6 +997,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `comercial.solicitudes.enriquecer`
 - `core.actividades.delete`
 - `core.anexos.generar`
+- `core.apps_conectadas.list`
 - `core.aprobaciones.get`
 - `core.audit.list`
 - `core.bitacora.verificar`

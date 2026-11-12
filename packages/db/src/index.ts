@@ -30,6 +30,7 @@ export {
   quitarPasskey,
   renombrarPasskey,
 } from "./identidad-metodos";
+export { type AppConectada, appsConectadas, desconectarApp } from "./identidad-oauth";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
 export type {
   DatosCondicionCobro,
