@@ -2,15 +2,15 @@ import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { twoFactor } from "better-auth/plugins";
 
 import { clienteAuth } from "@opai/db";
 import { COMUNICABLES_NUCLEO, renderizarCorreo } from "@opai/domain";
 import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
-import { marcaMfaSesion } from "./mfa-sesion";
+import { marcaMfaSesion, pluginTwoFactor } from "./mfa-sesion";
 import { proveedorOAuth } from "./oauth";
+import { marcaPasskey, pluginPasskey, RUTAS_PASSKEY_DESACTIVADAS } from "./passkey-plugin";
 import { sesionPin } from "./sesion-pin";
 import { rastroLoginPausado, rastroRestablecimiento, rastroSeguridad } from "./rastro-seguridad";
 import {
@@ -26,8 +26,6 @@ import {
   camposSesion,
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
-  MFA_BLOQUEO_SEGUNDOS,
-  MFA_LIMITE_INTENTOS,
   origenesConfiables,
   proveedoresSociales,
   VIGENCIA_RECUPERACION_SEGUNDOS,
@@ -45,6 +43,7 @@ export const auth = betterAuth({
   basePath: "/api/auth",
   database: prismaAdapter(clienteAuth(), { provider: "postgresql" }),
   trustedOrigins: origenesConfiables(env),
+  disabledPaths: RUTAS_PASSKEY_DESACTIVADAS,
   advanced: {
     cookiePrefix: "opai",
     // Prisma genera uuid(7) (`@default(uuid(7))`); Better Auth no envía id.
@@ -105,7 +104,12 @@ export const auth = betterAuth({
     window: 60,
     max: 100,
     // Primera barrera barata en memoria (5 cada 15 min); el tope real vive en la base (B1).
-    customRules: { "/sign-in/email": { window: 15 * 60, max: 5 } },
+    customRules: {
+      "/sign-in/email": { window: 15 * 60, max: 5 },
+      // Desafío de passkey (CAR-286): el login lo pide al cargar; tope por IP contra el llenado de
+      // `core.verifications` por el endpoint directo (la Server Action ya limita en la base).
+      "/passkey/generate-authenticate-options": { window: 15 * 60, max: 200 },
+    },
   },
   databaseHooks: {
     session: {
@@ -170,16 +174,10 @@ export const auth = betterAuth({
   // el mensaje se normaliza a `MENSAJE_PAUSA` en las Server Actions (ver `mfa.ts`). `nextCookies()`
   // queda último (requisito de Better Auth) y fija las cookies `opai.*`, incluida la del desafío 2FA.
   plugins: [
-    twoFactor({
-      issuer: "OPAI",
-      totpOptions: { digits: 6, period: 30 },
-      accountLockout: {
-        enabled: true,
-        maxFailedAttempts: MFA_LIMITE_INTENTOS,
-        durationSeconds: MFA_BLOQUEO_SEGUNDOS,
-      },
-    }),
+    pluginTwoFactor(),
     marcaMfaSesion,
+    pluginPasskey(env),
+    marcaPasskey,
     sesionPin,
     proveedorOAuth(), // OAuth del MCP (CAR-247, ADR-098): apps como Claude entran como la persona.
     // Después de twoFactor y de marcaMfaSesion: ve la respuesta final (p. ej. el desafío del MFA).

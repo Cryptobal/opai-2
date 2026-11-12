@@ -74,21 +74,19 @@ export function consultaParaAutorizar(consultaFirmada: string): string {
 }
 
 /**
- * Conectar una app exige lo mismo que entrar a un portal (NÚCLEO-F): con segundo factor activo, que
- * la sesión lo haya verificado; y owner, admin o plataforma deben tenerlo activo. La exigencia extra
- * que una empresa agregue por ajuste se revisa en las pantallas de `apps/web`.
+ * Conectar una app exige lo mismo que entrar a un portal (NÚCLEO-F, ajustado por CAR-286): con
+ * segundo factor activo, que la sesión lo haya verificado; y una cuenta de plataforma debe tenerlo.
  */
 export function faltaSegundoFactor(s: {
   activo: boolean;
   verificado: boolean;
   platformRole: unknown;
-  rol: unknown;
 }): boolean {
   return (
     pendienteMfa({
       activa: s.activo,
       verificada: s.verificado,
-      obligatoria: mfaEsObligatoria(s.platformRole, s.rol),
+      obligatoria: mfaEsObligatoria(s.platformRole),
     }) !== null
   );
 }

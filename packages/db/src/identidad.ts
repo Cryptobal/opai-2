@@ -35,6 +35,7 @@ const MODELOS_AUTH: ReadonlySet<string> = new Set([
   "OauthAccessToken",
   "OauthConsent",
   "OauthClientAssertion",
+  "Passkey",
 ]);
 
 function extender(base: ClienteApp) {
@@ -92,7 +93,7 @@ export function clienteBloqueoLogin() {
  * Corre `fn` con `opai_auth` dentro de la transacción del llamador y vuelve al rol que tenía la
  * conexión (no a `NONE`, que sería el `session_user`), también si `fn` lanza sin error SQL.
  */
-async function conRolAuth<T>(tx: TenantTx, fn: () => Promise<T>): Promise<T> {
+export async function conRolAuth<T>(tx: TenantTx, fn: () => Promise<T>): Promise<T> {
   notificarConsulta();
   const [previo] = await tx.$queryRaw<{ r: string }[]>`SELECT current_user::text AS r`;
   if (!previo) throw new Error("No se pudo leer el rol actual.");
@@ -136,11 +137,15 @@ export async function restablecerSegundoFactor(tx: TenantTx, userId: string) {
   return conRolAuth(tx, async () => {
     const enrolamientos = await tx.$executeRaw`
       DELETE FROM core.two_factor WHERE user_id = ${userId}::uuid`;
+    // Las passkeys pueden vivir en el teléfono perdido (CAR-286): también se borran; el trigger
+    // de core.passkeys deja `passkey_enabled` en false.
+    const passkeys =
+      await tx.$executeRaw`DELETE FROM core.passkeys WHERE user_id = ${userId}::uuid`;
     await tx.$executeRaw`
       UPDATE core.users SET two_factor_enabled = false, updated_at = now() WHERE id = ${userId}::uuid`;
     const sesiones =
       await tx.$executeRaw`DELETE FROM core.sessions WHERE user_id = ${userId}::uuid`;
-    return { enrolamientos, sesiones };
+    return { enrolamientos, passkeys, sesiones };
   });
 }
 
@@ -154,7 +159,8 @@ export async function estadoSesionEnTransaccion(tx: TenantTx, sesionId: string, 
         platformRole: string | null;
       }[]
     >`
-      SELECT s.mfa_verified AS "mfaVerificada", u.two_factor_enabled AS "mfaActiva",
+      SELECT s.mfa_verified AS "mfaVerificada",
+             (u.two_factor_enabled OR u.passkey_enabled) AS "mfaActiva",
              u.platform_role AS "platformRole"
       FROM core.sessions s JOIN core.users u ON u.id = s.user_id
       WHERE s.id = ${sesionId}::uuid AND s.user_id = ${userId}::uuid

@@ -1,6 +1,13 @@
 // Tipos de los servicios del núcleo que reciben las capacidades por el Contexto (Brief 02). Los
 // implementa el borde (base real) o `@opai/capabilities/testing` (memoria).
-import type { HechoBitacora, ResultadoBorrado, TenantTx, VerificacionBitacora } from "@opai/db";
+import type {
+  HechoBitacora,
+  MetodosUsuario,
+  OrigenCambio,
+  ResultadoBorrado,
+  TenantTx,
+  VerificacionBitacora,
+} from "@opai/db";
 
 /** Una fila del medidor de consumos (ADR-031). `capacidad.ejecucion` la escribe executeCapability. */
 export type ConsumoNuevo = {
@@ -102,7 +109,20 @@ export type Identidad = {
   restablecerSegundoFactor(
     tx: TenantTx,
     userId: string,
-  ): Promise<{ enrolamientos: number; sesiones: number }>;
+  ): Promise<{ enrolamientos: number; passkeys?: number; sesiones: number }>;
+  /** Métodos de autenticación propios (CAR-286): solo metadatos, nunca claves ni secretos. */
+  metodosDe(userId: string): Promise<MetodosUsuario>;
+  renombrarPasskey(
+    tx: TenantTx,
+    userId: string,
+    id: string,
+    nombre: string,
+    o: OrigenCambio,
+  ): Promise<boolean>;
+  quitarPasskey(tx: TenantTx, userId: string, id: string, o: OrigenCambio): Promise<boolean>;
+  desactivarTotp(tx: TenantTx, userId: string, o: OrigenCambio): Promise<boolean>;
+  /** Consume la confirmación de identidad reciente (≤ 5 min) que dejó la pantalla. */
+  consumirReautenticacion(tx: TenantTx, userId: string): Promise<boolean>;
   /** Borra un usuario sin rol de plataforma ni referencias, en la transacción del llamador. */
   borrarUsuario(tx: TenantTx, userId: string): Promise<ResultadoBorrado>;
 };

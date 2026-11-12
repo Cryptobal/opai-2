@@ -63,9 +63,8 @@ async function empresaAutorizada(user: UsuarioOAuth, session: { id: string }): P
   const membresias = await membresiasOAuth(user.id);
   const estado = await estadoDeSesion(session);
   const tenantId = empresaDelConsentimiento(membresias, estado.empresa);
-  const rol = membresias.find((m) => m.tenantId === tenantId)?.rol;
   const segundo = { activo: user.twoFactorEnabled === true, verificado: estado.mfaVerificada };
-  if (faltaSegundoFactor({ ...segundo, platformRole: user.platformRole, rol }))
+  if (faltaSegundoFactor({ ...segundo, platformRole: user.platformRole }))
     throw new Error("Falta el segundo factor.");
   return tenantId;
 }

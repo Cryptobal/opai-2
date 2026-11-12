@@ -132,14 +132,8 @@ export const AJUSTES_NUCLEO = defineAjustes(
         ambito: "plataforma",
         control: "json",
       }),
-    seguridad_mfa_obligatorio_admins: z.boolean().default(false).meta({
-      etiqueta: "Exigir segundo factor también a los demás roles",
-      ayuda:
-        "Solo agrega exigencia. Plataforma, owner y admin siempre requieren MFA y este ajuste no puede desactivarlo.",
-      grupo: "Seguridad",
-      ambito: "tenant",
-      control: "switch",
-    }),
+    // `seguridad_mfa_obligatorio_admins` se retiró (CAR-286, 11-nov-2026): el segundo factor es de
+    // cada usuario. Los valores guardados quedan inertes (el catálogo ignora claves no declaradas).
     remuneraciones_imm: z.number().int().min(1).default(553_553).meta({
       etiqueta: "Ingreso mínimo mensual (CLP)",
       ayuda: "Ley 21.830: $553.553 desde el 1-may-2026. Base del tope de gratificación legal.",

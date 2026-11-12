@@ -91,6 +91,9 @@ const TIPOS: Record<string, EventoSeguridad["tipo"]> = {
   "/two-factor/generate-backup-codes": "seguridad.mfa.codigos_regenerados",
   "/two-factor/verify-totp": "seguridad.mfa.verificacion",
   "/two-factor/verify-backup-code": "seguridad.mfa.verificacion",
+  // Passkeys (CAR-286): entrar y dar de alta. Bajas y nombres van por `core.seguridad.*`.
+  "/passkey/verify-authentication": "seguridad.login",
+  "/passkey/verify-registration": "seguridad.passkey.alta",
 };
 
 const METODOS: Record<string, string> = {
@@ -98,6 +101,8 @@ const METODOS: Record<string, string> = {
   "/callback/:id": "social",
   "/two-factor/verify-totp": "totp",
   "/two-factor/verify-backup-code": "respaldo",
+  "/passkey/verify-authentication": "passkey",
+  "/passkey/verify-registration": "passkey",
 };
 
 /** Último plugin antes de `nextCookies`: corre después de twoFactor y ve su respuesta final. */

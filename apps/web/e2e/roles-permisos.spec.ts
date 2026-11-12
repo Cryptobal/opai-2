@@ -42,7 +42,7 @@ async function comoUsuario(browser: Browser, ruta: string) {
   await page.goto("/login");
   await page.getByLabel("Correo").fill(USUARIO);
   await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await page.waitForURL((u) => u.pathname === "/");
   await page.goto(ruta);
   return { page, cerrar: () => contexto.close() };

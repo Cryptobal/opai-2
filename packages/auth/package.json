@@ -19,11 +19,13 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@better-auth/prisma-adapter": "^1.7.21",
     "@better-auth/oauth-provider": "^1.7.21",
+    "@better-auth/passkey": "1.7.21",
+    "@better-auth/prisma-adapter": "^1.7.21",
     "@opai/db": "workspace:*",
     "@opai/domain": "workspace:*",
     "@opai/integrations": "workspace:*",
+    "@simplewebauthn/server": "^13.3.3",
     "better-auth": "^1.7.21",
     "zod": "^4.6.7"
   },

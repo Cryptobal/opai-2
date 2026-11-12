@@ -92,29 +92,16 @@ describe("consultaParaAutorizar", () => {
 describe("faltaSegundoFactor", () => {
   it("bloquea si la cuenta tiene segundo factor y la sesión no lo verificó", async () => {
     const { faltaSegundoFactor } = await import("../src/oauth-reglas");
-    expect(
-      faltaSegundoFactor({ activo: true, verificado: false, platformRole: null, rol: "gerente" }),
-    ).toBe(true);
-    expect(
-      faltaSegundoFactor({ activo: true, verificado: true, platformRole: null, rol: "gerente" }),
-    ).toBe(false);
+    expect(faltaSegundoFactor({ activo: true, verificado: false, platformRole: null })).toBe(true);
+    expect(faltaSegundoFactor({ activo: true, verificado: true, platformRole: null })).toBe(false);
   });
-  it("bloquea a owner, admin o plataforma sin segundo factor activo", async () => {
+  it("bloquea a una cuenta de plataforma sin segundo factor; el resto decide (CAR-286)", async () => {
     const { faltaSegundoFactor } = await import("../src/oauth-reglas");
-    for (const rol of ["owner", "admin"])
-      expect(
-        faltaSegundoFactor({ activo: false, verificado: false, platformRole: null, rol }),
-      ).toBe(true);
-    expect(
-      faltaSegundoFactor({
-        activo: false,
-        verificado: false,
-        platformRole: "owner",
-        rol: "gerente",
-      }),
-    ).toBe(true);
-    expect(
-      faltaSegundoFactor({ activo: false, verificado: false, platformRole: null, rol: "gerente" }),
-    ).toBe(false);
+    expect(faltaSegundoFactor({ activo: false, verificado: false, platformRole: "owner" })).toBe(
+      true,
+    );
+    expect(faltaSegundoFactor({ activo: false, verificado: false, platformRole: null })).toBe(
+      false,
+    );
   });
 });

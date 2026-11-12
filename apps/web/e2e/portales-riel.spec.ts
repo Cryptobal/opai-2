@@ -89,7 +89,7 @@ test.describe("acceso a portales", () => {
     await page.goto("/login");
     await page.getByLabel("Correo").fill(sinErpEmail);
     await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await page.waitForURL((url) => !url.pathname.startsWith("/login"));
     if (new URL(page.url()).pathname === "/mfa") {
       await page.getByLabel(/Código/).fill(await codigoTotp());
@@ -128,7 +128,7 @@ test.describe("acceso a portales", () => {
     await page.goto("/login");
     await page.getByLabel("Correo").fill(sinEmpresaEmail);
     await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
     // Sin empresas usables, «Elegir empresa» rebota a «/», donde se muestra el aviso.
     await page.waitForURL((url) => url.pathname === "/");
     await expect(page.getByText(/Aún no perteneces a ninguna empresa activa/)).toBeVisible();

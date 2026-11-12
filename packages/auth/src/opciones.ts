@@ -45,7 +45,20 @@ export const camposSesion = {
 /** Campos propios en `users`. `platformRole` nunca se acepta desde el cliente. */
 export const camposUsuario = {
   platformRole: { type: "string", required: false, input: false },
+  /** Tiene al menos una passkey (CAR-286); la mantiene un trigger de `core.passkeys`. */
+  passkeyEnabled: { type: "boolean", required: false, input: false, defaultValue: false },
 } as const;
+
+/**
+ * RP ID y origen de WebAuthn desde `BETTER_AUTH_URL` (CAR-286). Sin la URL, el plugin usa
+ * `localhost` y la cabecera Origin (solo desarrollo).
+ */
+export function relyingParty(env: Record<string, string | undefined>) {
+  const url = env["BETTER_AUTH_URL"];
+  if (!url) return {};
+  const u = new URL(url);
+  return { rpID: u.hostname, origin: u.origin };
+}
 
 /** Orígenes de confianza: la URL pública y, fuera de producción, localhost. */
 export function origenesConfiables(env: Record<string, string | undefined>): string[] {

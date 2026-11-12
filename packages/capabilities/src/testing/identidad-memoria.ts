@@ -2,6 +2,7 @@
 // (`user`, `session`, `twoFactor`, `membership`, `apiKey`).
 import type { Identidad } from "../types";
 import type { Fila } from "./db-memoria-util";
+import { metodosEnMemoria } from "./identidad-metodos-memoria";
 
 export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
   const quitar = (n: string, userId: string) => {
@@ -27,9 +28,13 @@ export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
     },
     async restablecerSegundoFactor(_tx, userId) {
       const enrolamientos = quitar("twoFactor", userId);
-      for (const u of tabla("user")) if (u["id"] === userId) u["twoFactorEnabled"] = false;
-      return { enrolamientos, sesiones: quitar("session", userId) };
+      const passkeys = quitar("passkey", userId);
+      for (const u of tabla("user"))
+        if (u["id"] === userId)
+          Object.assign(u, { twoFactorEnabled: false, passkeyEnabled: false });
+      return { enrolamientos, passkeys, sesiones: quitar("session", userId) };
     },
+    ...metodosEnMemoria(tabla),
     async borrarUsuario(_tx, userId) {
       const usuarios = tabla("user");
       const u = usuarios.find((f) => f["id"] === userId);
