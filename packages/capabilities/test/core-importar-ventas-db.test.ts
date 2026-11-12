@@ -130,4 +130,15 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     expect(r.data.filas.find((f) => f.fila === 2)?.mensajes.join(" ")).toMatch(/No se anuló la nota de crédito/);
     expect(r.data.filas.find((f) => f.fila === 3)?.mensajes.join(" ")).not.toMatch(/anulada/);
   });
+
+  it("una nota de débito rechazada por el SII no anula la nota de crédito", async () => {
+    const csv = [
+      "Tipo Doc,Folio,Rut cliente,Fecha Docto,Monto Neto,Monto IVA,Monto total,Folio referencia,Tipo referencia,Codigo referencia,Estado",
+      "61,9203,77.777.777-7,11-10-2026,10000,1900,11900,9200,33,corrige montos,",
+      "56,9303,77.777.777-7,12-10-2026,10000,1900,11900,9203,61,anula,rechazada",
+    ].join("\n");
+    const r = await x.run<Salida>(x.t1, "core.importar.ejecutar", { importador: "documentos_venta", archivo: x.csv(csv) }, { dryRun: true, modulos });
+    if (!r.ok) throw new Error(r.error.message);
+    expect(r.data.filas.find((f) => f.fila === 2)?.mensajes.join(" ")).not.toMatch(/anulada/);
+  });
 });

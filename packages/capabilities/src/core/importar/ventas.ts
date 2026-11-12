@@ -22,6 +22,8 @@ function anularNcPorNd(
   for (const nd of planes) {
     const d = nd.datos;
     if (nd.accion !== "crear" || d?.tipoDte !== 56 || d.codigoReferencia !== 1 || d.refTipoDte !== 61 || !d.refFolio) continue;
+    // Una ND rechazada por el SII no anula nada (igual que al emitir en OPAI).
+    if (d.estadoDte !== "aceptado" && d.estadoDte !== "enviado") continue;
     const k = clave(61, d.refFolio);
     const nc = ncs.get(k);
     if (!nc) {
