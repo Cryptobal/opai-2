@@ -3,7 +3,14 @@ import { randomUUID } from "node:crypto";
 import { executeCapability, prohibido, type Contexto, type Resultado } from "@opai/capabilities";
 import type { Mensaje, RespuestaConversacion, SolicitudConversacion } from "@opai/integrations";
 
-import { esquemasDelAgente, herramientasDelAgente } from "./herramientas";
+import { herramientasDelAgente } from "./herramientas";
+import {
+  CARGAR,
+  GUIA,
+  esquemasADemanda,
+  indiceDelAgente,
+  resolverLlamada,
+} from "./herramientas-demanda";
 
 export type Paso = {
   capacidad: string;
@@ -38,10 +45,11 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     throw prohibido("Sin acceso al agente interno.");
   }
   const mensajes: Mensaje[] = [
-    { rol: "sistema", texto: SISTEMA },
+    { rol: "sistema", texto: `${SISTEMA}\n\n${GUIA}\n\n${indiceDelAgente(ctx)}` },
     { rol: "usuario", texto },
   ];
   const plan: Plan = { id: randomUUID(), pasos: [], texto: "", tokens: 0 };
+  const cargadas = new Set<string>();
   let llamadas = 0;
   for (let turno = 0; turno < MAX_PASOS; turno++) {
     if (plan.tokens >= MAX_TOKENS) break;
@@ -65,7 +73,7 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     try {
       r = await ia.conversar({
         mensajes,
-        herramientas: esquemasDelAgente(ctx),
+        herramientas: esquemasADemanda(),
         maxTokens: Math.min(2_000, MAX_TOKENS - plan.tokens),
       });
       await finalizar?.({ ok: true, duracionMs: Date.now() - inicio });
@@ -78,31 +86,34 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     plan.tokens += r.uso.tokensEntrada + r.uso.tokensSalida;
     plan.texto = r.texto;
     if (plan.tokens > MAX_TOKENS) throw prohibido("Se alcanzó el límite de tokens del turno.");
-    mensajes.push({ rol: "asistente", texto: r.texto, llamadas: r.llamadas,
-      ...(r.continuidad ? { continuidad: r.continuidad } : {}) });
+    mensajes.push({
+      rol: "asistente",
+      texto: r.texto,
+      llamadas: r.llamadas,
+      ...(r.continuidad ? { continuidad: r.continuidad } : {}),
+    });
     if (!r.llamadas.length) return plan;
     for (const llamada of r.llamadas) {
       await revalidarAccesoDelTurno(ctx);
-      if (++llamadas > MAX_PASOS) throw prohibido("Se alcanzó el límite de pasos del turno.");
-      const h = herramientasDelAgente(ctx).find((h) => h.nombre === llamada.nombre);
-      let resultado: Resultado = {
-        ok: false,
-        error: { code: "FORBIDDEN", message: "Sin permiso." },
-      };
-      if (h) {
-        const escritura = h.capacidad.efecto !== "lectura";
-        resultado = await executeCapability(ctx, h.capacidad.id, llamada.argumentos, {
+      // Cargar esquemas no ejecuta nada: no gasta el límite de pasos del turno.
+      if (llamada.nombre !== CARGAR && ++llamadas > MAX_PASOS)
+        throw prohibido("Se alcanzó el límite de pasos del turno.");
+      const paso = resolverLlamada(ctx, cargadas, llamada.nombre, llamada.argumentos);
+      let resultado: Resultado;
+      if ("h" in paso) {
+        const escritura = paso.h.capacidad.efecto !== "lectura";
+        resultado = await executeCapability(ctx, paso.h.capacidad.id, paso.argumentos, {
           dryRun: escritura,
         });
         if (escritura && resultado.ok) {
           plan.pasos.push({
-            capacidad: h.capacidad.id,
-            argumentos: llamada.argumentos,
+            capacidad: paso.h.capacidad.id,
+            argumentos: paso.argumentos,
             clave: randomUUID(),
             vistaPrevia: resultado,
           });
         }
-      }
+      } else resultado = paso;
       mensajes.push({
         rol: "herramienta",
         id: llamada.id,

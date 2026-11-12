@@ -24,11 +24,11 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   // que el servidor ya pinta el marco correcto y no hay parpadeo. Sin acceso a la empresa o fuera del
   // ERP queda el clásico —donde vive el aviso «Sin permisos»— y la cookie ni se lee.
   const conEmpresa = datos.acceso && datos.tenant !== null;
-  const hilo = (await marcoDeLaPeticion(portal, conEmpresa)) === "hilo";
+  const marco = await marcoDeLaPeticion(portal, conEmpresa);
   return (
     <MarcoPortal
       key={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}
-      hilo={hilo}
+      marco={marco}
       datos={datos}
     >
       <CargaPortal>{children}</CargaPortal>
