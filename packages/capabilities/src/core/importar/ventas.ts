@@ -24,10 +24,17 @@ function anularNcPorNd(
     if (nd.accion !== "crear" || d?.tipoDte !== 56 || d.codigoReferencia !== 1 || d.refTipoDte !== 61 || !d.refFolio) continue;
     const k = clave(61, d.refFolio);
     const nc = ncs.get(k);
-    if (nc?.datos && sinEstado.has(nc.fila)) {
+    if (!nc) {
+      if (enOpai.has(k)) nd.mensajes.push("La nota de crédito que anula ya está en OPAI: su estado no se cambia.");
+      continue;
+    }
+    // Solo si la NC va antes (así la ND queda vinculada a ella) y es del mismo cliente; si no, se avisa y no se anula.
+    if (nc.fila > nd.fila || nc.datos?.cuentaId !== d.cuentaId)
+      nd.mensajes.push("No se anuló la nota de crédito: ponla antes de esta fila y revisa que sea del mismo cliente.");
+    else if (nc.datos && sinEstado.has(nc.fila)) {
       nc.datos.estadoDte = "anulado_nd";
       nc.mensajes.push(`Queda anulada por la nota de débito de la fila ${nd.fila}.`);
-    } else if (!nc && enOpai.has(k)) nd.mensajes.push("La nota de crédito que anula ya está en OPAI: su estado no se cambia.");
+    }
   }
 }
 

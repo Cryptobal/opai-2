@@ -7,6 +7,7 @@ import { capacidad, dibujarDetalle, medirFila, paginar } from "./pdf-detalle";
 import { cabeceraContinuacion, numeroDePagina } from "./pdf-pagina";
 import { fechaCorta, fechaLarga, pesos } from "./pdf-texto";
 import { incrustarLogo } from "./pdf-logo";
+import { ajustarLineas } from "./pdf-medidas";
 import type { PdfLinea, PdfLogo, PdfParte } from "./pdf-tipos";
 
 export type PdfPrevioInput = {
@@ -48,10 +49,13 @@ function cabecera(p: PDFPage, d: PdfPrevioInput, r: Recursos) {
     p.drawImage(r.logo, { x: xe, y: p.getHeight() - 60 - alto, width: ancho, height: alto });
     xe += ancho + 12;
   }
-  texto(p, d.emisor.razon, xe, 66, r.negrita, 11);
+  // Con logo queda menos ancho: la razón social baja a un segundo renglón y el resto se corta antes de la caja del número.
+  const ancho = XFIN - CAJA_W - 12 - xe;
+  const razon = ajustarLineas(d.emisor.razon, r.negrita, 11, ancho, 2);
+  razon.forEach((l, i) => texto(p, l, xe, 66 + i * 13, r.negrita, 11));
   [d.emisor.giro, d.emisor.direccion, [d.emisor.comuna, d.emisor.ciudad].filter(Boolean).join(", ")]
     .filter(Boolean)
-    .forEach((l, i) => texto(p, l as string, xe, 84 + i * 12, r.normal));
+    .forEach((l, i) => texto(p, ajustarLineas(l as string, r.normal, 8, ancho, 1)[0] ?? "", xe, 71 + razon.length * 13 + i * 12, r.normal));
   const x = XFIN - CAJA_W;
   caja(p, x, 64, CAJA_W, 70, GRIS);
   centrado(p, NOMBRE[d.tipo], x + CAJA_W / 2, 76, r.negrita, 12);

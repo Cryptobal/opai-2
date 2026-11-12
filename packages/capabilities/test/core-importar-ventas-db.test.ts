@@ -118,4 +118,16 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     const nd = await x.e.admin.documentoEmitido.findFirstOrThrow({ where: { tenantId: x.t1, tipoDte: 56, folio: 9301 } });
     expect(nd.documentoReferenciaId).toBe(nc.id);
   });
+
+  it("si la nota de crédito va después de la nota de débito no se anula y se avisa", async () => {
+    const csv = [
+      "Tipo Doc,Folio,Rut cliente,Fecha Docto,Monto Neto,Monto IVA,Monto total,Folio referencia,Tipo referencia,Codigo referencia",
+      "56,9302,77.777.777-7,12-10-2026,10000,1900,11900,9202,61,anula",
+      "61,9202,77.777.777-7,11-10-2026,10000,1900,11900,9200,33,corrige montos",
+    ].join("\n");
+    const r = await x.run<Salida>(x.t1, "core.importar.ejecutar", { importador: "documentos_venta", archivo: x.csv(csv) }, { dryRun: true, modulos });
+    if (!r.ok) throw new Error(r.error.message);
+    expect(r.data.filas.find((f) => f.fila === 2)?.mensajes.join(" ")).toMatch(/No se anuló la nota de crédito/);
+    expect(r.data.filas.find((f) => f.fila === 3)?.mensajes.join(" ")).not.toMatch(/anulada/);
+  });
 });
