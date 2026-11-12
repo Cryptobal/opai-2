@@ -173,6 +173,10 @@
   --ds-success-muted: #e6f4ea;
   --ds-warning-muted: #fbf0dc;
   --ds-danger-muted: #fbe9e7;
+  /* Hilo no tiene azul: un aviso informativo es neutro (fondo fill, texto muted; CAR-361). */
+  --ds-info: #5a5a60;
+  --ds-info-fg: #5a5a60;
+  --ds-info-muted: #f0f0ee;
   --ds-shadow-overlay: 0 14px 40px -14px rgba(13, 13, 14, 0.28), 0 2px 6px rgba(13, 13, 14, 0.05);
 }
 
@@ -189,6 +193,9 @@
     --ds-success-muted: #10261a;
     --ds-warning-muted: #2a2009;
     --ds-danger-muted: #2c1313;
+    --ds-info: #a1a1aa;
+    --ds-info-fg: #a1a1aa;
+    --ds-info-muted: #1d1d20;
     --ds-shadow-overlay: 0 14px 40px -14px rgba(0, 0, 0, 0.8), 0 0 0 1px #29292d;
   }
 }
@@ -205,6 +212,9 @@
   --ds-success-muted: #10261a;
   --ds-warning-muted: #2a2009;
   --ds-danger-muted: #2c1313;
+  --ds-info: #a1a1aa;
+  --ds-info-fg: #a1a1aa;
+  --ds-info-muted: #1d1d20;
   --ds-shadow-overlay: 0 14px 40px -14px rgba(0, 0, 0, 0.8), 0 0 0 1px #29292d;
 }
 
