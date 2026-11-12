@@ -41,6 +41,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.importar.catalogo",
   "core.importar.lotes",
   "core.importar.plantilla",
+  "core.indicadores_gestion.catalogo",
   "core.integraciones.get",
   "core.integraciones.list",
   "core.invitations.peek",

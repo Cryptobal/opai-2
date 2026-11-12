@@ -1016,6 +1016,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.hechos_terreno.listar`
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
+- `core.indicadores_gestion.catalogo`
+- `core.indicadores_gestion.medir`
 - `core.invitations.revoke`
 - `core.patrones.get`
 - `core.ping`
