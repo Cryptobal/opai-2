@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 729 pares pantalla→capacidad · 652 con herramienta · 77 excepciones justificadas · 0 faltantes.
+**Resumen:** 731 pares pantalla→capacidad · 653 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -40,6 +40,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
 | cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
+| compartido | `app/_acciones` | `core.apps_conectadas.desconectar` | — | excepción |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.list` | `core_cuentas_list` | existe |
@@ -688,6 +689,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/nueva` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | erp | `/instalaciones/nueva` | `core.puestos.create` | `core_puestos_create` | existe |
 | erp | `/mi-cuenta/preferencias` | `core.config.set` | `core_config_set` | existe |
+| erp | `/mi-cuenta` | `core.apps_conectadas.list` | `core_apps_conectadas_list` | existe |
 | erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/negocios/reportes` | `comercial.informes.tablero` | `comercial_informes_tablero` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
@@ -747,6 +749,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
+| `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
 | `app/_acciones/auth.ts#accionGoogle` | Identidad: login con Google, solo personas. |
@@ -840,6 +843,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.apikeys.revoke` | Solo personas: gobierno de keys y credenciales (ADR-032). |
 | `core.apikeys.set_autonomia` | Solo personas: un agente no se da autonomía a sí mismo (ADR-032). |
 | `core.apikeys.update` | Solo personas: cambiar alcances de una key es gobernar agentes (ADR-032). |
+| `core.apps_conectadas.desconectar` | Solo personas: desconectar una app conectada por OAuth gobierna agentes; se hace en Mi cuenta (CAR-247). Listar sí va por MCP. |
 | `core.aprobaciones.aprobar` | Solo personas: lo irreversible lo aprueba un humano (ADR-032). |
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
 | `core.biometria.enrolar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4). |
@@ -938,6 +942,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apikeys.revoke` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.apikeys.set_autonomia` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
+| `core.apps_conectadas.desconectar` | `app/_acciones` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.biometria.enrolar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |

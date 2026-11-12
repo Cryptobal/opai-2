@@ -91,6 +91,7 @@ core_anexos_get
 core_anexos_list
 core_apikeys_get
 core_apikeys_list
+core_apps_conectadas_list
 core_aprobaciones_get
 core_aprobaciones_list
 core_audit_list

@@ -51,7 +51,7 @@ test.describe("@preview OAuth del MCP", () => {
     const pedido = await pedirAutorizacion(request);
     await hastaAutorizar(page, pedido.url);
     await expect(
-      page.getByRole("heading", { name: "Conectar App de prueba con OPAI" }),
+      page.getByRole("heading", { name: `Conectar ${pedido.nombre} con OPAI` }),
     ).toBeVisible();
     await expect(page.getByText("Ver lo que tú ves")).toBeVisible();
     await capturar(page, info, "oauth-autorizar");
@@ -99,6 +99,17 @@ test.describe("@preview OAuth del MCP", () => {
       },
     });
     expect(renovado.status(), await renovado.text()).toBe(200);
+    const nuevo = ((await renovado.json()) as { access_token?: string }).access_token ?? "";
+
+    // Mi cuenta › Apps conectadas: la app aparece y, al desconectarla, deja de entrar (PR 2).
+    await page.goto("/mi-cuenta");
+    const fila = page.getByRole("listitem").filter({ hasText: pedido.nombre });
+    await expect(fila).toBeVisible();
+    await capturar(page, info, "oauth-apps-conectadas");
+    await fila.getByRole("button", { name: "Desconectar" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Desconectar" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expect((await mcp(nuevo)).status()).toBe(401);
     expect(errores).toEqual([]);
   });
 });

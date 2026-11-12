@@ -1908,6 +1908,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
 
+### Adenda 1 a ADR-098 · Tope de gasto de las apps conectadas (Carlos, 12-nov-2026, 07:28)
+
+Respuesta de Carlos («Opción 1») a la `DECISIÓN CARLOS:` del PR #535: las apps conectadas por OAuth (Claude u otras) **comparten el presupuesto mensual del agente de la empresa** (ajuste `agente.presupuestoMensualMicro`, el mismo del agente interno). No hay un tope por cada app. El medidor cobra su consumo en el mismo registro del agente interno (`agente-interno`); al agotarse, tanto el agente interno como las apps reciben `BUDGET_EXCEEDED` hasta el mes siguiente o hasta que suba el tope. Código: `esAgenteSinKey` en `packages/db/src/presupuesto.ts`.
+
+### Adenda a ADR-095 · «Ninguna, sigo» significa seguir (Carlos, 11-nov-2026, 22:56)
+
+Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con el trabajo en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una revisión a sí misma cada pocos minutos y avanza mientras tanto con lo que no dependa de eso. Los avisos automáticos de GitHub no se responden uno por uno. Solo se detiene por una decisión real o porque no queda trabajo posible, y dice por qué. Regla escrita en `AGENTS.md` («Decisiones de Carlos»).
+
 ## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)

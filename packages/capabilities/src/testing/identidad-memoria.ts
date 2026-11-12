@@ -3,6 +3,7 @@
 import type { Identidad } from "../types";
 import type { Fila } from "./db-memoria-util";
 import { metodosEnMemoria } from "./identidad-metodos-memoria";
+import { appsOAuthEnMemoria } from "./identidad-oauth-memoria";
 
 export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
   const quitar = (n: string, userId: string) => {
@@ -35,6 +36,7 @@ export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
       return { enrolamientos, passkeys, sesiones: quitar("session", userId) };
     },
     ...metodosEnMemoria(tabla),
+    ...appsOAuthEnMemoria(tabla),
     async borrarUsuario(_tx, userId) {
       const usuarios = tabla("user");
       const u = usuarios.find((f) => f["id"] === userId);
