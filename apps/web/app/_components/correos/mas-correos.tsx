@@ -1,14 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Button } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
-import { AsociarNegocio } from "./asociar-negocio";
 import { CorreoItem } from "./correo-item";
 import { type CorreoVista, type PaginaCorreos, sePuedeAsociar } from "./tipos";
+
+// Se carga aparte para no sumar al primer JS de la ficha (ADR-037).
+const AsociarNegocio = dynamic(() => import("./asociar-negocio").then((m) => m.AsociarNegocio));
 
 /** «Ver correos anteriores»: pide la página siguiente del historial con el cursor y la agrega abajo. */
 export function MasCorreos(p: {
