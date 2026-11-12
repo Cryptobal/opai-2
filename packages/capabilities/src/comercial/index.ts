@@ -93,3 +93,4 @@ export const capacidadesComercial: readonly Capacidad[] = [
   comercialImportar10,
   ...capacidadesSeguimiento,
 ];
+export { buscadoresComercial } from "./buscadores";
