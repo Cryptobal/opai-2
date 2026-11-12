@@ -38,6 +38,8 @@ const HREF_ENTIDAD: Record<string, string> = {
  */
 export const hiloAgenda = defineCapability({
   auditarLectura: (s) => [
+    // Tareas reveladas (mismo criterio que `core.actividades.tareas`).
+    ...s.items.filter((i) => i.origen === "tarea").map((i) => i.id),
     ...s.items.filter((i) => i.origen === "documento").map((i) => i.id),
     // Personas cuyo nombre se reveló: mismo criterio que `core.documentos.vencimientos`.
     ...s.items.flatMap((i) =>

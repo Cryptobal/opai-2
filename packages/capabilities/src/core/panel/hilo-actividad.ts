@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { sinPlataformaAjena } from "../../agentes/plataforma";
 import { idAutor } from "../../autor";
 import { defineCapability } from "../../define";
+import { obtenerCapacidad } from "../../registry";
 import type { Contexto } from "../../types";
 import { instalacionesEnAlcance } from "../maestros/alcance";
 import { itemActividadSchema, presentarActividad } from "./actividad-presentar";
@@ -22,13 +23,32 @@ const MAX_INSTALACIONES = 200;
  */
 export function alcanceActividad(ctx: Contexto) {
   const instalaciones = instalacionesEnAlcance(ctx);
-  if (instalaciones) return { modo: "instalaciones" as const, instalaciones };
+  // Sin permiso de leer instalaciones, un actor acotado solo ve lo propio.
+  if (instalaciones && ctx.autorizar(PERMISOS_CORE.instalacionesRead))
+    return { modo: "instalaciones" as const, instalaciones };
+  if (instalaciones) return { modo: "propia" as const, autor: idAutor(ctx.actor) };
   if (ctx.autorizar(PERMISOS_CORE.auditRead)) return { modo: "empresa" as const };
   return { modo: "propia" as const, autor: idAutor(ctx.actor) };
 }
 
-function dondeAlcance(ctx: Contexto) {
-  const a = alcanceActividad(ctx);
+/**
+ * Escrituras que un actor acotado ve en la actividad de sus instalaciones: las del núcleo (lo que ya
+ * ve de esas fichas; lo salarial va redactado) y, de otros módulos, solo las que tiene permiso de
+ * hacer (un supervisor sin `finanzas:*` no ve el detalle de un borrador de factura). Lo propio y la
+ * vista de empresa (con auditoría) se ven enteros.
+ */
+function capacidadesVisibles(ctx: Contexto, modo: "empresa" | "instalaciones" | "propia") {
+  const ids = capacidadesDeCambios(undefined);
+  if (modo !== "instalaciones") return ids;
+  return ids.filter((id) => {
+    const c = obtenerCapacidad(id);
+    if (!c) return false;
+    if (c.modulo === "core") return true;
+    return !!c.permiso && ctx.autorizar(c.permiso);
+  });
+}
+
+function dondeAlcance(ctx: Contexto, a: ReturnType<typeof alcanceActividad>) {
   if (a.modo === "empresa") return {};
   if (a.modo === "instalaciones") {
     const ids = a.instalaciones.slice(0, MAX_INSTALACIONES);
@@ -63,13 +83,14 @@ export const hiloActividad = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    const a = alcanceActividad(ctx);
     const filas = await ctx.db.auditEvent.findMany({
       select: auditoriaSelect,
       where: {
         AND: [
           sinPlataformaAjena(),
-          { capability: { in: capacidadesDeCambios(undefined) } },
-          dondeAlcance(ctx),
+          { capability: { in: capacidadesVisibles(ctx, a.modo) } },
+          dondeAlcance(ctx, a),
         ],
       },
       orderBy: { id: "desc" },
@@ -77,6 +98,6 @@ export const hiloActividad = defineCapability({
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     });
     const pagina = await presentarActividad(ctx, filas, input.limite, "core.hilo.actividad");
-    return { alcance: alcanceActividad(ctx).modo, ...pagina };
+    return { alcance: a.modo, ...pagina };
   },
 });

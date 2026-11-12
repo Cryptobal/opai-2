@@ -73,6 +73,31 @@ describe.skipIf(!urlPropietario)("hilo: actividad y agenda con alcance y dos emp
         nombre: "Sur",
       })
     ).id;
+    // Eventos sembrados (fuera de la cadena real, hash de relleno; esta prueba es de alcance):
+    // una escritura de Finanzas con `instalacionId` de instA (el supervisor no tiene `finanzas:*`),
+    // una de núcleo con `instalacionId` de instA y una propia del supervisor.
+    const seqBase = await e.admin.auditEvent.count({ where: { tenantId } });
+    const ev = (n: number, actorId: string, capability: string, input: object) => ({
+      tenantId,
+      actorType: "user",
+      actorId,
+      capability,
+      payload: { input },
+      seq: seqBase + n,
+      hashAnterior: "0".repeat(64),
+      hash: String(n).repeat(64).slice(0, 64),
+      hashCanon: "{}",
+    });
+    await e.admin.auditEvent.createMany({
+      data: [
+        ev(1, ownerId, "finanzas.ventas.crear_borrador", {
+          instalacionId: instA,
+          glosa: "secreto",
+        }),
+        ev(2, ownerId, "core.puestos.create", { instalacionId: instA, nombre: "Portería" }),
+        ev(3, supId, "core.cuentas.update", { id: randomUUID(), nombre: "Propia" }),
+      ],
+    });
     // Algo hecho por quien no tiene auditoría (viewer): solo eso debe ver de la empresa.
     const otroOwner = ctx("owner", randomUUID(), {}, otroTenant);
     await ok(otroOwner, "core.cuentas.create", { nombre: "Ajena" });
@@ -107,6 +132,10 @@ describe.skipIf(!urlPropietario)("hilo: actividad y agenda con alcance y dos emp
     const ids = r.items.map((i) => i.entidad?.id);
     expect(ids).toContain(instA);
     expect(ids).not.toContain(instB);
+    const caps = r.items.map((i) => (i as { capability?: string }).capability);
+    // Por `instalacionId` del input sí, pero solo de módulos con permiso.
+    expect(caps).toContain("core.puestos.create");
+    expect(caps).not.toContain("finanzas.ventas.crear_borrador");
     const sinNada = await ok<Act>(
       ctx("supervisor", supId, { alcance: { instalaciones: [] } }),
       "core.hilo.actividad",
@@ -119,6 +148,12 @@ describe.skipIf(!urlPropietario)("hilo: actividad y agenda con alcance y dos emp
     const r = await ok<Act>(ctx("viewer", viewerId), "core.hilo.actividad", {});
     expect(r.alcance).toBe("propia");
     expect(r.items).toEqual([]);
+    // Un supervisor sin alcance asignado y sin auditoría: solo lo que hizo él.
+    const sup = await ok<Act>(ctx("supervisor", supId), "core.hilo.actividad", {});
+    expect(sup.alcance).toBe("propia");
+    expect(sup.items.map((i) => (i as { capability?: string }).capability)).toEqual([
+      "core.cuentas.update",
+    ]);
   });
 
   it("la agenda junta las fuentes que el actor puede ver y respeta el alcance", async () => {
