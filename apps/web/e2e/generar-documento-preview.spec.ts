@@ -14,7 +14,12 @@ test.describe("@preview personas: generar documento", () => {
   test("abre la vista previa del documento de una persona", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/personas");
-    await page.locator('a[href^="/personas/"]').first().click();
+    const primera = page
+      .locator('a[href^="/personas/"]:not([href*="vencimientos"])')
+      .filter({ visible: true })
+      .first();
+    await expect(primera, "qa-e2e tiene al menos una persona ficticia").toBeVisible();
+    await primera.click();
     await page.waitForURL(/\/personas\/[0-9a-f-]{36}/);
     const id = page.url().match(/\/personas\/([0-9a-f-]{36})/)?.[1] ?? "";
     await page.goto(`/personas/${id}/documentos`);
