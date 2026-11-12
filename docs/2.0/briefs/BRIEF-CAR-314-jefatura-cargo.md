@@ -97,7 +97,7 @@ Gate completo local. Sin cambio visual. Migración aplicada por el bot «OPAI 2.
 
 - Migración aditiva y reversible (sección «Reversión» del SQL). El código anterior ignora las columnas nuevas.
 - Si las personas de una empresa no tienen su usuario vinculado, `a_cargo` «por defecto» responde vacío y el modo `instalaciones` no encuentra instalaciones: es carga pendiente de cada empresa, no un error.
-- `equipoDe` lee los vínculos vigentes de los cargos que cuelgan del jefe (4 consultas). Para un gerente general son todas las personas activas; aceptable hoy, se revisa con el cierre de período (CAR-312).
+- `equipoDe` lee los vínculos vigentes de los cargos que cuelgan del jefe (4 consultas). Para un gerente general son todas las personas activas; aceptable hoy, se revisa con el cierre de período (CAR-322).
 
 ## 16. Reporte de ejecución
 
