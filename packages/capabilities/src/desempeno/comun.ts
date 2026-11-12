@@ -1,4 +1,4 @@
-import { periodoSiguiente } from "@opai/domain";
+import { esPeriodoMensual, periodoSiguiente } from "@opai/domain";
 import { z } from "zod";
 
 import { moduloDeIndicador, type IndicadorGestion } from "../indicadores-gestion";
@@ -91,3 +91,10 @@ export async function versionesDe(ctx: Contexto, cargoId: string): Promise<Vista
   });
   return filas.map(vistaScorecard);
 }
+
+/** Mes consultado por las lecturas de Desempeño. */
+export const periodo = z
+  .string()
+  .refine(esPeriodoMensual, "Usa aaaa-mm.")
+  .optional()
+  .describe("Mes consultado (aaaa-mm). Por defecto, el mes en curso de la empresa.");
