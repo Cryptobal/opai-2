@@ -191,6 +191,12 @@ model Cargo {
   sueldoSensible Boolean  @default(false) @map("sueldo_sensible")
   activo         Boolean  @default(true)
   orden          Int      @default(0)
+  /// Jefatura (CAR-314, ADR-094): el cargo al que reporta. null = no reporta a nadie (gerencia).
+  jefaturaCargoId String? @map("jefatura_cargo_id") @db.Uuid
+  /// A quiénes de este cargo ve cada persona de la jefatura: "asignadas" (solo las que tiene
+  /// asignadas en `personas.jefe_persona_id`) | "equipo" (todas) | "instalaciones" (las de sus
+  /// instalaciones a cargo, ADR-022).
+  jefaturaVe     String   @default("asignadas") @map("jefatura_ve")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -198,7 +204,12 @@ model Cargo {
   puestos     Puesto[]
   vinculos    VinculoLaboral[]
   estructuras EstructuraSueldo[]
+  /// FK compuesta por tenant: la jefatura siempre es un cargo de la MISMA empresa.
+  jefatura    Cargo?  @relation("CargoJefatura", fields: [tenantId, jefaturaCargoId], references: [tenantId, id], onDelete: Restrict)
+  reportan    Cargo[] @relation("CargoJefatura")
 
+  @@unique([tenantId, id])
+  @@index([tenantId, jefaturaCargoId])
   @@unique([tenantId, nombre])
   @@map("cargos")
   @@schema("core")
@@ -291,6 +302,9 @@ model Persona {
   bloqueadaEn         DateTime? @map("bloqueada_en") @db.Timestamptz(6)
   /// Usuario de OPAI vinculado (1:1), si la persona entra al sistema.
   usuarioId           String?   @map("usuario_id") @db.Uuid
+  /// Jefe directo (CAR-314): la persona que la tiene a su cargo cuando el cargo se ve por
+  /// "asignadas". null = sin asignar.
+  jefePersonaId       String?   @map("jefe_persona_id") @db.Uuid
   archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
   /// Anonimizada por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
   anonimizadaEn       DateTime? @map("anonimizada_en") @db.Timestamptz(6)
@@ -318,7 +332,12 @@ model Persona {
   jornadaDt   PersonaJornadaDt?
   os10        PersonaOs10?
   contactoLaboral PersonaContactoLaboral?
+  /// FK compuesta por tenant: el jefe siempre es una persona de la MISMA empresa.
+  jefe        Persona?  @relation("PersonaJefe", fields: [tenantId, jefePersonaId], references: [tenantId, id], onDelete: Restrict)
+  aCargo      Persona[] @relation("PersonaJefe")
 
+  @@unique([tenantId, id])
+  @@index([tenantId, jefePersonaId])
   @@unique([tenantId, rut])
   @@index([tenantId, estado])
   @@index([tenantId, apellidos])

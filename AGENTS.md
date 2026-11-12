@@ -68,6 +68,7 @@ Regla de Carlos del 11-nov-2026 (ADR-095), para todas las sesiones de Claude del
 
 - Toda respuesta a Carlos que necesite una decisión suya termina con un último párrafo titulado **«Decisión tuya»** con: qué hay que decidir y las opciones; por qué importa (qué se frena o qué cambia); el link que debe revisar (PR, vista previa, captura, issue), si existe; la sugerencia de Claude y por qué. Todo en **lenguaje simple, sin tecnicismos**, entendible sin leer el resto de la respuesta.
 - Si hay varias, van numeradas de la más urgente a la menos urgente. Si no hay ninguna, la respuesta termina con «Decisión tuya: ninguna, sigo».
+- **«Ninguna, sigo» significa seguir (regla de Carlos del 11-nov-2026, 22:56):** sin una decisión suya pendiente, la sesión no se detiene ni cierra el turno; continúa con el trabajo. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión, una vista previa), programa una revisión a sí misma cada pocos minutos (`send_later`) y mientras tanto avanza con lo siguiente que no dependa de eso (siguiente bloque, siguiente brief apilado sobre su rama, pendientes de `ESTADO.md`). Los avisos automáticos de GitHub no se responden uno por uno: se leen, se arregla lo propio y se sigue. Solo se detiene por una decisión real de Carlos o porque no queda trabajo posible, y entonces dice por qué.
 - Además, la decisión queda como comentario `DECISIÓN CARLOS:` en el PR (mismo contenido) y el trabajo sigue en lo que no dependa de ella.
 
 ## Prohibido
