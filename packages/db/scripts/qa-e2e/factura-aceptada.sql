@@ -29,3 +29,19 @@ SELECT '00000000-0000-7000-8000-000000267003'::uuid, t.id, '00000000-0000-7000-8
        'Servicio ficticio para pruebas visuales', 10000
 FROM core.tenants t WHERE t.slug = 'qa-e2e'
 ON CONFLICT (id) DO NOTHING;
+
+-- CAR-320 (ADR-100): contacto de facturación ficticio y una factura vencida para ver a quién sale el recordatorio de
+-- cobro (e2e `@preview` de cobranza). Correo en dominio reservado `.test`; idempotente; solo `qa-e2e`.
+INSERT INTO core.contactos (id, tenant_id, cuenta_id, nombres, apellidos, email, es_principal, roles, updated_at)
+SELECT '00000000-0000-7000-8000-000000320001'::uuid, t.id, '00000000-0000-7000-8000-000000267001'::uuid,
+       'Contacto', 'Ficticio QA', 'pagos@qa-e2e.test', true, ARRAY['facturacion'], now()
+FROM core.tenants t WHERE t.slug = 'qa-e2e'
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO finanzas.documentos_emitidos
+  (id, tenant_id, cuenta_id, tipo_dte, folio, fecha_emision, fecha_vencimiento, monto_neto, monto_iva, monto_total,
+   estado_dte, glosa, updated_at)
+SELECT '00000000-0000-7000-8000-000000320002'::uuid, t.id, '00000000-0000-7000-8000-000000267001'::uuid, 33, 990002,
+       DATE '2026-09-01', DATE '2026-10-01', 20000, 3800, 23800, 'aceptado', 'Servicio ficticio vencido para pruebas visuales', now()
+FROM core.tenants t WHERE t.slug = 'qa-e2e'
+ON CONFLICT (id) DO NOTHING;
