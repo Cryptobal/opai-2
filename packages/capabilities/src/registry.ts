@@ -1,3 +1,4 @@
+import { limpiarBuscadores } from "./core/maestros/buscadores";
 import type { Capacidad } from "./types";
 
 const registro = new Map<string, Capacidad>();
@@ -23,4 +24,5 @@ export function listarCapacidades(): readonly Capacidad[] {
 /** Solo para tests. */
 export function limpiarRegistro(): void {
   registro.clear();
+  limpiarBuscadores();
 }
