@@ -1,4 +1,9 @@
-import { credencialDePlataforma, type DefinicionIntegracion, definicionIntegracion } from "@opai/integrations";
+import {
+  appSlackDelEntorno,
+  credencialDePlataforma,
+  type DefinicionIntegracion,
+  definicionIntegracion,
+} from "@opai/integrations";
 
 import { ajuste } from "../core/config/valores";
 
@@ -60,6 +65,11 @@ export function estadoIntegracion(
 ) {
   if (!def.disponible) return "proximamente";
   if (fila?.estado === "error") return "error";
+  // Slack (ADR-093): configurada solo si la empresa instaló la app; sin la app en el entorno, no disponible.
+  if (def.id === "slack") {
+    if (fila?.estado === "configurada") return "configurada";
+    return appSlackDelEntorno() ? "no_configurada" : "no_disponible";
+  }
   const modalidad =
     fila?.modalidad ?? (def.modalidades.includes("plataforma") ? "plataforma" : "propia");
   if (modalidad === "plataforma")

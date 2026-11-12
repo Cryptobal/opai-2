@@ -44,6 +44,20 @@ export const miAcceso = defineCapability({
   portales: ["cliente"],
   async handler(ctx) {
     const a = await accesoDelActor(ctx, { permitirLimitado: true });
+    // El prospecto solo ve su propuesta: no se le entrega el perfil del portal (instalaciones, secciones, opciones).
+    if (a.alcance === "limitado") {
+      return {
+        cuentaId: a.cuentaId,
+        cuentaNombre: a.cuentaNombre,
+        alcance: a.alcance,
+        limitado: true,
+        instalaciones: [],
+        seccionesVisibles: [],
+        muestraFotoGuardias: false,
+        muestraRutGuardias: false,
+        gestionaListas: false,
+      };
+    }
     const { config } = await configDeCuenta(ctx, a.cuentaId);
     const total = await ctx.db.instalacion.count({ where: { cuentaId: a.cuentaId, estado: "activa", archivadaEn: null } });
     return {

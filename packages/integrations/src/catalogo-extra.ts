@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { CategoriaIntegracion, DefinicionIntegracion } from "./catalogo";
+import { slackConfigSchema } from "./slack/config";
 
 const sinConfig = z.object({}).strict();
 
@@ -10,7 +11,6 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     [
       ["whatsapp", "WhatsApp", "whatsapp"],
       ["factoring", "Factoring", "factoring"],
-      ["slack", "Slack", "slack"],
       ["webhooks", "Webhooks", "webhooks"],
     ] as const
   ).map(([id, nombre, categoria]) => ({
@@ -34,8 +34,23 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
       { nombre: "secret_access_key", etiqueta: "Secret access key de AWS" },
       { nombre: "region", etiqueta: "Región de AWS (por ejemplo sa-east-1)" },
     ],
-    config: z.object({ proveedor: z.enum(["rekognition", "simulado"]).default("simulado") }).strict(),
+    config: z
+      .object({ proveedor: z.enum(["rekognition", "simulado"]).default("simulado") })
+      .strict(),
     disponible: true,
+  },
+  {
+    // Slack (ADR-093, CAR-291): una sola app «OPAI» de plataforma que cada empresa instala con OAuth
+    // desde su propia pantalla. El token del bot se guarda cifrado y no es un secreto que se escriba a
+    // mano: por eso `secretos` va vacío. `envPlataforma` indica si la app está registrada en el entorno.
+    id: "slack",
+    nombre: "Slack",
+    categoria: "slack",
+    modalidades: ["plataforma"] as const,
+    secretos: [],
+    config: slackConfigSchema,
+    disponible: true,
+    envPlataforma: "SLACK_CLIENT_ID",
   },
   {
     // Traer los datos de la empresa desde OPAI 1 (CAR-279): el exportador de 1.0 (`/api/export/opai2/v1`)

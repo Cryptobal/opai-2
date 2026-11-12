@@ -203,4 +203,14 @@ describe.skipIf(!urlPropietario)("cpq · cotizaciones en el Portal Cliente en ba
     const c = await comoContacto<{ alcance: string }>(t.a, contacto, "portal_cliente.mi_acceso", {});
     expect(c.ok && c.data.alcance).toBe("completo");
   });
+
+  it("mi_acceso no entrega al prospecto instalaciones, secciones ni opciones del portal, solo su cuenta y el alcance (CAR-300)", async () => {
+    const r = await comoContacto<{ alcance: string; cuentaId: string; instalaciones: unknown[]; seccionesVisibles: unknown[]; muestraFotoGuardias: boolean; muestraRutGuardias: boolean; gestionaListas: boolean }>(t.a, prospecto, "portal_cliente.mi_acceso", {});
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.data.alcance).toBe("limitado");
+    expect(r.data.instalaciones).toEqual([]);
+    expect(r.data.seccionesVisibles).toEqual([]);
+    expect([r.data.muestraFotoGuardias, r.data.muestraRutGuardias, r.data.gestionaListas]).toEqual([false, false, false]);
+  });
 });
