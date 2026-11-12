@@ -40,7 +40,7 @@ export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
       vistos.set(k, f.fila);
       const existente = enOpai.get(k);
       if (existente) return { ...base, accion: "sin_cambio", mensajes: ["Ya está en OPAI: no se toca."], existente: { id: existente.id } };
-      if ("error" in r) return falla(`${r.error} Importa primero las cuentas.`);
+      if ("error" in r) return falla(/importa primero/i.test(r.error) ? r.error : `${r.error} Importa primero las cuentas.`);
       if (datos.montoTotal <= 0) return falla("El monto total debe ser mayor que cero.");
       if (datos.montoNeto + datos.montoExento + datos.montoIva !== datos.montoTotal)
         return falla("Neto + exento + IVA no suma el monto total.");
