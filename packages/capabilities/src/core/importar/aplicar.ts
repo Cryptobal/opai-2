@@ -49,7 +49,12 @@ async function corridaDe(tx: TenantTx, ctx: Contexto, imp: Importador, plan: Pla
 async function escribirFila(tx: TenantTx, ctx: Contexto, imp: Importador, plan: Plan, f: FilaPlan<Datos>): Promise<Registro> {
   const base = { entidad: imp.entidad, id10: f.clave, motivo: null, previos: null };
   if (f.accion === "error") return { ...base, id20: null, accion: "omitido", motivo: f.mensajes.join(" ").slice(0, 500) };
-  if (f.accion === "crear" && f.datos) return { ...base, id20: await imp.crear(tx, ctx, f.datos), accion: "creado" };
+  if (f.accion === "crear" && f.datos) {
+    const creado = await imp.crear(tx, ctx, f.datos);
+    return typeof creado === "string"
+      ? { ...base, id20: creado, accion: "creado" }
+      : { ...base, id20: creado.id, accion: "creado", previos: creado.previos };
+  }
   const existente = f.existente;
   if (!existente) throw reglaDeNegocio("El plan cambió mientras se importaba. Vuelve a simular.");
   const cambios = plan.cambios.get(f.fila) ?? {};
