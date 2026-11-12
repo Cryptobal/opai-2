@@ -105,7 +105,7 @@ export async function sincronizarMovimientos(ctx: Contexto, input: SincronizarIn
   const saldoBanco = saldoReportado(input);
   const base = { reconocida: true, cuentaId: cuenta.id, duplicados, sospechosos, saldoBanco };
   if (dryRun) return { ...base, nuevos: nuevos.length };
-  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, duplicados, sospechosos, saldoBanco, saldoBancoEn: fechaSaldoReportado(input) });
+  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, duplicados, sospechosos, saldoBanco, saldoBancoEn: fechaSaldoReportado(input), saldoExplicito: input.saldoCuenta != null });
   return { ...base, nuevos: insertados };
 }
 
