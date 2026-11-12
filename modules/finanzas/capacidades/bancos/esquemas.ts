@@ -23,6 +23,10 @@ export const movimientoSchema = z.object({
   referencia: z.string().nullable(),
   estado: z.enum(["pendiente", "sugerido", "conciliado", "por_autorizar", "ignorado"]),
   origen: z.string(),
+  /** Dónde quedó conciliado (fila del flujo, «Facturas» o «Compras»); null si no está conciliado (CAR-328). */
+  clasificacion: z.string().nullable().optional(),
+  /** Nombre de la regla que lo concilió sola; null si lo hizo una persona. */
+  regla: z.string().nullable().optional(),
 });
 
 export const filaPreviewSchema = z.object({

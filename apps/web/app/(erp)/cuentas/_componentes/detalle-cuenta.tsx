@@ -21,7 +21,7 @@ export async function DetalleCuenta({ datos, p, tab, children }: Props) {
   const [ficha, negocios] = await Promise.all([datos, verPestanaNegocios()]);
   return (
     <>
-      <FichaCuenta state={ficha.state} cuenta={ficha.cuenta} tab={tab} negocios={negocios}>
+      <FichaCuenta state={ficha.state} cuenta={ficha.cuenta} tab={tab} negocios={negocios} filtros={p}>
         {ficha.cuenta ? children(ficha.cuenta, p) : null}
       </FichaCuenta>
       {ficha.cuenta ? <HojaCuenta cuenta={ficha.cuenta} /> : null}

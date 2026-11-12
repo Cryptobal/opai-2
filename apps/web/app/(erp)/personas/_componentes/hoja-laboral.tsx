@@ -93,7 +93,7 @@ export function HojaLaboral({ seccion, personaId, inicial, bloqueo }: Props) {
     const input = cfg.armar(personaId, cambios);
     // Ids literales: el gate de paridad exige ver qué capacidad invoca la pantalla.
     const r = await ejecutar(
-      seccion === "pago"
+      seccion === "pago" || seccion === "pago-agregar"
         ? "core.personas.pago_solicitar_cambio"
         : seccion === "prevision"
           ? "core.personas.prevision_actualizar"

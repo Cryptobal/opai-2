@@ -5,6 +5,7 @@ import { saldoPendiente, sugerirConciliacion } from "@opai/domain";
 
 import { PERMISO_BANCOS_VER } from "./permisos";
 import { montoDe } from "./esquemas";
+import { reglasQueCalzan, sugerenciaReglaSchema } from "./reglas-sugerir";
 import { aIso, movimientoDe } from "./util";
 
 const sugerenciaSchema = z.object({
@@ -25,16 +26,21 @@ const sugerenciaSchema = z.object({
 export const bancosConciliacionSugerir = defineCapability({
   id: "finanzas.conciliaciones.sugerir",
   descripcion:
-    "Sugiere conciliaciones para un movimiento bancario (tres niveles, RUT o monto único) sin marcar pagada.",
+    "Sugiere conciliaciones para un movimiento bancario (facturas por RUT o monto único y reglas del banco) sin marcar nada pagado.",
   permiso: PERMISO_BANCOS_VER,
   input: z.object({ movimientoId: z.uuid() }),
-  output: z.object({ sugerencias: z.array(sugerenciaSchema) }),
+  output: z.object({
+    sugerencias: z.array(sugerenciaSchema),
+    /** Reglas del banco que calzan: proponen la fila del flujo y la cuenta contable (CAR-328). */
+    reglas: z.array(sugerenciaReglaSchema),
+  }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (s, input) => [input.movimientoId, ...s.sugerencias.map((x) => x.documentoId)],
+  auditarLectura: (s, input) => [input.movimientoId, ...s.sugerencias.map((x) => x.documentoId), ...s.reglas.map((r) => r.reglaId)],
   async handler(ctx, input) {
     const mov = await movimientoDe(ctx, input.movimientoId);
-    if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [] };
+    if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [], reglas: [] };
+    const reglas = await reglasQueCalzan(ctx, mov);
     const desde = new Date(mov.fecha);
     desde.setUTCDate(desde.getUTCDate() - 15);
     const hasta = new Date(mov.fecha);
@@ -109,7 +115,7 @@ export const bancosConciliacionSugerir = defineCapability({
       { montosUnicosVentana: montos },
     );
 
-    if (sugerencias.length && mov.estado === "pendiente") {
+    if ((sugerencias.length || reglas.length) && mov.estado === "pendiente") {
       await ctx.db.movimientoBancario.update({
         where: { id: mov.id },
         data: { estado: "sugerido" },
@@ -121,6 +127,7 @@ export const bancosConciliacionSugerir = defineCapability({
       ...recibidos.map((d) => [d.id, { folio: d.folio, tipoDte: null, contraparte: d.proveedor.razonSocial }] as const),
     ]);
     return {
+      reglas,
       sugerencias: sugerencias.map((x) => ({ ...x, ...(info.get(x.documentoId) ?? { folio: null, tipoDte: null, contraparte: null }) })),
     };
   },

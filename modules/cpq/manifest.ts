@@ -1,6 +1,7 @@
 
 import { defineModule } from "@opai/capabilities";
 
+import { buscadoresCpq } from "./buscador";
 import { capacidades } from "./capabilities";
 import { ajustesCpq } from "./persistencia/supuestos";
 
@@ -64,4 +65,5 @@ export const manifest = defineModule({
     { id: "cpq.envio_propuesta.acceso_cliente", descripcion: "Al enviar una propuesta se invitó o vinculó al contacto a su Portal Cliente." },
   ],
   capacidades,
+  buscadores: buscadoresCpq,
 });
