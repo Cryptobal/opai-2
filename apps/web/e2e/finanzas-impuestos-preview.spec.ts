@@ -16,7 +16,7 @@ test.describe("@preview finanzas: impuestos (borrador del F29)", () => {
     await expect(page.getByText("Se paga el")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ventas (IVA débito)" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Compras (IVA crédito)" })).toBeVisible();
-    await expect(page.getByRole("combobox", { name: "Mes" })).toBeVisible();
+    await expect(page.getByLabel("Mes", { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "IVA y F29" })).toHaveAttribute("aria-current", "page");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "finanzas-impuestos-f29");
