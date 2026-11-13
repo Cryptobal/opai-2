@@ -9,6 +9,11 @@ export const actualizarLaboralInput = z.object({
       tallaPantalon: textoOpcional(20),
       tallaChaqueta: textoOpcional(20),
       tallaZapato: textoOpcional(20),
+      tallaPolera: textoOpcional(20),
+      tallaGeologo: textoOpcional(20),
+      tallaPolar: textoOpcional(20),
+      estaturaCm: z.number().int().min(100).max(230).nullable().optional(),
+      pesoKg: z.number().int().min(30).max(250).nullable().optional(),
       notas: textoOpcional(500),
       entrega: z
         .object({
@@ -25,11 +30,14 @@ export const actualizarLaboralInput = z.object({
     .object({
       resolucion: textoOpcional(200),
       resolucionVigenteDesde: diaSchema.nullable().optional(),
+      resolucionVigenteHasta: diaSchema.nullable().optional(),
       horasSemanales: z.string().trim().max(10).nullable().optional(),
       distribucion: textoOpcional(200),
       articulo22: z.boolean().optional(),
       plazoFijoPeriodo: z.number().int().min(1).max(3).nullable().optional(),
       terminoPlazoFijo: diaSchema.nullable().optional(),
+      /** Término de cada período de plazo fijo, en orden (hasta 3). */
+      terminosPlazoFijo: z.array(diaSchema).max(3).optional(),
       avisoTerminoDias: z.number().int().min(0).max(365).nullable().optional(),
     })
     .optional(),
@@ -46,6 +54,8 @@ export const actualizarLaboralInput = z.object({
       emergenciaNombre: textoOpcional(120),
       emergenciaRelacion: textoOpcional(80),
       emergenciaTelefono: telefonoSchema.nullable().optional(),
+      codigoInterno: textoOpcional(40),
+      movilizacion: textoOpcional(120),
     })
     .optional(),
 });
