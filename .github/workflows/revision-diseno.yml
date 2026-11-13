@@ -1,4 +1,4 @@
-# Revisión de diseño de cada PR contra el diseño nuevo (CAR-334, fase 3; ADR-109 y adenda de ADR-105). En cada PR que
+# Revisión de diseño a pedido (etiqueta «diseño») contra el diseño nuevo (CAR-334, fase 3; ADR-109 y adenda de ADR-105). En cada PR que
 # toca `apps/` o `packages/ds`: captura las pantallas que cambia (o las clave, si toca el DS o el marco)
 # en la vista previa del PR y en `main` (test.opai.cl), a 1440 y 390 px, con la empresa ficticia
 # `qa-e2e` (nunca Gard), y Claude (claude-code-action) comenta en el PR el antes, el después y lo que no
@@ -20,7 +20,7 @@ concurrency:
 jobs:
   revision-diseno:
     name: revision-diseno
-    # Solo con la etiqueta `revision-diseno` (ADR-112: ahorro de Actions). Al ponerla corre una vez; después, en cada push.
+    # Solo a pedido: al poner la etiqueta `diseño` corre una vez (ADR-112, adenda C).
     if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork == false && github.event.label.name == 'diseño'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 45

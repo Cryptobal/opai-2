@@ -7,8 +7,10 @@
 # Secretos (solo existen en GitHub Actions y nunca se imprimen): E2E_EMAIL, E2E_PASSWORD, E2E_TOTP_SECRET,
 # VERCEL_AUTOMATION_BYPASS_SECRET y, para ubicar la vista previa, VERCEL_TOKEN, VERCEL_ORG_ID y VERCEL_PROJECT_ID.
 name: preview-e2e
-# Ahorro de Actions (13-nov-2026): ya no corre en cada push. Corre de noche contra el despliegue de main
-# (vista previa de Vercel del último commit de main) y a pedido: etiqueta «e2e» en el PR o workflow_dispatch.
+# Ahorro de Actions (13-nov-2026): ya no corre en cada push. Corre de noche contra el despliegue del último
+# commit de main (el de test.opai.cl, en su URL *.vercel.app, con la empresa ficticia qa-e2e) y a pedido:
+# al poner la etiqueta «e2e» en el PR (prueba la vista previa del head de ese momento; para un head nuevo,
+# quitar y volver a poner la etiqueta) o con workflow_dispatch.
 on:
   pull_request:
     types: [labeled]
@@ -21,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: preview-e2e-${{ github.event.pull_request.number || github.ref }}
+  group: preview-e2e-${{ github.event.pull_request.number || github.ref }}-${{ github.event.label.name || 'a-pedido' }}
   cancel-in-progress: true
 
 jobs:

@@ -78,10 +78,10 @@ Regla de Carlos del 11-nov-2026 (ADR-095), para todas las sesiones de Claude del
 
 Regla permanente de Carlos (13-nov-2026, adenda de ADR-112), para bajar el gasto y la demora de GitHub Actions:
 
-1. **En cada PR** corre solo lo rápido: `typecheck`, `lint`, `test` y `secretos` (agregados en `typecheck · lint · test · test:db`). Un push nuevo cancela la corrida anterior del mismo PR. Ningún flujo corre en un PR en borrador.
+1. **En cada PR** corre solo lo rápido: `typecheck`, `lint`, `test` (resumidos en el check `typecheck · lint · test · test:db`) y `secretos`. Un push nuevo cancela la corrida anterior del mismo PR. Ningún flujo corre en un PR en borrador.
 2. **Base:** `test:db`, «Choque de tablas» y «Migración pendiente» corren en el PR solo si toca Prisma o migraciones. `test:db` corre siempre al integrar a `main` y de noche.
 3. **Build con presupuesto de JS:** solo al integrar a `main` o a pedido (`workflow_dispatch`). Quien toca pantallas lo corre en local antes de integrar.
-4. **e2e (10 grupos), `preview-e2e` y `rendimiento`:** una vez cada noche contra `main` y a pedido (`workflow_dispatch` o al poner la etiqueta `e2e`). Nunca en cada push.
+4. **e2e (10 grupos), `preview-e2e` y `rendimiento`:** una vez cada noche contra `main` y a pedido (`workflow_dispatch` o al poner la etiqueta `e2e` en un PR listo; prueban el head de ese momento, así que para un head nuevo se quita y se vuelve a poner la etiqueta). Nunca en cada push.
 5. **`revision-diseno` y `auditoria-diseno`:** solo a pedido, al poner la etiqueta `diseño`. Nunca automáticas.
 6. «Proteger main» exige solo los checks del punto 1 (`typecheck · lint · test · test:db` y `secretos`); la reactivación y el cambio del ruleset los hace Carlos.
 
