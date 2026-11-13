@@ -14,11 +14,12 @@ export type DatosGrupos = {
 /** Grupos vigentes y si el usuario actual los gestiona. La capacidad vuelve a validar todo. */
 export async function cargarGrupos(): Promise<DatosGrupos> {
   const [grupos, identidad] = await Promise.all([
-    ejecutarComoUsuario<GrupoVista[]>("erp", "core.grupos.list", {}),
+    // CAR-353: primera página (hasta 200 grupos, en orden alfabético).
+    ejecutarComoUsuario<{ items: GrupoVista[] }>("erp", "core.grupos.list", { limite: 200 }),
     identidadActual(),
   ]);
   const miRol = identidad?.actual?.rol ?? "viewer";
   const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
   const gestiona = (miRol === "owner" || miRol === "admin") && puede("core:users.manage");
-  return { grupos, gestiona };
+  return { grupos: grupos.ok ? { ...grupos, data: grupos.data.items } : grupos, gestiona };
 }
