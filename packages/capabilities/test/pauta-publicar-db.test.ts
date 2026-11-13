@@ -145,7 +145,25 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
     await e?.cerrar();
   });
 
-  it("la vista previa cuenta titulares, usuarios y turnos sin escribir", async () => {
+  it("la vista previa cuenta titulares, usuarios y turnos sin escribir; un refuerzo no quita el día", async () => {
+    const previo = await run(
+      ctx(tenantA),
+      "pauta.publicaciones.publicar",
+      { instalacionId: inst, mes },
+      { dryRun: true },
+    );
+    const puestoPorteria = (
+      await e.admin.puesto.findFirstOrThrow({ where: { tenantId: tenantA, nombre: "Portería" } })
+    ).id;
+    await e.admin.excepcionPauta.create({
+      data: {
+        tenantId: tenantA,
+        puestoId: puestoPorteria,
+        fecha: new Date(`${primero}T00:00:00Z`),
+        tipo: "refuerzo",
+        motivo: "Evento",
+      },
+    });
     const r = await run(
       ctx(tenantA),
       "pauta.publicaciones.publicar",
@@ -157,6 +175,7 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
       data: { personas: 2, conUsuario: 1, publicadaEn: null, publicadaAntes: null },
     });
     expect(await e.admin.publicacionPauta.count({ where: { tenantId: tenantA } })).toBe(0);
+    expect(r.ok && previo.ok && r.data.turnos).toBe(previo.ok ? previo.data.turnos : -1);
   });
 
   it("publicar registra, emite el evento y el consumidor avisa una sola vez a quien tiene usuario", async () => {

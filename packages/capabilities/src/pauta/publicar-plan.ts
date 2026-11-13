@@ -51,6 +51,8 @@ export async function planearPublicacion(ctx: Contexto, i: PublicacionInput) {
     ? await ctx.db.excepcionPauta.findMany({
         where: {
           estado: "activa",
+          // Un refuerzo se suma al turno del titular (turnos-esperados): no le quita el día.
+          tipo: { not: "refuerzo" },
           puestoId: { in: ids },
           fecha: { gte: aFechaDb(fechas[0] ?? ""), lte: aFechaDb(fechas.at(-1) ?? "") },
         },
