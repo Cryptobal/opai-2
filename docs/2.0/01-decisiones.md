@@ -2048,8 +2048,9 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 **Consecuencias.**
 - La auditoría por capa y módulo vive en `docs/2.0/auditoria-estandares/` y sus brechas altas y críticas van a Linear, en el proyecto del módulo y enlazadas a «22 · Estándares y arquitectura».
 - Todo PR que toque arquitectura, permisos, modelo de datos o UX declara «Referente seguido y en qué se aparta» (plantilla del PR y `AGENTS.md`, en un PR posterior de esta misma serie).
-- La Sesión Estándares revisa cada ADR y cada PR de esos temas contra la vara y comenta las brechas; no integra ni hace push a `main`.
+- La Sesión Estándares revisa cada ADR y cada PR de esos temas contra la vara y comenta las brechas.
 - No reemplaza a `AGENTS.md`, `REGLAS-codigo.md` ni a los ADR vigentes: ante un choque, mandan ellos y se anota la diferencia aquí.
+
 ## ADR-108 · Trabajo en paralelo sin esperas y sin choques entre sesiones (12-nov-2026)
 
 **Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»). **Modifica** `OPERACION-agentes.md` (A2.5), `AGENTS.md`, `CONTEXTO-agentes.md` e `INSTRUCCIONES-proyecto-claude.md`. (ADR-105 a ADR-107 están reservados por PR abiertos: #584, #591 a #594 y #595.)
