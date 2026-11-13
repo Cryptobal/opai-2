@@ -20,6 +20,8 @@ test.describe("Comercial · Actividad y tareas", () => {
       .getByRole("region", { name: "Lista de negocios" })
       .locator('a[href^="/negocios/"]')
       .first();
+    // La lista llega por streaming: contar de inmediato da 0 en un runner lento y la prueba se salta.
+    await primero.waitFor({ timeout: 60_000 }).catch(() => undefined);
     test.skip((await primero.count()) === 0, "Sin negocios en el entorno");
     await primero.click();
     await page.waitForURL(/\/negocios\/[0-9a-f-]{36}/);
