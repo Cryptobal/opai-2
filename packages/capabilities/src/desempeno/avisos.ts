@@ -3,20 +3,18 @@
 // bajo la meta y uno por jefatura directa (de su ficha o, sin jefe en la ficha, la del cargo). Son transaccionales: solo este consumidor los
 // envía, a la persona o a la jefatura, y solo si puede ver ese resultado. Nunca llevan el puntaje.
 import { type Acceso, esRol, renderizar, tienePermisoEfectivo } from "@opai/domain";
-import type { TenantTx } from "@opai/db";
 
 import { valoresEfectivos } from "../core/config";
 import { campoAjuste } from "../core/config/catalogo";
 import { equipoDe } from "../core/jefatura";
-import { directasPorJefatura } from "../core/jefatura/empresa";
 import { comunicableDe, plantillaVigente } from "../core/comunicaciones/resolver";
 import { defineConsumidor, type EventoPublicado } from "../eventos/consumidores";
 import type { Contexto } from "../types";
-import type { FilaCierre } from "./cierre-calculo";
 import { PERMISOS_DESEMPENO } from "./comun";
 
-export const EVENTO_PERSONA_BAJO_META = "desempeno.resultado.bajo_meta";
-export const EVENTO_EQUIPO_BAJO_META = "desempeno.equipo.bajo_meta";
+import { EVENTO_EQUIPO_BAJO_META, EVENTO_PERSONA_BAJO_META } from "./avisos-emitir";
+
+export { EVENTO_EQUIPO_BAJO_META, EVENTO_PERSONA_BAJO_META, emitirBajoMeta } from "./avisos-emitir";
 
 const MESES = [
   "enero",
@@ -43,46 +41,6 @@ export async function avisoActivo(ctx: Contexto): Promise<boolean> {
   if (!campo) return false;
   const v = await valoresEfectivos(ctx, [campo]);
   return v.get("desempeno.aviso_bajo_meta")?.valor === true;
-}
-
-const bajoMeta = (f: FilaCierre) => f.puntaje !== null && f.puntaje < 100;
-
-/** Emite los avisos del cierre dentro de su transacción (outbox, ADR-029). Quien cierra mira antes el ajuste. */
-export async function emitirBajoMeta(
-  ctx: Contexto,
-  tx: TenantTx,
-  periodo: string,
-  filas: FilaCierre[],
-) {
-  const porJefe = new Map<string, string[]>();
-  const sumar = (jefe: string, persona: string) => {
-    const l = porJefe.get(jefe) ?? [];
-    if (!l.includes(persona)) porJefe.set(jefe, [...l, persona]);
-  };
-  const bajo = filas.filter(bajoMeta);
-  // Jefatura directa por cargo (CAR-314): quien no tiene jefe en su ficha igual avisa a quien lo tiene a cargo.
-  const directas = bajo.length
-    ? await directasPorJefatura({ ...ctx, db: tx })
-    : new Map<string, Set<string>>();
-  for (const [jefe, reportan] of directas)
-    for (const f of bajo) if (reportan.has(f.personaId)) sumar(jefe, f.personaId);
-  for (const f of bajo) {
-    await ctx.eventos.emitir(tx, {
-      tipo: EVENTO_PERSONA_BAJO_META,
-      entidadTipo: "persona",
-      entidadId: f.personaId,
-      payload: { periodo, scorecardId: f.scorecardId },
-    });
-    if (f.jefePersonaId) sumar(f.jefePersonaId, f.personaId);
-  }
-  for (const [jefe, personaIds] of porJefe) {
-    await ctx.eventos.emitir(tx, {
-      tipo: EVENTO_EQUIPO_BAJO_META,
-      entidadTipo: "persona",
-      entidadId: jefe,
-      payload: { periodo, personaIds },
-    });
-  }
 }
 
 /** Usuario de la ficha con membresía activa y permiso efectivo de ver resultados, o null. */
