@@ -19,9 +19,9 @@ test.describe("@preview finanzas: resumen del flujo de caja", () => {
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "flujo-resumen-mes");
 
-    await page.getByRole("link", { name: "2 semanas", exact: true }).click();
+    await page.getByRole("link", { name: "+2 sem.", exact: true }).click();
     await expect(page).toHaveURL(/atraso=2/);
-    await expect(page.getByText(/los clientes pagan 2 semanas tarde/)).toBeVisible();
+    await expect(page.getByText(/Escenario: los clientes pagan 2 semanas tarde/)).toBeVisible();
     await page.getByRole("link", { name: "Por semana", exact: true }).click();
     await expect(page).toHaveURL(/vista=semana/);
     await expect(page.getByText("Semana a semana")).toBeVisible();

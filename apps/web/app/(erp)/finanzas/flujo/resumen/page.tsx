@@ -37,14 +37,18 @@ export default function ResumenFlujo({ searchParams }: { searchParams: SearchPar
         const r = d.resumen;
         return (
           <>
-            <div className="mb-3 flex flex-wrap items-center gap-3">
+            <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
               <Segmentado etiqueta="Vista" activa={d.vista} Link={LinkNext} opciones={VISTAS.map((v) => ({ id: v.id, etiqueta: v.etiqueta, href: rutaResumen(v.id, d.atraso) }))} />
+              <span className="t-label">Si los clientes pagan</span>
               <Segmentado etiqueta="Si los clientes pagan" activa={d.atraso} Link={LinkNext} opciones={ATRASOS.map((a) => ({ id: a.id, etiqueta: a.etiqueta, href: rutaResumen(d.vista, a.id) }))} />
             </div>
+            {d.atraso !== "0" ? (
+              <p className="t-body-sm mb-3 text-warning-fg">Escenario: los clientes pagan {d.atraso === "1" ? "1 semana" : `${d.atraso} semanas`} tarde. Es una simulación; no se guarda nada.</p>
+            ) : null}
             <DashboardScreen
               state={r ? (r.periodos.length ? "ready" : "empty") : d.state === "ready" ? "error" : d.state}
               titulo="Resumen del flujo"
-              subtitulo={r?.fuenteSaldo === "ajustes" ? "Parte del saldo inicial de los ajustes: ninguna cuenta del banco tiene saldo." : d.atraso === "0" ? "Desde el saldo del banco de hoy." : `Escenario: los clientes pagan ${d.atraso === "1" ? "1 semana" : `${d.atraso} semanas`} tarde. No se guarda nada.`}
+              subtitulo={r?.fuenteSaldo === "ajustes" ? "Parte del saldo inicial de los ajustes: ninguna cuenta del banco tiene saldo." : "Desde el saldo del banco de hoy."}
               kpis={r ? kpis(r) : []}
               textos={{ vacio: { titulo: "Sin semanas para resumir", descripcion: "Revisa el horizonte en los ajustes del flujo.", accion: <EnlaceBoton href="/finanzas/flujo" variante="secondary">Ir al flujo</EnlaceBoton> } }}
             >

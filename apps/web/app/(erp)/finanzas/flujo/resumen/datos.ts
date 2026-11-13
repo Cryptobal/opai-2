@@ -13,9 +13,9 @@ export type Vista = (typeof VISTAS)[number]["id"];
 /** Escenarios de cobro (CAR-378): cuántas semanas tarde pagan los clientes. */
 export const ATRASOS = [
   { id: "0", etiqueta: "A tiempo" },
-  { id: "1", etiqueta: "1 semana tarde" },
-  { id: "2", etiqueta: "2 semanas" },
-  { id: "4", etiqueta: "4 semanas" },
+  { id: "1", etiqueta: "+1 sem." },
+  { id: "2", etiqueta: "+2 sem." },
+  { id: "4", etiqueta: "+4 sem." },
 ] as const;
 export type Atraso = (typeof ATRASOS)[number]["id"];
 

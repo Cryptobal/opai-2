@@ -6,8 +6,9 @@ import type { Resumen, Vista } from "./datos";
 
 const MESES = new Intl.DateTimeFormat("es-CL", { month: "long", year: "numeric", timeZone: "UTC" });
 const DIA = new Intl.DateTimeFormat("es-CL", { day: "numeric", month: "short", timeZone: "UTC" });
+const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const nombre = (clave: string, vista: Vista) =>
-  vista === "mes" ? MESES.format(new Date(`${clave}-01T00:00:00Z`)) : `Semana del ${DIA.format(new Date(`${clave}T00:00:00Z`))}`;
+  vista === "mes" ? mayuscula(MESES.format(new Date(`${clave}-01T00:00:00Z`))) : `Semana del ${DIA.format(new Date(`${clave}T00:00:00Z`))}`;
 const TONO = { peligro: "text-danger-fg", alerta: "text-warning-fg" } as const;
 
 /** Tabla de períodos: ingresos, egresos y saldo al cierre, con el tono de caja baja. */
@@ -26,9 +27,9 @@ export function Periodos({ r, vista }: { r: Resumen; vista: Vista }) {
         <tbody>
           {r.periodos.map((p) => (
             <Tr key={p.clave}>
-              <Td className="capitalize">
+              <Td>
                 {nombre(p.clave, vista)}
-                {vista === "mes" ? <span className="t-caption block normal-case">{p.semanas} {p.semanas === 1 ? "semana" : "semanas"}</span> : null}
+                {vista === "mes" ? <span className="t-caption block">{p.semanas} {p.semanas === 1 ? "semana" : "semanas"}</span> : null}
               </Td>
               <Td className="t-numeric text-right">{pesos(p.ingresos)}</Td>
               <Td className="t-numeric text-right">{pesos(p.egresos)}</Td>
