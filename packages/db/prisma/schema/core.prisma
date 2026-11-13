@@ -36,6 +36,7 @@ model Tenant {
   memberships        Membership[]
   roles              Rol[]
   gruposUsuarios     GrupoUsuarios[]
+  reglasAprobacion   ReglaAprobacion[]
   slackInstalacion   SlackInstalacion?
   grupoMiembros      GrupoUsuarioMiembro[]
   permisoExcepciones PermisoExcepcion[]
