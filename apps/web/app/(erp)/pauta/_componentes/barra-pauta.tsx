@@ -36,10 +36,11 @@ type Props = {
   verPpc: boolean;
   diaria: boolean;
   fecha: string;
+  puedeEditar: boolean;
 };
 
 /** Selector de instalación y de mes, filtro «Sin cubrir» y acceso al historial (todo en la URL). */
-export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha }: Props) {
+export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha, puedeEditar }: Props) {
   const { fijar } = useParametros();
   const irA = (delta: number) => {
     const m = mesVecino(anio, mes, delta);
@@ -90,7 +91,7 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
             <Button variant="secondary" onClick={() => fijar({ alertas: "1" })}>
               Alertas
             </Button>
-            {diaria ? null : <PublicarPauta inst={inst} anio={anio} mes={mes} />}
+            {!diaria && puedeEditar ? <PublicarPauta key={`${inst}-${anio}-${mes}`} inst={inst} anio={anio} mes={mes} /> : null}
           </>
         ) : null}
       </div>

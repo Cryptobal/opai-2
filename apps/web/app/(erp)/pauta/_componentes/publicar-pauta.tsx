@@ -69,7 +69,11 @@ export function PublicarPauta({ inst, anio, mes }: Props) {
     const r = await ejecutar<Resumen>(CAP, input, false, "ninguna", crypto.randomUUID());
     if (!r) return;
     setResumen(null);
-    setHecho(`Pauta publicada: ${plural(r.conUsuario, "aviso enviado", "avisos enviados")}.`);
+    setHecho(
+      r.conUsuario > 0
+        ? `Pauta publicada: ${plural(r.conUsuario, "aviso enviado", "avisos enviados")}.`
+        : "Pauta publicada; nadie tiene usuario para recibir el aviso.",
+    );
   };
 
   return (

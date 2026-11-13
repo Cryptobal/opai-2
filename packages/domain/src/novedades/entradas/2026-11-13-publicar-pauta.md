@@ -5,6 +5,7 @@ modulo: pauta
 titulo: Publica la pauta del mes y avisa a tus guardias
 car: CAR-356
 ruta: /pauta
+permiso: pauta:write
 ---
 En **Pauta**, al elegir una instalación en la vista mensual aparece el botón **Publicar**:
 
