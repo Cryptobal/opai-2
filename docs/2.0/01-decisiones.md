@@ -223,6 +223,9 @@ cambio de empresa, salvo `next` explícito seguro. Matriz, adaptación a #68 y p
 en `briefs/ENCARGO-nucleo-d1.md`; criterios técnicos del constructor, sin nuevas
 decisiones atribuidas a Carlos.
 
+
+**Adenda CAR-350 (13-nov-2026, Sesión Núcleo, modo noche; Estándares P-1).** Los roles base **gerente** y **lector** dejan de definirse por «todo menos…» (`*` con 40 denegaciones; `*:read`/`*:*.read`) y pasan a **lista explícita**: cada permiso del catálogo (núcleo en `permisos-base-nucleo.ts`, módulos en `permisos-base-modulos.ts`) lleva su clase (`GL`, `G`, `L` o `-`). Un permiso nuevo no lo recibe ninguno de los dos hasta que alguien lo clasifica en el mismo PR, y `apps/web/test/permisos-base.test.ts` falla si un permiso del catálogo real no está clasificado o si la clasificación nombra uno que ya no existe. La matriz no cambió: la misma prueba compara, permiso por permiso, contra los patrones anteriores. Owner, admin y supervisor siguen con sus patrones (supervisor conserva `ops:*`, `rondas:*`, `pauta:*` y `tickets:*`; pasarlo a lista es un pendiente aparte). Sin migración.
+
 ---
 
 ## ADR-017 · Calidad visual: primitivas accesibles, pulido y lint del DS
