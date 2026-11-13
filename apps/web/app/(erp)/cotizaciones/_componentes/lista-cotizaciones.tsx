@@ -23,8 +23,11 @@ export function ListaCotizaciones({
   base?: string;
 }) {
   const nueva = d.crear ? (
-    <EnlaceBotonHoja href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`} icono={Plus} className="lg:hidden">
-      Nueva cotización
+    <EnlaceBotonHoja
+      href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`}
+      icono={Plus}
+    >
+      Nueva
     </EnlaceBotonHoja>
   ) : undefined;
   return (
@@ -34,7 +37,11 @@ export function ListaCotizaciones({
       accion={nueva}
       buscar="Buscar cotización"
       filtros={[
-        { param: "ver", etiqueta: "Mostrar", opciones: [{ valor: "archivadas", etiqueta: "Archivadas" }] },
+        {
+          param: "ver",
+          etiqueta: "Mostrar",
+          opciones: [{ valor: "archivadas", etiqueta: "Archivadas" }],
+        },
       ]}
       meta={{
         izquierda: `${d.items.length} ${d.archivadas ? "archivadas" : "cotizaciones"}`,
@@ -43,7 +50,10 @@ export function ListaCotizaciones({
       seleccionada={seleccionada}
       vacio={
         d.archivadas
-          ? { titulo: "No hay cotizaciones archivadas", descripcion: "Las que archives aparecen aquí y se pueden restaurar." }
+          ? {
+              titulo: "No hay cotizaciones archivadas",
+              descripcion: "Las que archives aparecen aquí y se pueden restaurar.",
+            }
           : {
               titulo: "Aún no hay cotizaciones",
               descripcion: "Crea una cotización ligada a un negocio abierto.",
@@ -53,7 +63,10 @@ export function ListaCotizaciones({
       pie={
         d.siguiente ? (
           <LinkNext
-            href={conBusqueda(`${base}?cursor=${d.siguiente}${d.archivadas ? "&ver=archivadas" : ""}`, q)}
+            href={conBusqueda(
+              `${base}?cursor=${d.siguiente}${d.archivadas ? "&ver=archivadas" : ""}`,
+              q,
+            )}
             className="t-label text-accent"
           >
             Siguiente página

@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 
 import { avisar } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { BASE, type PortalRendicion } from "../tipos";
 

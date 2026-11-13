@@ -13,7 +13,7 @@ import {
 } from "@opai/domain";
 import { avisar, Button, Campo, Dialog, Input, Segmentado, Select } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 /**
  * «Nueva plantilla» del diseño 05: nombre, tipo y firma por defecto; al crearla abre el editor (06)

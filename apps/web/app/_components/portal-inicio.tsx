@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Select, Sheet, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { PORTALES } from "./portales";
 
