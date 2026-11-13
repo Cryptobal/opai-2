@@ -5,6 +5,7 @@ import { calcularPlanilla, semanasDesde, sumarSemanas, type CeldaFlujo } from ".
 import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { celdasCobrosEsperados } from "./cobros-esperados";
+import { celdasRecurrentes } from "./recurrentes-planilla";
 import { celdasAbonosSemana } from "./abonos-semana";
 import { llevarSaldo } from "./saldo-llevado";
 import { movidosDeLaSemana } from "./semana-en-curso";
@@ -67,8 +68,9 @@ export async function serieSaldos(
   // Lo movido esta semana que el saldo del banco ya incluye: la apertura lo resta y los abonos vuelven como ingreso real.
   const movidos = await movidosDeLaSemana(db, banco, hoy);
   const abonos = await celdasAbonosSemana(ctx, hoy, movidos, tx);
-  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio];
-  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
+  const recurrentes = await celdasRecurrentes(ctx, hoy, listaCalc, tx);
+  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio, ...recurrentes.dominio];
+  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...recurrentes.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,
@@ -133,8 +135,9 @@ async function serieDesdeAjustes(
   );
   const cobros = await celdasCobrosEsperados(ctx, lista);
   const impuestos = await celdasImpuestos(ctx, lista);
-  const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
+  const recurrentes = await celdasRecurrentes(ctx, hoy, lista, tx);
+  const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio, ...recurrentes.dominio];
+  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...recurrentes.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const calculo = calcularPlanilla({
     saldoInicial: saldoPrevio,
     umbral: ajustes.umbral,

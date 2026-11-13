@@ -12,8 +12,14 @@ async function primerEnlace(page: Page, lista: string, re: RegExp): Promise<stri
   return hrefs.find((h) => re.test(h)) ?? null;
 }
 
+/** Cada acción falla a los 30 s en vez de esperar sin límite: la auditoría anota el motivo y sigue. */
+function conLimite(...paginas: Page[]) {
+  for (const p of paginas) p.setDefaultTimeout(30_000);
+}
+
 /** Empareja `terreno` (otra página, sin sesión de ERP) con la primera instalación. */
 export async function emparejarTerreno(erp: Page, terreno: Page): Promise<string | null> {
+  conLimite(erp, terreno);
   const ficha = await primerEnlace(erp, "/instalaciones", /^\/instalaciones\/[0-9a-f-]{36}$/);
   if (!ficha) return "sin instalaciones en qa-e2e";
   await erp.goto(`${ficha}/dispositivos`);
@@ -34,6 +40,7 @@ export async function emparejarTerreno(erp: Page, terreno: Page): Promise<string
 
 /** Entra al portal del trabajador con un PIN temporal de la primera persona con PIN posible. */
 export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<string | null> {
+  conLimite(erp, trabajador);
   const ficha = await primerEnlace(erp, "/personas", /^\/personas\/[0-9a-f-]{36}$/);
   if (!ficha) return "sin personas en qa-e2e";
   await erp.goto(`${ficha}/laboral`);

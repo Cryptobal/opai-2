@@ -10,6 +10,7 @@
     "apps/web/app/(erp)/configuracion/importar/vista-previa.tsx": 2,
     "apps/web/app/(erp)/desempeno/_componentes/tipos.ts": 1,
     "apps/web/app/(erp)/desempeno/indicadores/_componentes/textos.ts": 1,
+    "apps/web/app/(erp)/desempeno/personas/[id]/page.tsx": 1,
     "apps/web/app/(erp)/finanzas/ventas/programacion/_componentes/periodo-uf.ts": 1,
     "apps/web/app/(erp)/finanzas/ventas/programacion/cierre/_componentes/pantalla-cierre.tsx": 1,
     "apps/web/app/(erp)/instalaciones/_componentes/titular-tipos.ts": 1,
@@ -31,6 +32,7 @@
     "packages/ds/src/components/impacto-sueldo.tsx": 1,
     "modules/asistencia/capabilities/formato.ts": 1,
     "modules/cpq/domain/documento/capitulo-instalacion.ts": 1,
+    "modules/finanzas/capacidades/bancos/cartola-leer.ts": 1,
     "modules/rendiciones/capabilities/contenido.ts": 1,
     "modules/rendiciones/domain/kilometraje.ts": 4
   },

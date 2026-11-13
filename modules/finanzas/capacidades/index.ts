@@ -12,6 +12,7 @@ import { flujoImportar } from "./importar";
 import { impuestosPostergarIva } from "./impuestos-postergar";
 import { filasListar, planillaObtener } from "./lectura";
 import { celdasMover } from "./mover";
+import { recurrentesActualizar, recurrentesCrear, recurrentesListar } from "./recurrentes";
 
 export const capacidades: readonly Capacidad[] = [
   planillaObtener,
@@ -29,5 +30,8 @@ export const capacidades: readonly Capacidad[] = [
   flujoImportar,
   flujoDerivadasListar,
   cuadraturaMensualObtener,
+  recurrentesListar,
+  recurrentesCrear,
+  recurrentesActualizar,
   ...capacidadesBancos,
 ];
