@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Campo, Dialog, Input, Textarea } from "@opai/ds";
+import { avisar, Button, Campo, Dialog, Input, InputFecha, Textarea } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -66,7 +66,7 @@ export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: 
         }
       >
         <div className="flex flex-col gap-3">
-          <Campo etiqueta="Fecha de pago" htmlFor="fecha-pago"><Input id="fecha-pago" type="date" value={fecha} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setFecha(e.target.value)} /></Campo>
+          <Campo etiqueta="Fecha de pago" htmlFor="fecha-pago"><InputFecha id="fecha-pago" valor={fecha} onCambiar={setFecha} /></Campo>
           <Campo etiqueta="Referencia (número de nómina o comprobante)" htmlFor="ref-pago"><Input id="ref-pago" value={referencia} maxLength={80} onChange={(e) => setReferencia(e.target.value)} /></Campo>
           {error ? <p role="alert" className="text-base font-medium text-danger-fg">{error}</p> : null}
         </div>

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button, Input, Select } from "@opai/ds";
+import { Button, InputFecha, Select } from "@opai/ds";
 
 import { type FiltrosBandeja, hrefBandeja } from "./tipos";
 
@@ -32,8 +32,8 @@ export function FiltrosBandejaForm({
         onCambiar={(v) => cambiar({ solicitanteId: v })}
         opciones={[{ valor: "", etiqueta: "Todas las personas" }, ...personas.map((p) => ({ valor: p.id, etiqueta: p.nombre }))]}
       />
-      <Input type="date" aria-label="Enviada desde" value={f.desde ?? ""} onChange={(e) => cambiar({ desde: e.target.value })} />
-      <Input type="date" aria-label="Enviada hasta" value={f.hasta ?? ""} onChange={(e) => cambiar({ hasta: e.target.value })} />
+      <InputFecha aria-label="Enviada desde" valor={f.desde ?? ""} onCambiar={(v) => cambiar({ desde: v })} />
+      <InputFecha aria-label="Enviada hasta" valor={f.hasta ?? ""} onCambiar={(v) => cambiar({ hasta: v })} />
       <Button variant="secondary" onClick={() => { const n = { estado: f.estado }; setF(n); ir(n); }}>
         Limpiar
       </Button>
