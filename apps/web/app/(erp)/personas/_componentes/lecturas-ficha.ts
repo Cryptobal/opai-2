@@ -60,6 +60,22 @@ export type Prevision = {
   planIsapre: string | null;
   planUf: string | null;
   cotizacionUfPct: string | null;
+  jubilado: boolean;
+  tipoPension: string | null;
+  cotizaAfp: boolean;
+  cotizaAfc: boolean;
+  cotizaSalud: boolean;
+  saludAdicionalPct: string | null;
+  apvInstitucion: string | null;
+  apvRegimen: string | null;
+  apvMonto: string | null;
+  apvMoneda: string | null;
+  tramoAsignacion: string | null;
+  cargasSimples: number | null;
+  cargasMaternales: number | null;
+  cargasInvalidez: number | null;
+  discapacidadInvalidez: string | null;
+  sensiblesOcultos: boolean;
 };
 export type CuentaPago = {
   bancoCodigo: string | null;

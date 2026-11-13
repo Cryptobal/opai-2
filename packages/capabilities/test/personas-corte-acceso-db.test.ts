@@ -1,4 +1,5 @@
-// CAR-355 parte 2: terminar el último vínculo corta el acceso en el mismo acto. Datos ficticios, empresa qa-*.
+// CAR-355 parte 2: terminar el último vínculo con fecha de hoy o pasada corta el acceso en el mismo acto
+// (el término futuro lo cubre personas-corte-programado-db.test.ts, CAR-385). Datos ficticios, empresa qa-*.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -22,7 +23,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
         portal: "erp", portalesMembresia: ["erp"], rol: "owner", modulosActivos: [],
         medidor: { registrar: async () => undefined },
       }),
-      "core.vinculos.terminar", { id, termino: "2026-11-30", motivo: "Término de prueba" }, o,
+      "core.vinculos.terminar", { id, termino: "2026-11-01", motivo: "Término de prueba" }, o,
     )) as R;
   /** Persona con usuario y membresía en la empresa, y un vínculo vigente (o dos). */
   const personaConUsuario = async (rut: string, rol: string, vinculos = 1, usuario?: string) => {
@@ -59,6 +60,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
     const r = await terminar(x.vinculo, { dryRun: true });
     expect(r.ok, JSON.stringify(r)).toBe(true);
     expect(r.data?.["accesos"]).toEqual({ personaInactiva: true, membresiasSuspendidas: 1, ownerConservado: false, sinSuspender: 0 });
+    expect(r.data?.["corteProgramado"]).toBeNull();
     expect((await e.admin.membership.findUnique({ where: { id: x.membresia } }))?.estado).toBe("activa");
     expect((await e.admin.persona.findUnique({ where: { id: x.persona } }))?.estado).toBe("activa");
   });

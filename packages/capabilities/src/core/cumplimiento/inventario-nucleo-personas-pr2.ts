@@ -4,7 +4,8 @@ import { defineDatosPersonales } from "@opai/domain";
 export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
   {
     tabla: "personas_prevision",
-    finalidad: "Previsión social de la persona trabajadora (AFP, régimen, salud e ISAPRE).",
+    finalidad:
+      "Previsión social de la persona trabajadora (AFP, régimen, pensión, salud e ISAPRE, APV, asignación familiar y discapacidad) para cotizar y remunerar.",
     categorias: ["laboral", "sensible"],
     campos: [
       "afp",
@@ -14,6 +15,21 @@ export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
       "plan_isapre",
       "plan_uf",
       "cotizacion_uf_pct",
+      "jubilado",
+      "tipo_pension",
+      "salud_adicional_pct",
+      "cotiza_afp",
+      "cotiza_afc",
+      "cotiza_salud",
+      "apv_institucion",
+      "apv_regimen",
+      "apv_monto",
+      "apv_moneda",
+      "tramo_asignacion",
+      "cargas_simples",
+      "cargas_maternales",
+      "cargas_invalidez",
+      "discapacidad_invalidez",
     ],
     camposSensibles: ["plan_isapre"],
     baseLicitud: "obligacion_legal",

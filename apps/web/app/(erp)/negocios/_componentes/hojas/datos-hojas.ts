@@ -31,7 +31,7 @@ export async function cargarHojas(
           (r) => (r.ok ? r.data.items : []),
         )
       : Promise.resolve([]),
-    abierta === "transferir"
+    abierta === "transferir" || abierta === "editar"
       ? ejecutarComoUsuario<Responsable[]>("erp", "comercial.negocios.responsables", {}).then((r) => (r.ok ? r.data : []))
       : Promise.resolve([]),
   ]);
