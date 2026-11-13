@@ -182,12 +182,19 @@ describe.skipIf(!urlPropietario)("desempeño: cierre de período contra Postgres
       personaId: persona.vera,
       periodo: "2026-11",
     });
-    expect(vera).toMatchObject({ puntaje: 50, cerrado: true, cargoId: cargo.vendedor });
+    // El mes en curso sale en la zona de la empresa (10-dic 12:00 en Santiago): el selector no ofrece meses futuros.
+    expect(vera).toMatchObject({
+      puntaje: 50,
+      cerrado: true,
+      cargoId: cargo.vendedor,
+      mesEnCurso: "2026-12",
+    });
     const equipo = await dato<{
       cerrado: boolean;
+      mesEnCurso: string;
       personas: { personaId: string; puntaje: number }[];
     }>(ctx(a), CARGO, { cargoId: cargo.vendedor, periodo: "2026-11" });
-    expect(equipo.cerrado).toBe(true);
+    expect(equipo).toMatchObject({ cerrado: true, mesEnCurso: "2026-12" });
     expect(
       new Map(equipo.personas.map((p) => [p.personaId, p.puntaje])).get(persona.victor ?? ""),
     ).toBe(100);
