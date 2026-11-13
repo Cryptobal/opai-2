@@ -33,3 +33,25 @@ Todo por `forTenant`; instalaciones y puestos con `dondeInstalacion`/`dondePuest
 ## 15 Riesgos
 
 Calcula el mes completo por instalación en cada consulta (sin caché); con muchas instalaciones conviene paginar o precalcular. La pantalla queda pendiente de diseño.
+
+## Segunda entrega · pantalla (aprobada por Carlos el 12-nov-2026, 23:25)
+
+**Objetivo.** Ver en pantalla el informe que ya existe por MCP y API (`pauta.informes.instalaciones`).
+
+**Diseño.** Propuesta hecha con el diseño nuevo (ADR-109) y aprobada en el chat. Registro: adenda CAR-330 en ADR-094.
+
+**Alcance.**
+- Pestaña **Por instalación** en la barra de la Pauta (junto a Mensual y Diaria), ruta `/pauta/instalaciones`. No entra al menú: Operaciones ya tiene sus 7 entradas.
+- `ListScreen`: en teléfono, una tarjeta por instalación con la cobertura destacada y una grilla de 2 columnas con por cubrir, refuerzos, ausentismo y atrasos; en iPad y escritorio, una tabla. La fila abre `/pauta?inst=…&mes=…`.
+- Mes y orden en la URL (`?mes=aaaa-mm`, `?orden=`; por defecto, menor cobertura). Descarga CSV del mes en pantalla, armada en el navegador desde lo ya leído (no hay consulta nueva ni ruta nueva).
+- El color marca solo el estado, con los umbrales de la adenda (no son metas). Ausentismo y atrasos se ocultan sin Asistencia o sin permiso, con un subtítulo que lo explica.
+
+**Archivos.** `apps/web/app/(erp)/pauta/instalaciones/` (page, datos, barra, vistas, valores) y el enlace en `pauta/_componentes/barra-pauta.tsx`.
+
+**Consultas por navegación.** 1 (`pauta.informes.instalaciones`).
+
+**Seguridad.** Sin capacidad nueva. La pantalla invoca la misma capacidad que el MCP, con alcance por instalación y auditoría de lectura.
+
+**Tests.** `e2e/pauta-instalaciones-preview.spec.ts` (`@preview`, 375/1024/1280). Sin datos de instalaciones en qa-e2e, la prueba verifica el estado vacío.
+
+**Pendiente.** Sembrar una instalación con pauta en qa-e2e para capturar la lista con datos.

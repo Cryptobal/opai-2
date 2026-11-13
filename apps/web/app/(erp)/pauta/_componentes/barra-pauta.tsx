@@ -49,6 +49,7 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
       <nav aria-label="Vistas de pauta" className="flex w-full gap-2">
         <Button variant={diaria ? "secondary" : "primary"} aria-current={!diaria ? "page" : undefined} onClick={() => fijar({ vista: null, ver: null, dia: null })}>Mensual</Button>
         <Button variant={diaria ? "primary" : "secondary"} aria-current={diaria ? "page" : undefined} onClick={() => fijar({ vista: "diaria", ver: null, dia: null })}>Diaria</Button>
+        <EnlaceBoton variante="secondary" href={`/pauta/instalaciones?mes=${claveMes(anio, mes)}`}>Por instalación</EnlaceBoton>
       </nav>
       <Select
         aria-label="Instalación"
