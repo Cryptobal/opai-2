@@ -35,9 +35,11 @@ test.describe("@preview ficha · ausencias", () => {
       await registrar.click();
       const hoja = page.getByRole("dialog").first();
       await expect(hoja.getByText("Registrar permiso o licencia").first()).toBeVisible();
-      await expect(hoja.getByRole("button", { name: "Ver turnos afectados" })).toBeDisabled();
+      // Con Pauta revisa los turnos afectados; sin Pauta, solo el registro (CAR-393).
+      const revisar = hoja.getByRole("button", { name: /Ver turnos afectados|Revisar/ });
+      await expect(revisar).toBeDisabled();
       await hoja.getByLabel("Motivo").fill("Licencia folio 12345");
-      await expect(hoja.getByRole("button", { name: "Ver turnos afectados" })).toBeEnabled();
+      await expect(revisar).toBeEnabled();
       await capturar(page, info, "ficha-ausencias-registrar");
     }
     expect(errores).toEqual([]);
