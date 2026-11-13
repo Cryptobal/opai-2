@@ -25,5 +25,6 @@ describe("vistas guardadas", () => {
     const once = Array.from({ length: 11 }, (_, i) => ({ nombre: `V${i}`, query: "" }));
     expect(() => esquema.parse({ cuentas: once })).toThrow();
     expect(() => esquema.parse({ "../x": [] })).toThrow();
+    expect(() => esquema.parse({ __proto__x: [] })).toThrow();
   });
 });

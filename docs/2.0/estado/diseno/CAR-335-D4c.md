@@ -7,7 +7,7 @@
 
 ## Qué entra
 
-- Botón «Vistas» en las listas que lo activan (primero Cuentas). Hace tres cosas:
+- Botón «Vistas» en Cuentas, Personas, Instalaciones, Cargos y Ventas. Hace tres cosas:
   - guarda la búsqueda y los filtros actuales con un nombre;
   - aplica una vista guardada;
   - quita una vista.
@@ -17,7 +17,9 @@
 
 ## Qué queda pendiente
 
-- Activar «Vistas» en el resto de las listas (Contactos, Instalaciones, Personas, Cotizaciones, Solicitudes…): es una línea por lista.
+- Activar «Vistas» en Contactos, Cotizaciones y Solicitudes cuando entre #643, que edita esas listas: es una línea por lista.
+- Guardar con un nombre ya usado reemplaza la vista sin avisar, y «Quitar» no tiene deshacer.
+- La auditoría de `core.config.set` guarda el mapa completo de vistas. Queda pendiente auditar solo la clave y la versión en las preferencias `navegacion_*`.
 - Las secciones como pestañas dentro de `ListScreen` (resto de D4c) y «Ver a pantalla completa» (D4b).
 
 ## Qué se decidió

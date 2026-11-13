@@ -21,6 +21,7 @@ export function VistasGuardadas({ lista, ruta }: { lista: string; ruta: string }
   const [nombre, setNombre] = useState("");
   const [guardando, setGuardando] = useState(false);
   const preparar = () => void (vistas === null && cargar());
+  const fallo = error !== null && !dialogo;
   const lleno = (vistas?.length ?? 0) >= MAXIMO;
   const items: ItemMenu[] = [
     ...(vistas ?? []).map((v, i) => ({
@@ -29,6 +30,7 @@ export function VistasGuardadas({ lista, ruta }: { lista: string; ruta: string }
       ...(i === 0 ? { grupo: "Tus vistas" } : {}),
       onSelect: () => router.push(`${ruta}${v.query}`),
     })),
+    ...(fallo ? [{ id: "error", etiqueta: error ?? "", deshabilitado: true, onSelect: () => {} }] : []),
     {
       id: "guardar",
       etiqueta: lleno ? `Máximo ${MAXIMO} vistas` : "Guardar esta vista…",
@@ -43,7 +45,8 @@ export function VistasGuardadas({ lista, ruta }: { lista: string; ruta: string }
       ...(i === 0 ? { grupo: "Quitar", separador: true } : {}),
       onSelect: () =>
         void guardar((vistas ?? []).filter((x) => x !== v)).then(
-          (ok) => ok && avisar.exito(`Vista «${v.nombre}» quitada`),
+          (ok) =>
+            ok ? avisar.exito(`Vista «${v.nombre}» quitada`) : avisar.error("No se pudo quitar la vista"),
         ),
     })),
   ];
@@ -71,7 +74,7 @@ export function VistasGuardadas({ lista, ruta }: { lista: string; ruta: string }
         }
         items={items}
         lado="abajo-izquierda"
-        claseDisparador="min-h-8 rounded-full border border-border bg-surface"
+        claseDisparador="min-h-11 rounded-full border border-border bg-surface md:min-h-8"
       />
       <Dialog
         abierto={dialogo}

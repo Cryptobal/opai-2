@@ -11,12 +11,13 @@ const fijadoSchema = z.object({
 /** Vista guardada de una lista (CAR-335 D4c): nombre y filtros de la URL, sin la ficha abierta. */
 const vistaSchema = z.object({
   nombre: z.string().trim().min(1).max(40),
-  query: z.string().max(400).regex(/^(\?[^\s#]*)?$/, "Usa solo filtros de la URL"),
+  query: z.string().max(400, "Los filtros son demasiado largos para guardarlos")
+    .regex(/^(\?[A-Za-z0-9%&=_.~+\-]*)?$/, "Usa solo filtros de la URL"),
 });
 export const MAXIMO_VISTAS = 10;
 const vistasSchema = z
-  .record(z.string().regex(/^[a-z0-9_-]{1,40}$/), z.array(vistaSchema).max(MAXIMO_VISTAS))
-  .refine((r) => Object.keys(r).length <= 60, "Demasiadas listas")
+  .record(z.string().regex(/^[a-z][a-z0-9_-]{0,39}$/), z.array(vistaSchema).max(MAXIMO_VISTAS))
+  .refine((r) => Object.keys(r).length <= 20, "Demasiadas listas")
   .refine(
     (r) => Object.values(r).every((v) => new Set(v.map((x) => x.nombre)).size === v.length),
     "No repitas el nombre de una vista",

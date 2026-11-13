@@ -21,7 +21,7 @@ export function useVistas(portal: string, lista: string) {
   const [error, setError] = useState<string | null>(null);
   const todas = useRef<Todas>({});
   const version = useRef(0);
-  const cargar = useCallback(async () => {
+  const cargar = useCallback(async (limpiar = true) => {
     const r = await ejecutarCapacidad(portal, "core.config.get", { modulo: "core" }).catch(
       () => null,
     );
@@ -29,7 +29,7 @@ export function useVistas(portal: string, lista: string) {
     const campo = (r.data as Campo[]).find((c) => c.clave === CLAVE);
     todas.current = (campo?.valor as Todas | undefined) ?? {};
     version.current = campo?.version ?? 0;
-    setError(null);
+    if (limpiar) setError(null);
     setVistas(todas.current[lista] ?? []);
   }, [portal, lista]);
   const guardar = useCallback(
@@ -44,8 +44,9 @@ export function useVistas(portal: string, lista: string) {
         "ninguna",
       ).catch(() => null);
       if (!r?.ok) {
+        // Primero se relee (otra pestaña pudo guardar) y después se muestra el error, que queda.
+        await cargar(false);
         setError(r?.error.message ?? "No se pudo guardar. Reintenta.");
-        await cargar();
         return false;
       }
       todas.current = valor;
