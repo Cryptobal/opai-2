@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Campo, Dialog, Input, Textarea } from "@opai/ds";
+import { avisar, Button, Campo, Dialog, Input, InputFecha, Textarea } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -12,13 +12,16 @@ import type { LoteDetalle, PermisosLote } from "./tipos";
 
 type Modal = "pagar" | "anular" | null;
 
+/** Hoy en hora de Chile (aaaa-mm-dd) sin cargar el formateador de dominio en el navegador. */
+const hoyIso = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
+
 /** Acciones del lote según su estado y los permisos de la persona; cada una vuelve a autorizarse en servidor. */
 export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: PermisosLote }) {
   const router = useRouter();
   const [modal, setModal] = useState<Modal>(null);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
+  const [fecha, setFecha] = useState(() => hoyIso());
   const [referencia, setReferencia] = useState("");
   const [motivo, setMotivo] = useState("");
   async function correr(llamar: () => ReturnType<typeof ejecutarCapacidad>, ok: string) {
@@ -61,12 +64,12 @@ export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: 
         acciones={
           <>
             <Button variant="secondary" onClick={() => setModal(null)} disabled={ocupado}>Volver</Button>
-            <Button disabled={ocupado || referencia.trim().length < 3} onClick={() => void correr(() => ejecutarCapacidad("erp", "rendiciones.lotes.marcar_pagado", { ...base, fechaPago: fecha, referencia: referencia.trim() }), `${lote.codigoVisible} pagado`)}>{ocupado ? "Guardando…" : "Marcar como pagado"}</Button>
+            <Button disabled={ocupado || !fecha || fecha > hoyIso() || referencia.trim().length < 3} onClick={() => void correr(() => ejecutarCapacidad("erp", "rendiciones.lotes.marcar_pagado", { ...base, fechaPago: fecha, referencia: referencia.trim() }), `${lote.codigoVisible} pagado`)}>{ocupado ? "Guardando…" : "Marcar como pagado"}</Button>
           </>
         }
       >
         <div className="flex flex-col gap-3">
-          <Campo etiqueta="Fecha de pago" htmlFor="fecha-pago"><Input id="fecha-pago" type="date" value={fecha} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setFecha(e.target.value)} /></Campo>
+          <Campo etiqueta="Fecha de pago" htmlFor="fecha-pago" error={fecha > hoyIso() ? "La fecha de pago no puede ser futura." : undefined}><InputFecha id="fecha-pago" valor={fecha} onCambiar={setFecha} invalido={fecha > hoyIso()} /></Campo>
           <Campo etiqueta="Referencia (número de nómina o comprobante)" htmlFor="ref-pago"><Input id="ref-pago" value={referencia} maxLength={80} onChange={(e) => setReferencia(e.target.value)} /></Campo>
           {error ? <p role="alert" className="text-base font-medium text-danger-fg">{error}</p> : null}
         </div>
