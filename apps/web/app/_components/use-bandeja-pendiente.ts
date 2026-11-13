@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 /**
  * Si la Bandeja tiene algo pendiente (avisos no leídos, aprobaciones o tareas de seguimiento, D5/D6): un solo

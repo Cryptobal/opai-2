@@ -2,7 +2,7 @@
 
 - **Sesión:** Sesión Comercial
 - **PR:** #634 · rama `fix/car-27-reportes-truncado`
-- **Estado:** En PR
+- **Estado:** Integrado (#634 `a3ce45f1`, 13-nov-2026)
 - **Migración:** No
 
 ## Qué entra

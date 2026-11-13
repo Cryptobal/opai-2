@@ -24,7 +24,9 @@ export type Cuenta = {
   clienteDesde: string | null;
   clienteHasta: string | null;
 };
-export type CuentaFila = ConEtiquetas<ConFacturar<Cuenta & { instalaciones: number; contactoPrincipal: string | null }>>;
+export type CuentaFila = ConEtiquetas<
+  ConFacturar<Cuenta & { instalaciones: number; contactoPrincipal: string | null }>
+>;
 export type CuentaDetalle = Cuenta & {
   representantes: { id: string; nombre: string; rut: string; email: string | null }[];
   contactos: { id: string; nombre: string; email: string | null; esPrincipal: boolean }[];
@@ -146,16 +148,4 @@ export type Cargo = {
   puestosActivos: number;
 };
 
-export type Actividad = {
-  items: {
-    id: string;
-    cuando: string;
-    capability: string;
-    actor: { tipo: string; nombre: string; agente: boolean };
-    via: string | null;
-    accion: string;
-    cambios: { campo: string; valor: string }[];
-    detalle: unknown;
-  }[];
-  siguiente: string | null;
-};
+export type { Actividad } from "./tipos-actividad";

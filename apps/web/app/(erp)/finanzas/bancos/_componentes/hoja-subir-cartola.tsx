@@ -143,6 +143,7 @@ export function HojaSubirCartola({
             rechazados={vista.rechazados}
             filas={vista.filas}
             cuadratura={vista.cuadratura}
+            yaImportada={vista.yaImportada ?? null}
           />
         ) : null}
       </div>
