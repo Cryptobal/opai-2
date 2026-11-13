@@ -31,8 +31,8 @@ test.describe("Cuenta · datos tributarios", () => {
     test.skip(!(await primera.count()), "Sin cuentas en este entorno");
     await primera.click();
     await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}/);
-    await expect(page.getByText("Datos tributarios")).toBeVisible();
-    await expect(page.getByText(/Lista para facturar|para facturar/).first()).toBeVisible();
+    await expect(page.getByText("Datos tributarios").filter({ visible: true }).first()).toBeVisible();
+    await expect(page.getByText(/Lista para facturar|para facturar/).filter({ visible: true }).first()).toBeVisible();
     await page.screenshot({
       path: info.outputPath("cuenta-datos-tributarios.png"),
       fullPage: true,

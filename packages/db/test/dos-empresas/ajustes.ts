@@ -101,6 +101,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },
   "pauta.registros_operativos": { valores: () => ({ tipo: "cobertura_confirmada", estado: "activa", motivo: "" }) },
+  // Publicación de la pauta (CAR-356): CHECK del mes aaaa-mm.
+  "pauta.publicaciones": { fijas: ["mes"], valores: () => ({ mes: "2026-12" }) },
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },
@@ -304,7 +306,6 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.flujo_filas": { valores: () => ({ seccion: "ingreso" }) },
   "finanzas.flujo_celdas": { valores: () => ({ semana: "2026-01-05", monto: 1 }) },
   "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
-  "finanzas.flujo_ajustes": { valores: () => ({ desde: "2026-01-05" }) },
   "finanzas.flujo_avisos_emitidos": { valores: () => ({ semana: "2026-01-05", saldo_proyectado: 0 }) },
   // CAR-138 PR 6 · capítulo por instalación: CHECK de sección y origen.
   "cpq.propuesta_capitulos": { fijas: ["seccion_clave", "origen"], valores: () => ({ seccion_clave: "alcance", origen: "manual", contenido: "x" }) },

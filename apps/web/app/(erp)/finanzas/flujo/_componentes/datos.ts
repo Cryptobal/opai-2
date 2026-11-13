@@ -30,9 +30,7 @@ export type SemanaFlujo = {
   pasada: boolean;
 };
 export type AjustesFlujo = {
-  saldoInicial: number;
   umbral: number;
-  desde: string;
   horizonteSemanas: number;
   calendarioPagos: Record<string, number | undefined>;
   avisoActivo: boolean;
