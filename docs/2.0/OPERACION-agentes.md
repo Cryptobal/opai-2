@@ -197,6 +197,18 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 ---
 
+### A2.11 Sin GitHub Actions: gate local (Carlos, 13-nov-2026, ADR-112; temporal)
+
+Mientras GitHub Actions esté bloqueado y la regla «Proteger main» desactivada, **ninguna sesión integra sin esto**:
+
+1. Trae `main` a la rama con merge y empuja.
+2. En una copia limpia del head exacto, corre `scripts/gate-local.sh`, con Postgres local `postgres/postgres` o `GATE_DB_URL`. Todo debe salir `:ok`.
+3. Si hay cambio visual, corre `scripts/gate-local-visual.sh e2e/<tu-spec>.spec.ts` y revisa las capturas de `apps/web/test-results/playwright`.
+4. Comenta en el PR «Gate local» con el SHA completo y el resultado de cada paso, y la revisión final sin bloqueos sobre ese SHA.
+5. Integra con squash fijando `sha=<head>`, uno a la vez y en el orden acordado. Si `main` cambió entre medio, vuelve al paso 1.
+
+No se empujan commits vacíos para «despertar» CI ni se relanzan jobs: con Actions bloqueado fallan sin costo, pero llenan las notificaciones.
+
 ### ⚠ Contradicciones con el repo (se resuelven a favor de esta sección)
 
 | # | Dónde | Qué dice hoy | Qué rige desde el 28-oct |

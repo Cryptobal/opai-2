@@ -2161,3 +2161,23 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Alineación.** Quedan corregidas las frases que aún decían que el bot «OPAI 2.0» aplica las migraciones o que la sesión no las aplica: desde ADR-104 las aplica la sesión con respaldo, y el bot no integra ni migra. El veto de Carlos y la condición de `preview-e2e` para cambios visuales siguen vigentes también de noche. `REFERENTES-saas.md` llega con el PR #591 (CAR-348); mientras no esté en `main`, se usa el referente SaaS más cercano.
 
+
+## ADR-112 · Integración sin GitHub Actions mientras dure el bloqueo de pago, y ahorro de Actions (13-nov-2026)
+
+**Fecha:** 13-nov-2026 · **Estado:** vigente (la parte A es temporal) · **Decidió:** Carlos (chat de la Sesión Diseño, 13-nov-2026, 11:23, hora de Chile) · **Registra:** Claude («Sesión Diseño»). **Modifica** `.github/workflows/*`, `docs/2.0/OPERACION-agentes.md` (A2.11) y agrega `scripts/gate-local.sh` y `scripts/gate-local-visual.sh`.
+
+**Contexto.** Desde el 13-nov a las 05:36 (Chile) GitHub Actions no arranca ningún job («recent account payments have failed or your spending limit needs to be increased»). El gasto de Actions del mes iba en ~US$1.150 en 13 días, casi todo de `opai-2`: diez shards de e2e por cada push a `main` y por cada PR con la etiqueta `e2e`, más la revisión de diseño con Claude en cada push.
+
+**Decisión A (temporal, mientras Actions esté bloqueado).** Carlos desactivó la regla «Proteger main» (sus cuatro checks solo los puede cumplir GitHub Actions). Mientras siga desactivada:
+1. Cada sesión corre `scripts/gate-local.sh` sobre el **head exacto** del PR (después de traer `main` con merge). Equivale a los cuatro checks: typecheck, lint, test, test:db, build y presupuesto de JS, secretos (gitleaks) y aviso de migraciones nuevas.
+2. Si el PR tiene cambio visual, corre `scripts/gate-local-visual.sh <specs>` (los e2e `@preview` contra la app local sembrada con la empresa ficticia) y revisa las capturas: reemplaza a `preview-e2e`.
+3. Deja en el PR un comentario «Gate local» con el SHA completo y el resultado de cada paso, más la revisión final sin bloqueos sobre ese SHA, y recién entonces integra con squash usando `sha=<head>` (si el head cambió, no integra).
+4. Siguen iguales: el veto de Carlos, las migraciones con respaldo (ADR-104), un PR a la vez en orden y nunca push directo a `main`.
+5. Cuando Actions vuelva, Carlos reactiva la regla y esta parte queda sin efecto.
+
+**Decisión B (permanente, ahorro).**
+1. Los e2e completos (10 shards) ya no corren en cada push a `main`: corren de noche (03:00), a mano (`workflow_dispatch`) y en PRs con la etiqueta `e2e`.
+2. `revision-diseno` (Claude) corre solo en PRs con la etiqueta `revision-diseno`.
+3. Todos los jobs usan `runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}`. Para usar un runner propio (Linux con Docker; los minutos no se cobran) basta definir la variable de repositorio `RUNNER_LINUX=self-hosted`. Los pasos que amplían swap con `sudo` corren solo en runners de GitHub.
+
+**Riesgo aceptado.** Mientras dure A, nada impide técnicamente integrar sin gate; el control es este contrato y el comentario de evidencia en cada PR.
