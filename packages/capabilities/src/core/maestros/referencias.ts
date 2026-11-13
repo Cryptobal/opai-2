@@ -34,8 +34,15 @@ export const cuentasReferenciasList = defineCapability({
       .describe(
         "Con cuentaId: todos los otorgamientos y revocaciones, del más nuevo al más antiguo.",
       ),
+    // CAR-353: contrato único de listas (cursor + limite; items + siguiente) sobre `items`.
+    cursor: uuidSchema.optional().describe("Valor de «siguiente» de la página anterior."),
+    limite: z.number().int().min(1).max(200).default(200),
   }),
-  output: z.object({ items: z.array(referenciaSchema), historial: z.array(referenciaSchema) }),
+  output: z.object({
+    items: z.array(referenciaSchema),
+    siguiente: z.string().nullable(),
+    historial: z.array(referenciaSchema),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -48,7 +55,16 @@ export const cuentasReferenciasList = defineCapability({
     const ultimas = (await ultimasReferencias(ctx, donde))
       .map((f) => vistaReferencia(f, hoy, ver))
       .filter((v) => !input.soloVigentes || v.vigente)
-      .sort((a, b) => a.cuentaNombre.localeCompare(b.cuentaNombre, "es"));
+      .sort(
+        (a, b) =>
+          a.cuentaNombre.localeCompare(b.cuentaNombre, "es") || (a.cuentaId < b.cuentaId ? -1 : 1),
+      );
+    // Un cursor que ya no está (revocada entre páginas, otra empresa) termina la lista, no la reinicia.
+    const enCursor = ultimas.findIndex((v) => v.cuentaId === input.cursor);
+    const desde = !input.cursor ? 0 : enCursor < 0 ? ultimas.length : enCursor + 1;
+    const pagina = ultimas.slice(desde, desde + input.limite);
+    const siguiente =
+      desde + input.limite < ultimas.length ? (pagina.at(-1)?.cuentaId ?? null) : null;
     const historial =
       input.historial && input.cuentaId
         ? (
@@ -60,7 +76,7 @@ export const cuentasReferenciasList = defineCapability({
             })
           ).map((f) => vistaReferencia(f, hoy, ver))
         : [];
-    return { items: ultimas, historial };
+    return { items: pagina, siguiente, historial };
   },
 });
 
