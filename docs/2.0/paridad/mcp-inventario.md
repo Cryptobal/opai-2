@@ -1112,12 +1112,17 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.margen`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
+- `finanzas.cartolas.deshacer`
+- `finanzas.cartolas.listar`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.fijar_fecha_esperada`
 - `finanzas.cuadratura.obtener`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.flujo.postergar_iva`
+- `finanzas.recurrentes.actualizar`
+- `finanzas.recurrentes.crear`
+- `finanzas.recurrentes.listar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`

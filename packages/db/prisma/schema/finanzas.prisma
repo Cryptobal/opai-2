@@ -20,7 +20,8 @@ model FlujoFila {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  celdas FlujoCelda[]
+  celdas      FlujoCelda[]
+  recurrentes FlujoRecurrente[]
 
   @@unique([tenantId, etiqueta])
   @@index([tenantId, seccion, orden])
@@ -875,5 +876,40 @@ model VentasCierreSeguimiento {
 
   @@index([tenantId, estado])
   @@map("ventas_cierre_seguimientos")
+  @@schema("finanzas")
+}
+
+/// Gasto recurrente del flujo de caja (CAR-349): una regla por fila que se expande al leer (ADR-026); nada se copia
+/// a celdas. Cada cuota queda pagada cuando un cargo conciliado a su fila cae en su ventana.
+model FlujoRecurrente {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  filaId        String    @map("fila_id") @db.Uuid
+  concepto      String
+  /// CLP entero, en positivo; el signo lo da la sección de la fila.
+  monto         BigInt
+  /// "semanal" | "quincenal" | "mensual".
+  frecuencia    String
+  /// Solo mensual: 1 a 31 (se ajusta al último día del mes) o −1 = último día del mes.
+  diaDelMes     Int?      @map("dia_del_mes")
+  inicio        DateTime  @db.Date
+  fin           DateTime? @db.Date
+  repeticiones  Int?
+  /// Días antes y después de cada cuota en que un cargo de la fila la da por pagada.
+  ventanaAntes   Int      @default(5) @map("ventana_antes")
+  ventanaDespues Int      @default(10) @map("ventana_despues")
+  activa        Boolean   @default(true)
+  nota          String?
+  /// Clave del origen al importar (p. ej. «opai1:<id>»): hace idempotente la importación.
+  claveOrigen   String?   @map("clave_origen")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fila FlujoFila @relation(fields: [filaId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, claveOrigen])
+  @@index([tenantId, activa])
+  @@index([filaId])
+  @@map("flujo_recurrentes")
   @@schema("finanzas")
 }
