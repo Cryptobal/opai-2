@@ -22,10 +22,15 @@ export async function ejecutarSiguientes(
   const salida = c.output.safeParse(resultado.data);
   if (!salida.success) return [];
   // Lo aprobado ya se ejecutó: un error al armar los pasos no puede impedir guardar el resultado.
-  let porHacer: readonly { capability: string; input: unknown }[] = [];
-  try {
-    porHacer = c.aprobable.siguientes(salida.data);
-  } catch {
+  const siguientes = c.aprobable.siguientes;
+  const porHacer = (() => {
+    try {
+      return siguientes(salida.data);
+    } catch {
+      return null;
+    }
+  })();
+  if (!porHacer)
     return [
       {
         capability: a.capability,
@@ -33,7 +38,6 @@ export async function ejecutarSiguientes(
         mensaje: "No se pudieron preparar los pasos siguientes.",
       },
     ];
-  }
   const pasos: PasoSiguiente[] = [];
   for (const paso of porHacer) {
     const r = await executeCapability(ctx, paso.capability, paso.input).catch(() => null);
