@@ -1,11 +1,7 @@
 import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
 
 import { capacidades as capacidadesFlujo } from "./capacidades";
-import {
-  PERMISO_CONFIGURAR,
-  PERMISO_GESTIONAR,
-  PERMISO_VER,
-} from "./capacidades/permisos";
+import { PERMISO_CONFIGURAR, PERMISO_GESTIONAR, PERMISO_VER } from "./capacidades/permisos";
 import {
   PERMISO_BANCOS_AUTORIZAR,
   PERMISO_BANCOS_GESTIONAR,
