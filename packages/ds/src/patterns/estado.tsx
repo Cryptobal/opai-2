@@ -24,6 +24,19 @@ type Props = {
 /** Resuelve los cuatro estados estándar; en `ready` renderiza el contenido. */
 export function Estado({ state, variante, textos, children }: Props) {
   if (state === "loading") return <Loading variante={variante} />;
+  const aviso = avisoDe(state, textos);
+  if (!aviso) return <>{children}</>;
+  // En una lista las filas van de borde a borde; el aviso no: lleva margen (CAR-340).
+  return variante === "lista" ? (
+    <div data-estado-lista="" className="p-4">
+      {aviso}
+    </div>
+  ) : (
+    aviso
+  );
+}
+
+function avisoDe(state: EstadoPantalla, textos: Props["textos"]) {
   if (state === "forbidden") return <Forbidden />;
   if (state === "error") {
     const e = textos?.error;
@@ -55,7 +68,7 @@ export function Estado({ state, variante, textos, children }: Props) {
       />
     );
   }
-  return <>{children}</>;
+  return null;
 }
 
 export type CabeceraProps = {
@@ -92,7 +105,9 @@ export function Cabecera(props: CabeceraProps) {
     <div
       className={cn(
         "mb-4 flex gap-x-3 gap-y-2",
-        apilada ? "flex-col md:flex-row md:items-start md:justify-between" : "flex-wrap items-start justify-between",
+        apilada
+          ? "flex-col md:flex-row md:items-start md:justify-between"
+          : "flex-wrap items-start justify-between",
         props.soloTelefono && "md:hidden",
       )}
     >
