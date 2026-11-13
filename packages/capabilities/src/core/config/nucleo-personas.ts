@@ -10,9 +10,33 @@ import { defineAjustes } from "./registro";
  * valor de negocio decidido: 0 = sin tope, y la capacidad no lo exige todavía. TODO(decisión Carlos):
  * fijar el plazo máximo (o confirmar que no lo hay) antes de aplicarlo como validación.
  */
+const pasosProceso = (etiqueta: string, ayuda: string) =>
+  z
+    .array(z.object({ titulo: z.string().trim().min(3).max(120), plazoDias: z.number().int().min(-30).max(90) }))
+    .max(30)
+    .default([])
+    .meta({
+      etiqueta,
+      ayuda,
+      grupo: "Personas",
+      ambito: "tenant",
+      permiso: PERMISOS_CORE.vinculosManage,
+      soloPersonas: true,
+      control: "json",
+    });
+
 export const AJUSTES_PERSONAS = defineAjustes(
   "core",
   z.object({
+    // CAR-355: pasos de ingreso y salida. Vacío = los de la vertical de la empresa (@opai/domain).
+    personas_pasos_ingreso: pasosProceso(
+      "Pasos de ingreso de una persona",
+      'Se abren al crear un vínculo. Vacío: los de tu rubro. Ej.: [{ "titulo": "Firmar contrato", "plazoDias": 15 }]. El plazo cuenta desde el inicio.',
+    ),
+    personas_pasos_salida: pasosProceso(
+      "Pasos de salida de una persona",
+      'Se abren al terminar el último vínculo. Vacío: los de tu rubro. Ej.: [{ "titulo": "Firmar finiquito", "plazoDias": 10 }]. El plazo cuenta desde el término.',
+    ),
     personas_no_recontratar_vigencia_maxima_dias: z
       .number()
       .int()

@@ -303,6 +303,8 @@ core_plantillas_enviar_prueba
 core_plantillas_get
 core_plantillas_preview
 core_plantillas_update
+core_procesos_persona_listar
+core_procesos_persona_paso_actualizar
 core_puestos_create
 core_puestos_get
 core_puestos_list
@@ -721,6 +723,7 @@ preview_core_personas_update
 preview_core_personas_vincular_usuario
 preview_core_plantillas_enviar_prueba
 preview_core_plantillas_update
+preview_core_procesos_persona_paso_actualizar
 preview_core_puestos_create
 preview_core_puestos_set_estado
 preview_core_puestos_update

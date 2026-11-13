@@ -19,6 +19,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { type Seccion, seccion as s } from "./seccion-tipo";
 import { SECCIONES_FINANZAS } from "./secciones-finanzas";
 import { SECCIONES_OPERACION } from "./secciones-operacion";
+import { SECCIONES_PERSONAS } from "./secciones-personas";
 
 export type { Seccion };
 
@@ -78,6 +79,7 @@ export const SECCIONES: readonly Seccion[] = [
   }),
   ...SECCIONES_FINANZAS,
   ...SECCIONES_OPERACION,
+  ...SECCIONES_PERSONAS,
   s({
     id: "usuarios",
     titulo: "Usuarios y permisos",
