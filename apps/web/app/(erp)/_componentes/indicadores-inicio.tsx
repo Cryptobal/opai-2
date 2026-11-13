@@ -8,7 +8,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { esFalloReal } from "./fallo-bloque";
 import { ReintentarBloque } from "./reintentar-bloque";
 import { armarIndicadores, type Indicadores, ordenarTarjetas } from "./indicadores-armar";
-import { PersonalizarIndicadores } from "./personalizar-indicadores";
+import { PersonalizarIndicadores } from "./personalizar-diferido";
 
 /** Indicadores del Inicio (CAR-182): solo los que el usuario puede ver, cada uno como enlace a su lista.
  *  Sin permiso (FORBIDDEN) la sección no aparece; un fallo real se dice en una fila, sin tumbar el resto. */
@@ -26,7 +26,9 @@ export async function IndicadoresInicio({ personalizar = false }: { personalizar
       </div>
     );
   }
-  const tarjetas = ordenarTarjetas(armarIndicadores(r.data, UF_ESCALA), r.data.orden);
+  const todas = armarIndicadores(r.data, UF_ESCALA);
+  // La elección de la empresa solo rige en el diseño nuevo: el clásico y Hilo no cambian.
+  const tarjetas = personalizar ? ordenarTarjetas(todas, r.data.orden) : todas;
   if (tarjetas.length === 0) return null;
   const rejilla = (
     <section
@@ -52,7 +54,10 @@ export async function IndicadoresInicio({ personalizar = false }: { personalizar
   if (!personalizar || !r.data.editable) return rejilla;
   return (
     <div className="flex flex-col gap-2">
-      <PersonalizarIndicadores elegidos={r.data.orden ?? tarjetas.map((t) => t.id)} />
+      <PersonalizarIndicadores
+        key={(r.data.elegidos ?? []).join()}
+        elegidos={r.data.elegidos ?? []}
+      />
       {rejilla}
     </div>
   );

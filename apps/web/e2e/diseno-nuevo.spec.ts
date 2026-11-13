@@ -67,16 +67,15 @@ test.describe("@preview diseño nuevo con sesión", () => {
         "aria-selected",
         "true",
       );
-      // «Personalizar» (si qa-e2e puede configurar): se abre y se cierra sin cambiar la elección,
-      // porque la elección es de la empresa y otras pruebas leen sus indicadores.
+      // «Personalizar» (qa-e2e es administrador): se abre y se cierra sin cambiar la elección, porque
+      // la elección es de la empresa y otras pruebas leen sus indicadores. El guardado se prueba en
+      // unidad (inicio-indicadores-orden.test.ts).
       const personalizar = page.getByRole("button", { name: "Personalizar" });
-      if (await personalizar.isVisible()) {
-        await hidratado(personalizar);
-        await personalizar.click();
-        await expect(page.getByRole("button", { name: /Cobertura hoy/ })).toBeVisible();
-        await captura(page, "nuevo-inicio-personalizar", info);
-        await page.getByRole("button", { name: "Listo" }).click();
-      }
+      await hidratado(personalizar);
+      await personalizar.click();
+      await expect(page.getByRole("button", { name: "Cobertura hoy" })).toBeVisible();
+      await captura(page, "nuevo-inicio-personalizar", info);
+      await page.getByRole("button", { name: "Listo" }).click();
 
       if (ancho(page) >= 1024) {
         const ocultar = page.getByRole("button", { name: "Ocultar el menú" });

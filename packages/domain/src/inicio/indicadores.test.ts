@@ -19,3 +19,15 @@ describe("indicadores de Inicio elegidos por la empresa (CAR-335 D3)", () => {
     expect(ordenarIndicadores(["x", "negocios", "negocios"], ["negocios"])).toEqual(["negocios"]);
   });
 });
+
+describe("agenda de Inicio (CAR-335 D3)", () => {
+  it("cuenta días calendario en la zona: mañana sí, hoy no, el día 14 sí y el 15 no", async () => {
+    const { enAgenda } = await import("../actividades-tareas");
+    const ahora = new Date("2026-11-12T15:00:00-03:00");
+    expect(enAgenda("2026-11-12T20:00:00-03:00", ahora)).toBe(false);
+    expect(enAgenda("2026-11-13T09:00:00-03:00", ahora)).toBe(true);
+    expect(enAgenda("2026-11-26T23:00:00-03:00", ahora)).toBe(true);
+    expect(enAgenda("2026-11-27T08:00:00-03:00", ahora)).toBe(false);
+    expect(enAgenda(null, ahora)).toBe(false);
+  });
+});

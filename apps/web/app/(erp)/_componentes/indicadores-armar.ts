@@ -19,6 +19,8 @@ export type Indicadores = {
   orden?: string[];
   /** Quien mira puede cambiar esa elección. */
   editable?: boolean;
+  /** Elección completa de la empresa (solo si es editable). */
+  elegidos?: string[];
 };
 
 export type Tarjeta = {

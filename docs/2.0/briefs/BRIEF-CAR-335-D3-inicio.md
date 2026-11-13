@@ -85,4 +85,9 @@ Gate completo, presupuesto de JS y `preview-e2e` con capturas revisadas contra e
 Rollback: revertir el PR. El ajuste queda guardado sin uso.
 
 ## 16. Reporte de ejecución
-Pendiente.
+Diferencias con este brief:
+- El ajuste se declaró en `core/config/nucleo-inicio.ts`, no en `nucleo.ts`, por el límite de 150 líneas.
+- La agenda trae solo tareas con fecha. Los vencimientos de documentos quedan para cuando haya una lectura por fecha.
+- El `@preview` abre y cierra «Personalizar» sin guardar, para no cambiar los indicadores de qa-e2e que leen otras pruebas en paralelo. El guardado se prueba en unidad.
+- `core.inicio.indicadores` también devuelve `elegidos`, la elección completa de la empresa, solo a quien puede editarla. Así quien no ve un indicador no lo borra sin querer.
+- La elección de la empresa rige solo en el diseño nuevo.

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ordenarIndicadores, PERMISOS_CORE } from "@opai/domain";
+import { INDICADORES_INICIO, ordenarIndicadores, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { ajuste } from "../config/valores";
@@ -50,6 +50,12 @@ export const inicioIndicadores = defineCapability({
       .describe(
         "Indicadores a mostrar, en el orden que eligió la empresa (core.inicio_indicadores).",
       ),
+    editable: z
+      .boolean()
+      .describe("Quien consulta puede cambiar la elección (core:config.manage)."),
+    elegidos: z
+      .array(z.string())
+      .describe("Elección de la empresa sin filtrar por permisos; vacía si no es editable."),
   }),
   // Son totales de la empresa: no revelan ninguna ficha, así que no hay IDs que auditar.
   auditarLectura: () => [],
@@ -65,6 +71,7 @@ export const inicioIndicadores = defineCapability({
     ]);
     const valores = { cobertura, negocios, facturado, tickets };
     const elegidos = await ajuste<string[]>(ctx, "core", "inicio_indicadores");
+    const editable = ctx.autorizar(PERMISOS_CORE.configManage);
     const disponibles = Object.entries(valores)
       .filter(([, v]) => v !== null)
       .map(([id]) => id);
@@ -72,7 +79,10 @@ export const inicioIndicadores = defineCapability({
       ...valores,
       cotizacionesPorAprobar: porAprobar,
       orden: ordenarIndicadores(elegidos ?? [], disponibles),
-      editable: ctx.autorizar(PERMISOS_CORE.configManage),
+      editable,
+      // Solo quien puede cambiarla ve la elección completa: así no se borra sin querer un
+      // indicador que esa persona no alcanza a ver.
+      elegidos: editable ? ordenarIndicadores(elegidos ?? [], INDICADORES_INICIO) : [],
     };
   },
 });

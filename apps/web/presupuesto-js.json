@@ -3,7 +3,7 @@
   "porDefecto": 168,
   "maxSobreFramework": 38,
   "rutas": {
-    "/(erp)": 175,
+    "/(erp)": 176,
     "/(erp)/tareas": 173,
     "/(erp)/agente/historial": 176,
     "/(erp)/finanzas/ventas/programacion/*": 175,
