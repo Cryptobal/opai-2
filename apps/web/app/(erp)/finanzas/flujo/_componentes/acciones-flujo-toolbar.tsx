@@ -15,6 +15,9 @@ type Props = {
 export function AccionesFlujoEscritorio({ configura, onImportar }: Props) {
   return (
     <div className="hidden flex-wrap gap-2 xl:flex">
+      <EnlaceBoton href="/finanzas/flujo/recurrentes" variante="secondary">
+        Gastos recurrentes
+      </EnlaceBoton>
       <EnlaceBoton href="/finanzas/flujo?vista=movil" variante="secondary">
         Vista celular
       </EnlaceBoton>
@@ -43,6 +46,11 @@ export function AccionesFlujoMovil({ configura, onImportar }: Props) {
         className="relative inline-flex"
         disparador={<MoreHorizontal className="size-5" aria-hidden />}
         items={[
+          {
+            id: "recurrentes",
+            etiqueta: "Gastos recurrentes",
+            onSelect: () => router.push("/finanzas/flujo/recurrentes"),
+          },
           {
             id: "movil",
             etiqueta: "Vista celular",
