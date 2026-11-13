@@ -10,6 +10,7 @@ export {
   VERSION_CONTRATO,
 } from "./corridas";
 export { calcularPlan, type Plan } from "./plan";
+export { soloCotizaciones } from "./plan-solo-cotizaciones";
 export { OPCIONES_POR_DEFECTO, type OpcionesPlan, modulosDelPlan } from "./opciones";
 export { construirReporte, type Reporte, resumenLegible } from "./reporte";
 export { leerEstadoDestino, leerEstadoDestinoPorTenantId } from "./destino";
