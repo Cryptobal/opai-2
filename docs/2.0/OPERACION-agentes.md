@@ -8,7 +8,7 @@
 
 ## A. Flujo nuevo (acordado con Carlos el 28-oct-2026)
 
-> **Frente único (Carlos, 4-nov-2026, ADR-070).** Las sesiones de Claude **planifican, construyen e integran sus propios PRs**. El bot «OPAI 2.0» **no integra ni escribe encargos o briefs**: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:` y toma capturas) y **aplica las migraciones de Neon con respaldo cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos»** sobre el head del PR. Donde más abajo se diga que el bot integra, o que Claude también aplica migraciones (ADR-060, ADR-063), rige esta nota.
+> **Frente único (Carlos, 4-nov-2026, ADR-070).** Las sesiones de Claude **planifican, construyen e integran sus propios PRs**. El bot «OPAI 2.0» **no integra ni escribe encargos o briefs**: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:` y toma capturas). **Desde ADR-104 (12-nov-2026) las migraciones de Neon las aplica la sesión que construyó el PR**, con respaldo previo, y ninguna sesión espera al bot. Donde más abajo se diga que el bot integra o aplica migraciones, rigen esta nota, ADR-104 y el «Modo noche» de `AGENTS.md` (ADR-111).
 
 1. **El repo es la fuente única.** Briefs, decisiones, estado y pendientes viven en `docs/2.0/`.
 2. **Quién hace qué.**
@@ -81,7 +81,7 @@ OPAI 2.0 actúa **24 h** ante estas señales (no repite la revisión técnica de
 
 ### A2.5 Sesiones en paralelo (Carlos, 12-nov-2026 · ADR-108)
 
-**Regla de fondo.** Las sesiones avanzan solas y no se frenan entre sí. Una sesión se detiene **solo** cuando Carlos tiene que decidir negocio o producto, o cuando el paso es irreversible, toca plata, datos reales, producción, OPAI 1.0 o el tenant Gard, o necesita un secreto. Ni la revisión del bot «OPAI 2.0» ni la integración a `main` son una puerta para seguir trabajando.
+**Regla de fondo.** Las sesiones avanzan solas y no se frenan entre sí. Una sesión se detiene **solo** cuando Carlos tiene que decidir negocio o producto, o cuando el paso es irreversible, toca plata, datos reales, producción, OPAI 1.0 o el tenant Gard, o necesita un secreto. Ni la revisión del bot «OPAI 2.0» ni la integración a `main` son una puerta para seguir trabajando. **De 21:00 a 07:00 rige el «Modo noche»** (`AGENTS.md`, ADR-111): las dudas de producto o diseño tampoco detienen a la sesión (se deciden como «Decisión nocturna: … (revisar)») y lo que solo Carlos puede resolver queda en «Espera a Carlos» mientras la sesión pasa al ticket siguiente.
 
 #### A2.5.1 Avance continuo
 
