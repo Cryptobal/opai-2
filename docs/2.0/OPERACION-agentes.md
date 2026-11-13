@@ -197,6 +197,17 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 ---
 
+### A2.11 Modo noche (Carlos, 13-nov-2026 · ADR-111)
+
+Todas las noches, de **21:00 a 07:00 hora de Chile**, cada sesión trabaja sola:
+
+1. **Sin pausas.** Toma los tickets de Linear de su módulo por orden de prioridad y, al terminar uno, sigue con el siguiente. No espera a Carlos ni al bot «OPAI 2.0».
+2. **Dudas de producto o diseño.** No se detiene: elige la opción que sigue `REFERENTES-saas.md` (ADR-106) y el sistema visual oficial vigente (hoy el diseño nuevo de ADR-109, que reemplazó a Hilo), y la anota como **«Decisión nocturna: … (revisar)»** en el ticket y en el PR.
+3. **Integra sus propios PR** a `main`, sin esperar otra revisión, cuando cumplen «Integración a `main`» de `AGENTS.md`: los cuatro checks obligatorios en verde sobre el head, sin conflictos, su revisión final sin bloqueos (A2.2), sin veto y, si trae migración, snapshot de Neon antes de aplicarla (A2.3). Si un check falla, lo arregla. Si choca con otra sesión, trae `main` con merge y resuelve.
+4. **Nunca de noche**, aunque bloquee: producción (`app.opai.cl`), OPAI 1.0, datos reales del tenant Gard, plata o emisión real al SII, secretos y borrados irreversibles. El ticket que dependa de eso queda **«Espera a Carlos»** con la pregunta concreta, y la sesión pasa al siguiente.
+5. **El PC de Carlos** queda encendido: se puede usar para probar y mirar `test.opai.cl`, sin escribir datos del tenant Gard.
+6. **A las 07:00**, resumen breve en español en el ticket padre del módulo: PR integrados, decisiones nocturnas por revisar, lo que quedó «Espera a Carlos» y riesgos.
+
 ### ⚠ Contradicciones con el repo (se resuelven a favor de esta sección)
 
 | # | Dónde | Qué dice hoy | Qué rige desde el 28-oct |

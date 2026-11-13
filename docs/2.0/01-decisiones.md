@@ -2085,3 +2085,19 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 **Consecuencias.**
 - El corte automático de acceso al terminar (membresía, credencial de terreno, llaves) queda para la parte 2 de CAR-355.
 - La plantilla se edita como lista JSON hasta que haya diseño de editor (diseño nuevo, ADR-109).
+
+## ADR-111 · Modo noche: las sesiones trabajan solas de 21:00 a 07:00 (CAR-376, 13-nov-2026)
+
+**Decidió:** Carlos (chat de la Sesión Estándares, 13-nov-2026, 00:30, hora de Chile) · **Registra:** Claude («Sesión Estándares»). **Modifica** `OPERACION-agentes.md` (nueva A2.11) y `AGENTS.md` («Convenciones»).
+
+**Contexto.** De noche Carlos no está para responder. Con ADR-108 las sesiones ya no esperan revisiones, pero faltaba decir qué hacen ante una duda de producto, quién integra y qué no se toca nunca sin él.
+
+**Decisión.** De 21:00 a 07:00 hora de Chile:
+1. Cada sesión toma los tickets de su módulo por prioridad, sin pausas.
+2. Ante una duda de producto o diseño elige la opción que sigue `REFERENTES-saas.md` y el sistema visual oficial vigente, y la anota como «Decisión nocturna: … (revisar)» en el ticket y en el PR.
+3. Integra sus propios PR con las condiciones de «Integración a `main`» (checks, conflictos, revisión final sin bloqueos, veto y, si hay migración, snapshot de Neon antes de aplicarla).
+4. Nunca toca producción, OPAI 1.0, datos reales de Gard, plata o emisión real al SII, secretos ni borrados irreversibles: esos tickets quedan «Espera a Carlos» con la pregunta concreta.
+5. Puede usar el PC de Carlos para probar y mirar `test.opai.cl`, sin escribir datos de Gard.
+6. A las 07:00 deja un resumen en el ticket padre del módulo.
+
+**Consecuencias.** Las «Decisión nocturna» quedan a la vista para que Carlos las confirme o las revierta en la mañana. Carlos escribió «el sistema Hilo»; desde ADR-109 el sistema visual oficial es el diseño nuevo, que reemplazó a Hilo, y es el que se aplica.
