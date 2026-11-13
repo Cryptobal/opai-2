@@ -11,6 +11,12 @@ describe("elección del marco (ADR-090)", () => {
     expect(marcoDeCookie("")).toBe("clasico");
     expect(marcoDeCookie("HILO")).toBe("clasico");
     expect(marcoDeCookie("hilo")).toBe("hilo");
+    expect(marcoDeCookie("nuevo")).toBe("nuevo");
+  });
+
+  it("el diseño nuevo (ADR-109) también se recuerda un año", () => {
+    expect(cookieMarco("nuevo")).toContain(`${COOKIE_MARCO}=nuevo`);
+    expect(cookieMarco("nuevo")).toContain("Max-Age=31536000");
   });
 
   it("en esta etapa el Hilo solo existe en el ERP y con acceso a la empresa", () => {
@@ -61,14 +67,20 @@ describe("atajo de diseño en el menú de usuario", () => {
     const ids = clasico.map((i) => i.id);
     expect(ids.indexOf("diseno")).toBe(ids.indexOf("pref") + 1);
     const item = clasico.find((i) => i.id === "diseno");
-    expect(item?.etiqueta).toBe("Probar el diseño Hilo");
+    // Desde el 12-nov (ADR-109) el atajo lleva al diseño nuevo; Hilo se sigue eligiendo en Preferencias.
+    expect(item?.etiqueta).toBe("Probar el diseño nuevo");
     item?.onSelect();
-    expect(cambiar).toHaveBeenCalledWith("hilo");
+    expect(cambiar).toHaveBeenCalledWith("nuevo");
     const hilo = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
       actual: "hilo",
       onCambiar: cambiar,
     });
     expect(hilo.find((i) => i.id === "diseno")?.etiqueta).toBe("Volver al diseño clásico");
+    const nuevo = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
+      actual: "nuevo",
+      onCambiar: cambiar,
+    });
+    expect(nuevo.find((i) => i.id === "diseno")?.etiqueta).toBe("Volver al diseño clásico");
     expect(menuCuentaShell(false, nada, nada, false).some((i) => i.id === "diseno")).toBe(false);
     expect(menuCuentaShell(true, nada, nada, true).some((i) => i.id === "diseno")).toBe(false);
   });
@@ -81,5 +93,7 @@ describe("marco que se monta: una sola regla para el layout y las páginas", () 
     expect(marcoResuelto("erp", false, "hilo")).toBe("clasico");
     expect(marcoResuelto("supervisor", true, "hilo")).toBe("clasico");
     expect(marcoResuelto("erp", true, undefined)).toBe("clasico");
+    expect(marcoResuelto("erp", true, "nuevo")).toBe("nuevo");
+    expect(marcoResuelto("supervisor", true, "nuevo")).toBe("clasico");
   });
 });
