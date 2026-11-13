@@ -35,12 +35,15 @@ export function HojaRegistrarAusencia({
   const [motivo, setMotivo] = useState("");
   const [plan, setPlan] = useState<Plan | null>(null);
   if (!abierta) return null;
-  const entrada = {
-    personaId,
-    tipo,
-    motivo: motivo.trim(),
-    desde,
-    hasta: hasta < desde ? desde : hasta,
+  const fechasMal = hasta < desde;
+  const entrada = { personaId, tipo, motivo: motivo.trim(), desde, hasta };
+  const salir = () => {
+    setPlan(null);
+    setMotivo("");
+    setDesde(hoy);
+    setHasta(hoy);
+    limpiarError();
+    cerrar();
   };
   const cambiar =
     <T,>(f: (v: T) => void) =>
