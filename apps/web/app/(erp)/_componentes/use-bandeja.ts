@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import type { Aviso } from "@/app/_components/campana";
 
 import { conPlazo } from "./con-plazo";

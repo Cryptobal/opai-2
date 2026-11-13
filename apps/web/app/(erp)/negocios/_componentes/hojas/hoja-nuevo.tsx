@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Combobox, Sheet } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { CuentaFila } from "@/lib/tipos-maestros";
 

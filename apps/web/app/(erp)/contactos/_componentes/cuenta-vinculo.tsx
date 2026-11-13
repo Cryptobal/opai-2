@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { Alerta, Campo, Combobox } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 type Opcion = { valor: string; etiqueta: string };
 type Pagina = { items: { id: string; nombre: string }[] };

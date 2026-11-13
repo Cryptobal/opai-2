@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { avisar, Button, Campo, Dialog, Input, Textarea } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import type { LoteDetalle, PermisosLote } from "./tipos";

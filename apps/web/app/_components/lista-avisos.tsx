@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { haceCuanto } from "@/lib/fechas";
 
 import type { Aviso } from "./campana";

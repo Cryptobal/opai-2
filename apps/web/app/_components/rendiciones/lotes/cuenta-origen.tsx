@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { avisar, Button, Campo, Select } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 export type CuentaOrigen = { id: string; banco: string; numeroVisible: string };
 

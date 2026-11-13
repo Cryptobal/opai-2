@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import { Alerta, Button, Empty, Popover, Contador, Punto, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 // La lista de avisos solo se descarga al abrir la campana (ADR-037).
 const BandejaCorta = dynamic(() => import("../(erp)/_componentes/bandeja").then((m) => m.Bandeja));
