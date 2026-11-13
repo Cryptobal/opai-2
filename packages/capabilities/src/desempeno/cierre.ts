@@ -5,10 +5,11 @@ import { valoresEfectivos } from "../core/config";
 import { campoAjuste } from "../core/config/catalogo";
 import { sinDuplicado } from "../core/maestros/comun";
 import { defineCapability } from "../define";
-import { conflicto, ErrorCapacidad, reglaDeNegocio } from "../errores";
+import { conflicto, ErrorCapacidad, prohibido, reglaDeNegocio } from "../errores";
 import { defineTrabajo } from "../trabajos/registro";
 import type { Contexto } from "../types";
 import { DIA_CIERRE_DEFECTO } from "./ajustes";
+import { avisoActivo, emitirBajoMeta } from "./avisos";
 import { calcularCierre, filaParaGuardar } from "./cierre-calculo";
 import { estaCerrado } from "./cierre-lectura";
 import { mesesDe, PERMISOS_DESEMPENO } from "./comun";
@@ -38,6 +39,8 @@ export async function cerrarPeriodo(
   const filas = await calcularCierre(ctx, periodo, meses.zona);
   const salida = { periodo, personas: filas.length, cargos: new Set(filas.map((f) => f.cargoId)).size };
   if (dryRun) return salida;
+  // El ajuste se lee antes de la transacción: adentro solo se usa `tx`.
+  const avisar = await avisoActivo(ctx);
   const cerradoPor = origen === "manual" && ctx.actor.tipo === "user" ? ctx.actor.id : null;
   await ctx.transaccion(async (tx) => {
     await sinDuplicado(
@@ -67,6 +70,7 @@ export async function cerrarPeriodo(
       entidadTipo: "periodo_desempeno",
       payload: { ...salida, origen },
     });
+    if (avisar) await emitirBajoMeta(ctx, tx, periodo, filas);
   });
   return salida;
 }
@@ -85,33 +89,10 @@ export const periodosCerrar = defineCapability({
   // Cerrar no tiene vuelta atrás: a un agente siempre le pide aprobación humana.
   exigeAprobacion: () => true,
   describirAprobacion: async (_ctx, input) => `Cerrar el mes ${input.periodo} (no se puede reabrir)`,
-  handler: (ctx, input, { dryRun }) => cerrarPeriodo(ctx, input.periodo, "manual", dryRun),
-});
-
-export const periodosList = defineCapability({
-  id: "desempeno.periodos.list",
-  descripcion:
-    "Meses cerrados de Desempeño, del más reciente al más antiguo: cuándo y cómo se cerró cada uno (a mano o automático) y cuántas personas quedaron con resultado guardado.",
-  permiso: PERMISOS_DESEMPENO.scorecardsRead,
-  input: z.object({}),
-  output: z.array(
-    z.object({
-      periodo: z.string(),
-      origen: z.enum(["manual", "automatico"]),
-      cerradoEn: z.string(),
-      personas: z.number().int(),
-    }),
-  ),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx) {
-    const filas = await ctx.db.desempenoPeriodoCerrado.findMany({ orderBy: { periodo: "desc" }, take: 60 });
-    return filas.map((f) => ({
-      periodo: f.periodo,
-      origen: f.origen === "manual" ? ("manual" as const) : ("automatico" as const),
-      cerradoEn: f.createdAt.toISOString(),
-      personas: f.personas,
-    }));
+  handler(ctx, input, { dryRun }) {
+    // Cerrar fija el resultado de toda la empresa: con un alcance acotado no corresponde.
+    if (ctx.alcance !== null) throw prohibido("Con tu alcance no puedes cerrar el mes de la empresa.");
+    return cerrarPeriodo(ctx, input.periodo, "manual", dryRun);
   },
 });
 

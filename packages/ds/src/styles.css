@@ -501,3 +501,73 @@
     @apply gap-x-6 gap-y-0 border-b border-border;
   }
 }
+
+/* Marco Hilo: la fila seleccionada (lista de una vista dividida, lista lateral de Configuración) no usa
+   el índigo, que es solo del agente (DISENO-hilo.md R3; CAR-369). Fondo `fill` y barra en tinta. Vive en
+   CSS sobre las clases que ya pone `claseFila`, para no sumar JS (ADR-037). */
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent {
+  background-color: var(--ds-fill);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent::before {
+  background-color: var(--ds-fg);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .text-accent {
+  color: var(--ds-fg);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .bg-surface.text-accent {
+  box-shadow: inset 0 0 0 1px var(--ds-fg);
+}
+/* Menú plegable del diseño nuevo (ADR-109, CAR-335 D2): `ShellNuevo` pone `data-menu` y estas reglas
+   deciden qué se ve, sin JS en el shell compartido (ADR-037). Plegado: en escritorio queda el riel de
+   íconos. Asomado: el menú completo flota sobre la página, en iPad y en escritorio. */
+@media (min-width: 64rem) {
+  [data-menu="plegado"] nav[data-shell="riel"],
+  [data-menu="asomado"] nav[data-shell="riel"] {
+    display: flex;
+  }
+  [data-menu="plegado"] nav[data-shell="sidebar"] {
+    display: none;
+  }
+}
+[data-menu="asomado"] nav[data-shell="sidebar"] {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  box-shadow: var(--ds-shadow-overlay);
+}
+/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro, con la
+   ruta a la izquierda y el tema, el agente y la campana a la derecha. */
+@media (min-width: 64rem) {
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"],
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    flex: 1 1 0%;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    justify-content: flex-end;
+    order: 4;
+  }
+  /* Las acciones de la página van a la derecha del buscador, para no correrlo del centro. */
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
+    order: 1;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="buscar"] {
+    order: 2;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="acciones"] {
+    order: 3;
+  }
+}
+/* Teléfono del diseño nuevo (CAR-335 D2c): la barra inferior es Inicio, Agente, Menú y Yo
+   (`BarraInferiorNueva`); la clásica y el avatar de arriba se esconden, porque la cuenta vive en «Yo».
+   Se eligen por su rol y su nombre accesible, sin marcas nuevas en el shell compartido (ADR-037). */
+[data-marco="nuevo"] nav[aria-label="Principal"].fixed:not([data-shell="inferior-nuevo"]),
+[data-marco="nuevo"] header.md\:hidden div:has(> button[aria-label^="Menú de usuario"]) {
+  display: none;
+}
+/* Fondo propio del menú lateral y del riel en el diseño nuevo (`--ds-side`, D2c). */
+[data-marco="nuevo"] nav[data-shell="sidebar"],
+[data-marco="nuevo"] nav[data-shell="riel"] {
+  background-color: var(--ds-side);
+}

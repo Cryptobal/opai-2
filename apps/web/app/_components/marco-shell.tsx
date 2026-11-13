@@ -3,9 +3,9 @@
 
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ComponentType, type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { AppShell } from "@opai/ds";
+import { AppShell, type AppShellProps } from "@opai/ds";
 
 import type { DatosShell } from "./tipos-shell";
 export type { DatosShell } from "./tipos-shell";
@@ -43,7 +43,17 @@ const PortalInicio = dynamic(() => import("./portal-inicio").then((m) => m.Porta
  * se reemplaza el contenido. El título y las acciones de la página llegan por el almacén de cabecera
  * (`cabecera-contexto`), que la página fija al renderizarse.
  */
-export function MarcoShell({ datos, children }: { datos: DatosShell; children: ReactNode }) {
+export function MarcoShell({
+  datos,
+  Shell = AppShell,
+  children,
+}: {
+  datos: DatosShell;
+  /** Diseño nuevo (ADR-109): `MarcoNuevo` pasa `ShellNuevo`, con su piel y el menú plegable. */
+  Shell?: ComponentType<AppShellProps>;
+  children: ReactNode;
+}) {
+  const nuevo = Shell !== AppShell;
   const rutaActual = usePathname();
   const router = useRouter();
   const cabecera = useCabecera();
@@ -110,6 +120,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
       ? () => setInicio(true)
       : undefined,
+    nuevo ? "nuevo" : "clasico",
   );
   // CAR-316: la Bandeja suma las novedades sin leer y se resalta (también en la barra inferior).
   const novedadesBandeja = enErp ? novedadesNoLeidas : 0;
@@ -125,7 +136,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
     <PinFichaContexto.Provider value={pinMenu}>
-      <AppShell
+      <Shell
         {...cabecera}
         acciones={conPin(cabecera.acciones)}
         accionesTelefono={conPin(cabecera.accionesTelefono)}
@@ -177,7 +188,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         {inicio ? <PortalInicio portal={datos.portal} onCerrar={() => setInicio(false)} /> : null}
         {agente.panel}
         <Avisos />
-      </AppShell>
+      </Shell>
     </PinFichaContexto.Provider>
   );
 }
