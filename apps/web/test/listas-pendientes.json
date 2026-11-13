@@ -75,7 +75,6 @@
   "core.slack.canales",
   "core.supervisores.list",
   "core.terreno.en_sitio",
-  "core.turnos_esperados.listar",
   "core.users.list",
   "core.vinculos.list",
   "cpq.aprobaciones.list",
