@@ -536,6 +536,12 @@ model PersonaUniforme {
   tallaPantalon String? @map("talla_pantalon")
   tallaChaqueta String? @map("talla_chaqueta")
   tallaZapato  String?  @map("talla_zapato")
+  /// CAR-277: tallas de polera, geólogo y polar; estatura y peso para el pedido de uniforme.
+  tallaPolera  String?  @map("talla_polera")
+  tallaGeologo String?  @map("talla_geologo")
+  tallaPolar   String?  @map("talla_polar")
+  estaturaCm   Int?     @map("estatura_cm")
+  pesoKg       Int?     @map("peso_kg")
   notas        String?
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -576,11 +582,15 @@ model PersonaJornadaDt {
   personaId          String    @unique @map("persona_id") @db.Uuid
   resolucion         String?
   resolucionVigenteDesde DateTime? @map("resolucion_vigente_desde") @db.Date
+  /// CAR-277: hasta cuándo rige la resolución de jornada.
+  resolucionVigenteHasta DateTime? @map("resolucion_vigente_hasta") @db.Date
   horasSemanales     Decimal?  @map("horas_semanales") @db.Decimal(5, 2)
   distribucion       String?
   articulo22         Boolean   @default(false) @map("articulo_22")
   plazoFijoPeriodo   Int?      @map("plazo_fijo_periodo")
   terminoPlazoFijo   DateTime? @map("termino_plazo_fijo") @db.Date
+  /// CAR-277: término de cada período de plazo fijo (hasta 3, en orden).
+  terminosPlazoFijo  DateTime[] @default([]) @map("terminos_plazo_fijo") @db.Date
   avisoTerminoDias   Int?      @map("aviso_termino_dias")
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -619,6 +629,9 @@ model PersonaContactoLaboral {
   emergenciaNombre    String?  @map("emergencia_nombre")
   emergenciaRelacion  String?  @map("emergencia_relacion")
   emergenciaTelefono  String?  @map("emergencia_telefono")
+  /// CAR-277: código interno de la empresa y movilización.
+  codigoInterno       String?  @map("codigo_interno")
+  movilizacion        String?
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

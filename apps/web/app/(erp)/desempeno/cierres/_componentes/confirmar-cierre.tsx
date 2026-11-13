@@ -10,11 +10,11 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 type Props = { periodo: string; mes: string; onCerrar: () => void };
 type Resumen = { personas: number; cargos: number };
 
-const FIJO =
-  "Desde ahí no cambia aunque se corrija un dato, y el mes no se puede reabrir.";
+const FIJO = "Desde ahí no cambia aunque se corrija un dato, y el mes no se puede reabrir.";
 
 function descripcion(r: Resumen | null): string {
-  if (!r) return `Se guarda el resultado de cada persona con su cargo y scorecard de ese mes. ${FIJO}`;
+  if (!r)
+    return `Se guarda el resultado de cada persona con su cargo y scorecard de ese mes. ${FIJO}`;
   if (r.personas === 0) return `Este mes no tiene resultados: quedará cerrado vacío. ${FIJO}`;
   const personas = r.personas === 1 ? "1 persona" : `${r.personas} personas`;
   const cargos = r.cargos === 1 ? "1 cargo" : `${r.cargos} cargos`;
@@ -26,7 +26,9 @@ export function ConfirmarCierre({ periodo, mes, onCerrar }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [resumen, setResumen] = useState<Resumen | null>(null);
   useEffect(() => {
-    void ejecutar<Resumen>("desempeno.periodos.cerrar", { periodo }, true, "ninguna").then(setResumen);
+    void ejecutar<Resumen>("desempeno.periodos.cerrar", { periodo }, true, "ninguna").then(
+      setResumen,
+    );
   }, [ejecutar, periodo]);
   return (
     <DialogoConfirmar

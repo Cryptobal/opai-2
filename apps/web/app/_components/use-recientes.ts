@@ -8,6 +8,11 @@ export type Reciente = { href: string; etiqueta: string };
 
 const MAXIMO = 10;
 
+/** Una página 404 («No encontrado», con o sin portal) nunca es un acceso útil: no se guarda ni se muestra. */
+function esNoEncontrado(etiqueta: string): boolean {
+  return etiqueta === "No encontrado" || etiqueta.startsWith("No encontrado · ");
+}
+
 function clave(epoca: string): string {
   return `opai_recientes_${epoca}`;
 }
@@ -31,7 +36,8 @@ export function leerRecientes(epoca: string): Reciente[] {
           /^\/(?!\/)/.test(d.href) &&
           d.href.length <= 200 &&
           typeof d.etiqueta === "string" &&
-          d.etiqueta.length <= 80,
+          d.etiqueta.length <= 80 &&
+          !esNoEncontrado(d.etiqueta),
       )
       .slice(0, MAXIMO);
   } catch {
@@ -48,6 +54,7 @@ function escribirRecientes(epoca: string, lista: Reciente[]): void {
 }
 
 export function registrarReciente(epoca: string, entrada: Reciente): void {
+  if (esNoEncontrado(entrada.etiqueta)) return;
   // Sin barra final, query ni hash: `/cotizaciones/` y `/cotizaciones` son el mismo reciente.
   const item = { ...entrada, href: normalizarHref(entrada.href) };
   const previos = leerRecientes(epoca).filter((r) => r.href !== item.href);
