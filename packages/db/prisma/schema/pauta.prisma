@@ -41,6 +41,8 @@ model ExcepcionPauta {
   motivo     String
   /// Titular que faltó ese día (para alertas y trazabilidad); no cambia aunque cambie la serie.
   personaId  String?   @map("persona_id") @db.Uuid
+  /// Registro de ausencia de la persona que originó la excepción (CAR-393); null en reemplazos y refuerzos.
+  ausenciaId String?   @map("ausencia_id") @db.Uuid
   /// "activa" | "anulada".
   estado     String    @default("activa")
   creadaPor  String?   @map("creada_por") @db.Uuid
@@ -50,6 +52,7 @@ model ExcepcionPauta {
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([tenantId, puestoId, fecha])
+  @@index([ausenciaId])
   @@map("excepciones")
   @@schema("pauta")
 }

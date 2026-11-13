@@ -192,6 +192,7 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
       "personas_os10",
       "credenciales_terreno",
       "personas_contacto_laboral",
+      "ausencias",
     ]);
     // Datos legibles, nunca nombres de columna.
     expect(personal?.datos).toContain("RUT");
