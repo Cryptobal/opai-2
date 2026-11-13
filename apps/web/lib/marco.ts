@@ -6,12 +6,13 @@
  * entre dispositivos: se puede probar el Hilo en el computador y seguir con el clásico en el teléfono.
  * No es un permiso: quien cambie la cookie a mano solo cambia su propio marco.
  */
-export type Marco = "clasico" | "hilo";
+/** «nuevo» es el diseño de ADR-109: mientras se construye solo lo ve quien lo elige (vista previa). */
+export type Marco = "clasico" | "hilo" | "nuevo";
 
 export const COOKIE_MARCO = "opai_marco";
 
 export function marcoDeCookie(valor: string | undefined): Marco {
-  return valor === "hilo" ? "hilo" : "clasico";
+  return valor === "hilo" || valor === "nuevo" ? valor : "clasico";
 }
 
 /** En esta etapa (H1) el Hilo existe solo en el ERP y con acceso a la empresa actual. */
@@ -27,11 +28,29 @@ export function marcoResuelto(portal: string, acceso: boolean, cookie: string | 
   return portalAdmiteHilo(portal, acceso) ? marcoDeCookie(cookie) : "clasico";
 }
 
-/** Texto para `document.cookie`: un año para Hilo; el clásico es la ausencia de la cookie. */
+/** Texto para `document.cookie`: un año para Hilo y el nuevo; el clásico es la ausencia de la cookie. */
 export function cookieMarco(marco: Marco): string {
   const seguro =
     typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
-  return `${COOKIE_MARCO}=${marco === "hilo" ? "hilo" : ""}; Path=/; Max-Age=${marco === "hilo" ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
+  const guardado = marco === "clasico" ? "" : marco;
+  return `${COOKIE_MARCO}=${guardado}; Path=/; Max-Age=${guardado ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
+}
+
+/**
+ * Menú lateral plegado del diseño nuevo (ADR-109, CAR-335 D2b): como el marco, se recuerda en una
+ * cookie de este navegador que el servidor lee para pintar el menú plegado desde el primer byte.
+ */
+export const COOKIE_MENU = "opai_menu";
+
+export function menuPlegadoDeCookie(valor: string | undefined): boolean {
+  return valor === "plegado";
+}
+
+/** Texto para `document.cookie`: plegado dura un año; abierto (lo normal) es la ausencia. */
+export function cookieMenu(plegado: boolean): string {
+  const seguro =
+    typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
+  return `${COOKIE_MENU}=${plegado ? "plegado" : ""}; Path=/; Max-Age=${plegado ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
 }
 
 /** Planillas: pantallas que necesitan todo el ancho, donde el hilo va plegado en el riel. */

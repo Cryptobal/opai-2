@@ -18,6 +18,7 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 |---|---|
 | `core.personas.list/get` | Identificación, contacto, domicilio y vínculo; personas de la página/ficha |
 | `core.vinculos.list` | Historial laboral; vínculos devueltos |
+| `core.procesos_persona.listar` | Listas de ingreso y salida (CAR-355): revela ingreso o salida, pasos y motivos; listas devueltas |
 | `core.contactos.list/get` | Identificación/contacto; contactos devueltos |
 | `core.cuentas.list/get` | Cuenta persona natural, contacto principal y representantes; cuenta, representantes y contactos de la ficha |
 | `core.buscar` | Nombres, RUT y correo en sugerencias de UI/API/MCP; IDs de cuentas, personas y contactos devueltos |
@@ -36,11 +37,13 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `core.documentos.vencimientos` | Documentos vencidos/por vencer; IDs tras filtro de capa |
 | `core.documentos.matriz` | Nombres y estado documental; personas y documentos de las filas devueltas |
 | `core.users.list` | Directorio y último acceso; IDs de usuarios miembros del tenant |
+| `core.slack.usuarios` | Personas internas (nombre y correo) y su vínculo con Slack (CAR-292); IDs de usuarios revelados; prohibido con alcance por filas |
 | `core.excepciones.list` | Autor de la excepción; IDs de los autores revelados (`fijadoPor.id`) |
 | `core.invitations.list` | Destinatarios invitados; IDs de invitaciones efectivamente devueltas |
 | `core.apikeys.list/get` | Nombre y correo del responsable, nunca el secreto; IDs de keys |
 | `core.aprobaciones.list/get` | Responsable e input/resultado de la operación; IDs de aprobaciones |
 | `core.audit.list`, `core.actividad.list` | Historial con actores y payload de negocio; IDs de eventos revelados, sin centinela ni copiar payload |
+| `core.hilo.actividad`, `core.hilo.agenda` (CAR-331) | Actividad del hilo con alcance (empresa, instalaciones o propia): IDs de eventos revelados. Agenda: IDs de tareas y documentos revelados y de personas cuyo nombre se mostró |
 
 La auditoría del historial anterior es **un evento de acceso a la página**, no
 una segunda implementación de la revelación salarial. El mecanismo salarial de
