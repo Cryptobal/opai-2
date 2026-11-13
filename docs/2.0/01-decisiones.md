@@ -1867,6 +1867,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Adenda (12-nov-2026, CAR-312, Sesión Desempeño): el agente y Desempeño.** (1) **Propuestas del agente:** no se crea una cola propia. Un agente que guarda un scorecard como borrador deja una propuesta; publicarlo (sumar un indicador, mover una meta) exige siempre aprobación humana por la cola existente de `core.aprobaciones` (`exigeAprobacion` de `desempeno.scorecards.guardar`), que el hilo ya muestra en Pendientes. El agente nunca cambia una meta solo. (2) **Responder con los mismos números:** el agente usa las mismas capacidades que la pantalla (`desempeno.resultados.*`, `core.indicadores_gestion.*`). (3) **Avisos bajo la meta:** con el ajuste `desempeno.aviso_bajo_meta` encendido (**apagado por defecto**, ADR-020), al cerrar el mes se emite `desempeno.resultado.bajo_meta` por persona bajo la meta y `desempeno.equipo.bajo_meta` por la jefatura directa de su ficha. Son transaccionales (sin reglas de Comunicaciones): la campana llega a la persona solo si su cargo le muestra su resultado y tiene el permiso de ver resultados, y a la jefatura solo por las personas que la jefatura de cargos le deja ver. Nunca llevan el puntaje. (4) **Indicador nuevo del núcleo** `core.respuesta_escalados`: horas promedio desde que un agente pide una aprobación hasta que alguien la aprueba o rechaza, atribuido a quien decide; las vencidas sin decisión y las de plataforma no cuentan. (5) **Parte del agente:** el resultado de cada persona muestra qué parte de sus acciones auditadas del mes hizo un agente que actúa por ella; el resultado se atribuye igual a la persona. Sin migración.
 
+**Adenda (12-nov-2026, CAR-330, Sesión Desempeño): informe por instalación y su pantalla.** Carlos aprobó el 12-nov a las 23:25 (hora de Chile; «que recomiendas? avanza con eso») la propuesta de pantalla hecha con el diseño nuevo (ADR-109). (a) Va como **pestaña de la Pauta**, «Por instalación», junto a Mensual y Diaria, en `/pauta/instalaciones`: el área Operaciones ya tiene sus 7 entradas de menú (`NAVEGACION.md`). (b) Una fila por instalación con la cobertura del mes destacada y, debajo, turnos por cubrir, refuerzos, ausentismo y atrasos. Cada fila abre la pauta mensual de esa instalación. (c) Selector de mes, orden (menor cobertura, más turnos por cubrir, más ausentismo o más atrasos) y descarga CSV del mes en pantalla. (d) El color solo marca el estado y no es una meta de la empresa: cobertura bien ≥ 95 % y alerta < 88 %; ausentismo bien ≤ 3 % y alerta > 8 %; atrasos bien ≤ 5 % y alerta > 10 %. (e) Ausentismo y atrasos salen solo con Asistencia activa y permiso para verla. (f) Carlos también asignó a la Sesión Desempeño que los permisos y licencias de la ficha se vean en la pauta mensual y diaria; va en su propio PR.
+
 **Pendiente de Carlos.** Nada.
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
@@ -2031,6 +2033,25 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+
+## ADR-106 · La vara: OPAI 2.0 sigue a los mejores SaaS de cada capa (CAR-348, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 17:58, hora de Chile) · **Registra:** Claude («Sesión Estándares»).  (ADR-105 lo usa el PR #584, abierto antes.)
+
+**Contexto.** OPAI 2.0 lo construyen varias sesiones en paralelo. Cada una resuelve bien su módulo, pero sin una referencia común cada módulo inventa su forma de dar permisos, de listar, de aprobar o de mostrar un error. Carlos pidió que todo siga el estándar de los mejores SaaS y que no se reinvente la rueda.
+
+**Decisión.**
+1. [`REFERENTES-saas.md`](REFERENTES-saas.md) es la vara oficial. Para cada capa nombra el referente, el patrón concreto que se copia y cómo se mide: permisos (GitHub, Google Workspace, Rippling), multi-tenant (Linear, Slack, Stripe), API y MCP (Stripe), Comercial (HubSpot, Salesforce, Pipedrive), Finanzas (Stripe Billing, Xero, QuickBooks), Personas (Rippling, Deel, BambooHR), terreno (Connecteam, Deputy, ServiceTitan), UX (Linear, Notion) e IA (la IA propone y una persona aprueba, con registro).
+2. Vale para todo: diseño, lógica, permisos, Núcleo y módulos. Si un módulo ya construido se aparta sin motivo, se ajusta o se rehace; rehacer un módulo lo decide Carlos con la auditoría a la vista.
+3. El aspecto lo decide el sistema visual oficial vigente: el diseño nuevo de ADR-109, que reemplazó a Hilo el mismo 12-nov-2026. Los referentes de UX fijan el comportamiento, no el aspecto.
+4. Apartarse del referente exige una razón escrita: ley chilena (DT, SII, Ley 21.719), una regla de negocio de Carlos, agent-first (ADR-034) o costo desproporcionado.
+5. Un referente se cambia con una adenda a este ADR.
+
+**Consecuencias.**
+- La auditoría por capa y módulo vive en `docs/2.0/auditoria-estandares/` y sus brechas altas y críticas van a Linear, en el proyecto del módulo y enlazadas a «22 · Estándares y arquitectura».
+- Todo PR que toque arquitectura, permisos, modelo de datos o UX declara «Referente seguido y en qué se aparta» (plantilla del PR y `AGENTS.md`, en un PR posterior de esta misma serie).
+- La Sesión Estándares revisa cada ADR y cada PR de esos temas contra la vara y comenta las brechas.
+- No reemplaza a `AGENTS.md`, `REGLAS-codigo.md` ni a los ADR vigentes: ante un choque, mandan ellos y se anota la diferencia aquí.
 
 ## ADR-108 · Trabajo en paralelo sin esperas y sin choques entre sesiones (12-nov-2026)
 
