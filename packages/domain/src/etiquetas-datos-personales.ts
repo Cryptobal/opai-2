@@ -73,10 +73,15 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   // vinculos_laborales
   persona_id: "persona",
   cargo_id: "cargo",
-  tipo: "tipo de vínculo",
+  tipo: "tipo de vínculo o de ausencia",
   inicio: "fecha de inicio",
   termino: "fecha de término",
   motivo_termino: "motivo de término",
+  // ausencias (CAR-393)
+  desde: "primer día",
+  hasta: "último día",
+  motivo: "motivo",
+  estado: "estado",
   // estructuras_sueldo
   sueldo_base: "sueldo base",
   colacion: "colación",

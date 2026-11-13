@@ -1,7 +1,8 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Alerta, Button } from "@opai/ds";
 
@@ -37,8 +38,18 @@ export function RondaActiva({
   alCerrar: () => void;
 }) {
   const [error, setError] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
+  // El foco sigue a la pregunta («Volver a la ronda») y regresa a «Cerrar ronda» al volver.
+  // (El botón del DS no recibe ref: se enfoca el primer botón del bloque de cierre.)
+  const cierreRef = useRef<HTMLDivElement>(null);
+  const preguntoRef = useRef(false);
+  useEffect(() => {
+    if (confirmando || preguntoRef.current) cierreRef.current?.querySelector("button")?.focus();
+    preguntoRef.current = confirmando;
+  }, [confirmando]);
   const cerrar = async () => {
     setError(false);
+    setConfirmando(false);
     try {
       await encolarHecho({ tipo: "rondas.cierre", payload: { ejecucionClave: clave }, personaId });
       alCerrar();
@@ -47,6 +58,9 @@ export function RondaActiva({
     }
   };
   const confirmados = plantilla.puntos.filter((p) => marcados.has(p.id)).length;
+  // CAR-381: cerrar no se deshace; con puntos obligatorios pendientes se pregunta antes.
+  const pendientes = plantilla.puntos.filter((p) => p.obligatorio && !marcados.has(p.id)).length;
+  const pedirCierre = () => (pendientes > 0 ? setConfirmando(true) : void cerrar());
   return (
     <section aria-label="Ronda en curso" className="flex flex-col gap-3">
       <h2 className="t-heading text-fg">{plantilla.nombre}</h2>
@@ -76,9 +90,31 @@ export function RondaActiva({
           No quedó en el teléfono. Vuelve a intentarlo.
         </Alerta>
       ) : null}
-      <Button variant="secondary" onClick={() => void cerrar()}>
-        Cerrar ronda
-      </Button>
+      <div ref={cierreRef} className="flex flex-col gap-3">
+        {confirmando && pendientes > 0 ? (
+          <Alerta
+            tono="warning"
+            icono={AlertTriangle}
+            titulo={
+              pendientes === 1
+                ? "Queda 1 punto obligatorio pendiente. ¿Cerrar igual?"
+                : `Quedan ${pendientes} puntos obligatorios pendientes. ¿Cerrar igual?`
+            }
+          >
+            <div className="flex flex-col gap-2 pt-2">
+              <p>Al cerrar, la ronda queda incompleta y no se puede volver a abrir.</p>
+              <Button onClick={() => setConfirmando(false)}>Volver a la ronda</Button>
+              <Button variant="secondary" onClick={() => void cerrar()}>
+                Cerrar igual
+              </Button>
+            </div>
+          </Alerta>
+        ) : (
+          <Button variant="secondary" onClick={pedirCierre}>
+            Cerrar ronda
+          </Button>
+        )}
+      </div>
     </section>
   );
 }

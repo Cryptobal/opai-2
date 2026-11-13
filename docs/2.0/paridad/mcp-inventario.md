@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 772 pares pantalla→capacidad · 693 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 777 pares pantalla→capacidad · 698 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -386,6 +386,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.registrar` | `finanzas_compras_registrar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.sincronizar_rcv` | `finanzas_compras_sincronizar_rcv` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |
+| compartido | `app/(erp)/finanzas/compras/impuestos/_componentes` | `finanzas.impuestos.borrador_f29` | `finanzas_impuestos_borrador_f29` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.actualizar` | `finanzas_proveedores_actualizar` | existe |
@@ -399,6 +400,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.mover` | `finanzas_celdas_mover` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.actualizar` | `finanzas_recurrentes_actualizar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.crear` | `finanzas_recurrentes_crear` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.listar` | `finanzas_recurrentes_listar` | existe |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.cargar_caf` | — | excepción |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.listar` | `finanzas_folios_listar` | existe |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.set_activo` | `finanzas_folios_set_activo` | existe |
@@ -512,6 +517,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
 | compartido | `app/(erp)/pauta/instalaciones/_componentes` | `pauta.informes.instalaciones` | `pauta_informes_instalaciones` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `asistencia.telefono.habilitar` | — | excepción |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.anular` | `core_ausencias_anular` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.listar` | `core_ausencias_listar` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.registrar` | `core_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.borrar` | `core_biometria_borrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.estado` | `core_biometria_estado` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -548,9 +556,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.anular` | `pauta_ausencias_anular` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.listar` | `pauta_ausencias_listar` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.registrar` | `pauta_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/[id]/generar-documento/_componentes` | `core.documento_plantillas.generar` | `core_documento_plantillas_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
@@ -1140,13 +1145,12 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.flujo.postergar_iva`
-- `finanzas.impuestos.borrador_f29`
-- `finanzas.recurrentes.actualizar`
-- `finanzas.recurrentes.crear`
-- `finanzas.recurrentes.listar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
+- `pauta.ausencias.anular`
+- `pauta.ausencias.listar`
+- `pauta.ausencias.registrar`
 - `platform.ajustes.set`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`

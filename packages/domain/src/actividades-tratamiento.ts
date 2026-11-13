@@ -60,6 +60,7 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
     "personas_os10",
     "credenciales_terreno",
     "personas_contacto_laboral",
+    "ausencias",
   ] },
   { id: 2, actividad: "Sueldos y estructuras", categoriaPrincipal: "Económica", baseLicitud: "relacion_laboral", tablas: ["estructuras_sueldo"] },
   { id: 3, actividad: "Contactos de clientes", categoriaPrincipal: "Contacto", baseLicitud: "interes_legitimo", tablas: ["contactos", "cuentas", "cuentas_representantes", "sii_contribuyentes"] },

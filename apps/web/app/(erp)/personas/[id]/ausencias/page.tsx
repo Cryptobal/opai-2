@@ -16,17 +16,19 @@ export const metadata = { title: "Permisos y licencias" };
 type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
 /**
- * Persona · Ausencias (ADR-094, adenda CAR-311 d, decisión de Carlos del 12-nov-2026): permisos, licencias,
- * vacaciones y ausencias de la persona. Se registran aquí y se ven en la pauta mensual y diaria. Requiere Pauta:
- * `pauta.ausencias.listar` filtra el alcance en la consulta (ADR-022) y registrar pide `pauta:write`.
+ * Persona · Ausencias (ADR-094, adenda CAR-311 d; CAR-393): permisos, licencias, vacaciones y ausencias de la
+ * persona, leídos de su registro en el Núcleo (`core.ausencias.*`). No depende de la Pauta: si está activa, lo
+ * registrado también marca los turnos de la persona. Ver pide el permiso laboral; registrar y anular, gestionarlo.
  */
 export default function AusenciasPersona(props: Props) {
   return (
     <PaginaPersona {...props} tab="ausencias" acciones={<></>}>
       {async (p, q) => {
         const identidad = await requerirIdentidad(`/personas/${p.id}/ausencias`);
-        const pautaActiva = identidad.modulosActivos.includes("pauta");
-        const puedeEditar = pautaActiva && puedeDeIdentidad(identidad)("pauta:write");
+        const puede = puedeDeIdentidad(identidad);
+        const conPauta = identidad.modulosActivos.includes("pauta");
+        const puedeVer = puede("core:personas.laboral.read");
+        const puedeEditar = puede("core:personas.laboral.manage");
         return (
           <div className="flex flex-col gap-4">
             {puedeEditar ? (
@@ -36,16 +38,18 @@ export default function AusenciasPersona(props: Props) {
                 </EnlaceBotonHoja>
               </div>
             ) : null}
-            {pautaActiva ? (
-              <FichaAusencias personaId={p.id} puedeEditar={puedeEditar} />
+            {puedeVer ? (
+              <FichaAusencias personaId={p.id} puedeEditar={puedeEditar} conPauta={conPauta} />
             ) : (
-              <p className="t-caption">
-                Los permisos y licencias se registran sobre la pauta: activa el módulo Pauta para
-                usarlos.
-              </p>
+              <p className="t-caption">No tienes permiso para ver las ausencias de esta persona.</p>
             )}
             {puedeEditar ? (
-              <HojaRegistrarDiferida personaId={p.id} nombre={p.nombreCompleto} hoy={hoyIso()} />
+              <HojaRegistrarDiferida
+                personaId={p.id}
+                nombre={p.nombreCompleto}
+                hoy={hoyIso()}
+                conPauta={conPauta}
+              />
             ) : null}
           </div>
         );

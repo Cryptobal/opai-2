@@ -7,6 +7,7 @@ import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { anotar } from "./anotar";
 import { personaParaAusencia } from "./ausencias-plan";
+import { anularRegistrosSinTurnos } from "./ausencias-registro";
 import { aFechaDb, diasDelRango, PERMISO_WRITE, rangoSchema } from "./comun";
 import { tipoExcepcionSchema } from "./vistas";
 
@@ -19,6 +20,11 @@ const anularInput = z
       .optional()
       .describe(
         "Momento del registro (de `pauta.ausencias.listar`): anula solo ese registro y no otros que se crucen.",
+      ),
+    ausenciaId: uuidSchema
+      .optional()
+      .describe(
+        "Registro de ausencia (de `pauta.ausencias.listar`): anula solo los turnos de ese registro.",
       ),
   })
   .and(rangoSchema);
@@ -34,6 +40,7 @@ async function activas(ctx: Contexto, i: Entrada) {
       tipo: i.tipo,
       estado: "activa",
       fecha: { gte: aFechaDb(dias[0]!), lte: aFechaDb(dias[dias.length - 1]!) },
+      ...(i.ausenciaId ? { ausenciaId: i.ausenciaId } : {}),
       ...(i.registradaEn
         ? {
             createdAt: {
@@ -43,7 +50,7 @@ async function activas(ctx: Contexto, i: Entrada) {
           }
         : {}),
     },
-    select: { id: true, puestoId: true },
+    select: { id: true, puestoId: true, ausenciaId: true },
   });
   const enAlcance = await ctx.db.puesto.findMany({
     where: { id: { in: [...new Set(filas.map((f) => f.puestoId))] }, AND: [dondePuesto(ctx)] },
@@ -80,6 +87,12 @@ export const ausenciasAnular = defineCapability({
         where: { id: { in: filas.map((f) => f.id) }, estado: "activa" },
         data: { estado: "anulada", anuladaEn: new Date(), anuladaPor: ctx.usuario?.id ?? null },
       });
+      await anularRegistrosSinTurnos(
+        tx,
+        ctx.tenantId,
+        filas.map((f) => f.ausenciaId),
+        ctx.usuario?.id ?? null,
+      );
       for (const p of puestos.filter((x) => filas.some((f) => f.puestoId === x.id))) {
         await anotar(tx, ctx, {
           instalacionId: p.instalacionId,

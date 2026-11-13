@@ -293,4 +293,96 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
       }),
     ).toBe(4);
   });
+
+  it("el registro de la persona vive en el Núcleo y enlaza sus turnos (CAR-393)", async () => {
+    const r = await run(ctx(tenantA), "pauta.ausencias.registrar", {
+      personaId: ana,
+      tipo: "vacaciones",
+      motivo: "Vacaciones de verano",
+      desde: dia(17),
+      hasta: dia(24),
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const id = (r as Ok<{ ausenciaId: string; dias: number }>).data.ausenciaId;
+    const a = await e.admin.ausencia.findUnique({ where: { id } });
+    expect(a).toMatchObject({ personaId: ana, tipo: "vacaciones", estado: "aprobada" });
+    const turnos = await e.admin.excepcionPauta.count({ where: { ausenciaId: id } });
+    expect(turnos).toBe((r as Ok<{ dias: number }>).data.dias);
+    const lista = (await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: ana })) as Ok<{
+      grupos: { ausenciaId: string; dias: number; estado: string }[];
+    }>;
+    expect(lista.data.grupos.find((g) => g.ausenciaId === id)).toMatchObject({
+      dias: turnos,
+      estado: "activa",
+    });
+  });
+
+  it("anular algunos días deja el registro aprobado; anular todos lo anula (CAR-393)", async () => {
+    const lista = (await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: ana })) as Ok<{
+      grupos: { ausenciaId: string; tipo: string; desde: string; hasta: string }[];
+    }>;
+    const g = lista.data.grupos.find((x) => x.tipo === "vacaciones")!;
+    const parcial = await run(ctx(tenantA), "pauta.ausencias.anular", {
+      personaId: ana,
+      tipo: "vacaciones",
+      desde: g.desde,
+      hasta: g.desde,
+      ausenciaId: g.ausenciaId,
+    });
+    expect(parcial.ok, JSON.stringify(parcial)).toBe(true);
+    expect((await e.admin.ausencia.findUnique({ where: { id: g.ausenciaId } }))?.estado).toBe(
+      "aprobada",
+    );
+    const total = await run(ctx(tenantA), "pauta.ausencias.anular", {
+      personaId: ana,
+      tipo: "vacaciones",
+      desde: g.desde,
+      hasta: g.hasta,
+      ausenciaId: g.ausenciaId,
+    });
+    expect(total.ok, JSON.stringify(total)).toBe(true);
+    expect((await e.admin.ausencia.findUnique({ where: { id: g.ausenciaId } }))?.estado).toBe(
+      "anulada",
+    );
+  });
+
+  it("desde el Núcleo, con Pauta activa, marca los turnos y al anular los libera (CAR-393 parte 2)", async () => {
+    const r = await run(ctx(tenantA), "core.ausencias.registrar", {
+      personaId: ana,
+      tipo: "permiso",
+      motivo: "Trámite personal",
+      desde: dia(40),
+      hasta: dia(43),
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const { ausenciaId, dias } = (r as Ok<{ ausenciaId: string; dias: number }>).data;
+    expect(dias).toBeGreaterThan(0);
+    expect(await e.admin.excepcionPauta.count({ where: { ausenciaId, estado: "activa" } })).toBe(
+      dias,
+    );
+    const a = await run(ctx(tenantA), "core.ausencias.anular", {
+      personaId: ana,
+      ausenciaId,
+    });
+    expect(a).toMatchObject({ ok: true, data: { turnosLiberados: dias } });
+    expect(await e.admin.excepcionPauta.count({ where: { ausenciaId, estado: "activa" } })).toBe(0);
+    expect((await e.admin.ausencia.findUnique({ where: { id: ausenciaId } }))?.estado).toBe(
+      "anulada",
+    );
+  });
+
+  it("desde el Núcleo, marcar turnos sin permiso de editar la pauta se rechaza y no escribe (CAR-393)", async () => {
+    const base = ctx(tenantA);
+    const sinPauta = { ...base, autorizar: (p: string) => p !== "pauta:write" && base.autorizar(p) };
+    const antes = await e.admin.ausencia.count({ where: { personaId: ana } });
+    const r = await run(sinPauta, "core.ausencias.registrar", {
+      personaId: ana,
+      tipo: "permiso",
+      motivo: "Trámite personal",
+      desde: dia(50),
+      hasta: dia(52),
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await e.admin.ausencia.count({ where: { personaId: ana } })).toBe(antes);
+  });
 });
