@@ -1,4 +1,4 @@
-import type { EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
+import type { ConAprobable, EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, HechoPlataforma, TenantTx, VerificacionAuditoria } from "@opai/db";
 
 import type { EmpresaPlataforma } from "./plataforma-empresa";
@@ -177,7 +177,7 @@ export type ModoEjecucion = {
   preparado?: unknown;
 };
 
-export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType = z.ZodType> {
+export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType = z.ZodType> extends ConAprobable<Contexto, z.output<I>, z.output<O>> {
   /** `<modulo>.<entidad>.<verbo>` o `<modulo>.<verbo>`, en minúsculas. */
   id: string;
   /** Derivado del id: el primer segmento. */

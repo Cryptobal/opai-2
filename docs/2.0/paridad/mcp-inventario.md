@@ -154,15 +154,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
-| compartido | `app/(erp)/_componentes` | `core.aprobaciones.list` | `core_aprobaciones_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/_componentes` | `core.inicio.indicadores` | `core_inicio_indicadores` | existe |
 | compartido | `app/(erp)/_componentes` | `core.inicio.pendientes` | `core_inicio_pendientes` | existe |
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
+| compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
-| compartido | `app/(erp)/_componentes` | `cpq.aprobaciones.list` | `cpq_aprobaciones_list` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -365,6 +364,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.movimientos_bancarios.listar` | `finanzas_movimientos_bancarios_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.reglas_banco.guardar` | `finanzas_reglas_banco_guardar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.ventas.buscar` | `finanzas_ventas_buscar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.deshacer` | `finanzas_cartolas_deshacer` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.listar` | `finanzas_cartolas_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.aplicar` | `finanzas_reglas_banco_aplicar` | existe |
@@ -880,6 +882,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.apps_conectadas.desconectar` | Solo personas: desconectar una app conectada por OAuth gobierna agentes; se hace en Mi cuenta (CAR-247). Listar sí va por MCP. |
 | `core.aprobaciones.aprobar` | Solo personas: lo irreversible lo aprueba un humano (ADR-032). |
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
+| `core.aprobaciones.reglas_desactivar` | Solo personas: desactivar una regla quita una aprobación de lo irreversible; lo decide un humano (ADR-032, CAR-252). |
+| `core.aprobaciones.reglas_guardar` | Solo personas: decide quién aprueba lo irreversible; un agente no puede cambiar la regla que lo frena (ADR-032, CAR-252). |
 | `core.biometria.enrolar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4). |
 | `core.biometria.verificar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4). |
 | `core.correos.recibir` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el tenant por la dirección de registro t<token>@respuestas.opai.cl (CAR-233). |
@@ -979,6 +983,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apps_conectadas.desconectar` | `app/_acciones` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `core.aprobaciones.reglas_desactivar` | sin pantalla todavía · CAR-252 · desde 2026-11-12 | no | reservada a personas |
+| `core.aprobaciones.reglas_guardar` | sin pantalla todavía · CAR-252 · desde 2026-11-12 | no | reservada a personas |
 | `core.biometria.enrolar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.biometria.verificar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
@@ -1064,6 +1070,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.actividades.delete`
 - `core.anexos.generar`
 - `core.aprobaciones.get`
+- `core.aprobaciones.reglas_list`
 - `core.audit.list`
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
@@ -1122,8 +1129,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.margen`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
-- `finanzas.cartolas.deshacer`
-- `finanzas.cartolas.listar`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.fijar_fecha_esperada`
 - `finanzas.cuadratura.obtener`

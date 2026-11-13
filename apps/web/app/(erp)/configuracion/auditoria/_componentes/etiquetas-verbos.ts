@@ -47,6 +47,7 @@ export const VERBOS: Record<string, string> = {
   embudo: "Embudo", mover: "Mover", ganar: "Marcar como ganado", perder: "Marcar como perdido",
   reabrir: "Reabrir", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
   set_contactos: "Definir contactos", actualizar_etapa: "Actualizar etapa", guardar_catalogo: "Guardar catálogo", guardar_lote: "Guardar en lote",
+  reglas_list: "Ver reglas de aprobación", reglas_guardar: "Guardar regla de aprobación", reglas_desactivar: "Desactivar regla de aprobación",
   crear_etapa: "Crear etapa", reordenar_etapas: "Reordenar etapas", enriquecer: "Enriquecer",
   buscar_duplicadas: "Buscar duplicadas", acciones_agente: "Acciones del agente", derivar: "Derivar",
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
