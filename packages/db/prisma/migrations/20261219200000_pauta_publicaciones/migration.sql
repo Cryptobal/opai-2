@@ -39,3 +39,6 @@ CREATE POLICY tenant_isolation ON "pauta"."publicaciones" AS PERMISSIVE FOR ALL 
 GRANT SELECT, INSERT, UPDATE ON "pauta"."publicaciones" TO opai_app;
 
 COMMIT;
+
+-- Reversión: DROP TABLE "pauta"."publicaciones"; (tabla nueva sin otras dependencias; se puede restaurar desde el
+-- snapshot previo de Neon).
