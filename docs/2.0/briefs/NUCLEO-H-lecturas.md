@@ -18,6 +18,7 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 |---|---|
 | `core.personas.list/get` | Identificación, contacto, domicilio y vínculo; personas de la página/ficha |
 | `core.vinculos.list` | Historial laboral; vínculos devueltos |
+| `core.procesos_persona.listar` | Listas de ingreso y salida (CAR-355): revela ingreso o salida, pasos y motivos; listas devueltas |
 | `core.contactos.list/get` | Identificación/contacto; contactos devueltos |
 | `core.cuentas.list/get` | Cuenta persona natural, contacto principal y representantes; cuenta, representantes y contactos de la ficha |
 | `core.buscar` | Nombres, RUT y correo en sugerencias de UI/API/MCP; IDs de cuentas, personas y contactos devueltos |

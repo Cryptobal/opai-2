@@ -3,40 +3,40 @@
 import { type PointerEvent, useEffect, useState } from "react";
 
 import { AppShell, type AppShellProps } from "../app-shell";
-import { BotonFijarMenu, BotonPlegarMenu } from "./botones-menu";
+import { BarraInferiorNueva } from "./barra-inferior";
+import { BotonFijarMenu, BotonPlegarMenu, BotonTema } from "./botones-menu";
 
-const CLAVE_PLEGADO = "opai_menu_plegado";
 /** Ancho del menú lateral completo (`Sidebar`, 248 px) más un margen para no cerrarlo en el borde. */
 const ANCHO_MENU = 264;
 
-function leerPlegado(): boolean {
-  try {
-    return window.localStorage.getItem(CLAVE_PLEGADO) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function guardarPlegado(plegado: boolean) {
-  try {
-    window.localStorage.setItem(CLAVE_PLEGADO, plegado ? "1" : "0");
-  } catch {
-    // Sin almacenamiento (modo privado): el menú vuelve a su estado por defecto en la próxima visita.
-  }
-}
+export type ShellNuevoProps = AppShellProps & {
+  /** Menú plegado al cargar: lo lee el servidor (cookie) para pintarlo así desde el primer byte. */
+  plegadoInicial?: boolean;
+  /** La app recuerda la elección (cookie de este navegador). */
+  onPlegado?: (plegado: boolean) => void;
+  /** Botón de tema de la barra superior (iPad y escritorio) y en «Yo» del teléfono. */
+  onTema?: () => void;
+  /** Pestaña «Agente» de la barra inferior del teléfono; sin agente no aparece. */
+  onAgente?: () => void;
+};
 
 /**
  * Shell del diseño nuevo (ADR-109, CAR-335 D2; diseño en docs/2.0/design/export-diseno-nuevo/): el
  * mismo shell que el clásico, con la piel `data-marco="nuevo"` y el menú lateral plegable. Plegado, se
  * ve el riel de íconos; al pasar el mouse se asoma el menú completo sobre la página y se vuelve a
- * esconder al alejarse o al elegir. Este navegador recuerda si el menú queda plegado. La visibilidad
+ * esconder al alejarse o al elegir. La app recuerda si queda plegado y lo pasa al cargar, sin parpadeo. La visibilidad
  * va por `data-menu` y reglas de `styles.css`, y el componente se importa aparte
  * (`@opai/ds/shell-nuevo`): el shell clásico no carga nada de esto (ADR-037).
  */
-export function ShellNuevo(props: AppShellProps) {
-  const [plegado, setPlegado] = useState(false);
+export function ShellNuevo({
+  plegadoInicial,
+  onPlegado,
+  onTema,
+  onAgente,
+  ...props
+}: ShellNuevoProps) {
+  const [plegado, setPlegado] = useState(plegadoInicial ?? false);
   const [asomado, setAsomado] = useState(false);
-  useEffect(() => setPlegado(leerPlegado()), []);
   // Los menús y diálogos se pintan en <body>: el atributo en <html> les da la misma piel.
   useEffect(() => {
     const raiz = document.documentElement;
@@ -64,7 +64,7 @@ export function ShellNuevo(props: AppShellProps) {
   const cambiar = (valor: boolean) => {
     setPlegado(valor);
     setAsomado(false);
-    guardarPlegado(valor);
+    onPlegado?.(valor);
   };
   const asomar = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "mouse" || asomado) return;
@@ -79,6 +79,8 @@ export function ShellNuevo(props: AppShellProps) {
     >
       <AppShell
         {...props}
+        textoBusqueda="Busca o pídele algo a OPAI"
+        {...(onTema ? { tema: <BotonTema onTema={onTema} /> } : {})}
         botonesMenu={{
           sidebar: plegado ? (
             asomado ? (
@@ -90,6 +92,7 @@ export function ShellNuevo(props: AppShellProps) {
           riel: plegado ? fijar : undefined,
         }}
       />
+      <BarraInferiorNueva {...props} onAgente={onAgente} onTema={onTema} />
     </div>
   );
 }
