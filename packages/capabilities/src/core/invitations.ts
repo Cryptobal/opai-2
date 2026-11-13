@@ -5,6 +5,7 @@ import { PERMISOS_CORE, portalesIncoherentes } from "@opai/domain";
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { tenantActual, usuarioResponsable } from "./comun";
+import { cursorDe, pagina } from "./maestros/comun";
 import { emailSchema, portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { crearInvitacion, estadoInvitacion } from "./invitar";
 import { exigeAsignarRol } from "./permisos/comun";
@@ -65,21 +66,34 @@ const invitacionSchema = z.object({
 });
 
 export const invitationsList = defineCapability({
-  auditarLectura: (s) => s.map((i) => i.id),
+  auditarLectura: (s) => s.items.map((i) => i.id),
   id: "core.invitations.list",
   descripcion:
     "Invitaciones de la empresa actual con su estado (pendiente, aceptada, revocada, vencida).",
   permiso: PERMISOS_CORE.usersManage,
-  input: z.object({ soloPendientes: z.boolean().default(true) }),
-  output: z.array(invitacionSchema),
+  input: z.object({
+    soloPendientes: z.boolean().default(true),
+    cursor: uuidSchema.optional(),
+    limite: z.number().int().min(1).max(200).default(100),
+  }),
+  output: z.object({ items: z.array(invitacionSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     if (ctx.alcance) throw prohibido("No tienes acceso a estas invitaciones.");
-    const filas = await ctx.db.invitation.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
-    return filas
-      .map((i) => ({ ...i, estado: estadoInvitacion(i) }))
-      .filter((i) => !input.soloPendientes || i.estado === "pendiente");
+    // Pendiente = sin aceptar, sin revocar y sin vencer (`estadoInvitacion`): filtra en la consulta
+    // para que la página no quede corta.
+    const pendientes = { acceptedAt: null, revocadaEn: null, expiresAt: { gte: new Date() } };
+    const filas = await ctx.db.invitation.findMany({
+      where: input.soloPendientes ? pendientes : {},
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: input.limite + 1,
+      ...cursorDe(input.cursor),
+    });
+    return pagina(
+      filas.map((i) => ({ ...i, estado: estadoInvitacion(i) })),
+      input.limite,
+    );
   },
 });
 
