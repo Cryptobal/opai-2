@@ -2,6 +2,7 @@ import { Badge, cn, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
 
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { diaLargo } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -40,16 +41,6 @@ function Kpis({ r, className }: { r: Datos["resumen"]; className: string }) {
   );
 }
 
-/** «jueves 5 nov 2026» en la zona de la empresa. */
-function fechaLarga(iso: string, zona: string): string {
-  const p = Object.fromEntries(
-    new Intl.DateTimeFormat("es-CL", { weekday: "long", day: "numeric", month: "short", year: "numeric", timeZone: zona })
-      .formatToParts(new Date(`${iso}T12:00:00Z`))
-      .map((x) => [x.type, x.value]),
-  );
-  return `${p["weekday"]} ${p["day"]} ${String(p["month"]).replace(".", "")} ${p["year"]}`;
-}
-
 /** 600 → «10 h»; 150 → «2 h 30 min»; 45 → «45 min». */
 function duracion(min: number): string {
   const h = Math.floor(min / 60);
@@ -83,7 +74,7 @@ export default function AsistenciaHoy({ searchParams }: Props) {
             <ListScreen<Item>
               state={estadoPantalla(r)}
               titulo="Asistencia de hoy"
-              subtitulo={d ? `${fechaLarga(d.fecha, d.zona)} · ${d.resumen.turnos} turnos` : undefined}
+              subtitulo={d ? `${diaLargo(new Date(`${d.fecha}T12:00:00Z`), d.zona)} · ${d.resumen.turnos} turnos` : undefined}
               filtros={
                 <div className="flex w-full flex-col gap-3">
                   {d ? <Kpis r={d.resumen} className={cn("grid grid-cols-2 gap-3 md:hidden", GRILLA_KPI_HILO)} /> : null}
