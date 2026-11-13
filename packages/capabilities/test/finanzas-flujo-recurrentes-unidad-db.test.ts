@@ -59,6 +59,10 @@ describe.skipIf(omitirSuiteDb())("flujo · recurrentes en UF y % de ventas (db)"
     const base = { filaId: fila, concepto: "Pct", frecuencia: "mensual", diaDelMes: 5, inicio: lunes };
     expect((await run("finanzas.recurrentes.crear", { ...base, unidad: "pct_ventas", monto: 1_000_001 })).ok).toBe(false);
     expect((await run("finanzas.recurrentes.crear", { ...base, unidad: "dolares", monto: 1 })).ok).toBe(false);
+    // El día de la UF solo aplica en UF, y el día fijo va solo (y siempre) con su política.
+    expect((await run("finanzas.recurrentes.crear", { ...base, monto: 1, politicaUf: "fin_de_mes" })).ok).toBe(false);
+    expect((await run("finanzas.recurrentes.crear", { ...base, unidad: "uf", monto: 1, politicaUf: "dia_fijo" })).ok).toBe(false);
+    expect((await run("finanzas.recurrentes.crear", { ...base, unidad: "uf", monto: 1, ufDiaFijo: 10 })).ok).toBe(false);
     const p = await run("finanzas.recurrentes.crear", { ...base, unidad: "uf", monto: 125_000 }, { dryRun: true });
     expect(p.ok && (p.data as { unidad: string }).unidad).toBe("uf");
     // Cambiar solo la unidad reinterpretaría el monto: se exige el monto nuevo.
@@ -78,6 +82,10 @@ describe.skipIf(omitirSuiteDb())("flujo · recurrentes en UF y % de ventas (db)"
     const c = await cuotasDe("Arriendo UF");
     // 12,5 UF × $40.000 y × $40.100.
     expect(c.map((x) => x.monto)).toEqual([500_000, 501_250]);
+    // Con día fijo, ambas cuotas usan la UF de ese día del mes (aquí, el de la primera cuota si es el mismo mes).
+    const d0 = Number(dias[0].slice(8, 10));
+    await ok("finanzas.recurrentes.crear", { filaId: fila, concepto: "Fijo UF", unidad: "uf", monto: 125_000, politicaUf: "dia_fijo", ufDiaFijo: d0, frecuencia: "semanal", inicio: dias[0], repeticiones: 1 });
+    expect((await cuotasDe("Fijo UF")).map((x) => [x.monto, x.nota?.includes(`UF del ${dias[0]}`)])).toEqual([[500_000, true]]);
   });
 
   it("% de ventas: sobre las ventas netas del mes anterior (la nota de crédito resta) y marca lo estimado", async () => {

@@ -10,6 +10,7 @@ type Lector = Pick<TenantTx, "indicadorLegal" | "valorPublicado" | "documentoEmi
 
 /** Mismos documentos que el libro de ventas del IVA/PPM: la nota de crédito resta, factura y ND suman. */
 const VENTAS = { estadoDte: { in: ["enviado", "aceptado", "anulado_nc"] }, tipoDte: { in: [33, 34, 56, 61] } };
+const menosDias = (iso: string, n: number) => new Date(Date.parse(`${iso}T00:00:00Z`) - n * 86_400_000).toISOString().slice(0, 10);
 const entero = (v: unknown): number | null => {
   const n = Number(v);
   return Number.isSafeInteger(n) && n > 0 ? n : null;
@@ -85,7 +86,8 @@ async function ventas(db: Lector, desde: string, periodoActual: string) {
 export async function baseMonto(db: Lector, unidades: ReadonlySet<string>, desde: string, hasta: string): Promise<BaseMonto> {
   const periodoActual = hoyChile().slice(0, 7);
   const [u, v] = await Promise.all([
-    unidades.has("uf") ? ufs(db, desde, hasta) : Promise.resolve({ porDia: new Map<string, number>(), ultima: null }),
+    // La política «fin del mes anterior» puede pedir la UF de hasta un mes antes de la primera cuota.
+    unidades.has("uf") ? ufs(db, menosDias(desde, 31), hasta) : Promise.resolve({ porDia: new Map<string, number>(), ultima: null }),
     unidades.has("pct_ventas") ? ventas(db, desde, periodoActual) : Promise.resolve({ porPeriodo: new Map<string, number>(), ultimo: null }),
   ]);
   return {

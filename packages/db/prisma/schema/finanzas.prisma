@@ -890,6 +890,10 @@ model FlujoRecurrente {
   monto         BigInt
   /// "clp" | "uf" (UF del día de cada cuota) | "pct_ventas" (% de las ventas netas del mes anterior).
   unidad        String    @default("clp")
+  /// Solo UF: "dia_cuota" | "fin_de_mes" | "fin_mes_anterior" | "inicio_de_mes" | "dia_fijo" (paridad con OPAI 1).
+  politicaUf    String    @default("dia_cuota") @map("politica_uf")
+  /// Solo con politicaUf "dia_fijo": 1 a 31 (se ajusta en meses cortos).
+  ufDiaFijo     Int?      @map("uf_dia_fijo")
   /// "semanal" | "quincenal" | "mensual".
   frecuencia    String
   /// Solo mensual: 1 a 31 (se ajusta al último día del mes) o −1 = último día del mes.

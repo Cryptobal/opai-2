@@ -6,7 +6,7 @@ import type { z } from "zod";
 
 import type { CeldaFlujo } from "../domain";
 import { estadosPorFila, ocurrenciasDe, type CargoFila, type EstadoOcurrencia, type Frecuencia } from "../domain/recurrentes";
-import { montoCuota, type MontoCuota, type UnidadRecurrente } from "../domain/recurrentes-monto";
+import { montoCuota, type MontoCuota, type PoliticaUf, type UnidadRecurrente } from "../domain/recurrentes-monto";
 import { cuotasDelFlujo } from "../domain/recurrentes-semana";
 import { baseMonto } from "./recurrentes-base";
 import { aNumeroSeguro, type celdaSchema } from "./esquemas";
@@ -57,7 +57,7 @@ export async function celdasRecurrentes(
     recurrentes.map((r) => {
       const regla = { frecuencia: r.frecuencia as Frecuencia, diaDelMes: r.diaDelMes, inicio: aIso(r.inicio), fin: r.fin ? aIso(r.fin) : null, repeticiones: r.repeticiones };
       const fechas = ocurrenciasDe(regla, desde, hasta);
-      const porFecha = new Map(fechas.map((f) => [f, montoCuota({ unidad: r.unidad as UnidadRecurrente, monto: aNumeroSeguro(r.monto) }, f, base)] as const));
+      const porFecha = new Map(fechas.map((f) => [f, montoCuota({ unidad: r.unidad as UnidadRecurrente, monto: aNumeroSeguro(r.monto), politicaUf: r.politicaUf as PoliticaUf, ufDiaFijo: r.ufDiaFijo }, f, base)] as const));
       montos.set(r.id, porFecha);
       return [r.id, { id: r.id, fechas, monto: (f: string) => porFecha.get(f)?.monto ?? 0, ventana: { diasAntes: r.ventanaAntes, diasDespues: r.ventanaDespues } }] as const;
     }),

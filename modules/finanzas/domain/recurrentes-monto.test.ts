@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { montoCuota, periodoAnterior, type BaseMonto } from "./recurrentes-monto";
+import { fechaUf, montoCuota, periodoAnterior, type BaseMonto } from "./recurrentes-monto";
 
 // UF en centavos de CLP: 4.000.000 = $40.000,00.
 const ufs = new Map([["2026-11-05", 4_000_000], ["2026-12-05", 4_010_000]]);
@@ -70,6 +70,20 @@ describe("montoCuota", () => {
   it("montos grandes no pierden precisión (cálculo entero)", () => {
     // 100.000 UF × $40.000 = $4.000.000.000.
     expect(montoCuota({ unidad: "uf", monto: 1_000_000_000 }, "2026-11-05", base).monto).toBe(4_000_000_000);
+  });
+});
+
+describe("fechaUf (paridad con OPAI 1)", () => {
+  it("día de la cuota, fin de mes, inicio de mes, fin del mes anterior y día fijo ajustado", () => {
+    expect(fechaUf("dia_cuota", null, "2027-02-10")).toBe("2027-02-10");
+    expect(fechaUf("fin_de_mes", null, "2027-02-10")).toBe("2027-02-28");
+    expect(fechaUf("inicio_de_mes", null, "2027-02-10")).toBe("2027-02-01");
+    expect(fechaUf("fin_mes_anterior", null, "2027-01-10")).toBe("2026-12-31");
+    expect(fechaUf("dia_fijo", 31, "2027-02-10")).toBe("2027-02-28");
+  });
+  it("la cuota en UF usa la UF del día que dice la política", () => {
+    const r = montoCuota({ unidad: "uf", monto: 10_000, politicaUf: "fin_mes_anterior" }, "2026-12-05", { ...base, ufDelDia: (f) => (f === "2026-11-30" ? 4_020_000 : null) });
+    expect(r).toMatchObject({ monto: 40_200, estimado: false, detalle: "UF del 2026-11-30" });
   });
 });
 
