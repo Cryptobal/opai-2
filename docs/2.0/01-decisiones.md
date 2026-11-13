@@ -2031,6 +2031,24 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+
+## ADR-108 · Trabajo en paralelo sin esperas y sin choques entre sesiones (12-nov-2026)
+
+**Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»). **Modifica** `OPERACION-agentes.md` (A2.5), `AGENTS.md`, `CONTEXTO-agentes.md` e `INSTRUCCIONES-proyecto-claude.md`. (ADR-105 a ADR-107 están reservados por PR abiertos: #584, #591 a #594 y #595.)
+
+**Contexto.** El 12-nov había 25 PR abiertos de ocho sesiones. Dos problemas: sesiones que se detenían a esperar la revisión del bot «OPAI 2.0» o la integración, y PR que chocaban entre sí. Casi todos editaban la misma tabla de `ESTADO.md`, el inventario de paridad y `embed.ts`; tres pares editaban el mismo `.prisma`; y cuatro PR tomaron el mismo número de ADR (106).
+
+**Decisión.**
+
+1. **Las sesiones avanzan solas.** Al abrir un PR siguen con su próximo ticket, apilando si depende del anterior. La revisión del bot y la integración ocurren en paralelo y no son una puerta. Solo se detienen por una decisión de negocio o producto de Carlos, o por algo irreversible, plata, datos reales, producción, OPAI 1.0, el tenant Gard o un secreto.
+2. **Archivos sensibles.** Antes de tocar un `.prisma`, una migración, un registro central, un archivo generado o numerar un ADR, la sesión revisa los PR abiertos. Si otro ya edita ese archivo, apila sobre él o espera, y lo dice en la descripción («apilado sobre #N» o «espera #N»).
+3. **Migraciones de a una y en orden de fecha.** Dos PR no editan el mismo `.prisma` con migraciones distintas sin apilarse.
+4. **`ESTADO.md` deja de editarse en cada PR.** Cada PR escribe un archivo propio, `docs/2.0/estado/<modulo>/CAR-<n>.md`. `ESTADO.md` queda como índice y lo consolida un PR de documentación. Se eligió esto, y no «solo actualiza quien integra», porque quien integra es la misma sesión que construye: el choque seguiría igual, solo más tarde.
+5. **Dueños por módulo** en una tabla de `OPERACION-agentes.md` (A2.5.5). No se usa `CODEOWNERS` de GitHub porque todas las sesiones operan con la misma cuenta.
+6. **Dependencias en Linear.** Antes de tomar un ticket se revisan sus «blocked by»; el orden entre módulos vive en las relaciones de Linear.
+
+**Consecuencias.** El orden propuesto para los PR abiertos al 12-nov está en `docs/2.0/estado/orden-integracion-2026-11-12.md`. Carlos aprobó el 12-nov (18:28) un aviso automático: el workflow `choque-prisma.yml` avisa, sin bloquear, cuando dos PR abiertos editan el mismo `.prisma` sin estar apilados.
+
 ## ADR-109 · Diseño nuevo de OPAI 2.0: reemplaza a Hilo (CAR-335, 12-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 18:27, hora de Chile) · **Registra:** Claude. (ADR-105 a ADR-108 están reservados por PRs abiertos.)

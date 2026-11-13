@@ -8,6 +8,8 @@
 
 **Regla de operación (11-nov-2026, ADR-095):** toda respuesta que necesite una decisión de Carlos termina con el párrafo «Decisión tuya» (qué decidir, por qué, link, sugerencia, en lenguaje simple). Ver `AGENTS.md` «Decisiones de Carlos».
 
+**Regla de operación (12-nov-2026, ADR-108):** los PR de construcción ya **no editan este archivo**. Cada uno escribe su avance en `docs/2.0/estado/<modulo>/CAR-<n>.md` ([cómo](estado/README.md)); este archivo queda como índice y foto histórica, y lo consolida un PR de documentación. Motivo: casi todos los PR agregaban su fila en el mismo lugar y chocaban entre sí. Regla completa de trabajo en paralelo: `OPERACION-agentes.md` A2.5.
+
 ## En curso
 
 | PR | Qué | Estado | Migración |
