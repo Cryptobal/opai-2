@@ -69,6 +69,12 @@ export async function planearAusencia(
     },
     orderBy: { id: "asc" },
   });
+  // Alcance (ADR-022): si es titular en un puesto que el actor no gestiona, no se registra a medias.
+  const activos = await ctx.db.puesto.count({
+    where: { id: { in: [...new Set(conSerie.map((s) => s.puestoId))] }, estado: "activo" },
+  });
+  if (activos > puestos.length)
+    throw reglaDeNegocio("La persona tiene turnos en instalaciones fuera de tu alcance.");
   const series = await cargarSeriesDe(
     ctx,
     puestos.map((p) => p.id),

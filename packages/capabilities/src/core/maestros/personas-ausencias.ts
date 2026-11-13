@@ -6,7 +6,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import { anotar } from "../../pauta/anotar";
 import { escribirAusencia, salidaAusencia } from "../../pauta/ausencias-escribir";
 import {
@@ -67,7 +67,8 @@ export const personasAusenciasAnular = defineCapability({
         select: { estado: true },
       });
       if (!a) throw noEncontrado("La ausencia");
-      if (a.estado === "anulada") throw reglaDeNegocio("La ausencia ya está anulada.");
+      if (a.estado !== "aprobada" && a.estado !== "solicitada")
+        throw reglaDeNegocio("La ausencia ya está anulada o rechazada.");
       const turnos = await db.excepcionPauta.findMany({
         where: { ausenciaId, estado: "activa" },
         select: { id: true, puestoId: true, fecha: true },
@@ -79,11 +80,21 @@ export const personasAusenciasAnular = defineCapability({
       // Alcance (ADR-022): no se liberan turnos de instalaciones que el actor no gestiona.
       if (puestos.length < new Set(turnos.map((t) => t.puestoId)).size)
         throw reglaDeNegocio("La ausencia marca turnos en instalaciones fuera de tu alcance.");
+      if (turnos.length && !ctx.autorizar("pauta:write"))
+        throw prohibido("Liberar turnos de la pauta requiere el permiso de editar la pauta.");
       return { turnos, puestos };
     };
     if (dryRun) return { ausenciaId, turnosLiberados: (await cargar(ctx.db)).turnos.length };
     return ctx.transaccion(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`pauta:${ctx.tenantId}:${personaId}`}, 0))::text`;
+      // Mismo orden que la pauta (persona → puestos → registro) para no cruzarse con `pauta.excepciones.anular`.
+      const deTurnos = await tx.excepcionPauta.findMany({
+        where: { ausenciaId },
+        select: { puestoId: true },
+        distinct: ["puestoId"],
+      });
+      for (const p of deTurnos.map((t) => t.puestoId).sort())
+        await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${p}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       await tx.$queryRaw`SELECT id FROM core.ausencias WHERE id = ${ausenciaId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       const { turnos, puestos } = await cargar(tx);
       const usuario = ctx.usuario?.id ?? null;

@@ -14,7 +14,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
   let tenant = "";
   let otro = "";
   let persona = "";
-  const ctx = (tenantId: string, rol = "owner") =>
+  const ctx = (tenantId: string, rol: "owner" | "viewer" = "owner") =>
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: randomUUID() },
@@ -124,5 +124,29 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
         })
       ).ok,
     ).toBe(false);
+  });
+
+  it("sin el permiso laboral no se registra; una ausencia de otra persona no se anula", async () => {
+    const entrada = { personaId: persona, tipo: "permiso", motivo: "Trámite", desde: "2026-12-02" };
+    expect(
+      (await run(ctx(tenant, "viewer"), "core.ausencias.registrar", entrada)).error?.code,
+    ).toBe("FORBIDDEN");
+    const r = await run(ctx(tenant), "core.ausencias.registrar", entrada);
+    const otra = (
+      await e.admin.persona.create({
+        data: {
+          tenantId: tenant,
+          nombres: "Otra",
+          apellidos: "Ficticia",
+          rut: "22222222-2",
+          estado: "activa",
+        },
+      })
+    ).id;
+    const anular = await run(ctx(tenant), "core.ausencias.anular", {
+      personaId: otra,
+      ausenciaId: r.data?.["ausenciaId"],
+    });
+    expect(anular.error?.code).toBe("NOT_FOUND");
   });
 });
