@@ -12,7 +12,6 @@ import {
   cargarOpciones,
   cargarResultadoCargo,
   cargarScorecard,
-  mesEnCurso,
 } from "../../_componentes/datos";
 import { mesDeUrl, SelectorMes } from "../../_componentes/selector-mes";
 import { type DefinicionIndicador, mesCorto } from "../../_componentes/tipos";
@@ -57,12 +56,11 @@ export default function ScorecardCargo({ params, searchParams }: Props) {
           nombre: r.ok ? r.data.cargo : "Cargo",
           editaScorecard,
           editaJefatura: puede("core:estructuras.manage"),
-          actual: mesEnCurso(),
         };
       }}
       opciones={({ nombre }) => ({ titulo: nombre })}
     >
-      {({ id, r, equipo, opciones, cargos, nombre, editaScorecard, editaJefatura, actual }) => {
+      {({ id, r, equipo, opciones, cargos, nombre, editaScorecard, editaJefatura }) => {
         const vigente = r.ok ? r.data.vigente : null;
         const pendiente = r.ok ? r.data.pendiente : null;
         const mapa = (ds: DefinicionIndicador[]) => new Map(ds.map((d) => [d.indicador, d]));
@@ -118,7 +116,7 @@ export default function ScorecardCargo({ params, searchParams }: Props) {
                 {equipo.ok ? (
                   <SelectorMes
                     periodo={equipo.data.periodo}
-                    actual={actual}
+                    actual={equipo.data.mesEnCurso}
                     base={`/desempeno/cargos/${id}`}
                   />
                 ) : null}
