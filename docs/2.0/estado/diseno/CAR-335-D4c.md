@@ -1,7 +1,7 @@
 # CAR-335 D4c · Vistas guardadas en las listas
 
 - **Sesión:** Sesión Hilo
-- **PR:** por abrir · rama `brief/car-335-d4c-vistas`
+- **PR:** #652 · rama `brief/car-335-d4c-vistas`
 - **Estado:** En PR
 - **Migración:** No (ajuste de usuario, ADR-038)
 
