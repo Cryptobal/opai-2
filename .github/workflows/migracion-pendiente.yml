@@ -21,7 +21,7 @@ concurrency:
 jobs:
   migracion-pendiente:
     name: migración pendiente
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
       - name: Cola de merge (control ya hecho en el PR)
