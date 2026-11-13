@@ -83,11 +83,15 @@ async function crearCotizacion(page: Page, negocioId: string) {
 /** Crea la cuenta, la instalación, la persona, el negocio y la cotización que falten; devuelve notas de lo que no se pudo. */
 export async function prepararDatos(page: Page): Promise<string[]> {
   const notas: string[] = [];
-  const paso = async (nombre: string, f: () => Promise<unknown>) =>
-    f().then(
-      () => true,
+  // Cada acción falla a los 45 s: un paso colgado deja su nota y no se come el tope de la prueba.
+  page.setDefaultTimeout(45_000);
+  const paso = async (nombre: string, f: () => Promise<unknown>) => {
+    console.log(`datos de auditoría: creando ${nombre}…`);
+    return f().then(
+      () => (console.log(`datos de auditoría: ${nombre} lista`), true),
       (e: unknown) => (notas.push(`${nombre}: ${String(e).slice(0, 160)}`), false),
     );
+  };
   let cuentaId = await buscar(page, "cuentas", CUENTA_QA, new RegExp(CUENTA_QA));
   if (!cuentaId && !(await paso("cuenta", async () => (cuentaId = await crearCuenta(page)))))
     return notas;
