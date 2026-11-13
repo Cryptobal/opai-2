@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { accionNegocios } from "./negocios-ayuda";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -12,14 +13,9 @@ test.describe("@preview comercial: transferir cartera", () => {
     await entrar(page);
     await page.goto("/negocios");
     // En el teléfono las acciones secundarias van en el menú «⋯» (CAR-371).
-    if (info.project.name === "telefono") {
-      await page.getByRole("button", { name: "Más acciones de negocios" }).click({ timeout: 60_000 });
-      await page.getByRole("menuitem", { name: "Transferir cartera" }).click();
-    } else {
-      const boton = page.getByRole("link", { name: "Transferir cartera" }).first();
-      await expect(boton).toBeVisible({ timeout: 60_000 });
-      await boton.click();
-    }
+    if (info.project.name !== "telefono")
+      await expect(page.getByRole("link", { name: "Transferir cartera" }).first()).toBeVisible({ timeout: 60_000 });
+    await accionNegocios(page, info.project.name === "telefono", "Transferir cartera");
     const hoja = page.getByRole("dialog");
     await expect(hoja.getByRole("heading", { name: "Transferir cartera" })).toBeVisible({ timeout: 60_000 });
     await expect(hoja.getByText("Nuevo responsable", { exact: true })).toBeVisible();

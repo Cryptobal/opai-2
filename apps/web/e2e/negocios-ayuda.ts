@@ -57,8 +57,18 @@ export async function irANuevaCotizacion(page: Page) {
 }
 
 /** Acción secundaria de Negocios: botón desde md; en el teléfono, ítem del menú «⋯» (CAR-371). */
+/** Abre el menú «⋯» de Negocios (teléfono). Reintenta el clic hasta que el menú quede hidratado y abierto. */
+export async function abrirMenuNegocios(page: Page) {
+  const boton = page.getByRole("button", { name: "Más acciones de negocios" });
+  await base(boton).toBeVisible({ timeout: 60_000 });
+  await base(async () => {
+    if ((await boton.getAttribute("aria-expanded")) !== "true") await boton.click();
+    await base(page.getByRole("menu")).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
+}
+
 export async function accionNegocios(page: Page, telefono: boolean, nombre: string) {
   if (!telefono) return page.getByRole("link", { name: nombre, exact: true }).first().click();
-  await page.getByRole("button", { name: "Más acciones de negocios" }).click();
+  await abrirMenuNegocios(page);
   await page.getByRole("menuitem", { name: nombre }).click();
 }

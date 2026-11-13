@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { abrirMenuNegocios } from "./negocios-ayuda";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -18,7 +19,7 @@ test.describe("@preview comercial: acciones de negocios por tamaño", () => {
       await expect(reportes).toBeHidden();
       // Sin la animación de entrada (150 ms) la captura muestra el menú ya opaco.
       await page.emulateMedia({ reducedMotion: "reduce" });
-      await menu.click();
+      await abrirMenuNegocios(page);
       await expect(page.getByRole("menuitem", { name: "Pendientes de seguimiento" })).toBeVisible();
       await expect(page.getByRole("menuitem", { name: "Reportes" })).toBeVisible();
       await capturar(page, info, "comercial-negocios-menu-mas");

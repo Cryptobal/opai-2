@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { abrirMenuNegocios } from "./negocios-ayuda";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -31,7 +32,7 @@ test.describe("@preview negocios: exportar a Excel", () => {
     const telefono = info.project.name === "telefono";
     const visible = async () => {
       if (!telefono) return;
-      await page.getByRole("button", { name: "Más acciones de negocios" }).click();
+      await abrirMenuNegocios(page);
       await expect(page.getByRole("menuitem", { name: "Exportar a Excel" })).toBeVisible();
       await page.keyboard.press("Escape");
     };
