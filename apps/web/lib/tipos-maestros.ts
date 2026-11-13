@@ -24,7 +24,9 @@ export type Cuenta = {
   clienteDesde: string | null;
   clienteHasta: string | null;
 };
-export type CuentaFila = ConEtiquetas<ConFacturar<Cuenta & { instalaciones: number; contactoPrincipal: string | null }>>;
+export type CuentaFila = ConEtiquetas<
+  ConFacturar<Cuenta & { instalaciones: number; contactoPrincipal: string | null }>
+>;
 export type CuentaDetalle = Cuenta & {
   representantes: { id: string; nombre: string; rut: string; email: string | null }[];
   contactos: { id: string; nombre: string; email: string | null; esPrincipal: boolean }[];
