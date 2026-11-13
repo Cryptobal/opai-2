@@ -1,12 +1,19 @@
 import type { Contexto, FuenteAprobaciones } from "@opai/capabilities";
 
-import { PERMISO_GESTIONAR } from "./capacidades/permisos";
+import { PERMISO_GESTIONAR, PERMISO_VER_TODOS } from "./capacidades/permisos";
 
-/** Solo el rol aprobador del tipo decide (R-TCK-006), en un estado que se puede aprobar. */
+/**
+ * Solo el rol aprobador del tipo decide (R-TCK-006), en un estado que se puede aprobar, y solo lo que
+ * el actor puede ver (`vistaDeFila`, ADR-022): lo que pidió, lo que tiene a cargo o todo con `ver_todos`.
+ */
 function donde(ctx: Contexto) {
+  const yo = ctx.usuario?.id ?? "";
   return {
     estado: { in: ["abierto", "en_curso"] },
     tipo: { requiereAprobacion: true, aprobadorRol: ctx.rol ?? "" },
+    ...(ctx.autorizar(PERMISO_VER_TODOS)
+      ? {}
+      : { OR: [{ solicitanteId: yo }, { responsableId: yo }] }),
   };
 }
 

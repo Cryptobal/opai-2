@@ -26,8 +26,11 @@ describe.skipIf(omitirSuiteDb())("Por aprobar · bandeja única (db)", () => {
   const rinde = randomUUID();
   const gerente = randomUUID();
   const ajeno = randomUUID();
+  const lector = randomUUID();
+  let suyoId = "";
 
-  const ctx = (uid: string, rol: "supervisor" | "gerente", tid = tenantA) =>
+  type Rol = "supervisor" | "gerente" | "viewer";
+  const ctx = (uid: string, rol: Rol, tid = tenantA) =>
     mod.crearContexto({
       tenantId: tid,
       actor: { tipo: "user", id: uid },
@@ -43,7 +46,7 @@ describe.skipIf(omitirSuiteDb())("Por aprobar · bandeja única (db)", () => {
       modulosActivos: ["rendiciones", "tickets"],
       medidor: { registrar: async () => undefined },
     });
-  const leer = async (uid: string, rol: "supervisor" | "gerente", tid?: string) => {
+  const leer = async (uid: string, rol: Rol, tid?: string) => {
     const r = await mod.executeCapability(ctx(uid, rol, tid), "core.por_aprobar.list", {});
     if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`);
     return r.data as Grupos;
@@ -65,6 +68,7 @@ describe.skipIf(omitirSuiteDb())("Por aprobar · bandeja única (db)", () => {
       [rinde, "supervisor", tenantA],
       [gerente, "gerente", tenantA],
       [ajeno, "gerente", tenantB],
+      [lector, "viewer", tenantA],
     ] as const) {
       await e.admin.user.create({ data: { id, name: rol, email: `${id.slice(0, 8)}@pa.test` } });
       await e.admin.membership.create({
@@ -108,6 +112,28 @@ describe.skipIf(omitirSuiteDb())("Por aprobar · bandeja única (db)", () => {
         },
       });
     ticketId = (await ticket(tipo.id, "Guantes")).id;
+    // Un tipo que aprueba un rol sin `ver_todos`: solo ve lo que pidió o tiene a cargo (ADR-022).
+    const deLector = await e.admin.tipoTicket.create({
+      data: {
+        tenantId: tenantA,
+        nombre: "Reposición",
+        requiereAprobacion: true,
+        aprobadorRol: "viewer",
+      },
+    });
+    await ticket(deLector.id, "Ajeno");
+    suyoId = (
+      await e.admin.ticket.create({
+        data: {
+          tenantId: tenantA,
+          tipoId: deLector.id,
+          titulo: "Suyo",
+          descripcion: "—",
+          solicitanteId: rinde,
+          responsableId: lector,
+        },
+      })
+    ).id;
     await ticket(sinAprobacion.id, "Duda");
   });
 
@@ -136,6 +162,14 @@ describe.skipIf(omitirSuiteDb())("Por aprobar · bandeja única (db)", () => {
     expect(c).toMatchObject({
       ok: true,
       data: { aprobacionesPendientes: (await leer(gerente, "gerente")).total },
+    });
+  });
+
+  it("un aprobador sin «ver todos» solo ve los tickets que pidió o tiene a cargo", async () => {
+    const r = await leer(lector, "viewer");
+    expect(r.grupos.find((g) => g.origen === "tickets")).toMatchObject({
+      total: 1,
+      items: [{ id: suyoId }],
     });
   });
 

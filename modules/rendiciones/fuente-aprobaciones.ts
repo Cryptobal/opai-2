@@ -1,14 +1,14 @@
 import { formatearClp } from "@opai/domain";
 import type { Contexto, FuenteAprobaciones } from "@opai/capabilities";
 
-import { PERMISO_APROBAR, PERMISO_VER_TODAS } from "./capabilities/permisos";
+import { PERMISO_APROBAR } from "./capabilities/permisos";
 import { nombresDe } from "./capabilities/vista";
 import { codigoVisible } from "./domain";
 
-/** Igual que la bandeja del aprobador (ADR-022): lo asignado al actor; `ver_todas`, las de la empresa. */
+/** Solo lo que el actor puede decidir: le está asignada y no es suya (`decision.ts`), aunque vea todas. */
 function donde(ctx: Contexto) {
   const yo = ctx.actor.tipo === "user" ? ctx.actor.id : (ctx.actor.viaUserId ?? "");
-  return { estado: "enviada", ...(ctx.autorizar(PERMISO_VER_TODAS) ? {} : { aprobadorId: yo }) };
+  return { estado: "enviada", aprobadorId: yo, solicitanteId: { not: yo } };
 }
 
 /** Aporte de Rendiciones a «Por aprobar» (CAR-253): rendiciones enviadas que esperan decisión. */
