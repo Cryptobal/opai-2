@@ -11,9 +11,15 @@ import { identidadActual } from "@/lib/servidor";
 
 const TITULO = "Jornada DT y contrato";
 
-type Jornada = { terminosPlazoFijo: string[]; terminoPlazoFijo: string | null } | null | undefined;
+type Jornada =
+  | { terminosPlazoFijo: string[]; terminoPlazoFijo: string | null; plazoFijoPeriodo: number | null }
+  | null
+  | undefined;
+/** Casillas del formulario: la lista por período o, en registros antiguos, el término en la casilla de su período. */
 function terminosIniciales(j: Jornada): Record<string, string | undefined> {
-  const lista = j?.terminosPlazoFijo.length ? j.terminosPlazoFijo : j?.terminoPlazoFijo ? [j.terminoPlazoFijo] : [];
+  const lista: (string | undefined)[] = [];
+  if (j?.terminosPlazoFijo.length) lista.push(...j.terminosPlazoFijo);
+  else if (j?.terminoPlazoFijo) lista[Math.min(Math.max(j.plazoFijoPeriodo ?? 1, 1), 3) - 1] = j.terminoPlazoFijo;
   return { termino1: lista[0], termino2: lista[1], termino3: lista[2] };
 }
 

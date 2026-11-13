@@ -55,8 +55,13 @@ export const HOJA_JORNADA_DT: ConfigSeccion = {
   ],
   armar: (id, c) => {
     const { termino1, termino2, termino3, ...resto } = c;
-    const terminos = [termino1, termino2, termino3].filter((x): x is string => typeof x === "string" && x !== "");
-    return { id, jornadaDt: { ...resto, terminosPlazoFijo: terminos } };
+    const casillas = [termino1, termino2, termino3].map((x) => (typeof x === "string" && x !== "" ? x : null));
+    const terminos = casillas.filter((x): x is string => x !== null);
+    // El período es la casilla del último término lleno, no la cantidad (un registro antiguo
+    // de período 2 trae su término en la segunda casilla y debe seguir en período 2).
+    const ultima = casillas.reduce((acc, x, i) => (x !== null ? i + 1 : acc), 0);
+    const plazoFijoPeriodo = ultima > 0 ? ultima : null;
+    return { id, jornadaDt: { ...resto, terminosPlazoFijo: terminos, plazoFijoPeriodo } };
   },
 };
 

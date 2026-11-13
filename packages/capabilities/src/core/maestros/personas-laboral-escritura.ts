@@ -77,6 +77,10 @@ export async function aplicarLaboralParcial(
       const ultimo = terminos.at(-1);
       if (j.terminoPlazoFijo === undefined) patch["terminoPlazoFijo"] = ultimo ? aFecha(ultimo) : null;
       if (j.plazoFijoPeriodo === undefined) patch["plazoFijoPeriodo"] = terminos.length || null;
+    } else if (j.terminoPlazoFijo !== undefined || j.plazoFijoPeriodo !== undefined) {
+      // Llegaron solo los campos antiguos (API o MCP): la lista ya no los representa y se vacía,
+      // para que la ficha muestre los campos antiguos y un guardado posterior no la reescriba.
+      patch["terminosPlazoFijo"] = [];
     }
     if (Object.keys(patch).length) {
       await tx.personaJornadaDt.upsert({

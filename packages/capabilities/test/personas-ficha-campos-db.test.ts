@@ -67,4 +67,28 @@ describe.skipIf(omitirSuiteDb())("Personas · campos de la ficha CAR-277 (db)", 
     const cuatro = ["2026-01-31", "2026-02-28", "2026-03-31", "2026-04-30"];
     expect((await ejecutar("core.personas.laboral_actualizar", { id: personaId, jornadaDt: { terminosPlazoFijo: cuatro } })).ok).toBe(false);
   });
+
+  it("conserva el período de un registro antiguo y no deja la lista desfasada", async () => {
+    // Solo los campos antiguos (como un cliente de API): la lista queda vacía.
+    const antiguo = await ejecutar("core.personas.laboral_actualizar", {
+      id: personaId, jornadaDt: { terminoPlazoFijo: "2026-08-31", plazoFijoPeriodo: 2 },
+    });
+    expect(antiguo.ok, JSON.stringify(antiguo)).toBe(true);
+    let v = await ejecutar("core.personas.laboral_ver", { id: personaId });
+    expect(v.data).toMatchObject({ jornadaDt: { terminosPlazoFijo: [], plazoFijoPeriodo: 2, terminoPlazoFijo: "2026-08-31" } });
+    // Lo que envía el formulario al guardar sin tocar el plazo: el término en su casilla y el período.
+    const form = await ejecutar("core.personas.laboral_actualizar", {
+      id: personaId, jornadaDt: { resolucion: "R-1", terminosPlazoFijo: ["2026-08-31"], plazoFijoPeriodo: 2 },
+    });
+    expect(form.ok, JSON.stringify(form)).toBe(true);
+    v = await ejecutar("core.personas.laboral_ver", { id: personaId });
+    expect(v.data).toMatchObject({ jornadaDt: { plazoFijoPeriodo: 2, terminoPlazoFijo: "2026-08-31" } });
+  });
+
+  it("rechaza términos de plazo fijo repetidos", async () => {
+    const r = await ejecutar("core.personas.laboral_actualizar", {
+      id: personaId, jornadaDt: { terminosPlazoFijo: ["2026-03-31", "2026-03-31"] },
+    });
+    expect(r.ok).toBe(false);
+  });
 });
