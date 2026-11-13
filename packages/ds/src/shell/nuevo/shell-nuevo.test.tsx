@@ -43,10 +43,10 @@ describe("barra inferior del teléfono (CAR-335 D2c)", () => {
     usuario: { nombre: "QA E2E" },
     menuUsuario: [{ id: "salir", etiqueta: "Cerrar sesión", onSelect: () => undefined }],
   };
-  it("trae Inicio, Menú y Yo, y esconde la barra clásica con la piel", () => {
+  it("trae Inicio, Menú y Yo, y se distingue de la barra clásica", () => {
     const h = html(conUsuario);
     for (const texto of [">Inicio<", ">Menú<", ">Yo<"]) expect(h).toContain(texto);
-    expect(h).toContain('data-shell="inferior"');
+    expect(h).toContain('data-shell="inferior-nuevo"');
   });
 
   it("la pestaña Agente aparece solo si hay agente", () => {

@@ -6,13 +6,7 @@ import type { ItemMenu } from "../components/menu";
 import { Contador, Punto } from "./contador";
 import { MenuMas } from "./menu-mas";
 import type { ItemFijado } from "./fijados";
-import {
-  type BusquedaMasRender,
-  esActivo,
-  LinkPorDefecto,
-  type LinkComponent,
-  type NavItem,
-} from "./types";
+import { type BusquedaMasRender, esActivo, LinkPorDefecto, type LinkComponent, type NavItem } from "./types";
 
 export type NavProps = {
   items: readonly NavItem[];
@@ -88,7 +82,6 @@ export function BottomNav({
   return (
     <nav
       aria-label="Principal"
-      data-shell="inferior"
       className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface md:hidden"
     >
       <ul className="flex px-1">

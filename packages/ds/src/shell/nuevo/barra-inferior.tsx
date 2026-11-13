@@ -42,6 +42,7 @@ export function BarraInferiorNueva(props: Props) {
   return (
     <nav
       aria-label="Principal"
+      data-shell="inferior-nuevo"
       className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface md:hidden"
     >
       <ul className="flex px-1">
