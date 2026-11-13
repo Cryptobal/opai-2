@@ -16,6 +16,8 @@ test.describe("@preview comercial: acciones de negocios por tamaño", () => {
     const menu = page.getByRole("button", { name: "Más acciones de negocios" });
     if (info.project.name === "telefono") {
       await expect(reportes).toBeHidden();
+      // Sin la animación de entrada (150 ms) la captura muestra el menú ya opaco.
+      await page.emulateMedia({ reducedMotion: "reduce" });
       await menu.click();
       await expect(page.getByRole("menuitem", { name: "Pendientes de seguimiento" })).toBeVisible();
       await expect(page.getByRole("menuitem", { name: "Reportes" })).toBeVisible();
