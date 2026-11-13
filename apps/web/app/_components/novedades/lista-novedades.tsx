@@ -6,6 +6,7 @@ import { Alerta, Button, Empty, Skeleton } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
+import { EncabezadoNovedades, type FiltroNovedades } from "./encabezado-novedades";
 import { TarjetaNovedad, type ItemNovedad } from "./tarjeta-novedad";
 import { LineaNovedad } from "./texto-novedad";
 import { useMarcarNovedades } from "./use-marcar-novedades";
@@ -22,6 +23,13 @@ export function ListaNovedades({ portal }: { portal: string }) {
   const [error, setError] = useState(false);
   const [errorMarca, setErrorMarca] = useState(false);
   const [cerrando, setCerrando] = useState(false);
+  const [filtro, setFiltroEstado] = useState<FiltroNovedades>("todas");
+  // Las que se leen con «No leídas» activo siguen visibles hasta cambiar de filtro: la lista no salta.
+  const [leidasAqui, setLeidasAqui] = useState<ReadonlySet<string>>(new Set());
+  const setFiltro = (f: FiltroNovedades) => {
+    setLeidasAqui(new Set());
+    setFiltroEstado(f);
+  };
 
   const cargar = useCallback(() => {
     setError(false);
@@ -57,7 +65,11 @@ export function ListaNovedades({ portal }: { portal: string }) {
     () => void cargar(),
   );
 
-  const marcarUna = useMarcarUnaNovedad(portal, datos, setDatos, setErrorMarca);
+  const marcarEnLista = useMarcarUnaNovedad(portal, datos, setDatos, setErrorMarca);
+  const marcarUna = (id: string) => {
+    if (filtro === "no_leidas") setLeidasAqui((s) => new Set(s).add(id));
+    marcarEnLista(id);
+  };
 
   const descartarDestacada = (id: string) => {
     setCerrando(true);
@@ -68,6 +80,9 @@ export function ListaNovedades({ portal }: { portal: string }) {
   };
 
   const destacada = datos?.destacadaPendiente;
+  const visibles = (datos?.items ?? []).filter(
+    (i) => filtro === "todas" || !i.leida || leidasAqui.has(i.id),
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
@@ -104,20 +119,25 @@ export function ListaNovedades({ portal }: { portal: string }) {
         />
       ) : (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="t-body text-fg-muted" aria-live="polite">
-              {datos.noLeidas > 0
-                ? `${datos.noLeidas} ${datos.noLeidas === 1 ? "novedad sin leer" : "novedades sin leer"}`
-                : "Estás al día: leíste todas las novedades."}
-            </p>
-            {datos.noLeidas > 0 ? (
-              <Button variant="secondary" onClick={marcarTodas}>
-                Marcar todas como leídas
-              </Button>
-            ) : null}
-          </div>
+          <EncabezadoNovedades
+            noLeidas={datos.noLeidas}
+            filtro={filtro}
+            onFiltro={setFiltro}
+            onMarcarTodas={marcarTodas}
+          />
+          {visibles.length === 0 ? (
+            <Empty
+              titulo="No tienes novedades sin leer"
+              descripcion="Las que ya leíste siguen en «Todas»."
+              accion={
+                <Button variant="secondary" onClick={() => setFiltro("todas")}>
+                  Ver todas
+                </Button>
+              }
+            />
+          ) : null}
           <ul className="flex flex-col gap-3">
-            {datos.items.map((item) => (
+            {visibles.map((item) => (
               <li key={item.id} onClickCapture={() => marcarUna(item.id)}>
                 <TarjetaNovedad item={item} onMarcar={marcarUna} />
               </li>

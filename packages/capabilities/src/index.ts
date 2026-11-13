@@ -2,6 +2,7 @@ export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
 export {
   consumidorAvisoPrueba,
+  consumidorAvisoPruebaEmpresa,
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
@@ -14,10 +15,10 @@ export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/he
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
-export { ajustesRondas, capacidadesRondas } from "./rondas";
+export { ajustesRondas, capacidadesRondas, indicadoresRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
-export { ajustesPauta, capacidadesPauta } from "./pauta";
-export { ajustesDesempeno, capacidadesDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
+export { ajustesPauta, ausenteSinJustificar, capacidadesPauta, diasConTurno, type DiaConTurno, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
+export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";

@@ -30,3 +30,24 @@ export const MOTIVOS: Record<string, string> = {
   instalacion_de_organizacion:
     "OPAI se instala en un espacio de Slack, no en toda la organización.",
 };
+
+/** Persona interna y su vínculo con Slack (core.slack.usuarios, CAR-292). */
+export type PersonaSlack = {
+  usuarioId: string;
+  nombre: string;
+  email: string;
+  estado: "vinculado" | "sin_vincular" | "pendiente";
+  motivo: keyof typeof MOTIVOS_SIN_VINCULO | null;
+  revisadoEn: string | null;
+};
+
+/** Por qué una persona no quedó vinculada, en palabras simples. */
+export const MOTIVOS_SIN_VINCULO = {
+  no_encontrado: "Su correo no está en el espacio de Slack.",
+  invitado: "En Slack es invitada, no miembro del espacio.",
+  desactivado: "Su cuenta de Slack está desactivada.",
+  bot: "El correo es de un bot de Slack.",
+  otro_espacio: "Su correo es de otro espacio de Slack.",
+  ya_ligado: "Ese usuario de Slack ya está ligado a otra persona.",
+  error: "Slack no respondió. Se reintenta mañana.",
+} as const;

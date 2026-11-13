@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
+/* Piel nueva (ADR-109): solo se descargan cuando una pantalla las usa */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 @import "@opai/ds/styles.css";
 
 /* Tailwind debe ver las clases usadas dentro del paquete de diseño. */

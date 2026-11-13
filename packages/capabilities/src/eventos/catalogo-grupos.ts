@@ -14,3 +14,11 @@ export const EVENTOS_REGLAS_APROBACION: readonly EventoDeDominio[] = [
   { id: "core.regla_aprobacion.guardada", descripcion: "Se creó o cambió una regla de aprobación de la empresa." },
   { id: "core.regla_aprobacion.desactivada", descripcion: "Se desactivó una regla de aprobación de la empresa." },
 ];
+
+/** Membresías (CAR-292): alguien entró a la empresa. Lo escucha Slack F2 para buscarlo. Payload: usuarioId. */
+export const EVENTOS_MEMBRESIA: readonly EventoDeDominio[] = [
+  {
+    id: "core.membresia.creada",
+    descripcion: "Una persona entró a la empresa (aceptó su invitación).",
+  },
+];

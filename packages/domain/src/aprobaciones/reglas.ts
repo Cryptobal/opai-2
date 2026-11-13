@@ -76,3 +76,6 @@ export type Aprobable<Ctx, Entrada, Salida> = {
   monto?: (ctx: Ctx, input: Entrada) => Promise<number | null>;
   siguientes?: (salida: Salida) => readonly { capability: string; input: unknown }[];
 };
+
+/** Mezcla para `Capacidad`: `Ctx` es el contexto de `@opai/capabilities` (el dominio no lo conoce). */
+export type ConAprobable<Ctx, Entrada, Salida = unknown> = { aprobable?: Aprobable<Ctx, Entrada, Salida> };

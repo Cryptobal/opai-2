@@ -3,6 +3,7 @@ import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
+import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
@@ -23,7 +24,7 @@ import {
   integracionesSetSecreto,
 } from "./integraciones";
 import { integracionesGuardarCertificadoDte } from "./integraciones-certificado-dte";
-import { capacidadesSlack } from "./slack";
+import { capacidadesSlack, consumidoresSlack, trabajosSlack } from "./slack";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
 import {
@@ -153,6 +154,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesSlack,
   ...capacidadesIndicadoresGestion,
   ...capacidadesJefatura,
+  ...capacidadesProcesosPersona,
   ...capacidadesDocumentos,
   ...capacidadesFirmas,
   ...capacidadesConfig,
@@ -178,6 +180,8 @@ export const consumidoresDelNucleo = [
   consumidorCpqGanado,
   consumidorTurnosEsperados,
   consumidorRevocacionBiometria,
+  ...consumidoresSlack,
+  consumidorProcesosPersona,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
@@ -192,4 +196,5 @@ export const trabajosDelNucleo = [
   trabajoCapturaPrevisional,
   trabajoTareasVencidas,
   trabajoExtenderTurnos,
+  ...trabajosSlack,
 ];

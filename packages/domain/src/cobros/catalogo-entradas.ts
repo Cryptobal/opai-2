@@ -97,6 +97,13 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
   ),
   modulo("rondas", "Rondas", "Recorridos y control de rondas.", "por_unidad", "instalacion_activa"),
   modulo(
+    "acceso",
+    "Control de acceso",
+    "Registro de visitas, vehículos y listas de acceso por instalación.",
+    "por_unidad",
+    "instalacion_activa",
+  ),
+  modulo(
     "rendiciones",
     "Rendiciones",
     "Rendición de gastos (los aprobadores no se cobran).",
@@ -111,6 +118,13 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "usuario_licencia",
   ),
   modulo("cpq", "CPQ", "Cotizaciones y propuestas.", "por_unidad", "usuario_licencia"),
+  modulo(
+    "desempeno",
+    "Desempeño",
+    "Scorecard por cargo y resultado por persona (ADR-094, se vende aparte).",
+    "por_unidad",
+    "usuario_licencia",
+  ),
   {
     id: MODULO_FINANZAS,
     nombre: "Finanzas",

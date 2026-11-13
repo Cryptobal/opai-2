@@ -1,4 +1,4 @@
-import type { Aprobable, EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
+import type { ConAprobable, EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, HechoPlataforma, TenantTx, VerificacionAuditoria } from "@opai/db";
 
 import type { EmpresaPlataforma } from "./plataforma-empresa";
@@ -177,7 +177,7 @@ export type ModoEjecucion = {
   preparado?: unknown;
 };
 
-export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType = z.ZodType> {
+export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType = z.ZodType> extends ConAprobable<Contexto, z.output<I>, z.output<O>> {
   /** `<modulo>.<entidad>.<verbo>` o `<modulo>.<verbo>`, en minúsculas. */
   id: string;
   /** Derivado del id: el primer segmento. */
@@ -222,6 +222,8 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   autorizarRepeticion?: (ctx: Contexto, input: z.output<I>, salida: unknown) => Promise<void>;
   /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */
   soloPersonas?: boolean;
+  /** Registra lo que llega de fuera (webhook, correo): en solo lectura registra sin eventos (ADR-071, 7.5). */
+  entrante?: boolean;
   /**
    * Aprobación humana condicionada al input (firma.md R19): cuando se declara, reemplaza al efecto
    * como disparador de la aprobación de un agente. Si devuelve `true`, esta llamada queda en la cola
@@ -230,8 +232,6 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
    */
   exigeAprobacion?: (input: z.output<I>) => boolean;
   describirAprobacion?: (ctx: Contexto, input: z.output<I>) => Promise<string | null>; // CAR-250: acción en texto humano, sin el agente
-  /** CAR-252: acción que las reglas de aprobación de la empresa pueden exigir, con su monto en CLP. */
-  aprobable?: Aprobable<Contexto, z.output<I>, z.output<O>>;
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
   portales?: readonly string[];
   /**
