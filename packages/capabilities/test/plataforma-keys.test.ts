@@ -27,7 +27,7 @@ const crear = (scopes: string[], expiraEn?: string) => {
 };
 
 describe("keys de plataforma con vencimiento corto (CAR-40)", () => {
-  it("sin fecha vence en 7 días; más de 7 días se rechaza; sin el scope, no cambia", async () => {
+  it("sin fecha vence en 7 días; más de 7 días se rechaza; sin el scope, vence en el máximo de la empresa (CAR-351)", async () => {
     const { r, keys } = await crear(["*", "platform"]);
     expect(r).toMatchObject({ ok: true });
     const vence = (keys[0]?.["expiraEn"] as Date).getTime() - Date.now();
@@ -39,7 +39,10 @@ describe("keys de plataforma con vencimiento corto (CAR-40)", () => {
       error: { code: "UNPROCESSABLE" },
     });
     const comun = await crear(["*"]);
-    expect(comun.keys[0]?.["expiraEn"]).toBeNull();
+    // CAR-351: sin el scope de plataforma vence en el máximo de la empresa (90 días por defecto).
+    const venceComun = (comun.keys[0]?.["expiraEn"] as Date).getTime() - Date.now();
+    expect(venceComun).toBeGreaterThan(90 * DIA - 60_000);
+    expect(venceComun).toBeLessThanOrEqual(90 * DIA);
   });
 
   it("al autenticar: solo con vencimiento y a no más de 7 días", () => {
