@@ -1,4 +1,6 @@
 // Gasto recurrente tal como lo devuelve `finanzas.recurrentes.listar` (CAR-349) y su formato en pantalla.
+import { formatearClp, formatearNumero } from "@opai/domain";
+
 export type Unidad = "clp" | "uf" | "pct_ventas";
 export type PoliticaUf = "dia_cuota" | "fin_de_mes" | "fin_mes_anterior" | "inicio_de_mes" | "dia_fijo";
 export type Recurrente = {
@@ -22,13 +24,14 @@ export type Recurrente = {
 };
 export type FilaEgreso = { id: string; etiqueta: string; seccion: string; activa: boolean };
 
-const decimales = (n: number, agrupar = true) => n.toLocaleString("es-CL", { maximumFractionDigits: 4, useGrouping: agrupar });
+/** Hasta 4 decimales con coma; sin miles cuando el texto va a un campo editable (formateador único, R4). */
+const decimales = (n: number, agrupar = true) => (agrupar ? formatearNumero(n, 4) : formatearNumero(n, 4).replace(/\./g, ""));
 
 /** Monto legible según su unidad: pesos, UF (escala 10.000) o % de ventas (escala 10.000). */
 export function montoLegible(r: Pick<Recurrente, "unidad" | "monto">): string {
   if (r.unidad === "uf") return `${decimales(r.monto / 10_000)} UF`;
   if (r.unidad === "pct_ventas") return `${decimales(r.monto / 10_000)} % de las ventas`;
-  return `$ ${r.monto.toLocaleString("es-CL")}`;
+  return formatearClp(r.monto);
 }
 
 /** Texto escrito por la persona → entero en la escala de la unidad, o null si no es un número válido. */

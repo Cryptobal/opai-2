@@ -7,6 +7,7 @@ import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet, Switch
 
 import { useHojaUrl, useParametros } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { hoyIso } from "@/lib/fechas";
 
 import { CamposUf } from "./campos-uf";
 import { type FilaEgreso, montoEditable, montoEscrito, type PoliticaUf, type Recurrente, type Unidad } from "./tipos";
@@ -21,7 +22,6 @@ const FRECUENCIAS = [
   { valor: "quincenal", etiqueta: "Cada dos semanas" },
   { valor: "semanal", etiqueta: "Semanal" },
 ];
-const hoyIso = () => new Date().toLocaleDateString("sv-SE", { timeZone: "America/Santiago" });
 
 /** Nuevo gasto recurrente o editar uno existente (CAR-382). La fila, la frecuencia y el inicio no cambian al editar. */
 export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) {
