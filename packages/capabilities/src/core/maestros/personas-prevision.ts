@@ -7,13 +7,14 @@ import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaFicha } from "./personas-ficha-comun";
+import { COLUMNAS_PREVISION } from "./personas-prevision-input";
 import { inputPrevision, previsionSchema, vistaPrevision } from "./personas-prevision-vista";
 
 export const personasPrevisionVer = defineCapability({
   auditarLectura: (s) => [s.personaId],
   id: "core.personas.prevision_ver",
   descripcion:
-    "Muestra la previsión social de una persona (AFP, régimen, salud e ISAPRE). Dato reservado de RRHH; el supervisor recibe el plan ISAPRE enmascarado sin descifrar (R-PER-004).",
+    "Muestra la previsión social de una persona: AFP, régimen, pensión, salud e ISAPRE, qué cotiza, APV, asignación familiar y discapacidad. Dato reservado de RRHH; el supervisor recibe el plan ISAPRE enmascarado y los datos sensibles ocultos (R-PER-004).",
   permiso: PERMISOS_CORE.personasPrevisionRead,
   portales: ["erp", "supervisor"],
   input: z.object({ id: uuidSchema }),
@@ -30,9 +31,9 @@ export const personasPrevisionVer = defineCapability({
 export const personasPrevisionActualizar = defineCapability({
   id: "core.personas.prevision_actualizar",
   descripcion:
-    "Actualiza la previsión social de una persona (AFP, salud, plan ISAPRE). Solo RRHH y administradores; el plan ISAPRE se guarda cifrado.",
+    "Actualiza la previsión social de una persona: AFP y régimen (códigos del catálogo), pensión, salud e ISAPRE, qué cotiza, APV, tramo y cargas de asignación familiar y discapacidad. Solo RRHH y administradores; el plan ISAPRE se guarda cifrado.",
   permiso: PERMISOS_CORE.personasPrevisionManage,
-  sensibles: ["planIsapre"],
+  sensibles: ["planIsapre", "discapacidadInvalidez"],
   input: inputPrevision,
   output: previsionSchema,
   efecto: "escritura",
@@ -59,16 +60,14 @@ export const personasPrevisionActualizar = defineCapability({
                   "plan_isapre",
                   input.planIsapre,
                 );
+        const copia = Object.fromEntries(
+          COLUMNAS_PREVISION.filter((k) => input[k] !== undefined).map((k) => [k, input[k]]),
+        );
         const data = {
           tenantId: p.tenantId,
           personaId: p.id,
-          ...(input.afp !== undefined ? { afp: input.afp } : {}),
-          ...(input.regimen !== undefined ? { regimen: input.regimen } : {}),
-          ...(input.sistemaSalud !== undefined ? { sistemaSalud: input.sistemaSalud } : {}),
-          ...(input.isapreNombre !== undefined ? { isapreNombre: input.isapreNombre } : {}),
+          ...copia,
           ...(planCifrado !== undefined ? { planIsapre: planCifrado } : {}),
-          ...(input.planUf !== undefined ? { planUf: input.planUf } : {}),
-          ...(input.cotizacionUfPct !== undefined ? { cotizacionUfPct: input.cotizacionUfPct } : {}),
         };
         return tx.personaPrevision.upsert({
           where: { personaId: p.id },
