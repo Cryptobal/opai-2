@@ -24,7 +24,10 @@ export function ListaContactos(p: {
 }) {
   const principales = p.items.filter((c) => c.esPrincipal).length;
   const nuevo = p.gestionar ? (
-    <EnlaceBotonHoja href="/contactos?contacto=nuevo" icono={Plus}>
+    <EnlaceBotonHoja
+      href={`/contactos?${p.q ? `q=${encodeURIComponent(p.q)}&` : ""}contacto=nuevo`}
+      icono={Plus}
+    >
       Nuevo
     </EnlaceBotonHoja>
   ) : null;

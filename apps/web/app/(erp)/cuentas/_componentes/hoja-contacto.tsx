@@ -13,6 +13,9 @@ import { CamposContacto, correoMalo, type DatosContacto } from "./campos-contact
 
 export { ROL_CONTACTO } from "./campos-contacto";
 
+// Estable entre renders: un arreglo nuevo volvía a buscar cuentas con cada tecla del formulario.
+const SIN_VINCULADAS: string[] = [];
+
 /**
  * Nuevo o editar contacto (03): nombres, correo con validación, principal y roles. Sin `cuentaId`
  * (alta directa desde Contactos, CAR-337) se elige la cuenta primero.
@@ -114,8 +117,9 @@ function Formulario({
           <CuentaVinculo
             valor={cuenta}
             onCambiar={setCuenta}
-            vinculadas={[]}
+            vinculadas={SIN_VINCULADAS}
             disabled={pendiente}
+            ayuda="Busca por nombre, razón social o RUT. El contacto queda en esa cuenta."
           />
         </div>
       ) : null}

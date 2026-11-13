@@ -25,13 +25,22 @@ export default function Contacto({ params, searchParams }: Props) {
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      acciones={
-        <EnlaceBoton href="/contactos?contacto=nuevo" icono={Plus} className="max-lg:hidden">
-          Nuevo contacto
-        </EnlaceBoton>
-      }
       opciones={(d) => ({
         volver: { href: conBusqueda("/contactos", d.p.q), etiqueta: "Contactos" },
+        // Con permiso de crear (CAR-337), como «Nueva cuenta» en la ficha de una cuenta.
+        ...(d.lista.gestionar
+          ? {
+              acciones: (
+                <EnlaceBoton
+                  href="/contactos?contacto=nuevo"
+                  icono={Plus}
+                  className="max-lg:hidden"
+                >
+                  Nuevo contacto
+                </EnlaceBoton>
+              ),
+            }
+          : {}),
       })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
