@@ -60,7 +60,7 @@ Cuando un PR está **listo para revisión** (constructor terminó, `ESTADO.md` a
 
 - **Desde ADR-104 (Carlos, 12-nov-2026):** ninguna sesión de Claude depende del bot «OPAI 2.0» (Grok). Cada migración la aplica **la sesión que construyó el PR**, **después** de la revisión final **sin bloqueos** sobre el head y con CI verde, con el procedimiento de A.5: ramas Neon de respaldo de `dev` y `main`, aplicar en `dev` y luego en `main` en una transacción con `lock_timeout` corto junto con su fila en `_prisma_migrations` (checksum sha256 del archivo), verificar en ambas, dejar el aviso en el PR y quitar `migracion-pendiente`.
 - Si el PR necesita datos ficticios de `qa-e2e` para `preview-e2e`, la misma sesión los carga en `main` y en la rama `preview/pr-<n>`.
-- El bot «OPAI 2.0» puede seguir vigilando, pero no se le pide nada ni se lo espera.
+- El bot «OPAI 2.0» puede seguir vigilando, pero ninguna sesión depende de él: la sesión sigue con su próximo ticket (A2.5.1).
 
 ### A2.4 Señales en PR (escalado 24 h)
 
@@ -79,10 +79,84 @@ En el cuerpo (breve): resumen mínimo, enlace a Linear (`CAR-n`) si existe, qué
 
 OPAI 2.0 actúa **24 h** ante estas señales (no repite la revisión técnica de la sesión).
 
-### A2.5 Sesiones en paralelo
+### A2.5 Sesiones en paralelo (Carlos, 12-nov-2026 · ADR-108)
 
-- Las sesiones **no esperan** a OPAI 2.0 para seguir construyendo **otros frentes independientes**.
-- **Nunca** integran con bloqueos pendientes (revisión final, veto, `migracion-pendiente` sin retirar) ni **tocan datos de OPAI 1.0** (`Cryptobal/opai`, opai.gard.cl).
+**Regla de fondo.** Las sesiones avanzan solas y no se frenan entre sí. Una sesión se detiene **solo** cuando Carlos tiene que decidir negocio o producto, o cuando el paso es irreversible, toca plata, datos reales, producción, OPAI 1.0 o el tenant Gard, o necesita un secreto. Ni la revisión del bot «OPAI 2.0» ni la integración a `main` son una puerta para seguir trabajando.
+
+#### A2.5.1 Avance continuo
+
+- Al abrir un PR, la sesión sigue **de inmediato** con su próximo ticket.
+- Si el ticket siguiente depende del PR anterior, **apila**: rama nueva desde la rama de ese PR y PR con esa rama como base. Para ponerse al día se usa merge, nunca rebase ni force-push. Cuando el PR de abajo se integra, la sesión trae `main` con merge y cambia la base a `main`.
+- La revisión del bot «OPAI 2.0», el CI, `preview-e2e` y la integración ocurren **en paralelo**. Si el bot o una revisión comentan algo, la sesión lo corrige en el mismo PR cuando le toque, sin soltar lo que está haciendo si no es un bloqueo de seguridad o de datos.
+- Lo que sigue prohibido: integrar con bloqueos (revisión final, veto, `migracion-pendiente` sin retirar) y tocar datos de OPAI 1.0 (`Cryptobal/opai`, opai.gard.cl).
+
+#### A2.5.2 Archivos sensibles (donde chocan las sesiones)
+
+Casi todo PR los toca, así que dos PR abiertos a la vez chocan:
+
+| Archivo | Por qué choca |
+|---|---|
+| `packages/db/prisma/schema/*.prisma` | Dos PR que editan el mismo modelo generan migraciones incompatibles. |
+| `packages/db/prisma/migrations/*` | El orden de fecha es el orden de aplicación en Neon. |
+| `packages/capabilities/src/index.ts`, `src/core/index.ts` y `apps/web/lib/registro.ts` | Registros centrales: todos agregan una línea en el mismo lugar. |
+| `packages/domain/src/novedades/entradas/embed.ts` | Archivo generado: siempre choca. |
+| `docs/2.0/paridad/mcp-inventario.md` y `packages/capabilities/test/__snapshots__/herramientas-mcp*.txt` | Generados por las pruebas de paridad: siempre chocan. |
+| `docs/2.0/01-decisiones.md` | Dos PR toman el mismo número de ADR. |
+| `apps/web/presupuesto-js.json` y `apps/web/app/(erp)/configuracion/auditoria/_componentes/etiquetas-verbos.ts` | Listas compartidas de una línea por ruta o por verbo. |
+
+**Antes de tocar uno**, la sesión revisa los PR abiertos y sus archivos:
+
+```bash
+gh pr list --state open --json number,title,headRefName,baseRefName
+gh pr view <n> --json files --jq '.files[].path'
+```
+
+- Si otro PR abierto **ya edita el mismo `.prisma`** o trae una migración sobre las mismas tablas: la sesión **apila sobre ese PR** o **espera a que se integre**, y lo dice en la primera línea de la descripción de su PR: «apilado sobre #N» o «espera #N».
+- **Aviso automático:** el workflow `choque de tablas (aviso)` (`.github/workflows/choque-prisma.yml`, pedido por Carlos el 12-nov) revisa cada PR y avisa si edita un `.prisma` que otro PR abierto también edita sin estar apilados. Solo avisa; no bloquea el merge.
+- **Archivos generados** (`embed.ts`, `mcp-inventario.md`, instantáneas MCP): no se resuelven a mano. Al traer `main` con merge, se toma la versión de `main` y se **regeneran** (`pnpm --filter @opai/domain gen:novedades-embed`; `vitest run test/paridad -u` en `packages/capabilities`).
+- **Registros centrales**: cada módulo agrega su línea en su bloque y en orden alfabético, para que dos líneas nuevas no caigan en el mismo lugar.
+- **ADR**: antes de numerar, la sesión mira el último número en `main` **y en los PR abiertos**, y toma el siguiente libre. El número se dice en la descripción del PR.
+
+#### A2.5.3 Migraciones: de a una y en orden de fecha
+
+- Las migraciones se integran **de a una y en orden de fecha**. El prefijo de fecha de una migración nueva es posterior al de toda migración en `main` y en los PR abiertos.
+- Dos PR **no pueden** editar el mismo `.prisma` con migraciones distintas sin apilarse.
+- Si un PR con migración se integra antes que otro de fecha anterior, el segundo trae `main` con merge y **renombra su carpeta de migración** a una fecha posterior antes de aplicarla en Neon (solo si todavía no está aplicada; una migración aplicada nunca se renombra).
+- Aplicar en Neon sigue A2.3 (ADR-104): la sesión que construyó el PR, con respaldo, primero `dev` y después `main`.
+
+#### A2.5.4 `ESTADO.md` ya no lo edita cada PR
+
+Hasta el 12-nov casi todos los PR agregaban una fila a la tabla «En curso» de `docs/2.0/ESTADO.md`, en el mismo lugar, y chocaban entre sí. Desde ADR-108:
+
+- **Cada PR escribe su avance en un archivo propio:** `docs/2.0/estado/<modulo>/CAR-<n>.md` (qué entró, qué quedó pendiente, qué se decidió, migración). Un archivo por ticket: dos PR nunca editan el mismo. La plantilla está en `docs/2.0/estado/README.md`.
+- **`ESTADO.md` queda como índice y foto histórica.** Ningún PR de construcción lo edita. Lo consolida, de vez en cuando, un PR solo de documentación (pasa los archivos de `estado/` ya integrados a las secciones «Integrado» y los borra).
+- Los PR abiertos antes de esta regla conservan su fila en `ESTADO.md`; al traer `main` y encontrar conflicto ahí, mueven su fila a su archivo de `estado/` y dejan `ESTADO.md` como está en `main`.
+- Donde `AGENTS.md`, `CONTEXTO-agentes.md` o un brief digan «el PR actualiza `ESTADO.md`», vale el archivo de `estado/`.
+
+#### A2.5.5 Quién es dueño de qué
+
+No se usa `CODEOWNERS` de GitHub: todas las sesiones operan con la misma cuenta, así que no distinguiría a nadie. Vale esta tabla. Una sesión que necesita tocar carpetas de otra lo dice en la descripción del PR y revisa antes los PR abiertos de la sesión dueña.
+
+| Módulo | Sesión | Carpetas |
+|---|---|---|
+| Núcleo y Plataforma | Sesión Núcleo | `packages/capabilities/src/core/**`, `packages/capabilities/src/agentes/**`, `packages/capabilities/src/*.ts`, `packages/auth/**`, `packages/db/prisma/schema/{core,tenancy,permisos,agentes,grupos,slack,reglas-aprobacion}.prisma`, `apps/web/app/(platform)/**`, `apps/web/app/(erp)/configuracion/**` (salvo lo de otro módulo), `packages/integrations/**` |
+| Marco, Hilo y Design System | Sesión Hilo y Sesión Diseño | `packages/ds/**`, `apps/web/app/_components/**` del marco, `portal-layout.tsx`, `marco-shell.tsx`, `docs/2.0/design/**`, `docs/2.0/diseño/**` |
+| Agente interno | Sesión Hilo | `modules/agente/**`, `apps/web/app/api/agente/**` |
+| Comercial y CPQ | Sesión Comercial | `modules/comercial/**`, `modules/cpq/**`, `packages/capabilities/src/comercial/**`, `apps/web/app/(erp)/{negocios,solicitudes,cotizaciones,cpq}/**`, `apps/web/app/p/**` |
+| Finanzas, Caja y Rendiciones | Sesión Finanzas y Sesión Caja | `modules/finanzas/**`, `modules/rendiciones/**`, `packages/capabilities/src/finanzas/**`, `apps/web/app/(erp)/{finanzas,rendiciones}/**` |
+| Personas, Documentos y Nómina | Sesión Personas y Documentos | `packages/capabilities/src/core/{maestros,documentos,firmas,anexos,remuneraciones}/**`, `modules/nomina/**`, `packages/capabilities/src/nomina/**`, `apps/web/app/(erp)/personas/**`, `apps/web/app/(erp)/documentos/**`, `apps/web/app/(erp)/remuneraciones/**` |
+| Operaciones: pauta, asistencia, rondas, acceso y terreno | La sesión que lleve Operaciones (hoy sin nombre fijo en los PR; por confirmar) | `modules/{pauta,asistencia,rondas,acceso}/**`, `packages/capabilities/src/{pauta,rondas,acceso}/**`, `apps/web/app/(terreno)/**`, `apps/web/app/(supervisor)/**` |
+| Desempeño | Sesión Desempeño | `modules/desempeno/**`, `packages/capabilities/src/desempeno/**`, `packages/domain/src/desempeno/**` |
+| Portales de cliente y trabajador, Tickets | Sesión Proyecto, hasta que tengan sesión propia | `modules/{portal_cliente,portal_trabajador,tickets}/**`, `apps/web/app/(cliente)/**`, `apps/web/app/(trabajador)/**` |
+| Reglas, operación y estándares | Sesión Proyecto y Sesión Estándares | `AGENTS.md`, `CLAUDE.md`, `docs/2.0/*.md`, `.github/**` (solo en un PR de operación pedido por Carlos) |
+
+Las carpetas `core/maestros` (personas, cargos y estructuras), `core/documentos`, `core/firmas`, `core/anexos` y `core/remuneraciones` están dentro del Núcleo, pero su dueña es la Sesión Personas y Documentos (decisión de Carlos). Los nombres de sesión son los que hoy aparecen en los títulos de los PR; si una sesión cambia, se corrige esta tabla.
+
+#### A2.5.6 Dependencias en Linear
+
+- **Antes de tomar un ticket**, la sesión revisa sus «blocked by» en Linear. Si alguno sigue abierto, toma otro ticket.
+- Si al trabajar descubre que depende de otro ticket, **lo marca en Linear** (relación «blocked by») y lo avisa en la descripción del PR.
+- El **orden entre módulos vive en las relaciones de Linear** («blocks» y «blocked by»), no solo en la descripción de los proyectos. Quien crea o deriva tickets deja esas relaciones puestas.
 
 ### A2.6 Vigilancia de avance (OPAI 2.0)
 
