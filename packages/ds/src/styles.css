@@ -571,3 +571,12 @@
 [data-marco="nuevo"] nav[data-shell="riel"] {
   background-color: var(--ds-side);
 }
+/* Riel del diseño nuevo (CAR-377): `ShellNuevo` pone `RielNuevo` (primer nivel y un ícono por
+   módulo) a la izquierda del shell; el riel clásico, que lista cada submódulo, no se muestra. */
+[data-marco="nuevo"][data-menu] > div {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+[data-marco="nuevo"] nav[data-shell="riel"]:not([data-riel-nuevo]) {
+  display: none !important;
+}

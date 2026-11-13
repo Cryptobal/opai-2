@@ -1,4 +1,4 @@
-import { Home } from "lucide-react";
+import { Briefcase, Home } from "lucide-react";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -72,5 +72,37 @@ describe("área plegada del menú", () => {
     expect(plegada).toContain(
       '<div class="min-h-0 overflow-hidden"><div class="flex flex-col gap-0.5 pt-0.5 pb-1.5">',
     );
+  });
+});
+
+describe("riel del menú plegado (CAR-377)", () => {
+  it("muestra el primer nivel y un ícono por área, no cada submódulo", () => {
+    const h = html({
+      nav: [
+        { href: "/", etiqueta: "Inicio", icono: Home },
+        {
+          href: "/negocios",
+          etiqueta: "Negocios",
+          icono: Briefcase,
+          grupo: "Comercial",
+          area: "comercial",
+        },
+        {
+          href: "/cuentas",
+          etiqueta: "Cuentas",
+          icono: Briefcase,
+          grupo: "Comercial",
+          area: "comercial",
+        },
+      ],
+    });
+    const riel = h.slice(
+      h.indexOf('data-shell="riel"'),
+      h.indexOf("</nav>", h.indexOf('data-shell="riel"')),
+    );
+    expect(riel).toContain(">Inicio<");
+    expect(riel).toContain(">Comercial<");
+    expect(riel).not.toContain(">Negocios<");
+    expect(riel).not.toContain(">Cuentas<");
   });
 });

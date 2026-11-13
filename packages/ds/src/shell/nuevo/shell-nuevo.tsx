@@ -3,7 +3,9 @@
 import { type PointerEvent, useEffect, useState } from "react";
 
 import { AppShell, type AppShellProps } from "../app-shell";
+import { LinkPorDefecto } from "../types";
 import { BarraInferiorNueva } from "./barra-inferior";
+import { RielNuevo } from "./riel-nuevo";
 import { BotonFijarMenu, BotonPlegarMenu, BotonTema } from "./botones-menu";
 
 /** Ancho del menú lateral completo (`Sidebar`, 248 px) más un margen para no cerrarlo en el borde. */
@@ -58,8 +60,17 @@ export function ShellNuevo({
     const mover = (e: globalThis.PointerEvent) => {
       if (e.pointerType === "mouse" && e.clientX > ANCHO_MENU) setAsomado(false);
     };
+    // En pantalla táctil (iPad) no hay mouse que se aleje: tocar fuera del menú lo cierra.
+    const tocar = (e: globalThis.PointerEvent) => {
+      if (e.target instanceof Element && !e.target.closest('nav[data-shell="sidebar"]'))
+        setAsomado(false);
+    };
     window.addEventListener("pointermove", mover);
-    return () => window.removeEventListener("pointermove", mover);
+    window.addEventListener("pointerdown", tocar);
+    return () => {
+      window.removeEventListener("pointermove", mover);
+      window.removeEventListener("pointerdown", tocar);
+    };
   }, [asomado]);
   const cambiar = (valor: boolean) => {
     setPlegado(valor);
@@ -71,12 +82,30 @@ export function ShellNuevo({
     if (e.target instanceof Element && e.target.closest('nav[data-shell="riel"]')) setAsomado(true);
   };
   const fijar = <BotonFijarMenu onFijar={() => cambiar(false)} />;
+  // Tocar un área del riel abre el menú completo sobre la página con esa área desplegada.
+  const abrirArea = (area: string) => {
+    // `onAreaAbierta` alterna: si el área ya está abierta, se deja así.
+    if (props.areaAbierta !== area) props.onAreaAbierta?.(area);
+    setAsomado(true);
+  };
   return (
     <div
       data-marco="nuevo"
       data-menu={asomado ? "asomado" : plegado ? "plegado" : "fijo"}
       onPointerOver={asomar}
+      className="flex"
     >
+      <RielNuevo
+        items={props.nav}
+        rutaActual={props.rutaActual}
+        Link={props.Link ?? LinkPorDefecto}
+        portales={props.portales}
+        portalActual={props.portalActual}
+        tenant={props.tenant}
+        empresas={props.empresas}
+        boton={plegado ? fijar : undefined}
+        onArea={abrirArea}
+      />
       <AppShell
         {...props}
         textoBusqueda="Busca o pídele algo a OPAI"
