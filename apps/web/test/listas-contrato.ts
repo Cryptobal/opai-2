@@ -18,27 +18,45 @@ const campos = (s: z.ZodType): Record<string, z.ZodType> => {
   return o instanceof z.ZodObject ? (o.shape as Record<string, z.ZodType>) : {};
 };
 
-/** Una lectura es «lista» si devuelve un arreglo o su último segmento es list/listar (…_list, …_listar). */
+/**
+ * Una lectura es «lista» si devuelve un arreglo, si su salida trae `items` o si su último segmento
+ * nombra una lista (list/listar como palabra: `list`, `…_listar`, `list_a_cargo`).
+ */
 export function esLista(id: string, output: z.ZodType): boolean {
   const segmento = id.split(".").at(-1) ?? "";
   return (
-    desenvolver(output) instanceof z.ZodArray || /^(list|listar)$|_(list|listar)$/.test(segmento)
+    desenvolver(output) instanceof z.ZodArray ||
+    "items" in campos(output) ||
+    /(^|_)(list|listar)($|_)/.test(segmento)
   );
 }
 
-/** Qué le falta a una capacidad de lista para cumplir el contrato (vacío = cumple). */
-export function faltasDelContrato(input: z.ZodType, output: z.ZodType): string[] {
-  const entrada = campos(input);
-  const salida = campos(output);
+const faltasDeEntrada = (entrada: Record<string, z.ZodType>): string[] => {
   const faltas: string[] = [];
-  if (!entrada["cursor"]) faltas.push("entrada sin cursor");
+  const cursor = entrada["cursor"];
+  if (!cursor) faltas.push("entrada sin cursor");
+  else if (!cursor.safeParse(undefined).success || desenvolver(cursor).def.type !== "string") {
+    faltas.push("cursor no es texto opcional");
+  }
   const limite = entrada["limite"] ? desenvolver(entrada["limite"]) : undefined;
   if (!(limite instanceof z.ZodNumber)) faltas.push("entrada sin limite");
   else if (limite.maxValue === null || limite.maxValue > TOPE_LIMITE)
     faltas.push("limite sin tope");
+  else if (!limite.isInt || limite.minValue === null || limite.minValue < 1) {
+    faltas.push("limite no es entero ≥ 1");
+  }
+  return faltas;
+};
+
+/** Qué le falta a una capacidad de lista para cumplir el contrato (vacío = cumple). */
+export function faltasDelContrato(input: z.ZodType, output: z.ZodType): string[] {
+  const salida = campos(output);
+  const faltas = faltasDeEntrada(campos(input));
   const items = salida["items"] ? desenvolver(salida["items"]) : undefined;
   if (!(items instanceof z.ZodArray)) faltas.push("salida sin items");
-  if (!salida["siguiente"]) faltas.push("salida sin siguiente");
+  const siguiente = salida["siguiente"];
+  if (!siguiente) faltas.push("salida sin siguiente");
+  else if (!siguiente.safeParse(null).success) faltas.push("siguiente no admite null");
   return faltas;
 }
 

@@ -28,12 +28,23 @@ describe("contrato único de listas (CAR-353)", () => {
   it("el detector reconoce el contrato y sus faltas", () => {
     const entrada = z.object({
       cursor: z.string().optional(),
-      limite: z.number().max(200).default(50),
+      limite: z.number().int().min(1).max(200).default(50),
     });
     const salida = z.object({ items: z.array(z.string()), siguiente: z.string().nullable() });
     expect(esLista("x.cosas.listar", salida)).toBe(true);
+    expect(esLista("x.cosas.list_a_cargo", z.object({}))).toBe(true);
+    expect(esLista("x.cosas.buscar", salida)).toBe(true);
     expect(esLista("x.cosas.get", z.object({}))).toBe(false);
+    expect(esLista("x.cosas.listado", z.object({}))).toBe(false);
     expect(faltasDelContrato(entrada, salida)).toEqual([]);
+    const flojas = z.object({ cursor: z.number().optional(), limite: z.number().max(100) });
+    expect(
+      faltasDelContrato(flojas, z.object({ items: z.array(z.string()), siguiente: z.string() })),
+    ).toEqual([
+      "cursor no es texto opcional",
+      "limite no es entero ≥ 1",
+      "siguiente no admite null",
+    ]);
     expect(faltasDelContrato(z.object({ limite: z.number() }), z.array(z.string()))).toEqual([
       "entrada sin cursor",
       "limite sin tope",
