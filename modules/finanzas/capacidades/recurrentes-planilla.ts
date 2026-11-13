@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { Contexto } from "@opai/capabilities";
+import { ventasProgramadasPorPeriodo, type Contexto } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 import type { z } from "zod";
 
@@ -51,7 +51,10 @@ export async function celdasRecurrentes(
     select: { movimientoId: true, enlaceId: true, monto: true, movimiento: { select: { fecha: true } } },
   });
   const cargoDe = new Map(conc.map((c) => [c.movimientoId, { fecha: aIso(c.movimiento.fecha), monto: Math.abs(aNumeroSeguro(c.monto)) }] as const));
-  const base = await baseMonto(db, new Set(recurrentes.map((r) => r.unidad)), desde, hasta);
+  const unidades = new Set(recurrentes.map((r) => r.unidad));
+  // El % de ventas de meses abiertos se estima con lo programado (CAR-374); solo se calcula si hace falta.
+  const programadas = unidades.has("pct_ventas") ? await ventasProgramadasPorPeriodo(ctx, db, hasta) : undefined;
+  const base = await baseMonto(db, unidades, desde, hasta, programadas);
   const montos = new Map<string, Map<string, MontoCuota>>();
   const cuotas = new Map(
     recurrentes.map((r) => {

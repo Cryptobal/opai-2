@@ -4,6 +4,7 @@ import { type PointerEvent, useEffect, useState } from "react";
 
 import { AppShell, type AppShellProps } from "../app-shell";
 import { LinkPorDefecto } from "../types";
+import { BandaConexion } from "./banda-conexion";
 import { BarraInferiorNueva } from "./barra-inferior";
 import { RielNuevo } from "./riel-nuevo";
 import { BotonFijarMenu, BotonPlegarMenu, BotonTema } from "./botones-menu";
@@ -138,6 +139,7 @@ export function ShellNuevo({
         }}
       />
       <BarraInferiorNueva {...props} onAgente={onAgente} onTema={onTema} />
+      <BandaConexion />
     </div>
   );
 }
