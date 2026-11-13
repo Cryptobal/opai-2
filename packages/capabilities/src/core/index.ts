@@ -45,6 +45,7 @@ import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
 import { consumidorNegocioGanado } from "../comercial/consumidor-ganado";
 import { consumidorCpqGanado } from "../comercial/consumidor-ganado-cpq";
+import { consumidorPropuestaAlAceptar } from "../portal-cliente/propuesta-al-aceptar";
 import { capacidadesCorreos } from "./correos";
 import { capacidadesImportar } from "./importar";
 import { capacidadesCrm } from "./crm";
@@ -178,6 +179,7 @@ export const consumidoresDelNucleo = [
   ...consumidoresPausaSeguimiento,
   consumidorNegocioGanado,
   consumidorCpqGanado,
+  consumidorPropuestaAlAceptar,
   consumidorTurnosEsperados,
   consumidorRevocacionBiometria,
   ...consumidoresSlack,
