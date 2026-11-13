@@ -18,9 +18,10 @@ test.describe("@preview bandeja única por aprobar", () => {
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
     await page.goto("/bandeja");
+    // La tarjeta «Bandeja · N» aparece siempre al cargar; puede traer avisos o novedades de otras
+    // pruebas (mismo usuario), así que no se exige «Todo al día».
+    await expect(page.getByText(/^Bandeja · \d+$/).first()).toBeVisible({ timeout: 30_000 });
     const seccion = page.getByRole("heading", { name: /Aprobaciones pendientes/ });
-    const alDia = page.getByText(/Todo al día/);
-    await expect(seccion.or(alDia).first()).toBeVisible({ timeout: 30_000 });
     await capturar(page, info, "bandeja-por-aprobar");
     if (await seccion.count()) {
       const decisiones = page.locator('[aria-labelledby="bandeja-aprobaciones"] li a');
