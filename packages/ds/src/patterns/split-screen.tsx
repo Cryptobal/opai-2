@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
+import { ExpandirFicha } from "./expandir-ficha";
 
 type Props = {
   /** Columna izquierda: búsqueda, chips y filas (`FilaSeleccionable`). */
@@ -82,6 +83,7 @@ export function SplitScreen(props: Props) {
           telefono === "detalle" ? "flex" : uno ? "hidden lg:flex" : "hidden",
         )}
       >
+        {detalle && !props.contenido && !props.incrustado ? <ExpandirFicha /> : null}
         {detalle ?? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
             {Icono ? (

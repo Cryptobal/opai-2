@@ -1,0 +1,24 @@
+# e2e completos a pedido (ADR-112, adenda C; 13-nov-2026). Al poner la etiqueta `e2e` en un PR listo (no
+# borrador), lanza el workflow `CI` por workflow_dispatch sobre la rama del PR: corren el e2e (10 grupos),
+# `rendimiento` y los checks rápidos sobre el head de ese momento. Para un head nuevo, quitar y volver a
+# poner la etiqueta. Así `CI` no escucha eventos de etiqueta y un check omitido nunca figura en verde.
+name: e2e a pedido
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  lanzar:
+    if: github.event.label.name == 'e2e' && github.event.pull_request.draft != true && github.event.pull_request.head.repo.fork != true
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    timeout-minutes: 3
+    steps:
+      - name: Lanzar CI con e2e sobre la rama del PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RAMA: ${{ github.event.pull_request.head.ref }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$RAMA"

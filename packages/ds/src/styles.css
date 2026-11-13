@@ -603,4 +603,12 @@
   [data-marco="nuevo"] [data-split][data-sin-detalle]:not([data-contenido]) > [data-columna="detalle"] {
     display: none;
   }
+  /* «Ver a pantalla completa» (CAR-335 D4b): sin JS; la casilla de la ficha esconde la lista. */
+  [data-marco="nuevo"] [data-split] [data-expandir-ficha] {
+    display: flex;
+    margin: -0.5rem -0.75rem 0 0;
+  }
+  [data-marco="nuevo"] [data-split]:has([data-expandir]:checked) > [data-columna="lista"] {
+    display: none;
+  }
 }
