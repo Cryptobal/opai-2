@@ -10,7 +10,7 @@ import { aSeguimiento } from "./cierre-esquemas";
 import { emitirBorrador, leerEmisionPreparada } from "./ventas-emision";
 import { prepararEmision, type EmisionPreparada } from "./ventas-emision-preparar";
 import { foliosPrevistos } from "./ventas-folios-logica";
-import { montoDocumentos } from "./ventas-aprobacion-texto";
+import { enviarEmitidosAlSii, montoDocumentos } from "./ventas-aprobacion-texto";
 import type { Contexto } from "../types";
 
 export const MAX_LOTE_CIERRE = 50;
@@ -73,7 +73,11 @@ export const cierreEmitirLote = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
-  aprobable: { accion: "emitir_dte", monto: (ctx, i) => montoDocumentos(ctx, i.documentoIds) },
+  aprobable: {
+    accion: "emitir_dte",
+    monto: (ctx, i) => montoDocumentos(ctx, i.documentoIds),
+    siguientes: enviarEmitidosAlSii,
+  },
   preparar: prepararLote,
   async handler(ctx, input, { dryRun, preparado }) {
     const preparadas = Array.isArray(preparado)
