@@ -729,6 +729,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
 | platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
+| platform | `/platform/ajustes` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/catalogo` | `platform.catalogo.list` | `platform_catalogo_list` | existe |
 | platform | `/platform/consumos` | `platform.consumos.summary` | `platform_consumos_summary` | existe |
 | platform | `/platform/facturacion` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
