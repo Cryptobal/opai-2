@@ -1,6 +1,6 @@
 // Avisos bajo la meta al cerrar el mes (ADR-094, CAR-312). Si la empresa activó
 // `desempeno.aviso_bajo_meta` (silencio por defecto, ADR-020), el cierre emite un evento por persona
-// bajo la meta y uno por jefatura directa de su ficha. Son transaccionales: solo este consumidor los
+// bajo la meta y uno por jefatura directa (de su ficha o, sin jefe en la ficha, la del cargo). Son transaccionales: solo este consumidor los
 // envía, a la persona o a la jefatura, y solo si puede ver ese resultado. Nunca llevan el puntaje.
 import { type Acceso, esRol, renderizar, tienePermisoEfectivo } from "@opai/domain";
 import type { TenantTx } from "@opai/db";
@@ -8,6 +8,7 @@ import type { TenantTx } from "@opai/db";
 import { valoresEfectivos } from "../core/config";
 import { campoAjuste } from "../core/config/catalogo";
 import { equipoDe } from "../core/jefatura";
+import { directasPorJefatura } from "../core/jefatura/empresa";
 import { comunicableDe, plantillaVigente } from "../core/comunicaciones/resolver";
 import { defineConsumidor, type EventoPublicado } from "../eventos/consumidores";
 import type { Contexto } from "../types";
@@ -17,10 +18,24 @@ import { PERMISOS_DESEMPENO } from "./comun";
 export const EVENTO_PERSONA_BAJO_META = "desempeno.resultado.bajo_meta";
 export const EVENTO_EQUIPO_BAJO_META = "desempeno.equipo.bajo_meta";
 
-const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const MESES = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
+];
 
 /** "2026-10" → "octubre de 2026". */
-export const nombreDelMes = (p: string) => `${MESES[Number(p.slice(5, 7)) - 1] ?? p} de ${p.slice(0, 4)}`;
+export const nombreDelMes = (p: string) =>
+  `${MESES[Number(p.slice(5, 7)) - 1] ?? p} de ${p.slice(0, 4)}`;
 
 /** ¿La empresa activó el aviso? Sin el ajuste declarado (registro sin el módulo), apagado. */
 export async function avisoActivo(ctx: Contexto): Promise<boolean> {
@@ -33,16 +48,32 @@ export async function avisoActivo(ctx: Contexto): Promise<boolean> {
 const bajoMeta = (f: FilaCierre) => f.puntaje !== null && f.puntaje < 100;
 
 /** Emite los avisos del cierre dentro de su transacción (outbox, ADR-029). Quien cierra mira antes el ajuste. */
-export async function emitirBajoMeta(ctx: Contexto, tx: TenantTx, periodo: string, filas: FilaCierre[]) {
+export async function emitirBajoMeta(
+  ctx: Contexto,
+  tx: TenantTx,
+  periodo: string,
+  filas: FilaCierre[],
+) {
   const porJefe = new Map<string, string[]>();
-  for (const f of filas.filter(bajoMeta)) {
+  const sumar = (jefe: string, persona: string) => {
+    const l = porJefe.get(jefe) ?? [];
+    if (!l.includes(persona)) porJefe.set(jefe, [...l, persona]);
+  };
+  const bajo = filas.filter(bajoMeta);
+  // Jefatura directa por cargo (CAR-314): quien no tiene jefe en su ficha igual avisa a quien lo tiene a cargo.
+  const directas = bajo.length
+    ? await directasPorJefatura({ ...ctx, db: tx })
+    : new Map<string, Set<string>>();
+  for (const [jefe, reportan] of directas)
+    for (const f of bajo) if (reportan.has(f.personaId)) sumar(jefe, f.personaId);
+  for (const f of bajo) {
     await ctx.eventos.emitir(tx, {
       tipo: EVENTO_PERSONA_BAJO_META,
       entidadTipo: "persona",
       entidadId: f.personaId,
       payload: { periodo, scorecardId: f.scorecardId },
     });
-    if (f.jefePersonaId) porJefe.set(f.jefePersonaId, [...(porJefe.get(f.jefePersonaId) ?? []), f.personaId]);
+    if (f.jefePersonaId) sumar(f.jefePersonaId, f.personaId);
   }
   for (const [jefe, personaIds] of porJefe) {
     await ctx.eventos.emitir(tx, {
@@ -77,7 +108,10 @@ async function usuarioQueVe(ctx: Contexto, personaId: string): Promise<string | 
 }
 
 /** Destinatario y cantidad. A la persona, si su cargo le muestra su resultado; a la jefatura, solo por su equipo real. */
-async function destinatario(ctx: Contexto, ev: EventoPublicado): Promise<{ usuarioId: string; cantidad: number } | null> {
+async function destinatario(
+  ctx: Contexto,
+  ev: EventoPublicado,
+): Promise<{ usuarioId: string; cantidad: number } | null> {
   if (!ev.entidadId) return null;
   const p = (ev.payload ?? {}) as { scorecardId?: unknown; personaIds?: unknown };
   let cantidad = 0;
@@ -90,7 +124,9 @@ async function destinatario(ctx: Contexto, ev: EventoPublicado): Promise<{ usuar
     if (!s?.personaVeResultado) return null;
   } else {
     // Solo cuentan las personas que la jefatura de cargos le deja ver (ADR-094 §9, ADR-022).
-    const ids = Array.isArray(p.personaIds) ? p.personaIds.filter((x): x is string => typeof x === "string") : [];
+    const ids = Array.isArray(p.personaIds)
+      ? p.personaIds.filter((x): x is string => typeof x === "string")
+      : [];
     const equipo = (await equipoDe(ctx, ev.entidadId)).ids;
     cantidad = ids.filter((id) => equipo.has(id)).length;
     if (cantidad === 0) return null;
@@ -101,7 +137,8 @@ async function destinatario(ctx: Contexto, ev: EventoPublicado): Promise<{ usuar
 
 export const consumidorBajoMeta = defineConsumidor({
   id: "desempeno.avisos.bajo_meta",
-  descripcion: "Campana a la persona bajo la meta y a su jefatura al cerrar el mes, si la empresa lo activó.",
+  descripcion:
+    "Campana a la persona bajo la meta y a su jefatura al cerrar el mes, si la empresa lo activó.",
   eventos: [EVENTO_PERSONA_BAJO_META, EVENTO_EQUIPO_BAJO_META],
   async handler(ctx, ev) {
     if (!(await avisoActivo(ctx))) return;
@@ -113,7 +150,10 @@ export const consumidorBajoMeta = defineConsumidor({
     if (await ctx.db.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId } })) return;
     const p = (ev.payload ?? {}) as { periodo?: unknown };
     const periodo = typeof p.periodo === "string" ? p.periodo : "";
-    const empresa = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } });
+    const empresa = await ctx.db.tenant.findUnique({
+      where: { id: ctx.tenantId },
+      select: { nombre: true },
+    });
     const datos = {
       periodo: { nombre: nombreDelMes(periodo) },
       equipo: { bajo_meta: cantidad },
