@@ -7,6 +7,7 @@ export {
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
 export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
+export { type FuenteAprobaciones, type ItemPorAprobar } from "./core/aprobaciones-fuentes";
 export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
 export { hechosComercial } from "./comercial/hechos-gestion";
 export { defineHecho, type HechoGestion } from "./hechos-gestion";
