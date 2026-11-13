@@ -62,7 +62,6 @@ describe.skipIf(omitirSuiteDb())("flujo · fecha esperada de cobro (db)", () => 
     await e.admin.user.create({ data: { id: usuario, email: `u-${randomUUID().slice(0, 8)}@cobro.test`, name: "u" } });
     clienteA = (await e.admin.cuenta.create({ data: { tenantId: tenantA, nombre: "Cliente A", rut: "76111111-1" } })).id;
     clientePromedio = (await e.admin.cuenta.create({ data: { tenantId: tenantA, nombre: "Cliente que paga a 20 días", rut: "76222222-2" } })).id;
-    await ok(tenantA, "finanzas.ajustes.actualizar", { saldoInicial: 0, desde: mas(lunes, -28) });
   }, 120_000);
 
   afterAll(async () => {
