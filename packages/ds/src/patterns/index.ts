@@ -3,7 +3,7 @@ export { DashboardScreen, type DashboardScreenProps, type Kpi } from "./dashboar
 export { DetailScreen, type DetailScreenProps, Pares, type Par, Seccion } from "./detail-screen";
 export { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./estado";
 export { FormScreen, type FormScreenProps, type SeccionFormulario } from "./form-screen";
-export { type Columna, ListScreen, type ListScreenProps } from "./list-screen";
+export { type Columna, ListScreen, type ListScreenProps, type SeleccionTabla } from "./list-screen";
 export {
   type Celda,
   type ColumnaPlanilla,

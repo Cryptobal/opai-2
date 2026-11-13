@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { FilaHilo, ListaHilo, PendienteHilo, SegmentoHilo } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { EVENTO_CAMBIO, ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import {
   cargarFilasHilo,
@@ -56,26 +56,37 @@ export function useHilo(portal: string) {
         cargar();
     };
     void Promise.resolve().then(cargar);
-    window.addEventListener("opai-bandeja", cargar);
+    window.addEventListener(EVENTO_CAMBIO, cargar);
     document.addEventListener("visibilitychange", alVolver);
     return () => {
-      window.removeEventListener("opai-bandeja", cargar);
+      window.removeEventListener(EVENTO_CAMBIO, cargar);
       document.removeEventListener("visibilitychange", alVolver);
     };
   }, [cargarPendientes]);
 
   const cargarSegmento = useCallback(
-    (s: "actividad" | "agenda") => cargarFilasHilo(ejecutar, s, new Date()),
-    [ejecutar],
+    (s: "actividad" | "agenda") => cargarFilasHilo(ejecutar, s, new Date(), portal === "erp"),
+    [ejecutar, portal],
   );
 
-  const onSegmento = useMemo(
-    () =>
-      refrescoDeSegmentos(cargarSegmento, (s, actualizar) =>
-        (s === "actividad" ? setActividad : setAgenda)(actualizar),
-      ),
-    [cargarSegmento],
-  );
+  // Segmento a la vista: tras una acción (Reenviar, aprobar…) se vuelve a pedir (CAR-338).
+  const visible = useRef<SegmentoHilo>("pendientes");
+  const onSegmento = useMemo(() => {
+    const refrescar = refrescoDeSegmentos(cargarSegmento, (s, actualizar) =>
+      (s === "actividad" ? setActividad : setAgenda)(actualizar),
+    );
+    return (s: SegmentoHilo) => {
+      visible.current = s;
+      refrescar(s);
+    };
+  }, [cargarSegmento]);
+  useEffect(() => {
+    const alCambiar = () => {
+      if (visible.current !== "pendientes") onSegmento(visible.current);
+    };
+    window.addEventListener(EVENTO_CAMBIO, alCambiar);
+    return () => window.removeEventListener(EVENTO_CAMBIO, alCambiar);
+  }, [onSegmento]);
 
   const onReintentar = useCallback(
     (s: SegmentoHilo) => {

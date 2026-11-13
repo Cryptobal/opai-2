@@ -39,6 +39,7 @@ export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: 
       <ListaMaestro
         state={d.state}
         titulo="Ventas (DTE)"
+        vistas={{ lista: "ventas", ruta: "/finanzas/ventas" }}
         accion={emitir}
         buscar="Buscar folio o cliente"
         filtros={filtrosVentas(d.periodos)}

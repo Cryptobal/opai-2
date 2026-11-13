@@ -1,7 +1,9 @@
+import { Plus } from "lucide-react";
 import { Suspense } from "react";
 
 import { Loading, SplitScreen } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { conBusqueda, type SearchParams } from "@/lib/parametros";
 
@@ -23,7 +25,23 @@ export default function Contacto({ params, searchParams }: Props) {
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      opciones={(d) => ({ volver: { href: conBusqueda("/contactos", d.p.q), etiqueta: "Contactos" } })}
+      opciones={(d) => ({
+        volver: { href: conBusqueda("/contactos", d.p.q), etiqueta: "Contactos" },
+        // Con permiso de crear (CAR-337), como «Nueva cuenta» en la ficha de una cuenta.
+        ...(d.lista.gestionar
+          ? {
+              acciones: (
+                <EnlaceBoton
+                  href="/contactos?contacto=nuevo"
+                  icono={Plus}
+                  className="max-lg:hidden"
+                >
+                  Nuevo contacto
+                </EnlaceBoton>
+              ),
+            }
+          : {}),
+      })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
         const datos = cargarContacto(id);
@@ -37,7 +55,12 @@ export default function Contacto({ params, searchParams }: Props) {
           unPanelHastaLg
           etiquetaLista="Lista de contactos"
           lista={
-            <ListaContactosSplit state={lista.state} items={lista.items} seleccionado={id} q={p.q} />
+            <ListaContactosSplit
+              state={lista.state}
+              items={lista.items}
+              seleccionado={id}
+              q={p.q}
+            />
           }
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>
