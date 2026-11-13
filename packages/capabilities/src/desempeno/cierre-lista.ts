@@ -26,7 +26,7 @@ export const periodosList = defineCapability({
     abiertos: z
       .array(z.string())
       .describe(
-        "Meses ya terminados sin cerrar, del más reciente al más antiguo (máximo 12), desde el primer scorecard publicado. Vacío para quien no puede cerrar.",
+        "Meses ya terminados sin cerrar, del más reciente al más antiguo (máximo 12), desde el primer scorecard publicado. Vacío con alcance acotado (cerrar es de toda la empresa).",
       ),
   }),
   efecto: "lectura",
@@ -42,7 +42,14 @@ export const periodosList = defineCapability({
       }),
     ]);
     const anterior = mesAnterior(meses.actual);
-    const cerrados = new Set(filas.map((f) => f.periodo));
+    // Los meses abiertos se buscan en los últimos 12, sin depender del tope de la lista.
+    let desde = anterior;
+    for (let i = 0; i < 11; i++) desde = mesAnterior(desde);
+    const recientes = await ctx.db.desempenoPeriodoCerrado.findMany({
+      where: { periodo: { gte: desde } },
+      select: { periodo: true },
+    });
+    const cerrados = new Set(recientes.map((f) => f.periodo));
     const abiertos: string[] = [];
     if (ctx.alcance === null && primero)
       for (let m = anterior; m >= primero.vigenteDesde && abiertos.length < 12; m = mesAnterior(m))

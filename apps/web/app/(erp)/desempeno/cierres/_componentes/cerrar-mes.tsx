@@ -16,7 +16,11 @@ export function CerrarMes({ periodo, enFila = false }: { periodo: string; enFila
   const mes = mesCorto(periodo);
   return (
     <>
-      <Button variant={enFila ? "secondary" : "primary"} onClick={() => setConfirmando(true)}>
+      <Button
+        variant={enFila ? "secondary" : "primary"}
+        aria-label={`Cerrar ${mes}`}
+        onClick={() => setConfirmando(true)}
+      >
         {enFila ? "Cerrar" : `Cerrar ${mes}`}
       </Button>
       {confirmando ? (

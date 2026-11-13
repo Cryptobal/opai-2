@@ -35,7 +35,10 @@ export function SelectorMes({
       <EnlaceBoton variante="ghost" href={href(anterior)} etiqueta={`Ver ${mesCorto(anterior)}`}>
         ‹
       </EnlaceBoton>
-      <span className="t-label min-w-28 text-center first-letter:uppercase" aria-live="polite">
+      <span
+        className="t-label inline-block min-w-28 text-center first-letter:uppercase"
+        aria-live="polite"
+      >
         {mesCorto(periodo)}
       </span>
       {periodo < actual ? (
@@ -47,7 +50,14 @@ export function SelectorMes({
           ›
         </EnlaceBoton>
       ) : (
-        <span aria-hidden className="inline-flex size-11 md:size-10" />
+        <EnlaceBoton
+          variante="ghost"
+          href={href(periodo)}
+          etiqueta="Mes en curso"
+          className="invisible"
+        >
+          ›
+        </EnlaceBoton>
       )}
     </nav>
   );
