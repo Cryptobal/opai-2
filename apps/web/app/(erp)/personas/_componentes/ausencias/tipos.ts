@@ -10,6 +10,7 @@ export type TipoAusencia = (typeof TIPOS_AUSENCIA)[number]["valor"];
 export const etiquetaTipo = (t: string) => TIPOS_AUSENCIA.find((x) => x.valor === t)?.etiqueta ?? t;
 
 export type GrupoAusencia = {
+  ausenciaId: string;
   tipo: TipoAusencia;
   motivo: string;
   desde: string;
