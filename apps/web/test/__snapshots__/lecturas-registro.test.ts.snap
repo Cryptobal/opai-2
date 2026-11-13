@@ -98,6 +98,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "nomina.periodos.listar",
   "pauta.alertas.listar",
   "pauta.exportar",
+  "pauta.publicaciones.listar",
   "pauta.reemplazos.sugerir",
   "platform.ajustes.get",
   "platform.auditoria.estado",

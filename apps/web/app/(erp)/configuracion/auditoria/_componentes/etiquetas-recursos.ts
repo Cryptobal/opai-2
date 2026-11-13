@@ -49,4 +49,5 @@ export const RECURSOS: Record<string, string> = {
   hilo: "Hilo",
   // Permisos y licencias de una persona en la pauta (CAR-373).
   ausencias: "Permisos y licencias",
+  publicaciones: "Publicaciones de la pauta",
 };
