@@ -13,8 +13,15 @@ const reglaSchema = z.object({
   id: z.string(),
   accion: z.enum(ACCIONES_APROBABLES),
   accionEtiqueta: z.string(),
-  montoMinimo: z.number().int().nullable().describe("CLP. null: toda la acción, sin importar el monto."),
-  aprobadorRol: z.string().nullable().describe("Rol base (owner, admin, gerente…) o id de un rol de la empresa."),
+  montoMinimo: z
+    .number()
+    .int()
+    .nullable()
+    .describe("CLP. null: toda la acción, sin importar el monto."),
+  aprobadorRol: z
+    .string()
+    .nullable()
+    .describe("Rol base (owner, admin, gerente…) o id de un rol de la empresa."),
   aprobadorGrupoId: z.string().nullable(),
   activa: z.boolean(),
 });
@@ -41,21 +48,30 @@ async function exigeAprobador(ctx: Contexto, rol: string | null, grupoId: string
 
 export const reglasAprobacionList = defineCapability({
   // Lectura auditada (NÚCLEO-H): solo los ids de las reglas reveladas.
-  auditarLectura: (s) => s.map((r) => r.id),
+  auditarLectura: (s) => s.items.map((r) => r.id),
   id: "core.aprobaciones.reglas_list",
   descripcion:
     "Reglas de aprobación de la empresa: qué acción (emitir al SII, enviar cotizaciones) necesita aprobación, desde qué monto y quién la aprueba.",
   permiso: PERMISOS_CORE.aprobacionesManage,
-  input: z.object({ incluirInactivas: z.boolean().default(false) }),
-  output: z.array(reglaSchema),
+  // CAR-353: contrato único de listas (cursor + limite; items + siguiente).
+  input: z.object({
+    incluirInactivas: z.boolean().default(false),
+    cursor: z.uuid().optional(),
+    limite: z.number().int().min(1).max(200).default(200),
+  }),
+  output: z.object({ items: z.array(reglaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.reglaAprobacion.findMany({
       where: input.incluirInactivas ? {} : { activa: true },
-      orderBy: [{ accion: "asc" }, { montoMinimo: "asc" }],
+      orderBy: [{ accion: "asc" }, { montoMinimo: "asc" }, { id: "asc" }],
+      take: input.limite + 1,
+      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     });
-    return filas.map(vista);
+    const pagina = filas.slice(0, input.limite);
+    const siguiente = filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null;
+    return { items: pagina.map(vista), siguiente };
   },
 });
 
@@ -80,13 +96,23 @@ export const reglasAprobacionGuardar = defineCapability({
     await exigeAprobador(ctx, input.aprobadorRol, input.aprobadorGrupoId);
     if (id && !(await ctx.db.reglaAprobacion.findFirst({ where: { id, activa: true } })))
       throw noEncontrado("La regla");
-    const data = { ...input, montoMinimo: input.montoMinimo === null ? null : BigInt(input.montoMinimo) };
+    const data = {
+      ...input,
+      montoMinimo: input.montoMinimo === null ? null : BigInt(input.montoMinimo),
+    };
     // Dos reglas activas con la misma acción y el mismo monto serían ambiguas: manda una sola (CAR-253).
     const repetida = await ctx.db.reglaAprobacion.findFirst({
-      where: { accion: data.accion, montoMinimo: data.montoMinimo, activa: true, ...(id ? { id: { not: id } } : {}) },
+      where: {
+        accion: data.accion,
+        montoMinimo: data.montoMinimo,
+        activa: true,
+        ...(id ? { id: { not: id } } : {}),
+      },
     });
     if (repetida)
-      throw reglaDeNegocio("Ya hay una regla activa para esa acción y ese monto. Cámbiala en vez de crear otra.");
+      throw reglaDeNegocio(
+        "Ya hay una regla activa para esa acción y ese monto. Cámbiala en vez de crear otra.",
+      );
     if (dryRun) return vista({ id: id ?? "", activa: true, ...data });
     const r = await escribirConEvento(
       ctx,

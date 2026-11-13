@@ -8,6 +8,7 @@ import { dondePersona } from "../core/maestros/alcance";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { anotar } from "./anotar";
+import { marcarAusenciasDelTitular } from "./ausencias-arrastrar";
 import { aFechaDb, diaSchema, hoy, puestoParaPauta } from "./comun";
 import { validarNoDoblar } from "./doblaje";
 import { nombresDePersonas } from "./nombres";
@@ -144,6 +145,9 @@ export async function fijarSerieInterna(
         creadaPor: ctx.usuario?.id ?? null,
       },
     });
+    // CAR-393 parte 2c: los turnos nuevos que caen en una ausencia aprobada del titular quedan marcados.
+    const r = { puestoId: puesto.id, instalacionId: puesto.instalacionId, titularId: input.titularPersonaId };
+    await marcarAusenciasDelTitular(tx, dentro, { ...r, desde: input.desde });
     await op.enTransaccion?.(tx, dentro, {
       serieId: nueva.id,
       puestoId: puesto.id,
