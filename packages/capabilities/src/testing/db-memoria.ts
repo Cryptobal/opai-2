@@ -37,6 +37,7 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   const unicos: Record<string, string[]> = {
     trabajo: ["claveUnica"],
     flujoAvisoEmitido: ["semana"],
+    slackAviso: ["clave"],
   };
 
   function delegado(modelo: string) {
