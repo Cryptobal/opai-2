@@ -69,19 +69,21 @@ export function useHilo(portal: string) {
     [ejecutar],
   );
 
-  // Segmentos ya abiertos: tras una acción (Reenviar, aprobar…) se vuelven a pedir (CAR-338).
-  const abiertos = useRef(new Set<SegmentoHilo>());
+  // Segmento a la vista: tras una acción (Reenviar, aprobar…) se vuelve a pedir (CAR-338).
+  const visible = useRef<SegmentoHilo>("pendientes");
   const onSegmento = useMemo(() => {
     const refrescar = refrescoDeSegmentos(cargarSegmento, (s, actualizar) =>
       (s === "actividad" ? setActividad : setAgenda)(actualizar),
     );
     return (s: SegmentoHilo) => {
-      abiertos.current.add(s);
+      visible.current = s;
       refrescar(s);
     };
   }, [cargarSegmento]);
   useEffect(() => {
-    const alCambiar = () => abiertos.current.forEach((s) => onSegmento(s));
+    const alCambiar = () => {
+      if (visible.current !== "pendientes") onSegmento(visible.current);
+    };
     window.addEventListener(EVENTO_CAMBIO, alCambiar);
     return () => window.removeEventListener(EVENTO_CAMBIO, alCambiar);
   }, [onSegmento]);

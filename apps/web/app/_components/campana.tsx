@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import { Alerta, Button, Empty, Popover, Contador, Punto, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
+import { avisarCambio, ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 // La lista de avisos solo se descarga al abrir la campana (ADR-037).
 const BandejaCorta = dynamic(() => import("../(erp)/_componentes/bandeja").then((m) => m.Bandeja));
@@ -76,7 +76,7 @@ function CampanaAvisos({
   }
   async function marcarTodas() {
     await ejecutarCapacidad(portal, "core.notificaciones.marcar_todas", {});
-    window.dispatchEvent(new Event("opai-bandeja"));
+    avisarCambio();
     setNoLeidas(0);
     setAvisos(
       (l) => l?.map((a) => ({ ...a, leidaEn: a.leidaEn ?? new Date().toISOString() })) ?? null,
