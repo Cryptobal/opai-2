@@ -9,8 +9,9 @@ import { Button, Empty, Estado, Segmentado, Tabs, type EstadoPantalla } from "@o
 import { LinkNext } from "@/app/_components/link-next";
 import { fechaHora } from "@/lib/formato";
 
-import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/datos";
+import { clp } from "../../flujo/_componentes/datos";
 import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
+import { origenSaldo } from "./origen-saldo";
 import { PESTANAS_ESTADO_BANCO } from "./bancos-tipos";
 import { ListaMovimientos } from "./lista-movimientos";
 
@@ -75,9 +76,7 @@ export function PantallaBancos({
             {cuenta?.saldoHoy != null ? (
               <p className="t-body-sm">
                 Saldo de hoy <span className="t-mono font-medium">{clp(cuenta.saldoHoy)}</span>
-                {cuenta.saldoDesde ? (
-                  <span className="text-fg-muted"> · último saldo conocido al {fechaDdMmAaaa(cuenta.saldoDesde)}</span>
-                ) : null}
+                {origenSaldo(cuenta) ? <span className="text-fg-muted"> · {origenSaldo(cuenta)}</span> : null}
               </p>
             ) : null}
             {cuenta?.ultimaSyncEn ? (

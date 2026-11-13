@@ -23,6 +23,8 @@ export type FilaScorecard = {
 export type ResultadoCargo = {
   cargoId: string;
   periodo: string;
+  /** Mes en curso (aaaa-mm) en la zona de la empresa: el selector no ofrece meses futuros. */
+  mesEnCurso: string;
   vigenteDesde: string | null;
   personas: {
     personaId: string;
@@ -40,6 +42,7 @@ export type ResultadoPersona = {
   apellidos: string;
   cargoId: string | null;
   periodo: string;
+  mesEnCurso: string;
   vigenteDesde: string | null;
   puntaje: number | null;
   cobertura: number;
@@ -81,10 +84,6 @@ export const cargarResultadoPersona = (personaId: string, periodo?: string | nul
     personaId,
     ...(periodo ? { periodo } : {}),
   });
-
-/** Mes en curso «aaaa-mm» en la hora de Chile, para no ofrecer meses futuros. */
-export const mesEnCurso = () =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date()).slice(0, 7);
 
 export const cargarCargos = () =>
   ejecutarComoUsuario<CargoJefatura[]>("erp", "core.cargos.list", {});

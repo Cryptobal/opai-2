@@ -32,6 +32,8 @@ export const bancosCuentasListar = defineCapability({
         saldoBanco: c.saldoBanco === null ? null : Number(c.saldoBanco),
         saldoHoy: saldos.get(c.id)?.saldoHoy ?? null,
         saldoDesde: saldos.get(c.id)?.saldoDesde ?? null,
+        saldoFuente: saldos.get(c.id)?.saldoFuente ?? null,
+        saldoMovimientosDespues: saldos.get(c.id)?.movimientosDespues ?? null,
       })),
     };
   },

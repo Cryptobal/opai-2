@@ -11,6 +11,11 @@ export type Uniforme = {
   tallaPantalon: string | null;
   tallaChaqueta: string | null;
   tallaZapato: string | null;
+  tallaPolera: string | null;
+  tallaGeologo: string | null;
+  tallaPolar: string | null;
+  estaturaCm: number | null;
+  pesoKg: number | null;
   notas: string | null;
   entregas: {
     id: string;
@@ -23,11 +28,13 @@ export type Uniforme = {
 export type JornadaDt = {
   resolucion: string | null;
   resolucionVigenteDesde: string | null;
+  resolucionVigenteHasta: string | null;
   horasSemanales: string | null;
   distribucion: string | null;
   articulo22: boolean;
   plazoFijoPeriodo: number | null;
   terminoPlazoFijo: string | null;
+  terminosPlazoFijo: string[];
   avisoTerminoDias: number | null;
 };
 export type Laboral = {
@@ -40,6 +47,8 @@ export type Laboral = {
     emergenciaNombre: string | null;
     emergenciaRelacion: string | null;
     emergenciaTelefono: string | null;
+    codigoInterno: string | null;
+    movilizacion: string | null;
   } | null;
 };
 export type Prevision = {

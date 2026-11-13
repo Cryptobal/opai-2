@@ -78,7 +78,7 @@
 <div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las correcciones" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-COR-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
 </sc-if>
 <sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
-<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes corregir marcas" description="Corrigen administración y RRHH; los supervisores proponen. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes corregir marcas" description="Corrigen administración y RRHH; los supervisores proponen. Pídele acceso a Andrea Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
 </sc-if>
 <sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
@@ -113,9 +113,9 @@ class Component extends DCLogic {
     const isWorker = b.v_trabajador || b.v_objetar;
     const rows = [
       { id: 1, nombre: "Camila Herrera Soto", rut: "12.345.678-9", fecha: "14-10-2026", tipo: "Entrada", de: "08:14", a: "07:58", motivo: "Reloj del acceso norte sin conexión", por: "Jorge Muñoz", est: "pendiente", h: 31, m: 12 },
-      { id: 2, nombre: "Luis Pérez Rojas", rut: "9.876.543-2", fecha: "13-10-2026", tipo: "Salida", de: "—", a: "20:00", motivo: "Olvidó marcar la salida", por: "Carlos Irigoyen", est: "pendiente", h: 6, m: 40 },
+      { id: 2, nombre: "Luis Pérez Rojas", rut: "9.876.543-2", fecha: "13-10-2026", tipo: "Salida", de: "—", a: "20:00", motivo: "Olvidó marcar la salida", por: "Andrea Fuentes", est: "pendiente", h: 6, m: 40 },
       { id: 3, nombre: "Diego Silva Muñoz", rut: "13.456.789-0", fecha: "11-10-2026", tipo: "Entrada", de: "19:41", a: "20:00", motivo: "Llegó antes por cambio de turno", por: "Jorge Muñoz", est: "objetada", h: 0, m: 0 },
-      { id: 4, nombre: "María F. Soto Vera", rut: "16.234.567-8", fecha: "09-10-2026", tipo: "Salida", de: "06:30", a: "08:00", motivo: "Salida registrada por error en ronda", por: "Carlos Irigoyen", est: "aceptada", h: 0, m: 0 },
+      { id: 4, nombre: "María F. Soto Vera", rut: "16.234.567-8", fecha: "09-10-2026", tipo: "Salida", de: "06:30", a: "08:00", motivo: "Salida registrada por error en ronda", por: "Andrea Fuentes", est: "aceptada", h: 0, m: 0 },
       { id: 5, nombre: "Héctor Araya Lillo", rut: "15.009.332-7", fecha: "06-10-2026", tipo: "Entrada", de: "08:22", a: "08:00", motivo: "Corte de energía en Bodega Lampa", por: "Jorge Muñoz", est: "vencida", h: 0, m: 0 },
     ];
     const C = A.CuentaRegresiva;
