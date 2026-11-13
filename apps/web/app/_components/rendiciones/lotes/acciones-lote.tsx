@@ -7,11 +7,13 @@ import { avisar, Button, Campo, Dialog, Input, InputFecha, Textarea } from "@opa
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-import { hoyIso } from "@/lib/fechas";
 
 import type { LoteDetalle, PermisosLote } from "./tipos";
 
 type Modal = "pagar" | "anular" | null;
+
+/** Hoy en hora de Chile (aaaa-mm-dd) sin cargar el formateador de dominio en el navegador. */
+const hoyIso = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
 
 /** Acciones del lote según su estado y los permisos de la persona; cada una vuelve a autorizarse en servidor. */
 export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: PermisosLote }) {
