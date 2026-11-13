@@ -95,13 +95,19 @@ test.describe("lista con selección (CAR-335 D4a)", () => {
     await hidratado(primera);
     await primera.click();
     await page.getByRole("checkbox", { name: "Seleccionar [CUENTA B]" }).click();
-    await expect(page.getByText("2 filas seleccionadas")).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Selección" }).getByText("2 filas seleccionadas"),
+    ).toBeVisible();
     await expect(page.getByTestId("accion-muestra")).toHaveText("Archivar 2");
     await capturar(page, info, "nuevo-lista-seleccion");
     await page.getByRole("checkbox", { name: "Seleccionar todas las filas" }).click();
-    await expect(page.getByText("3 filas seleccionadas")).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Selección" }).getByText("3 filas seleccionadas"),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Quitar selección" }).click();
     await expect(page.getByRole("region", { name: "Selección" })).toHaveCount(0);
+    // El foco vuelve a la casilla de la cabecera y el lector de pantalla oyó el conteo.
+    await expect(page.getByRole("checkbox", { name: "Seleccionar todas las filas" })).toBeFocused();
     expect(errores).toEqual([]);
   });
 });

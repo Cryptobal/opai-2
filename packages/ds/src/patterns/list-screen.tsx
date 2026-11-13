@@ -16,7 +16,7 @@ export type Columna<T> = {
 export type SeleccionTabla<T> = {
   cabecera: ReactNode;
   celda: (item: T) => ReactNode;
-  envolver: (tabla: ReactNode) => ReactNode;
+  envolver: (tabla: ReactNode, visibles: string[]) => ReactNode;
 };
 
 export type ListScreenProps<T> = {
@@ -55,7 +55,8 @@ export type ListScreenProps<T> = {
   /**
    * Selección de varias filas (diseño nuevo, CAR-335 D4a), desde md. Se arma con
    * `seleccionDeLista` de `@opai/ds/seleccion`, que trae las casillas y la barra en su propio trozo
-   * de JS: las listas que no la usan no las descargan (ADR-037).
+   * de JS: las listas que no la usan no las descargan (ADR-037). Trae funciones: se arma en el mismo
+   * componente de servidor que pinta `ListScreen`, nunca se pasa a un componente de cliente.
    */
   seleccion?: SeleccionTabla<T>;
 };

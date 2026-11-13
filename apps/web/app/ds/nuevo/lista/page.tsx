@@ -32,8 +32,7 @@ export default function PaginaListaNueva() {
           { id: "nombre", etiqueta: "Nombre", render: (f) => f.nombre },
           { id: "estado", etiqueta: "Estado", render: (f) => f.estado },
         ]}
-        seleccion={seleccionDeLista(
-          FILAS,
+        seleccion={seleccionDeLista<Fila>(
           (f) => f.id,
           (f) => f.nombre,
           <AccionMuestra />,

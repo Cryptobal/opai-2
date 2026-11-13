@@ -23,8 +23,7 @@ const pintar = (seleccion: boolean) =>
       href={(f) => `/cuentas/${f.id}`}
       {...(seleccion
         ? {
-            seleccion: seleccionDeLista(
-              items,
+            seleccion: seleccionDeLista<Fila>(
               (f) => f.id,
               (f) => f.nombre,
               <span>Archivar</span>,

@@ -12,16 +12,15 @@ export { useSeleccion } from "./piezas";
  * capacidad masiva, que autoriza fila por fila.
  */
 export function seleccionDeLista<T>(
-  items: readonly T[],
   clave: (item: T) => string,
   etiqueta: (item: T) => string,
   acciones: ReactNode,
 ): SeleccionTabla<T> {
-  const visibles = items.map(clave);
   return {
     cabecera: <CasillaTodas />,
     celda: (item) => <CasillaFila id={clave(item)} etiqueta={etiqueta(item)} />,
-    envolver: (tabla) => (
+    // `visibles` los pone la tabla: siempre son las filas que se ven.
+    envolver: (tabla, visibles) => (
       <ProveedorSeleccion visibles={visibles}>
         {tabla}
         <BarraSeleccionLista acciones={acciones} />

@@ -28,7 +28,7 @@ export function TablaLista<T>({
   seleccion,
 }: Props<T>) {
   return (
-    <TablaConSeleccion envolver={seleccion?.envolver}>
+    <TablaConSeleccion envolver={seleccion?.envolver} visibles={items.map(clave)}>
       <Table>
         <thead>
           <tr>
@@ -83,9 +83,10 @@ export function TablaLista<T>({
 
 /** Tabla de md+; con selección, la pantalla la envuelve con su estado y su barra de acciones. */
 function TablaConSeleccion(p: {
-  envolver?: ((tabla: ReactNode) => ReactNode) | undefined;
+  envolver?: ((tabla: ReactNode, visibles: string[]) => ReactNode) | undefined;
+  visibles: string[];
   children: ReactNode;
 }) {
   const tabla = <div className="hidden md:block">{p.children}</div>;
-  return p.envolver ? p.envolver(tabla) : tabla;
+  return p.envolver ? p.envolver(tabla, p.visibles) : tabla;
 }

@@ -42,15 +42,19 @@ export function ProveedorSeleccion({
   });
   const marcados = estado.clave === clave ? estado.ids : [];
   const valor = useMemo<Seleccion>(() => {
-    const fijar = (ids: readonly string[]) =>
-      setEstado({ clave, ids: visibles.filter((v) => ids.includes(v)) });
+    // Funcional: dos cambios en el mismo instante no se pisan.
+    const cambiar = (f: (actuales: readonly string[]) => readonly string[]) =>
+      setEstado((e) => {
+        const actuales = e.clave === clave ? e.ids : [];
+        const nuevos = f(actuales);
+        return { clave, ids: visibles.filter((v) => nuevos.includes(v)) };
+      });
     return {
       ids: marcados,
       visibles,
-      alternar: (id) =>
-        fijar(marcados.includes(id) ? marcados.filter((x) => x !== id) : [...marcados, id]),
-      todas: (marcar) => fijar(marcar ? visibles : []),
-      limpiar: () => fijar([]),
+      alternar: (id) => cambiar((a) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id])),
+      todas: (marcar) => cambiar(() => (marcar ? visibles : [])),
+      limpiar: () => cambiar(() => []),
     };
   }, [clave, marcados, visibles]);
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
@@ -74,7 +78,8 @@ export function CasillaTodas() {
 export function CasillaFila({ id, etiqueta }: { id: string; etiqueta: string }) {
   const s = useSeleccion();
   return (
-    <span className="relative z-10 inline-flex">
+    // Sobre el enlace estirado (z-10) y sin llegar al clic de la fila, que abriría la ficha.
+    <span className="relative z-10 inline-flex" onClick={(e) => e.stopPropagation()}>
       <Checkbox
         soloControl
         etiqueta={`Seleccionar ${etiqueta}`}
@@ -88,18 +93,30 @@ export function CasillaFila({ id, etiqueta }: { id: string; etiqueta: string }) 
 /** Barra «N filas seleccionadas» con las acciones de la pantalla y «Quitar selección». */
 export function BarraSeleccionLista({ acciones }: { acciones: ReactNode }) {
   const s = useSeleccion();
-  if (!s.ids.length) return null;
-  const texto = `${s.ids.length} ${s.ids.length === 1 ? "fila seleccionada" : "filas seleccionadas"}`;
+  const n = s.ids.length;
+  const texto = `${n} ${n === 1 ? "fila seleccionada" : "filas seleccionadas"}`;
+  const quitar = () => {
+    s.limpiar();
+    // La barra desaparece con el foco dentro: vuelve a la casilla de la cabecera.
+    document.querySelector<HTMLElement>('[aria-label="Seleccionar todas las filas"]')?.focus();
+  };
   return (
-    <BarraSeleccion texto={texto}>
-      {acciones}
-      <Button
-        variant="ghost"
-        className="text-inverse-fg hover:bg-inverse-fg/10"
-        onClick={s.limpiar}
-      >
-        Quitar selección
-      </Button>
-    </BarraSeleccion>
+    <>
+      <span role="status" className="sr-only">
+        {n ? texto : ""}
+      </span>
+      {n ? (
+        <BarraSeleccion texto={texto}>
+          {acciones}
+          <Button
+            variant="ghost"
+            className="text-inverse-fg hover:bg-inverse-fg/10"
+            onClick={quitar}
+          >
+            Quitar selección
+          </Button>
+        </BarraSeleccion>
+      ) : null}
+    </>
   );
 }
