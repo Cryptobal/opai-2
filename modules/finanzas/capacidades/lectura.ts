@@ -35,7 +35,7 @@ const avisoSchema = z.object({
 
 /** De dónde sale el saldo de la planilla y qué cuentas activas no tienen saldo (ADR-073). */
 const saldoBancoSchema = z.object({
-  fuente: z.enum(["banco", "ajustes"]),
+  fuente: z.enum(["banco", "sin_banco"]),
   saldo: saldoSchema.nullable(),
   cuentasSinSaldo: z.array(z.object({ cuentaId: z.string(), banco: z.string() })),
   saldoHoy: saldoSchema.nullable().describe("Saldo conocido más lo que la cartola movió después, al cierre de hoy."),
@@ -90,7 +90,7 @@ export const planillaObtener = defineCapability({
     const cantidad = input.movil
       ? 4
       : (input.semanas ?? ajustes.horizonteSemanas + SEMANAS_HISTORIA);
-    const desde = input.movil ? hoy : desdeVentana(ajustes, input.desde, hoy);
+    const desde = input.movil ? hoy : desdeVentana(input.desde, hoy);
     const { lista, calculo, extraVista, filas, celdas, banco, avisos } = await serieSaldos(
       ctx,
       ajustes,
