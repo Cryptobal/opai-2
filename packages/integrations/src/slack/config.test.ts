@@ -31,6 +31,7 @@ describe("configuración por empresa", () => {
         escalarAGrupoId: null,
       },
       resumen: { activo: false },
+      mensajesDirectos: { activo: true },
     });
   });
 

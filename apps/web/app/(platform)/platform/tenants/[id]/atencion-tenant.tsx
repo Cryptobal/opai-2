@@ -1,5 +1,6 @@
 import { Badge, SeccionTarjeta } from "@opai/ds";
 
+import { etiquetaCapacidad } from "@/app/(erp)/configuracion/auditoria/_componentes/capacidad";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import { usd } from "../../_componentes/formato";
@@ -51,10 +52,13 @@ export function AtencionTenant({ problemas, keys: keysAlerta, faltaRut, pruebas 
                 {p.estado === "fallido" ? "Fallido" : "Reintentando"}
               </Badge>
               <span className="min-w-0 flex-1 truncate text-base text-fg">
-                <span className="t-mono">{p.tipo}</span>
+                <span>{etiquetaCapacidad(p.tipo)}</span>
                 {p.ultimoError ? ` · ${p.ultimoError}` : ""}
               </span>
-              <EnlaceBoton href={`/platform/trabajos?ver=${p.tenantId}:${p.id}`} variante="ghost">
+              <EnlaceBoton
+                href={`/platform/trabajos?empresa=${p.tenantId}&estado=problemas&ver=${p.tenantId}:${p.id}`}
+                variante="ghost"
+              >
                 Abrir
               </EnlaceBoton>
             </li>
