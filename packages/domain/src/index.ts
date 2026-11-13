@@ -47,6 +47,7 @@ export * from "./datos-personales";
 export * from "./cumplimiento";
 export * from "./indicadores-gestion";
 export * from "./jefatura";
+export * from "./procesos-persona";
 export * from "./desempeno";
 export * from "./incidentes";
 export * from "./documento-subida";
