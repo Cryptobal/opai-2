@@ -46,7 +46,7 @@ export const VERBOS: Record<string, string> = {
   set_autonomia: "Definir autonomía", set_role: "Cambiar rol", borrar: "Borrar", preparar: "Preparar",
   embudo: "Embudo", mover: "Mover", ganar: "Marcar como ganado", perder: "Marcar como perdido",
   reabrir: "Reabrir", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
-  set_contactos: "Definir contactos", actualizar_etapa: "Actualizar etapa", guardar_catalogo: "Guardar catálogo",
+  set_contactos: "Definir contactos", actualizar_etapa: "Actualizar etapa", guardar_catalogo: "Guardar catálogo", guardar_lote: "Guardar en lote",
   crear_etapa: "Crear etapa", reordenar_etapas: "Reordenar etapas", enriquecer: "Enriquecer",
   buscar_duplicadas: "Buscar duplicadas", acciones_agente: "Acciones del agente", derivar: "Derivar",
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
@@ -91,6 +91,7 @@ export const VERBOS: Record<string, string> = {
   plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
   // Slack (CAR-291, ADR-093).
   canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
+  usuarios: "Ver personas en Slack", vincular_usuarios: "Vincular personas con Slack",
   // Indicadores de gestión (CAR-305).
   medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",

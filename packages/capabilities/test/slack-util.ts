@@ -58,7 +58,12 @@ export function prepararSlack() {
   vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
     const metodo = url.replace("https://slack.com/api/", "");
     llamadas.push({ metodo, auth: new Headers(init.headers).get("authorization") });
-    const r = respuestas[metodo];
+    const valor = respuestas[metodo];
+    // Respuesta por cuerpo (p. ej. un usuario distinto por correo en `users.lookupByEmail`).
+    const r =
+      typeof valor === "function"
+        ? (valor as (c: URLSearchParams) => unknown)(new URLSearchParams(String(init.body)))
+        : valor;
     if (r instanceof Error) throw r;
     return new Response(JSON.stringify(r ?? { ok: false, error: "unknown_method" }));
   });

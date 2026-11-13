@@ -76,21 +76,21 @@ describe("cuotasDelFlujo", async () => {
   const lunes = "2026-11-09";
   const cargo = (id: string) => ({ c1: { fecha: "2026-11-03", monto: 60 }, c2: { fecha: "2026-11-10", monto: 100 }, c3: { fecha: "2026-11-11", monto: 120 } } as Record<string, { fecha: string; monto: number }>)[id];
   it("lo pagado antes del lunes ya está en la apertura: no se proyecta", () => {
-    expect(cuotasDelFlujo([{ fecha: "2026-11-05", estado: "pagada", pendiente: 0, cargoId: "c1" }], 100, cargo, lunes)).toEqual([]);
+    expect(cuotasDelFlujo([{ fecha: "2026-11-05", estado: "pagada", pendiente: 0, cargoId: "c1" }], cargo, lunes)).toEqual([]);
   });
   it("lo pagado esta semana sí suma a la semana en curso", () => {
-    expect(cuotasDelFlujo([{ fecha: "2026-11-05", estado: "pagada", pendiente: 0, cargoId: "c2" }], 100, cargo, lunes)).toEqual([
+    expect(cuotasDelFlujo([{ fecha: "2026-11-05", estado: "pagada", pendiente: 0, cargoId: "c2" }], cargo, lunes)).toEqual([
       { fecha: "2026-11-05", semana: lunes, monto: 100, estado: "pagada" },
     ]);
   });
   it("un cargo de esta semana mayor que la cuota suma completo (la apertura no lo incluye)", () => {
-    expect(cuotasDelFlujo([{ fecha: "2026-11-12", estado: "pagada", pendiente: 0, cargoId: "c3" }], 100, cargo, lunes)[0]?.monto).toBe(120);
+    expect(cuotasDelFlujo([{ fecha: "2026-11-12", estado: "pagada", pendiente: 0, cargoId: "c3" }], cargo, lunes)[0]?.monto).toBe(120);
   });
   it("una cuota vencida e impaga pasa a la semana en curso; una futura queda en su semana", () => {
     const r = cuotasDelFlujo([
       { fecha: "2026-11-04", estado: "proyectada", pendiente: 100, cargoId: null },
       { fecha: "2026-11-25", estado: "parcial", pendiente: 40, cargoId: "c1" },
-    ], 100, cargo, lunes);
+    ], cargo, lunes);
     expect(r).toEqual([
       { fecha: "2026-11-04", semana: lunes, monto: 100, estado: "proyectada" },
       { fecha: "2026-11-25", semana: "2026-11-23", monto: 40, estado: "parcial" },
@@ -112,5 +112,13 @@ describe("estadosPorFila", async () => {
   it("sin monto exacto, una cuota impaga toma un cargo de otro monto como pago parcial", () => {
     const r = estadosPorFila([{ id: "r1", fechas: ["2026-11-05"], monto: 100_000, ventana: v }], [{ id: "c", fecha: "2026-11-06", monto: 60_000 }]);
     expect(r.get("r1")?.[0]).toMatchObject({ estado: "parcial", pendiente: 40_000 });
+  });
+  it("monto por fecha (UF o % de ventas): cada cuota se cruza con su propio monto exacto", () => {
+    const monto = (f: string) => (f === "2026-11-05" ? 500_000 : 510_000);
+    const r = estadosPorFila(
+      [{ id: "r1", fechas: ["2026-11-05", "2026-12-05"], monto, ventana: v }],
+      [{ id: "a", fecha: "2026-11-05", monto: 500_000 }, { id: "b", fecha: "2026-12-04", monto: 510_000 }],
+    );
+    expect(r.get("r1")?.map((e) => [e.estado, e.cargoId])).toEqual([["pagada", "a"], ["pagada", "b"]]);
   });
 });
