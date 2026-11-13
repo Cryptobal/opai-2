@@ -90,6 +90,7 @@ export function RielNuevo(p: Props) {
             <li key={area} className="w-full">
               <button
                 type="button"
+                data-area={area}
                 onClick={() => p.onArea(area)}
                 aria-current={dentro ? "true" : undefined}
                 className={claseItem(dentro)}
