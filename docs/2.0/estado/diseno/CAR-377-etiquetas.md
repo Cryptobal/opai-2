@@ -1,7 +1,7 @@
 # CAR-377 · Barra angosta del iPad sin palabras cortadas
 
 - **Sesión:** Sesión Hilo
-- **PR:** pendiente · rama `fix/car-377-riel-etiquetas`
+- **PR:** #657 · rama `fix/car-377-riel-etiquetas`
 - **Estado:** En PR
 - **Migración:** No
 - **Apilado sobre / espera:** apilado sobre #632
