@@ -27,7 +27,7 @@ Que crear un vínculo laboral abra una **lista de ingreso** y terminarlo abra un
 **Parte 2 (PR apilado `brief/car-355-corte-acceso`):** terminar el último vínculo deja a la persona inactiva (PIN de terreno sin efecto) y suspende la membresía de su usuario en la misma transacción, salvo un owner (queda informado). La salida y el evento `core.vinculo.terminado` traen `accesos` como prueba. Las llaves del módulo Acceso las corta ese módulo con el evento.
 
 **No entra:**
-- Corte automático de acceso en el mismo acto de terminar (membresía, credencial de terreno, llaves de Acceso), con prueba.
+- Llaves y credenciales del módulo Acceso (las corta ese módulo con `core.vinculo.terminado`).
 - Plantillas por cargo.
 - Editor visual de la plantilla: en v1 se edita como lista JSON validada, en Configuración.
 

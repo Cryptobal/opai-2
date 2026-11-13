@@ -3,6 +3,7 @@
 import { type PointerEvent, useEffect, useState } from "react";
 
 import { AppShell, type AppShellProps } from "../app-shell";
+import { BarraInferiorNueva } from "./barra-inferior";
 import { BotonFijarMenu, BotonPlegarMenu, BotonTema } from "./botones-menu";
 
 /** Ancho del menú lateral completo (`Sidebar`, 248 px) más un margen para no cerrarlo en el borde. */
@@ -13,8 +14,10 @@ export type ShellNuevoProps = AppShellProps & {
   plegadoInicial?: boolean;
   /** La app recuerda la elección (cookie de este navegador). */
   onPlegado?: (plegado: boolean) => void;
-  /** Botón de tema de la barra superior (iPad y escritorio). */
+  /** Botón de tema de la barra superior (iPad y escritorio) y en «Yo» del teléfono. */
   onTema?: () => void;
+  /** Pestaña «Agente» de la barra inferior del teléfono; sin agente no aparece. */
+  onAgente?: () => void;
 };
 
 /**
@@ -25,7 +28,13 @@ export type ShellNuevoProps = AppShellProps & {
  * va por `data-menu` y reglas de `styles.css`, y el componente se importa aparte
  * (`@opai/ds/shell-nuevo`): el shell clásico no carga nada de esto (ADR-037).
  */
-export function ShellNuevo({ plegadoInicial, onPlegado, onTema, ...props }: ShellNuevoProps) {
+export function ShellNuevo({
+  plegadoInicial,
+  onPlegado,
+  onTema,
+  onAgente,
+  ...props
+}: ShellNuevoProps) {
   const [plegado, setPlegado] = useState(plegadoInicial ?? false);
   const [asomado, setAsomado] = useState(false);
   // Los menús y diálogos se pintan en <body>: el atributo en <html> les da la misma piel.
@@ -83,6 +92,7 @@ export function ShellNuevo({ plegadoInicial, onPlegado, onTema, ...props }: Shel
           riel: plegado ? fijar : undefined,
         }}
       />
+      <BarraInferiorNueva {...props} onAgente={onAgente} onTema={onTema} />
     </div>
   );
 }

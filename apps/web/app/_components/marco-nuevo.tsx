@@ -8,6 +8,7 @@ import { ShellNuevo } from "@opai/ds/shell-nuevo";
 import { cookieMenu } from "@/lib/marco";
 
 import { useAcentoEmpresa } from "./acento-empresa";
+import { abrirAgente } from "./agente/abrir-agente";
 import { alternarTema } from "./hilo/marco-cliente";
 import { MarcoShell } from "./marco-shell";
 import type { DatosShell } from "./tipos-shell";
@@ -26,6 +27,8 @@ export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
   // Un solo componente por montaje: `MarcoShell` lo usa como tipo y no debe cambiar entre renders.
   const [Shell] = useState(() => {
     const portal = datos.portal;
+    // La pestaña «Agente» del teléfono abre el mismo panel que el botón de la barra (evento del shell).
+    const conAgente = Boolean(datos.agente);
     return function ShellDelMarco(props: AppShellProps) {
       return (
         <ShellNuevo
@@ -35,6 +38,7 @@ export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
             document.cookie = cookieMenu(plegado);
           }}
           onTema={() => alternarTema(portal)}
+          {...(conAgente ? { onAgente: () => abrirAgente() } : {})}
         />
       );
     };
