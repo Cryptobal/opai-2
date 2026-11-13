@@ -304,6 +304,7 @@ core_plantillas_enviar_prueba
 core_plantillas_get
 core_plantillas_preview
 core_plantillas_update
+core_por_aprobar_list
 core_procesos_persona_listar
 core_procesos_persona_paso_actualizar
 core_puestos_create
