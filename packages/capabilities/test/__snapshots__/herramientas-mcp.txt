@@ -230,6 +230,8 @@ core_grupos_list
 core_grupos_quitar_miembro
 core_grupos_update
 core_hechos_terreno_listar
+core_hilo_actividad
+core_hilo_agenda
 core_ia_probar
 core_importar_catalogo
 core_importar_ejecutar
