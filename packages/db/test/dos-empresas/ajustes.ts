@@ -25,6 +25,9 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.reglas_aprobacion": {
     valores: () => ({ accion: "emitir_dte", aprobador_rol: "gerente", aprobador_grupo_id: null, monto_minimo: null }),
   },
+  // Listas de ingreso y salida (CAR-355): CHECK de tipo y estado.
+  "core.procesos_persona": { fijas: ["tipo"], valores: () => ({ tipo: "ingreso", estado: "abierto" }) },
+  "core.procesos_persona_pasos": { valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }) },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],
