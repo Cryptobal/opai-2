@@ -1453,7 +1453,7 @@ identidad de servicio en main.
 **Adenda del 13-nov-2026 (Carlos, en el chat de la Sesión Caja; registrada en CAR-391).**
 - **No hay saldo de partida.** El flujo es una proyección desde lo que hay hoy en el banco: la suma de las cuentas activas, leída del endpoint de Web4Leads (hoy reenviado por OPAI 1.0) o de los movimientos cargados por cartola (históricos o provisorios, sin duplicar). No se pide un saldo inicial ni una semana desde en Configuración, para Gard ni para ninguna otra empresa.
 - **Sin saldo del banco** (ninguna cuenta activa con saldo), la planilla parte en $0 y avisa «Todavía no hay saldo del banco». La ventana por defecto empieza unas semanas antes de la semana en curso, no en una fecha de ajustes.
-- Las columnas `saldo_inicial` y `desde` de los ajustes quedan en la base y ya no entran en el saldo (sin migración); se retiran en un PR de limpieza.
+- Las columnas `saldo_inicial` y `desde` de los ajustes dejaron de entrar en el saldo (CAR-391) y se retiraron de la base en CAR-394, con autorización de Carlos del 13-nov-2026 y respaldo previo.
 
 ## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
 

@@ -2,11 +2,9 @@ import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
-import { semanaSchema } from "./esquemas";
 import { filaImportSchema, filaDesdeRegistroCsv, MAX_FILAS_IMPORT, parsearCsv } from "./importar-parse";
 import { PERMISO_CONFIGURAR } from "./permisos";
-import { aFecha, ajustesDe, lunesHoy } from "./util";
-import { escribirAjustes } from "./importar-ajustes";
+import { aFecha, lunesHoy } from "./util";
 import { aplicarFilasImportadas, type FilaValida } from "./importar-aplicar";
 
 const resultadoFila = z.object({
@@ -21,13 +19,11 @@ export const flujoImportar = defineCapability({
   id: "finanzas.flujo.importar",
   descripcion:
     "Importa celdas planificadas del flujo desde CSV (columnas seccion, etiqueta, semana, monto, nota, vinculo). " +
-    "Opcionalmente actualiza saldo inicial y semana de partida. XLSX queda pendiente de decisión.",
+    "XLSX queda pendiente de decisión.",
   permiso: PERMISO_CONFIGURAR,
   input: z.object({
     formato: z.enum(["csv"]).default("csv"),
     contenido: z.string().min(1).max(2_000_000),
-    saldoInicial: z.number().int().optional(),
-    desde: semanaSchema.optional(),
   }),
   output: z.object({
     aplicadas: z.number().int(),
@@ -126,11 +122,8 @@ export const flujoImportar = defineCapability({
           omitidas += 1;
         }
       aplicadas = 0;
-    } else if (!dryRun && (aEscribir.length > 0 || input.saldoInicial != null || input.desde)) {
-      const base = await ajustesDe(ctx);
-      const ajustes = escribirAjustes(ctx, base, hoy, input);
-      if (aEscribir.length > 0) await aplicarFilasImportadas(ctx, aEscribir, filasDb, celdas, ajustes);
-      else await ctx.transaccion(ajustes);
+    } else if (!dryRun && aEscribir.length > 0) {
+      await aplicarFilasImportadas(ctx, aEscribir, filasDb, celdas);
     }
     filas.sort((a, b) => a.indice - b.indice);
     if (!dryRun && aplicadas > 0) {
