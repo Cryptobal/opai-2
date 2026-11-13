@@ -8,7 +8,13 @@ const fecha = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato aaaa-mm-dd
 /** Datos editables de un gasto recurrente (CAR-349). */
 export const recurrenteDatos = {
   concepto: z.string().trim().min(2).max(120),
-  monto: montoSchema.refine((v) => v > 0, "El monto debe ser mayor que cero.").describe("CLP entero por cuota."),
+  unidad: z
+    .enum(["clp", "uf", "pct_ventas"])
+    .default("clp")
+    .describe("clp = pesos; uf = UF del día de cada cuota; pct_ventas = % de las ventas netas del mes anterior (retiro de socios)."),
+  monto: montoSchema
+    .refine((v) => v > 0, "El monto debe ser mayor que cero.")
+    .describe("Entero por cuota según la unidad: CLP; UF × 10.000 (12,5 UF = 125000); % × 10.000 (5 % = 50000, tope 1000000)."),
   frecuencia: z.enum(["semanal", "quincenal", "mensual"]),
   diaDelMes: z
     .number()
@@ -38,6 +44,7 @@ type FilaDb = {
   filaId: string;
   concepto: string;
   monto: bigint | number;
+  unidad: string;
   frecuencia: string;
   diaDelMes: number | null;
   inicio: Date;
@@ -56,6 +63,7 @@ export function vistaRecurrente(r: FilaDb): z.infer<typeof recurrenteSchema> {
     filaId: r.filaId,
     concepto: r.concepto,
     monto: aNumeroSeguro(r.monto),
+    unidad: r.unidad as "clp" | "uf" | "pct_ventas",
     frecuencia: r.frecuencia as "semanal" | "quincenal" | "mensual",
     diaDelMes: r.diaDelMes,
     inicio: aIso(r.inicio),
@@ -69,8 +77,12 @@ export function vistaRecurrente(r: FilaDb): z.infer<typeof recurrenteSchema> {
   };
 }
 
-/** Reglas que el modelo no puede expresar en tipos: día solo en mensual y fin posterior al inicio. */
-export function motivoInvalido(d: { frecuencia: string; diaDelMes: number | null; inicio: string; fin: string | null }): string | null {
+/** Tope del porcentaje: 1.000.000 = 100 % de las ventas netas. */
+export const PCT_TOPE = 1_000_000;
+
+/** Reglas que el modelo no puede expresar en tipos: día solo en mensual, fin posterior al inicio y % ≤ 100. */
+export function motivoInvalido(d: { frecuencia: string; diaDelMes: number | null; inicio: string; fin: string | null; unidad: string; monto: number }): string | null {
+  if (d.unidad === "pct_ventas" && d.monto > PCT_TOPE) return "El porcentaje de ventas no puede superar el 100 %.";
   if (d.frecuencia !== "mensual" && d.diaDelMes != null) return "El día del mes solo aplica a la frecuencia mensual.";
   if (d.fin && d.fin < d.inicio) return "La fecha de fin no puede ser anterior al inicio.";
   return null;

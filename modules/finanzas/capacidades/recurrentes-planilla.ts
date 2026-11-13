@@ -6,7 +6,9 @@ import type { z } from "zod";
 
 import type { CeldaFlujo } from "../domain";
 import { estadosPorFila, ocurrenciasDe, type CargoFila, type EstadoOcurrencia, type Frecuencia } from "../domain/recurrentes";
+import { montoCuota, type MontoCuota, type UnidadRecurrente } from "../domain/recurrentes-monto";
 import { cuotasDelFlujo } from "../domain/recurrentes-semana";
+import { baseMonto } from "./recurrentes-base";
 import { aNumeroSeguro, type celdaSchema } from "./esquemas";
 import { aFecha, aIso } from "./util";
 
@@ -49,10 +51,15 @@ export async function celdasRecurrentes(
     select: { movimientoId: true, enlaceId: true, monto: true, movimiento: { select: { fecha: true } } },
   });
   const cargoDe = new Map(conc.map((c) => [c.movimientoId, { fecha: aIso(c.movimiento.fecha), monto: Math.abs(aNumeroSeguro(c.monto)) }] as const));
+  const base = await baseMonto(db, new Set(recurrentes.map((r) => r.unidad)), desde, hasta);
+  const montos = new Map<string, Map<string, MontoCuota>>();
   const cuotas = new Map(
     recurrentes.map((r) => {
       const regla = { frecuencia: r.frecuencia as Frecuencia, diaDelMes: r.diaDelMes, inicio: aIso(r.inicio), fin: r.fin ? aIso(r.fin) : null, repeticiones: r.repeticiones };
-      return [r.id, { id: r.id, fechas: ocurrenciasDe(regla, desde, hasta), monto: aNumeroSeguro(r.monto), ventana: { diasAntes: r.ventanaAntes, diasDespues: r.ventanaDespues } }] as const;
+      const fechas = ocurrenciasDe(regla, desde, hasta);
+      const porFecha = new Map(fechas.map((f) => [f, montoCuota({ unidad: r.unidad as UnidadRecurrente, monto: aNumeroSeguro(r.monto) }, f, base)] as const));
+      montos.set(r.id, porFecha);
+      return [r.id, { id: r.id, fechas, monto: (f: string) => porFecha.get(f)?.monto ?? 0, ventana: { diasAntes: r.ventanaAntes, diasDespues: r.ventanaDespues } }] as const;
     }),
   );
   const estados = new Map<string, EstadoOcurrencia[]>();
@@ -64,10 +71,12 @@ export async function celdasRecurrentes(
   const dominio: CeldaFlujo[] = [];
   const vista: z.infer<typeof celdaSchema>[] = [];
   for (const r of recurrentes) {
-    for (const c of cuotasDelFlujo(estados.get(r.id) ?? [], aNumeroSeguro(r.monto), (id) => cargoDe.get(id), lunes)) {
+    for (const c of cuotasDelFlujo(estados.get(r.id) ?? [], (id) => cargoDe.get(id), lunes)) {
       if (!futuras.includes(c.semana)) continue;
+      const m = montos.get(r.id)?.get(c.fecha);
+      const extra = m?.detalle ? ` · ${m.detalle}` : "";
       dominio.push({ filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto });
-      vista.push({ id: idEstable(`recurrente:${r.id}:${c.fecha}`), filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto, nota: `${r.concepto} · cuota del ${c.fecha} · ${ETIQUETA[c.estado]}` });
+      vista.push({ id: idEstable(`recurrente:${r.id}:${c.fecha}`), filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto, nota: `${r.concepto} · cuota del ${c.fecha} · ${ETIQUETA[c.estado]}${extra}` });
     }
   }
   return { dominio, vista };

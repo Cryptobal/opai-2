@@ -10,7 +10,7 @@ import { aFecha, filaDe, ID_VISTA_PREVIA } from "./util";
 export const recurrentesListar = defineCapability({
   id: "finanzas.recurrentes.listar",
   descripcion:
-    "Lista los gastos recurrentes del flujo de caja (arriendo, honorarios, cuotas de impuestos, provisiones): concepto, monto, frecuencia, día de pago, vigencia y fila del flujo donde se proyectan.",
+    "Lista los gastos recurrentes del flujo de caja (arriendo, honorarios, cuotas de impuestos, provisiones): concepto, monto y su unidad (CLP, UF o % de ventas), frecuencia, día de pago, vigencia y fila del flujo donde se proyectan.",
   permiso: PERMISO_VER,
   input: z.object({ filaId: uuidSchema.optional(), incluirInactivos: z.boolean().default(false) }),
   output: z.array(recurrenteSchema),
@@ -43,6 +43,7 @@ export const recurrentesCrear = defineCapability({
       filaId: fila.id,
       concepto: input.concepto,
       monto: BigInt(input.monto),
+      unidad: input.unidad,
       frecuencia: input.frecuencia,
       diaDelMes: input.frecuencia === "mensual" ? input.diaDelMes : null,
       inicio: aFecha(input.inicio),
@@ -68,6 +69,7 @@ const parcial = z.object({
   id: uuidSchema,
   concepto: recurrenteDatos.concepto.optional(),
   monto: recurrenteDatos.monto.optional(),
+  unidad: recurrenteDatos.unidad.unwrap().optional(),
   diaDelMes: recurrenteDatos.diaDelMes.unwrap().unwrap().nullable().optional(),
   fin: recurrenteDatos.fin.unwrap().unwrap().nullable().optional(),
   repeticiones: recurrenteDatos.repeticiones.unwrap().unwrap().nullable().optional(),
@@ -78,7 +80,7 @@ const parcial = z.object({
 export const recurrentesActualizar = defineCapability({
   id: "finanzas.recurrentes.actualizar",
   descripcion:
-    "Cambia un gasto recurrente del flujo de caja: concepto, monto, día de pago, fin, tope de cuotas, nota o si sigue activo. Como el flujo lo calcula al leer, el cambio se ve de inmediato en todas las cuotas futuras.",
+    "Cambia un gasto recurrente del flujo de caja: concepto, monto o su unidad, día de pago, fin, tope de cuotas, nota o si sigue activo. Como el flujo lo calcula al leer, el cambio se ve de inmediato en todas las cuotas futuras.",
   permiso: PERMISO_CONFIGURAR,
   input: parcial,
   output: recurrenteSchema,
@@ -101,6 +103,7 @@ export const recurrentesActualizar = defineCapability({
         data: {
           concepto: nuevo.concepto,
           monto: BigInt(nuevo.monto),
+          unidad: nuevo.unidad,
           diaDelMes: nuevo.diaDelMes,
           fin: nuevo.fin ? aFecha(nuevo.fin) : null,
           repeticiones: nuevo.repeticiones,
