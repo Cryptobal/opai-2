@@ -80,6 +80,20 @@ describe("reglas de aprobación (CAR-252)", () => {
     ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 
+  it("no deja dos reglas activas con la misma acción y el mismo monto (CAR-253)", async () => {
+    const { ana } = mundo();
+    const igual = { accion: "emitir_dte", montoMinimo: 1_000_000, aprobadorRol: "admin" };
+    expect(await executeCapability(ana, "core.aprobaciones.reglas_guardar", igual)).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE" },
+    });
+    // Cambiar la misma regla sí se puede, y otro monto es otra regla.
+    expect(await executeCapability(ana, "core.aprobaciones.reglas_guardar", { ...igual, id: REGLA })).toMatchObject({ ok: true });
+    expect(
+      await executeCapability(ana, "core.aprobaciones.reglas_guardar", { ...igual, montoMinimo: 5_000_000 }),
+    ).toMatchObject({ ok: true });
+  });
+
   it("una regla desactivada deja de pedir aprobación", async () => {
     const { ana, ceci } = mundo();
     await executeCapability(ana, "core.aprobaciones.reglas_desactivar", { id: REGLA });

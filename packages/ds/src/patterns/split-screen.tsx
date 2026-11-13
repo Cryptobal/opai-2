@@ -33,6 +33,8 @@ type Props = {
 /**
  * Vista dividida (iPad y desktop): lista de 360 px (400 px desde 1280) y detalle. En teléfono la
  * lista y el detalle son pantallas distintas. Sale del contenedor del shell para ocupar el alto.
+ * Con el diseño nuevo (CAR-336), desde 1024 px la lista ocupa todo el ancho mientras no hay detalle
+ * y, con detalle, la ficha toma el 58 % (reglas en `styles.css`, por las marcas `data-*`).
  */
 export function SplitScreen(props: Props) {
   const { lista, detalle, vacio, telefono, anchoXl = 400 } = props;
@@ -40,6 +42,9 @@ export function SplitScreen(props: Props) {
   const uno = props.unPanelHastaLg === true;
   return (
     <div
+      data-split=""
+      {...(detalle ? {} : { "data-sin-detalle": "" })}
+      {...(props.contenido ? { "data-contenido": "" } : {})}
       className={cn(
         "flex min-h-0 flex-1",
         props.contenido
@@ -52,6 +57,7 @@ export function SplitScreen(props: Props) {
       )}
     >
       <section
+        data-columna="lista"
         aria-label={props.etiquetaLista ?? "Lista"}
         className={cn(
           "min-w-0 flex-col",
@@ -66,6 +72,7 @@ export function SplitScreen(props: Props) {
         {lista}
       </section>
       <section
+        data-columna="detalle"
         aria-label={props.etiquetaDetalle ?? "Detalle"}
         className={cn(
           "min-w-0 flex-1 flex-col",
