@@ -68,6 +68,9 @@ export const salidaTablero = z.object({
       .object({ cantidad: z.number().int(), ponderadoClp: clp })
       .describe("Abiertos sin fecha de cierre estimada, vencida o posterior a los meses mostrados."),
   }),
+  parcial: z
+    .boolean()
+    .describe("true si alguna fuente llegó al tope de filas que el reporte suma: las cifras pueden quedar cortas."),
   responsables: z.array(
     z.object({
       responsableId: z.string().nullable(),
