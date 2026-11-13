@@ -226,6 +226,8 @@ decisiones atribuidas a Carlos.
 
 **Adenda CAR-350 (13-nov-2026, Sesión Núcleo, modo noche; Estándares P-1).** Los roles base **gerente** y **lector** dejan de definirse por «todo menos…» (`*` con 40 denegaciones; `*:read`/`*:*.read`) y pasan a **lista explícita**: cada permiso del catálogo (núcleo en `permisos-base-nucleo.ts`, módulos en `permisos-base-modulos.ts`) lleva su clase (`GL`, `G`, `L` o `-`). Un permiso nuevo no lo recibe ninguno de los dos hasta que alguien lo clasifica en el mismo PR, y `apps/web/test/permisos-base.test.ts` falla si un permiso del catálogo real no está clasificado o si la clasificación nombra uno que ya no existe. La matriz no cambió: la misma prueba compara, permiso por permiso, contra los patrones anteriores. Owner, admin y supervisor siguen con sus patrones (supervisor conserva `ops:*`, `rondas:*`, `pauta:*` y `tickets:*`; pasarlo a lista es un pendiente aparte). Sin migración.
 
+**Adenda CAR-387 (13-nov-2026, Sesión Núcleo; Estándares P-1b).** El rol **supervisor** también pasa a lista explícita: la clase de cada permiso suma la letra `S` (`GLS`, `GS`, `LS`, `S`…), y se eliminan sus comodines `ops:*`, `rondas:*`, `pauta:*` y `tickets:*` junto con sus denegaciones. Un permiso nuevo de esos módulos no lo recibe el supervisor hasta que se clasifica en el mismo PR. La matriz no cambió: `apps/web/test/permisos-base.test.ts` la compara, permiso por permiso, contra los patrones anteriores (32 permisos). Owner y admin siguen con `*`. Sin migración.
+
 ---
 
 ## ADR-017 · Calidad visual: primitivas accesibles, pulido y lint del DS

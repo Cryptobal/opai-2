@@ -2,17 +2,21 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Sheet } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Select, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { NegocioDetalle } from "../datos";
 import { CamposNegocio, camposAInput, type DatosNegocio } from "./campos-negocio";
-import type { ConfigComercial } from "./tipos";
+import type { ConfigComercial, Responsable } from "./tipos";
 import { useHojaNegocio } from "./use-hoja";
 
-/** Editar un negocio: los campos de `comercial.negocios.update`; el monto no se edita con cotización. */
-export function HojaEditar({ n, config }: { n: NegocioDetalle; config: ConfigComercial }) {
+/**
+ * Editar un negocio: los campos de `comercial.negocios.update`; el monto no se edita con cotización.
+ * El responsable se elige entre las personas del ERP (CAR-27); si no hay lista, no se muestra.
+ */
+export function HojaEditar(p: { n: NegocioDetalle; config: ConfigComercial; responsables: Responsable[] }) {
+  const { n, config } = p;
   const hoja = useHojaNegocio("editar");
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const bloqueado = n.valorMensual != null;
@@ -25,6 +29,7 @@ export function HojaEditar({ n, config }: { n: NegocioDetalle; config: ConfigCom
     monto: String(n.valorMensual ?? n.montoEstimadoMensual ?? ""),
     probabilidad: String(n.probabilidad),
   });
+  const [responsable, setResponsable] = useState(n.responsableId ?? "");
   const set = <K extends keyof DatosNegocio>(k: K, v: DatosNegocio[K]) =>
     setD((x) => ({ ...x, [k]: v }));
   async function guardar() {
@@ -32,6 +37,7 @@ export function HojaEditar({ n, config }: { n: NegocioDetalle; config: ConfigCom
       id: n.id,
       ...camposAInput(d, !bloqueado),
       inicioServicioEstimado: d.inicioServicioEstimado || null,
+      ...(responsable && responsable !== n.responsableId ? { responsableId: responsable } : {}),
     });
     if (!r) return;
     avisar.exito("Negocio actualizado");
@@ -58,6 +64,17 @@ export function HojaEditar({ n, config }: { n: NegocioDetalle; config: ConfigCom
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
         <CamposNegocio d={d} set={set} config={config} editar={{ montoBloqueado: bloqueado }} />
+        {p.responsables.length ? (
+          <Campo etiqueta="Responsable" htmlFor="neg-responsable" ayuda="Recibe las tareas y avisos de este negocio.">
+            <Select
+              id="neg-responsable"
+              valor={responsable || undefined}
+              onCambiar={setResponsable}
+              placeholder="Sin responsable"
+              opciones={p.responsables.map((r) => ({ valor: r.id, etiqueta: r.nombre }))}
+            />
+          </Campo>
+        ) : null}
       </div>
     </Sheet>
   );

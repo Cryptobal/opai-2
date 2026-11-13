@@ -5,7 +5,13 @@ import { aNumeroSeguro } from "../esquemas";
 import { aFecha, aIso, hoyIso } from "../util";
 import { saldoDelBanco } from "./saldo-banco";
 
-export type SaldoDeCuenta = { saldoHoy: number; saldoDesde: string };
+export type SaldoDeCuenta = {
+  saldoHoy: number;
+  saldoDesde: string;
+  saldoFuente: "banco" | "movimiento" | "cartola" | null;
+  /** Movimientos posteriores a `saldoDesde` que se sumaron para llegar a hoy. */
+  movimientosDespues: number;
+};
 
 /**
  * Saldo de hoy de cada cuenta activa (CAR-341): su último saldo conocido (banco en línea, último movimiento con
@@ -32,7 +38,13 @@ export async function saldosDeCuentas(db: TenantTx): Promise<Map<string, SaldoDe
     porCuenta.set(f.cuentaId, lista);
   }
   for (const c of cuentasConSaldo) {
-    out.set(c.cuentaId, { saldoHoy: saldoAlCierre(c, porCuenta.get(c.cuentaId) ?? [], hoy), saldoDesde: c.fecha });
+    const despues = porCuenta.get(c.cuentaId) ?? [];
+    out.set(c.cuentaId, {
+      saldoHoy: saldoAlCierre(c, despues, hoy),
+      saldoDesde: c.fecha,
+      saldoFuente: c.fuente ?? null,
+      movimientosDespues: despues.length,
+    });
   }
   return out;
 }
