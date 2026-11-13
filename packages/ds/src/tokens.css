@@ -226,6 +226,8 @@
    @opai/domain/marca-acento, que ajusta el color de cada empresa sobre ellos (lo mide tokens.test.ts). */
 [data-marco="nuevo"] {
   --ds-bg: #ffffff;
+  /* Fondo del menú lateral y del riel (D2c): un gris apenas más oscuro que la página. */
+  --ds-side: #fafafa;
   --ds-surface: #ffffff;
   --ds-surface-raised: #ffffff;
   --ds-fill: #f2f2f2;
@@ -269,6 +271,7 @@
   :root:not([data-theme="light"])[data-marco="nuevo"],
   :root:not([data-theme="light"]) [data-marco="nuevo"] {
     --ds-bg: #000000;
+    --ds-side: #0a0a0a;
     --ds-surface: #0a0a0a;
     --ds-surface-raised: #111111;
     --ds-fill: #1f1f1f;
@@ -305,6 +308,7 @@
 :root[data-theme="dark"][data-marco="nuevo"],
 :root[data-theme="dark"] [data-marco="nuevo"] {
   --ds-bg: #000000;
+  --ds-side: #0a0a0a;
   --ds-surface: #0a0a0a;
   --ds-surface-raised: #111111;
   --ds-fill: #1f1f1f;

@@ -38,6 +38,23 @@ describe("shell del diseño nuevo (CAR-335 D2b)", () => {
   });
 });
 
+describe("barra inferior del teléfono (CAR-335 D2c)", () => {
+  const conUsuario = {
+    usuario: { nombre: "QA E2E" },
+    menuUsuario: [{ id: "salir", etiqueta: "Cerrar sesión", onSelect: () => undefined }],
+  };
+  it("trae Inicio, Menú y Yo, y se distingue de la barra clásica", () => {
+    const h = html(conUsuario);
+    for (const texto of [">Inicio<", ">Menú<", ">Yo<"]) expect(h).toContain(texto);
+    expect(h).toContain('data-shell="inferior-nuevo"');
+  });
+
+  it("la pestaña Agente aparece solo si hay agente", () => {
+    expect(html({ ...conUsuario, onAgente: () => undefined })).toContain(">Agente<");
+    expect(html(conUsuario)).not.toContain(">Agente<");
+  });
+});
+
 describe("área plegada del menú", () => {
   it("sin relleno: nada del contenido asoma bajo el encabezado", () => {
     const plegada = renderToStaticMarkup(

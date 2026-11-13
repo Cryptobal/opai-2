@@ -46,7 +46,8 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   }
   // Prueba vencida sin «pasa a cobro» (ADR-071): el módulo se ve y se lee, pero no se crea ni se
   // cambia nada. Rige igual para pantalla, `/api/v1` y MCP (todas pasan por aquí) y no borra datos.
-  if (c.efecto !== "lectura" && ctx.modulosSoloLectura.includes(c.modulo)) {
+  // Lo entrante (webhooks, correo) se registra igual, sin disparar acciones (ADR-071, adenda 7.5).
+  if (c.efecto !== "lectura" && !c.entrante && ctx.modulosSoloLectura.includes(c.modulo)) {
     return falla(
       "FORBIDDEN",
       `El módulo "${c.modulo}" está en solo lectura: puedes ver tus datos, pero no crear ni cambiar nada. Pide a OPAI activarlo.`,
@@ -101,4 +102,13 @@ export function denegar(ctx: Contexto, c: Capacidad): Falla | null {
   return tienePermisoDeCapacidad(ctx, c)
     ? null
     : falla("FORBIDDEN", "Sin permiso para esta capacidad.");
+}
+
+/**
+ * Lo entrante con el módulo en solo lectura (ADR-071, adenda 7.5): se registra, pero sin eventos no
+ * dispara acciones del módulo (consumidores, avisos).
+ */
+export function contextoEntrante(ctx: Contexto, c: Capacidad): Contexto {
+  if (!c.entrante || !ctx.modulosSoloLectura.includes(c.modulo)) return ctx;
+  return { ...ctx, eventos: { emitir: async () => crypto.randomUUID() } };
 }
