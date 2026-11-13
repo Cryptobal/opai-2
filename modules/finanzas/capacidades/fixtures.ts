@@ -44,9 +44,7 @@ export function semilla() {
       {
         id: "0192f3a0-0000-7000-8000-000000000199",
         tenantId: TENANT_DE_PRUEBA,
-        saldoInicial: 100,
         umbral: 500,
-        desde: f(S0),
         horizonteSemanas: 12,
         calendarioPagos: {},
         avisoActivo: false,

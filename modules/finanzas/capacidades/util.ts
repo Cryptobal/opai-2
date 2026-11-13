@@ -25,9 +25,7 @@ export const aIso = (d: Date | string): string =>
 export const aFecha = (iso: string): Date => new Date(`${iso}T00:00:00Z`);
 
 type AjustesDb = {
-  saldoInicial: bigint | number;
   umbral: bigint | number;
-  desde: Date;
   horizonteSemanas: number;
   calendarioPagos: unknown;
   avisoActivo: boolean;
@@ -42,9 +40,7 @@ const calendarioDefecto = () => ({});
 export function vistaAjustes(a: AjustesDb) {
   const cal = (a.calendarioPagos ?? {}) as Record<string, number | undefined>;
   return {
-    saldoInicial: aNumeroSeguro(a.saldoInicial),
     umbral: aNumeroSeguro(a.umbral),
-    desde: aIso(a.desde),
     horizonteSemanas: a.horizonteSemanas,
     calendarioPagos: {
       ...(cal.remuneraciones != null ? { remuneraciones: cal.remuneraciones } : {}),
@@ -60,14 +56,12 @@ export function vistaAjustes(a: AjustesDb) {
   };
 }
 
-/** Ajustes del tenant; si aún no hay, los de partida (saldo 0, umbral de saldo bajo por defecto, desde la semana actual). */
+/** Ajustes del tenant; si aún no hay, los de partida (umbral de saldo bajo por defecto). */
 export async function ajustesDe(ctx: Contexto) {
   const a = await ctx.db.flujoAjustes.findFirst({});
   if (a) return vistaAjustes(a);
   return vistaAjustes({
-    saldoInicial: 0,
     umbral: UMBRAL_SALDO_BAJO_DEFECTO,
-    desde: aFecha(lunesHoy()),
     horizonteSemanas: 12,
     calendarioPagos: calendarioDefecto(),
     avisoActivo: true,

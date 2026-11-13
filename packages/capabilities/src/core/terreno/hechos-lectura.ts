@@ -70,8 +70,11 @@ export const hechosListar = defineCapability({
     instalacionId: uuidSchema,
     tipo: z.string().min(1).max(80).optional(),
     limite: z.number().int().min(1).max(200).default(50),
+    // CAR-353: contrato único de listas.
+    cursor: z.uuid().optional().describe("Valor de «siguiente» de la página anterior."),
   }),
   output: z.object({
+    siguiente: z.string().nullable(),
     items: z.array(
       z.object({
         id: z.string(),
@@ -88,7 +91,7 @@ export const hechosListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (salida) => salida.items.map((h) => h.id),
-  async handler(ctx, { instalacionId, tipo, limite }) {
+  async handler(ctx, { instalacionId, tipo, limite, cursor }) {
     const i = await ctx.db.instalacion.findFirst({
       where: { id: instalacionId, ...dondeInstalacion(ctx) },
       select: { id: true },
@@ -96,11 +99,14 @@ export const hechosListar = defineCapability({
     if (!i) throw noEncontrado("La instalación");
     const filas = await ctx.db.hechoTerreno.findMany({
       where: { instalacionId, ...(tipo ? { tipo } : {}) },
-      orderBy: { horaCorregida: "desc" },
-      take: limite,
+      orderBy: [{ horaCorregida: "desc" }, { id: "desc" }],
+      take: limite + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
+    const pagina = filas.slice(0, limite);
     return {
-      items: filas.map((h) => ({
+      siguiente: filas.length > limite ? (pagina.at(-1)?.id ?? null) : null,
+      items: pagina.map((h) => ({
         id: h.id,
         tipo: h.tipo,
         dispositivoId: h.dispositivoId,

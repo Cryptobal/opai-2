@@ -26,7 +26,7 @@ export function esLista(id: string, output: z.ZodType): boolean {
   const segmento = id.split(".").at(-1) ?? "";
   return (
     desenvolver(output) instanceof z.ZodArray ||
-    "items" in campos(output) ||
+    (!/^(get|obtener)($|_)/.test(segmento) && "items" in campos(output)) ||
     /(^|_)(list|listar)($|_)/.test(segmento)
   );
 }
