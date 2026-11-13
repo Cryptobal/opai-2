@@ -2,7 +2,7 @@
 
 import { type FormEvent, type ReactNode, lazy, Suspense, useState } from "react";
 
-import { avisar, Button, Campo, Input, Skeleton, type SwitchProps } from "@opai/ds";
+import { avisar, Button, Campo, SelectorHora, Skeleton, type SwitchProps } from "@opai/ds";
 import { CATEGORIAS_AVISO, type CategoriaAviso } from "@opai/domain";
 
 import { FormScreenListo } from "@opai/ds/form-screen-listo";
@@ -103,20 +103,10 @@ export function FormularioAvisos({
               {conSilencio ? (
                 <div className="grid grid-cols-2 gap-3">
                   <Campo etiqueta="Desde" htmlFor="silencio-desde">
-                    <Input
-                      id="silencio-desde"
-                      type="time"
-                      value={desde}
-                      onChange={(e) => setDesde(e.target.value)}
-                    />
+                    <SelectorHora id="silencio-desde" valor={desde} onCambiar={setDesde} />
                   </Campo>
                   <Campo etiqueta="Hasta" htmlFor="silencio-hasta">
-                    <Input
-                      id="silencio-hasta"
-                      type="time"
-                      value={hasta}
-                      onChange={(e) => setHasta(e.target.value)}
-                    />
+                    <SelectorHora id="silencio-hasta" valor={hasta} onCambiar={setHasta} />
                   </Campo>
                 </div>
               ) : null}
