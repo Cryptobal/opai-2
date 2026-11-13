@@ -30,6 +30,7 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "/finanzas/bancos",
       "/finanzas/flujo",
     ]);
+<<<<<<< HEAD
     expect(manifest.eventos).toHaveLength(55);
     expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(55);
     expect(manifest.configuracion).toBe(ajustesFinanzas);
@@ -39,5 +40,16 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
     const ids = manifest.capacidades.map((c) => c.id);
     expect(ids).toHaveLength(95);
     expect(new Set(ids).size).toBe(95);
+=======
+    expect(manifest.eventos).toHaveLength(54);
+    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(54);
+    expect(manifest.configuracion).toBe(ajustesFinanzas);
+  });
+
+  it("tiene 94 capacidades con ids únicos", () => {
+    const ids = manifest.capacidades.map((c) => c.id);
+    expect(ids).toHaveLength(94);
+    expect(new Set(ids).size).toBe(94);
+>>>>>>> origin/main
   });
 });

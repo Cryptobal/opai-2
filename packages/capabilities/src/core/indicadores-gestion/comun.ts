@@ -3,6 +3,7 @@ import { moduloDeIndicador, type IndicadorGestion } from "../../indicadores-gest
 import { listarModulos } from "../../module";
 import type { Contexto } from "../../types";
 import { indicadorDocumentosAlDia } from "./documentos-al-dia";
+import { indicadorRespuestaEscalados } from "./respuesta-escalados";
 import { indicadorRetencion90 } from "./retencion-90";
 import { indicadorTareasATiempo } from "./tareas-a-tiempo";
 
@@ -11,6 +12,7 @@ export const indicadoresDelNucleo: readonly IndicadorGestion[] = [
   indicadorTareasATiempo,
   indicadorDocumentosAlDia,
   indicadorRetencion90,
+  indicadorRespuestaEscalados,
 ];
 
 /** Todos los indicadores declarados: núcleo más los manifiestos registrados. */

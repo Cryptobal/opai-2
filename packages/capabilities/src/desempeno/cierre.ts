@@ -9,6 +9,7 @@ import { conflicto, ErrorCapacidad, prohibido, reglaDeNegocio } from "../errores
 import { defineTrabajo } from "../trabajos/registro";
 import type { Contexto } from "../types";
 import { DIA_CIERRE_DEFECTO } from "./ajustes";
+import { avisoActivo, emitirBajoMeta } from "./avisos";
 import { calcularCierre, filaParaGuardar } from "./cierre-calculo";
 import { estaCerrado } from "./cierre-lectura";
 import { mesesDe, PERMISOS_DESEMPENO } from "./comun";
@@ -38,6 +39,8 @@ export async function cerrarPeriodo(
   const filas = await calcularCierre(ctx, periodo, meses.zona);
   const salida = { periodo, personas: filas.length, cargos: new Set(filas.map((f) => f.cargoId)).size };
   if (dryRun) return salida;
+  // El ajuste se lee antes de la transacción: adentro solo se usa `tx`.
+  const avisar = await avisoActivo(ctx);
   const cerradoPor = origen === "manual" && ctx.actor.tipo === "user" ? ctx.actor.id : null;
   await ctx.transaccion(async (tx) => {
     await sinDuplicado(
@@ -67,6 +70,7 @@ export async function cerrarPeriodo(
       entidadTipo: "periodo_desempeno",
       payload: { ...salida, origen },
     });
+    if (avisar) await emitirBajoMeta(ctx, tx, periodo, filas);
   });
   return salida;
 }
