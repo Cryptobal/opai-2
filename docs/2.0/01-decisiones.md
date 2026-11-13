@@ -2041,3 +2041,19 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 - El color por empresa usa el perfil de marca del núcleo (ADR-028); no se agregan colores fijos de Gard.
 - `DISENO.md` §3c lo deja como regla.
 
+
+## ADR-110 · El ingreso y la salida de una persona son listas de pasos con responsable (CAR-355, 12-nov-2026)
+
+**Decidió:** la sesión dueña de Personas y Documentos, con la autonomía que Carlos le dio para esos módulos (11-nov-2026), sobre la brecha H-1 de la Sesión Estándares (referente: Rippling) · **Registra:** Claude.
+
+**Decisión.**
+- Crear un vínculo abre una lista de ingreso y terminar el último vínculo vigente abre una de salida, una de cada tipo por vínculo.
+- Cada paso es una fila propia (`core.procesos_persona_pasos`) con responsable, plazo y estado. Su bandeja es una tarea del núcleo (`core.actividades`), con el mismo patrón paso → tarea que el seguimiento comercial (CAR-160).
+- No se abre lista en contratos importados ni cuando hay continuidad (traslado o recontratación al día siguiente).
+- La plantilla es configurable por empresa y, si está vacía, se usa la de la vertical.
+
+**Por qué no extender Actividades con «persona».** La visibilidad de Actividades es comercial (cuentas, contactos, negocios, instalaciones; ADR-022). Mezclar datos laborales ahí abriría la ficha de una persona a quien solo tiene alcance comercial. La tarea solo lleva el nombre, y lo pierde al anonimizar (Ley 21.719).
+
+**Consecuencias.**
+- El corte automático de acceso al terminar (membresía, credencial de terreno, llaves) queda para la parte 2 de CAR-355.
+- La plantilla se edita como lista JSON hasta que haya diseño de editor (diseño nuevo, ADR-109).
