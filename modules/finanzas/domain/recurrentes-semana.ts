@@ -11,7 +11,6 @@ export type CuotaFlujo = { fecha: string; semana: string; monto: number; estado:
  */
 export function cuotasDelFlujo(
   estados: readonly EstadoOcurrencia[],
-  monto: number,
   cargoDe: (id: string) => { fecha: string; monto: number } | undefined,
   lunesActual: string,
 ): CuotaFlujo[] {

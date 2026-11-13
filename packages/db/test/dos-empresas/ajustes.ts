@@ -21,6 +21,9 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Listas de ingreso y salida (CAR-355): CHECK de tipo y estado.
+  "core.procesos_persona": { fijas: ["tipo"], valores: () => ({ tipo: "ingreso", estado: "abierto" }) },
+  "core.procesos_persona_pasos": { valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }) },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],
@@ -421,6 +424,16 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.slack_instalaciones": {
     fijas: ["team_id"],
     valores: (ctx) => ({ team_id: `T${ctx.tenant.replace(/-/g, "").toUpperCase()}` }),
+  },
+  // Slack F2 (CAR-292): (tenant_id, user_id) → memberships; «vinculado» exige un id de Slack (CHECK).
+  "core.slack_usuarios": {
+    dependencias: ["core.memberships"],
+    fijas: ["user_id", "estado", "slack_user_id"],
+    valores: (ctx) => ({
+      user_id: ctx.usuario,
+      estado: "vinculado",
+      slack_user_id: `U${ctx.tenant.replace(/-/g, "").toUpperCase()}`,
+    }),
   },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },

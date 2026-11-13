@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 756 pares pantalla→capacidad · 678 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 761 pares pantalla→capacidad · 682 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -176,9 +176,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.config.get` | `comercial_config_get` | existe |
+| compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
+| compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
@@ -260,6 +262,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.configurar` | `core_slack_configurar` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.desconectar` | — | excepción |
 | compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.iniciar_conexion` | — | excepción |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.vincular_usuarios` | `core_slack_vincular_usuarios` | existe |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.permisos.catalogo` | `core_permisos_catalogo` | existe |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.roles.list` | `core_roles_list` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `comercial.contactos.list` | `comercial_contactos_list` | existe |
@@ -530,6 +533,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.procesos_persona.listar` | `core_procesos_persona_listar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.puestos.list` | `core_puestos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.create` | `core_vinculos_create` | existe |
@@ -572,8 +576,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.cambiar_estado` | `tickets_tickets_cambiar_estado` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.comentar` | `tickets_tickets_comentar` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.rechazar` | `tickets_tickets_rechazar` | existe |
-| compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.ajustes.set` | `platform_ajustes_set` | existe |
-| compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.precios.set` | `platform_precios_set` | existe |
+| compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.ajustes.guardar_lote` | `platform_ajustes_guardar_lote` | existe |
 | compartido | `app/(platform)/platform/catalogo/_componentes` | `platform.catalogo.precio_set` | `platform_catalogo_precio_set` | existe |
 | compartido | `app/(platform)/platform/facturacion/_componentes` | `platform.cobros.cargos_generar` | `platform_cobros_cargos_generar` | existe |
 | compartido | `app/(platform)/platform/indicadores/_componentes` | `platform.indicadores.resolver` | — | excepción |
@@ -643,6 +646,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.list` | `core_integraciones_list` | existe |
 | erp | `/configuracion/integraciones/slack` | `core.grupos.list` | `core_grupos_list` | existe |
 | erp | `/configuracion/integraciones/slack` | `core.slack.estado` | `core_slack_estado` | existe |
+| erp | `/configuracion/integraciones/slack` | `core.slack.usuarios` | `core_slack_usuarios` | existe |
 | erp | `/configuracion/integraciones` | `core.integraciones.list` | `core_integraciones_list` | existe |
 | erp | `/configuracion/marca` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/marca` | `core.marca.get` | `core_marca_get` | existe |
@@ -726,6 +730,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
 | platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
+| platform | `/platform/ajustes` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/catalogo` | `platform.catalogo.list` | `platform_catalogo_list` | existe |
 | platform | `/platform/consumos` | `platform.consumos.summary` | `platform_consumos_summary` | existe |
 | platform | `/platform/facturacion` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
@@ -960,7 +965,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.rostro.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
-| `comercial.importar_1_0` | sin pantalla todavía · CAR-325 · desde 2026-11-12 | no | reservada a personas |
+| `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
 | `core.anexos.rechazar` | `app/_components` | no | reservada a personas |
 | `core.apikeys.create` | `/configuracion/agentes` | no | reservada a personas |
@@ -1082,6 +1087,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.asignar_jefe`
 - `core.personas.list_a_cargo`
 - `core.ping`
+- `core.procesos_persona.paso_actualizar`
 - `core.puestos.get`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`
@@ -1126,10 +1132,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
+- `pauta.informes.instalaciones`
+- `platform.ajustes.set`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`
 - `platform.eventos.list`
+- `platform.precios.set`
 - `platform.tenants.update`
 - `platform.trabajos.cancelar`
 - `platform.trabajos.reintentar`

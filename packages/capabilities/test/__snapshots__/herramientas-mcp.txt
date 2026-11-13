@@ -303,6 +303,8 @@ core_plantillas_enviar_prueba
 core_plantillas_get
 core_plantillas_preview
 core_plantillas_update
+core_procesos_persona_listar
+core_procesos_persona_paso_actualizar
 core_puestos_create
 core_puestos_get
 core_puestos_list
@@ -315,6 +317,8 @@ core_roles_list
 core_slack_canales
 core_slack_configurar
 core_slack_estado
+core_slack_usuarios
+core_slack_vincular_usuarios
 core_supervisores_asignar
 core_supervisores_de_instalacion
 core_supervisores_list
@@ -540,6 +544,7 @@ pauta_excepciones_anular
 pauta_excepciones_crear
 pauta_exportar
 pauta_historial_listar
+pauta_informes_instalaciones
 pauta_marca_registrar
 pauta_mes_leer
 pauta_ppc_listar
@@ -718,10 +723,12 @@ preview_core_personas_update
 preview_core_personas_vincular_usuario
 preview_core_plantillas_enviar_prueba
 preview_core_plantillas_update
+preview_core_procesos_persona_paso_actualizar
 preview_core_puestos_create
 preview_core_puestos_set_estado
 preview_core_puestos_update
 preview_core_slack_configurar
+preview_core_slack_vincular_usuarios
 preview_core_supervisores_asignar
 preview_core_supervisores_quitar
 preview_core_tenant_update

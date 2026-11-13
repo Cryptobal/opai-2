@@ -1,5 +1,6 @@
 platform_admins_invite
 platform_ajustes_get
+platform_ajustes_guardar_lote
 platform_ajustes_set
 platform_auditoria_estado
 platform_auditoria_list
@@ -36,6 +37,7 @@ platform_usage_summary
 platform_users_list
 platform_users_set_role
 preview_platform_admins_invite
+preview_platform_ajustes_guardar_lote
 preview_platform_ajustes_set
 preview_platform_catalogo_precio_set
 preview_platform_cobros_cargo_anular

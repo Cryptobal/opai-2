@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { manifest } from "../../../modules/asistencia/manifest";
+import { manifest as pauta } from "../../../modules/pauta/manifest";
 import { prepararEntorno, type Entorno, urlPropietario } from "../../db/test/entorno";
 import * as mod from "../src";
 import { dato } from "./maestros-ayuda";
@@ -27,7 +28,7 @@ describe.skipIf(!urlPropietario)("indicadores de Asistencia contra Postgres real
       usuario: { id: usuaria, nombre: "Rrhh", email: `r-${sufijo}@prueba.cl`, platformRole: null },
       portal: "erp",
       portalesMembresia: ["erp"],
-      modulosActivos: ["asistencia"],
+      modulosActivos: ["asistencia", "pauta"],
     });
 
   beforeAll(async () => {
@@ -35,7 +36,7 @@ describe.skipIf(!urlPropietario)("indicadores de Asistencia contra Postgres real
     mod.limpiarRegistro();
     mod.limpiarModulos();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo]);
-    mod.registrarModulos([manifest]);
+    mod.registrarModulos([manifest, pauta]);
     const empresa = (slug: string) =>
       e.admin.tenant
         .create({ data: { slug, nombre: slug, vertical: "seguridad", timezone: "America/Santiago" } })
@@ -147,5 +148,15 @@ describe.skipIf(!urlPropietario)("indicadores de Asistencia contra Postgres real
     expect([de(ausentismo, "ines"), de(ausentismo, "jose")]).toEqual([42.9, 50]);
     const enB = await dato<Salida>(ctx(b), MEDIR, { indicador: "asistencia.ausentismo", periodo: "2026-10" });
     expect(enB.mediciones).toEqual([expect.objectContaining({ sujetoId: persona.berta, valor: 100 })]);
+  });
+
+  it("informe por instalación: ausentismo y atrasos de la instalación, sin otras empresas", async () => {
+    type Informe = { conAsistencia: boolean; instalaciones: { instalacion: string; ausentismo: number | null; atrasos: number | null; diasConTurno: number }[] };
+    const r = await dato<Informe>(ctx(a), "pauta.informes.instalaciones", { anio: 2026, mes: 10, orden: "ausentismo" });
+    expect(r.conAsistencia).toBe(true);
+    // Inés 3 en contra de 7 y José 1 de 2: 4 de 9. Entradas: 5, una fuera de la tolerancia (el 3).
+    expect(r.instalaciones).toEqual([expect.objectContaining({ instalacion: "Planta", diasConTurno: 9, ausentismo: 44.4, atrasos: 20 })]);
+    const enB = await dato<Informe>(ctx(b), "pauta.informes.instalaciones", { anio: 2026, mes: 10 });
+    expect(enB.instalaciones).toEqual([]);
   });
 });
