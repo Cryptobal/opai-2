@@ -23,7 +23,7 @@ type Punto = { semana: string; saldo: number };
 export type Resumen = {
   escenario: { atrasoCobrosSemanas: number };
   umbral: number;
-  fuenteSaldo: "banco" | "ajustes";
+  fuenteSaldo: "banco" | "sin_banco";
   periodos: { clave: string; desde: string; hasta: string; semanas: number; ingresos: number; egresos: number; neto: number; saldoInicial: number; saldoFinal: number; tono: "peligro" | "alerta" | null }[];
   indicadores: {
     primerQuiebre: (Punto & { faltaParaUmbral: number }) | null;

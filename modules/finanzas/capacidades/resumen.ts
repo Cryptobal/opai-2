@@ -42,7 +42,7 @@ export const planillaResumen = defineCapability({
   output: z.object({
     escenario: z.object({ atrasoCobrosSemanas: z.number().int() }),
     umbral: saldoSchema,
-    fuenteSaldo: z.enum(["banco", "ajustes"]).describe("Si el saldo parte del banco o, sin saldo de banco, del saldo inicial de los ajustes."),
+    fuenteSaldo: z.enum(["banco", "sin_banco"]).describe("Si el saldo parte del banco de hoy o, sin saldo de ninguna cuenta, de $0 (no hay saldo de partida, CAR-391)."),
     periodos: z.array(periodoSchema),
     indicadores: z.object({
       primerQuiebre: puntoSchema.extend({ faltaParaUmbral: saldoSchema }).nullable(),

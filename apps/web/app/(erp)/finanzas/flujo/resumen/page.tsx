@@ -48,7 +48,7 @@ export default function ResumenFlujo({ searchParams }: { searchParams: SearchPar
             <DashboardScreen
               state={r ? (r.periodos.length ? "ready" : "empty") : d.state === "ready" ? "error" : d.state}
               titulo="Resumen del flujo"
-              subtitulo={r?.fuenteSaldo === "ajustes" ? "Parte del saldo inicial de los ajustes: ninguna cuenta del banco tiene saldo." : "Desde el saldo del banco de hoy."}
+              subtitulo={r?.fuenteSaldo === "sin_banco" ? "Parte en $0: todavía no hay saldo de ningún banco." : "Desde el saldo del banco de hoy."}
               kpis={r ? kpis(r) : []}
               textos={{ vacio: { titulo: "Sin semanas para resumir", descripcion: "Revisa el horizonte en los ajustes del flujo.", accion: <EnlaceBoton href="/finanzas/flujo" variante="secondary">Ir al flujo</EnlaceBoton> } }}
             >
