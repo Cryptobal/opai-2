@@ -11,8 +11,6 @@ import { exigirPermisosElegidos, exigirScopeAmplio, vencimientoConPolitica } fro
 import { expiracionDeKey, SCOPE_PLATAFORMA, validarScopes } from "./apikey-scopes";
 export { apikeysRevoke } from "./apikey-revoke";
 export { apikeysList } from "./apikey-list";
-
-import { keySchema } from "./apikey-schema";
 export { keySchema } from "./apikey-schema";
 
 export const apikeysCreate = defineCapability({
