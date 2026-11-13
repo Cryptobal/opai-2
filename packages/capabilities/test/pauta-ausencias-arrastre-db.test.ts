@@ -44,14 +44,22 @@ describe.skipIf(!urlPropietario)("Pauta · ausencias y cambios de titular (Postg
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesPauta]);
     tenant = (
       await e.admin.tenant.create({
-        data: { slug: `qa-arrastre-${randomUUID().slice(0, 8)}`, nombre: "QA", vertical: "seguridad" },
+        data: {
+          slug: `qa-arrastre-${randomUUID().slice(0, 8)}`,
+          nombre: "QA",
+          vertical: "seguridad",
+        },
       })
     ).id;
-    const cuenta = (await e.admin.cuenta.create({ data: { tenantId: tenant, nombre: "Cuenta" } })).id;
+    const cuenta = (await e.admin.cuenta.create({ data: { tenantId: tenant, nombre: "Cuenta" } }))
+      .id;
     const inst = (
-      await e.admin.instalacion.create({ data: { tenantId: tenant, cuentaId: cuenta, nombre: "Planta" } })
+      await e.admin.instalacion.create({
+        data: { tenantId: tenant, cuentaId: cuenta, nombre: "Planta" },
+      })
     ).id;
-    const cargo = (await e.admin.cargo.create({ data: { tenantId: tenant, nombre: "Guardia" } })).id;
+    const cargo = (await e.admin.cargo.create({ data: { tenantId: tenant, nombre: "Guardia" } }))
+      .id;
     const patron = (
       await e.admin.patronTurno.create({
         data: { tenantId: tenant, nombre: "4x4", diasTrabajo: 4, diasDescanso: 4 },
@@ -132,8 +140,33 @@ describe.skipIf(!urlPropietario)("Pauta · ausencias y cambios de titular (Postg
     expect(fechas(await activas(juan))).toEqual([dia(10)]);
     expect(await activas(ana)).toEqual([]);
     const [registro] = await e.admin.ausencia.findMany({ where: { personaId: juan } });
-    const anular = await run("core.ausencias.anular", { personaId: juan, ausenciaId: registro?.id });
+    const anular = await run("core.ausencias.anular", {
+      personaId: juan,
+      ausenciaId: registro?.id,
+    });
     expect(anular).toMatchObject({ ok: true, data: { turnosLiberados: 1 } });
     expect(await activas(juan)).toEqual([]);
+  });
+
+  it("al quitar al titular se liberan sus días y el registro sigue aprobado", async () => {
+    const r = await run("core.ausencias.registrar", {
+      personaId: ana,
+      tipo: "permiso",
+      motivo: "Trámite",
+      desde: dia(11),
+      hasta: dia(14),
+    });
+    expect(r, JSON.stringify(r)).toMatchObject({ ok: true, data: { dias: 4 } });
+    const quitar = await run("pauta.titular.asignar", {
+      puestoId: puesto,
+      titularPersonaId: null,
+      desde: dia(13),
+    });
+    expect(quitar.ok, JSON.stringify(quitar)).toBe(true);
+    expect(fechas(await activas(ana))).toEqual([dia(11), dia(12)]);
+    const registro = await e.admin.ausencia.findUnique({
+      where: { id: String(r.data?.["ausenciaId"]) },
+    });
+    expect(registro?.estado).toBe("aprobada");
   });
 });

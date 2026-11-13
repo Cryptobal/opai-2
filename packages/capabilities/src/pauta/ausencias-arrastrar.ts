@@ -13,7 +13,11 @@ import { aFechaDb, fechaIso } from "./comun";
 type Destino = { puestoId: string; instalacionId: string; titularId: string | null; desde: string };
 
 /** Libera los días que ya no son turnos de quien faltaba y marca los del titular en sus ausencias; devuelve los marcados. */
-export async function marcarAusenciasDelTitular(tx: TenantTx, ctx: Contexto, d: Destino): Promise<number> {
+export async function marcarAusenciasDelTitular(
+  tx: TenantTx,
+  ctx: Contexto,
+  d: Destino,
+): Promise<number> {
   const titular = d.titularId;
   const series = (await cargarSeriesDe({ ...ctx, db: tx }, [d.puestoId])).get(d.puestoId) ?? [];
   const turnoDe = (personaId: string | null, f: string) => {
@@ -58,7 +62,9 @@ export async function marcarAusenciasDelTitular(tx: TenantTx, ctx: Contexto, d: 
   let total = 0;
   for (const a of ausencias) {
     const inicio = fechaIso(a.desde) > d.desde ? fechaIso(a.desde) : d.desde;
-    const dias = rangoDias(inicio, fechaIso(a.hasta)).filter((f) => !ocupadas.has(f) && turnoDe(titular, f));
+    const dias = rangoDias(inicio, fechaIso(a.hasta)).filter(
+      (f) => !ocupadas.has(f) && turnoDe(titular, f),
+    );
     if (dias.length === 0) continue;
     for (const f of dias) ocupadas.add(f);
     await tx.excepcionPauta.createMany({
@@ -86,7 +92,12 @@ export async function marcarAusenciasDelTitular(tx: TenantTx, ctx: Contexto, d: 
       tipo: "pauta.excepcion.creada",
       entidadTipo: "puesto",
       entidadId: d.puestoId,
-      payload: { puestoId: d.puestoId, tipo: a.tipo, desde: dias[0]!, hasta: dias[dias.length - 1]! },
+      payload: {
+        puestoId: d.puestoId,
+        tipo: a.tipo,
+        desde: dias[0]!,
+        hasta: dias[dias.length - 1]!,
+      },
     });
     total += dias.length;
   }
