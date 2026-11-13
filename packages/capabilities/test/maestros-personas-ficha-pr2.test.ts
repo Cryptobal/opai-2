@@ -123,7 +123,7 @@ describe("Personas ficha PR 2 (capacidades)", () => {
     expect(directo).toMatchObject({ ok: true, data: { planIsapre: "••••" } });
     // CAR-276: APV, cargas, % adicional y discapacidad también van ocultos al supervisor.
     expect(directo).toMatchObject({
-      data: { sensiblesOcultos: true, cargasSimples: null, apvMonto: null, discapacidadInvalidez: null },
+      data: { sensiblesOcultos: true, tipoPension: null, cargasSimples: null, apvMonto: null, discapacidadInvalidez: null },
     });
     expect(JSON.stringify(directo)).not.toContain(planClaro);
 

@@ -86,7 +86,7 @@ function normalizar<T extends string>(c: readonly OpcionCatalogo<T>[], texto: st
 export const normalizarAfp = (t: string | null | undefined): AdministradoraAFP | null =>
   normalizar(AFPS, t, "afp") ?? (AFP.find((a) => a === simple(t ?? "")) ?? null);
 export const normalizarRegimen = (t: string | null | undefined): RegimenPrevisional | null =>
-  normalizar(REGIMENES_PREVISIONALES, t) ?? (simple(t ?? "").includes("inp") ? "ips" : null);
+  normalizar(REGIMENES_PREVISIONALES, t) ?? (["inp", "exinp", "ipsexinp"].includes(simple(t ?? "")) ? "ips" : null);
 export const normalizarSalud = (t: string | null | undefined): SistemaSalud | null =>
   normalizar(SISTEMAS_SALUD, t);
 

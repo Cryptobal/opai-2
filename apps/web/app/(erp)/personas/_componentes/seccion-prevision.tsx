@@ -36,8 +36,8 @@ export async function SeccionPrevision({ personaId }: { personaId: string }) {
       ) : null}
       {d.sensiblesOcultos ? (
         <div className="mb-3">
-          <Alerta tono="info" titulo="Datos sensibles ocultos">
-            Tu rol ve la previsión sin el plan de salud, el APV, las cargas ni la discapacidad.
+          <Alerta tono="warning" titulo="Datos sensibles ocultos">
+            Tu rol no tiene permiso de lectura sensible. Pídelo a un administrador.
           </Alerta>
         </div>
       ) : null}

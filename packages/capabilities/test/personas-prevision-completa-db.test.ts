@@ -70,6 +70,9 @@ describe.skipIf(omitirSuiteDb())("Personas · previsión completa CAR-276 (db)",
     expect((await ejecutar("core.personas.prevision_actualizar", { id: personaId, cargasSimples: 3 })).ok).toBe(true);
     const v2 = await ejecutar("core.personas.prevision_ver", { id: personaId });
     expect(v2.data).toMatchObject({ cargasSimples: 3, tramoAsignacion: "B", afp: "habitat" });
+    // Vaciar el campo en la hoja manda null: queda en 0.
+    expect((await ejecutar("core.personas.prevision_actualizar", { id: personaId, cargasSimples: null })).ok).toBe(true);
+    expect((await ejecutar("core.personas.prevision_ver", { id: personaId })).data).toMatchObject({ cargasSimples: 0 });
   });
 
   it("rechaza valores fuera del catálogo o del rango", async () => {
@@ -80,6 +83,9 @@ describe.skipIf(omitirSuiteDb())("Personas · previsión completa CAR-276 (db)",
       { cargasSimples: 21 },
       { saludAdicionalPct: "120" },
       { discapacidadInvalidez: "si" },
+      { apvMoneda: "pct", apvMonto: "150" },
+      { saludAdicionalPct: "2.1234" },
+      { regimen: "Sin previsión" },
     ]) {
       const r = await ejecutar("core.personas.prevision_actualizar", { id: personaId, ...malo });
       expect(r.ok, JSON.stringify(malo)).toBe(false);

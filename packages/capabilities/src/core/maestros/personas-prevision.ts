@@ -33,7 +33,7 @@ export const personasPrevisionActualizar = defineCapability({
   descripcion:
     "Actualiza la previsión social de una persona: AFP y régimen (códigos del catálogo), pensión, salud e ISAPRE, qué cotiza, APV, tramo y cargas de asignación familiar y discapacidad. Solo RRHH y administradores; el plan ISAPRE se guarda cifrado.",
   permiso: PERMISOS_CORE.personasPrevisionManage,
-  sensibles: ["planIsapre", "discapacidadInvalidez"],
+  sensibles: ["planIsapre", "tipoPension", "discapacidadInvalidez"],
   input: inputPrevision,
   output: previsionSchema,
   efecto: "escritura",

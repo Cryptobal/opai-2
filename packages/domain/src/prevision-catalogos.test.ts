@@ -18,6 +18,9 @@ describe("catálogos de previsión (CAR-276)", () => {
     expect(normalizarAfp(null)).toBeNull();
     expect(normalizarRegimen("AFP")).toBe("afp");
     expect(normalizarRegimen("INP")).toBe("ips");
+    expect(normalizarRegimen("ex INP")).toBe("ips");
+    expect(normalizarRegimen("Sin previsión")).toBeNull();
+    expect(normalizarRegimen("Sin pensión")).toBeNull();
     expect(normalizarSalud("FONASA")).toBe("fonasa");
     expect(normalizarSalud("Isapre")).toBe("isapre");
   });

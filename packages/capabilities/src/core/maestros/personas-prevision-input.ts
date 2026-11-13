@@ -28,17 +28,18 @@ const codigo = <T extends string>(valores: [T, ...T[]], normalizar?: (t: string)
     )
     .optional();
 
-const decimal = (max: number) =>
+const decimal = (max: number, decimales = 4) =>
   z
     .string()
     .trim()
-    .regex(/^\d{1,10}([.,]\d{1,4})?$/, "Usa un número, con hasta 4 decimales.")
+    .regex(new RegExp(`^\\d{1,10}([.,]\\d{1,${decimales}})?$`), `Usa un número, con hasta ${decimales} decimales.`)
     .transform((s) => s.replace(",", "."))
     .refine((s) => Number(s) <= max, `No puede superar ${max}.`)
     .nullable()
     .optional();
 
-const cargas = z.number().int().min(0).max(20).optional();
+// Vaciar el campo en la hoja manda null: queda en 0 (la columna no admite null).
+const cargas = z.number().int().min(0).max(20).nullable().optional().transform((v) => (v === null ? 0 : v));
 
 export const inputPrevision = z.object({
   id: uuidSchema,
@@ -51,7 +52,7 @@ export const inputPrevision = z.object({
   cotizacionUfPct: z.string().trim().max(20).nullable().optional(),
   jubilado: z.boolean().optional(),
   tipoPension: codigo(valoresDe(TIPOS_PENSION)),
-  saludAdicionalPct: decimal(100),
+  saludAdicionalPct: decimal(100, 3),
   cotizaAfp: z.boolean().optional(),
   cotizaAfc: z.boolean().optional(),
   cotizaSalud: z.boolean().optional(),
@@ -64,6 +65,9 @@ export const inputPrevision = z.object({
   cargasMaternales: cargas,
   cargasInvalidez: cargas,
   discapacidadInvalidez: codigo(valoresDe(DISCAPACIDAD_INVALIDEZ)),
+}).refine((i) => i.apvMoneda !== "pct" || !i.apvMonto || Number(i.apvMonto) <= 100, {
+  message: "El APV en % de la renta no puede superar 100.",
+  path: ["apvMonto"],
 });
 
 export type InputPrevision = z.infer<typeof inputPrevision>;
