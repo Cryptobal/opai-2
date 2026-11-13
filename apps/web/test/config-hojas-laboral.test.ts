@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { obtenerCapacidad } from "@opai/capabilities";
@@ -101,4 +104,9 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
       expect(capacidad?.input.safeParse(input).error?.issues ?? []).toEqual([]);
     },
   );
+
+  it("toda hoja de Laboral se carga al abrir su enlace (la carga diferida conoce su parámetro)", () => {
+    const diferidas = readFileSync(join(__dirname, "../app/(erp)/personas/_componentes/diferidas.ts"), "utf8");
+    for (const c of Object.values(SECCIONES_LABORAL)) expect(diferidas, c.param).toContain(`"${c.param}"`);
+  });
 });

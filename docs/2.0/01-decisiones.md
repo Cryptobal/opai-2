@@ -2033,6 +2033,21 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+**Adenda del 13-nov-2026 (Carlos, 00:12 hora de Chile, chat de la «Sesión Diseño»: «nunca más hace nada OPAI 2.0, tú integras todo»).** El bot «OPAI 2.0» queda fuera del flujo: no vigila, no migra, no integra ni revisa. Toda sesión de Claude integra a `main` sus propios PR (squash, con las condiciones de «Integración a `main`») y aplica sus migraciones. Donde un encargo, brief o documento diga que el bot integra, migra o revisa, lo hace la sesión que construyó el PR.
+
+
+## ADR-105 · Hilo es la fuente única de diseño, con reglas verificables (CAR-334, 12-nov-2026)
+
+**Decidió:** Carlos (encargo a la «Sesión Diseño», 12-nov-2026, 16:20, hora de Chile: «La referencia única es el "OPAI 2.0 Design System · Hilo" de Claude Design. V1, V2 y el "OPAI Design System" antiguo quedan obsoletos») · **Registra:** Claude («Sesión Diseño»). **Extiende** ADR-102 (Hilo para todo diseño nuevo) a la revisión de lo ya construido; **no cambia** ADR-090 (el interruptor de marco y las etapas H1–H7 siguen como están).
+
+**Decisión.**
+1. La única referencia de diseño de OPAI 2.0 es el sistema «OPAI 2.0 Design System · Hilo» de Claude Design, con su copia en el repo (`docs/2.0/design/export-base-hilo/`, `packages/ds`). V1, V2 y el «OPAI Design System» antiguo quedan obsoletos: no se usan para diseñar ni para juzgar una pantalla.
+2. Hilo se aplica como reglas verificables (`docs/2.0/DISENO-hilo.md`): los tokens en `packages/ds/src/hilo/tokens-hilo.ts` con una prueba que los compara con `tokens.css`, y las reglas de uso (un primario por vista, ubicación de acciones, estados, formatos chilenos, textos) como trinquete en `pnpm test` y como mediciones de la auditoría visual.
+3. La «Sesión Diseño» es dueña de Diseño y experiencia: audita los cuatro portales, corrige lo transversal (DS, marco, navegación, tipografía, botones, textos) y asigna lo de cada módulo a su sesión. No cambia decisiones de producto ni flujos de negocio; si Hilo y una pantalla aprobada se contradicen, pregunta a Carlos.
+
+**Consecuencias.** Un PR que cambie la piel en `tokens.css` sin cambiar `tokens-hilo.ts` (o al revés) falla. Un archivo no puede sumar formatos propios, tamaños fuera de escala, botones genéricos ni estilos en línea respecto de `apps/web/test/reglas-diseno/base.json`. El marco clásico sigue hasta H7; la auditoría se hace en el marco Hilo.
+
+**Adenda (12-nov-2026, Sesión Diseño, con ADR-109 a la vista; confirmada por Carlos en el chat de la sesión, 12-nov-2026, 20:36, hora de Chile: «seguir el nuevo diseño»).** ADR-109 reemplaza a Hilo como referencia visual. De este ADR quedan las reglas verificables que no dependen de la piel (un solo botón primario por vista, ubicación de acciones, estados, formatos chilenos de RUT, fecha y monto, escala tipográfica, accesibilidad), el trinquete de `apps/web/test/reglas-diseno` y la auditoría `@auditoria`: desde hoy se miden contra el diseño nuevo (`docs/2.0/design/export-diseno-nuevo/`). Los tokens de `@opai/ds/hilo` y su prueba solo cuidan la piel Hilo mientras exista (hasta D6). La Sesión Diseño no abre más correcciones de piel Hilo; los hallazgos de piel (tarjetas o líneas, cabecera del teléfono, índigo) pasan a los bloques D1 a D6 de `BRIEF-CAR-335-diseno-nuevo.md`.
 
 ## ADR-106 · La vara: OPAI 2.0 sigue a los mejores SaaS de cada capa (CAR-348, 12-nov-2026)
 
@@ -2052,6 +2067,30 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 - Todo PR que toque arquitectura, permisos, modelo de datos o UX declara «Referente seguido y en qué se aparta» (plantilla del PR y `AGENTS.md`, en un PR posterior de esta misma serie).
 - La Sesión Estándares revisa cada ADR y cada PR de esos temas contra la vara y comenta las brechas.
 - No reemplaza a `AGENTS.md`, `REGLAS-codigo.md` ni a los ADR vigentes: ante un choque, mandan ellos y se anota la diferencia aquí.
+
+## ADR-107 · Reglas de aprobación por empresa, versión 1 (CAR-252, 12-nov-2026)
+
+**Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»).
+
+**Contexto.** Hasta hoy solo los agentes pasaban por la cola de aprobaciones (ADR-032), y aprobaba cualquiera con `core:aprobaciones.manage` (dueños y administradores). Carlos pidió poder elegir, por empresa, qué acciones necesitan aprobación y quién las aprueba (CAR-252), y que valga también para las personas (CAR-253).
+
+**Decisión (versión 1 simple, como lo hacen las herramientas de gastos y facturación).**
+
+1. **Una regla = acción + monto mínimo opcional + quién aprueba.** Acciones de la versión 1: `emitir_dte` (emitir al SII una factura, nota de crédito, nota de débito o el lote del cierre) y `enviar_cotizacion` (enviar una propuesta de CPQ). Quién aprueba: un rol (base o propio de la empresa) o un grupo (CAR-251), nunca los dos a la vez.
+2. **Vale igual para personas y agentes.** Si una regla aplica, la acción queda en la cola de aprobaciones (`core.aprobaciones`, con `regla_id`) aunque la pida una persona desde la pantalla o un agente con autonomía «directo». Sin reglas, todo sigue como antes.
+3. **Basta una aprobación.** Con varias reglas para la misma acción, aplica la de monto mínimo más alto que se cumpla. Si el monto no se puede calcular, aplica cualquier regla de la acción (ante la duda, se pide).
+4. **Dueños y administradores aprueban todo, siempre** (también lo propio, para no trabar a una empresa chica). Los aprobadores de una regla ven y resuelven solo las solicitudes de sus reglas, y nunca la propia.
+5. **La regla se vuelve a evaluar al aprobar.** Si el monto o las reglas cambiaron desde que se pidió (por ejemplo, alguien editó el borrador), quien aprueba debe poder resolver la regla vigente; si no, la aprobación se rechaza con un conflicto y la resuelve quien corresponde.
+5 bis. **Quien aprueba también necesita el permiso de la acción**, porque la acción se ejecuta a su nombre (como hasta hoy). La ejecución que resulta de aprobar no vuelve a pedir aprobación.
+6. **Configurar reglas es solo para personas** (`soloPersonas`): un agente no puede cambiar la regla que lo frena. La lista de reglas sí está en el MCP.
+7. **Fuera de la versión 1:** varias aprobaciones («N de M»), el reemplazo por vacaciones, otras condiciones y unir las aprobaciones propias de CPQ, Rendiciones y tickets (CAR-253).
+
+**Consecuencias.**
+
+- La pantalla Configuración › Aprobaciones › Reglas espera su diseño en Claude Design (`docs/2.0/design/DESIGN-PROMPT-reglas-aprobacion.md`). Como crear reglas es solo para personas, hasta que llegue la pantalla ninguna empresa tiene reglas y todo funciona como antes.
+- Los aprobadores sin `core:aprobaciones.manage` ven sus solicitudes en la Bandeja y por el MCP, pero la pantalla de la cola requiere ese permiso hasta que llegue el diseño.
+- **Pendiente antes de construir la pantalla de reglas** (hallazgos de la autorrevisión, no bloqueantes mientras nadie pueda crear reglas): que la aprobación de una emisión pedida por una persona también envíe el documento al SII (hoy lo hace la pantalla de quien emite); que los aprobadores sin `core:aprobaciones.manage` tengan dónde resolver; avisos a los aprobadores de la regla; que editar una regla no cambie el aprobador de las solicitudes ya pendientes; y evitar dos reglas activas iguales.
+- En la versión 1, el envío de propuestas de CPQ no calcula el monto: una regla de «enviar cotización» aplica a todos los envíos. CPQ conserva su propia aprobación de envíos hasta CAR-253.
 
 ## ADR-108 · Trabajo en paralelo sin esperas y sin choques entre sesiones (12-nov-2026)
 
