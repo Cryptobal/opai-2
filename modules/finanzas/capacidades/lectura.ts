@@ -38,6 +38,8 @@ const saldoBancoSchema = z.object({
   fuente: z.enum(["banco", "ajustes"]),
   saldo: saldoSchema.nullable(),
   cuentasSinSaldo: z.array(z.object({ cuentaId: z.string(), banco: z.string() })),
+  saldoHoy: saldoSchema.nullable().describe("Saldo conocido más lo que la cartola movió después, al cierre de hoy."),
+  saldoDesde: z.string().nullable().describe("Fecha del saldo conocido más antiguo entre las cuentas."),
 });
 
 export const filasListar = defineCapability({
@@ -132,7 +134,7 @@ export const planillaObtener = defineCapability({
       semanas: semanasOut,
       aviso: { activo: ajustes.avisoActivo, umbral: ajustes.umbral, semanas: avisoSemanas },
       avisos,
-      saldoBanco: { fuente: banco.fuente, saldo: banco.saldo, cuentasSinSaldo: banco.cuentasSinSaldo },
+      saldoBanco: { fuente: banco.fuente, saldo: banco.saldo, cuentasSinSaldo: banco.cuentasSinSaldo, saldoHoy: banco.saldoHoy, saldoDesde: banco.saldoDesde },
       columnaHoy: lista.includes(hoy) ? hoy : null,
     };
   },

@@ -39,3 +39,6 @@ Todo corre con `enTransaccion(tenantId)` y RLS; prueba con dos empresas.
 
 ## 11. Riesgos y rollback
 La importación real en Gard **no se corre en este PR**: requiere el OK de Carlos tras ver la simulación. Rollback: revertir la corrida desde el registro de corridas.
+
+## 12. Adenda: botón «Importar cotizaciones» (12-nov-2026, decisión de Carlos)
+Ninguna sesión espera al bot «OPAI 2.0», y la llave de solo lectura de OPAI 1 solo se usa dentro de la app. Por eso vuelve una sección mínima en Configuración › Módulos › Comercial: «Simular», «Importar N cotizaciones» (solo tras simular) y «Deshacer esta importación». La capacidad `comercial.importar_1_0` suma `soloCotizaciones`: el plan deja cuentas, contactos e instalaciones solo como referencia (sin cambios), sin programaciones, con los negocios que ya están, y omite con `negocio_no_importado` las cotizaciones cuyo negocio no está en 2.0. La importación es de Carlos (owner/admin), con `permitirReimportacion`. Pruebas: `solo-cotizaciones.test.ts` y `importar-cotizaciones-preview.spec.ts` (`@preview`).
