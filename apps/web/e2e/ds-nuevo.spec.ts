@@ -58,6 +58,17 @@ test.describe("muestra del marco nuevo", () => {
       await page.getByRole("button", { name: "Ocultar el menú" }).click();
       const fijar = page.getByRole("button", { name: "Dejar el menú fijo" });
       await expect(fijar).toBeVisible();
+      // Plegado (CAR-377): el riel muestra los módulos, no cada submódulo; tocar uno lo abre.
+      await page.mouse.move(900, 500);
+      const riel = page.locator("nav[data-riel-nuevo]");
+      await expect(riel.getByRole("button", { name: "Comercial" })).toBeVisible();
+      await expect(riel.getByRole("link", { name: "Negocios" })).toHaveCount(0);
+      await capturar(page, info, "ds-nuevo-marco-oculto");
+      // Con el teclado o en pantalla táctil (sin pasar el mouse por encima).
+      await riel.getByRole("button", { name: "Comercial" }).dispatchEvent("click");
+      await expect(page.getByRole("link", { name: "Negocios" })).toBeVisible();
+      await page.mouse.move(900, 500);
+      await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
       await page.getByRole("navigation", { name: "Principal" }).filter({ has: fijar }).hover();
       const completo = page
         .getByRole("navigation", { name: "Principal" })
@@ -78,6 +89,36 @@ test.describe("muestra del marco nuevo", () => {
       await page.reload();
       await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
     }
+    expect(errores).toEqual([]);
+  });
+});
+
+test.describe("lista con selección (CAR-335 D4a)", () => {
+  test.skip(EN_PREVIEW, "La muestra /ds/nuevo/lista solo existe fuera de producción");
+
+  test("se eligen filas, aparece la barra con la acción y se quita la selección", async ({
+    page,
+  }, info) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 768, "La selección va en la tabla desde md");
+    const errores = erroresDeConsola(page);
+    await page.goto("/ds/nuevo/lista");
+    const primera = page.getByRole("checkbox", { name: "Seleccionar [CUENTA A]" });
+    await hidratado(primera);
+    await primera.click();
+    await page.getByRole("checkbox", { name: "Seleccionar [CUENTA B]" }).click();
+    await expect(
+      page.getByRole("region", { name: "Selección" }).getByText("2 filas seleccionadas"),
+    ).toBeVisible();
+    await expect(page.getByTestId("accion-muestra")).toHaveText("Archivar 2");
+    await capturar(page, info, "nuevo-lista-seleccion");
+    await page.getByRole("checkbox", { name: "Seleccionar todas las filas" }).click();
+    await expect(
+      page.getByRole("region", { name: "Selección" }).getByText("3 filas seleccionadas"),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Quitar selección" }).click();
+    await expect(page.getByRole("region", { name: "Selección" })).toHaveCount(0);
+    // El foco vuelve a la casilla de la cabecera y el lector de pantalla oyó el conteo.
+    await expect(page.getByRole("checkbox", { name: "Seleccionar todas las filas" })).toBeFocused();
     expect(errores).toEqual([]);
   });
 });
