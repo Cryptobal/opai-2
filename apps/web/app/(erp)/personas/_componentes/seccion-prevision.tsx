@@ -1,9 +1,10 @@
 import { PERMISOS_CORE } from "@opai/domain";
-import { ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { Alerta, Badge, ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { conDatos, SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
 import { previsionDe } from "./lecturas-ficha";
+import { gruposPrevision, inicialPrevision, porVerificar } from "./vista-prevision";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { identidadActual } from "@/lib/servidor";
 
@@ -18,7 +19,7 @@ export async function SeccionPrevision({ personaId }: { personaId: string }) {
   if (!r.ok) return <SeccionError titulo={TITULO} que="la previsión" />;
   const d = r.data;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPrevisionManage);
-  const vacia = !conDatos(d.afp, d.regimen, d.sistemaSalud, d.isapreNombre, d.planIsapre);
+  const vacia = !conDatos(d.afp, d.regimen, d.sistemaSalud, d.isapreNombre, d.planIsapre, d.tipoPension);
   return (
     <SeccionTarjeta
       titulo={TITULO}
@@ -33,31 +34,28 @@ export async function SeccionPrevision({ personaId }: { personaId: string }) {
       {vacia ? (
         <VacioSeccion texto="Sin previsión registrada." accion={puede ? "Agregar" : null} />
       ) : null}
-      <ParesGrid
-        items={[
-          { etiqueta: "AFP", valor: d.afp },
-          { etiqueta: "Régimen", valor: d.regimen },
-          { etiqueta: "Salud", valor: d.sistemaSalud },
-          { etiqueta: "ISAPRE", valor: d.isapreNombre },
-          { etiqueta: "Plan ISAPRE", valor: d.planIsapre },
-          { etiqueta: "Plan (UF)", valor: d.planUf },
-          { etiqueta: "Cotización UF", valor: d.cotizacionUfPct },
-        ]}
-      />
+      {d.sensiblesOcultos ? (
+        <div className="mb-3">
+          <Alerta tono="info" titulo="Datos sensibles ocultos">
+            Tu rol ve la previsión sin el plan de salud, el APV, las cargas ni la discapacidad.
+          </Alerta>
+        </div>
+      ) : null}
+      {porVerificar(d) ? (
+        <div className="mb-3">
+          <Badge tono="neutro">Campo por verificar contra LRE / Previred</Badge>
+        </div>
+      ) : null}
+      <div className="flex flex-col gap-4">
+        {gruposPrevision(d).map((g) => (
+          <div key={g.titulo}>
+            <h4 className="t-overline mb-2 text-fg-muted">{g.titulo}</h4>
+            <ParesGrid items={g.pares} />
+          </div>
+        ))}
+      </div>
       {puede ? (
-        <HojaEditarSeccion
-          seccion="prevision"
-          personaId={personaId}
-          inicial={{
-            afp: d.afp,
-            regimen: d.regimen,
-            sistemaSalud: d.sistemaSalud,
-            isapreNombre: d.isapreNombre,
-            planIsapre: d.planIsapre,
-            planUf: d.planUf,
-            cotizacionUfPct: d.cotizacionUfPct,
-          }}
-        />
+        <HojaEditarSeccion seccion="prevision" personaId={personaId} inicial={inicialPrevision(d)} />
       ) : null}
     </SeccionTarjeta>
   );
