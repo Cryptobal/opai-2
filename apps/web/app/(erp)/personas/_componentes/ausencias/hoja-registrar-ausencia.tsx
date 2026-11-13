@@ -56,19 +56,19 @@ export function HojaRegistrarAusencia({
   async function confirmar() {
     if (await ejecutar("pauta.ausencias.registrar", entrada)) {
       avisar.exito("Quedó registrado en la pauta");
-      cerrar();
+      salir();
     }
   }
 
   return (
     <Sheet
       abierto
-      onCerrar={cerrar}
+      onCerrar={salir}
       titulo="Registrar permiso o licencia"
       descripcion={`${nombre}. Sus turnos de esas fechas quedan por cubrir en la pauta, con este motivo.`}
       acciones={
         <>
-          <Button variant="secondary" onClick={cerrar}>
+          <Button variant="secondary" onClick={salir}>
             Cancelar
           </Button>
           {plan ? (
@@ -76,7 +76,7 @@ export function HojaRegistrarAusencia({
               Registrar {plan.dias === 1 ? "1 turno" : `${plan.dias} turnos`}
             </Button>
           ) : (
-            <Button onClick={revisar} disabled={pendiente || motivo.trim().length < 3}>
+            <Button onClick={revisar} disabled={pendiente || fechasMal || motivo.trim().length < 3}>
               Ver turnos afectados
             </Button>
           )}
@@ -100,7 +100,11 @@ export function HojaRegistrarAusencia({
               onCambiar={cambiar((v: string) => v && setDesde(v))}
             />
           </Campo>
-          <Campo etiqueta="Hasta" htmlFor="aus-hasta">
+          <Campo
+            etiqueta="Hasta"
+            htmlFor="aus-hasta"
+            {...(fechasMal ? { error: "No puede ser antes de «Desde»." } : {})}
+          >
             <InputFecha
               id="aus-hasta"
               valor={hasta}

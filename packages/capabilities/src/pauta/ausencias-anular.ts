@@ -10,7 +10,18 @@ import { personaParaAusencia } from "./ausencias-plan";
 import { aFechaDb, diasDelRango, PERMISO_WRITE, rangoSchema } from "./comun";
 import { tipoExcepcionSchema } from "./vistas";
 
-const anularInput = z.object({ personaId: uuidSchema, tipo: tipoExcepcionSchema }).and(rangoSchema);
+const anularInput = z
+  .object({
+    personaId: uuidSchema,
+    tipo: tipoExcepcionSchema,
+    registradaEn: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        "Momento del registro (de `pauta.ausencias.listar`): anula solo ese registro y no otros que se crucen.",
+      ),
+  })
+  .and(rangoSchema);
 type Entrada = z.output<typeof anularInput>;
 
 /** Excepciones activas de la persona, de ese tipo y en ese rango, solo en puestos del alcance (ADR-022). */
@@ -23,6 +34,14 @@ async function activas(ctx: Contexto, i: Entrada) {
       tipo: i.tipo,
       estado: "activa",
       fecha: { gte: aFechaDb(dias[0]!), lte: aFechaDb(dias[dias.length - 1]!) },
+      ...(i.registradaEn
+        ? {
+            createdAt: {
+              gte: new Date(i.registradaEn),
+              lt: new Date(new Date(i.registradaEn).getTime() + 1),
+            },
+          }
+        : {}),
     },
     select: { id: true, puestoId: true },
   });
@@ -39,7 +58,7 @@ async function activas(ctx: Contexto, i: Entrada) {
 export const ausenciasAnular = defineCapability({
   id: "pauta.ausencias.anular",
   descripcion:
-    "Anula los permisos, licencias, vacaciones o ausencias activos de una persona, de un tipo y en un día o rango: sus turnos vuelven a cubrirse según la serie, en todos sus puestos. No toca excepciones de otras personas y la anulación queda en el historial.",
+    "Anula los permisos, licencias, vacaciones o ausencias activos de una persona, de un tipo y en un día o rango (o solo el registro indicado con `registradaEn`): sus turnos vuelven a cubrirse según la serie, en todos sus puestos. No toca excepciones de otras personas y la anulación queda en el historial.",
   permiso: PERMISO_WRITE,
   input: anularInput,
   output: z.object({ personaId: z.string(), anuladas: z.number().int() }),
@@ -50,6 +69,7 @@ export const ausenciasAnular = defineCapability({
       return { personaId: input.personaId, anuladas: (await activas(ctx, input)).filas.length };
     return ctx.transaccion(async (tx) => {
       const tctx = { ...ctx, db: tx };
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`pauta:${ctx.tenantId}:${input.personaId}`}, 0))::text`;
       const previo = await activas(tctx, input);
       for (const p of previo.puestos)
         await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${p.id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;

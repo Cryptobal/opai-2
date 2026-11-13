@@ -248,4 +248,49 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     });
     expect(otraVez).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
+
+  it("anular un registro no toca otro del mismo tipo que se cruza en sus fechas", async () => {
+    // Dos permisos de Juan que se intercalan: uno en sus turnos de la Planta (días 1-4) y otro en la Bodega (5-8).
+    const a = await run(ctx(tenantA), "pauta.ausencias.registrar", {
+      personaId: juan,
+      tipo: "permiso",
+      motivo: "Trámite A",
+      desde: inicio,
+      hasta: dia(4),
+    });
+    const b = await run(ctx(tenantA), "pauta.ausencias.registrar", {
+      personaId: juan,
+      tipo: "permiso",
+      motivo: "Trámite B",
+      desde: dia(5),
+      hasta: dia(8),
+    });
+    expect([a.ok, b.ok]).toEqual([true, true]);
+    const lista = await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: juan });
+    const g = (
+      lista as Ok<{
+        grupos: {
+          motivo: string;
+          estado: string;
+          registradaEn: string;
+          desde: string;
+          hasta: string;
+        }[];
+      }>
+    ).data.grupos;
+    const primero = g.find((x) => x.motivo === "Trámite A" && x.estado === "activa")!;
+    const r = await run(ctx(tenantA), "pauta.ausencias.anular", {
+      personaId: juan,
+      tipo: "permiso",
+      desde: inicio,
+      hasta: dia(8),
+      registradaEn: primero.registradaEn,
+    });
+    expect(r).toMatchObject({ ok: true, data: { anuladas: 4 } });
+    expect(
+      await e.admin.excepcionPauta.count({
+        where: { personaId: juan, tipo: "permiso", estado: "activa", motivo: "Trámite B" },
+      }),
+    ).toBe(4);
+  });
 });

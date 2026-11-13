@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { sinDuplicado } from "../core/maestros/comun";
 import { defineCapability } from "../define";
+import { conflicto } from "../errores";
 import { anotar } from "./anotar";
 import { ausenciaPersonaInput, planearAusencia, type PlanPuesto } from "./ausencias-plan";
 import { aFechaDb, PERMISO_WRITE } from "./comun";
@@ -27,7 +28,7 @@ const salida = z.object({
 /**
  * Registra un permiso, licencia, vacaciones o ausencia desde la ficha de la persona (ADR-094, adenda CAR-311 d): los
  * turnos que tiene como titular en esas fechas quedan como excepción en la pauta mensual y diaria, con el motivo, y
- * el ausentismo de Desempeño los cuenta como justificados.
+ * el ausentismo de Desempeño cuenta como justificados los de licencia, vacaciones y permiso (no la ausencia).
  */
 export const ausenciasRegistrar = defineCapability({
   id: "pauta.ausencias.registrar",
@@ -56,11 +57,17 @@ export const ausenciasRegistrar = defineCapability({
     if (dryRun) return resumen(await planearAusencia(ctx, input));
     return ctx.transaccion(async (tx) => {
       const tctx = { ...ctx, db: tx };
-      // Bloquea los puestos de la persona en orden fijo y revalida dentro (series, días y repeticiones).
+      // Persona y luego puestos (mismo orden que fijar series y trasladar titular), en orden fijo; revalida dentro.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`pauta:${ctx.tenantId}:${input.personaId}`}, 0))::text`;
       const previo = await planearAusencia(tctx, input);
       for (const p of previo)
         await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${p.puesto.id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       const plan = await planearAusencia(tctx, input);
+      const bloqueados = new Set(previo.map((p) => p.puesto.id));
+      if (plan.some((p) => !bloqueados.has(p.puesto.id)))
+        throw conflicto(
+          "La pauta de esta persona cambió mientras se registraba: vuelve a intentarlo.",
+        );
       await sinDuplicado(
         tx.excepcionPauta.createMany({
           data: plan.flatMap((p) =>
@@ -85,7 +92,12 @@ export const ausenciasRegistrar = defineCapability({
           accion: "excepcion_creada",
           desde: input.desde,
           hasta,
-          detalle: { tipo: input.tipo, dias: p.dias.length },
+          detalle: {
+            tipo: input.tipo,
+            dias: p.dias.length,
+            personaId: input.personaId,
+            origen: "ficha",
+          },
         });
         await ctx.eventos.emitir(tx, {
           tipo: "pauta.excepcion.creada",
