@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Alerta, Badge, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { aislarCorreo } from "@/lib/correo-srcdoc";
 
 type Previa = { asunto: string; texto: string; html: string };

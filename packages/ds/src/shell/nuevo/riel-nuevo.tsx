@@ -58,7 +58,7 @@ export function RielNuevo(p: Props) {
           <i.icono className={cn("size-5", activo(i) && "text-accent")} aria-hidden />
           {conContador ? <Contador n={i.alerta ? i.contador : undefined} /> : null}
         </span>
-        <span lang="es" className="w-full hyphens-auto px-0.5 text-center text-[11px]">
+        <span lang="es" className="w-full break-normal px-0.5 text-center text-[11px] leading-tight">
           {i.corta ?? i.etiqueta}
         </span>
       </p.Link>
@@ -69,7 +69,7 @@ export function RielNuevo(p: Props) {
       aria-label="Principal"
       data-shell="riel"
       data-riel-nuevo=""
-      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex lg:hidden"
+      className="sticky top-0 hidden h-dvh w-24 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex lg:hidden"
     >
       {p.boton ? <span className="mb-2">{p.boton}</span> : null}
       <PortalSwitcher
@@ -90,6 +90,7 @@ export function RielNuevo(p: Props) {
             <li key={area} className="w-full">
               <button
                 type="button"
+                data-area={area}
                 onClick={() => p.onArea(area)}
                 aria-current={dentro ? "true" : undefined}
                 className={claseItem(dentro)}
@@ -98,7 +99,7 @@ export function RielNuevo(p: Props) {
                   <Icono className={cn("size-5", dentro && "text-accent")} aria-hidden />
                   <Contador n={alertasDe(area) || undefined} />
                 </span>
-                <span lang="es" className="w-full hyphens-auto px-0.5 text-center text-[11px]">
+                <span lang="es" className="w-full break-normal px-0.5 text-center text-[11px] leading-tight">
                   {primero.grupo ?? area}
                 </span>
               </button>
