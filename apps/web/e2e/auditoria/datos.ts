@@ -8,6 +8,7 @@ import { digitoVerificador } from "@opai/domain";
 
 export const CUENTA_QA = "Cuenta QA auditoría";
 const INSTALACION_QA = "Instalación QA auditoría";
+const NEGOCIO_QA = "Negocio QA auditoría";
 
 /** RUT válido y único por corrida (cuerpo de 8 dígitos desde la hora). */
 function rutNuevo() {
@@ -61,7 +62,25 @@ async function crearPersona(page: Page) {
   await page.waitForURL(/\/personas\/[0-9a-f-]{36}$/, { timeout: 60_000 });
 }
 
-/** Crea la cuenta, la instalación y la persona que falten; devuelve notas de lo que no se pudo. */
+async function crearNegocio(page: Page, cuentaId: string): Promise<string> {
+  await page.goto(`/negocios?nuevo=1&cuenta=${cuentaId}`);
+  const hoja = page.getByRole("dialog", { name: "Nuevo negocio" });
+  await hoja.waitFor({ timeout: 60_000 });
+  await hoja.getByLabel("Nombre del negocio").fill(NEGOCIO_QA);
+  await hoja.getByRole("button", { name: "Crear negocio", exact: true }).click();
+  await page.waitForURL(/\/negocios\/[0-9a-f-]{36}$/, { timeout: 60_000 });
+  return new URL(page.url()).pathname.split("/").pop() ?? "";
+}
+
+async function crearCotizacion(page: Page, negocioId: string) {
+  await page.goto(`/cotizaciones/nueva?negocio=${negocioId}`);
+  await page.getByLabel("Título").fill("Cotización QA auditoría");
+  await page.getByRole("button", { name: "Revisar cotización" }).click();
+  await page.getByRole("button", { name: "Confirmar creación" }).click();
+  await page.waitForURL(/\/cotizaciones\/[0-9a-f-]{36}/, { timeout: 60_000 });
+}
+
+/** Crea la cuenta, la instalación, la persona, el negocio y la cotización que falten; devuelve notas de lo que no se pudo. */
 export async function prepararDatos(page: Page): Promise<string[]> {
   const notas: string[] = [];
   const paso = async (nombre: string, f: () => Promise<unknown>) =>
@@ -82,5 +101,13 @@ export async function prepararDatos(page: Page): Promise<string[]> {
     return notas;
   const persona = await buscar(page, "personas", "Auditoría", /Persona QA/);
   if (!persona) await paso("persona", () => crearPersona(page));
+  let negocioId = await buscar(page, "negocios", NEGOCIO_QA, new RegExp(NEGOCIO_QA));
+  if (
+    !negocioId &&
+    !(await paso("negocio", async () => (negocioId = await crearNegocio(page, cuentaId))))
+  )
+    return notas;
+  const cotizacion = await buscar(page, "cotizaciones", "Cotización QA", /Cotización QA/);
+  if (!cotizacion) await paso("cotización", () => crearCotizacion(page, negocioId));
   return notas;
 }
