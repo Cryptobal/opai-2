@@ -5,6 +5,7 @@ import type { TenantTx } from "@opai/db";
 
 import { sincronizarAvisosEnTx } from "../aviso";
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_VER } from "./permisos";
+import { aNumeroSeguro } from "../esquemas";
 import { aIso } from "./util";
 
 const cartolaSchema = z.object({
@@ -15,6 +16,12 @@ const cartolaSchema = z.object({
   fechaHasta: z.string().nullable(),
   movimientos: z.number().int(),
   conciliados: z.number().int(),
+  /** Saldos del bloque «Saldos» de la cartola; null si no los trae. */
+  saldoInicial: z.number().int().nullable(),
+  saldoFinal: z.number().int().nullable(),
+  /** Quién la importó (la persona, o por quién actuó el agente) y si fue un agente. */
+  creadaPor: z.string().nullable(),
+  viaAgente: z.boolean(),
   creadaEn: z.string(),
 });
 
@@ -53,6 +60,10 @@ export const bancosCartolasListar = defineCapability({
         fechaHasta: c.fechaHasta ? aIso(c.fechaHasta) : null,
         movimientos: contar(c.id),
         conciliados: contar(c.id, "conciliado"),
+        saldoInicial: c.saldoInicial == null ? null : aNumeroSeguro(c.saldoInicial),
+        saldoFinal: c.saldoFinal == null ? null : aNumeroSeguro(c.saldoFinal),
+        creadaPor: c.creadoPorNombre,
+        viaAgente: c.viaAgente,
         creadaEn: c.createdAt.toISOString(),
       })),
     };
