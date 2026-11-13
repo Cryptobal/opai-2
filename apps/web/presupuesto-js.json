@@ -70,7 +70,7 @@
     "/(platform)/platform/tenants/[id]/cobro": 171,
     "/(erp)/instalaciones/[id]/negocios": 170,
     "/(erp)/negocios": 170,
-    "/(erp)/negocios/[id]": 171,
+    "/(erp)/negocios/[id]": 172,
     "/(erp)/negocios/[id]/cotizaciones": 171,
     "/(erp)/negocios/[id]/documentos": 171,
     "/(supervisor)/supervisor/rendiciones*": 164,
