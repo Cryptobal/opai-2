@@ -75,7 +75,6 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo antiguo llevado a hoy y cuadrat
     otroTenant = (await e.admin.tenant.create({ data: { slug: `cuadra-b-${sufijo}`, nombre: "B", vertical: "seguridad" } })).id;
     await e.admin.user.create({ data: { id: usuario, email: `u-${sufijo}@cuadra.test`, name: "u" } });
     // La planilla no muestra semanas anteriores a la base de los ajustes: se abre la ventana hacia atrás.
-    await ok("finanzas.ajustes.actualizar", { saldoInicial: 0, desde: mas(lunes, -56) });
     cuentaId = (await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco QA", numeroVisible: "0001", activa: true } })).id;
     await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco sin saldo", numeroVisible: "0002", activa: true } });
     // Saldo conocido antiguo, como lo deja la apertura: fuera de la cartola (ignorado) y con saldo posterior.

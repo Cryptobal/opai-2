@@ -65,10 +65,8 @@ export const celdaSchema = z.object({
 });
 
 export const ajustesSchema = z.object({
-  saldoInicial: saldoSchema,
   /** Un solo umbral de saldo bajo (planilla, aviso semanal y aviso de banco); su valor por defecto vive en `ajustesDe`. */
   umbral: saldoSchema,
-  desde: semanaSchema,
   horizonteSemanas: z.number().int().min(1).max(52),
   calendarioPagos: z
     .object({
