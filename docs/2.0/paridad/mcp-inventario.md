@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 761 pares pantalla→capacidad · 682 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 763 pares pantalla→capacidad · 684 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -467,7 +467,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.mover` | `comercial_negocios_mover` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.perder` | `comercial_negocios_perder` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.reabrir` | `comercial_negocios_reabrir` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.responsables` | `comercial_negocios_responsables` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.set_contactos` | `comercial_negocios_set_contactos` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.transferir` | `comercial_negocios_transferir` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.update` | `comercial_negocios_update` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.vincular_instalacion` | `comercial_negocios_vincular_instalacion` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
@@ -1055,8 +1057,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
 - `comercial.negocios.alertas`
-- `comercial.negocios.responsables`
-- `comercial.negocios.transferir`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
 - `core.actividades.delete`
