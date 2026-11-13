@@ -2,6 +2,7 @@
 
 import { Input, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
 
+import { nombreRecurso } from "../../_componentes/formato";
 import type { Precio } from "./tipos";
 
 type Props = {
@@ -30,11 +31,11 @@ export function TablaPrecios({ precios, valores, onCambiar, invalidos }: Props) 
           <tbody>
             {precios.map((p) => (
               <Tr key={p.recurso}>
-                <Td className="t-mono">{p.recurso}</Td>
+                <Td>{nombreRecurso(p.recurso)}</Td>
                 <Td>{p.unidad}</Td>
                 <Td className="w-40">
                   <Input
-                    aria-label={`Precio de ${p.recurso} en US$`}
+                    aria-label={`Precio de ${nombreRecurso(p.recurso)} en US$`}
                     inputMode="decimal"
                     className="t-numeric text-right"
                     value={valores[p.recurso] ?? ""}

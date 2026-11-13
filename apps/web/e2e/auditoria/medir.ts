@@ -87,7 +87,16 @@ export async function medir(page: Page, telefono: boolean): Promise<Omit<Medicio
 
 export async function axe(page: Page): Promise<Medicion["axe"]> {
   try {
-    const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+    // La vista previa de correo es un iframe con sandbox sin scripts: axe esperaba su respuesta y la
+    // pantalla de la plantilla superaba el tope de 75 s (CAR-366). Se excluye y axe tiene su propio tope.
+    const analisis = new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      .exclude("iframe")
+      .analyze();
+    const r = await Promise.race([
+      analisis,
+      new Promise<never>((_, no) => setTimeout(() => no(new Error("axe: tope de 20 s")), 20_000)),
+    ]);
     return r.violations
       .filter((v) => v.impact === "serious" || v.impact === "critical")
       .map((v) => ({ id: v.id, impacto: v.impact ?? "", nodos: v.nodes.length }));
