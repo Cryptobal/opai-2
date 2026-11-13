@@ -12,7 +12,12 @@ export type Scorecard = {
   indicadores: ItemScorecard[];
 };
 
-export type DefinicionIndicador = { indicador: string; nombre: string; descripcion: string; unidad: string };
+export type DefinicionIndicador = {
+  indicador: string;
+  nombre: string;
+  descripcion: string;
+  unidad: string;
+};
 
 export type IndicadorOpcion = {
   id: string;
