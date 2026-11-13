@@ -1,12 +1,22 @@
-import { DatoArchivado, SeccionTarjeta, TablaEstructura } from "@opai/ds";
+import { Alerta, DatoArchivado, SeccionTarjeta, TablaEstructura } from "@opai/ds";
 import { fecha } from "@/lib/fechas";
 import type { EstructuraVista } from "@/lib/tipos-sueldo";
 
 /** Todas las versiones originales, también las anuladas; ninguna participa en la resolución. */
-export function Versiones({ versiones }: { versiones: EstructuraVista[] }) {
+export function Versiones({
+  versiones,
+  conError = false,
+}: {
+  versiones: EstructuraVista[];
+  conError?: boolean;
+}) {
   return (
     <SeccionTarjeta titulo="Estructuras antiguas del cargo">
-      {versiones.length ? (
+      {conError ? (
+        <Alerta tono="warning" titulo="No pudimos cargar las estructuras antiguas">
+          El resto del cargo está al día. Recarga la página en unos segundos.
+        </Alerta>
+      ) : versiones.length ? (
         <div className="flex flex-col gap-3">
           {versiones.map((v) => (
             <DatoArchivado

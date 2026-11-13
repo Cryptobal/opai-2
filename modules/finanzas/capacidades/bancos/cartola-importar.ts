@@ -138,6 +138,7 @@ export const bancosCartolaImportar = defineCapability({
       duplicados,
       rechazadas,
       saldoFinal,
+      saldoInicial: cuadratura?.saldoInicial ?? null,
       fechaDesde,
       fechaHasta,
     });
