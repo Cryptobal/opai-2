@@ -1,6 +1,6 @@
 // Historial de importaciones y saldos de Bancos contra Postgres real (CAR-341, seguimiento): autor y saldos de cada
 // cartola, saldo de hoy de la cuenta desde el cierre de la cartola, fecha futura de Web4Leads acotada a hoy y calce
-// de la cartola con Web4Leads con un día de diferencia. Datos ficticios.
+// exacto de la cartola con lo que ya llegó por Web4Leads. Datos ficticios.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -86,9 +86,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · historial de importaciones y saldo
     expect((await cuenta(id))?.saldoHoy).toBe(1240000);
   });
 
-  it("la cartola reconoce como el mismo movimiento uno de Web4Leads con un día de diferencia", async () => {
+  it("la cartola reconoce el movimiento que ya llegó por Web4Leads el mismo día", async () => {
     const id = await nuevaCuenta("444555666");
-    await sincronizar("444555666", [{ fecha: "2026-11-01", monto: 250000, glosa: "Abono cliente ficticio" }]);
+    await sincronizar("444555666", [{ fecha: "2026-10-31", monto: 250000, glosa: "Abono cliente ficticio" }]);
     expect(await importar(id)).toMatchObject({ aplicados: 1, duplicados: 1 });
     expect(await e.admin.movimientoBancario.count({ where: { cuentaId: id } })).toBe(2);
   });

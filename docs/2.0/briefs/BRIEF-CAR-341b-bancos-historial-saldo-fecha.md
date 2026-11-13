@@ -16,11 +16,11 @@ Carlos tiene que limpiar las cartolas 0001–0016 (importadas con el lector anti
 ## 3. Alcance
 
 1. Pestaña **Bancos › Importaciones**: historial por cuenta (archivo, período, movimientos y conciliados, saldo inicial y final, quién importó, si fue un agente, fecha) y **Deshacer importación** con vista previa en un diálogo de confirmación. No deja deshacer si hay movimientos conciliados.
-2. **Saldo de la cuenta**: `finanzas.bancos.listar` devuelve `saldoHoy` y `saldoDesde`. El cierre de la última cartola importada pasa a ser una fuente más del saldo conocido (`saldoDelBanco`, también para el flujo de caja); se toma la más reciente y, con la misma fecha, la del banco. Se muestra en Movimientos y en Importaciones.
+2. **Saldo de la cuenta** (el cierre de la cartola se fecha con el menor entre el fin del período y el día de la importación): `finanzas.bancos.listar` devuelve `saldoHoy` y `saldoDesde`. El cierre de la última cartola importada pasa a ser una fuente más del saldo conocido (`saldoDelBanco`, también para el flujo de caja); se toma la más reciente y, con la misma fecha, la del banco. Se muestra en Movimientos y en Importaciones.
 3. **Fecha futura**:
-   - Web4Leads ya no guarda fechas posteriores a hoy (zona de la empresa).
-   - La cartola reconoce como el mismo movimiento uno de Web4Leads con un día de diferencia, igual monto y glosa, que no haya calzado exacto.
-   - La migración corrige los movimientos de Web4Leads que quedaron con fecha futura.
+   - Web4Leads ya no guarda fechas posteriores a hoy (zona de la empresa), así que el movimiento queda con el día en que ocurrió y calza exacto con la cartola.
+   - La migración corrige los movimientos de Web4Leads que quedaron con fecha futura. Si dos quedarían con la misma huella, corrige solo el primero e informa cuántos quedaron.
+   - Se evaluó y se descartó reconocer como iguales movimientos con un día de diferencia: ocultaba en silencio pagos reales repetidos en días seguidos (revisión del subagente).
 4. **Clave de idempotencia** nueva por cada archivo elegido.
 5. **Migración** `20261215100000_finanzas_cartolas_historial`:
    - Columnas `creado_por_id`, `creado_por_nombre`, `via_agente` y `saldo_inicial`; `saldo_final` pasa a aceptar NULL, y el 0 sin respaldo queda NULL.
@@ -33,8 +33,8 @@ Todo pasa por `ctx.db`/`tx` con RLS. El autor sale de la sesión (`ctx.usuario`)
 
 ## 12–13. Pruebas
 
-- Dominio: ±1 día solo contra Web4Leads, cada movimiento calza una vez, el calce exacto va primero, dos días no calzan, y fecha futura acotada a hoy.
-- Base (`finanzas-bancos-historial-db.test.ts`): autor y saldos de la importación; saldo de hoy desde el cierre de la cartola; fecha futura acotada que suma al saldo; calce de cartola con Web4Leads con un día de diferencia. Todas las `finanzas-*-db` siguen en verde.
+- Dominio: fecha futura acotada a hoy.
+- Base (`finanzas-bancos-historial-db.test.ts`): autor y saldos de la importación; saldo de hoy desde el cierre de la cartola; fecha futura acotada que suma al saldo; la cartola calza exacto con el movimiento de Web4Leads ya acotado. Todas las `finanzas-*-db` siguen en verde.
 - e2e `@preview` (`finanzas-bancos-importaciones-preview.spec.ts`) con la semilla `qa-e2e/bancos-importaciones.sql`: historial, saldo y diálogo de deshacer, cancelando.
 
 ## 15. Riesgos y rollback

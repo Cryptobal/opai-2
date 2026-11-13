@@ -59,20 +59,34 @@ BEGIN
   RAISE NOTICE 'cartolas con autor completado: %', n;
 
   -- Web4Leads con fecha posterior al día en que llegó (zona de la empresa): se lleva a ese día y se rehace
-  -- la huella (empieza con la fecha). Se salta si la huella nueva ya existe en la cuenta.
-  UPDATE "finanzas"."movimientos_bancarios" m
-     SET "fecha" = (m."created_at" AT TIME ZONE t."timezone")::date,
-         "clave_dedupe" = to_char((m."created_at" AT TIME ZONE t."timezone")::date, 'YYYY-MM-DD') || substr(m."clave_dedupe", 11)
-    FROM "core"."tenants" t
-   WHERE t."id" = m."tenant_id" AND m."origen" = 'web4leads'
-     AND m."fecha" > (m."created_at" AT TIME ZONE t."timezone")::date
-     AND m."clave_dedupe" ~ '^\d{4}-\d{2}-\d{2}\|'
-     AND NOT EXISTS (
+  -- la huella (empieza con la fecha). Se salta si la huella nueva ya existe en la cuenta o si dos movimientos
+  -- quedarían con la misma (solo se corrige el primero de cada huella nueva).
+  WITH candidatos AS (
+    SELECT m."id", m."tenant_id", m."cuenta_id",
+           (m."created_at" AT TIME ZONE t."timezone")::date AS dia,
+           to_char((m."created_at" AT TIME ZONE t."timezone")::date, 'YYYY-MM-DD') || substr(m."clave_dedupe", 11) AS clave
+      FROM "finanzas"."movimientos_bancarios" m
+      JOIN "core"."tenants" t ON t."id" = m."tenant_id"
+     WHERE m."origen" = 'web4leads'
+       AND m."fecha" > (m."created_at" AT TIME ZONE t."timezone")::date
+       AND m."clave_dedupe" ~ '^\d{4}-\d{2}-\d{2}\|'
+  ), unicos AS (
+    SELECT c.*, row_number() OVER (PARTITION BY c."tenant_id", c."cuenta_id", c.clave ORDER BY c."id") AS orden
+      FROM candidatos c
+     WHERE NOT EXISTS (
        SELECT 1 FROM "finanzas"."movimientos_bancarios" o
-        WHERE o."tenant_id" = m."tenant_id" AND o."cuenta_id" = m."cuenta_id"
-          AND o."clave_dedupe" = to_char((m."created_at" AT TIME ZONE t."timezone")::date, 'YYYY-MM-DD') || substr(m."clave_dedupe", 11));
+        WHERE o."tenant_id" = c."tenant_id" AND o."cuenta_id" = c."cuenta_id" AND o."clave_dedupe" = c.clave)
+  )
+  UPDATE "finanzas"."movimientos_bancarios" m
+     SET "fecha" = u.dia, "clave_dedupe" = u.clave
+    FROM unicos u
+   WHERE u."id" = m."id" AND u.orden = 1;
   GET DIAGNOSTICS n = ROW_COUNT;
   RAISE NOTICE 'movimientos de Web4Leads con fecha futura corregidos: %', n;
+  SELECT count(*) INTO n
+    FROM "finanzas"."movimientos_bancarios" m JOIN "core"."tenants" t ON t."id" = m."tenant_id"
+   WHERE m."origen" = 'web4leads' AND m."fecha" > (m."created_at" AT TIME ZONE t."timezone")::date;
+  RAISE NOTICE 'movimientos de Web4Leads que siguen con fecha futura (huella repetida): %', n;
 END $$;
 
 COMMIT;

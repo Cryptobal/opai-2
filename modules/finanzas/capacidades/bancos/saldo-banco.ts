@@ -55,10 +55,13 @@ export async function saldoDelBanco(
       const cartola = await db.cartolaImportada.findFirst({
         where: { cuentaId: c.id, saldoFinal: { not: null }, fechaHasta: { not: null } },
         orderBy: [{ fechaHasta: "desc" }, { createdAt: "desc" }],
-        select: { fechaHasta: true, saldoFinal: true },
+        select: { fechaHasta: true, saldoFinal: true, createdAt: true },
       });
       if (cartola?.saldoFinal != null && cartola.fechaHasta) {
-        const fecha = cartola.fechaHasta.toISOString().slice(0, 10);
+        // El cierre no puede ser posterior al día en que se importó (un período que termina en el futuro).
+        const hasta = cartola.fechaHasta.toISOString().slice(0, 10);
+        const importada = hoyIso(cartola.createdAt);
+        const fecha = hasta < importada ? hasta : importada;
         if (!conocido || fecha > conocido.fecha) conocido = { cuentaId: c.id, saldo: Number(cartola.saldoFinal), fecha };
       }
     }
