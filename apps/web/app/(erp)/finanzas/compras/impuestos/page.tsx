@@ -23,11 +23,14 @@ export default function ImpuestosPage({ searchParams }: { searchParams: SearchPa
       ruta="/finanzas/compras/impuestos"
       cargando="detalle"
       cargar={async () => cargarF29((await leerParametros(searchParams))["mes"])}
-      opciones={(d) => ({ acciones: <SelectorMes mes={d.mes} opciones={d.opciones} /> })}
     >
       {(d) => (
         <div className="flex flex-col gap-4">
           <PestanasCompras activa="impuestos" />
+          {/* El selector va en el contenido: el marco nuevo no muestra las acciones de la cabecera en todas las vistas. */}
+          <div className="flex justify-end">
+            <SelectorMes mes={d.mes} opciones={d.opciones} />
+          </div>
           <Estado state={d.state} variante="detalle">
             {d.f29 ? <VistaF29 f={d.f29} /> : null}
           </Estado>
