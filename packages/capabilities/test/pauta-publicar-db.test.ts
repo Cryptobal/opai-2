@@ -209,7 +209,7 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
     const lista = await run(ctx(tenantA), "pauta.publicaciones.listar", { mes });
     expect(lista).toMatchObject({
       ok: true,
-      data: { publicaciones: [{ instalacionId: inst, avisados: 1 }] },
+      data: { items: [{ instalacionId: inst, avisados: 1 }], siguiente: null },
     });
   });
 
@@ -235,7 +235,7 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
     });
     expect(await run(sup, "pauta.publicaciones.listar", { mes })).toMatchObject({
       ok: true,
-      data: { publicaciones: [] },
+      data: { items: [], siguiente: null },
     });
   });
 });

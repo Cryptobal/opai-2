@@ -99,36 +99,47 @@ export const publicacionesPublicar = defineCapability({
   },
 });
 
-/** Qué instalaciones tienen publicada la pauta de un mes (para el botón «Publicar» y su estado). */
+/** Qué instalaciones tienen publicada la pauta de un mes (para el botón «Publicar» y su estado). Contrato de listas. */
 export const publicacionesListar = defineCapability({
   id: "pauta.publicaciones.listar",
   descripcion:
     "Lista, para un mes, las instalaciones cuya pauta ya se publicó, con cuándo y a cuántas personas se avisó. Solo instalaciones dentro del alcance de quien consulta.",
   permiso: PERMISO_READ,
-  input: z.object({ mes: publicacionInput.shape.mes }),
+  input: z.object({
+    mes: publicacionInput.shape.mes,
+    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
+    limite: z.number().int().min(1).max(200).default(50),
+  }),
   output: z.object({
-    publicaciones: z.array(
+    items: z.array(
       z.object({ instalacionId: uuidSchema, publicadaEn: z.string(), avisados: z.number().int() }),
     ),
+    siguiente: z.string().nullable(),
   }),
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { mes }) {
+  async handler(ctx, { mes, cursor, limite }) {
     const visibles = await ctx.db.instalacion.findMany({
       where: { AND: [dondeInstalacion(ctx)] },
       select: { id: true },
     });
     const filas = await ctx.db.publicacionPauta.findMany({
-      where: { mes, instalacionId: { in: visibles.map((v) => v.id) } },
+      where: {
+        mes,
+        instalacionId: { in: visibles.map((v) => v.id), ...(cursor ? { gt: cursor } : {}) },
+      },
       select: { instalacionId: true, publicadaEn: true, avisados: true },
       orderBy: { instalacionId: "asc" },
+      take: limite + 1,
     });
+    const pagina = filas.slice(0, limite);
     return {
-      publicaciones: filas.map((f) => ({
+      items: pagina.map((f) => ({
         instalacionId: f.instalacionId,
         publicadaEn: f.publicadaEn.toISOString(),
         avisados: f.avisados,
       })),
+      siguiente: filas.length > limite ? (pagina.at(-1)?.instalacionId ?? null) : null,
     };
   },
 });
