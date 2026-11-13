@@ -21,11 +21,11 @@ function archivos(dir: string, salida: string[] = []): string[] {
 }
 
 describe("sin campo de fecha nativo en pantallas", () => {
-  it('ninguna pantalla usa type="date"', () => {
+  it('ninguna pantalla usa type="date" ni type="datetime-local"', () => {
     const bases = ["apps/web/app", "apps/web/components", "modules"].map((d) => join(raiz, d));
     const fallas = bases
       .flatMap((b) => archivos(b))
-      .filter((f) => /type=\{?["']date["']\}?/.test(readFileSync(f, "utf8")))
+      .filter((f) => /type=\{?["'](date|datetime-local)["']\}?/.test(readFileSync(f, "utf8")))
       .map((f) => relative(raiz, f));
     expect(fallas).toEqual([]);
   });

@@ -46,7 +46,7 @@
 <div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el checklist" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-CER-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
 </sc-if>
 <sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
-<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo el dueño ve el checklist de certificación" description="Contiene brechas técnicas del sistema. Si lo necesitas, pídeselo a Carlos Irigoyen." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo el dueño ve el checklist de certificación" description="Contiene brechas técnicas del sistema. Si lo necesitas, pídeselo a Andrea Fuentes." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
 </sc-if>
 <sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;gap:16px">

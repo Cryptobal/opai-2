@@ -1,0 +1,12 @@
+# CAR-27 · Comercial PR 3: reportes, exportación, campos personalizados, fusión y transferencia
+
+- **Sesión:** Sesión Comercial
+
+## PR #633 · rama `brief/car-27-transferir-negocios`
+
+- **Estado:** En PR
+- **Migración:** No
+
+### Qué entra
+
+Botón **Transferir cartera** en Negocios (tablero y lista; diseño `export-crm-v3-cierre/Negocios·cartera`): hoja con De, Nuevo responsable, «Tareas pendientes» y mensaje; antes de confirmar muestra cuántos negocios, el monto mensual y las tareas que se mueven (vista previa de la misma capacidad). Capacidad nueva `comercial.negocios.transferir` (MCP `comercial_negocios_transferir`, con `dryRun`): los negocios elegidos (`negocioIds`, hasta 200) o la cartera abierta de una persona (`deResponsableId`); solo abiertos y sin archivar; omite con motivo los no encontrados, cerrados y los que ya son del nuevo responsable; pasa las tareas pendientes de esos negocios; evento `comercial.negocio.actualizado` por negocio y aviso in-app al nuevo responsable con el mensaje. Lectura nueva `comercial.negocios.responsables` (MCP `comercial_negocios_responsables`): usuarios activos del ERP con sus negocios abiertos (sin contactos de clientes). Sin migración. **Decisiones nocturnas (revisar):** (1) la pantalla transfiere la **cartera de una persona**; la selección múltiple de negocios del diseño queda en la capacidad y el MCP (la lista actual no tiene selección); (2) las **cuentas** no se transfieren: en 2.0 no tienen responsable; (3) el aviso es in-app (sin correo).

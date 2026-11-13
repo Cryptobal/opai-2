@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Sheet, Textarea } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Input, InputFecha, InputHora, Sheet, Textarea } from "@opai/ds";
 
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 /** «YYYY-MM-DDTHH:mm» local del navegador → ISO 8601 (o nada si está vacío). */
-const aIso = (v: string) => (v ? new Date(v).toISOString() : undefined);
+// Fecha (aaaa-mm-dd) y hora (HH:mm) del navegador → instante ISO; sin hora se toma el inicio del día.
+const aIso = (fecha: string, hora: string) =>
+  fecha ? new Date(`${fecha}T${hora || "00:00"}`).toISOString() : undefined;
 
 /**
  * Registrar un incidente de seguridad (`?nuevo=1`, §16.5): flujo manual, sin detector automático.
@@ -20,9 +22,10 @@ export function HojaIncidente() {
   const [descripcion, setDescripcion] = useState("");
   const [alcance, setAlcance] = useState("");
   const [datos, setDatos] = useState("");
-  const [ocurrido, setOcurrido] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [hora, setHora] = useState("");
   async function registrar() {
-    const iso = aIso(ocurrido);
+    const iso = aIso(fecha, hora);
     const r = await ejecutar("core.cumplimiento.incidente_registrar", {
       descripcion: descripcion.trim(),
       ...(alcance.trim() ? { alcance: alcance.trim() } : {}),
@@ -68,12 +71,10 @@ export function HojaIncidente() {
           htmlFor="inc-cuando"
           ayuda="Desde aquí corre el plazo de aviso"
         >
-          <Input
-            id="inc-cuando"
-            type="datetime-local"
-            value={ocurrido}
-            onChange={(e) => setOcurrido(e.target.value)}
-          />
+          <div className="grid grid-cols-[1fr_8rem] gap-2">
+            <InputFecha id="inc-cuando" valor={fecha} onCambiar={setFecha} />
+            <InputHora aria-label="Hora en que se detectó" valor={hora} onCambiar={setHora} />
+          </div>
         </Campo>
         <Campo
           etiqueta="Alcance"

@@ -1,4 +1,4 @@
-// CAR-350: patrones de gerente y lector tal como estaban antes de pasar a lista explícita
+// CAR-350/CAR-387: patrones de gerente, lector y supervisor tal como estaban antes de pasar a lista explícita
 // («todo menos…»). Solo para probar que la matriz no cambió sobre el catálogo real.
 import { PERMISOS_CORE } from "@opai/domain";
 
@@ -82,5 +82,38 @@ export const PREVIOS = {
       // ADR-094: el comodín `*:*.read` no alcanza a los resultados de gestión de otras personas.
       PERMISOS_CORE.indicadoresGestionRead,
     ],
+  },
+  supervisor: {
+    permitir: [
+      "ops:*",
+      "rondas:*",
+      "acceso:read",
+      "pauta:*",
+      "asistencia:ver",
+      "asistencia:corregir",
+      "tickets:*",
+      "desempeno:scorecards.read",
+      "desempeno:resultados.ver",
+      "rendiciones:rendir",
+      "personas:read",
+      "personas:*.read",
+      PERMISOS_CORE.tenantRead,
+      PERMISOS_CORE.cuentasRead,
+      PERMISOS_CORE.instalacionesRead,
+      PERMISOS_CORE.patronesRead,
+      PERMISOS_CORE.funcionesRead,
+      PERMISOS_CORE.vinculosRead,
+      PERMISOS_CORE.personasRead,
+      PERMISOS_CORE.personasPrevisionRead,
+      PERMISOS_CORE.personasPagoRead,
+      PERMISOS_CORE.personasLaboralRead,
+      PERMISOS_CORE.documentosRead,
+      PERMISOS_CORE.documentosSubirAlcance,
+      PERMISOS_CORE.firmasEnviar,
+      PERMISOS_CORE.firmasRead,
+      PERMISOS_CORE.configRead,
+      PERMISOS_CORE.calendarioRead,
+    ],
+    denegar: [...FINANCIERO, "comercial:*", "cpq:*", "tickets:tipos.manage"],
   },
 };
