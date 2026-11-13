@@ -10,11 +10,11 @@ import {
   type MapeoColumnasGenerico,
 } from "@opai/domain";
 
-import { filaPreviewSchema } from "./esquemas";
+import { cuadraturaSchema, filaPreviewSchema } from "./esquemas";
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { cuentaDe } from "./util";
 import { aplicarImportacionCartola } from "./cartola-importar-aplicar";
-import { leerCartola } from "./cartola-leer";
+import { leerCartola, mensajeDescuadre } from "./cartola-leer";
 
 const MAX_B64 = CARTOLA_MAX_BASE64;
 
@@ -46,6 +46,8 @@ export const bancosCartolaImportar = defineCapability({
     rechazados: z.number().int(),
     saldoFinal: z.number().int().nullable(),
     filas: z.array(filaPreviewSchema),
+    /** Saldo inicial + detalle = saldo final de la cartola (CAR-341); null si el archivo no trae saldos. */
+    cuadratura: cuadraturaSchema.nullable(),
     /** Movimientos que las reglas del banco conciliaron solas o dejaron sugeridos (no en vista previa). */
     reglas: z.object({ conciliados: z.number().int(), sugeridos: z.number().int() }).optional(),
   }),
@@ -59,7 +61,7 @@ export const bancosCartolaImportar = defineCapability({
     if (prevCartola && !dryRun) throw reglaDeNegocio("Importación ya aplicada con esta clave de idempotencia.");
 
     const buf = Buffer.from(input.contenidoBase64, "base64");
-    const { filas: parsedFilas, rechazadas, saldoFinal, fechaDesde, fechaHasta } = await leerCartola(
+    const { filas: parsedFilas, rechazadas, saldoFinal, fechaDesde, fechaHasta, cuadratura } = await leerCartola(
       buf,
       input.formato,
       (input.mapeoColumnas ?? cuenta.mapeoColumnas ?? null) as MapeoColumnasGenerico | null,
@@ -117,9 +119,12 @@ export const bancosCartolaImportar = defineCapability({
       rechazados: rechazadas.length,
       saldoFinal,
       filas: previews,
+      cuadratura,
     };
 
     if (dryRun) return resumen;
+    // CAR-341: una cartola que no cuadra (saldo inicial + detalle ≠ saldo final) está mal leída o incompleta.
+    if (cuadratura && !cuadratura.cuadra) throw reglaDeNegocio(mensajeDescuadre(cuadratura.diferencia));
 
     const { reglas } = await aplicarImportacionCartola(ctx, {
       cuenta,
