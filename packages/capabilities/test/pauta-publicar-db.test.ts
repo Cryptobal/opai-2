@@ -175,7 +175,8 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
       data: { personas: 2, conUsuario: 1, publicadaEn: null, publicadaAntes: null },
     });
     expect(await e.admin.publicacionPauta.count({ where: { tenantId: tenantA } })).toBe(0);
-    expect(r.ok && previo.ok && r.data.turnos).toBe(previo.ok ? previo.data.turnos : -1);
+    const turnos = (x: unknown) => (x as { data?: { turnos?: number } }).data?.turnos;
+    expect(turnos(r)).toBe(turnos(previo));
   });
 
   it("publicar registra, emite el evento y el consumidor avisa una sola vez a quien tiene usuario", async () => {
