@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineModule } from "@opai/capabilities";
 
 import { capacidades } from "./capacidades";
+import { fuentesAprobacionTickets } from "./fuente-aprobaciones";
 
 /**
  * Manifest del módulo Tickets (CAR-84, Brief 13 · PR 1, ADR-003/ADR-025). Tickets internos sin chat
@@ -53,4 +54,5 @@ export const manifest = defineModule({
     { id: "tickets.ticket.rechazado", descripcion: "Se rechazó una solicitud con su motivo." },
   ],
   capacidades,
+  aprobaciones: fuentesAprobacionTickets,
 });
