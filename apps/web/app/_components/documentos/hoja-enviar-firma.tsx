@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { avisar, Button, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
 
+import { avisarCambio } from "../ejecutar-capacidad";
 import { useCapacidad } from "../use-capacidad";
 import { useHojaUrl } from "../maestros/use-url";
 
@@ -81,6 +82,7 @@ export function HojaEnviarFirma() {
               );
               if (r) {
                 avisar.exito("Enviado a firma");
+                avisarCambio(); // sin invalidar la página, pero pendientes y Actividad se ponen al día
                 cerrar();
               }
             }}

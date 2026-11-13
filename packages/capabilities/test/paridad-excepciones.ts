@@ -53,6 +53,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.personas.pago_rechazar_cambio":
     "Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
+  "core.aprobaciones.reglas_guardar":
+    "Solo personas: decide quién aprueba lo irreversible; un agente no puede cambiar la regla que lo frena (ADR-032, CAR-252).",
+  "core.aprobaciones.reglas_desactivar":
+    "Solo personas: desactivar una regla quita una aprobación de lo irreversible; lo decide un humano (ADR-032, CAR-252).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
   "platform.aprobaciones.aprobar":

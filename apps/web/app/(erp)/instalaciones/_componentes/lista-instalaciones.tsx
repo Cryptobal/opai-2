@@ -37,6 +37,7 @@ export function ListaInstalaciones(p: Props) {
       state={p.state}
       titulo={p.titulo}
       accion={nueva}
+      vistas={{ lista: "instalaciones", ruta: "/instalaciones" }}
       buscar={`Buscar ${p.singular}`}
       filtros={[
         { param: "cuenta", etiqueta: "Cuenta", opciones: p.cuentas },

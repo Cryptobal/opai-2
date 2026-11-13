@@ -6,7 +6,8 @@
 name: auditoria-diseno
 on:
   pull_request:
-    types: [labeled, synchronize]
+    # Solo a pedido: corre cuando se pone la etiqueta «diseño» (ahorro de Actions, 13-nov-2026).
+    types: [labeled]
 
 permissions:
   contents: read
@@ -18,8 +19,8 @@ concurrency:
 jobs:
   auditoria-diseno:
     name: auditoria-diseno
-    if: (github.event.action == 'labeled' && github.event.label.name == 'auditoria-diseno') || (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'auditoria-diseno'))
-    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft != true && github.event.label.name == 'diseño'
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 100
     permissions:
       contents: read

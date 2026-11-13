@@ -71,7 +71,7 @@ describe("ejecutarCapacidad nunca lanza", () => {
       throw new Error("revalidar falló");
     });
     const r = await ejecutarCapacidad("erp", "core.config.set", {});
-    expect(r).toEqual({ ok: true, data: { version: 3 }, dryRun: false });
+    expect(r).toEqual({ ok: true, data: { version: 3 }, dryRun: false, escritura: true });
     expect(h.revalidar).toHaveBeenCalledTimes(1);
   });
 

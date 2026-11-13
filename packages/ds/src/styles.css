@@ -579,3 +579,36 @@
 [data-marco="nuevo"] nav[data-shell="riel"] {
   background-color: var(--ds-side);
 }
+/* Riel del diseño nuevo (CAR-377): `ShellNuevo` pone `RielNuevo` (primer nivel y un ícono por
+   módulo) a la izquierda del shell; el riel clásico, que lista cada submódulo, no se muestra. */
+[data-marco="nuevo"][data-menu] > div {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+[data-marco="nuevo"] nav[data-shell="riel"]:not([data-riel-nuevo]) {
+  display: none !important;
+}
+/* Listas con ficha a la derecha en el diseño nuevo (ADR-109, CAR-336): desde 1024 px, sin ficha la
+   lista usa todo el ancho (sin un panel casi vacío al lado) y, con ficha, la ficha toma el 58 %. No
+   aplica a Configuración (`data-contenido`), que tiene su propio menú a la izquierda. */
+@media (min-width: 64rem) {
+  [data-marco="nuevo"] [data-split]:not([data-contenido]) > [data-columna="lista"] {
+    width: 42%;
+  }
+  [data-marco="nuevo"] [data-split][data-sin-detalle]:not([data-contenido]) > [data-columna="lista"] {
+    width: 100%;
+    flex: 1 1 auto;
+    border-right-width: 0;
+  }
+  [data-marco="nuevo"] [data-split][data-sin-detalle]:not([data-contenido]) > [data-columna="detalle"] {
+    display: none;
+  }
+  /* «Ver a pantalla completa» (CAR-335 D4b): sin JS; la casilla de la ficha esconde la lista. */
+  [data-marco="nuevo"] [data-split] [data-expandir-ficha] {
+    display: flex;
+    margin: -0.5rem -0.75rem 0 0;
+  }
+  [data-marco="nuevo"] [data-split]:has([data-expandir]:checked) > [data-columna="lista"] {
+    display: none;
+  }
+}

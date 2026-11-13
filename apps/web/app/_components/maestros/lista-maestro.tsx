@@ -12,6 +12,7 @@ import {
 
 import { LinkNext } from "../link-next";
 import { AccionListaFlotante } from "./accion-lista-flotante";
+import { VistasDiferidas } from "./vistas-diferidas";
 import { Buscador } from "./buscador";
 import type { Filtro } from "./chips-filtro";
 import { ChipsFiltroDiferido } from "./chips-filtro-diferido";
@@ -43,6 +44,8 @@ type Props = {
   filas: readonly FilaLista[];
   seleccionada?: string | undefined;
   vacio: { titulo: string; descripcion?: string; accion?: ReactNode };
+  /** Vistas guardadas de esta lista (CAR-335 D4c): clave de la lista y su ruta. */
+  vistas?: { lista: string; ruta: string };
   pie?: ReactNode;
 };
 
@@ -68,7 +71,12 @@ export function ListaMaestro(p: Props) {
       {p.vista ? <div className="pb-2.5 md:px-4 md:pt-3 md:pb-0">{p.vista}</div> : null}
       <HerramientasLista>
         <Buscador placeholder={p.buscar} />
-        {p.filtros?.length ? <ChipsFiltroDiferido filtros={p.filtros} /> : null}
+        {p.filtros?.length || p.vistas ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {p.filtros?.length ? <ChipsFiltroDiferido filtros={p.filtros} /> : null}
+            {p.vistas ? <VistasDiferidas lista={p.vistas.lista} ruta={p.vistas.ruta} /> : null}
+          </div>
+        ) : null}
       </HerramientasLista>
       {p.meta ? <MetaLista izquierda={p.meta.izquierda} derecha={p.meta.derecha} /> : null}
       <div className="-mx-4 border-t border-border md:mx-0 md:border-t-0">

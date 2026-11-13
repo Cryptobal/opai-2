@@ -10,6 +10,7 @@
     ".": "./src/index.ts",
     "./form-screen-listo": "./src/patterns/form-screen-listo.tsx",
     "./shell-nuevo": "./src/shell/nuevo/shell-nuevo.tsx",
+    "./seleccion": "./src/patterns/seleccion/index.tsx",
     "./switch": "./src/components/switch.tsx",
     "./uploader": "./src/components/uploader.tsx",
     "./hilo": "./src/hilo/tokens-hilo.ts",
