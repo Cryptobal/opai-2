@@ -14,7 +14,7 @@ import { cuadraturaSchema, filaPreviewSchema } from "./esquemas";
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { cuentaDe } from "./util";
 import { aplicarImportacionCartola } from "./cartola-importar-aplicar";
-import { leerCartola, mensajeDescuadre } from "./cartola-leer";
+import { cartolaRepetida, leerCartola, mensajeDescuadre } from "./cartola-leer";
 
 const MAX_B64 = CARTOLA_MAX_BASE64;
 
@@ -48,6 +48,8 @@ export const bancosCartolaImportar = defineCapability({
     filas: z.array(filaPreviewSchema),
     /** Saldo inicial + detalle = saldo final de la cartola (CAR-341); null si el archivo no trae saldos. */
     cuadratura: cuadraturaSchema.nullable(),
+    /** La misma cuenta ya tiene una cartola con este período (CAR-341); la vista previa lo avisa. */
+    yaImportada: z.object({ nombreArchivo: z.string().nullable(), creadaEn: z.string() }).nullable().optional(),
     /** Movimientos que las reglas del banco conciliaron solas o dejaron sugeridos (no en vista previa). */
     reglas: z.object({ conciliados: z.number().int(), sugeridos: z.number().int() }).optional(),
   }),
@@ -120,6 +122,7 @@ export const bancosCartolaImportar = defineCapability({
       saldoFinal,
       filas: previews,
       cuadratura,
+      yaImportada: dryRun ? await cartolaRepetida(ctx, cuenta.id, fechaDesde, fechaHasta) : null,
     };
 
     if (dryRun) return resumen;

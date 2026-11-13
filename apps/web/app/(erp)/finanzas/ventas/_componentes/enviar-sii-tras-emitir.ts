@@ -1,6 +1,6 @@
 import { avisar } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { mensajeDeError } from "@/lib/mensajes-error";
 
 // Un corte de red no deja saber si el SII recibió el documento: nunca se invita a reenviar a ciegas.

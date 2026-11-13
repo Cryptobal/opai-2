@@ -123,30 +123,12 @@ export function subLienzo(
 
 const dia = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(d);
 /** Hora si es de hoy; si no, día y mes («10-11»). */
-function cuandoCorto(iso: string, ahora: Date): string {
+export function cuandoCorto(iso: string, ahora: Date): string {
   const d = new Date(iso);
   if (dia(d) === dia(ahora)) return hora(d);
   return new Intl.DateTimeFormat("es-CL", { day: "2-digit", month: "2-digit", timeZone: ZONA })
     .format(d)
     .replace(/\//g, "-");
-}
-
-type ItemActividad = {
-  id: string;
-  cuando: string;
-  actor: { nombre: string; agente: boolean };
-  accion: string;
-};
-
-/** «Actividad»: lo último que hicieron las personas y los agentes (salida de `core.actividad.list`). */
-export function actividadHilo(items: readonly ItemActividad[], ahora: Date): FilaHilo[] {
-  return items.map((i) => ({
-    id: i.id,
-    cuando: cuandoCorto(i.cuando, ahora),
-    quien: i.actor.nombre,
-    ...(i.actor.agente ? { agente: true } : {}),
-    texto: i.accion,
-  }));
 }
 
 type ItemAgenda = {
