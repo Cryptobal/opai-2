@@ -29,4 +29,15 @@ describe("sin campo de fecha nativo en pantallas", () => {
       .map((f) => relative(raiz, f));
     expect(fallas).toEqual([]);
   });
+
+  // La hora nativa (y `InputHora`, que la envuelve) muestra «--:-- --» con AM/PM en un equipo en
+  // inglés; las pantallas usan `SelectorHora` de `@opai/ds` (24 h, hh:mm).
+  it('ninguna pantalla usa type="time" ni InputHora', () => {
+    const bases = ["apps/web/app", "apps/web/components", "modules"].map((d) => join(raiz, d));
+    const fallas = bases
+      .flatMap((b) => archivos(b))
+      .filter((f) => /type=\{?["']time["']\}?|\bInputHora\b/.test(readFileSync(f, "utf8")))
+      .map((f) => relative(raiz, f));
+    expect(fallas).toEqual([]);
+  });
 });
