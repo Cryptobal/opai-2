@@ -5,7 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { variablesFueraDeClase } from "@opai/domain";
 import { avisar } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import type { PlantillaEditor } from "./tipos";
 

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { Alerta, avisar, Badge, Button, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { fechaHora } from "@/lib/formato";
 
 import { type ModuloCatalogo, nombrePermiso } from "./_permisos/etiquetas";
