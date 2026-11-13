@@ -12,7 +12,7 @@
     "/(erp)/finanzas/bancos": 170,
     "/(erp)/finanzas/bancos/reglas": 169,
     "/(erp)/finanzas/bancos/importaciones": 172,
-    "/(erp)/negocios/[id]/actividad": 183,
+    "/(erp)/negocios/[id]/actividad": 187,
     "/(erp)/instalaciones/[id]/actividad": 179,
     "/(auth)/*": 153,
     "/(auth)/activar-mfa": 160,
