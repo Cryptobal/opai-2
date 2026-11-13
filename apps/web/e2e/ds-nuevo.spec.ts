@@ -58,6 +58,17 @@ test.describe("muestra del marco nuevo", () => {
       await page.getByRole("button", { name: "Ocultar el menú" }).click();
       const fijar = page.getByRole("button", { name: "Dejar el menú fijo" });
       await expect(fijar).toBeVisible();
+      // Plegado (CAR-377): el riel muestra los módulos, no cada submódulo; tocar uno lo abre.
+      await page.mouse.move(900, 500);
+      const riel = page.locator("nav[data-riel-nuevo]");
+      await expect(riel.getByRole("button", { name: "Comercial" })).toBeVisible();
+      await expect(riel.getByRole("link", { name: "Negocios" })).toHaveCount(0);
+      await capturar(page, info, "ds-nuevo-marco-oculto");
+      // Con el teclado o en pantalla táctil (sin pasar el mouse por encima).
+      await riel.getByRole("button", { name: "Comercial" }).dispatchEvent("click");
+      await expect(page.getByRole("link", { name: "Negocios" })).toBeVisible();
+      await page.mouse.move(900, 500);
+      await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
       await page.getByRole("navigation", { name: "Principal" }).filter({ has: fijar }).hover();
       const completo = page
         .getByRole("navigation", { name: "Principal" })
