@@ -3,6 +3,7 @@ import type { FilaCartolaParseada } from "@opai/domain";
 import type { Contexto } from "@opai/capabilities";
 
 import { sinDuplicado } from "../esquemas";
+import type { AjusteFecha } from "./cartola-emparejar";
 import { sincronizarAvisoSaldoBajo } from "./aviso-banco";
 import { aplicarReglasBanco } from "./reglas-aplicar";
 import { aFecha } from "./util";
@@ -17,6 +18,8 @@ export async function aplicarImportacionCartola(
     nombreArchivo?: string;
     idempotencyKey: string;
     nuevos: FilaCartolaParseada[];
+    /** Movimientos ya guardados con otra fecha: manda la fecha de la cartola (CAR-341). */
+    ajustes?: AjusteFecha[];
     duplicados: number;
     rechazadas: { indice: number; motivo: string }[];
     saldoFinal: number | null;
@@ -50,6 +53,18 @@ export async function aplicarImportacionCartola(
       "Importación duplicada.",
     );
 
+    for (const a of p.ajustes ?? []) {
+      await tx.movimientoBancario.update({
+        where: { id: a.existenteId },
+        data: {
+          fecha: aFecha(a.fecha),
+          claveDedupe: a.claveDedupe,
+          ...(a.saldoDespues != null ? { saldoDespues: BigInt(a.saldoDespues) } : {}),
+          ...(a.referencia != null ? { referencia: a.referencia } : {}),
+        },
+      });
+    }
+
     const ids: string[] = [];
     for (const f of p.nuevos) {
       const estado = f.esRemuneracion ? "por_autorizar" : "pendiente";
@@ -80,7 +95,7 @@ export async function aplicarImportacionCartola(
       tipo: "finanzas.banco.cartola_importada",
       entidadTipo: "cartolaImportada",
       entidadId: cartola.id,
-      payload: { nuevos: p.nuevos.length, duplicados: p.duplicados, ...reglas },
+      payload: { nuevos: p.nuevos.length, duplicados: p.duplicados, fechasAjustadas: p.ajustes?.length ?? 0, ...reglas },
     });
     return { cartola, reglas };
   });

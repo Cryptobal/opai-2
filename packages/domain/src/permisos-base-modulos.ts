@@ -1,20 +1,20 @@
-// CAR-350 (Estándares P-1): qué permisos del catálogo de los módulos reciben los roles base gerente y lector.
-// Lista explícita: un permiso que no está aquí no lo recibe ninguno de los dos (como en GitHub, los
-// permisos se suman). Clase: "GL" gerente y lector · "G" solo gerente · "L" solo lector · "-" ninguno.
+// CAR-350 (Estándares P-1): qué permisos del catálogo de los módulos reciben los roles base gerente, lector y supervisor.
+// Lista explícita: un permiso que no está aquí no lo recibe ningún rol base (como en GitHub, los
+// permisos se suman). Clase: letras de quien lo recibe, G gerente · L lector · S supervisor (CAR-387) · "-" ninguno.
 // Todo permiso del catálogo debe estar clasificado; lo exige `apps/web/test/permisos-base.test.ts`.
 import type { ClaseBase } from "./permisos-base-tipos";
 
 export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "acceso:datos.ver_patente": "G",
   "acceso:listas.manage": "G",
-  "acceso:read": "GL",
+  "acceso:read": "GLS",
   "agente:configurar": "-",
   "agente:usar": "G",
   "asistencia:configurar": "G",
-  "asistencia:corregir": "G",
+  "asistencia:corregir": "GS",
   "asistencia:marcar": "G",
   "asistencia:reportes": "G",
-  "asistencia:ver": "G",
+  "asistencia:ver": "GS",
   "asistencia:ver_todo": "G",
   "comercial:canales.manage": "-",
   "comercial:config.manage": "-",
@@ -31,10 +31,10 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "cpq:envios.aprobar": "-",
   "cpq:modelo.manage": "-",
   "cpq:puestos.confirmar": "-",
-  "desempeno:resultados.ver": "GL",
+  "desempeno:resultados.ver": "GLS",
   "desempeno:resultados.ver_todos": "G",
   "desempeno:scorecards.manage": "-",
-  "desempeno:scorecards.read": "GL",
+  "desempeno:scorecards.read": "GLS",
   "finanzas:bancos.autorizar": "-",
   "finanzas:bancos.gestionar": "-",
   "finanzas:bancos.ver": "-",
@@ -57,8 +57,8 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "nomina:prestamos.manage": "-",
   "nomina:prestamos.read": "-",
   "nomina:read": "-",
-  "pauta:read": "GL",
-  "pauta:write": "G",
+  "pauta:read": "GLS",
+  "pauta:write": "GS",
   "portal_cliente:accesos.manage": "G",
   "portal_cliente:accesos.read": "GL",
   "portal_cliente:config.manage": "G",
@@ -68,15 +68,15 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "rendiciones:config.manage": "G",
   "rendiciones:pagar": "G",
   "rendiciones:pagar.aprobar": "G",
-  "rendiciones:rendir": "G",
+  "rendiciones:rendir": "GS",
   "rendiciones:ver_todas": "G",
-  "rondas:administrar": "G",
-  "rondas:confianza.manage": "G",
-  "rondas:configurar": "G",
-  "rondas:read": "GL",
-  "rondas:revisar": "G",
-  "tickets:tickets.gestionar": "GL",
-  "tickets:tickets.ver": "GL",
-  "tickets:tickets.ver_todos": "G",
+  "rondas:administrar": "GS",
+  "rondas:confianza.manage": "GS",
+  "rondas:configurar": "GS",
+  "rondas:read": "GLS",
+  "rondas:revisar": "GS",
+  "tickets:tickets.gestionar": "GLS",
+  "tickets:tickets.ver": "GLS",
+  "tickets:tickets.ver_todos": "GS",
   "tickets:tipos.manage": "-",
 };

@@ -19,7 +19,7 @@ export function VistaMovilFlujo({
       <div className="rounded-lg border border-border bg-surface p-4">
         <p className="text-sm text-fg-muted">Saldo de hoy</p>
         <p className="text-2xl font-semibold text-fg">
-          {clp(planilla.semanas[0]?.saldoFinal ?? planilla.ajustes.saldoInicial)}
+          {clp(planilla.semanas[0]?.saldoFinal ?? 0)}
         </p>
       </div>
       {planilla.semanas.map((s) => (

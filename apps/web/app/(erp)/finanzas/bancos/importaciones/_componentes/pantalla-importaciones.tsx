@@ -10,6 +10,8 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { clp, fechaDdMmAaaa } from "../../../flujo/_componentes/datos";
 import type { CuentaBanco } from "../../_componentes/bancos-tipos";
+import { origenSaldo } from "../../_componentes/origen-saldo";
+import { BorrarSincronizacion } from "./borrar-sincronizacion";
 import { DialogDeshacerImportacion } from "./dialog-deshacer-importacion";
 import type { ImportacionCartola, VistaDeshacer } from "./tipos";
 
@@ -77,9 +79,7 @@ export function PantallaImportaciones({
             <div className="text-right">
               <p className="t-caption text-fg-muted">Saldo de hoy</p>
               <p className="t-mono t-body font-medium">{clp(cuenta.saldoHoy)}</p>
-              {cuenta.saldoDesde ? (
-                <p className="t-caption text-fg-muted">Último saldo conocido al {fechaDdMmAaaa(cuenta.saldoDesde)}</p>
-              ) : null}
+              {origenSaldo(cuenta) ? <p className="t-caption text-fg-muted">{origenSaldo(cuenta)}</p> : null}
             </div>
           ) : null}
         </div>
@@ -123,6 +123,7 @@ export function PantallaImportaciones({
             ))}
           </ul>
         )}
+        {gestiona && cuentaId ? <BorrarSincronizacion cuentaId={cuentaId} /> : null}
       </div>
       <DialogDeshacerImportacion
         vista={vista}

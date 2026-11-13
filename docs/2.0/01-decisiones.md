@@ -226,6 +226,8 @@ decisiones atribuidas a Carlos.
 
 **Adenda CAR-350 (13-nov-2026, Sesión Núcleo, modo noche; Estándares P-1).** Los roles base **gerente** y **lector** dejan de definirse por «todo menos…» (`*` con 40 denegaciones; `*:read`/`*:*.read`) y pasan a **lista explícita**: cada permiso del catálogo (núcleo en `permisos-base-nucleo.ts`, módulos en `permisos-base-modulos.ts`) lleva su clase (`GL`, `G`, `L` o `-`). Un permiso nuevo no lo recibe ninguno de los dos hasta que alguien lo clasifica en el mismo PR, y `apps/web/test/permisos-base.test.ts` falla si un permiso del catálogo real no está clasificado o si la clasificación nombra uno que ya no existe. La matriz no cambió: la misma prueba compara, permiso por permiso, contra los patrones anteriores. Owner, admin y supervisor siguen con sus patrones (supervisor conserva `ops:*`, `rondas:*`, `pauta:*` y `tickets:*`; pasarlo a lista es un pendiente aparte). Sin migración.
 
+**Adenda CAR-387 (13-nov-2026, Sesión Núcleo; Estándares P-1b).** El rol **supervisor** también pasa a lista explícita: la clase de cada permiso suma la letra `S` (`GLS`, `GS`, `LS`, `S`…), y se eliminan sus comodines `ops:*`, `rondas:*`, `pauta:*` y `tickets:*` junto con sus denegaciones. Un permiso nuevo de esos módulos no lo recibe el supervisor hasta que se clasifica en el mismo PR. La matriz no cambió: `apps/web/test/permisos-base.test.ts` la compara, permiso por permiso, contra los patrones anteriores (32 permisos). Owner y admin siguen con `*`. Sin migración.
+
 ---
 
 ## ADR-017 · Calidad visual: primitivas accesibles, pulido y lint del DS
@@ -1445,6 +1447,11 @@ identidad de servicio en main.
 - **Umbral: $10.000.000 configurable por empresa.** Reemplaza los $15.000.000 de la regla 6. Se compara contra la suma de las cuentas activas y avisa solo por la campana. El defecto de la columna y del código pasa a $10.000.000; una migración de datos lleva a ese valor los ajustes que están en $15.000.000 y que nadie ha editado (sin ninguna escritura de ajustes por capacidad en la auditoría de la empresa: el defecto anterior o la migración del PR A) y no toca los que una persona o un agente fijó, aunque sea en $15.000.000. El bot toma el respaldo de Neon antes de aplicarla.
 - **Doble conteo en la semana en curso.** Un abono del banco sin conciliar ya está en el saldo de hoy. En la semana en curso, la proyección no suma una factura (ni el depósito esperado de una cesión) cuando un abono sin conciliar coincide con su monto pendiente y con el RUT de quien paga (cliente o factor) en la glosa. Con el mismo monto pero sin RUT que calce se mantiene la proyección y la planilla avisa «Posible cobro ya recibido: concilia el abono de $ X». Cada abono se usa una sola vez.
 - **Factoring.** El ingreso de una factura cedida es el depósito neto del factor (monto menos su descuento), por la fecha del banco si ya está en la cartola y, si no, en la semana de la cesión (o la actual si ya pasó); la factura cedida sale de «Cobros esperados». La diferencia (monto − depósito) va a la cuenta configurable y es solo informativa.
+
+**Adenda del 13-nov-2026 (Carlos, en el chat de la Sesión Caja; registrada en CAR-391).**
+- **No hay saldo de partida.** El flujo es una proyección desde lo que hay hoy en el banco: la suma de las cuentas activas, leída del endpoint de Web4Leads (hoy reenviado por OPAI 1.0) o de los movimientos cargados por cartola (históricos o provisorios, sin duplicar). No se pide un saldo inicial ni una semana desde en Configuración, para Gard ni para ninguna otra empresa.
+- **Sin saldo del banco** (ninguna cuenta activa con saldo), la planilla parte en $0 y avisa «Todavía no hay saldo del banco». La ventana por defecto empieza unas semanas antes de la semana en curso, no en una fecha de ajustes.
+- Las columnas `saldo_inicial` y `desde` de los ajustes quedan en la base y ya no entran en el saldo (sin migración); se retiran en un PR de limpieza.
 
 ## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
 

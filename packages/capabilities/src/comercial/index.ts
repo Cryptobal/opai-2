@@ -15,6 +15,8 @@ import { informesPerdidosPorMotivo } from "./informes-perdidos";
 import { informesTablero } from "./informes-tablero";
 import { negociosEmbudo } from "./negocios-embudo";
 import { negociosExportar } from "./negocios-exportar";
+import { negociosResponsables } from "./negocios-responsables";
+import { negociosTransferir } from "./negocios-transferir";
 import { negociosList } from "./negocios-lectura";
 import { negociosGanar, negociosMover } from "./negocios-mover";
 import { negociosSetContactos } from "./negocios-contactos";
@@ -49,6 +51,8 @@ import { contextoSugerirSeccion } from "./contexto-sugerir";
 export const capacidadesComercial: readonly Capacidad[] = [
   negociosList,
   negociosExportar,
+  negociosTransferir,
+  negociosResponsables,
   negociosGet,
   negociosEmbudo,
   negociosAlertas,

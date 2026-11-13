@@ -18,7 +18,7 @@ export async function semanasProyectadas(
   const { calculo } = await serieSaldos(
     ctx,
     ajustes,
-    desdeVentana(ajustes, hoy, hoy),
+    desdeVentana(hoy, hoy),
     ajustes.horizonteSemanas,
     tx,
   );

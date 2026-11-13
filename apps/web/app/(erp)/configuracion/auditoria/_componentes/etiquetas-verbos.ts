@@ -76,7 +76,7 @@ export const VERBOS: Record<string, string> = {
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
   prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
-  resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar",
+  resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar", transferir: "Transferir cartera", responsables: "Responsables posibles",
   // Cobro por módulo (CAR-188).
   condiciones_set: "Fijar condición comercial", cargos_generar: "Generar cargos del mes",
   cargos_list: "Listar cargos", cargo_anular: "Anular cargo",
@@ -98,6 +98,8 @@ export const VERBOS: Record<string, string> = {
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
   // Hilo (CAR-331).
   actividad: "Ver actividad", agenda: "Ver agenda",
+  // Bancos (CAR-341).
+  borrar_rango: "Borrar por fechas",
   // Impuestos (CAR-173).
   borrador_f29: "Borrador del F29",
 };

@@ -46,6 +46,7 @@ import {
   personasVincularUsuario,
 } from "./personas-estado";
 import { trabajoPersonasNoRecontratarVencer } from "./personas-no-recontratar-limpieza";
+import { trabajoCortarAccesosProgramado } from "./vinculos-corte-programado";
 import {
   personasMarcarNoRecontratar,
   personasNoRecontratarVer,
@@ -149,4 +150,5 @@ export const capacidadesMaestros: readonly Capacidad[] = [
 ];
 
 /** Trabajos diarios de los maestros, registrados por el borde (`apps/web/lib/registro.ts`). */
-export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer, trabajoConsultarContribuyenteSii, trabajoPurgarCacheSii];
+// prettier-ignore
+export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer, trabajoConsultarContribuyenteSii, trabajoPurgarCacheSii, trabajoCortarAccesosProgramado];
