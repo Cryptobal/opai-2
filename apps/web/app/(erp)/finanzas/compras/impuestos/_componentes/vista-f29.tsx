@@ -1,3 +1,4 @@
+import { formatearNumero } from "@opai/domain";
 import { Alerta, cn, GRILLA_KPI_HILO, KpiTile, SeccionTarjeta } from "@opai/ds";
 
 import { fecha, pesos } from "@/lib/fechas";
@@ -13,7 +14,7 @@ function Fila({ etiqueta, valor, fuerte }: { etiqueta: string; valor: string; fu
   );
 }
 
-const tasa = (bps: number) => `${(bps / 100).toLocaleString("es-CL", { maximumFractionDigits: 2 })} %`;
+const tasa = (bps: number) => `${formatearNumero(bps / 100, 2)} %`;
 const plural = (n: number, uno: string, varios: string) => (n === 1 ? uno : varios);
 
 /** Borrador del F29: totales arriba, libros de ventas y compras abajo, y los avisos que cambian el número. */
