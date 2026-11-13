@@ -2,8 +2,8 @@ import { Tabs } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
-/** Secciones de Bancos como rutas reales (server-first, ADR-037): movimientos y reglas (CAR-328). */
-export function PestanasBancos({ activa }: { activa: "movimientos" | "reglas" }) {
+/** Secciones de Bancos como rutas reales (server-first, ADR-037): movimientos, reglas (CAR-328) e importaciones (CAR-341). */
+export function PestanasBancos({ activa }: { activa: "movimientos" | "reglas" | "importaciones" }) {
   return (
     <Tabs
       Link={LinkNext}
@@ -11,6 +11,7 @@ export function PestanasBancos({ activa }: { activa: "movimientos" | "reglas" })
       tabs={[
         { id: "movimientos", etiqueta: "Movimientos", href: "/finanzas/bancos" },
         { id: "reglas", etiqueta: "Reglas", href: "/finanzas/bancos/reglas" },
+        { id: "importaciones", etiqueta: "Importaciones", href: "/finanzas/bancos/importaciones" },
       ]}
     />
   );
