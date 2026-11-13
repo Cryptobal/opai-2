@@ -40,6 +40,14 @@ describe("emparejarMovimientos", () => {
     expect(new Set([...r.values()].map((v) => v.existenteId)).size).toBe(3);
   });
 
+  it("dos filas idénticas frente a un solo existente: una es duplicado y la otra es nueva", () => {
+    const filas = [ent("2026-10-01", 1000, "ABONO X"), ent("2026-10-01", 1000, "ABONO X")];
+    const r = emparejarMovimientos(filas, [ex("e0", "2026-10-01", 1000, "ABONO X")]);
+    expect(r.size).toBe(1);
+    const ocupadas = new Set(["base"]);
+    expect(claveLibre("base", ocupadas)).not.toBe("base");
+  });
+
   it("una provisoria seguida de la histórica del mismo mes solo agrega lo que faltaba", () => {
     const provisoria = [ex("p1", "2026-11-03", 20_000, "Abono cliente ficticio"), ex("p2", "2026-11-04", -3_000, "Comision mantencion")];
     const historica = [

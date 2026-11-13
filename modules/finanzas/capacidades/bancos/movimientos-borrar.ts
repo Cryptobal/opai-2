@@ -61,7 +61,8 @@ export const bancosMovimientosBorrarRango = defineCapability({
     const actual = await ctx.transaccion(async (tx) => {
       // Se vuelve a contar dentro de la transacción: lo que se concilió entre la vista previa y ahora se conserva.
       const ahora = await contar(tx);
-      await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ahora.libres } } });
+      // Solo propuestas sin confirmar: si alguien confirmó una entre el recuento y aquí, la FK Restrict aborta todo.
+      await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ahora.libres }, confirmada: false } });
       await tx.movimientoBancario.deleteMany({ where: { id: { in: ahora.libres } } });
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.banco.movimientos_borrados",
