@@ -43,6 +43,8 @@ export type ResultadoPersona = {
   vigenteDesde: string | null;
   puntaje: number | null;
   cobertura: number;
+  /** Parte de sus acciones del mes hecha por su agente (CAR-312); null sin usuario en OPAI. */
+  parteAgente: { acciones: number; porAgente: number; porcentaje: number } | null;
   indicadores: {
     indicador: string;
     nombre: string;
@@ -117,3 +119,17 @@ const TONO = { verde: "success", amarillo: "warning", rojo: "danger" } as const;
 export function tonoPuntaje(puntaje: number | null): NonNullable<BadgeProps["tono"]> {
   return puntaje === null ? "neutro" : TONO[semaforoDeLogro(puntaje / 100)];
 }
+
+export type MesCerrado = {
+  periodo: string;
+  origen: "manual" | "automatico";
+  cerradoEn: string;
+  personas: number;
+};
+
+export const cargarCierres = () =>
+  ejecutarComoUsuario<{ cerrados: MesCerrado[]; porCerrar: string | null }>(
+    "erp",
+    "desempeno.periodos.list",
+    {},
+  );
