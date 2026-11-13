@@ -27,8 +27,10 @@ export function HojaSubirCartola({
   const [formato, setFormato] = useState<"santander" | "generico">("santander");
   const [archivo, setArchivo] = useState<File | null>(null);
   const [vista, setVista] = useState<VistaCartolaPreview | null>(null);
+  // Una clave nueva por cada archivo elegido: evita el doble clic, pero permite volver a importar el mismo archivo
+  // después de deshacer su importación (CAR-341); con la clave anterior se devolvía el resultado ya guardado.
   const idempotencyKey = useMemo(
-    () => (archivo ? `${archivo.name}-${archivo.lastModified}-${archivo.size}` : ""),
+    () => (archivo ? `${archivo.size}-${archivo.lastModified}-${crypto.randomUUID()}` : ""),
     [archivo],
   );
 
