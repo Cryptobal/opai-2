@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import type { Resultado } from "@opai/capabilities";
 
 import { ejecutarAsistenciaEquipo } from "@/app/_acciones/terreno-asistencia";
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { mensajeDeError } from "@/lib/mensajes-error";
 
 export type Modo = "equipo" | "telefono";
