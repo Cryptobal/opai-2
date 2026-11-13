@@ -88,6 +88,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "finanzas.impuestos.borrador_f29",
   "finanzas.plan.listar",
   "finanzas.planilla.obtener",
+  "finanzas.planilla.resumen",
   "finanzas.recurrentes.listar",
   "finanzas.ventas.libro_resumen",
   "finanzas.ventas.preflight_emision",

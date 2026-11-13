@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 772 pares pantalla→capacidad · 693 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 777 pares pantalla→capacidad · 698 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -400,6 +400,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.mover` | `finanzas_celdas_mover` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.actualizar` | `finanzas_recurrentes_actualizar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.crear` | `finanzas_recurrentes_crear` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.listar` | `finanzas_recurrentes_listar` | existe |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.cargar_caf` | — | excepción |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.listar` | `finanzas_folios_listar` | existe |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.set_activo` | `finanzas_folios_set_activo` | existe |
@@ -705,6 +709,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/documentos/plantillas/[id]` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
+| erp | `/finanzas/flujo/resumen` | `finanzas.planilla.resumen` | `finanzas_planilla_resumen` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador_nota_debito` | `finanzas_ventas_crear_borrador_nota_debito` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
@@ -1140,9 +1145,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.flujo.postergar_iva`
-- `finanzas.recurrentes.actualizar`
-- `finanzas.recurrentes.crear`
-- `finanzas.recurrentes.listar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
