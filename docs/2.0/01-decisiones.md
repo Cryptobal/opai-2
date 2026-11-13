@@ -2104,3 +2104,18 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 **Consecuencias.**
 - El corte automático de acceso al terminar (membresía, credencial de terreno, llaves) queda para la parte 2 de CAR-355.
 - La plantilla se edita como lista JSON hasta que haya diseño de editor (diseño nuevo, ADR-109).
+
+## ADR-111 · Modo noche: de 21:00 a 07:00 las sesiones trabajan e integran solas (CAR-375, 13-nov-2026)
+
+**Fecha:** 13-nov-2026 · **Estado:** vigente · **Decidió:** Carlos (chat de la Sesión Núcleo, 13-nov-2026, 00:30, hora de Chile) · **Registra:** Claude («Sesión Núcleo»). **Modifica** `AGENTS.md` (sección nueva «Modo noche», roles y migraciones), `docs/2.0/CONTEXTO-agentes.md` y `docs/2.0/OPERACION-agentes.md`.
+
+**Decisión.** Todas las noches, de 21:00 a 07:00 (America/Santiago), rige el «Modo noche» de `AGENTS.md`:
+1. Las sesiones trabajan sin pausa los tickets de Linear de su módulo por prioridad, sin esperar a Carlos ni al bot «OPAI 2.0».
+2. Las dudas de producto o diseño se resuelven con `docs/2.0/REFERENTES-saas.md` y el sistema de diseño vigente, y se anotan como «Decisión nocturna: … (revisar)» en el ticket y en el PR.
+3. Cada sesión integra sus PRs sin esperar revisión cuando cumplen los cuatro checks, no tienen conflictos, tienen revisión final sin bloqueos y, si hay migración, snapshot de Neon previo. Arregla sus checks rotos y resuelve choques trayendo `main`.
+4. De noche nunca se tocan: producción (`app.opai.cl`), OPAI 1.0, datos reales del tenant Gard, plata o emisiones reales al SII, secretos ni borrados irreversibles. Lo que dependa de eso queda en «Espera a Carlos» con la pregunta concreta.
+5. El PC de Carlos se puede usar para probar `test.opai.cl`, sin escribir datos de Gard.
+6. A las 07:00, resumen en el ticket padre del módulo: PRs integrados, decisiones nocturnas, «Espera a Carlos» y riesgos.
+
+**Alineación.** Quedan corregidas las frases que aún decían que el bot «OPAI 2.0» aplica las migraciones o que la sesión no las aplica: desde ADR-104 las aplica la sesión con respaldo, y el bot no integra ni migra. El veto de Carlos y la condición de `preview-e2e` para cambios visuales siguen vigentes también de noche. `REFERENTES-saas.md` llega con el PR #591 (CAR-348); mientras no esté en `main`, se usa el referente SaaS más cercano.
+
