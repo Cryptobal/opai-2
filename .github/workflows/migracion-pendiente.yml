@@ -5,8 +5,12 @@ name: Migración pendiente
 # puso. Para que frene el merge, Carlos lo activa como check obligatorio en el ruleset «Proteger
 # main». Solo lee etiquetas y archivos: no pone ni quita etiquetas y no usa secretos propios.
 on:
+  # Solo si el PR toca Prisma o migraciones (ahorro de Actions, 13-nov-2026).
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+    paths:
+      - "**/prisma/**"
+      - "**/migrations/**"
   merge_group:
 
 permissions:
@@ -20,8 +24,9 @@ concurrency:
 
 jobs:
   migracion-pendiente:
+    if: github.event.pull_request.draft != true
     name: migración pendiente
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
       - name: Cola de merge (control ya hecho en el PR)
