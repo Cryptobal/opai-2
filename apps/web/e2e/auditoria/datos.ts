@@ -38,7 +38,13 @@ async function crearCuenta(page: Page): Promise<string> {
 async function crearInstalacion(page: Page, cuentaId: string) {
   await page.goto(`/instalaciones/nueva?cuenta=${cuentaId}`);
   await page.getByLabel("Nombre", { exact: true }).fill(INSTALACION_QA);
-  await page.getByRole("button", { name: "Crear instalación", exact: true }).click();
+  const crear = page.getByRole("button", { name: "Crear instalación", exact: true });
+  // Si el botón sigue deshabilitado, la nota dice qué pide la pantalla («Falta …»).
+  if (await crear.isDisabled().catch(() => false)) {
+    const falta = await page.getByText(/^Falta /).first().textContent().catch(() => null);
+    throw new Error(`«Crear instalación» deshabilitado: ${falta ?? "sin aviso de lo que falta"}`);
+  }
+  await crear.click();
   await page.waitForURL(/\/instalaciones\/[0-9a-f-]{36}$/, { timeout: 60_000 });
 }
 
@@ -101,8 +107,8 @@ export async function prepararDatos(page: Page): Promise<string[]> {
     INSTALACION_QA,
     new RegExp(INSTALACION_QA),
   );
-  if (!instalacion && !(await paso("instalación", () => crearInstalacion(page, cuentaId))))
-    return notas;
+  // La persona y el negocio no dependen de la instalación: si falla, se anota y se sigue.
+  if (!instalacion) await paso("instalación", () => crearInstalacion(page, cuentaId));
   const persona = await buscar(page, "personas", "Auditoría", /Persona QA/);
   if (!persona) await paso("persona", () => crearPersona(page));
   let negocioId = await buscar(page, "negocios", NEGOCIO_QA, new RegExp(NEGOCIO_QA));
