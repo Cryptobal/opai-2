@@ -41,6 +41,8 @@ test.describe("@preview finanzas: cuadratura de la cartola", () => {
   test("una cartola que cuadra se puede importar", async ({ page }, info) => {
     const hoja = await previsualizar(page, 1235000);
     await expect(hoja.getByText("La cartola cuadra")).toBeVisible({ timeout: 30_000 });
+    // La empresa qa-e2e ya tiene una cartola de octubre (qa-e2e/bancos-importaciones.sql): se avisa (CAR-341).
+    await expect(hoja.getByText("Esta cartola ya se importó")).toBeVisible();
     await capturar(page, info, "cartola-cuadra");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
   });
