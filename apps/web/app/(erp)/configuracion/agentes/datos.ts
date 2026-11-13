@@ -16,6 +16,7 @@ export type ApiKey = {
   scopeAmplio: boolean;
   responsable: { nombre: string; email: string };
   ultimoUsoEn: string | null;
+  expiraEn: string | null;
   revocadaEn: string | null;
   presupuestoMensualUsd: number | null;
   valida: boolean;

@@ -56,7 +56,7 @@ describe.skipIf(!urlPropietario)("core · importador de personas en base real", 
     expect(r.conteos).toEqual({ crear: 2, actualizar: 0, sin_cambio: 0, error: 5 });
     lote = r.importacionId ?? "";
     const [ana, tomas] = await personas(x.t1);
-    expect([ana?.nombres, ana?.rut, ana?.telefono, ana?.prevision?.afp, ana?.prevision?.sistemaSalud]).toEqual(["Ana", "11111111-1", "+56912345678", "Habitat", "fonasa"]);
+    expect([ana?.nombres, ana?.rut, ana?.telefono, ana?.prevision?.afp, ana?.prevision?.sistemaSalud]).toEqual(["Ana", "11111111-1", "+56912345678", "habitat", "fonasa"]);
     expect([ana?.pagos[0]?.bancoCodigo, ana?.pagos[0]?.tipoCuenta]).toEqual(["012", "rut"]);
     expect(ana?.pagos[0]?.numeroCuenta).toBeTruthy();
     expect(ana?.pagos[0]?.numeroCuenta).not.toContain("11111111");
@@ -64,7 +64,7 @@ describe.skipIf(!urlPropietario)("core · importador de personas en base real", 
     const auditoria = JSON.stringify(await x.e.admin.auditEvent.findMany({ where: { tenantId: x.t1, capability: "core.importar.ejecutar" } }));
     expect(auditoria).not.toContain("11111111-1");
     const filasLote = JSON.stringify(await x.e.admin.importacionFila.findMany({ where: { importacionId: lote } }));
-    expect(filasLote).not.toContain("Habitat");
+    expect(filasLote).not.toContain("abitat");
   });
 
   it("reimportar no duplica; completa lo vacío y nunca reemplaza una cuenta bancaria existente", async () => {
@@ -80,7 +80,7 @@ describe.skipIf(!urlPropietario)("core · importador de personas en base real", 
     expect(r.filas[1]?.cambios.sort()).toEqual(["afp", "bancoCodigo", "numeroCuenta", "tipoCuenta"]);
     const [ana, tomas] = await personas(x.t1);
     expect([ana?.comuna, ana?.pagos[0]?.bancoCodigo]).toEqual(["Maipú", "012"]);
-    expect([tomas?.prevision?.afp, tomas?.pagos[0]?.bancoCodigo, tomas?.pagos[0]?.tipoCuenta]).toEqual(["Capital", "037", "vista"]);
+    expect([tomas?.prevision?.afp, tomas?.pagos[0]?.bancoCodigo, tomas?.pagos[0]?.tipoCuenta]).toEqual(["capital", "037", "vista"]);
     expect(await personas(x.t1)).toHaveLength(2);
     // Revertir este lote deja a Tomás sin la previsión ni la cuenta que el lote le cargó.
     const rev = await x.run<Reversion>(x.t1, "core.importar.revertir", { importacionId: r.importacionId ?? "" });

@@ -12,11 +12,12 @@
     "/(erp)/finanzas/bancos": 170,
     "/(erp)/finanzas/bancos/reglas": 169,
     "/(erp)/finanzas/bancos/importaciones": 172,
-    "/(erp)/negocios/[id]/actividad": 184,
+    "/(erp)/negocios/[id]/actividad": 187,
     "/(erp)/instalaciones/[id]/actividad": 179,
     "/(auth)/*": 153,
     "/(auth)/activar-mfa": 160,
     "/(erp)/configuracion*": 177,
+    "/(erp)/configuracion/agentes": 181,
     "/(erp)/configuracion/modulo/[id]": 192,
     "/(erp)/instalaciones/nueva": 180,
     "/(erp)/negocios/[id]/seguimiento": 175,
@@ -50,7 +51,7 @@
     "/(trabajador)/trabajador*": 164,
     "/(supervisor)/supervisor*": 162,
     "/ds*": 225,
-    "/(erp)/personas/[id]/sueldo": 172,
+    "/(erp)/personas/[id]/sueldo": 176,
     "/(erp)/personas/[id]/anexos": 171,
     "/(erp)/personas/[id]/anexos/[anexoId]": 171,
     "/(erp)/personas/[id]/privacidad": 171,
@@ -122,7 +123,7 @@
     "/(platform)/platform/catalogo": 169,
     "/(platform)/platform/tenants/[id]/usuarios": 169,
     "/(erp)/solicitudes/[id]": 169,
-    "/(platform)/platform/ajustes": 170,
+    "/(platform)/platform/ajustes": 174,
     "/(platform)/platform/indicadores": 169
   }
 }

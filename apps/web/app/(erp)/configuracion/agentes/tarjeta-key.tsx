@@ -28,6 +28,11 @@ export function TarjetaKey({ k, gasto }: { k: ApiKey; gasto: number }) {
         </LinkNext>
         <span className="flex flex-wrap gap-1.5">
           {k.tipo === "servicio" ? <Badge punto={false}>Servicio</Badge> : null}
+          {/* CAR-351: marcar las keys que heredan todo o no vencen, para renovarlas con lo mínimo. */}
+          {k.tipo !== "servicio" && k.permisos === null && !k.revocadaEn ? (
+            <Badge tono="warning">Hereda todos los permisos</Badge>
+          ) : null}
+          {k.expiraEn === null && !k.revocadaEn ? <Badge tono="warning">No vence</Badge> : null}
           {(k.scopes.includes("*") ? ["todos los módulos"] : k.scopes).map((s) => (
             <Badge key={s} punto={false}>
               {s === "todos los módulos" ? "* · amplio y transitorio" : s}
