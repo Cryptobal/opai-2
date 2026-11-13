@@ -15,7 +15,6 @@ describe.skipIf(!urlPropietario)("flujo de caja: aviso idempotente en base real"
   const usuario = randomUUID();
   const medidor = { registrar: async () => undefined };
   const hoy = lunesDe(new Date().toISOString().slice(0, 10));
-  const desde = sumarSemanas(hoy, -2);
   const semana = sumarSemanas(hoy, 2);
 
   const ctx = () =>
@@ -59,8 +58,6 @@ describe.skipIf(!urlPropietario)("flujo de caja: aviso idempotente en base real"
     ).id;
     await e.admin.user.create({ data: { id: usuario, email: `u-${sufijo}@flujo.test`, name: "u" } });
     await ok("finanzas.ajustes.actualizar", {
-      saldoInicial: 100,
-      desde,
       avisoActivo: true,
       umbral: 50_000,
     });

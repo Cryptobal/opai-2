@@ -35,6 +35,7 @@ describe("contrato único de listas (CAR-353)", () => {
     expect(esLista("x.cosas.list_a_cargo", z.object({}))).toBe(true);
     expect(esLista("x.cosas.buscar", salida)).toBe(true);
     expect(esLista("x.cosas.get", z.object({}))).toBe(false);
+    expect(esLista("x.cosas.get", z.object({ items: z.array(z.string()) }))).toBe(false);
     expect(esLista("x.cosas.listado", z.object({}))).toBe(false);
     expect(faltasDelContrato(entrada, salida)).toEqual([]);
     const flojas = z.object({ cursor: z.number().optional(), limite: z.number().max(100) });

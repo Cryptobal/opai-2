@@ -35,7 +35,7 @@ export const manifest = defineModule({
     },
     { id: PERMISO_VER, descripcion: "Ver la planilla del flujo de caja" },
     { id: PERMISO_GESTIONAR, descripcion: "Fijar, mover y dar por cumplidas las celdas del flujo" },
-    { id: PERMISO_CONFIGURAR, descripcion: "Configurar filas, saldo inicial y umbral del flujo" },
+    { id: PERMISO_CONFIGURAR, descripcion: "Configurar filas y umbral del flujo" },
     { id: PERMISO_BANCOS_VER, descripcion: "Ver cuentas bancarias, movimientos y sugerencias de conciliación" },
     { id: PERMISO_BANCOS_GESTIONAR, descripcion: "Importar cartolas, conciliar movimientos y administrar reglas" },
     { id: PERMISO_BANCOS_AUTORIZAR, descripcion: "Autorizar movimientos de remuneraciones y pagos sensibles" },
