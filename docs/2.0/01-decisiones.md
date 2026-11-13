@@ -2031,6 +2031,8 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+**Adenda del 13-nov-2026 (Carlos, 00:12 hora de Chile, chat de la «Sesión Diseño»: «nunca más hace nada OPAI 2.0, tú integras todo»).** El bot «OPAI 2.0» queda fuera del flujo: no vigila, no migra, no integra ni revisa. Toda sesión de Claude integra a `main` sus propios PR (squash, con las condiciones de «Integración a `main`») y aplica sus migraciones. Donde un encargo, brief o documento diga que el bot integra, migra o revisa, lo hace la sesión que construyó el PR.
+
 
 ## ADR-105 · Hilo es la fuente única de diseño, con reglas verificables (CAR-334, 12-nov-2026)
 
