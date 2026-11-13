@@ -519,6 +519,8 @@ revisados en `briefs/ENCARGO-portal-sesion.md`.
 
 **Consecuencias.** La auditoría distingue a cada agente. La inyección de instrucciones desde correos o documentos no puede producir efectos irreversibles. Cualquier modelo elige bien las herramientas porque las descripciones son explícitas. Los manuales no se desactualizan en silencio.
 
+**Adenda CAR-353 (13-nov-2026, Sesión Núcleo; Estándares N-2, referente Stripe).** Todas las capacidades de lista comparten un contrato: entrada `cursor` (opcional) y `limite` con tope ≤ 200; salida `{ items, siguiente }`, con `siguiente` nulo en la última página. Es «lista» toda lectura que devuelve un arreglo, cuya salida trae `items` o cuyo último segmento nombra una lista (`list`, `…_listar`, `list_a_cargo`). `apps/web/test/listas-contrato.test.ts` lo verifica sobre el registro completo: una lista nueva fuera del contrato hace fallar `pnpm test`. Las 152 que existían sin cumplirlo quedan congeladas en `apps/web/test/listas-pendientes.json`; solo pueden salir de ahí al migrarse (la prueba también falla si una ya cumple y sigue en la lista). Para lo nuevo, los verbos son `list` y `get` (no `listar`/`obtener`); lo existente no se renombra para no romper clientes.
+
 ---
 
 ## ADR-035 · Ejecución de briefs desde el proyecto Claude con integración automática

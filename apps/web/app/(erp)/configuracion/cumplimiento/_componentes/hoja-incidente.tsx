@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, InputFecha, InputHora, Sheet, Textarea } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Input, InputFecha, SelectorHora, Sheet, Textarea } from "@opai/ds";
 
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -73,7 +73,7 @@ export function HojaIncidente() {
         >
           <div className="grid grid-cols-[1fr_8rem] gap-2">
             <InputFecha id="inc-cuando" valor={fecha} onCambiar={setFecha} />
-            <InputHora aria-label="Hora en que se detectó" valor={hora} onCambiar={setHora} />
+            <SelectorHora aria-label="Hora en que se detectó" valor={hora} onCambiar={setHora} />
           </div>
         </Campo>
         <Campo
