@@ -21,7 +21,9 @@ export function Equipo({ resultado }: { resultado: Carga }) {
   }
   const { vigenteDesde, siguiente } = resultado.data;
   // Mejor puntaje primero; quien no tiene datos queda al final.
-  const personas = [...resultado.data.personas].sort((a, b) => (b.puntaje ?? -1) - (a.puntaje ?? -1));
+  const personas = [...resultado.data.personas].sort(
+    (a, b) => (b.puntaje ?? -1) - (a.puntaje ?? -1),
+  );
   if (personas.length === 0) {
     return (
       <p className="t-body-sm text-fg-muted">
@@ -39,7 +41,7 @@ export function Equipo({ resultado }: { resultado: Carga }) {
           return (
             <li key={p.personaId} className="border-b border-border last:border-b-0">
               <LinkNext
-                href={`/desempeno/personas/${p.personaId}`}
+                href={`/desempeno/personas/${p.personaId}?mes=${resultado.data.periodo}`}
                 className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 hover:bg-fill"
               >
                 <span className="flex min-w-0 flex-1 flex-col gap-2">
