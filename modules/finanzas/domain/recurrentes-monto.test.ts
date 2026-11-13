@@ -81,6 +81,12 @@ describe("fechaUf (paridad con OPAI 1)", () => {
     expect(fechaUf("fin_mes_anterior", null, "2027-01-10")).toBe("2026-12-31");
     expect(fechaUf("dia_fijo", 31, "2027-02-10")).toBe("2027-02-28");
   });
+  it("febrero bisiesto y cambio de año", () => {
+    expect(fechaUf("fin_de_mes", null, "2028-02-03")).toBe("2028-02-29");
+    expect(fechaUf("fin_mes_anterior", null, "2028-03-01")).toBe("2028-02-29");
+    expect(fechaUf("dia_fijo", 30, "2028-02-03")).toBe("2028-02-29");
+    expect(fechaUf("inicio_de_mes", null, "2027-01-31")).toBe("2027-01-01");
+  });
   it("la cuota en UF usa la UF del día que dice la política", () => {
     const r = montoCuota({ unidad: "uf", monto: 10_000, politicaUf: "fin_mes_anterior" }, "2026-12-05", { ...base, ufDelDia: (f) => (f === "2026-11-30" ? 4_020_000 : null) });
     expect(r).toMatchObject({ monto: 40_200, estimado: false, detalle: "UF del 2026-11-30" });

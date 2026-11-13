@@ -86,8 +86,9 @@ async function ventas(db: Lector, desde: string, periodoActual: string) {
 export async function baseMonto(db: Lector, unidades: ReadonlySet<string>, desde: string, hasta: string): Promise<BaseMonto> {
   const periodoActual = hoyChile().slice(0, 7);
   const [u, v] = await Promise.all([
-    // La política «fin del mes anterior» puede pedir la UF de hasta un mes antes de la primera cuota.
-    unidades.has("uf") ? ufs(db, menosDias(desde, 31), hasta) : Promise.resolve({ porDia: new Map<string, number>(), ultima: null }),
+    // La política del día de UF puede pedir hasta un mes antes de la primera cuota (fin del mes anterior) o hasta el
+    // fin del mes de la última (fin de mes o día fijo).
+    unidades.has("uf") ? ufs(db, menosDias(desde, 31), menosDias(hasta, -31)) : Promise.resolve({ porDia: new Map<string, number>(), ultima: null }),
     unidades.has("pct_ventas") ? ventas(db, desde, periodoActual) : Promise.resolve({ porPeriodo: new Map<string, number>(), ultimo: null }),
   ]);
   return {

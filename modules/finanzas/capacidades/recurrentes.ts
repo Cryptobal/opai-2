@@ -101,6 +101,9 @@ export const recurrentesActualizar = defineCapability({
       ...vista,
       ...Object.fromEntries(Object.entries(input).filter(([k, v]) => k !== "id" && v !== undefined)),
     } as typeof vista;
+    // Lo que deja de aplicar se limpia solo: sin UF no hay día de UF, y sin «día fijo» no hay día fijo.
+    if (nuevo.unidad !== "uf" && input.politicaUf === undefined) nuevo.politicaUf = "dia_cuota";
+    if (nuevo.politicaUf !== "dia_fijo" && input.ufDiaFijo === undefined) nuevo.ufDiaFijo = null;
     const motivo = motivoInvalido(nuevo);
     if (motivo) throw reglaDeNegocio(motivo);
     if (dryRun) return nuevo;
