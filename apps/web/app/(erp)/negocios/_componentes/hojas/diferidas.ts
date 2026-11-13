@@ -27,3 +27,6 @@ export const HojaInstalaciones = hojaDiferida(["instalaciones"], () =>
 export const HojaContactos = hojaDiferida(["contactos"], () =>
   import("./hoja-contactos").then((m) => m.HojaContactos),
 );
+export const HojaTransferir = hojaDiferida(["transferir"], () =>
+  import("./hoja-transferir").then((m) => m.HojaTransferir),
+);

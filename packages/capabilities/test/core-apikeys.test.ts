@@ -27,7 +27,7 @@ describe("core.apikeys.*", () => {
           await executeCapability(
             ctx,
             "core.apikeys.create",
-            { nombre: "Prueba", scopes: ["*"] },
+            { nombre: "Prueba", scopes: ["*"], heredarPermisos: true },
             { dryRun },
           ),
         ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
@@ -40,6 +40,7 @@ describe("core.apikeys.*", () => {
     const r = await executeCapability(ctx, "core.apikeys.create", {
       nombre: "Grokbot",
       scopes: ["*"],
+      heredarPermisos: true,
     });
     if (!r.ok) throw new Error(r.error.message);
     const { secreto, prefijo } = r.data as { secreto: string; prefijo: string };
@@ -64,7 +65,7 @@ describe("core.apikeys.*", () => {
     const r = await executeCapability(
       ctx,
       "core.apikeys.create",
-      { nombre: "Xa", scopes: ["core"] },
+      { nombre: "Xa", scopes: ["core"], heredarPermisos: true },
       { dryRun: true },
     );
     expect(r).toMatchObject({ ok: true, data: { secreto: null } });
@@ -91,6 +92,7 @@ describe("core.apikeys.*", () => {
     const c = await executeCapability(ctx, "core.apikeys.create", {
       nombre: "Ka",
       scopes: ["core"],
+      heredarPermisos: true,
     });
     const id = c.ok ? (c.data as { id: string }).id : "";
     expect(await executeCapability(ctx, "core.apikeys.revoke", { apiKeyId: id })).toMatchObject({

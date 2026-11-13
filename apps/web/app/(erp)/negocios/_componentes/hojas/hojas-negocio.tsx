@@ -8,6 +8,7 @@ import {
   HojaNuevo,
   HojaPerder,
   HojaReabrir,
+  HojaTransferir,
 } from "./diferidas";
 
 /**
@@ -20,6 +21,7 @@ export function HojasNegocio({ h }: { h: DatosHojas | null }) {
   return (
     <>
       <HojaNuevo config={config} cuentas={h.cuentas} cuentaInicial={h.cuentaInicial} />
+      {h.abierta === "transferir" ? <HojaTransferir responsables={h.responsables} /> : null}
       {n ? (
         <>
           <HojaEditar n={n} config={config} />
