@@ -146,7 +146,7 @@
 <sc-if value="{{ showAutoClose }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);font:400 14px/20px var(--font-sans)">
 <span style="display:flex;gap:8px"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span><b style="font-weight:600">OPAI cerrará sin confirmación de una persona.</b> Con la regla actual se cerrarían hoy 2 negocios: Feria Espacio Riesco y Condominio Lomas de Chicureo.</span></span>
-<span class="t-caption" style="padding-left:24px;color:inherit">Desactivado por Carlos Irigoyen · 12-10-2026 · plan v3</span>
+<span class="t-caption" style="padding-left:24px;color:inherit">Desactivado por Andrea Fuentes · 12-10-2026 · plan v3</span>
 </div>
 </sc-if>
 <div style="max-width:320px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Nunca cerrar solo desde la etapa" value="s5" options="{{ etapaOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import></div>
@@ -232,7 +232,7 @@ class Component extends DCLogic {
     ];
     const heads = {
       planes: { eyebrow: "Configuración", title: "Comercial", sub: "Embudo, catálogos y planes de seguimiento de Atlas Seguridad SpA.", btn: "Nuevo plan", btnIcon: "plus", showBtn: !isPhone },
-      editor: { eyebrow: "Comercial · Seguimiento", title: "Post-cotización", sub: "Versión 4 en uso · 12 seguimientos en curso · editada por Carlos Irigoyen el 28-10-2026", badge: h(NS.Badge, { tone: "success" }, "Activo"), showBtn: false },
+      editor: { eyebrow: "Comercial · Seguimiento", title: "Post-cotización", sub: "Versión 4 en uso · 12 seguimientos en curso · editada por Andrea Fuentes el 28-10-2026", badge: h(NS.Badge, { tone: "success" }, "Activo"), showBtn: false },
       variantes: { eyebrow: "Configuración · Comunicaciones", title: "Variantes del correo de seguimiento", sub: "La edición de cada variante usa el editor de plantillas de Comunicaciones.", btn: "Nueva variante", btnIcon: "plus", showBtn: !isPhone },
       etiquetas: { eyebrow: "Configuración", title: "Etiquetas", sub: "Grupos y valores que se usan en cuentas, contactos, instalaciones y negocios.", btn: "Nuevo grupo", btnIcon: "plus", showBtn: !isPhone },
     };
@@ -240,7 +240,7 @@ class Component extends DCLogic {
       const q = ["agcon", "per", "per", "auto"][i];
       let alert = null, audit = null, alertBg = "var(--ds-info-muted)", alertFg = "var(--ds-info-fg)", alertIcon = "i-bot";
       if (i === 0) { alert = estado === "sinAgente" ? "Sin agente conectado: este paso pasará a una persona al vencer." : "El agente prepara el borrador y espera tu aprobación antes de enviar."; if (estado === "sinAgente") { alertBg = "var(--ds-warning-muted)"; alertFg = "var(--ds-warning-fg)"; alertIcon = "i-alert"; } }
-      if (i === 3) { alert = "OPAI automático: crea la propuesta de cierre sin que una persona lo revise."; audit = "Activado por Carlos Irigoyen · 28-10-2026 · plan v4"; alertBg = "var(--ds-warning-muted)"; alertFg = "var(--ds-warning-fg)"; alertIcon = "i-alert"; }
+      if (i === 3) { alert = "OPAI automático: crea la propuesta de cierre sin que una persona lo revise."; audit = "Activado por Andrea Fuentes · 28-10-2026 · plan v4"; alertBg = "var(--ds-warning-muted)"; alertFg = "var(--ds-warning-fg)"; alertIcon = "i-alert"; }
       return { ...p, icon: "i-" + C.CH[p.ch].icon, chLabel: C.CH[p.ch].label, quien: q, tpl: ["s1", "wa", "call", "close"][i], tplOpts: [[{ value: "s1", label: "Seguimiento 1" }], [{ value: "wa", label: "Seguimiento WhatsApp" }], [{ value: "call", label: "Guion llamada de cierre" }], [{ value: "close", label: "Proponer perdido" }]][i], etapa: i === 2 ? "s5" : "none", alert, audit, alertBg, alertFg, alertIcon };
     });
     const plan = estado === "planBasico";
@@ -287,7 +287,7 @@ class Component extends DCLogic {
       previewDates: C.plan.map((p) => ({ icon: "i-" + C.CH[p.ch].icon, l: "Paso " + p.n + " · " + p.dia, v: p.fecha + " · " + p.hora })),
       execOpts,
       showExecPreview: !plan,
-      auditLine: estado === "sinPermiso" ? "Activado por Carlos Irigoyen · 28-10-2026 · plan v4 · no puedes cambiarlo" : "Activado por Carlos Irigoyen · 28-10-2026 · plan v4",
+      auditLine: estado === "sinPermiso" ? "Activado por Andrea Fuentes · 28-10-2026 · plan v4 · no puedes cambiarlo" : "Activado por Andrea Fuentes · 28-10-2026 · plan v4",
       noPermNote: estado === "sinPermiso",
       respOpts: [{ value: "det", label: "Detener y mover a etapa" }, { value: "pau", label: "Pausar hasta una fecha" }, { value: "rei", label: "Reiniciar desde un paso" }],
       endOpts, showAutoClose: end === "auto",
