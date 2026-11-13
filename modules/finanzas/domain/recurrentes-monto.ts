@@ -12,7 +12,7 @@ export type BaseMonto = {
   ufUltima: { fecha: string; centavos: number } | null;
   /** Ventas netas del período «aaaa-mm» (neto + exento, las notas de crédito restan), o null si no hay documentos. */
   ventasNetas: (periodo: string) => number | null;
-  /** Último período con ventas registradas, para estimar meses que aún no ocurren. */
+  /** Último mes CERRADO con ventas (el en curso solo si no hay otro): base para estimar meses que aún no ocurren. */
   ultimoPeriodoConVentas: string | null;
   /** Período en curso «aaaa-mm» (hoy, hora de Chile). */
   periodoActual: string;
@@ -47,7 +47,9 @@ function enUf(monto: number, fecha: string, b: BaseMonto): MontoCuota {
 function enPctVentas(monto: number, fecha: string, b: BaseMonto): MontoCuota {
   const periodo = periodoAnterior(fecha);
   if (periodo < b.periodoActual) {
-    const base = b.ventasNetas(periodo) ?? 0;
+    const base = b.ventasNetas(periodo);
+    // Sin documentos ese mes puede ser que aún no se cargan (p. ej. emitidos en otro sistema): 0, pero estimado.
+    if (base == null) return { monto: 0, estimado: true, detalle: `sin ventas registradas en ${periodo}` };
     return { monto: escalar(monto, base, DIVISOR_PCT), estimado: false, detalle: `ventas de ${periodo}` };
   }
   if (periodo === b.periodoActual) {

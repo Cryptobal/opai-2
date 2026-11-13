@@ -21,11 +21,12 @@ Que un gasto recurrente pueda ir en UF (arriendos, contratos indexados) o como p
    - **UF:** se usa la UF publicada del día de la cuota. Si aún no se publica (cuota futura), se usa la última UF publicada y la cuota queda marcada como estimada.
    - **% de ventas:** se calcula sobre las ventas netas del mes anterior a la cuota (neto + exento; la nota de crédito resta, igual que la base del PPM).
      - Si ese mes es el mes en curso, se usa lo emitido hasta hoy y la cuota queda estimada.
-     - Si es un mes futuro, se usa el último mes con ventas y la cuota queda estimada.
+     - Si es un mes futuro, se usa el último mes **cerrado** con ventas (el mes en curso está incompleto) y la cuota queda estimada.
+     - Un mes pasado sin documentos da 0 estimado: pueden faltar por cargar.
      - Ventas negativas dan 0.
 3. Al cruzar con los cargos del banco, cada cuota usa su propio monto exacto.
 4. La nota de la celda dice qué base se usó, por ejemplo «estimado con la UF del …».
-5. Las capacidades `finanzas.recurrentes.crear/actualizar/listar` aceptan y devuelven `unidad`, con vista previa y MCP.
+5. Las capacidades `finanzas.recurrentes.crear/actualizar/listar` aceptan y devuelven `unidad`, con vista previa y MCP. Para cambiar la unidad hay que indicar también el monto nuevo; si no, el monto se reinterpretaría.
 6. **Retiro por socio:** una fila de egresos por socio («Retiro <socio>») con su recurrente en % de ventas. El interruptor es el `activa` de la fila o del recurrente. No hace falta una tabla nueva.
 
 **Fuera de este bloque:**
@@ -65,11 +66,11 @@ Las filas existentes no cambian. La aplica la sesión (ADR-104), con respaldo, p
 
 - Sin recurrentes en UF ni en %, cero consultas nuevas.
 - Con UF: 3 consultas.
-- Con %: 1 a 3 consultas.
+- Con %: 1 a 3 consultas, agrupadas por día y tipo de documento en la base.
 
 ## 15. Riesgos y rollback
 
-La columna es aditiva. Si se revierte el código, la columna queda con `'clp'` y se ignora.
+La columna es aditiva. **Ojo antes de revertir el código:** el código anterior lee `monto` como pesos. Un recurrente en UF o en % quedaría proyectado con un monto absurdo (12,5 UF se leerían como $125.000). Por eso, antes de revertir hay que desactivar esos recurrentes (`activa = false`) o pasarlos a CLP.
 
 **Supuestos de negocio por confirmar (Decisión de Carlos):**
 - Si la base de «ventas netas» incluye lo exento.

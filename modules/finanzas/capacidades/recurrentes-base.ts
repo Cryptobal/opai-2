@@ -18,8 +18,10 @@ const entero = (v: unknown): number | null => {
 async function ufs(db: Lector, desde: string, hasta: string) {
   const ind = await db.indicadorLegal.findFirst({ where: { clave: "uf" }, select: { id: true } });
   if (!ind) return { porDia: new Map<string, number>(), ultima: null };
+  // Orden por publicación: si un día tiene dos valores vigentes, gana el más reciente (igual que ufCentavosDelDia).
   const filas = await db.valorPublicado.findMany({
     where: { indicadorId: ind.id, estado: "vigente", vigenteDesde: { gte: aFecha(desde), lte: aFecha(hasta) } },
+    orderBy: { createdAt: "asc" },
     select: { vigenteDesde: true, valorJson: true },
   });
   const porDia = new Map<string, number>();
@@ -27,38 +29,52 @@ async function ufs(db: Lector, desde: string, hasta: string) {
     const v = entero(f.valorJson);
     if (v != null) porDia.set(aIso(f.vigenteDesde), v);
   }
-  const u = await db.valorPublicado.findFirst({ where: { indicadorId: ind.id, estado: "vigente" }, orderBy: { vigenteDesde: "desc" }, select: { vigenteDesde: true, valorJson: true } });
+  const u = await db.valorPublicado.findFirst({
+    where: { indicadorId: ind.id, estado: "vigente" },
+    orderBy: [{ vigenteDesde: "desc" }, { createdAt: "desc" }],
+    select: { vigenteDesde: true, valorJson: true },
+  });
   const centavos = u ? entero(u.valorJson) : null;
   return { porDia, ultima: u && centavos != null ? { fecha: aIso(u.vigenteDesde), centavos } : null };
 }
 
-async function ventas(db: Lector, desde: string) {
-  const docs = await db.documentoEmitido.findMany({
-    where: { ...VENTAS, fechaEmision: { gte: aFecha(`${periodoAnterior(desde)}-01`) } },
-    select: { fechaEmision: true, tipoDte: true, montoNeto: true, montoExento: true },
+/** Ventas netas por período desde `desdeMes` (inclusive) hasta antes de `hastaMes` (si se da), agrupadas en la base. */
+async function ventasPorPeriodo(db: Lector, desdeMes: string, hastaMes?: string) {
+  const grupos = await db.documentoEmitido.groupBy({
+    by: ["fechaEmision", "tipoDte"],
+    where: { ...VENTAS, fechaEmision: { gte: aFecha(`${desdeMes}-01`), ...(hastaMes ? { lt: aFecha(`${hastaMes}-01`) } : {}) } },
+    _sum: { montoNeto: true, montoExento: true },
   });
   const porPeriodo = new Map<string, number>();
-  for (const d of docs) {
-    if (!d.fechaEmision) continue;
-    const p = aIso(d.fechaEmision).slice(0, 7);
-    const signo = d.tipoDte === 61 ? -1 : 1;
-    porPeriodo.set(p, (porPeriodo.get(p) ?? 0) + signo * (d.montoNeto + d.montoExento));
+  for (const g of grupos) {
+    if (!g.fechaEmision) continue;
+    const p = aIso(g.fechaEmision).slice(0, 7);
+    const neto = (g._sum.montoNeto ?? 0) + (g._sum.montoExento ?? 0);
+    porPeriodo.set(p, (porPeriodo.get(p) ?? 0) + (g.tipoDte === 61 ? -neto : neto));
   }
-  let ultimo = [...porPeriodo.keys()].sort().at(-1) ?? null;
+  return porPeriodo;
+}
+
+/**
+ * Ventas del mes anterior a `desde` en adelante, más el último mes CERRADO con ventas (base para estimar meses que
+ * aún no ocurren; el mes en curso está incompleto y no sirve de base).
+ */
+async function ventas(db: Lector, desde: string, periodoActual: string) {
+  const porPeriodo = await ventasPorPeriodo(db, periodoAnterior(desde));
+  let ultimo = [...porPeriodo.keys()].filter((p) => p < periodoActual).sort().at(-1) ?? null;
   if (!ultimo) {
-    const previo = await db.documentoEmitido.findFirst({ where: { ...VENTAS, fechaEmision: { not: null } }, orderBy: { fechaEmision: "desc" }, select: { fechaEmision: true } });
+    const previo = await db.documentoEmitido.findFirst({
+      where: { ...VENTAS, fechaEmision: { lt: aFecha(`${periodoAnterior(desde)}-01`) } },
+      orderBy: { fechaEmision: "desc" },
+      select: { fechaEmision: true },
+    });
     if (previo?.fechaEmision) {
       ultimo = aIso(previo.fechaEmision).slice(0, 7);
-      const delMes = await db.documentoEmitido.findMany({
-        where: { ...VENTAS, fechaEmision: { gte: aFecha(`${ultimo}-01`), lt: aFecha(`${desde}`) } },
-        select: { fechaEmision: true, tipoDte: true, montoNeto: true, montoExento: true },
-      });
-      for (const d of delMes) {
-        if (!d.fechaEmision || aIso(d.fechaEmision).slice(0, 7) !== ultimo) continue;
-        porPeriodo.set(ultimo, (porPeriodo.get(ultimo) ?? 0) + (d.tipoDte === 61 ? -1 : 1) * (d.montoNeto + d.montoExento));
-      }
+      for (const [p, v] of await ventasPorPeriodo(db, ultimo, periodoAnterior(desde))) if (p === ultimo) porPeriodo.set(p, v);
     }
   }
+  // Empresa nueva sin ningún mes cerrado: a falta de algo mejor, el mes en curso (la cuota igual queda estimada).
+  if (!ultimo && porPeriodo.has(periodoActual)) ultimo = periodoActual;
   return { porPeriodo, ultimo };
 }
 
@@ -67,15 +83,16 @@ async function ventas(db: Lector, desde: string) {
  * (hasta 3 consultas de UF y 1 a 3 de ventas).
  */
 export async function baseMonto(db: Lector, unidades: ReadonlySet<string>, desde: string, hasta: string): Promise<BaseMonto> {
+  const periodoActual = hoyChile().slice(0, 7);
   const [u, v] = await Promise.all([
     unidades.has("uf") ? ufs(db, desde, hasta) : Promise.resolve({ porDia: new Map<string, number>(), ultima: null }),
-    unidades.has("pct_ventas") ? ventas(db, desde) : Promise.resolve({ porPeriodo: new Map<string, number>(), ultimo: null }),
+    unidades.has("pct_ventas") ? ventas(db, desde, periodoActual) : Promise.resolve({ porPeriodo: new Map<string, number>(), ultimo: null }),
   ]);
   return {
     ufDelDia: (f) => u.porDia.get(f) ?? null,
     ufUltima: u.ultima,
     ventasNetas: (p) => v.porPeriodo.get(p) ?? null,
     ultimoPeriodoConVentas: v.ultimo,
-    periodoActual: hoyChile().slice(0, 7),
+    periodoActual,
   };
 }

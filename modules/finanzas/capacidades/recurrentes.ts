@@ -90,6 +90,9 @@ export const recurrentesActualizar = defineCapability({
     const actual = await ctx.db.flujoRecurrente.findFirst({ where: { id: input.id } });
     if (!actual) throw noEncontrado("El gasto recurrente");
     const vista = vistaRecurrente(actual);
+    // Cambiar solo la unidad reinterpretaría el monto (500.000 CLP pasarían a ser 50 UF o 50 %): se pide el monto nuevo.
+    if (input.unidad !== undefined && input.unidad !== vista.unidad && input.monto === undefined)
+      throw reglaDeNegocio("Al cambiar la unidad indica también el monto en la nueva unidad.");
     const nuevo = {
       ...vista,
       ...Object.fromEntries(Object.entries(input).filter(([k, v]) => k !== "id" && v !== undefined)),

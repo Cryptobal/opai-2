@@ -61,6 +61,10 @@ describe.skipIf(omitirSuiteDb())("flujo · recurrentes en UF y % de ventas (db)"
     expect((await run("finanzas.recurrentes.crear", { ...base, unidad: "dolares", monto: 1 })).ok).toBe(false);
     const p = await run("finanzas.recurrentes.crear", { ...base, unidad: "uf", monto: 125_000 }, { dryRun: true });
     expect(p.ok && (p.data as { unidad: string }).unidad).toBe("uf");
+    // Cambiar solo la unidad reinterpretaría el monto: se exige el monto nuevo.
+    const clp = await ok<{ id: string }>("finanzas.recurrentes.crear", { ...base, concepto: "Pesos", monto: 500_000, fin: lunes });
+    expect((await run("finanzas.recurrentes.actualizar", { id: clp.id, unidad: "uf" })).ok).toBe(false);
+    expect((await run("finanzas.recurrentes.actualizar", { id: clp.id, unidad: "uf", monto: 125_000 }, { dryRun: true })).ok).toBe(true);
   });
 
   it("UF: cada cuota usa la UF publicada de su día", async () => {
@@ -87,5 +91,8 @@ describe.skipIf(omitirSuiteDb())("flujo · recurrentes en UF y % de ventas (db)"
     await ok("finanzas.recurrentes.crear", { filaId: fila, concepto: "Retiro 5%", unidad: "pct_ventas", monto: 50_000, frecuencia: "semanal", inicio: cuota, repeticiones: 1 });
     const [c] = await cuotasDe("Retiro 5%");
     expect(c?.monto).toBe(800_000);
+    // Si la cuota cae en el mes siguiente, su mes anterior es el en curso: se usa lo emitido hasta hoy y lo dice.
+    const enCurso = periodo === new Date().toLocaleDateString("sv-SE", { timeZone: "America/Santiago" }).slice(0, 7);
+    expect(c?.nota).toContain(enCurso ? "hasta hoy" : `ventas de ${periodo}`);
   });
 });

@@ -5,12 +5,12 @@ import { montoCuota, periodoAnterior, type BaseMonto } from "./recurrentes-monto
 // UF en centavos de CLP: 4.000.000 = $40.000,00.
 const ufs = new Map([["2026-11-05", 4_000_000], ["2026-12-05", 4_010_000]]);
 const ufUltima = { fecha: "2026-11-30", centavos: 4_005_000 };
-const ventas = new Map([["2026-10", 100_000_000], ["2026-11", 80_000_000]]);
+const ventas = new Map([["2026-09", 90_000_000], ["2026-10", 100_000_000], ["2026-11", 80_000_000]]);
 const base: BaseMonto = {
   ufDelDia: (f) => ufs.get(f) ?? null,
   ufUltima,
   ventasNetas: (p) => ventas.get(p) ?? null,
-  ultimoPeriodoConVentas: "2026-11",
+  ultimoPeriodoConVentas: "2026-10",
   periodoActual: "2026-11",
 };
 
@@ -46,10 +46,15 @@ describe("montoCuota", () => {
     expect(montoCuota({ unidad: "pct_ventas", monto: 50_000 }, "2026-12-05", base)).toMatchObject({ monto: 4_000_000, estimado: true });
   });
 
-  it("% de ventas de un mes futuro sin ventas: usa el último mes con ventas y lo marca estimado", () => {
+  it("% de ventas de un mes futuro: usa el último mes cerrado con ventas (no el mes en curso) y lo marca estimado", () => {
     const r = montoCuota({ unidad: "pct_ventas", monto: 50_000 }, "2027-02-05", base);
-    expect(r).toMatchObject({ monto: 4_000_000, estimado: true });
-    expect(r.detalle).toContain("2026-11");
+    expect(r).toMatchObject({ monto: 5_000_000, estimado: true });
+    expect(r.detalle).toContain("2026-10");
+  });
+
+  it("% de ventas de un mes pasado sin documentos: 0 pero estimado (pueden faltar por cargar)", () => {
+    const r = montoCuota({ unidad: "pct_ventas", monto: 50_000 }, "2026-09-05", { ...base, ventasNetas: () => null });
+    expect(r).toMatchObject({ monto: 0, estimado: true });
   });
 
   it("% de ventas sin ninguna venta registrada: 0 y estimado", () => {
