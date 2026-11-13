@@ -97,4 +97,6 @@ export const VERBOS: Record<string, string> = {
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
   // Hilo (CAR-331).
   actividad: "Ver actividad", agenda: "Ver agenda",
+  // Impuestos (CAR-173).
+  borrador_f29: "Borrador del F29",
 };
