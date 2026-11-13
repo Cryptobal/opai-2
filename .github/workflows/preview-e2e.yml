@@ -7,28 +7,37 @@
 # Secretos (solo existen en GitHub Actions y nunca se imprimen): E2E_EMAIL, E2E_PASSWORD, E2E_TOTP_SECRET,
 # VERCEL_AUTOMATION_BYPASS_SECRET y, para ubicar la vista previa, VERCEL_TOKEN, VERCEL_ORG_ID y VERCEL_PROJECT_ID.
 name: preview-e2e
+# Ahorro de Actions (13-nov-2026): ya no corre en cada push. Corre de noche contra el despliegue del último
+# commit de main (el de test.opai.cl, en su URL *.vercel.app, con la empresa ficticia qa-e2e) y a pedido:
+# al poner la etiqueta «e2e» en el PR (prueba la vista previa del head de ese momento; para un head nuevo,
+# quitar y volver a poner la etiqueta) o con workflow_dispatch.
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [labeled]
+  schedule:
+    # 03:30 America/Santiago (UTC−3) ≈ 06:30 UTC
+    - cron: "30 6 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: preview-e2e-${{ github.event.pull_request.number }}
+  group: preview-e2e-${{ github.event.pull_request.number || github.ref }}-${{ github.event.label.name || 'a-pedido' }}
   cancel-in-progress: true
 
 jobs:
   preview-e2e:
     name: preview-e2e
-    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || (github.event.label.name == 'e2e' && github.event.pull_request.draft != true)
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 40
     permissions:
       contents: read
       checks: read
     env:
-      SHA: ${{ github.event.pull_request.head.sha }}
-      ES_FORK: ${{ github.event.pull_request.head.repo.fork }}
+      SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ES_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
       VERCEL_CLI: vercel@65.3.1
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -61,7 +70,7 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.listo.outputs.ok == 'true'
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: pnpm/action-setup@v4
         if: steps.listo.outputs.ok == 'true'
       - uses: actions/setup-node@v4
@@ -70,7 +79,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - name: Esperar a que el workflow «preview» deje lista la base de la vista previa
-        if: steps.listo.outputs.ok == 'true'
+        if: steps.listo.outputs.ok == 'true' && github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

@@ -11,6 +11,8 @@ export type VistaCartolaPreview = {
     diferencia: number;
     cuadra: boolean;
   } | null;
+  /** La cuenta ya tiene una cartola con este período (CAR-341). */
+  yaImportada?: { nombreArchivo: string | null; creadaEn: string } | null;
   filas: {
     indice: number;
     estado: string;

@@ -1,9 +1,12 @@
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { cargarOpcionesEtiqueta, filtroEtiquetaDe } from "@/app/_components/etiquetas/opciones";
 import type { EtiquetaDeFila } from "@/lib/tipos-etiquetas";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { leerParametros } from "@/lib/parametros";
-import { ejecutarComoUsuario } from "@/lib/servidor";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
+import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 export type ContactoFila = {
   id: string;
@@ -37,17 +40,20 @@ export type ContactoDetalle = {
 type Lista = { items: ContactoFila[]; siguiente: string | null };
 
 export async function cargarContactos(f: Record<string, string | undefined>) {
-  const [r, etiquetas] = await Promise.all([
+  const [r, etiquetas, identidad] = await Promise.all([
     ejecutarComoUsuario<Lista>("erp", "comercial.contactos.list", {
-    limite: 100,
-    ...filtroEtiquetaDe(f),
-    ...(f["archivados"] === "si" ? { incluirArchivadas: true } : {}),
-    ...(f["q"] ? { q: f["q"] } : {}),
-    ...(f["principales"] === "si" ? { soloPrincipales: true } : {}),
+      limite: 100,
+      ...filtroEtiquetaDe(f),
+      ...(f["archivados"] === "si" ? { incluirArchivadas: true } : {}),
+      ...(f["q"] ? { q: f["q"] } : {}),
+      ...(f["principales"] === "si" ? { soloPrincipales: true } : {}),
     }),
     cargarOpcionesEtiqueta(),
+    identidadActual(),
   ]);
-  return { state: estadoPantalla(r), items: r.ok ? r.data.items : [], etiquetas };
+  // Alta directa (CAR-337): con permiso de gestionar cuentas, como el «Nuevo contacto» de la cuenta.
+  const gestionar = identidad ? puedeDeIdentidad(identidad)(PERMISOS_CORE.cuentasManage) : false;
+  return { state: estadoPantalla(r), items: r.ok ? r.data.items : [], etiquetas, gestionar };
 }
 
 export async function cargarContacto(id: string) {
