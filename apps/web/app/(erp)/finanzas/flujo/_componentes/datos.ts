@@ -52,7 +52,7 @@ export type Planilla = {
     semanas: { semana: string; saldoFinal: number; emitido: boolean }[];
   };
   saldoBanco: {
-    fuente: "banco" | "ajustes";
+    fuente: "banco" | "sin_banco";
     saldo: number | null;
     cuentasSinSaldo: { cuentaId: string; banco: string }[];
   };

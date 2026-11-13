@@ -1448,6 +1448,11 @@ identidad de servicio en main.
 - **Doble conteo en la semana en curso.** Un abono del banco sin conciliar ya está en el saldo de hoy. En la semana en curso, la proyección no suma una factura (ni el depósito esperado de una cesión) cuando un abono sin conciliar coincide con su monto pendiente y con el RUT de quien paga (cliente o factor) en la glosa. Con el mismo monto pero sin RUT que calce se mantiene la proyección y la planilla avisa «Posible cobro ya recibido: concilia el abono de $ X». Cada abono se usa una sola vez.
 - **Factoring.** El ingreso de una factura cedida es el depósito neto del factor (monto menos su descuento), por la fecha del banco si ya está en la cartola y, si no, en la semana de la cesión (o la actual si ya pasó); la factura cedida sale de «Cobros esperados». La diferencia (monto − depósito) va a la cuenta configurable y es solo informativa.
 
+**Adenda del 13-nov-2026 (Carlos, en el chat de la Sesión Caja; registrada en CAR-391).**
+- **No hay saldo de partida.** El flujo es una proyección desde lo que hay hoy en el banco: la suma de las cuentas activas, leída del endpoint de Web4Leads (hoy reenviado por OPAI 1.0) o de los movimientos cargados por cartola (históricos o provisorios, sin duplicar). No se pide un saldo inicial ni una semana desde en Configuración, para Gard ni para ninguna otra empresa.
+- **Sin saldo del banco** (ninguna cuenta activa con saldo), la planilla parte en $0 y avisa «Todavía no hay saldo del banco». La ventana por defecto empieza unas semanas antes de la semana en curso, no en una fecha de ajustes.
+- Las columnas `saldo_inicial` y `desde` de los ajustes quedan en la base y ya no entran en el saldo (sin migración); se retiran en un PR de limpieza.
+
 ## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
 
 **Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (respuesta 5 del comentario «DECISIÓN CARLOS» en #318, 21:22 CLT), registrada por Claude (Sesión 5, CAR-189). · Cierra la pregunta abierta desde CAR-169 (#287).
