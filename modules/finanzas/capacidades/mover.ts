@@ -74,7 +74,7 @@ export const celdasMover = defineCapability({
       return tras;
     };
     // Mismos saldos que la planilla: cartola en lo pasado y plan en lo futuro (hallazgo 10).
-    const desdeSerie = desdeVentana(ajustes, todas[0]);
+    const desdeSerie = desdeVentana(todas[0]);
     const cantidad = Math.max(
       26,
       Math.round((Date.parse(hasta) - Date.parse(desdeSerie)) / (7 * 86_400_000)) + 1,
