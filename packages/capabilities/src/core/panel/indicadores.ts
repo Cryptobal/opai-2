@@ -1,6 +1,9 @@
 import { z } from "zod";
 
+import { ordenarIndicadores } from "@opai/domain";
+
 import { defineCapability } from "../../define";
+import { ajuste } from "../config/valores";
 import { hoy } from "../../pauta/comun";
 import { coberturaHoy } from "./indicadores/pauta";
 import { cotizacionesPorAprobar, negociosAbiertos } from "./indicadores/comercial";
@@ -10,7 +13,7 @@ import { ticketsInicio } from "./indicadores/tickets";
 export const inicioIndicadores = defineCapability({
   id: "core.inicio.indicadores",
   descripcion:
-    "Indicadores del Inicio: cobertura de la pauta de hoy, negocios abiertos en CLP y UF, cotizaciones por aprobar, facturado del mes contra el mismo tramo del mes anterior y tickets abiertos o asignados al usuario. Cada indicador viene null si el actor no tiene el permiso o el módulo no está activo.",
+    "Indicadores del Inicio: cobertura de la pauta de hoy, negocios abiertos en CLP y UF, cotizaciones por aprobar, facturado del mes contra el mismo tramo del mes anterior y tickets abiertos o asignados al usuario. Cada indicador viene null si el actor no tiene el permiso o el módulo no está activo; `orden` dice cuáles mostrar y en qué orden, según lo que eligió la empresa.",
   permiso: null,
   input: z.object({}),
   output: z.object({
@@ -42,6 +45,11 @@ export const inicioIndicadores = defineCapability({
     tickets: z
       .object({ abiertos: z.number().int().nullable(), asignadosAMi: z.number().int() })
       .nullable(),
+    orden: z
+      .array(z.string())
+      .describe(
+        "Indicadores a mostrar, en el orden que eligió la empresa (core.inicio_indicadores).",
+      ),
   }),
   // Son totales de la empresa: no revelan ninguna ficha, así que no hay IDs que auditar.
   auditarLectura: () => [],
@@ -55,6 +63,15 @@ export const inicioIndicadores = defineCapability({
       facturadoDelMes(ctx, await hoy(ctx)),
       ticketsInicio(ctx),
     ]);
-    return { cobertura, negocios, cotizacionesPorAprobar: porAprobar, facturado, tickets };
+    const valores = { cobertura, negocios, facturado, tickets };
+    const elegidos = await ajuste<string[]>(ctx, "core", "inicio_indicadores");
+    const disponibles = Object.entries(valores)
+      .filter(([, v]) => v !== null)
+      .map(([id]) => id);
+    return {
+      ...valores,
+      cotizacionesPorAprobar: porAprobar,
+      orden: ordenarIndicadores(elegidos ?? [], disponibles),
+    };
   },
 });
