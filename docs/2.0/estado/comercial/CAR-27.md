@@ -4,7 +4,7 @@
 
 ## PR #633 · rama `brief/car-27-transferir-negocios`
 
-- **Estado:** En PR
+- **Estado:** Integrado (#633 `38d880d2`, 13-nov-2026)
 - **Migración:** No
 
 ### Qué entra
@@ -15,7 +15,7 @@ Botón **Transferir cartera** en Negocios (tablero y lista; diseño `export-crm-
 
 - **Estado:** En PR
 - **Migración:** No
-- **Apilado sobre:** #633
+- **Apilado sobre:** #633 (integrado)
 
 ### Qué entra
 

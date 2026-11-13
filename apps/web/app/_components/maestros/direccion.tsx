@@ -5,7 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { CampoDireccion, type Direccion } from "@opai/ds";
 
 import { urlMapaOpai } from "@/lib/mapa";
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 type Sugerencia = { placeId: string; texto: string; secundario: string | null };
 

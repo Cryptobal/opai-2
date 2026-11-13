@@ -62,6 +62,7 @@ export function GrupoNav({ grupo, lista, rutaActual, Link, abierto, onAreaAbiert
         abierto={expandido}
         activa={activa}
         onAlternar={() => onAreaAbierta!(area ?? grupo)}
+        contador={lista.reduce((n, x) => n + (x.alerta ? (x.contador ?? 0) : 0), 0)}
       >
         {lista.map((item) => (
           <EntradaArea

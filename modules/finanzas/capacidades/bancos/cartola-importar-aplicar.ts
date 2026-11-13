@@ -20,6 +20,7 @@ export async function aplicarImportacionCartola(
     duplicados: number;
     rechazadas: { indice: number; motivo: string }[];
     saldoFinal: number | null;
+    saldoInicial: number | null;
     fechaDesde: string | null;
     fechaHasta: string | null;
   },
@@ -34,7 +35,12 @@ export async function aplicarImportacionCartola(
           nombreArchivo: p.nombreArchivo ?? null,
           fechaDesde: p.fechaDesde ? aFecha(p.fechaDesde) : null,
           fechaHasta: p.fechaHasta ? aFecha(p.fechaHasta) : null,
-          saldoFinal: BigInt(p.saldoFinal ?? 0),
+          saldoFinal: p.saldoFinal == null ? null : BigInt(p.saldoFinal),
+          saldoInicial: p.saldoInicial == null ? null : BigInt(p.saldoInicial),
+          // Quién importó: la persona, o la persona por la que actúa el agente (CAR-341).
+          creadoPorId: ctx.usuario?.id ?? null,
+          creadoPorNombre: ctx.usuario?.nombre ?? null,
+          viaAgente: ctx.actor.tipo === "agent",
           movimientosNuevos: p.nuevos.length,
           duplicados: p.duplicados,
           rechazados: p.rechazadas.length,

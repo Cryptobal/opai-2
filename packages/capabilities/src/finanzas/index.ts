@@ -28,6 +28,7 @@ import {
 } from "./ventas-escritura";
 import { reporteResultados } from "./reportes-resultados";
 import { ventasBuscar } from "./ventas-buscar";
+import { impuestosBorradorF29 } from "./impuestos-f29";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
 import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
@@ -61,6 +62,7 @@ import { cierreActualizar } from "./cierre-actualizar";
 import { cierreEmitirLote } from "./cierre-emitir-lote";
 
 export { ajustesFinanzas } from "./ajustes";
+export { ventasProgramadasPorPeriodo } from "./ventas-programacion-netas";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
 export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones, trabajoRecordatoriosCobranza, trabajoSincronizarRcv];
@@ -83,6 +85,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasListar,
   ventasObtener,
   ventasLibroResumen,
+  impuestosBorradorF29,
   ventasBuscar,
   reporteResultados,
   cobranzaResumen,

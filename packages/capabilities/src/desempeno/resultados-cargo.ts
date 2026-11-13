@@ -24,10 +24,19 @@ export const resultadosCargo = defineCapability({
   output: z.object({
     cargoId: z.string(),
     periodo: z.string(),
+    mesEnCurso: z.string().describe("Mes en curso (aaaa-mm) en la zona horaria de la empresa."),
     vigenteDesde: z.string().nullable().describe("null = el cargo no tiene scorecard ese mes."),
-    cerrado: z.boolean().describe("true = mes cerrado: personas y puntajes son los que quedaron guardados."),
+    cerrado: z
+      .boolean()
+      .describe("true = mes cerrado: personas y puntajes son los que quedaron guardados."),
     personas: z.array(
-      z.object({ personaId: z.string(), nombres: z.string(), apellidos: z.string(), puntaje, cobertura }),
+      z.object({
+        personaId: z.string(),
+        nombres: z.string(),
+        apellidos: z.string(),
+        puntaje,
+        cobertura,
+      }),
     ),
     siguiente: z.string().nullable(),
   }),
@@ -35,7 +44,10 @@ export const resultadosCargo = defineCapability({
   dryRun: false,
   auditarLectura: (salida) => salida.personas.map((p) => p.personaId),
   async handler(ctx, input) {
-    const cargo = await ctx.db.cargo.findUnique({ where: { id: input.cargoId }, select: { id: true } });
+    const cargo = await ctx.db.cargo.findUnique({
+      where: { id: input.cargoId },
+      select: { id: true },
+    });
     if (!cargo) throw noEncontrado("El cargo");
     const [meses, vis, vinculos] = await Promise.all([
       mesesDe(ctx),
@@ -46,14 +58,29 @@ export const resultadosCargo = defineCapability({
       }),
     ]);
     const mes = input.periodo ?? meses.actual;
-    if (await estaCerrado(ctx, mes)) return deMesCerrado(ctx, input.cargoId, mes, vis, input.despuesDe);
+    if (await estaCerrado(ctx, mes)) {
+      return {
+        ...(await deMesCerrado(ctx, input.cargoId, mes, vis, input.despuesDe)),
+        mesEnCurso: meses.actual,
+      };
+    }
     const scorecard = versionVigente(await versionesDe(ctx, input.cargoId), mes);
-    const base = { cargoId: input.cargoId, periodo: mes, cerrado: false, vigenteDesde: scorecard?.vigenteDesde ?? null };
+    const base = {
+      cargoId: input.cargoId,
+      periodo: mes,
+      mesEnCurso: meses.actual,
+      cerrado: false,
+      vigenteDesde: scorecard?.vigenteDesde ?? null,
+    };
     if (!scorecard) return { ...base, personas: [], siguiente: null };
     const delCargo = vinculos.map((v) => v.personaId);
     const visibles = await visiblesEntre(ctx, vis, delCargo);
     // Quien consulta también aparece si es de este cargo y puede ver su propio resultado.
-    if (vis.propia && delCargo.includes(vis.propia) && (vis.todos || scorecard.personaVeResultado)) {
+    if (
+      vis.propia &&
+      delCargo.includes(vis.propia) &&
+      (vis.todos || scorecard.personaVeResultado)
+    ) {
       visibles.add(vis.propia);
     }
     const orden = [...visibles].filter((id) => !input.despuesDe || id > input.despuesDe).sort();
