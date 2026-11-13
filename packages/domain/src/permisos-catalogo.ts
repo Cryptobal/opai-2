@@ -20,7 +20,7 @@ export const PERMISOS_CORE = {
   instalacionesRead: "core:instalaciones.read",
   instalacionesManage: "core:instalaciones.manage",
   // Puestos (Brief 11): catálogos de patrones de turno y funciones, con lectura, edición y
-  // desactivación separadas (permisos finos del #47). viewer lee por el comodín `*:*.read`.
+  // desactivación separadas (permisos finos del #47). viewer lee por su lista (`permisos-base-nucleo.ts`).
   patronesRead: "core:patrones.read",
   patronesManage: "core:patrones.manage",
   patronesDesactivar: "core:patrones.desactivar",
@@ -32,8 +32,8 @@ export const PERMISOS_CORE = {
   vinculosManage: "core:vinculos.manage",
   personasManage: "core:personas.manage",
   // P1 "No recontratar" (Personas y Cargos PR 1): marcar y ver la marca es de RRHH y administradores;
-  // el resto no ve ni que la sección existe (denegado explícito a gerente, fuera del allowlist de
-  // supervisor y viewer).
+  // el resto no ve ni que la sección existe (fuera de las listas de gerente, lector y
+  // supervisor).
   personasNoRecontratarManage: "core:personas.no_recontratar.manage",
   // Personas y Cargos PR 2: previsión, pago bancario (aprobación RRHH) y ficha laboral ampliada.
   personasPrevisionRead: "core:personas.prevision.read",
@@ -80,7 +80,7 @@ export const PERMISOS_CORE = {
   cumplimientoManage: "core:cumplimiento.manage",
   cumplimientoDpaAceptar: "core:cumplimiento.dpa_aceptar",
   // Calendario hábil y feriados del Núcleo (CAR-79). Ver lo tienen todos los roles internos (viewer
-  // por el comodín `*:*.read`); gestionar (agregar, editar, archivar días) es de owner y admin.
+  // por su lista o patrón); gestionar (agregar, editar, archivar días) es de owner y admin.
   calendarioRead: "core:calendario.read",
   calendarioManage: "core:calendario.manage",
   remuneracionesRead: "core:remuneraciones.read",
