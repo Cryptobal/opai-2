@@ -1126,6 +1126,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.flujo.postergar_iva`
+- `finanzas.planilla.resumen`
 - `finanzas.recurrentes.actualizar`
 - `finanzas.recurrentes.crear`
 - `finanzas.recurrentes.listar`
