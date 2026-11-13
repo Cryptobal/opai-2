@@ -41,7 +41,11 @@ export async function emparejarTerreno(erp: Page, terreno: Page): Promise<string
 /** Entra al portal del trabajador con un PIN temporal de la primera persona con PIN posible. */
 export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<string | null> {
   conLimite(erp, trabajador);
-  const ficha = await primerEnlace(erp, "/personas", /^\/personas\/[0-9a-f-]{36}$/);
+  // La persona ficticia de `auditoria-datos.spec.ts` (con RUT y vínculo); si no está, la primera.
+  const re = /^\/personas\/[0-9a-f-]{36}$/;
+  const ficha =
+    (await primerEnlace(erp, "/personas?q=Auditor%C3%ADa", re)) ??
+    (await primerEnlace(erp, "/personas", re));
   if (!ficha) return "sin personas en qa-e2e";
   await erp.goto(`${ficha}/laboral`);
   const rut = (await erp.locator("body").innerText()).match(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)?.[0];
