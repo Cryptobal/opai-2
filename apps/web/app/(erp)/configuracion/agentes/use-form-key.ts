@@ -8,7 +8,7 @@ export function useFormKey(limpiarError: () => void) {
   const [nombre, setNombre] = useState("");
   const [todos, setTodos] = useState(false);
   const [servicio, setServicio] = useState(false);
-  const [hereda, setHereda] = useState(true);
+  const [hereda, setHereda] = useState(false);
   const [permisos, setPermisos] = useState<string[]>([]);
   const [modulos, setModulos] = useState<string[]>(["core"]);
   const [presupuesto, setPresupuesto] = useState("");
@@ -31,7 +31,7 @@ export function useFormKey(limpiarError: () => void) {
     setPresupuesto("");
     setTodos(false);
     setServicio(false);
-    setHereda(true);
+    setHereda(false);
     setPermisos([]);
     setModulos(["core"]);
     limpiarError();

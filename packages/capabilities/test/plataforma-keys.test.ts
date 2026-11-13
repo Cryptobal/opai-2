@@ -21,6 +21,7 @@ const crear = (scopes: string[], expiraEn?: string) => {
   return executeCapability(ctx, "core.apikeys.create", {
     nombre: "Plataforma",
     scopes,
+    heredarPermisos: true,
     ...(expiraEn ? { expiraEn } : {}),
   }).then((r) => ({ r, keys: tabla("apiKey") }));
 };
