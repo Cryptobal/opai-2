@@ -1,3 +1,5 @@
+import { esMembresiaDeCliente, type Rol } from "@opai/domain";
+
 import { dondeInstalacion } from "../core/maestros/alcance";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
@@ -38,14 +40,21 @@ export async function instalacionesDeCuenta<T extends { instalacionId: string }>
   return unicos;
 }
 
-/** El responsable es un usuario con membresía activa en esta empresa (core.users es global). */
+/**
+ * El responsable es un usuario activo del ERP de esta empresa (core.users es global): nunca un
+ * contacto del Portal Cliente ni un trabajador sin acceso al ERP (mismo criterio que
+ * `comercial.negocios.responsables`).
+ */
 export async function responsableValido(ctx: Contexto, userId: string | null | undefined) {
   if (!userId) return;
   const m = await ctx.db.membership.findFirst({
     where: { userId, estado: "activa" },
-    select: { id: true },
+    select: { rol: true, portales: true },
   });
   if (!m) throw noEncontrado("El responsable");
+  const erp = m.portales.length === 0 || m.portales.includes("erp");
+  if (esMembresiaDeCliente(m.rol as Rol, m.portales) || !erp)
+    throw reglaDeNegocio("El responsable debe ser un usuario de la empresa con acceso al ERP.");
 }
 
 /** Evento `comercial.negocio.actualizado` por outbox, en la transacción de la capacidad. */
