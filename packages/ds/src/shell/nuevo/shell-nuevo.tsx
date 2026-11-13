@@ -88,7 +88,12 @@ export function ShellNuevo({
   };
   const asomar = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "mouse" || asomado) return;
-    if (e.target instanceof Element && e.target.closest('nav[data-shell="riel"]')) setAsomado(true);
+    if (!(e.target instanceof Element) || !e.target.closest('nav[data-shell="riel"]')) return;
+    // CAR-386: si el mouse entra por el ícono de un área, el menú se asoma con esa área abierta,
+    // así el aviso del ícono (p. ej. «2» en Comercial) se ve en la misma entrada al desplegarse.
+    const area = e.target.closest<HTMLElement>("[data-area]")?.dataset["area"];
+    if (area && props.areaAbierta !== area) props.onAreaAbierta?.(area);
+    setAsomado(true);
   };
   const fijar = <BotonFijarMenu onFijar={() => cambiar(false)} />;
   // Tocar un área del riel abre el menú completo sobre la página con esa área desplegada.
