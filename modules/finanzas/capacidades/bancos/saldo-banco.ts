@@ -16,8 +16,9 @@ export type SaldoBanco = {
 
 /**
  * Saldo del banco de hoy: suma de las cuentas activas, cada una con su último saldo conocido y la fecha de ese
- * saldo. De las dos fuentes (el saldo que reportó el banco por Web4Leads y el saldo posterior del último movimiento
- * de la cartola) se toma la más reciente; con la misma fecha, la del banco. La cuenta que se acaba de sincronizar
+ * saldo. De las fuentes (el saldo que reportó el banco por Web4Leads, el saldo posterior del último movimiento y el
+ * saldo final de la última cartola importada, a su fecha de cierre; CAR-341) se toma la más reciente; con la misma
+ * fecha, la del banco. La cuenta que se acaba de sincronizar
  * (`actual`) aporta el saldo recién recibido, fechado hoy. Solo lectura.
  */
 export async function saldoDelBanco(
@@ -50,6 +51,18 @@ export async function saldoDelBanco(
       if (ultimo?.saldoDespues != null) {
         const fecha = ultimo.fecha.toISOString().slice(0, 10);
         if (!conocido || fecha > conocido.fecha) conocido = { cuentaId: c.id, saldo: Number(ultimo.saldoDespues), fecha };
+      }
+      const cartola = await db.cartolaImportada.findFirst({
+        where: { cuentaId: c.id, saldoFinal: { not: null }, fechaHasta: { not: null } },
+        orderBy: [{ fechaHasta: "desc" }, { createdAt: "desc" }],
+        select: { fechaHasta: true, saldoFinal: true, createdAt: true },
+      });
+      if (cartola?.saldoFinal != null && cartola.fechaHasta) {
+        // El cierre no puede ser posterior al día en que se importó (un período que termina en el futuro).
+        const hasta = cartola.fechaHasta.toISOString().slice(0, 10);
+        const importada = hoyIso(cartola.createdAt);
+        const fecha = hasta < importada ? hasta : importada;
+        if (!conocido || fecha > conocido.fecha) conocido = { cuentaId: c.id, saldo: Number(cartola.saldoFinal), fecha };
       }
     }
     if (!conocido) {

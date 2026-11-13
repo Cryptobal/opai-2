@@ -94,6 +94,7 @@ core_apikeys_list
 core_apps_conectadas_list
 core_aprobaciones_get
 core_aprobaciones_list
+core_aprobaciones_reglas_list
 core_audit_list
 core_biometria_borrar
 core_biometria_estado

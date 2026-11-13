@@ -9,7 +9,7 @@ import { Button, Empty, Estado, Segmentado, Tabs, type EstadoPantalla } from "@o
 import { LinkNext } from "@/app/_components/link-next";
 import { fechaHora } from "@/lib/formato";
 
-import { clp } from "../../flujo/_componentes/datos";
+import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/datos";
 import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
 import { PESTANAS_ESTADO_BANCO } from "./bancos-tipos";
 import { ListaMovimientos } from "./lista-movimientos";
@@ -72,11 +72,16 @@ export function PantallaBancos({
             <p className="t-body-sm text-fg-muted">
               {cuenta ? `${cuenta.banco} · ${cuenta.numeroVisible}` : "Configura una cuenta para importar cartolas."}
             </p>
-            {cuenta?.ultimaSyncEn ? (
-              <p className="t-body-sm text-fg-muted">
-                Sincronizado con el banco el {fechaHora(cuenta.ultimaSyncEn)}
-                {cuenta.saldoBanco !== null ? ` · saldo ${clp(cuenta.saldoBanco)}` : ""}
+            {cuenta?.saldoHoy != null ? (
+              <p className="t-body-sm">
+                Saldo de hoy <span className="t-mono font-medium">{clp(cuenta.saldoHoy)}</span>
+                {cuenta.saldoDesde ? (
+                  <span className="text-fg-muted"> · último saldo conocido al {fechaDdMmAaaa(cuenta.saldoDesde)}</span>
+                ) : null}
               </p>
+            ) : null}
+            {cuenta?.ultimaSyncEn ? (
+              <p className="t-body-sm text-fg-muted">Sincronizado con el banco el {fechaHora(cuenta.ultimaSyncEn)}</p>
             ) : null}
           </div>
           {gestiona && cuentas.length > 0 ? (
