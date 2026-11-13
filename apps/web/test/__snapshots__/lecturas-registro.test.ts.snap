@@ -85,6 +85,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "finanzas.dte_config.obtener",
   "finanzas.filas.listar",
   "finanzas.folios.listar",
+  "finanzas.impuestos.borrador_f29",
   "finanzas.plan.listar",
   "finanzas.planilla.obtener",
   "finanzas.planilla.resumen",

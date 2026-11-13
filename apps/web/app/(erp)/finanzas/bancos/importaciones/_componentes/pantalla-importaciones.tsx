@@ -3,15 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { formatearFechaHora } from "@opai/domain";
 import { Alerta, avisar, Badge, Button, Campo, Empty, Estado, Select, type EstadoPantalla } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
-import { fechaHora } from "@/lib/formato";
 
 import { clp, fechaDdMmAaaa } from "../../../flujo/_componentes/datos";
 import type { CuentaBanco } from "../../_componentes/bancos-tipos";
 import { DialogDeshacerImportacion } from "./dialog-deshacer-importacion";
 import type { ImportacionCartola, VistaDeshacer } from "./tipos";
+
 
 const periodoDe = (i: ImportacionCartola) =>
   i.fechaDesde && i.fechaHasta ? `${fechaDdMmAaaa(i.fechaDesde)} al ${fechaDdMmAaaa(i.fechaHasta)}` : "Sin período";
@@ -96,7 +97,7 @@ export function PantallaImportaciones({
                     {i.conciliados > 0 ? ` (${i.conciliados} conciliados)` : ""}
                   </p>
                   <p className="t-caption text-fg-muted">
-                    Importada el {fechaHora(i.creadaEn)}
+                    Importada el {formatearFechaHora(i.creadaEn)}
                     {i.creadaPor ? ` por ${i.creadaPor}` : ""}
                     {i.viaAgente ? " (vía agente)" : ""}
                   </p>

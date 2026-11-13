@@ -43,3 +43,11 @@ export function errorDeCampo(c: ConfigSeccion["campos"][number], texto: string):
 
 export const faltantes = (cfg: ConfigSeccion, actual: Readonly<Record<string, string>>): boolean =>
   cfg.campos.some((c) => errorDeCampo(c, actual[c.clave] ?? "") !== null);
+
+/** Hay algo distinto de lo guardado (también en las hojas que envían todos los campos). */
+export const hayCambios = (
+  cfg: ConfigSeccion,
+  inicial: Readonly<Record<string, string>>,
+  actual: Readonly<Record<string, string>>,
+): boolean =>
+  cfg.campos.some((c) => (actual[c.clave] ?? "").trim() !== (inicial[c.clave] ?? "").trim());

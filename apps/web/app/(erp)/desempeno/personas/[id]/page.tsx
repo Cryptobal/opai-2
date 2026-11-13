@@ -3,12 +3,14 @@ import { Badge, BarraProgreso, DetailScreen, Seccion } from "@opai/ds";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 
-import { cargarResultadoPersona, tonoPuntaje } from "../../_componentes/datos";
+import { cargarResultadoPersona, mesEnCurso, tonoPuntaje } from "../../_componentes/datos";
+import { mesDeUrl, SelectorMes } from "../../_componentes/selector-mes";
 import { conUnidad, mesCorto } from "../../_componentes/tipos";
 
 export const metadata = { title: "Resultado de la persona" };
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
 const TONO_BARRA = {
   success: "accent",
@@ -18,22 +20,23 @@ const TONO_BARRA = {
 } as const;
 
 /** Resultado de gestión de una persona en el mes (ADR-094, CAR-307): puntaje y detalle por indicador. */
-export default function ResultadoPersona({ params }: Props) {
+export default function ResultadoPersona({ params, searchParams }: Props) {
   return (
     <PaginaPortal
       portal="erp"
       titulo="Resultado de la persona"
       ruta="/desempeno"
       cargar={async () => {
-        const r = await cargarResultadoPersona(requerirUuid((await params).id));
+        const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
+        const r = await cargarResultadoPersona(requerirUuid(id), mesDeUrl(p["mes"]));
         requerirEncontrado(r);
-        return { r };
+        return { r, actual: mesEnCurso() };
       }}
       opciones={({ r }) => ({
         titulo: r.ok ? `${r.data.nombres} ${r.data.apellidos}` : "Resultado de la persona",
       })}
     >
-      {({ r }) => {
+      {({ r, actual }) => {
         const d = r.ok ? r.data : null;
         return (
           <DetailScreen
@@ -50,9 +53,14 @@ export default function ResultadoPersona({ params }: Props) {
           >
             {d ? (
               <div className="flex flex-col gap-6">
+                <SelectorMes
+                  periodo={d.periodo}
+                  actual={actual}
+                  base={`/desempeno/personas/${d.personaId}`}
+                />
                 {d.vigenteDesde === null ? (
                   <p className="t-body-sm text-fg-muted">
-                    Su cargo no tiene scorecard este mes, así que no hay resultado que mostrar.
+                    Su cargo no tiene scorecard en ese mes, así que no hay resultado que mostrar.
                   </p>
                 ) : (
                   <>
@@ -64,9 +72,9 @@ export default function ResultadoPersona({ params }: Props) {
                     </p>
                     {d.parteAgente && d.parteAgente.porAgente > 0 ? (
                       <p className="t-body-sm text-fg-muted">
-                        Su agente hizo el {d.parteAgente.porcentaje.toLocaleString("es-CL")} % de sus
-                        acciones del mes ({d.parteAgente.porAgente} de {d.parteAgente.acciones}). El
-                        resultado sigue siendo de la persona.
+                        Su agente hizo el {d.parteAgente.porcentaje.toLocaleString("es-CL")} % de
+                        sus acciones del mes ({d.parteAgente.porAgente} de {d.parteAgente.acciones}
+                        ). El resultado sigue siendo de la persona.
                       </p>
                     ) : null}
                     <Seccion titulo="Indicadores">
