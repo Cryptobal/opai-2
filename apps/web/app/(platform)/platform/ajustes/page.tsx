@@ -22,17 +22,23 @@ export default function Ajustes() {
       ruta="/platform/ajustes"
       opciones={() => ({ insignia: <Superadmin /> })}
       cargar={async () => {
-        const [p, a] = await Promise.all([
+        const [p, a, t] = await Promise.all([
           ejecutarComoUsuario<Precio[]>("platform", "platform.precios.list", {}),
           ejecutarComoUsuario<Ajuste[]>("platform", "platform.ajustes.get", {}),
+          ejecutarComoUsuario<{ estado: string }[]>("platform", "platform.tenants.list"),
         ]);
-        return { precios: exigirDatos(p), ajustes: exigirDatos(a) };
+        return {
+          precios: exigirDatos(p),
+          ajustes: exigirDatos(a),
+          // Solo para el texto de confirmación: si la lista falla, la pantalla igual carga.
+          empresas: t.ok ? t.data.filter((e) => e.estado !== "suspendido").length : null,
+        };
       }}
     >
       {(d) => (
         <>
           <h2 className="t-title mb-3 text-fg md:hidden">Ajustes de plataforma</h2>
-          <AjustesPlataforma precios={d.precios} ajustes={d.ajustes} />
+          <AjustesPlataforma precios={d.precios} ajustes={d.ajustes} empresas={d.empresas} />
         </>
       )}
     </PaginaPortal>

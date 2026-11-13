@@ -128,6 +128,9 @@ const t = TENANT_DE_PRUEBA;
 /** Un caso por escritura `platform.*`: su input mínimo válido sobre la semilla. */
 const CASOS: Record<string, Record<string, unknown>> = {
   "platform.ajustes.set": { modulo: "core", clave: "remuneraciones_imm", valor: 560_000 },
+  "platform.ajustes.guardar_lote": {
+    cambios: [{ tipo: "ajuste", modulo: "core", clave: "remuneraciones_imm", valor: 560_000 }],
+  },
   "platform.cobros.prueba_gratis_extender": { tenantId: t, moduloId: "cpq", dias: 10 },
   "platform.catalogo.precio_set": {
     moduloId: "cpq",

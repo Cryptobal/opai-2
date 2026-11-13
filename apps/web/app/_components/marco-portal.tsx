@@ -13,14 +13,19 @@ import type { Marco } from "@/lib/marco";
 const MarcoHilo = dynamic(() => import("./hilo/marco-hilo").then((m) => m.MarcoHilo));
 const MarcoNuevo = dynamic(() => import("./marco-nuevo").then((m) => m.MarcoNuevo));
 
-type Props = { marco: Marco; datos: DatosShell; children: ReactNode };
+type Props = { marco: Marco; menuPlegado?: boolean; datos: DatosShell; children: ReactNode };
 
 /**
  * Monta el marco elegido por la persona con las mismas páginas y los mismos datos del shell. El diseño
  * nuevo (ADR-109) usa el mismo shell que el clásico, con su piel y su menú plegable.
  */
-export function MarcoPortal({ marco, datos, children }: Props) {
+export function MarcoPortal({ marco, menuPlegado = false, datos, children }: Props) {
   if (marco === "hilo") return <MarcoHilo datos={datos}>{children}</MarcoHilo>;
-  if (marco === "nuevo") return <MarcoNuevo datos={datos}>{children}</MarcoNuevo>;
+  if (marco === "nuevo")
+    return (
+      <MarcoNuevo datos={datos} menuPlegado={menuPlegado}>
+        {children}
+      </MarcoNuevo>
+    );
   return <MarcoShell datos={datos}>{children}</MarcoShell>;
 }
