@@ -15,6 +15,8 @@ export function CuentaVinculo(p: {
   onCambiar: (v: string) => void;
   vinculadas: string[];
   disabled: boolean;
+  /** Texto de ayuda; por defecto, el de vincular (excluye las ya vinculadas). */
+  ayuda?: string;
 }) {
   const [vistas, setVistas] = useState<Opcion[]>([]);
   const [error, setError] = useState(false);
@@ -53,7 +55,9 @@ export function CuentaVinculo(p: {
       <Campo
         etiqueta="Cuenta"
         htmlFor="vinculo-cuenta"
-        ayuda="Busca por nombre, razón social o RUT. Se excluyen las cuentas ya vinculadas."
+        ayuda={
+          p.ayuda ?? "Busca por nombre, razón social o RUT. Se excluyen las cuentas ya vinculadas."
+        }
       >
         <Combobox
           id="vinculo-cuenta"

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { CuentaVinculo } from "../../contactos/_componentes/cuenta-vinculo";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import type { Contacto } from "@/lib/tipos-maestros";
 
@@ -12,13 +13,16 @@ import { CamposContacto, correoMalo, type DatosContacto } from "./campos-contact
 
 export { ROL_CONTACTO } from "./campos-contacto";
 
-/** Nuevo o editar contacto (03): nombres, correo con validación, principal y roles. */
+/**
+ * Nuevo o editar contacto (03): nombres, correo con validación, principal y roles. Sin `cuentaId`
+ * (alta directa desde Contactos, CAR-337) se elige la cuenta primero.
+ */
 export function HojaContacto({
   cuentaId,
   contactos,
   soloDatos = false,
 }: {
-  cuentaId: string;
+  cuentaId?: string;
   contactos: Contacto[];
   soloDatos?: boolean;
 }) {
@@ -44,13 +48,14 @@ function Formulario({
   principal,
   onCerrar,
 }: {
-  cuentaId: string;
+  cuentaId: string | undefined;
   soloDatos: boolean;
   actual: Contacto | null;
   principal: Contacto | null;
   onCerrar: () => void;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const [cuenta, setCuenta] = useState(cuentaId ?? "");
   const [d, setD] = useState<DatosContacto>({
     nombres: actual?.nombres ?? "",
     apellidos: actual?.apellidos ?? "",
@@ -71,7 +76,7 @@ function Formulario({
     };
     const r = await ejecutar(
       actual ? "core.contactos.update" : "core.contactos.create",
-      actual ? { id: actual.id, ...campos } : { cuentaId, ...campos },
+      actual ? { id: actual.id, ...campos } : { cuentaId: cuenta, ...campos },
     );
     if (r) {
       avisar.exito(actual ? "Contacto actualizado" : "Contacto creado");
@@ -90,7 +95,13 @@ function Formulario({
             Cancelar
           </Button>
           <Button
-            disabled={pendiente || !d.nombres.trim() || !d.apellidos.trim() || correoMalo(d.email)}
+            disabled={
+              pendiente ||
+              !cuenta ||
+              !d.nombres.trim() ||
+              !d.apellidos.trim() ||
+              correoMalo(d.email)
+            }
             onClick={() => void guardar()}
           >
             {pendiente ? "Guardando…" : actual ? "Guardar" : "Crear contacto"}
@@ -98,6 +109,16 @@ function Formulario({
         </>
       }
     >
+      {cuentaId === undefined && !actual ? (
+        <div className="mb-4">
+          <CuentaVinculo
+            valor={cuenta}
+            onCambiar={setCuenta}
+            vinculadas={[]}
+            disabled={pendiente}
+          />
+        </div>
+      ) : null}
       <CamposContacto soloDatos={soloDatos} d={d} set={set} error={error} principal={principal} />
     </Sheet>
   );
