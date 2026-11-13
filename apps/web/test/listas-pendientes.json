@@ -25,7 +25,6 @@
   "core.apps_conectadas.list",
   "core.aprobaciones.list",
   "core.aprobaciones.reglas_list",
-  "core.audit.list",
   "core.ausencias.listar",
   "core.calendario.listar",
   "core.cargos.list",
