@@ -199,6 +199,8 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 ### A2.11 Sin GitHub Actions: revisión mínima local (Carlos, 13-nov-2026, ADR-112; temporal)
 
+> **Terminada el 13-nov-2026 a las 15:47 (ADR-112, adenda D):** Actions vuelve a correr. No se corre el gate local ni se deja el comentario «Gate local»; se integra con los checks de GitHub en verde. Se conserva el texto por si el bloqueo vuelve.
+
 Mientras GitHub Actions esté bloqueado y la regla «Proteger main» desactivada, **ninguna sesión integra sin esto** (detalle en ADR-112, decisión A):
 
 1. No uses Actions: no relances jobs ni empujes commits vacíos.

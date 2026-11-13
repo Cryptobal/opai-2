@@ -70,11 +70,21 @@ export const cargarScorecard = (cargoId: string) =>
     definicionesPendiente: DefinicionIndicador[];
   }>("erp", "desempeno.scorecards.get", { cargoId });
 
-export const cargarResultadoCargo = (cargoId: string) =>
-  ejecutarComoUsuario<ResultadoCargo>("erp", "desempeno.resultados.ver_cargo", { cargoId });
+export const cargarResultadoCargo = (cargoId: string, periodo?: string | null) =>
+  ejecutarComoUsuario<ResultadoCargo>("erp", "desempeno.resultados.ver_cargo", {
+    cargoId,
+    ...(periodo ? { periodo } : {}),
+  });
 
-export const cargarResultadoPersona = (personaId: string) =>
-  ejecutarComoUsuario<ResultadoPersona>("erp", "desempeno.resultados.ver_persona", { personaId });
+export const cargarResultadoPersona = (personaId: string, periodo?: string | null) =>
+  ejecutarComoUsuario<ResultadoPersona>("erp", "desempeno.resultados.ver_persona", {
+    personaId,
+    ...(periodo ? { periodo } : {}),
+  });
+
+/** Mes en curso «aaaa-mm» en la hora de Chile, para no ofrecer meses futuros. */
+export const mesEnCurso = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date()).slice(0, 7);
 
 export const cargarCargos = () =>
   ejecutarComoUsuario<CargoJefatura[]>("erp", "core.cargos.list", {});
@@ -128,7 +138,7 @@ export type MesCerrado = {
 };
 
 export const cargarCierres = () =>
-  ejecutarComoUsuario<{ cerrados: MesCerrado[]; porCerrar: string | null }>(
+  ejecutarComoUsuario<{ cerrados: MesCerrado[]; porCerrar: string | null; abiertos: string[] }>(
     "erp",
     "desempeno.periodos.list",
     {},

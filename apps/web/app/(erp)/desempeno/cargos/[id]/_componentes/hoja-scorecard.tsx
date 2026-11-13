@@ -46,61 +46,60 @@ export function HojaScorecard({ cargoId, base, soloPublicar, opciones, onCerrar 
       publicar,
     });
     if (!r) return;
-    avisar.exito(publicar ? `Publicado: rige desde ${mesCorto(r.vigenteDesde)}` : "Borrador guardado");
+    avisar.exito(
+      publicar ? `Publicado: rige desde ${mesCorto(r.vigenteDesde)}` : "Borrador guardado",
+    );
     onCerrar();
   }
 
   return (
     <Sheet
-        abierto
-        onCerrar={onCerrar}
-        titulo="Scorecard del cargo"
-        acciones={
-          <>
-            <Button
-              variant="secondary"
-              disabled={pendiente || !completos || soloPublicar}
-              onClick={() => void guardar(false)}
-            >
-              Guardar borrador
-            </Button>
-            <Button
-              disabled={pendiente || !completos || items.length === 0 || suma !== 100}
-              onClick={() => void guardar(true)}
-            >
-              {pendiente ? "Guardando…" : "Publicar"}
-            </Button>
-          </>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <FilasScorecard items={items} opciones={opciones} onCambiar={setItems} />
-          <p
-            className={suma === 100 ? "t-caption" : "t-caption text-warning-fg"}
-            aria-live="polite"
+      abierto
+      onCerrar={onCerrar}
+      titulo="Scorecard del cargo"
+      acciones={
+        <>
+          <Button
+            variant="secondary"
+            disabled={pendiente || !completos || soloPublicar}
+            onClick={() => void guardar(false)}
           >
-            Los pesos suman {suma} %. {suma === 100 ? "" : "Para publicar deben sumar 100 %."}
+            Guardar borrador
+          </Button>
+          <Button
+            disabled={pendiente || !completos || items.length === 0 || suma !== 100}
+            onClick={() => void guardar(true)}
+          >
+            {pendiente ? "Guardando…" : "Publicar"}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <FilasScorecard items={items} opciones={opciones} onCambiar={setItems} />
+        <p className={suma === 100 ? "t-caption" : "t-caption text-warning-fg"} aria-live="polite">
+          Los pesos suman {suma} %. {suma === 100 ? "" : "Para publicar deben sumar 100 %."}
+        </p>
+        <Switch
+          activo={veResultado}
+          onCambiar={setVeResultado}
+          etiqueta="La persona ve su resultado"
+          descripcion="Cada persona de este cargo ve su puntaje y sus indicadores."
+        />
+        {completos ? null : (
+          <p className="t-caption text-warning-fg">Completa la meta y el peso de cada indicador.</p>
+        )}
+        <p className="t-caption">
+          {soloPublicar
+            ? "Ya hay un cambio publicado para el mes siguiente: al publicar de nuevo lo reemplazas."
+            : "Si el cargo ya tiene un scorecard en uso, lo que publiques empieza el mes siguiente."}
+        </p>
+        {error ? (
+          <p role="alert" className="t-body-sm text-danger-fg">
+            {error}
           </p>
-          <Switch
-            activo={veResultado}
-            onCambiar={setVeResultado}
-            etiqueta="La persona ve su resultado"
-            descripcion="Cada persona de este cargo ve su puntaje y sus indicadores."
-          />
-          {completos ? null : (
-            <p className="t-caption text-warning-fg">Completa la meta y el peso de cada indicador.</p>
-          )}
-          <p className="t-caption">
-            {soloPublicar
-              ? "Ya hay un cambio publicado para el mes siguiente: al publicar de nuevo lo reemplazas."
-              : "Si el cargo ya tiene un scorecard en uso, lo que publiques empieza el mes siguiente."}
-          </p>
-          {error ? (
-            <p role="alert" className="t-body-sm text-danger-fg">
-              {error}
-            </p>
-          ) : null}
-        </div>
+        ) : null}
+      </div>
     </Sheet>
   );
 }

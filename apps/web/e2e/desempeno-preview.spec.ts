@@ -12,7 +12,9 @@ test.setTimeout(180_000);
 test.describe("@preview desempeño", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
-  test("lista de cargos, scorecard con su editor y resultado de una persona", async ({ page }, info) => {
+  test("lista de cargos, scorecard con su editor y resultado de una persona", async ({
+    page,
+  }, info) => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
@@ -29,13 +31,28 @@ test.describe("@preview desempeño", () => {
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "desempeno-cargo");
 
+    // Elegir otro mes (pendiente de CAR-307): el mes anterior por la URL, sin errores.
+    const anterior = page.getByRole("navigation", { name: "Mes" }).getByRole("link").first();
+    await expect(anterior, "el equipo trae el selector de mes").toBeVisible();
+    {
+      await anterior.click();
+      await page.waitForURL(/[?&]mes=\d{4}-\d{2}/);
+      await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+      await capturar(page, info, "desempeno-cargo-mes-anterior");
+      await page.goBack();
+      await page.waitForURL((u) => !u.search.includes("mes="));
+    }
+
     const editar = page.getByRole("button", { name: /Editar scorecard|Definir scorecard/ }).first();
     await editar.click();
     await expect(page.getByText(/Los pesos suman/)).toBeVisible();
     await capturar(page, info, "desempeno-editor");
     await page.keyboard.press("Escape");
 
-    const persona = page.locator('a[href^="/desempeno/personas/"]').filter({ visible: true }).first();
+    const persona = page
+      .locator('a[href^="/desempeno/personas/"]')
+      .filter({ visible: true })
+      .first();
     if (await persona.count()) {
       await persona.click();
       await page.waitForURL(/\/desempeno\/personas\/[0-9a-f-]{36}/);
@@ -54,7 +71,9 @@ test.describe("@preview desempeño", () => {
     const cerrar = page.getByRole("button", { name: /^Cerrar / }).first();
     if (await cerrar.count()) {
       await cerrar.click();
-      await expect(page.getByText(/Se guarda el resultado de \d|quedará cerrado vacío/)).toBeVisible();
+      await expect(
+        page.getByText(/Se guarda el resultado de \d|quedará cerrado vacío/),
+      ).toBeVisible();
       await page.waitForTimeout(300);
       await capturar(page, info, "desempeno-cierres-confirmar");
       await page.getByRole("button", { name: "Cancelar" }).click();

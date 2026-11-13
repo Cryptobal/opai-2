@@ -4,6 +4,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { identidadActual } from "@/lib/servidor";
 
 import {
@@ -11,7 +12,9 @@ import {
   cargarOpciones,
   cargarResultadoCargo,
   cargarScorecard,
+  mesEnCurso,
 } from "../../_componentes/datos";
+import { mesDeUrl, SelectorMes } from "../../_componentes/selector-mes";
 import { type DefinicionIndicador, mesCorto } from "../../_componentes/tipos";
 import { EditarScorecard } from "./_componentes/editar-scorecard";
 import { Equipo } from "./_componentes/equipo";
@@ -19,24 +22,28 @@ import { Jefatura } from "./_componentes/jefatura";
 import { TablaScorecard } from "./_componentes/tabla-scorecard";
 
 export const metadata = { title: "Scorecard del cargo" };
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
 /** Scorecard de un cargo (ADR-094, CAR-307): indicadores, metas y pesos, jefatura y equipo. */
-export default function ScorecardCargo({ params }: Props) {
+export default function ScorecardCargo({ params, searchParams }: Props) {
   return (
     <PaginaPortal
       portal="erp"
       titulo="Scorecard del cargo"
       ruta="/desempeno"
       cargar={async () => {
-        const [{ id: crudo }, identidad] = await Promise.all([params, identidadActual()]);
+        const [{ id: crudo }, identidad, p] = await Promise.all([
+          params,
+          identidadActual(),
+          leerParametros(searchParams),
+        ]);
         const id = requerirUuid(crudo);
         const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
         const editaScorecard = puede("desempeno:scorecards.manage");
         // El catálogo solo hace falta para editar; los cargos, para mostrar o cambiar la jefatura.
         const [r, equipo, opciones, cargos] = await Promise.all([
           cargarScorecard(id),
-          cargarResultadoCargo(id),
+          cargarResultadoCargo(id, mesDeUrl(p["mes"])),
           editaScorecard ? cargarOpciones() : [],
           cargarCargos(),
         ]);
@@ -50,11 +57,12 @@ export default function ScorecardCargo({ params }: Props) {
           nombre: r.ok ? r.data.cargo : "Cargo",
           editaScorecard,
           editaJefatura: puede("core:estructuras.manage"),
+          actual: mesEnCurso(),
         };
       }}
       opciones={({ nombre }) => ({ titulo: nombre })}
     >
-      {({ id, r, equipo, opciones, cargos, nombre, editaScorecard, editaJefatura }) => {
+      {({ id, r, equipo, opciones, cargos, nombre, editaScorecard, editaJefatura, actual }) => {
         const vigente = r.ok ? r.data.vigente : null;
         const pendiente = r.ok ? r.data.pendiente : null;
         const mapa = (ds: DefinicionIndicador[]) => new Map(ds.map((d) => [d.indicador, d]));
@@ -107,6 +115,13 @@ export default function ScorecardCargo({ params }: Props) {
               ) : null}
               {cargos ? <Jefatura cargoId={id} cargos={cargos} editable={editaJefatura} /> : null}
               <Seccion titulo="Equipo">
+                {equipo.ok ? (
+                  <SelectorMes
+                    periodo={equipo.data.periodo}
+                    actual={actual}
+                    base={`/desempeno/cargos/${id}`}
+                  />
+                ) : null}
                 <Equipo resultado={equipo} />
               </Seccion>
             </div>
