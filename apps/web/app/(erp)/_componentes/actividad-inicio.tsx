@@ -5,6 +5,7 @@ import { Avatar, SeccionTarjeta, Segmentado } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { fecha, haceCuanto, hora, hoyIso } from "@/lib/fechas";
+import { rutaDeEntidad } from "@/lib/ruta-entidad";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Actividad } from "@/lib/tipos-maestros";
 
@@ -64,7 +65,14 @@ export async function ActividadInicio({ actor }: { actor: string | undefined }) 
               )}
               <span className="flex min-w-0 flex-col">
                 <span className="text-base text-fg">
-                  <strong className="font-semibold">{i.actor.nombre}</strong> {i.accion}
+                  <strong className="font-semibold">{i.actor.nombre}</strong>{" "}
+                  {rutaDeEntidad(i.entidad) ? (
+                    <LinkNext href={rutaDeEntidad(i.entidad) ?? "/"} className="hover:underline">
+                      {i.accion}
+                    </LinkNext>
+                  ) : (
+                    i.accion
+                  )}
                 </span>
                 <span className="t-caption">
                   {i.actor.agente ? `Agente${i.via ? ` vía ${i.via}` : ""} · ` : ""}

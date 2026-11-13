@@ -1,13 +1,8 @@
 import type { FilaHilo, ListaHilo, PendienteHilo } from "@opai/ds";
 import type { Resultado } from "@opai/capabilities";
 
-import {
-  actividadHilo,
-  agendaHilo,
-  estadoDeFallo,
-  type PendienteInicio,
-  pendientesHilo,
-} from "./datos-hilo";
+import { actividadHilo } from "./actividad-hilo";
+import { agendaHilo, estadoDeFallo, type PendienteInicio, pendientesHilo } from "./datos-hilo";
 
 /**
  * Lecturas del hilo. Quien las arma (el gancho `useHilo`) llama a `ejecutarCapacidad` con el id

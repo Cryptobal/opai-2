@@ -38,3 +38,20 @@ it("selecciona cambios desde el efecto del registro, también por prefijo", () =
   expect(capacidadesDeCambios("core.instalaciones")).toContain("core.instalaciones.update");
   expect(capacidadesDeCambios("inexistente")).toEqual([]);
 });
+
+it("dice qué se hizo y sobre qué en las acciones de todos los módulos (CAR-339)", () => {
+  expect(frase("core.users.invite", { email: "ana@empresa.test" })).toBe(
+    "invitó a ana@empresa.test",
+  );
+  expect(frase("cpq.cotizaciones.aprobar", {})).toBe("aprobó la cotización");
+  expect(frase("comercial.solicitudes.convertir", { empresa: "Minera Sur" })).toBe(
+    "convirtió la solicitud Minera Sur",
+  );
+  expect(frase("core.anexos.rechazar", {})).toBe("rechazó el anexo");
+});
+
+it("sin verbo conocido nombra la ficha, y sin ficha conocida nombra el módulo", () => {
+  expect(frase("cpq.cotizaciones.margen", {})).toBe("modificó la cotización");
+  expect(frase("finanzas.zzz.aprobar", {})).toBe("aprobó un registro de Finanzas");
+  expect(frase("finanzas.zzz.zzz", {})).toBe("realizó un cambio en Finanzas");
+});

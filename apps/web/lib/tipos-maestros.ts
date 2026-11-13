@@ -156,6 +156,7 @@ export type Actividad = {
     accion: string;
     cambios: { campo: string; valor: string }[];
     detalle: unknown;
+    entidad?: { tipo: string; id: string } | null;
   }[];
   siguiente: string | null;
 };
