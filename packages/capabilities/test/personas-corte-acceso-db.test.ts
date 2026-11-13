@@ -25,10 +25,12 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
       "core.vinculos.terminar", { id, termino: "2026-11-30", motivo: "Término de prueba" }, o,
     )) as R;
   /** Persona con usuario y membresía en la empresa, y un vínculo vigente (o dos). */
-  const personaConUsuario = async (rut: string, rol: string, vinculos = 1) => {
-    const uid = randomUUID();
-    await e.admin.user.create({ data: { id: uid, name: "Usuario Ficticio", email: `${uid.slice(0, 8)}@c355b.test` } });
-    const m = await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol, portales: ["trabajador"] } });
+  const personaConUsuario = async (rut: string, rol: string, vinculos = 1, usuario?: string) => {
+    const uid = usuario ?? randomUUID();
+    if (!usuario) await e.admin.user.create({ data: { id: uid, name: "Usuario Ficticio", email: `${uid.slice(0, 8)}@c355b.test` } });
+    const m = usuario
+      ? (await e.admin.membership.findFirst({ where: { tenantId: tenant, userId: uid } }))!
+      : await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol, portales: ["trabajador"] } });
     const p = await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activa", usuarioId: uid } });
     const vs = [];
     for (let i = 0; i < vinculos; i++)
@@ -56,7 +58,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
     const x = await personaConUsuario("11111111-1", "trabajador");
     const r = await terminar(x.vinculo, { dryRun: true });
     expect(r.ok, JSON.stringify(r)).toBe(true);
-    expect(r.data?.["accesos"]).toEqual({ personaInactiva: true, membresiasSuspendidas: 1, ownerConservado: false });
+    expect(r.data?.["accesos"]).toEqual({ personaInactiva: true, membresiasSuspendidas: 1, ownerConservado: false, sinSuspender: 0 });
     expect((await e.admin.membership.findUnique({ where: { id: x.membresia } }))?.estado).toBe("activa");
     expect((await e.admin.persona.findUnique({ where: { id: x.persona } }))?.estado).toBe("activa");
   });
@@ -74,7 +76,25 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
   it("un owner no se suspende solo: queda informado", async () => {
     const x = await personaConUsuario("33333333-3", "owner");
     const r = await terminar(x.vinculo);
-    expect(r.data?.["accesos"]).toEqual({ personaInactiva: true, membresiasSuspendidas: 0, ownerConservado: true });
+    expect(r.data?.["accesos"]).toEqual({ personaInactiva: true, membresiasSuspendidas: 0, ownerConservado: true, sinSuspender: 1 });
+    expect((await e.admin.membership.findUnique({ where: { id: x.membresia } }))?.estado).toBe("activa");
+  });
+
+  it("la membresía del mismo usuario en otra empresa no se toca", async () => {
+    const x = await personaConUsuario("44444444-4", "trabajador");
+    const otraEmpresa = (await e.admin.tenant.create({ data: { slug: `qa-c355c-${randomUUID().slice(0, 8)}`, nombre: "c355c", vertical: "seguridad" } })).id;
+    const persona = await e.admin.persona.findUnique({ where: { id: x.persona } });
+    const ajena = await e.admin.membership.create({ data: { tenantId: otraEmpresa, userId: persona!.usuarioId!, rol: "trabajador", portales: ["trabajador"] } });
+    const r = await terminar(x.vinculo);
+    expect(r.data?.["accesos"]).toMatchObject({ membresiasSuspendidas: 1 });
+    expect((await e.admin.membership.findUnique({ where: { id: ajena.id } }))?.estado).toBe("activa");
+  });
+
+  it("quien termina no se suspende a sí mismo: queda informado", async () => {
+    const x = await personaConUsuario("55555555-5", "admin", 1, rrhh);
+    const r = await terminar(x.vinculo);
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    expect((r.data?.["accesos"] as { sinSuspender: number }).sinSuspender).toBe(1);
     expect((await e.admin.membership.findUnique({ where: { id: x.membresia } }))?.estado).toBe("activa");
   });
 });

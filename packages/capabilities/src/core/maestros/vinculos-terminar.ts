@@ -30,7 +30,12 @@ export const vinculosTerminar = defineCapability({
     const termino = aFecha(input.termino);
     if (termino < v.inicio) throw reglaDeNegocio("El término es anterior al inicio del vínculo.");
     const data = { termino, motivoTermino: input.motivo, estado: "terminado" };
-    if (dryRun) return { ...vistaVinculo({ ...v, ...data }), accesos: await cortarAccesos(ctx.db, v, false) };
+    const quien = {
+      tenantId: ctx.tenantId,
+      gestionaUsuarios: ctx.autorizar(PERMISOS_CORE.usersManage),
+      usuarioId: ctx.usuario?.id ?? null,
+    };
+    if (dryRun) return { ...vistaVinculo({ ...v, ...data }), accesos: await cortarAccesos(ctx.db, v, quien, false) };
     let accesos: CorteAcceso | null = null;
     const r = await escribirConEvento(
       ctx,
@@ -41,10 +46,11 @@ export const vinculosTerminar = defineCapability({
       },
       async (tx) => {
         const t = await tx.vinculoLaboral.update({ where: { id: v.id }, data });
-        accesos = await cortarAccesos(tx, v, true);
+        accesos = await cortarAccesos(tx, v, quien, true);
         return t;
       },
     );
-    return { ...vistaVinculo(r), accesos: accesos ?? (await cortarAccesos(ctx.db, v, false)) };
+    if (!accesos) throw new Error("El corte de accesos no se registró.");
+    return { ...vistaVinculo(r), accesos };
   },
 });
