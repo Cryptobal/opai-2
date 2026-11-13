@@ -11,6 +11,18 @@ import { identidadActual } from "@/lib/servidor";
 
 const TITULO = "Jornada DT y contrato";
 
+type Jornada =
+  | { terminosPlazoFijo: string[]; terminoPlazoFijo: string | null; plazoFijoPeriodo: number | null }
+  | null
+  | undefined;
+/** Casillas del formulario: la lista por período o, en registros antiguos, el término en la casilla de su período. */
+function terminosIniciales(j: Jornada): Record<string, string | undefined> {
+  const lista: (string | undefined)[] = [];
+  if (j?.terminosPlazoFijo.length) lista.push(...j.terminosPlazoFijo);
+  else if (j?.terminoPlazoFijo) lista[Math.min(Math.max(j.plazoFijoPeriodo ?? 1, 1), 3) - 1] = j.terminoPlazoFijo;
+  return { termino1: lista[0], termino2: lista[1], termino3: lista[2] };
+}
+
 export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
   if (!identidad) return null;
@@ -72,16 +84,24 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
           },
           { etiqueta: "Resolución", valor: j?.resolucion },
           {
-            etiqueta: "Vigente desde",
-            valor: j?.resolucionVigenteDesde ? fecha(j.resolucionVigenteDesde) : null,
+            etiqueta: "Vigente",
+            valor: j?.resolucionVigenteDesde
+              ? `desde ${fecha(j.resolucionVigenteDesde)}${j.resolucionVigenteHasta ? ` hasta ${fecha(j.resolucionVigenteHasta)}` : ""}`
+              : j?.resolucionVigenteHasta
+                ? `hasta ${fecha(j.resolucionVigenteHasta)}`
+                : null,
           },
           {
             etiqueta: "Plazo fijo (período)",
             valor: j?.plazoFijoPeriodo ? `${j.plazoFijoPeriodo} de 3` : null,
           },
           {
-            etiqueta: "Término plazo fijo",
-            valor: j?.terminoPlazoFijo ? fecha(j.terminoPlazoFijo) : null,
+            etiqueta: "Términos de plazo fijo",
+            valor: j?.terminosPlazoFijo.length
+              ? j.terminosPlazoFijo.map((d, i) => `${i + 1}.º ${fecha(d)}`).join(" · ")
+              : j?.terminoPlazoFijo
+                ? fecha(j.terminoPlazoFijo)
+                : null,
           },
           {
             etiqueta: "Aviso de término",
@@ -96,11 +116,12 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
           inicial={{
             resolucion: j?.resolucion,
             resolucionVigenteDesde: j?.resolucionVigenteDesde,
+            resolucionVigenteHasta: j?.resolucionVigenteHasta,
             horasSemanales: j?.horasSemanales,
             distribucion: j?.distribucion,
             articulo22: j?.articulo22 ? "si" : "no",
-            plazoFijoPeriodo: j?.plazoFijoPeriodo?.toString(),
-            terminoPlazoFijo: j?.terminoPlazoFijo,
+            // Antes de CAR-277 solo había un término: va como el del período registrado.
+            ...terminosIniciales(j),
             avisoTerminoDias: j?.avisoTerminoDias?.toString(),
           }}
         />

@@ -15,7 +15,9 @@ export const puntaje = z
   .number()
   .nullable()
   .describe("0 a 120; 100 = todas las metas cumplidas. null = sin hechos que medir todavía.");
-export const cobertura = z.number().describe("Peso del scorecard que sí tuvo hechos este mes (0 a 100).");
+export const cobertura = z
+  .number()
+  .describe("Peso del scorecard que sí tuvo hechos este mes (0 a 100).");
 
 export const resultadosPersona = defineCapability({
   id: "desempeno.resultados.ver_persona",
@@ -32,8 +34,11 @@ export const resultadosPersona = defineCapability({
     apellidos: z.string(),
     cargoId: z.string().nullable(),
     periodo: z.string(),
+    mesEnCurso: z.string().describe("Mes en curso (aaaa-mm) en la zona horaria de la empresa."),
     vigenteDesde: z.string().nullable().describe("null = su cargo no tiene scorecard ese mes."),
-    cerrado: z.boolean().describe("true = mes cerrado: el resultado es el que quedó guardado y no cambia."),
+    cerrado: z
+      .boolean()
+      .describe("true = mes cerrado: el resultado es el que quedó guardado y no cambia."),
     puntaje,
     cobertura,
     parteAgente: parteAgenteSchema,
@@ -58,7 +63,9 @@ export const resultadosPersona = defineCapability({
     const vis = await visibilidadDe(ctx);
     const personaId = input.personaId ?? vis.propia;
     if (!personaId) {
-      throw reglaDeNegocio("Tu usuario no está vinculado a una ficha de Persona: indica a quién consultar.");
+      throw reglaDeNegocio(
+        "Tu usuario no está vinculado a una ficha de Persona: indica a quién consultar.",
+      );
     }
     const persona = await ctx.db.persona.findFirst({
       where: { id: personaId, anonimizadaEn: null },
@@ -88,10 +95,17 @@ export const resultadosPersona = defineCapability({
       apellidos,
       cargoId: vinculo?.cargoId ?? null,
       periodo: mes,
+      mesEnCurso: meses.actual,
       cerrado,
       parteAgente: agente,
     };
-    const sinScorecard = { ...base, vigenteDesde: null, puntaje: null, cobertura: 0, indicadores: [] };
+    const sinScorecard = {
+      ...base,
+      vigenteDesde: null,
+      puntaje: null,
+      cobertura: 0,
+      indicadores: [],
+    };
     if (cerrado) {
       // Mes cerrado: lo guardado, con el cargo y el scorecard que tenía ese mes.
       const g = await personaCerrada(ctx, personaId, mes);
