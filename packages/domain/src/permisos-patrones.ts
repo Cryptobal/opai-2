@@ -4,9 +4,6 @@ import type { Rol } from "./permisos-roles";
 
 type Patrones = { permitir: readonly string[]; denegar: readonly string[] };
 
-/** Bloqueo financiero heredado de 1.0 (`applyFinancialRoleLock`): solo owner y admin. */
-const FINANCIERO = ["finanzas:*", "nomina:*"] as const;
-
 export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
   owner: { permitir: ["*"], denegar: [] },
   admin: {
