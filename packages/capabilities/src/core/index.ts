@@ -50,6 +50,7 @@ import { capacidadesCorreos } from "./correos";
 import { capacidadesImportar } from "./importar";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
+import { capacidadesAusencias } from "./maestros/personas-ausencias";
 import { capacidadesPanel } from "./panel";
 import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";
 import { porAprobarList } from "./por-aprobar";
@@ -140,6 +141,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesAusencias,
   ...capacidadesCrm,
   ...capacidadesCorreos,
   ...capacidadesImportar,
