@@ -1,14 +1,16 @@
+import { etiquetaPeriodo } from "@opai/domain";
 import { SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
 
 import { pesos } from "@/lib/fechas";
 
 import type { Resumen, Vista } from "./datos";
 
-const MESES = new Intl.DateTimeFormat("es-CL", { month: "long", year: "numeric", timeZone: "UTC" });
-const DIA = new Intl.DateTimeFormat("es-CL", { day: "numeric", month: "short", timeZone: "UTC" });
-const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
-const nombre = (clave: string, vista: Vista) =>
-  vista === "mes" ? mayuscula(MESES.format(new Date(`${clave}-01T00:00:00Z`))) : `Semana del ${DIA.format(new Date(`${clave}T00:00:00Z`))}`;
+// Sin Intl ni toLocale en pantalla (regla F1): nombres de mes fijos, la semana como «Semana del 9 nov».
+const CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic"];
+const nombre = (clave: string, vista: Vista) => {
+  const [a, m, d] = clave.split("-").map(Number);
+  return vista === "mes" ? etiquetaPeriodo(a ?? 0, m ?? 1) : `Semana del ${d ?? 1} ${CORTOS[(m ?? 1) - 1] ?? ""}`;
+};
 const TONO = { peligro: "text-danger-fg", alerta: "text-warning-fg" } as const;
 
 /** Tabla de períodos: ingresos, egresos y saldo al cierre, con el tono de caja baja. */
