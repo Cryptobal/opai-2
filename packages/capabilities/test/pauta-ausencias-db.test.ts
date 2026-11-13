@@ -345,4 +345,29 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
       "anulada",
     );
   });
+
+  it("desde el Núcleo, con Pauta activa, marca los turnos y al anular los libera (CAR-393 parte 2)", async () => {
+    const r = await run(ctx(tenantA), "core.ausencias.registrar", {
+      personaId: ana,
+      tipo: "permiso",
+      motivo: "Trámite personal",
+      desde: dia(40),
+      hasta: dia(43),
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const { ausenciaId, dias } = (r as Ok<{ ausenciaId: string; dias: number }>).data;
+    expect(dias).toBeGreaterThan(0);
+    expect(await e.admin.excepcionPauta.count({ where: { ausenciaId, estado: "activa" } })).toBe(
+      dias,
+    );
+    const a = await run(ctx(tenantA), "core.ausencias.anular", {
+      personaId: ana,
+      ausenciaId,
+    });
+    expect(a).toMatchObject({ ok: true, data: { turnosLiberados: dias } });
+    expect(await e.admin.excepcionPauta.count({ where: { ausenciaId, estado: "activa" } })).toBe(0);
+    expect((await e.admin.ausencia.findUnique({ where: { id: ausenciaId } }))?.estado).toBe(
+      "anulada",
+    );
+  });
 });

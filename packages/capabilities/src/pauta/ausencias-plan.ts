@@ -44,7 +44,11 @@ export type PlanPuesto = {
  * Los turnos de la persona en el rango: por cada puesto donde es titular según la serie vigente de cada día, los
  * días que trabaja. Rechaza si no tiene turnos o si alguno ya tiene una excepción activa (se anula antes).
  */
-export async function planearAusencia(ctx: Contexto, i: AusenciaPersona): Promise<PlanPuesto[]> {
+export async function planearAusencia(
+  ctx: Contexto,
+  i: AusenciaPersona,
+  exigirTurnos = true,
+): Promise<PlanPuesto[]> {
   await personaParaAusencia(ctx, i.personaId);
   const fechas = diasDelRango(i.desde, i.hasta);
   const conSerie = await ctx.db.seriePauta.findMany({
@@ -83,8 +87,11 @@ export async function planearAusencia(ctx: Contexto, i: AusenciaPersona): Promis
     };
     return dias.length ? [{ puesto, dias }] : [];
   });
-  if (plan.length === 0)
+  if (plan.length === 0) {
+    // Sin turnos: la ficha del Núcleo igual registra la ausencia (CAR-393); la de la pauta la rechaza.
+    if (!exigirTurnos) return [];
     throw reglaDeNegocio("La persona no tiene turnos en la pauta en esas fechas.");
+  }
   const repetida = await ctx.db.excepcionPauta.findFirst({
     where: {
       estado: "activa",
