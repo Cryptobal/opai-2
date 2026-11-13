@@ -1,15 +1,15 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { useContext } from "react";
 
-import { avisar, Badge, Button, Campo, Input, Segmentado } from "@opai/ds";
+import { avisar, Badge, Button, Campo, Input } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { erroresValores, type ValoresTexto } from "@/lib/instrumentos-valores";
 
+import { DefectoCtx, MarcaSobrescrito, SelectorMarcado } from "./margen-marca";
+
 type Cambiar = (v: ValoresTexto) => void;
-/** Valores por defecto del modelo, para marcar cada campo «Sobrescrito» y poder volver a él (CAR-214). */
-export const DefectoCtx = createContext<ValoresTexto | null>(null);
 function Num({ id, clave, etiqueta, valor, error, onCambiar }: { id: string; clave: string; etiqueta: string; valor: string; error: string | undefined; onCambiar: (v: string) => void }) {
   const defecto = useContext(DefectoCtx);
   const [g, k] = clave.split(".") as ["financiero" | "garantia" | "rc", string];
@@ -18,12 +18,7 @@ function Num({ id, clave, etiqueta, valor, error, onCambiar }: { id: string; cla
   return (
     <Campo etiqueta={etiqueta} htmlFor={id} {...(error ? { error } : {})}>
       <Input id={id} inputMode="decimal" value={valor} aria-invalid={error ? true : undefined} onChange={(x) => onCambiar(x.target.value)} />
-      {sobrescrito ? (
-        <span className="mt-1 flex flex-wrap items-center gap-2">
-          <Badge tono="warning" punto={false}>Sobrescrito</Badge>
-          <Button type="button" variant="ghost" onClick={() => onCambiar(porDefecto)}>Volver al valor por defecto</Button>
-        </span>
-      ) : null}
+      {sobrescrito ? <MarcaSobrescrito onVolver={() => onCambiar(porDefecto)} /> : null}
     </Campo>
   );
 }
@@ -40,13 +35,12 @@ export function ValoresGarantia({ v, onCambiar }: { v: ValoresTexto; onCambiar: 
   const g = (k: keyof ValoresTexto["garantia"], t: string) => onCambiar({ ...v, garantia: { ...v.garantia, [k]: t } });
   return (
     <div className="space-y-3">
-      <Segmentado
+      <SelectorMarcado
+        campo="garantiaModo"
         etiqueta="Cálculo de la póliza"
-        activa={v.garantiaModo}
-        opciones={[
-          { id: "porcentaje", etiqueta: "% garantizado", onClick: () => onCambiar({ ...v, garantiaModo: "porcentaje" }) },
-          { id: "fija", etiqueta: "Monto fijo (UF)", onClick: () => onCambiar({ ...v, garantiaModo: "fija" }) },
-        ]}
+        v={v}
+        onCambiar={onCambiar}
+        opciones={[{ id: "porcentaje", etiqueta: "% garantizado" }, { id: "fija", etiqueta: "Monto fijo (UF)" }]}
       />
       {v.garantiaModo === "porcentaje" ? (
         <Num id="cpq-gar-pct" clave="garantia.contratoPct" etiqueta="% garantizado del contrato" valor={v.garantia.contratoPct} error={err["garantia.contratoPct"]} onCambiar={(t) => g("contratoPct", t)} />
@@ -68,13 +62,12 @@ export function ValoresRc({ v, onCambiar }: { v: ValoresTexto; onCambiar: Cambia
   const r = (k: keyof ValoresTexto["rc"], t: string) => onCambiar({ ...v, rc: { ...v.rc, [k]: t } });
   return (
     <div className="space-y-3">
-      <Segmentado
+      <SelectorMarcado
+        campo="rcModo"
         etiqueta="Cálculo de la RC"
-        activa={v.rcModo}
-        opciones={[
-          { id: "prima", etiqueta: "Prima anual (UF)", onClick: () => onCambiar({ ...v, rcModo: "prima" }) },
-          { id: "tasa", etiqueta: "Tasa sobre asegurado", onClick: () => onCambiar({ ...v, rcModo: "tasa" }) },
-        ]}
+        v={v}
+        onCambiar={onCambiar}
+        opciones={[{ id: "prima", etiqueta: "Prima anual (UF)" }, { id: "tasa", etiqueta: "Tasa sobre asegurado" }]}
       />
       {v.rcModo === "prima" ? (
         <Num id="cpq-rc-prima" clave="rc.primaAnualUf" etiqueta="Prima anual (UF)" valor={v.rc.primaAnualUf} error={err["rc.primaAnualUf"]} onCambiar={(t) => r("primaAnualUf", t)} />
@@ -85,14 +78,12 @@ export function ValoresRc({ v, onCambiar }: { v: ValoresTexto; onCambiar: Cambia
         </>
       )}
       <Num id="cpq-rc-asig" clave="rc.asignacionPct" etiqueta="% asignado a esta cotización" valor={v.rc.asignacionPct} error={err["rc.asignacionPct"]} onCambiar={(t) => r("asignacionPct", t)} />
-      <Segmentado
+      <SelectorMarcado
+        campo="rcPlazo"
         etiqueta="Plazo"
-        activa={v.rcPlazo}
-        opciones={[
-          { id: "anual", etiqueta: "Anual", onClick: () => onCambiar({ ...v, rcPlazo: "anual" }) },
-          { id: "contrato", etiqueta: "Plazo del contrato", onClick: () => onCambiar({ ...v, rcPlazo: "contrato" }) },
-          { id: "meses", etiqueta: "N meses", onClick: () => onCambiar({ ...v, rcPlazo: "meses" }) },
-        ]}
+        v={v}
+        onCambiar={onCambiar}
+        opciones={[{ id: "anual", etiqueta: "Anual" }, { id: "contrato", etiqueta: "Plazo del contrato" }, { id: "meses", etiqueta: "N meses" }]}
       />
       {v.rcPlazo === "meses" ? <Num id="cpq-rc-meses" clave="rc.meses" etiqueta="Meses" valor={v.rc.meses} error={err["rc.meses"]} onCambiar={(t) => r("meses", t)} /> : null}
       <Badge tono="info" punto={false}>Fórmula provisional</Badge>
