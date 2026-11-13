@@ -5,6 +5,8 @@ import { Alerta, Button, Skeleton } from "@opai/ds";
 import type { Aviso } from "@/app/_components/campana";
 import { ListaAvisos } from "@/app/_components/lista-avisos";
 
+import type { Decision } from "./use-bandeja";
+
 export function BandejaCorta({
   avisos,
   aprobaciones,
@@ -16,7 +18,7 @@ export function BandejaCorta({
 }: {
   avisos: Aviso[] | null;
   aprobaciones: number | null;
-  decisiones: { id: string; resumen: string }[];
+  decisiones: Decision[];
   error: boolean;
   onMarcar: () => void;
   onLeida: () => void;
@@ -52,7 +54,7 @@ export function BandejaCorta({
           {decisiones.map((d) => (
             <Link
               key={d.id}
-              href={`/configuracion/aprobaciones?id=${d.id}`}
+              href={d.href}
               {...(onNavegar ? { onClick: onNavegar } : {})}
               className="flex min-h-11 items-center px-4 text-fg"
             >
