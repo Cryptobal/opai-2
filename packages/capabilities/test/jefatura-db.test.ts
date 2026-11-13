@@ -21,7 +21,7 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
   const A_CARGO = "core.personas.list_a_cargo";
   type Equipo = {
     jefePersonaId: string | null;
-    personas: { id: string; directa: boolean; cargoId: string | null }[];
+    items: { id: string; directa: boolean; cargoId: string | null }[];
   };
   let n = 0;
 
@@ -36,7 +36,7 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
       modulosActivos: [],
       alcance: extra.alcance ?? null,
     });
-  const ids = (r: Equipo) => r.personas.map((p) => p.id).sort();
+  const ids = (r: Equipo) => r.items.map((p) => p.id).sort();
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -156,7 +156,7 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
     expect(ids(gema)).toEqual(
       [persona.julia, persona.jorge, persona.vera, persona.victor].map(String).sort(),
     );
-    const directas = gema.personas.filter((p) => p.directa).map((p) => p.id).sort();
+    const directas = gema.items.filter((p) => p.directa).map((p) => p.id).sort();
     expect(directas).toEqual([persona.julia, persona.jorge].map(String).sort());
   });
 
@@ -177,7 +177,7 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
     const julia = await dato<Equipo>(ctx(a), A_CARGO, { personaId: persona.julia });
     expect(ids(julia)).toEqual([persona.vera]);
     const gema = await dato<Equipo>(ctx(a), A_CARGO, {});
-    const fila = gema.personas.find((p) => p.id === valeria.id);
+    const fila = gema.items.find((p) => p.id === valeria.id);
     expect(fila).toMatchObject({ directa: false, cargoId: cargo.vendedor });
     await e.admin.vinculoLaboral.deleteMany({ where: { personaId: valeria.id } });
     await e.admin.persona.delete({ where: { id: valeria.id } });
@@ -217,6 +217,6 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
     // La jefatura no amplía el alcance: sin instalaciones a cargo no ve a nadie, aunque sea jefa.
     const propio = await dato<Equipo>(acotado, A_CARGO, {});
     expect(propio.jefePersonaId).toBe(persona.gema);
-    expect(propio.personas).toEqual([]);
+    expect(propio.items).toEqual([]);
   });
 });
