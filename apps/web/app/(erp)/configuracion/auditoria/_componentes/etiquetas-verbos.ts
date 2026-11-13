@@ -98,4 +98,6 @@ export const VERBOS: Record<string, string> = {
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
   // Hilo (CAR-331).
   actividad: "Ver actividad", agenda: "Ver agenda",
+  // Bancos (CAR-341).
+  borrar_rango: "Borrar por fechas",
 };
