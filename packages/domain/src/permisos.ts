@@ -5,7 +5,13 @@
 export { ROLES, ROLES_PLATAFORMA, type Rol, type RolPlataforma } from "./permisos-roles";
 export { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "./permisos-catalogo";
 export { PATRONES_POR_ROL } from "./permisos-patrones";
-export { CLASES_BASE, PERMISOS_GERENTE, PERMISOS_LECTOR, type ClaseBase } from "./permisos-base";
+export {
+  CLASES_BASE,
+  PERMISOS_GERENTE,
+  PERMISOS_LECTOR,
+  PERMISOS_SUPERVISOR,
+  type ClaseBase,
+} from "./permisos-base";
 
 import { PATRONES_POR_ROL } from "./permisos-patrones";
 import { ROLES, ROLES_PLATAFORMA, type Rol, type RolPlataforma } from "./permisos-roles";
