@@ -1881,6 +1881,9 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Pendiente de Carlos.** Nada.
 
+**Adenda CAR-383 (13-nov-2026, decide Carlos en el chat de la sesión Desempeño, 18:02):** cada persona ve solo su propio resultado, sin su posición frente a los compañeros de cargo (la opción «la persona ve su posición» del scorecard queda sin uso en pantalla), y los scorecards siguen siendo mensuales, sin trimestre ni semestre. Un trimestre se lee sumando meses cerrados.
+
+
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
 
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:22, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` (sección «Decisiones de Carlos») e `INSTRUCCIONES-proyecto-claude.md`. (ADR-093 y ADR-094 están reservados por los PRs abiertos #505 y #506.)
