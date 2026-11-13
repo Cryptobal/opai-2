@@ -15,6 +15,12 @@ export type Indicadores = {
     netoMesAnteriorClp: number;
   } | null;
   tickets: { abiertos: number | null; asignadosAMi: number } | null;
+  /** Cuáles mostrar y en qué orden (elección de la empresa, CAR-335 D3). */
+  orden?: string[];
+  /** Quien mira puede cambiar esa elección. */
+  editable?: boolean;
+  /** Elección completa de la empresa (solo si es editable). */
+  elegidos?: string[];
 };
 
 export type Tarjeta = {
@@ -108,4 +114,13 @@ export function armarIndicadores(d: Indicadores, ufEscala: number): Tarjeta[] {
     });
   }
   return t;
+}
+
+/** Deja solo las tarjetas elegidas, en el orden de la empresa; sin orden, todas como vienen. */
+export function ordenarTarjetas(
+  tarjetas: Tarjeta[],
+  orden: readonly string[] | undefined,
+): Tarjeta[] {
+  if (!orden) return tarjetas;
+  return orden.flatMap((id) => tarjetas.filter((t) => t.id === id));
 }
