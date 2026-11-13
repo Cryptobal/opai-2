@@ -115,7 +115,10 @@ describe.skipIf(!urlPropietario)("grupos de usuarios en base real (CAR-251)", ()
     expect(archivado).toMatchObject({ archivado: true, miembros: 1 });
     // Archivar no borra: la fila sigue y sale de la lista por defecto.
     expect(await e.admin.grupoUsuarios.count({ where: { id: g.id } })).toBe(1);
-    expect(await dato<Grupo[]>(adminA(), "core.grupos.list", {})).toEqual([]);
+    expect(await dato<{ items: Grupo[] }>(adminA(), "core.grupos.list", {})).toEqual({
+      items: [],
+      siguiente: null,
+    });
     expect(await auditadas(t.a)).toEqual(
       expect.arrayContaining([
         "core.grupos.create",
@@ -132,9 +135,9 @@ describe.skipIf(!urlPropietario)("grupos de usuarios en base real (CAR-251)", ()
   it("una empresa no ve ni modifica grupos de otra, ni suma usuarios ajenos", async () => {
     const gB = await dato<Grupo>(adminB(), "core.grupos.create", { nombre: "Equipo B" });
     expect(
-      (await dato<Grupo[]>(adminA(), "core.grupos.list", { incluirArchivados: true })).map(
-        (g) => g.id,
-      ),
+      (
+        await dato<{ items: Grupo[] }>(adminA(), "core.grupos.list", { incluirArchivados: true })
+      ).items.map((g) => g.id),
     ).not.toContain(gB.id);
     for (const [id, input] of [
       ["core.grupos.get", { id: gB.id }],

@@ -6,28 +6,36 @@ import { defineCapability } from "../define";
 import { prohibido } from "../errores";
 import { keySchema } from "./apikey-schema";
 import { iso } from "./comun";
+import { cursorDe, pagina } from "./maestros/comun";
 
 export const apikeysList = defineCapability({
-  auditarLectura: (s) => s.map((k) => k.id),
+  auditarLectura: (s) => s.items.map((k) => k.id),
   id: "core.apikeys.list",
   descripcion:
-    "API keys de la empresa (sin secretos): nombre, prefijo, scopes, responsable, último uso y validez.",
+    "API keys de la empresa (sin secretos): nombre, prefijo, scopes, responsable, último uso y validez. Paginada por cursor, de la más nueva a la más antigua.",
   permiso: PERMISOS_CORE.apikeysManage,
-  input: z.object({}),
-  output: z.array(keySchema),
+  // CAR-353: contrato único de listas (cursor + limite; items + siguiente).
+  input: z.object({
+    cursor: z.uuid().optional().describe("Id de la última key de la página anterior."),
+    limite: z.number().int().min(1).max(100).default(100),
+  }),
+  output: z.object({ items: z.array(keySchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx) {
+  async handler(ctx, input) {
     if (ctx.alcance) throw prohibido("No tienes acceso a estas API keys.");
-    const keys = await ctx.db.apiKey.findMany({
+    const filas = await ctx.db.apiKey.findMany({
       include: { user: true },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: input.limite + 1,
+      ...cursorDe(input.cursor),
     });
+    const { items: keys, siguiente } = pagina(filas, input.limite);
     const activas = new Set(
       (await ctx.db.membership.findMany({ where: { estado: "activa" } })).map((m) => m.userId),
     );
     const ahora = Date.now();
-    return keys.map((k) => ({
+    const items = keys.map((k) => ({
       ...k,
       tipo: k.principalTipo ?? "usuario",
       permisos: k.heredaPermisos === false ? k.permisos : null,
@@ -42,5 +50,6 @@ export const apikeysList = defineCapability({
       valida:
         !k.revocadaEn && (!k.expiraEn || k.expiraEn.getTime() > ahora) && activas.has(k.userId),
     }));
+    return { items, siguiente };
   },
 });
