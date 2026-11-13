@@ -20,3 +20,9 @@
 ## Qué se decidió
 
 - ADR-112 (Carlos, 13-nov-2026).
+
+## 13-nov-2026, 15:47 · fin del modo sin Actions (ADR-112, adenda D)
+
+- El repo queda público hasta que Carlos lo vuelva a privado (anunciado para el lunes 16-nov); Actions vuelve a correr sin costo.
+- Termina la decisión A: no hay gate local obligatorio ni comentario «Gate local». Siguen la decisión B y la adenda C.
+- Escaneo de secretos (gitleaks) de todo el historial de `main` al publicarlo: sin hallazgos. Los correos @gard.cl de ejemplo son inventados (confirmado por Carlos), salvo el suyo.
