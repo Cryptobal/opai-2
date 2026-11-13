@@ -9,6 +9,8 @@ import { aFechaDb, PERMISO_WRITE } from "./comun";
 import { tipoExcepcionSchema } from "./vistas";
 
 const salida = z.object({
+  /** Registro de la ausencia en el Núcleo (CAR-393); null en la vista previa. */
+  ausenciaId: z.string().nullable(),
   personaId: z.string(),
   tipo: tipoExcepcionSchema,
   desde: z.string(),
@@ -41,7 +43,8 @@ export const ausenciasRegistrar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const hasta = input.hasta ?? input.desde;
-    const resumen = (plan: PlanPuesto[]) => ({
+    const resumen = (plan: PlanPuesto[], ausenciaId: string | null = null) => ({
+      ausenciaId,
       personaId: input.personaId,
       tipo: input.tipo,
       desde: input.desde,
@@ -68,6 +71,26 @@ export const ausenciasRegistrar = defineCapability({
         throw conflicto(
           "La pauta de esta persona cambió mientras se registraba: vuelve a intentarlo.",
         );
+      // El dato es el registro de la persona (CAR-393); las excepciones lo marcan en la pauta y apuntan a él.
+      const usuario = ctx.usuario?.id ?? null;
+      // Mismo instante en el registro y sus turnos: `registradaEn` sigue identificando el registro al anular.
+      const ahora = new Date();
+      const ausencia = await tx.ausencia.create({
+        data: {
+          tenantId: ctx.tenantId,
+          personaId: input.personaId,
+          tipo: input.tipo,
+          desde: aFechaDb(input.desde),
+          hasta: aFechaDb(hasta),
+          motivo: input.motivo,
+          estado: "aprobada",
+          registradaPor: usuario,
+          aprobadaPor: usuario,
+          aprobadaEn: ahora,
+          createdAt: ahora,
+        },
+        select: { id: true },
+      });
       await sinDuplicado(
         tx.excepcionPauta.createMany({
           data: plan.flatMap((p) =>
@@ -78,7 +101,9 @@ export const ausenciasRegistrar = defineCapability({
               tipo: input.tipo,
               motivo: input.motivo,
               personaId: input.personaId,
-              creadaPor: ctx.usuario?.id ?? null,
+              ausenciaId: ausencia.id,
+              creadaPor: usuario,
+              createdAt: ahora,
             })),
           ),
         }),
@@ -106,7 +131,7 @@ export const ausenciasRegistrar = defineCapability({
           payload: { puestoId: p.puesto.id, tipo: input.tipo, desde: input.desde, hasta },
         });
       }
-      return resumen(plan);
+      return resumen(plan, ausencia.id);
     });
   },
 });

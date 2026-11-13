@@ -293,4 +293,37 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
       }),
     ).toBe(4);
   });
+
+  it("el registro de la persona vive en el Núcleo y enlaza sus turnos (CAR-393)", async () => {
+    const r = await run(ctx(tenantA), "pauta.ausencias.registrar", {
+      personaId: ana, tipo: "vacaciones", motivo: "Vacaciones de verano", desde: dia(17), hasta: dia(24),
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const id = (r as Ok<{ ausenciaId: string; dias: number }>).data.ausenciaId;
+    const a = await e.admin.ausencia.findUnique({ where: { id } });
+    expect(a).toMatchObject({ personaId: ana, tipo: "vacaciones", estado: "aprobada" });
+    const turnos = await e.admin.excepcionPauta.count({ where: { ausenciaId: id } });
+    expect(turnos).toBe((r as Ok<{ dias: number }>).data.dias);
+    const lista = (await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: ana })) as Ok<{
+      grupos: { ausenciaId: string; dias: number; estado: string }[];
+    }>;
+    expect(lista.data.grupos.find((g) => g.ausenciaId === id)).toMatchObject({ dias: turnos, estado: "activa" });
+  });
+
+  it("anular algunos días deja el registro aprobado; anular todos lo anula (CAR-393)", async () => {
+    const lista = (await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: ana })) as Ok<{
+      grupos: { ausenciaId: string; tipo: string; desde: string; hasta: string }[];
+    }>;
+    const g = lista.data.grupos.find((x) => x.tipo === "vacaciones")!;
+    const parcial = await run(ctx(tenantA), "pauta.ausencias.anular", {
+      personaId: ana, tipo: "vacaciones", desde: g.desde, hasta: g.desde, ausenciaId: g.ausenciaId,
+    });
+    expect(parcial.ok, JSON.stringify(parcial)).toBe(true);
+    expect((await e.admin.ausencia.findUnique({ where: { id: g.ausenciaId } }))?.estado).toBe("aprobada");
+    const total = await run(ctx(tenantA), "pauta.ausencias.anular", {
+      personaId: ana, tipo: "vacaciones", desde: g.desde, hasta: g.hasta, ausenciaId: g.ausenciaId,
+    });
+    expect(total.ok, JSON.stringify(total)).toBe(true);
+    expect((await e.admin.ausencia.findUnique({ where: { id: g.ausenciaId } }))?.estado).toBe("anulada");
+  });
 });

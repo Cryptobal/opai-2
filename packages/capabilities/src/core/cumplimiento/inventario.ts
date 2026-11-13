@@ -5,6 +5,7 @@ import { INVENTARIO_NUCLEO as INVENTARIO_BASE } from "./inventario-nucleo";
 import { INVENTARIO_PERSONAS_PR2 } from "./inventario-nucleo-personas-pr2";
 import { INVENTARIO_RETENCION } from "./inventario-retencion";
 import { INVENTARIO_AGENTES } from "./inventario-agentes";
+import { INVENTARIO_AUSENCIAS } from "./inventario-ausencias";
 import { INVENTARIO_OAUTH } from "./inventario-oauth";
 import { INVENTARIO_SII } from "./inventario-sii";
 
@@ -13,6 +14,7 @@ import { INVENTARIO_SII } from "./inventario-sii";
 export const INVENTARIO_NUCLEO: DatoPersonalDeclarado[] = [
   ...INVENTARIO_BASE,
   ...INVENTARIO_PERSONAS_PR2,
+  ...INVENTARIO_AUSENCIAS,
   ...INVENTARIO_RETENCION,
   ...INVENTARIO_AGENTES,
   ...INVENTARIO_SII,

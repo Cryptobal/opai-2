@@ -27,6 +27,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Listas de ingreso y salida (CAR-355): CHECK de tipo y estado.
   "core.procesos_persona": { fijas: ["tipo"], valores: () => ({ tipo: "ingreso", estado: "abierto" }) },
+  // Registro de ausencias (CAR-393): CHECK de tipo, estado, rango y largo del motivo.
+  "core.ausencias": {
+    valores: () => ({ tipo: "licencia", estado: "aprobada", desde: "2026-12-01", hasta: "2026-12-03", motivo: "Prueba" }),
+  },
   "core.procesos_persona_pasos": { valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }) },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
