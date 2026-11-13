@@ -18,7 +18,7 @@ type Props = {
 
 /** Panel derecho de un cargo: catálogo, privacidad e historial archivado. */
 export async function DetalleCargo({ datos, puedeGestionar, puedeVerSensible }: Props) {
-  const { state, cargo: c, versiones } = await datos;
+  const { state, cargo: c, versiones, versionesConError } = await datos;
   return (
     <DetailScreen
       state={c ? state : state === "ready" ? "error" : state}
@@ -26,7 +26,9 @@ export async function DetalleCargo({ datos, puedeGestionar, puedeVerSensible }: 
       {...(c
         ? {
             estado: (
-              <Badge tono={c.activo ? "success" : "neutro"}>{c.activo ? "Activo" : "Inactivo"}</Badge>
+              <Badge tono={c.activo ? "success" : "neutro"}>
+                {c.activo ? "Activo" : "Inactivo"}
+              </Badge>
             ),
             subtitulo: `${CLASES.find((x) => x.valor === c.clase)?.etiqueta ?? c.clase} · ${conteo(c.personasVigentes, "persona")} · ${conteo(c.puestosActivos, "puesto")}`,
             acciones: (
@@ -75,7 +77,7 @@ export async function DetalleCargo({ datos, puedeGestionar, puedeVerSensible }: 
                 titulo="Las estructuras antiguas de cargo están retiradas y son de solo lectura."
               />
             </div>
-            <Versiones versiones={versiones} />
+            <Versiones versiones={versiones} conError={versionesConError} />
           </div>
           <SeccionMontosPorInstalacion cargoId={c.id} />
           {puedeGestionar ? <HojaCargo cargo={c} puedeVerSensible={puedeVerSensible} /> : null}

@@ -398,6 +398,14 @@
     @apply bg-warning-muted text-warning-fg;
   }
 }
+/* Acción de un estado: en el marco Hilo va como botón secundario, aunque la pantalla pase un botón
+   principal (DISENO.md §3b; CAR-360). Así la cabecera conserva el único primario de la vista (R1). */
+@utility ds-estado-accion {
+  @apply mt-1;
+  &:is([data-marco="hilo"] *) :is(.bg-accent.bg-accent) {
+    @apply border-border-control bg-surface text-fg hover:bg-fill;
+  }
+}
 @utility ds-estado-titulo {
   @apply text-md font-medium text-fg;
   &:is([data-marco="hilo"] *) {
