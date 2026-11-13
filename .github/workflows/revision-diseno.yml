@@ -7,7 +7,7 @@
 name: revision-diseno
 on:
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+    types: [opened, reopened, synchronize, ready_for_review, labeled]
     paths:
       - "apps/**"
       - "packages/ds/**"
@@ -22,8 +22,9 @@ concurrency:
 jobs:
   revision-diseno:
     name: revision-diseno
-    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork == false
-    runs-on: ubuntu-latest
+    # Solo con la etiqueta `revision-diseno` (ADR-112: ahorro de Actions). Al ponerla corre una vez; después, en cada push.
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork == false && contains(github.event.pull_request.labels.*.name, 'revision-diseno') && (github.event.action != 'labeled' || github.event.label.name == 'revision-diseno')
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 45
     permissions:
       contents: read
