@@ -471,6 +471,7 @@ finanzas_flujo_postergar_iva
 finanzas_folios_listar
 finanzas_folios_set_activo
 finanzas_hoy_resumen
+finanzas_impuestos_borrador_f29
 finanzas_movimientos_bancarios_borrar_rango
 finanzas_movimientos_bancarios_listar
 finanzas_plan_actualizar
