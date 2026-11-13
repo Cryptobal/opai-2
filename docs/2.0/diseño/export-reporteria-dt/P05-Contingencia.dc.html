@@ -46,7 +46,7 @@
 <div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la contingencia" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-CTG-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
 </sc-if>
 <sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
-<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes registrar contingencias" description="Lo hacen administración y RRHH. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes registrar contingencias" description="Lo hacen administración y RRHH. Pídele acceso a Andrea Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
 </sc-if>
 
 <sc-if value="{{ showCont }}" hint-placeholder-val="{{ true }}">
@@ -84,12 +84,12 @@ class Component extends DCLogic {
     const cRows = [
       { id: 1, nombre: "Camila Herrera Soto", rut: "12.345.678-9", marca: "Entrada · 30-10-2026 14:05", inst: "Planta Quilicura", autor: "Jorge Muñoz", motivo: "Incidente total desde 13:58", ev: "libro_novedades_30-10.jpg", est: "pendiente", hh: 47, mm: 20 },
       { id: 2, nombre: "Diego Silva Muñoz", rut: "13.456.789-0", marca: "Entrada · 30-10-2026 14:10", inst: "Planta Quilicura", autor: "Jorge Muñoz", motivo: "Incidente total desde 13:58", ev: "libro_novedades_30-10.jpg", est: "pendiente", hh: 47, mm: 25 },
-      { id: 3, nombre: "Luis Pérez Rojas", rut: "9.876.543-2", marca: "Salida · 22-10-2026 20:00", inst: "Bodega Lampa", autor: "Carlos Irigoyen", motivo: "Corte de energía en la bodega", ev: "acta_corte_energia.pdf", est: "aceptada" },
-      { id: 4, nombre: "Héctor Araya Lillo", rut: "15.009.332-7", marca: "Entrada · 22-10-2026 08:00", inst: "Bodega Lampa", autor: "Carlos Irigoyen", motivo: "Corte de energía en la bodega", ev: "acta_corte_energia.pdf", est: "vencida" },
+      { id: 3, nombre: "Luis Pérez Rojas", rut: "9.876.543-2", marca: "Salida · 22-10-2026 20:00", inst: "Bodega Lampa", autor: "Andrea Fuentes", motivo: "Corte de energía en la bodega", ev: "acta_corte_energia.pdf", est: "aceptada" },
+      { id: 4, nombre: "Héctor Araya Lillo", rut: "15.009.332-7", marca: "Entrada · 22-10-2026 08:00", inst: "Bodega Lampa", autor: "Andrea Fuentes", motivo: "Corte de energía en la bodega", ev: "acta_corte_energia.pdf", est: "vencida" },
     ];
     const iRows = [
       { id: 1, ini: "30-10-2026 13:58", fin: "En curso", sev: ["danger", "Total"], origen: "Monitoreo automático", desc: "Servicio de marcación sin respuesta", est: ["danger", "Abierto"] },
-      { id: 2, ini: "22-10-2026 07:40", fin: "22-10-2026 21:15", sev: ["warning", "Parcial"], origen: "Registrado por Carlos Irigoyen", desc: "Corte de energía en Bodega Lampa", est: ["neutral", "Cerrado"] },
+      { id: 2, ini: "22-10-2026 07:40", fin: "22-10-2026 21:15", sev: ["warning", "Parcial"], origen: "Registrado por Andrea Fuentes", desc: "Corte de energía en Bodega Lampa", est: ["neutral", "Cerrado"] },
       { id: 3, ini: "15-10-2026 02:10", fin: "15-10-2026 02:34", sev: ["warning", "Parcial"], origen: "Monitoreo automático", desc: "Validación de GPS lenta (sin bloqueo)", est: ["neutral", "Cerrado"] },
     ];
     let sheet = null;
@@ -103,7 +103,7 @@ class Component extends DCLogic {
           h(NS.Input, { label: "Fecha y hora declaradas", value: "30-10-2026 14:05", hint: "El servidor registra además la hora en que la cargas." }),
           h(NS.Textarea, { label: "Motivo", hint: "Obligatorio.", value: "Incidente total del servicio de marcación desde las 13:58.", rows: 3 }),
           h(NS.Campo, { etiqueta: "Evidencia" }, h(NS.Uploader, { compacto: b.isPhone, archivosIniciales: [{ nombre: "libro_novedades_30-10.jpg", size: 1300000, estado: "listo" }] })),
-          h("div", { className: "pg-kv" }, h("span", { className: "l" }, "Autor"), h("span", { className: "v" }, "Carlos Irigoyen (tú)")),
+          h("div", { className: "pg-kv" }, h("span", { className: "l" }, "Autor"), h("span", { className: "v" }, "Andrea Fuentes (tú)")),
           h(NS.Alerta, { tono: "info" }, "Se distinguirá como contingencia en reportes y listados. El trabajador tiene 48 h para aceptar u objetar.")));
     }
     return {
