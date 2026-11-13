@@ -8,6 +8,7 @@ import { COMUNICABLES_CPQ } from "./cpq";
 import { COMUNICABLES_DESEMPENO } from "./desempeno";
 import { COMUNICABLES_DOCUMENTOS } from "./documentos";
 import { COMUNICABLES_FINANZAS } from "./finanzas";
+import { COMUNICABLES_PRUEBAS } from "./pruebas";
 import { COMUNICABLES_SISTEMA } from "./sistema";
 import type { EventoComunicable } from "./tipos";
 import { COMUNICABLES_USUARIOS } from "./usuarios";
@@ -25,6 +26,7 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_USUARIOS,
   ...COMUNICABLES_DOCUMENTOS,
   ...COMUNICABLES_SISTEMA,
+  ...COMUNICABLES_PRUEBAS,
   ...COMUNICABLES_CUMPLIMIENTO,
   ...COMUNICABLES_COMERCIAL,
   ...COMUNICABLES_CPQ,

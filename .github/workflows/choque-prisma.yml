@@ -1,0 +1,82 @@
+name: Choque de tablas
+
+# Aviso de choque entre sesiones (ADR-108, OPERACION-agentes.md A2.5.2 y A2.5.3; pedido de Carlos del
+# 12-nov-2026). Si este PR edita un `.prisma` que otro PR abierto también edita, y ninguno está apilado
+# sobre el otro, deja un aviso con los PR y archivos en choque. Solo avisa: no bloquea el merge, no
+# comenta, no pone etiquetas y no usa secretos propios. Solo lee PR y archivos.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: choque-prisma-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  choque-prisma:
+    name: choque de tablas (aviso)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Buscar otros PR abiertos que editan el mismo .prisma
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          prisma() {
+            gh api --paginate "repos/$REPO/pulls/$1/files" \
+              | jq -r '.[].filename | select(test("^packages/db/prisma/schema/.*\\.prisma$"))' | sort -u
+          }
+          mios=$(prisma "$PR")
+          if [ -z "$mios" ]; then
+            echo "Este PR no edita ningún .prisma: nada que revisar."
+            exit 0
+          fi
+
+          abiertos=$(gh api --paginate "repos/$REPO/pulls?state=open&per_page=100" \
+            | jq -s '[.[][] | {n: .number, head: .head.ref, base: .base.ref}]')
+
+          # Un PR está apilado sobre otro si, siguiendo las ramas base, se llega a la rama del otro.
+          apilado() {
+            echo "$abiertos" | jq -e --argjson a "$1" --argjson b "$2" '
+              (map({key: .head, value: .base}) | from_entries) as $base
+              | (map({key: (.n | tostring), value: .head}) | from_entries) as $head
+              | def sube($r; $meta; $pasos):
+                  if $pasos > 30 or $r == null then false
+                  elif $r == $meta then true
+                  else sube($base[$r]; $meta; $pasos + 1) end;
+              sube($base[$head[$a | tostring]]; $head[$b | tostring]; 0)
+            ' > /dev/null
+          }
+
+          choques=""
+          for otro in $(echo "$abiertos" | jq -r --argjson yo "$PR" '.[] | select(.n != $yo) | .n'); do
+            comunes=$(comm -12 <(echo "$mios") <(prisma "$otro") || true)
+            [ -z "$comunes" ] && continue
+            if apilado "$PR" "$otro" || apilado "$otro" "$PR"; then
+              echo "#$otro edita los mismos .prisma, pero está apilado con este PR: bien."
+              continue
+            fi
+            choques="$choques"$'\n'"- #$otro: $(echo "$comunes" | xargs -n1 basename | tr '\n' ' ')"
+          done
+
+          if [ -z "$choques" ]; then
+            echo "Ningún otro PR abierto edita estos .prisma sin estar apilado."
+            exit 0
+          fi
+
+          mensaje="Este PR edita tablas que otro PR abierto también edita, y no están apilados. Apila sobre ese PR o espera a que se integre, y dilo en la descripción («apilado sobre #N» o «espera #N»). Regla: docs/2.0/OPERACION-agentes.md A2.5.2."
+          echo "::warning title=Choque de tablas con otro PR::$mensaje"
+          {
+            echo "## Choque de tablas con otro PR abierto"
+            echo
+            echo "$mensaje"
+            echo "$choques"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "$choques"

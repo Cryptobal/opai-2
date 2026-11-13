@@ -537,3 +537,37 @@
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
 }
+/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro, con la
+   ruta a la izquierda y el tema, el agente y la campana a la derecha. */
+@media (min-width: 64rem) {
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"],
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    flex: 1 1 0%;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    justify-content: flex-end;
+    order: 4;
+  }
+  /* Las acciones de la página van a la derecha del buscador, para no correrlo del centro. */
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
+    order: 1;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="buscar"] {
+    order: 2;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="acciones"] {
+    order: 3;
+  }
+}
+/* Teléfono del diseño nuevo (CAR-335 D2c): la barra inferior es Inicio, Agente, Menú y Yo
+   (`BarraInferiorNueva`); la clásica y el avatar de arriba se esconden, porque la cuenta vive en «Yo».
+   Se eligen por su rol y su nombre accesible, sin marcas nuevas en el shell compartido (ADR-037). */
+[data-marco="nuevo"] nav[aria-label="Principal"].fixed:not([data-shell="inferior-nuevo"]),
+[data-marco="nuevo"] header.md\:hidden div:has(> button[aria-label^="Menú de usuario"]) {
+  display: none;
+}
+/* Fondo propio del menú lateral y del riel en el diseño nuevo (`--ds-side`, D2c). */
+[data-marco="nuevo"] nav[data-shell="sidebar"],
+[data-marco="nuevo"] nav[data-shell="riel"] {
+  background-color: var(--ds-side);
+}

@@ -303,6 +303,8 @@ core_plantillas_enviar_prueba
 core_plantillas_get
 core_plantillas_preview
 core_plantillas_update
+core_procesos_persona_listar
+core_procesos_persona_paso_actualizar
 core_puestos_create
 core_puestos_get
 core_puestos_list
@@ -475,6 +477,9 @@ finanzas_proveedores_actualizar
 finanzas_proveedores_crear
 finanzas_proveedores_listar
 finanzas_proveedores_obtener
+finanzas_recurrentes_actualizar
+finanzas_recurrentes_crear
+finanzas_recurrentes_listar
 finanzas_reglas_banco_aplicar
 finanzas_reglas_banco_guardar
 finanzas_reglas_banco_listar
@@ -537,6 +542,7 @@ pauta_excepciones_anular
 pauta_excepciones_crear
 pauta_exportar
 pauta_historial_listar
+pauta_informes_instalaciones
 pauta_marca_registrar
 pauta_mes_leer
 pauta_ppc_listar
@@ -715,6 +721,7 @@ preview_core_personas_update
 preview_core_personas_vincular_usuario
 preview_core_plantillas_enviar_prueba
 preview_core_plantillas_update
+preview_core_procesos_persona_paso_actualizar
 preview_core_puestos_create
 preview_core_puestos_set_estado
 preview_core_puestos_update
@@ -810,6 +817,8 @@ preview_finanzas_plan_crear
 preview_finanzas_plan_inicializar
 preview_finanzas_proveedores_actualizar
 preview_finanzas_proveedores_crear
+preview_finanzas_recurrentes_actualizar
+preview_finanzas_recurrentes_crear
 preview_finanzas_reglas_banco_aplicar
 preview_finanzas_reglas_banco_guardar
 preview_finanzas_ventas_actualizar_borrador

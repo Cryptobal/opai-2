@@ -21,6 +21,9 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Listas de ingreso y salida (CAR-355): CHECK de tipo y estado.
+  "core.procesos_persona": { fijas: ["tipo"], valores: () => ({ tipo: "ingreso", estado: "abierto" }) },
+  "core.procesos_persona_pasos": { valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }) },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],
@@ -81,6 +84,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   "comercial.seguimiento_pasos": { valores: () => ({ canal: "interno", ejecutor: "persona" }) },
   // Finanzas · flujo (CAR-193): CHECK del formato «aaaa-mm» del mes.
   "finanzas.flujo_iva_postergado": { fijas: ["periodo"], valores: () => ({ periodo: "2026-11" }) },
+  // CAR-349: CHECK de frecuencia, día, monto y ventana del gasto recurrente.
+  "finanzas.flujo_recurrentes": {
+    dependencias: ["finanzas.flujo_filas"],
+    valores: (ctx) => ({ fila_id: id(ctx, "finanzas.flujo_filas"), frecuencia: "mensual", dia_del_mes: 5, monto: 1000, ventana_antes: 5, ventana_despues: 10, repeticiones: null, fin: null }),
+  },
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },
