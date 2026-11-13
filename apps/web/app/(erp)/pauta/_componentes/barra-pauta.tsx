@@ -6,6 +6,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useParametros } from "@/app/_components/maestros/use-url";
 
 import { claveMes, mesVecino, nombreMes } from "./etiquetas";
+import { PublicarPauta } from "./publicar-pauta";
 import type { OpcionInstalacion } from "./tipos";
 
 function urlExportar(
@@ -89,6 +90,7 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
             <Button variant="secondary" onClick={() => fijar({ alertas: "1" })}>
               Alertas
             </Button>
+            {diaria ? null : <PublicarPauta inst={inst} anio={anio} mes={mes} />}
           </>
         ) : null}
       </div>
