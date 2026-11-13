@@ -4,6 +4,7 @@ import { defineConsumidor, type EventoPublicado } from "../../eventos/consumidor
 import { correoDe } from "../../integraciones/adaptadores";
 import type { Contexto } from "../../types";
 import { supervisoresConDocEnAlcance } from "../documentos/alcance-doc";
+import { encolarMensajeDirecto } from "../slack/mensaje-directo";
 import { conAccesoAnexo, esDocumentoDeAnexo } from "./acceso-anexo";
 import { type Destinatario, destinatarios, silenciados } from "./destinatarios";
 import { enviarCorreo } from "./envio";
@@ -26,15 +27,19 @@ async function entregar(
     const p = await plantillaVigente(ctx.db, e, "inapp");
     if (!p) return;
     const rutas = e.variables.map((v) => v.ruta);
-    await ctx.db.notificacion.create({
-      data: {
-        tenantId: ctx.tenantId,
-        usuarioId: para.id,
-        eventoId: ev.id,
-        titulo: renderizar(p.asunto, datos, rutas),
-        cuerpo: renderizar(p.cuerpo, datos, rutas),
-        enlace: typeof datos["url"] === "string" ? datos["url"] : null,
-      },
+    await ctx.transaccion(async (tx) => {
+      const n = await tx.notificacion.create({
+        data: {
+          tenantId: ctx.tenantId,
+          usuarioId: para.id,
+          eventoId: ev.id,
+          titulo: renderizar(p.asunto, datos, rutas),
+          cuerpo: renderizar(p.cuerpo, datos, rutas),
+          enlace: typeof datos["url"] === "string" ? datos["url"] : null,
+        },
+      });
+      // Slack F2 (CAR-292): si la persona está vinculada, también por mensaje directo (en cola).
+      await encolarMensajeDirecto(ctx, tx, { notificacionId: n.id, usuarioId: para.id });
     });
     return;
   }

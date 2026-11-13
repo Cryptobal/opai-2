@@ -118,6 +118,6 @@
     "/(platform)/platform/catalogo": 169,
     "/(platform)/platform/tenants/[id]/usuarios": 169,
     "/(erp)/solicitudes/[id]": 169,
-    "/(platform)/platform/ajustes": 169
+    "/(platform)/platform/ajustes": 170
   }
 }
