@@ -2033,6 +2033,21 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+**Adenda del 13-nov-2026 (Carlos, 00:12 hora de Chile, chat de la «Sesión Diseño»: «nunca más hace nada OPAI 2.0, tú integras todo»).** El bot «OPAI 2.0» queda fuera del flujo: no vigila, no migra, no integra ni revisa. Toda sesión de Claude integra a `main` sus propios PR (squash, con las condiciones de «Integración a `main`») y aplica sus migraciones. Donde un encargo, brief o documento diga que el bot integra, migra o revisa, lo hace la sesión que construyó el PR.
+
+
+## ADR-105 · Hilo es la fuente única de diseño, con reglas verificables (CAR-334, 12-nov-2026)
+
+**Decidió:** Carlos (encargo a la «Sesión Diseño», 12-nov-2026, 16:20, hora de Chile: «La referencia única es el "OPAI 2.0 Design System · Hilo" de Claude Design. V1, V2 y el "OPAI Design System" antiguo quedan obsoletos») · **Registra:** Claude («Sesión Diseño»). **Extiende** ADR-102 (Hilo para todo diseño nuevo) a la revisión de lo ya construido; **no cambia** ADR-090 (el interruptor de marco y las etapas H1–H7 siguen como están).
+
+**Decisión.**
+1. La única referencia de diseño de OPAI 2.0 es el sistema «OPAI 2.0 Design System · Hilo» de Claude Design, con su copia en el repo (`docs/2.0/design/export-base-hilo/`, `packages/ds`). V1, V2 y el «OPAI Design System» antiguo quedan obsoletos: no se usan para diseñar ni para juzgar una pantalla.
+2. Hilo se aplica como reglas verificables (`docs/2.0/DISENO-hilo.md`): los tokens en `packages/ds/src/hilo/tokens-hilo.ts` con una prueba que los compara con `tokens.css`, y las reglas de uso (un primario por vista, ubicación de acciones, estados, formatos chilenos, textos) como trinquete en `pnpm test` y como mediciones de la auditoría visual.
+3. La «Sesión Diseño» es dueña de Diseño y experiencia: audita los cuatro portales, corrige lo transversal (DS, marco, navegación, tipografía, botones, textos) y asigna lo de cada módulo a su sesión. No cambia decisiones de producto ni flujos de negocio; si Hilo y una pantalla aprobada se contradicen, pregunta a Carlos.
+
+**Consecuencias.** Un PR que cambie la piel en `tokens.css` sin cambiar `tokens-hilo.ts` (o al revés) falla. Un archivo no puede sumar formatos propios, tamaños fuera de escala, botones genéricos ni estilos en línea respecto de `apps/web/test/reglas-diseno/base.json`. El marco clásico sigue hasta H7; la auditoría se hace en el marco Hilo.
+
+**Adenda (12-nov-2026, Sesión Diseño, con ADR-109 a la vista; confirmada por Carlos en el chat de la sesión, 12-nov-2026, 20:36, hora de Chile: «seguir el nuevo diseño»).** ADR-109 reemplaza a Hilo como referencia visual. De este ADR quedan las reglas verificables que no dependen de la piel (un solo botón primario por vista, ubicación de acciones, estados, formatos chilenos de RUT, fecha y monto, escala tipográfica, accesibilidad), el trinquete de `apps/web/test/reglas-diseno` y la auditoría `@auditoria`: desde hoy se miden contra el diseño nuevo (`docs/2.0/design/export-diseno-nuevo/`). Los tokens de `@opai/ds/hilo` y su prueba solo cuidan la piel Hilo mientras exista (hasta D6). La Sesión Diseño no abre más correcciones de piel Hilo; los hallazgos de piel (tarjetas o líneas, cabecera del teléfono, índigo) pasan a los bloques D1 a D6 de `BRIEF-CAR-335-diseno-nuevo.md`.
 
 ## ADR-106 · La vara: OPAI 2.0 sigue a los mejores SaaS de cada capa (CAR-348, 12-nov-2026)
 

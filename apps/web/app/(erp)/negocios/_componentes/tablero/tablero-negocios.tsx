@@ -72,9 +72,13 @@ export function TableroNegocios(p: {
       <Estado state={p.state} variante="lista">
         {p.etapas.length ? (
           <ArrastreTablero etapas={etapas}>
+            {/* Zona desplazable alcanzable con el teclado aunque una etapa esté vacía (CAR-364). */}
             <div
               id="columnas-tablero"
-              className="-mx-4 flex min-w-0 max-w-[calc(100%+2rem)] items-start snap-x snap-mandatory data-[arrastrando]:snap-none gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:max-w-full md:items-stretch md:px-0"
+              role="region"
+              aria-label="Etapas del tablero"
+              tabIndex={0}
+              className="-mx-4 flex min-w-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-w-[calc(100%+2rem)] items-start snap-x snap-mandatory data-[arrastrando]:snap-none gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:max-w-full md:items-stretch md:px-0"
             >
               {p.etapas.map((e) => (
                 <ColumnaEtapa
