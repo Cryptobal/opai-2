@@ -73,7 +73,7 @@ describe.skipIf(omitirSuiteDb())("flujo · recurrentes en UF y % de ventas (db)"
 
   it("UF: cada cuota usa la UF publicada de su día", async () => {
     const uf = await e.admin.indicadorLegal.findFirstOrThrow({ where: { clave: "uf" } });
-    const dias = [mas(lunes, 2), mas(lunes, 9)];
+    const dias: [string, string] = [mas(lunes, 2), mas(lunes, 9)];
     for (const [i, d] of dias.entries()) {
       const v = await e.admin.valorPublicado.create({ data: { indicadorId: uf.id, valorJson: 4_000_000 + i * 10_000, vigenteDesde: fecha(d), estado: "vigente", fuente: "prueba CAR-349" } });
       ufCreadas.push(v.id);
