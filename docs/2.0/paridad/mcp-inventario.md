@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 770 pares pantalla→capacidad · 691 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 771 pares pantalla→capacidad · 692 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -367,6 +367,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.deshacer` | `finanzas_cartolas_deshacer` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.listar` | `finanzas_cartolas_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.movimientos_bancarios.borrar_rango` | `finanzas_movimientos_bancarios_borrar_rango` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.aplicar` | `finanzas_reglas_banco_aplicar` | existe |

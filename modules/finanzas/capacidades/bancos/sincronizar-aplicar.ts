@@ -3,6 +3,7 @@ import { esRemuneracion } from "@opai/domain";
 
 import { sincronizarAvisoSaldoBajo } from "./aviso-banco";
 import { aplicarReglasBanco } from "./reglas-aplicar";
+import type { VinculoExterno } from "./sincronizar-cartola";
 import { aFecha } from "./util";
 
 export type MovimientoNuevo = {
@@ -22,9 +23,13 @@ export type MovimientoNuevo = {
  */
 export async function aplicarSincronizacion(
   ctx: Contexto,
-  p: { cuentaId: string; nuevos: MovimientoNuevo[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
+  p: { cuentaId: string; nuevos: MovimientoNuevo[]; vinculos?: VinculoExterno[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
 ): Promise<number> {
   return ctx.transaccion(async (tx) => {
+    // CAR-341: el movimiento que ya estaba por cartola recibe su id externo (si otro no lo tomó ya).
+    for (const v of p.vinculos ?? []) {
+      await tx.movimientoBancario.updateMany({ where: { id: v.existenteId, idExterno: null }, data: { idExterno: v.idExterno } });
+    }
     // Ids externos que ya existían antes de este lote: una entrega repetida no vuelve a evaluar reglas sobre ellos.
     const previos = p.nuevos.length
       ? await tx.movimientoBancario.findMany({

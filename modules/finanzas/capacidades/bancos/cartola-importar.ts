@@ -5,11 +5,10 @@ import { z } from "zod";
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 import {
   CARTOLA_MAX_BASE64,
-  planificarDedupeCartola,
-  type FilaCartolaParseada,
   type MapeoColumnasGenerico,
 } from "@opai/domain";
 
+import { emparejarCartola } from "./cartola-emparejar";
 import { cuadraturaSchema, filaPreviewSchema } from "./esquemas";
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { cuentaDe } from "./util";
@@ -21,7 +20,7 @@ const MAX_B64 = CARTOLA_MAX_BASE64;
 export const bancosCartolaImportar = defineCapability({
   id: "finanzas.cartolas.importar",
   descripcion:
-    "Importa una cartola Santander XLSX o CSV/XLSX genérico con vista previa por fila (leída, duplicada o rechazada).",
+    "Importa una cartola Santander XLSX o CSV/XLSX genérico con vista previa por fila (leída, duplicada o rechazada). No duplica lo que ya entró por la sincronización con el banco u otra cartola, aunque venga con otra fecha (±3 días, misma glosa o número de documento): lo omite y deja la fecha de la cartola.",
   permiso: PERMISO_BANCOS_GESTIONAR,
   input: z.object({
     cuentaId: z.uuid(),
@@ -43,6 +42,8 @@ export const bancosCartolaImportar = defineCapability({
   output: z.object({
     aplicados: z.number().int(),
     duplicados: z.number().int(),
+    /** Duplicados que ya estaban con otra fecha: se dejan con la fecha de la cartola (CAR-341). */
+    fechasAjustadas: z.number().int(),
     rechazados: z.number().int(),
     saldoFinal: z.number().int().nullable(),
     filas: z.array(filaPreviewSchema),
@@ -69,48 +70,8 @@ export const bancosCartolaImportar = defineCapability({
       (input.mapeoColumnas ?? cuenta.mapeoColumnas ?? null) as MapeoColumnasGenerico | null,
     );
 
-    const existentes = await ctx.db.movimientoBancario.findMany({
-      where: { cuentaId: cuenta.id },
-      select: { claveDedupe: true, saldoDespues: true },
-    });
-    const porIndice = new Map(parsedFilas.map((f) => [f.indice, f]));
-    const plan = planificarDedupeCartola(
-      parsedFilas.map((f) => ({
-        indice: f.indice,
-        base: f.claveDedupe,
-        saldoDespues: f.saldoDespues,
-      })),
-      existentes,
-    );
-    const previews: z.infer<typeof filaPreviewSchema>[] = [];
-    let duplicados = 0;
-    const nuevos: FilaCartolaParseada[] = [];
-
-    for (const p of plan) {
-      const orig = porIndice.get(p.indice);
-      if (!orig) continue;
-      if (p.estado === "duplicada") {
-        duplicados += 1;
-        previews.push({
-          indice: orig.indice,
-          estado: "duplicada",
-          motivo: "Ya existe con la misma huella.",
-          fecha: orig.fecha,
-          monto: orig.monto,
-          glosa: orig.glosa,
-        });
-        continue;
-      }
-      nuevos.push({ ...orig, claveDedupe: p.claveDedupe });
-      previews.push({
-        indice: orig.indice,
-        estado: "leida",
-        motivo: null,
-        fecha: orig.fecha,
-        monto: orig.monto,
-        glosa: orig.glosa,
-      });
-    }
+    // CAR-341: lo que ya entró por la sincronización u otra cartola (aunque con otra fecha) no se duplica.
+    const { previews, nuevos, ajustes, duplicados } = await emparejarCartola(ctx, cuenta.id, parsedFilas);
     for (const r of rechazadas) {
       previews.push({ indice: r.indice, estado: "rechazada", motivo: r.motivo, fecha: null, monto: null, glosa: null });
     }
@@ -118,6 +79,7 @@ export const bancosCartolaImportar = defineCapability({
     const resumen = {
       aplicados: nuevos.length,
       duplicados,
+      fechasAjustadas: ajustes.length,
       rechazados: rechazadas.length,
       saldoFinal,
       filas: previews,
@@ -135,6 +97,7 @@ export const bancosCartolaImportar = defineCapability({
       ...(input.nombreArchivo !== undefined ? { nombreArchivo: input.nombreArchivo } : {}),
       idempotencyKey: input.idempotencyKey,
       nuevos,
+      ajustes,
       duplicados,
       rechazadas,
       saldoFinal,

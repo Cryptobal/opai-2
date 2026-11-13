@@ -31,4 +31,21 @@ test.describe("@preview finanzas: historial de importaciones", () => {
     await expect(dialogo).toBeHidden();
     await expect(page.getByText("cartola-ficticia-qa-octubre.xlsx")).toBeVisible();
   });
+
+  test("borrar movimientos de la sincronización por fechas muestra el conteo antes de borrar", async ({ page }, info) => {
+    await entrar(page);
+    await page.goto("/finanzas/bancos/importaciones");
+    await expect(page.getByText(/cierre de la cartola al|saldo del último movimiento al|saldo informado por el banco al/i)).toBeVisible({ timeout: 60_000 });
+    const abrir = page.getByRole("button", { name: "Borrar por fechas" });
+    await hidratado(abrir);
+    await abrir.click();
+    const dialogo = page.getByRole("dialog");
+    await dialogo.getByRole("textbox", { name: "Desde" }).fill("01-10-2026");
+    await dialogo.getByRole("textbox", { name: "Hasta" }).fill("31-10-2026");
+    await dialogo.getByRole("button", { name: "Ver cuántos son" }).click();
+    await expect(dialogo.getByText(/No hay movimientos para borrar|Se borrarán/)).toBeVisible({ timeout: 30_000 });
+    await capturar(page, info, "bancos-borrar-sincronizacion");
+    await dialogo.getByRole("button", { name: "Cancelar" }).click();
+    await expect(dialogo).toBeHidden();
+  });
 });
