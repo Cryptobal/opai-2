@@ -1,6 +1,6 @@
 // CAR-356 · Publicar la pauta de una instalación y mes: la vista previa no escribe, publicar registra quién y cuándo,
 // emite `pauta.publicada` con los turnos de cada titular y el consumidor avisa en la campana solo a quien tiene
-// usuario (una vez por evento). Tenant y alcance en la consulta, contra Postgres real.
+// usuario (una vez por evento). Un cambio en un mes publicado avisa al titular afectado (PR 3). Tenant y alcance en la consulta, contra Postgres real.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -211,6 +211,36 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
       ok: true,
       data: { items: [{ instalacionId: inst, avisados: 1 }], siguiente: null },
     });
+  });
+
+  it("un cambio en un mes publicado avisa al titular afectado; en un mes sin publicar, no (PR 3)", async () => {
+    const porteria = (
+      await e.admin.puesto.findFirstOrThrow({ where: { tenantId: tenantA, nombre: "Portería" } })
+    ).id;
+    const avisar = async (desde: string) => {
+      const r = await run(ctx(tenantA), "pauta.excepciones.crear", {
+        puestoId: porteria,
+        tipo: "permiso",
+        motivo: "Trámite",
+        desde,
+      });
+      expect(r, JSON.stringify(r)).toMatchObject({ ok: true });
+      const ev = await e.admin.evento.findFirstOrThrow({
+        where: { tenantId: tenantA, tipo: "pauta.excepcion.creada" },
+        orderBy: { createdAt: "desc" },
+      });
+      const evento = { ...ev, actorTipo: ev.actorTipo, payload: ev.payload };
+      await mod.consumidorPautaCambio.handler(ctx(tenantA), evento);
+      await mod.consumidorPautaCambio.handler(ctx(tenantA), evento);
+      return e.admin.notificacion.findMany({ where: { tenantId: tenantA, eventoId: ev.id } });
+    };
+    const enPublicado = await avisar(primero);
+    expect(enPublicado).toHaveLength(1);
+    expect(enPublicado[0]?.usuarioId).toBe(usuarioJuan);
+    expect(enPublicado[0]?.titulo).toContain("Cambió tu pauta");
+    const lejos = new Date(`${primero}T00:00:00Z`);
+    lejos.setUTCMonth(lejos.getUTCMonth() + 2);
+    expect(await avisar(lejos.toISOString().slice(0, 10))).toHaveLength(0);
   });
 
   it("otro tenant y un supervisor sin la instalación no la ven", async () => {
