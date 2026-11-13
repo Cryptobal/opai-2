@@ -43,7 +43,10 @@ export async function misPermisos() {
 
 export async function cargarKeys() {
   const [r, gasto, permisos, identidad] = await Promise.all([
-    ejecutarComoUsuario<ApiKey[]>("erp", "core.apikeys.list"),
+    // CAR-353: primera página (hasta 100 keys, de la más nueva a la más antigua).
+    ejecutarComoUsuario<{ items: ApiKey[]; siguiente: string | null }>("erp", "core.apikeys.list", {
+      limite: 100,
+    }),
     gastoDelMes(),
     misPermisos(),
     identidadActual(),
@@ -51,7 +54,7 @@ export async function cargarKeys() {
   const ctx = identidad ? contextoServidor(identidad, "erp") : null;
   return {
     state: estadoPantalla(r),
-    keys: r.ok ? r.data : [],
+    keys: r.ok ? r.data.items : [],
     gasto,
     // El scope "platform" solo se ofrece a un usuario de plataforma (ADR-055).
     scopes: [

@@ -57,7 +57,10 @@ describe("core.apikeys.*", () => {
 
     const lista = await executeCapability(ctx, "core.apikeys.list", {});
     expect(JSON.stringify(lista)).not.toContain(secreto);
-    expect(lista).toMatchObject({ ok: true, data: [{ nombre: "Grokbot", valida: true }] });
+    expect(lista).toMatchObject({
+      ok: true,
+      data: { items: [{ nombre: "Grokbot", valida: true }], siguiente: null },
+    });
   });
 
   it("dryRun no crea ni revela secreto", async () => {
@@ -100,7 +103,7 @@ describe("core.apikeys.*", () => {
     });
     expect(await executeCapability(ctx, "core.apikeys.list", {})).toMatchObject({
       ok: true,
-      data: [{ valida: false }],
+      data: { items: [{ valida: false }], siguiente: null },
     });
   });
 });

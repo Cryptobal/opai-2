@@ -249,7 +249,7 @@ describe("auditoría global de las escrituras de plataforma (CAR-41)", () => {
     // `entity_type` nulo: el filtro de lo ajeno no debe esconderla (lógica de tres valores).
     expect(r).toMatchObject({
       ok: true,
-      data: { eventos: [{ capability: "platform.tenants.update", entityType: null }] },
+      data: { items: [{ capability: "platform.tenants.update", entityType: null }] },
     });
   });
 });

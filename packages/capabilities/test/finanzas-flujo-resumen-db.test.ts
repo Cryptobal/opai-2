@@ -81,6 +81,6 @@ describe.skipIf(omitirSuiteDb())("flujo · resumen por mes e indicadores (db)", 
   it("otra empresa no ve los egresos ni el saldo del banco", async () => {
     const r = await ok<Resumen>("finanzas.planilla.resumen", { agrupar: "semana", semanas: 4 }, otro);
     expect(r.periodos.every((p) => p.egresos === 0)).toBe(true);
-    expect(r.fuenteSaldo).toBe("ajustes");
+    expect(r.fuenteSaldo).toBe("sin_banco");
   });
 });
