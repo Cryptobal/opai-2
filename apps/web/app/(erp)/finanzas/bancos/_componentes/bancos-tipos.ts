@@ -7,6 +7,9 @@ export type CuentaBanco = {
   activa: boolean;
   ultimaSyncEn: string | null;
   saldoBanco: number | null;
+  /** Saldo de hoy (último saldo conocido llevado con los movimientos posteriores) y desde qué fecha (CAR-341). */
+  saldoHoy?: number | null;
+  saldoDesde?: string | null;
 };
 
 export type MovimientoBanco = {
