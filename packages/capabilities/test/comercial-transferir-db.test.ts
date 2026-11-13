@@ -122,4 +122,13 @@ describe.skipIf(!urlPropietario)("comercial · transferir negocios (CAR-27)", ()
     expect(lista.some((r) => r.id === cliente.id)).toBe(false);
     expect(lista.find((r) => r.id === francisca)?.abiertos).toBeGreaterThan(0);
   });
+
+  it("rechaza como nuevo responsable a un usuario del Portal Cliente", async () => {
+    const propio = await negocio(francisca, "Para cliente", 1);
+    const cliente = await e.admin.user.create({ data: { email: `cli2-${sufijo}@prueba.cl`, name: "Cliente 2", emailVerified: true } });
+    await e.admin.membership.create({ data: { tenantId: tA, userId: cliente.id, rol: "viewer", portales: ["cliente"] } });
+    const x = await mod.executeCapability(ctx(), "comercial.negocios.transferir", { negocioIds: [propio], nuevoResponsableId: cliente.id });
+    expect(x.ok).toBe(false);
+    expect((await e.admin.negocio.findUniqueOrThrow({ where: { id: propio } })).responsableId).toBe(francisca);
+  });
 });
