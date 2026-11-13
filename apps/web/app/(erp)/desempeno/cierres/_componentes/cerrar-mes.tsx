@@ -10,13 +10,15 @@ const Confirmar = lazy(() =>
   import("./confirmar-cierre").then((m) => ({ default: m.ConfirmarCierre })),
 );
 
-/** Botón para cerrar a mano el mes anterior (`desempeno.periodos.cerrar`); confirma antes. */
-export function CerrarMes({ periodo }: { periodo: string }) {
+/** Botón para cerrar a mano un mes ya terminado (el anterior arriba; los más antiguos en su fila) (`desempeno.periodos.cerrar`); confirma antes. */
+export function CerrarMes({ periodo, enFila = false }: { periodo: string; enFila?: boolean }) {
   const [confirmando, setConfirmando] = useState(false);
   const mes = mesCorto(periodo);
   return (
     <>
-      <Button onClick={() => setConfirmando(true)}>Cerrar {mes}</Button>
+      <Button variant={enFila ? "secondary" : "primary"} onClick={() => setConfirmando(true)}>
+        {enFila ? "Cerrar" : `Cerrar ${mes}`}
+      </Button>
       {confirmando ? (
         <Suspense fallback={null}>
           <Confirmar periodo={periodo} mes={mes} onCerrar={() => setConfirmando(false)} />

@@ -29,6 +29,16 @@ test.describe("@preview desempeño", () => {
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "desempeno-cargo");
 
+    // Elegir otro mes (pendiente de CAR-307): el mes anterior por la URL, sin errores.
+    const anterior = page.getByRole("navigation", { name: "Mes" }).getByRole("link").first();
+    if (await anterior.count()) {
+      await anterior.click();
+      await page.waitForURL(/[?&]mes=\d{4}-\d{2}/);
+      await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+      await capturar(page, info, "desempeno-cargo-mes-anterior");
+      await page.goBack();
+    }
+
     const editar = page.getByRole("button", { name: /Editar scorecard|Definir scorecard/ }).first();
     await editar.click();
     await expect(page.getByText(/Los pesos suman/)).toBeVisible();
