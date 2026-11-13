@@ -21,13 +21,13 @@ test.describe("@preview pauta por instalación", () => {
     await page.getByRole("link", { name: "Por instalación" }).first().click();
     await page.waitForURL(/\/pauta\/instalaciones/);
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
-    await expect(page.getByRole("combobox", { name: "Ordenar por" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ordenar por" })).toBeVisible();
     await capturar(page, info, "pauta-instalaciones");
 
     const fila = page.locator('a[href^="/pauta?inst="]').filter({ visible: true }).first();
     if (await fila.count()) {
       await page.goto("/pauta/instalaciones?orden=ppc");
-      await expect(page.getByRole("combobox", { name: "Ordenar por" })).toContainText("Más turnos por cubrir");
+      await expect(page.getByRole("button", { name: "Ordenar por" })).toContainText("Más turnos por cubrir");
       await capturar(page, info, "pauta-instalaciones-orden");
       await page.locator('a[href^="/pauta?inst="]').filter({ visible: true }).first().click();
       await page.waitForURL(/\/pauta\?inst=/);

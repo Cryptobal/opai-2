@@ -31,7 +31,10 @@ function descargarCsv(filas: readonly FilaInforme[], anio: number, mes: number) 
     "Ausentismo %",
     "Atrasos %",
   ];
-  const celda = (v: string | number) => `"${String(v).replaceAll('"', '""')}"`;
+  const celda = (v: string | number) => {
+    const t = typeof v === "string" && /^[=+\-@]/.test(v) ? `'${v}` : String(v);
+    return `"${t.replaceAll('"', '""')}"`;
+  };
   const lineas = [
     cab,
     ...filas.map((f) => [
@@ -54,7 +57,7 @@ function descargarCsv(filas: readonly FilaInforme[], anio: number, mes: number) 
     download: `pauta-por-instalacion-${claveMes(anio, mes)}.csv`,
   });
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 type Props = { anio: number; mes: number; orden: Orden; filas: readonly FilaInforme[] };
