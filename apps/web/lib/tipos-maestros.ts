@@ -146,17 +146,4 @@ export type Cargo = {
   puestosActivos: number;
 };
 
-export type Actividad = {
-  items: {
-    id: string;
-    cuando: string;
-    capability: string;
-    actor: { tipo: string; nombre: string; agente: boolean };
-    via: string | null;
-    accion: string;
-    cambios: { campo: string; valor: string }[];
-    detalle: unknown;
-    entidad?: { tipo: string; id: string } | null;
-  }[];
-  siguiente: string | null;
-};
+export type { Actividad } from "./tipos-actividad";

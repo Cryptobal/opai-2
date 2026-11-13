@@ -22,7 +22,12 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
       tenantId: a,
       rol: "owner",
       actor: { tipo: "user", id: usuario[quien] ?? "" },
-      usuario: { id: usuario[quien] ?? "", nombre: quien, email: `${quien}-${sufijo}@prueba.cl`, platformRole: null },
+      usuario: {
+        id: usuario[quien] ?? "",
+        nombre: quien,
+        email: `${quien}-${sufijo}@prueba.cl`,
+        platformRole: null,
+      },
       portal: "erp",
       portalesMembresia: ["erp"],
       modulosActivos: ["desempeno"],
@@ -36,21 +41,36 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
     mod.registrarModulos([manifest]);
     a = (
       await e.admin.tenant.create({
-        data: { slug: `dav-${sufijo}`, nombre: "Empresa A", vertical: "seguridad", timezone: "America/Santiago" },
+        data: {
+          slug: `dav-${sufijo}`,
+          nombre: "Empresa A",
+          vertical: "seguridad",
+          timezone: "America/Santiago",
+        },
       })
     ).id;
     for (const clave of ["gema", "vera", "jose"]) {
-      const u = await e.admin.user.create({ data: { name: clave, email: `${clave}-${sufijo}@prueba.cl`, emailVerified: true } });
+      const u = await e.admin.user.create({
+        data: { name: clave, email: `${clave}-${sufijo}@prueba.cl`, emailVerified: true },
+      });
       usuario[clave] = u.id;
-      await e.admin.membership.create({ data: { tenantId: a, userId: u.id, rol: "owner", portales: ["erp"] } });
+      await e.admin.membership.create({
+        data: { tenantId: a, userId: u.id, rol: "owner", portales: ["erp"] },
+      });
     }
     // José es jefe de ventas; el cargo vendedor cuelga del suyo y Vera lo tiene de jefe en la ficha.
-    const jefe = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Jefe de ventas" } })).id;
+    const jefe = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Jefe de ventas" } }))
+      .id;
     const vendedor = (
-      await e.admin.cargo.create({ data: { tenantId: a, nombre: "Vendedor", jefaturaCargoId: jefe, jefaturaVe: "equipo" } })
+      await e.admin.cargo.create({
+        data: { tenantId: a, nombre: "Vendedor", jefaturaCargoId: jefe, jefaturaVe: "equipo" },
+      })
     ).id;
     let n = 0;
-    for (const [clave, cargo] of [["jose", jefe], ["vera", vendedor]] as const) {
+    for (const [clave, cargo] of [
+      ["jose", jefe],
+      ["vera", vendedor],
+    ] as const) {
       n += 1;
       const p = await e.admin.persona.create({
         data: {
@@ -64,7 +84,13 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
       });
       persona[clave] = p.id;
       await e.admin.vinculoLaboral.create({
-        data: { tenantId: a, personaId: p.id, cargoId: cargo, tipo: "indefinido", inicio: new Date("2026-01-01") },
+        data: {
+          tenantId: a,
+          personaId: p.id,
+          cargoId: cargo,
+          tipo: "indefinido",
+          inicio: new Date("2026-01-01"),
+        },
       });
     }
     await e.admin.desempenoScorecard.create({
@@ -80,14 +106,24 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
     });
     // Vera: 1 de 2 tareas a tiempo en octubre y en noviembre (50 %, bajo la meta de 100).
     for (const mes of ["10", "11"]) {
-      for (const [vence, hecha] of [["05T15", "05T14"], ["06T15", "07T14"]]) {
+      for (const [vence, hecha] of [
+        ["05T15", "05T14"],
+        ["06T15", "07T14"],
+      ]) {
         const t = await e.admin.actividad.create({
           data: {
-            tenantId: a, tipo: "tarea", titulo: "Tarea", estado: "hecha", prioridad: "media",
-            vencimiento: new Date(`2026-${mes}-${vence}:00:00Z`), completadaEn: new Date(`2026-${mes}-${hecha}:00:00Z`),
+            tenantId: a,
+            tipo: "tarea",
+            titulo: "Tarea",
+            estado: "hecha",
+            prioridad: "media",
+            vencimiento: new Date(`2026-${mes}-${vence}:00:00Z`),
+            completadaEn: new Date(`2026-${mes}-${hecha}:00:00Z`),
           },
         });
-        await e.admin.actividadResponsable.create({ data: { tenantId: a, actividadId: t.id, usuarioId: usuario.vera ?? "" } });
+        await e.admin.actividadResponsable.create({
+          data: { tenantId: a, actividadId: t.id, usuarioId: usuario.vera ?? "" },
+        });
       }
     }
   });
@@ -101,7 +137,9 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
   afterEach(() => vi.useRealTimers());
 
   const eventos = (periodo: string) =>
-    e.admin.evento.findMany({ where: { tenantId: a, tipo: { in: TIPOS }, payload: { path: ["periodo"], equals: periodo } } });
+    e.admin.evento.findMany({
+      where: { tenantId: a, tipo: { in: TIPOS }, payload: { path: ["periodo"], equals: periodo } },
+    });
   const consumir = async (periodo: string) => {
     for (const ev of await eventos(periodo)) await consumidorBajoMeta.handler(ctx(), ev);
   };
@@ -112,7 +150,11 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
   });
 
   it("encendido, avisa a la persona y a su jefatura una sola vez y sin puntaje", async () => {
-    await dato(ctx(), "core.config.set", { modulo: "desempeno", clave: "aviso_bajo_meta", valor: true });
+    await dato(ctx(), "core.config.set", {
+      modulo: "desempeno",
+      clave: "aviso_bajo_meta",
+      valor: true,
+    });
     await dato(ctx(), "desempeno.periodos.cerrar", { periodo: "2026-11" });
     const evs = await eventos("2026-11");
     expect(evs.map((ev) => [ev.tipo, ev.entidadId]).sort()).toEqual([
@@ -121,7 +163,10 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
     ]);
     await consumir("2026-11");
     await consumir("2026-11"); // Idempotente: el mismo evento no avisa dos veces.
-    const lista = await e.admin.notificacion.findMany({ where: { tenantId: a }, orderBy: { titulo: "asc" } });
+    const lista = await e.admin.notificacion.findMany({
+      where: { tenantId: a },
+      orderBy: { titulo: "asc" },
+    });
     expect(lista.map((x) => [x.usuarioId, x.titulo])).toEqual([
       [usuario.jose, "1 de tu equipo bajo la meta en noviembre de 2026"],
       [usuario.vera, "Tu resultado de noviembre de 2026 quedó bajo la meta"],
@@ -132,12 +177,63 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
   it("una jefatura sin permiso de ver resultados no recibe el aviso de su equipo", async () => {
     const [ev] = (await eventos("2026-11")).filter((x) => x.tipo === "desempeno.equipo.bajo_meta");
     if (!ev) throw new Error("falta el evento");
-    await e.admin.notificacion.deleteMany({ where: { tenantId: a, usuarioId: usuario.jose ?? "" } });
-    const m = await e.admin.membership.findFirstOrThrow({ where: { tenantId: a, userId: usuario.jose ?? "" } });
+    await e.admin.notificacion.deleteMany({
+      where: { tenantId: a, usuarioId: usuario.jose ?? "" },
+    });
+    const m = await e.admin.membership.findFirstOrThrow({
+      where: { tenantId: a, userId: usuario.jose ?? "" },
+    });
     await e.admin.permisoExcepcion.create({
-      data: { tenantId: a, membershipId: m.id, permiso: "desempeno:resultados.ver", conceder: false, motivo: "Prueba" },
+      data: {
+        tenantId: a,
+        membershipId: m.id,
+        permiso: "desempeno:resultados.ver",
+        conceder: false,
+        motivo: "Prueba",
+      },
     });
     await consumidorBajoMeta.handler(ctx(), ev);
-    expect(await e.admin.notificacion.count({ where: { tenantId: a, usuarioId: usuario.jose ?? "" } })).toBe(0);
+    expect(
+      await e.admin.notificacion.count({ where: { tenantId: a, usuarioId: usuario.jose ?? "" } }),
+    ).toBe(0);
+  });
+
+  it("sin jefe en la ficha, avisa a la jefatura del cargo (CAR-314)", async () => {
+    await e.admin.persona.update({
+      where: { id: persona.vera ?? "" },
+      data: { jefePersonaId: null },
+    });
+    for (const [vence, hecha] of [
+      ["05T15", "05T14"],
+      ["06T15", "07T14"],
+    ]) {
+      const t = await e.admin.actividad.create({
+        data: {
+          tenantId: a,
+          tipo: "tarea",
+          titulo: "Tarea",
+          estado: "hecha",
+          prioridad: "media",
+          vencimiento: new Date(`2026-12-${vence}:00:00Z`),
+          completadaEn: new Date(`2026-12-${hecha}:00:00Z`),
+        },
+      });
+      await e.admin.actividadResponsable.create({
+        data: { tenantId: a, actividadId: t.id, usuarioId: usuario.vera ?? "" },
+      });
+    }
+    vi.setSystemTime(new Date("2027-01-10T15:00:00Z"));
+    await dato(ctx(), "desempeno.periodos.cerrar", { periodo: "2026-12" });
+    const evs = await eventos("2026-12");
+    expect(evs.map((ev) => [ev.tipo, ev.entidadId]).sort()).toEqual([
+      ["desempeno.equipo.bajo_meta", persona.jose],
+      ["desempeno.resultado.bajo_meta", persona.vera],
+    ]);
+    await e.admin.notificacion.deleteMany({ where: { tenantId: a } });
+    await e.admin.permisoExcepcion.deleteMany({ where: { tenantId: a } });
+    await consumir("2026-12");
+    expect(
+      await e.admin.notificacion.count({ where: { tenantId: a, usuarioId: usuario.jose ?? "" } }),
+    ).toBe(1);
   });
 });

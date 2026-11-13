@@ -25,7 +25,7 @@ function Marco({
       <div className={cn("ds-estado-icono", tono)}>{icono}</div>
       <p className="ds-estado-titulo">{titulo}</p>
       {descripcion ? <p className="ds-estado-texto">{descripcion}</p> : null}
-      {accion ? <div className="mt-1">{accion}</div> : null}
+      {accion ? <div className="ds-estado-accion">{accion}</div> : null}
     </div>
   );
 }
