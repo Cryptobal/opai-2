@@ -51,6 +51,8 @@ export const enviosPropuestaSolicitar = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
+  // CAR-252: las reglas de la empresa para «enviar cotización» aplican sin monto en la versión 1.
+  aprobable: { accion: "enviar_cotizacion" },
   async handler(ctx, input, { dryRun }) {
     const destinatarios = exigirDestinatariosEnvio(
       input.destinatarios.map((d) => ({
