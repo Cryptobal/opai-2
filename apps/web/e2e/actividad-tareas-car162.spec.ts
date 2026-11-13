@@ -47,13 +47,13 @@ test.describe("Comercial · Actividad y tareas", () => {
 
     await page.goto("/tareas?ver=equipo");
     await expect(page.getByRole("heading", { name: /Mis tareas/ }).first()).toBeVisible();
-    const fila = page.getByText(titulo).first();
+    const fila = page.getByText(titulo).filter({ visible: true }).first();
     await expect(fila).toBeVisible({ timeout: 45_000 });
     for (const ancho of ANCHOS) {
       await page.setViewportSize({ width: ancho, height: 900 });
       await page.screenshot({ path: info.outputPath(`mis-tareas-${ancho}.png`), fullPage: true });
     }
-    await page.getByRole("checkbox", { name: new RegExp(titulo) }).first().click();
+    await page.getByRole("checkbox", { name: new RegExp(titulo) }).filter({ visible: true }).first().click();
     await expect(page.getByText("Tarea hecha").first()).toBeVisible();
   });
 });
