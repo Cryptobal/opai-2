@@ -1,6 +1,8 @@
 "use client";
 
 import { formatearNumero } from "@opai/domain";
+
+import { fechaHora } from "@/lib/formato";
 import { Alerta } from "@opai/ds";
 
 import type { VistaCartolaPreview as Vista } from "./tipos-cartola";
@@ -37,12 +39,14 @@ export function VistaCartolaPreview({
   rechazados,
   filas,
   cuadratura,
+  yaImportada,
 }: {
   aplicados: number;
   duplicados: number;
   rechazados: number;
   filas: FilaVistaCartola[];
   cuadratura: Vista["cuadratura"];
+  yaImportada?: Vista["yaImportada"];
 }) {
   // Primero las rechazadas, con su motivo: son las que hay que revisar.
   const orden = [...filas].sort((a, b) => Number(b.estado === "rechazada") - Number(a.estado === "rechazada") || a.indice - b.indice);
@@ -50,6 +54,11 @@ export function VistaCartolaPreview({
     <>
       <Alerta tono="info" titulo={`${aplicados} nuevos · ${duplicados} duplicados · ${rechazados} rechazados`} />
       {cuadratura ? <AvisoCuadratura c={cuadratura} /> : null}
+      {yaImportada ? (
+        <Alerta tono="warning" titulo="Esta cartola ya se importó">
+          {`${yaImportada.nombreArchivo ?? "Una cartola"} con el mismo período se importó el ${fechaHora(yaImportada.creadaEn)}. Si la vuelves a importar, sus movimientos quedan como duplicados. Para reemplazarla, deshazla primero en Importaciones.`}
+        </Alerta>
+      ) : null}
       <ul className="max-h-48 overflow-auto text-sm text-fg-muted">
         {orden.slice(0, 60).map((f) => (
           <li key={f.indice} className="border-b border-border py-1">
