@@ -1,6 +1,6 @@
 // Avisos bajo la meta al cerrar el mes (ADR-094, CAR-312). Si la empresa activó
 // `desempeno.aviso_bajo_meta` (silencio por defecto, ADR-020), el cierre emite un evento por persona
-// bajo la meta y uno por jefatura directa (de su ficha o, sin jefe en la ficha, la del cargo). Son transaccionales: solo este consumidor los
+// bajo la meta y uno por jefatura directa (la de su ficha más la de la jerarquía de cargos). Son transaccionales: solo este consumidor los
 // envía, a la persona o a la jefatura, y solo si puede ver ese resultado. Nunca llevan el puntaje.
 import { type Acceso, esRol, renderizar, tienePermisoEfectivo } from "@opai/domain";
 

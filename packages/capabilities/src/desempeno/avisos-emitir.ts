@@ -1,5 +1,5 @@
 // Eventos de los avisos bajo la meta (ADR-094, CAR-312, CAR-379): uno por persona bajo la meta y uno por
-// jefatura directa (la de su ficha o, sin jefe en la ficha, la que da la jerarquía de cargos).
+// jefatura directa: la de su ficha más la que da la jerarquía de cargos (sin duplicar). Usa la jefatura de hoy.
 import type { TenantTx } from "@opai/db";
 
 import { directasPorJefatura } from "../core/jefatura/empresa";

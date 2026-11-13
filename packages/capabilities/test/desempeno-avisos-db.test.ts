@@ -229,5 +229,11 @@ describe.skipIf(!urlPropietario)("desempeño: avisos bajo la meta contra Postgre
       ["desempeno.equipo.bajo_meta", persona.jose],
       ["desempeno.resultado.bajo_meta", persona.vera],
     ]);
+    await e.admin.notificacion.deleteMany({ where: { tenantId: a } });
+    await e.admin.permisoExcepcion.deleteMany({ where: { tenantId: a } });
+    await consumir("2026-12");
+    expect(
+      await e.admin.notificacion.count({ where: { tenantId: a, usuarioId: usuario.jose ?? "" } }),
+    ).toBe(1);
   });
 });
