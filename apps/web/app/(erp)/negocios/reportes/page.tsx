@@ -1,4 +1,4 @@
-import { DashboardScreen, Segmentado, type Kpi } from "@opai/ds";
+import { Alerta, DashboardScreen, Segmentado, type Kpi } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -78,6 +78,11 @@ export default function ReportesComerciales({ searchParams }: Props) {
             >
               {t ? (
                 <>
+                  {t.parcial ? (
+                    <Alerta tono="warning" titulo="Este reporte llegó a su tope de datos">
+                      Hay más negocios o solicitudes de los que el reporte alcanza a sumar: las cifras pueden quedar cortas. Elige un período más corto o un responsable.
+                    </Alerta>
+                  ) : null}
                   <Embudo t={t} />
                   <GanadosPerdidos t={t} />
                   {t.canales ? <Canales canales={t.canales} /> : null}
