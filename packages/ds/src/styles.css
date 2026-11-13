@@ -398,6 +398,14 @@
     @apply bg-warning-muted text-warning-fg;
   }
 }
+/* Acción de un estado: en el marco Hilo va como botón secundario, aunque la pantalla pase un botón
+   principal (DISENO.md §3b; CAR-360). Así la cabecera conserva el único primario de la vista (R1). */
+@utility ds-estado-accion {
+  @apply mt-1;
+  &:is([data-marco="hilo"] *) :is(.bg-accent.bg-accent) {
+    @apply border-border-control bg-surface text-fg hover:bg-fill;
+  }
+}
 @utility ds-estado-titulo {
   @apply text-md font-medium text-fg;
   &:is([data-marco="hilo"] *) {
@@ -502,6 +510,21 @@
   }
 }
 
+/* Marco Hilo: la fila seleccionada (lista de una vista dividida, lista lateral de Configuración) no usa
+   el índigo, que es solo del agente (DISENO-hilo.md R3; CAR-369). Fondo `fill` y barra en tinta. Vive en
+   CSS sobre las clases que ya pone `claseFila`, para no sumar JS (ADR-037). */
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent {
+  background-color: var(--ds-fill);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent::before {
+  background-color: var(--ds-fg);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .text-accent {
+  color: var(--ds-fg);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .bg-surface.text-accent {
+  box-shadow: inset 0 0 0 1px var(--ds-fg);
+}
 /* Menú plegable del diseño nuevo (ADR-109, CAR-335 D2): `ShellNuevo` pone `data-menu` y estas reglas
    deciden qué se ve, sin JS en el shell compartido (ADR-037). Plegado: en escritorio queda el riel de
    íconos. Asomado: el menú completo flota sobre la página, en iPad y en escritorio. */

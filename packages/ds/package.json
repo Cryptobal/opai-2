@@ -13,6 +13,7 @@
     "./seleccion": "./src/patterns/seleccion/index.tsx",
     "./switch": "./src/components/switch.tsx",
     "./uploader": "./src/components/uploader.tsx",
+    "./hilo": "./src/hilo/tokens-hilo.ts",
     "./tokens.css": "./src/tokens.css",
     "./styles.css": "./src/styles.css"
   },
