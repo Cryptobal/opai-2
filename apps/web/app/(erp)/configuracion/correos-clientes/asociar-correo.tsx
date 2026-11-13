@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { avisar, Button, Campo, Combobox, Dialog, Select } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { type Opcion, opcionesDeCuenta } from "./opciones-cuenta";

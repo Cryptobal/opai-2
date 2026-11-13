@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { ERROR_RED_PLAN, ERROR_VENCIDO } from "./mensajes-error";
 import { aplicarRespuesta } from "./respuesta-plan";

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Checkbox, Empty, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import type { InstalacionDetalle, InstalacionFila, Puesto } from "@/lib/tipos-maestros";
 
 /** Elige instalaciones cuyas posiciones activas se copian a la nueva (función, patrón y horario). */
