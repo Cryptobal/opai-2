@@ -54,6 +54,9 @@ test.describe("@preview diseño nuevo con sesión", () => {
         const barra = page.getByRole("navigation", { name: "Principal" }).filter({ hasText: "Yo" });
         await expect(barra.getByText("Menú", { exact: true })).toBeVisible();
         await expect(barra.getByRole("button", { name: /^Yo/ })).toBeVisible();
+        // La barra clásica y el avatar de arriba quedan escondidos: una sola navegación principal.
+        await expect(page.getByRole("navigation", { name: "Principal" })).toHaveCount(1);
+        await expect(page.getByRole("button", { name: /^Menú de usuario/ })).toBeHidden();
       }
       await captura(page, "nuevo-inicio", info);
 

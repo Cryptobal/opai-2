@@ -71,7 +71,10 @@ export function BarraInferiorNueva(props: Props) {
             items={nav.filter((i) => i.href !== inicio?.href)}
             rutaActual={rutaActual}
             extras={[]}
+            etiqueta="Menú"
             {...(props.fijados ? { fijados: props.fijados } : {})}
+            {...(props.errorFijados ? { errorFijados: true } : {})}
+            {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
             {...(props.onFijar ? { onFijar: props.onFijar } : {})}
             {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
             {...(props.epoca ? { epoca: props.epoca } : {})}
@@ -95,6 +98,14 @@ export function BarraInferiorNueva(props: Props) {
               className="w-full"
               claseDisparador="w-full"
               claseContenido="w-[248px]"
+              cabecera={
+                <div className="min-w-0">
+                  <p className="truncate text-base font-medium text-fg">{usuario.nombre}</p>
+                  {usuario.email ? (
+                    <p className="truncate text-xs text-fg-muted">{usuario.email}</p>
+                  ) : null}
+                </div>
+              }
               disparador={
                 <span className={clase(false)}>
                   <span className="relative inline-flex">
