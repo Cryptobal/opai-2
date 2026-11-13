@@ -52,6 +52,7 @@ export function ListaCuentas(p: {
       state={p.state}
       titulo="Cuentas"
       accion={nueva}
+      vistas={{ lista: "cuentas", ruta: "/cuentas" }}
       buscar="Buscar por nombre o RUT"
       filtros={[
         {
