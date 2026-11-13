@@ -543,7 +543,14 @@ model CartolaImportada {
   nombreArchivo   String?  @map("nombre_archivo")
   fechaDesde      DateTime? @map("fecha_desde") @db.Date
   fechaHasta      DateTime? @map("fecha_hasta") @db.Date
-  saldoFinal      BigInt   @map("saldo_final")
+  /// Saldo final de la cartola; null si no lo trae (CAR-341).
+  saldoFinal      BigInt?  @map("saldo_final")
+  /// Saldo inicial del bloque «Saldos» de la cartola; null si no lo trae (CAR-341).
+  saldoInicial    BigInt?  @map("saldo_inicial")
+  /// Persona que importó (o por quien actuó el agente) y su nombre al momento de importar.
+  creadoPorId     String?  @map("creado_por_id") @db.Uuid
+  creadoPorNombre String?  @map("creado_por_nombre")
+  viaAgente       Boolean  @default(false) @map("via_agente")
   movimientosNuevos Int    @default(0) @map("movimientos_nuevos")
   duplicados      Int      @default(0)
   rechazados      Int      @default(0)
