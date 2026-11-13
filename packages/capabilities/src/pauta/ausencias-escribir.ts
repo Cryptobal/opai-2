@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { sinDuplicado } from "../core/maestros/comun";
-import { conflicto } from "../errores";
+import { conflicto, prohibido } from "../errores";
 import type { Contexto } from "../types";
 import { anotar } from "./anotar";
 import {
@@ -40,14 +40,18 @@ export const salidaAusencia = z.object({
 export async function escribirAusencia(
   ctx: Contexto,
   input: AusenciaPersona,
-  o: { dryRun: boolean; conPauta: boolean; exigirTurnos: boolean },
+  o: { dryRun: boolean; conPauta: boolean; exigirTurnos: boolean; exigirPermisoPauta?: boolean },
 ): Promise<z.infer<typeof salidaAusencia>> {
   const planear = async (c: Contexto): Promise<PlanPuesto[]> => {
     if (!o.conPauta) {
       await personaParaAusencia(c, input.personaId);
       return [];
     }
-    return planearAusencia(c, input, o.exigirTurnos);
+    const plan = await planearAusencia(c, input, o.exigirTurnos);
+    // Desde la ficha, marcar turnos pide editar la pauta (mismo criterio que anular la ausencia).
+    if (o.exigirPermisoPauta && plan.some((p) => p.dias.length) && !c.autorizar("pauta:write"))
+      throw prohibido("Marcar turnos de la pauta requiere el permiso de editar la pauta.");
+    return plan;
   };
   const dryRun = o.dryRun;
   const hasta = input.hasta ?? input.desde;

@@ -15,17 +15,19 @@ type Plan = {
 };
 
 /**
- * Registrar un permiso, licencia, vacaciones o ausencia desde la ficha (ADR-094, adenda CAR-311 d): primero muestra
- * qué turnos de la pauta quedan con el registro (vista previa), y solo después se confirma.
+ * Registrar un permiso, licencia, vacaciones o ausencia desde la ficha (ADR-094, adenda CAR-311 d; CAR-393): queda en
+ * el registro de la persona. Con Pauta, la vista previa muestra qué turnos marca, y solo después se confirma.
  */
 export function HojaRegistrarAusencia({
   personaId,
   nombre,
   hoy,
+  conPauta,
 }: {
   personaId: string;
   nombre: string;
   hoy: string;
+  conPauta: boolean;
 }) {
   const { abierta, cerrar } = useHojaUrl("registrar");
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
@@ -54,11 +56,13 @@ export function HojaRegistrarAusencia({
     };
 
   async function revisar() {
-    setPlan(await ejecutar<Plan>("pauta.ausencias.registrar", entrada, true, "ninguna"));
+    setPlan(await ejecutar<Plan>("core.ausencias.registrar", entrada, true, "ninguna"));
   }
   async function confirmar() {
-    if (await ejecutar("pauta.ausencias.registrar", entrada)) {
-      avisar.exito("Quedó registrado en la pauta");
+    if (await ejecutar("core.ausencias.registrar", entrada)) {
+      avisar.exito(
+        plan && plan.dias > 0 ? "Quedó registrado y marcado en la pauta" : "Quedó registrado",
+      );
       salir();
     }
   }
@@ -68,7 +72,11 @@ export function HojaRegistrarAusencia({
       abierto
       onCerrar={salir}
       titulo="Registrar permiso o licencia"
-      descripcion={`${nombre}. Sus turnos de esas fechas quedan por cubrir en la pauta, con este motivo.`}
+      descripcion={
+        conPauta
+          ? `${nombre}. Si tiene turnos en esas fechas, quedan por cubrir en la pauta con este motivo.`
+          : nombre
+      }
       acciones={
         <>
           <Button variant="secondary" onClick={salir}>
@@ -76,11 +84,13 @@ export function HojaRegistrarAusencia({
           </Button>
           {plan ? (
             <Button onClick={confirmar} disabled={pendiente}>
-              Registrar {plan.dias === 1 ? "1 turno" : `${plan.dias} turnos`}
+              {plan.dias === 0
+                ? "Registrar"
+                : `Registrar ${plan.dias === 1 ? "1 turno" : `${plan.dias} turnos`}`}
             </Button>
           ) : (
             <Button onClick={revisar} disabled={pendiente || fechasMal || motivo.trim().length < 3}>
-              Ver turnos afectados
+              {conPauta ? "Ver turnos afectados" : "Revisar"}
             </Button>
           )}
         </>
@@ -127,7 +137,11 @@ export function HojaRegistrarAusencia({
             onChange={(e) => cambiar(setMotivo)(e.target.value)}
           />
         </Campo>
-        {plan ? (
+        {plan && plan.dias === 0 ? (
+          <Alerta tono="info" titulo="Queda solo el registro">
+            {conPauta ? "No tiene turnos en la pauta en esas fechas." : "Lista para registrar."}
+          </Alerta>
+        ) : plan ? (
           <Alerta
             tono="info"
             titulo={

@@ -15,17 +15,12 @@ const DialogoConfirmar = lazy(() =>
   })),
 );
 
-/** Anula un registro de la persona: sus turnos vuelven a la serie; no toca a otras personas. */
+/** Anula un registro de la persona (CAR-393): si marcaba turnos, vuelven a la serie; no toca a otras personas. */
 export function AnularAusencia({ personaId, g }: { personaId: string; g: GrupoAusencia }) {
   const [abierto, setAbierto] = useState(false);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   async function anular() {
-    const r = await ejecutar("pauta.ausencias.anular", {
-      personaId,
-      tipo: g.tipo,
-      desde: g.desde,
-      hasta: g.hasta,
-    });
+    const r = await ejecutar("core.ausencias.anular", { personaId, ausenciaId: g.ausenciaId });
     if (r) {
       avisar.exito("Registro anulado");
       setAbierto(false);
@@ -41,7 +36,7 @@ export function AnularAusencia({ personaId, g }: { personaId: string; g: GrupoAu
           <DialogoConfirmar
             confirmacion={{
               titulo: `Anular ${etiquetaTipo(g.tipo).toLowerCase()}`,
-              descripcion: `Del ${fecha(g.desde)} al ${fecha(g.hasta)}: los turnos vuelven a su serie en la pauta. Queda en el historial.`,
+              descripcion: `Del ${fecha(g.desde)} al ${fecha(g.hasta)}.${g.dias > 0 ? " Sus turnos vuelven a su serie en la pauta." : ""} Queda en el historial.`,
               boton: "Anular",
               peligro: true,
             }}
