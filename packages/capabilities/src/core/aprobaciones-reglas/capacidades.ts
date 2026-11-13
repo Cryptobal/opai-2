@@ -81,6 +81,12 @@ export const reglasAprobacionGuardar = defineCapability({
     if (id && !(await ctx.db.reglaAprobacion.findFirst({ where: { id, activa: true } })))
       throw noEncontrado("La regla");
     const data = { ...input, montoMinimo: input.montoMinimo === null ? null : BigInt(input.montoMinimo) };
+    // Dos reglas activas con la misma acción y el mismo monto serían ambiguas: manda una sola (CAR-253).
+    const repetida = await ctx.db.reglaAprobacion.findFirst({
+      where: { accion: data.accion, montoMinimo: data.montoMinimo, activa: true, ...(id ? { id: { not: id } } : {}) },
+    });
+    if (repetida)
+      throw reglaDeNegocio("Ya hay una regla activa para esa acción y ese monto. Cámbiala en vez de crear otra.");
     if (dryRun) return vista({ id: id ?? "", activa: true, ...data });
     const r = await escribirConEvento(
       ctx,
