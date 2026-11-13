@@ -75,7 +75,7 @@ export const VERBO: Record<string, string> = {
   recalcular: "recalculó",
   renombrar: "renombró",
   devolver: "devolvió",
-  marcar_pagado: "marcó como pagado",
+  marcar_pagado: "registró el pago de",
   ganar: "ganó",
   perder: "dio por perdido",
 };

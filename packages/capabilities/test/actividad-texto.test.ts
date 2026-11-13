@@ -55,3 +55,14 @@ it("sin verbo conocido nombra la ficha, y sin ficha conocida nombra el módulo",
   expect(frase("finanzas.zzz.aprobar", {})).toBe("aprobó un registro de Finanzas");
   expect(frase("finanzas.zzz.zzz", {})).toBe("realizó un cambio en Finanzas");
 });
+
+it("contrae «de el» y «a el», y la ficha sin nombre dice «de una persona» (CAR-339)", () => {
+  expect(frase("tickets.tickets.cambiar_estado", {})).toBe("cambió el estado del ticket");
+  expect(frase("core.personas.marcar_no_recontratar", {})).toBe("modificó la ficha de una persona");
+  expect(frase("core.personas.update", { nombres: "Ana", apellidos: "Pérez" })).toBe(
+    "actualizó la ficha de Ana Pérez",
+  );
+  expect(frase("rendiciones.rendiciones.marcar_pagado", {})).toBe(
+    "registró el pago de la rendición",
+  );
+});

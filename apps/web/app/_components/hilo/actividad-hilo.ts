@@ -13,9 +13,13 @@ type ItemActividad = {
 };
 
 /** «Actividad»: lo último que hicieron las personas y los agentes (salida de `core.actividad.list`). */
-export function actividadHilo(items: readonly ItemActividad[], ahora: Date): FilaHilo[] {
+export function actividadHilo(
+  items: readonly ItemActividad[],
+  ahora: Date,
+  enlazar = true,
+): FilaHilo[] {
   return items.map((i) => {
-    const href = rutaDeEntidad(i.entidad);
+    const href = enlazar ? rutaDeEntidad(i.entidad) : undefined;
     return {
       id: i.id,
       cuando: cuandoCorto(i.cuando, ahora),

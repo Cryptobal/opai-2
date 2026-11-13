@@ -39,6 +39,8 @@ export async function cargarFilasHilo(
   leer: LecturasHilo,
   segmento: "actividad" | "agenda",
   ahora: Date,
+  /** Las fichas enlazadas son del ERP: en otros portales la fila no enlaza (CAR-339). */
+  enlazar = true,
 ): Promise<ListaHilo<FilaHilo>> {
   const esActividad = segmento === "actividad";
   const r = await leer[segmento]().catch(() => null);
@@ -46,7 +48,7 @@ export async function cargarFilasHilo(
   if (!r.ok) return { estado: estadoDeFallo(r.error.code), items: [] };
   if (esActividad) {
     const { items } = r.data as { items: Parameters<typeof actividadHilo>[0] };
-    return { estado: "listo", items: actividadHilo(items, ahora) };
+    return { estado: "listo", items: actividadHilo(items, ahora, enlazar) };
   }
   const { items } = r.data as { items: Parameters<typeof agendaHilo>[0] };
   return { estado: "listo", items: agendaHilo(items, ahora) };

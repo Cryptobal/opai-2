@@ -69,7 +69,9 @@ const idDe = (v: unknown): string | null =>
 
 /**
  * Entidad afectada por una escritura, para la actividad de cada ficha: la entidad del id de la
- * capacidad (`core.cuentas.update` → cuenta) con el id de la salida o de la entrada.
+ * capacidad (`core.cuentas.update` → cuenta) con el id de la entrada o, si no trae (alta), el de la salida.
+ * La entrada manda: un sub-recurso (`tickets.tickets.comentar`) devuelve el id del comentario, no
+ * el de la ficha (CAR-339).
  */
 export function entidadAuditada(
   capacidad: string,
@@ -77,7 +79,7 @@ export function entidadAuditada(
   salida: unknown,
 ): { entityType?: string; entityId?: string } {
   const tipo = SINGULAR[capacidad.split(".")[1] ?? ""];
-  const id = idDe(salida) ?? idDe(entrada);
+  const id = idDe(entrada) ?? idDe(salida);
   return tipo && id ? { entityType: tipo, entityId: id } : {};
 }
 

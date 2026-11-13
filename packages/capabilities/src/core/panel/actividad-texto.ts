@@ -61,11 +61,16 @@ export function frase(capability: string, input: Input): string {
   const modulo = partes.length > 2 ? MODULO[partes[0] ?? ""] : undefined;
   const o = objeto(input);
   if (verbo === "invite") return `invitó a ${o ?? "un usuario"}`;
-  if (v && s) return `${v} ${s}${o ? ` ${o}` : ""}`;
-  if (s) return `modificó ${s}${o ? ` ${o}` : ""}`;
+  // «la ficha de» necesita a quién: sin nombre, «la ficha de una persona».
+  const sujeto = s && (o ? `${s} ${o}` : s.endsWith(" de") ? `${s} una persona` : s);
+  if (v && sujeto) return contraer(`${v} ${sujeto}`);
+  if (sujeto) return contraer(`modificó ${sujeto}`);
   if (v && modulo) return `${v} un registro de ${modulo}`;
   return modulo ? `realizó un cambio en ${modulo}` : "realizó un cambio";
 }
+
+/** «de el» → «del», «a el» → «al» («cambió el estado del ticket»). */
+const contraer = (t: string) => t.replace(/\bde el\b/g, "del").replace(/\ba el\b/g, "al");
 
 /** Campos cambiados (sin ids ni claves técnicas), hasta 4. */
 export function cambios(input: Input): { campo: string; valor: string }[] {
