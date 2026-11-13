@@ -61,6 +61,10 @@ export type EstadoOcurrencia = {
   cargoId: string | null;
 };
 
+/** Monto de cada cuota: fijo, o por fecha cuando la regla va en UF o en % de ventas (bloque 2). */
+export type MontoRegla = number | ((fecha: string) => number);
+const montoEn = (m: MontoRegla, fecha: string) => (typeof m === "function" ? m(fecha) : m);
+
 /**
  * Cruza las ocurrencias con los cargos conciliados a la fila del recurrente: un cargo dentro de la ventana de una
  * ocurrencia (días antes y después de su fecha) la paga, total o parcialmente. Cada cargo se usa una sola vez; se
@@ -69,13 +73,14 @@ export type EstadoOcurrencia = {
  */
 export function estadoOcurrencias(
   fechas: readonly string[],
-  monto: number,
+  montoRegla: MontoRegla,
   cargos: readonly CargoFila[],
   ventana: { diasAntes: number; diasDespues: number },
 ): EstadoOcurrencia[] {
   const usados = new Set<string>();
   return [...fechas].sort().map((fecha) => {
     const t = aMs(fecha);
+    const monto = montoEn(montoRegla, fecha);
     const candidatos = cargos
       .filter((c) => !usados.has(c.id))
       .filter((c) => aMs(c.fecha) >= t - ventana.diasAntes * DIA_MS && aMs(c.fecha) <= t + ventana.diasDespues * DIA_MS)
@@ -88,7 +93,7 @@ export function estadoOcurrencias(
   });
 }
 
-export type ReglaConCuotas = { id: string; fechas: readonly string[]; monto: number; ventana: { diasAntes: number; diasDespues: number } };
+export type ReglaConCuotas = { id: string; fechas: readonly string[]; monto: MontoRegla; ventana: { diasAntes: number; diasDespues: number } };
 
 /**
  * Reparte los cargos de una fila entre todos sus recurrentes (CAR-349, autorrevisión). Primero cada recurrente toma
@@ -100,7 +105,8 @@ export function estadosPorFila(reglas: readonly ReglaConCuotas[], cargos: readon
   const libres = (filtro: (c: CargoFila) => boolean) => cargos.filter((c) => !usados.has(c.id) && filtro(c));
   const out = new Map<string, EstadoOcurrencia[]>();
   for (const r of reglas) {
-    const est = estadoOcurrencias(r.fechas, r.monto, libres((c) => Math.abs(c.monto) === r.monto), r.ventana);
+    const exactos = new Set(r.fechas.map((f) => montoEn(r.monto, f)));
+    const est = estadoOcurrencias(r.fechas, r.monto, libres((c) => exactos.has(Math.abs(c.monto))), r.ventana);
     for (const e of est) if (e.cargoId) usados.add(e.cargoId);
     out.set(r.id, est);
   }
