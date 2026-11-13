@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 756 pares pantalla→capacidad · 678 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 757 pares pantalla→capacidad · 679 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -530,6 +530,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.procesos_persona.listar` | `core_procesos_persona_listar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.puestos.list` | `core_puestos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.create` | `core_vinculos_create` | existe |
@@ -1082,6 +1083,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.asignar_jefe`
 - `core.personas.list_a_cargo`
 - `core.ping`
+- `core.procesos_persona.paso_actualizar`
 - `core.puestos.get`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`
