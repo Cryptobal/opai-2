@@ -22,7 +22,7 @@ export type Recurrente = {
 };
 export type FilaEgreso = { id: string; etiqueta: string; seccion: string; activa: boolean };
 
-const decimales = (n: number) => n.toLocaleString("es-CL", { maximumFractionDigits: 4 });
+const decimales = (n: number, agrupar = true) => n.toLocaleString("es-CL", { maximumFractionDigits: 4, useGrouping: agrupar });
 
 /** Monto legible según su unidad: pesos, UF (escala 10.000) o % de ventas (escala 10.000). */
 export function montoLegible(r: Pick<Recurrente, "unidad" | "monto">): string {
@@ -43,7 +43,8 @@ export function montoEscrito(unidad: Unidad, texto: string): number | null {
 
 /** Monto en la escala → texto editable (12,5 para 125.000 en UF). */
 export const montoEditable = (r: Pick<Recurrente, "unidad" | "monto">) =>
-  r.unidad === "clp" ? String(r.monto) : decimales(r.monto / 10_000);
+  // Sin punto de miles: «1.234» en UF se leería como 1,234 UF al guardar.
+  r.unidad === "clp" ? String(r.monto) : decimales(r.monto / 10_000, false);
 
 const DIA = (d: number | null) => (d === -1 ? "el último día" : `el día ${d}`);
 /** «Mensual, el día 5» / «Semanal desde el 3 nov». */

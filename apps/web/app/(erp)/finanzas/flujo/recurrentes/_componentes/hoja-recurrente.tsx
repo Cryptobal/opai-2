@@ -35,7 +35,8 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
   const [unidad, setUnidad] = useState<Unidad>(r?.unidad ?? "clp");
   const [monto, setMonto] = useState(r ? montoEditable(r) : "");
   const [frecuencia, setFrecuencia] = useState(r?.frecuencia ?? "mensual");
-  const [dia, setDia] = useState(r?.diaDelMes != null ? String(r.diaDelMes) : "1");
+  // Sin día guardado, el mensual se paga el día de su inicio (como lo muestra la lista).
+  const [dia, setDia] = useState(r ? String(r.diaDelMes ?? Number(r.inicio.slice(8, 10))) : "1");
   const [inicio, setInicio] = useState(r?.inicio ?? hoyIso());
   const [fin, setFin] = useState(r?.fin ?? "");
   const [politica, setPolitica] = useState<PoliticaUf>(r?.politicaUf ?? "dia_cuota");
@@ -93,9 +94,9 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
           <Input id="rc-concepto" value={concepto} onChange={(e) => setConcepto(e.target.value)} autoFocus={!r} />
         </Campo>
         <Campo etiqueta="Unidad del monto" htmlFor="rc-unidad">
-          <Select id="rc-unidad" valor={unidad} onCambiar={(v) => setUnidad(v as Unidad)} opciones={UNIDADES} />
+          <Select id="rc-unidad" valor={unidad} onCambiar={(v) => { setUnidad(v as Unidad); setMonto(""); }} opciones={UNIDADES} />
         </Campo>
-        <Campo etiqueta={unidad === "clp" ? "Monto por cuota ($)" : unidad === "uf" ? "UF por cuota" : "Porcentaje (%)"} htmlFor="rc-monto" {...(monto && montoN === null ? { error: unidad === "pct_ventas" ? "Un número entre 0 y 100." : "Un número mayor que cero." } : {})}>
+        <Campo etiqueta={unidad === "clp" ? "Monto por cuota ($)" : unidad === "uf" ? "UF por cuota" : "Porcentaje (%)"} htmlFor="rc-monto" {...(unidad === "clp" ? {} : { ayuda: "Usa coma para los decimales (12,5)." })} {...(monto && montoN === null ? { error: unidad === "pct_ventas" ? "Un número entre 0 y 100." : "Un número mayor que cero." } : {})}>
           <Input id="rc-monto" inputMode="decimal" className="t-numeric" value={monto} onChange={(e) => setMonto(e.target.value)} />
         </Campo>
         {unidad === "uf" ? <CamposUf politica={politica} onPolitica={setPolitica} dia={ufDia} onDia={setUfDia} diaOk={ufDiaOk} /> : null}

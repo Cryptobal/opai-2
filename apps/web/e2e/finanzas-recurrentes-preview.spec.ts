@@ -18,7 +18,12 @@ test.describe("@preview finanzas: gastos recurrentes", () => {
     await capturar(page, info, "flujo-recurrentes-lista");
 
     const nuevo = page.getByRole("link", { name: "Nuevo gasto recurrente" });
-    if ((await nuevo.count()) === 0) return; // Sin filas de egreso en la empresa de prueba: queda el estado vacío.
+    if ((await nuevo.count()) === 0) {
+      // Sin filas de egreso en la empresa de prueba: la captura muestra el estado vacío con su acción.
+      test.info().annotations.push({ type: "aviso", description: "qa-e2e sin filas de egreso: no se probó la hoja" });
+      await expect(page.getByText("Primero crea una fila de egresos")).toBeVisible();
+      return;
+    }
     await nuevo.first().click();
     await expect(page.getByRole("dialog").getByText("Nuevo gasto recurrente")).toBeVisible();
     await page.getByLabel("Concepto").fill("Arriendo de prueba");

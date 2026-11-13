@@ -18,6 +18,9 @@ describe("montos de gastos recurrentes en pantalla", () => {
     expect(montoLegible({ unidad: "pct_ventas", monto: 50_000 })).toBe("5 % de las ventas");
     expect(montoEditable({ unidad: "uf", monto: 125_000 })).toBe("12,5");
     expect(montoEscrito("uf", montoEditable({ unidad: "uf", monto: 125_000 }))).toBe(125_000);
+    // Montos de 1.000 UF o más vuelven igual al guardar sin tocarlos.
+    expect(montoEditable({ unidad: "uf", monto: 12_345_000 })).toBe("1234,5");
+    expect(montoEscrito("uf", montoEditable({ unidad: "uf", monto: 12_345_000 }))).toBe(12_345_000);
   });
   it("describe cuándo se paga", () => {
     const base = { frecuencia: "mensual", diaDelMes: -1, inicio: "2026-01-05" } as Recurrente;

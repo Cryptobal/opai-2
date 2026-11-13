@@ -19,7 +19,7 @@ export default function GastosRecurrentes() {
       {(d) => (
         <>
           <ListaRecurrentes state={d.state} items={d.items} filas={d.filas} configura={d.configura} />
-          {d.configura ? <HojaRecurrente items={d.items} filas={d.filas} /> : null}
+          {d.configura ? <HojaRecurrente key={d.items.length} items={d.items} filas={d.filas} /> : null}
         </>
       )}
     </PaginaPortal>
