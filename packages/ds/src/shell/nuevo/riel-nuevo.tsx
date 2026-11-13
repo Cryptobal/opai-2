@@ -36,12 +36,21 @@ type Props = {
 export function RielNuevo(p: Props) {
   const visibles = p.items.filter((i) => !i.pie && !i.soloAmplio);
   const sueltos = visibles.filter((i) => !i.area);
-  const areas = [...new Map(visibles.filter((i) => i.area).map((i) => [i.area ?? "", i])).values()];
+  // El primer ítem de cada área da el orden y la etiqueta del área.
+  const porArea = new Map<string, NavItem>();
+  for (const i of visibles) if (i.area && !porArea.has(i.area)) porArea.set(i.area, i);
+  const areas = [...porArea.values()];
+  // El aviso de un submódulo (p. ej. solicitudes por revisar) se ve en el ícono de su área.
+  const alertasDe = (area: string) =>
+    visibles.reduce((n, i) => n + (i.area === area && i.alerta ? (i.contador ?? 0) : 0), 0);
   const activo = (i: NavItem) => esActivo(p.rutaActual, i.href, i.exacta, i.activoEn);
   const enlace = (i: NavItem, conContador = true) => (
     <li key={i.href} className="w-full">
       <p.Link
         href={i.href}
+        {...(i.corta && i.corta !== i.etiqueta
+          ? { title: i.etiqueta, "aria-label": i.etiqueta }
+          : {})}
         aria-current={activo(i) ? "page" : undefined}
         className={claseItem(activo(i))}
       >
@@ -49,7 +58,9 @@ export function RielNuevo(p: Props) {
           <i.icono className={cn("size-5", activo(i) && "text-accent")} aria-hidden />
           {conContador ? <Contador n={i.alerta ? i.contador : undefined} /> : null}
         </span>
-        <span lang="es" className="w-full hyphens-auto px-0.5 text-center text-[11px]">{i.corta ?? i.etiqueta}</span>
+        <span lang="es" className="w-full hyphens-auto px-0.5 text-center text-[11px]">
+          {i.corta ?? i.etiqueta}
+        </span>
       </p.Link>
     </li>
   );
@@ -80,11 +91,16 @@ export function RielNuevo(p: Props) {
               <button
                 type="button"
                 onClick={() => p.onArea(area)}
-                aria-haspopup="true"
+                aria-current={dentro ? "true" : undefined}
                 className={claseItem(dentro)}
               >
-                <Icono className={cn("size-5", dentro && "text-accent")} aria-hidden />
-                <span lang="es" className="w-full hyphens-auto px-0.5 text-center text-[11px]">{primero.grupo ?? area}</span>
+                <span className="relative">
+                  <Icono className={cn("size-5", dentro && "text-accent")} aria-hidden />
+                  <Contador n={alertasDe(area) || undefined} />
+                </span>
+                <span lang="es" className="w-full hyphens-auto px-0.5 text-center text-[11px]">
+                  {primero.grupo ?? area}
+                </span>
               </button>
             </li>
           );

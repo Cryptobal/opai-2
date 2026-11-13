@@ -105,4 +105,35 @@ describe("riel del menú plegado (CAR-377)", () => {
     expect(riel).not.toContain(">Negocios<");
     expect(riel).not.toContain(">Cuentas<");
   });
+  it("el área marca la página actual y suma los avisos de sus submódulos", () => {
+    const h = html({
+      rutaActual: "/solicitudes",
+      nav: [
+        { href: "/", etiqueta: "Inicio", icono: Home },
+        {
+          href: "/negocios",
+          etiqueta: "Negocios",
+          icono: Briefcase,
+          grupo: "Comercial",
+          area: "comercial",
+        },
+        {
+          href: "/solicitudes",
+          etiqueta: "Solicitudes",
+          icono: Briefcase,
+          grupo: "Comercial",
+          area: "comercial",
+          alerta: true,
+          contador: 3,
+        },
+        { href: "/configuracion", etiqueta: "Configuración", icono: Home, pie: true },
+      ],
+    });
+    const inicio = h.indexOf('data-shell="riel"');
+    const riel = h.slice(inicio, h.indexOf("</nav>", inicio));
+    expect(riel).toContain('aria-current="true"');
+    expect(riel).toContain(">3<");
+    expect(riel).not.toContain("aria-haspopup");
+    expect(riel.indexOf(">Configuración<")).toBeGreaterThan(riel.indexOf(">Comercial<"));
+  });
 });
