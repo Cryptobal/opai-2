@@ -3,7 +3,13 @@ import type { TenantTx } from "@opai/db";
 import { hoyIso } from "../util";
 
 /** Saldo conocido de una cuenta y el día (zona del negocio) al que corresponde. */
-export type SaldoCuenta = { cuentaId: string; saldo: number; fecha: string };
+export type SaldoCuenta = {
+  cuentaId: string;
+  saldo: number;
+  fecha: string;
+  /** De dónde sale: el banco en línea, el saldo posterior del último movimiento o el cierre de una cartola (CAR-341). */
+  fuente?: "banco" | "movimiento" | "cartola";
+};
 
 export type SaldoBanco = {
   /** Suma de las cuentas activas con saldo conocido; null si ninguna lo tiene. */
@@ -37,11 +43,11 @@ export async function saldoDelBanco(
   for (const c of cuentas) {
     let conocido: SaldoCuenta | null = null;
     if (actual && c.id === actual.cuentaId && actual.saldo != null) {
-      conocido = { cuentaId: c.id, saldo: actual.saldo, fecha: hoy };
+      conocido = { cuentaId: c.id, saldo: actual.saldo, fecha: hoy, fuente: "banco" };
     } else {
       if (c.saldoBanco != null) {
         const en = c.saldoBancoEn ?? c.ultimaSyncEn;
-        conocido = { cuentaId: c.id, saldo: Number(c.saldoBanco), fecha: en ? hoyIso(en) : hoy };
+        conocido = { cuentaId: c.id, saldo: Number(c.saldoBanco), fecha: en ? hoyIso(en) : hoy, fuente: "banco" };
       }
       const ultimo = await db.movimientoBancario.findFirst({
         where: { cuentaId: c.id, saldoDespues: { not: null } },
@@ -50,7 +56,7 @@ export async function saldoDelBanco(
       });
       if (ultimo?.saldoDespues != null) {
         const fecha = ultimo.fecha.toISOString().slice(0, 10);
-        if (!conocido || fecha > conocido.fecha) conocido = { cuentaId: c.id, saldo: Number(ultimo.saldoDespues), fecha };
+        if (!conocido || fecha > conocido.fecha) conocido = { cuentaId: c.id, saldo: Number(ultimo.saldoDespues), fecha, fuente: "movimiento" };
       }
       const cartola = await db.cartolaImportada.findFirst({
         where: { cuentaId: c.id, saldoFinal: { not: null }, fechaHasta: { not: null } },
@@ -62,7 +68,7 @@ export async function saldoDelBanco(
         const hasta = cartola.fechaHasta.toISOString().slice(0, 10);
         const importada = hoyIso(cartola.createdAt);
         const fecha = hasta < importada ? hasta : importada;
-        if (!conocido || fecha > conocido.fecha) conocido = { cuentaId: c.id, saldo: Number(cartola.saldoFinal), fecha };
+        if (!conocido || fecha > conocido.fecha) conocido = { cuentaId: c.id, saldo: Number(cartola.saldoFinal), fecha, fuente: "cartola" };
       }
     }
     if (!conocido) {

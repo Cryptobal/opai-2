@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 766 pares pantalla→capacidad · 687 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 772 pares pantalla→capacidad · 693 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -367,6 +367,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.deshacer` | `finanzas_cartolas_deshacer` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.listar` | `finanzas_cartolas_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.movimientos_bancarios.borrar_rango` | `finanzas_movimientos_bancarios_borrar_rango` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.aplicar` | `finanzas_reglas_banco_aplicar` | existe |
@@ -471,7 +472,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.mover` | `comercial_negocios_mover` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.perder` | `comercial_negocios_perder` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.reabrir` | `comercial_negocios_reabrir` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.responsables` | `comercial_negocios_responsables` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.set_contactos` | `comercial_negocios_set_contactos` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.transferir` | `comercial_negocios_transferir` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.update` | `comercial_negocios_update` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.vincular_instalacion` | `comercial_negocios_vincular_instalacion` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
@@ -546,6 +549,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.anular` | `pauta_ausencias_anular` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.listar` | `pauta_ausencias_listar` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.registrar` | `pauta_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/[id]/generar-documento/_componentes` | `core.documento_plantillas.generar` | `core_documento_plantillas_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |

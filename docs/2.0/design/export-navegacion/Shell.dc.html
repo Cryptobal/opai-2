@@ -352,7 +352,7 @@ const CORE = ['inicio', 'cuentas', 'instalaciones', 'personas', 'vencimientos', 
 const SCEN = { A: CORE, B: CORE.concat(['bandeja', 'solicitudes', 'negocios', 'cotizaciones', 'contactos', 'documentos']), C: Object.keys(E), D: CORE.concat(['nomina']) };
 const HIDE = { owner: [], admin: [], gerente: ['@finanzas', 'nomina'], supervisor: ['@comercial', '@finanzas', 'nomina'], viewer: ['@finanzas'] };
 const USERS = {
-  owner: { name: 'Carlos Irigoyen', first: 'Carlos', ini: 'CI', role: 'Propietario', mail: 'carlos@gardsecurity.cl' },
+  owner: { name: 'Andrea Fuentes', first: 'Carlos', ini: 'CI', role: 'Propietario', mail: 'carlos@gardsecurity.cl' },
   admin: { name: 'Fernanda Soto', first: 'Fernanda', ini: 'FS', role: 'Administradora', mail: 'fernanda@gardsecurity.cl' },
   gerente: { name: 'Rodrigo Pizarro', first: 'Rodrigo', ini: 'RP', role: 'Gerente', mail: 'rodrigo@gardsecurity.cl' },
   supervisor: { name: 'Jorge Muñoz', first: 'Jorge', ini: 'JM', role: 'Supervisor', mail: 'jorge@gardsecurity.cl' },
@@ -430,7 +430,7 @@ const BANDEJA = [
   { i: 'file', t: 'Aprobar cotización COT-2026-0187', d: 'Logística Andina SpA · $ 18.450.000 mensual', b: 'Aprobación', bt: 'accent', e: 'cotizaciones' },
   { i: 'clock', t: 'Aprobar turno extra', d: 'Planta Quilicura · 26-10-2026 · 20:00–08:00', b: 'Aprobación', bt: 'accent' },
   { i: 'alert', t: 'OS-10 por vencer · 3 personas', d: 'Vencen antes del 15-11-2026', b: 'Aviso', bt: 'warning' },
-  { i: 'clipboard', t: 'Visitar Bodega Lampa', d: 'Tarea asignada por Carlos Irigoyen · 27-10-2026', b: 'Tarea', bt: 'neutral' },
+  { i: 'clipboard', t: 'Visitar Bodega Lampa', d: 'Tarea asignada por Andrea Fuentes · 27-10-2026', b: 'Tarea', bt: 'neutral' },
   { i: 'file', t: 'Firmar anexo de contrato', d: 'Retail Sur Ltda. · Documentos', b: 'Firma', bt: 'neutral', e: 'documentos' },
 ];
 const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
