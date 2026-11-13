@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio, type Contexto } from "@opai/capabilities";
 import {
+  acotarFechaAHoy,
   normalizarBanco,
   normalizarNumeroCuenta,
   planificarMovimientosApi,
@@ -71,7 +72,8 @@ function fechaSaldoReportado(i: SincronizarInput): Date | null {
   return fecha && !Number.isNaN(fecha.getTime()) ? fecha : null;
 }
 
-export async function sincronizarMovimientos(ctx: Contexto, input: SincronizarInput, dryRun: boolean): Promise<Salida> {
+export async function sincronizarMovimientos(ctx: Contexto, entrada: SincronizarInput, dryRun: boolean): Promise<Salida> {
+  const input = await sinFechasFuturas(ctx, entrada);
   const cuenta = await resolverCuenta(ctx, input.numeroCuenta, input.codigoBanco);
   if (!cuenta) return sinCuenta;
   // Serializa entregas simultáneas de la misma cuenta: el UPDATE toma el bloqueo de la fila hasta el COMMIT
@@ -122,3 +124,10 @@ export const bancosSincronizar = defineCapability({
     return sincronizarMovimientos(ctx, input, dryRun);
   },
 });
+
+/** Fechas posteriores a hoy (zona de la empresa) se acotan a hoy antes de deduplicar y guardar (CAR-341). */
+async function sinFechasFuturas(ctx: Contexto, input: SincronizarInput): Promise<SincronizarInput> {
+  const t = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { timezone: true } });
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: t?.timezone ?? "America/Santiago" }).format(new Date());
+  return { ...input, movimientos: input.movimientos.map((m) => ({ ...m, fecha: acotarFechaAHoy(m.fecha, hoy) })) };
+}

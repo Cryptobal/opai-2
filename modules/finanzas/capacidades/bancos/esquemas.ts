@@ -12,6 +12,10 @@ export const cuentaSchema = z.object({
   /** Última entrega del banco en línea (Web4Leads) y saldo que informó; null si nunca sincronizó. */
   ultimaSyncEn: z.string().nullable(),
   saldoBanco: z.number().int().nullable(),
+  /** Saldo de hoy: el último saldo conocido llevado con los movimientos posteriores (CAR-341). */
+  saldoHoy: z.number().int().nullable().optional(),
+  /** Fecha del saldo conocido desde el que se lleva `saldoHoy`. */
+  saldoDesde: z.string().nullable().optional(),
 });
 
 export const movimientoSchema = z.object({
