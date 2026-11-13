@@ -10,7 +10,14 @@ import type { Contexto } from "../types";
 import { anotar } from "./anotar";
 import { registrarDesdePauta } from "./ausencias-registro";
 import { cargarSeries } from "./cargar";
-import { aFechaDb, diasDelRango, fechaIso, PERMISO_WRITE, puestoParaPauta, rangoSchema } from "./comun";
+import {
+  aFechaDb,
+  diasDelRango,
+  fechaIso,
+  PERMISO_WRITE,
+  puestoParaPauta,
+  rangoSchema,
+} from "./comun";
 import { nombresDePersonas } from "./nombres";
 import { tipoExcepcionSchema } from "./vistas";
 
@@ -51,12 +58,21 @@ async function planear(ctx: Contexto, i: Entrada) {
         : "Ningún día de ese rango es de turno según la serie del puesto.",
     );
   const repetida = await ctx.db.excepcionPauta.findFirst({
-    where: { puestoId: puesto.id, estado: "activa", fecha: { in: dias.map((d) => aFechaDb(d.fecha)) } },
+    where: {
+      puestoId: puesto.id,
+      estado: "activa",
+      fecha: { in: dias.map((d) => aFechaDb(d.fecha)) },
+    },
     select: { fecha: true },
   });
   if (repetida)
-    throw conflicto(`Ya hay una excepción activa el ${fechaIso(repetida.fecha)}: anúlala antes de registrar otra.`);
-  const nombres = await nombresDePersonas(ctx, dias.map((d) => d.personaId));
+    throw conflicto(
+      `Ya hay una excepción activa el ${fechaIso(repetida.fecha)}: anúlala antes de registrar otra.`,
+    );
+  const nombres = await nombresDePersonas(
+    ctx,
+    dias.map((d) => d.personaId),
+  );
   return { puesto, dias, avisarA: [...nombres.values()] };
 }
 
@@ -88,7 +104,11 @@ export const excepcionesCrear = defineCapability({
       // Cada titular afectado queda con su registro de ausencia (CAR-393), en el mismo instante que sus turnos.
       const ahora = new Date();
       const registros = await registrarDesdePauta(tx, {
-        tenantId: ctx.tenantId, tipo: input.tipo, motivo: input.motivo, usuarioId: ctx.usuario?.id ?? null, ahora,
+        tenantId: ctx.tenantId,
+        tipo: input.tipo,
+        motivo: input.motivo,
+        usuarioId: ctx.usuario?.id ?? null,
+        ahora,
         dias: plan.dias.map((d) => ({ fecha: aFechaDb(d.fecha), personaId: d.personaId })),
       });
       await sinDuplicado(

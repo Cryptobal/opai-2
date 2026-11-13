@@ -33,7 +33,7 @@ export const ausenciasListar = defineCapability({
   input: z.object({ personaId: uuidSchema, limite: z.number().int().min(1).max(100).default(30) }),
   output: z.object({ personaId: z.string(), grupos: z.array(grupoSchema) }),
   // El motivo es texto libre y puede ser de salud: la lectura queda auditada con la persona revelada.
-  auditarLectura: (s) => [s.personaId],
+  auditarLectura: (s) => [s.personaId, ...s.grupos.map((g) => g.ausenciaId)],
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { personaId, limite }) {
@@ -45,7 +45,7 @@ export const ausenciasListar = defineCapability({
     });
     const turnos = await ctx.db.excepcionPauta.findMany({
       where: { ausenciaId: { in: registros.map((r) => r.id) } },
-      select: { ausenciaId: true, puestoId: true, estado: true },
+      select: { ausenciaId: true, puestoId: true, estado: true, fecha: true },
     });
     const puestos = await ctx.db.puesto.findMany({
       where: { id: { in: [...new Set(turnos.map((t) => t.puestoId))] }, AND: [dondePuesto(ctx)] },
@@ -56,15 +56,21 @@ export const ausenciasListar = defineCapability({
     for (const r of registros) {
       if (grupos.length >= limite) break;
       // Un registro vigente cuenta sus turnos activos; uno anulado, los que tuvo.
-      const suyos = turnos.filter((t) => t.ausenciaId === r.id && (r.estado === "anulada" || t.estado === "activa"));
-      const visibles = suyos.flatMap((t) => instalacionDe.get(t.puestoId) ?? []);
+      const suyos = turnos.filter(
+        (t) => t.ausenciaId === r.id && (r.estado === "anulada" || t.estado === "activa"),
+      );
+      const enAlcance = suyos.filter((t) => instalacionDe.has(t.puestoId));
+      const visibles = enAlcance.map((t) => instalacionDe.get(t.puestoId)!);
       if (suyos.length > 0 && visibles.length === 0) continue;
+      // Con turnos fuera del alcance, el rango que se muestra es el de los turnos visibles (ADR-022).
+      const fechas =
+        enAlcance.length < suyos.length ? enAlcance.map((t) => fechaIso(t.fecha)).sort() : null;
       grupos.push({
         ausenciaId: r.id,
         tipo: tipoExcepcionSchema.parse(r.tipo),
         motivo: r.motivo,
-        desde: fechaIso(r.desde),
-        hasta: fechaIso(r.hasta),
+        desde: fechas?.[0] ?? fechaIso(r.desde),
+        hasta: fechas?.[fechas.length - 1] ?? fechaIso(r.hasta),
         dias: visibles.length,
         estado: r.estado === "anulada" ? "anulada" : "activa",
         registradaEn: r.createdAt.toISOString(),

@@ -5,12 +5,16 @@ import type { TenantTx } from "@opai/db";
  * en la pauta queda anulado, con quién y cuándo. Una anulación parcial (algunos días) deja el registro aprobado.
  */
 export async function anularRegistrosSinTurnos(
-  tx: Pick<TenantTx, "excepcionPauta" | "ausencia">,
+  tx: Pick<TenantTx, "excepcionPauta" | "ausencia" | "$queryRaw">,
+  tenantId: string,
   ausenciaIds: readonly (string | null)[],
   usuarioId: string | null,
 ): Promise<number> {
-  const ids = [...new Set(ausenciaIds.filter((x): x is string => x !== null))];
+  const ids = [...new Set(ausenciaIds.filter((x): x is string => x !== null))].sort();
   if (ids.length === 0) return 0;
+  // Bloquea los registros antes de contar: dos anulaciones simultáneas de puestos del mismo registro se ordenan y la
+  // segunda ve lo que confirmó la primera (READ COMMITTED), así ninguno queda aprobado sin turnos.
+  await tx.$queryRaw`SELECT id FROM core.ausencias WHERE id = ANY(${ids}::uuid[]) AND tenant_id = ${tenantId}::uuid ORDER BY id FOR UPDATE`;
   const conActivas = await tx.excepcionPauta.findMany({
     where: { ausenciaId: { in: ids }, estado: "activa" },
     select: { ausenciaId: true },
@@ -55,8 +59,17 @@ export async function registrarDesdePauta(
   for (const [personaId, { desde, hasta }] of rangos) {
     const a = await tx.ausencia.create({
       data: {
-        tenantId: r.tenantId, personaId, tipo: r.tipo, desde, hasta, motivo: r.motivo, estado: "aprobada",
-        registradaPor: r.usuarioId, aprobadaPor: r.usuarioId, aprobadaEn: r.ahora, createdAt: r.ahora,
+        tenantId: r.tenantId,
+        personaId,
+        tipo: r.tipo,
+        desde,
+        hasta,
+        motivo: r.motivo,
+        estado: "aprobada",
+        registradaPor: r.usuarioId,
+        aprobadaPor: r.usuarioId,
+        aprobadaEn: r.ahora,
+        createdAt: r.ahora,
       },
       select: { id: true },
     });

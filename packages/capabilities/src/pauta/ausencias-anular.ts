@@ -23,7 +23,9 @@ const anularInput = z
       ),
     ausenciaId: uuidSchema
       .optional()
-      .describe("Registro de ausencia (de `pauta.ausencias.listar`): anula solo los turnos de ese registro."),
+      .describe(
+        "Registro de ausencia (de `pauta.ausencias.listar`): anula solo los turnos de ese registro.",
+      ),
   })
   .and(rangoSchema);
 type Entrada = z.output<typeof anularInput>;
@@ -85,7 +87,12 @@ export const ausenciasAnular = defineCapability({
         where: { id: { in: filas.map((f) => f.id) }, estado: "activa" },
         data: { estado: "anulada", anuladaEn: new Date(), anuladaPor: ctx.usuario?.id ?? null },
       });
-      await anularRegistrosSinTurnos(tx, filas.map((f) => f.ausenciaId), ctx.usuario?.id ?? null);
+      await anularRegistrosSinTurnos(
+        tx,
+        ctx.tenantId,
+        filas.map((f) => f.ausenciaId),
+        ctx.usuario?.id ?? null,
+      );
       for (const p of puestos.filter((x) => filas.some((f) => f.puestoId === x.id))) {
         await anotar(tx, ctx, {
           instalacionId: p.instalacionId,
