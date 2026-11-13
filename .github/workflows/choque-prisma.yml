@@ -5,8 +5,12 @@ name: Choque de tablas
 # sobre el otro, deja un aviso con los PR y archivos en choque. Solo avisa: no bloquea el merge, no
 # comenta, no pone etiquetas y no usa secretos propios. Solo lee PR y archivos.
 on:
+  # Solo si el PR toca Prisma o migraciones (ahorro de Actions, 13-nov-2026).
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "**/prisma/**"
+      - "**/migrations/**"
 
 permissions:
   contents: read
@@ -18,8 +22,9 @@ concurrency:
 
 jobs:
   choque-prisma:
+    if: github.event.pull_request.draft != true
     name: choque de tablas (aviso)
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
       - name: Buscar otros PR abiertos que editan el mismo .prisma

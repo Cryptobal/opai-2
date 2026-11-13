@@ -29,7 +29,6 @@ export default function Solicitudes({ searchParams }: Props) {
         ]);
         return { p, lista, gestiona };
       }}
-      opciones={(d) => (d.gestiona ? { acciones: accionRegistrar } : {})}
     >
       {(d) => (
         <>

@@ -12,6 +12,7 @@ import {
 import {
   cambiosDe,
   faltantes,
+  hayCambios,
   valorDeCampo,
 } from "@/app/(erp)/personas/_componentes/valores-hoja-laboral";
 import { asegurarRegistro } from "../lib/registro";
@@ -125,7 +126,19 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
   });
 
   it("toda hoja de Laboral se carga al abrir su enlace (la carga diferida conoce su parámetro)", () => {
-    const diferidas = readFileSync(join(__dirname, "../app/(erp)/personas/_componentes/diferidas.ts"), "utf8");
-    for (const c of Object.values(SECCIONES_LABORAL)) expect(diferidas, c.param).toContain(`"${c.param}"`);
+    const diferidas = readFileSync(
+      join(__dirname, "../app/(erp)/personas/_componentes/diferidas.ts"),
+      "utf8",
+    );
+    for (const c of Object.values(SECCIONES_LABORAL))
+      expect(diferidas, c.param).toContain(`"${c.param}"`);
+  });
+
+  it("una hoja que envía todos los campos no se puede guardar sin cambios (CAR-277)", () => {
+    const c = cfg["pago-agregar"];
+    const inicial = { bancoCodigo: "", tipoCuenta: "", numeroCuenta: "", porDefecto: "no" };
+    expect(c.todos).toBe(true);
+    expect(hayCambios(c, inicial, { ...inicial })).toBe(false);
+    expect(hayCambios(c, inicial, { ...inicial, numeroCuenta: "123" })).toBe(true);
   });
 });
