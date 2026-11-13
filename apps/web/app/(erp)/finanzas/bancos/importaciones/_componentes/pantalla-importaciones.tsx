@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { formatearFechaHora } from "@opai/domain";
 import { Alerta, avisar, Badge, Button, Campo, Empty, Estado, Select, type EstadoPantalla } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -12,15 +13,6 @@ import type { CuentaBanco } from "../../_componentes/bancos-tipos";
 import { DialogDeshacerImportacion } from "./dialog-deshacer-importacion";
 import type { ImportacionCartola, VistaDeshacer } from "./tipos";
 
-/** «dd-mm-aaaa a las HH:mm» en hora de Chile, sin cargar el formateador de dominio en el navegador. */
-function cuando(iso: string): string {
-  const p = Object.fromEntries(
-    new Intl.DateTimeFormat("es-CL", { timeZone: "America/Santiago", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
-      .formatToParts(new Date(iso))
-      .map((x) => [x.type, x.value]),
-  );
-  return `${p["day"]}-${p["month"]}-${p["year"]} a las ${p["hour"]}:${p["minute"]}`;
-}
 
 const periodoDe = (i: ImportacionCartola) =>
   i.fechaDesde && i.fechaHasta ? `${fechaDdMmAaaa(i.fechaDesde)} al ${fechaDdMmAaaa(i.fechaHasta)}` : "Sin período";
@@ -105,7 +97,7 @@ export function PantallaImportaciones({
                     {i.conciliados > 0 ? ` (${i.conciliados} conciliados)` : ""}
                   </p>
                   <p className="t-caption text-fg-muted">
-                    Importada el {cuando(i.creadaEn)}
+                    Importada el {formatearFechaHora(i.creadaEn)}
                     {i.creadaPor ? ` por ${i.creadaPor}` : ""}
                     {i.viaAgente ? " (vía agente)" : ""}
                   </p>
