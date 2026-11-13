@@ -81,9 +81,16 @@ async function ventas(db: Lector, desde: string, periodoActual: string) {
 
 /**
  * Base de conversión para las cuotas entre `desde` y `hasta`. Solo consulta lo que piden las unidades presentes
- * (hasta 3 consultas de UF y 1 a 3 de ventas).
+ * (hasta 3 consultas de UF y 1 a 3 de ventas). Lo programado lo trae quien llama.
  */
-export async function baseMonto(db: Lector, unidades: ReadonlySet<string>, desde: string, hasta: string): Promise<BaseMonto> {
+export async function baseMonto(
+  db: Lector,
+  unidades: ReadonlySet<string>,
+  desde: string,
+  hasta: string,
+  /** Ventas aún no emitidas por período (CAR-374); sin ellas los meses futuros usan el último mes cerrado. */
+  programadas?: ReadonlyMap<string, number>,
+): Promise<BaseMonto> {
   const periodoActual = hoyChile().slice(0, 7);
   const [u, v] = await Promise.all([
     // La política del día de UF puede pedir hasta un mes antes de la primera cuota (fin del mes anterior) o hasta el
@@ -97,5 +104,6 @@ export async function baseMonto(db: Lector, unidades: ReadonlySet<string>, desde
     ventasNetas: (p) => v.porPeriodo.get(p) ?? null,
     ultimoPeriodoConVentas: v.ultimo,
     periodoActual,
+    ...(programadas ? { ventasProgramadas: (p: string) => programadas.get(p) ?? null } : {}),
   };
 }
