@@ -60,7 +60,8 @@ describe.skipIf(!urlPropietario)("flujo de caja: dos empresas en base real", () 
     fila = (await ok<{ id: string }>(t.a, "finanzas.filas.crear", { seccion: "egreso", etiqueta: "Proveedor 1", arrastre: true })).id;
     await ok(t.a, "finanzas.celdas.fijar", { filaId: fila, semana: futura, monto: 500 });
     const p = await ok<{ semanas: { semana: string; saldoFinal: number }[] }>(t.a, "finanzas.planilla.obtener", { desde, semanas: 6 });
-    expect(p.semanas.find((s) => s.semana === futura)?.saldoFinal).toBe(500);
+    // Sin saldo del banco la planilla parte en $0 (no hay saldo de partida, CAR-391): 0 − 500.
+    expect(p.semanas.find((s) => s.semana === futura)?.saldoFinal).toBe(-500);
   });
 
   it("dry_run no escribe nada", async () => {
