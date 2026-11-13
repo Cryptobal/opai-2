@@ -36,7 +36,9 @@ export function TablaScorecard({ scorecard, nombres }: Props) {
         <Badge tono={scorecard.sumaPesos === 100 ? "success" : "warning"}>
           Pesos: {scorecard.sumaPesos} %
         </Badge>
-        {scorecard.personaVeResultado ? "La persona ve su resultado." : "La persona no ve su resultado."}
+        {scorecard.personaVeResultado
+          ? "La persona ve su resultado."
+          : "La persona no ve su resultado."}
       </p>
     </div>
   );

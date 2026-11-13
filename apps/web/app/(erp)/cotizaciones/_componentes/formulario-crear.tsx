@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Alerta, avisar, Button, Campo, FormScreen, Input } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, FormScreen, Input, InputFecha } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -117,11 +117,10 @@ export function FormularioCrear({ inicial }: { inicial: NegocioOpcion | null }) 
                 htmlFor="cpq-valida"
                 ayuda="Si la dejas vacía, se usan 30 días desde hoy."
               >
-                <Input
+                <InputFecha
                   id="cpq-valida"
-                  type="date"
-                  value={validaHasta}
-                  onChange={(e) => setValidaHasta(e.target.value)}
+                  valor={validaHasta}
+                  onCambiar={setValidaHasta}
                   disabled={pendiente || Boolean(preview)}
                 />
               </Campo>
