@@ -50,6 +50,7 @@ import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";
+import { porAprobarList } from "./por-aprobar";
 import { capacidadesGrupos } from "./grupos";
 import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
 import { capacidadesJefatura } from "./jefatura";
@@ -148,6 +149,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesPermisos,
   ...capacidadesGrupos,
   ...capacidadesReglasAprobacion,
+  porAprobarList,
   ...capacidadesSlack,
   ...capacidadesIndicadoresGestion,
   ...capacidadesJefatura,

@@ -5,11 +5,14 @@ import type { Aviso } from "@/app/_components/campana";
 
 import { conPlazo } from "./con-plazo";
 
+/** Una decisión de «Por aprobar» (CAR-253): `href` es la pantalla donde se resuelve. */
+export type Decision = { id: string; resumen: string; href: string };
+
 /** Carga y acciones de la Bandeja; el servidor aplica destinatario, permisos y tenant. */
 export function useBandeja() {
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const [aprobaciones, setAprobaciones] = useState<number | null>(null);
-  const [decisiones, setDecisiones] = useState<{ id: string; resumen: string }[]>([]);
+  const [decisiones, setDecisiones] = useState<Decision[]>([]);
   const [error, setError] = useState(false);
   const [noLeidas, setNoLeidas] = useState(0);
   const [cargandoMas, setCargandoMas] = useState(false);
@@ -45,18 +48,12 @@ export function useBandeja() {
         setAprobaciones(total);
         // null significa sin permiso: no se solicita la lista para viewer/supervisor.
         if (total !== null && total > 0) {
-          const [a, cpq] = await Promise.all([
-            conPlazo(ejecutarCapacidad("erp", "core.aprobaciones.list", { estado: "pendiente" })),
-            conPlazo(ejecutarCapacidad("erp", "cpq.aprobaciones.list", { limite: 5 })),
-          ]);
-          const agente = a.ok ? (a.data as { id: string; resumen: string }[]) : [];
-          const cpqItems = cpq.ok
-            ? (cpq.data as { id: string; resumen: string }[]).map((x) => ({
-                id: x.id,
-                resumen: x.resumen,
-              }))
+          // CAR-253: bandeja única «Por aprobar»; cada decisión lleva a la pantalla donde se resuelve.
+          const pa = await conPlazo(ejecutarCapacidad("erp", "core.por_aprobar.list", { limite: 5 }));
+          const grupos = pa.ok
+            ? (pa.data as { grupos: { items: Decision[] }[] }).grupos
             : [];
-          setDecisiones([...agente, ...cpqItems].slice(0, 5));
+          setDecisiones(grupos.flatMap((g) => g.items).slice(0, 5));
         } else setDecisiones([]);
       }
     } catch {
