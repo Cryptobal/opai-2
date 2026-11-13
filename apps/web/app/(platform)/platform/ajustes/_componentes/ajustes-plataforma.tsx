@@ -6,7 +6,7 @@ import { Alerta, avisar, Button, Campo, Input, SeccionTarjeta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { type Cambio, cambiosPendientes, FUERA_DE_LIMITES } from "./cambios";
+import { aLote, type Cambio, cambiosPendientes, FUERA_DE_LIMITES } from "./cambios";
 import { ModelosIaCard } from "./modelos-ia";
 import { TablaPrecios } from "./tabla-precios";
 import { type Ajuste, aMicro, aUsd, esModelosIa, type ModelosIa, type Precio } from "./tipos";
@@ -17,8 +17,8 @@ type Props = { precios: Precio[]; ajustes: Ajuste[]; empresas: number | null };
 
 /**
  * Ajustes de plataforma (50): precios, modelos de IA por clase y límites; un solo «Guardar». Todo o
- * nada (CAR-323, §2.7): primero se validan todos los cambios en vista previa y se confirma cuántas
- * empresas afectan; si alguno falla, no se escribe ninguno.
+ * nada: la vista previa revisa todos los cambios y se confirma cuántas empresas afectan (CAR-323); al
+ * confirmar, `platform.ajustes.guardar_lote` los escribe en una sola transacción (CAR-329).
  */
 export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("platform");
@@ -42,19 +42,15 @@ export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
   );
   const numMalo = numericos.some((a) => !Number.isInteger(Number(nums[a.clave])));
 
-  // Ids literales (gate de paridad): un cambio es un precio o un ajuste de plataforma.
-  const correr = (c: Cambio, dryRun = false) =>
-    c.id === "platform.precios.set"
-      ? ejecutar("platform.precios.set", c.input, dryRun)
-      : ejecutar("platform.ajustes.set", c.input, dryRun);
+  const lote = (cambios: Cambio[], dryRun = false) =>
+    ejecutar("platform.ajustes.guardar_lote", aLote(cambios), dryRun);
 
   async function revisar() {
     const cambios = cambiosPendientes(precios, txtPrecios, modelos, modelosIni, numericos, nums);
     if (!cambios.length) return avisar.exito("Sin cambios");
     setRevisando(true);
     try {
-      for (const c of cambios) if ((await correr(c, true)) === null) return;
-      setPorConfirmar(cambios);
+      if ((await lote(cambios, true)) !== null) setPorConfirmar(cambios);
     } finally {
       setRevisando(false);
     }
@@ -62,8 +58,7 @@ export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
 
   async function guardar(cambios: Cambio[]) {
     setPorConfirmar(null);
-    for (const c of cambios) if ((await correr(c)) === null) return;
-    avisar.exito("Ajustes guardados");
+    if ((await lote(cambios)) !== null) avisar.exito("Ajustes guardados");
   }
 
   return (
