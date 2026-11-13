@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 /** Contador de novedades no leídas para el menú de usuario (ADR-045: carga post-montaje). */
 export function useConteoNovedades(

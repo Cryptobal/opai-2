@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { Alerta, Button } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 type Props = { plantillaId: string; entidadId: string; documentosHref: string; puedeGenerar: boolean };
 
