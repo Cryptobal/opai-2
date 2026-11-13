@@ -1,3 +1,5 @@
+import { conVecinosWeb4leads } from "./dedupe-vecinos";
+
 /** Huella de deduplicación de movimientos bancarios (paridad 1.0). */
 export function claveDedupe(input: {
   fecha: string;
@@ -60,14 +62,18 @@ export type FilaDedupePlanificada =
  */
 export function planificarDedupeCartola(
   filas: FilaDedupeEntrada[],
-  existentes: { claveDedupe: string; saldoDespues?: bigint | number | null }[],
+  existentes: { claveDedupe: string; saldoDespues?: bigint | number | null; origen?: string }[],
 ): FilaDedupePlanificada[] {
   const kPorBase = new Map<string, number>();
   for (const e of existentes) {
     const { base } = descomponerClaveDedupe(e.claveDedupe);
     kPorBase.set(base, (kPorBase.get(base) ?? 0) + 1);
   }
+  const planExacto = planExactoCartola(filas, kPorBase);
+  return conVecinosWeb4leads(planExacto, existentes);
+}
 
+function planExactoCartola(filas: FilaDedupeEntrada[], kPorBase: Map<string, number>): FilaDedupePlanificada[] {
   const porBase = new Map<string, FilaDedupeEntrada[]>();
   for (const f of filas) {
     const list = porBase.get(f.base) ?? [];
