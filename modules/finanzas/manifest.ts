@@ -1,11 +1,7 @@
 import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
 
 import { capacidades as capacidadesFlujo } from "./capacidades";
-import {
-  PERMISO_CONFIGURAR,
-  PERMISO_GESTIONAR,
-  PERMISO_VER,
-} from "./capacidades/permisos";
+import { PERMISO_CONFIGURAR, PERMISO_GESTIONAR, PERMISO_VER } from "./capacidades/permisos";
 import {
   PERMISO_BANCOS_AUTORIZAR,
   PERMISO_BANCOS_GESTIONAR,
@@ -111,6 +107,8 @@ export const manifest = defineModule({
     { id: "finanzas.compras.importadas", descripcion: "Se importó un lote de documentos recibidos." },
     { id: "finanzas.compras.centro_asignado", descripcion: "Se asignó un centro de costo a documentos del libro de compras." },
     { id: "finanzas.flujo.fila_creada", descripcion: "Se creó una fila del flujo de caja." },
+    { id: "finanzas.flujo.recurrente_creado", descripcion: "Se creó un gasto recurrente del flujo de caja." },
+    { id: "finanzas.flujo.recurrente_actualizado", descripcion: "Se cambió un gasto recurrente del flujo de caja." },
     { id: "finanzas.flujo.fila_actualizada", descripcion: "Se cambió una fila del flujo de caja." },
     { id: "finanzas.flujo.fila_archivada", descripcion: "Se archivó o restauró una fila del flujo de caja." },
     { id: "finanzas.flujo.celda_fijada", descripcion: "Se fijó la cifra de una celda del flujo." },
