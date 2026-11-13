@@ -70,4 +70,7 @@ Gate, presupuesto de JS (la isla no entra en las listas que no la usan) y captur
 - Rollback: revertir el PR.
 
 ## 16. Reporte de ejecución
-Pendiente.
+- **D4a:** la selección no va en `ListScreen`, que no importa nada de cliente. La pantalla la arma con `seleccionDeLista`, de `@opai/ds/seleccion`, y se la pasa en el prop `seleccion` (cabecera, celda y envoltura).
+  - **Por qué:** la primera versión importaba las casillas desde el patrón y sumaba hasta 6 KB a 27 rutas que no las usan.
+  - **Resultado:** con el punto de entrada aparte, el presupuesto queda sin cambios.
+- La selección en teléfono («Seleccionar» y barra abajo) queda para cuando la adopte la primera pantalla.
