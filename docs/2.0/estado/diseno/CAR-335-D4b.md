@@ -1,7 +1,7 @@
 # CAR-335 · D4b · Ver la ficha a pantalla completa (diseño nuevo)
 
 - **Sesión:** Sesión Hilo
-- **PR:** pendiente · rama `brief/car-335-d4b-pantalla-completa`
+- **PR:** #653 · rama `brief/car-335-d4b-pantalla-completa`
 - **Estado:** En PR
 - **Migración:** No
 - **Apilado sobre / espera:** apilado sobre #621 (CAR-336)
