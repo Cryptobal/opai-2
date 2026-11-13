@@ -1,4 +1,5 @@
 export * from "./novedades/catalogo";
+export * from "./inicio/indicadores";
 export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./bancos";
@@ -86,3 +87,4 @@ export * from "./contexto-comercial";
 export * from "./sugerencia-seccion";
 export * from "./qa-aislado";
 export * from "./aprobaciones/resumen-humano";
+export * from "./aprobaciones/reglas";

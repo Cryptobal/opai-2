@@ -79,7 +79,13 @@ export default function Conectar() {
                   <div className="flex flex-col gap-3">
                     <p className="text-base text-fg-muted">{s.paso}</p>
                     <div className="relative rounded-md border border-border bg-fill p-3">
-                      <pre className="t-mono overflow-x-auto pr-24 text-sm text-fg">{s.codigo}</pre>
+                      <pre
+                        tabIndex={0}
+                        aria-label={`Código para ${s.etiqueta}`}
+                        className="t-mono overflow-x-auto pr-24 text-sm text-fg outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      >
+                        {s.codigo}
+                      </pre>
                       <span className="absolute top-2 right-2">
                         <BotonCopiar texto={s.codigo} />
                       </span>

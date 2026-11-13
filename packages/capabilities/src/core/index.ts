@@ -45,11 +45,13 @@ import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
 import { consumidorNegocioGanado } from "../comercial/consumidor-ganado";
 import { consumidorCpqGanado } from "../comercial/consumidor-ganado-cpq";
+import { consumidorPropuestaAlAceptar } from "../portal-cliente/propuesta-al-aceptar";
 import { capacidadesCorreos } from "./correos";
 import { capacidadesImportar } from "./importar";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
+import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";
 import { capacidadesGrupos } from "./grupos";
 import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
 import { capacidadesJefatura } from "./jefatura";
@@ -147,6 +149,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesGrupos,
+  ...capacidadesReglasAprobacion,
   ...capacidadesSlack,
   ...capacidadesIndicadoresGestion,
   ...capacidadesJefatura,
@@ -174,6 +177,7 @@ export const consumidoresDelNucleo = [
   ...consumidoresPausaSeguimiento,
   consumidorNegocioGanado,
   consumidorCpqGanado,
+  consumidorPropuestaAlAceptar,
   consumidorTurnosEsperados,
   consumidorRevocacionBiometria,
   ...consumidoresSlack,

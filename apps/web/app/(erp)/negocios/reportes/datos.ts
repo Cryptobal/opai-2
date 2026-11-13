@@ -31,6 +31,7 @@ export type Tablero = {
   canales: { canal: string; solicitudes: number; negocios: number; ganados: number; conversionPct: number }[] | null;
   primeraRespuesta: { objetivoHoras: number; atendidas: number; aTiempo: number; tarde: number; pendientesDentro: number; pendientesFuera: number; cumplimientoPct: number | null } | null;
   pronostico: { totalPonderadoClp: number; meses: { mes: string; ponderadoClp: number }[]; fueraDeRango: { cantidad: number; ponderadoClp: number } };
+  parcial: boolean;
   responsables: { responsableId: string | null; nombre: string; abiertos: number; enCursoMensualClp: number; ponderadoClp: number; ganados: number; perdidos: number; conversionPct: number | null }[];
 };
 
