@@ -222,6 +222,8 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   autorizarRepeticion?: (ctx: Contexto, input: z.output<I>, salida: unknown) => Promise<void>;
   /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */
   soloPersonas?: boolean;
+  /** Registra lo que llega de fuera (webhook, correo): en solo lectura registra sin eventos (ADR-071, 7.5). */
+  entrante?: boolean;
   /**
    * Aprobación humana condicionada al input (firma.md R19): cuando se declara, reemplaza al efecto
    * como disparador de la aprobación de un agente. Si devuelve `true`, esta llamada queda en la cola

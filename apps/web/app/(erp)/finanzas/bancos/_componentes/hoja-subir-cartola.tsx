@@ -77,7 +77,7 @@ export function HojaSubirCartola({
             Cancelar
           </Button>
           {vista ? (
-            <Button disabled={pendiente || vista.aplicados === 0} onClick={() => void confirmar()}>
+            <Button disabled={pendiente || vista.aplicados === 0 || vista.cuadratura?.cuadra === false} onClick={() => void confirmar()}>
               Importar
             </Button>
           ) : (
@@ -140,6 +140,7 @@ export function HojaSubirCartola({
             duplicados={vista.duplicados}
             rechazados={vista.rechazados}
             filas={vista.filas}
+            cuadratura={vista.cuadratura}
           />
         ) : null}
       </div>
