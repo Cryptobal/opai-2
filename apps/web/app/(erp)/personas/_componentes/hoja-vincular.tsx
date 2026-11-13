@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Combobox, Dialog, type OpcionCombobox } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 

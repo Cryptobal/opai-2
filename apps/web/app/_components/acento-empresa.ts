@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { acentoDeMarca, type Modo, type TonoAcento } from "@opai/domain/marca-acento";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 type Tonos = Record<Modo, TonoAcento>;
 

@@ -92,3 +92,33 @@ test.describe("muestra del marco nuevo", () => {
     expect(errores).toEqual([]);
   });
 });
+
+test.describe("lista con selección (CAR-335 D4a)", () => {
+  test.skip(EN_PREVIEW, "La muestra /ds/nuevo/lista solo existe fuera de producción");
+
+  test("se eligen filas, aparece la barra con la acción y se quita la selección", async ({
+    page,
+  }, info) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 768, "La selección va en la tabla desde md");
+    const errores = erroresDeConsola(page);
+    await page.goto("/ds/nuevo/lista");
+    const primera = page.getByRole("checkbox", { name: "Seleccionar [CUENTA A]" });
+    await hidratado(primera);
+    await primera.click();
+    await page.getByRole("checkbox", { name: "Seleccionar [CUENTA B]" }).click();
+    await expect(
+      page.getByRole("region", { name: "Selección" }).getByText("2 filas seleccionadas"),
+    ).toBeVisible();
+    await expect(page.getByTestId("accion-muestra")).toHaveText("Archivar 2");
+    await capturar(page, info, "nuevo-lista-seleccion");
+    await page.getByRole("checkbox", { name: "Seleccionar todas las filas" }).click();
+    await expect(
+      page.getByRole("region", { name: "Selección" }).getByText("3 filas seleccionadas"),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Quitar selección" }).click();
+    await expect(page.getByRole("region", { name: "Selección" })).toHaveCount(0);
+    // El foco vuelve a la casilla de la cabecera y el lector de pantalla oyó el conteo.
+    await expect(page.getByRole("checkbox", { name: "Seleccionar todas las filas" })).toBeFocused();
+    expect(errores).toEqual([]);
+  });
+});
