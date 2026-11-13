@@ -10,6 +10,7 @@ import { obtenerCapacidad } from "../../registry";
 import type { Contexto } from "../../types";
 import { puedeResolverSolicitud } from "../aprobaciones-reglas/comun";
 import { pendiente } from "./aprobaciones-pendiente";
+import { ejecutarSiguientes } from "./aprobaciones-siguientes";
 
 /**
  * La regla se vuelve a evaluar al aprobar (CAR-252): si el monto o las reglas cambiaron desde que se
@@ -38,7 +39,14 @@ export const aprobacionesAprobar = defineCapability({
   // una regla, sus aprobadores; lo verifica el handler (`puedeResolverSolicitud`).
   permiso: null,
   input: z.object({ id: uuidSchema }),
-  output: z.object({ estado: z.string(), resultado: z.unknown() }),
+  output: z.object({
+    estado: z.string(),
+    resultado: z.unknown(),
+    // CAR-253: pasos encadenados tras aprobar (p. ej. el envío al SII) y si cada uno resultó.
+    siguientes: z
+      .array(z.object({ capability: z.string(), ok: z.boolean(), mensaje: z.string().nullable() }))
+      .optional(),
+  }),
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
@@ -59,10 +67,12 @@ export const aprobacionesAprobar = defineCapability({
       ...(a.idempotencyKey ? { idempotencyKey: a.idempotencyKey } : {}),
       auditoriaExtra: { aprobacionId: a.id, apiKeyId: a.apiKeyId },
     });
+    const siguientes = await ejecutarSiguientes(ctx, a, resultado);
+    const guardado = siguientes.length ? { ...resultado, siguientes } : resultado;
     await ctx.transaccion(async (tx) => {
       await tx.aprobacion.update({
         where: { id: a.id },
-        data: { resultado: JSON.parse(JSON.stringify(resultado)) },
+        data: { resultado: JSON.parse(JSON.stringify(guardado)) },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "core.aprobacion.resuelta",
@@ -71,7 +81,7 @@ export const aprobacionesAprobar = defineCapability({
         payload: { estado: "aprobada", ok: resultado.ok },
       });
     });
-    return { estado: "aprobada", resultado };
+    return { estado: "aprobada", resultado, ...(siguientes.length ? { siguientes } : {}) };
   },
 });
 

@@ -1,6 +1,7 @@
 import { defineModule } from "@opai/capabilities";
 
 import { ajustesRendiciones, capacidades } from "./capabilities";
+import { fuentesAprobacionRendiciones } from "./fuente-aprobaciones";
 
 /**
  * Manifest del módulo Rendiciones (CAR-175, R1; ADR-003, ADR-048). Se vende solo, sin depender de
@@ -44,4 +45,5 @@ export const manifest = defineModule({
     { id: "rendiciones.lote.anulado", descripcion: "Un lote de pago fue anulado." },
   ],
   capacidades,
+  aprobaciones: fuentesAprobacionRendiciones,
 });
