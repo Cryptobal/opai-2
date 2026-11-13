@@ -16,6 +16,10 @@ export const cuentaSchema = z.object({
   saldoHoy: z.number().int().nullable().optional(),
   /** Fecha del saldo conocido desde el que se lleva `saldoHoy`. */
   saldoDesde: z.string().nullable().optional(),
+  /** Origen del saldo conocido: banco en línea, último movimiento con saldo o cierre de cartola (CAR-341). */
+  saldoFuente: z.enum(["banco", "movimiento", "cartola"]).nullable().optional(),
+  /** Movimientos posteriores al saldo conocido sumados para llegar a hoy. */
+  saldoMovimientosDespues: z.number().int().nullable().optional(),
 });
 
 export const movimientoSchema = z.object({
