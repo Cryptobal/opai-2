@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { actividadHilo } from "@/app/_components/hilo/actividad-hilo";
 import {
-  actividadHilo,
   agendaHilo,
   estadoDeFallo,
   indiceHilo,

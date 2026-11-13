@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, Button, Empty, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { EncabezadoNovedades, type FiltroNovedades } from "./encabezado-novedades";
 import { TarjetaNovedad, type ItemNovedad } from "./tarjeta-novedad";

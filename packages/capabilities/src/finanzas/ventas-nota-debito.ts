@@ -11,6 +11,7 @@ import { cargarNcAnulable, leerNdPreparada, prepararNotaDebito } from "./ventas-
 import { claveXmlDte, descartarXmlPreparado } from "./ventas-xml";
 import { adaptadorSiiDe } from "./adaptador-sii";
 import { ventaSchema } from "./vistas-venta";
+import { enviarAlSiiTrasAprobar, montoDocumentos } from "./ventas-aprobacion-texto";
 
 export const ventasEmitirNotaDebito = defineCapability({
   id: "finanzas.ventas.emitir_nota_debito",
@@ -25,6 +26,11 @@ export const ventasEmitirNotaDebito = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
+  aprobable: {
+    accion: "emitir_dte",
+    monto: (ctx, i) => montoDocumentos(ctx, [i.notaCreditoId]),
+    siguientes: enviarAlSiiTrasAprobar,
+  },
   // La firma (llamada remota) va antes de la transacción de la escritura.
   preparar: (ctx, input) => prepararNotaDebito(ctx, input),
   async handler(ctx, input, { dryRun, preparado }) {

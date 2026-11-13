@@ -1,3 +1,4 @@
+import { type FuenteAprobaciones, limpiarFuentesAprobaciones, registrarFuentesAprobaciones } from "./core/aprobaciones-fuentes";
 import { type Buscador, limpiarBuscadores, registrarBuscadores } from "./core/maestros/buscadores";
 import { esAreaNav, type DatoPersonalDeclarado } from "@opai/domain";
 import type { z } from "zod";
@@ -65,6 +66,8 @@ export type ModuleManifest = {
   hechos?: readonly HechoGestion[];
   /** Lo que aporta a la búsqueda global ⌘K / `core.buscar` (CAR-301). El núcleo lo ejecuta según el permiso. */
   buscadores?: readonly Buscador[];
+  /** Lo que aporta a la bandeja única «Por aprobar» (CAR-253). Conserva su flujo; el núcleo solo lo junta. */
+  aprobaciones?: readonly FuenteAprobaciones[];
 };
 
 /** Declara un módulo validando que ids, permisos y capacidades le pertenezcan. */
@@ -163,6 +166,7 @@ export function obtenerModulo(id: string): ModuleManifest | undefined {
 export function limpiarModulos(): void {
   manifests.clear();
   limpiarBuscadores();
+  limpiarFuentesAprobaciones();
 }
 
 /** Registra módulos verificando dependencias y registrando sus capacidades. */
@@ -176,6 +180,7 @@ export function registrarModulos(modulos: readonly ModuleManifest[]): void {
     }
     registrarCapacidades(modulo.capacidades);
     registrarBuscadores(modulo.buscadores ?? []);
+    registrarFuentesAprobaciones(modulo.aprobaciones ?? []);
     manifests.set(modulo.id, modulo);
   }
 }

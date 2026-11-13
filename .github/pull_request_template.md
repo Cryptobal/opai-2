@@ -1,4 +1,4 @@
-<!-- Contrato: AGENTS.md y OPERACION-agentes.md A2 (ADR-077). Integra la sesión de Claude Code con squash cuando los cuatro checks obligatorios están en verde sobre el head, no hay veto, migración aplicada por el bot si corresponde, revisión final de la sesión (SHA + sin bloqueos o bloqueos concretos) y OK visual de Carlos si hay cambio visual (A2.10). El bot «OPAI 2.0» no integra. Revisor Grok Bot solo bajo demanda de Carlos o riesgo grave.
+<!-- Contrato: AGENTS.md y OPERACION-agentes.md A2 (ADR-077). Integra la sesión de Claude Code con squash cuando los checks obligatorios (`typecheck · lint · test · test:db` y `secretos`) están en verde sobre el head, no hay veto, migración aplicada por el bot si corresponde, revisión final de la sesión (SHA + sin bloqueos o bloqueos concretos) y, si hay cambio visual, `preview-e2e` en verde (etiqueta `e2e`) con las capturas revisadas por la sesión (A2.10). El bot «OPAI 2.0» no integra. Revisor Grok Bot solo bajo demanda de Carlos o riesgo grave.
 
 **Veto y migración pendiente (ADR-043 v3, ajustado por ADR-054 y ADR-060; la autoría humana rige para el veto).**
 1. Carlos veta un PR con un comentario cuya primera línea es exactamente `VETO`, o con la etiqueta `veto`. Cada forma se levanta por su lado: la etiqueta, quitándola; el comentario, con un comentario posterior cuya primera línea es exactamente `VETO LEVANTADO`. Si hay ambos, hay que levantar los dos.
@@ -13,6 +13,10 @@
 ## Qué cambia
 
 <!-- Brief o encargo (enlace), qué se hizo y por qué. Diferencias con el brief y su motivo. -->
+
+**Referente seguido y en qué se aparta:**
+
+<!-- Obligatorio si el PR toca arquitectura, permisos, modelo de datos o UX (ADR-106). Nombra la capa y el referente de `docs/2.0/REFERENTES-saas.md`, el patrón que se siguió y, si se aparta, por qué (ley chilena, regla de Carlos, agent-first o costo). Si no toca nada de eso: «no aplica». -->
 
 ## Resumen ejecutivo para Carlos
 
@@ -29,12 +33,14 @@
 - [ ] `typecheck`
 - [ ] `lint`
 - [ ] `test`
-- [ ] `test:db`
-- [ ] `build · presupuesto de JS`
+- [ ] `test:db` (en CI solo si toca Prisma o migraciones; en local si toca base, capacidades, auth o módulos)
+- [ ] `build · presupuesto de JS` (en local si toca pantallas; en CI al integrar)
+- [ ] `secretos`
 
 ## Definición de terminado
 
 - [ ] Cumple el brief o el encargo; las diferencias están reportadas arriba.
+- [ ] Si toca arquitectura, permisos, modelo de datos o UX: la línea «Referente seguido y en qué se aparta» está completa (ADR-106, `docs/2.0/REFERENTES-saas.md`).
 - [ ] `secretos` en verde y todos los checks de arriba en verde en el último commit; si sube un tope de JS, la justificación está en este PR (manda el check de presupuesto; ADR-043 v3).
 - [ ] Gate local corrido antes de cada commit (`pnpm typecheck && pnpm lint && pnpm test`) y `pnpm test:db` si toca base o RLS.
 - [ ] Multi-tenant: toda tabla nueva con `tenant_id` tiene RLS y la política `tenant_isolation`; todo acceso pasa por `forTenant` o `enTransaccion`; no hay `$queryRaw` fuera de `enTransaccion`; `dbAdmin` solo en migraciones y seeds.

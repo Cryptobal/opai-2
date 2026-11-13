@@ -25,7 +25,9 @@ export function Jefatura({ cargoId, cargos, editable }: Props) {
         <Pares
           items={[
             { etiqueta: "Reporta a", valor: jefatura?.nombre ?? "Nadie (lo ve gerencia)" },
-            ...(jefatura ? [{ etiqueta: "Cada jefe ve", valor: ETIQUETA_VE[cargo.jefaturaVe] }] : []),
+            ...(jefatura
+              ? [{ etiqueta: "Cada jefe ve", valor: ETIQUETA_VE[cargo.jefaturaVe] }]
+              : []),
           ]}
         />
         {editable ? (

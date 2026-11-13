@@ -7,6 +7,7 @@ export {
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
 export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
+export { type FuenteAprobaciones, type ItemPorAprobar } from "./core/aprobaciones-fuentes";
 export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
 export { hechosComercial } from "./comercial/hechos-gestion";
 export { defineHecho, type HechoGestion } from "./hechos-gestion";
@@ -23,7 +24,7 @@ export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
 export { registrarPropuestaEnviada, type ResultadoPropuesta } from "./portal-cliente/propuesta-vigente";
 export { propuestaAlAceptar } from "./portal-cliente/propuesta-al-aceptar";
-export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
+export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas, ventasProgramadasPorPeriodo } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
 export { pagosImpuestosEsperados, type PagoImpuestoEsperado } from "./finanzas/impuestos-esperados-datos";

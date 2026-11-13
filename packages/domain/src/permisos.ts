@@ -1,9 +1,11 @@
 // Roles y permisos (ADR-016). Permisos con formato `<modulo>:<accion>`; los roles se expresan con
-// patrones con comodín (`*`) y una lista de denegaciones que siempre gana. Lógica pura.
+// patrones (owner, admin y supervisor con comodín `*` y denegaciones que siempre ganan; gerente y
+// lector con lista explícita, CAR-350). Lógica pura.
 
 export { ROLES, ROLES_PLATAFORMA, type Rol, type RolPlataforma } from "./permisos-roles";
 export { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "./permisos-catalogo";
 export { PATRONES_POR_ROL } from "./permisos-patrones";
+export { CLASES_BASE, PERMISOS_GERENTE, PERMISOS_LECTOR, type ClaseBase } from "./permisos-base";
 
 import { PATRONES_POR_ROL } from "./permisos-patrones";
 import { ROLES, ROLES_PLATAFORMA, type Rol, type RolPlataforma } from "./permisos-roles";
