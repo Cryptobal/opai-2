@@ -84,6 +84,10 @@ test.describe("@preview diseño nuevo con sesión", () => {
         const fijar = page.getByRole("button", { name: "Dejar el menú fijo" });
         await expect(fijar).toBeVisible();
         await captura(page, "nuevo-menu-oculto", info);
+        // Plegado (CAR-377): el riel muestra las áreas, no cada submódulo.
+        const riel = page.locator('nav[data-riel-nuevo]');
+        await expect(riel.getByRole("button", { name: "Comercial" })).toBeVisible();
+        await expect(riel.getByRole("link", { name: "Negocios" })).toHaveCount(0);
         // Al recargar, el servidor ya manda el menú plegado: sin parpadeo del menú abierto (D2b).
         const recarga = await page.goto("/");
         expect(await recarga?.text()).toContain('data-menu="plegado"');
