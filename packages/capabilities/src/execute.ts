@@ -1,7 +1,7 @@
 import { ocultarSensibles } from "./idempotencia-sensibles";
 import { auditarRechazoSensible } from "./execute-rechazo";
 import { controlAgente } from "./agentes/control";
-import { denegar, falla } from "./autorizacion";
+import { contextoEntrante, denegar, falla } from "./autorizacion";
 import { conAuditoriaAlFinal } from "./execute-auditoria-final";
 import { ejecutarLecturaAuditada } from "./execute-lectura";
 import { resultadoDeError } from "./execute-log";
@@ -133,13 +133,14 @@ async function correr(
  * de lectura queda en `audit_events`; toda ejecución queda en `usage_events`.
  */
 export async function executeCapability(
-  ctx: Contexto,
+  ctxEntrada: Contexto,
   id: string,
   input: unknown,
   opciones: OpcionesEjecucion = {},
 ): Promise<Resultado> {
   const c = obtenerCapacidad(id);
   if (!c) return falla("NOT_FOUND", `Capacidad "${id}" no existe.`);
+  const ctx = contextoEntrante(ctxEntrada, c);
 
   const inicio = Date.now();
   let r: Awaited<ReturnType<typeof correr>>;

@@ -533,6 +533,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.procesos_persona.listar` | `core_procesos_persona_listar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.puestos.list` | `core_puestos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.create` | `core_vinculos_create` | existe |
@@ -1085,6 +1086,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.asignar_jefe`
 - `core.personas.list_a_cargo`
 - `core.ping`
+- `core.procesos_persona.paso_actualizar`
 - `core.puestos.get`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`
@@ -1129,6 +1131,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
+- `pauta.informes.instalaciones`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`

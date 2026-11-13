@@ -33,6 +33,8 @@ export const bancosRecibirWeb4leads = defineCapability({
   // Sin permiso de usuario: la llama el receptor público como sistema y la autoridad es la firma HMAC, no un rol.
   permiso: null,
   interna: true,
+  // Con Finanzas en solo lectura los movimientos se registran igual, sin avisos ni eventos (ADR-071, 7.5).
+  entrante: true,
   // El cuerpo trae movimientos y glosas bancarias y la firma es una credencial: nunca a la auditoría inmutable.
   sensibles: ["cuerpo", "firma"],
   input: z.object({
