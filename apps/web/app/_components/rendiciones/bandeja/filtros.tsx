@@ -20,6 +20,8 @@ export function FiltrosBandejaForm({
   const ir = (n: FiltrosBandeja) => router.push(hrefBandeja(n));
   const cambiar = (parcial: Partial<FiltrosBandeja>) => {
     const n = { ...f, ...parcial };
+    // InputFecha avisa "" mientras la fecha está incompleta: no se navega hasta que cambie de verdad.
+    if ((Object.keys(parcial) as (keyof FiltrosBandeja)[]).every((k) => (n[k] || "") === (f[k] || ""))) return;
     for (const k of ["solicitanteId", "desde", "hasta"] as const) if (!n[k]) delete n[k];
     setF(n);
     ir(n);
@@ -33,7 +35,7 @@ export function FiltrosBandejaForm({
         opciones={[{ valor: "", etiqueta: "Todas las personas" }, ...personas.map((p) => ({ valor: p.id, etiqueta: p.nombre }))]}
       />
       <InputFecha aria-label="Enviada desde" valor={f.desde ?? ""} onCambiar={(v) => cambiar({ desde: v })} />
-      <InputFecha aria-label="Enviada hasta" valor={f.hasta ?? ""} onCambiar={(v) => cambiar({ hasta: v })} />
+      <InputFecha aria-label="Enviada hasta" valor={f.hasta ?? ""} onCambiar={(v) => cambiar({ hasta: v })} invalido={Boolean(f.desde && f.hasta && f.hasta < f.desde)} />
       <Button variant="secondary" onClick={() => { const n = { estado: f.estado }; setF(n); ir(n); }}>
         Limpiar
       </Button>
