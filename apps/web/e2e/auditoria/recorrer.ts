@@ -16,6 +16,9 @@ import { type Ruta, slug } from "./rutas";
 export const CARPETA = EN_PREVIEW
   ? "test-results/capturas/auditoria"
   : "e2e/__screenshots__/auditoria";
+export const CARPETA_REVISION = EN_PREVIEW
+  ? "test-results/capturas/revision"
+  : "e2e/__screenshots__/revision";
 
 export type Fila = Ruta & {
   ancho: string;
