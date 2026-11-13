@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { avisar, Button } from "@opai/ds";
 
-import { DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fecha } from "@/lib/fechas";
 
 import { etiquetaTipo, type GrupoAusencia } from "./tipos";
+
+const DialogoConfirmar = lazy(() =>
+  import("@/app/_components/maestros/dialogo-confirmar").then((m) => ({
+    default: m.DialogoConfirmar,
+  })),
+);
 
 /** Anula un registro de la persona: sus turnos vuelven a la serie; no toca a otras personas. */
 export function AnularAusencia({ personaId, g }: { personaId: string; g: GrupoAusencia }) {
@@ -32,18 +37,20 @@ export function AnularAusencia({ personaId, g }: { personaId: string; g: GrupoAu
         Anular
       </Button>
       {abierto ? (
-        <DialogoConfirmar
-          confirmacion={{
-            titulo: `Anular ${etiquetaTipo(g.tipo).toLowerCase()}`,
-            descripcion: `Del ${fecha(g.desde)} al ${fecha(g.hasta)}: los turnos vuelven a su serie en la pauta. Queda en el historial.`,
-            boton: "Anular",
-            peligro: true,
-          }}
-          pendiente={pendiente}
-          error={error}
-          onCerrar={() => setAbierto(false)}
-          onConfirmar={anular}
-        />
+        <Suspense fallback={null}>
+          <DialogoConfirmar
+            confirmacion={{
+              titulo: `Anular ${etiquetaTipo(g.tipo).toLowerCase()}`,
+              descripcion: `Del ${fecha(g.desde)} al ${fecha(g.hasta)}: los turnos vuelven a su serie en la pauta. Queda en el historial.`,
+              boton: "Anular",
+              peligro: true,
+            }}
+            pendiente={pendiente}
+            error={error}
+            onCerrar={() => setAbierto(false)}
+            onConfirmar={anular}
+          />
+        </Suspense>
       ) : null}
     </>
   );

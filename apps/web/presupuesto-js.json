@@ -23,6 +23,7 @@
     "/(erp)/personas/vencimientos": 175,
     "/(erp)/personas/[id]": 171,
     "/(erp)/personas/[id]/laboral": 172,
+    "/(erp)/personas/[id]/ausencias": 172,
     "/(erp)/personas/[id]/documentos": 171,
     "/(erp)/documentos/plantillas/[id]": 174,
     "/(erp)/cargos/[id]": 168,

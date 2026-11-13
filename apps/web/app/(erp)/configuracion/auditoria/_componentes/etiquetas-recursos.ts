@@ -47,4 +47,6 @@ export const RECURSOS: Record<string, string> = {
   indicadores_gestion: "Indicadores de gestión", scorecards: "Scorecards de desempeño", resultados: "Resultados de desempeño", hechos: "Hechos medibles", propios: "Indicadores propios",
   // Hilo del marco «Hilo»: actividad y agenda (CAR-331).
   hilo: "Hilo",
+  // Permisos y licencias de una persona en la pauta (CAR-373).
+  ausencias: "Permisos y licencias",
 };

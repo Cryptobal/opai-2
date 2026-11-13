@@ -7,7 +7,7 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { requerirIdentidad } from "@/lib/servidor";
 
 import { FichaAusencias } from "../../_componentes/ausencias/ficha-ausencias";
-import { HojaRegistrarAusencia } from "../../_componentes/ausencias/hoja-registrar-ausencia";
+import { HojaRegistrarDiferida } from "../../_componentes/ausencias/hoja-diferida";
 import { conHoja } from "../../_componentes/lista-personas";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 
@@ -45,7 +45,7 @@ export default function AusenciasPersona(props: Props) {
               </p>
             )}
             {puedeEditar ? (
-              <HojaRegistrarAusencia personaId={p.id} nombre={p.nombreCompleto} hoy={hoyIso()} />
+              <HojaRegistrarDiferida personaId={p.id} nombre={p.nombreCompleto} hoy={hoyIso()} />
             ) : null}
           </div>
         );
