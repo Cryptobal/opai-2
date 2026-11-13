@@ -23,6 +23,8 @@ export type FilaScorecard = {
 export type ResultadoCargo = {
   cargoId: string;
   periodo: string;
+  /** Mes en curso (aaaa-mm) en la zona de la empresa: el selector no ofrece meses futuros. */
+  mesEnCurso: string;
   vigenteDesde: string | null;
   personas: {
     personaId: string;
@@ -40,6 +42,7 @@ export type ResultadoPersona = {
   apellidos: string;
   cargoId: string | null;
   periodo: string;
+  mesEnCurso: string;
   vigenteDesde: string | null;
   puntaje: number | null;
   cobertura: number;
@@ -70,11 +73,17 @@ export const cargarScorecard = (cargoId: string) =>
     definicionesPendiente: DefinicionIndicador[];
   }>("erp", "desempeno.scorecards.get", { cargoId });
 
-export const cargarResultadoCargo = (cargoId: string) =>
-  ejecutarComoUsuario<ResultadoCargo>("erp", "desempeno.resultados.ver_cargo", { cargoId });
+export const cargarResultadoCargo = (cargoId: string, periodo?: string | null) =>
+  ejecutarComoUsuario<ResultadoCargo>("erp", "desempeno.resultados.ver_cargo", {
+    cargoId,
+    ...(periodo ? { periodo } : {}),
+  });
 
-export const cargarResultadoPersona = (personaId: string) =>
-  ejecutarComoUsuario<ResultadoPersona>("erp", "desempeno.resultados.ver_persona", { personaId });
+export const cargarResultadoPersona = (personaId: string, periodo?: string | null) =>
+  ejecutarComoUsuario<ResultadoPersona>("erp", "desempeno.resultados.ver_persona", {
+    personaId,
+    ...(periodo ? { periodo } : {}),
+  });
 
 export const cargarCargos = () =>
   ejecutarComoUsuario<CargoJefatura[]>("erp", "core.cargos.list", {});
@@ -128,7 +137,7 @@ export type MesCerrado = {
 };
 
 export const cargarCierres = () =>
-  ejecutarComoUsuario<{ cerrados: MesCerrado[]; porCerrar: string | null }>(
+  ejecutarComoUsuario<{ cerrados: MesCerrado[]; porCerrar: string | null; abiertos: string[] }>(
     "erp",
     "desempeno.periodos.list",
     {},

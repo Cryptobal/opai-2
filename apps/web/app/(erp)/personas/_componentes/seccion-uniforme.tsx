@@ -24,6 +24,11 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
     u?.tallaPantalon,
     u?.tallaChaqueta,
     u?.tallaZapato,
+    u?.tallaPolera,
+    u?.tallaGeologo,
+    u?.tallaPolar,
+    u?.estaturaCm,
+    u?.pesoKg,
     u?.notas,
   );
   // CAR-124: las entregas ya estaban en la capacidad y no se mostraban (export «Secciones», tarjeta «Entregadas»).
@@ -47,7 +52,12 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
           { etiqueta: "Camisa", valor: u?.tallaCamisa },
           { etiqueta: "Pantalón", valor: u?.tallaPantalon },
           { etiqueta: "Chaqueta", valor: u?.tallaChaqueta },
+          { etiqueta: "Polera", valor: u?.tallaPolera },
+          { etiqueta: "Geólogo", valor: u?.tallaGeologo },
+          { etiqueta: "Polar", valor: u?.tallaPolar },
           { etiqueta: "Calzado", valor: u?.tallaZapato },
+          { etiqueta: "Estatura", valor: u?.estaturaCm ? `${u.estaturaCm} cm` : null },
+          { etiqueta: "Peso", valor: u?.pesoKg ? `${u.pesoKg} kg` : null },
           { etiqueta: "Notas", valor: u?.notas, ancho: true },
         ]}
       />
@@ -72,6 +82,11 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
             tallaPantalon: u?.tallaPantalon,
             tallaChaqueta: u?.tallaChaqueta,
             tallaZapato: u?.tallaZapato,
+            tallaPolera: u?.tallaPolera,
+            tallaGeologo: u?.tallaGeologo,
+            tallaPolar: u?.tallaPolar,
+            estaturaCm: u?.estaturaCm?.toString(),
+            pesoKg: u?.pesoKg?.toString(),
             notas: u?.notas,
           }}
         />

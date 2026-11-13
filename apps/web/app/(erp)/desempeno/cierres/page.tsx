@@ -14,7 +14,12 @@ export const metadata = { title: "Meses cerrados" };
 
 const personas = (n: number) => (n === 1 ? "1 persona" : `${n} personas`);
 
-function Origen({ m }: { m: MesCerrado }) {
+/** Un mes de la lista: cerrado, o ya terminado y todavía abierto (se puede cerrar). */
+type Fila = MesCerrado | { periodo: string; abierto: true };
+const abierto = (m: Fila): m is { periodo: string; abierto: true } => "abierto" in m;
+
+function Origen({ m }: { m: Fila }) {
+  if (abierto(m)) return <Badge tono="warning">Abierto</Badge>;
   return m.origen === "manual" ? (
     <Badge tono="neutro">A mano</Badge>
   ) : (
@@ -42,28 +47,51 @@ export default function MesesCerrados() {
     >
       {({ r, cierra }) => {
         const porCerrar = r.ok ? r.data.porCerrar : null;
+        const filas: Fila[] = r.ok
+          ? [
+              ...r.data.abiertos.map((periodo) => ({ periodo, abierto: true as const })),
+              ...r.data.cerrados,
+            ].sort((a, b) => b.periodo.localeCompare(a.periodo))
+          : [];
         return (
-          <ListScreen<MesCerrado>
+          <ListScreen<Fila>
             state={estadoPantalla(r)}
             titulo="Desempeño"
             filtros={<PestanasDesempeno activa="cierres" />}
             accionPrincipal={cierra && porCerrar ? <CerrarMes periodo={porCerrar} /> : undefined}
-            items={r.ok ? r.data.cerrados : []}
+            items={filas}
+            acciones={(m) =>
+              cierra && abierto(m) && m.periodo !== porCerrar ? (
+                <CerrarMes periodo={m.periodo} enFila />
+              ) : null
+            }
             clave={(m) => m.periodo}
             tarjeta={(m) => (
               <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="truncate text-base font-medium text-fg">{mesCorto(m.periodo)}</span>
+                <span className="truncate text-base font-medium text-fg">
+                  {mesCorto(m.periodo)}
+                </span>
                 <span className="t-caption">
-                  Cerrado el {fechaCorta(m.cerradoEn)} · {personas(m.personas)}
+                  {abierto(m)
+                    ? "Terminó y sigue abierto: su resultado todavía puede cambiar."
+                    : `Cerrado el ${fechaCorta(m.cerradoEn)} · ${personas(m.personas)}`}
                 </span>
                 <Origen m={m} />
               </span>
             )}
             columnas={[
               { id: "mes", etiqueta: "Mes", render: (m) => mesCorto(m.periodo) },
-              { id: "cerrado", etiqueta: "Cerrado el", render: (m) => fechaCorta(m.cerradoEn) },
+              {
+                id: "cerrado",
+                etiqueta: "Cerrado el",
+                render: (m) => (abierto(m) ? "—" : fechaCorta(m.cerradoEn)),
+              },
               { id: "origen", etiqueta: "Forma", render: (m) => <Origen m={m} /> },
-              { id: "personas", etiqueta: "Personas", render: (m) => m.personas },
+              {
+                id: "personas",
+                etiqueta: "Personas",
+                render: (m) => (abierto(m) ? "—" : m.personas),
+              },
             ]}
             textos={{
               vacio: {

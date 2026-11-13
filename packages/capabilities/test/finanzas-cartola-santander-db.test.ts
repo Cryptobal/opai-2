@@ -80,6 +80,11 @@ describe.skipIf(omitirSuiteDb())("Finanzas · cartola Santander de Office Bankin
     expect(montos).toEqual([-15000, 250000, -30000]);
   });
 
+  it("la vista previa avisa si la cuenta ya tiene una cartola con el mismo período (CAR-341)", async () => {
+    const r = await ejecutar({ contenidoBase64: (await xlsxOfficeBanking(filasCartolaHistorica(octubre))).toString("base64") }, true);
+    expect(r.ok && (r.data as { yaImportada: unknown }).yaImportada).toMatchObject({ creadaEn: expect.any(String) });
+  });
+
   it("un archivo que no es cartola responde con un error de negocio, no interno", async () => {
     const r = await ejecutar({ contenidoBase64: Buffer.from("no es un xlsx").toString("base64") }, true);
     expect(r.ok).toBe(false);
