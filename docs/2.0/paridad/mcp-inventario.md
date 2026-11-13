@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 762 pares pantalla→capacidad · 683 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 761 pares pantalla→capacidad · 682 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -576,8 +576,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.cambiar_estado` | `tickets_tickets_cambiar_estado` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.comentar` | `tickets_tickets_comentar` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.rechazar` | `tickets_tickets_rechazar` | existe |
-| compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.ajustes.set` | `platform_ajustes_set` | existe |
-| compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.precios.set` | `platform_precios_set` | existe |
+| compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.ajustes.guardar_lote` | `platform_ajustes_guardar_lote` | existe |
 | compartido | `app/(platform)/platform/catalogo/_componentes` | `platform.catalogo.precio_set` | `platform_catalogo_precio_set` | existe |
 | compartido | `app/(platform)/platform/facturacion/_componentes` | `platform.cobros.cargos_generar` | `platform_cobros_cargos_generar` | existe |
 | compartido | `app/(platform)/platform/indicadores/_componentes` | `platform.indicadores.resolver` | — | excepción |
@@ -1139,10 +1138,12 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `pauta.informes.instalaciones`
+- `platform.ajustes.set`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`
 - `platform.eventos.list`
+- `platform.precios.set`
 - `platform.tenants.update`
 - `platform.trabajos.cancelar`
 - `platform.trabajos.reintentar`
