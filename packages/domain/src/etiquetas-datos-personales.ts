@@ -3,7 +3,10 @@
 // test exige que cada columna declarada en el inventario tenga etiqueta aquí, para que ninguna
 // filtre su nombre técnico a la pantalla (hallazgo C10/C11 de la QA, Parte C).
 
+import { ETIQUETAS_PREVISION } from "./etiquetas-datos-prevision";
+
 export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
+  ...ETIQUETAS_PREVISION,
   // personas
   nombres: "nombres",
   apellidos: "apellidos",

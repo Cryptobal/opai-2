@@ -2,6 +2,7 @@ export * from "./novedades/catalogo";
 export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./bancos";
+export * from "./prevision-catalogos";
 export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";
 export * from "./comercial/datos-sii";
