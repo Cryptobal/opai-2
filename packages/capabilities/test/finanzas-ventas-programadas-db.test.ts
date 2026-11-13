@@ -66,7 +66,7 @@ describe.skipIf(!urlPropietario)("ventas programadas por período (CAR-374) · b
     const fila = (await s.dato<{ id: string }>("finanzas.filas.crear", { seccion: "egreso", etiqueta: "Retiro QA" })).id;
     const cuota = `${mesMas(2)}-05`;
     await s.dato("finanzas.recurrentes.crear", { filaId: fila, concepto: "Retiro 10%", unidad: "pct_ventas", monto: 100_000, frecuencia: "mensual", diaDelMes: 5, inicio: cuota, repeticiones: 1 });
-    const lunes = await s.dato<{ semanas: string[]; celdas: { filaId: string; monto: number; nota: string | null }[] }>("finanzas.planilla.obtener", { semanas: 12 });
+    const lunes = await s.dato<{ semanas: string[]; celdas: { filaId: string; monto: number; nota: string | null }[] }>("finanzas.planilla.obtener", { semanas: 16 }); // la ventana por defecto parte 4 semanas atrás (CAR-391)
     const c = lunes.celdas.find((x) => x.filaId === fila);
     // 10 % de 1.250.000.
     expect(c?.monto).toBe(125_000);

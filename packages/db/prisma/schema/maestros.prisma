@@ -460,6 +460,22 @@ model PersonaPrevision {
   planIsapre      String?  @map("plan_isapre")
   planUf          Decimal? @map("plan_uf") @db.Decimal(10, 4)
   cotizacionUfPct Decimal? @map("cotizacion_uf_pct") @db.Decimal(10, 4)
+  /// CAR-276: previsión completa (códigos de los catálogos de `@opai/domain`, prevision-catalogos).
+  jubilado              Boolean  @default(false)
+  tipoPension           String?  @map("tipo_pension")
+  saludAdicionalPct     Decimal? @map("salud_adicional_pct") @db.Decimal(6, 3)
+  cotizaAfp             Boolean  @default(true) @map("cotiza_afp")
+  cotizaAfc             Boolean  @default(true) @map("cotiza_afc")
+  cotizaSalud           Boolean  @default(true) @map("cotiza_salud")
+  apvInstitucion        String?  @map("apv_institucion")
+  apvRegimen            String?  @map("apv_regimen")
+  apvMonto              Decimal? @map("apv_monto") @db.Decimal(14, 4)
+  apvMoneda             String?  @map("apv_moneda")
+  tramoAsignacion       String?  @map("tramo_asignacion")
+  cargasSimples         Int      @default(0) @map("cargas_simples") @db.SmallInt
+  cargasMaternales      Int      @default(0) @map("cargas_maternales") @db.SmallInt
+  cargasInvalidez       Int      @default(0) @map("cargas_invalidez") @db.SmallInt
+  discapacidadInvalidez String?  @map("discapacidad_invalidez")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
