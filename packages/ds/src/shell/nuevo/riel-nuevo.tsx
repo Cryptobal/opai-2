@@ -58,7 +58,7 @@ export function RielNuevo(p: Props) {
           <i.icono className={cn("size-5", activo(i) && "text-accent")} aria-hidden />
           {conContador ? <Contador n={i.alerta ? i.contador : undefined} /> : null}
         </span>
-        <span lang="es" className="w-full break-normal px-0.5 text-center text-[10px] leading-tight">
+        <span lang="es" className="w-full break-normal px-0.5 text-center text-[11px] leading-tight">
           {i.corta ?? i.etiqueta}
         </span>
       </p.Link>
@@ -98,7 +98,7 @@ export function RielNuevo(p: Props) {
                   <Icono className={cn("size-5", dentro && "text-accent")} aria-hidden />
                   <Contador n={alertasDe(area) || undefined} />
                 </span>
-                <span lang="es" className="w-full break-normal px-0.5 text-center text-[10px] leading-tight">
+                <span lang="es" className="w-full break-normal px-0.5 text-center text-[11px] leading-tight">
                   {primero.grupo ?? area}
                 </span>
               </button>
