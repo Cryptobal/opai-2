@@ -45,8 +45,8 @@ export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
   },
   {
     tabla: "personas_uniforme",
-    finalidad: "Tallas y medidas de uniforme de la persona trabajadora.",
-    categorias: ["laboral", "sensible"],
+    finalidad: "Tallas y medidas (estatura y peso) para el uniforme de la persona trabajadora.",
+    categorias: ["laboral"],
     campos: [
       "talla_camisa",
       "talla_pantalon",
@@ -59,8 +59,6 @@ export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
       "peso_kg",
       "notas",
     ],
-    // Estatura y peso son características físicas: se tratan como sensibles (CAR-277).
-    camposSensibles: ["estatura_cm", "peso_kg"],
     baseLicitud: "relacion_laboral",
   },
   {
