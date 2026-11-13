@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, avisar, type OpcionCombobox, Skeleton } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { AsignarACargo, type FilaACargo, FilasACargo } from "@/app/_components/alcance/a-cargo";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 

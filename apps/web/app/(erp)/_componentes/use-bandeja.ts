@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { avisarCambio, ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import type { Aviso } from "@/app/_components/campana";
 
 import { conPlazo } from "./con-plazo";
@@ -98,7 +98,7 @@ export function useBandeja() {
       return;
     }
     await cargar();
-    window.dispatchEvent(new Event("opai-bandeja"));
+    avisarCambio();
   }
   return {
     avisos,

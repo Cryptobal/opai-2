@@ -38,6 +38,10 @@ function render() {
   return VistaPreviaPrueba();
 }
 const correrEfecto = () => h.efectos.at(-1)?.();
+// La pasarela del navegador (CAR-338) suma un salto antes de devolver el resultado.
+const vaciarMicrotareas = async () => {
+  for (let i = 0; i < 5; i++) await Promise.resolve();
+};
 
 beforeEach(() => {
   h.slots = [];
@@ -52,7 +56,7 @@ describe("vista previa del PDF (CAR-162)", () => {
     render();
     correrEfecto();
     await vi.runAllTicks();
-    await Promise.resolve();
+    await vaciarMicrotareas();
     const r = render();
     expect(r.estado.fase).toBe("error");
     expect(r.mensaje).toBe("Fallo del PDF");
@@ -78,7 +82,7 @@ describe("vista previa del PDF (CAR-162)", () => {
     render();
     correrEfecto();
     await vi.runAllTicks();
-    await Promise.resolve();
+    await vaciarMicrotareas();
     const r = render();
     // `blob:` y no `data:`: la CSP (`frame-src`) bloquea los `data:` en el iframe del PDF.
     expect(r.estado).toEqual({ fase: "listo", pdfUrl: "blob:pdf-previa", paginas: 2 });

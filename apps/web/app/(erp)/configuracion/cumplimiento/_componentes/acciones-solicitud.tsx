@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { DialogoAnonimizar } from "./dialogo-anonimizar";
