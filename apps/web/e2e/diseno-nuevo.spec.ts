@@ -4,7 +4,7 @@ import { hidratado } from "./hidratacion";
 import { captura, erroresDeConsola } from "./hilo-apoyo";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Diseño nuevo (ADR-109, CAR-335 D2 y D2b) con el usuario de la empresa ficticia `qa-e2e`: pinta la piel
+// Diseño nuevo (ADR-109, CAR-335 D2, D2b y D2c) con el usuario de la empresa ficticia `qa-e2e`: pinta la piel
 // nueva desde el servidor, Preferencias lo muestra elegido, el menú lateral se oculta y se asoma al
 // pasar el mouse, y se vuelve al clásico. Las capturas se comparan con docs/2.0/design/export-diseno-nuevo/.
 const marco = (page: Page) => page.locator('div[data-marco="nuevo"]');
@@ -49,6 +49,12 @@ test.describe("@preview diseño nuevo con sesión", () => {
       // Barra superior (D2b): el buscador único y el tema como ícono, en iPad y escritorio.
       if (ancho(page) >= 768)
         await expect(page.getByRole("button", { name: "Cambiar entre día y noche" })).toBeVisible();
+      // Teléfono (D2c): barra inferior Inicio, Menú y Yo; la cuenta y el tema viven en «Yo».
+      if (ancho(page) < 768) {
+        const barra = page.getByRole("navigation", { name: "Principal" }).filter({ hasText: "Yo" });
+        await expect(barra.getByText("Menú", { exact: true })).toBeVisible();
+        await expect(barra.getByRole("button", { name: /^Yo/ })).toBeVisible();
+      }
       await captura(page, "nuevo-inicio", info);
 
       if (ancho(page) >= 1024) {
