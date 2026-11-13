@@ -516,6 +516,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
 | compartido | `app/(erp)/pauta/instalaciones/_componentes` | `pauta.informes.instalaciones` | `pauta_informes_instalaciones` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `asistencia.telefono.habilitar` | — | excepción |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.anular` | `core_ausencias_anular` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.listar` | `core_ausencias_listar` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.registrar` | `core_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.borrar` | `core_biometria_borrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.estado` | `core_biometria_estado` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -552,9 +555,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.anular` | `pauta_ausencias_anular` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.listar` | `pauta_ausencias_listar` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `pauta.ausencias.registrar` | `pauta_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/[id]/generar-documento/_componentes` | `core.documento_plantillas.generar` | `core_documento_plantillas_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
@@ -1081,9 +1081,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.aprobaciones.get`
 - `core.aprobaciones.reglas_list`
 - `core.audit.list`
-- `core.ausencias.anular`
-- `core.ausencias.listar`
-- `core.ausencias.registrar`
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
@@ -1151,6 +1148,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
+- `pauta.ausencias.anular`
+- `pauta.ausencias.listar`
+- `pauta.ausencias.registrar`
 - `platform.ajustes.set`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
