@@ -12,7 +12,7 @@ const fijadoSchema = z.object({
 const vistaSchema = z.object({
   nombre: z.string().trim().min(1).max(40),
   query: z.string().max(400, "Los filtros son demasiado largos para guardarlos")
-    .regex(/^(\?[A-Za-z0-9%&=_.~+\-]*)?$/, "Usa solo filtros de la URL"),
+    .regex(/^(\?[A-Za-z0-9%&=_.~+-]*)?$/, "Usa solo filtros de la URL"),
 });
 export const MAXIMO_VISTAS = 10;
 const vistasSchema = z
