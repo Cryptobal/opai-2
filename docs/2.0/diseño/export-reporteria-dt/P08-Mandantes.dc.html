@@ -46,7 +46,7 @@
 <div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los accesos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-MAN-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
 </sc-if>
 <sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
-<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes administrar accesos de mandante" description="Lo hacen el dueño, administración y RRHH. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes administrar accesos de mandante" description="Lo hacen el dueño, administración y RRHH. Pídele acceso a Andrea Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
 </sc-if>
 <sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
 <div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;align-items:start">
@@ -78,11 +78,11 @@ class Component extends DCLogic {
     const h = A.h, NS = A.NS();
     const est = b.isB;
     const rows = est ? [
-      { id: 1, nom: "Trabajo Temporal Andes EST SpA", rut: "77.120.455-3", inst: "Bodega Lampa", por: "Carlos Irigoyen · 12-10-2026", est: ["success", "Activo"] },
+      { id: 1, nom: "Trabajo Temporal Andes EST SpA", rut: "77.120.455-3", inst: "Bodega Lampa", por: "Andrea Fuentes · 12-10-2026", est: ["success", "Activo"] },
     ] : [
-      { id: 1, nom: "Inmobiliaria Apoquindo S.A.", rut: "96.812.330-1", inst: "Torre Apoquindo", por: "Carlos Irigoyen · 03-09-2026", est: ["success", "Activo"] },
-      { id: 2, nom: "Alimentos del Norte Ltda.", rut: "78.455.900-6", inst: "Planta Quilicura", por: "Carlos Irigoyen · 15-07-2026", est: ["success", "Activo"] },
-      { id: 3, nom: "Logística Lampa SpA", rut: "76.990.112-4", inst: "Bodega Lampa", por: "Revocado por Carlos Irigoyen · 30-09-2026", est: ["neutral", "Revocado"] },
+      { id: 1, nom: "Inmobiliaria Apoquindo S.A.", rut: "96.812.330-1", inst: "Torre Apoquindo", por: "Andrea Fuentes · 03-09-2026", est: ["success", "Activo"] },
+      { id: 2, nom: "Alimentos del Norte Ltda.", rut: "78.455.900-6", inst: "Planta Quilicura", por: "Andrea Fuentes · 15-07-2026", est: ["success", "Activo"] },
+      { id: 3, nom: "Logística Lampa SpA", rut: "76.990.112-4", inst: "Bodega Lampa", por: "Revocado por Andrea Fuentes · 30-09-2026", est: ["neutral", "Revocado"] },
     ];
     let sheet = null;
     if (b.v_sheet && NS.Sheet) {
@@ -111,9 +111,9 @@ class Component extends DCLogic {
       ],
       toCard: (r) => ({ icon: "briefcase", title: r.nom, subtitle: r.inst + " · Ver y descargar", meta: r.rut, badge: { tone: r.est[0], label: r.est[1] } }),
       hist: [
-        { who: "Carlos Irigoyen", initials: "CI", action: "revocó el acceso de Logística Lampa SpA", when: "30-09-2026 17:20" },
+        { who: "Andrea Fuentes", initials: "CI", action: "revocó el acceso de Logística Lampa SpA", when: "30-09-2026 17:20" },
         { who: "control.contratistas@apoquindo.cl", initials: "IA", action: "descargó «Asistencia · 08-2026»", when: "05-09-2026 09:12" },
-        { who: "Carlos Irigoyen", initials: "CI", action: "dio acceso a Inmobiliaria Apoquindo S.A.", changes: [{ field: "Instalaciones", from: "—", to: "Torre Apoquindo" }], when: "03-09-2026 11:47" },
+        { who: "Andrea Fuentes", initials: "CI", action: "dio acceso a Inmobiliaria Apoquindo S.A.", changes: [{ field: "Instalaciones", from: "—", to: "Torre Apoquindo" }], when: "03-09-2026 11:47" },
       ],
       emptyAction: A.prim("Dar acceso", { size: "lg", icon: "plus" }),
     };
