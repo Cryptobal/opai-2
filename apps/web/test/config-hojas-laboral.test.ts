@@ -59,15 +59,15 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
   });
 
   it("rechaza texto no numérico en los campos enteros", () => {
-    expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "dos" })).toBe(true);
-    expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "2" })).toBe(false);
+    expect(faltantes(cfg.uniforme, { estaturaCm: "uno" })).toBe(true);
+    expect(faltantes(cfg.uniforme, { estaturaCm: "172" })).toBe(false);
   });
 
   it("valida decimales y rangos antes de enviar", () => {
     expect(faltantes(cfg.prevision, { planUf: "abc" })).toBe(true);
     expect(faltantes(cfg.prevision, { planUf: "12,5" })).toBe(false);
     expect(valorDeCampo("decimal", "12,5")).toBe("12.5");
-    expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "4" })).toBe(true);
+    expect(faltantes(cfg.uniforme, { pesoKg: "400" })).toBe(true);
     expect(faltantes(cfg["jornada-dt"], { avisoTerminoDias: "400" })).toBe(true);
     expect(faltantes(cfg["jornada-dt"], { avisoTerminoDias: "30" })).toBe(false);
   });
@@ -84,7 +84,7 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
           f.tipo === "fecha"
             ? "2026-12-31"
             : f.tipo === "entero"
-              ? "2"
+              ? String(f.min ?? 2)
               : f.tipo === "decimal"
                 ? "12.5"
                 : f.tipo === "si_no"
@@ -101,4 +101,14 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
       expect(capacidad?.input.safeParse(input).error?.issues ?? []).toEqual([]);
     },
   );
+
+  it("jornada DT envía los tres términos de plazo fijo como una lista ordenada (CAR-277)", () => {
+    const c = cfg["jornada-dt"];
+    const input = c.armar(ID, cambiosDe(c, {}, { termino1: "2026-03-31", termino2: "", termino3: "2026-09-30" }));
+    expect((input as { jornadaDt: { terminosPlazoFijo: string[] } }).jornadaDt.terminosPlazoFijo).toEqual([
+      "2026-03-31",
+      "2026-09-30",
+    ]);
+    expect(obtenerCapacidad(c.capacidad)?.input.safeParse(input).success).toBe(true);
+  });
 });

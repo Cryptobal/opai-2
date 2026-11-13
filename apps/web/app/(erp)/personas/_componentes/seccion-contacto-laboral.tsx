@@ -22,6 +22,8 @@ export async function SeccionContactoLaboral({ personaId }: { personaId: string 
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
   const vacio = !conDatos(
     c?.estadoCivil,
+    c?.codigoInterno,
+    c?.movilizacion,
     c?.telefonoSecundario,
     c?.emergenciaNombre,
     c?.emergenciaTelefono,
@@ -48,7 +50,9 @@ export async function SeccionContactoLaboral({ personaId }: { personaId: string 
       ) : null}
       <ParesGrid
         items={[
+          { etiqueta: "Código interno", valor: c?.codigoInterno },
           { etiqueta: "Estado civil", valor: c?.estadoCivil },
+          { etiqueta: "Movilización", valor: c?.movilizacion },
           {
             etiqueta: "Teléfono secundario",
             valor: c?.telefonoSecundario ? telefono(c.telefonoSecundario) : null,
@@ -66,6 +70,8 @@ export async function SeccionContactoLaboral({ personaId }: { personaId: string 
           seccion="contacto-laboral"
           personaId={personaId}
           inicial={{
+            codigoInterno: c?.codigoInterno,
+            movilizacion: c?.movilizacion,
             estadoCivil: c?.estadoCivil,
             telefonoSecundario: c?.telefonoSecundario,
             emergenciaNombre: c?.emergenciaNombre,
