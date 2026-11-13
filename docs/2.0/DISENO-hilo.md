@@ -40,10 +40,15 @@ Cada regla dice qué pide Hilo y quién la verifica. «Trinquete» quiere decir:
 
 ## 3. Cómo se audita
 
-`apps/web/e2e/auditoria-diseno.spec.ts` (`@auditoria`) recorre las rutas de los cuatro portales con la empresa ficticia `qa-e2e` (nunca Gard), en el marco Hilo, a 1440 y 390 px. Guarda una captura por pantalla y un informe JSON con las mediciones de R1, R2, R6, R9, R10, R11 y los errores de consola. Lo corre el workflow `auditoria-diseno` en el PR con la etiqueta `auditoria-diseno` o a mano. Las capturas y el índice quedan en `docs/2.0/auditoria-diseno/`; cada hallazgo es un issue en Linear («21 · Diseño y experiencia») con su prioridad:
+`apps/web/e2e/auditoria-diseno.spec.ts` (`@auditoria`) recorre las rutas de los cuatro portales con la empresa ficticia `qa-e2e` (nunca Gard), en el marco Hilo, a 1440 y 390 px. Guarda una captura por pantalla y un informe JSON con las mediciones de R1, R2, R6, R9, R10, R11 y los errores de consola. Lo corre el workflow `auditoria-diseno` en el PR al poner la etiqueta `diseño` (ADR-112, adenda C). Las capturas y el índice quedan en `docs/2.0/auditoria-diseno/`; cada hallazgo es un issue en Linear («21 · Diseño y experiencia») con su prioridad:
 
 - **Alta:** rompe un flujo o confunde al cliente.
 - **Media:** incoherente con Hilo.
 - **Baja:** pulido.
 
 Lo repetido en varias pantallas va en un solo issue transversal. Primera corrida: [auditoria-diseno/2026-11-12](auditoria-diseno/2026-11-12/README.md). Lo que vive dentro de un módulo se asigna a la sesión dueña del módulo; lo transversal (DS, marco, navegación, tipografía, botones, textos) lo corrige la Sesión Diseño.
+
+## 4. Que no retroceda
+
+- **Referencias visuales y axe en cada PR** (`apps/web/e2e/diseno-referencias.spec.ts`, `@preview`): pantallas estables (ingresos públicos) se comparan contra su captura de referencia en `e2e/diseno-referencias.spec.ts-snapshots/` (tolerancia 2 %), y axe no puede sumar violaciones serias o críticas. Si falta la referencia, la prueba deja la candidata en el artefacto (`referencias-candidatas/`) y no compara; la sesión la revisa y la copia. Cambiar el diseño a propósito es actualizar la referencia en el mismo PR.
+- **Revisión de diseño con Claude** (`.github/workflows/revision-diseno.yml`): en cada PR que toca `apps/` o `packages/ds`, captura las pantallas que cambia (o las clave, si toca el DS o el marco) en la vista previa y en `main` (test.opai.cl), a 1440 y 390 px, con `qa-e2e`, y `claude-code-action` comenta el antes, el después y lo que no calza con estas reglas. Usa el secreto `ANTHROPIC_API_KEY`: si no existe, se salta sin fallar. No es check obligatorio.

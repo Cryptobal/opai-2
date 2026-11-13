@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 
 import type { GrupoPaleta, ItemPaleta } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { destinoAjuste } from "@/lib/ajuste-destino";
 import type { AccionCmdK } from "@/lib/navegacion-entradas";
 import type { ItemNav } from "@/lib/navegacion";
