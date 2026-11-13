@@ -18,6 +18,11 @@ export type BaseMonto = {
   ultimoPeriodoConVentas: string | null;
   /** Período en curso «aaaa-mm» (hoy, hora de Chile). */
   periodoActual: string;
+  /**
+   * Ventas netas aún no emitidas del período (programaciones sin generar y borradores), o null si no hay nada
+   * programado (CAR-374). Solo se usa para meses que no han cerrado.
+   */
+  ventasProgramadas?: (periodo: string) => number | null;
 };
 
 export type MontoCuota = { monto: number; estimado: boolean; detalle: string | null };
@@ -68,9 +73,15 @@ function enPctVentas(monto: number, fecha: string, b: BaseMonto): MontoCuota {
     if (base == null) return { monto: 0, estimado: true, detalle: `sin ventas registradas en ${periodo}` };
     return { monto: escalar(monto, base, DIVISOR_PCT), estimado: false, detalle: `ventas de ${periodo}` };
   }
+  const programado = b.ventasProgramadas?.(periodo) ?? null;
   if (periodo === b.periodoActual) {
-    const base = b.ventasNetas(periodo) ?? 0;
-    return { monto: escalar(monto, base, DIVISOR_PCT), estimado: true, detalle: `ventas de ${periodo} hasta hoy` };
+    const base = (b.ventasNetas(periodo) ?? 0) + (programado ?? 0);
+    const detalle = programado ? `ventas de ${periodo} hasta hoy más lo programado` : `ventas de ${periodo} hasta hoy`;
+    return { monto: escalar(monto, base, DIVISOR_PCT), estimado: true, detalle };
+  }
+  if (programado && programado > 0) {
+    const base = (b.ventasNetas(periodo) ?? 0) + programado;
+    return { monto: escalar(monto, base, DIVISOR_PCT), estimado: true, detalle: `estimado con lo programado para ${periodo}` };
   }
   const ultimo = b.ultimoPeriodoConVentas;
   if (!ultimo) return { monto: 0, estimado: true, detalle: "sin ventas registradas" };

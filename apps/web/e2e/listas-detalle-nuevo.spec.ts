@@ -4,7 +4,7 @@ import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-336 (diseño nuevo, ADR-109): desde 1024 px la lista de Cuentas usa todo el ancho mientras no hay
-// ficha, y al abrir una cuenta la ficha toma cerca del 58 %. Con el usuario de qa-e2e; el diseño se
+// ficha, al abrir una cuenta la ficha toma cerca del 58 % y «Ver a pantalla completa» la deja sola. Con el usuario de qa-e2e; el diseño se
 // elige por la cookie de este navegador (no cambia la preferencia guardada) y se restaura al final.
 const conDiseno = async (page: Page, valor: string) =>
   page
@@ -41,6 +41,15 @@ test.describe("@preview listas con ficha a la derecha en el diseño nuevo", () =
       const detalle = await ancho(page, "detalle");
       expect(detalle / (lista + detalle)).toBeGreaterThan(0.5);
       await capturar(page, info, "nuevo-cuentas-ficha");
+      // CAR-335 D4b: «Ver a pantalla completa» esconde la lista y la ficha toma todo el ancho.
+      const expandir = page.locator("[data-expandir-ficha] label").first();
+      await expect(expandir).toBeVisible();
+      await expandir.click();
+      await expect(page.locator('[data-split] > [data-columna="lista"]').first()).toBeHidden();
+      expect(await ancho(page, "detalle")).toBeGreaterThan(contenedor * 0.95);
+      await capturar(page, info, "nuevo-cuentas-ficha-completa");
+      await expandir.click();
+      await expect(page.locator('[data-split] > [data-columna="lista"]').first()).toBeVisible();
     } finally {
       await conDiseno(page, "");
     }
