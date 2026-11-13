@@ -65,8 +65,8 @@ export function useHilo(portal: string) {
   }, [cargarPendientes]);
 
   const cargarSegmento = useCallback(
-    (s: "actividad" | "agenda") => cargarFilasHilo(ejecutar, s, new Date()),
-    [ejecutar],
+    (s: "actividad" | "agenda") => cargarFilasHilo(ejecutar, s, new Date(), portal === "erp"),
+    [ejecutar, portal],
   );
 
   // Segmento a la vista: tras una acción (Reenviar, aprobar…) se vuelve a pedir (CAR-338).
