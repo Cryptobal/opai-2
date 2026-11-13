@@ -28,6 +28,7 @@ import {
 } from "./ventas-escritura";
 import { reporteResultados } from "./reportes-resultados";
 import { ventasBuscar } from "./ventas-buscar";
+import { impuestosBorradorF29 } from "./impuestos-f29";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
 import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
@@ -83,6 +84,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasListar,
   ventasObtener,
   ventasLibroResumen,
+  impuestosBorradorF29,
   ventasBuscar,
   reporteResultados,
   cobranzaResumen,
