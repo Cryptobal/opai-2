@@ -24,7 +24,7 @@ export const RECURSOS: Record<string, string> = {
   alertas: "Alertas", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
-  planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja",
+  planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura", recurrentes: "Gastos recurrentes",
   derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios",
   cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", reglas_banco: "Reglas del banco",
   tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", compartir: "Compartir cotización", lineas: "Líneas",
@@ -45,4 +45,6 @@ export const RECURSOS: Record<string, string> = {
   importar: "Importación de datos",
   // Indicadores de gestión de las personas (CAR-305, ADR-094).
   indicadores_gestion: "Indicadores de gestión", scorecards: "Scorecards de desempeño", resultados: "Resultados de desempeño", hechos: "Hechos medibles", propios: "Indicadores propios",
+  // Hilo del marco «Hilo»: actividad y agenda (CAR-331).
+  hilo: "Hilo",
 };

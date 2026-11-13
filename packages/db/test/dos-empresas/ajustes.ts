@@ -44,6 +44,25 @@ export const AJUSTES: Record<string, Ajuste> = {
       meta_sugerida: 10,
     }),
   },
+  // Desempeño (CAR-322): CHECK del mes y del origen; FK compuestas a persona, cargo, scorecard y mes.
+  "desempeno.periodos_cerrados": {
+    fijas: ["periodo"],
+    valores: () => ({ periodo: "2026-10", origen: "manual", personas: 1 }),
+  },
+  "desempeno.resultados_cerrados": {
+    dependencias: ["desempeno.periodos_cerrados", "core.personas", "core.cargos", "desempeno.scorecards"],
+    fijas: ["periodo", "persona_id", "cargo_id", "scorecard_id"],
+    valores: (ctx) => ({
+      periodo: "2026-10",
+      persona_id: id(ctx, "core.personas"),
+      cargo_id: id(ctx, "core.cargos"),
+      scorecard_id: id(ctx, "desempeno.scorecards"),
+      vigente_desde: "2026-10",
+      puntaje: 80,
+      cobertura: 100,
+      indicadores: "[]",
+    }),
+  },
   "desempeno.scorecard_indicadores": {
     dependencias: ["desempeno.scorecards"],
     fijas: ["scorecard_id"],
@@ -62,6 +81,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   "comercial.seguimiento_pasos": { valores: () => ({ canal: "interno", ejecutor: "persona" }) },
   // Finanzas · flujo (CAR-193): CHECK del formato «aaaa-mm» del mes.
   "finanzas.flujo_iva_postergado": { fijas: ["periodo"], valores: () => ({ periodo: "2026-11" }) },
+  // CAR-349: CHECK de frecuencia, día, monto y ventana del gasto recurrente.
+  "finanzas.flujo_recurrentes": {
+    dependencias: ["finanzas.flujo_filas"],
+    valores: (ctx) => ({ fila_id: id(ctx, "finanzas.flujo_filas"), frecuencia: "mensual", dia_del_mes: 5, monto: 1000, ventana_antes: 5, ventana_despues: 10, repeticiones: null, fin: null }),
+  },
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },

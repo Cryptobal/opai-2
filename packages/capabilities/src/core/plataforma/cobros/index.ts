@@ -12,6 +12,7 @@ import { platformCobrosResumen } from "./resumen";
 
 export { trabajoCobrosMesAnterior } from "./trabajo";
 export { consumidorAvisoPrueba } from "./consumidor-aviso";
+export { consumidorAvisoPruebaEmpresa } from "./consumidor-aviso-empresa";
 export { trabajoCobrosPruebas } from "./trabajo-pruebas";
 
 /** Cobro por módulo (CAR-188, ADR-071, BRIEF-35). */

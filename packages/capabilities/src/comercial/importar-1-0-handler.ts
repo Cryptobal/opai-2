@@ -12,6 +12,7 @@ import {
   iniciarCorrida,
   leerEstadoDestinoPorTenantId,
   revertirCorrida,
+  soloCotizaciones,
   validarDatos,
   type DatosOpai1,
   type Plan,
@@ -68,6 +69,8 @@ export async function ejecutarImportar10(
     modulosActivos: input.soloComercial ? ctx.modulosActivos.filter((m) => m !== "finanzas") : ctx.modulosActivos,
     ...(tenant?.slug ? { tenantSlug: tenant.slug } : {}),
   });
+
+  if (input.soloCotizaciones) plan = soloCotizaciones(plan);
 
   if (input.accion === "conciliar") {
     return {
