@@ -1385,6 +1385,14 @@ identidad de servicio en main.
 
 6. **Prueba gratis por empresa (CAR-222, 6-nov-2026).** Cada empresa activa **una sola vez**, desde su ERP, la prueba gratis de un módulo o de una parte de Finanzas; dura **10 días** (el primero cuenta) y **se desactiva sola**: el módulo queda en solo lectura, sin borrar nada. Plataforma puede extenderla o reactivarla. No es un cobro: no tiene precio ni genera cargos (`core.pruebas_gratis`, único por empresa y módulo). Una parte de Finanzas se prueba aunque Finanzas no esté contratado; hasta que la Sesión 5 filtre por partes, eso abre todo el módulo durante la prueba (riesgo aceptado, acotado a 10 días). Ver BRIEF-40.
 
+
+7. **Decisiones de Carlos del 12-nov-2026, 10:54 (CAR-323, bloque D).**
+   1. **El Agente interno se cobra aparte**, como cualquier módulo del catálogo (no viene incluido en el plan base). Responde el punto (1) de «Pendiente de Carlos» de ADR-090 para el agente interno.
+   2. **«Usuario con licencia» = cualquier usuario con algún permiso efectivo del módulo**, contando roles de sistema, roles personalizados y excepciones (la que deniega gana). Sin permisos efectivos del módulo, no cuenta. Ya lo hacía `contarUnidades`; queda con prueba.
+   3. **El aviso de prueba por vencer también llega por correo a la empresa** (dueños y administradores), además de a Plataforma: las pruebas que abre Plataforma avisan a 7 días y la prueba gratis de 10 días avisa a 2 días. Evento comunicable declarado en el manifiesto con plantilla por defecto (ADR-020), con un solo envío por evento y destinatario (`core.envios`).
+   4. **Un módulo en solo lectura oculta sus herramientas de escritura en el conector MCP**: `tools/list` no lista sus escrituras ni sus `preview_…`; las lecturas siguen, y `executeCapability` las sigue rechazando. Ya estaba así desde CAR-188; queda con prueba.
+   5. **Solo lectura en rutas públicas y webhooks:** las rutas públicas que escriben en ese módulo (formularios, enlaces de aprobación, firmas) responden «Este módulo está en solo lectura» sin escribir; los webhooks salientes del módulo se pausan; los webhooks e integraciones entrantes (banco, SII, proveedores) siguen registrando lo que llega, para no perder datos, pero no disparan acciones del módulo.
+   6. **Control de acceso se cobra por instalación activa** (12-nov-2026, 13:56).
 ---
 
 ## ADR-072 · Finanzas es un módulo con siete partes contratables por separado
@@ -1857,6 +1865,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Adenda (12-nov-2026, CAR-311, Sesión Desempeño): indicadores de Asistencia.** Leen el consolidado diario (`asistencia.dias`), los turnos esperados y las ausencias registradas en la Pauta; nunca marcas ni bitácora, y no tocan el reporte para la DT. Un día cuenta solo si su turno esperado sigue vigente y ya terminó (una licencia o vacación registrada tarde anula el turno y saca el día). Son indicadores **de cada persona** (se ponen en el scorecard de su cargo, que cada empresa define según su rubro); al supervisor y al jefe de zona no se les cargan. **Decidido por Carlos el 12-nov-2026 (13:10, hora de Chile):** (a) en el ausentismo no cuentan ni a favor ni en contra las licencias médicas, accidentes del trabajo, pre y postnatal, vacaciones, permisos con y sin goce y ausencias justificadas; cuentan en contra la ausencia injustificada y el día con turno sin marca; (b) «Marcas a la hora» usa una **tolerancia de atraso configurable por empresa, 15 minutos por defecto** (ajuste `asistencia.tolerancia_atraso_min`; no cambia el atraso registrado ni el reporte para la DT); (c) se hace un **informe de Operaciones por instalación** (cobertura, turnos por cubrir, ausentismo y atrasos por instalación, ordenable) para comparar instalaciones, primero como capacidad con MCP y la pantalla después de su diseño; (d) los permisos y licencias se ingresan en la ficha del guardia y deben verse en la pauta mensual y diaria, para saber si una falta está justificada (pendiente de Personas y Pauta).
 
+**Adenda (12-nov-2026, CAR-312, Sesión Desempeño): el agente y Desempeño.** (1) **Propuestas del agente:** no se crea una cola propia. Un agente que guarda un scorecard como borrador deja una propuesta; publicarlo (sumar un indicador, mover una meta) exige siempre aprobación humana por la cola existente de `core.aprobaciones` (`exigeAprobacion` de `desempeno.scorecards.guardar`), que el hilo ya muestra en Pendientes. El agente nunca cambia una meta solo. (2) **Responder con los mismos números:** el agente usa las mismas capacidades que la pantalla (`desempeno.resultados.*`, `core.indicadores_gestion.*`). (3) **Avisos bajo la meta:** con el ajuste `desempeno.aviso_bajo_meta` encendido (**apagado por defecto**, ADR-020), al cerrar el mes se emite `desempeno.resultado.bajo_meta` por persona bajo la meta y `desempeno.equipo.bajo_meta` por la jefatura directa de su ficha. Son transaccionales (sin reglas de Comunicaciones): la campana llega a la persona solo si su cargo le muestra su resultado y tiene el permiso de ver resultados, y a la jefatura solo por las personas que la jefatura de cargos le deja ver. Nunca llevan el puntaje. (4) **Indicador nuevo del núcleo** `core.respuesta_escalados`: horas promedio desde que un agente pide una aprobación hasta que alguien la aprueba o rechaza, atribuido a quien decide; las vencidas sin decisión y las de plataforma no cuentan. (5) **Parte del agente:** el resultado de cada persona muestra qué parte de sus acciones auditadas del mes hizo un agente que actúa por ella; el resultado se atribuye igual a la persona. Sin migración.
+
 **Pendiente de Carlos.** Nada.
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
@@ -2020,6 +2030,24 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 **Decisión.** Ni esta sesión ni ninguna otra sesión de Claude depende del bot «OPAI 2.0». Cada sesión aplica la migración de su propio PR con el procedimiento de siempre (respaldo de `dev` y `main`, `dev` antes que `main`, `lock_timeout` corto, verificación y aviso en el PR) y quita `migracion-pendiente`. Reemplaza en esto a ADR-054 y ADR-070.
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
+
+
+## ADR-108 · Trabajo en paralelo sin esperas y sin choques entre sesiones (12-nov-2026)
+
+**Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»). **Modifica** `OPERACION-agentes.md` (A2.5), `AGENTS.md`, `CONTEXTO-agentes.md` e `INSTRUCCIONES-proyecto-claude.md`. (ADR-105 a ADR-107 están reservados por PR abiertos: #584, #591 a #594 y #595.)
+
+**Contexto.** El 12-nov había 25 PR abiertos de ocho sesiones. Dos problemas: sesiones que se detenían a esperar la revisión del bot «OPAI 2.0» o la integración, y PR que chocaban entre sí. Casi todos editaban la misma tabla de `ESTADO.md`, el inventario de paridad y `embed.ts`; tres pares editaban el mismo `.prisma`; y cuatro PR tomaron el mismo número de ADR (106).
+
+**Decisión.**
+
+1. **Las sesiones avanzan solas.** Al abrir un PR siguen con su próximo ticket, apilando si depende del anterior. La revisión del bot y la integración ocurren en paralelo y no son una puerta. Solo se detienen por una decisión de negocio o producto de Carlos, o por algo irreversible, plata, datos reales, producción, OPAI 1.0, el tenant Gard o un secreto.
+2. **Archivos sensibles.** Antes de tocar un `.prisma`, una migración, un registro central, un archivo generado o numerar un ADR, la sesión revisa los PR abiertos. Si otro ya edita ese archivo, apila sobre él o espera, y lo dice en la descripción («apilado sobre #N» o «espera #N»).
+3. **Migraciones de a una y en orden de fecha.** Dos PR no editan el mismo `.prisma` con migraciones distintas sin apilarse.
+4. **`ESTADO.md` deja de editarse en cada PR.** Cada PR escribe un archivo propio, `docs/2.0/estado/<modulo>/CAR-<n>.md`. `ESTADO.md` queda como índice y lo consolida un PR de documentación. Se eligió esto, y no «solo actualiza quien integra», porque quien integra es la misma sesión que construye: el choque seguiría igual, solo más tarde.
+5. **Dueños por módulo** en una tabla de `OPERACION-agentes.md` (A2.5.5). No se usa `CODEOWNERS` de GitHub porque todas las sesiones operan con la misma cuenta.
+6. **Dependencias en Linear.** Antes de tomar un ticket se revisan sus «blocked by»; el orden entre módulos vive en las relaciones de Linear.
+
+**Consecuencias.** El orden propuesto para los PR abiertos al 12-nov está en `docs/2.0/estado/orden-integracion-2026-11-12.md`. Carlos aprobó el 12-nov (18:28) un aviso automático: el workflow `choque-prisma.yml` avisa, sin bloquear, cuando dos PR abiertos editan el mismo `.prisma` sin estar apilados.
 
 ## ADR-109 · Diseño nuevo de OPAI 2.0: reemplaza a Hilo (CAR-335, 12-nov-2026)
 
