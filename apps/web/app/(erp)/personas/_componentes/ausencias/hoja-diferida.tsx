@@ -9,6 +9,11 @@ const Hoja = dynamic(() =>
 );
 
 /** La hoja de registrar se descarga recién al abrirla (`?registrar=1`): la pestaña queda dentro del tope de JS (ADR-037). */
-export function HojaRegistrarDiferida(props: { personaId: string; nombre: string; hoy: string }) {
+export function HojaRegistrarDiferida(props: {
+  personaId: string;
+  nombre: string;
+  hoy: string;
+  conPauta: boolean;
+}) {
   return useParametros().valor("registrar") !== null ? <Hoja {...props} /> : null;
 }
