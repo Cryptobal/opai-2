@@ -73,7 +73,7 @@
     "/(erp)/instalaciones/[id]/negocios": 171,
     "/(erp)/negocios": 170,
     "/(erp)/negocios/[id]": 172,
-    "/(erp)/negocios/[id]/cotizaciones": 171,
+    "/(erp)/negocios/[id]/cotizaciones": 172,
     "/(erp)/negocios/[id]/documentos": 171,
     "/(supervisor)/supervisor/rendiciones*": 164,
     "/(supervisor)/supervisor/rendiciones/nueva/compra": 188,
