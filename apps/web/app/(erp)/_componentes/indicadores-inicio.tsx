@@ -7,11 +7,12 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { esFalloReal } from "./fallo-bloque";
 import { ReintentarBloque } from "./reintentar-bloque";
-import { armarIndicadores, type Indicadores } from "./indicadores-armar";
+import { armarIndicadores, type Indicadores, ordenarTarjetas } from "./indicadores-armar";
+import { PersonalizarIndicadores } from "./personalizar-indicadores";
 
 /** Indicadores del Inicio (CAR-182): solo los que el usuario puede ver, cada uno como enlace a su lista.
  *  Sin permiso (FORBIDDEN) la sección no aparece; un fallo real se dice en una fila, sin tumbar el resto. */
-export async function IndicadoresInicio() {
+export async function IndicadoresInicio({ personalizar = false }: { personalizar?: boolean }) {
   const r = await ejecutarComoUsuario<Indicadores>("erp", "core.inicio.indicadores", {});
   if (!r.ok) {
     if (!esFalloReal(r.error.code)) return null;
@@ -25,9 +26,9 @@ export async function IndicadoresInicio() {
       </div>
     );
   }
-  const tarjetas = armarIndicadores(r.data, UF_ESCALA);
+  const tarjetas = ordenarTarjetas(armarIndicadores(r.data, UF_ESCALA), r.data.orden);
   if (tarjetas.length === 0) return null;
-  return (
+  const rejilla = (
     <section
       aria-label="Indicadores"
       className={cn("grid grid-cols-2 gap-3 xl:grid-cols-4", GRILLA_KPI_HILO)}
@@ -46,5 +47,13 @@ export async function IndicadoresInicio() {
         </LinkNext>
       ))}
     </section>
+  );
+  // Diseño nuevo (CAR-335 D3): la empresa elige sus indicadores con «Personalizar».
+  if (!personalizar || !r.data.editable) return rejilla;
+  return (
+    <div className="flex flex-col gap-2">
+      <PersonalizarIndicadores elegidos={r.data.orden ?? tarjetas.map((t) => t.id)} />
+      {rejilla}
+    </div>
   );
 }

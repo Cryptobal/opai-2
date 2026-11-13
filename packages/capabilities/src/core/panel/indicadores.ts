@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ordenarIndicadores } from "@opai/domain";
+import { ordenarIndicadores, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { ajuste } from "../config/valores";
@@ -72,6 +72,7 @@ export const inicioIndicadores = defineCapability({
       ...valores,
       cotizacionesPorAprobar: porAprobar,
       orden: ordenarIndicadores(elegidos ?? [], disponibles),
+      editable: ctx.autorizar(PERMISOS_CORE.configManage),
     };
   },
 });

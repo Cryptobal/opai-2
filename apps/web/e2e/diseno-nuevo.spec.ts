@@ -58,7 +58,25 @@ test.describe("@preview diseño nuevo con sesión", () => {
         await expect(page.getByRole("navigation", { name: "Principal" })).toHaveCount(1);
         await expect(page.getByRole("button", { name: /^Menú de usuario/ })).toBeHidden();
       }
+      // Inicio nuevo (D3): cola de trabajo en pestañas.
+      const pestanas = page.getByRole("tablist");
+      await expect(pestanas.getByRole("tab", { name: "Necesita tu atención" })).toBeVisible();
       await captura(page, "nuevo-inicio", info);
+      await pestanas.getByRole("tab", { name: "Agenda" }).click();
+      await expect(pestanas.getByRole("tab", { name: "Agenda" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      // «Personalizar» (si qa-e2e puede configurar): se abre y se cierra sin cambiar la elección,
+      // porque la elección es de la empresa y otras pruebas leen sus indicadores.
+      const personalizar = page.getByRole("button", { name: "Personalizar" });
+      if (await personalizar.isVisible()) {
+        await hidratado(personalizar);
+        await personalizar.click();
+        await expect(page.getByRole("button", { name: /Cobertura hoy/ })).toBeVisible();
+        await captura(page, "nuevo-inicio-personalizar", info);
+        await page.getByRole("button", { name: "Listo" }).click();
+      }
 
       if (ancho(page) >= 1024) {
         const ocultar = page.getByRole("button", { name: "Ocultar el menú" });
