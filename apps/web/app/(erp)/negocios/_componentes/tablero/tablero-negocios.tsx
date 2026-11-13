@@ -1,4 +1,4 @@
-import { ChartColumn, Download, Plus } from "lucide-react";
+import { ChartColumn, Download, Plus, UserCheck } from "lucide-react";
 
 import { Cabecera, Empty, Estado, type EstadoPantalla } from "@opai/ds";
 
@@ -54,6 +54,11 @@ export function TableroNegocios(p: {
         <EnlaceBoton href="/negocios/reportes" variante="secondary" icono={ChartColumn}>
           Reportes
         </EnlaceBoton>
+        {p.gestiona ? (
+          <EnlaceBoton href="/negocios?transferir=1" variante="secondary" icono={UserCheck}>
+            Transferir cartera
+          </EnlaceBoton>
+        ) : null}
         {p.exportar ? (
           <EnlaceBoton href={p.exportar} variante="secondary" icono={Download}>
             Exportar a Excel

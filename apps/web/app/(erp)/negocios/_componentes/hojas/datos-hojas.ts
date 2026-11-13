@@ -4,7 +4,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { CuentaDetalle, CuentaFila, Pagina } from "@/lib/tipos-maestros";
 
 import type { NegocioDetalle } from "../datos";
-import { type ConfigComercial, type DatosHojas, PARAMS_HOJA } from "./tipos";
+import { type ConfigComercial, type DatosHojas, PARAMS_HOJA, type Responsable } from "./tipos";
 
 const datos = <T>(r: { ok: true; data: T } | { ok: false }) => (r.ok ? r.data : null);
 
@@ -21,7 +21,7 @@ export async function cargarHojas(
   if (!abierta) return null;
   const id = p["negocio"];
   const leerNegocio = !deFicha && abierta !== "nuevo" && id && esUuid(id);
-  const [config, negocio, cuentas] = await Promise.all([
+  const [config, negocio, cuentas, responsables] = await Promise.all([
     ejecutarComoUsuario<ConfigComercial>("erp", "comercial.config.get", {}).then(datos),
     leerNegocio
       ? ejecutarComoUsuario<NegocioDetalle>("erp", "comercial.negocios.get", { id }).then(datos)
@@ -30,6 +30,9 @@ export async function cargarHojas(
       ? ejecutarComoUsuario<Pagina<CuentaFila>>("erp", "core.cuentas.list", { limite: 100 }).then(
           (r) => (r.ok ? r.data.items : []),
         )
+      : Promise.resolve([]),
+    abierta === "transferir"
+      ? ejecutarComoUsuario<Responsable[]>("erp", "comercial.negocios.responsables", {}).then((r) => (r.ok ? r.data : []))
       : Promise.resolve([]),
   ]);
   const vinculos = negocio && (abierta === "instalaciones" || abierta === "contactos");
@@ -48,5 +51,6 @@ export async function cargarHojas(
     cuentas,
     cuentaInicial: inicial && esUuid(inicial) ? inicial : null,
     cuenta,
+    responsables,
   };
 }
