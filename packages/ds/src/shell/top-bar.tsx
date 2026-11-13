@@ -89,7 +89,9 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
           ) : null}
           {props.agente}
           {campana}
-          <MenuUsuarioBarra {...props} lado="abajo-derecha" />
+          <span data-shell="usuario" className="contents">
+            <MenuUsuarioBarra {...props} lado="abajo-derecha" />
+          </span>
         </div>
       </div>
     </header>

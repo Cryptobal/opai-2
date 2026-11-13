@@ -544,3 +544,14 @@
     order: 3;
   }
 }
+/* Teléfono del diseño nuevo (CAR-335 D2c): la barra inferior es Inicio, Agente, Menú y Yo
+   (`BarraInferiorNueva`); la clásica y el avatar de arriba se esconden, porque la cuenta vive en «Yo». */
+[data-marco="nuevo"] nav[data-shell="inferior"],
+[data-marco="nuevo"] header [data-shell="usuario"] {
+  display: none;
+}
+/* Fondo propio del menú lateral y del riel en el diseño nuevo (`--ds-side`, D2c). */
+[data-marco="nuevo"] nav[data-shell="sidebar"],
+[data-marco="nuevo"] nav[data-shell="riel"] {
+  background-color: var(--ds-side);
+}
