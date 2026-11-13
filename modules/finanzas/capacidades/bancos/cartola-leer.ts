@@ -23,9 +23,14 @@ export async function leerCartola(
     if (formato === "santander") return await parsearCartolaSantander(buf);
     if (!mapeo) throw reglaDeNegocio("Indica el mapeo de columnas o guárdalo en la cuenta.");
     const r = parsearCsvGenerico(buf.toString("utf8"), mapeo);
-    return { filas: r.filas, rechazadas: r.rechazadas, saldoFinal: null, fechaDesde: null, fechaHasta: null };
+    return { filas: r.filas, rechazadas: r.rechazadas, saldoFinal: null, fechaDesde: null, fechaHasta: null, cuadratura: null };
   } catch (e) {
     if (e instanceof ErrorCartola) throw reglaDeNegocio(e.message);
     throw e;
   }
+}
+
+export function mensajeDescuadre(diferencia: number): string {
+  const monto = Math.abs(diferencia).toLocaleString("es-CL");
+  return `La cartola no cuadra: saldo inicial + movimientos ${diferencia > 0 ? "supera" : "queda bajo"} el saldo final en $${monto}. No se importó nada; revisa el archivo.`;
 }
