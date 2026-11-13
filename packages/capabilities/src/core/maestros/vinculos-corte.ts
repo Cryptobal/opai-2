@@ -12,7 +12,7 @@ import { z } from "zod";
 import type { TenantTx } from "@opai/db";
 
 export const corteAccesoSchema = z.object({
-  /** La persona quedó inactiva (el PIN de terreno ya no sirve). */
+  /** La persona quedó inactiva (el PIN de terreno ya no sirve); con `corteProgramado`, lo que pasará ese día. */
   personaInactiva: z.boolean(),
   /** Membresías de su usuario en esta empresa que se suspendieron. */
   membresiasSuspendidas: z.number().int(),
