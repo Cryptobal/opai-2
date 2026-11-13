@@ -7,22 +7,25 @@ import { uuidSchema } from "../esquemas";
 import { dondePersona } from "../maestros/alcance";
 import { equipoDe, personaDelUsuario } from "./datos";
 
-const MAX = 200;
-
 export const personasACargoList = defineCapability({
   id: "core.personas.list_a_cargo",
   descripcion:
-    "Personas a cargo de un jefe según la jefatura de cada cargo: las que le reportan directamente y, hacia abajo, toda su línea. Sin indicar a quién, responde por quien consulta. De a 200 por respuesta. Sirve para saber a quién puede ver o aprobar un jefe.",
+    "Personas a cargo de un jefe según la jefatura de cada cargo: las que le reportan directamente y, hacia abajo, toda su línea. Sin indicar a quién, responde por quien consulta. Paginada por cursor (hasta 200 por página). Sirve para saber a quién puede ver o aprobar un jefe.",
   permiso: PERMISOS_CORE.personasRead,
   input: z.object({
     personaId: uuidSchema
       .optional()
       .describe("Jefe por el que se pregunta. Por defecto, la Persona de quien consulta."),
-    despuesDe: uuidSchema.optional().describe("Para seguir: el valor `siguiente` anterior."),
+    // CAR-353: contrato único de listas (cursor + limite; items + siguiente).
+    cursor: uuidSchema.optional().describe("Para seguir: el valor `siguiente` anterior."),
+    limite: z.number().int().min(1).max(200).default(200),
   }),
   output: z.object({
-    jefePersonaId: z.string().nullable().describe("null = quien consulta no tiene ficha de Persona."),
-    personas: z.array(
+    jefePersonaId: z
+      .string()
+      .nullable()
+      .describe("null = quien consulta no tiene ficha de Persona."),
+    items: z.array(
       z.object({
         id: z.string(),
         nombres: z.string(),
@@ -36,7 +39,7 @@ export const personasACargoList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   // Revela quién depende de quién: se auditan los ids de la página entregada.
-  auditarLectura: (salida) => salida.personas.map((p) => p.id),
+  auditarLectura: (salida) => salida.items.map((p) => p.id),
   async handler(ctx, input) {
     const propia = await personaDelUsuario(ctx);
     const jefeId = input.personaId ?? propia;
@@ -44,10 +47,13 @@ export const personasACargoList = defineCapability({
     if (ctx.alcance !== null && jefeId !== propia) {
       throw prohibido("Con tu alcance solo puedes ver a las personas a tu cargo.");
     }
-    if (!jefeId) return { jefePersonaId: null, personas: [], siguiente: null };
+    if (!jefeId) return { jefePersonaId: null, items: [], siguiente: null };
     // Una persona de otra empresa (o inexistente) no existe para quien consulta: ni se repite su id.
     if (input.personaId) {
-      const existe = await ctx.db.persona.findFirst({ where: { id: jefeId }, select: { id: true } });
+      const existe = await ctx.db.persona.findFirst({
+        where: { id: jefeId },
+        select: { id: true },
+      });
       if (!existe) throw noEncontrado("La persona");
     }
     const equipo = await equipoDe(ctx, jefeId);
@@ -64,8 +70,8 @@ export const personasACargoList = defineCapability({
               })
             ).map((p) => p.id),
           );
-    const orden = [...visibles].filter((id) => !input.despuesDe || id > input.despuesDe).sort();
-    const pagina = orden.slice(0, MAX);
+    const orden = [...visibles].filter((id) => !input.cursor || id > input.cursor).sort();
+    const pagina = orden.slice(0, input.limite);
     const [personas, vinculos] = await Promise.all([
       ctx.db.persona.findMany({
         where: { id: { in: pagina } },
@@ -79,14 +85,14 @@ export const personasACargoList = defineCapability({
     const cargoDe = new Map(vinculos.map((v) => [v.personaId, v.cargoId]));
     return {
       jefePersonaId: jefeId,
-      personas: personas
+      items: personas
         .map((p) => ({
           ...p,
           cargoId: cargoDe.get(p.id) ?? null,
           directa: equipo.directas.has(p.id),
         }))
         .sort((a, b) => (a.id < b.id ? -1 : 1)),
-      siguiente: orden.length > MAX ? (pagina.at(-1) ?? null) : null,
+      siguiente: orden.length > input.limite ? (pagina.at(-1) ?? null) : null,
     };
   },
 });
