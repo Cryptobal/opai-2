@@ -65,3 +65,14 @@ export function puedeResolver(p: {
   if (p.apruebaTodo) return true;
   return p.esAprobador && !p.esSolicitante;
 }
+
+/**
+ * Marca de una capacidad que las reglas de aprobación de la empresa pueden frenar (CAR-252), con su
+ * monto en CLP. `Ctx` es el contexto de ejecución de `@opai/capabilities` (el dominio no lo conoce).
+ */
+export type ConAprobable<Ctx, Entrada> = {
+  aprobable?: {
+    accion: AccionAprobable;
+    monto?: (ctx: Ctx, input: Entrada) => Promise<number | null>;
+  };
+};
