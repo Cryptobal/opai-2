@@ -24,7 +24,7 @@ export function HojasNegocio({ h }: { h: DatosHojas | null }) {
       {h.abierta === "transferir" ? <HojaTransferir responsables={h.responsables} /> : null}
       {n ? (
         <>
-          <HojaEditar n={n} config={config} />
+          <HojaEditar n={n} config={config} responsables={h.responsables} />
           <HojaMover n={n} config={config} />
           <HojaGanar n={n} />
           <HojaPerder n={n} config={config} />
