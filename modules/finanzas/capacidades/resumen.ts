@@ -57,9 +57,11 @@ export const planillaResumen = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const ajustes = await ajustesDe(ctx);
-    const hoy = lunesHoy();
-    const serie = await serieSaldos(ctx, ajustes, hoy, input.semanas ?? ajustes.horizonteSemanas);
+    const serie = await serieSaldos(ctx, ajustes, lunesHoy(), input.semanas ?? ajustes.horizonteSemanas);
+    // El lunes de la serie (no uno recalculado): a medianoche del domingo podrían diferir en una semana.
+    const hoy = serie.hoy;
     const cobros = new Map<string, number>();
+    // Solo los cobros de facturas del cliente; el depósito del factor (cesión) no se atrasa en el escenario.
     for (const c of serie.extraVista)
       if (c.filaId === FILA_COBROS_ESPERADOS && c.capa === "comprometido") cobros.set(c.semana, (cobros.get(c.semana) ?? 0) + c.monto);
     const semanas = atrasarCobros(serie.calculo, cobros, input.atrasoCobrosSemanas, hoy, ajustes.umbral);

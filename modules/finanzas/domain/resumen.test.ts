@@ -7,7 +7,7 @@ const filas = [
   { id: "ing", seccion: "ingreso" as const, arrastre: false },
   { id: "egr", seccion: "egreso" as const, arrastre: false },
 ];
-// 6 semanas desde el lunes 2026-11-09; hoy es esa semana. Egreso fijo 100; cobros de 300 en las semanas 2 y 4.
+// Una semana pasada (2026-11-02) y 6 desde el lunes 2026-11-09, que es la semana en curso. Egreso fijo 100; cobros de 300 en las semanas 2 y 4.
 const semanas = semanasDesde("2026-11-02", 7);
 const hoy = "2026-11-09";
 const celdas = [
