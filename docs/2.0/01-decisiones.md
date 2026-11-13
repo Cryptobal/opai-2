@@ -519,6 +519,8 @@ revisados en `briefs/ENCARGO-portal-sesion.md`.
 
 **Consecuencias.** La auditoría distingue a cada agente. La inyección de instrucciones desde correos o documentos no puede producir efectos irreversibles. Cualquier modelo elige bien las herramientas porque las descripciones son explícitas. Los manuales no se desactualizan en silencio.
 
+**Adenda CAR-353 (13-nov-2026, Sesión Núcleo; Estándares N-2, referente Stripe).** Todas las capacidades de lista comparten un contrato: entrada `cursor` (opcional) y `limite` con tope ≤ 200; salida `{ items, siguiente }`, con `siguiente` nulo en la última página. Es «lista» toda lectura que devuelve un arreglo, cuya salida trae `items` o cuyo último segmento nombra una lista (`list`, `…_listar`, `list_a_cargo`). `apps/web/test/listas-contrato.test.ts` lo verifica sobre el registro completo: una lista nueva fuera del contrato hace fallar `pnpm test`. Las 152 que existían sin cumplirlo quedan congeladas en `apps/web/test/listas-pendientes.json`; solo pueden salir de ahí al migrarse (la prueba también falla si una ya cumple y sigue en la lista). Para lo nuevo, los verbos son `list` y `get` (no `listar`/`obtener`); lo existente no se renombra para no romper clientes.
+
 ---
 
 ## ADR-035 · Ejecución de briefs desde el proyecto Claude con integración automática
@@ -1880,6 +1882,9 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Adenda (12-nov-2026, CAR-330, Sesión Desempeño): informe por instalación y su pantalla.** Carlos aprobó el 12-nov a las 23:25 (hora de Chile; «que recomiendas? avanza con eso») la propuesta de pantalla hecha con el diseño nuevo (ADR-109). (a) Va como **pestaña de la Pauta**, «Por instalación», junto a Mensual y Diaria, en `/pauta/instalaciones`: el área Operaciones ya tiene sus 7 entradas de menú (`NAVEGACION.md`). (b) Una fila por instalación con la cobertura del mes destacada y, debajo, turnos por cubrir, refuerzos, ausentismo y atrasos. Cada fila abre la pauta mensual de esa instalación. (c) Selector de mes, orden (menor cobertura, más turnos por cubrir, más ausentismo o más atrasos) y descarga CSV del mes en pantalla. (d) El color solo marca el estado y no es una meta de la empresa: cobertura bien ≥ 95 % y alerta < 88 %; ausentismo bien ≤ 3 % y alerta > 8 %; atrasos bien ≤ 5 % y alerta > 10 %. (e) Ausentismo y atrasos salen solo con Asistencia activa y permiso para verla. (f) Carlos también asignó a la Sesión Desempeño que los permisos y licencias de la ficha se vean en la pauta mensual y diaria; va en su propio PR.
 
 **Pendiente de Carlos.** Nada.
+
+**Adenda CAR-383 (13-nov-2026, decide Carlos en el chat de la sesión Desempeño, 18:02):** cada persona ve solo su propio resultado, sin su posición frente a los compañeros de cargo (la opción «la persona ve su posición» del scorecard queda sin uso en pantalla), y los scorecards siguen siendo mensuales, sin trimestre ni semestre. Un trimestre se lee sumando meses cerrados.
+
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
 

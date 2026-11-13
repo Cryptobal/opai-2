@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Switch, Textarea } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Input, Select, SelectorHora, Sheet, Switch, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -55,7 +55,7 @@ export function EditorPlan({ id, plan, etapas, onCerrar }: Props) {
         <Campo etiqueta="Cómo se cuentan los días" htmlFor="plan-conteo">
           <Select id="plan-conteo" valor={c.conteo} onCambiar={(v) => setC({ ...c, conteo: v === "corridos" ? "corridos" : "habiles" })} opciones={[{ valor: "habiles", etiqueta: "Días hábiles (sin fines de semana ni feriados)" }, { valor: "corridos", etiqueta: "Días corridos" }]} />
         </Campo>
-        <Campo etiqueta="Hora de los pasos" htmlFor="plan-hora"><Input id="plan-hora" type="time" value={c.hora} onChange={(e) => setC({ ...c, hora: e.target.value })} /></Campo>
+        <Campo etiqueta="Hora de los pasos" htmlFor="plan-hora"><SelectorHora id="plan-hora" valor={c.hora} onCambiar={(hora) => setC({ ...c, hora })} /></Campo>
         <Campo etiqueta="Si el cliente responde" htmlFor="plan-resp">
           <Select id="plan-resp" valor={c.alResponder} onCambiar={(v) => setC({ ...c, alResponder: v === "detener" ? "detener" : "pausar" })} opciones={[{ valor: "pausar", etiqueta: "Pausar (se puede reanudar)" }, { valor: "detener", etiqueta: "Detener el seguimiento" }]} />
         </Campo>
