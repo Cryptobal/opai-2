@@ -5,7 +5,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
-import { cargarResultadoPersona, mesEnCurso, tonoPuntaje } from "../../_componentes/datos";
+import { cargarResultadoPersona, tonoPuntaje } from "../../_componentes/datos";
 import { mesDeUrl, SelectorMes } from "../../_componentes/selector-mes";
 import { conUnidad, mesCorto } from "../../_componentes/tipos";
 
@@ -30,13 +30,13 @@ export default function ResultadoPersona({ params, searchParams }: Props) {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
         const r = await cargarResultadoPersona(requerirUuid(id), mesDeUrl(p["mes"]));
         requerirEncontrado(r);
-        return { r, actual: mesEnCurso() };
+        return { r };
       }}
       opciones={({ r }) => ({
         titulo: r.ok ? `${r.data.nombres} ${r.data.apellidos}` : "Resultado de la persona",
       })}
     >
-      {({ r, actual }) => {
+      {({ r }) => {
         const d = r.ok ? r.data : null;
         return (
           <DetailScreen
@@ -55,7 +55,7 @@ export default function ResultadoPersona({ params, searchParams }: Props) {
               <div className="flex flex-col gap-6">
                 <SelectorMes
                   periodo={d.periodo}
-                  actual={actual}
+                  actual={d.mesEnCurso}
                   base={`/desempeno/personas/${d.personaId}`}
                 />
                 {d.vigenteDesde === null ? (

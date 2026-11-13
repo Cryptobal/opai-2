@@ -2,6 +2,9 @@
 // y MCP (ADR-004, ADR-055).
 import type { Capacidad } from "../types";
 import { alertasListar } from "./alertas-listar";
+import { ausenciasAnular } from "./ausencias-anular";
+import { ausenciasListar } from "./ausencias-listar";
+import { ausenciasRegistrar } from "./ausencias-registrar";
 import { coberturaConfirmar } from "./cobertura-confirmar";
 import { coberturaDeshacer } from "./cobertura-deshacer";
 import { excepcionesAnular } from "./excepciones-anular";
@@ -35,6 +38,9 @@ export const capacidadesPauta: readonly Capacidad[] = [
   titularesListar,
   excepcionesCrear,
   excepcionesAnular,
+  ausenciasListar,
+  ausenciasRegistrar,
+  ausenciasAnular,
   coberturaConfirmar,
   coberturaDeshacer,
   marcaManual,
