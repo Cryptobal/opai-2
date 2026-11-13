@@ -26,7 +26,7 @@
    - El Revisor hace **una sola pasada**.
    - Solo **bloquea** por **seguridad, migraciones o datos** (RLS, permisos, pérdida o mezcla de datos entre tenants).
    - Todo lo demás es no bloqueante y va a un **PR de pendientes**, no a otra vuelta del mismo PR.
-   - Se integra (la **sesión de Claude** que lleva el PR) con los cuatro checks obligatorios en verde sobre el head (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`), sin conflictos con `main` (traer `main` con merge solo si hay conflicto; decisión 4-nov-2026), sin veto de Carlos, migración ya aplicada con aviso en el PR y etiqueta `migracion-pendiente` quitada si corresponde, y —solo si el PR trae migración o toca RLS, permisos o datos de tenants— tras el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head.
+   - Se integra (la **sesión de Claude** que lleva el PR) con los checks obligatorios en verde sobre el head (`typecheck · lint · test · test:db` y `secretos`; ver AGENTS.md «Revisiones largas», ADR-112 adenda C), sin conflictos con `main` (traer `main` con merge solo si hay conflicto; decisión 4-nov-2026), sin veto de Carlos, migración ya aplicada con aviso en el PR y etiqueta `migracion-pendiente` quitada si corresponde, y —solo si el PR trae migración o toca RLS, permisos o datos de tenants— tras el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head.
    - Cuando Carlos active la **cola de merge** en el ruleset «Proteger main», la sesión de Claude encola el PR ahí: GitHub vuelve a correr los checks obligatorios en el evento `merge_group` (sin e2e ni rendimiento) y hace el squash sin reiniciar el CI de todos los demás PR abiertos.
 7. **QA en vivo va después de integrar** (en test.opai.cl) y **no frena nada**. Sus hallazgos van al PR de pendientes, salvo que sean de seguridad o datos: en ese caso se abre un arreglo inmediato.
 8. **Capturas.** Cuando Carlos quiera ver algo, se las pide al bot OPAI 2.0, que las toma en test.opai.cl.
@@ -50,7 +50,7 @@
 
 Cuando un PR está **listo para revisión** (constructor terminó, `ESTADO.md` actualizado si aplica):
 
-1. Los **cuatro checks obligatorios** del ruleset «Proteger main» deben estar **en verde sobre el head exacto** del PR (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`; ADR-061).
+1. Los **checks obligatorios** del ruleset «Proteger main» deben estar **en verde sobre el head exacto** del PR: `typecheck · lint · test · test:db` y `secretos` (ADR-112, adenda C; antes eran cuatro, ADR-061). `build · presupuesto de JS` corre al integrar a `main`; `migración pendiente`, solo si el PR toca Prisma o migraciones.
 2. La **sesión de Claude Code que construyó el PR** deja un **comentario nuevo** en el PR con:
    - el **SHA completo** del commit revisado;
    - **`sin bloqueos`** si no hay impedimentos en **seguridad, RLS/tenant, permisos, migraciones e integridad de datos**; o **bloqueos concretos** numerados si los hay (misma checklist que `docs/2.0/checklists/revision.md` en esos ejes).
@@ -72,7 +72,7 @@ La **primera línea** del comentario es exactamente una de:
 |---|---|
 | **`DECISIÓN CARLOS:`** | Falta una decisión de negocio que solo Carlos puede tomar. |
 | **`BLOQUEO OPAI:`** | Bloqueo operativo que la sesión no puede resolver (infra, cola, migración, permisos de bot, etc.). |
-| **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, cuatro checks verdes y migración pendiente de aplicar por el bot. |
+| **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, checks obligatorios verdes y migración pendiente de aplicar. |
 | ~~`REVISIÓN VISUAL CARLOS:`~~ | En desuso desde el 11-nov-2026 (ADR-092): el chequeo visual es el run `preview-e2e` y sus capturas (A2.10). |
 
 En el cuerpo (breve): resumen mínimo, enlace a Linear (`CAR-n`) si existe, qué se intentó y qué se necesita. **Sin secretos ni datos personales.** En **`REVISIÓN VISUAL CARLOS:`** incluir siempre preview usable, rutas y checklist de usabilidad.
@@ -188,7 +188,7 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 **El primer vistazo visual ya no lo hace Carlos.** Lo reemplazan las pruebas visuales automáticas y sus capturas (CAR-285):
 
-1. **Workflow `preview-e2e`** (`.github/workflows/preview-e2e.yml`): en cada PR corre los e2e de Playwright marcados **`@preview`** contra la vista previa de Vercel de ese commit, a **375, 1024 y 1280 px**, y sube las capturas como artefacto `preview-e2e-capturas`.
+1. **Workflow `preview-e2e`** (`.github/workflows/preview-e2e.yml`): a pedido (etiqueta `e2e`), de noche contra `main` o a mano (ADR-112, adenda C) corre los e2e de Playwright marcados **`@preview`** contra la vista previa de Vercel de ese commit, a **375, 1024 y 1280 px**, y sube las capturas como artefacto `preview-e2e-capturas`.
 2. **Usuario de pruebas:** siempre el de la empresa ficticia **`qa-e2e`** («QA E2E (ficticia)», 13 módulos activos, sin datos de Gard). **Nunca** Gard ni datos reales. Los secretos (`E2E_EMAIL`, `E2E_PASSWORD`, `E2E_TOTP_SECRET`, `VERCEL_AUTOMATION_BYPASS_SECRET`) solo existen en GitHub Actions; no se muestran ni se escriben en logs, capturas, PRs ni en el repo.
 3. **Cada PR con cambio visual** agrega o actualiza las pruebas `@preview` de sus pantallas (flujo principal y captura con `capturar` de `apps/web/e2e/preview.ts`). Las pruebas crean sus propios datos en `qa-e2e` y no dependen de datos sembrados de otra empresa.
 4. **Integración:** un PR se integra solo con el run de `preview-e2e` **en verde sobre el head** y las **capturas revisadas por la propia sesión** contra el diseño aprobado y `DISENO.md`. La sesión deja en el PR qué revisó. La revisión final técnica (A2.2) sigue aparte.
@@ -214,7 +214,7 @@ Mientras GitHub Actions esté bloqueado y la regla «Proteger main» desactivada
 | 1 | `01-decisiones.md` ADR-043 «Segunda modificación (24-oct)» e `INSTRUCCIONES-proyecto-claude.md` (Ejecución, paso 4); cabecera de `ESTADO.md` | Las tareas viven en Linear (`Fixes CAR-n`). `ESTADO.md` se toca solo si cambia la foto técnica. | **Cada PR actualiza `ESTADO.md`** (A.3). Linear puede seguir como referencia (`Fixes CAR-n`), pero no reemplaza a `ESTADO.md`. |
 | 2 | `AGENTS.md`, «Prohibido» y etiqueta `migracion-pendiente` | «Las migraciones de Neon las aplica Carlos desde su Mac»; «Solo Carlos» quita la etiqueta y ningún bot la pone ni la quita. | **El bot aplica la migración con respaldo, dev → main, y quita la etiqueta** (A.5). Esto ya se hacía así por los mandatos t500u (26-oct) y t682u (28-oct); por ejemplo, el #91. |
 | 3 | `AGENTS.md` y ADR-043 v3 (Revisor) | Se exige APROBAR sin condiciones, y cualquier push invalida la aprobación. | **Una pasada; solo bloquea por seguridad, migraciones o datos** (A.6). Tras un push, el Revisor revisa solo el delta. |
-| 4 | `AGENTS.md`, checks del ruleset «Proteger main» | 3 obligatorios: `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`. | Desde el 4-nov-2026 (ADR-061) son **4** obligatorios, incluido `migración pendiente` (CAR-61). `rendimiento` (ADR-045) sigue por confirmar aparte (E.4). |
+| 4 | `AGENTS.md`, checks del ruleset «Proteger main» | 3 obligatorios: `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`. | Desde el 13-nov-2026 (ADR-112, adenda C) son **2**: `typecheck · lint · test · test:db` y `secretos` (antes 4, ADR-061). `rendimiento` (ADR-045) sigue por confirmar aparte (E.4). |
 | 5 | Práctica del 27-oct (t618u) | QA sin bloqueantes **antes** de integrar. | **QA en vivo después de integrar, sin frenar** (A.7). Esto coincide con ADR-043 v3. |
 | 6 | ADR-043 v3 §8 / `REGLAS-codigo.md` (e2e) | La e2e no es obligatoria. | Igual (sigue sin ser check obligatorio del ruleset). En CI (PR #257 / CAR-181): **e2e** (6 shards), informe, **`e2e (Playwright)`** y **rendimiento** corren en cron nocturno (03:00 Santiago), `workflow_dispatch`, push a `main` o PR con etiqueta **`e2e`** (la pone Carlos); no en cada `pull_request`. El gate **`typecheck · lint · test · test:db`** corre en cuatro jobs paralelos más un agregador con el mismo nombre. Regla t611u (27-oct): en local, specs tocados + gate completo antes del push. |
 | 7 | `CONTEXTO-agentes.md` (rol del bot) | El bot «prepara los prompts de cada encargo». | **Claude escribe los briefs** (A.2). El bot opera la cola. |
