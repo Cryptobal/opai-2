@@ -55,3 +55,10 @@ export async function irANuevaCotizacion(page: Page) {
     await base(page).toHaveURL(/\/cotizaciones\/nueva/, { timeout: 5_000 });
   }).toPass({ timeout: 40_000 });
 }
+
+/** Acción secundaria de Negocios: botón desde md; en el teléfono, ítem del menú «⋯» (CAR-371). */
+export async function accionNegocios(page: Page, telefono: boolean, nombre: string) {
+  if (!telefono) return page.getByRole("link", { name: nombre, exact: true }).first().click();
+  await page.getByRole("button", { name: "Más acciones de negocios" }).click();
+  await page.getByRole("menuitem", { name: nombre }).click();
+}

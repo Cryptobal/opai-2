@@ -1,10 +1,11 @@
-import { ChartColumn, Download, Plus, UserCheck } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Cabecera, Empty, Estado, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos } from "@/lib/fechas";
 
+import { AccionesNegocios } from "../acciones-negocios";
 import type { NegocioFila } from "../datos";
 import { VistaNegocios } from "../vista-negocios";
 import { ArrastreTablero } from "./arrastre-tablero";
@@ -48,22 +49,16 @@ export function TableroNegocios(p: {
       />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <VistaNegocios activa="tablero" />
-        <EnlaceBoton href="/negocios/seguimiento" variante="secondary">
-          Pendientes de seguimiento
-        </EnlaceBoton>
-        <EnlaceBoton href="/negocios/reportes" variante="secondary" icono={ChartColumn}>
-          Reportes
-        </EnlaceBoton>
-        {p.gestiona ? (
-          <EnlaceBoton href="/negocios?transferir=1" variante="secondary" icono={UserCheck}>
-            Transferir cartera
-          </EnlaceBoton>
-        ) : null}
-        {p.exportar ? (
-          <EnlaceBoton href={p.exportar} variante="secondary" icono={Download}>
-            Exportar a Excel
-          </EnlaceBoton>
-        ) : null}
+        <div className="flex items-center gap-2 md:contents">
+          <AccionesNegocios
+            acciones={[
+              { id: "seguimiento", href: "/negocios/seguimiento" },
+              { id: "reportes", href: "/negocios/reportes" },
+              ...(p.gestiona ? [{ id: "transferir" as const, href: "/negocios?transferir=1" }] : []),
+              ...(p.exportar ? [{ id: "exportar" as const, href: p.exportar }] : []),
+            ]}
+          />
+        </div>
         <SelectorEtapa
           etapas={p.etapas.map((e) => ({ id: e.id, nombre: e.nombre, n: de(e.id).length }))}
           inicial={p.etapa}

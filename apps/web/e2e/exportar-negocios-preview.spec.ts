@@ -27,14 +27,24 @@ test.describe("@preview negocios: exportar a Excel", () => {
   test("el botón está en el tablero y en la lista, y la descarga es un Excel", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/negocios");
-    const enTablero = page.getByRole("link", { name: "Exportar a Excel" });
-    await expect(enTablero).toBeVisible();
+    // En el teléfono el enlace queda oculto y la acción va en el menú «⋯» (CAR-371).
+    const telefono = info.project.name === "telefono";
+    const visible = async () => {
+      if (!telefono) return;
+      await page.getByRole("button", { name: "Más acciones de negocios" }).click();
+      await expect(page.getByRole("menuitem", { name: "Exportar a Excel" })).toBeVisible();
+      await page.keyboard.press("Escape");
+    };
+    const enTablero = page.getByRole("link", { name: "Exportar a Excel", includeHidden: true });
+    if (!telefono) await expect(enTablero).toBeVisible();
+    await visible();
     await expect(enTablero).toHaveAttribute("href", "/api/negocios/export");
     await capturar(page, info, "negocios-exportar-tablero");
 
     await page.goto("/negocios?vista=lista&estado=abierto");
-    const enLista = page.getByRole("link", { name: "Exportar a Excel" });
-    await expect(enLista).toBeVisible();
+    const enLista = page.getByRole("link", { name: "Exportar a Excel", includeHidden: true });
+    if (!telefono) await expect(enLista).toBeVisible();
+    await visible();
     await expect(enLista).toHaveAttribute("href", "/api/negocios/export?estado=abierto");
     await capturar(page, info, "negocios-exportar-lista");
 
