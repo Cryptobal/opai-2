@@ -2,6 +2,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { consultaDeRuta } from "./lib/existencia-ruta";
+import { loginDe } from "./lib/login-destino";
 import { destino404, esIdInvalido } from "./lib/rutas-invalidas";
 import { cabecerasConNonce } from "./lib/nonce";
 
@@ -114,9 +115,9 @@ export async function proxy(request: NextRequest) {
       return responder(await respuesta404(request, headers));
     return responder(NextResponse.next({ request: { headers } }));
   }
-  const login = new URL("/login", request.url);
+  // Cada portal a su ingreso (CAR-347): el trabajador entra con RUT y PIN, no con correo.
   const destino = request.nextUrl.pathname + request.nextUrl.search;
-  if (destino !== "/") login.searchParams.set("next", destino);
+  const login = new URL(loginDe(destino === "/" ? undefined : destino), request.url);
   return responder(NextResponse.redirect(login));
 }
 
