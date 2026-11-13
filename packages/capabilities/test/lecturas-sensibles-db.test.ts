@@ -127,7 +127,7 @@ describe.skipIf(!urlPropietario)("inventario NÚCLEO-H: accesos sensibles en Pos
 
   it("historial y auditoría registran solo los IDs de la página; sin duplicar read_sensible", async () => {
     for (const [id, campo] of [
-      ["core.audit.list", "eventos"],
+      ["core.audit.list", "items"],
       ["core.actividad.list", "items"],
     ] as const) {
       const r = await mod.executeCapability(contexto(), id, { limite: 2 });
