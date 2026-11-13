@@ -197,17 +197,15 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 ---
 
-### A2.11 Sin GitHub Actions: gate local (Carlos, 13-nov-2026, ADR-112; temporal)
+### A2.11 Sin GitHub Actions: revisión mínima local (Carlos, 13-nov-2026, ADR-112; temporal)
 
-Mientras GitHub Actions esté bloqueado y la regla «Proteger main» desactivada, **ninguna sesión integra sin esto**:
+Mientras GitHub Actions esté bloqueado y la regla «Proteger main» desactivada, **ninguna sesión integra sin esto** (detalle en ADR-112, decisión A):
 
-1. Trae `main` a la rama con merge y empuja.
-2. En una copia limpia del head exacto, corre `scripts/gate-local.sh`, con Postgres local `postgres/postgres` o `GATE_DB_URL`. Todo debe salir `:ok`.
-3. Si hay cambio visual, corre `scripts/gate-local-visual.sh e2e/<tu-spec>.spec.ts` y revisa las capturas de `apps/web/test-results/playwright`.
-4. Comenta en el PR «Gate local» con el SHA completo y el resultado de cada paso, y la revisión final sin bloqueos sobre ese SHA.
-5. Integra con squash fijando `sha=<head>`, uno a la vez y en el orden acordado. Si `main` cambió entre medio, vuelve al paso 1.
-
-No se empujan commits vacíos para «despertar» CI ni se relanzan jobs: con Actions bloqueado fallan sin costo, pero llenan las notificaciones.
+1. No uses Actions: no relances jobs ni empujes commits vacíos.
+2. Trae `main` a la rama con merge, empuja y corre `scripts/gate-local.sh` sobre el head exacto, en tu espacio de trabajo. Revisa solo lo afectado; `test:db` solo si tocas base, capacidades, auth o módulos.
+3. La vista previa de Vercel del PR debe estar «Ready». Si tocas pantallas, agrega `--presupuesto`.
+4. Si hay cambio visual, revisa las capturas en la vista previa o con `scripts/gate-local-visual.sh e2e/<spec>.spec.ts`.
+5. Comenta «Gate local» en el PR con el SHA completo y cada resultado, más la revisión final sin bloqueos, e integra con squash fijando `sha=<head>`.
 
 ### ⚠ Contradicciones con el repo (se resuelven a favor de esta sección)
 
