@@ -370,4 +370,19 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
       "anulada",
     );
   });
+
+  it("desde el Núcleo, marcar turnos sin permiso de editar la pauta se rechaza y no escribe (CAR-393)", async () => {
+    const base = ctx(tenantA);
+    const sinPauta = { ...base, autorizar: (p: string) => p !== "pauta:write" && base.autorizar(p) };
+    const antes = await e.admin.ausencia.count({ where: { personaId: ana } });
+    const r = await run(sinPauta, "core.ausencias.registrar", {
+      personaId: ana,
+      tipo: "permiso",
+      motivo: "Trámite personal",
+      desde: dia(50),
+      hasta: dia(52),
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await e.admin.ausencia.count({ where: { personaId: ana } })).toBe(antes);
+  });
 });
