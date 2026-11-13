@@ -33,6 +33,7 @@ export const personasAusenciasRegistrar = defineCapability({
       dryRun,
       conPauta: ctx.modulosActivos.includes("pauta"),
       exigirTurnos: false,
+      exigirPermisoPauta: true,
     }),
 });
 
