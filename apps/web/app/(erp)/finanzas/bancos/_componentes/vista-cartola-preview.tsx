@@ -2,7 +2,7 @@
 
 import { formatearNumero } from "@opai/domain";
 
-import { fechaHora } from "@/lib/formato";
+import { fecha, hora } from "@/lib/fechas";
 import { Alerta } from "@opai/ds";
 
 import type { VistaCartolaPreview as Vista } from "./tipos-cartola";
@@ -56,7 +56,7 @@ export function VistaCartolaPreview({
       {cuadratura ? <AvisoCuadratura c={cuadratura} /> : null}
       {yaImportada ? (
         <Alerta tono="warning" titulo="Esta cartola ya se importó">
-          {`${yaImportada.nombreArchivo ?? "Una cartola"} con el mismo período se importó el ${fechaHora(yaImportada.creadaEn)}. Si la vuelves a importar, sus movimientos quedan como duplicados. Para reemplazarla, deshazla primero en Importaciones.`}
+          {`${yaImportada.nombreArchivo ?? "Una cartola"} con el mismo período se importó el ${fecha(yaImportada.creadaEn)} a las ${hora(yaImportada.creadaEn)}. Si la vuelves a importar, sus movimientos quedan como duplicados. Para reemplazarla, deshazla primero en Importaciones.`}
         </Alerta>
       ) : null}
       <ul className="max-h-48 overflow-auto text-sm text-fg-muted">
