@@ -1867,6 +1867,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Adenda (12-nov-2026, CAR-312, Sesión Desempeño): el agente y Desempeño.** (1) **Propuestas del agente:** no se crea una cola propia. Un agente que guarda un scorecard como borrador deja una propuesta; publicarlo (sumar un indicador, mover una meta) exige siempre aprobación humana por la cola existente de `core.aprobaciones` (`exigeAprobacion` de `desempeno.scorecards.guardar`), que el hilo ya muestra en Pendientes. El agente nunca cambia una meta solo. (2) **Responder con los mismos números:** el agente usa las mismas capacidades que la pantalla (`desempeno.resultados.*`, `core.indicadores_gestion.*`). (3) **Avisos bajo la meta:** con el ajuste `desempeno.aviso_bajo_meta` encendido (**apagado por defecto**, ADR-020), al cerrar el mes se emite `desempeno.resultado.bajo_meta` por persona bajo la meta y `desempeno.equipo.bajo_meta` por la jefatura directa de su ficha. Son transaccionales (sin reglas de Comunicaciones): la campana llega a la persona solo si su cargo le muestra su resultado y tiene el permiso de ver resultados, y a la jefatura solo por las personas que la jefatura de cargos le deja ver. Nunca llevan el puntaje. (4) **Indicador nuevo del núcleo** `core.respuesta_escalados`: horas promedio desde que un agente pide una aprobación hasta que alguien la aprueba o rechaza, atribuido a quien decide; las vencidas sin decisión y las de plataforma no cuentan. (5) **Parte del agente:** el resultado de cada persona muestra qué parte de sus acciones auditadas del mes hizo un agente que actúa por ella; el resultado se atribuye igual a la persona. Sin migración.
 
+**Adenda (12-nov-2026, CAR-330, Sesión Desempeño): informe por instalación y su pantalla.** Carlos aprobó el 12-nov a las 23:25 (hora de Chile; «que recomiendas? avanza con eso») la propuesta de pantalla hecha con el diseño nuevo (ADR-109). (a) Va como **pestaña de la Pauta**, «Por instalación», junto a Mensual y Diaria, en `/pauta/instalaciones`: el área Operaciones ya tiene sus 7 entradas de menú (`NAVEGACION.md`). (b) Una fila por instalación con la cobertura del mes destacada y, debajo, turnos por cubrir, refuerzos, ausentismo y atrasos. Cada fila abre la pauta mensual de esa instalación. (c) Selector de mes, orden (menor cobertura, más turnos por cubrir, más ausentismo o más atrasos) y descarga CSV del mes en pantalla. (d) El color solo marca el estado y no es una meta de la empresa: cobertura bien ≥ 95 % y alerta < 88 %; ausentismo bien ≤ 3 % y alerta > 8 %; atrasos bien ≤ 5 % y alerta > 10 %. (e) Ausentismo y atrasos salen solo con Asistencia activa y permiso para verla. (f) Carlos también asignó a la Sesión Desempeño que los permisos y licencias de la ficha se vean en la pauta mensual y diaria; va en su propio PR.
+
 **Pendiente de Carlos.** Nada.
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
@@ -2031,6 +2033,40 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+**Adenda del 13-nov-2026 (Carlos, 00:12 hora de Chile, chat de la «Sesión Diseño»: «nunca más hace nada OPAI 2.0, tú integras todo»).** El bot «OPAI 2.0» queda fuera del flujo: no vigila, no migra, no integra ni revisa. Toda sesión de Claude integra a `main` sus propios PR (squash, con las condiciones de «Integración a `main`») y aplica sus migraciones. Donde un encargo, brief o documento diga que el bot integra, migra o revisa, lo hace la sesión que construyó el PR.
+
+
+## ADR-105 · Hilo es la fuente única de diseño, con reglas verificables (CAR-334, 12-nov-2026)
+
+**Decidió:** Carlos (encargo a la «Sesión Diseño», 12-nov-2026, 16:20, hora de Chile: «La referencia única es el "OPAI 2.0 Design System · Hilo" de Claude Design. V1, V2 y el "OPAI Design System" antiguo quedan obsoletos») · **Registra:** Claude («Sesión Diseño»). **Extiende** ADR-102 (Hilo para todo diseño nuevo) a la revisión de lo ya construido; **no cambia** ADR-090 (el interruptor de marco y las etapas H1–H7 siguen como están).
+
+**Decisión.**
+1. La única referencia de diseño de OPAI 2.0 es el sistema «OPAI 2.0 Design System · Hilo» de Claude Design, con su copia en el repo (`docs/2.0/design/export-base-hilo/`, `packages/ds`). V1, V2 y el «OPAI Design System» antiguo quedan obsoletos: no se usan para diseñar ni para juzgar una pantalla.
+2. Hilo se aplica como reglas verificables (`docs/2.0/DISENO-hilo.md`): los tokens en `packages/ds/src/hilo/tokens-hilo.ts` con una prueba que los compara con `tokens.css`, y las reglas de uso (un primario por vista, ubicación de acciones, estados, formatos chilenos, textos) como trinquete en `pnpm test` y como mediciones de la auditoría visual.
+3. La «Sesión Diseño» es dueña de Diseño y experiencia: audita los cuatro portales, corrige lo transversal (DS, marco, navegación, tipografía, botones, textos) y asigna lo de cada módulo a su sesión. No cambia decisiones de producto ni flujos de negocio; si Hilo y una pantalla aprobada se contradicen, pregunta a Carlos.
+
+**Consecuencias.** Un PR que cambie la piel en `tokens.css` sin cambiar `tokens-hilo.ts` (o al revés) falla. Un archivo no puede sumar formatos propios, tamaños fuera de escala, botones genéricos ni estilos en línea respecto de `apps/web/test/reglas-diseno/base.json`. El marco clásico sigue hasta H7; la auditoría se hace en el marco Hilo.
+
+**Adenda (12-nov-2026, Sesión Diseño, con ADR-109 a la vista; confirmada por Carlos en el chat de la sesión, 12-nov-2026, 20:36, hora de Chile: «seguir el nuevo diseño»).** ADR-109 reemplaza a Hilo como referencia visual. De este ADR quedan las reglas verificables que no dependen de la piel (un solo botón primario por vista, ubicación de acciones, estados, formatos chilenos de RUT, fecha y monto, escala tipográfica, accesibilidad), el trinquete de `apps/web/test/reglas-diseno` y la auditoría `@auditoria`: desde hoy se miden contra el diseño nuevo (`docs/2.0/design/export-diseno-nuevo/`). Los tokens de `@opai/ds/hilo` y su prueba solo cuidan la piel Hilo mientras exista (hasta D6). La Sesión Diseño no abre más correcciones de piel Hilo; los hallazgos de piel (tarjetas o líneas, cabecera del teléfono, índigo) pasan a los bloques D1 a D6 de `BRIEF-CAR-335-diseno-nuevo.md`.
+
+## ADR-106 · La vara: OPAI 2.0 sigue a los mejores SaaS de cada capa (CAR-348, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 17:58, hora de Chile) · **Registra:** Claude («Sesión Estándares»).  (ADR-105 lo usa el PR #584, abierto antes.)
+
+**Contexto.** OPAI 2.0 lo construyen varias sesiones en paralelo. Cada una resuelve bien su módulo, pero sin una referencia común cada módulo inventa su forma de dar permisos, de listar, de aprobar o de mostrar un error. Carlos pidió que todo siga el estándar de los mejores SaaS y que no se reinvente la rueda.
+
+**Decisión.**
+1. [`REFERENTES-saas.md`](REFERENTES-saas.md) es la vara oficial. Para cada capa nombra el referente, el patrón concreto que se copia y cómo se mide: permisos (GitHub, Google Workspace, Rippling), multi-tenant (Linear, Slack, Stripe), API y MCP (Stripe), Comercial (HubSpot, Salesforce, Pipedrive), Finanzas (Stripe Billing, Xero, QuickBooks), Personas (Rippling, Deel, BambooHR), terreno (Connecteam, Deputy, ServiceTitan), UX (Linear, Notion) e IA (la IA propone y una persona aprueba, con registro).
+2. Vale para todo: diseño, lógica, permisos, Núcleo y módulos. Si un módulo ya construido se aparta sin motivo, se ajusta o se rehace; rehacer un módulo lo decide Carlos con la auditoría a la vista.
+3. El aspecto lo decide el sistema visual oficial vigente: el diseño nuevo de ADR-109, que reemplazó a Hilo el mismo 12-nov-2026. Los referentes de UX fijan el comportamiento, no el aspecto.
+4. Apartarse del referente exige una razón escrita: ley chilena (DT, SII, Ley 21.719), una regla de negocio de Carlos, agent-first (ADR-034) o costo desproporcionado.
+5. Un referente se cambia con una adenda a este ADR.
+
+**Consecuencias.**
+- La auditoría por capa y módulo vive en `docs/2.0/auditoria-estandares/` y sus brechas altas y críticas van a Linear, en el proyecto del módulo y enlazadas a «22 · Estándares y arquitectura».
+- Todo PR que toque arquitectura, permisos, modelo de datos o UX declara «Referente seguido y en qué se aparta» (plantilla del PR y `AGENTS.md`, en un PR posterior de esta misma serie).
+- La Sesión Estándares revisa cada ADR y cada PR de esos temas contra la vara y comenta las brechas.
+- No reemplaza a `AGENTS.md`, `REGLAS-codigo.md` ni a los ADR vigentes: ante un choque, mandan ellos y se anota la diferencia aquí.
 
 ## ADR-108 · Trabajo en paralelo sin esperas y sin choques entre sesiones (12-nov-2026)
 
@@ -2085,3 +2121,18 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 **Consecuencias.**
 - El corte automático de acceso al terminar (membresía, credencial de terreno, llaves) queda para la parte 2 de CAR-355.
 - La plantilla se edita como lista JSON hasta que haya diseño de editor (diseño nuevo, ADR-109).
+
+## ADR-111 · Modo noche: de 21:00 a 07:00 las sesiones trabajan e integran solas (CAR-375, 13-nov-2026)
+
+**Fecha:** 13-nov-2026 · **Estado:** vigente · **Decidió:** Carlos (chat de la Sesión Núcleo, 13-nov-2026, 00:30, hora de Chile) · **Registra:** Claude («Sesión Núcleo»). **Modifica** `AGENTS.md` (sección nueva «Modo noche», roles y migraciones), `docs/2.0/CONTEXTO-agentes.md` y `docs/2.0/OPERACION-agentes.md`.
+
+**Decisión.** Todas las noches, de 21:00 a 07:00 (America/Santiago), rige el «Modo noche» de `AGENTS.md`:
+1. Las sesiones trabajan sin pausa los tickets de Linear de su módulo por prioridad, sin esperar a Carlos ni al bot «OPAI 2.0».
+2. Las dudas de producto o diseño se resuelven con `docs/2.0/REFERENTES-saas.md` y el sistema de diseño vigente, y se anotan como «Decisión nocturna: … (revisar)» en el ticket y en el PR.
+3. Cada sesión integra sus PRs sin esperar revisión cuando cumplen los cuatro checks, no tienen conflictos, tienen revisión final sin bloqueos y, si hay migración, snapshot de Neon previo. Arregla sus checks rotos y resuelve choques trayendo `main`.
+4. De noche nunca se tocan: producción (`app.opai.cl`), OPAI 1.0, datos reales del tenant Gard, plata o emisiones reales al SII, secretos ni borrados irreversibles. Lo que dependa de eso queda en «Espera a Carlos» con la pregunta concreta.
+5. El PC de Carlos se puede usar para probar `test.opai.cl`, sin escribir datos de Gard.
+6. A las 07:00, resumen en el ticket padre del módulo: PRs integrados, decisiones nocturnas, «Espera a Carlos» y riesgos.
+
+**Alineación.** Quedan corregidas las frases que aún decían que el bot «OPAI 2.0» aplica las migraciones o que la sesión no las aplica: desde ADR-104 las aplica la sesión con respaldo, y el bot no integra ni migra. El veto de Carlos y la condición de `preview-e2e` para cambios visuales siguen vigentes también de noche. `REFERENTES-saas.md` llega con el PR #591 (CAR-348); mientras no esté en `main`, se usa el referente SaaS más cercano.
+
