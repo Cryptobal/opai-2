@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 764 pares pantalla→capacidad · 685 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 767 pares pantalla→capacidad · 688 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -365,6 +365,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.movimientos_bancarios.listar` | `finanzas_movimientos_bancarios_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.reglas_banco.guardar` | `finanzas_reglas_banco_guardar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.ventas.buscar` | `finanzas_ventas_buscar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.deshacer` | `finanzas_cartolas_deshacer` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.listar` | `finanzas_cartolas_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.aplicar` | `finanzas_reglas_banco_aplicar` | existe |
@@ -1126,8 +1129,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.margen`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
-- `finanzas.cartolas.deshacer`
-- `finanzas.cartolas.listar`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.fijar_fecha_esperada`
 - `finanzas.cuadratura.obtener`
