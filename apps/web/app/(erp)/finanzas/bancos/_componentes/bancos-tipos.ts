@@ -10,6 +10,8 @@ export type CuentaBanco = {
   /** Saldo de hoy (último saldo conocido llevado con los movimientos posteriores) y desde qué fecha (CAR-341). */
   saldoHoy?: number | null;
   saldoDesde?: string | null;
+  saldoFuente?: "banco" | "movimiento" | "cartola" | null;
+  saldoMovimientosDespues?: number | null;
 };
 
 export type MovimientoBanco = {

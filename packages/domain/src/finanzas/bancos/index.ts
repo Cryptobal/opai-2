@@ -1,4 +1,5 @@
 export * from "./dedupe";
+export * from "./emparejar";
 export * from "./fechas";
 export * from "./remuneracion";
 export * from "./conciliacion";

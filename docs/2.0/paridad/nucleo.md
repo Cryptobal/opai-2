@@ -11,7 +11,7 @@ Generado: 24-10-2026, 10:45 (hora de Chile, UTC-3). Solo lectura: se comparan re
 > **Reglas que ya están a la par (no son brecha):**
 > - El último owner activo está protegido. 1.0: `src/app/(app)/opai/actions/users.ts`, "Debe haber al menos un owner activo". 2.0: `packages/capabilities/src/core/users.ts`, `quedanOtrosOwners`.
 > - Nadie asigna un rol superior al propio. 1.0: `hasHigherRole` en `src/lib/role-policy.ts`. 2.0: `puedeAsignarRol` en `packages/domain/src/permisos.ts`.
-> - Solo owner y admin ven finanzas y sueldos. 1.0: `applySensitiveSalaryRoleLock` / financial lock en `src/lib/permissions.ts`. 2.0: `FINANCIERO` y `core:estructuras.read_sensible`, ADR-016.
+> - Solo owner y admin ven finanzas y sueldos. 1.0: `applySensitiveSalaryRoleLock` / financial lock en `src/lib/permissions.ts`. 2.0: ningún permiso `finanzas:*` ni `nomina:*` está en la lista explícita de gerente, lector o supervisor (`permisos-base-*.ts`, CAR-350/CAR-387) y `core:estructuras.read_sensible`, ADR-016.
 > - Un tenant suspendido bloquea el ingreso. 1.0: `resolveTenantAccess` en `src/lib/auth.ts`. 2.0: `Tenant.estado` "suspendido" en `core.prisma`.
 > - Google no permite autorregistro. 1.0: `src/lib/auth.ts` busca un Admin existente. 2.0: `disableSignUp` en `packages/auth/src/opciones.ts`.
 > - Hay invitación revocable de un solo uso en ambos.
