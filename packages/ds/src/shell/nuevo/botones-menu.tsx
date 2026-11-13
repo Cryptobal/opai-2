@@ -1,4 +1,4 @@
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, SunMoon } from "lucide-react";
 
 const ESTILO =
   "-mr-1 hidden size-9 items-center justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus lg:flex";
@@ -29,6 +29,21 @@ export function BotonFijarMenu({ onFijar }: { onFijar: () => void }) {
       className={ESTILO}
     >
       <PanelLeftOpen className="size-[18px]" aria-hidden />
+    </button>
+  );
+}
+
+/** Barra superior del diseño nuevo, en iPad y escritorio: cambia entre día y noche. */
+export function BotonTema({ onTema }: { onTema: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onTema}
+      aria-label="Cambiar entre día y noche"
+      title="Cambiar entre día y noche"
+      className="flex size-11 items-center justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus xl:size-9"
+    >
+      <SunMoon className="size-[18px]" aria-hidden />
     </button>
   );
 }

@@ -41,3 +41,12 @@ export const filaPreviewSchema = z.object({
 export function montoDe(v: bigint | number): number {
   return aNumeroSeguro(v);
 }
+
+/** Saldo inicial + detalle = saldo final de una cartola (CAR-341). */
+export const cuadraturaSchema = z.object({
+  saldoInicial: z.number().int(),
+  saldoFinal: z.number().int(),
+  sumaDetalle: z.number().int(),
+  diferencia: z.number().int(),
+  cuadra: z.boolean(),
+});

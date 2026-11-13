@@ -82,7 +82,7 @@ describe("traer el export de OPAI 1 con la llave de la empresa", () => {
   });
 
   it("solo se lee OPAI 1 cuando se pide y no viene un origen pegado", () => {
-    const base = { accion: "simular" as const, permitirReimportacion: false, usuarios: [], soloComercial: true };
+    const base = { accion: "simular" as const, permitirReimportacion: false, usuarios: [], soloComercial: true, soloCotizaciones: false };
     expect(pideOpai1({ ...base, desdeOpai1: true })).toBe(true);
     expect(pideOpai1({ ...base, desdeOpai1: false })).toBe(false);
     expect(pideOpai1({ ...base, desdeOpai1: true, accion: "revertir" })).toBe(false);
