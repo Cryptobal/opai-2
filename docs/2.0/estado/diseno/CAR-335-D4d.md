@@ -1,7 +1,7 @@
 # CAR-335 D4d · Sin conexión en el diseño nuevo
 
 - **Sesión:** Sesión Hilo
-- **PR:** por abrir · rama `brief/car-335-d4d-conexion` (apilado sobre #632, que también edita `shell-nuevo.tsx`)
+- **PR:** #650 · rama `brief/car-335-d4d-conexion` (apilado sobre #632, que también edita `shell-nuevo.tsx`)
 - **Estado:** En PR
 - **Migración:** No
 
