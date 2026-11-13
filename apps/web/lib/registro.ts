@@ -1,6 +1,7 @@
 import {
   capacidadesDelNucleo,
   consumidorAvisoPrueba,
+  consumidorAvisoPruebaEmpresa,
   consumidorSeguimientoCierre,
   consumidoresDelNucleo,
   limpiarConsumidores,
@@ -57,6 +58,7 @@ export function asegurarRegistro(): void {
     consumidorCpqEnlace,
     consumidorSeguimientoCierre,
     consumidorAvisoPrueba,
+    consumidorAvisoPruebaEmpresa,
   ]);
   hecho = true;
 }
