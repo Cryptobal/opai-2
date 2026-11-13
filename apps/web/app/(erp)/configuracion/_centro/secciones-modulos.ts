@@ -35,12 +35,6 @@ export type SeccionModulo = {
 export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
   comercial: [
     {
-      id: "importar-cotizaciones",
-      etiqueta: "Importar cotizaciones",
-      permiso: "comercial:config.manage",
-      Contenido: SeccionImportarCotizaciones,
-    },
-    {
       id: "embudo",
       etiqueta: "Embudo",
       permiso: "comercial:config.manage",
@@ -63,6 +57,12 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       etiqueta: "Seguimiento",
       permiso: "comercial:config.manage",
       Contenido: SeccionSeguimiento,
+    },
+    {
+      id: "importar-cotizaciones",
+      etiqueta: "Importar cotizaciones",
+      permiso: "comercial:config.manage",
+      Contenido: SeccionImportarCotizaciones,
     },
   ],
   nomina: [
