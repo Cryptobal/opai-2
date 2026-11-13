@@ -105,15 +105,12 @@ model FlujoIvaPostergado {
   @@schema("finanzas")
 }
 
-/// Ajustes del flujo por empresa (una fila por tenant): saldo inicial del horizonte y umbral de alerta.
+/// Ajustes del flujo por empresa (una fila por tenant): umbral de alerta, horizonte y calendario. El saldo parte del banco (ADR-073; sin saldo inicial, CAR-394).
 model FlujoAjustes {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @unique @map("tenant_id") @db.Uuid
-  saldoInicial BigInt   @default(0) @map("saldo_inicial")
   /// Umbral único de saldo bajo (planilla, aviso semanal y aviso de banco; ADR-073). Defecto 10.000.000, configurable por empresa (decisión de Carlos del 5-nov-2026).
   umbral       BigInt   @default(10000000)
-  /// Semana (lunes) desde la que parte el saldo inicial.
-  desde        DateTime @db.Date
   toleranciaCierre     BigInt   @default(1000) @map("tolerancia_cierre")
   horizonteSemanas     Int      @default(12) @map("horizonte_semanas")
   calendarioPagos      Json     @default("{}") @map("calendario_pagos")

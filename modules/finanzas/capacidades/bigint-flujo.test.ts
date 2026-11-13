@@ -67,11 +67,11 @@ describe("finanzas flujo · BIGINT (CAR-139 §1)", () => {
     expect(saldo).toBeGreaterThan(10 ** 12);
   });
 
-  it("ajustes.actualizar persiste saldoInicial > INT4", async () => {
+  it("ajustes.actualizar persiste un umbral > INT4", async () => {
     const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS });
     const grande = 3_000_000_000;
-    const aj = await executeCapability(ctx, "finanzas.ajustes.actualizar", { saldoInicial: grande });
-    expect(aj).toMatchObject({ ok: true, data: { saldoInicial: grande } });
+    const aj = await executeCapability(ctx, "finanzas.ajustes.actualizar", { umbral: grande });
+    expect(aj).toMatchObject({ ok: true, data: { umbral: grande } });
   });
 
   it("lectura serializa montos BIGINT de la base a number seguro", async () => {

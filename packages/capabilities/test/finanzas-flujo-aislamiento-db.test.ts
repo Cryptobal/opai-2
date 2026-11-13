@@ -48,7 +48,7 @@ describe.skipIf(!urlPropietario)("flujo de caja: dos empresas en base real", () 
     for (const k of ["a", "b"] as const)
       t[k] = (await e.admin.tenant.create({ data: { slug: `flujo-${k}-${sufijo}`, nombre: k, vertical: "seguridad" } })).id;
     await e.admin.user.create({ data: { id: usuario, email: `u-${sufijo}@flujo.test`, name: "u" } });
-    await ok(t.a, "finanzas.ajustes.actualizar", { saldoInicial: 1000, umbral: 300, desde });
+    await ok(t.a, "finanzas.ajustes.actualizar", { umbral: 300 });
   });
   afterAll(async () => {
     await e?.cerrar();

@@ -279,10 +279,10 @@ describe("finanzas.ajustes.actualizar · actualización parcial", () => {
     const { ctx } = nuevo({
       flujoAjustes: [{ ...semilla().flujoAjustes[0]!, umbral: 2_000_000, avisoActivo: false }],
     });
-    const r = await executeCapability(ctx, "finanzas.ajustes.actualizar", { saldoInicial: 777 });
-    expect(r).toMatchObject({ ok: true, data: { saldoInicial: 777, umbral: 2_000_000, avisoActivo: false } });
+    const r = await executeCapability(ctx, "finanzas.ajustes.actualizar", { horizonteSemanas: 8 });
+    expect(r).toMatchObject({ ok: true, data: { horizonteSemanas: 8, umbral: 2_000_000, avisoActivo: false } });
     const guardado = await executeCapability(ctx, "finanzas.ajustes.obtener", {});
-    expect(guardado).toMatchObject({ ok: true, data: { umbral: 2_000_000, avisoActivo: false, horizonteSemanas: 12 } });
+    expect(guardado).toMatchObject({ ok: true, data: { umbral: 2_000_000, avisoActivo: false, horizonteSemanas: 8 } });
   });
 
   it("sin ajustes guardados parte del umbral único de 10 millones y el aviso activo", async () => {
