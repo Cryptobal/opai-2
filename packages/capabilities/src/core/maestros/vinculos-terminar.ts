@@ -8,8 +8,8 @@ import { vinculoSchema, vistaVinculo } from "./vinculos-vista";
 import { vinculoDe } from "./vinculos";
 import { bloquearVinculo, exigirEdicionVinculo } from "./vinculos-validacion";
 import { type CorteAcceso, corteAccesoSchema, cortarAccesos } from "./vinculos-corte";
-import { instanteDeCorte, programarCorte } from "./vinculos-corte-programado";
-import { zonaDelTenant } from "../turnos/comun";
+import { instanteDeCorte, programarCorte, terminoDeCorte } from "./vinculos-corte-programado";
+import { hoyEn, zonaDelTenant } from "../turnos/comun";
 
 /** «Se cortará el acceso al cierre del dd-mm» para un término futuro (CAR-385). */
 const avisoCorte = (termino: string) =>
@@ -41,9 +41,12 @@ export const vinculosTerminar = defineCapability({
       gestionaUsuarios: ctx.autorizar(PERMISOS_CORE.usersManage),
       usuarioId: ctx.usuario?.id ?? null,
     };
-    // Término futuro: el acceso sigue hasta el cierre de ese día y lo corta un trabajo programado (CAR-385).
-    const cuando = instanteDeCorte(input.termino, await zonaDelTenant(ctx));
-    const corteProgramado = cuando ? avisoCorte(input.termino) : null;
+    // Término futuro (este u otro vínculo terminado que aún no llega): el acceso sigue hasta el cierre de
+    // ese día y lo corta un trabajo programado (CAR-385).
+    const zona = await zonaDelTenant(ctx);
+    const fechaCorte = await terminoDeCorte(ctx.db, v, input.termino, hoyEn(zona));
+    const cuando = instanteDeCorte(fechaCorte, zona);
+    const corteProgramado = cuando ? avisoCorte(fechaCorte) : null;
     if (dryRun) {
       const accesos = await cortarAccesos(ctx.db, v, quien, false);
       return { ...vistaVinculo({ ...v, ...data }), accesos, corteProgramado };
@@ -59,7 +62,8 @@ export const vinculosTerminar = defineCapability({
       async (tx) => {
         const t = await tx.vinculoLaboral.update({ where: { id: v.id }, data });
         accesos = await cortarAccesos(tx, v, quien, !cuando);
-        if (cuando && accesos.personaInactiva) await programarCorte(ctx, tx, v.id, quien, cuando);
+        if (cuando && accesos.personaInactiva)
+          await programarCorte(ctx, tx, { vinculoId: v.id, termino: input.termino }, quien, cuando);
         return t;
       },
     );
