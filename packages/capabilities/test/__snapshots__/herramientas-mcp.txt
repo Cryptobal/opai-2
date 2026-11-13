@@ -484,6 +484,7 @@ finanzas_plan_crear
 finanzas_plan_inicializar
 finanzas_plan_listar
 finanzas_planilla_obtener
+finanzas_planilla_resumen
 finanzas_proveedores_actualizar
 finanzas_proveedores_crear
 finanzas_proveedores_listar

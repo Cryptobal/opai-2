@@ -13,10 +13,14 @@ Botón **Transferir cartera** en Negocios (tablero y lista; diseño `export-crm-
 
 ## PR #635 · rama `brief/car-27-responsable-ficha`
 
-- **Estado:** En PR
+- **Estado:** Integrado (#635 `7f3d1cf6`, 13-nov-2026)
 - **Migración:** No
 - **Apilado sobre:** #633 (integrado)
 
 ### Qué entra
 
 La hoja «Editar negocio» suma el campo **Responsable** (personas del ERP de `comercial.negocios.responsables`); guarda con `comercial.negocios.update`, que ya aceptaba `responsableId`. Antes no había forma de cambiar el responsable desde la pantalla. Sin capacidad nueva ni migración. **Decisión nocturna (revisar):** sin prueba `@preview` porque `qa-e2e` no tiene negocios que editar.
+
+## Pendientes vistos en el e2e completo (13-nov-2026)
+
+- Con el diseño nuevo de listas de `main` fallan tres pruebas de Comercial que no tocaron estos PR: `crm-vinculos` (cuentas vinculadas), `cuenta-sii` (resumen «Lista para facturar», que queda oculto) y `actividad-tareas-car162` (la tarea no aparece en «Mis tareas»). Hay que revisarlas en un PR propio.
