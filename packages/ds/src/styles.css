@@ -522,3 +522,25 @@
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
 }
+/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro, con la
+   ruta a la izquierda y el tema, el agente y la campana a la derecha. */
+@media (min-width: 64rem) {
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"],
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    flex: 1 1 0%;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    justify-content: flex-end;
+    order: 4;
+  }
+  /* Las acciones de la página van a la derecha del buscador, para no correrlo del centro. */
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
+    order: 1;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="buscar"] {
+    order: 2;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="acciones"] {
+    order: 3;
+  }
+}

@@ -62,6 +62,13 @@ export default function ResultadoPersona({ params }: Props) {
                         ? ` Este mes hay datos para el ${Math.round(d.cobertura)} % del scorecard.`
                         : ""}
                     </p>
+                    {d.parteAgente && d.parteAgente.porAgente > 0 ? (
+                      <p className="t-body-sm text-fg-muted">
+                        Su agente hizo el {d.parteAgente.porcentaje.toLocaleString("es-CL")} % de sus
+                        acciones del mes ({d.parteAgente.porAgente} de {d.parteAgente.acciones}). El
+                        resultado sigue siendo de la persona.
+                      </p>
+                    ) : null}
                     <Seccion titulo="Indicadores">
                       <ul className="overflow-hidden rounded-lg border border-border bg-surface">
                         {d.indicadores.map((i) => {

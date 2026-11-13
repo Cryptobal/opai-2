@@ -36,6 +36,23 @@ export function cookieMarco(marco: Marco): string {
   return `${COOKIE_MARCO}=${guardado}; Path=/; Max-Age=${guardado ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
 }
 
+/**
+ * Menú lateral plegado del diseño nuevo (ADR-109, CAR-335 D2b): como el marco, se recuerda en una
+ * cookie de este navegador que el servidor lee para pintar el menú plegado desde el primer byte.
+ */
+export const COOKIE_MENU = "opai_menu";
+
+export function menuPlegadoDeCookie(valor: string | undefined): boolean {
+  return valor === "plegado";
+}
+
+/** Texto para `document.cookie`: plegado dura un año; abierto (lo normal) es la ausencia. */
+export function cookieMenu(plegado: boolean): string {
+  const seguro =
+    typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
+  return `${COOKIE_MENU}=${plegado ? "plegado" : ""}; Path=/; Max-Age=${plegado ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
+}
+
 /** Planillas: pantallas que necesitan todo el ancho, donde el hilo va plegado en el riel. */
 const ANCHAS = ["/pauta", "/asistencia", "/finanzas/flujo"] as const;
 

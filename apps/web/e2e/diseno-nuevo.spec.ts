@@ -4,7 +4,7 @@ import { hidratado } from "./hidratacion";
 import { captura, erroresDeConsola } from "./hilo-apoyo";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Diseño nuevo (ADR-109, CAR-335 D2) con el usuario de la empresa ficticia `qa-e2e`: pinta la piel
+// Diseño nuevo (ADR-109, CAR-335 D2 y D2b) con el usuario de la empresa ficticia `qa-e2e`: pinta la piel
 // nueva desde el servidor, Preferencias lo muestra elegido, el menú lateral se oculta y se asoma al
 // pasar el mouse, y se vuelve al clásico. Las capturas se comparan con docs/2.0/design/export-diseno-nuevo/.
 const marco = (page: Page) => page.locator('div[data-marco="nuevo"]');
@@ -46,6 +46,9 @@ test.describe("@preview diseño nuevo con sesión", () => {
       const errores = erroresDeConsola(page);
       await page.goto("/");
       await expect(marco(page)).toBeVisible();
+      // Barra superior (D2b): el buscador único y el tema como ícono, en iPad y escritorio.
+      if (ancho(page) >= 768)
+        await expect(page.getByRole("button", { name: "Cambiar entre día y noche" })).toBeVisible();
       await captura(page, "nuevo-inicio", info);
 
       if (ancho(page) >= 1024) {
@@ -55,6 +58,10 @@ test.describe("@preview diseño nuevo con sesión", () => {
         const fijar = page.getByRole("button", { name: "Dejar el menú fijo" });
         await expect(fijar).toBeVisible();
         await captura(page, "nuevo-menu-oculto", info);
+        // Al recargar, el servidor ya manda el menú plegado: sin parpadeo del menú abierto (D2b).
+        const recarga = await page.goto("/");
+        expect(await recarga?.text()).toContain('data-menu="plegado"');
+        await hidratado(fijar);
         // Al pasar el mouse por el riel, el menú completo se asoma sobre la página.
         await fijar.hover();
         await expect(page.getByText("OPAI", { exact: true })).toBeVisible();
@@ -69,6 +76,8 @@ test.describe("@preview diseño nuevo con sesión", () => {
       expect(errores).toEqual([]);
     } finally {
       await conDiseno(page, "");
+      const url = new URL(page.url()).origin;
+      await page.context().addCookies([{ name: "opai_menu", value: "", url }]);
     }
     const clasico = await page.goto("/");
     expect(await clasico?.text()).not.toContain('data-marco="nuevo"');
