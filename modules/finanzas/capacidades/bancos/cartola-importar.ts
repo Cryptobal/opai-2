@@ -69,7 +69,7 @@ export const bancosCartolaImportar = defineCapability({
 
     const existentes = await ctx.db.movimientoBancario.findMany({
       where: { cuentaId: cuenta.id },
-      select: { claveDedupe: true, saldoDespues: true },
+      select: { claveDedupe: true, saldoDespues: true, origen: true },
     });
     const porIndice = new Map(parsedFilas.map((f) => [f.indice, f]));
     const plan = planificarDedupeCartola(
@@ -135,6 +135,7 @@ export const bancosCartolaImportar = defineCapability({
       duplicados,
       rechazadas,
       saldoFinal,
+      saldoInicial: cuadratura?.saldoInicial ?? null,
       fechaDesde,
       fechaHasta,
     });
