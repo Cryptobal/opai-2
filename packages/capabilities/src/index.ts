@@ -27,6 +27,7 @@ export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro,
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
 export { pagosImpuestosEsperados, type PagoImpuestoEsperado } from "./finanzas/impuestos-esperados-datos";
 export { hoyChile, type IngresoEsperado } from "./finanzas/cobro-esperado-datos";
+export { ventasProgramadasPorPeriodo } from "./finanzas/ventas-programacion-netas";
 export { proyeccionDeIngresos, ingresosEsperados, type AvisoFlujo, type ProyeccionIngresos } from "./finanzas/proyeccion-ingresos";
 export type { DiferenciaFactoring } from "./finanzas/factoring-esperado-datos";
 export { ajuste, defineAjustes, valoresEfectivos, type CampoAjuste, type MetaAjuste } from "./core/config";
