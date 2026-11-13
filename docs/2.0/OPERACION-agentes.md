@@ -197,6 +197,16 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 ---
 
+### A2.11 Sin GitHub Actions: revisión mínima local (Carlos, 13-nov-2026, ADR-112; temporal)
+
+Mientras GitHub Actions esté bloqueado y la regla «Proteger main» desactivada, **ninguna sesión integra sin esto** (detalle en ADR-112, decisión A):
+
+1. No uses Actions: no relances jobs ni empujes commits vacíos.
+2. Trae `main` a la rama con merge, empuja y corre `scripts/gate-local.sh` sobre el head exacto, en tu espacio de trabajo. Revisa solo lo afectado; `test:db` solo si tocas base, capacidades, auth o módulos.
+3. La vista previa de Vercel del PR debe estar «Ready». Si tocas pantallas, agrega `--presupuesto`.
+4. Si hay cambio visual, revisa las capturas en la vista previa o con `scripts/gate-local-visual.sh e2e/<spec>.spec.ts`.
+5. Comenta «Gate local» en el PR con el SHA completo y cada resultado, más la revisión final sin bloqueos, e integra con squash fijando `sha=<head>`.
+
 ### ⚠ Contradicciones con el repo (se resuelven a favor de esta sección)
 
 | # | Dónde | Qué dice hoy | Qué rige desde el 28-oct |

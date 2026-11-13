@@ -22,6 +22,7 @@ import {
   rutEmisorDe,
 } from "./ventas-comun";
 import { ventaSchema } from "./vistas-venta";
+import { enviarAlSiiTrasAprobar } from "./ventas-aprobacion-texto";
 
 const codigoNcSchema = z
   .union([z.literal(1), z.literal(2), z.literal(3)])
@@ -42,7 +43,7 @@ export const ventasEmitirNotaCredito = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
-  aprobable: { accion: "emitir_dte", monto: async (_ctx, i) => i.monto },
+  aprobable: { accion: "emitir_dte", monto: async (_ctx, i) => i.monto, siguientes: enviarAlSiiTrasAprobar },
   // La firma (llamada remota) va antes de la transacción de la escritura (CAR-196).
   preparar: (ctx, input) => prepararNotaCredito(ctx, input),
   async handler(ctx, input, { dryRun, preparado }) {
