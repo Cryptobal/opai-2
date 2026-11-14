@@ -84,10 +84,14 @@ export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: P
           Descargar
         </Button>
       </div>
-      {obligacion && tenantId && ["generado", "cargado", "pagado"].includes(obligacion.estado) ? <ComprobanteObligacion obligacion={obligacion} tenantId={tenantId} tipo={tipo} /> : null}
+      {obligacion && tenantId && admiteComprobante(obligacion) ? <ComprobanteObligacion obligacion={obligacion} tenantId={tenantId} tipo={tipo} /> : null}
     </Card>
   );
 }
+
+/** Se sube con el archivo generado o cargado; una obligación pagada con comprobante queda fija. */
+const admiteComprobante = (o: ObligacionArchivo) =>
+  ["generado", "cargado"].includes(o.estado) || (o.estado === "pagado" && !o.comprobanteDocumentoId);
 
 /** Estado de la tarjeta: cerrada con comprobante, resultado de la validación o sin validar. */
 function EstadoArchivo({ cerrada, validado, conErrores }: { cerrada: string | null; validado: boolean; conErrores: boolean }) {
