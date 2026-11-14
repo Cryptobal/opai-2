@@ -1,0 +1,30 @@
+// Módulo Inventario (CAR-235, ADR-116): catálogo de tipos de activos y ropa. Schema propio `inventario`.
+// Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. El
+// tenant_id no lleva @relation al núcleo: la FK a core.tenants va en el SQL de la migración.
+
+/// Tipo de inventario de la empresa: «activo» (por unidad, con campos propios) o «ropa» (por
+/// existencias y talla). Nunca se borra: se desactiva (R5 de docs/2.0/modulos/inventario.md).
+model InventarioTipo {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  /// "activo" | "ropa". No cambia después de crear (R2).
+  categoria         String
+  nombre            String
+  /// Nombre sin mayúsculas, tildes ni espacios de más: único por empresa (R1).
+  nombreNormalizado String   @map("nombre_normalizado")
+  descripcion       String?
+  /// Campos propios de un tipo de activo: [{ clave, etiqueta, tipo, obligatorio }] (R4).
+  campos            Json     @default("[]")
+  /// Tallas de un tipo de ropa (R3).
+  tallas            String[] @default([])
+  /// Clave de la prenda del uniforme de Personas (CAR-408) a la que corresponde un tipo de ropa.
+  prendaClave       String?  @map("prenda_clave")
+  activo            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, nombreNormalizado])
+  @@unique([tenantId, id])
+  @@map("tipos")
+  @@schema("inventario")
+}

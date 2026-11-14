@@ -119,6 +119,13 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
   ),
   modulo("cpq", "CPQ", "Cotizaciones y propuestas.", "por_unidad", "usuario_licencia"),
   modulo(
+    "inventario",
+    "Inventario",
+    "Activos y ropa del uniforme, con su asignación a personas e instalaciones (ADR-116, se vende aparte).",
+    "por_unidad",
+    "instalacion_activa",
+  ),
+  modulo(
     "desempeno",
     "Desempeño",
     "Scorecard por cargo y resultado por persona (ADR-094, se vende aparte).",
