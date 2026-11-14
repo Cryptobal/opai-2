@@ -5,7 +5,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import { nombreDeMes } from "../../_componentes/mes";
 
-export type NovedadLibro = {
+type NovedadLibro = {
   id: string;
   codigo: string | null;
   fecha: string;

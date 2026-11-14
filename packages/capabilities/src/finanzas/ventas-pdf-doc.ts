@@ -120,3 +120,9 @@ export async function pdfDeDocumento(
       : {}),
   });
 }
+
+/** El PDF de un documento emitido listo para responder por API o MCP (ficha de venta y Portal Cliente). */
+export async function pdfEnBase64(ctx: Contexto, doc: DocPdf) {
+  const bytes = await pdfDeDocumento(ctx, doc);
+  return { base64: Buffer.from(bytes).toString("base64"), mime: "application/pdf" as const };
+}

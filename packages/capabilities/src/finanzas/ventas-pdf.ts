@@ -4,7 +4,7 @@ import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { noEncontrado } from "../errores";
 import { PERMISO_READ } from "./comun";
-import { pdfDeDocumento } from "./ventas-pdf-doc";
+import { pdfEnBase64 } from "./ventas-pdf-doc";
 
 export const ventasPdf = defineCapability({
   id: "finanzas.ventas.pdf",
@@ -22,7 +22,6 @@ export const ventasPdf = defineCapability({
   async handler(ctx, input) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");
-    const bytes = await pdfDeDocumento(ctx, doc);
-    return { base64: Buffer.from(bytes).toString("base64"), mime: "application/pdf" as const };
+    return pdfEnBase64(ctx, doc);
   },
 });
