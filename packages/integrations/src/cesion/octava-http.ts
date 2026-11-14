@@ -1,7 +1,7 @@
 // Transporte HTTP de Octava: POST JSON con timeout y `fetch` inyectable (los tests nunca llaman a Octava).
 import { OCTAVA_BASE_URL, type OctavaRespuestaBase } from "./octava-api";
 
-export const OCTAVA_TIMEOUT_MS = 30_000;
+const OCTAVA_TIMEOUT_MS = 30_000;
 
 export type FetchOctava = (url: string, init: RequestInit) => Promise<Response>;
 

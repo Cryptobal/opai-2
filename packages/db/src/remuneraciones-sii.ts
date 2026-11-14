@@ -1,6 +1,6 @@
 import type { TenantTx } from "./transaccion";
 
-export type ClaveSiiPublicable = "uf" | "utm";
+type ClaveSiiPublicable = "uf" | "utm";
 
 export type PublicarSiiInput = {
   clave: ClaveSiiPublicable;

@@ -11,8 +11,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@opai/capabilities": "workspace:*",
-    "@opai/db": "workspace:*"
+    "@opai/capabilities": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
