@@ -14,9 +14,14 @@
 - Prueba de que cada perfil cae en su portal (guardia, cliente, supervisor, administrativo, equipo emparejado): función pura y página `/entrar` con sesión y equipo simulados, más e2e `@preview` con el user agent de la app.
 - Android sin respaldo automático (`allowBackup=false`): el respaldo copiaría la cookie del equipo emparejado a otro teléfono (hallazgo de la autorrevisión).
 
+## Parte 2a (PR apilado sobre la parte 1)
+
+- Botón atrás de Android: `@capacitor/app` 8 en las dos variantes; sin código web, vuelve en el historial y cierra la app en la primera pantalla (comportamiento por defecto del plugin). APK compilado.
+- La web reconoce la app por el user agent (`lib/app-nativa.ts`). En Notificaciones del Portal Trabajador, dentro de la app ya no pide «agregar OPAI a la pantalla de inicio» (en la app no existe ese paso): avisa que los verá en la campana hasta que llegue el push nativo.
+
 ## Qué queda pendiente
 
-- **Parte 2:** íconos y pantalla de carga con la marca; push nativo (APNs/FCM) por el adaptador del núcleo; GPS en segundo plano para rondas; botón atrás de Android con historial; ocultar «Instalar» y el aviso de iPhone dentro de la app (user agent `OPAIApp/`); ingreso con Google por el navegador del sistema (Google lo bloquea en vistas web embebidas).
+- **Parte 2:** íconos y pantalla de carga con la marca; push nativo (APNs/FCM) por el adaptador del núcleo; GPS en segundo plano para rondas; ingreso con Google por el navegador del sistema (Google lo bloquea en vistas web embebidas).
 - Compilar iOS en un Mac con Xcode.
 - Probar en un teléfono real que «Reintentar» de la página sin conexión vuelve a cargar (usa `history.back()`; si al arrancar sin red no hay historial, cambiar a recargar la entrada).
 - El e2e `@preview` acepta el portal del usuario `qa-e2e` o el selector; afirmar el portal exacto cuando haya usuarios de prueba por perfil.
