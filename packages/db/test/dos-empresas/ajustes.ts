@@ -23,21 +23,41 @@ const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? nul
 export const AJUSTES: Record<string, Ajuste> = {
   // Reglas de aprobación (CAR-252): CHECK de un solo aprobador (rol o grupo) y monto no negativo.
   "core.reglas_aprobacion": {
-    valores: () => ({ accion: "emitir_dte", aprobador_rol: "gerente", aprobador_grupo_id: null, monto_minimo: null }),
+    valores: () => ({
+      accion: "emitir_dte",
+      aprobador_rol: "gerente",
+      aprobador_grupo_id: null,
+      monto_minimo: null,
+    }),
   },
   // Listas de ingreso y salida (CAR-355): CHECK de tipo y estado.
-  "core.procesos_persona": { fijas: ["tipo"], valores: () => ({ tipo: "ingreso", estado: "abierto" }) },
+  "core.procesos_persona": {
+    fijas: ["tipo"],
+    valores: () => ({ tipo: "ingreso", estado: "abierto" }),
+  },
   // Registro de ausencias (CAR-393): CHECK de tipo, estado, rango y largo del motivo.
   "core.ausencias": {
-    valores: () => ({ tipo: "licencia", estado: "aprobada", desde: "2026-12-01", hasta: "2026-12-03", motivo: "Prueba" }),
+    valores: () => ({
+      tipo: "licencia",
+      estado: "aprobada",
+      desde: "2026-12-01",
+      hasta: "2026-12-03",
+      motivo: "Prueba",
+    }),
   },
-  "core.procesos_persona_pasos": { valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }) },
+  "core.procesos_persona_pasos": {
+    valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }),
+  },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],
     // FK compuesta (tenant_id, cargo_id): el catálogo no la ve como referencia; no se regenera.
     fijas: ["vigente_desde", "cargo_id"],
-    valores: (ctx) => ({ cargo_id: id(ctx, "core.cargos"), vigente_desde: "2026-11", estado: "publicado" }),
+    valores: (ctx) => ({
+      cargo_id: id(ctx, "core.cargos"),
+      vigente_desde: "2026-11",
+      estado: "publicado",
+    }),
   },
   // Desempeño (CAR-313): CHECK de sentido, meta y mes de vigencia; FK compuesta al indicador.
   "desempeno.indicadores_propios": {
@@ -61,7 +81,12 @@ export const AJUSTES: Record<string, Ajuste> = {
     valores: () => ({ periodo: "2026-10", origen: "manual", personas: 1 }),
   },
   "desempeno.resultados_cerrados": {
-    dependencias: ["desempeno.periodos_cerrados", "core.personas", "core.cargos", "desempeno.scorecards"],
+    dependencias: [
+      "desempeno.periodos_cerrados",
+      "core.personas",
+      "core.cargos",
+      "desempeno.scorecards",
+    ],
     fijas: ["periodo", "persona_id", "cargo_id", "scorecard_id"],
     valores: (ctx) => ({
       periodo: "2026-10",
@@ -80,12 +105,19 @@ export const AJUSTES: Record<string, Ajuste> = {
     valores: (ctx) => ({ scorecard_id: id(ctx, "desempeno.scorecards"), meta: 10, peso: 100 }),
   },
   // Comercial · seguimiento (CAR-67): CHECK de disparador, canal y ejecutor.
-  "comercial.seguimiento_planes": { valores: () => ({ nombre: "Plan de prueba", disparador: "manual" }) },
+  "comercial.seguimiento_planes": {
+    valores: () => ({ nombre: "Plan de prueba", disparador: "manual" }),
+  },
   "comercial.seguimiento_plan_versiones": {
     valores: () => ({
       config: JSON.stringify({
-        conteo: "habiles", desde: "inicio", hora: "09:00", ventana: { desde: "09:00", hasta: "18:00" },
-        alResponder: "pausar", alTerminar: "solo_avisar", pasos: [],
+        conteo: "habiles",
+        desde: "inicio",
+        hora: "09:00",
+        ventana: { desde: "09:00", hasta: "18:00" },
+        alResponder: "pausar",
+        alTerminar: "solo_avisar",
+        pasos: [],
       }),
     }),
   },
@@ -95,12 +127,23 @@ export const AJUSTES: Record<string, Ajuste> = {
   // CAR-349: CHECK de frecuencia, día, monto y ventana del gasto recurrente.
   "finanzas.flujo_recurrentes": {
     dependencias: ["finanzas.flujo_filas"],
-    valores: (ctx) => ({ fila_id: id(ctx, "finanzas.flujo_filas"), frecuencia: "mensual", dia_del_mes: 5, monto: 1000, ventana_antes: 5, ventana_despues: 10, repeticiones: null, fin: null }),
+    valores: (ctx) => ({
+      fila_id: id(ctx, "finanzas.flujo_filas"),
+      frecuencia: "mensual",
+      dia_del_mes: 5,
+      monto: 1000,
+      ventana_antes: 5,
+      ventana_despues: 10,
+      repeticiones: null,
+      fin: null,
+    }),
   },
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },
-  "pauta.registros_operativos": { valores: () => ({ tipo: "cobertura_confirmada", estado: "activa", motivo: "" }) },
+  "pauta.registros_operativos": {
+    valores: () => ({ tipo: "cobertura_confirmada", estado: "activa", motivo: "" }),
+  },
   // Publicación de la pauta (CAR-356): CHECK del mes aaaa-mm.
   "pauta.publicaciones": { fijas: ["mes"], valores: () => ({ mes: "2026-12" }) },
   "core.anexos_contrato": {
@@ -135,7 +178,14 @@ export const AJUSTES: Record<string, Ajuste> = {
   // que coincide con la moneda (CLP por defecto).
   "finanzas.ventas_programaciones": {
     dependencias: ["core.cuentas"],
-    valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas"), tipo_dte: 33, dia_generacion: 1, moneda: "CLP", frecuencia: "mensual", plazo_pago_dias: 30 }),
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "core.cuentas"),
+      tipo_dte: 33,
+      dia_generacion: 1,
+      moneda: "CLP",
+      frecuencia: "mensual",
+      plazo_pago_dias: 30,
+    }),
   },
   "finanzas.ventas_programaciones_destinatarios": {
     dependencias: ["finanzas.ventas_programaciones", "core.contactos"],
@@ -165,24 +215,47 @@ export const AJUSTES: Record<string, Ajuste> = {
   "rendiciones.rendicion_items": { valores: () => ({ monto: 1 }) },
   // Rendiciones · kilometraje (CAR-194): CHECK de método y de origen de la distancia, monto positivo.
   "rendiciones.rendicion_viajes": {
-    valores: () => ({ metodo: "consumo", origen_distancia: "linea_recta", monto_calculado: 1, km: 1, peaje_clp: 0 }),
+    valores: () => ({
+      metodo: "consumo",
+      origen_distancia: "linea_recta",
+      monto_calculado: 1,
+      km: 1,
+      peaje_clp: 0,
+    }),
   },
   // Asistencia (CAR-89): CHECK de enumeraciones. Las marcas y correcciones son inmutables.
   "asistencia.marcas": {
-    valores: () => ({ tipo: "entrada", origen: "en_linea", metodo: "rut_pin", gps_estado: "sin_gps", snapshot: "{}", seq: 1 }),
+    valores: () => ({
+      tipo: "entrada",
+      origen: "en_linea",
+      metodo: "rut_pin",
+      gps_estado: "sin_gps",
+      snapshot: "{}",
+      seq: 1,
+    }),
   },
   "asistencia.cadenas_cabeza": { fijas: ["cadena"], valores: () => ({ cadena: "marcas" }) },
   "asistencia.correcciones": { valores: () => ({ tipo_propuesto: "entrada", seq: 1 }) },
   "asistencia.contingencias": { valores: () => ({ tipo: "entrada", estado: "pendiente" }) },
-  "asistencia.correcciones_respuestas": { fijas: ["resultado", "canal"], valores: () => ({ resultado: "aceptada", canal: "portal" }) },
-  "asistencia.dias": { fijas: ["estado", "tipo_jornada"], valores: () => ({ estado: "presente", tipo_jornada: "ordinaria" }) },
+  "asistencia.correcciones_respuestas": {
+    fijas: ["resultado", "canal"],
+    valores: () => ({ resultado: "aceptada", canal: "portal" }),
+  },
+  "asistencia.dias": {
+    fijas: ["estado", "tipo_jornada"],
+    valores: () => ({ estado: "presente", tipo_jornada: "ordinaria" }),
+  },
   "asistencia.alertas": { fijas: ["tipo"], valores: () => ({ tipo: "compensables" }) },
   "asistencia.incidentes_tecnicos": {
     valores: () => ({ tipo: "otro", severidad: "baja", origen: "manual" }),
   },
   // Núcleo · turnos esperados (CAR-201): CHECK de origen y de intervalo (fin > inicio).
   "core.turnos_esperados": {
-    valores: () => ({ origen: "pauta", inicio: "2026-12-01T12:00:00Z", fin: "2026-12-01T20:00:00Z" }),
+    valores: () => ({
+      origen: "pauta",
+      inicio: "2026-12-01T12:00:00Z",
+      fin: "2026-12-01T20:00:00Z",
+    }),
   },
   // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
   "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
@@ -297,6 +370,21 @@ export const AJUSTES: Record<string, Ajuste> = {
     fijas: ["grupo_id", "user_id"],
     valores: (ctx) => ({ user_id: ctx.usuario, grupo_id: id(ctx, "core.grupos_usuarios") }),
   },
+  // CAR-359: (tenant_id, user_id) → memberships, (tenant_id, grupo_id) → grupos y
+  // (tenant_id, role_id) → roles, todas compuestas.
+  "core.roles_miembro": {
+    dependencias: ["core.memberships", "core.roles"],
+    fijas: ["user_id", "role_id"],
+    valores: (ctx) => ({ user_id: ctx.usuario, role_id: id(ctx, "core.roles") }),
+  },
+  "core.roles_grupo": {
+    dependencias: ["core.grupos_usuarios", "core.roles"],
+    fijas: ["grupo_id", "role_id"],
+    valores: (ctx) => ({
+      grupo_id: id(ctx, "core.grupos_usuarios"),
+      role_id: id(ctx, "core.roles"),
+    }),
+  },
   // Nómina (Brief 25): los CHECK de unidad por tipo y de tipo/estado rechazan el texto genérico.
   "nomina.novedades": { valores: () => ({ tipo: "ausencia", cantidad: 1, monto_clp: null }) },
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
@@ -306,13 +394,24 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.flujo_filas": { valores: () => ({ seccion: "ingreso" }) },
   "finanzas.flujo_celdas": { valores: () => ({ semana: "2026-01-05", monto: 1 }) },
   "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
-  "finanzas.flujo_avisos_emitidos": { valores: () => ({ semana: "2026-01-05", saldo_proyectado: 0 }) },
+  "finanzas.flujo_avisos_emitidos": {
+    valores: () => ({ semana: "2026-01-05", saldo_proyectado: 0 }),
+  },
   // CAR-138 PR 6 · capítulo por instalación: CHECK de sección y origen.
-  "cpq.propuesta_capitulos": { fijas: ["seccion_clave", "origen"], valores: () => ({ seccion_clave: "alcance", origen: "manual", contenido: "x" }) },
+  "cpq.propuesta_capitulos": {
+    fijas: ["seccion_clave", "origen"],
+    valores: () => ({ seccion_clave: "alcance", origen: "manual", contenido: "x" }),
+  },
   // CAR-138 PR 9 · plantilla HTML importada: CHECK de estado, hash y largo; el nombre/versión no se repiten por empresa.
   "cpq.propuesta_html": {
     fijas: ["estado", "hash_sha256", "html_saneado", "catalogo_version"],
-    valores: () => ({ estado: "archivada", hash_sha256: "a".repeat(64), html_saneado: "<p>x</p>", catalogo_version: 1, version: 1 }),
+    valores: () => ({
+      estado: "archivada",
+      hash_sha256: "a".repeat(64),
+      html_saneado: "<p>x</p>",
+      catalogo_version: 1,
+      version: 1,
+    }),
   },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
@@ -321,7 +420,9 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.cuentas_contables": { valores: () => ({ tipo: "activo", naturaleza: "deudora" }) },
   "finanzas.centros_costo": { valores: () => ({ tipo: "general" }) },
   "finanzas.documentos_recibidos": { valores: () => ({ tipo_dte: 33, monto_total: 0 }) },
-  "finanzas.dte_config": { valores: () => ({ ambiente: "certificacion", emision_proveedor: "simulado" }) },
+  "finanzas.dte_config": {
+    valores: () => ({ ambiente: "certificacion", emision_proveedor: "simulado" }),
+  },
   "finanzas.dte_envios": {
     dependencias: ["finanzas.documentos_emitidos"],
     valores: () => ({ track_id: "SIM-1", estado: "pendiente", intentos: 0, max_intentos: 7 }),
@@ -358,7 +459,9 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["finanzas.documentos_emitidos"],
     valores: () => ({ tipo_dte_ref: 33, folio_ref: 1, codigo_ref: 1 }),
   },
-  "finanzas.cuentas_bancarias": { valores: () => ({ banco: "Banco Sintético", numero_visible: "00012345678" }) },
+  "finanzas.cuentas_bancarias": {
+    valores: () => ({ banco: "Banco Sintético", numero_visible: "00012345678" }),
+  },
   "finanzas.cartolas_importadas": {
     dependencias: ["finanzas.cuentas_bancarias"],
     valores: (ctx) => ({
@@ -392,7 +495,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.reglas_conciliacion": { valores: () => ({ nombre: "Regla prueba", condiciones: {} }) },
   "finanzas.banco_avisos_emitidos": {
     dependencias: ["finanzas.cuentas_bancarias"],
-    valores: (ctx) => ({ cuenta_id: id(ctx, "finanzas.cuentas_bancarias"), dia: "2026-01-05", saldo: 0 }),
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "finanzas.cuentas_bancarias"),
+      dia: "2026-01-05",
+      saldo: 0,
+    }),
   },
   // CRM PR 2a: el trigger de core.contactos crea el vínculo inicial contacto–cuenta.
   "core.contacto_cuentas": {
@@ -409,26 +516,47 @@ export const AJUSTES: Record<string, Ajuste> = {
     // `seq` es identity GENERATED ALWAYS: la base la asigna y rechaza un valor explícito.
     omitir: ["seq"],
     valores: (ctx) => ({
-      cuenta_id: id(ctx, "core.cuentas"), contacto_id: id(ctx, "core.contactos"), estado: "otorgado",
-      otorgado_en: "2026-11-01", vigente_hasta: null, evidencia: "correo", evidencia_detalle: "ficticio",
-      motivo: null, descripcion: null, cita: null, mostrar_nombre: false,
+      cuenta_id: id(ctx, "core.cuentas"),
+      contacto_id: id(ctx, "core.contactos"),
+      estado: "otorgado",
+      otorgado_en: "2026-11-01",
+      vigente_hasta: null,
+      evidencia: "correo",
+      evidencia_detalle: "ficticio",
+      motivo: null,
+      descripcion: null,
+      cita: null,
+      mostrar_nombre: false,
     }),
   },
   // Caché SII (CAR-156): CHECK de estado, formato de RUT, datos según estado y vencimiento posterior.
   "core.sii_contribuyentes": {
     fijas: ["rut"],
     valores: () => ({
-      rut: "11111111-1", estado: "ok", datos: JSON.stringify({ razonSocial: "FICTICIA SPA" }),
-      consultado_en: "2026-11-01T00:00:00Z", vence_en: "2026-12-01T00:00:00Z",
+      rut: "11111111-1",
+      estado: "ok",
+      datos: JSON.stringify({ razonSocial: "FICTICIA SPA" }),
+      consultado_en: "2026-11-01T00:00:00Z",
+      vence_en: "2026-12-01T00:00:00Z",
     }),
   },
   // Historial de correos (CAR-233): CHECK de sentido, origen y asociación; token «t» + 32 hex, único
   // global (se deriva del id de la empresa para que A y B no choquen).
   "core.correos_cliente": {
     dependencias: ["core.cuentas"],
-    valores: (ctx) => ({ sentido: "recibido", origen: "buzon", asociacion: "dominio", cuenta_id: id(ctx, "core.cuentas"), contacto_id: null, negocio_id: null }),
+    valores: (ctx) => ({
+      sentido: "recibido",
+      origen: "buzon",
+      asociacion: "dominio",
+      cuenta_id: id(ctx, "core.cuentas"),
+      contacto_id: null,
+      negocio_id: null,
+    }),
   },
-  "core.buzones_correo": { fijas: ["token"], valores: (ctx) => ({ token: `t${ctx.tenant.replace(/-/g, "")}` }) },
+  "core.buzones_correo": {
+    fijas: ["token"],
+    valores: (ctx) => ({ token: `t${ctx.tenant.replace(/-/g, "")}` }),
+  },
   // Slack (CAR-291): team_id con formato de Slack (CHECK) y único global; se deriva del id de la empresa.
   "core.slack_instalaciones": {
     fijas: ["team_id"],
