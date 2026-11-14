@@ -19,7 +19,7 @@ export const ESTADOS_ACTIVOS: readonly EstadoAlerta[] = ["nueva", "en_contacto",
 /** Estados cerrados. */
 export const ESTADOS_CERRADOS: readonly EstadoAlerta[] = ["resuelta", "falsa_alarma"];
 
-export type Accion = "resolver" | "falsa_alarma" | "reabrir" | "posponer";
+export type Accion = "resolver" | "falsa_alarma" | "reabrir" | "posponer" | "hacerse_cargo";
 
 /**
  * Estado al que pasa una alerta con la acción, o null si la transición no vale. Resolver se acepta
@@ -37,6 +37,8 @@ export function transicion(estado: EstadoAlerta, accion: Accion): EstadoAlerta |
       return activa ? "pospuesta" : null;
     case "reabrir":
       return ESTADOS_CERRADOS.includes(estado) ? "en_atencion" : null;
+    case "hacerse_cargo":
+      return activa && estado !== "en_atencion" ? "en_atencion" : null;
   }
 }
 
