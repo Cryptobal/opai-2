@@ -12,6 +12,8 @@ export function menuCuentaShell(
   iconos?: Record<string, ReactNode>,
   portalInicio?: () => void,
   novedades?: { href: string; noLeidas: number },
+  /** Con acceso a Configuración, el menú de la cuenta también lleva ahí (CAR-442). */
+  configuracion = false,
 ): ItemMenu[] {
   const Settings2 = iconoShell("Settings2", iconos);
   const UserRound = iconoShell("UserRound", iconos);
@@ -48,6 +50,16 @@ export function menuCuentaShell(
             ...(novedades.noLeidas > 0 ? { contador: novedades.noLeidas } : {}),
             icono: Sparkles,
             onSelect: () => navegar(novedades.href),
+          },
+        ]
+      : []),
+    ...(configuracion
+      ? [
+          {
+            id: "configuracion",
+            etiqueta: "Configuración",
+            icono: Settings2,
+            onSelect: () => navegar("/configuracion"),
           },
         ]
       : []),

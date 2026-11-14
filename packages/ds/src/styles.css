@@ -545,6 +545,39 @@
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
 }
+/* Ancho y movimiento del menú del diseño nuevo (CAR-442, referente Linear): `ShellNuevo` fija
+   `--ancho-menu` (200 a 360 px; se cambia arrastrando el borde, `AsaMenu`). El menú entra
+   deslizándose al fijarlo (no al cargar la página) o al asomarse, sin animación si el sistema pide menos movimiento. */
+[data-marco="nuevo"] nav[data-shell="sidebar"] {
+  width: var(--ancho-menu, 248px);
+}
+[data-marco="nuevo"] [data-shell="asa-menu"] {
+  left: var(--ancho-menu, 248px);
+}
+[data-menu="plegado"] [data-shell="asa-menu"],
+[data-menu="asomado"] [data-shell="asa-menu"] {
+  display: none;
+}
+[data-arrastre] {
+  cursor: col-resize;
+  user-select: none;
+}
+@keyframes menu-entra {
+  from {
+    opacity: 0.6;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+  [data-menu="fijo"][data-animar] nav[data-shell="sidebar"],
+  [data-menu="asomado"] nav[data-shell="sidebar"] {
+    animation: menu-entra 180ms ease-out;
+  }
+}
 /* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro exacto de
    la barra, con la ruta a la izquierda y las acciones, el tema, el agente y la campana a la derecha.
    Va centrado sobre la barra (no en el flujo) para que «Atrás» o las acciones de una ficha no lo

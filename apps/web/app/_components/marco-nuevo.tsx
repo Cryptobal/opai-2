@@ -6,6 +6,7 @@ import type { AppShellProps } from "@opai/ds";
 import { ShellNuevo } from "@opai/ds/shell-nuevo";
 
 import { cookieMenu } from "@/lib/marco";
+import { cookieAnchoMenu } from "@/lib/menu-ancho";
 
 import { useAcentoEmpresa } from "./acento-empresa";
 import { abrirAgente } from "./agente/abrir-agente";
@@ -13,7 +14,7 @@ import { alternarTema } from "./hilo/marco-cliente";
 import { MarcoShell } from "./marco-shell";
 import type { DatosShell } from "./tipos-shell";
 
-type Props = { datos: DatosShell; menuPlegado: boolean; children: ReactNode };
+type Props = { datos: DatosShell; menuPlegado: boolean; menuAncho?: number; children: ReactNode };
 
 /**
  * Marco del diseño nuevo (ADR-109, CAR-335 D2): el mismo shell del clásico con `ShellNuevo` (piel,
@@ -21,7 +22,7 @@ type Props = { datos: DatosShell; menuPlegado: boolean; children: ReactNode };
  * Va en su propio trozo de JS, como Hilo. El menú plegado se recuerda en una cookie que el servidor
  * lee al cargar (`menuPlegado`), así que se pinta plegado desde el primer byte.
  */
-export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
+export function MarcoNuevo({ datos, menuPlegado, menuAncho, children }: Props) {
   const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
   useAcentoEmpresa(enErp, datos.portal, datos.epoca);
   // Un solo componente por montaje: `MarcoShell` lo usa como tipo y no debe cambiar entre renders.
@@ -38,6 +39,10 @@ export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
           plegadoInicial={menuPlegado}
           onPlegado={(plegado) => {
             document.cookie = cookieMenu(plegado);
+          }}
+          {...(menuAncho ? { anchoInicial: menuAncho } : {})}
+          onAncho={(ancho) => {
+            document.cookie = cookieAnchoMenu(ancho);
           }}
           onTema={() => alternarTema(portal)}
           {...(conAgente ? { onAgente: () => abrirAgente() } : {})}
