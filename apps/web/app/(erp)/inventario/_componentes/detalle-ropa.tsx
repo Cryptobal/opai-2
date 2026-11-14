@@ -1,6 +1,7 @@
 import { Plus, SlidersHorizontal } from "lucide-react";
 
 import { Badge, DetailScreen, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
+import { formatearFechaHora } from "@opai/domain";
 
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { conteo } from "@/lib/plural";
@@ -9,8 +10,6 @@ import type { cargarPrenda } from "./datos-ropa";
 import { HojaAjusteRopa, HojaIngresoRopa } from "./diferidas";
 import type { MovimientoRopa } from "./tipos";
 
-const fecha = (iso: string) =>
-  new Intl.DateTimeFormat("es-CL", { dateStyle: "short", timeStyle: "short", timeZone: "America/Santiago" }).format(new Date(iso));
 
 function Movimientos({ items }: { items: MovimientoRopa[] }) {
   if (items.length === 0) return <p className="t-caption">Aún no hay movimientos.</p>;
@@ -22,7 +21,7 @@ function Movimientos({ items }: { items: MovimientoRopa[] }) {
             <span className="font-medium">
               {m.motivoEtiqueta} · talla {m.talla}
             </span>
-            <span className="t-caption truncate">{m.nota ? `${fecha(m.fecha)} · ${m.nota}` : fecha(m.fecha)}</span>
+            <span className="t-caption truncate">{m.nota ? `${formatearFechaHora(m.fecha)} · ${m.nota}` : formatearFechaHora(m.fecha)}</span>
           </span>
           <Badge tono={m.delta > 0 ? "success" : "warning"}>{m.delta > 0 ? `+${m.delta}` : m.delta}</Badge>
         </li>
