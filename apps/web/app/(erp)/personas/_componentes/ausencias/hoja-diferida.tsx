@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 
 import { useParametros } from "@/app/_components/maestros/use-url";
 
+import type { ClaseAusencia } from "./tipos";
+
 const Hoja = dynamic(() =>
   import("./hoja-registrar-ausencia").then((m) => ({ default: m.HojaRegistrarAusencia })),
 );
@@ -14,6 +16,7 @@ export function HojaRegistrarDiferida(props: {
   nombre: string;
   hoy: string;
   conPauta: boolean;
+  clases: readonly ClaseAusencia[];
 }) {
   return useParametros().valor("registrar") !== null ? <Hoja {...props} /> : null;
 }
