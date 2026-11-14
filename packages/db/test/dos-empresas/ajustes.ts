@@ -160,6 +160,8 @@ export const AJUSTES: Record<string, Ajuste> = {
       motivo_anulacion: null,
     }),
   },
+  // Tallas por prenda (CAR-408): CHECK del formato de la clave y del largo de la talla.
+  "core.personas_tallas": { fijas: ["prenda"], valores: () => ({ prenda: "camisa", talla: "M" }) },
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },

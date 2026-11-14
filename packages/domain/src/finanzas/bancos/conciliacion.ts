@@ -49,7 +49,7 @@ export function sugerirConciliacion(
       motivo = "RUT en la glosa coincide con el documento";
     } else if (opts?.montosUnicosVentana?.get(abs) === 1) {
       confianza = 0.7;
-      motivo = "Monto único en ±15 días";
+      motivo = "Monto único entre los documentos candidatos";
     }
 
     out.push({

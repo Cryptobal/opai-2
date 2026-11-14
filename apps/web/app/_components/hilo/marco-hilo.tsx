@@ -79,7 +79,6 @@ export function MarcoHilo({ datos, children }: { datos: DatosShell; children: Re
     router,
     () => setPassword(true),
     () => setInicio(true),
-    "hilo",
   );
   const portal = datos.portales.find((p) => p.id === datos.portal)?.etiqueta ?? "ERP";
   const empresa = datos.tenant?.nombre ?? "OPAI";

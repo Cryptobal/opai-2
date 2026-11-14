@@ -177,7 +177,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.schema` | `core_config_schema` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
-| compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
@@ -743,6 +742,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/finanzas/flujo/resumen` | `finanzas.planilla.resumen` | `finanzas_planilla_resumen` | existe |
+| erp | `/finanzas/rentabilidad` | `finanzas.rentabilidad.get` | `finanzas_rentabilidad_get` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador_nota_debito` | `finanzas_ventas_crear_borrador_nota_debito` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
