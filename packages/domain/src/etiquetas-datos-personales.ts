@@ -81,6 +81,7 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   desde: "primer día",
   hasta: "último día",
   motivo: "motivo",
+  clase: "clase de ausencia",
   estado: "estado",
   // estructuras_sueldo
   sueldo_base: "sueldo base",

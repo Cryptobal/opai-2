@@ -38,6 +38,8 @@ test.describe("@preview ficha · ausencias", () => {
       // Con Pauta revisa los turnos afectados; sin Pauta, solo el registro (CAR-393).
       const revisar = hoja.getByRole("button", { name: /Ver turnos afectados|Revisar/ });
       await expect(revisar).toBeDisabled();
+      // CAR-393 parte 3: la clase sale del catálogo de la vertical de qa-e2e.
+      await expect(hoja.getByText("Clase", { exact: true })).toBeVisible();
       await hoja.getByLabel("Motivo").fill("Licencia folio 12345");
       await expect(revisar).toBeEnabled();
       await capturar(page, info, "ficha-ausencias-registrar");
