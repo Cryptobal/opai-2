@@ -269,6 +269,7 @@ core_integraciones_list
 core_integraciones_probar
 core_invitations_list
 core_invitations_revoke
+core_libro_novedades_listar
 core_marca_get
 core_marca_update
 core_me

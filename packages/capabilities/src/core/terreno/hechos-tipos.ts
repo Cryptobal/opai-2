@@ -37,7 +37,7 @@ export const TIPOS_HECHO_TERRENO = {
   "rondas.cierre": z.object({ ejecucionClave: z.string().uuid() }).strict(),
   /**
    * Novedad o incidente de una ronda (CAR-78 · E5a): texto, gravedad y, si se reporta desde un punto, el punto. Va
-   * al libro de novedades (`rondas.novedades`); no bloquea la marca ni marca presencia laboral. La evidencia
+   * al libro de novedades del núcleo (`core.libro_novedades`, CAR-77); no bloquea la marca ni marca presencia laboral. La evidencia
    * (fotos) exige línea y sube aparte por `core.documentos`.
    */
   "rondas.novedad": z

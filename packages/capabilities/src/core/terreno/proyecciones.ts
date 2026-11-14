@@ -33,7 +33,7 @@ export async function prepararProyecciones(
   const marcas = await resolverMarcas(ctx, equipo.instalacionId, hechos);
   const acceso = await resolverAcceso(ctx, equipo, hechos, t);
   const rondas = await resolverEjecuciones(ctx, equipo, hechos, t);
-  const novedades = await resolverNovedades(ctx, equipo, hechos);
+  const novedades = await resolverNovedades(ctx, equipo, hechos, t);
   const rechazos = new Map<string, MotivoRechazo>([
     ...acceso.rechazos,
     ...rondas.rechazos,
