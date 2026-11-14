@@ -12,13 +12,24 @@ export const recurrentesListar = defineCapability({
   descripcion:
     "Lista los gastos recurrentes del flujo de caja (arriendo, honorarios, cuotas de impuestos, provisiones): concepto, monto y su unidad (CLP, UF o % de ventas), frecuencia, día de pago, vigencia y fila del flujo donde se proyectan.",
   permiso: PERMISO_VER,
-  input: z.object({ filaId: uuidSchema.optional(), incluirInactivos: z.boolean().default(false) }),
+  input: z.object({
+    filaId: uuidSchema.optional(),
+    incluirInactivos: z.boolean().default(false),
+    incluirTramosAnteriores: z
+      .boolean()
+      .default(false)
+      .describe("true incluye los tramos ya reemplazados por un cambio «desde una fecha»; por defecto solo el vigente de cada gasto."),
+  }),
   output: z.array(recurrenteSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.flujoRecurrente.findMany({
-      where: { ...(input.filaId ? { filaId: input.filaId } : {}), ...(input.incluirInactivos ? {} : { activa: true }) },
+      where: {
+        ...(input.filaId ? { filaId: input.filaId } : {}),
+        ...(input.incluirInactivos ? {} : { activa: true }),
+        ...(input.incluirTramosAnteriores ? {} : { siguiente: { is: null } }),
+      },
       orderBy: [{ concepto: "asc" }, { id: "asc" }],
     });
     return filas.map(vistaRecurrente);
@@ -91,8 +102,9 @@ export const recurrentesActualizar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const actual = await ctx.db.flujoRecurrente.findFirst({ where: { id: input.id } });
+    const actual = await ctx.db.flujoRecurrente.findFirst({ where: { id: input.id }, include: { siguiente: { select: { id: true } } } });
     if (!actual) throw noEncontrado("El gasto recurrente");
+    if (actual.siguiente) throw reglaDeNegocio("Ese tramo ya fue reemplazado por un cambio desde una fecha: edita el tramo vigente.");
     const vista = vistaRecurrente(actual);
     // Cambiar solo la unidad reinterpretaría el monto (500.000 CLP pasarían a ser 50 UF o 50 %): se pide el monto nuevo.
     if (input.unidad !== undefined && input.unidad !== vista.unidad && input.monto === undefined)

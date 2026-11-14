@@ -10,22 +10,18 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { hoyIso } from "@/lib/fechas";
 
 import { CamposUf } from "./campos-uf";
-import { type FilaEgreso, montoEditable, montoEscrito, type PoliticaUf, type Recurrente, type Unidad } from "./tipos";
+import { type FilaEgreso, FRECUENCIAS, montoEditable, montoEscrito, type PoliticaUf, type Recurrente, type Unidad } from "./tipos";
 
 const UNIDADES = [
   { valor: "clp", etiqueta: "Pesos" },
   { valor: "uf", etiqueta: "UF" },
   { valor: "pct_ventas", etiqueta: "% de las ventas netas del mes anterior" },
 ];
-const FRECUENCIAS = [
-  { valor: "mensual", etiqueta: "Mensual" },
-  { valor: "quincenal", etiqueta: "Cada dos semanas" },
-  { valor: "semanal", etiqueta: "Semanal" },
-];
 
-/** Nuevo gasto recurrente o editar uno existente (CAR-382). La fila, la frecuencia y el inicio no cambian al editar. */
+/** Nuevo gasto recurrente o editar uno existente (CAR-382). La fila, la frecuencia y el día cambian desde una fecha (CAR-413). */
 export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) {
-  const id = useParametros().valor("editar");
+  const url = useParametros();
+  const id = url.valor("editar");
   const r = p.items.find((x) => x.id === id);
   const hoja = useHojaUrl(id ? "editar" : "nuevo");
   const router = useRouter();
@@ -87,7 +83,13 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <Campo etiqueta="Fila del flujo" htmlFor="rc-fila" {...(r ? { ayuda: "La fila no se cambia; crea uno nuevo en la otra fila." } : {})}>
+        {r ? (
+          <div className="flex flex-col gap-2 rounded-md border border-border p-3">
+            <p className="text-sm text-fg-muted">La fila, la frecuencia y el día de pago cambian desde una fecha: las cuotas anteriores no se tocan.</p>
+            <Button variant="secondary" onClick={() => url.fijar({ editar: null, cambiar: r.id })}>Cambiar desde una fecha</Button>
+          </div>
+        ) : null}
+        <Campo etiqueta="Fila del flujo" htmlFor="rc-fila">
           <Select id="rc-fila" valor={fila} onCambiar={setFila} disabled={!!r} opciones={p.filas.map((f) => ({ valor: f.id, etiqueta: f.etiqueta }))} />
         </Campo>
         <Campo etiqueta="Concepto" htmlFor="rc-concepto">
@@ -105,7 +107,7 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
         </Campo>
         {frecuencia === "mensual" ? (
           <Campo etiqueta="Día de pago" htmlFor="rc-dia" ayuda="1 a 31 (se ajusta en meses cortos) o -1 para el último día." {...(diaOk ? {} : { error: "Del 1 al 31, o -1." })}>
-            <Input id="rc-dia" inputMode="numeric" value={dia} onChange={(e) => setDia(e.target.value.replace(/[^\d-]/g, ""))} />
+            <Input id="rc-dia" inputMode="numeric" value={dia} onChange={(e) => setDia(e.target.value.replace(/[^\d-]/g, ""))} disabled={!!r} />
           </Campo>
         ) : null}
         <Campo etiqueta="Desde" htmlFor="rc-inicio">

@@ -60,7 +60,7 @@ export const camposPersonalizadosList = defineCapability({
   auditarLectura: (s) => s.items.map((c) => c.id),
   id: "core.campos_personalizados.list",
   descripcion:
-    "Campos personalizados que la empresa definió para cuentas, contactos o negocios, en su orden de ficha (activos por defecto).",
+    "Campos personalizados que la empresa definió para cuentas, contactos o negocios, en su orden de ficha (activos por defecto). No son los tokens de documentos de core.campos.catalogo.",
   permiso: PERMISOS_CORE.cuentasRead,
   portales: ["erp"],
   input: z.object({
