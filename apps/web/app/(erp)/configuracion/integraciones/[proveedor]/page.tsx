@@ -53,7 +53,7 @@ const guardar = (
   </Button>
 );
 
-/** Estado y resultado de la última prueba; en teléfono, también «Probar conexión» (la barra solo lleva Guardar). */
+/** Estado y resultado de la última prueba; en teléfono, también «Probar conexión». */
 function PruebaIntegracion({ items }: { items: Integracion[] }) {
   const i = items[0];
   if (!i) return null;
@@ -95,7 +95,6 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
       ruta="/configuracion"
       cargando="detalle"
       volver={{ href: "/configuracion/integraciones", etiqueta: "Integraciones" }}
-      accionesTelefono={guardar}
       cargar={async () => cargar((await params).proveedor)}
       opciones={({ items }) => {
         const i = items[0];
@@ -139,6 +138,8 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
             <FormIntegracion items={items}>
               <Credenciales items={items} conNombre={items.length > 1} />
             </FormIntegracion>
+            {/* Teléfono: «Guardar» al final y no en la cabecera, que cortaba el título (CAR-367). */}
+            <div className="flex justify-end md:hidden">{guardar}</div>
             {consumo ? (
               <SeccionTarjeta titulo="Consumo del mes">
                 <p className="t-numeric text-md font-semibold text-fg">
