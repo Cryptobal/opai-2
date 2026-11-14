@@ -24,6 +24,10 @@ export const FILA_PPM = "00000000-0000-4000-8000-000000000007";
 export const FILA_RENDICIONES = "00000000-0000-4000-8000-000000000010";
 /** Diferencia del factoring: solo informativa, no suma al saldo (adenda de ADR-073 del 5-nov-2026). */
 export const FILA_DIFERENCIA_FACTORING = "00000000-0000-4000-8000-000000000008";
+/** Remuneraciones proyectadas desde Nómina (CAR-344): sueldos, anticipo de quincena y Previred. */
+export const FILA_SUELDOS = "00000000-0000-4000-8000-000000000011";
+export const FILA_ANTICIPO = "00000000-0000-4000-8000-000000000012";
+export const FILA_PREVIRED = "00000000-0000-4000-8000-000000000013";
 
 export const FILAS_VIRTUALES_DOMINIO: FilaFlujo[] = [
   { id: FILA_SIN_CLASIFICAR_INGRESO, seccion: "ingreso", arrastre: false },
@@ -35,6 +39,9 @@ export const FILAS_VIRTUALES_DOMINIO: FilaFlujo[] = [
   { id: FILA_IVA, seccion: "egreso", arrastre: false },
   { id: FILA_PPM, seccion: "egreso", arrastre: false },
   { id: FILA_RENDICIONES, seccion: "egreso", arrastre: false },
+  { id: FILA_SUELDOS, seccion: "egreso", arrastre: false },
+  { id: FILA_ANTICIPO, seccion: "egreso", arrastre: false },
+  { id: FILA_PREVIRED, seccion: "egreso", arrastre: false },
 ];
 
 export const FILAS_VIRTUALES_VISTA: z.infer<typeof filaSchema>[] = [
@@ -87,6 +94,9 @@ export const FILAS_VIRTUALES_VISTA: z.infer<typeof filaSchema>[] = [
   { id: FILA_IVA, seccion: "egreso", etiqueta: "IVA a pagar", vinculo: "finanzas:impuestos", arrastre: false, orden: 9991, activa: true },
   { id: FILA_PPM, seccion: "egreso", etiqueta: "PPM", vinculo: "finanzas:impuestos", arrastre: false, orden: 9992, activa: true },
   { id: FILA_RENDICIONES, seccion: "egreso", etiqueta: "Rendiciones por pagar", vinculo: "rendiciones:lotes", arrastre: false, orden: 9994, activa: true },
+  { id: FILA_SUELDOS, seccion: "egreso", etiqueta: "Sueldos", vinculo: "nomina:costo_proyectado", arrastre: false, orden: 9986, activa: true },
+  { id: FILA_ANTICIPO, seccion: "egreso", etiqueta: "Anticipo de quincena", vinculo: "nomina:costo_proyectado", arrastre: false, orden: 9987, activa: true },
+  { id: FILA_PREVIRED, seccion: "egreso", etiqueta: "Previred", vinculo: "nomina:costo_proyectado", arrastre: false, orden: 9988, activa: true },
 ];
 
 /** Fila informativa de la diferencia del factoring: la etiqueta es la cuenta que elige la empresa. */
