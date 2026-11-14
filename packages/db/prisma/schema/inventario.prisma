@@ -1,0 +1,96 @@
+// Módulo Inventario (CAR-235, ADR-116): catálogo de tipos de activos y ropa. Schema propio `inventario`.
+// Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. El
+// tenant_id no lleva @relation al núcleo: la FK a core.tenants va en el SQL de la migración.
+
+/// Tipo de inventario de la empresa: «activo» (por unidad, con campos propios) o «ropa» (por
+/// existencias y talla). Nunca se borra: se desactiva (R5 de docs/2.0/modulos/inventario.md).
+model InventarioTipo {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  /// "activo" | "ropa". No cambia después de crear (R2).
+  categoria         String
+  nombre            String
+  /// Nombre sin mayúsculas, tildes ni espacios de más: único por empresa (R1).
+  nombreNormalizado String   @map("nombre_normalizado")
+  descripcion       String?
+  /// Campos propios de un tipo de activo: [{ clave, etiqueta, tipo, obligatorio }] (R4).
+  campos            Json     @default("[]")
+  /// Tallas de un tipo de ropa (R3).
+  tallas            String[] @default([])
+  /// Clave de la prenda del uniforme de Personas (CAR-408) a la que corresponde un tipo de ropa.
+  prendaClave       String?  @map("prenda_clave")
+  activo            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, nombreNormalizado])
+  @@unique([tenantId, id])
+  @@map("tipos")
+  @@schema("inventario")
+}
+
+/// Una unidad física de un tipo «activo» (CAR-236): un teléfono, una radio. Se identifica por su código
+/// interno (único por empresa) y guarda los valores de los campos propios de su tipo. Nunca se borra:
+/// se da de baja con motivo (R12).
+model InventarioActivo {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  tipoId            String    @map("tipo_id") @db.Uuid
+  codigo            String
+  /// Código sin mayúsculas ni espacios de más: único por empresa (R10).
+  codigoNormalizado String    @map("codigo_normalizado")
+  numeroSerie       String?   @map("numero_serie")
+  /// "disponible" | "asignado" | "en_reparacion" | "de_baja" (R12).
+  estado            String    @default("disponible")
+  /// Valores de los campos propios del tipo, por clave (R11).
+  valores           Json      @default("{}")
+  notas             String?
+  bajaEn            DateTime? @map("baja_en") @db.Timestamptz(6)
+  motivoBaja        String?   @map("motivo_baja")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, codigoNormalizado])
+  @@unique([tenantId, id])
+  @@index([tenantId, tipoId])
+  @@map("activos")
+  @@schema("inventario")
+}
+
+/// Cantidad disponible de un tipo de ropa en una talla (CAR-237). Cambia solo junto con un
+/// movimiento en la misma transacción; nunca queda bajo cero (R17).
+model InventarioExistencia {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  tipoId    String   @map("tipo_id") @db.Uuid
+  /// Talla normalizada (R8).
+  talla     String
+  cantidad  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, tipoId, talla])
+  @@map("existencias")
+  @@schema("inventario")
+}
+
+/// Movimiento de existencias de ropa (CAR-237): ingreso, ajuste, entrega o devolución. Solo se
+/// agrega: una corrección es un movimiento nuevo (R18).
+model InventarioMovimiento {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  tipoId    String   @map("tipo_id") @db.Uuid
+  talla     String
+  /// Unidades que suma (positivo) o resta (negativo).
+  delta     Int
+  /// "ingreso" | "ajuste" | "entrega" | "devolucion".
+  motivo    String
+  nota      String?
+  /// Usuario que lo registró (null si fue un agente sin usuario).
+  actorId   String?  @map("actor_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, tipoId, createdAt])
+  @@map("movimientos")
+  @@schema("inventario")
+}

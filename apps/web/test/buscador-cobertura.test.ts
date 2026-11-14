@@ -15,6 +15,7 @@ export const SIN_BUSCADOR: Readonly<Record<string, string>> = {
   asistencia:
     "Marcas y turnos se ven por persona e instalación, que ya se buscan; pendiente su buscador.",
   desempeno: "Indicadores y scorecards: pendiente su buscador (cargos y personas ya se buscan).",
+  inventario: "Activos y tipos se buscan en su propia lista (código o serie); pendiente su aporte al buscador general.",
   finanzas: "CAR-402: facturas, notas y documentos de compra.",
   nomina: "CAR-406: procesos de remuneraciones.",
   portal_cliente: "Portal del cliente: no agrega entidades al ERP.",

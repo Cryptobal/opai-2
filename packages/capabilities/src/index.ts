@@ -1,11 +1,6 @@
 export { avisarAlCelular, capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
-export {
-  consumidorAvisoPrueba,
-  consumidorAvisoPruebaEmpresa,
-  trabajoCobrosMesAnterior,
-  trabajoCobrosPruebas,
-} from "./core/plataforma/cobros";
+export { consumidorAvisoPrueba, consumidorAvisoPruebaEmpresa, trabajoCobrosMesAnterior, trabajoCobrosPruebas } from "./core/plataforma/cobros";
 export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
 export { type FuenteAprobaciones, type ItemPorAprobar } from "./core/aprobaciones-fuentes";
 export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
@@ -18,6 +13,7 @@ export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas, indicadoresRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, ausenteSinJustificar, buscadoresPauta, capacidadesPauta, consumidorPautaCambio, consumidorPautaPublicada, diasConTurno, type DiaConTurno, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
+export { capacidadesInventario, PERMISOS_INVENTARIO } from "./inventario";
 export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
