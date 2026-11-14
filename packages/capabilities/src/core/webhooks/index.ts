@@ -1,5 +1,6 @@
 import type { Capacidad } from "../../types";
 import { webhooksDestinoCreate, webhooksDestinosList, webhooksDestinoUpdate } from "./destinos";
+import { webhooksEventosList } from "./catalogo";
 import { webhooksEntregaReenviar, webhooksEntregasList } from "./entregas";
 import { webhooksDestinoDelete, webhooksDestinoRotar } from "./secreto";
 export { consumidorWebhooks, enviador, trabajoEnviarWebhooks } from "./envio";
@@ -13,4 +14,5 @@ export const capacidadesWebhooks: readonly Capacidad[] = [
   webhooksDestinoDelete,
   webhooksEntregasList,
   webhooksEntregaReenviar,
+  webhooksEventosList,
 ];

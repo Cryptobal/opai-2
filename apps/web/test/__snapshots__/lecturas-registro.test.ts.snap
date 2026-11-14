@@ -66,6 +66,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.usage.summary",
   "core.webhooks.destinos_list",
   "core.webhooks.entregas_list",
+  "core.webhooks.eventos_list",
   "cpq.catalogo_categorias.list",
   "cpq.catalogo_items.list",
   "cpq.cotizaciones.preview_pdf",
