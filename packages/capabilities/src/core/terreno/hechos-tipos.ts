@@ -52,6 +52,17 @@ export const TIPOS_HECHO_TERRENO = {
     })
     .strict(),
   /**
+   * Novedad en el libro de la instalación desde el equipo de terreno (CAR-77 parte 3), sin depender de Rondas:
+   * texto y gravedad. Va a `core.libro_novedades` con el equipo, la persona y la hora del hecho.
+   */
+  "terreno.novedad": z
+    .object({
+      resumen: z.string().trim().min(3).max(200),
+      detalle: z.string().trim().max(2000).optional(),
+      gravedad: z.enum(["baja", "media", "alta"]).optional(),
+    })
+    .strict(),
+  /**
    * Entrada a una instalación (portería, CAR-78 · E4b-2). Del documento solo se guardan su huella y su máscara:
    * el número completo no se persiste (decisión de Carlos, 7-nov-2026). El servidor cruza con las listas.
    */

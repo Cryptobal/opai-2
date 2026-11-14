@@ -1,6 +1,6 @@
 "use client";
 
-import { UserCheck } from "lucide-react";
+import { NotebookPen, UserCheck } from "lucide-react";
 
 import { Button, Empty, FilaSeleccionable } from "@opai/ds";
 
@@ -38,10 +38,17 @@ export function InicioEquipo({
           secundario="Con tu rostro o con tu RUT y PIN"
           inicio={<UserCheck aria-hidden className="size-5 flex-none text-fg-muted" />}
         />
+        <FilaSeleccionable
+          href="/terreno/libro"
+          Link={LinkNext}
+          titulo="Libro de novedades"
+          secundario="Anota lo que pasa en la instalación"
+          inicio={<NotebookPen aria-hidden className="size-5 flex-none text-fg-muted" />}
+        />
       </div>
       <Empty
         titulo="Aún no hay nada por hacer"
-        descripcion="Tus rondas, novedades y accesos aparecerán aquí cuando tu empresa los active."
+        descripcion="Tus rondas y accesos aparecerán aquí cuando tu empresa los active."
       />
     </div>
   );
