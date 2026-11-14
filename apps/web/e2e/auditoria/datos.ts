@@ -9,6 +9,7 @@ import { digitoVerificador } from "@opai/domain";
 export const CUENTA_QA = "Cuenta QA auditoría";
 const INSTALACION_QA = "Instalación QA auditoría";
 const NEGOCIO_QA = "Negocio QA auditoría";
+const PLANTILLA_QA = "Plantilla QA auditoría";
 
 /** RUT válido y único por corrida (cuerpo de 8 dígitos desde la hora). */
 function rutNuevo() {
@@ -106,6 +107,15 @@ async function crearCotizacion(page: Page, negocioId: string) {
   await esperarFicha(page, "cotizaciones");
 }
 
+/** Plantilla en blanco para que la auditoría abra el editor (CAR-364). */
+async function crearPlantilla(page: Page) {
+  await page.goto("/documentos/plantillas");
+  await page.getByRole("button", { name: "Nueva plantilla" }).click();
+  await page.getByLabel("Nombre", { exact: true }).fill(PLANTILLA_QA);
+  await page.getByRole("button", { name: "Crear y editar" }).click();
+  await esperarFicha(page, "documentos/plantillas");
+}
+
 /** Crea la cuenta, la instalación, la persona, el negocio y la cotización que falten; devuelve notas de lo que no se pudo. */
 export async function prepararDatos(page: Page): Promise<string[]> {
   const notas: string[] = [];
@@ -139,5 +149,7 @@ export async function prepararDatos(page: Page): Promise<string[]> {
     return notas;
   const cotizacion = await buscar(page, "cotizaciones", "Cotización QA", /Cotización QA/);
   if (!cotizacion) await paso("cotización", () => crearCotizacion(page, negocioId));
+  const plantilla = await buscar(page, "documentos/plantillas", PLANTILLA_QA, /Plantilla QA/);
+  if (!plantilla) await paso("plantilla", () => crearPlantilla(page));
   return notas;
 }
