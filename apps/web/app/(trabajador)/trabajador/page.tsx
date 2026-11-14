@@ -1,4 +1,4 @@
-import { AlertTriangle, Bell } from "lucide-react";
+import { AlertTriangle, Bell, CalendarDays } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, Empty, Estado } from "@opai/ds";
 import { primerNombre } from "@opai/domain";
@@ -11,6 +11,7 @@ import { fechaHora } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { estadoTrabajador, SIN_FICHA } from "./_componentes/estado";
+import { etiquetaDia, horario, type MisTurnos } from "./mi-pauta/_componentes/semanas";
 import { type Aviso, ETIQUETA_FALTANTE, type MisDatos } from "./_componentes/tipos";
 
 export const metadata = { title: tituloPagina("trabajador", "Inicio") };
@@ -23,20 +24,23 @@ export default function Pagina() {
       titulo="Inicio"
       ruta="/trabajador"
       cargar={async () => {
-        const [datos, avisos] = await Promise.all([
+        const [datos, avisos, turnos] = await Promise.all([
           ejecutarComoUsuario<MisDatos>("trabajador", "portal_trabajador.mis_datos.obtener"),
           ejecutarComoUsuario<{ items: Aviso[]; noLeidas: number }>("trabajador", "core.notificaciones.list", {
             limite: 5,
           }),
+          ejecutarComoUsuario<MisTurnos>("trabajador", "portal_trabajador.mis_turnos.listar", { dias: 14, limite: 1 }),
         ]);
         return {
           state: estadoTrabajador(datos, avisos),
           datos: datos.ok ? datos.data : null,
           avisos: avisos.ok ? avisos.data.items : [],
+          // Tarjeta secundaria (CAR-462): si su carga falla, el Inicio sigue sin ella.
+          turnos: turnos.ok ? turnos.data : null,
         };
       }}
     >
-      {({ state, datos, avisos }) => (
+      {({ state, datos, avisos, turnos }) => (
         <Estado state={state} variante="detalle" textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}>
           <div className="flex flex-col gap-4">
             <div>
@@ -59,6 +63,7 @@ export default function Pagina() {
                 </CardContent>
               </Card>
             ) : null}
+            {turnos ? <ProximoTurno r={turnos} /> : null}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -88,5 +93,33 @@ export default function Pagina() {
         </Estado>
       )}
     </PaginaPortal>
+  );
+}
+
+/** Tarjeta «Tu próximo turno» (CAR-462): el primero de los próximos 14 días, con acceso a «Mi pauta». */
+function ProximoTurno({ r }: { r: MisTurnos }) {
+  const t = r.items[0];
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarDays aria-hidden className="size-4 text-fg-muted" />
+          Tu próximo turno
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        {t ? (
+          <p className="text-base text-fg">
+            <span className="font-medium">{t.fecha === r.hoy ? "Hoy" : etiquetaDia(t.fecha)}</span>
+            {` · ${horario(t, r.zona)} · ${t.instalacion.nombre}`}
+          </p>
+        ) : (
+          <p className="text-base text-fg-muted">No tienes turnos en los próximos 14 días.</p>
+        )}
+        <EnlaceBoton href="/trabajador/mi-pauta" variante="secondary">
+          Ver mi pauta
+        </EnlaceBoton>
+      </CardContent>
+    </Card>
   );
 }
