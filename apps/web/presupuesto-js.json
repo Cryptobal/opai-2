@@ -93,7 +93,7 @@
     "/(supervisor)/supervisor/[...ruta]": 166,
     "/(supervisor)/supervisor/instalaciones": 166,
     "/(supervisor)/supervisor/instalaciones/[id]": 166,
-    "/(terreno)/terreno": 170,
+    "/(terreno)/terreno": 171,
     "/(terreno)/terreno/[...ruta]": 166,
     "/(terreno)/terreno/cola": 169,
     "/(terreno)/terreno/porteria": 167,
