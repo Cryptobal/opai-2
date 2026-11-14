@@ -23,6 +23,7 @@ type FilaTicket = {
   estado: string;
   solicitanteId: string;
   responsableId: string;
+  instalacionId: string | null;
   motivoRechazo: string | null;
   slaVenceEn: Date | null;
   resueltoEn: Date | null;
@@ -45,6 +46,7 @@ function vistaTicket(
     estado: t.estado as z.infer<typeof ticketSchema>["estado"],
     solicitanteId: t.solicitanteId,
     responsableId: t.responsableId,
+    instalacionId: t.instalacionId,
     motivoRechazo: t.motivoRechazo,
     slaVenceEn: t.slaVenceEn,
     resueltoEn: t.resueltoEn,
@@ -80,6 +82,7 @@ export const ticketsListar = defineCapability({
     vista: z.enum(["mios", "asignados", "todos"]).default("mios"),
     estado: estadoSchema.optional(),
     tipoId: uuidSchema.optional(),
+    instalacionId: uuidSchema.optional().describe("Solo los tickets de esta instalación."),
   }),
   output: z.object({ items: z.array(ticketSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
@@ -90,6 +93,7 @@ export const ticketsListar = defineCapability({
         ...dondeVista(ctx, input.vista),
         ...(input.estado ? { estado: input.estado } : {}),
         ...(input.tipoId ? { tipoId: input.tipoId } : {}),
+        ...(input.instalacionId ? { instalacionId: input.instalacionId } : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
       ...cursorDe(input.cursor, input.limite),
