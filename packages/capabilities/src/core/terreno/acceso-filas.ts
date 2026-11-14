@@ -74,6 +74,29 @@ function decidir(x: Lista, l: Listas, hora: Date, zona: string, consumidas: Set<
   };
 }
 
+/** Fila de un registro de entrada: datos de la entrada o, si faltan, los del prerregistro. */
+function filaRegistro(
+  x: Lista,
+  comun: Omit<FilaRegistro, "nombre" | "origen">,
+  id: string,
+  entradaListaId: string | null,
+  t: Tiempo,
+): FilaRegistro {
+  return {
+    ...comun,
+    id,
+    nombre: x.e.p.nombre,
+    empresa: x.e.p.empresa ?? x.pre?.empresa ?? null,
+    motivoVisita: x.e.p.motivo ?? null,
+    patente: (x.e.p.patente ? normalizarPatente(x.e.p.patente) : null) ?? x.pre?.patente ?? null,
+    entradaListaId,
+    origen:
+      t.recibidoEn.getTime() - new Date(x.e.h.horaHecho).getTime() > DIFERIDO_MS
+        ? "diferido"
+        : "en_linea",
+  };
+}
+
 /** Registros, intentos y usos de prerregistro de las entradas listas para decidir (todo es solo inserción). */
 export async function escribirFilas(
   ctx: Contexto,
@@ -114,19 +137,7 @@ export async function escribirFilas(
       continue;
     }
     const id = randomUUID();
-    registros.push({
-      ...comun,
-      id,
-      nombre: x.e.p.nombre,
-      empresa: x.e.p.empresa ?? x.pre?.empresa ?? null,
-      motivoVisita: x.e.p.motivo ?? null,
-      patente: (x.e.p.patente ? normalizarPatente(x.e.p.patente) : null) ?? x.pre?.patente ?? null,
-      entradaListaId,
-      origen:
-        t.recibidoEn.getTime() - new Date(x.e.h.horaHecho).getTime() > DIFERIDO_MS
-          ? "diferido"
-          : "en_linea",
-    });
+    registros.push(filaRegistro(x, comun, id, entradaListaId, t));
     if (x.pre)
       usos.push({
         tenantId: ctx.tenantId,

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { fechaDia, hoyEmpresa } from "../../acceso/prerregistro-comun";
+import { fechaDia, hoyEmpresa, prerregistroSchema } from "../../acceso/prerregistro-comun";
 import { cursorDe, pagina } from "../maestros/comun";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
@@ -28,18 +28,15 @@ export const accesoEsperadosTerreno = defineCapability({
     dia: z.string(),
     siguiente: z.string().nullable(),
     items: z.array(
-      z.object({
-        visitanteId: uuidSchema,
-        nombre: z.string(),
-        empresa: z.string().nullable(),
-        documento: z.string(),
-        desdeMin: z.number().int().nullable(),
-        hastaMin: z.number().int().nullable(),
-        anfitrion: z.string(),
-        motivo: z.string().nullable(),
-        nota: z.string().nullable(),
-        ingreso: z.boolean(),
-      }),
+      prerregistroSchema
+        .pick({ desdeMin: true, hastaMin: true, anfitrion: true, motivo: true, nota: true })
+        .extend({
+          visitanteId: uuidSchema,
+          nombre: z.string(),
+          empresa: z.string().nullable(),
+          documento: z.string(),
+          ingreso: z.boolean(),
+        }),
     ),
   }),
   efecto: "lectura",

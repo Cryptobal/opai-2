@@ -78,6 +78,27 @@ function Confirmar(p: { e: Esperado; codigo: string; personaId: string; listo: (
   );
 }
 
+/** Lista de los esperados de hoy con su horario, anfitrión y si ya entraron. */
+function ListaEsperados({ items }: { items: Esperado[] }) {
+  return (
+    <ul className="flex flex-col divide-y divide-border">
+      {items.map((e) => (
+        <li key={e.visitanteId} className="flex items-center justify-between gap-3 py-2">
+          <span className="flex min-w-0 flex-col">
+            <span className="t-body truncate text-fg">{e.nombre}</span>
+            <span className="t-caption">
+              {[e.empresa, horario(e), e.anfitrion].filter(Boolean).join(" · ")}
+            </span>
+          </span>
+          <Badge tono={e.ingreso ? "success" : "info"} punto>
+            {e.ingreso ? "Ingresó" : "Esperado"}
+          </Badge>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * Esperados hoy (CAR-478): los prerregistrados de la instalación y la lectura de su invitación. Al leer el QR el
  * formulario llega lleno y el guardia solo confirma; sin invitación, el documento prerregistrado igual entra.
@@ -128,21 +149,7 @@ export function Esperados({
           Registra la entrada con el documento; la oficina revisará el caso.
         </Alerta>
       ) : null}
-      <ul className="flex flex-col divide-y divide-border">
-        {items.map((e) => (
-          <li key={e.visitanteId} className="flex items-center justify-between gap-3 py-2">
-            <span className="flex min-w-0 flex-col">
-              <span className="t-body truncate text-fg">{e.nombre}</span>
-              <span className="t-caption">
-                {[e.empresa, horario(e), e.anfitrion].filter(Boolean).join(" · ")}
-              </span>
-            </span>
-            <Badge tono={e.ingreso ? "success" : "info"} punto>
-              {e.ingreso ? "Ingresó" : "Esperado"}
-            </Badge>
-          </li>
-        ))}
-      </ul>
+      <ListaEsperados items={items} />
     </section>
   );
 }
