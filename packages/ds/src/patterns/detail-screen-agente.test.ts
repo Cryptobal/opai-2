@@ -8,7 +8,7 @@ import { DetailScreen } from "./detail-screen";
 describe("ranura del agente en la ficha", () => {
   it("la ficha marca su raíz y deja la ranura entre la cabecera y el contenido", () => {
     const html = renderToStaticMarkup(
-      createElement(DetailScreen, { titulo: "Cuenta", state: "ok" }, "contenido"),
+      createElement(DetailScreen, { titulo: "Cuenta", state: "ready" }, "contenido"),
     );
     expect(html).toContain("data-detalle");
     const ranura = html.indexOf("data-ficha-agente");
