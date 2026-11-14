@@ -8,6 +8,8 @@ import { HojaActivo } from "./diferidas";
 import { type Entrega, estadoActivo, type FichaActivo } from "./tipos";
 
 const fecha = (iso: string) => iso.split("-").reverse().join("-");
+const dia = (iso: string) =>
+  new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(iso));
 
 function acciones(a: FichaActivo): AccionEntidad[] {
   if (a.estado === "de_baja") return [];
@@ -45,7 +47,7 @@ function LoTiene({ entrega, puedeGestionar }: { entrega: Entrega; puedeGestionar
     <SeccionTarjeta titulo="Lo tiene">
       <p>
         <span className="font-medium">{entrega.destino}</span>
-        <span className="text-fg-muted"> · desde el {fecha(entrega.entregadaEn.slice(0, 10))}</span>
+        <span className="text-fg-muted"> · desde el {dia(entrega.entregadaEn)}</span>
       </p>
       {puedeGestionar ? (
         <EnlaceBoton href={`/inventario/entregas?devolver=${entrega.id}`} variante="secondary" className="mt-3">

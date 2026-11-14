@@ -26,6 +26,8 @@ export const entregarActivo = defineCapability({
     const activo = await ctx.db.inventarioActivo.findFirst({ where: { id: input.activoId } });
     if (!activo) throw noEncontrado("El activo");
     if (activo.estado !== "disponible") throw reglaDeNegocio("Solo se entrega un activo disponible.");
+    const tipoActivo = await ctx.db.inventarioTipo.findFirst({ where: { id: activo.tipoId }, select: { activo: true } });
+    if (!tipoActivo?.activo) throw reglaDeNegocio("El tipo del activo está desactivado.");
     const datos = {
       activoId: activo.id,
       tipoId: null,
@@ -69,6 +71,7 @@ export const entregarRopa = defineCapability({
     const tipo = await ctx.db.inventarioTipo.findFirst({ where: { id: input.tipoId } });
     if (!tipo) throw noEncontrado("El tipo de ropa");
     if (tipo.categoria !== "ropa") throw reglaDeNegocio("Los activos se entregan uno por uno.");
+    if (!tipo.activo) throw reglaDeNegocio("El tipo está desactivado.");
     const talla = normalizarTalla(input.talla);
     const hay = await ctx.db.inventarioExistencia.findFirst({ where: { tipoId: tipo.id, talla }, select: { cantidad: true } });
     if ((hay?.cantidad ?? 0) < input.cantidad) throw reglaDeNegocio(`No hay suficientes unidades de la talla ${talla}.`);

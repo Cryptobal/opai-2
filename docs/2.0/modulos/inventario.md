@@ -37,7 +37,7 @@ Se nota que funciona cuando: (1) cada guardia nuevo recibe su uniforme registrad
 | Tipo | Categoría configurable: «Teléfono», «Radio», «Camisa» | Activos, existencias | `inventario.tipos` (CAR-235) |
 | Activo | Una unidad física con código o serie | Tipo; asignación vigente | `inventario.activos` (CAR-236) |
 | Existencia | Cantidad disponible de un tipo de ropa en una talla | Tipo | `inventario.existencias` (CAR-237) |
-| Asignación | Quién tiene un activo, o qué ropa se entregó a quién, desde cuándo y hasta cuándo | Activo o tipo de ropa; persona o instalación del núcleo | `inventario.asignaciones` (CAR-238) |
+| Entrega | Quién tiene un activo, o qué ropa se entregó a quién, desde cuándo y hasta cuándo | Activo o tipo de ropa; persona o instalación del núcleo | `inventario.entregas` (CAR-238) |
 
 ## 4. Pantallas
 
@@ -81,12 +81,12 @@ Mismo diseño que el resto de OPAI (diseño nuevo, ADR-109). No hay diseño apro
 - **R15.** La ropa se controla por existencias: cuántas unidades hay de cada talla de un tipo de ropa. Un ingreso suma unidades a una o varias tallas (enteros mayores que cero), con nota opcional.
 - **R16.** Solo se ingresan tallas que el tipo ofrece; las líneas de la misma talla se suman. Un tipo desactivado no recibe ingresos.
 - **R17.** El ajuste fija la cantidad real contada de una talla, con motivo obligatorio. Las existencias nunca quedan bajo cero: un movimiento que restaría de más falla sin cambiar nada.
+- **R18.** Todo cambio de existencias (ingreso, ajuste, entrega, devolución) queda como movimiento que solo se agrega; la app no puede cambiarlo ni borrarlo.
 - **R19.** Una entrega va a una persona o a una instalación de la empresa, nunca a las dos ni a ninguna.
 - **R20.** Solo se entrega un activo «Disponible»; queda «Asignado» con a lo más una entrega abierta, y no se puede dar de baja mientras esté entregado.
 - **R21.** La ropa se entrega por talla y cantidad y descuenta las existencias en la misma operación; si no alcanzan, no se entrega nada.
 - **R22.** Devolver cierra la entrega: el activo vuelve a «Disponible» o a «En reparación» si vuelve dañado; la ropa devuelta vuelve a su talla. Una entrega se devuelve una sola vez.
-- **R23.** Un supervisor ve solo las entregas a sus instalaciones o a personas con vínculo vigente en ellas; entregar exige `inventario:gestionar` y que el destino esté en su alcance.
-- **R18.** Todo cambio de existencias (ingreso, ajuste, entrega, devolución) queda como movimiento que solo se agrega; la app no puede cambiarlo ni borrarlo.
+- **R23.** Un supervisor ve solo las entregas a sus instalaciones o a personas con vínculo vigente en ellas; entregar o devolver exige `inventario:gestionar` y que el destino esté en su alcance. Un tipo desactivado no se entrega.
 
 ## 7. Permisos
 

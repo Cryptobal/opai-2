@@ -30,6 +30,14 @@ export const entregaSchema = z.object({
 });
 export type VistaEntrega = z.infer<typeof entregaSchema>;
 
+/** Alcance (ADR-022, R23): un supervisor ve y gestiona solo entregas a sus instalaciones o a personas de ellas. */
+export async function dondeEntregaEnAlcance(ctx: Contexto) {
+  const ids = instalacionesEnAlcance(ctx);
+  if (!ids) return {};
+  const personas = await ctx.db.persona.findMany({ where: { AND: [dondePersona(ctx)] }, select: { id: true } });
+  return { OR: [{ instalacionId: { in: [...ids] } }, { personaId: { in: personas.map((p) => p.id) } }] };
+}
+
 /** R19 y alcance (ADR-022): el destino existe en la empresa y está a cargo de quien entrega. */
 export async function exigirDestino(ctx: Contexto, d: { personaId?: string | undefined; instalacionId?: string | undefined }) {
   const error = errorDeDestino(d);

@@ -24,10 +24,10 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
   let camisa = "";
   const sufijo = randomUUID().slice(0, 8);
 
-  const ctx = (tenantId: string, alcance: string[] | null = null) =>
+  const ctx = (tenantId: string, alcance: string[] | null = null, rol: "owner" | "supervisor" = alcance ? "supervisor" : "owner") =>
     mod.crearContexto({
       tenantId,
-      rol: alcance ? "supervisor" : "owner",
+      rol,
       actor: { tipo: "user", id: ana },
       usuario: { id: ana, nombre: "Ana", email: `ana-${sufijo}@prueba.cl`, platformRole: null },
       portal: "erp",
@@ -71,6 +71,8 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
   });
 
   it("entrega un activo a una persona: queda asignado y no se entrega dos veces (R20)", async () => {
+    await dato(ctx(a), "inventario.entregas.entregar_activo", { activoId: activo, personaId: persona }, { dryRun: true });
+    expect(await e.admin.inventarioEntrega.count({ where: { tenantId: a } })).toBe(0);
     const r = await dato<Entrega>(ctx(a), "inventario.entregas.entregar_activo", { activoId: activo, personaId: persona });
     expect(r).toMatchObject({ item: "TEL-1", destino: "Pedro Soto", devueltaEn: null });
     expect((await e.admin.inventarioActivo.findFirst({ where: { id: activo } }))?.estado).toBe("asignado");
@@ -84,6 +86,8 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     const ambos = { tipoId: camisa, talla: "M", cantidad: 1, personaId: persona, instalacionId: instalacion };
     expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", ambos)).toBe("UNPROCESSABLE");
     expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, personaId: personaB })).toBe("NOT_FOUND");
+    const instalacionB = await sitio(b, "Otra empresa");
+    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: instalacionB })).toBe("NOT_FOUND");
   });
 
   it("entrega ropa a una instalación: descuenta, no deja bajo cero y la devolución la repone", async () => {
@@ -108,7 +112,13 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
   it("R23: el supervisor solo ve entregas de sus instalaciones; otra empresa no ve nada", async () => {
     await dato(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: otraInstalacion });
     const supervisor = await dato<{ items: Entrega[] }>(ctx(a, [instalacion]), "inventario.entregas.list", { estado: "todas" });
+    expect(supervisor.items.length).toBeGreaterThan(0);
     expect(supervisor.items.every((x) => x.destino === "Planta Norte")).toBe(true);
+    // Con permiso de gestionar pero acotado: no entrega ni devuelve fuera de sus instalaciones.
+    const acotado = ctx(a, [instalacion], "owner");
+    const fuera = await dato<{ items: Entrega[] }>(ctx(a), "inventario.entregas.list", { instalacionId: otraInstalacion });
+    expect(await codigo(acotado, "inventario.entregas.devolver", { id: fuera.items[0]?.id })).toBe("NOT_FOUND");
+    expect(await codigo(acotado, "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: otraInstalacion })).toBe("NOT_FOUND");
     expect((await dato<{ items: Entrega[] }>(ctx(b), "inventario.entregas.list", { estado: "todas" })).items).toEqual([]);
   });
 });

@@ -5,7 +5,7 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { conflicto, noEncontrado } from "../errores";
 import { PERMISOS_INVENTARIO } from "./comun";
-import { entregaSchema, vistaEntrega } from "./entregas-comun";
+import { dondeEntregaEnAlcance, entregaSchema, vistaEntrega } from "./entregas-comun";
 import { aplicarMovimiento } from "./ropa-movimiento";
 
 /**
@@ -26,19 +26,22 @@ export const entregasDevolver = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const actual = await ctx.db.inventarioEntrega.findFirst({ where: { id: input.id } });
+    const actual = await ctx.db.inventarioEntrega.findFirst({ where: { id: input.id, AND: [await dondeEntregaEnAlcance(ctx)] } });
     if (!actual) throw noEncontrado("La entrega");
     if (actual.devueltaEn) throw conflicto("Esta entrega ya se devolvió.");
-    const cierre = { devueltaEn: new Date(), notaDevolucion: input.nota || null };
+    // Nunca antes de la entrega (CHECK), aunque los relojes de la app y la base difieran.
+    const ahora = new Date();
+    const cierre = { devueltaEn: ahora > actual.entregadaEn ? ahora : actual.entregadaEn, notaDevolucion: input.nota || null };
     if (dryRun) return vistaEntrega(ctx, { ...actual, ...cierre });
     const fila = await ctx.transaccion(async (tx) => {
       const r = await tx.inventarioEntrega.updateMany({ where: { id: actual.id, devueltaEn: null }, data: cierre });
       if (r.count !== 1) throw conflicto("Esta entrega ya se devolvió.");
       if (actual.activoId) {
-        await tx.inventarioActivo.updateMany({
+        const a = await tx.inventarioActivo.updateMany({
           where: { id: actual.activoId, estado: "asignado" },
           data: { estado: input.estadoActivo },
         });
+        if (a.count !== 1) throw conflicto("El activo no figura como asignado: revisa su estado.");
       } else if (actual.tipoId && actual.talla && actual.cantidad) {
         const nota = cierre.notaDevolucion;
         await aplicarMovimiento(ctx, tx, { tipoId: actual.tipoId, talla: actual.talla, delta: actual.cantidad, motivo: "devolucion", nota });

@@ -50,7 +50,7 @@ export function ListaEntregas({
       vista={<PestanasInventario activa="entregas" />}
       accion={nueva}
       accionFlotante={Boolean(nueva)}
-      buscar="Buscar"
+      buscar="Buscar por prenda, activo o persona"
       filtros={[
         {
           param: "estado",

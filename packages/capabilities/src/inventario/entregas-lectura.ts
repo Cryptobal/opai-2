@@ -1,19 +1,9 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
-import { dondePersona, instalacionesEnAlcance } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
-import type { Contexto } from "../types";
 import { PERMISOS_INVENTARIO } from "./comun";
-import { entregaSchema, vistasEntrega } from "./entregas-comun";
-
-/** Alcance (ADR-022): un supervisor ve solo entregas a sus instalaciones o a personas de ellas. */
-async function dondeEnAlcance(ctx: Contexto) {
-  const ids = instalacionesEnAlcance(ctx);
-  if (!ids) return {};
-  const personas = await ctx.db.persona.findMany({ where: { AND: [dondePersona(ctx)] }, select: { id: true } });
-  return { OR: [{ instalacionId: { in: [...ids] } }, { personaId: { in: personas.map((p) => p.id) } }] };
-}
+import { dondeEntregaEnAlcance, entregaSchema, vistasEntrega } from "./entregas-comun";
 
 export const entregasList = defineCapability({
   id: "inventario.entregas.list",
@@ -38,7 +28,7 @@ export const entregasList = defineCapability({
     const filas = await ctx.db.inventarioEntrega.findMany({
       where: {
         AND: [
-          await dondeEnAlcance(ctx),
+          await dondeEntregaEnAlcance(ctx),
           input.personaId ? { personaId: input.personaId } : {},
           input.instalacionId ? { instalacionId: input.instalacionId } : {},
           input.activoId ? { activoId: input.activoId } : {},
