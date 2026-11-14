@@ -3,6 +3,8 @@ import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
+import { capacidadesPush } from "./push";
+export { avisarAlCelular } from "./push-avisar";
 import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
@@ -101,6 +103,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   invitationsPeek,
   invitationsAccept,
   invitationsRequestNew,
+  ...capacidadesPush,
   modulesList,
   ...capacidadesModulos,
   apikeysList,
