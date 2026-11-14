@@ -41,7 +41,7 @@ Fuera de alcance: campos calculados, campos en instalaciones o personas, y filtr
 ## 7. Capacidades
 - `core.campos_personalizados.list`: lectura con `core:cuentas.read`. Filtros: entidad e incluir archivados. Sigue el contrato de listas (CAR-353).
 - `core.campos_personalizados.create` y `.update`: el permiso nuevo `core:campos.config` (owner y admin). Con `dryRun`.
-- (PR 2) `core.campos_personalizados.valores.get` y `.valores.set`. Usan el permiso de lectura o gestión de la entidad y su alcance (ADR-022).
+- (PR 2) `core.valores_personalizados.get` y `.set` (cuentas y contactos) y `comercial.negocio_campos.get` y `.set` (negocios). Usan el permiso de lectura o gestión de la entidad y su alcance (ADR-022).
 
 ## 8. Interfaz y responsive
 En el PR 3, con los patrones `ListScreen` y `FormScreen` del DS, a 375, 1024 y 1280 px.

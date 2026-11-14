@@ -9,6 +9,7 @@ import { contactosDesvincular } from "./contactos-desvincular";
 import { contactosSetRoles, contactosVincular } from "./contactos-vinculos";
 import { camposPersonalizadosCreate, camposPersonalizadosList } from "./campos-personalizados";
 import { camposPersonalizadosUpdate } from "./campos-personalizados-editar";
+import { camposValoresGet, camposValoresSet } from "./campos-valores";
 import { etiquetasAsignar, etiquetasDeEntidad, etiquetasQuitar } from "./etiquetas-asignar";
 import { etiquetasCreate, etiquetasList, etiquetasUpdate } from "./etiquetas";
 import { etiquetasDelete } from "./etiquetas-eliminar";
@@ -35,4 +36,6 @@ export const capacidadesCrm: readonly Capacidad[] = [
   camposPersonalizadosList,
   camposPersonalizadosCreate,
   camposPersonalizadosUpdate,
+  camposValoresGet,
+  camposValoresSet,
 ];
