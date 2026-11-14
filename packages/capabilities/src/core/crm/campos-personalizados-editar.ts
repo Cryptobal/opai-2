@@ -43,7 +43,7 @@ export const camposPersonalizadosUpdate = defineCapability({
     const c = await ctx.transaccion(async (tx) => {
       const r = await sinDuplicado(
         tx.campoPersonalizado.update({ where: { id }, data }),
-        "No se pudo actualizar el campo.",
+        "Ya existe un campo con ese nombre para esa entidad.",
       );
       await ctx.eventos.emitir(tx, {
         tipo: "core.campo_personalizado.actualizado",

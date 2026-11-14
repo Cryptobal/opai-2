@@ -17,7 +17,7 @@ describe("core · campos personalizados contra Postgres real", () => {
   let b = "";
   let userId = "";
   const sufijo = randomUUID().slice(0, 8);
-  const ctx = (tenantId: string, rol = "owner") =>
+  const ctx = (tenantId: string, rol: "owner" | "viewer" = "owner") =>
     mod.crearContexto({
       tenantId,
       rol,

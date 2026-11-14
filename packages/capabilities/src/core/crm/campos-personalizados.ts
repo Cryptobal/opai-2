@@ -31,7 +31,7 @@ export const campoPersonalizadoSchema = z.object({
 export type CampoPersonalizadoVista = z.infer<typeof campoPersonalizadoSchema>;
 
 export const etiquetaCampo = z.string().trim().min(1).max(60);
-export const opcionesCampo = z.array(z.string()).max(MAX_OPCIONES_CAMPO);
+export const opcionesCampo = z.array(z.string().max(100)).max(MAX_OPCIONES_CAMPO);
 
 type Fila = Omit<CampoPersonalizadoVista, "entidad" | "tipo"> & { entidad: string; tipo: string };
 export const vistaCampo = (c: Fila): CampoPersonalizadoVista => ({
