@@ -1,9 +1,9 @@
 # CAR-77 · Libro de novedades en el núcleo
 
 - **Sesión:** Sesión Terreno
-- **PR:** #817 · rama `brief/car-77-libro-novedades` (parte 1 de 5); parte 2 en rama `brief/car-77-libro-novedades-estados` (apilada sobre #817) · [brief](../../briefs/BRIEF-CAR-77-libro-novedades.md)
+- **PR:** #817 (parte 1 de 5, integrada el 14-nov-2026); parte 2 en #826 (rama `brief/car-77-libro-novedades-estados`) · [brief](../../briefs/BRIEF-CAR-77-libro-novedades.md)
 - **Estado:** En PR
-- **Migración:** `20270102100000_core_libro_novedades` (parte 1) y `20270103100000_core_libro_novedades_hechos` (parte 2), por aplicar en dev y main, con snapshot previo
+- **Migración:** `20270102100000_core_libro_novedades` (parte 1, aplicada en dev y main con respaldo) y `20270103100000_core_libro_novedades_hechos` (parte 2, por aplicar en dev y main con snapshot previo)
 
 ## Qué entra (parte 1)
 

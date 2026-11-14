@@ -325,6 +325,7 @@ model Persona {
   estructuras EstructuraSueldo[]
   anexos      AnexoContrato[]
   contratoPeriodos ContratoPeriodo[]
+  tallas      PersonaTalla[]
   prevision   PersonaPrevision?
   pagos       PersonaPago[]
   pagoSolicitudes PersonaPagoSolicitud[]
@@ -729,5 +730,26 @@ model ContratoPeriodo {
   @@index([tenantId, vinculoId, inicio])
   @@index([tenantId, personaId])
   @@map("contrato_periodos")
+  @@schema("core")
+}
+
+/// Talla de la persona por prenda del uniforme (CAR-408): la prenda sale del kit de la empresa o de su vertical
+/// (`personas_prendas_uniforme`, @opai/domain), no de columnas fijas. Una fila por persona y prenda.
+model PersonaTalla {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  personaId String   @map("persona_id") @db.Uuid
+  /// Clave de la prenda (`clavePrenda` de @opai/domain).
+  prenda    String
+  talla     String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@unique([personaId, prenda])
+  @@index([tenantId, personaId])
+  @@map("personas_tallas")
   @@schema("core")
 }

@@ -1,0 +1,48 @@
+name: Simplicidad
+
+# Código simple (ADR-115): mide duplicados, archivos y funciones largos, y exportaciones, archivos y
+# dependencias sin uso. Falla solo si el PR empeora las cifras de `simplicidad-base.json`.
+# Es rápido (menos de un minuto de medición), por eso corre en cada PR como typecheck, lint y test.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: simplicidad-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simplicidad:
+    name: simplicidad
+    if: github.event.pull_request.draft != true
+    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - uses: pnpm/action-setup@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: Medir contra la línea base
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        env:
+          SIMPLICIDAD_RAMA_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || 'origin/main' }}
+        run: pnpm simplicidad
+      - name: Solo documentación
+        if: steps.solo_docs.outputs.only_docs == 'true'
+        run: 'echo "PR de solo *.md y docs/** — simplicidad omitida."'

@@ -48,9 +48,3 @@ export function accionesNovedad(actual: EstadoNovedadLibro): AccionNovedadLibro[
 
 /** Número visible de una novedad (NOV-0042), correlativo por empresa. */
 export const codigoNovedad = (numero: number) => `NOV-${String(numero).padStart(4, "0")}`;
-
-/** «NOV-42», «nov 42» o «42»: el número de la novedad, o null si el texto no lo es. */
-export function numeroNovedadDeTexto(q: string): number | null {
-  const m = /^\s*(?:nov[\s-]*)?(\d{1,9})\s*$/i.exec(q);
-  return m ? Number(m[1]) : null;
-}

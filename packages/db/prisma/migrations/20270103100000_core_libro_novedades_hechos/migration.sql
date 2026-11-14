@@ -34,6 +34,8 @@ CREATE POLICY tenant_isolation ON "core"."libro_novedades_hechos" AS PERMISSIVE 
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 GRANT SELECT, INSERT ON "core"."libro_novedades_hechos" TO opai_app;
+-- Los privilegios por defecto del schema dan UPDATE y DELETE: un hecho no se edita ni se borra.
+REVOKE UPDATE, DELETE, TRUNCATE ON "core"."libro_novedades_hechos" FROM opai_app;
 
 CREATE TRIGGER mismo_tenant BEFORE INSERT ON "core"."libro_novedades_hechos"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('novedad_id', 'core.libro_novedades');
