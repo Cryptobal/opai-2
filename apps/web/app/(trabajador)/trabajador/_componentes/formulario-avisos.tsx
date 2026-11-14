@@ -9,7 +9,7 @@ import { FormScreenListo } from "@opai/ds/form-screen-listo";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { activarPush, apagarPush, mensajePush } from "./suscripcion-push";
+import { activarPush, apagarPush, mensajePush, pedirPermiso } from "./suscripcion-push";
 import type { Preferencias } from "./tipos";
 
 // Aparte (React.lazy, ADR-037): el interruptor sobre Radix no pesa en el JS inicial de la ruta;
@@ -58,6 +58,10 @@ export function FormularioAvisos({
 
   async function guardar(e: FormEvent) {
     e.preventDefault();
+    // El permiso del celular se pide aquí, al activar un aviso (ADR-044.4), y antes de esperar al servidor:
+    // Safari en iOS solo lo acepta dentro del gesto de guardar.
+    const algunPush = Object.values(prefs).some((p) => p.push);
+    const permiso = algunPush ? pedirPermiso(clavePush) : null;
     const r = await ejecutar<Preferencias>(
       "portal_trabajador.preferencias_notificacion.actualizar",
       {
@@ -70,10 +74,8 @@ export function FormularioAvisos({
       return;
     }
     avisar.exito("Tus avisos quedaron guardados");
-    // El permiso del celular se pide aquí, al activar un aviso, nunca al abrir (ADR-044.4).
-    const algunPush = Object.values(prefs).some((p) => p.push);
     if (!algunPush) return void apagarPush(ejecutar);
-    const texto = mensajePush(await activarPush(clavePush, ejecutar));
+    const texto = mensajePush(await activarPush(clavePush, ejecutar, permiso));
     if (texto) avisar.info(texto);
   }
 

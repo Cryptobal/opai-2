@@ -176,7 +176,9 @@ self.addEventListener("notificationclick", (evento) => {
       const abierta = ventanas.find((v) => new URL(v.url).origin === self.location.origin);
       if (abierta) {
         await abierta.focus();
-        if ("navigate" in abierta) await abierta.navigate(url).catch(() => undefined);
+        // navigate() solo funciona en ventanas controladas por este service worker; si falla, se abre una nueva.
+        const ok = "navigate" in abierta && (await abierta.navigate(url).then(() => true, () => false));
+        if (!ok) await self.clients.openWindow(url);
         return;
       }
       await self.clients.openWindow(url);
