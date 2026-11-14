@@ -388,6 +388,11 @@ jobs:
             echo "::add-mask::$valor"
             echo "$var=$valor" >> "$GITHUB_ENV"
           done
+          # KEK efímera para el cifrado de campos (CAR-418): las pruebas que escriben datos cifrados
+          # (importar personas o contratos, previsión) necesitan la clave. Nunca la clave real.
+          kek=$(openssl rand -base64 32)
+          echo "::add-mask::$kek"
+          echo "OPAI_SECRETS_KEY=$kek" >> "$GITHUB_ENV"
           clave="$(openssl rand -hex 12)Aa1"
           echo "::add-mask::$clave"
           echo "SEED_OWNER_PASSWORD=$clave" >> "$GITHUB_ENV"
@@ -530,6 +535,11 @@ jobs:
             echo "::add-mask::$valor"
             echo "$var=$valor" >> "$GITHUB_ENV"
           done
+          # KEK efímera para el cifrado de campos (CAR-418): las pruebas que escriben datos cifrados
+          # (importar personas o contratos, previsión) necesitan la clave. Nunca la clave real.
+          kek=$(openssl rand -base64 32)
+          echo "::add-mask::$kek"
+          echo "OPAI_SECRETS_KEY=$kek" >> "$GITHUB_ENV"
           clave="$(openssl rand -hex 12)Aa1"
           echo "::add-mask::$clave"
           echo "SEED_OWNER_PASSWORD=$clave" >> "$GITHUB_ENV"
