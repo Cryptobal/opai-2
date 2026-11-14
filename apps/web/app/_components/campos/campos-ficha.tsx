@@ -1,11 +1,15 @@
+import dynamic from "next/dynamic";
+
 import { PERMISOS_CORE } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
-import { EditarCampos } from "./editar-campos";
 import { capacidadesDe, mostrarValor, type CampoFicha, type EntidadCampos } from "./tipos";
+
+// El editor (hoja y controles) se carga aparte del primer JS de la ficha (ADR-037).
+const EditarCampos = dynamic(() => import("./editar-campos").then((m) => m.EditarCampos));
 
 const PERMISOS: Record<EntidadCampos, { ver: string; editar: string }> = {
   cuenta: { ver: PERMISOS_CORE.cuentasRead, editar: PERMISOS_CORE.cuentasManage },
