@@ -12,7 +12,7 @@ export const RECURSOS: Record<string, string> = {
   excepciones: "Excepciones de permisos", supervisores: "Supervisores", documento_tipos: "Tipos de documento",
   documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", biometria: "Reconocimiento facial", terreno: "Terreno", personas_terreno: "Personas de terreno", listas: "Listas de acceso", registros: "Registros de acceso", config: "Ajustes", ajustes: "Ajustes",
   cumplimiento: "Cumplimiento", empresa: "Empresa", marca: "Marca", comunicaciones: "Comunicaciones",
-  plantillas: "Plantillas", notificacion_reglas: "Reglas de aviso", notificaciones: "Notificaciones",
+  plantillas: "Plantillas", notificacion_reglas: "Reglas de aviso", notificaciones: "Notificaciones", push: "Avisos al celular",
   aprobaciones: "Aprobaciones", por_aprobar: "Por aprobar", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
   turno: "Turnos", plan: "Plan", historial: "Historial", negocios: "Negocios", solicitudes: "Solicitudes",
   seguimiento_planes: "Planes de seguimiento", seguimientos: "Seguimientos", canales: "Canales", importar_1_0: "Importación desde OPAI 1.0", puntos: "Puntos de ronda",
