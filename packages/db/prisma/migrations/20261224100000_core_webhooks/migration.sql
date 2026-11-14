@@ -1,4 +1,6 @@
 -- CAR-352 (Estándares N-1): eventos salientes por empresa. Aditiva: dos tablas nuevas con RLS.
+-- Tablas con tenant_id: RLS + FORCE + política tenant_isolation (docs/2.0/REGLAS-codigo.md).
+BEGIN;
 SET LOCAL lock_timeout = '5s';
 
 -- CreateTable
@@ -90,3 +92,9 @@ ALTER TABLE "core"."webhook_entregas" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "core"."webhook_entregas" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+
+COMMIT;
+
+-- Reversión: las tablas son nuevas y nada más depende de ellas. En orden inverso:
+-- DROP TABLE "core"."webhook_entregas"; DROP TABLE "core"."webhook_destinos";
+-- (las políticas, los índices y las FK caen con cada tabla).
