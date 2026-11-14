@@ -24,6 +24,8 @@ test.describe("@preview pauta publicar", () => {
       .locator('a[href^="/instalaciones/"]:not([href^="/instalaciones/nueva"])')
       .filter({ visible: true })
       .first();
+    // La lista llega después del esqueleto: se espera la primera fila o el estado vacío.
+    await expect(enlace.or(page.getByText("Aún no hay instalaciones"))).toBeVisible();
     const href = (await enlace.count()) ? await enlace.getAttribute("href") : null;
     const inst = href?.split("/")[2]?.split("?")[0];
     if (!inst) {
