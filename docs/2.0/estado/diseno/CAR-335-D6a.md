@@ -30,6 +30,11 @@
 - `ficha-un-panel`: a 1024 la lista ya no mide 360 px fijos; en el diseño nuevo la ficha toma el 58 % (CAR-336) y la prueba lo comprueba así.
 - El resto de las e2e en rojo también fallan con el diseño clásico (#723) o pasan al reintento; no vienen del diseño nuevo.
 
+## Buscador de la barra (#727, revisión de capturas)
+
+- Las capturas de `preview-e2e` mostraron que el buscador centrado con `position: absolute` tapaba «Editar» y «Fijar» en la ficha de persona a 1280 px, y las pestañas de la ruta y esos botones a 1024 px. Ahora queda al centro exacto solo en escritorio y cuando la barra no trae acciones; con acciones, o en iPad, vuelve al flujo (ruta, buscador, acciones, iconos), como antes de #727.
+- `cabecera-estable` (CAR-12, CA1) sigue exigiendo que la campana y el usuario no se muevan entre vistas; del buscador exige el mismo tamaño y la misma altura, pero no la misma x. Es la diferencia aceptada frente a CA1 para no tapar controles.
+
 ## Presupuesto de JS (#727)
 
 - Tras traer `main` con #723, #725 y #726, `build · presupuesto de JS` marcó 25 rutas con 0,0 a 0,2 KB de más: el trozo común del shell creció con las novedades nuevas, no hay código nuevo en esas páginas. Se sube el tope de cada una al entero siguiente de su medida (ADR-037). Sigue pendiente para núcleo que las novedades no viajen en el trozo común.
