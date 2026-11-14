@@ -22,7 +22,7 @@
     "/(erp)/configuracion/campos-personalizados": 178,
     "/(erp)/instalaciones/nueva": 181,
     "/(erp)/negocios/[id]/seguimiento": 177,
-    "/(erp)/pauta": 179,
+    "/(erp)/pauta": 180,
     "/(erp)/personas/vencimientos": 177,
     "/(erp)/personas/[id]": 173,
     "/(erp)/personas/[id]/laboral": 174,
@@ -146,7 +146,7 @@
     "/(erp)/finanzas/compras": 169,
     "/(erp)/finanzas/compras/[id]": 169,
     "/(erp)/finanzas/compras/proveedores": 169,
-    "/(erp)/mi-cuenta": 169,
+    "/(erp)/mi-cuenta": 171,
     "/(platform)/platform/tenants/[id]/trabajos": 169
   }
 }
