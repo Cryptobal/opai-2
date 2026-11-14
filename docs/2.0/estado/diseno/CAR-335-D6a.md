@@ -19,3 +19,7 @@
 ## Riesgo
 
 - Quien tenía guardado «clásico» en la preferencia pero sin cookie en su navegador ve el nuevo. Vuelve al clásico desde Preferencias o desde el menú de su cuenta.
+
+## Presupuesto de JS
+
+- `/rendiciones/lotes/[id]` quedó en 176,1 KB contra un tope de 176 (la entrada de novedades suma unos bytes al trozo común del shell). Se sube su tope a 177 KB (ADR-037).
