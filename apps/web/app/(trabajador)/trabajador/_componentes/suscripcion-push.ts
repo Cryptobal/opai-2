@@ -1,5 +1,7 @@
 "use client";
 
+import { esAppNativa } from "@/lib/app-nativa";
+
 /** El `ejecutar` de `useCapacidad`: devuelve null si la capacidad falló. */
 type EjecutarCap = (
   id: string,
@@ -9,7 +11,8 @@ type EjecutarCap = (
 ) => Promise<unknown>;
 
 /** Cómo quedó el aviso al celular en este dispositivo después de guardar. */
-export type EstadoPush = "activo" | "apagado" | "sin-soporte" | "instalar" | "denegado" | "error";
+export type EstadoPush =
+  "activo" | "apagado" | "sin-soporte" | "instalar" | "app" | "denegado" | "error";
 
 const aBytes = (b64: string) => {
   const s = atob(
@@ -76,6 +79,8 @@ export async function activarPush(
   permisoPedido: Promise<NotificationPermission> | null,
 ): Promise<EstadoPush> {
   if (!clave) return "apagado";
+  // En la app nativa la vista web no tiene Web Push (iOS) o no es fiable (Android): push nativo, parte 2.
+  if (esAppNativa(navigator.userAgent)) return "app";
   if (
     !("serviceWorker" in navigator) ||
     !("PushManager" in window) ||
@@ -130,6 +135,8 @@ export function mensajePush(e: EstadoPush): string | null {
   switch (e) {
     case "instalar":
       return "Para recibir avisos en el iPhone, agrega OPAI a tu pantalla de inicio (Compartir › Agregar a inicio) y vuelve a guardar.";
+    case "app":
+      return "Dentro de la app todavía no hay avisos en el celular. Los verás igual en la campana.";
     case "sin-soporte":
       return "Este navegador no permite avisos en el celular. Los verás igual en la campana de la app.";
     case "denegado":
