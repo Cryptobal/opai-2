@@ -90,3 +90,4 @@ export * from "./qa-aislado";
 export * from "./aprobaciones/resumen-humano";
 export * from "./aprobaciones/reglas";
 export * from "./webhooks/url";
+export * from "./webhooks/reintentos";

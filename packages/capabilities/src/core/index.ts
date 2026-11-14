@@ -55,7 +55,7 @@ import { capacidadesPanel } from "./panel";
 import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";
 import { porAprobarList } from "./por-aprobar";
 import { capacidadesGrupos } from "./grupos";
-import { capacidadesWebhooks } from "./webhooks";
+import { capacidadesWebhooks, consumidorWebhooks, trabajoEnviarWebhooks } from "./webhooks";
 import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
 import { capacidadesJefatura } from "./jefatura";
 import { capacidadesPermisos } from "./permisos";
@@ -188,6 +188,7 @@ export const consumidoresDelNucleo = [
   consumidorRevocacionBiometria,
   ...consumidoresSlack,
   consumidorProcesosPersona,
+  consumidorWebhooks,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
@@ -202,5 +203,6 @@ export const trabajosDelNucleo = [
   trabajoCapturaPrevisional,
   trabajoTareasVencidas,
   trabajoExtenderTurnos,
+  trabajoEnviarWebhooks,
   ...trabajosSlack,
 ];

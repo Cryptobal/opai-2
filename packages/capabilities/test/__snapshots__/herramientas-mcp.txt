@@ -344,6 +344,8 @@ core_vinculos_previsualizar
 core_vinculos_terminar
 core_vinculos_update
 core_webhooks_destinos_list
+core_webhooks_entrega_reenviar
+core_webhooks_entregas_list
 cpq_aprobaciones_contar
 cpq_aprobaciones_get
 cpq_aprobaciones_list
@@ -758,6 +760,7 @@ preview_core_users_update
 preview_core_vinculos_create
 preview_core_vinculos_terminar
 preview_core_vinculos_update
+preview_core_webhooks_entrega_reenviar
 preview_cpq_biblioteca_bloques_publicar
 preview_cpq_catalogo_categorias_create
 preview_cpq_catalogo_categorias_desactivar

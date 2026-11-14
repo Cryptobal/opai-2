@@ -1124,6 +1124,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
 - `core.webhooks.destinos_list`
+- `core.webhooks.entrega_reenviar`
+- `core.webhooks.entregas_list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
