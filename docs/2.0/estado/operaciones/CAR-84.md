@@ -1,7 +1,7 @@
 # CAR-84 · Tickets y solicitudes (PR 2 del Brief 13)
 
 - **Sesión:** Sesión Operaciones
-- **PR:** (por abrir) · rama `brief/car-84-avisos-solicitante`
+- **PR:** #811 · rama `brief/car-84-avisos-solicitante`
 - **Estado:** En PR
 - **Migración:** No
 - **Apilado sobre / espera:** ninguno
