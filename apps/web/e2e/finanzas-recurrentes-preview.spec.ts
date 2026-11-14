@@ -39,7 +39,7 @@ test.describe("@preview finanzas: gastos recurrentes", () => {
     await expect(page.getByRole("heading", { name: "Gastos recurrentes", exact: true }).first()).toBeVisible({ timeout: 60_000 });
     const nuevo = page.getByRole("link", { name: "Nuevo gasto recurrente" });
     test.skip((await nuevo.count()) === 0, "qa-e2e sin filas de egreso");
-    const fila = page.locator('a[href*="?editar="]').first();
+    const fila = page.locator('a[href*="?editar="]:visible').first();
     if ((await fila.count()) === 0) {
       // Sin gastos en la empresa de prueba: crea uno ficticio para poder probar el cambio.
       await expect(async () => {
