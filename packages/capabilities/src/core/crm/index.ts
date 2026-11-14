@@ -37,5 +37,7 @@ export const capacidadesCrm: readonly Capacidad[] = [
   camposPersonalizadosList,
   camposPersonalizadosCreate,
   camposPersonalizadosUpdate,
+  camposValoresGet,
+  camposValoresSet,
   cuentasFusionar,
 ];

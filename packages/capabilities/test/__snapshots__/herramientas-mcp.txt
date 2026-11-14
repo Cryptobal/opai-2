@@ -347,6 +347,8 @@ core_usage_summary
 core_users_list
 core_users_remove
 core_users_update
+core_valores_personalizados_get
+core_valores_personalizados_set
 core_vinculos_create
 core_vinculos_list
 core_vinculos_previsualizar
@@ -768,6 +770,7 @@ preview_core_tenant_update
 preview_core_turnos_esperados_regenerar
 preview_core_users_remove
 preview_core_users_update
+preview_core_valores_personalizados_set
 preview_core_vinculos_create
 preview_core_vinculos_terminar
 preview_core_vinculos_update

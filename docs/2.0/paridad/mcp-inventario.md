@@ -1147,6 +1147,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
+- `core.valores_personalizados.get`
+- `core.valores_personalizados.set`
 - `core.webhooks.destinos_list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`

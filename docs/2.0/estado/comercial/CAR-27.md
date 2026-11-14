@@ -34,6 +34,15 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 
 - PR 3: pantallas de configuración y de ficha, y tokens de documentos.
 
+## PR campos personalizados 2/3 · rama `brief/car-27-campos-valores`
+
+- **Estado:** Integrado (#724)
+- **Migración:** No
+
+### Qué entra
+
+Valores por ficha: `core.valores_personalizados.get/set` (cuentas y contactos, permisos `core:cuentas.read`/`core:cuentas.manage` y alcance de la cuenta o del contacto) y `comercial.negocio_campos.get/set` (negocios, permisos de Comercial). `set` cambia solo las claves enviadas, `null` borra, valida tipo y opciones contra el catálogo activo de **esa** entidad (una clave de otra entidad se rechaza), no deja vaciar un obligatorio, acepta `dryRun` y emite un evento sin valores (solo las claves). La lectura se audita con el id de la ficha.
+
 ## PR fusionar cuentas (F1) · rama `brief/car-27-fusionar`
 
 - **Estado:** Abierto (apilado sobre el PR 1/3 de campos personalizados)
