@@ -1,4 +1,5 @@
 /** Generado por `pnpm --filter @opai/domain gen:novedades-embed`. No editar. */
+/* eslint-disable max-lines -- una línea por novedad; crece con cada entrada. */
 export const NOVEDADES_MARKDOWN: readonly string[] = [
   "---\nid: menu-bandeja\nfecha: 2026-11-03\nmodulo: core\ntitulo: Menú más claro y Bandeja única\ncar: CAR-182\nruta: /bandeja\n---\nEl menú lateral se ordenó por **cómo trabajas** (Comercial, Operaciones, Personas, Finanzas y Documentos). **Bandeja** quedó como entrada propia, con su contador, y ya no se repite dentro de Inicio.\n\nLa campana de avisos sigue en la barra superior; «Ver todo» te lleva siempre a la misma Bandeja.\n",
   "---\nid: explorador-documentos\nfecha: 2026-11-04\nmodulo: core\ntitulo: Explorador de documentos\ncar: CAR-182\npermiso: core:documentos.read\nruta: /documentos\n---\nEn **Documentos › Explorador** puedes buscar archivos de toda la empresa, filtrar por estado y tipo, y ver de un vistazo el propietario y si falta una firma.\n\nDesde el mismo lugar puedes subir un archivo nuevo a nivel empresa cuando tengas permiso de gestión.\n",
