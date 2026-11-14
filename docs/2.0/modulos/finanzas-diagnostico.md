@@ -14,7 +14,7 @@ Revisión del código de `main` en `e49bee1` (Sesión 5, CAR-189), solo lectura.
 
 ## Conciliación
 
-- **Funciona:** sugerencias (RUT, glosa, monto) en ±15 días; conciliación N:M de 1 a 10 enlaces con suma exacta, candado por documento y tope del pendiente (ADR-068); deshacer; cobro manual desde la ficha de venta.
+- **Funciona:** sugerencias (RUT, glosa, monto) en ±15 días, más las facturas por cobrar del último año (CAR-490); conciliación N:M de 1 a 10 enlaces con suma exacta, candado por documento y tope del pendiente (ADR-068); deshacer; cobro manual desde la ficha de venta.
 - **Roto o riesgoso:** las reglas se guardan y **no se evalúan** (sin esquema, sin pantalla). `sugerir` se declara lectura pero escribe el estado «sugerido». Enlazar a una fila del flujo no valida que la fila exista. En compras el pendiente no descuenta NC recibidas. Las NC no sirven como enlace.
 - **Falta frente a 1.0:** estado de conciliación, clasificar a una fila del flujo con vista previa propia, cuadrar saldo.
 
