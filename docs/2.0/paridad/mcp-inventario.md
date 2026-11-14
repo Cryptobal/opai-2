@@ -1155,6 +1155,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.valores_personalizados.get`
 - `core.valores_personalizados.set`
 - `core.webhooks.destinos_list`
+- `core.webhooks.entrega_reenviar`
+- `core.webhooks.entregas_list`
+- `core.webhooks.eventos_list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
