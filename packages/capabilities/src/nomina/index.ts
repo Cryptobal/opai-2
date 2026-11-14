@@ -7,6 +7,7 @@ import { anticiposGenerar, prestamosAplicarCuotas } from "./automaticas";
 import { costoProyectadoListar } from "./costo-proyectado";
 import { liquidacionesCalcular } from "./liquidaciones-calcular";
 import { liquidacionesListar, liquidacionesObtener } from "./liquidaciones-lectura";
+import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
 import { lreGenerar } from "./lre";
 import { previredGenerar } from "./previred";
 import { conceptosActualizar, conceptosCrear, conceptosListar } from "./conceptos";
@@ -45,6 +46,7 @@ export const capacidadesNomina: readonly Capacidad[] = [
   costoProyectadoListar,
   liquidacionesCalcular,
   liquidacionesListar,
+  liquidacionesMarcarRevisadas,
   liquidacionesObtener,
   lreGenerar,
   previredGenerar,

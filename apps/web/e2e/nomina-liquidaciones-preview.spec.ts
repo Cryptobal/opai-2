@@ -4,7 +4,7 @@ import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Brief 27 (CAR-99): liquidaciones del período (diseño 03). Entra al primer período de la empresa de prueba
-// y muestra la pantalla; la vista previa del cálculo no guarda nada.
+// y muestra la pantalla con el conteo de revisadas; la vista previa del cálculo no guarda nada.
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(120_000);
 
@@ -20,6 +20,7 @@ test.describe("@preview nómina: liquidaciones", () => {
     await page.goto(`${href}/liquidaciones`);
     await expect(page.getByText("Total líquido").first()).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await expect(page.getByText("Revisadas").first()).toBeVisible();
     await capturar(page, info, "nomina-liquidaciones");
     const calcular = page.getByRole("button", { name: "Calcular liquidaciones" });
     if ((await calcular.count()) > 0) {

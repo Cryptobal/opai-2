@@ -48,7 +48,7 @@ export default function LiquidacionPersona({ params }: Props) {
         const sum = (x: LineaLiquidacion[]) => x.reduce((s, y) => s + y.monto, 0);
         const descuentos = [...l.detalle.descuentosLegales, ...l.detalle.otrosDescuentos];
         return (
-          <DetailScreen state="ready" titulo={l.personaNombre || "Liquidación"} subtitulo={`${l.diasTrabajados} días trabajados`}>
+          <DetailScreen state="ready" titulo={l.personaNombre || "Liquidación"} subtitulo={`${l.diasTrabajados} días trabajados · ${l.estado === "revisada" ? "Revisada" : "Calculada"}`}>
             <div className="flex flex-col gap-4">
               {l.advertencias.map((a) => <Alerta key={a} tono="warning" titulo={a} />)}
               <div className="grid gap-4 lg:grid-cols-2">
