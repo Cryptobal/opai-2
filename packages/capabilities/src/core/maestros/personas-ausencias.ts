@@ -28,6 +28,8 @@ export const personasAusenciasRegistrar = defineCapability({
   input: ausenciaPersonaInput,
   output: salidaAusencia,
   efecto: "escritura",
+  // El motivo es texto libre y puede ser de salud: no llega en claro a la auditoría (CAR-393).
+  sensibles: ["motivo"],
   dryRun: true,
   handler: (ctx, input, { dryRun }) =>
     escribirAusencia(ctx, input, {

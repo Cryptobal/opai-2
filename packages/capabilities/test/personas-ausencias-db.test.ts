@@ -235,6 +235,33 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
       hasta: "2027-03-03",
     });
     expect(r.ok, JSON.stringify(r)).toBe(true);
+    // El motivo nunca llega en claro a la auditoría inmutable.
+    const auditoria = await e.admin.auditEvent.findMany({
+      where: { tenantId: tenant, capability: "core.ausencias.registrar" },
+      select: { payload: true },
+    });
+    expect(auditoria.length).toBeGreaterThan(0);
+    expect(JSON.stringify(auditoria)).not.toContain("Folio ficticio 999");
+    // Una ausencia de otra empresa, con el mismo motivo, no se toca al anonimizar.
+    const ajena = (
+      await e.admin.persona.create({
+        data: {
+          tenantId: otro,
+          nombres: "Ajena",
+          apellidos: "Ficticia",
+          rut: "17777777-7",
+          estado: "activa",
+        },
+      })
+    ).id;
+    const rAjena = await run(ctx(otro), "core.ausencias.registrar", {
+      personaId: ajena,
+      tipo: "licencia",
+      motivo: "Folio ficticio 999",
+      desde: "2027-03-01",
+      hasta: "2027-03-03",
+    });
+    expect(rAjena.ok, JSON.stringify(rAjena)).toBe(true);
     const { anonimizarPersona, MARCA_ANONIMO } =
       await import("../src/core/cumplimiento/retencion-anonimizar");
     const hecho = await ctx(tenant).transaccion((tx) =>
@@ -254,5 +281,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
     });
     expect(ajenas.length).toBeGreaterThan(0);
     expect(ajenas.every((a) => a.motivo !== MARCA_ANONIMO)).toBe(true);
+    const deOtraEmpresa = await e.admin.ausencia.findFirst({ where: { personaId: ajena } });
+    expect(deOtraEmpresa?.motivo).toBe("Folio ficticio 999");
   });
 });
