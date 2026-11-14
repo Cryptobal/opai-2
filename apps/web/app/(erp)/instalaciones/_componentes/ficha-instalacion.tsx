@@ -21,6 +21,7 @@ export type TabInstalacion =
   | "negocios"
   | "rondas"
   | "accesos"
+  | "visitas"
   | "dispositivos"
   | "documentos"
   | "actividad";
@@ -39,6 +40,8 @@ export function FichaInstalacion(p: {
   rondas?: boolean;
   /** Pestaña «Accesos» (CAR-475): Control de acceso activo y permiso de lectura. */
   accesos?: boolean;
+  /** Pestaña de visitas de supervisión (CAR-83): con Pauta activo y permiso de lectura. */
+  visitas?: boolean;
   children: ReactNode;
 }) {
   const i = p.instalacion;
@@ -105,6 +108,7 @@ export function FichaInstalacion(p: {
               [p.negocios, "negocios", "Negocios"],
               [p.rondas, "rondas", "Rondas"],
               [p.accesos, "accesos", "Accesos"],
+              [p.visitas, "visitas", "Visitas"],
             ] as const
           )
             .filter(([ver]) => ver)
