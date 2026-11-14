@@ -37,4 +37,15 @@ describe("envío de eventos salientes (CAR-352)", () => {
     });
     expect(r).toMatchObject({ ok: false, error: "La dirección no es https" });
   });
+
+  it("revisa también una IP escrita en la dirección, que no pasa por la resolución", async () => {
+    const r = await enviarWebhook({
+      url: "https://127.0.0.1:9/hook",
+      secreto: "whsec_x",
+      cuerpo: "{}",
+      eventoId: "e1",
+      ipPermitida: interna,
+    });
+    expect(r.error).toBe("La dirección resuelve a una red interna");
+  });
 });

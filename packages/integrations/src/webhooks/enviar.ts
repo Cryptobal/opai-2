@@ -5,7 +5,7 @@
 import { createHmac } from "node:crypto";
 import { lookup as dnsLookup, type LookupAddress } from "node:dns";
 import { request } from "node:https";
-import type { LookupFunction } from "node:net";
+import { isIP, type LookupFunction } from "node:net";
 
 export const TIEMPO_MAXIMO_WEBHOOK_MS = 10_000;
 /** Lo que se lee de la respuesta: el cuerpo no se guarda, solo se descarta. */
@@ -69,6 +69,13 @@ export function enviarWebhook(e: EnvioWebhook): Promise<ResultadoWebhook> {
     }
     if (url.protocol !== "https:") {
       return resolver(fin({ ok: false, codigo: null, error: "La dirección no es https" }));
+    }
+    // Con una IP escrita en la dirección, Node conecta sin pasar por `lookup`: se revisa aquí.
+    const ipLiteral = url.hostname.replace(/^\[|\]$/g, "");
+    if (isIP(ipLiteral) && !e.ipPermitida(ipLiteral)) {
+      return resolver(
+        fin({ ok: false, codigo: null, error: "La dirección resuelve a una red interna" }),
+      );
     }
     const req = request(
       url,
