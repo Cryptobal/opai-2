@@ -22,9 +22,10 @@ describe.skipIf(!urlPropietario)("Finanzas · conciliación de facturas vencidas
   let s: VentasDbSuite;
   let cuentaBanco = "";
 
-  const factura = (folio: number, monto: number, emitidaHace: number, estadoCobro = "pendiente") =>
+  const factura = (folio: number, monto: number, emitidaHace: number, estadoCobro = "pendiente", extra: Record<string, unknown> = {}) =>
     s.e.admin.documentoEmitido.create({
       data: {
+        ...extra,
         tenantId: s.tenantId, cuentaId: s.cuentaId, tipoDte: 33, folio, estadoDte: "aceptado", estadoCobro,
         fechaEmision: diasAtras(emitidaHace), fechaVencimiento: diasAtras(emitidaHace - 30), montoNeto: monto, montoTotal: monto,
       },
@@ -76,5 +77,13 @@ describe.skipIf(!urlPropietario)("Finanzas · conciliación de facturas vencidas
   it("una factura abierta de hace más de un año queda fuera", async () => {
     await factura(9305, 777_000, 400);
     expect((await sugerir(777_000)).sugerencias).toHaveLength(0);
+  });
+
+  it("una pagada en parte de hace 40 días se sugiere por su saldo; una cedida no", async () => {
+    const parcial = await factura(9306, 900_000, 40, "pagada_parcial", { montoCobrado: 400_000 });
+    const r = await sugerir(500_000);
+    expect(r.sugerencias).toMatchObject([{ documentoId: parcial.id }]);
+    await factura(9307, 888_000, 40, "pendiente", { cesionEstado: "cedido" });
+    expect((await sugerir(888_000)).sugerencias).toHaveLength(0);
   });
 });

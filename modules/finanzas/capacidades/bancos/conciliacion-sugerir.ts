@@ -52,11 +52,9 @@ export const bancosConciliacionSugerir = defineCapability({
       ctx.db.documentoEmitido.findMany({
         where: {
           estadoDte: { not: "borrador" },
-          // CAR-490: además de la ventana, toda factura con saldo por cobrar del último año (el pago de una vencida).
-          OR: [
-            { fechaEmision: { gte: desde, lte: hasta } },
-            { estadoCobro: { in: ["pendiente", "pagada_parcial"] }, fechaEmision: { gte: haceUnAno, lte: hasta } },
-          ],
+          // CAR-490: además de la ventana, toda factura (33/34) con saldo por cobrar del último año: el pago de una vencida.
+          fechaEmision: { gte: haceUnAno, lte: hasta },
+          OR: [{ fechaEmision: { gte: desde } }, { tipoDte: { in: [33, 34] }, estadoCobro: { in: ["pendiente", "pagada_parcial"] } }],
         },
         select: {
           id: true,
