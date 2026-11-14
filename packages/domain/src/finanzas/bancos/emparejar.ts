@@ -68,13 +68,14 @@ export function glosasParecidas(a: string, b: string): boolean {
 /**
  * Empareja cada entrante (por su índice en la lista) con a lo más un existente, y cada existente con a lo más un
  * entrante. Los que no emparejan son movimientos nuevos. `toleranciaDias` acota las pasadas 1, 3 y 4. La pasada 4
- * solo considera los existentes que cumplen `porMontoSi` (sin él no corre): el banco en línea rotula distinto que la
- * cartola, así que ahí basta el monto y la fecha cercana cuando no hay ambigüedad.
+ * solo considera los pares que cumplen `porMontoSi` (sin él no corre): el banco en línea rotula distinto que la
+ * cartola, así que ahí basta el monto y la fecha cercana cuando no hay ambigüedad. La ambigüedad se mide solo entre
+ * pares elegibles: un registro de otro origen con el mismo monto no impide el par.
  */
 export function emparejarMovimientos<E extends MovimientoEmparejable>(
   entrantes: readonly E[],
   existentes: readonly ExistenteEmparejable[],
-  opciones: { toleranciaDias?: number; porMontoSi?: (e: ExistenteEmparejable) => boolean } = {},
+  opciones: { toleranciaDias?: number; porMontoSi?: (e: ExistenteEmparejable, m: E) => boolean } = {},
 ): Map<number, Emparejado> {
   const tol = opciones.toleranciaDias ?? 3;
   const out = new Map<number, Emparejado>();
@@ -113,7 +114,7 @@ export function emparejarMovimientos<E extends MovimientoEmparejable>(
     const vecesExistente = new Map<string, number>();
     entrantes.forEach((m, i) => {
       if (!libres(i)) return;
-      const c = (porMonto.get(m.monto) ?? []).filter((e) => !usados.has(e.id) && elegible(e) && diasEntre(m.fecha, e.fecha) <= tol);
+      const c = (porMonto.get(m.monto) ?? []).filter((e) => !usados.has(e.id) && elegible(e, m) && diasEntre(m.fecha, e.fecha) <= tol);
       candidatos.set(i, c);
       for (const e of c) vecesExistente.set(e.id, (vecesExistente.get(e.id) ?? 0) + 1);
     });

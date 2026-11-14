@@ -84,4 +84,16 @@ describe.skipIf(omitirSuiteDb())("Finanzas · cartola frente al banco en línea 
     expect(r).toMatchObject({ aplicados: 2, duplicados: 0 });
     expect(await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId } })).toBe(4);
   });
+
+  it("un registro manual con el mismo monto y otra glosa no se empareja por monto: sigue exigiendo glosa parecida", async () => {
+    const cuentaId = await nuevaCuenta("000000003");
+    await e.admin.movimientoBancario.create({
+      data: { tenantId, cuentaId, fecha: new Date("2026-11-03T00:00:00Z"), monto: -42_000n, glosa: "Registro a mano", claveDedupe: `m-${randomUUID()}`, origen: "manual" },
+    });
+    const r = await importar(cuentaId, [
+      [42000, "Pago proveedores 0099", "05/11/2026", "1", "Santiago", "C"],
+      [277000, "Abono cliente ficticio", "06/11/2026", "2", "Santiago", "A"],
+    ]);
+    expect(r).toMatchObject({ aplicados: 2, duplicados: 0 });
+  });
 });
