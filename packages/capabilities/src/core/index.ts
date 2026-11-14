@@ -55,6 +55,7 @@ import { capacidadesPanel } from "./panel";
 import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";
 import { porAprobarList } from "./por-aprobar";
 import { capacidadesGrupos } from "./grupos";
+import { capacidadesWebhooks } from "./webhooks";
 import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
 import { capacidadesJefatura } from "./jefatura";
 import { capacidadesPermisos } from "./permisos";
@@ -152,6 +153,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesGrupos,
+  ...capacidadesWebhooks,
   ...capacidadesReglasAprobacion,
   porAprobarList,
   ...capacidadesSlack,

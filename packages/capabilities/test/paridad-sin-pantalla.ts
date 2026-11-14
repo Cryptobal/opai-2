@@ -29,7 +29,8 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
   "finanzas.apertura.importar": {
     encargo: "CAR-168",
     desde: "2026-11-04",
-    motivo: "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
+    motivo:
+      "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
   },
   "finanzas.apertura.revertir": {
     encargo: "CAR-168",
@@ -101,5 +102,29 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-11-10",
     motivo:
       "La verificación con prueba de vida se invoca desde la marcación de Asistencia (frente «Face ID»), que aporta la cámara; B4 deja el adaptador y la capacidad.",
+  },
+  "core.webhooks.destino_crear": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
+  },
+  "core.webhooks.destino_actualizar": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
+  },
+  "core.webhooks.destino_rotar_secreto": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
+  },
+  "core.webhooks.destino_eliminar": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
   },
 };
