@@ -103,3 +103,23 @@ model RegistroOperativoPauta {
   @@map("registros_operativos")
   @@schema("pauta")
 }
+
+/// Publicación de la pauta de una instalación en un mes (CAR-356): quién y cuándo la publicó y a cuántas
+/// personas se avisó. Republicar actualiza la misma fila. La pauta rige igual sin publicar.
+model PublicacionPauta {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  /// aaaa-mm
+  mes           String
+  publicadaEn   DateTime @map("publicada_en") @db.Timestamptz(6)
+  publicadaPor  String?  @map("publicada_por") @db.Uuid
+  avisados      Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, instalacionId, mes])
+  @@index([tenantId, mes])
+  @@map("publicaciones")
+  @@schema("pauta")
+}
