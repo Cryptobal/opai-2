@@ -23,7 +23,7 @@ La hoja «Editar negocio» suma el campo **Responsable** (personas del ERP de `c
 
 ## PR campos personalizados 1/3 · rama `brief/car-27-campos-personalizados`
 
-- **Estado:** Abierto
+- **Estado:** Integrado (#722)
 - **Migración:** Sí (`20261226100000_core_campos_personalizados`, aditiva)
 
 ### Qué entra
@@ -45,7 +45,7 @@ Valores por ficha: `core.valores_personalizados.get/set` (cuentas y contactos, p
 
 ## PR fusionar cuentas (F1) · rama `brief/car-27-fusionar`
 
-- **Estado:** Abierto (apilado sobre el PR 1/3 de campos personalizados)
+- **Estado:** Integrado (#739)
 - **Migración:** No
 
 ### Qué entra
@@ -66,6 +66,22 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-fusionar.md`. Capacidad `core.cuentas.fusion
 
 - F2: hoja de 4 pasos en la cuenta.
 - F3: fusión de contactos.
+
+## PR fusionar contactos (F3) · rama `brief/car-27-fusionar-contactos`
+
+- **Estado:** Abierto (F1 ya está en main)
+- **Migración:** No
+
+### Qué entra
+
+Capacidad `core.contactos.fusionar` (`efecto: "irreversible"`, `dryRun`), con la misma forma que la de cuentas. Todo pasa en una transacción con los dos contactos bloqueados. Funciona así:
+
+- Pasan al contacto que queda: los vínculos con cuentas, negocios, actividad, etiquetas, campos personalizados, documentos, firmas, correos, accesos al portal, seguimientos y solicitudes.
+- Si el duplicado era el contacto principal de una cuenta compartida, el que queda pasa a ser el principal.
+- El correo del duplicado se libera antes de asignarlo.
+- Se bloquea si el duplicado firmó un consentimiento de referencia comercial, porque ese registro es append-only.
+
+Una prueba compara el inventario de FK con la base. Falta la pantalla.
 
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
