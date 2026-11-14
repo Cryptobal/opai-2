@@ -8,6 +8,30 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "core.roles.adicional_asignar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Sumar un rol a un usuario: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.roles.adicional_quitar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Quitar un rol adicional a un usuario: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.grupos.rol_asignar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Dar un rol a un grupo: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.grupos.rol_quitar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Quitar un rol a un grupo: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
   "core.aprobaciones.reglas_guardar": {
     encargo: "CAR-252",
     desde: "2026-11-12",
@@ -29,7 +53,8 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
   "finanzas.apertura.importar": {
     encargo: "CAR-168",
     desde: "2026-11-04",
-    motivo: "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
+    motivo:
+      "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
   },
   "finanzas.apertura.revertir": {
     encargo: "CAR-168",
