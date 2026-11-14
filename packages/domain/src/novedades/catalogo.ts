@@ -89,7 +89,8 @@ export function novedadesVisibles(
   esPlataforma: boolean,
   tabla: readonly AccesoRuta[] = [],
 ): EntradaNovedad[] {
-  const activos = new Set(["core", ...modulosActivos]);
+  // «personas» es parte del núcleo, no un módulo vendible: sus entradas se ven con el núcleo.
+  const activos = new Set(["core", "personas", ...modulosActivos]);
   return entradas.filter((e) => {
     if (e.modulo === "platform") return esPlataforma;
     if (e.modulo !== "core" && !moduloActivo(e.modulo, activos)) return false;

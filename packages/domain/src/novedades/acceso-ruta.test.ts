@@ -59,4 +59,15 @@ describe("novedadesVisibles por pantalla (CAR-430)", () => {
     const ids = novedadesVisibles(conPermiso, [], (p) => p === "core:x", false, TABLA).map((e) => e.id);
     expect(ids).toEqual(["propia"]);
   });
+
+  it("una entrada del núcleo con permiso propio se esconde a quien no lo tiene", () => {
+    const conPermiso = [entrada("propia", null, { permiso: "core:x" })];
+    expect(novedadesVisibles(conPermiso, [], () => false, false, TABLA)).toEqual([]);
+  });
+
+  it("las entradas de Personas se ven con el núcleo según su permiso", () => {
+    const dePersonas = [entrada("p", "/personas", { modulo: "personas", permiso: "core:personas.read" })];
+    const ids = novedadesVisibles(dePersonas, [], (p) => p === "core:personas.read", false, TABLA);
+    expect(ids.map((e) => e.id)).toEqual(["p"]);
+  });
 });
