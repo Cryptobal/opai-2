@@ -28,3 +28,10 @@
    - el aviso único a quien tiene usuario;
    - el listado;
    - el aislamiento por tenant y por alcance.
+
+## Reporte PR 3 · aviso de cambios (13-nov-2026)
+
+- Consumidor `pauta.cambio.avisar` (`consumidor-cambio.ts`) sobre `pauta.excepcion.creada`, `pauta.excepcion.anulada` y `pauta.serie.fijada`.
+- Solo avisa si alguno de los meses tocados por el cambio está publicado para la instalación del puesto (`pauta.publicaciones`). Excepciones: meses entre `desde` y `hasta`; cambio de serie: meses desde `desde` en adelante.
+- Afectados: titular vigente en cada día cambiado de los meses publicados; en un cambio de serie, también el titular nuevo y el de la serie que se cortó el día anterior. Solo personas con usuario; idempotente por evento y usuario.
+- Fuera: reemplazantes y refuerzos (el evento no trae la persona), titulares desvinculados (siguen en pendientes), push (PR 4).

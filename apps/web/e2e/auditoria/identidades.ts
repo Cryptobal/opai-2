@@ -50,7 +50,11 @@ export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<str
   await erp.goto(`${ficha}/laboral`);
   const rut = (await erp.locator("body").innerText()).match(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)?.[0];
   const asignar = erp.getByRole("button", { name: /^(Asignar|Cambiar) PIN$/ });
-  if (!rut || !(await asignar.count())) return "la persona no tiene RUT o PIN de terreno";
+  if (!rut) return "la persona no muestra RUT en Laboral";
+  if (!(await asignar.count())) return "la ficha no ofrece «Asignar PIN»";
+  // El PIN solo abre el portal si la persona tiene usuario en OPAI (la tarjeta lo avisa).
+  if (await erp.getByText(/No tiene usuario en OPAI/).count())
+    return "la persona no tiene usuario en OPAI (hay que invitarla antes de asignar PIN)";
   const pin = "731946";
   await asignar.first().click();
   await erp.getByLabel("PIN de 6 dígitos").fill(pin);
