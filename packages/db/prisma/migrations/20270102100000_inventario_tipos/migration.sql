@@ -27,8 +27,8 @@ CREATE TABLE "inventario"."tipos" (
     CONSTRAINT "tipos_nombre_check" CHECK (char_length("nombre") BETWEEN 2 AND 80),
     CONSTRAINT "tipos_campos_check" CHECK (jsonb_typeof("campos") = 'array'),
     CONSTRAINT "tipos_ropa_check" CHECK (
-      ("categoria" = 'ropa' AND cardinality("tallas") >= 1 AND "campos" = '[]'::jsonb)
-      OR ("categoria" = 'activo' AND cardinality("tallas") = 0 AND "prenda_clave" IS NULL)
+      ("categoria" = 'ropa' AND coalesce(cardinality("tallas"), 0) >= 1 AND "campos" = '[]'::jsonb)
+      OR ("categoria" = 'activo' AND coalesce(cardinality("tallas"), 0) = 0 AND "prenda_clave" IS NULL)
     )
 );
 

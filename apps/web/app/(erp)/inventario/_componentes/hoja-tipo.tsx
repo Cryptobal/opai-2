@@ -14,8 +14,9 @@ import { type CampoEditable, EditorCampos } from "./editor-campos";
 const aTallas = (texto: string) =>
   texto
     .split(",")
-    .map((t) => t.trim())
+    .map((t) => t.replace(/\s+/g, "").toUpperCase())
     .filter(Boolean);
+const tallasValidas = (t: string[]) => t.length > 0 && t.length <= 20 && t.every((x) => x.length <= 10);
 
 /** Nuevo tipo de inventario o editar uno (la categoría solo se elige al crear, R2). */
 export function HojaTipo({ tipo }: { tipo?: TipoInventario }) {
@@ -31,7 +32,7 @@ export function HojaTipo({ tipo }: { tipo?: TipoInventario }) {
   );
   const esRopa = categoria === "ropa";
   const camposListos = campos.every((c) => c.etiqueta.trim().length >= 2);
-  const listo = nombre.trim().length >= 2 && (esRopa ? aTallas(tallas).length > 0 : camposListos);
+  const listo = nombre.trim().length >= 2 && (esRopa ? tallasValidas(aTallas(tallas)) : camposListos);
 
   async function guardar() {
     const datos = {
@@ -92,7 +93,7 @@ export function HojaTipo({ tipo }: { tipo?: TipoInventario }) {
           <Textarea id="it-desc" rows={2} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
         </Campo>
         {esRopa ? (
-          <Campo etiqueta="Tallas" htmlFor="it-tallas" ayuda="Separadas por coma, por ejemplo: S, M, L, XL.">
+          <Campo etiqueta="Tallas" htmlFor="it-tallas" ayuda="Separadas por coma, por ejemplo: S, M, L, XL. Hasta 20 tallas de 10 caracteres.">
             <Input id="it-tallas" value={tallas} onChange={(e) => setTallas(e.target.value)} />
           </Campo>
         ) : (

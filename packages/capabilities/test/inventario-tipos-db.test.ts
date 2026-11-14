@@ -19,7 +19,7 @@ describe.skipIf(!urlPropietario)("inventario · catálogo de tipos en base real"
   let ana = "";
   const sufijo = randomUUID().slice(0, 8);
 
-  const ctx = (tenantId: string, rol = "owner") =>
+  const ctx = (tenantId: string, rol: "owner" | "viewer" = "owner") =>
     mod.crearContexto({
       tenantId,
       rol,
@@ -78,7 +78,19 @@ describe.skipIf(!urlPropietario)("inventario · catálogo de tipos en base real"
     expect(await crear({ categoria: "ropa", nombre: "Camisa", tallas: ["M", "m"] })).toBe("UNPROCESSABLE");
     expect(await crear({ categoria: "activo", nombre: "Radio", tallas: ["M"] })).toBe("UNPROCESSABLE");
     expect(await crear({ categoria: "activo", nombre: "Radio", prendaClave: "camisa" })).toBe("UNPROCESSABLE");
-    expect(await crear({ categoria: "ropa", nombre: "Camisa", tallas: ["S", "M"], prendaClave: "camisa" })).toBe("OK");
+    expect(await crear({ categoria: "ropa", nombre: "Camisa", tallas: [" s", "m "], prendaClave: "camisa" })).toBe("OK");
+    const camisa = await e.admin.inventarioTipo.findFirst({ where: { tenantId: a, nombreNormalizado: "camisa" } });
+    expect(camisa?.tallas).toEqual(["S", "M"]);
+  });
+
+  it("renombrar al nombre de otro tipo responde CONFLICT; sin cambios no escribe", async () => {
+    const camisa = await e.admin.inventarioTipo.findFirst({ where: { tenantId: a, nombreNormalizado: "camisa" } });
+    if (!camisa) throw new Error("falta la camisa");
+    expect(await codigo(ctx(a), "inventario.tipos.actualizar", { id: camisa.id, nombre: "teléfono" })).toBe("CONFLICT");
+    await dato(ctx(a), "inventario.tipos.actualizar", { id: camisa.id, tallas: ["S", "M"] });
+    expect(await e.admin.inventarioTipo.findFirst({ where: { id: camisa.id } })).toMatchObject({
+      updatedAt: camisa.updatedAt,
+    });
   });
 
   it("actualiza conservando la clave del campo y desactiva sin borrar (R4, R5)", async () => {
@@ -93,6 +105,12 @@ describe.skipIf(!urlPropietario)("inventario · catálogo de tipos en base real"
       ["imei", "IMEI principal"],
       ["modelo", "Modelo"],
     ]);
+    // Renombrar «Modelo» a «Marca» y agregar otro «Modelo»: el nuevo no hereda la clave en uso.
+    const otra = await dato<Tipo>(ctx(a), "inventario.tipos.actualizar", {
+      id: t.id,
+      campos: [{ clave: "imei", etiqueta: "IMEI principal" }, { clave: "modelo", etiqueta: "Marca" }, { etiqueta: "Modelo" }],
+    });
+    expect(otra.campos.map((c) => c.clave)).toEqual(["imei", "modelo", "modelo_2"]);
     expect(nuevo.activo).toBe(false);
     const ajeno = { id: t.id, campos: [{ clave: "inventado", etiqueta: "Otro" }] };
     expect(await codigo(ctx(a), "inventario.tipos.actualizar", ajeno)).toBe("UNPROCESSABLE");
@@ -128,6 +146,7 @@ describe.skipIf(!urlPropietario)("inventario · catálogo de tipos en base real"
     expect(await codigo(ctx(a, "viewer"), "inventario.tipos.crear", { ...telefono, nombre: "Linterna 2" })).toBe(
       "FORBIDDEN",
     );
+    expect(await codigo(ctx(a, "viewer"), "inventario.tipos.cargar_sugeridos", {})).toBe("FORBIDDEN");
     expect(await codigo(ctx(a, "viewer"), "inventario.tipos.list", {})).toBe("OK");
   });
 

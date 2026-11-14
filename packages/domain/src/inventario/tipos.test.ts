@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { camposConClave, claveCampo, errorDeTipo, nombreNormalizado, tiposSugeridos } from ".";
+import { camposConClave, claveCampo, errorDeTipo, nombreNormalizado, normalizarTalla, tiposSugeridos } from ".";
 
 describe("inventario · tipos (CAR-235)", () => {
   it("R1: compara nombres sin mayúsculas, tildes ni espacios de más", () => {
@@ -42,9 +42,19 @@ describe("inventario · tipos (CAR-235)", () => {
     }
   });
 
-  it("la ropa sugerida usa la clave de la prenda del uniforme (CAR-408)", () => {
-    const camisa = tiposSugeridos("seguridad").find((t) => t.nombre === "Camisa");
-    expect(camisa?.prendaClave).toBe("camisa");
-    expect(tiposSugeridos("seguridad").find((t) => t.nombre === "Pantalón")?.prendaClave).toBe("pantalon");
+  it("normaliza tallas y no repite claves de campo", () => {
+    expect(normalizarTalla(" x l ")).toBe("XL");
+    expect(errorDeTipo({ categoria: "ropa", campos: [], tallas: ["XL", "x l"] })).toMatch(/repetidas/);
+    const campos = camposConClave(
+      [
+        { clave: "modelo", etiqueta: "Marca", tipo: "texto", obligatorio: false },
+        { etiqueta: "Modelo", tipo: "texto", obligatorio: false },
+      ],
+      ["modelo"],
+    );
+    expect(campos.map((c) => c.clave)).toEqual(["modelo", "modelo_2"]);
+    expect(errorDeTipo({ categoria: "activo", campos, tallas: [] })).toBeNull();
+    const signo = { clave: "c_", etiqueta: "##", tipo: "texto" as const, obligatorio: false };
+    expect(errorDeTipo({ categoria: "activo", campos: [signo], tallas: [] })).toMatch(/letras o números/);
   });
 });

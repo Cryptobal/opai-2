@@ -1,5 +1,5 @@
 // Tipos sugeridos por vertical (CAR-235, R6): lo típico del rubro para empezar con un clic.
-// Las prendas de ropa siguen el kit de uniforme de Personas (CAR-408) con la misma clave.
+// La ropa queda sin prenda del uniforme: el vínculo con las tallas de Personas (CAR-408) llega con CAR-237.
 import { claveCampo, type CampoTipo, type CategoriaTipo } from "./tipos";
 
 export type TipoSugerido = {
@@ -37,7 +37,7 @@ const ropa = (nombre: string, tallas = LETRAS): TipoSugerido => ({
   descripcion: null,
   campos: [],
   tallas,
-  prendaClave: claveCampo(nombre),
+  prendaClave: null,
 });
 
 const TELEFONO = activo("Teléfono", "Teléfono corporativo del puesto o de la persona.", [

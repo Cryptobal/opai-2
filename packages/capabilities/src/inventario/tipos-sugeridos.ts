@@ -30,13 +30,13 @@ export const tiposCargarSugeridos = defineCapability({
       yaExistian: sugeridos.filter((s) => hay.has(nombreNormalizado(s.nombre))).map((s) => s.nombre),
     };
     if (dryRun || nuevos.length === 0) return resultado;
-    await ctx.transaccion(async (tx) => {
-      const creados = await tx.inventarioTipo.createManyAndReturn({
+    const creados = await ctx.transaccion(async (tx) => {
+      const filas = await tx.inventarioTipo.createManyAndReturn({
         data: nuevos.map((s) => ({ ...s, nombreNormalizado: nombreNormalizado(s.nombre), tenantId: ctx.tenantId })),
         skipDuplicates: true,
         select: { id: true, nombre: true, categoria: true },
       });
-      for (const t of creados) {
+      for (const t of filas) {
         await ctx.eventos.emitir(tx, {
           tipo: "inventario.tipo.creado",
           entidadTipo: "inventario_tipo",
@@ -44,7 +44,13 @@ export const tiposCargarSugeridos = defineCapability({
           payload: { nombre: t.nombre, categoria: t.categoria, sugerido: true },
         });
       }
+      return filas.map((t) => t.nombre);
     });
-    return resultado;
+    // Otra carga simultánea pudo crear algunos: se informa solo lo que creó esta.
+    const agregados = new Set(creados);
+    return {
+      agregados: [...agregados],
+      yaExistian: sugeridos.map((s) => s.nombre).filter((n) => !agregados.has(n)),
+    };
   },
 });

@@ -43,7 +43,7 @@ Se nota que funciona cuando: (1) cada guardia nuevo recibe su uniforme registrad
 
 | Pantalla | Ruta | Patrón | Menú |
 |---|---|---|---|
-| Tipos | `/inventario/tipos` | Lista + ficha a la derecha (como Cargos) y hoja para crear o editar | Área **Operaciones** › Inventario, pestaña «Tipos» |
+| Tipos | `/inventario` (ficha en `/inventario/tipos/<id>`) | Lista + ficha a la derecha (como Cargos) y hoja para crear o editar | Área **Operaciones** › Inventario, pestaña «Tipos» |
 | Activos | `/inventario/activos` | Lista + ficha | Pestaña «Activos» (CAR-236) |
 | Ropa | `/inventario/ropa` | Lista de tipos de ropa con existencias por talla | Pestaña «Ropa» (CAR-237) |
 | Asignaciones | En la ficha del activo, en la ropa y en la ficha de la persona y de la instalación | Tarjeta | CAR-238 |
@@ -71,7 +71,8 @@ Mismo diseño que el resto de OPAI (diseño nuevo, ADR-109). No hay diseño apro
 - **R5.** Un tipo nunca se borra: se desactiva (los activos y entregas lo referencian).
 - **R6.** «Cargar tipos sugeridos» solo agrega los que faltan por nombre; nunca cambia los existentes. Es idempotente.
 - **R7.** Toda escritura tiene vista previa (`dryRun`, MCP `preview_…`), clave de idempotencia y auditoría.
-- **R8.** Las reglas R9 en adelante se agregan con CAR-236 a CAR-238 (activos, existencias y asignaciones).
+- **R8.** Las tallas se guardan sin espacios y en mayúsculas («x l» → «XL»): son la clave de las existencias (CAR-237). La clave de un campo nuevo nunca repite una clave en uso.
+- **R9.** Las reglas R10 en adelante se agregan con CAR-236 a CAR-238 (activos, existencias y asignaciones).
 
 ## 7. Permisos
 

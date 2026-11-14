@@ -45,34 +45,48 @@ type Definicion = {
   tallas: readonly string[];
 };
 
+/** Talla tal como se guarda: sin espacios y en mayúsculas («x l» → «XL»). Es la clave de las existencias. */
+export function normalizarTalla(talla: string): string {
+  return talla.replace(/\s+/g, "").toUpperCase();
+}
+
 /** R3 y R4: el error de negocio del tipo, o null si es válido. */
 export function errorDeTipo({ categoria, campos, tallas }: Definicion): string | null {
   if (categoria === "ropa") {
     if (campos.length > 0) return "Los campos propios son solo para tipos de activo.";
     if (tallas.length === 0) return "Un tipo de ropa necesita al menos una talla.";
     if (tallas.length > LIMITES_TIPO.tallas) return `Hasta ${LIMITES_TIPO.tallas} tallas por tipo.`;
-    const vistas = new Set(tallas.map((t) => t.trim().toUpperCase()));
+    const vistas = new Set(tallas.map(normalizarTalla));
     if (vistas.size !== tallas.length) return "Hay tallas repetidas.";
     return null;
   }
   if (tallas.length > 0) return "Las tallas son solo para tipos de ropa.";
   if (campos.length > LIMITES_TIPO.campos) return `Hasta ${LIMITES_TIPO.campos} campos por tipo.`;
-  const claves = new Set(campos.map((c) => c.clave));
-  if (claves.size !== campos.length) return "Hay campos con el mismo nombre.";
+  if (campos.some((c) => !/[\p{L}\p{N}]/u.test(c.etiqueta))) return "El nombre de cada campo necesita letras o números.";
+  const etiquetas = new Set(campos.map((c) => nombreNormalizado(c.etiqueta)));
+  if (etiquetas.size !== campos.length) return "Hay campos con el mismo nombre.";
+  if (new Set(campos.map((c) => c.clave)).size !== campos.length) return "Hay campos con la misma clave.";
   return null;
 }
 
 /**
  * Arma los campos guardados a partir de lo que llega: conserva la clave de los que ya existían
- * (por clave) y deriva la de los nuevos desde su etiqueta.
+ * (por clave) y deriva la de los nuevos desde su etiqueta, sin repetir una clave en uso ni una ya
+ * usada antes por el tipo (`usadas`), para que un campo nuevo nunca herede valores de otro.
  */
 export function camposConClave(
   entrada: readonly { clave?: string | undefined; etiqueta: string; tipo: TipoCampoInventario; obligatorio: boolean }[],
+  usadas: readonly string[] = [],
 ): CampoTipo[] {
-  return entrada.map((c) => ({
-    clave: c.clave ?? claveCampo(c.etiqueta),
-    etiqueta: c.etiqueta.trim(),
-    tipo: c.tipo,
-    obligatorio: c.obligatorio,
-  }));
+  const tomadas = new Set([...usadas, ...entrada.flatMap((c) => (c.clave ? [c.clave] : []))]);
+  return entrada.map((c) => {
+    let clave = c.clave;
+    if (!clave) {
+      const base = claveCampo(c.etiqueta);
+      clave = base;
+      for (let n = 2; tomadas.has(clave); n++) clave = `${base.slice(0, 36)}_${n}`;
+      tomadas.add(clave);
+    }
+    return { clave, etiqueta: c.etiqueta.trim(), tipo: c.tipo, obligatorio: c.obligatorio };
+  });
 }
