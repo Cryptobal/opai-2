@@ -71,10 +71,9 @@ export const webhooksEntregasList = defineCapability({
       },
       select: SELECT_ENTREGA,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     return { items: items.map(vista), siguiente };
   },
 });
