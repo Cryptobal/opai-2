@@ -23,6 +23,7 @@ function datosHuella(i: Identidad, portal: string | null) {
     permisos: i.acceso.permisosRol === null ? null : ordenadas(i.acceso.permisosRol),
     excepciones: i.acceso.excepciones.map((e) => JSON.stringify([e.permiso, e.conceder])).sort(),
     instalaciones: i.acceso.instalaciones === null ? null : ordenadas(i.acceso.instalaciones),
+    adicionales: ordenadas(i.acceso.permisosAdicionales ?? []),
     modulos: ordenadas(i.modulosActivos),
     soloLectura: ordenadas(i.modulosSoloLectura ?? []),
     mfaActiva: i.mfaActiva,
