@@ -126,10 +126,11 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
 
   // CAR-395 · el Inicio ya no ofrece «Marcar punto» suelto (el QR desconocido se prueba dentro de la ronda).
   await inicioSinMarcarPunto(t);
+  // E3e · «Mis rondas»: iniciar, marcar dos puntos y cerrar (la ronda de prueba la siembra seed:pauta-e2e,
+  // CAR-451). Va antes de portería para que una falla de portería no la deje sin probar.
+  expect(await rondaIniciarMarcarYCerrar(t, ["E2E-PUNTO-1", "E2E-PUNTO-2"])).toBe(true);
   // E4d · portería: entrada, «En sitio» y salida (si Control de acceso está activo en la empresa).
   await porteriaEntradaYSalida(t);
-  // E3e · «Mis rondas»: iniciar, marcar dos puntos y cerrar (si la instalación tiene la ronda de prueba).
-  await rondaIniciarMarcarYCerrar(t, ["E2E-PUNTO-1", "E2E-PUNTO-2"]);
 
   await capturasDeInicioYCola(t);
 

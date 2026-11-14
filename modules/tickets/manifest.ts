@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineModule } from "@opai/capabilities";
 
+import { buscadoresTickets } from "./buscador";
 import { capacidades } from "./capacidades";
 import { fuentesAprobacionTickets } from "./fuente-aprobaciones";
 
@@ -55,4 +56,6 @@ export const manifest = defineModule({
   ],
   capacidades,
   aprobaciones: fuentesAprobacionTickets,
+  // Aporte al buscador general (CAR-404): tickets por asunto.
+  buscadores: buscadoresTickets,
 });
