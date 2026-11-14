@@ -30,7 +30,7 @@ export default function TipoDetalle({ params, searchParams }: Props) {
       volverSoloTelefono
       volverBajoLg
       acciones={
-        <EnlaceBoton href="/inventario?nuevo=1" icono={Plus} className="max-lg:hidden">
+        <EnlaceBoton href="/inventario/tipos?nuevo=1" icono={Plus} className="max-lg:hidden">
           Nuevo tipo
         </EnlaceBoton>
       }
@@ -38,7 +38,7 @@ export default function TipoDetalle({ params, searchParams }: Props) {
         const [{ id }, p, identidad] = await Promise.all([
           params,
           leerParametros(searchParams),
-          requerirIdentidad("/inventario"),
+          requerirIdentidad("/inventario/tipos"),
         ]);
         const datos = cargarTipo(id);
         datos.catch(() => undefined);
@@ -50,7 +50,7 @@ export default function TipoDetalle({ params, searchParams }: Props) {
           puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage"),
         };
       }}
-      opciones={(d) => ({ volver: { href: conBusqueda("/inventario", d.p.q), etiqueta: "Inventario" } })}
+      opciones={(d) => ({ volver: { href: conBusqueda("/inventario/tipos", d.p.q), etiqueta: "Tipos" } })}
     >
       {({ id, p, datos, lista, puedeGestionar }) => (
         <>

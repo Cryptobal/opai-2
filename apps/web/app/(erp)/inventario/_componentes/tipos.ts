@@ -24,3 +24,30 @@ export const CATEGORIAS = [
 ];
 
 export const etiquetaCategoria = (v: string) => CATEGORIAS.find((c) => c.valor === v)?.etiqueta ?? v;
+
+export type EstadoActivo = "disponible" | "asignado" | "en_reparacion" | "de_baja";
+
+export type Activo = {
+  id: string;
+  tipoId: string;
+  tipo: string;
+  codigo: string;
+  numeroSerie: string | null;
+  estado: EstadoActivo;
+  valores: Record<string, string | number>;
+  notas: string | null;
+  bajaEn: string | null;
+  motivoBaja: string | null;
+};
+
+export type FichaActivo = Activo & { campos: CampoTipo[] };
+
+export const ESTADOS_ACTIVO: { valor: EstadoActivo; etiqueta: string; tono: "success" | "info" | "warning" | "neutro" }[] = [
+  { valor: "disponible", etiqueta: "Disponible", tono: "success" },
+  { valor: "asignado", etiqueta: "Asignado", tono: "info" },
+  { valor: "en_reparacion", etiqueta: "En reparación", tono: "warning" },
+  { valor: "de_baja", etiqueta: "De baja", tono: "neutro" },
+];
+
+const DISPONIBLE = { valor: "disponible" as const, etiqueta: "Disponible", tono: "success" as const };
+export const estadoActivo = (v: EstadoActivo) => ESTADOS_ACTIVO.find((e) => e.valor === v) ?? DISPONIBLE;

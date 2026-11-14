@@ -7,13 +7,13 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { requerirIdentidad } from "@/lib/servidor";
 
-import { cargarTipos } from "./_componentes/datos";
-import { HojaTipo } from "./_componentes/diferidas";
-import { ListaTipos } from "./_componentes/lista-tipos";
+import { cargarActivos } from "./_componentes/datos-activos";
+import { HojaActivo } from "./_componentes/diferidas";
+import { ListaActivos } from "./_componentes/lista-activos";
 
 export const metadata = { title: "Inventario" };
 
-/** Inventario › Tipos (CAR-235): vista dividida con «Elige un tipo»; lista en teléfono. */
+/** Inventario › Activos (CAR-236): vista dividida con «Elige un activo»; lista en teléfono. */
 export default function Inventario({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal
@@ -24,9 +24,9 @@ export default function Inventario({ searchParams }: { searchParams: SearchParam
       cargar={async () => {
         const [p, identidad] = await Promise.all([leerParametros(searchParams), requerirIdentidad("/inventario")]);
         return {
-          ...(await cargarTipos(p)),
+          ...(await cargarActivos(p)),
           q: p.q,
-          puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage"),
+          puedeGestionar: puedeDeIdentidad(identidad)("inventario:gestionar"),
         };
       }}
     >
@@ -35,19 +35,19 @@ export default function Inventario({ searchParams }: { searchParams: SearchParam
           <SplitScreen
             telefono="lista"
             unPanelHastaLg
-            etiquetaLista="Lista de tipos"
-            vacio={{ texto: "Elige un tipo", icono: Package }}
+            etiquetaLista="Lista de activos"
+            vacio={{ texto: "Elige un activo", icono: Package }}
             lista={
-              <ListaTipos
+              <ListaActivos
                 state={d.state}
                 items={d.items}
-                total={d.total}
+                tipos={d.tipos}
                 {...(d.q ? { q: d.q } : {})}
                 puedeGestionar={d.puedeGestionar}
               />
             }
           />
-          {d.puedeGestionar ? <HojaTipo /> : null}
+          {d.puedeGestionar ? <HojaActivo tipos={d.tipos} /> : null}
         </>
       )}
     </PaginaPortal>
