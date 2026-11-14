@@ -1,7 +1,8 @@
 import type { BadgeProps } from "@opai/ds";
 
 import type { Parametros } from "@/lib/parametros";
-import { ejecutarComoUsuario } from "@/lib/servidor";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
+import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 type Tono = NonNullable<BadgeProps["tono"]>;
 
@@ -17,10 +18,10 @@ export type Alerta = {
   pasoActual: number;
   atencionPorId: string | null;
   estado: string;
-  pospuestaHasta: string | null;
+  pospuestaHasta: string | Date | null;
   notaCierre: string | null;
-  cerradaEn: string | null;
-  createdAt: string;
+  cerradaEn: string | Date | null;
+  createdAt: string | Date;
 };
 
 export type EventoAlerta = {
@@ -30,7 +31,7 @@ export type EventoAlerta = {
   nota: string | null;
   estadoDesde: string | null;
   estadoHacia: string;
-  createdAt: string;
+  createdAt: string | Date;
 };
 
 export type EstadoCentral = {
@@ -88,7 +89,7 @@ export function ordenarCola(items: readonly Alerta[]): Alerta[] {
       nombre(a).localeCompare(nombre(b), "es") ||
       a.instalacionId.localeCompare(b.instalacionId) ||
       peso(a.severidad) - peso(b.severidad) ||
-      String(a.createdAt).localeCompare(String(b.createdAt)),
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 }
 
@@ -113,4 +114,10 @@ export function cargarAlerta(id: string) {
     "central.alertas.obtener",
     { id },
   );
+}
+
+/** ¿Puede atender alertas? Oculta las acciones a quien solo ve la cola (ADR-022); el servidor igual lo valida. */
+export async function puedeAtender(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("central:alertas.atender") : false;
 }

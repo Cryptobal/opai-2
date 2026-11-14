@@ -3,28 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Dialog } from "@opai/ds";
+import dynamic from "next/dynamic";
 
-import { type Confirmacion, DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
+import { avisar, Button } from "@opai/ds";
+
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import type { ConNota } from "./dialogos";
+
+const DialogosAlerta = dynamic(() => import("./dialogos"));
+
 type Props = { id: string; estado: string };
-type ConNota = "resolver" | "falsa_alarma" | "reabrir";
 
 const ACTIVOS = new Set(["nueva", "en_contacto", "escalada", "en_atencion", "pospuesta"]);
-const PLAZOS = [
-  { minutos: 15, etiqueta: "15 minutos" },
-  { minutos: 60, etiqueta: "1 hora" },
-  { minutos: 240, etiqueta: "4 horas" },
-  { minutos: 1440, etiqueta: "24 horas" },
-];
-
-const CONFIRMACION: Record<ConNota, Confirmacion & { exito: string }> = {
-  resolver: { titulo: "Resolver alerta", descripcion: "Cuenta qué se hizo: queda en la bitácora.", boton: "Resolver", motivo: true, motivoEtiqueta: "Qué se hizo", exito: "Alerta resuelta" },
-  falsa_alarma: { titulo: "Cerrar como falsa alarma", descripcion: "Cuenta por qué no era real.", boton: "Falsa alarma", motivo: true, motivoEtiqueta: "Motivo", exito: "Cerrada como falsa alarma" },
-  reabrir: { titulo: "Reabrir alerta", descripcion: "Vuelve a la cola como nueva.", boton: "Reabrir", motivo: true, motivoEtiqueta: "Qué evidencia nueva hay", exito: "Alerta reabierta" },
-};
-
 /** Acciones de la alerta (spec §6): cada botón llama a la misma capacidad que el MCP. */
 export function AccionesAlerta({ id, estado }: Props) {
   const router = useRouter();
@@ -58,9 +49,11 @@ export function AccionesAlerta({ id, estado }: Props) {
       ) : null}
       {activa ? (
         <>
-          <Button variant={estado === "en_atencion" ? "primary" : "secondary"} disabled={pendiente} onClick={() => setDialogo("resolver")}>
-            Resolver
-          </Button>
+          {estado !== "pospuesta" ? (
+            <Button variant={estado === "en_atencion" ? "primary" : "secondary"} disabled={pendiente} onClick={() => setDialogo("resolver")}>
+              Resolver
+            </Button>
+          ) : null}
           <Button variant="secondary" disabled={pendiente} onClick={() => setDialogo("falsa_alarma")}>
             Falsa alarma
           </Button>
@@ -81,35 +74,21 @@ export function AccionesAlerta({ id, estado }: Props) {
         </Button>
       )}
 
-      {dialogo && dialogo !== "posponer" ? (
-        <DialogoConfirmar
-          confirmacion={CONFIRMACION[dialogo]}
+      {error && !dialogo ? (
+        <p role="alert" className="w-full text-base text-danger">
+          {error}
+        </p>
+      ) : null}
+      {dialogo ? (
+        <DialogosAlerta
+          dialogo={dialogo}
           pendiente={pendiente}
           error={error}
           onCerrar={cerrar}
-          onConfirmar={(motivo) => correr(conNota(dialogo, motivo?.trim() ?? ""), CONFIRMACION[dialogo].exito)}
+          onNota={(accion, nota, exito) => correr(conNota(accion, nota), exito)}
+          onPosponer={(minutos) => correr(ejecutar("central.alertas.posponer", { id, minutos }), "Alerta pospuesta")}
         />
       ) : null}
-      <Dialog
-        abierto={dialogo === "posponer"}
-        onCerrar={cerrar}
-        titulo="Posponer alerta"
-        descripcion="Sale de la cola y vuelve sola al cumplirse el plazo."
-        acciones={
-          <Button variant="secondary" onClick={cerrar}>
-            Cancelar
-          </Button>
-        }
-      >
-        <div className="grid grid-cols-2 gap-2">
-          {PLAZOS.map((p) => (
-            <Button key={p.minutos} variant="secondary" disabled={pendiente} onClick={() => correr(ejecutar("central.alertas.posponer", { id, minutos: p.minutos }), "Alerta pospuesta")}>
-              {p.etiqueta}
-            </Button>
-          ))}
-        </div>
-        {error ? <p className="mt-3 text-base text-danger">{error}</p> : null}
-      </Dialog>
     </div>
   );
 }

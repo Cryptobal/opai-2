@@ -55,6 +55,9 @@ export default function Central({ searchParams }: Props) {
           titulo="Central"
           subtitulo={estado.ok ? <ResumenCentral estado={estado.data} /> : undefined}
           filtros={<ChipsFiltro filtros={FILTROS} />}
+          paginacion={
+            cola.ok && cola.data.siguiente ? <span>Se muestran las 100 alertas más recientes; filtra por severidad para ver el resto.</span> : undefined
+          }
           items={ordenarCola(cola.ok ? cola.data.items : [])}
           clave={(a) => a.id}
           grupo={instalacion}

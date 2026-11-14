@@ -6,6 +6,7 @@ import { estadoPantalla } from "@/lib/formato";
 
 import {
   cargarAlerta,
+  puedeAtender,
   ETIQUETA_ESTADO,
   ETIQUETA_SEVERIDAD,
   type EventoAlerta,
@@ -47,11 +48,12 @@ export default function AlertaFicha({ params }: Props) {
       ruta="/central"
       cargar={async () => {
         const { id } = await params;
-        return { id, r: await cargarAlerta(id) };
+        const [r, atender] = await Promise.all([cargarAlerta(id), puedeAtender()]);
+        return { id, r, atender };
       }}
       opciones={({ r }) => ({ titulo: r.ok ? r.data.alerta.titulo : "Alerta" })}
     >
-      {({ id, r }) => {
+      {({ id, r, atender }) => {
         const a = r.ok ? r.data.alerta : null;
         const eventos = r.ok ? r.data.eventos : [];
         return (
@@ -67,7 +69,7 @@ export default function AlertaFicha({ params }: Props) {
                 </span>
               ) : undefined
             }
-            acciones={a ? <AccionesAlerta id={id} estado={a.estado} /> : undefined}
+            acciones={a && atender ? <AccionesAlerta id={id} estado={a.estado} /> : undefined}
           >
             {a ? (
               <div className="flex flex-col gap-4">
