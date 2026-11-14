@@ -104,6 +104,8 @@ model Tenant {
   personasPrevision PersonaPrevision[]
   personasPago PersonaPago[]
   personasPagoSolicitudes PersonaPagoSolicitud[]
+  contratoPeriodos ContratoPeriodo[]
+  personasTallas PersonaTalla[]
   personasUniforme PersonaUniforme[]
   personasUniformeEntregas PersonaUniformeEntrega[]
   personasJornadaDt PersonaJornadaDt[]

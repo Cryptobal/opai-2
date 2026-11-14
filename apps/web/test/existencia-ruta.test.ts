@@ -43,6 +43,10 @@ describe("qué rutas dependen de la base para ser 404", () => {
     expect(consultaDeRuta(`/supervisor/instalaciones/${CERO}`)?.tipo).toBe("ficha");
     expect(consultaDeRuta(`/supervisor/personas/${CERO}`)?.tipo).toBe("ficha");
     expect(consultaDeRuta("/configuracion/agentes/conectar")).toBeNull();
+    expect(consultaDeRuta("/configuracion/agentes/eventos")).toBeNull();
+    expect(
+      consultaDeRuta("/configuracion/agentes/eventos/0190f0e8-7b1a-7c00-8000-000000000001"),
+    ).toBeNull();
   });
 
   it("un % malformado en el slug no lanza (el proxy no puede dar 500)", () => {

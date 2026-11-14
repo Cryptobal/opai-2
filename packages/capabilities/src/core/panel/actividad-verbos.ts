@@ -28,6 +28,12 @@ export const VERBO: Record<string, string> = {
   desbloquear: "desbloqueó",
   terminar: "terminó",
   anular: "anuló",
+  // Eventos salientes (CAR-352).
+  destino_crear: "creó",
+  destino_actualizar: "actualizó",
+  destino_eliminar: "eliminó",
+  destino_rotar_secreto: "rotó el secreto de",
+  entrega_reenviar: "reenvió una entrega de",
   confirmar_subida: "subió",
   iniciar_subida: "empezó a subir",
   vincular: "vinculó",

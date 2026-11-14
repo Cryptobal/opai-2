@@ -1,8 +1,7 @@
 import { Cabecera } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { marcoDeLaPeticion } from "@/lib/marco-servidor";
-import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
+import { requerirIdentidad } from "@/lib/servidor";
 import { cargarAjustes } from "@/app/(erp)/configuracion/_centro/ajustes-datos";
 
 import { AreaPrincipalServidor } from "./area-principal-servidor";
@@ -31,13 +30,10 @@ export default function Preferencias() {
           requerirIdentidad("/mi-cuenta/preferencias"),
           cargarAjustes("core", "Preferencias"),
         ]);
-        // El diseño rige por navegador, como el tema: se muestra el que este navegador tiene puesto.
-        const conEmpresa = tieneAccesoAPortal(identidad, "erp") && Boolean(identidad.actual);
-        const marco = await marcoDeLaPeticion("erp", conEmpresa);
-        return { nombre: identidad.usuario.nombre, valores: ajustes.valores, marco };
+        return { nombre: identidad.usuario.nombre, valores: ajustes.valores };
       }}
     >
-      {({ nombre, valores, marco }) => {
+      {({ nombre, valores }) => {
         const de = (k: string) => valores[`core.${k}`]?.valor;
         return (
           <section aria-label="Preferencias" className="flex w-full max-w-[720px] flex-col">
@@ -55,7 +51,6 @@ export default function Preferencias() {
                   silencio: de("preferencias_silencio") === true,
                   resumen: String(de("preferencias_resumen") ?? "nunca"),
                 }}
-                marco={marco}
               />
               <AreaPrincipalServidor />
             </div>
