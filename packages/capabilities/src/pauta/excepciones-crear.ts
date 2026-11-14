@@ -1,3 +1,5 @@
+import type { z } from "zod";
+
 import { serieVigente, trabajaEn } from "@opai/domain";
 
 import { claseValida } from "../core/maestros/ausencias-clases";
@@ -12,7 +14,7 @@ import { aFechaDb, diasDelRango, fechaIso, PERMISO_WRITE, puestoParaPauta } from
 import { nombresDePersonas } from "./nombres";
 import { crearInput, crearSalida } from "./excepciones-crear-esquemas";
 
-type Entrada = typeof crearInput._output;
+type Entrada = z.output<typeof crearInput>;
 
 /** Valida el rango contra la serie vigente y arma lo que se registra; sirve a la vista previa y a la real. */
 async function planear(ctx: Contexto, i: Entrada) {
