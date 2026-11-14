@@ -59,10 +59,9 @@ export const etiquetasList = defineCapability({
     const filas = await ctx.db.etiqueta.findMany({
       where: input.incluirInactivas ? {} : { activa: true },
       orderBy: [{ nombre: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    return pagina(filas.map(vista), input.limite);
+    return pagina(filas.map(vista), input.limite, input.cursor);
   },
 });
 

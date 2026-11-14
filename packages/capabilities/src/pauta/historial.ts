@@ -46,10 +46,9 @@ export const historialListar = defineCapability({
         ...(ids ? { AND: [{ instalacionId: { in: [...ids] } }] } : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     const puestos = new Map(
       (
         await ctx.db.puesto.findMany({
