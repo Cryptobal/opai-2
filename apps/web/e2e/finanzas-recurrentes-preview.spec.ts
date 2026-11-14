@@ -42,8 +42,9 @@ test.describe("@preview finanzas: gastos recurrentes", () => {
     const editar = page.getByRole("dialog");
     await expect(editar.getByText("Editar gasto recurrente")).toBeVisible();
     await editar.getByRole("button", { name: "Cambiar desde una fecha" }).click();
-    const hoja = page.getByRole("dialog");
-    await expect(hoja.getByText("Rige desde")).toBeVisible();
+    // La hoja de edición puede seguir animando su salida: se elige la que tiene «Rige desde».
+    const hoja = page.getByRole("dialog").filter({ has: page.getByText("Rige desde") });
+    await expect(hoja).toBeVisible();
     // Elige una frecuencia distinta de la actual (el combo es Radix, no un select nativo).
     await hoja.getByLabel("Frecuencia").click();
     await page.getByRole("option", { selected: false }).first().click();

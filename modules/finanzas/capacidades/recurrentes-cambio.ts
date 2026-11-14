@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 import { defineCapability, hoyChile, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+import { formatearFecha } from "@opai/domain";
 
 import type { Frecuencia, Recurrente } from "../domain/recurrentes";
-import { cuotasQueCambian, partirEn } from "../domain/recurrentes-tramo";
+import { cuotasPagablesYa, cuotasQueCambian, diaAntes, partirEn } from "../domain/recurrentes-tramo";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_CONFIGURAR } from "./permisos";
 import { motivoInvalido, recurrenteDatos, recurrenteSchema, vistaRecurrente } from "./recurrentes-esquemas";
@@ -40,7 +41,8 @@ export const recurrentesCambiarDesde = defineCapability({
     if (!actual) throw noEncontrado("El gasto recurrente");
     if (actual.siguiente) throw reglaDeNegocio("Ese tramo ya fue reemplazado: cambia el tramo vigente.");
     if (!actual.activa) throw reglaDeNegocio("Reactiva el gasto antes de cambiarlo.");
-    if (input.desde < hoyChile()) throw reglaDeNegocio("El cambio rige desde hoy o una fecha futura: las cuotas pasadas no se tocan.");
+    const hoy = hoyChile();
+    if (input.desde < hoy) throw reglaDeNegocio("El cambio rige desde hoy o una fecha futura: las cuotas pasadas no se tocan.");
     const vista = vistaRecurrente(actual);
     const frecuencia = input.frecuencia ?? vista.frecuencia;
     const diaDelMes = frecuencia === "mensual" ? (input.diaDelMes !== undefined ? input.diaDelMes : vista.diaDelMes) : null;
@@ -54,6 +56,22 @@ export const recurrentesCambiarDesde = defineCapability({
     const regla: Recurrente = { frecuencia: vista.frecuencia as Frecuencia, diaDelMes: vista.diaDelMes, inicio: vista.inicio, fin: vista.fin, repeticiones: vista.repeticiones };
     const tramos = partirEn(regla, input.desde, { frecuencia, diaDelMes });
     if ("motivo" in tramos) throw reglaDeNegocio(tramos.motivo);
+    // Una cuota desde la fecha pudo pagarse por adelantado con un cargo ya conciliado a la fila: no se mueve.
+    const pagables = cuotasPagablesYa(regla, input.desde > vista.inicio ? input.desde : vista.inicio, hoy, actual.ventanaAntes);
+    if (pagables.length) {
+      const cargo = await ctx.db.conciliacionBanco.findFirst({
+        where: {
+          tipoEnlace: "flujo_fila",
+          enlaceId: actual.filaId,
+          activa: true,
+          confirmada: true,
+          movimiento: { estado: { not: "ignorado" }, fecha: { gte: aFecha(diaAntes(pagables[0] as string, actual.ventanaAntes)), lte: aFecha(hoy) } },
+        },
+        select: { id: true },
+      });
+      if (cargo)
+        throw reglaDeNegocio(`La cuota del ${formatearFecha(pagables[0] as string)} pudo pagarse ya con un cargo del banco: elige una fecha posterior a esa cuota.`);
+    }
     const motivo = motivoInvalido({ ...vista, ...tramos.nuevo });
     if (motivo) throw reglaDeNegocio(motivo);
     const cuotas = cuotasQueCambian(regla, tramos.nuevo, input.desde);

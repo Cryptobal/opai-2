@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Recurrente } from "./recurrentes";
-import { cuotasQueCambian, diaAntes, partirEn } from "./recurrentes-tramo";
+import { cuotasPagablesYa, cuotasQueCambian, diaAntes, partirEn } from "./recurrentes-tramo";
 
 const arriendo: Recurrente = { frecuencia: "mensual", diaDelMes: 5, inicio: "2026-01-05", fin: null, repeticiones: null };
 
@@ -15,11 +15,16 @@ describe("gasto recurrente que cambia desde una fecha (CAR-413)", () => {
     });
   });
 
-  it("si aún no empieza, cambia el mismo gasto y mueve el inicio", () => {
+  it("si aún no empieza, cambia el mismo gasto sin mover su inicio (no adelanta cuotas)", () => {
     expect(partirEn(arriendo, "2025-12-20", { frecuencia: "mensual", diaDelMes: 10 })).toEqual({
       tipo: "en_lugar",
-      nuevo: { ...arriendo, diaDelMes: 10, inicio: "2025-12-20" },
+      nuevo: { ...arriendo, diaDelMes: 10 },
     });
+  });
+
+  it("las cuotas que un cargo ya hecho pudo pagar por adelantado", () => {
+    expect(cuotasPagablesYa(arriendo, "2026-12-01", "2026-11-30", 5)).toEqual(["2026-12-05"]);
+    expect(cuotasPagablesYa(arriendo, "2026-12-01", "2026-11-20", 5)).toEqual([]);
   });
 
   it("reparte el tope de cuotas: el nuevo tramo lleva solo las que faltan", () => {

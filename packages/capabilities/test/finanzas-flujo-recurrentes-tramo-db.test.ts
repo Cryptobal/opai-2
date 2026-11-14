@@ -82,11 +82,33 @@ describe.skipIf(omitirSuiteDb())("flujo · gasto recurrente que cambia desde una
     expect((await run("finanzas.recurrentes.actualizar", { id: r.id, monto: 1 })).ok).toBe(false);
   });
 
-  it("si el gasto aún no empieza, cambia el mismo gasto sin partirlo", async () => {
+  it("si el gasto aún no empieza, cambia el mismo gasto sin partirlo ni adelantar su inicio", async () => {
     const r = await crear("Bodega nueva", mas(hoy, 40));
     const hecho = await ok<Cambio>("finanzas.recurrentes.cambiar_desde", { id: r.id, desde: mas(hoy, 20), diaDelMes: 15 });
     expect(hecho.anterior).toBeNull();
-    expect(hecho.nuevo).toMatchObject({ id: r.id, inicio: mas(hoy, 20), diaDelMes: 15, anteriorId: null });
+    expect(hecho.nuevo).toMatchObject({ id: r.id, inicio: mas(hoy, 40), diaDelMes: 15, anteriorId: null });
+  });
+
+  it("un tramo que aún no empieza no se monta sobre el anterior", async () => {
+    const a = await crear("Arriendo local", mas(hoy, -100));
+    const b = (await ok<Cambio>("finanzas.recurrentes.cambiar_desde", { id: a.id, desde: mas(hoy, 30), diaDelMes: 20 })).nuevo;
+    const otra = await ok<Cambio>("finanzas.recurrentes.cambiar_desde", { id: b.id, desde: mas(hoy, 5), diaDelMes: 25 });
+    expect(otra.nuevo).toMatchObject({ id: b.id, inicio: mas(hoy, 30), diaDelMes: 25 });
+    expect((await e.admin.flujoRecurrente.findFirst({ where: { id: a.id } }))?.fin?.toISOString().slice(0, 10)).toBe(mas(hoy, 29));
+  });
+
+  it("no mueve una cuota que un cargo del banco ya pudo pagar por adelantado", async () => {
+    const pagado = (await ok<{ id: string }>("finanzas.filas.crear", { seccion: "egreso", etiqueta: "Pagado antes" })).id;
+    const r = await ok<Rec>("finanzas.recurrentes.crear", { filaId: pagado, concepto: "Pagado antes", monto: 100_000, frecuencia: "semanal", inicio: mas(hoy, -12) });
+    const cuenta = (await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco QA", numeroVisible: "0009", activa: true, saldoBanco: 1_000_000n } })).id;
+    const m = await e.admin.movimientoBancario.create({
+      data: { tenantId, cuentaId: cuenta, fecha: new Date(`${hoy}T00:00:00Z`), monto: -100_000n, glosa: "Pago QA", claveDedupe: `qa|${randomUUID()}`, estado: "conciliado", origen: "cartola" },
+    });
+    await e.admin.conciliacionBanco.create({ data: { tenantId, movimientoId: m.id, tipoEnlace: "flujo_fila", enlaceId: pagado, monto: -100_000n, activa: true, confirmada: true } });
+    const rechazo = await run("finanzas.recurrentes.cambiar_desde", { id: r.id, desde: hoy, frecuencia: "quincenal" });
+    expect(rechazo.ok).toBe(false);
+    // Desde después de las cuotas que ese cargo pudo pagar, sí.
+    expect((await run("finanzas.recurrentes.cambiar_desde", { id: r.id, desde: mas(hoy, 10), frecuencia: "quincenal" })).ok).toBe(true);
   });
 
   it("rechaza fechas pasadas, cambios vacíos y filas archivadas", async () => {
