@@ -5,7 +5,7 @@ import { verPestanaNegocios } from "@/lib/pestanas-modulos";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
 import type { cargarCuenta } from "./datos";
-import { HojaCuenta, HojaSii } from "./diferidas";
+import { HojaCuenta, HojaFusionar, HojaSii } from "./diferidas";
 import { FichaCuenta, type TabCuenta } from "./ficha-cuenta";
 
 type Props = {
@@ -26,6 +26,7 @@ export async function DetalleCuenta({ datos, p, tab, children }: Props) {
       </FichaCuenta>
       {ficha.cuenta ? <HojaCuenta cuenta={ficha.cuenta} /> : null}
       {ficha.cuenta ? <HojaSii cuenta={ficha.cuenta} /> : null}
+      {ficha.cuenta ? <HojaFusionar cuenta={ficha.cuenta} /> : null}
     </>
   );
 }
