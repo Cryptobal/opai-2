@@ -3,7 +3,7 @@
 - **Sesión:** Sesión Operaciones
 - **PR:** #811 · rama `brief/car-84-avisos-solicitante`
 - **Estado:** En PR
-- **Migración:** PR #811 no; PR «instalación del ticket» sí: `20270101110000_tickets_instalacion` (se integra después de `20270101100000_pauta_visitas`, #816)
+- **Migración:** PR #811 no; PR «instalación del ticket» sí: `20270107110000_tickets_instalacion` (se integra después de `20270107100000_pauta_visitas`, #816)
 - **Apilado sobre / espera:** el PR «instalación del ticket» va apilado sobre #811
 
 ## Qué entra (parte 1: avisos)
