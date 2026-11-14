@@ -511,6 +511,19 @@ export const AJUSTES: Record<string, Ajuste> = {
       monto: 1000,
     }),
   },
+  // Finanzas · descartes de «Borrar por fechas» (CAR-412): CHECK de origen, rango y cantidad > 0.
+  "finanzas.movimientos_bancarios_descartes": {
+    dependencias: ["finanzas.cuentas_bancarias"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "finanzas.cuentas_bancarias"),
+      desde: "2026-01-01",
+      hasta: "2026-01-31",
+      origen: "web4leads",
+      motivo: "Prueba",
+      cantidad: 1,
+      movimientos: [],
+    }),
+  },
   "finanzas.reglas_conciliacion": { valores: () => ({ nombre: "Regla prueba", condiciones: {} }) },
   "finanzas.banco_avisos_emitidos": {
     dependencias: ["finanzas.cuentas_bancarias"],
