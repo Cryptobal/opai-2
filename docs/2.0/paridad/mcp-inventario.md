@@ -1109,6 +1109,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
+- `core.campos_personalizados.create`
+- `core.campos_personalizados.list`
+- `core.campos_personalizados.update`
 - `core.consumos.por_recurso`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
