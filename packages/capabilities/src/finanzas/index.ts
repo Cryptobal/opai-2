@@ -28,6 +28,7 @@ import {
   ventasEnviarSii,
 } from "./ventas-escritura";
 import { reporteResultados } from "./reportes-resultados";
+import { rentabilidadInstalaciones } from "./rentabilidad";
 import { ventasBuscar } from "./ventas-buscar";
 import { impuestosBorradorF29 } from "./impuestos-f29";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
@@ -90,6 +91,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   impuestosBorradorF29,
   ventasBuscar,
   reporteResultados,
+  rentabilidadInstalaciones,
   cobranzaResumen,
   cobranzaDeudor,
   cobranzaRecordar,

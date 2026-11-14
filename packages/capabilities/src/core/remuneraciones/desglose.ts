@@ -1,6 +1,6 @@
-import { formatearClp, UF_ESCALA } from "@opai/domain";
+import { formatearClp } from "@opai/domain";
 
-import { pctDisplay, resumenIndicador, ufCentavosDisplay, ufEscaladaDisplay } from "./formato";
+import { escaladaDisplay, pctDisplay, resumenIndicador, ufCentavosDisplay, ufEscaladaDisplay } from "./formato";
 
 function etiquetaAfp(id: string): string {
   const n: Record<string, string> = {
@@ -77,9 +77,8 @@ export function desgloseIndicador(clave: string, valor: unknown): string[] {
     case "impuesto": {
       const tramos = valor as { hastaUtm: number | null; tasa: number; rebajaUtm: number }[];
       return tramos.map((tr, i) => {
-        const hasta =
-          tr.hastaUtm == null ? "y más" : `hasta ${(tr.hastaUtm / UF_ESCALA).toFixed(3).replace(".", ",")} UTM`;
-        return `Tramo ${i + 1} (${hasta}): ${pctDisplay(tr.tasa)} · rebaja ${tr.rebajaUtm} UTM`;
+        const hasta = tr.hastaUtm == null ? "y más" : `hasta ${escaladaDisplay(tr.hastaUtm)} UTM`;
+        return `Tramo ${i + 1} (${hasta}): ${pctDisplay(tr.tasa)} · rebaja ${escaladaDisplay(tr.rebajaUtm)} UTM`;
       });
     }
     default:

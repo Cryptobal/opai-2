@@ -737,6 +737,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/finanzas/flujo/resumen` | `finanzas.planilla.resumen` | `finanzas_planilla_resumen` | existe |
+| erp | `/finanzas/rentabilidad` | `finanzas.rentabilidad.get` | `finanzas_rentabilidad_get` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador_nota_debito` | `finanzas_ventas_crear_borrador_nota_debito` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
@@ -1119,6 +1120,14 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.jornadas.fijar_tipo`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
+- `central.alertas.abrir`
+- `central.alertas.falsa_alarma`
+- `central.alertas.listar`
+- `central.alertas.obtener`
+- `central.alertas.posponer`
+- `central.alertas.reabrir`
+- `central.alertas.resolver`
+- `central.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
@@ -1157,6 +1166,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.indicadores.uf_utm`
 - `core.indicadores_gestion.medir`
 - `core.invitations.revoke`
+- `core.libro_novedades.listar`
 - `core.patrones.get`
 - `core.personas.asignar_jefe`
 - `core.personas.list_a_cargo`
