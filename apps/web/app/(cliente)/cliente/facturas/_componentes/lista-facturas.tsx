@@ -43,10 +43,13 @@ export function ListaFacturas({
     <div className="flex flex-col gap-4">
       <ul className="overflow-hidden rounded-lg border border-border bg-surface">
         {items.map((f) => {
+          // Una nota de crédito no se paga: no lleva estado de cobro.
           const cobro =
             f.estadoDte === "anulado_nc"
               ? { tono: "neutro" as const, texto: "Anulada" }
-              : COBRO[f.estadoCobro];
+              : f.tipo.startsWith("Nota de crédito")
+                ? null
+                : COBRO[f.estadoCobro];
           return (
             <li
               key={f.id}

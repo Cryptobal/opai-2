@@ -19,7 +19,8 @@ export function BotonPdf({ documentoId, nombre }: { documentoId: string; nombre:
     const bytes = Uint8Array.from(atob(r.base64), (c) => c.charCodeAt(0));
     const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
     descargarPdf(url, nombre);
-    URL.revokeObjectURL(url);
+    // Safari e iOS necesitan la URL viva hasta después del clic.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
   return (
     <Button variant="ghost" disabled={pendiente} onClick={() => void descargar()}>
