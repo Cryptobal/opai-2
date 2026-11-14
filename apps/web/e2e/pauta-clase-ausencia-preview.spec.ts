@@ -38,7 +38,13 @@ test.describe("@preview pauta clase de ausencia", () => {
       .getByRole("link", { name: /: Cubierto$/ })
       .filter({ visible: true })
       .first();
-    await expect(dia.or(page.getByRole("button", { name: "Publicar", exact: true }))).toBeVisible();
+    // La pauta cargó cuando aparece un día cubierto, el botón «Publicar» (quien edita) o el aviso de solo lectura.
+    await expect(
+      dia
+        .or(page.getByRole("button", { name: "Publicar", exact: true }))
+        .or(page.getByText("Solo lectura."))
+        .first(),
+    ).toBeVisible();
     if ((await dia.count()) === 0) {
       info.annotations.push({ type: "omitido", description: "qa-e2e sin días de turno en el mes" });
       return;
@@ -48,7 +54,10 @@ test.describe("@preview pauta clase de ausencia", () => {
     await expect(hoja).toBeVisible();
     // Sin permiso para editar la pauta, la hoja es de solo lectura y no hay qué registrar.
     if ((await hoja.getByText("Solo lectura").count()) > 0) {
-      info.annotations.push({ type: "omitido", description: "usuario de qa-e2e sin permiso de pauta" });
+      info.annotations.push({
+        type: "omitido",
+        description: "usuario de qa-e2e sin permiso de pauta",
+      });
       return;
     }
     // El tipo por defecto es «Ausencia», con la clase base «Injustificada».
