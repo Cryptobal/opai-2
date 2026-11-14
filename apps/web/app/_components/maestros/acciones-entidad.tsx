@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { avisar, type ItemMenu, Menu } from "@opai/ds";
 
-import { useAgenteListo } from "../agente/abrir-agente";
+import { useHayAgente } from "../agente/agente-disponible";
 import { BotonAgenteFicha } from "../agente/boton-agente-ficha";
 import type { Contexto } from "../agente/tipos";
 import { useBajoLg, usePinFicha } from "../pin-ficha-contexto";
@@ -42,7 +42,7 @@ export function AccionesEntidad({
   /** La ficha ofrece «Preguntar a OPAI sobre esta …» (cuenta, instalación, negocio o persona). */
   agente?: { contexto: Contexto; nombre: string; articulo: string };
 }) {
-  const hayAgente = useAgenteListo();
+  const hayAgente = useHayAgente();
   const { fijar } = useParametros();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [confirmando, setConfirmando] = useState<AccionEntidad | null>(null);
