@@ -3,8 +3,8 @@
 - **Sesión:** Sesión Operaciones
 - **PR:** #811 · rama `brief/car-84-avisos-solicitante`
 - **Estado:** En PR
-- **Migración:** No
-- **Apilado sobre / espera:** ninguno
+- **Migración:** PR #811 no; PR «instalación del ticket» sí: `20270101110000_tickets_instalacion` (se integra después de `20270101100000_pauta_visitas`, #816)
+- **Apilado sobre / espera:** el PR «instalación del ticket» va apilado sobre #811
 
 ## Qué entra (parte 1: avisos)
 
@@ -12,11 +12,20 @@
 - Prueba `tickets-avisos-db.test.ts` (5 casos, con dos empresas).
 - `docs/2.0/modulos/tickets.md` §8 al día. Novedad para usuarios.
 
+## Qué entra (parte 2: instalación del ticket, apilado sobre #811)
+
+- Columna opcional `tickets.tickets.instalacion_id` con FK a `core.instalaciones` y el trigger de mismo tenant ampliado.
+- `tickets.tickets.crear` acepta `instalacionId` (de esta empresa, no archivada y dentro del alcance de quien crea; si no, NOT_FOUND); `listar` filtra por instalación; la ficha y la bandeja devuelven `instalacionId`.
+- Prueba `tickets-instalacion-db.test.ts`: filtro, otra empresa, alcance del supervisor y trigger de la base.
+- Sin pantalla todavía: elegir la instalación en «Nuevo ticket» y verla en la ficha va con la lista del portal del supervisor.
+
 ## Qué queda pendiente (resto del PR 2 del Brief 13)
 
 - Correo al solicitante: declarar los comunicables de Tickets (ADR-020, silencio por defecto). Hoy el catálogo comunicable vive solo en el núcleo (`COMUNICABLES_NUCLEO`).
-- Vínculo polimórfico del ticket a otras entidades (negocio, instalación).
-- Adjuntos vía `core.documentos`.
+- Vínculo a un negocio (Comercial): Tickets no depende de Comercial; se decide cuando haya un caso real.
+- Elegir la instalación en «Nuevo ticket» y mostrarla en la ficha.
+- Decidir si la bandeja «Todos» de un supervisor con `tickets:tickets.ver_todos` se acota a sus instalaciones (hoy ve todos, como antes de este PR).
+- Adjuntos vía `core.documentos`: espera CAR-496 (Documentos acepta el tipo `ticket`).
 - Lista de tickets en el portal del supervisor.
 
 ## Qué se decidió
