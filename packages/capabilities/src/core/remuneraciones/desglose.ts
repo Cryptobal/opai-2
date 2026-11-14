@@ -1,6 +1,12 @@
 import { formatearClp } from "@opai/domain";
 
-import { escaladaDisplay, pctDisplay, resumenIndicador, ufCentavosDisplay, ufEscaladaDisplay } from "./formato";
+import {
+  escaladaDisplay,
+  pctDisplay,
+  resumenIndicador,
+  ufCentavosDisplay,
+  ufEscaladaDisplay,
+} from "./formato";
 
 function etiquetaAfp(id: string): string {
   const n: Record<string, string> = {
@@ -13,6 +19,31 @@ function etiquetaAfp(id: string): string {
     provida: "Provida",
   };
   return n[id] ?? id;
+}
+
+type Afp = { obligatoria: number; salud: number; comisiones: Record<string, number> };
+
+function lineasAfp(a: Afp): string[] {
+  const com = Object.entries(a.comisiones ?? {})
+    .sort(([x], [y]) => x.localeCompare(y))
+    .map(([k, v]) => `${etiquetaAfp(k)}: ${pctDisplay(v)}`);
+  return [
+    `Cotización obligatoria: ${pctDisplay(a.obligatoria)}`,
+    `Salud (7 %): ${pctDisplay(a.salud)}`,
+    "Comisiones AFP:",
+    ...com,
+  ];
+}
+
+function lineasTopes(t: Record<string, unknown>): string[] {
+  const lineas = [
+    `Tope pensión y salud: ${ufEscaladaDisplay(Number(t.pensionSaludUf))}`,
+    `Tope indemnización: ${ufEscaladaDisplay(Number(t.indemnizacionUf))}`,
+    `Tope cesantía: ${ufEscaladaDisplay(Number(t.cesantiaUf))}`,
+    `Tope IPS: ${ufEscaladaDisplay(Number(t.ipsUf))}`,
+  ];
+  if (t.ipsPorVerificar === true) lineas.push("Tope IPS marcado por verificar.");
+  return lineas;
 }
 
 /** Líneas para el panel lateral (desglose completo). */
@@ -40,40 +71,21 @@ export function desgloseIndicador(clave: string, valor: unknown): string[] {
       return [`Mutual básica: ${pctDisplay(m.basica)}`, `SANNA: ${pctDisplay(m.sanna)}`];
     }
     case "cesantia": {
-      const c = valor as { indefinidoEmpleador: number; plazoFijoEmpleador: number; indefinidoTrabajador: number };
+      const c = valor as {
+        indefinidoEmpleador: number;
+        plazoFijoEmpleador: number;
+        indefinidoTrabajador: number;
+      };
       return [
         `Empleador contrato indefinido: ${pctDisplay(c.indefinidoEmpleador)}`,
         `Empleador plazo fijo: ${pctDisplay(c.plazoFijoEmpleador)}`,
         `Trabajador indefinido: ${pctDisplay(c.indefinidoTrabajador)}`,
       ];
     }
-    case "afp": {
-      const a = valor as {
-        obligatoria: number;
-        salud: number;
-        comisiones: Record<string, number>;
-      };
-      const com = Object.entries(a.comisiones ?? {})
-        .sort(([x], [y]) => x.localeCompare(y))
-        .map(([k, v]) => `${etiquetaAfp(k)}: ${pctDisplay(v)}`);
-      return [
-        `Cotización obligatoria: ${pctDisplay(a.obligatoria)}`,
-        `Salud (7 %): ${pctDisplay(a.salud)}`,
-        "Comisiones AFP:",
-        ...com,
-      ];
-    }
-    case "topes": {
-      const t = valor as Record<string, unknown>;
-      const lineas = [
-        `Tope pensión y salud: ${ufEscaladaDisplay(Number(t.pensionSaludUf))}`,
-        `Tope indemnización: ${ufEscaladaDisplay(Number(t.indemnizacionUf))}`,
-        `Tope cesantía: ${ufEscaladaDisplay(Number(t.cesantiaUf))}`,
-        `Tope IPS: ${ufEscaladaDisplay(Number(t.ipsUf))}`,
-      ];
-      if (t.ipsPorVerificar === true) lineas.push("Tope IPS marcado por verificar.");
-      return lineas;
-    }
+    case "afp":
+      return lineasAfp(valor as Afp);
+    case "topes":
+      return lineasTopes(valor as Record<string, unknown>);
     case "impuesto": {
       const tramos = valor as { hastaUtm: number | null; tasa: number; rebajaUtm: number }[];
       return tramos.map((tr, i) => {
@@ -86,7 +98,11 @@ export function desgloseIndicador(clave: string, valor: unknown): string[] {
   }
 }
 
-export function resumenHistorial(clave: string, valorJson: unknown, resumenFallback: string): string {
+export function resumenHistorial(
+  clave: string,
+  valorJson: unknown,
+  resumenFallback: string,
+): string {
   if (valorJson == null) return resumenFallback;
   if (typeof valorJson === "number" || typeof valorJson === "object") {
     try {
