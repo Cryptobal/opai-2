@@ -41,9 +41,10 @@ export function useAcentoEmpresa(
   portal: string,
   epoca: string,
 ): string | undefined {
-  const [logo, setLogo] = useState<string | undefined>(undefined);
+  // El logo queda ligado a la empresa y la época que lo leyeron: al cambiar no se muestra el anterior.
+  const clave = `${portal}|${epoca}`;
+  const [leido, setLeido] = useState<{ clave: string; logo: string | undefined } | null>(null);
   useEffect(() => {
-    setLogo(undefined);
     if (!activo) return;
     let tonos: Tonos | null = null;
     let vivo = true;
@@ -55,7 +56,8 @@ export function useAcentoEmpresa(
             : null;
         tonos = acentoDeMarca(typeof color === "string" ? color : null);
         if (vivo && tonos) pintar(tonos);
-        if (vivo) setLogo(logoDeMarca(r.ok ? r.data : null));
+        if (vivo)
+          setLeido({ clave: `${portal}|${epoca}`, logo: logoDeMarca(r.ok ? r.data : null) });
       })
       .catch(() => undefined);
     const repintar = () => tonos && pintar(tonos);
@@ -75,5 +77,5 @@ export function useAcentoEmpresa(
       sistema.removeEventListener("change", repintar);
     };
   }, [activo, portal, epoca]);
-  return logo;
+  return activo && leido?.clave === clave ? leido.logo : undefined;
 }
