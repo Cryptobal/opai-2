@@ -29,6 +29,7 @@ export const MOTIVOS_RECHAZO = [
   "entrada_desconocida",
   "salida_repetida",
   "entrada_anulada",
+  "invitacion_invalida",
   "plantilla_invalida",
   "ronda_no_permitida",
   "ejecucion_desconocida",

@@ -2,6 +2,7 @@ import { capacidadesBiometria } from "../biometria";
 import { capacidadesDispositivos } from "./dispositivos";
 import { capacidadesCredencialesTerreno } from "./credenciales";
 import { hechosRecibir } from "./hechos";
+import { accesoEsperadosTerreno } from "./acceso-esperados";
 import { accesoEnSitioTerreno } from "./acceso-sitio";
 import { terrenoContexto } from "./contexto";
 import { rondasEstadoTerreno } from "./rondas-estado";
@@ -16,5 +17,6 @@ export const capacidadesTerreno = [
   hechosListar,
   terrenoContexto,
   accesoEnSitioTerreno,
+  accesoEsperadosTerreno,
   rondasEstadoTerreno,
 ];

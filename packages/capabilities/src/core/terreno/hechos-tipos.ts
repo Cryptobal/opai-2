@@ -64,13 +64,19 @@ export const TIPOS_HECHO_TERRENO = {
           numero: z.string().min(1).max(40),
           pais: z.string().min(2).max(3).optional(),
         })
-        .strict(),
+        .strict()
+        .optional(),
+      /** Código del QR de invitación de un prerregistro (CAR-478): reemplaza al documento, que ya está registrado. */
+      invitacion: z.string().min(1).max(120).optional(),
       nombre: z.string().trim().min(2).max(120),
       empresa: z.string().trim().min(1).max(120).optional(),
       motivo: z.string().trim().min(1).max(200).optional(),
       patente: z.string().min(1).max(12).optional(),
     })
-    .strict(),
+    .strict()
+    .refine((p) => p.documento !== undefined || p.invitacion !== undefined, {
+      message: "La entrada necesita el documento o la invitación.",
+    }),
   /** Salida de una entrada ya registrada: apunta a la clave del hecho `acceso.entrada`. */
   "acceso.salida": z.object({ entradaClave: z.string().uuid() }).strict(),
 } as const satisfies Record<string, z.ZodType>;
