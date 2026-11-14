@@ -2,10 +2,10 @@ import type { ConAprobable, EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, HechoPlataforma, TenantTx, VerificacionAuditoria } from "@opai/db";
 
 import type { EmpresaPlataforma } from "./plataforma-empresa";
-import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
 import type { Idempotencia } from "./idempotencia";
+import type { Servicios } from "./servicios-nucleo";
 import type {
   AgenteContexto,
   BitacoraServicio,
@@ -17,6 +17,7 @@ import type {
 } from "./servicios-tipos";
 
 export type * from "./servicios-tipos";
+export type { Servicios } from "./servicios-nucleo";
 
 /** Efecto de una capacidad sobre los datos. Decide auditoría y confirmación (ADR-004). */
 export type Efecto = "lectura" | "escritura" | "irreversible";
@@ -54,15 +55,6 @@ export type UsuarioContexto = {
   nombre: string;
   email: string;
   platformRole: RolPlataforma | null;
-};
-
-/** Servicios del núcleo disponibles para las capacidades. Los implementa el borde. */
-export type Servicios = {
-  correo: Mailer;
-  /** Almacenamiento de archivos (R2) con URLs firmadas. */
-  almacenamiento: Almacenamiento;
-  /** URL pública de la app, para enlaces en correos ("https://test.opai.cl"). */
-  urlBase: string;
 };
 
 /**
