@@ -43,7 +43,9 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
     mod.limpiarRegistro();
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
     const empresa = (slug: string) =>
-      e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "seguridad" } }).then((t) => t.id);
+      e.admin.tenant
+        .create({ data: { slug, nombre: slug, vertical: "seguridad" } })
+        .then((t) => t.id);
     a = await empresa(`jef-a-${sufijo}`);
     b = await empresa(`jef-b-${sufijo}`);
     usuaria = (
@@ -59,7 +61,12 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
     const crearCargo = async (tenantId: string, clave: string) => {
       cargo[clave] = (await e.admin.cargo.create({ data: { tenantId, nombre: clave } })).id;
     };
-    const crearPersona = async (tenantId: string, clave: string, cargoClave: string, usuarioId?: string) => {
+    const crearPersona = async (
+      tenantId: string,
+      clave: string,
+      cargoClave: string,
+      usuarioId?: string,
+    ) => {
       n += 1;
       const p = await e.admin.persona.create({
         data: {
@@ -156,8 +163,21 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
     expect(ids(gema)).toEqual(
       [persona.julia, persona.jorge, persona.vera, persona.victor].map(String).sort(),
     );
-    const directas = gema.items.filter((p) => p.directa).map((p) => p.id).sort();
+    const directas = gema.items
+      .filter((p) => p.directa)
+      .map((p) => p.id)
+      .sort();
     expect(directas).toEqual([persona.julia, persona.jorge].map(String).sort());
+    // CAR-353: de a 3 por página, la segunda página trae el resto y no repite.
+    const p1 = await dato<Equipo & { siguiente: string | null }>(ctx(a), A_CARGO, { limite: 3 });
+    expect(p1.items).toHaveLength(3);
+    expect(p1.siguiente).not.toBeNull();
+    const p2 = await dato<Equipo & { siguiente: string | null }>(ctx(a), A_CARGO, {
+      limite: 3,
+      cursor: p1.siguiente,
+    });
+    expect([...ids(p1), ...ids(p2)].sort()).toEqual(ids(gema));
+    expect(p2.siguiente).toBeNull();
   });
 
   it("quien no tiene jefe asignado no queda invisible: sube al nivel de arriba", async () => {
@@ -199,7 +219,9 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
     };
     const exjefa = await crear("exjefa", persona.julia);
     const sub = await crear("sub", exjefa);
-    const cambio = await ctx(a).transaccion((tx) => anonimizarPersona(tx, exjefa, new Date(), null));
+    const cambio = await ctx(a).transaccion((tx) =>
+      anonimizarPersona(tx, exjefa, new Date(), null),
+    );
     expect(cambio).toBe(true);
     const filas = await e.admin.persona.findMany({
       where: { id: { in: [exjefa, sub] } },
