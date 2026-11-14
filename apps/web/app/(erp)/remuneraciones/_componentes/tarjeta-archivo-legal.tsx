@@ -3,17 +3,13 @@
 import { Download, FileCheck } from "lucide-react";
 import { useState } from "react";
 
-import { Alerta, avisar, Badge, Button, Card, Table, Td, Th } from "@opai/ds";
+import { Alerta, avisar, Badge, Button, Card } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-type Archivo = {
-  nombre: string;
-  contenido: string;
-  filas: number;
-  errores: { personaId: string | null; personaNombre: string | null; mensaje: string }[];
-  advertencias: string[];
-};
+import { type ArchivoLegal, ResultadoArchivo } from "./resultado-archivo";
+
+type Archivo = ArchivoLegal;
 
 const TEXTOS = {
   lre: { titulo: "Libro de Remuneraciones Electrónico (LRE)", desc: "Carga mensual en Mi DT · separador «;» y encabezados del suplemento", tipo: "text/csv" },
@@ -56,27 +52,7 @@ export function TarjetaArchivoLegal({ periodoId, tipo }: { periodoId: string; ti
         <span className="t-body-sm text-fg-muted">{t.desc}</span>
         {archivo ? <span className="t-mono t-body-sm">{archivo.nombre}</span> : null}
       </div>
-      {archivo ? (
-        <div className="flex flex-col gap-2">
-          <span className="t-label">
-            Validación · {archivo.errores.length} {archivo.errores.length === 1 ? "error" : "errores"} en {archivo.filas} filas
-          </span>
-          {conErrores ? (
-            <Table etiqueta={`Errores del ${tipo === "lre" ? "LRE" : "archivo de Previred"}`}>
-              <thead><tr><Th>Persona</Th><Th>Error</Th></tr></thead>
-              <tbody>
-                {archivo.errores.map((e, i) => (
-                  <tr key={`${e.personaId ?? "empresa"}-${i}`}>
-                    <Td>{e.personaId ? (e.personaNombre ?? "Persona") : "Empresa"}</Td>
-                    <Td>{e.mensaje}</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : null}
-          <p className="t-caption text-fg-muted">{archivo.advertencias.join(" ")}</p>
-        </div>
-      ) : null}
+      {archivo ? <ResultadoArchivo archivo={archivo} tipo={tipo} /> : null}
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" disabled={pendiente} onClick={() => void validar()}>
