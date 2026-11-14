@@ -19,7 +19,7 @@ Una sola app para todos los perfiles. Al entrar, cada persona cae en su portal s
 | Público | Adultos (uso laboral) |
 | Sitio | https://opai.cl |
 | Correo de soporte | **Falta:** lo define Carlos |
-| Política de privacidad (URL pública) | **Falta:** página pública con texto legal (Carlos). Ambas tiendas la exigen |
+| Política de privacidad (URL pública) | Borrador en `borrador-politica-privacidad.md`, **por aprobar por Carlos**. No se publica sin su OK. Ambas tiendas la exigen |
 
 ## Google Play
 
@@ -82,14 +82,14 @@ Todo viaja cifrado (HTTPS). La persona puede pedir acceso, corrección o elimina
 | Google Play | Teléfono, entre 320 y 3.840 px por lado | 2 (recomendado 4 a 8) |
 | App Store | iPhone 6,9" (1320 × 2868) | 3 |
 
-Se toman con la empresa ficticia `qa-e2e` (nunca Gard ni datos reales): entrada, Inicio del Trabajador con turnos, ronda en curso, Supervisor y Cliente. **Falta:** generarlas con la marca definitiva (logo pendiente).
+Se toman con la empresa ficticia `qa-e2e` (nunca Gard ni datos reales): entrada, Inicio del Trabajador con turnos, ronda en curso, Supervisor y Cliente. Ícono y pantalla de carga: el logo actual de OPAI (decisión de Carlos, 14-nov-2026).
 
 ## Antes de publicar (lista)
 
-1. URL pública de la política de privacidad (Carlos, texto legal).
+1. Política de privacidad: aprobar el borrador (Carlos) y luego publicarla como página pública.
 2. Correo de soporte (Carlos).
-3. Logo definitivo e íconos de la app.
+3. ~~Íconos de la app~~: listos con el logo actual de OPAI.
 4. Usuario revisor en una empresa ficticia (Sesión Núcleo).
-5. Push nativo u otra función propia del teléfono: Apple rechaza una app que solo muestra una web (guía 4.2). Sin esto, el riesgo de rechazo en iOS es alto.
+5. Push nativo: Firebase lo gestiona el asistente de Carlos. Apple espera el pago de Apple Developer. Sin push nativo, el riesgo de rechazo en iOS es alto (guía 4.2).
 6. Cuentas de Google Play Console y App Store Connect, y llaves de firma en 1Password (Carlos).
 7. Versión de producción: `OPAI_APP_ENTORNO=produccion`, que abre `app.opai.cl`.
