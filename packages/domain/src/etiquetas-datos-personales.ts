@@ -133,6 +133,8 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   titular_email: "correo del titular",
   titular_nombre: "nombre del titular",
   registrado_por: "quién lo registró",
+  anulado_por: "quién lo anuló",
+  motivo_anulacion: "motivo de la anulación",
   responsable_id: "responsable",
   actor: "usuario o agente",
   resultado: "resultado temporal de la acción",
