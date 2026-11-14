@@ -30,17 +30,13 @@ export const HOJA_UNIFORME: ConfigSeccion = {
   armar: (id, c) => ({ id, uniforme: c }),
 };
 
-/**
- * Jornada DT (CAR-277): los términos de los 3 períodos de plazo fijo se editan juntos, así que la hoja
- * envía todos sus campos; el período y el término vigente se derivan de la lista en la capacidad.
- */
+/** Jornada DT. Los períodos del contrato se registran aparte, como historia (CAR-409). */
 export const HOJA_JORNADA_DT: ConfigSeccion = {
   param: "editar-jornada-dt",
   titulo: "Editar jornada DT",
   capacidad: "core.personas.laboral_actualizar",
   exito: "Jornada DT actualizada",
   boton: "Guardar",
-  todos: true,
   campos: [
     t("resolucion", "Resolución", 200),
     { clave: "resolucionVigenteDesde", etiqueta: "Vigente desde", tipo: "fecha" },
@@ -48,21 +44,9 @@ export const HOJA_JORNADA_DT: ConfigSeccion = {
     t("horasSemanales", "Horas semanales", 10),
     t("distribucion", "Distribución", 200),
     { clave: "articulo22", etiqueta: "Artículo 22", tipo: "si_no" },
-    { clave: "termino1", etiqueta: "Término del 1.er plazo fijo", tipo: "fecha" },
-    { clave: "termino2", etiqueta: "Término del 2.º plazo fijo", tipo: "fecha" },
-    { clave: "termino3", etiqueta: "Término del 3.er plazo fijo", tipo: "fecha" },
     entero("avisoTerminoDias", "Aviso de término (días)", 0, 365),
   ],
-  armar: (id, c) => {
-    const { termino1, termino2, termino3, ...resto } = c;
-    const casillas = [termino1, termino2, termino3].map((x) => (typeof x === "string" && x !== "" ? x : null));
-    const terminos = casillas.filter((x): x is string => x !== null);
-    // El período es la casilla del último término lleno, no la cantidad (un registro antiguo
-    // de período 2 trae su término en la segunda casilla y debe seguir en período 2).
-    const ultima = casillas.reduce((acc, x, i) => (x !== null ? i + 1 : acc), 0);
-    const plazoFijoPeriodo = ultima > 0 ? ultima : null;
-    return { id, jornadaDt: { ...resto, terminosPlazoFijo: terminos, plazoFijoPeriodo } };
-  },
+  armar: (id, c) => ({ id, jornadaDt: c }),
 };
 
 export const HOJA_CONTACTO_LABORAL: ConfigSeccion = {

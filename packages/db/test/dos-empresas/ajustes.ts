@@ -146,6 +146,16 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Publicación de la pauta (CAR-356): CHECK del mes aaaa-mm.
   "pauta.publicaciones": { fijas: ["mes"], valores: () => ({ mes: "2026-12" }) },
+  // Períodos del contrato (CAR-409): CHECK de tipo, término según el tipo y anulación con motivo.
+  "core.contrato_periodos": {
+    valores: () => ({
+      tipo: "plazo_fijo",
+      inicio: "2026-01-01",
+      termino: "2026-03-31",
+      anulado_en: null,
+      motivo_anulacion: null,
+    }),
+  },
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },

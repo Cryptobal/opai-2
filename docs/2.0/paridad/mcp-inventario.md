@@ -555,6 +555,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_rechazar_cambio` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_solicitar_cambio` | `core_personas_pago_solicitar_cambio` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_ver` | `core_personas_pago_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_anular` | `core_personas_periodos_anular` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_registrar` | `core_personas_periodos_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
