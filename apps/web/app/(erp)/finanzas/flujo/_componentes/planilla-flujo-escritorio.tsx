@@ -1,12 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import Link from "next/link";
 
 import { Alerta, Badge, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
 import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
+import { esFilaVirtual } from "./celda-agregada";
 import { celdaEditable, type Planilla } from "./datos";
 import { filaBase } from "./grupos-cobro";
 import type { ArmadoPlanilla } from "./datos";
@@ -49,6 +51,11 @@ export function PlanillaFlujoEscritorio({
   onImportAbiertaChange,
   onAlternarFila,
 }: Props) {
+  // «Reprogramar» vive en cada fila con plan (CAR-456), no como botón suelto bajo la planilla.
+  const [mover, setMover] = useState<string | null>(null);
+  const filasPlan = p.filas.filter((f) => !esFilaVirtual(f.id));
+  const conAccion = (id: string) => gestiona && filasPlan.some((f) => f.id === id);
+  const filas = armado.filas.map((f) => (conAccion(f.id) ? { ...f, accion: "Reprogramar" } : f));
   return (
     <div className="flex min-w-0 flex-col gap-4">
       {avisoTitulo ? (
@@ -77,11 +84,12 @@ export function PlanillaFlujoEscritorio({
             descripcion: "Agrega filas en Configuración › Módulos › Finanzas › Flujo de caja.",
           },
         }}
-        filas={armado.filas.length > 3 ? armado.filas : []}
+        filas={filas.length > 3 ? filas : []}
         columnas={armado.columnas}
         celda={armado.celda}
         celdaEditable={armado.celdaEditable}
         onAlternarFila={onAlternarFila}
+        onAccionFila={setMover}
         {...(gestiona
           ? {
               onCelda: (filaId: string, semana: string) => {
@@ -116,12 +124,16 @@ export function PlanillaFlujoEscritorio({
             onCerrar={() => onSeleccion(null)}
             contexto={seleccion ? celdaEditable(p, seleccion.filaId, seleccion.semana) : null}
           />
-          <HojaMover
-            filas={p.filas}
-            semanas={p.semanas.map((s) => s.semana)}
-            semanasPasadas={p.semanas.filter((s) => s.pasada).map((s) => s.semana)}
-            horizonte={p.semanas.length}
-          />
+          {mover ? (
+            <HojaMover
+              filas={filasPlan}
+              semanas={p.semanas.map((s) => s.semana)}
+              semanasPasadas={p.semanas.filter((s) => s.pasada).map((s) => s.semana)}
+              horizonte={p.semanas.length}
+              filaInicial={mover}
+              onCerrar={() => setMover(null)}
+            />
+          ) : null}
         </>
       ) : null}
       {configura ? (

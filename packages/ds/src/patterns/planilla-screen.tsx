@@ -36,6 +36,7 @@ export function PlanillaScreen({
   textos,
   onCelda,
   onAlternarFila,
+  onAccionFila,
 }: PlanillaScreenProps) {
   const [seleccion, setSeleccion] = useState<SeleccionPlanilla | null>(null);
   const vacio = state === "ready" && filas.length === 0 ? "empty" : state;
@@ -56,6 +57,7 @@ export function PlanillaScreen({
           {...(celdaEditable ? { celdaEditable } : {})}
           {...(onCelda ? { onCelda } : {})}
           {...(onAlternarFila ? { onAlternarFila } : {})}
+          {...(onAccionFila ? { onAccionFila } : {})}
           onSeleccion={setSeleccion}
         />
         {seleccion ? (

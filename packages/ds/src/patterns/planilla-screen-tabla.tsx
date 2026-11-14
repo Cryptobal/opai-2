@@ -18,6 +18,7 @@ type Props = {
   celdaEditable?: (filaId: string, columnaId: string) => boolean;
   onCelda?: (filaId: string, columnaId: string) => void;
   onAlternarFila?: (filaId: string) => void;
+  onAccionFila?: (filaId: string) => void;
   onSeleccion: (seleccion: SeleccionPlanilla) => void;
 };
 
@@ -28,6 +29,7 @@ export function PlanillaTabla({
   celdaEditable,
   onCelda,
   onAlternarFila,
+  onAccionFila,
   onSeleccion,
 }: Props) {
   return (
@@ -53,8 +55,8 @@ export function PlanillaTabla({
         </thead>
         <tbody>
           {filas.map((f) => (
-            <tr key={f.id}>
-              <CabeceraFila fila={f} {...(onAlternarFila ? { onAlternar: onAlternarFila } : {})} />
+            <tr key={f.id} className="group">
+              <CabeceraFila fila={f} onAlternar={onAlternarFila} onAccion={onAccionFila} />
               {columnas.map((c) => {
                 const valor = celda(f.id, c.id);
                 const editable = Boolean(onCelda && celdaEditable?.(f.id, c.id));
