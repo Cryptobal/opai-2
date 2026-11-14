@@ -1,6 +1,7 @@
 import type { ModuleManifest } from "@opai/capabilities";
 
 import { manifest as Desempeno } from "@opai/mod-desempeno";
+import { manifest as Inventario } from "@opai/mod-inventario";
 
 import { manifest as Acceso } from "@opai/mod-acceso";
 
@@ -48,5 +49,6 @@ export const modulos: readonly ModuleManifest[] = [
   Asistencia,
   Acceso,
   Desempeno,
+  Inventario,
   // scaffold:module — las entradas se agregan sobre esta línea
 ];

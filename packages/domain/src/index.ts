@@ -53,6 +53,7 @@ export * from "./jefatura";
 export * from "./procesos-persona";
 export * from "./ausencias";
 export * from "./desempeno";
+export * from "./inventario";
 export * from "./incidentes";
 export * from "./documento-subida";
 export * from "./firma";
