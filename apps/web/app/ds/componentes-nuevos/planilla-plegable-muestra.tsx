@@ -18,12 +18,12 @@ const MONTOS: Record<string, Record<string, number>> = {
   "cli-b": { s1: 350_000, s2: 920_000 },
 };
 
-/** Planilla con filas plegables (CAR-456): una fila abre su detalle por cliente y cada cliente sus instalaciones. */
+/** Planilla con filas plegables y acción de fila (CAR-456): una fila abre su detalle por cliente y sus instalaciones. */
 export function PlanillaPlegableMuestra({ state }: { state: EstadoPantalla }) {
   const [abiertas, setAbiertas] = useState<ReadonlySet<string>>(() => new Set(["cobros"]));
   const abierta = (id: string) => abiertas.has(id);
   const filas: FilaPlanilla[] = [
-    { id: "cobros", etiqueta: "Cobros esperados", plegable: { abierta: abierta("cobros") } },
+    { id: "cobros", etiqueta: "Cobros esperados", plegable: { abierta: abierta("cobros") }, accion: "Reprogramar" },
     ...(abierta("cobros")
       ? [
           { id: "cli-a", etiqueta: "Cementera Andina", sub: "2 instalaciones", nivel: 1 as const, plegable: { abierta: abierta("cli-a") } },
@@ -48,6 +48,7 @@ export function PlanillaPlegableMuestra({ state }: { state: EstadoPantalla }) {
         const m = MONTOS[f]?.[c];
         return m ? { texto: formatearClp(m), tono: "info", detalle: "Comprometido" } : null;
       }}
+      onAccionFila={() => undefined}
       onAlternarFila={(id) =>
         setAbiertas((prev) => {
           const sig = new Set(prev);
