@@ -35,3 +35,15 @@ describe("ancho del menú del diseño nuevo (CAR-442)", () => {
     expect(plegado).not.toContain('aria-label="Cambiar el ancho del menú"');
   });
 });
+
+describe("teclado del borde del menú (CAR-442)", () => {
+  it("flechas de a 16 px, Inicio y Fin a los límites, Enter al ancho base", async () => {
+    const { anchoPorTecla } = await import("./asa-menu");
+    expect(anchoPorTecla("ArrowRight", 248)).toBe(264);
+    expect(anchoPorTecla("ArrowLeft", 208)).toBe(ANCHO_MIN);
+    expect(anchoPorTecla("Home", 300)).toBe(ANCHO_MIN);
+    expect(anchoPorTecla("End", 300)).toBe(ANCHO_MAX);
+    expect(anchoPorTecla("Enter", 300)).toBe(ANCHO_BASE);
+    expect(anchoPorTecla("a", 300)).toBeUndefined();
+  });
+});

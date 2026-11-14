@@ -50,6 +50,8 @@ test.describe("@preview menú lateral: ancho y cuenta", () => {
       await page.mouse.down();
       await page.mouse.move(60, y, { steps: 8 });
       await page.mouse.up();
+      // Lejos del riel, para que el menú no quede asomado bajo el mouse en la captura.
+      await page.mouse.move(anchoVentana(page) - 40, 500);
       await expect(page.getByRole("button", { name: "Dejar el menú fijo" })).toBeVisible();
       await captura(page, "menu-lateral-plegado", info);
       expect(errores).toEqual([]);

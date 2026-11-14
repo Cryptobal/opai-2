@@ -558,6 +558,12 @@
 [data-menu="asomado"] [data-shell="asa-menu"] {
   display: none;
 }
+/* En pantallas táctiles (iPad horizontal) no hay borde de 8 px que tomar: el menú se pliega con su botón. */
+@media (pointer: coarse) {
+  [data-marco="nuevo"] [data-shell="asa-menu"] {
+    display: none;
+  }
+}
 [data-arrastre] {
   cursor: col-resize;
   user-select: none;

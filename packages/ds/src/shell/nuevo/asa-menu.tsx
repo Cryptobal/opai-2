@@ -16,6 +16,16 @@ export function anchoValido(ancho: number): number {
   return Math.min(ANCHO_MAX, Math.max(ANCHO_MIN, Math.round(ancho)));
 }
 
+/** Teclado del borde: flechas de a 16 px, Inicio y Fin a los límites, Enter al ancho base. */
+export function anchoPorTecla(tecla: string, ancho: number): number | undefined {
+  if (tecla === "ArrowLeft") return anchoValido(ancho - PASO_TECLADO);
+  if (tecla === "ArrowRight") return anchoValido(ancho + PASO_TECLADO);
+  if (tecla === "Home") return ANCHO_MIN;
+  if (tecla === "End") return ANCHO_MAX;
+  if (tecla === "Enter") return ANCHO_BASE;
+  return undefined;
+}
+
 /** Qué hacer al soltar el borde: plegar si quedó muy a la izquierda o fijar el ancho nuevo. */
 export function alSoltar(x: number): { plegar: true } | { plegar: false; ancho: number } {
   return x < UMBRAL_PLEGAR ? { plegar: true } : { plegar: false, ancho: anchoValido(x) };
@@ -31,7 +41,7 @@ type Props = {
  * Borde del menú lateral fijo, en escritorio (CAR-442, referente Linear): arrastrarlo cambia el ancho
  * entre 200 y 360 px; soltarlo muy a la izquierda pliega el menú y deja el riel. Mientras se arrastra,
  * el ancho cambia directo en la variable CSS, sin pintar de nuevo el shell. Doble clic vuelve al ancho
- * base. Con el teclado, las flechas lo cambian de a 16 px.
+ * base. Solo con mouse o trackpad (`pointer: fine`): en pantallas táctiles no hay borde que tomar.
  */
 export function AsaMenu({ ancho, onAncho, onPlegar }: Props) {
   const raiz = useRef<HTMLElement | null>(null);
@@ -48,22 +58,26 @@ export function AsaMenu({ ancho, onAncho, onPlegar }: Props) {
     raiz.current?.setAttribute("data-arrastre", "");
     e.currentTarget.setPointerCapture(e.pointerId);
   };
-  const soltar = (e: PointerEvent<HTMLDivElement>) => {
+  const terminar = (): boolean => {
     const r = raiz.current;
-    if (!r) return;
+    if (!r) return false;
     raiz.current = null;
     r.removeAttribute("data-arrastre");
     r.style.setProperty("--ancho-menu", `${ancho}px`);
+    return true;
+  };
+  const soltar = (e: PointerEvent<HTMLDivElement>) => {
+    if (!terminar()) return;
     if (Math.abs(e.clientX - inicio.current) < 3) return; // un clic sin arrastrar no cambia nada
     const fin = alSoltar(e.clientX);
     if (fin.plegar) onPlegar();
     else onAncho(fin.ancho);
   };
   const tecla = (e: KeyboardEvent<HTMLDivElement>) => {
-    const delta = e.key === "ArrowLeft" ? -PASO_TECLADO : e.key === "ArrowRight" ? PASO_TECLADO : 0;
-    if (!delta) return;
+    const destino = anchoPorTecla(e.key, ancho);
+    if (destino === undefined) return;
     e.preventDefault();
-    onAncho(anchoValido(ancho + delta));
+    onAncho(destino);
   };
   return (
     <div
@@ -73,12 +87,13 @@ export function AsaMenu({ ancho, onAncho, onPlegar }: Props) {
       aria-valuenow={ancho}
       aria-valuemin={ANCHO_MIN}
       aria-valuemax={ANCHO_MAX}
+      aria-valuetext={`${ancho} píxeles`}
       tabIndex={0}
       data-shell="asa-menu"
       onPointerDown={empezar}
       onPointerMove={mover}
       onPointerUp={soltar}
-      onPointerCancel={soltar}
+      onPointerCancel={() => void terminar()}
       onDoubleClick={() => onAncho(ANCHO_BASE)}
       onKeyDown={tecla}
       className="group fixed inset-y-0 z-30 hidden w-2 -translate-x-1 cursor-col-resize touch-none outline-none focus-visible:outline-2 focus-visible:outline-focus lg:block"
