@@ -30,15 +30,15 @@ export default function AusenciasPersona(props: Props) {
         const conPauta = identidad.modulosActivos.includes("pauta");
         const puedeVer = puede("core:personas.laboral.read");
         const puedeEditar = puede("core:personas.laboral.manage");
-        // Clases del catálogo de la empresa (CAR-393 parte 3): solo para quien registra y con la hoja abierta.
-        const clases =
-          puedeEditar && q["registrar"] !== undefined
-            ? await ejecutarComoUsuario<{ items: ClaseAusencia[] }>(
-                "erp",
-                "core.ausencias.clases",
-                {},
-              )
-            : null;
+        // Clases del catálogo de la empresa (CAR-393 parte 3): solo para quien registra. La hoja se abre en el
+        // cliente sin volver al servidor, así que el catálogo viaja con la página.
+        const clases = puedeEditar
+          ? await ejecutarComoUsuario<{ items: ClaseAusencia[] }>(
+              "erp",
+              "core.ausencias.clases",
+              {},
+            )
+          : null;
         return (
           <div className="flex flex-col gap-4">
             {puedeEditar ? (
