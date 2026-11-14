@@ -33,6 +33,28 @@ export async function verPestanaRondas(): Promise<boolean> {
   return puedeDeIdentidad(identidad)("rondas:read");
 }
 
+/**
+ * Pestaña «Accesos» de la ficha de instalación (CAR-475, `control-acceso.md` §3): solo si Control de acceso
+ * está activo para la empresa y el usuario puede leer accesos. Sin pestañas deshabilitadas (ADR-041.5).
+ */
+export async function verPestanaAccesos(): Promise<boolean> {
+  const identidad = await identidadActual();
+  if (!identidad?.modulosActivos.includes("acceso")) return false;
+  return puedeDeIdentidad(identidad)("acceso:read");
+}
+
+/** ¿Puede ver y gestionar las listas de acceso? Oculta «Listas» a quien no puede (ADR-041.5). */
+export async function puedeGestionarListas(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("acceso:listas.manage") : false;
+}
+
+/** ¿Puede registrar salidas, anular registros y cerrar en bloque (CAR-477)? Oculta esas acciones a quien no. */
+export async function puedeGestionarRegistros(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("acceso:registros.manage") : false;
+}
+
 /** ¿Puede configurar puntos, plantillas y programación de rondas? Oculta acciones a quien solo lee. */
 export async function puedeConfigurarRondas(): Promise<boolean> {
   const identidad = await identidadActual();
