@@ -46,7 +46,6 @@ export const laboralSchema = z.object({
   os10Respaldo: z
     .object({
       documentoId: z.string(),
-      emitidoEn: z.string().nullable(),
       venceEn: z.string().nullable(),
     })
     .nullable(),
@@ -74,24 +73,24 @@ export const laboralSchema = z.object({
     .nullable(),
 });
 
-export async function cargarLaboral(ctx: Contexto, personaId: string) {
-  const [uniforme, jornada, os10, contacto, contrato, kit, guardadas, os10Respaldo] =
-    await Promise.all([
-      ctx.db.personaUniforme.findUnique({
-        where: { personaId },
-        include: { entregas: { orderBy: { entregadaEn: "desc" }, take: 20 } },
-      }),
-      ctx.db.personaJornadaDt.findUnique({ where: { personaId } }),
-      ctx.db.personaOs10.findUnique({ where: { personaId } }),
-      ctx.db.personaContactoLaboral.findUnique({ where: { personaId } }),
-      cargarContrato(ctx.db, personaId),
-      prendasDeLaEmpresa(ctx),
-      ctx.db.personaTalla.findMany({ where: { personaId }, select: { prenda: true, talla: true } }),
-      respaldoOs10(ctx, personaId),
-    ]);
+const CONTACTO = {
+  estadoCivil: true,
+  telefonoSecundario: true,
+  emergenciaNombre: true,
+  emergenciaRelacion: true,
+  emergenciaTelefono: true,
+  codigoInterno: true,
+  movilizacion: true,
+} as const;
+
+/** Una fila por prenda del kit, más las tallas guardadas de prendas que la empresa ya no usa (CAR-408). */
+function tallasDe(
+  kit: { clave: string; nombre: string }[],
+  guardadas: { prenda: string; talla: string }[],
+) {
   const porPrenda = new Map(guardadas.map((t) => [t.prenda, t.talla]));
   const claves = new Set(kit.map((p) => p.clave));
-  const tallas = [
+  return [
     ...kit.map((p) => ({
       prenda: p.clave,
       nombre: p.nombre,
@@ -102,6 +101,23 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
       .filter((t) => !claves.has(t.prenda))
       .map((t) => ({ prenda: t.prenda, nombre: t.prenda, talla: t.talla, enKit: false })),
   ];
+}
+
+export async function cargarLaboral(ctx: Contexto, personaId: string) {
+  const [uniforme, jornada, os10, contacto, contrato, kit, guardadas, os10Respaldo] =
+    await Promise.all([
+      ctx.db.personaUniforme.findUnique({
+        where: { personaId },
+        include: { entregas: { orderBy: { entregadaEn: "desc" }, take: 20 } },
+      }),
+      ctx.db.personaJornadaDt.findUnique({ where: { personaId } }),
+      ctx.db.personaOs10.findUnique({ where: { personaId } }),
+      ctx.db.personaContactoLaboral.findUnique({ where: { personaId }, select: CONTACTO }),
+      cargarContrato(ctx.db, personaId),
+      prendasDeLaEmpresa(ctx),
+      ctx.db.personaTalla.findMany({ where: { personaId }, select: { prenda: true, talla: true } }),
+      respaldoOs10(ctx, personaId),
+    ]);
   return {
     personaId,
     uniforme: uniforme
@@ -130,20 +146,10 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
           avisoTerminoDias: jornada.avisoTerminoDias,
         }
       : null,
-    tallas,
+    tallas: tallasDe(kit, guardadas),
     contrato,
     os10: os10 ? { credencial: os10.credencial, venceEn: dia(os10.venceEn) } : null,
     os10Respaldo,
-    contacto: contacto
-      ? {
-          estadoCivil: contacto.estadoCivil,
-          telefonoSecundario: contacto.telefonoSecundario,
-          emergenciaNombre: contacto.emergenciaNombre,
-          emergenciaRelacion: contacto.emergenciaRelacion,
-          emergenciaTelefono: contacto.emergenciaTelefono,
-          codigoInterno: contacto.codigoInterno ?? null,
-          movilizacion: contacto.movilizacion ?? null,
-        }
-      : null,
+    contacto,
   };
 }

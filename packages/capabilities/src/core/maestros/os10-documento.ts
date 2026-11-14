@@ -4,7 +4,7 @@ import type { Contexto } from "../../types";
 import { filtroDocumentoSensible } from "../documentos/sensibles";
 
 /** Código del tipo de documento de la credencial OS-10 en el catálogo base (`@opai/domain` catalogos). */
-export const CODIGO_OS10 = "os10";
+const CODIGO_OS10 = "os10";
 
 /**
  * Respaldo documental del OS-10 de una persona (CAR-429): el documento disponible más reciente
@@ -24,12 +24,11 @@ export async function respaldoOs10(ctx: Contexto, personaId: string) {
       ...filtroDocumentoSensible(ctx),
     },
     orderBy: [{ version: "desc" }, { createdAt: "desc" }],
-    select: { id: true, emitidoEn: true, venceEn: true },
+    select: { id: true, venceEn: true },
   });
   if (!doc) return null;
   return {
     documentoId: doc.id,
-    emitidoEn: doc.emitidoEn ? doc.emitidoEn.toISOString().slice(0, 10) : null,
     venceEn: doc.venceEn ? doc.venceEn.toISOString().slice(0, 10) : null,
   };
 }

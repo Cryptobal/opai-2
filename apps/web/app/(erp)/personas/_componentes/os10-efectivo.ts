@@ -3,12 +3,8 @@
  * en Documentos cuando existe; si no, el dato manual de la ficha, marcado «sin respaldo».
  * El número de credencial sigue siendo el de la ficha (el documento no lo trae).
  */
-export type Os10Manual = { credencial: string | null; venceEn: string | null } | null;
-export type Os10Respaldo = {
-  documentoId: string;
-  emitidoEn: string | null;
-  venceEn: string | null;
-} | null;
+type Os10Manual = { credencial: string | null; venceEn: string | null } | null;
+type Os10Respaldo = { documentoId: string; venceEn: string | null } | null;
 
 export type Os10Efectivo = {
   credencial: string | null;

@@ -5,7 +5,7 @@ import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
 import { estadoOs10 } from "./estado-ficha";
 import { laboralDe } from "./lecturas-ficha";
-import { os10Efectivo } from "./os10-efectivo";
+import { os10Efectivo, type Os10Efectivo } from "./os10-efectivo";
 import { LinkNext } from "@/app/_components/link-next";
 import { fecha, hoyIso } from "@/lib/fechas";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -46,30 +46,12 @@ export async function SeccionOs10({ personaId }: { personaId: string }) {
       {vacio ? (
         <VacioSeccion texto="Sin credencial OS-10 registrada." accion={puede ? "Agregar" : null} />
       ) : null}
-      {e.difiere && o?.venceEn ? (
-        <Alerta
-          tono="warning"
-          titulo="La fecha de la ficha no coincide con el documento"
-          className="mb-3"
-        >
-          La ficha dice {fecha(o.venceEn)}; vale la del documento vigente.
-        </Alerta>
-      ) : null}
+      {e.difiere && o?.venceEn ? <AvisoDifiere manual={o.venceEn} /> : null}
       <ParesGrid
         items={[
           { etiqueta: "Credencial", valor: e.credencial, mono: true },
           { etiqueta: "Vence", valor: e.venceEn ? fecha(e.venceEn) : null },
-          {
-            etiqueta: "Respaldo",
-            valor:
-              e.fuente === "documento" ? (
-                <Enlace Link={LinkNext} href={`/personas/${personaId}/documentos`}>
-                  Credencial en Documentos
-                </Enlace>
-              ) : e.fuente === "manual" ? (
-                "Sin documento: dato ingresado a mano"
-              ) : null,
-          },
+          { etiqueta: "Respaldo", valor: <Respaldo e={e} personaId={personaId} /> },
         ]}
       />
       {puede ? (
@@ -82,3 +64,24 @@ export async function SeccionOs10({ personaId }: { personaId: string }) {
     </SeccionTarjeta>
   );
 }
+
+/** De dónde sale la fecha (CAR-429): el documento en Documentos o el dato manual sin respaldo. */
+function Respaldo({ e, personaId }: { e: Os10Efectivo; personaId: string }) {
+  if (e.fuente === "documento")
+    return (
+      <Enlace Link={LinkNext} href={`/personas/${personaId}/documentos`}>
+        Credencial en Documentos
+      </Enlace>
+    );
+  return e.fuente === "manual" ? "Sin documento: dato ingresado a mano" : null;
+}
+
+const AvisoDifiere = ({ manual }: { manual: string }) => (
+  <Alerta
+    tono="warning"
+    titulo="La fecha de la ficha no coincide con el documento"
+    className="mb-3"
+  >
+    La ficha dice {fecha(manual)}; vale la del documento vigente.
+  </Alerta>
+);

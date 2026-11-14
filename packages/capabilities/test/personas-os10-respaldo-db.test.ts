@@ -7,7 +7,7 @@ import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/ento
 import type * as ModuloCapacidades from "../src";
 
 type R = { ok: boolean; data?: Record<string, unknown>; error?: { code: string; message: string } };
-type Respaldo = { documentoId: string; emitidoEn: string | null; venceEn: string | null } | null;
+type Respaldo = { documentoId: string; venceEn: string | null } | null;
 
 describe.skipIf(omitirSuiteDb())("Personas · OS-10 desde Documentos CAR-429 (db)", () => {
   let e: Entorno;
@@ -129,10 +129,7 @@ describe.skipIf(omitirSuiteDb())("Personas · OS-10 desde Documentos CAR-429 (db
 
   it("toma la versión vigente más reciente; ignora reemplazados y archivados", async () => {
     await documentoOs10(0, "2026-06-01", { estado: "reemplazado" });
-    const vigente = await documentoOs10(0, "2028-01-10", {
-      version: 2,
-      emitidoEn: new Date("2026-01-10T00:00:00Z"),
-    });
+    const vigente = await documentoOs10(0, "2028-01-10", { version: 2 });
     await documentoOs10(0, "2030-01-01", {
       estado: "archivado",
       archivadoEn: new Date(),
@@ -140,7 +137,6 @@ describe.skipIf(omitirSuiteDb())("Personas · OS-10 desde Documentos CAR-429 (db
     });
     expect(await respaldoDe(0)).toEqual({
       documentoId: vigente,
-      emitidoEn: "2026-01-10",
       venceEn: "2028-01-10",
     });
   });

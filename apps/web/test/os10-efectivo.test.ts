@@ -4,7 +4,7 @@ import { os10Efectivo } from "../app/(erp)/personas/_componentes/os10-efectivo";
 
 // CAR-429: el vencimiento del OS-10 tiene una sola fuente (el documento vigente en Documentos).
 describe("os10Efectivo", () => {
-  const doc = { documentoId: "d1", emitidoEn: "2026-01-10", venceEn: "2028-01-10" };
+  const doc = { documentoId: "d1", venceEn: "2028-01-10" };
 
   it("sin documento usa el dato manual y lo marca como tal", () => {
     const e = os10Efectivo({ credencial: "A-1", venceEn: "2027-05-01" }, null);
