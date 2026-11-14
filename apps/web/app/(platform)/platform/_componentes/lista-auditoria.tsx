@@ -18,7 +18,7 @@ export type EventoPlataforma = {
 };
 
 /** Valor de antes/después en palabras: texto, número o «clave: valor» de un objeto plano. */
-export function legible(v: unknown): string {
+function legible(v: unknown): string {
   if (v === null || v === undefined || v === "") return "—";
   if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") return String(v);
   if (Array.isArray(v)) return v.map(legible).join(", ");

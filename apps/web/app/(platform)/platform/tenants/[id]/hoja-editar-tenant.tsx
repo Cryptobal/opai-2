@@ -73,50 +73,62 @@ export function HojaEditarTenant(props: { tenantId: string; actual: Datos; onCer
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <Campo
-          etiqueta="Nombre"
-          htmlFor="emp-nombre"
-          ayuda="El nombre con que la empresa aparece en OPAI."
-        >
-          <Input
-            id="emp-nombre"
-            value={datos.nombre}
-            onChange={(e) => set("nombre", e.target.value)}
-          />
-        </Campo>
-        <Campo
-          etiqueta="Rubro"
-          htmlFor="emp-vertical"
-          ayuda="Cambiar el rubro no vuelve a cargar el catálogo de cargos y funciones de la empresa."
-        >
-          <Select
-            id="emp-vertical"
-            aria-label="Rubro"
-            valor={datos.vertical}
-            onCambiar={(v) => set("vertical", v)}
-            opciones={VERTICALES.map((v) => ({ valor: v, etiqueta: nombreVertical(v) }))}
-          />
-        </Campo>
-        <Campo etiqueta="Zona horaria" htmlFor="emp-zona" ayuda="Por ejemplo America/Santiago.">
-          <Input
-            id="emp-zona"
-            value={datos.timezone}
-            onChange={(e) => set("timezone", e.target.value)}
-          />
-        </Campo>
-        {revisado ? (
-          <Alerta tono="info" titulo="Revisa antes de confirmar">
-            <ul className="t-body-sm flex flex-col gap-1">
-              {cambios.map((k) => (
-                <li key={k}>
-                  {ETIQUETAS[k]}: {legible(k, actual[k])} →{" "}
-                  <strong>{legible(k, datos[k].trim())}</strong>
-                </li>
-              ))}
-            </ul>
-          </Alerta>
-        ) : null}
+        <CamposEmpresa datos={datos} set={set} />
+        {revisado ? <ResumenCambios cambios={cambios} actual={actual} datos={datos} /> : null}
       </div>
     </Sheet>
+  );
+}
+
+function CamposEmpresa({ datos, set }: { datos: Datos; set: (k: keyof Datos, v: string) => void }) {
+  return (
+    <>
+      <Campo
+        etiqueta="Nombre"
+        htmlFor="emp-nombre"
+        ayuda="El nombre con que la empresa aparece en OPAI."
+      >
+        <Input
+          id="emp-nombre"
+          value={datos.nombre}
+          onChange={(e) => set("nombre", e.target.value)}
+        />
+      </Campo>
+      <Campo
+        etiqueta="Rubro"
+        htmlFor="emp-vertical"
+        ayuda="Cambiar el rubro no vuelve a cargar el catálogo de cargos y funciones de la empresa."
+      >
+        <Select
+          id="emp-vertical"
+          aria-label="Rubro"
+          valor={datos.vertical}
+          onCambiar={(v) => set("vertical", v)}
+          opciones={VERTICALES.map((v) => ({ valor: v, etiqueta: nombreVertical(v) }))}
+        />
+      </Campo>
+      <Campo etiqueta="Zona horaria" htmlFor="emp-zona" ayuda="Por ejemplo America/Santiago.">
+        <Input
+          id="emp-zona"
+          value={datos.timezone}
+          onChange={(e) => set("timezone", e.target.value)}
+        />
+      </Campo>
+    </>
+  );
+}
+
+function ResumenCambios(p: { cambios: (keyof Datos)[]; actual: Datos; datos: Datos }) {
+  return (
+    <Alerta tono="info" titulo="Revisa antes de confirmar">
+      <ul className="t-body-sm flex flex-col gap-1">
+        {p.cambios.map((k) => (
+          <li key={k}>
+            {ETIQUETAS[k]}: {legible(k, p.actual[k])} →{" "}
+            <strong>{legible(k, p.datos[k].trim())}</strong>
+          </li>
+        ))}
+      </ul>
+    </Alerta>
   );
 }

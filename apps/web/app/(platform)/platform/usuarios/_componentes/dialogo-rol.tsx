@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Dialog, Input, Select } from "@opai/ds";
 
@@ -42,6 +42,7 @@ export function DialogoRol({ objetivo, onCerrar }: { objetivo: Objetivo; onCerra
     onCerrar();
   }
 
+  const limpiar = () => setVista(null);
   return (
     <Dialog
       abierto
@@ -69,46 +70,66 @@ export function DialogoRol({ objetivo, onCerrar }: { objetivo: Objetivo; onCerra
         </>
       }
     >
-      <div className="flex flex-col gap-4">
-        {error ? <Alerta tono="danger" titulo={error} /> : null}
-        {objetivo.nombre ? null : (
-          <Campo
-            etiqueta="Correo"
-            htmlFor="rol-email"
-            ayuda="Debe ser una cuenta que ya existe en OPAI."
-          >
-            <Input
-              id="rol-email"
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setVista(null);
-                setEmail(e.target.value);
-              }}
-            />
-          </Campo>
-        )}
-        <Campo etiqueta="Rol" htmlFor="rol-plataforma">
-          <Select
-            id="rol-plataforma"
-            aria-label="Rol"
-            valor={rol}
-            opciones={OPCIONES}
-            onCambiar={(v) => {
-              setVista(null);
-              setRol(v);
-            }}
+      <CamposRol
+        error={error}
+        conCorreo={!objetivo.nombre}
+        email={email}
+        rol={rol}
+        onEmail={(v) => (limpiar(), setEmail(v))}
+        onRol={(v) => (limpiar(), setRol(v))}
+      >
+        {vista ? <VistaRol vista={vista} email={input.email} rol={input.platformRole} /> : null}
+      </CamposRol>
+    </Dialog>
+  );
+}
+
+function CamposRol(p: {
+  error: string | null;
+  conCorreo: boolean;
+  email: string;
+  rol: string;
+  onEmail: (v: string) => void;
+  onRol: (v: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      {p.error ? <Alerta tono="danger" titulo={p.error} /> : null}
+      {p.conCorreo ? (
+        <Campo
+          etiqueta="Correo"
+          htmlFor="rol-email"
+          ayuda="Debe ser una cuenta que ya existe en OPAI."
+        >
+          <Input
+            id="rol-email"
+            type="email"
+            value={p.email}
+            onChange={(e) => p.onEmail(e.target.value)}
           />
         </Campo>
-        {vista ? (
-          <Alerta tono={rol === "ninguno" ? "warning" : "info"} titulo="Revisa antes de confirmar">
-            <p className="t-body-sm">
-              {vista.nombre ?? input.email}: {texto(vista.anterior)} →{" "}
-              <strong>{texto(input.platformRole)}</strong>
-            </p>
-          </Alerta>
-        ) : null}
-      </div>
-    </Dialog>
+      ) : null}
+      <Campo etiqueta="Rol" htmlFor="rol-plataforma">
+        <Select
+          id="rol-plataforma"
+          aria-label="Rol"
+          valor={p.rol}
+          opciones={OPCIONES}
+          onCambiar={p.onRol}
+        />
+      </Campo>
+      {p.children}
+    </div>
+  );
+}
+
+function VistaRol(p: { vista: Vista; email: string; rol: string | null }) {
+  return (
+    <Alerta tono={p.rol === null ? "warning" : "info"} titulo="Revisa antes de confirmar">
+      <p className="t-body-sm">
+        {p.vista.nombre ?? p.email}: {texto(p.vista.anterior)} → <strong>{texto(p.rol)}</strong>
+      </p>
+    </Alerta>
   );
 }

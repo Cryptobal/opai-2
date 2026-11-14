@@ -11,7 +11,7 @@ import { AccionesTenant } from "./acciones-tenant";
 import { cargarTenant } from "./datos";
 import type { DetalleTenant, PanelTenant } from "./tipos";
 
-export type TabTenant =
+type TabTenant =
   | "resumen"
   | "modulos"
   | "cobro"
@@ -55,8 +55,6 @@ export function PaginaTenant({ params, searchParams, tab, children }: Props) {
       {({ state, detalle, panel, contenido }) => {
         const t = detalle?.tenant;
         const base = `/platform/tenants/${t?.id ?? ""}`;
-        const activas = panel?.keys.filter((k) => !k.revocada).length ?? 0;
-        const problemas = (panel?.trabajos.fallidos ?? 0) + (panel?.trabajos.reintentando ?? 0);
         return (
           <DetailScreen
             state={t ? state : state === "ready" ? "error" : state}
@@ -85,34 +83,7 @@ export function PaginaTenant({ params, searchParams, tab, children }: Props) {
               : {})}
             tabActiva={tab}
             Link={LinkNext}
-            tabs={[
-              { id: "resumen", etiqueta: "Resumen", href: base },
-              {
-                id: "modulos",
-                etiqueta: "Módulos",
-                contador:
-                  detalle?.modulos.filter((m) => m.estado === "activo" || m.estado === "trial")
-                    .length ?? 0,
-                href: `${base}/modulos`,
-              },
-              { id: "cobro", etiqueta: "Cobro", href: `${base}/cobro` },
-              {
-                id: "usuarios",
-                etiqueta: "Usuarios",
-                contador: detalle?.administradores.length ?? 0,
-                href: `${base}/usuarios`,
-              },
-              { id: "consumos", etiqueta: "Consumos", href: `${base}/consumos` },
-              {
-                id: "trabajos",
-                etiqueta: "Trabajos",
-                ...(problemas ? { contador: problemas } : {}),
-                href: `${base}/trabajos`,
-              },
-              { id: "agentes", etiqueta: "Agentes", contador: activas, href: `${base}/agentes` },
-              { id: "integraciones", etiqueta: "Integraciones", href: `${base}/integraciones` },
-              { id: "auditoria", etiqueta: "Auditoría", href: `${base}/auditoria` },
-            ]}
+            tabs={tabsTenant(base, detalle, panel)}
           >
             {contenido}
           </DetailScreen>
@@ -120,4 +91,32 @@ export function PaginaTenant({ params, searchParams, tab, children }: Props) {
       }}
     </PaginaPortal>
   );
+}
+
+function tabsTenant(base: string, detalle: DetalleTenant | null, panel: PanelTenant | null) {
+  const activas = panel?.keys.filter((k) => !k.revocada).length ?? 0;
+  const problemas = (panel?.trabajos.fallidos ?? 0) + (panel?.trabajos.reintentando ?? 0);
+  const modulos =
+    detalle?.modulos.filter((m) => m.estado === "activo" || m.estado === "trial").length ?? 0;
+  return [
+    { id: "resumen", etiqueta: "Resumen", href: base },
+    { id: "modulos", etiqueta: "Módulos", contador: modulos, href: `${base}/modulos` },
+    { id: "cobro", etiqueta: "Cobro", href: `${base}/cobro` },
+    {
+      id: "usuarios",
+      etiqueta: "Usuarios",
+      contador: detalle?.administradores.length ?? 0,
+      href: `${base}/usuarios`,
+    },
+    { id: "consumos", etiqueta: "Consumos", href: `${base}/consumos` },
+    {
+      id: "trabajos",
+      etiqueta: "Trabajos",
+      ...(problemas ? { contador: problemas } : {}),
+      href: `${base}/trabajos`,
+    },
+    { id: "agentes", etiqueta: "Agentes", contador: activas, href: `${base}/agentes` },
+    { id: "integraciones", etiqueta: "Integraciones", href: `${base}/integraciones` },
+    { id: "auditoria", etiqueta: "Auditoría", href: `${base}/auditoria` },
+  ];
 }

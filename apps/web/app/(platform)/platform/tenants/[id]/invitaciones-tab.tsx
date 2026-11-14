@@ -45,48 +45,76 @@ export function Invitaciones({
       {error && !revocar ? <Alerta tono="danger" titulo={error} /> : null}
       <ul className="divide-y divide-border">
         {invitaciones.map((i) => (
-          <li
+          <FilaInvitacion
             key={i.id}
-            className="flex min-h-14 flex-wrap items-center justify-between gap-3 py-2"
-          >
-            <span className="min-w-0">
-              <span className="block truncate text-base font-medium text-fg">{i.email}</span>
-              <span className="t-caption block">Vence el {fechaHora(i.venceEn)}</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <Badge tono="info">{ETIQUETA_ROL[i.rol] ?? i.rol}</Badge>
-              <Button variant="secondary" disabled={pendiente} onClick={() => void reenviar(i)}>
-                Reenviar
-              </Button>
-              <Button variant="ghost" disabled={pendiente} onClick={() => setRevocar(i)}>
-                Revocar
-              </Button>
-            </span>
-          </li>
+            i={i}
+            pendiente={pendiente}
+            onReenviar={() => void reenviar(i)}
+            onRevocar={() => setRevocar(i)}
+          />
         ))}
       </ul>
-      <Dialog
-        abierto={Boolean(revocar)}
+      <DialogoRevocar
+        invitacion={revocar}
+        pendiente={pendiente}
+        error={error}
         onCerrar={() => setRevocar(null)}
-        titulo="¿Revocar la invitación?"
-        descripcion={`El enlace enviado a ${revocar?.email ?? ""} deja de servir.`}
-        acciones={
-          <>
-            <Button variant="secondary" onClick={() => setRevocar(null)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={pendiente}
-              onClick={() => void confirmarRevocar()}
-            >
-              Revocar
-            </Button>
-          </>
-        }
-      >
-        {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
-      </Dialog>
+        onConfirmar={() => void confirmarRevocar()}
+      />
     </section>
+  );
+}
+
+function FilaInvitacion(p: {
+  i: Invitacion;
+  pendiente: boolean;
+  onReenviar: () => void;
+  onRevocar: () => void;
+}) {
+  return (
+    <li className="flex min-h-14 flex-wrap items-center justify-between gap-3 py-2">
+      <span className="min-w-0">
+        <span className="block truncate text-base font-medium text-fg">{p.i.email}</span>
+        <span className="t-caption block">Vence el {fechaHora(p.i.venceEn)}</span>
+      </span>
+      <span className="flex items-center gap-2">
+        <Badge tono="info">{ETIQUETA_ROL[p.i.rol] ?? p.i.rol}</Badge>
+        <Button variant="secondary" disabled={p.pendiente} onClick={p.onReenviar}>
+          Reenviar
+        </Button>
+        <Button variant="ghost" disabled={p.pendiente} onClick={p.onRevocar}>
+          Revocar
+        </Button>
+      </span>
+    </li>
+  );
+}
+
+function DialogoRevocar(p: {
+  invitacion: Invitacion | null;
+  pendiente: boolean;
+  error: string | null;
+  onCerrar: () => void;
+  onConfirmar: () => void;
+}) {
+  return (
+    <Dialog
+      abierto={Boolean(p.invitacion)}
+      onCerrar={p.onCerrar}
+      titulo="¿Revocar la invitación?"
+      descripcion={`El enlace enviado a ${p.invitacion?.email ?? ""} deja de servir.`}
+      acciones={
+        <>
+          <Button variant="secondary" onClick={p.onCerrar}>
+            Cancelar
+          </Button>
+          <Button variant="destructive" disabled={p.pendiente} onClick={p.onConfirmar}>
+            Revocar
+          </Button>
+        </>
+      }
+    >
+      {p.error ? <p className="text-sm font-medium text-danger-fg">{p.error}</p> : null}
+    </Dialog>
   );
 }

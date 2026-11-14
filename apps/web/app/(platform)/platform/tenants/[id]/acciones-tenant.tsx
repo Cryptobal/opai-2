@@ -47,21 +47,12 @@ export function AccionesTenant({
         etiqueta="Acciones de la empresa"
         disparador={<MoreHorizontal className="size-5" />}
         claseDisparador="border border-border-strong bg-surface md:size-11"
-        items={[
-          {
-            id: "editar",
-            etiqueta: "Editar empresa",
-            grupo: "Empresa",
-            onSelect: () => setEditar(true),
-          },
-          ...ESTADOS.filter((e) => e.estado !== estado).map((e, i) => ({
-            id: e.estado,
-            etiqueta: e.etiqueta,
-            ...(i === 0 ? { grupo: "Estado" } : {}),
-            ...(e.estado === "suspendido" ? { peligro: true } : {}),
-            onSelect: () => (e.estado === "suspendido" ? setSuspender(true) : void fijar(e.estado)),
-          })),
-        ]}
+        items={itemsMenu(
+          estado,
+          () => setEditar(true),
+          () => setSuspender(true),
+          (e) => void fijar(e),
+        )}
       />
       {editar ? (
         <Suspense fallback={null}>
@@ -72,28 +63,62 @@ export function AccionesTenant({
           />
         </Suspense>
       ) : null}
-      <Dialog
+      <DialogoSuspender
         abierto={suspender}
+        nombre={nombre}
+        pendiente={pendiente}
+        error={error}
         onCerrar={() => setSuspender(false)}
-        titulo={`¿Suspender ${nombre}?`}
-        descripcion="Sus miembros no podrán entrar ni usar API keys hasta que la reactives."
-        acciones={
-          <>
-            <Button variant="secondary" onClick={() => setSuspender(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={pendiente}
-              onClick={() => void fijar("suspendido")}
-            >
-              Suspender
-            </Button>
-          </>
-        }
-      >
-        {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
-      </Dialog>
+        onConfirmar={() => void fijar("suspendido")}
+      />
     </>
   );
+}
+
+function DialogoSuspender(p: {
+  abierto: boolean;
+  nombre: string;
+  pendiente: boolean;
+  error: string | null;
+  onCerrar: () => void;
+  onConfirmar: () => void;
+}) {
+  return (
+    <Dialog
+      abierto={p.abierto}
+      onCerrar={p.onCerrar}
+      titulo={`¿Suspender ${p.nombre}?`}
+      descripcion="Sus miembros no podrán entrar ni usar API keys hasta que la reactives."
+      acciones={
+        <>
+          <Button variant="secondary" onClick={p.onCerrar}>
+            Cancelar
+          </Button>
+          <Button variant="destructive" disabled={p.pendiente} onClick={p.onConfirmar}>
+            Suspender
+          </Button>
+        </>
+      }
+    >
+      {p.error ? <p className="text-sm font-medium text-danger-fg">{p.error}</p> : null}
+    </Dialog>
+  );
+}
+
+function itemsMenu(
+  estado: string,
+  onEditar: () => void,
+  onSuspender: () => void,
+  onFijar: (estado: string) => void,
+) {
+  return [
+    { id: "editar", etiqueta: "Editar empresa", grupo: "Empresa", onSelect: onEditar },
+    ...ESTADOS.filter((e) => e.estado !== estado).map((e, i) => ({
+      id: e.estado,
+      etiqueta: e.etiqueta,
+      ...(i === 0 ? { grupo: "Estado" } : {}),
+      ...(e.estado === "suspendido" ? { peligro: true } : {}),
+      onSelect: () => (e.estado === "suspendido" ? onSuspender() : onFijar(e.estado)),
+    })),
+  ];
 }

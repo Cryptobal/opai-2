@@ -46,29 +46,11 @@ export function UsuariosPlataforma(props: {
             descripcion: "Nadie tiene rol de plataforma.",
           },
         }}
-        tarjeta={(u) => (
-          <>
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-base text-fg">{u.nombre}</span>
-              <span className="t-caption truncate">{u.email}</span>
-            </span>
-            <Badge tono={u.platformRole === "owner" ? "accent" : "neutro"}>
-              {ROL_PLATAFORMA[u.platformRole ?? ""] ?? "Sin rol"}
-            </Badge>
-          </>
-        )}
+        tarjeta={(u) => <TarjetaUsuario u={u} />}
         columnas={[
           { id: "nombre", etiqueta: "Nombre", render: (u) => u.nombre },
           { id: "email", etiqueta: "Correo", render: (u) => u.email },
-          {
-            id: "rol",
-            etiqueta: "Rol",
-            render: (u) => (
-              <Badge tono={u.platformRole === "owner" ? "accent" : "neutro"}>
-                {ROL_PLATAFORMA[u.platformRole ?? ""] ?? "Sin rol"}
-              </Badge>
-            ),
-          },
+          { id: "rol", etiqueta: "Rol", render: (u) => <BadgeRol rol={u.platformRole} /> },
         ]}
         acciones={(u) =>
           u.id === props.yo ? (
@@ -88,6 +70,26 @@ export function UsuariosPlataforma(props: {
           <DialogoRol objetivo={objetivo} onCerrar={() => setObjetivo(null)} />
         </Suspense>
       ) : null}
+    </>
+  );
+}
+
+function BadgeRol({ rol }: { rol: string | null }) {
+  return (
+    <Badge tono={rol === "owner" ? "accent" : "neutro"}>
+      {ROL_PLATAFORMA[rol ?? ""] ?? "Sin rol"}
+    </Badge>
+  );
+}
+
+function TarjetaUsuario({ u }: { u: UsuarioPlataforma }) {
+  return (
+    <>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-base text-fg">{u.nombre}</span>
+        <span className="t-caption truncate">{u.email}</span>
+      </span>
+      <BadgeRol rol={u.platformRole} />
     </>
   );
 }
