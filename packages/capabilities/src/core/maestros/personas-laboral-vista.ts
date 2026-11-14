@@ -150,6 +150,10 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
     contrato,
     os10: os10 ? { credencial: os10.credencial, venceEn: dia(os10.venceEn) } : null,
     os10Respaldo,
-    contacto,
+    contacto: contacto && {
+      ...contacto,
+      codigoInterno: contacto.codigoInterno ?? null,
+      movilizacion: contacto.movilizacion ?? null,
+    },
   };
 }
