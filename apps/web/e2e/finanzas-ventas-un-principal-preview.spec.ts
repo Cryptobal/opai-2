@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { capturar, EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
@@ -15,8 +16,10 @@ test.describe("@preview finanzas: un solo botón principal en Ventas", () => {
     await page.goto("/finanzas/ventas");
     await expect(page.getByRole("group", { name: "Vista de Ventas" })).toBeVisible({ timeout: 60_000 });
     await capturar(page, info, "finanzas-ventas-lista");
-    const fila = page.locator('a[href^="/finanzas/ventas/0"]').first();
+    const fila = page.locator('a[href^="/finanzas/ventas/0"]').filter({ visible: true }).first();
     test.skip((await fila.count()) === 0, "La empresa qa-e2e no tiene documentos de venta");
+    // En iPad y escritorio el clic llegaba antes de hidratar la lista y no navegaba (CAR-370).
+    await hidratado(fila);
     await fila.click();
     await expect(page).toHaveURL(/\/finanzas\/ventas\/[0-9a-f-]{36}/, { timeout: 30_000 });
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
