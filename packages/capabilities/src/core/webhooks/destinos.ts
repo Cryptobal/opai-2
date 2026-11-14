@@ -40,10 +40,9 @@ export const webhooksDestinosList = defineCapability({
     const filas = await ctx.db.webhookDestino.findMany({
       select: SELECT_DESTINO,
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     return { items: items.map(vistaDestino), siguiente };
   },
 });
