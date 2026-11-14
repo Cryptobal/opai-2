@@ -111,6 +111,7 @@ model Evento {
 
   tenant   Tenant          @relation(fields: [tenantId], references: [id])
   entregas EventoEntrega[]
+  webhookEntregas WebhookEntrega[]
 
   @@index([tenantId, estado, createdAt])
   @@index([tenantId, tipo, createdAt])
