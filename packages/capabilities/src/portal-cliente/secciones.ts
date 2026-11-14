@@ -46,7 +46,7 @@ export async function seccionesDelResumen(
     conNovedades ? novedadesPorInstalacion(ctx, ids, mes, zona) : null,
   ]);
   const activas = { cobertura: conCobertura, rondas: conRondas, novedades: conNovedades };
-  const secciones = visibles.filter((s): s is SeccionResumen => s in FUENTE);
+  const secciones = visibles.filter((s): s is SeccionResumen => Object.hasOwn(FUENTE, s));
   return (id: string) => ({
     secciones: secciones.map((s) => ({ seccion: s, disponibilidad: activas[s] ? ("disponible" as const) : ("pendiente" as const) })),
     cobertura: cobertura?.get(id) ?? null,

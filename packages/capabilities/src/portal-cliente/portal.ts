@@ -89,7 +89,7 @@ const seccionResumen = z.object({
 export const resumenLeer = defineCapability({
   id: "portal_cliente.resumen.leer",
   descripcion:
-    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). La cobertura trae turnos programados, cubiertos y por cubrir del mes (hasta hoy en el mes en curso) las rondas realizadas, completas e incompletas, y las novedades por gravedad (solo cantidades); sin personas ni costos. Las secciones sin datos aún se marcan como pendientes, sin cifras.",
+    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). Trae la cobertura (turnos programados, cubiertos y por cubrir del mes, hasta hoy en el mes en curso), las rondas (realizadas, completas e incompletas) y las novedades por gravedad (solo cantidades), sin personas ni costos. Una sección apagada por la empresa o sin su módulo se marca como pendiente, sin cifras.",
   permiso: PERMISO_PORTAL,
   input: z.object({ mes: z.string().regex(MES).optional() }),
   output: z.object({

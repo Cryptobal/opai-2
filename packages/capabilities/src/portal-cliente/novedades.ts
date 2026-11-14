@@ -13,7 +13,7 @@ export const novedadesSchema = z.object({
   alta: z.number().int(),
   media: z.number().int(),
   baja: z.number().int(),
-  /** Las que siguen abiertas o en atención. */
+  /** Las que siguen abiertas o en atención (una derivada ya salió de la empresa y no cuenta). */
   abiertas: z.number().int(),
 });
 type NovedadesCliente = z.output<typeof novedadesSchema>;
@@ -37,9 +37,10 @@ export async function novedadesPorInstalacion(
   const out = new Map(instalacionIds.map((id) => [id, { total: 0, alta: 0, media: 0, baja: 0, abiertas: 0 }]));
   for (const f of filas) {
     const k = out.get(f.instalacionId);
-    if (!k) continue;
+    // Una gravedad fuera de las tres conocidas no cuenta: así el total cuadra con la suma por gravedad.
+    if (!k || (f.gravedad !== "alta" && f.gravedad !== "media" && f.gravedad !== "baja")) continue;
     k.total += 1;
-    if (f.gravedad === "alta" || f.gravedad === "media" || f.gravedad === "baja") k[f.gravedad] += 1;
+    k[f.gravedad] += 1;
     if (ABIERTAS.has(f.estado)) k.abiertas += 1;
   }
   return out;
