@@ -18,6 +18,7 @@ import {
   trabajosComercial,
   trabajosDesempeno,
   consumidoresDesempeno,
+  consumidorPautaPublicada,
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
@@ -54,6 +55,7 @@ export function asegurarRegistro(): void {
     ...consumidoresDelNucleo,
     ...consumidoresAsistencia,
     ...consumidoresDesempeno,
+    consumidorPautaPublicada,
     consumidorCpqBandeja,
     consumidorCpqEnlace,
     consumidorSeguimientoCierre,

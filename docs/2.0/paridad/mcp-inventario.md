@@ -1151,6 +1151,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.ausencias.anular`
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
+- `pauta.publicaciones.listar`
+- `pauta.publicaciones.publicar`
 - `platform.ajustes.set`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
