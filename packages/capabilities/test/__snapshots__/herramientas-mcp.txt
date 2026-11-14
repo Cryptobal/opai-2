@@ -99,6 +99,7 @@ core_aprobaciones_list
 core_aprobaciones_reglas_list
 core_audit_list
 core_ausencias_anular
+core_ausencias_clases
 core_ausencias_listar
 core_ausencias_registrar
 core_biometria_borrar
@@ -110,6 +111,9 @@ core_calendario_archivar
 core_calendario_crear_feriado
 core_calendario_listar
 core_campos_catalogo
+core_campos_personalizados_create
+core_campos_personalizados_list
+core_campos_personalizados_update
 core_campos_valores
 core_cargos_create
 core_cargos_get
@@ -650,6 +654,8 @@ preview_core_biometria_borrar
 preview_core_calendario_actualizar
 preview_core_calendario_archivar
 preview_core_calendario_crear_feriado
+preview_core_campos_personalizados_create
+preview_core_campos_personalizados_update
 preview_core_cargos_create
 preview_core_cargos_set_activo
 preview_core_cargos_set_jefatura
