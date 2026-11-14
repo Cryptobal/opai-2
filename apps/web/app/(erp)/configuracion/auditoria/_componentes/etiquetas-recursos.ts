@@ -10,7 +10,7 @@ export const RECURSOS: Record<string, string> = {
   etiquetas: "Etiquetas", campos_personalizados: "Campos personalizados", valores_personalizados: "Valores de campos personalizados", negocio_campos: "Campos del negocio", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
   actividad: "Actividad", resumen: "Resumen", inicio: "Inicio", permisos: "Permisos", roles: "Roles",
   excepciones: "Excepciones de permisos", supervisores: "Supervisores", documento_tipos: "Tipos de documento",
-  documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", biometria: "Reconocimiento facial", terreno: "Terreno", personas_terreno: "Personas de terreno", listas: "Listas de acceso", registros: "Registros de acceso", config: "Ajustes", ajustes: "Ajustes",
+  documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", libro_novedades: "Libro de novedades", biometria: "Reconocimiento facial", terreno: "Terreno", personas_terreno: "Personas de terreno", listas: "Listas de acceso", registros: "Registros de acceso", config: "Ajustes", ajustes: "Ajustes",
   cumplimiento: "Cumplimiento", empresa: "Empresa", marca: "Marca", comunicaciones: "Comunicaciones",
   plantillas: "Plantillas", notificacion_reglas: "Reglas de aviso", notificaciones: "Notificaciones", push: "Avisos al celular",
   aprobaciones: "Aprobaciones", por_aprobar: "Por aprobar", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
