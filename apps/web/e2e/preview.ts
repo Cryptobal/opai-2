@@ -36,13 +36,19 @@ export async function capturar(page: Page, info: TestInfo, nombre: string): Prom
  * quede semitransparente sobre la pantalla (CAR-417). Ignora animaciones infinitas (indicadores de carga).
  */
 export async function capturarHoja(page: Page, info: TestInfo, nombre: string): Promise<void> {
-  await page.evaluate(() =>
-    Promise.all(
-      document
+  // Las transiciones CSS recién arrancan en el cuadro siguiente: se espera un par de cuadros y se repite
+  // hasta que no quede ninguna animación finita corriendo (con tope, para no colgar la prueba).
+  await page.evaluate(async () => {
+    const cuadro = () => new Promise((r) => requestAnimationFrame(() => r(undefined)));
+    for (let i = 0; i < 10; i++) {
+      await cuadro();
+      await cuadro();
+      const vivas = document
         .getAnimations()
-        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
-        .map((a) => a.finished.catch(() => undefined)),
-    ),
-  );
+        .filter((a) => a.playState === "running" && a.effect?.getComputedTiming().iterations !== Infinity);
+      if (vivas.length === 0) return;
+      await Promise.all(vivas.map((a) => a.finished.catch(() => undefined)));
+    }
+  });
   await capturar(page, info, nombre);
 }
