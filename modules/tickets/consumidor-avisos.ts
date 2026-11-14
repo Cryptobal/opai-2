@@ -58,7 +58,7 @@ export const consumidorTicketsAvisos = defineConsumidor({
     const responsable = typeof p.responsableId === "string" ? p.responsableId : t.responsableId;
     const usuarioId = aviso.para === "solicitante" ? t.solicitanteId : responsable;
     if (usuarioId === ev.actorId || usuarioId === ev.viaUserId) return;
-    const activo = await ctx.db.membership.findFirst({ where: { userId: usuarioId, estado: "activa" }, select: { userId: true } });
+    const activo = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: usuarioId, estado: "activa" }, select: { userId: true } });
     if (!activo) return;
     if (await ctx.db.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId } })) return;
     await ctx.db.notificacion.create({

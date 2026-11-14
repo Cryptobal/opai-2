@@ -65,6 +65,14 @@ describe.skipIf(omitirSuiteDb())("tickets.avisos (CAR-84)", () => {
     expect((await avisos(u.otro)).map((x) => x.titulo)).toEqual(["Te asignaron un ticket"]);
   });
 
+  it("no avisa a quien solo es miembro activo de otra empresa", async () => {
+    const ajeno = randomUUID();
+    await e.admin.user.create({ data: { id: ajeno, name: "Ajeno", email: `${ajeno.slice(0, 8)}@tav.test` } });
+    await e.admin.membership.create({ data: { tenantId: otroTenant, userId: ajeno, rol: "gerente", portales: ["erp"] } });
+    await consumidorTicketsAvisos.handler(ctx(tenantId), await ev("tickets.ticket.reasignado", u.atiende, { responsableId: ajeno }));
+    expect(await e.admin.notificacion.count({ where: { usuarioId: ajeno } })).toBe(0);
+  });
+
   it("desde otra empresa no encuentra el ticket y no avisa", async () => {
     await consumidorTicketsAvisos.handler(ctx(otroTenant), await ev("tickets.ticket.creado", u.pide, {}, otroTenant));
     expect(await avisos(u.atiende, otroTenant)).toEqual([]);
