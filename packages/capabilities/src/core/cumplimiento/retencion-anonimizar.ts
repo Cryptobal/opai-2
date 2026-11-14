@@ -73,6 +73,10 @@ export async function anonimizarPersona(
   if (count !== 1) return false;
   // Su resultado guardado de meses cerrados de Desempeño (CAR-322) es un dato de la persona: se borra.
   await tx.desempenoResultadoCerrado.deleteMany({ where: { personaId: id } });
+  // El motivo de sus ausencias es texto libre que puede ser de salud (CAR-393): se reemplaza por la marca, en el
+  // registro y en los turnos de la pauta. Tipo, clase, fechas y estado quedan: son hechos laborales.
+  await tx.ausencia.updateMany({ where: { personaId: id }, data: { motivo: MARCA_ANONIMO } });
+  await tx.excepcionPauta.updateMany({ where: { personaId: id }, data: { motivo: MARCA_ANONIMO } });
   // Ni queda como jefe de nadie: quienes la tenían de jefe quedan sin asignar.
   await tx.persona.updateMany({ where: { jefePersonaId: id }, data: { jefePersonaId: null } });
   // Los ids de otros sistemas llevan de vuelta a la identidad: se sueltan.
