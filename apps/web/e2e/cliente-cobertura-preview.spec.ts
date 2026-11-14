@@ -10,9 +10,11 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 const CLIENTE = process.env["E2E_CLIENTE_EMAIL"];
+// Contraseña propia del contacto (CAR-500); sin ella, la de e2e.
+const CLAVE = process.env["E2E_CLIENTE_PASSWORD"] ?? E2E_PASSWORD;
 
 test.describe("@preview cliente cobertura", () => {
-  test.skip(!CLIENTE || !E2E_PASSWORD, "Falta E2E_CLIENTE_EMAIL o la contraseña de e2e");
+  test.skip(!CLIENTE || !CLAVE, "Falta E2E_CLIENTE_EMAIL o la contraseña de e2e");
 
   test("el resumen del mes muestra la cobertura de cada instalación", async ({ page }, info) => {
     const errores: string[] = [];
@@ -20,7 +22,7 @@ test.describe("@preview cliente cobertura", () => {
     await pasarProteccionDeVercel(page);
     await page.goto("/login");
     await page.getByLabel("Correo").fill(CLIENTE ?? "");
-    await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
+    await page.getByLabel("Contraseña", { exact: true }).fill(CLAVE ?? "");
     await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await page.waitForURL((u) => u.pathname !== "/login");
     await page.goto("/cliente");
