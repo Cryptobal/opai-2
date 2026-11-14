@@ -173,6 +173,16 @@ describe.skipIf(omitirSuiteDb())("Personas · responder solicitudes del portal (
     expect(r.error?.code).toBe("UNPROCESSABLE");
   });
 
+  it("una solicitud por responder no se anula: se aprueba o se rechaza", async () => {
+    const id = await solicitar();
+    const r = await run(ctx(tenant), "core.ausencias.anular", {
+      personaId: persona,
+      ausenciaId: id,
+    });
+    expect(r.error?.code).toBe("UNPROCESSABLE");
+    expect((await e.admin.ausencia.findUnique({ where: { id } }))?.estado).toBe("solicitada");
+  });
+
   it("otra empresa no la ve y un rol sin permiso laboral no puede responder", async () => {
     const id = await solicitar();
     const ajena = await run(ctx(otro), "core.ausencias.aprobar", {

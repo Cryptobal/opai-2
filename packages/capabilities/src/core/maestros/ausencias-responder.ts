@@ -81,10 +81,12 @@ export const ausenciasRechazar = defineCapability({
       await solicitud({ ...ctx, db: tx }, input);
       const usuario = ctx.usuario?.id ?? null;
       // Sin columnas propias del rechazo: quién y cuándo cerró la solicitud quedan en anulada_por/en y en la auditoría.
-      await tx.ausencia.update({
-        where: { id: input.ausenciaId },
+      // Con condición de estado: si la persona la retiró entre la lectura y aquí, no se pisa su retiro.
+      const r = await tx.ausencia.updateMany({
+        where: { id: input.ausenciaId, personaId: input.personaId, estado: "solicitada" },
         data: { estado: "rechazada", anuladaPor: usuario, anuladaEn: new Date() },
       });
+      if (r.count !== 1) throw reglaDeNegocio("La solicitud ya fue respondida o retirada.");
       await ctx.eventos.emitir(tx, {
         tipo: "core.ausencia.respondida",
         entidadTipo: "persona",
