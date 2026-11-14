@@ -35,6 +35,30 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 - PR 2: valores por ficha (`core.campos_personalizados.valores.get/set`) con permiso y alcance de cada entidad.
 - PR 3: pantallas de configuración y de ficha, y tokens de documentos.
 
+## PR fusionar cuentas (F1) · rama `brief/car-27-fusionar`
+
+- **Estado:** Abierto (apilado sobre el PR 1/3 de campos personalizados)
+- **Migración:** No
+
+### Qué entra
+
+Brief `docs/2.0/briefs/BRIEF-CAR-27-fusionar.md`. Capacidad `core.cuentas.fusionar` (`efecto: "irreversible"`, así que un agente necesita aprobación humana; acepta `dryRun`).
+
+- **Vista previa:** devuelve la comparación campo por campo y cuánto se mueve.
+- **Al ejecutar:** mueve todo lo del duplicado (contactos, instalaciones, negocios, documentos, actividad, etiquetas, campos personalizados, portal, correos y facturas), resuelve los choques a favor de la cuenta que queda y borra el duplicado.
+- **Se bloquea con explicación cuando:**
+  - hay contactos con el mismo correo en las dos cuentas;
+  - el duplicado tiene facturas emitidas y el RUT final es otro;
+  - el duplicado tiene consentimiento de referencia comercial (registro legal append-only).
+- Una prueba compara el inventario de tablas con FK a cuentas contra la base.
+
+**Decisiones nocturnas (revisar):** las tres reglas de bloqueo; renombrar a « (fusionada)» la instalación movida si su nombre choca; el estado de la cuenta que queda no cambia.
+
+### Pendiente
+
+- F2: hoja de 4 pasos en la cuenta.
+- F3: fusión de contactos.
+
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
 - Con el diseño nuevo de listas de `main` fallan tres pruebas de Comercial que no tocaron estos PR: `crm-vinculos` (cuentas vinculadas), `cuenta-sii` (resumen «Lista para facturar», que queda oculto) y `actividad-tareas-car162` (la tarea no aparece en «Mis tareas»). Hay que revisarlas en un PR propio.
