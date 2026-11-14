@@ -322,7 +322,8 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       // CAR-512: la versión nueva (o la copia firmada) de un anexo tampoco se ve sin anexos.read.
       const get = await mod.executeCapability(ctx(rol), "core.documentos.get", { id: nueva.id });
       expect(get.ok).toBe(ve);
-      if (get.ok) {
+      if (!get.ok) expect(get.error.code).toBe("NOT_FOUND");
+      else {
         const versiones = (get.data as { versiones: { id: string }[] }).versiones;
         expect(versiones.some((d) => d.id === documentoId)).toBe(true);
       }

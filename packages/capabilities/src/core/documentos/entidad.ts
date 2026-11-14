@@ -3,7 +3,7 @@ import type { z } from "zod";
 
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
-import { filtroDocumentoSensible, sinAnexo } from "./sensibles";
+import { filtroDocumentoSensible, NIVELES_VERSION_ANEXO, sinAnexo } from "./sensibles";
 import type { entidadSchema } from "./vista";
 
 export type Entidad = z.output<typeof entidadSchema>;
@@ -51,7 +51,7 @@ export async function tipoParaEntidad(ctx: Contexto, tipoId: string | undefined,
 /** Solo se versiona un documento disponible cuyo propietario es la misma entidad. */
 export async function documentoAReemplazar(ctx: Contexto, id: string, e: Entidad) {
   const anterior = await ctx.db.documento.findFirst({
-    where: { id, AND: [filtroDocumentoSensible(ctx), sinAnexo(3)] },
+    where: { id, AND: [filtroDocumentoSensible(ctx), sinAnexo(NIVELES_VERSION_ANEXO)] },
   });
   const propietario = anterior
     ? await ctx.db.documentoVinculo.findFirst({ where: { documentoId: id, rol: "propietario" } })
