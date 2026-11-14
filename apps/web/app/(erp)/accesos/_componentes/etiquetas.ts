@@ -1,3 +1,5 @@
+import { formatearFechaHora } from "@opai/domain";
+
 import type { Registro } from "./datos";
 
 type Tono = "neutro" | "success" | "warning" | "danger" | "info" | "accent";
@@ -26,13 +28,15 @@ export const DOC_TIPO: Record<string, string> = {
 
 export const tipoDe = (t: string) => TIPO_REGISTRO[t] ?? t;
 
-/** Hora corta en la zona de la empresa (America/Santiago por defecto). */
-export function hora(valor: string, zona = "America/Santiago"): string {
-  return new Intl.DateTimeFormat("es-CL", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: zona,
-  }).format(new Date(valor));
+/** Hora «HH:mm» (24 h) en la zona de la empresa, con el formato común de `@opai/domain`. */
+export const hora = (valor: string) => formatearFechaHora(valor).slice(11);
+
+/** Hora si es de hoy; si no, «dd-mm · HH:mm» para que una fila de otro día no se lea como de hoy. */
+export function cuando(valor: string): string {
+  const f = formatearFechaHora(valor);
+  return f.slice(0, 10) === formatearFechaHora(new Date()).slice(0, 10)
+    ? f.slice(11)
+    : `${f.slice(0, 5)} · ${f.slice(11)}`;
 }
 
 /** Estado visible de un registro (diseño `Accesos`): en sitio, salió a una hora o diferido (sin conexión). */

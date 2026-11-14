@@ -36,16 +36,18 @@ export type Intento = {
 
 type Instalacion = { id: string; nombre: string };
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid = (v: string | undefined) => (v && UUID.test(v) ? v : undefined);
 const TIPOS = new Set(["visita", "contratista", "proveedor", "vehiculo", "despacho"]);
 const MOTIVOS = new Set(["bloqueado", "fuera_de_lista", "fuera_de_horario", "uso_unico_consumido"]);
 
 /** Filtros de la URL que entiende la capacidad; un valor desconocido se ignora en vez de fallar. */
 function filtros(p: Parametros) {
   return {
-    ...(p["instalacion"] ? { instalacionId: p["instalacion"] } : {}),
+    ...(uuid(p["instalacion"]) ? { instalacionId: p["instalacion"] } : {}),
     ...(p["tipo"] && TIPOS.has(p["tipo"]) ? { tipoRegistro: p["tipo"] } : {}),
     ...(p["q"] ? { q: p["q"] } : {}),
-    ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
+    ...(uuid(p["cursor"]) ? { cursor: p["cursor"] } : {}),
   };
 }
 

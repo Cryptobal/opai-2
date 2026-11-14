@@ -45,6 +45,8 @@ export const registrosListar = defineCapability({
     if (input.instalacionId) await instalacionEnAlcance(ctx, input.instalacionId);
     const verPatente = ctx.autorizar(PERMISO_PATENTE);
     const q = input.q ? { contains: input.q, mode: "insensitive" as const } : null;
+    // La patente se guarda normalizada («AB-CD 12» → «ABCD12»): se busca igual de normalizada.
+    const qPatente = input.q?.replace(/[\s.-]/g, "").toUpperCase();
     const filas = await ctx.db.registroAcceso.findMany({
       where: {
         AND: [
@@ -54,7 +56,11 @@ export const registrosListar = defineCapability({
           input.tipoRegistro ? { tipoRegistro: input.tipoRegistro } : {},
           q
             ? {
-                OR: [{ nombre: q }, { empresa: q }, ...(verPatente ? [{ patente: q }] : [])],
+                OR: [
+                  { nombre: q },
+                  { empresa: q },
+                  ...(verPatente && qPatente ? [{ patente: { contains: qPatente } }] : []),
+                ],
               }
             : {},
         ],

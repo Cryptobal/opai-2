@@ -21,7 +21,12 @@ test.describe("@preview acceso: Accesos en el ERP", () => {
     await capturar(page, info, "accesos-registros");
 
     const fila = page.locator('a[href^="/accesos/"]:not([href^="/accesos/intentos"])').first();
-    if ((await fila.count()) > 0) {
+    if ((await fila.count()) === 0) {
+      // Sin registros (p. ej. test.opai.cl sin ACCESO_HUELLA_SECRET, CAR-483): la ficha no se recorre y se anota.
+      test
+        .info()
+        .annotations.push({ type: "sin-datos", description: "Sin registros: ficha no recorrida" });
+    } else {
       await fila.click();
       await expect(page.getByText("Documento enmascarado")).toBeVisible({ timeout: 60_000 });
       await expect(page.getByText("Historial")).toBeVisible();
@@ -35,7 +40,12 @@ test.describe("@preview acceso: Accesos en el ERP", () => {
     await capturar(page, info, "accesos-en-sitio");
 
     await page.goto("/accesos/intentos");
-    await expect(page.getByRole("button", { name: "Motivo" }).first()).toBeVisible({
+    await expect(
+      page
+        .getByText(/Sin intentos denegados|Bloqueado|Fuera de lista|Fuera de horario|Pase ya usado/)
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible({
       timeout: 60_000,
     });
     await capturar(page, info, "accesos-intentos");

@@ -1,15 +1,16 @@
+import { formatearFechaHora } from "@opai/domain";
 import { Badge, ListScreen } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla, fechaHora } from "@/lib/formato";
+import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
 import { cargarIntentos, type Intento } from "../_componentes/datos";
 import { MOTIVO_INTENTO, OPCIONES_MOTIVO, tipoDe } from "../_componentes/etiquetas";
 import { rutaAccesos } from "../_componentes/lista-registros";
-import { SegmentoAccesos, SegmentoAccesosMovil } from "../_componentes/segmento-accesos";
+import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 
 export const metadata = { title: "Intentos denegados" };
 
@@ -31,11 +32,10 @@ export default function IntentosDenegados({ searchParams }: { searchParams: Sear
       ruta="/accesos"
       completo
       cargar={() => cargarIntentos(searchParams)}
-      opciones={() => ({ insignia: <SegmentoAccesos activa="intentos" /> })}
     >
       {(d) => (
         <>
-          <SegmentoAccesosMovil activa="intentos" />
+          <SegmentoAccesos activa="intentos" />
           <ListScreen<Intento>
             state={estadoPantalla(d.r)}
             titulo="Intentos denegados"
@@ -60,7 +60,7 @@ export default function IntentosDenegados({ searchParams }: { searchParams: Sear
                   {motivo(i)}
                 </span>
                 <span className="t-caption">
-                  {tipoDe(i.tipoRegistro)} · {i.instalacion} · {fechaHora(i.ocurrioEn)}
+                  {tipoDe(i.tipoRegistro)} · {i.instalacion} · {formatearFechaHora(i.ocurrioEn)}
                 </span>
               </span>
             )}
@@ -68,7 +68,7 @@ export default function IntentosDenegados({ searchParams }: { searchParams: Sear
               { id: "documento", etiqueta: "Documento", render: (i) => i.documento },
               { id: "tipo", etiqueta: "Tipo", render: (i) => tipoDe(i.tipoRegistro) },
               { id: "instalacion", etiqueta: "Instalación", render: (i) => i.instalacion },
-              { id: "cuando", etiqueta: "Cuándo", render: (i) => fechaHora(i.ocurrioEn) },
+              { id: "cuando", etiqueta: "Cuándo", render: (i) => formatearFechaHora(i.ocurrioEn) },
               { id: "motivo", etiqueta: "Motivo", render: motivo },
             ]}
             textos={{

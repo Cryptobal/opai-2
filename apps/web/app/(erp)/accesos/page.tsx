@@ -8,7 +8,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarRegistros } from "./_componentes/datos";
 import { ListaRegistros } from "./_componentes/lista-registros";
-import { SegmentoAccesos, SegmentoAccesosMovil } from "./_componentes/segmento-accesos";
+import { SegmentoAccesos } from "./_componentes/segmento-accesos";
 
 export const metadata = { title: "Accesos" };
 
@@ -21,15 +21,10 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
       ruta="/accesos"
       completo
       cargar={() => cargarRegistros(searchParams)}
-      opciones={(d) => ({
-        insignia: (
-          <SegmentoAccesos activa={d.p["estado"] === "en_sitio" ? "en_sitio" : "registros"} />
-        ),
-      })}
     >
       {(d) => (
         <>
-          <SegmentoAccesosMovil activa={d.p["estado"] === "en_sitio" ? "en_sitio" : "registros"} />
+          <SegmentoAccesos activa={d.p["estado"] === "en_sitio" ? "en_sitio" : "registros"} />
           <SplitScreen
             telefono="lista"
             unPanelHastaLg

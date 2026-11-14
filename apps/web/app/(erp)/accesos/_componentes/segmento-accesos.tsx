@@ -10,25 +10,13 @@ const OPCIONES = [
   { id: "intentos", etiqueta: "Intentos denegados", href: "/accesos/intentos" },
 ] as const;
 
-/** Secciones de Accesos en la barra superior (desde xl; a 1024 la barra no muestra insignias), estandarizadas como en el resto del ERP. */
+/**
+ * Secciones de Accesos arriba del contenido, en todos los tamaños: la barra superior del diseño nuevo
+ * (ADR-109) no muestra insignias, así que el segmento vive en la página.
+ */
 export function SegmentoAccesos({ activa }: { activa: ActivaAccesos }) {
   return (
-    <span className="ml-4 hidden items-center xl:inline-flex">
-      <Segmentado
-        etiqueta="Secciones de Accesos"
-        variante="plano"
-        activa={activa}
-        Link={LinkNext}
-        opciones={[...OPCIONES]}
-      />
-    </span>
-  );
-}
-
-/** Mismas secciones en teléfono e iPad, arriba del contenido. */
-export function SegmentoAccesosMovil({ activa }: { activa: ActivaAccesos }) {
-  return (
-    <div className="-mx-4 mb-3 overflow-x-auto px-4 xl:hidden">
+    <div className="-mx-4 mb-3 overflow-x-auto px-4 lg:mx-0 lg:px-0">
       <Segmentado
         etiqueta="Secciones de Accesos"
         variante="plano"

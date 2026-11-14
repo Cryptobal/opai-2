@@ -5,7 +5,7 @@ import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { conFiltros, type Parametros } from "@/lib/parametros";
 
 import type { Registro } from "./datos";
-import { estadoRegistro, hora, OPCIONES_TIPO, tipoDe } from "./etiquetas";
+import { cuando, estadoRegistro, OPCIONES_TIPO, tipoDe } from "./etiquetas";
 
 type Props = {
   state: EstadoPantalla;
@@ -76,10 +76,11 @@ export function ListaRegistros({ state, items, siguiente, p, instalaciones, sele
         const e = estadoRegistro(r);
         return {
           id: r.id,
-          href: rutaAccesos(`/accesos/${r.id}`, p),
+          // Abrir la ficha conserva la página de la lista (cursor), para no volver a la primera.
+          href: rutaAccesos(`/accesos/${r.id}`, p, p["cursor"] ? { cursor: p["cursor"] } : {}),
           titulo: r.nombre,
           secundario: [tipoDe(r.tipoRegistro), r.empresa].filter(Boolean).join(" · "),
-          terciario: `${r.instalacion} · ${hora(r.entradaEn)}`,
+          terciario: `${r.instalacion} · ${cuando(r.entradaEn)}`,
           fin: (
             <Badge tono={e.tono} punto>
               {e.etiqueta}

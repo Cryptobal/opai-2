@@ -159,6 +159,8 @@ describe.skipIf(!urlPropietario)("Accesos en el ERP, base real (CAR-474)", () =>
     expect(porEmpresa.items.map((x) => x.nombre)).toEqual(["Visita Norte"]);
     const porPatente = await ok<Pagina<Reg>>(ctx("A"), "acceso.registros.listar", { q: "ABCD" });
     expect(porPatente.items.map((x) => x.nombre)).toEqual(["Visita Sur"]);
+    const conGuion = await ok<Pagina<Reg>>(ctx("A"), "acceso.registros.listar", { q: "ab-cd 1" });
+    expect(conGuion.items.map((x) => x.nombre)).toEqual(["Visita Sur"]);
     const sup = ctx("A", { rol: "supervisor" });
     expect(
       (await ok<Pagina<Reg>>(sup, "acceso.registros.listar", { q: "ABCD" })).items,

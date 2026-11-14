@@ -1,3 +1,4 @@
+import { formatearFechaHora } from "@opai/domain";
 import {
   Alerta,
   Badge,
@@ -7,8 +8,6 @@ import {
   Seccion,
   Timeline,
 } from "@opai/ds";
-
-import { fechaHora } from "@/lib/formato";
 
 import type { RegistroFicha } from "./datos";
 import { DOC_TIPO, estadoRegistro, tipoDe } from "./etiquetas";
@@ -57,8 +56,10 @@ export function DetalleRegistro({ r, state }: { r: RegistroFicha | null; state: 
                 },
                 { etiqueta: "Instalación", valor: r.instalacion },
                 ...(r.patente ? [{ etiqueta: "Patente", valor: r.patente, numerico: true }] : []),
-                { etiqueta: "Entrada", valor: fechaHora(r.entradaEn) },
-                ...(r.salidaEn ? [{ etiqueta: "Salida", valor: fechaHora(r.salidaEn) }] : []),
+                { etiqueta: "Entrada", valor: formatearFechaHora(r.entradaEn) },
+                ...(r.salidaEn
+                  ? [{ etiqueta: "Salida", valor: formatearFechaHora(r.salidaEn) }]
+                  : []),
                 ...(r.motivoVisita ? [{ etiqueta: "Motivo", valor: r.motivoVisita }] : []),
                 { etiqueta: "Lista", valor: r.lista ? LISTA[r.lista] : "Sin lista" },
                 {
@@ -80,7 +81,7 @@ export function DetalleRegistro({ r, state }: { r: RegistroFicha | null; state: 
                         id: "salida",
                         actor: { nombre: r.dispositivo ?? "Portería" },
                         accion: "registró la salida",
-                        cuando: fechaHora(r.salidaEn),
+                        cuando: formatearFechaHora(r.salidaEn),
                       },
                     ]
                   : []),
@@ -88,9 +89,9 @@ export function DetalleRegistro({ r, state }: { r: RegistroFicha | null; state: 
                   id: "entrada",
                   actor: { nombre: r.dispositivo ?? "Portería" },
                   accion: "registró la entrada",
-                  cuando: fechaHora(r.entradaEn),
+                  cuando: formatearFechaHora(r.entradaEn),
                   ...(r.origen === "diferido"
-                    ? { meta: `Recibido ${fechaHora(r.recibidoEn)}` }
+                    ? { meta: `Recibido ${formatearFechaHora(r.recibidoEn)}` }
                     : {}),
                 },
               ]}
