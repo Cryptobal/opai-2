@@ -43,6 +43,9 @@ export type Liquidacion = {
   haberes: LineaLiquidacion[];
   descuentosLegales: LineaLiquidacion[];
   otrosDescuentos: LineaLiquidacion[];
+  /** Aportes del empleador (no salen del líquido): los informa el LRE (41xx). */
+  aportesEmpleador: LineaLiquidacion[];
+  diasLicencia: number;
   totalHaberes: number;
   imponible: number;
   totalDescuentosLegales: number;
@@ -111,6 +114,12 @@ export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores):
     { concepto: "Cuotas de préstamo", monto: n.prestamos },
     { concepto: "Descuentos", monto: n.descuentos },
   ]);
+  const aportesEmpleador = conMonto([
+    { concepto: "Seguro de cesantía empleador", monto: d.cesantiaEmpleadorClp },
+    { concepto: "Ley 16.744 y SANNA", monto: d.mutualClp },
+    { concepto: "SIS", monto: d.sisClp },
+    { concepto: "Aporte de la reforma", monto: d.reformaClp },
+  ]);
   const totalOtros = sumar(otrosDescuentos);
   const liquido = r.liquidoEstimadoClp - totalOtros;
   const minimo = minimoPorJornada(imm, e.jornadaMinutosSemanales, jornadaLegal);
@@ -122,7 +131,8 @@ export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores):
       : []),
   ];
   return {
-    diasTrabajados: dias, haberes, descuentosLegales, otrosDescuentos,
+    diasTrabajados: dias, haberes, descuentosLegales, otrosDescuentos, aportesEmpleador,
+    diasLicencia: Math.min(n.diasLicencia, DIAS_MES_LIQUIDACION),
     totalHaberes: h.total, imponible: h.imponible,
     totalDescuentosLegales: sumar(descuentosLegales), totalOtrosDescuentos: totalOtros,
     liquido, costoEmpresa: r.costoEmpresaMensualClp,
