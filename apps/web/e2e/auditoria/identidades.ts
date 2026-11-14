@@ -38,8 +38,19 @@ export async function emparejarTerreno(erp: Page, terreno: Page): Promise<string
     : null;
 }
 
-/** Entra al portal del trabajador con un PIN temporal de la primera persona con PIN posible. */
+/**
+ * Entra al portal del trabajador con un PIN temporal de la primera persona con PIN posible. Los dos
+ * anchos corren en paralelo sobre la misma persona: si el otro ancho le cambió el PIN entremedio, se
+ * reintenta una vez después de una pausa.
+ */
 export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<string | null> {
+  const nota = await intentarTrabajador(erp, trabajador);
+  if (!nota?.startsWith("no entró")) return nota;
+  await trabajador.waitForTimeout(20_000);
+  return intentarTrabajador(erp, trabajador);
+}
+
+async function intentarTrabajador(erp: Page, trabajador: Page): Promise<string | null> {
   conLimite(erp, trabajador);
   // La persona ficticia de `auditoria-datos.spec.ts` (con RUT y vínculo); si no está, la primera.
   const re = /^\/personas\/[0-9a-f-]{36}$/;
@@ -50,9 +61,19 @@ export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<str
     (await primerEnlace(erp, "/personas", re));
   if (!ficha) return "sin personas en qa-e2e";
   await erp.goto(`${ficha}/laboral`);
+  // La cabecera de la ficha llega por streaming: se espera el RUT antes de leer el texto (CAR-401).
+  await erp
+    .getByText(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)
+    .first()
+    .waitFor({ timeout: 20_000 })
+    .catch(() => undefined);
   const rut = (await erp.locator("body").innerText()).match(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)?.[0];
   const asignar = erp.getByRole("button", { name: /^(Asignar|Cambiar) PIN$/ });
   if (!rut) return "la persona no muestra RUT en Laboral";
+  await asignar
+    .first()
+    .waitFor({ timeout: 20_000 })
+    .catch(() => undefined);
   if (!(await asignar.count())) return "la ficha no ofrece «Asignar PIN»";
   // El PIN solo abre el portal si la persona tiene usuario en OPAI (la tarjeta lo avisa).
   if (await erp.getByText(/No tiene usuario en OPAI/).count())
@@ -69,9 +90,20 @@ export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<str
   await trabajador.getByLabel("RUT").fill(rut.replace(/\./g, "").replace("-", ""));
   for (const d of pin) await trabajador.getByRole("button", { name: d, exact: true }).click();
   await trabajador.getByRole("button", { name: "Entrar", exact: true }).click();
-  await trabajador
-    .waitForURL((u) => u.pathname !== "/trabajador/login", { timeout: 30_000 })
-    .catch(() => undefined);
+  // Con PIN temporal de RR. HH., el mismo formulario pide elegir uno propio antes de abrir sesión.
+  const nuevo = trabajador.getByLabel("PIN nuevo (6 dígitos)");
+  await Promise.race([
+    trabajador.waitForURL((u) => u.pathname !== "/trabajador/login", { timeout: 30_000 }),
+    nuevo.waitFor({ timeout: 30_000 }),
+  ]).catch(() => undefined);
+  if (await nuevo.count()) {
+    await nuevo.fill("582913");
+    await trabajador.getByLabel("Repite el PIN nuevo").fill("582913");
+    await trabajador.getByRole("button", { name: "Entrar", exact: true }).click();
+    await trabajador
+      .waitForURL((u) => u.pathname !== "/trabajador/login", { timeout: 30_000 })
+      .catch(() => undefined);
+  }
   if (new URL(trabajador.url()).pathname === "/trabajador/cambiar-pin") {
     // Primer ingreso: el portal exige cambiar el PIN temporal antes de seguir.
     await trabajador.getByLabel("PIN actual").fill(pin);
