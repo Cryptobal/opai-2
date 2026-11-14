@@ -48,6 +48,23 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.procesos_persona_pasos": {
     valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }),
   },
+  // Inventario (CAR-235): CHECK de categoría; un activo va sin tallas ni prenda del uniforme.
+  "inventario.tipos": {
+    valores: () => ({ categoria: "activo", campos: "[]", tallas: [], prenda_clave: null }),
+  },
+  // Inventario (CAR-236): FK compuesta al tipo y CHECK de estado y baja.
+  "inventario.activos": {
+    dependencias: ["inventario.tipos"],
+    fijas: ["tipo_id"],
+    valores: (ctx) => ({
+      tipo_id: id(ctx, "inventario.tipos"),
+      codigo: "A-1",
+      estado: "disponible",
+      valores: "{}",
+      baja_en: null,
+      motivo_baja: null,
+    }),
+  },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],

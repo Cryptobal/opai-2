@@ -474,6 +474,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.archivar` | `rondas_puntos_archivar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.crear` | `rondas_puntos_crear` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.listar` | `rondas_puntos_listar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.actualizar` | `inventario_activos_actualizar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.crear` | `inventario_activos_crear` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.get` | `inventario_activos_get` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.list` | `inventario_activos_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.actualizar` | `inventario_tipos_actualizar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.cargar_sugeridos` | `inventario_tipos_cargar_sugeridos` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.crear` | `inventario_tipos_crear` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.get` | `inventario_tipos_get` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.list` | `inventario_tipos_list` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.archivar` | `comercial_negocios_archivar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.create` | `comercial_negocios_create` | existe |
@@ -1197,6 +1206,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.actualizar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
+- `inventario.activos.cambiar_estado`
 - `nomina.novedades.cargar`
 - `pauta.ausencias.anular`
 - `pauta.ausencias.listar`
