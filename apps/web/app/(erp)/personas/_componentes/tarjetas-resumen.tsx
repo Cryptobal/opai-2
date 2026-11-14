@@ -10,6 +10,7 @@ import { identidadActual } from "@/lib/servidor";
 
 import * as E from "./estado-ficha";
 import { laboralDe, pagoDe, previsionDe } from "./lecturas-ficha";
+import { os10Efectivo } from "./os10-efectivo";
 
 type Tarjeta = {
   titulo: string;
@@ -95,7 +96,9 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
   }
   if (lab && !lab.ok) fallo("Laboral");
   else if (lab) {
-    const { uniforme: u, jornadaDt: j, os10: o, contrato, tallas } = lab.data;
+    const { uniforme: u, jornadaDt: j, contrato, tallas } = lab.data;
+    // CAR-429: vencimiento del documento vigente en Documentos; sin él, el dato manual.
+    const o = os10Efectivo(lab.data.os10, lab.data.os10Respaldo);
     const termino = contrato?.terminoVigente ?? null;
     const kitTallas = tallas.filter((t) => t.enKit);
     const ultima = u?.entregas.at(0);
@@ -143,12 +146,12 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
       ir:
         os10.tono === "success"
           ? "Ir a OS-10"
-          : o?.venceEn
+          : o.venceEn
             ? "Registrar renovación"
             : "Registrar OS-10",
       filas: [
-        { etiqueta: "Credencial", valor: o?.credencial, mono: true },
-        { etiqueta: "Vencimiento", valor: o?.venceEn ? fecha(o.venceEn) : null },
+        { etiqueta: "Credencial", valor: o.credencial, mono: true },
+        { etiqueta: "Vencimiento", valor: o.venceEn ? fecha(o.venceEn) : null },
       ],
     });
   }

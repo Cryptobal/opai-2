@@ -53,6 +53,8 @@ export type Laboral = {
   jornadaDt: JornadaDt | null;
   contrato: ContratoPeriodos | null;
   os10: { credencial: string | null; venceEn: string | null } | null;
+  /** Documento OS-10 vigente en Documentos (CAR-429). */
+  os10Respaldo: { documentoId: string; emitidoEn: string | null; venceEn: string | null } | null;
   contacto: {
     estadoCivil: string | null;
     telefonoSecundario: string | null;
