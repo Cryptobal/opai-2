@@ -25,11 +25,19 @@ model CentralAlerta {
   /// Nota de resolución o motivo de falsa alarma.
   notaCierre     String?   @map("nota_cierre")
   abiertaPorId   String?   @map("abierta_por_id") @db.Uuid
+  /// Cadena que rige la alerta (null = plantilla por defecto) y paso en curso (0 = sin contactar).
+  cadenaId       String?   @map("cadena_id") @db.Uuid
+  pasoActual     Int       @default(0) @map("paso_actual")
+  pasoVenceEn    DateTime? @map("paso_vence_en") @db.Timestamptz(6)
+  /// Quién dijo «me hago cargo» y hasta cuándo tiene para resolver (R8).
+  atencionPorId  String?   @map("atencion_por_id") @db.Uuid
+  atencionVenceEn DateTime? @map("atencion_vence_en") @db.Timestamptz(6)
   cerradaEn      DateTime? @map("cerrada_en") @db.Timestamptz(6)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  eventos CentralAlertaEvento[]
+  eventos  CentralAlertaEvento[]
+  intentos CentralIntento[]
 
   @@unique([tenantId, id])
   @@index([tenantId, estado])
@@ -60,5 +68,47 @@ model CentralAlertaEvento {
 
   @@index([tenantId, alertaId])
   @@map("alerta_eventos")
+  @@schema("central")
+}
+
+/// Cadena de escalamiento (R7): por empresa, instalación y severidad. `pasos` se valida con Zod en la
+/// capacidad (destinatario, canales, espera y si exige «me hago cargo»).
+model CentralCadena {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  instalacionId    String?  @map("instalacion_id") @db.Uuid
+  /// null = vale para toda severidad.
+  severidad        String?
+  pasos            Json
+  plazoAtencionMin Int      @default(30) @map("plazo_atencion_min")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId])
+  @@map("cadenas")
+  @@schema("central")
+}
+
+/// Intento de contacto dentro de una alerta (R7, R18): append-only, un trigger impide editarlo.
+model CentralIntento {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  alertaId       String   @map("alerta_id") @db.Uuid
+  /// Paso de la cadena (0 = contacto fuera de la cadena).
+  paso           Int
+  destinatarioId String?  @map("destinatario_id") @db.Uuid
+  canal          String
+  /// "avisado" (salió por un canal activo) | "apagado" (canal sin activar, R6) | "contesto" |
+  /// "no_contesto" | "confirmo" | "rechazo".
+  resultado      String
+  nota           String?
+  registradoPorId String? @map("registrado_por_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  alerta CentralAlerta @relation(fields: [tenantId, alertaId], references: [tenantId, id], onDelete: Restrict)
+
+  @@index([tenantId, alertaId])
+  @@map("intentos")
   @@schema("central")
 }

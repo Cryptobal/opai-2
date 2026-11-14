@@ -900,6 +900,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `asistencia.rostro.iniciar_vida` | Solo personas: la prueba de vida la completa la cámara de quien marca o se enrola, y cada sesión tiene costo (CAR-89). |
 | `asistencia.rostro.revocar` | Solo personas: la revocación es un derecho personal del trabajador y borra su biometría (L-14). |
 | `asistencia.telefono.habilitar` | Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes. |
+| `central.alertas.hacerse_cargo` | Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala. |
 | `comercial.canales.rotar_token_formulario` | Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant. |
 | `comercial.importar_1_0` | Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25). |
 | `comercial.seguimientos.recibir_correo` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67). |
@@ -1013,6 +1014,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.rostro.iniciar_vida` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `central.alertas.hacerse_cargo` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
@@ -1109,12 +1111,16 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
 - `central.alertas.abrir`
+- `central.alertas.contactar`
+- `central.alertas.escalar`
 - `central.alertas.falsa_alarma`
 - `central.alertas.listar`
 - `central.alertas.obtener`
 - `central.alertas.posponer`
 - `central.alertas.reabrir`
 - `central.alertas.resolver`
+- `central.cadenas.guardar`
+- `central.cadenas.listar`
 - `central.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
