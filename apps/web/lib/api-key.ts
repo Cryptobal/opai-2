@@ -81,6 +81,7 @@ export async function contextoDeApiKey(
     rol: acceso.permisosRol != null ? null : membresia.rol,
     permisosRol: acceso.permisosRol,
     excepciones: acceso.excepciones,
+    permisosAdicionales: acceso.permisosAdicionales ?? null,
   };
   const modulos = fuentes.modulosConEstado
     ? await fuentes.modulosConEstado(tenant.id)
@@ -97,6 +98,7 @@ export async function contextoDeApiKey(
     rol: servicio ? null : membresia.rol,
     permisosRol: servicio ? null : acceso.permisosRol,
     excepciones: servicio ? null : acceso.excepciones,
+    permisosAdicionales: servicio ? null : (acceso.permisosAdicionales ?? null),
     accesoResponsable,
     // La key hereda el alcance por filas de su responsable (ADR-033); un servicio no hereda alcance.
     alcance: servicio ? null : alcanceDe(acceso.instalaciones),

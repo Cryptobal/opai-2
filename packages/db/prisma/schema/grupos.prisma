@@ -16,6 +16,8 @@ model GrupoUsuarios {
 
   tenant   Tenant                @relation(fields: [tenantId], references: [id])
   miembros GrupoUsuarioMiembro[]
+  /// Roles que heredan sus miembros (CAR-359).
+  roles    RolGrupo[]
 
   /// Destino de la FK compuesta de los miembros: el miembro y su grupo son de la misma empresa.
   @@unique([tenantId, id])
