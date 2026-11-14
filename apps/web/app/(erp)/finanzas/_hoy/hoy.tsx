@@ -76,6 +76,16 @@ export function HoyEnFinanzas({ state, resumen }: { state: EstadoPantalla; resum
           </Card>
         );
       })}
+      <Card className="p-4 flex flex-col gap-2">
+        <h2 className="t-subheading text-fg">Informes</h2>
+        <LinkNext href="/finanzas/rentabilidad" className="flex min-h-11 items-center justify-between gap-3 py-2">
+          <span className="flex min-w-0 flex-col">
+            <span className="font-medium">Rentabilidad por instalación</span>
+            <span className="text-sm text-fg-muted">Ventas del mes contra el costo estimado del personal</span>
+          </span>
+          <ArrowRight className="size-4 flex-none text-fg-muted" aria-hidden />
+        </LinkNext>
+      </Card>
     </div>
   );
 }
