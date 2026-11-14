@@ -144,7 +144,7 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
       estado: os10,
       ancla: "os10",
       ir:
-        os10.tono === "success"
+        os10.tono === "success" || o.fuente === "documento"
           ? "Ir a OS-10"
           : o.venceEn
             ? "Registrar renovación"

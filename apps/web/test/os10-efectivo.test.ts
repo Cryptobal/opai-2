@@ -27,9 +27,9 @@ describe("os10Efectivo", () => {
     expect(os10Efectivo({ credencial: null, venceEn: "2028-01-10" }, doc).difiere).toBe(false);
   });
 
-  it("documento sin vencimiento cae a la fecha manual", () => {
+  it("documento sin vencimiento no respalda: queda el dato manual", () => {
     const e = os10Efectivo({ credencial: null, venceEn: "2027-05-01" }, { ...doc, venceEn: null });
-    expect(e).toMatchObject({ venceEn: "2027-05-01", fuente: "documento", difiere: false });
+    expect(e).toMatchObject({ venceEn: "2027-05-01", fuente: "manual", documentoId: null });
   });
 
   it("sin nada no hay fuente", () => {

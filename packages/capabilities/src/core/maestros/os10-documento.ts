@@ -1,3 +1,5 @@
+import { PERMISOS_CORE } from "@opai/domain";
+
 import type { Contexto } from "../../types";
 import { filtroDocumentoSensible } from "../documentos/sensibles";
 
@@ -6,11 +8,13 @@ export const CODIGO_OS10 = "os10";
 
 /**
  * Respaldo documental del OS-10 de una persona (CAR-429): el documento disponible más reciente
- * del tipo `os10` que la persona tiene como propietaria. Es la fuente del vencimiento; el dato
+ * (mayor versión, mismo criterio que la Matriz de documentos) del tipo `os10` que la persona tiene
+ * como propietaria. Sin `documentos.read` no se informa (roles personalizados). Es la fuente del vencimiento; el dato
  * manual de la ficha solo vale mientras no exista. Respeta el filtro de documentos sensibles y
  * no expone el nombre del archivo, solo el id (para enlazar a Documentos) y sus fechas.
  */
 export async function respaldoOs10(ctx: Contexto, personaId: string) {
+  if (!ctx.autorizar(PERMISOS_CORE.documentosRead)) return null;
   const doc = await ctx.db.documento.findFirst({
     where: {
       estado: "disponible",
@@ -19,7 +23,7 @@ export async function respaldoOs10(ctx: Contexto, personaId: string) {
       vinculos: { some: { entidadTipo: "persona", entidadId: personaId, rol: "propietario" } },
       ...filtroDocumentoSensible(ctx),
     },
-    orderBy: [{ venceEn: { sort: "desc", nulls: "last" } }, { version: "desc" }],
+    orderBy: [{ version: "desc" }, { createdAt: "desc" }],
     select: { id: true, emitidoEn: true, venceEn: true },
   });
   if (!doc) return null;

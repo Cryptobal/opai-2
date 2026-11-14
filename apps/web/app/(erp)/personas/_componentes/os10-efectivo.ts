@@ -22,11 +22,12 @@ export type Os10Efectivo = {
 
 export function os10Efectivo(manual: Os10Manual, respaldo: Os10Respaldo): Os10Efectivo {
   const credencial = manual?.credencial ?? null;
-  if (respaldo) {
+  // Un documento sin vencimiento no respalda la fecha: se trata como dato manual.
+  if (respaldo?.venceEn) {
     const difiere = !!manual?.venceEn && !!respaldo.venceEn && manual.venceEn !== respaldo.venceEn;
     return {
       credencial,
-      venceEn: respaldo.venceEn ?? manual?.venceEn ?? null,
+      venceEn: respaldo.venceEn,
       fuente: "documento",
       difiere,
       documentoId: respaldo.documentoId,

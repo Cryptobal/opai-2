@@ -66,17 +66,19 @@ describe.skipIf(omitirSuiteDb())("Personas · OS-10 desde Documentos CAR-429 (db
         ...extra,
       },
     });
-    await e.admin.documentoVinculo.create({
+    await vincular(t, doc.id, personas[t]!);
+    return doc.id;
+  };
+  const vincular = (t: number, documentoId: string, entidadId: string) =>
+    e.admin.documentoVinculo.create({
       data: {
-        tenantId,
-        documentoId: doc.id,
+        tenantId: tenants[t]!,
+        documentoId,
         entidadTipo: "persona",
-        entidadId: personas[t]!,
+        entidadId,
         rol: "propietario",
       },
     });
-    return doc.id;
-  };
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -125,18 +127,28 @@ describe.skipIf(omitirSuiteDb())("Personas · OS-10 desde Documentos CAR-429 (db
     expect(await respaldoDe(0)).toBeNull();
   });
 
-  it("toma el documento disponible con el vencimiento más lejano; ignora archivados", async () => {
-    await documentoOs10(0, "2026-06-01");
-    const vigente = await documentoOs10(0, "2028-01-10");
-    await documentoOs10(0, "2030-01-01", { estado: "archivado", archivadoEn: new Date() });
+  it("toma la versión vigente más reciente; ignora reemplazados y archivados", async () => {
+    await documentoOs10(0, "2026-06-01", { estado: "reemplazado" });
+    const vigente = await documentoOs10(0, "2028-01-10", {
+      version: 2,
+      emitidoEn: new Date("2026-01-10T00:00:00Z"),
+    });
+    await documentoOs10(0, "2030-01-01", {
+      estado: "archivado",
+      archivadoEn: new Date(),
+      version: 3,
+    });
     expect(await respaldoDe(0)).toEqual({
       documentoId: vigente,
-      emitidoEn: null,
+      emitidoEn: "2026-01-10",
       venceEn: "2028-01-10",
     });
   });
 
   it("aísla por empresa: el documento de otra empresa no respalda a nadie aquí", async () => {
+    // Documento de la empresa 0 vinculado (a la fuerza) a la persona de la empresa 1: la RLS lo oculta.
+    const ajeno = await documentoOs10(0, "2029-01-01");
+    await vincular(0, ajeno, personas[1]!);
     expect(await respaldoDe(1)).toBeNull();
     const r = await ejecutar(1, "core.personas.laboral_ver", { id: personas[0] });
     expect(r.error?.code).toBe("NOT_FOUND");
