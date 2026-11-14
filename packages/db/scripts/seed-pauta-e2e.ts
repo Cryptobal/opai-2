@@ -27,12 +27,15 @@ async function main() {
 }
 
 async function sembrar(db: TenantTx, tenantId: string) {
-  // El módulo Pauta se activa en la empresa de pruebas (navegación y capacidades).
-  await db.tenantModule.upsert({
-    where: { tenantId_moduloId: { tenantId, moduloId: "pauta" } },
-    update: { estado: "activo" },
-    create: { tenantId, moduloId: "pauta", estado: "activo" },
-  });
+  // Pauta y Desempeño se activan en la empresa de pruebas (navegación y capacidades). Sin Desempeño
+  // activo sus capacidades responden «Módulo inactivo» y sus e2e no prueban nada (CAR-507).
+  for (const moduloId of ["pauta", "desempeno"]) {
+    await db.tenantModule.upsert({
+      where: { tenantId_moduloId: { tenantId, moduloId } },
+      update: { estado: "activo" },
+      create: { tenantId, moduloId, estado: "activo" },
+    });
+  }
   const cuenta = await db.cuenta.upsert({
     where: { id: "00000000-0000-7000-8000-0000000b0010" },
     update: {},
