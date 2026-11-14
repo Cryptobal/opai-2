@@ -16,7 +16,8 @@ CREATE TABLE "inventario"."existencias" (
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
     CONSTRAINT "existencias_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "existencias_cantidad_check" CHECK ("cantidad" BETWEEN 0 AND 100000)
+    CONSTRAINT "existencias_cantidad_check" CHECK ("cantidad" BETWEEN 0 AND 100000),
+    CONSTRAINT "existencias_talla_check" CHECK (char_length("talla") BETWEEN 1 AND 10)
 );
 
 CREATE TABLE "inventario"."movimientos" (
@@ -32,6 +33,7 @@ CREATE TABLE "inventario"."movimientos" (
 
     CONSTRAINT "movimientos_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "movimientos_delta_check" CHECK ("delta" <> 0),
+    CONSTRAINT "movimientos_talla_check" CHECK (char_length("talla") BETWEEN 1 AND 10),
     CONSTRAINT "movimientos_motivo_check" CHECK ("motivo" IN ('ingreso', 'ajuste', 'entrega', 'devolucion'))
 );
 

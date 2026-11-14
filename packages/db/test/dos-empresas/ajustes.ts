@@ -68,7 +68,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   // Inventario (CAR-237): FK compuesta al tipo; movimiento con delta distinto de cero y motivo válido.
   "inventario.existencias": {
     dependencias: ["inventario.tipos"],
-    fijas: ["tipo_id"],
+    // La talla tiene CHECK de largo (1 a 10): la copia no la regenera.
+    fijas: ["tipo_id", "talla"],
     valores: (ctx) => ({ tipo_id: id(ctx, "inventario.tipos"), talla: "M", cantidad: 1 }),
   },
   "inventario.movimientos": {

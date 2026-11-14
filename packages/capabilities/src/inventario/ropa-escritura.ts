@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { PERMISOS_INVENTARIO } from "./comun";
 import { aplicarMovimiento } from "./ropa-movimiento";
@@ -93,6 +93,9 @@ export const ropaAjustar = defineCapability({
     if (delta === 0) throw reglaDeNegocio("La cantidad ya es esa: no hay nada que ajustar.");
     if (dryRun) return { tipoId: tipo.id, existencias: [{ talla, cantidad: input.cantidad }] };
     const cantidad = await ctx.transaccion(async (tx) => {
+      // R17: el ajuste fija lo contado; si la talla cambió desde la lectura (otro ingreso o entrega), falla.
+      const hoy = await tx.inventarioExistencia.findFirst({ where: { tipoId: tipo.id, talla }, select: { cantidad: true } });
+      if ((hoy?.cantidad ?? 0) !== actual) throw conflicto("La talla cambió mientras tanto. Vuelve a contar o recarga.");
       const c = await aplicarMovimiento(ctx, tx, { tipoId: tipo.id, talla, delta, motivo: "ajuste", nota: input.motivo });
       await ctx.eventos.emitir(tx, {
         tipo: "inventario.ropa.ajustada",
