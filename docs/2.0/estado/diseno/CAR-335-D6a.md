@@ -23,3 +23,22 @@
 ## Presupuesto de JS
 
 - `/rendiciones/lotes/[id]` quedó en 176,1 KB contra un tope de 176 (la entrada de novedades suma unos bytes al trozo común del shell). Se sube su tope a 177 KB (ADR-037).
+
+## Sondeo e2e con el diseño nuevo (#727)
+
+- `cabecera-estable` (CAR-12, CA1): en iPad el buscador se corría a la izquierda en las fichas con «Atrás» o acciones. Ahora va centrado sobre la barra (`position: absolute`) y la ruta se corta antes de llegar a él. En el teléfono la cuenta vive en «Yo» y la prueba la mide ahí.
+- `ficha-un-panel`: a 1024 la lista ya no mide 360 px fijos; en el diseño nuevo la ficha toma el 58 % (CAR-336) y la prueba lo comprueba así.
+- El resto de las e2e en rojo también fallan con el diseño clásico (#723) o pasan al reintento; no vienen del diseño nuevo.
+
+## Buscador de la barra (#727, revisión de capturas)
+
+- Las capturas de `preview-e2e` mostraron que el buscador centrado con `position: absolute` tapaba «Editar» y «Fijar» en la ficha de persona a 1280 px, y las pestañas de la ruta y esos botones a 1024 px. Ahora queda al centro exacto solo en escritorio y cuando la barra no trae acciones; con acciones, o en iPad, vuelve al flujo (ruta, buscador, acciones, iconos), como antes de #727.
+- `cabecera-estable` (CAR-12, CA1) sigue exigiendo que la campana y el usuario no se muevan entre vistas; del buscador exige el mismo tamaño y la misma altura, pero no la misma x. Es la diferencia aceptada frente a CA1 para no tapar controles.
+
+- Segunda revisión de capturas (9bfcec34): en iPad el buscador aún tapaba la pestaña «Personas», y en escritorio, «Vencimientos». Ahora la ruta o las pestañas tienen su ancho natural, el buscador se centra en el espacio que queda y, en iPad con acciones de página, el buscador queda como ícono, sin texto. Así nada se monta sobre otra cosa.
+
+## Presupuesto de JS (#727)
+
+- Tras traer `main` con #723, #725 y #726, `build · presupuesto de JS` marcó 25 rutas con 0,0 a 0,2 KB de más: el trozo común del shell creció con las novedades nuevas, no hay código nuevo en esas páginas. Se sube el tope de cada una al entero siguiente de su medida (ADR-037). Sigue pendiente para núcleo que las novedades no viajen en el trozo común.
+- Tras traer `main` con #735 (campos personalizados), `/(erp)/pauta` midió 179,2 KB contra un tope de 179: se sube a 180 por el mismo motivo.
+- Tras traer `main` con #735, `/(erp)/cuentas/[id]` (175,4 KB), `/(erp)/contactos/[id]` (185,4 KB) y `/(erp)/configuracion/campos-personalizados` (177,1 KB, que usaba el tope por defecto de 177) quedaron 0,1 a 0,4 KB sobre su tope. Se suben a 176, 186 y 178 por el mismo motivo.

@@ -281,6 +281,7 @@ core_integraciones_list
 core_integraciones_probar
 core_invitations_list
 core_invitations_revoke
+core_libro_novedades_listar
 core_marca_get
 core_marca_update
 core_me
@@ -369,6 +370,7 @@ core_vinculos_list
 core_vinculos_previsualizar
 core_vinculos_terminar
 core_vinculos_update
+core_webhooks_destino_get
 core_webhooks_destinos_list
 core_webhooks_entrega_reenviar
 core_webhooks_entregas_list
@@ -528,6 +530,7 @@ finanzas_reglas_banco_aplicar
 finanzas_reglas_banco_guardar
 finanzas_reglas_banco_listar
 finanzas_reglas_banco_probar
+finanzas_rentabilidad_get
 finanzas_reportes_resultados
 finanzas_ventas_actualizar_borrador
 finanzas_ventas_buscar
