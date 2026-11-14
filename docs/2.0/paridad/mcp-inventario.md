@@ -623,6 +623,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
+| compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
+| compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
@@ -811,6 +813,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
 | trabajador | `/trabajador/notificaciones` | `portal_trabajador.preferencias_notificacion.obtener` | `portal_trabajador_preferencias_notificacion_obtener` | existe |
 | trabajador | `/trabajador/privacidad` | `portal_trabajador.privacidad.obtener` | `portal_trabajador_privacidad_obtener` | existe |
+| trabajador | `/trabajador/solicitudes` | `portal_trabajador.solicitudes.listar` | `portal_trabajador_solicitudes_listar` | existe |
 | trabajador | `/trabajador` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |

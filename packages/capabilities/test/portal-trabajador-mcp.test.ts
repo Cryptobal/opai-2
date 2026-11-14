@@ -34,6 +34,11 @@ describe("tools/list · portal_trabajador", () => {
       "portal_trabajador_mis_turnos_listar",
       "portal_trabajador_mis_documentos_listar",
       "portal_trabajador_mis_documentos_descargar",
+      "portal_trabajador_solicitudes_listar",
+      "portal_trabajador_solicitudes_crear",
+      "preview_portal_trabajador_solicitudes_crear",
+      "portal_trabajador_solicitudes_cancelar",
+      "preview_portal_trabajador_solicitudes_cancelar",
     ];
     const nombres = herramientasMcp(contextoOwnerAgente()).map((h) => h.nombre);
     expect(nombres).toEqual(expect.arrayContaining(esperadas));
