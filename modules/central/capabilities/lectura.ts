@@ -25,6 +25,13 @@ function dondeVista(vista: "activas" | "pospuestas" | "cerradas" | "todas", ahor
   return {};
 }
 
+/** Filtro por estado efectivo: una pospuesta vencida cuenta en el estado al que volvió. */
+function dondeEstado(estado: string, ahora: Date) {
+  if (estado === "pospuesta") return { estado, pospuestaHasta: { gt: ahora } };
+  if (!ESTADOS_ACTIVOS.includes(estado as (typeof ESTADOS_ACTIVOS)[number])) return { estado };
+  return { OR: [{ estado }, { estado: "pospuesta", pospuestaHasta: { lte: ahora }, estadoPrevio: estado }] };
+}
+
 export const alertasListar = defineCapability({
   auditarLectura: (s) => s.items.flatMap((a) => [a.id, ...(a.personaId ? [a.personaId] : [])]),
   id: "central.alertas.listar",
@@ -48,7 +55,7 @@ export const alertasListar = defineCapability({
           dondeAlcance(ctx),
           dondeVista(input.vista, ahora),
           input.severidad ? { severidad: input.severidad } : {},
-          input.estado ? { estado: input.estado } : {},
+          input.estado ? dondeEstado(input.estado, ahora) : {},
           input.instalacionId ? { instalacionId: input.instalacionId } : {},
         ],
       },

@@ -40,13 +40,9 @@ export function vistaAlerta(a: FilaAlerta, ahora: Date): z.infer<typeof alertaSc
   };
 }
 
-/** El agente de central (key de servicio) es quien solo propone estas acciones (R10). */
-export function esAgenteDeServicio(ctx: Contexto) {
-  return ctx.principal?.tipo === "servicio";
-}
-
+/** Un agente (key de servicio o delegada) solo propone estas acciones (R10, R4a). */
 export function exigirPersona(ctx: Contexto, accion: string) {
-  if (esAgenteDeServicio(ctx))
+  if (ctx.principal?.tipo === "servicio" || ctx.agente)
     throw reglaDeNegocio(
       `El agente de central no puede ${accion} por su cuenta: solo puede proponerlo al operador de turno (R10).`,
     );
@@ -58,18 +54,20 @@ type Hecho = {
   estadoDesde: EstadoAlerta | null;
   estadoHacia: EstadoAlerta;
   nota?: string | null;
+  /** Hecho del sistema (p. ej. la vuelta de una pospuesta): sin actor humano. */
+  sistema?: boolean;
 };
 
 /** Línea de tiempo de la alerta y bitácora encadenada del núcleo, en la misma transacción (R18). */
 export async function registrarHecho(ctx: Contexto, tx: TenantTx, h: Hecho) {
-  const actorTipo = ctx.agente ? "agente" : ctx.usuario ? "persona" : "sistema";
+  const actorTipo = h.sistema ? "sistema" : ctx.agente ? "agente" : ctx.usuario ? "persona" : "sistema";
   await tx.centralAlertaEvento.create({
     data: {
       tenantId: ctx.tenantId,
       alertaId: h.alertaId,
       tipo: h.tipo,
       actorTipo,
-      actorId: ctx.usuario?.id ?? null,
+      actorId: h.sistema ? null : (ctx.usuario?.id ?? null),
       nota: h.nota ?? null,
       estadoDesde: h.estadoDesde,
       estadoHacia: h.estadoHacia,

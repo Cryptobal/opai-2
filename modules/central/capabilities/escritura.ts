@@ -1,61 +1,10 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { defineCapability, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
 import { type Accion, estadoEfectivo, POSPONER_MAX_MIN, transicion } from "../domain";
-import { PERMISO_ATENDER, severidadSchema, uuidSchema } from "./esquemas";
-import { alertaVisible, exigirPersona, ID_VISTA_PREVIA, registrarHecho } from "./util";
-
-export const alertasAbrir = defineCapability({
-  id: "central.alertas.abrir",
-  descripcion:
-    "Abre a mano una alerta en la central para una instalación (y opcionalmente el guardia involucrado), con título, descripción y severidad; queda nueva en la cola.",
-  permiso: PERMISO_ATENDER,
-  input: z.object({
-    instalacionId: uuidSchema,
-    personaId: uuidSchema.optional(),
-    titulo: z.string().trim().min(3).max(140),
-    descripcion: z.string().trim().max(2000).default(""),
-    severidad: severidadSchema,
-  }),
-  output: z.object({ id: uuidSchema }),
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    if (ctx.alcance && !ctx.alcance.instalaciones.includes(input.instalacionId))
-      throw noEncontrado("La instalación");
-    const inst = await ctx.db.instalacion.findFirst({ where: { id: input.instalacionId }, select: { id: true } });
-    if (!inst) throw noEncontrado("La instalación");
-    if (input.personaId) {
-      const p = await ctx.db.persona.findFirst({ where: { id: input.personaId }, select: { id: true } });
-      if (!p) throw noEncontrado("La persona");
-    }
-    if (dryRun) return { id: ID_VISTA_PREVIA };
-    const creada = await ctx.transaccion(async (tx) => {
-      const a = await tx.centralAlerta.create({
-        data: {
-          tenantId: ctx.tenantId,
-          instalacionId: input.instalacionId,
-          personaId: input.personaId ?? null,
-          titulo: input.titulo,
-          descripcion: input.descripcion,
-          severidad: input.severidad,
-          origen: "manual",
-          abiertaPorId: ctx.usuario?.id ?? null,
-        },
-      });
-      await registrarHecho(ctx, tx, { alertaId: a.id, tipo: "abierta", estadoDesde: null, estadoHacia: "nueva" });
-      await ctx.eventos.emitir(tx, {
-        tipo: "central.alerta.abierta",
-        entidadTipo: "central.alerta",
-        entidadId: a.id,
-        payload: { instalacionId: a.instalacionId, severidad: a.severidad, origen: a.origen },
-      });
-      return a;
-    });
-    return { id: creada.id };
-  },
-});
+import { PERMISO_ATENDER, uuidSchema } from "./esquemas";
+import { alertaVisible, exigirPersona, registrarHecho } from "./util";
 
 const salida = z.object({ id: uuidSchema, estado: z.string() });
 
@@ -85,7 +34,14 @@ function cambiarEstado(accion: Accion, tipoHecho: string, evento: string, verbo:
       });
       if (count !== 1) throw reglaDeNegocio("La alerta cambió mientras la atendías: vuelve a abrirla.");
       if (a.estado === "pospuesta" && desde !== "pospuesta")
-        await registrarHecho(ctx, tx, { alertaId: a.id, tipo: "reactivada", estadoDesde: "pospuesta", estadoHacia: desde });
+        await registrarHecho(ctx, tx, {
+          alertaId: a.id,
+          tipo: "reactivada",
+          estadoDesde: "pospuesta",
+          estadoHacia: desde,
+          nota: `Venció el plazo: ${a.pospuestaHasta?.toISOString() ?? ""}`,
+          sistema: true,
+        });
       await registrarHecho(ctx, tx, { alertaId: a.id, tipo: tipoHecho, estadoDesde: desde, estadoHacia: hacia, nota: i.nota ?? null });
       await ctx.eventos.emitir(tx, { tipo: evento, entidadTipo: "central.alerta", entidadId: a.id, payload: { desde, hacia } });
     });
@@ -137,7 +93,7 @@ export const alertasPosponer = defineCapability({
   id: "central.alertas.posponer",
   descripcion: "Pospone una alerta activa por un plazo en minutos (hasta 24 horas): sale de la cola y vuelve sola a su estado al vencer.",
   permiso: PERMISO_ATENDER,
-  input: z.object({ id: uuidSchema, minutos: z.number().int().min(5).max(POSPONER_MAX_MIN), nota: nota(0).optional() }),
+  input: z.object({ id: uuidSchema, minutos: z.number().int().min(5).max(POSPONER_MAX_MIN), nota: nota(1).optional() }),
   output: salida,
   efecto: "escritura",
   dryRun: true,

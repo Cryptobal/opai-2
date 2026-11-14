@@ -3,8 +3,8 @@
 -- Qué hace y por qué: la alerta es el caso que atiende la central (§2, estados de §6) y su línea de
 -- tiempo es append-only (R18). Cada hecho se encadena además en core.bitacora desde la capacidad.
 -- Tablas con tenant_id: RLS + FORCE + política tenant_isolation (docs/2.0/REGLAS-codigo.md).
--- Instalación, persona y usuario se validan del mismo tenant en la capacidad; aquí van FK simples
--- (core.instalaciones no tiene índice único (tenant_id, id)).
+-- Instalación y persona: FK simples más el trigger core.verificar_mismo_tenant (una alerta nunca
+-- apunta a la instalación o la persona de otra empresa).
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
@@ -73,6 +73,10 @@ ALTER TABLE "central"."alerta_eventos" ADD CONSTRAINT "alerta_eventos_tenant_id_
   ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "central"."alerta_eventos" ADD CONSTRAINT "alerta_eventos_actor_id_fkey"
   FOREIGN KEY ("actor_id") REFERENCES "core"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "central"."alertas"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
+    'instalacion_id', 'core.instalaciones', 'persona_id', 'core.personas');
 
 -- Línea de tiempo append-only (R18): las correcciones son hechos nuevos.
 CREATE OR REPLACE FUNCTION "central"."alerta_eventos_inmutable"() RETURNS trigger

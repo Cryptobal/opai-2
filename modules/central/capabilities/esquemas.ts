@@ -11,7 +11,7 @@ export const PERMISO_ATENDER = "central:alertas.atender";
 
 /** Contrato de listas (CAR-353): cursor opaco (id de la última fila) y límite con tope. */
 export const listaSchema = z.object({
-  cursor: z.string().optional().describe("Id de la última alerta de la página anterior."),
+  cursor: uuidSchema.optional().describe("Id de la última alerta de la página anterior."),
   limite: z.number().int().min(1).max(100).default(50),
 });
 

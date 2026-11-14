@@ -1,5 +1,5 @@
+import { alertasAbrir } from "./abrir";
 import {
-  alertasAbrir,
   alertasFalsaAlarma,
   alertasPosponer,
   alertasReabrir,

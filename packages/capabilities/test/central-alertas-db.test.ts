@@ -83,11 +83,29 @@ describe.skipIf(omitirSuiteDb())("Central · alertas (db)", () => {
     expect(hechos.map((h) => h.tipo)).toEqual(["central.alerta.abierta"]);
   });
 
-  it("la vista previa no escribe nada", async () => {
-    const antes = await e.admin.centralAlerta.count({ where: { tenantId: t.A } });
+  it("la vista previa no escribe nada: ni alerta, ni hecho, ni bitácora", async () => {
+    const contar = async () => [
+      await e.admin.centralAlerta.count({ where: { tenantId: t.A } }),
+      await e.admin.centralAlertaEvento.count({ where: { tenantId: t.A } }),
+      await e.admin.bitacora.count({ where: { tenantId: t.A } }),
+    ];
+    const antes = await contar();
     const r = await run(adminA(), "central.alertas.abrir", { instalacionId: inst.A1, titulo: "Prueba", severidad: "baja" }, true);
     expect(r.ok).toBe(true);
-    expect(await e.admin.centralAlerta.count({ where: { tenantId: t.A } })).toBe(antes);
+    const { id } = await abrir(adminA(), inst.A1);
+    const despues = await contar();
+    expect(await run(adminA(), "central.alertas.resolver", { id, nota: "Solo simular" }, true)).toMatchObject({ ok: true });
+    expect(await contar()).toEqual(despues);
+    expect(despues).toEqual(antes.map((n) => n + 1));
+  });
+
+  it("no liga una persona de otra empresa, ni por capacidad ni directo en la base", async () => {
+    const personaB = (await e.admin.persona.create({ data: { tenantId: t.B, nombres: "Ana", apellidos: "Pérez", rut: "11.111.111-1" } })).id;
+    const r = await run(adminA(), "central.alertas.abrir", { instalacionId: inst.A1, personaId: personaB, titulo: "Ajena", severidad: "baja" });
+    expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    await expect(
+      e.admin.centralAlerta.create({ data: { tenantId: t.A, instalacionId: inst.B, titulo: "Cruzada", severidad: "baja" } }),
+    ).rejects.toThrow();
   });
 
   it("resuelve, rechaza resolver dos veces y reabre en atención", async () => {
