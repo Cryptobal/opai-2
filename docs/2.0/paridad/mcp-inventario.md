@@ -1091,9 +1091,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `acceso.intentos.listar`
 - `acceso.listas.agregar`
 - `acceso.listas.listar`
 - `acceso.listas.quitar`
+- `acceso.registros.get`
 - `acceso.registros.listar`
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
