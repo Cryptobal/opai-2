@@ -18,8 +18,8 @@ test("Más lista solo lo que existe y cada entrada abre su pantalla", async ({ p
   await page.goto("/trabajador/mas");
   for (const { ruta } of PANTALLAS)
     await expect(page.locator(`main a[href="${ruta}"]`).first()).toBeVisible();
-  // Lo pendiente (Central, rondas, accesos, pauta) no se dibuja como entrada falsa.
-  for (const pendiente of ["Central", "Rondas", "Accesos", "Mi pauta"])
+  // Lo pendiente (Central, rondas, accesos) no se dibuja como entrada falsa. «Mi pauta» ya existe (CAR-462).
+  for (const pendiente of ["Central", "Rondas", "Accesos"])
     await expect(page.getByRole("link", { name: pendiente })).toHaveCount(0);
 });
 
@@ -60,4 +60,14 @@ test("Inicio saluda sin errores y navega a Mis datos desde la barra", async ({ p
   await expect(page.getByText("No pudimos cargar esta información")).toHaveCount(0);
   await page.locator('a[href="/trabajador/mis-datos"]:visible').first().click();
   await page.waitForURL((u) => u.pathname === "/trabajador/mis-datos");
+});
+
+test("Mi pauta: sin ficha vinculada muestra el estado vacío con orientación (CAR-462)", async ({ page }) => {
+  await entrar(page);
+  await page.goto("/trabajador/mi-pauta");
+  await expect(page).toHaveTitle(/Mi pauta · Portal Trabajador/);
+  const vacio = page.getByText("Tu cuenta aún no tiene una ficha");
+  const conFicha = page.getByRole("link", { name: "Siguientes" });
+  await expect(vacio.or(conFicha).first()).toBeVisible();
+  await expect(page.getByText("No pudimos cargar esta información")).toHaveCount(0);
 });
