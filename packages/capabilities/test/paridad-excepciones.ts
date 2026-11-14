@@ -25,6 +25,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP.",
   "core.apps_conectadas.desconectar":
     "Solo personas: desconectar una app conectada por OAuth gobierna agentes; se hace en Mi cuenta (CAR-247). Listar sí va por MCP.",
+  "core.push.suscribir":
+    "Solo personas: la suscripción de Web Push es del navegador de quien tiene la sesión; un agente no tiene celular (CAR-356 PR 4a).",
+  "core.push.quitar":
+    "Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a).",
   "core.apikeys.create": "Solo personas: una key no se crea keys ni ve secretos (ADR-032).",
   "core.apikeys.revoke": "Solo personas: gobierno de keys y credenciales (ADR-032).",
   "core.apikeys.update":

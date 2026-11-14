@@ -44,6 +44,17 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Desactivar una regla de aprobación: llega con la misma pantalla de reglas (diseño pendiente). Mientras no haya pantalla nadie crea reglas, así que no hay nada que desactivar.",
   },
+  "core.push.suscribir": {
+    encargo: "CAR-356",
+    desde: "2026-11-13",
+    motivo:
+      "Activar los avisos al celular: el interruptor del portal del trabajador llega en el PR 4b con el service worker. Sin suscripciones, el aviso sigue solo en la campana.",
+  },
+  "core.push.quitar": {
+    encargo: "CAR-356",
+    desde: "2026-11-13",
+    motivo: "Apagar los avisos al celular: llega con el mismo interruptor del PR 4b. Sin pantalla nadie se suscribe, así que no hay nada que quitar.",
+  },
   "core.cuentas_referencias.otorgar": {
     encargo: "CAR-138",
     desde: "2026-11-10",
