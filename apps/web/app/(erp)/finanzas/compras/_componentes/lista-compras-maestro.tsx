@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 
-import { Alerta, Badge } from "@opai/ds";
+import { Alerta } from "@opai/ds";
 
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
@@ -9,6 +9,7 @@ import type { Parametros } from "@/lib/parametros";
 
 import { PestanasCompras } from "../../_componentes/pestanas-compras";
 import { type Compra, diaCL, NOMBRE_DTE } from "../../_componentes/tipos";
+import { EstadoPago } from "./celdas-compras";
 import { type cargarLibro, periodosRecientes } from "./datos";
 import { conFiltrosCompras } from "./filtros-url";
 
@@ -77,7 +78,7 @@ export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos:
           fin: (
             <>
               <span className="t-numeric font-medium">{montoCompra(c)}</span>
-              <Badge>Sin conciliar</Badge>
+              <EstadoPago c={c} />
             </>
           ),
         }))}

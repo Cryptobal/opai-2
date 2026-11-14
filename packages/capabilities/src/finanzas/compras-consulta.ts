@@ -40,12 +40,29 @@ export async function vistasDeCompras(ctx: Contexto, filas: readonly FilaConProv
     ? await ctx.db.centroCosto.findMany({ where: { id: { in: [...ids] } }, select: { id: true, nombre: true } })
     : [];
   const nombreDe = new Map(centros.map((c) => [c.id, c.nombre]));
+  const pagadoDe = await pagadoPorCompra(ctx, filas.map((f) => f.id));
   return filas.map((f) =>
     vistaCompra(
       f,
       f.proveedor,
       f.centroCostoId ? (nombreDe.get(f.centroCostoId) ?? null) : null,
       sugerenciaDe(f),
+      pagadoDe.get(f.id) ?? 0,
     ),
   );
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Lo pagado de cada compra: conciliaciones bancarias confirmadas y vigentes (una consulta por página). */
+async function pagadoPorCompra(ctx: Contexto, todos: string[]): Promise<Map<string, number>> {
+  // La vista previa de un registro trae un id que aún no es uuid: no tiene pagos y no se consulta.
+  const ids = todos.filter((id) => UUID.test(id));
+  if (!ids.length) return new Map();
+  const grupos = await ctx.db.conciliacionBanco.groupBy({
+    by: ["enlaceId"],
+    where: { tipoEnlace: "documento_recibido", enlaceId: { in: ids }, activa: true, confirmada: true },
+    _sum: { monto: true },
+  });
+  return new Map(grupos.map((g) => [g.enlaceId, Number(g._sum.monto ?? 0n)]));
 }

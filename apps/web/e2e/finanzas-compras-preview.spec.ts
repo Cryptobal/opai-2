@@ -23,4 +23,21 @@ test.describe("@preview finanzas: compras maestro-detalle", () => {
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "finanzas-compras-detalle");
   });
+
+  test("el libro muestra el estado de pago que sale de la conciliación (CAR-239)", async ({ page }, info) => {
+    await entrar(page);
+    // Siembra `compras-estado-pago.sql`: el folio 990102 está pagado por una conciliación y el 990101 sigue por pagar y vencido.
+    await page.goto("/finanzas/compras?q=990102");
+    const pagada = page.locator('a[href^="/finanzas/compras/"]').filter({ hasText: "990102" }).filter({ visible: true }).first();
+    if ((await pagada.count()) === 0) return; // Sin la siembra en qa-e2e: no hay nada que mirar.
+    await expect(pagada.getByText("Pagada")).toBeVisible({ timeout: 60_000 });
+    await pagada.click();
+    await expect(page.getByText("Saldo por pagar")).toBeVisible({ timeout: 60_000 });
+    await capturar(page, info, "finanzas-compras-pagada");
+    await page.goto("/finanzas/compras?q=990101");
+    const vencida = page.locator('a[href^="/finanzas/compras/"]').filter({ hasText: "990101" }).filter({ visible: true }).first();
+    await expect(vencida.getByText("Pago vencido")).toBeVisible({ timeout: 60_000 });
+    await capturar(page, info, "finanzas-compras-por-pagar");
+  });
 });
+

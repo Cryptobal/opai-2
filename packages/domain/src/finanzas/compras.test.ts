@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { sugerirCentroCosto, vistaPreviaAsignacion } from "./centro-costo";
 import {
   diasParaReclamo,
+  estadoPagoCompra,
   finDePeriodo,
   periodoDe,
   signoDte,
@@ -92,5 +93,12 @@ describe("plazos y períodos", () => {
 
   it("el vencimiento de pago suma el plazo del proveedor", () => {
     expect(vencimientoPago("2026-10-20", 30)).toBe("2026-11-19");
+  });
+
+  it("deriva el estado de pago de lo conciliado; la nota de crédito no se paga", () => {
+    expect(estadoPagoCompra(33, 119_000, 0)).toBe("por_pagar");
+    expect(estadoPagoCompra(33, 119_000, 50_000)).toBe("parcial");
+    expect(estadoPagoCompra(33, 119_000, 119_000)).toBe("pagada");
+    expect(estadoPagoCompra(61, 20_000, 0)).toBe("no_aplica");
   });
 });

@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-import { ESTADOS_RECEPCION, diasParaReclamo, vencimientoPago, venceReclamo } from "@opai/domain";
+import {
+  ESTADOS_PAGO_COMPRA,
+  ESTADOS_RECEPCION,
+  diasParaReclamo,
+  estadoPagoCompra,
+  vencimientoPago,
+  venceReclamo,
+} from "@opai/domain";
 
 import { dia, hoy } from "../core/maestros/comun";
 
@@ -34,8 +41,11 @@ export const compraSchema = z.object({
   sugerencia: sugerenciaSchema.nullable(),
   origen: z.string(),
   glosa: z.string().nullable(),
-  /** El estado de pago saldrá de la conciliación bancaria; hasta entonces siempre «sin_conciliar». */
-  estadoPago: z.literal("sin_conciliar"),
+  /** Derivado de lo conciliado con el banco (Brief 23); la nota de crédito queda «no_aplica». */
+  estadoPago: z.enum(ESTADOS_PAGO_COMPRA),
+  montoPagado: z.number().int().describe("Suma de las conciliaciones bancarias confirmadas y vigentes."),
+  saldoPorPagar: z.number().int().describe("Total menos lo pagado; 0 en una nota de crédito."),
+  pagoVencido: z.boolean().describe("Queda saldo y ya pasó el vencimiento de pago del proveedor."),
 });
 
 type FilaCompra = {
@@ -61,9 +71,12 @@ export function vistaCompra(
   proveedor: { rut: string; razonSocial: string; plazoPagoDias: number },
   centroNombre: string | null,
   sugerencia: z.input<typeof sugerenciaSchema> | null,
+  montoPagado = 0,
 ): z.input<typeof compraSchema> {
   const recepcion = dia(c.fechaRecepcion) ?? hoy();
   const emision = dia(c.fechaEmision) ?? recepcion;
+  const saldoPorPagar = c.tipoDte === 61 ? 0 : Math.max(c.montoTotal - montoPagado, 0);
+  const vencePago = vencimientoPago(emision, proveedor.plazoPagoDias);
   return {
     id: c.id,
     proveedorId: c.proveedorId,
@@ -81,12 +94,15 @@ export function vistaCompra(
     estadoRecepcion: c.estadoRecepcion as (typeof ESTADOS_RECEPCION)[number],
     venceReclamo: venceReclamo(recepcion),
     diasParaReclamo: diasParaReclamo(recepcion, hoy()),
-    vencimientoPago: vencimientoPago(emision, proveedor.plazoPagoDias),
+    vencimientoPago: vencePago,
     centroCostoId: c.centroCostoId,
     centroCostoNombre: centroNombre,
     sugerencia: c.centroCostoId ? null : sugerencia,
     origen: c.origen,
     glosa: c.glosa,
-    estadoPago: "sin_conciliar",
+    estadoPago: estadoPagoCompra(c.tipoDte, c.montoTotal, montoPagado),
+    montoPagado,
+    saldoPorPagar,
+    pagoVencido: saldoPorPagar > 0 && vencePago < hoy(),
   };
 }

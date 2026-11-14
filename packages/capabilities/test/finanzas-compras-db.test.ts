@@ -80,7 +80,7 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     await dato("finanzas.compras.registrar", doc(1001), { dryRun: true });
     expect(await e.admin.documentoRecibido.count({ where: { tenantId } })).toBe(0);
     const c = await dato<Compra & { vencimientoPago: string; montoTotal: number }>("finanzas.compras.registrar", doc(1001));
-    expect(c).toMatchObject({ montoTotal: 119_000, estadoPago: "sin_conciliar", centroCostoId: null, vencimientoPago: "2026-11-19" });
+    expect(c).toMatchObject({ montoTotal: 119_000, estadoPago: "por_pagar", montoPagado: 0, saldoPorPagar: 119_000, centroCostoId: null, vencimientoPago: "2026-11-19" });
     expect(await ejecutar("finanzas.compras.registrar", doc(1001))).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
     expect(await ejecutar("finanzas.compras.registrar", doc(1002, { montoTotal: 120_000 }))).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
@@ -184,4 +184,27 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     const real = await ejecutarSinProveedores("finanzas.compras.importar", { documentos: filas, crearProveedores: true });
     expect(real).toMatchObject({ ok: true, data: { nuevos: 1, proveedoresCreados: 0 } });
   });
+
+  it("el estado de pago sale de lo conciliado con el banco: parcial, pagada, y lo deshecho no cuenta (CAR-239)", async () => {
+    const c = await dato<Compra & { montoTotal: number }>("finanzas.compras.registrar", doc(9101, { fechaRecepcion: "2026-10-09" }));
+    const cuentaId = (await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco de prueba", numeroVisible: "****0001" } })).id;
+    const pagar = async (monto: number, activa = true) => {
+      const mov = await e.admin.movimientoBancario.create({
+        data: { tenantId, cuentaId, fecha: new Date("2026-10-20"), monto: BigInt(-monto), glosa: "Transferencia de prueba", claveDedupe: randomUUID() },
+      });
+      await e.admin.conciliacionBanco.create({
+        data: { tenantId, movimientoId: mov.id, tipoEnlace: "documento_recibido", enlaceId: c.id, monto: BigInt(monto), activa, confirmada: true },
+      });
+    };
+    const ver = () => dato<Compra & { montoPagado: number; saldoPorPagar: number }>("finanzas.compras.get", { id: c.id });
+    await pagar(50_000, false);
+    expect(await ver()).toMatchObject({ estadoPago: "por_pagar", montoPagado: 0, saldoPorPagar: 119_000 });
+    await pagar(50_000);
+    expect(await ver()).toMatchObject({ estadoPago: "parcial", montoPagado: 50_000, saldoPorPagar: 69_000 });
+    await pagar(69_000);
+    expect(await ver()).toMatchObject({ estadoPago: "pagada", montoPagado: 119_000, saldoPorPagar: 0 });
+    const enLibro = (await libro()).items.find((i) => i.id === c.id);
+    expect(enLibro?.estadoPago).toBe("pagada");
+  });
 });
+

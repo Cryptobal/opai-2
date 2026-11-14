@@ -26,7 +26,10 @@ export type Compra = {
   sugerencia: Sugerencia | null;
   origen: string;
   glosa: string | null;
-  estadoPago: "sin_conciliar";
+  estadoPago: "por_pagar" | "parcial" | "pagada" | "no_aplica";
+  montoPagado: number;
+  saldoPorPagar: number;
+  pagoVencido: boolean;
 };
 
 export type Libro = {
