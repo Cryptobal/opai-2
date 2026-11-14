@@ -17,10 +17,13 @@ export const SIN_BUSCADOR: Readonly<Record<string, string>> = {
   desempeno: "Indicadores y scorecards: pendiente su buscador (cargos y personas ya se buscan).",
   finanzas: "CAR-402: facturas, notas y documentos de compra.",
   nomina: "CAR-406: procesos de remuneraciones.",
-  pauta: "La pauta se abre por instalación, que ya se busca; pendiente su buscador.",
   portal_cliente: "Portal del cliente: no agrega entidades al ERP.",
   portal_trabajador: "Portal del trabajador: no agrega entidades al ERP.",
+<<<<<<< HEAD
   tickets: "CAR-404: tickets y puestos.",
+=======
+  rondas: "CAR-405: rondas y puntos de control.",
+>>>>>>> origin/main
 };
 
 asegurarRegistro();
