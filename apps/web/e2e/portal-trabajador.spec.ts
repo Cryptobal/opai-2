@@ -11,6 +11,7 @@ const PANTALLAS = [
   { ruta: "/trabajador/mis-datos", titulo: "Mis datos" },
   { ruta: "/trabajador/notificaciones", titulo: "Notificaciones" },
   { ruta: "/trabajador/privacidad", titulo: "Privacidad" },
+  { ruta: "/trabajador/mis-documentos", titulo: "Mis documentos" },
 ];
 
 test("Más lista solo lo que existe y cada entrada abre su pantalla", async ({ page }) => {
@@ -33,7 +34,8 @@ for (const { ruta, titulo } of PANTALLAS) {
     const conFicha = page.getByRole("button", { name: "Guardar cambios" });
     const privacidad = page.getByText("Quién cuida tus datos");
     const derechosArco = page.getByText("Tus derechos");
-    await expect(vacio.or(conFicha).or(privacidad).or(derechosArco).first()).toBeVisible();
+    const documentos = page.getByText("Tu contrato, tus anexos y lo que tu empresa comparte contigo.");
+    await expect(vacio.or(conFicha).or(privacidad).or(derechosArco).or(documentos).first()).toBeVisible();
     await expect(page.getByText("No pudimos cargar esta información")).toHaveCount(0);
     await expect(page.locator("main, [data-contenido]").first()).not.toContainText("undefined");
     // Sin scroll horizontal en teléfono (375): el contenido cabe en el ancho.
