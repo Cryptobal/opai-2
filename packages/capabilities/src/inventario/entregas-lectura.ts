@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { PERMISOS_INVENTARIO } from "./comun";
+import { entradaLista, paginaPor, PERMISOS_INVENTARIO, salidaLista } from "./comun";
 import { dondeEntregaEnAlcance, entregaSchema, vistasEntrega } from "./entregas-comun";
 
 export const entregasList = defineCapability({
@@ -18,10 +18,9 @@ export const entregasList = defineCapability({
     activoId: uuidSchema.optional(),
     tipoId: uuidSchema.optional(),
     estado: z.enum(["abiertas", "devueltas", "todas"]).default("abiertas"),
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(50),
+    ...entradaLista(50),
   }),
-  output: z.object({ items: z.array(entregaSchema), siguiente: z.string().nullable() }),
+  output: salidaLista(entregaSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -33,17 +32,18 @@ export const entregasList = defineCapability({
           input.instalacionId ? { instalacionId: input.instalacionId } : {},
           input.activoId ? { activoId: input.activoId } : {},
           input.tipoId ? { tipoId: input.tipoId } : {},
-          input.estado === "abiertas" ? { devueltaEn: null } : input.estado === "devueltas" ? { devueltaEn: { not: null } } : {},
+          input.estado === "abiertas"
+            ? { devueltaEn: null }
+            : input.estado === "devueltas"
+              ? { devueltaEn: { not: null } }
+              : {},
           input.cursor ? { id: { lt: input.cursor } } : {},
         ],
       },
       orderBy: { id: "desc" },
       take: input.limite + 1,
     });
-    const pagina = filas.slice(0, input.limite);
-    return {
-      items: await vistasEntrega(ctx, pagina),
-      siguiente: filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null,
-    };
+    const { items, siguiente } = paginaPor(filas, input.limite, (f) => f.id);
+    return { items: await vistasEntrega(ctx, items), siguiente };
   },
 });

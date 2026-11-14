@@ -1,7 +1,4 @@
 import { Plus } from "lucide-react";
-import { Suspense } from "react";
-
-import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -9,6 +6,7 @@ import { conBusqueda, type SearchParams } from "@/lib/parametros";
 
 import { cargarFichaActivo } from "../../_componentes/datos-activos";
 import { DetalleActivo } from "../../_componentes/detalle-activo";
+import { DivisionFicha } from "../../_componentes/division-ficha";
 import { HojaActivo } from "../../_componentes/diferidas";
 import { ListaActivos } from "../../_componentes/lista-activos";
 
@@ -37,26 +35,14 @@ export default function ActivoDetalle({ params, searchParams }: Props) {
     >
       {({ id, p, datos, lista, puedeGestionar }) => (
         <>
-          <SplitScreen
-            telefono="detalle"
-            unPanelHastaLg
-            etiquetaLista="Lista de activos"
-            lista={
-              <ListaActivos
-                state={lista.state}
-                items={lista.items}
-                tipos={lista.tipos}
+          <DivisionFicha etiqueta="Lista de activos" lista={<ListaActivos
+                {...lista}
                 seleccionada={id}
                 {...(p.q ? { q: p.q } : {})}
                 puedeGestionar={puedeGestionar}
-              />
-            }
-            detalle={
-              <Suspense fallback={<Loading variante="detalle" />}>
-                <DetalleActivo datos={datos} puedeGestionar={puedeGestionar} />
-              </Suspense>
-            }
-          />
+              />}>
+            <DetalleActivo datos={datos} puedeGestionar={puedeGestionar} />
+          </DivisionFicha>
           {puedeGestionar ? <HojaActivo tipos={lista.tipos} /> : null}
         </>
       )}

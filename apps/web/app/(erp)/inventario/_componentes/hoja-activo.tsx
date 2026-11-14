@@ -1,16 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Alerta, avisar, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
-
-import { useHojaUrl } from "@/app/_components/maestros/use-url";
-import { useCapacidad } from "@/app/_components/use-capacidad";
+import { Alerta, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
 
 import { AccionesHoja } from "./acciones-hoja";
 import { CamposActivo } from "./campos-activo";
 import type { CampoTipo, FichaActivo, TipoInventario } from "./tipos";
+import { useHojaEntidad } from "./use-hoja-entidad";
 
 type Estado = { tipoId: string; codigo: string; serie: string; notas: string; valores: Record<string, string> };
 
@@ -34,9 +31,7 @@ function datosDe(e: Estado, campos: CampoTipo[], editando: boolean) {
 
 /** Registrar un activo (eligiendo su tipo) o corregir sus datos; el tipo no cambia después (R13). */
 export function HojaActivo({ activo, tipos = [] }: { activo?: FichaActivo; tipos?: TipoInventario[] }) {
-  const hoja = useHojaUrl(activo ? "editar" : "nuevo");
-  const router = useRouter();
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const { hoja, ejecutar, pendiente, error, terminar } = useHojaEntidad(Boolean(activo), "/inventario/activos");
   const [e, setE] = useState<Estado>(() => inicial(activo, tipos));
   const fijar = (parcial: Partial<Estado>) => setE((x) => ({ ...x, ...parcial }));
   const campos = activo?.campos ?? tipos.find((t) => t.id === e.tipoId)?.campos ?? [];
@@ -49,10 +44,7 @@ export function HojaActivo({ activo, tipos = [] }: { activo?: FichaActivo; tipos
       activo ? "inventario.activos.actualizar" : "inventario.activos.crear",
       activo ? { id: activo.id, ...datos } : { tipoId: e.tipoId, ...datos },
     );
-    if (!r) return;
-    avisar.exito(activo ? "Activo actualizado" : "Activo registrado");
-    hoja.cerrar();
-    if (!activo) router.push(`/inventario/activos/${r.id}`);
+    terminar(r, activo ? "Activo actualizado" : "Activo registrado");
   }
 
   return (

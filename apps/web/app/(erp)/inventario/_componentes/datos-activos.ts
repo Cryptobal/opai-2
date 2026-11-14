@@ -1,13 +1,10 @@
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
-import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
+import type { Parametros, SearchParams } from "@/lib/parametros";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 
+import { conCursor, contextoPagina, todas } from "./paginas";
 import type { Activo, Entrega, FichaActivo, TipoInventario } from "./tipos";
-
-type Pagina = { items: Activo[]; siguiente: string | null };
-type Resultado = Awaited<ReturnType<typeof ejecutarComoUsuario<Pagina>>>;
 
 /** Activos filtrados en el servidor (tipo, estado y texto), página a página: la lista nunca se corta. */
 export async function cargarActivos(p: Parametros) {
@@ -18,22 +15,13 @@ export async function cargarActivos(p: Parametros) {
     incluirBaja: p["estado"] === "de_baja",
     limite: 200,
   };
-  const items: Activo[] = [];
-  let cursor: string | null = null;
-  let r: Resultado | null = null;
-  for (let vuelta = 0; vuelta < 25; vuelta++) {
-    r = await ejecutarComoUsuario<Pagina>("erp", "inventario.activos.list", { ...filtros, ...(cursor ? { cursor } : {}) });
-    if (!r.ok) break;
-    items.push(...r.data.items);
-    cursor = r.data.siguiente;
-    if (!cursor) break;
-  }
+  const { r, items } = await todas<Activo>((cursor) => ejecutarComoUsuario("erp", "inventario.activos.list", { ...filtros, ...conCursor(cursor) }), 25);
   const tipos = await ejecutarComoUsuario<{ items: TipoInventario[] }>("erp", "inventario.tipos.list", {
     categoria: "activo",
     limite: 200,
   });
   return {
-    state: estadoPantalla(r ?? { ok: true }),
+    state: estadoPantalla(r),
     items,
     tipos: tipos.ok ? tipos.data.items : [],
   };
@@ -51,8 +39,8 @@ export async function cargarActivo(id: string) {
 
 /** Datos de la página de la ficha: la lista de la izquierda, la ficha (sin esperar) y el permiso. */
 export async function cargarFichaActivo(params: Promise<{ id: string }>, searchParams: SearchParams) {
-  const [{ id }, p, identidad] = await Promise.all([params, leerParametros(searchParams), requerirIdentidad("/inventario")]);
+  const [{ id }, { p, puede }] = await Promise.all([params, contextoPagina(searchParams, "/inventario", "inventario:gestionar")]);
   const datos = cargarActivo(id);
   datos.catch(() => undefined);
-  return { id, p, datos, lista: await cargarActivos(p), puedeGestionar: puedeDeIdentidad(identidad)("inventario:gestionar") };
+  return { id, p, datos, lista: await cargarActivos(p), puedeGestionar: puede };
 }

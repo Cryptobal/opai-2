@@ -3,8 +3,25 @@
 import type { TenantTx } from "@opai/db";
 import { LIMITES_ROPA, type MotivoMovimiento } from "@opai/domain";
 
-import { conflicto } from "../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+
+/** Tipo de ropa de la empresa; un activo se controla por unidad, no por talla. */
+export async function tipoDeRopa(ctx: Contexto, tipoId: string) {
+  const tipo = await ctx.db.inventarioTipo.findFirst({ where: { id: tipoId } });
+  if (!tipo) throw noEncontrado("El tipo de ropa");
+  if (tipo.categoria !== "ropa")
+    throw reglaDeNegocio("Los activos se controlan uno por uno, no por talla.");
+  return tipo;
+}
+
+export async function cantidadActual(ctx: Contexto, tipoId: string, talla: string) {
+  const e = await ctx.db.inventarioExistencia.findFirst({
+    where: { tipoId, talla },
+    select: { cantidad: true },
+  });
+  return e?.cantidad ?? 0;
+}
 
 export type Movimiento = {
   tipoId: string;
@@ -15,10 +32,17 @@ export type Movimiento = {
 };
 
 /** Aplica un movimiento; si resta más de lo que hay, falla sin cambiar nada (R17). */
-export async function aplicarMovimiento(ctx: Contexto, tx: TenantTx, m: Movimiento): Promise<number> {
+export async function aplicarMovimiento(
+  ctx: Contexto,
+  tx: TenantTx,
+  m: Movimiento,
+): Promise<number> {
   const clave = { tenantId: ctx.tenantId, tipoId: m.tipoId, talla: m.talla };
   // Crea la fila en cero si no existe; dos primeros movimientos simultáneos no chocan.
-  await tx.inventarioExistencia.createMany({ data: [{ ...clave, cantidad: 0 }], skipDuplicates: true });
+  await tx.inventarioExistencia.createMany({
+    data: [{ ...clave, cantidad: 0 }],
+    skipDuplicates: true,
+  });
   const tope = m.delta < 0 ? { gte: -m.delta } : { lte: LIMITES_ROPA.cantidadMax - m.delta };
   const r = await tx.inventarioExistencia.updateMany({
     where: { ...clave, cantidad: tope },
@@ -40,6 +64,9 @@ export async function aplicarMovimiento(ctx: Contexto, tx: TenantTx, m: Movimien
       actorId: ctx.usuario?.id ?? null,
     },
   });
-  const e = await tx.inventarioExistencia.findFirstOrThrow({ where: clave, select: { cantidad: true } });
+  const e = await tx.inventarioExistencia.findFirstOrThrow({
+    where: clave,
+    select: { cantidad: true },
+  });
   return e.cantidad;
 }

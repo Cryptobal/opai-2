@@ -1,6 +1,13 @@
 // Módulo Inventario (CAR-235, ADR-116): piezas compartidas por sus capacidades.
-import { CATEGORIAS_TIPO, LIMITES_TIPO, TIPOS_CAMPO_INVENTARIO, type CampoTipo } from "@opai/domain";
+import {
+  CATEGORIAS_TIPO,
+  LIMITES_TIPO,
+  TIPOS_CAMPO_INVENTARIO,
+  type CampoTipo,
+} from "@opai/domain";
 import { z } from "zod";
+
+import type { Contexto } from "../types";
 
 /** Permisos del módulo Inventario (declarados en su manifiesto). */
 export const PERMISOS_INVENTARIO = {
@@ -75,9 +82,48 @@ export function vistaTipo(f: FilaTipo): VistaTipo {
   };
 }
 
-export const nombreSchema = z.string().trim().min(LIMITES_TIPO.nombreMin).max(LIMITES_TIPO.nombreMax);
+export const nombreSchema = z
+  .string()
+  .trim()
+  .min(LIMITES_TIPO.nombreMin)
+  .max(LIMITES_TIPO.nombreMax);
 export const descripcionSchema = z.string().trim().max(LIMITES_TIPO.descripcionMax);
-export const prendaSchema = z.string().trim().regex(/^[a-z][a-z0-9_]{0,39}$/);
+export const prendaSchema = z
+  .string()
+  .trim()
+  .regex(/^[a-z][a-z0-9_]{0,39}$/);
 export const duplicado = (nombre: string) => `Ya existe un tipo llamado «${nombre}».`;
 
 export const ID_VISTA_PREVIA = "00000000-0000-7000-8000-000000000000";
+
+/** Entrada común de las listas (CAR-353): cursor opaco y tamaño de página. */
+export const entradaLista = (limite: number) => ({
+  cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
+  limite: z.number().int().min(1).max(200).default(limite),
+});
+
+/** Salida común de las listas: la página y el cursor siguiente (nulo en la última). */
+export const salidaLista = <T extends z.ZodType>(item: T) =>
+  z.object({ items: z.array(item), siguiente: z.string().nullable() });
+
+/** Corta la fila de más y arma el cursor siguiente con la clave de orden. */
+export function paginaPor<T>(filas: T[], limite: number, clave: (f: T) => string) {
+  const items = filas.slice(0, limite);
+  const ultima = items.at(-1);
+  return { items, siguiente: filas.length > limite && ultima ? clave(ultima) : null };
+}
+
+/** Página de tipos ordenados por nombre (catálogo y existencias de ropa). */
+export async function tiposPorNombre(
+  ctx: Contexto,
+  filtro: { categoria?: string; activo?: boolean },
+  cursor: string | undefined,
+  limite: number,
+) {
+  const filas = await ctx.db.inventarioTipo.findMany({
+    where: { ...filtro, ...(cursor ? { nombreNormalizado: { gt: cursor } } : {}) },
+    orderBy: { nombreNormalizado: "asc" },
+    take: limite + 1,
+  });
+  return paginaPor(filas, limite, (f) => f.nombreNormalizado);
+}

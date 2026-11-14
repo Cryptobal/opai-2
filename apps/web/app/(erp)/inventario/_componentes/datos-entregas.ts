@@ -2,30 +2,8 @@ import { estadoPantalla } from "@/lib/formato";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
+import { conCursor as c, sinTildes, todas } from "./paginas";
 import type { Activo, Entrega, Opcion, Prenda } from "./tipos";
-
-type Pagina<T> = { items: T[]; siguiente: string | null };
-type Respuesta<T> = { ok: true; data: Pagina<T> } | { ok: false; error: { code: string } };
-const c = (cursor: string | null) => (cursor ? { cursor } : {});
-const sinTildes = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-
-/** Recorre una lista por cursor hasta `maxPaginas`; `pedir` llama a la capacidad con su id literal. */
-async function todas<T>(pedir: (cursor: string | null) => Promise<Respuesta<T>>, maxPaginas: number) {
-  const items: T[] = [];
-  let cursor: string | null = null;
-  let error: Respuesta<T> | null = null;
-  for (let i = 0; i < maxPaginas; i++) {
-    const r = await pedir(cursor);
-    if (!r.ok) {
-      if (i === 0) error = r;
-      break;
-    }
-    items.push(...r.data.items);
-    cursor = r.data.siguiente;
-    if (!cursor) break;
-  }
-  return { r: error ?? ({ ok: true } as const), items };
-}
 
 export async function cargarEntregas(p: Parametros) {
   const estado = p["estado"] === "devueltas" || p["estado"] === "todas" ? p["estado"] : "abiertas";
