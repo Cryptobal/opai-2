@@ -39,6 +39,8 @@ export const manifest = defineModule({
     { id: "inventario.activo.estado_cambiado", descripcion: "Un activo pasó a reparación, volvió o se dio de baja." },
     { id: "inventario.ropa.ingresada", descripcion: "Ingresaron unidades de ropa a las existencias." },
     { id: "inventario.ropa.ajustada", descripcion: "Se corrigió la cantidad de una talla de ropa." },
+    { id: "inventario.entrega.registrada", descripcion: "Se entregó un activo o ropa a una persona o instalación." },
+    { id: "inventario.entrega.devuelta", descripcion: "Se devolvió una entrega de inventario." },
   ],
   capacidades: capacidadesInventario,
 });

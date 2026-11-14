@@ -94,3 +94,29 @@ model InventarioMovimiento {
   @@map("movimientos")
   @@schema("inventario")
 }
+
+/// Entrega de inventario a una persona o a una instalación (CAR-238): un activo (queda «asignado»
+/// hasta devolverlo) o unidades de una talla de ropa (descuentan existencias). Un activo tiene a lo
+/// más una entrega abierta (R20).
+model InventarioEntrega {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  activoId       String?   @map("activo_id") @db.Uuid
+  tipoId         String?   @map("tipo_id") @db.Uuid
+  talla          String?
+  cantidad       Int?
+  personaId      String?   @map("persona_id") @db.Uuid
+  instalacionId  String?   @map("instalacion_id") @db.Uuid
+  nota           String?
+  entregadaEn    DateTime  @default(now()) @map("entregada_en") @db.Timestamptz(6)
+  devueltaEn     DateTime? @map("devuelta_en") @db.Timestamptz(6)
+  notaDevolucion String?   @map("nota_devolucion")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, personaId])
+  @@index([tenantId, instalacionId])
+  @@index([tenantId, activoId])
+  @@map("entregas")
+  @@schema("inventario")
+}

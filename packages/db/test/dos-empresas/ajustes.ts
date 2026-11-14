@@ -76,6 +76,20 @@ export const AJUSTES: Record<string, Ajuste> = {
     fijas: ["tipo_id"],
     valores: (ctx) => ({ tipo_id: id(ctx, "inventario.tipos"), talla: "M", delta: 1, motivo: "ingreso" }),
   },
+  // Inventario (CAR-238): entrega de ropa a una persona (CHECK de ítem y destino; FK compuestas).
+  "inventario.entregas": {
+    dependencias: ["inventario.tipos", "core.personas"],
+    fijas: ["tipo_id", "persona_id"],
+    valores: (ctx) => ({
+      tipo_id: id(ctx, "inventario.tipos"),
+      persona_id: id(ctx, "core.personas"),
+      activo_id: null,
+      instalacion_id: null,
+      talla: "M",
+      cantidad: 1,
+      devuelta_en: null,
+    }),
+  },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],
