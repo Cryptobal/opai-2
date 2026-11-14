@@ -512,6 +512,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.marca.registrar` | `pauta_marca_registrar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.mes.leer` | `pauta_mes_leer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.ppc.listar` | `pauta_ppc_listar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.publicaciones.publicar` | `pauta_publicaciones_publicar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.reemplazos.asignar` | `pauta_reemplazos_asignar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.reemplazos.sugerir` | `pauta_reemplazos_sugerir` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.refuerzos.agregar` | `pauta_refuerzos_agregar` | existe |
@@ -1153,7 +1154,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
 - `pauta.publicaciones.listar`
-- `pauta.publicaciones.publicar`
 - `platform.ajustes.set`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
