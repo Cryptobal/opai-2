@@ -21,9 +21,9 @@ const ICONOS = [
 
 type IconoManifest = { sizes: string; purpose?: string };
 
-// Lo único que puede quedar en `caches`: la página offline neutra, los íconos y los estáticos con
-// hash (JS/CSS/fuentes). Cualquier HTML o RSC con sesión (query `_rsc`) o `/api/*` sería una fuga.
-const PUBLICOS = new Set(["/sin-conexion", ...ICONOS]);
+// Lo único que puede quedar en `caches`: las páginas offline neutras (la general y la de Terreno, que
+// precachea `sw.js` sin datos de personas ni de la empresa), los íconos y los estáticos con hash (JS/CSS/fuentes). Cualquier HTML o RSC con sesión (query `_rsc`) o `/api/*` sería una fuga.
+const PUBLICOS = new Set(["/sin-conexion", "/terreno/sin-conexion", ...ICONOS]);
 function esActivoPublico(u: string): boolean {
   const { pathname, search } = new URL(u);
   if (search.includes("_rsc")) return false;
