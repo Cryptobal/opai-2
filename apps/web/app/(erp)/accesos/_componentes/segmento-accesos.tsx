@@ -2,12 +2,13 @@ import { Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
-export type ActivaAccesos = "registros" | "en_sitio" | "intentos";
+export type ActivaAccesos = "registros" | "en_sitio" | "intentos" | "listas";
 
 const OPCIONES = [
   { id: "registros", etiqueta: "Registros", href: "/accesos" },
   { id: "en_sitio", etiqueta: "En sitio", href: "/accesos?estado=en_sitio" },
   { id: "intentos", etiqueta: "Intentos denegados", href: "/accesos/intentos" },
+  { id: "listas", etiqueta: "Listas", href: "/accesos/listas" },
 ] as const;
 
 /**
