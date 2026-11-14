@@ -94,6 +94,18 @@ export function operacionesCobros(db: TenantTx, tenantId: string) {
           roleId: true,
           rolTenant: { select: { permisos: true } },
           excepciones: { select: { permiso: true, conceder: true } },
+          // Roles que se suman (CAR-359): también cuentan como licencia del módulo.
+          rolesAdicionales: { select: { rol: { select: { permisos: true, archivadoEn: true } } } },
+          gruposUsuarios: {
+            select: {
+              grupo: {
+                select: {
+                  archivadoEn: true,
+                  roles: { select: { rol: { select: { permisos: true, archivadoEn: true } } } },
+                },
+              },
+            },
+          },
         },
       }),
       trabajadores: (
