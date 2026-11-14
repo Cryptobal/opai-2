@@ -105,7 +105,7 @@ test.describe("@preview diseño nuevo con sesión", () => {
       }
       expect(errores).toEqual([]);
     } finally {
-      await conDiseno(page, "");
+      await conDiseno(page, "clasico");
       const url = new URL(page.url()).origin;
       await page.context().addCookies([{ name: "opai_menu", value: "", url }]);
     }
