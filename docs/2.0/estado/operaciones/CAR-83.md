@@ -3,7 +3,7 @@
 - **Sesión:** Sesión Operaciones
 - **PR:** #816 · rama `brief/car-83-visitas-supervision` · [brief](../../briefs/BRIEF-CAR-83-supervision-visitas.md)
 - **Estado:** En PR (PR 1 de 3)
-- **Migración:** `20270101100000_pauta_visitas` (pendiente de aplicar con snapshot de Neon, dev y main)
+- **Migración:** `20270107100000_pauta_visitas` (pendiente de aplicar con snapshot de Neon, dev y main)
 - **Apilado sobre / espera:** ninguno
 
 ## Qué entra (PR 1: visitas en el servidor, sin pantalla)
