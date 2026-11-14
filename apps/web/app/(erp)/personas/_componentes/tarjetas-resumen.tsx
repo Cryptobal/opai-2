@@ -95,23 +95,22 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
   }
   if (lab && !lab.ok) fallo("Laboral");
   else if (lab) {
-    const { uniforme: u, jornadaDt: j, os10: o, contrato } = lab.data;
+    const { uniforme: u, jornadaDt: j, os10: o, contrato, tallas } = lab.data;
     const termino = contrato?.terminoVigente ?? null;
     const ultima = u?.entregas.at(0);
     agregar({
       titulo: "Uniforme",
-      estado: E.estadoUniforme(u),
+      estado: E.estadoUniforme(tallas),
       ancla: "uniforme",
       ir: "Ir a Uniforme y tallas",
       filas: [
-        {
-          etiqueta: "Calzado · Pantalón",
-          valor: `${u?.tallaZapato ?? "—"} · ${u?.tallaPantalon ?? "—"}`,
-        },
-        {
-          etiqueta: "Camisa · Chaqueta",
-          valor: `${u?.tallaCamisa ?? "—"} · ${u?.tallaChaqueta ?? "—"}`,
-        },
+        // Las primeras prendas del uniforme de la empresa, de a dos (CAR-408).
+        ...[tallas.slice(0, 2), tallas.slice(2, 4)]
+          .filter((par) => par.length)
+          .map((par) => ({
+            etiqueta: par.map((t) => t.nombre).join(" · "),
+            valor: par.map((t) => t.talla ?? "—").join(" · "),
+          })),
         {
           etiqueta: "Última entrega",
           valor: ultima ? `${fecha(ultima.entregadaEn)} · ${ultima.articulo}` : null,

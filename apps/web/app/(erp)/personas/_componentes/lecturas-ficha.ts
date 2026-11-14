@@ -1,3 +1,4 @@
+import type { TallaPrenda } from "./estado-ficha";
 import { cache } from "react";
 
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -7,13 +8,6 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
  * por capacidad, en vez de una por tarjeta (consultas por navegación, ADR-045). Mismo permiso y auditoría.
  */
 export type Uniforme = {
-  tallaCamisa: string | null;
-  tallaPantalon: string | null;
-  tallaChaqueta: string | null;
-  tallaZapato: string | null;
-  tallaPolera: string | null;
-  tallaGeologo: string | null;
-  tallaPolar: string | null;
   estaturaCm: number | null;
   pesoKg: number | null;
   notas: string | null;
@@ -53,6 +47,8 @@ export type ContratoPeriodos = {
 };
 export type Laboral = {
   uniforme: Uniforme | null;
+  /** Talla por prenda del uniforme de la empresa (CAR-408). */
+  tallas: TallaPrenda[];
   jornadaDt: JornadaDt | null;
   contrato: ContratoPeriodos | null;
   os10: { credencial: string | null; venceEn: string | null } | null;
