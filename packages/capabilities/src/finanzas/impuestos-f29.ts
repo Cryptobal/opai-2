@@ -3,13 +3,21 @@
 // Solo lectura: no declara nada al SII.
 import { z } from "zod";
 
-import { type DocumentoImpuesto, fechaDePago, finDePeriodo, impuestosPorPeriodo, sumarMeses } from "@opai/domain";
+import {
+  type DocumentoImpuesto,
+  fechaDePago,
+  finDePeriodo,
+  impuestosPorPeriodo,
+  ivaConRemanente,
+  sumarMeses,
+} from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { aFecha } from "../core/maestros/comun";
 import { ajusteFinanzas } from "./ajuste-finanzas";
 import { PERMISO_READ } from "./comun";
 import { DIA_PAGO_IVA_DEFECTO } from "./impuestos-esperados-datos";
+import { MESES_REMANENTE, remanenteDelMes } from "./impuestos-remanente";
 
 const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa-mm.");
 const TIPOS = [33, 34, 56, 61];
@@ -34,7 +42,7 @@ const libro = (filas: readonly Fila[]) => ({
 export const impuestosBorradorF29 = defineCapability({
   id: "finanzas.impuestos.borrador_f29",
   descripcion:
-    "Borrador del F29 de un mes: IVA débito de las ventas emitidas, IVA crédito de las compras recibidas no reclamadas, IVA a pagar o remanente del mes, PPM con la tasa de la empresa y fecha de pago. No incluye el remanente de meses anteriores ni declara nada al SII.",
+    "Borrador del F29 de un mes: IVA débito de las ventas emitidas, IVA crédito de las compras recibidas no reclamadas, remanente de crédito arrastrado de los meses anteriores, IVA a pagar o remanente para el mes siguiente, PPM con la tasa de la empresa y fecha de pago. El remanente no se reajusta por UTM y no se declara nada al SII.",
   permiso: PERMISO_READ,
   input: z.object({ periodo: periodoSchema.describe("Mes del libro, aaaa-mm.") }),
   output: z.object({
@@ -46,8 +54,12 @@ export const impuestosBorradorF29 = defineCapability({
     }),
     debito: z.number().int(),
     credito: z.number().int(),
-    ivaAPagar: z.number().int().describe("Débito − crédito, si es positivo."),
-    remanenteMes: z.number().int().describe("Crédito que excede al débito en el mes (queda a favor)."),
+    remanenteAnterior: z
+      .number()
+      .int()
+      .describe(`Crédito a favor arrastrado de hasta ${MESES_REMANENTE} meses anteriores, sin reajuste por UTM.`),
+    ivaAPagar: z.number().int().describe("Débito − crédito − remanente anterior, si es positivo."),
+    remanenteMes: z.number().int().describe("Crédito que queda a favor para el mes siguiente."),
     tasaPpmBps: z.number().int().describe("Puntos base sobre ventas netas y exentas (100 = 1 %)."),
     ppm: z.number().int(),
     totalAPagar: z.number().int().describe("IVA a pagar + PPM."),
@@ -60,7 +72,7 @@ export const impuestosBorradorF29 = defineCapability({
     const desde = aFecha(`${input.periodo}-01`);
     const hasta = aFecha(finDePeriodo(input.periodo));
     const sel = { tipoDte: true, montoNeto: true, montoExento: true, montoIva: true } as const;
-    const [ventas, compras, reclamados, tasaPpmBps, ajustes, postergado] = await Promise.all([
+    const [ventas, compras, reclamados, tasaPpmBps, ajustes, postergado, remanenteAnterior] = await Promise.all([
       ctx.db.documentoEmitido.findMany({
         where: { estadoDte: { in: ESTADOS_VENTA }, tipoDte: { in: TIPOS }, fechaEmision: { gte: desde, lt: hasta } },
         select: sel,
@@ -75,6 +87,7 @@ export const impuestosBorradorF29 = defineCapability({
       ajusteFinanzas(ctx, "flujo_tasa_ppm_bps"),
       ctx.db.flujoAjustes.findFirst({ select: { calendarioPagos: true } }),
       ctx.db.flujoIvaPostergado.findFirst({ where: { periodo: input.periodo }, select: { periodo: true } }),
+      remanenteDelMes(ctx, input.periodo),
     ]);
     const fecha = `${input.periodo}-01`;
     const doc = (f: Fila): DocumentoImpuesto => ({ fecha, ...f });
@@ -82,7 +95,7 @@ export const impuestosBorradorF29 = defineCapability({
     const debito = imp?.debito ?? 0;
     const credito = imp?.credito ?? 0;
     const ppm = imp?.ppm ?? 0;
-    const ivaAPagar = Math.max(0, debito - credito);
+    const { ivaAPagar, remanenteSiguiente } = ivaConRemanente(debito, credito, remanenteAnterior);
     const dia = Number((ajustes?.calendarioPagos as { iva?: number } | null)?.iva ?? DIA_PAGO_IVA_DEFECTO);
     return {
       periodo: input.periodo,
@@ -94,8 +107,9 @@ export const impuestosBorradorF29 = defineCapability({
       },
       debito,
       credito,
+      remanenteAnterior,
       ivaAPagar,
-      remanenteMes: Math.max(0, credito - debito),
+      remanenteMes: remanenteSiguiente,
       tasaPpmBps,
       ppm,
       totalAPagar: ivaAPagar + ppm,
