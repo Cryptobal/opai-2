@@ -6,20 +6,14 @@ import { type Borrador, DIAS, DOCS, TIPOS } from "./borrador-entrada";
 
 export { BORRADOR_VACIO, type Borrador } from "./borrador-entrada";
 
+type P = { b: Borrador; set: (b: Borrador) => void };
+
 const alternar = <T,>(xs: T[], x: T) => (xs.includes(x) ? xs.filter((y) => y !== x) : [...xs, x]);
 
-/** Campos de una entrada de lista (diseño `Listas`, hoja «Agregar»). El número nunca se guarda: solo su huella. */
-export function CamposEntrada({
-  b,
-  set,
-  bloqueada,
-}: {
-  b: Borrador;
-  set: (b: Borrador) => void;
-  bloqueada: boolean;
-}) {
+/** Nombre y documento. El número nunca se guarda: solo su huella. */
+function CamposPersona({ b, set }: P) {
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <Campo etiqueta="Nombre" htmlFor="ae-nombre">
         <Input
           id="ae-nombre"
@@ -60,6 +54,58 @@ export function CamposEntrada({
           />
         </Campo>
       )}
+    </>
+  );
+}
+
+/** Días, horario y uso único (solo en la lista autorizada). */
+function CamposHorario({ b, set }: P) {
+  return (
+    <>
+      <fieldset className="flex flex-wrap gap-3">
+        <legend className="t-label mb-1">Días permitidos (sin marcar = todos)</legend>
+        {DIAS.map(([d, e]) => (
+          <Checkbox
+            key={d}
+            etiqueta={e}
+            marcado={b.dias.includes(d)}
+            onCambiar={() => set({ ...b, dias: alternar(b.dias, d) })}
+          />
+        ))}
+      </fieldset>
+      <div className="grid grid-cols-2 gap-3">
+        <Campo etiqueta="Desde (hora)" htmlFor="ae-desde">
+          <InputFecha
+            id="ae-desde"
+            tipo="time"
+            valor={b.desde}
+            onCambiar={(v) => set({ ...b, desde: v })}
+          />
+        </Campo>
+        <Campo etiqueta="Hasta (hora)" htmlFor="ae-hasta-hora">
+          <InputFecha
+            id="ae-hasta-hora"
+            tipo="time"
+            valor={b.hastaHora}
+            onCambiar={(v) => set({ ...b, hastaHora: v })}
+          />
+        </Campo>
+      </div>
+      <Switch
+        etiqueta="Uso único"
+        descripcion="Sirve para una sola entrada."
+        activo={b.usoUnico}
+        onCambiar={(v) => set({ ...b, usoUnico: v })}
+      />
+    </>
+  );
+}
+
+/** Campos de una entrada de lista (diseño `Listas`, hoja «Agregar»). */
+export function CamposEntrada({ b, set, bloqueada }: P & { bloqueada: boolean }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <CamposPersona b={b} set={set} />
       <fieldset className="flex flex-col gap-2">
         <legend className="t-label mb-1">Tipos de registro (sin marcar = todos)</legend>
         {TIPOS.map(([v, e]) => (
@@ -74,44 +120,6 @@ export function CamposEntrada({
       <Campo etiqueta="Vigente hasta (opcional)" htmlFor="ae-hasta">
         <InputFecha id="ae-hasta" valor={b.hasta} onCambiar={(v) => set({ ...b, hasta: v })} />
       </Campo>
-      {bloqueada ? null : (
-        <>
-          <fieldset className="flex flex-wrap gap-3">
-            <legend className="t-label mb-1">Días permitidos (sin marcar = todos)</legend>
-            {DIAS.map(([d, e]) => (
-              <Checkbox
-                key={d}
-                etiqueta={e}
-                marcado={b.dias.includes(d)}
-                onCambiar={() => set({ ...b, dias: alternar(b.dias, d) })}
-              />
-            ))}
-          </fieldset>
-          <div className="grid grid-cols-2 gap-3">
-            <Campo etiqueta="Desde (hora)" htmlFor="ae-desde">
-              <InputFecha
-                id="ae-desde"
-                tipo="time"
-                valor={b.desde}
-                onCambiar={(v) => set({ ...b, desde: v })}
-              />
-            </Campo>
-            <Campo etiqueta="Hasta (hora)" htmlFor="ae-hasta-hora">
-              <InputFecha
-                tipo="time"
-                valor={b.hastaHora}
-                onCambiar={(v) => set({ ...b, hastaHora: v })}
-              />
-            </Campo>
-          </div>
-          <Switch
-            etiqueta="Uso único"
-            descripcion="Sirve para una sola entrada."
-            activo={b.usoUnico}
-            onCambiar={(v) => set({ ...b, usoUnico: v })}
-          />
-        </>
-      )}
       {bloqueada ? (
         <Campo
           etiqueta="Motivo del bloqueo"
@@ -126,7 +134,9 @@ export function CamposEntrada({
             onChange={(e) => set({ ...b, motivo: e.target.value })}
           />
         </Campo>
-      ) : null}
+      ) : (
+        <CamposHorario b={b} set={set} />
+      )}
     </div>
   );
 }

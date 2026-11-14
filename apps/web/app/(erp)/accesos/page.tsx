@@ -3,7 +3,6 @@ import { DoorOpen } from "lucide-react";
 import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
 import { cargarRegistros } from "./_componentes/datos";
