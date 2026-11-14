@@ -2,11 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   CONFIG_PORTAL_DEFECTO,
-  disponibilidadSeccion,
   instalacionesVisibles,
   normalizarCorreo,
   normalizarDestinatarios,
-  SECCIONES_PORTAL,
   tipoNuncaVisibleParaCliente,
   tiposDocumentoPermitidos,
   type AccesoBase,
@@ -107,9 +105,8 @@ describe("configuración por defecto", () => {
   it("no muestra ningún tipo de documento y omite el RUT en reportes", () => {
     expect(CONFIG_PORTAL_DEFECTO.tiposDocumentoVisibles).toEqual([]);
     expect(CONFIG_PORTAL_DEFECTO.rutEnReportes).toBe("omitido");
-  });
-
-  it("hoy ninguna sección tiene datos propios: todas son pendientes, sin cifras", () => {
-    for (const s of SECCIONES_PORTAL) expect(disponibilidadSeccion(s)).toBe("pendiente");
+    // El texto de las novedades puede nombrar personas: se enciende por cuenta (CAR-502).
+    expect(CONFIG_PORTAL_DEFECTO.seccionesVisibles).not.toContain("novedades_texto");
+    expect(CONFIG_PORTAL_DEFECTO.seccionesVisibles).toContain("novedades");
   });
 });

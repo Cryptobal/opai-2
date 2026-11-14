@@ -10,8 +10,13 @@ export const SECCIONES_PORTAL = [
   "supervision",
   "accesos",
   "documentos",
+  // El texto de las novedades (CAR-502): puede nombrar personas, así que cada cuenta lo enciende aparte.
+  "novedades_texto",
 ] as const;
 export type SeccionPortal = (typeof SECCIONES_PORTAL)[number];
+
+/** Secciones que una cuenta ve solo si la empresa las enciende para ella (apagadas por defecto, CAR-502). */
+const SECCIONES_OPCIONALES: readonly SeccionPortal[] = ["novedades_texto"];
 
 /** Estados de un acceso: solo `activo` abre el portal; `suspendido` es reversible, `revocado` cierra. */
 export const ESTADOS_ACCESO = ["activo", "suspendido", "revocado"] as const;
@@ -38,7 +43,7 @@ export type ConfigPortal = {
 
 export const CONFIG_PORTAL_DEFECTO: ConfigPortal = {
   tiposDocumentoVisibles: [],
-  seccionesVisibles: [...SECCIONES_PORTAL],
+  seccionesVisibles: SECCIONES_PORTAL.filter((s) => !SECCIONES_OPCIONALES.includes(s)),
   muestraFotoGuardias: true,
   muestraRutGuardias: true,
   rutEnReportes: "omitido",
@@ -135,17 +140,4 @@ export function instalacionesVisibles(
     .filter((i) => i.cuentaId === acceso.cuentaId && i.estado === "activa" && !i.archivada)
     .filter((i) => acceso.todasInstalaciones || habilitadas.has(i.id))
     .map((i) => i.id);
-}
-
-/** Estados posibles de una sección que aún no tiene datos en el sistema (vacío honesto, sin cifras). */
-export type DisponibilidadSeccion = "disponible" | "pendiente";
-
-/**
- * Secciones del portal que ya tienen datos propios en esta etapa. Las demás se muestran como
- * «pendiente de integración» y nunca con cifras inventadas (decisión del encargo, PR 1).
- */
-export const SECCIONES_CON_DATOS: readonly SeccionPortal[] = [];
-
-export function disponibilidadSeccion(s: SeccionPortal): DisponibilidadSeccion {
-  return SECCIONES_CON_DATOS.includes(s) ? "disponible" : "pendiente";
 }
