@@ -34,14 +34,6 @@ export const actualizarLaboralInput = z.object({
       horasSemanales: z.string().trim().max(10).nullable().optional(),
       distribucion: textoOpcional(200),
       articulo22: z.boolean().optional(),
-      plazoFijoPeriodo: z.number().int().min(1).max(3).nullable().optional(),
-      terminoPlazoFijo: diaSchema.nullable().optional(),
-      /** Término de cada período de plazo fijo, en orden (hasta 3). */
-      terminosPlazoFijo: z
-        .array(diaSchema)
-        .max(3)
-        .refine((l) => new Set(l).size === l.length, "Hay términos de plazo fijo repetidos.")
-        .optional(),
       avisoTerminoDias: z.number().int().min(0).max(365).nullable().optional(),
     })
     .optional(),
