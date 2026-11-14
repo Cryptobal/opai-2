@@ -33,7 +33,8 @@ export async function capturar(page: Page, info: TestInfo, nombre: string): Prom
 
 /**
  * Captura una hoja o diálogo recién abierto después de que termine su animación de entrada, para que no
- * quede semitransparente sobre la pantalla (CAR-417). Ignora animaciones infinitas (indicadores de carga).
+ * quede semitransparente sobre la pantalla (CAR-417). Ignora animaciones infinitas (indicadores de carga)
+ * y captura solo la ventana visible.
  */
 export async function capturarHoja(page: Page, info: TestInfo, nombre: string): Promise<void> {
   // Las transiciones CSS recién arrancan en el cuadro siguiente: se espera un par de cuadros y se repite
@@ -50,5 +51,8 @@ export async function capturarHoja(page: Page, info: TestInfo, nombre: string): 
       await Promise.all(vivas.map((a) => a.finished.catch(() => undefined)));
     }
   });
-  await capturar(page, info, nombre);
+  // Sin `fullPage`: alargar la ventana para la captura completa cambia el diseño en iPad (borde táctil de
+  // 1024 px) y la hoja vuelve a animar su entrada. La hoja ocupa la ventana, así que basta lo visible.
+  const carpeta = EN_PREVIEW ? "test-results/capturas" : "e2e/__screenshots__";
+  await page.screenshot({ path: `${carpeta}/${nombre}-${info.project.name}.png` });
 }
