@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { dia } from "./comun";
+import { cargarContrato, contratoSchema } from "./contrato-periodos-vista";
 import type { Contexto } from "../../types";
 
 export const laboralSchema = z.object({
@@ -37,9 +38,6 @@ export const laboralSchema = z.object({
       horasSemanales: z.string().nullable(),
       distribucion: z.string().nullable(),
       articulo22: z.boolean(),
-      plazoFijoPeriodo: z.number().nullable(),
-      terminoPlazoFijo: z.string().nullable(),
-      terminosPlazoFijo: z.array(z.string()),
       avisoTerminoDias: z.number().nullable(),
     })
     .nullable(),
@@ -49,6 +47,8 @@ export const laboralSchema = z.object({
       venceEn: z.string().nullable(),
     })
     .nullable(),
+  /** Historia del contrato vigente (CAR-409): períodos de plazo fijo y paso a indefinido. */
+  contrato: contratoSchema.nullable(),
   contacto: z
     .object({
       estadoCivil: z.string().nullable(),
@@ -63,7 +63,7 @@ export const laboralSchema = z.object({
 });
 
 export async function cargarLaboral(ctx: Contexto, personaId: string) {
-  const [uniforme, jornada, os10, contacto] = await Promise.all([
+  const [uniforme, jornada, os10, contacto, contrato] = await Promise.all([
     ctx.db.personaUniforme.findUnique({
       where: { personaId },
       include: { entregas: { orderBy: { entregadaEn: "desc" }, take: 20 } },
@@ -71,6 +71,7 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
     ctx.db.personaJornadaDt.findUnique({ where: { personaId } }),
     ctx.db.personaOs10.findUnique({ where: { personaId } }),
     ctx.db.personaContactoLaboral.findUnique({ where: { personaId } }),
+    cargarContrato(ctx.db, personaId),
   ]);
   return {
     personaId,
@@ -104,12 +105,10 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
           horasSemanales: jornada.horasSemanales?.toString() ?? null,
           distribucion: jornada.distribucion,
           articulo22: jornada.articulo22,
-          plazoFijoPeriodo: jornada.plazoFijoPeriodo,
-          terminoPlazoFijo: dia(jornada.terminoPlazoFijo),
-          terminosPlazoFijo: (jornada.terminosPlazoFijo ?? []).map((d) => dia(d)!),
           avisoTerminoDias: jornada.avisoTerminoDias,
         }
       : null,
+    contrato,
     os10: os10 ? { credencial: os10.credencial, venceEn: dia(os10.venceEn) } : null,
     contacto: contacto
       ? {

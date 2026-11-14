@@ -36,10 +36,13 @@ async function caja(loc: Locator) {
 }
 
 const campanaDe = (page: Page) =>
-  page.locator("header").getByRole("button", { name: /^Notificaciones(?:, hay avisos sin leer)?$/ });
-// A 1280 el usuario está al pie de la barra lateral; en 375 y 1024, en la cabecera.
+  page
+    .locator("header")
+    .getByRole("button", { name: /^Notificaciones(?:, hay avisos sin leer)?$/ });
+// A 1280 el usuario está al pie de la barra lateral; en 1024, en la cabecera. En el teléfono del diseño
+// nuevo (CAR-335 D2c) la cuenta vive en «Yo», en la barra de abajo.
 const usuarioDe = (page: Page) =>
-  page.locator("header, nav").getByRole("button", { name: "Menú de usuario" });
+  page.locator("header, nav").getByRole("button", { name: /^(Menú de usuario|Yo)/ });
 
 test.describe("cabecera estable (CAR-12, CA1)", () => {
   test.beforeEach(() => {
@@ -90,8 +93,13 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
         await expect(inferior.getByRole("button", { name: "Buscar" })).toHaveCount(0);
       }
       for (const [clave, valor] of Object.entries(actual)) {
-        if (refs[clave]) expect(valor, `${clave} en ${vista.nombre}`).toEqual(refs[clave]);
-        else refs[clave] = valor;
+        const ref = refs[clave];
+        if (!ref) refs[clave] = valor;
+        // En el diseño nuevo el buscador vuelve al flujo cuando la barra trae acciones o en iPad, para
+        // no tapar pestañas ni botones (CAR-335 D6c): conserva tamaño y altura, no su x.
+        else if (clave === "buscador")
+          expect({ ...valor, x: 0 }, `${clave} en ${vista.nombre}`).toEqual({ ...ref, x: 0 });
+        else expect(valor, `${clave} en ${vista.nombre}`).toEqual(ref);
       }
       if (vista.nombre === "Vencimientos") {
         await page.getByRole("button", { name: /Faltan/ }).click();
