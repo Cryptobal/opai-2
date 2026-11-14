@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { diferenciaAsignada } from "@opai/domain";
-import { avisar, Button, Sheet } from "@opai/ds";
+import { avisar, Button, Card } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -17,28 +17,21 @@ import { useReconocerFila } from "./use-reconocer-fila";
 import type { SugerenciaReconocer } from "./lista-sugerencias-reconocer";
 import type { Elegida } from "./seleccion-conciliacion";
 
-export function HojaReconocer({
-  movimiento,
-  abierta,
-  onCerrar,
-}: {
-  movimiento: MovimientoBanco | null;
-  abierta: boolean;
-  onCerrar: () => void;
-}) {
+/** Panel derecho de Bancos (CAR-257): reconocer o revisar la conciliación del movimiento elegido, junto a la lista. */
+export function PanelReconocer({ movimiento, onCerrar }: { movimiento: MovimientoBanco | null; onCerrar: () => void }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [sugerencias, setSugerencias] = useState<SugerenciaReconocer[]>([]);
   const [elegidas, setElegidas] = useState<Elegida[]>([]);
   const [deshacerAbierto, setDeshacerAbierto] = useState(false);
   const [motivoDeshacer, setMotivoDeshacer] = useState("");
-  const fila = useReconocerFila(ejecutar, abierta, movimiento?.glosa ?? "");
+  const fila = useReconocerFila(ejecutar, true, movimiento?.glosa ?? "");
   const { alSugerir, modo } = fila;
 
   const movimientoId = movimiento?.id;
   const movimientoEstado = movimiento?.estado;
 
   useEffect(() => {
-    if (!abierta || !movimientoId || movimientoEstado === "conciliado") return;
+    if (!movimientoId || movimientoEstado === "conciliado") return;
     limpiarError();
     let cancel = false;
     void ejecutar<{ sugerencias: SugerenciaReconocer[]; reglas?: SugerenciaRegla[] }>("finanzas.conciliaciones.sugerir", {
@@ -52,7 +45,7 @@ export function HojaReconocer({
     return () => {
       cancel = true;
     };
-  }, [abierta, movimientoId, movimientoEstado, ejecutar, limpiarError, alSugerir]);
+  }, [movimientoId, movimientoEstado, ejecutar, limpiarError, alSugerir]);
 
   if (!movimiento) return null;
 
@@ -97,33 +90,11 @@ export function HojaReconocer({
 
   return (
     <>
-      <Sheet
-        abierto={abierta}
-        onCerrar={onCerrar}
-        titulo={esConciliado ? "Conciliación" : "Reconocer movimiento"}
-        descripcion={`${movimiento.glosa} · ${clp(movimiento.monto)}`}
-        acciones={
-          esConciliado ? (
-            <>
-              <Button variant="secondary" onClick={onCerrar}>
-                Cerrar
-              </Button>
-              <Button variant="destructive" onClick={() => setDeshacerAbierto(true)}>
-                Deshacer…
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="secondary" onClick={onCerrar}>
-                Sin conciliar
-              </Button>
-              <Button disabled={pendiente || !cuadra} onClick={() => void confirmar()}>
-                Confirmar conciliación
-              </Button>
-            </>
-          )
-        }
-      >
+      <Card className="flex flex-col gap-4 p-4">
+        <div>
+          <h2 className="t-subheading text-fg">{esConciliado ? "Conciliación" : "Reconocer movimiento"}</h2>
+          <p className="t-body-sm text-fg-muted break-words">{`${movimiento.glosa} · ${clp(movimiento.monto)}`}</p>
+        </div>
         <CuerpoHojaReconocer
           movimiento={movimiento}
           esConciliado={esConciliado}
@@ -134,7 +105,23 @@ export function HojaReconocer({
           onElegidas={setElegidas}
           fila={fila}
         />
-      </Sheet>
+        <div className="flex flex-wrap justify-end gap-2">
+          {esConciliado ? (
+            <Button variant="destructive" onClick={() => setDeshacerAbierto(true)}>
+              Deshacer…
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={onCerrar}>
+                Sin conciliar
+              </Button>
+              <Button disabled={pendiente || !cuadra} onClick={() => void confirmar()}>
+                Confirmar conciliación
+              </Button>
+            </>
+          )}
+        </div>
+      </Card>
       <DialogDeshacerBanco
         abierto={deshacerAbierto}
         pendiente={pendiente}

@@ -43,14 +43,20 @@ export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<str
   conLimite(erp, trabajador);
   // La persona ficticia de `auditoria-datos.spec.ts` (con RUT y vínculo); si no está, la primera.
   const re = /^\/personas\/[0-9a-f-]{36}$/;
+  // Primero la de `seed:guardia-qa` (CAR-401), la única con usuario de OPAI; luego la de la preparación.
   const ficha =
+    (await primerEnlace(erp, "/personas?q=Guardia%20QA", re)) ??
     (await primerEnlace(erp, "/personas?q=Auditor%C3%ADa", re)) ??
     (await primerEnlace(erp, "/personas", re));
   if (!ficha) return "sin personas en qa-e2e";
   await erp.goto(`${ficha}/laboral`);
   const rut = (await erp.locator("body").innerText()).match(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)?.[0];
   const asignar = erp.getByRole("button", { name: /^(Asignar|Cambiar) PIN$/ });
-  if (!rut || !(await asignar.count())) return "la persona no tiene RUT o PIN de terreno";
+  if (!rut) return "la persona no muestra RUT en Laboral";
+  if (!(await asignar.count())) return "la ficha no ofrece «Asignar PIN»";
+  // El PIN solo abre el portal si la persona tiene usuario en OPAI (la tarjeta lo avisa).
+  if (await erp.getByText(/No tiene usuario en OPAI/).count())
+    return "la persona no tiene usuario en OPAI (hay que invitarla antes de asignar PIN)";
   const pin = "731946";
   await asignar.first().click();
   await erp.getByLabel("PIN de 6 dígitos").fill(pin);

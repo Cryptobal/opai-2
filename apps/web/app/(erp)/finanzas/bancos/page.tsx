@@ -3,20 +3,25 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarBancos } from "./_componentes/datos";
 import { PantallaBancos } from "./_componentes/pantalla-bancos";
-import { PestanasBancos } from "./_componentes/pestanas-bancos";
 
 export const metadata = { title: "Bancos" };
 
-/** Banca (CAR-97): cuentas, cartola, movimientos y conciliación. */
+/** Banca (CAR-97): cuentas, cartola, movimientos y conciliación; maestro-detalle desde CAR-257. */
 export default function Bancos({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <PaginaPortal portal="erp" titulo="Bancos" ruta="/finanzas/bancos" cargar={() => cargarBancos(searchParams)}>
-      {(d) => (
-        <div className="flex flex-col gap-4">
-          <PestanasBancos activa="movimientos" />
-          <PantallaBancos {...d} />
-        </div>
-      )}
+    <PaginaPortal
+      portal="erp"
+      titulo="Bancos"
+      ruta="/finanzas/bancos"
+      completo
+      cargar={() => cargarBancos(searchParams)}
+      opciones={(d) =>
+        d.movId && d.gestiona
+          ? { volver: { href: d.volverA, etiqueta: "Movimientos" }, volverSoloTelefono: true, volverBajoLg: true }
+          : {}
+      }
+    >
+      {(d) => <PantallaBancos {...d} />}
     </PaginaPortal>
   );
 }
