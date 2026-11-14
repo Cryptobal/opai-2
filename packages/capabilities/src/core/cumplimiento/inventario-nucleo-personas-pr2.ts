@@ -31,7 +31,8 @@ export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
       "cargas_invalidez",
       "discapacidad_invalidez",
     ],
-    camposSensibles: ["plan_isapre"],
+    // CAR-411: el tipo de pensión y la discapacidad (pueden revelar invalidez) son datos de salud, igual que el plan.
+    camposSensibles: ["plan_isapre", "tipo_pension", "discapacidad_invalidez"],
     baseLicitud: "obligacion_legal",
     reguladoNoBorrable: true,
   },
