@@ -77,6 +77,6 @@ export const consumidorPautaPublicada = defineConsumidor({
       avisados.push(usuarioId);
     }
     // Celular (PR 4a): solo a quien recibió el aviso ahora; un reintento del despacho no vuelve a tocar.
-    await avisarAlCelular(ctx, avisados, "pauta");
+    await avisarAlCelular(ctx, avisados, "pauta", "pauta");
   },
 });
