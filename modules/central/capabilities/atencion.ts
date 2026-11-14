@@ -6,6 +6,7 @@ import { estadoEfectivo, type Severidad, transicion } from "../domain";
 import { CANALES, siguientePaso } from "../domain/cadena";
 import { PERMISO_ATENDER, uuidSchema } from "./esquemas";
 import { bloquearAlerta, cadenaDe, contactarPaso, TRABAJO_REVISAR } from "./motor";
+import { exigirAgenteHabilitado } from "./humano";
 import { alertaVisible, exigirPersona, registrarHecho } from "./util";
 
 const salida = z.object({ id: uuidSchema, estado: z.string() });
@@ -59,6 +60,7 @@ export const alertasContactar = defineCapability({
   async handler(ctx, i, { dryRun }) {
     const a = await alertaVisible(ctx, i.id);
     if (["resuelta", "falsa_alarma"].includes(a.estado)) throw reglaDeNegocio("La alerta ya está cerrada.");
+    await exigirAgenteHabilitado(ctx, ctx.db, a);
     if (i.destinatarioId && !(await ctx.db.membership.findFirst({ where: { userId: i.destinatarioId, estado: "activa" }, select: { id: true } })))
       throw reglaDeNegocio("La persona contactada no es miembro de la empresa.");
     if (dryRun) return { id: a.id };
@@ -92,6 +94,7 @@ export const alertasEscalar = defineCapability({
         throw reglaDeNegocio(`No se puede escalar una alerta «${estado}».`);
       // R8 y R13: el agente no le quita la alerta a la persona que se hizo cargo.
       if (estado === "en_atencion") exigirPersona(ctx, "escalar una alerta que una persona está atendiendo");
+      await exigirAgenteHabilitado(ctx, tx, a);
       const total = (await cadenaDe(tx, a)).pasos.length;
       const siguiente = a.pasoActual === 0 ? 1 : siguientePaso(a.pasoActual, total, a.severidad as Severidad);
       if (!siguiente) throw reglaDeNegocio("La alerta ya está en el último paso de su cadena.");

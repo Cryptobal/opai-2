@@ -184,6 +184,20 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: el rostro es un dato biométrico sensible (Ley 21.719); un agente nunca enrola a un trabajador. Lo hace la propia persona con prueba de vida.",
   "asistencia.telefono.habilitar":
     "Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes.",
+  "central.turno.abrir":
+    "Solo personas: abrir el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.entregar":
+    "Solo personas: entregar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.aceptar":
+    "Solo personas: aceptar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.cerrar":
+    "Solo personas: cerrar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.alertas.tomar":
+    "Solo personas: tomar una alerta garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.alertas.devolver":
+    "Solo personas: devolver una alerta tomada garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.agente.reanudar":
+    "Solo personas: reanudar al agente de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
   "central.alertas.hacerse_cargo":
     "Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala.",
   "asistencia.marcas.verificar":

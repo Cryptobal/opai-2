@@ -29,7 +29,7 @@ function cambiarEstado(accion: Accion, tipoHecho: string, evento: string, verbo:
           estado: hacia,
           estadoPrevio: hacia === "pospuesta" ? desde : null,
           pospuestaHasta: hacia === "pospuesta" ? (i.hasta ?? null) : null,
-          ...(cierra ? { notaCierre: i.nota ?? null, cerradaEn: new Date() } : {}),
+          ...(cierra ? { notaCierre: i.nota ?? null, cerradaEn: new Date(), tomadaPorId: null, tomadaEn: null } : {}),
           ...(hacia === "en_atencion" ? { notaCierre: null, cerradaEn: null } : {}),
         },
       });
