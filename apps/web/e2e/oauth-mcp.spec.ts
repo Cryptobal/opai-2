@@ -39,6 +39,10 @@ async function hastaAutorizar(page: Page, url: string): Promise<void> {
   }
 }
 
+// El registro de apps (DCR) es un POST sin Origin: con la cookie de marco que fija la configuración,
+// Better Auth lo rechaza por CSRF (403). Estas pruebas van sin cookies previas (CAR-335 D6a).
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe("@preview OAuth del MCP", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 

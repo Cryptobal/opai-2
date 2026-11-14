@@ -63,7 +63,9 @@ export async function FichaAusencias({
             </span>
             <span className="min-w-0 flex-1">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="text-base font-medium text-fg">{etiquetaTipo(g.tipo)}</span>
+                <span className="text-base font-medium text-fg">
+                  {g.clase ? `${etiquetaTipo(g.tipo)} · ${g.clase}` : etiquetaTipo(g.tipo)}
+                </span>
                 {g.estado === "anulada" ? (
                   <Badge tono="neutro">Anulada</Badge>
                 ) : g.dias > 0 ? (
