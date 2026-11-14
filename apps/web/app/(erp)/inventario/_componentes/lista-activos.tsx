@@ -10,6 +10,32 @@ import { conteo } from "@/lib/plural";
 import { PestanasInventario } from "./pestanas";
 import { type Activo, ESTADOS_ACTIVO, estadoActivo, type TipoInventario } from "./tipos";
 
+function filaActivo(a: Activo, q?: string) {
+  const estado = estadoActivo(a.estado);
+  return {
+    id: a.id,
+    href: conBusqueda(`/inventario/activos/${a.id}`, q),
+    inicio: (
+      <span className="flex size-10 flex-none items-center justify-center rounded-sm bg-fill text-fg-muted">
+        <Package className="size-4" aria-hidden />
+      </span>
+    ),
+    titulo: <span className="font-medium">{a.codigo}</span>,
+    secundario: (
+      <>
+        {a.tipo}
+        {a.numeroSerie ? ` · ${a.numeroSerie}` : ""}
+        <span className="md:hidden"> · {estado.etiqueta}</span>
+      </>
+    ),
+    fin: (
+      <Badge tono={estado.tono} className="hidden md:inline-flex">
+        {estado.etiqueta}
+      </Badge>
+    ),
+  };
+}
+
 /** Columna de activos (CAR-236): búsqueda por código o serie, filtros por tipo y estado. */
 export function ListaActivos({
   state,
@@ -55,31 +81,7 @@ export function ListaActivos({
               ...(nuevo ? { accion: nuevo } : {}),
             }
       }
-      filas={items.map((a) => {
-        const estado = estadoActivo(a.estado);
-        return {
-          id: a.id,
-          href: conBusqueda(`/inventario/activos/${a.id}`, q),
-          inicio: (
-            <span className="flex size-10 flex-none items-center justify-center rounded-sm bg-fill text-fg-muted">
-              <Package className="size-4" aria-hidden />
-            </span>
-          ),
-          titulo: <span className="font-medium">{a.codigo}</span>,
-          secundario: (
-            <>
-              {a.tipo}
-              {a.numeroSerie ? ` · ${a.numeroSerie}` : ""}
-              <span className="md:hidden"> · {estado.etiqueta}</span>
-            </>
-          ),
-          fin: (
-            <Badge tono={estado.tono} className="hidden md:inline-flex">
-              {estado.etiqueta}
-            </Badge>
-          ),
-        };
-      })}
+      filas={items.map((a) => filaActivo(a, q))}
     />
   );
 }

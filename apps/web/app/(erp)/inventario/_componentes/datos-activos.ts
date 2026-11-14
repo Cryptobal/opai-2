@@ -1,7 +1,8 @@
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
-import type { Parametros } from "@/lib/parametros";
-import { ejecutarComoUsuario } from "@/lib/servidor";
+import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
+import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import type { Activo, FichaActivo, TipoInventario } from "./tipos";
 
@@ -43,4 +44,12 @@ export async function cargarActivo(id: string) {
   const r = await ejecutarComoUsuario<FichaActivo>("erp", "inventario.activos.get", { id });
   requerirEncontrado(r);
   return { state: estadoPantalla(r), activo: r.ok ? r.data : null };
+}
+
+/** Datos de la página de la ficha: la lista de la izquierda, la ficha (sin esperar) y el permiso. */
+export async function cargarFichaActivo(params: Promise<{ id: string }>, searchParams: SearchParams) {
+  const [{ id }, p, identidad] = await Promise.all([params, leerParametros(searchParams), requerirIdentidad("/inventario")]);
+  const datos = cargarActivo(id);
+  datos.catch(() => undefined);
+  return { id, p, datos, lista: await cargarActivos(p), puedeGestionar: puedeDeIdentidad(identidad)("inventario:gestionar") };
 }

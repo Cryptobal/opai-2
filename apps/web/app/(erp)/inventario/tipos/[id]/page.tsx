@@ -5,11 +5,9 @@ import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { conBusqueda, leerParametros, type SearchParams } from "@/lib/parametros";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { requerirIdentidad } from "@/lib/servidor";
+import { conBusqueda, type SearchParams } from "@/lib/parametros";
 
-import { cargarTipo, cargarTipos } from "../../_componentes/datos";
+import { cargarFichaTipo } from "../../_componentes/datos";
 import { DetalleTipo } from "../../_componentes/detalle-tipo";
 import { HojaTipo } from "../../_componentes/diferidas";
 import { ListaTipos } from "../../_componentes/lista-tipos";
@@ -34,22 +32,7 @@ export default function TipoDetalle({ params, searchParams }: Props) {
           Nuevo tipo
         </EnlaceBoton>
       }
-      cargar={async () => {
-        const [{ id }, p, identidad] = await Promise.all([
-          params,
-          leerParametros(searchParams),
-          requerirIdentidad("/inventario/tipos"),
-        ]);
-        const datos = cargarTipo(id);
-        datos.catch(() => undefined);
-        return {
-          id,
-          p,
-          datos,
-          lista: await cargarTipos(p),
-          puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage"),
-        };
-      }}
+      cargar={() => cargarFichaTipo(params, searchParams)}
       opciones={(d) => ({ volver: { href: conBusqueda("/inventario/tipos", d.p.q), etiqueta: "Tipos" } })}
     >
       {({ id, p, datos, lista, puedeGestionar }) => (

@@ -5,11 +5,9 @@ import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { conBusqueda, leerParametros, type SearchParams } from "@/lib/parametros";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { requerirIdentidad } from "@/lib/servidor";
+import { conBusqueda, type SearchParams } from "@/lib/parametros";
 
-import { cargarActivo, cargarActivos } from "../../_componentes/datos-activos";
+import { cargarFichaActivo } from "../../_componentes/datos-activos";
 import { DetalleActivo } from "../../_componentes/detalle-activo";
 import { HojaActivo } from "../../_componentes/diferidas";
 import { ListaActivos } from "../../_componentes/lista-activos";
@@ -34,22 +32,7 @@ export default function ActivoDetalle({ params, searchParams }: Props) {
           Nuevo activo
         </EnlaceBoton>
       }
-      cargar={async () => {
-        const [{ id }, p, identidad] = await Promise.all([
-          params,
-          leerParametros(searchParams),
-          requerirIdentidad("/inventario"),
-        ]);
-        const datos = cargarActivo(id);
-        datos.catch(() => undefined);
-        return {
-          id,
-          p,
-          datos,
-          lista: await cargarActivos(p),
-          puedeGestionar: puedeDeIdentidad(identidad)("inventario:gestionar"),
-        };
-      }}
+      cargar={() => cargarFichaActivo(params, searchParams)}
       opciones={(d) => ({ volver: { href: conBusqueda("/inventario", d.p.q), etiqueta: "Inventario" } })}
     >
       {({ id, p, datos, lista, puedeGestionar }) => (
