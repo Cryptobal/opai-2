@@ -15,7 +15,7 @@ model CentralAlerta {
   descripcion    String    @default("")
   /// "critica" | "alta" | "media" | "baja".
   severidad      String
-  /// "manual" (PR 1); las reglas de vigilancia agregan los suyos (PR 3).
+  /// "manual" o el evento de la señal que la abrió (PR 3, p. ej. "rondas.emergencia").
   origen         String    @default("manual")
   /// "nueva" | "en_contacto" | "escalada" | "en_atencion" | "resuelta" | "falsa_alarma" | "pospuesta".
   estado         String    @default("nueva")
@@ -42,6 +42,7 @@ model CentralAlerta {
   @@unique([tenantId, id])
   @@index([tenantId, estado])
   @@index([tenantId, instalacionId])
+  @@index([tenantId, instalacionId, personaId], map: "alertas_tenant_instalacion_persona_idx")
   @@map("alertas")
   @@schema("central")
 }
@@ -110,5 +111,21 @@ model CentralIntento {
 
   @@index([tenantId, alertaId])
   @@map("intentos")
+  @@schema("central")
+}
+
+/// Regla de vigilancia de la empresa (R1–R6): si una señal abre alertas y con qué severidad. Sin fila,
+/// rige el catálogo por defecto (`modules/central/domain/senales.ts`), activo solo dentro de la cola.
+model CentralRegla {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  evento    String
+  severidad String
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, evento])
+  @@map("reglas")
   @@schema("central")
 }

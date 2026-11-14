@@ -5,6 +5,7 @@ import { defineConsumidor, defineTrabajo, type Contexto } from "@opai/capabiliti
 import type { EstadoAlerta, Severidad } from "../domain";
 import { siguientePaso } from "../domain/cadena";
 import { bloquearAlerta, cadenaDe, contactarPaso, TRABAJO_REVISAR } from "./motor";
+import { consumidorSenales } from "./senales";
 import { registrarHecho } from "./util";
 
 /** Al abrirse una alerta se contacta el paso 1 de su cadena (R7). Idempotente: solo si sigue nueva. */
@@ -56,4 +57,4 @@ export const trabajoRevisarAlerta = defineTrabajo({
 });
 
 export const trabajosCentral = [trabajoRevisarAlerta];
-export const consumidoresCentral = [consumidorAlertaAbierta];
+export const consumidoresCentral = [consumidorAlertaAbierta, consumidorSenales];
