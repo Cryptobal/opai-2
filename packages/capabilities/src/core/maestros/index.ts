@@ -14,8 +14,6 @@ import {
 import { cuentasGet, cuentasList } from "./cuentas";
 import { cuentasCreate, cuentasUpdate } from "./cuentas-escritura";
 import { cuentasArchive, cuentasSetEstado, cuentasSetRepresentantes } from "./cuentas-estado";
-import { cuentasFusionar } from "./cuentas-fusion";
-import { contactosFusionar } from "./contactos-fusion";
 import { capacidadesReferencias } from "./referencias";
 import { cuentasAplicarSii, cuentasConsultarSii, cuentasFacturable } from "./cuentas-sii";
 import { trabajoConsultarContribuyenteSii, trabajoPurgarCacheSii } from "./cuentas-sii-trabajo";
@@ -79,8 +77,6 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   cuentasCreate,
   cuentasUpdate,
   cuentasSetEstado,
-  cuentasFusionar,
-  contactosFusionar,
   cuentasArchive,
   cuentasSetRepresentantes,
   ...capacidadesReferencias,
