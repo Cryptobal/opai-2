@@ -1,5 +1,6 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
+export { INCLUIR_ACCESO, INCLUIR_ROLES_QUE_SUMAN } from "./core/permisos/acceso-membresia";
 export {
   consumidorAvisoPrueba,
   consumidorAvisoPruebaEmpresa,

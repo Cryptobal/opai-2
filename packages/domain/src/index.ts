@@ -17,6 +17,7 @@ export * from "./documentos";
 export * from "./comunicaciones";
 export * from "./permisos";
 export * from "./permisos-efectivos";
+export * from "./acceso-membresia";
 export * from "./portales";
 export * from "./permisos-key";
 export * from "./vocabulario";

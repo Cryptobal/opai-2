@@ -2,11 +2,12 @@
 // `desempeno.aviso_bajo_meta` (silencio por defecto, ADR-020), el cierre emite un evento por persona
 // bajo la meta y uno por jefatura directa (la de su ficha más la de la jerarquía de cargos). Son transaccionales: solo este consumidor los
 // envía, a la persona o a la jefatura, y solo si puede ver ese resultado. Nunca llevan el puntaje.
-import { type Acceso, esRol, renderizar, tienePermisoEfectivo } from "@opai/domain";
+import { accesoDeMembresia, renderizar, tienePermisoEfectivo } from "@opai/domain";
 
 import { valoresEfectivos } from "../core/config";
 import { campoAjuste } from "../core/config/catalogo";
 import { equipoDe } from "../core/jefatura";
+import { INCLUIR_ACCESO } from "../core/permisos/acceso-membresia";
 import { comunicableDe, plantillaVigente } from "../core/comunicaciones/resolver";
 import { defineConsumidor, type EventoPublicado } from "../eventos/consumidores";
 import type { Contexto } from "../types";
@@ -52,17 +53,13 @@ async function usuarioQueVe(ctx: Contexto, personaId: string): Promise<string | 
   if (!p?.usuarioId) return null;
   const m = await ctx.db.membership.findFirst({
     where: { userId: p.usuarioId, estado: "activa" },
-    include: { rolTenant: true, excepciones: true },
+    include: INCLUIR_ACCESO,
   });
   if (!m) return null;
-  const r = m.rolTenant;
-  const acceso: Acceso = {
-    rol: r || !esRol(m.rol) ? null : m.rol,
-    // Un rol personalizado archivado deniega, igual que en la sesión.
-    permisosRol: r ? (r.archivadoEn ? [] : r.permisos) : null,
-    excepciones: m.excepciones.map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
-  };
-  return tienePermisoEfectivo(acceso, PERMISOS_DESEMPENO.resultadosVer) ? m.userId : null;
+  // Igual que en la sesión: rol (archivado deniega), excepciones y roles que se suman (CAR-359).
+  return tienePermisoEfectivo(accesoDeMembresia(m), PERMISOS_DESEMPENO.resultadosVer)
+    ? m.userId
+    : null;
 }
 
 /** Destinatario y cantidad. A la persona, si su cargo le muestra su resultado; a la jefatura, solo por su equipo real. */

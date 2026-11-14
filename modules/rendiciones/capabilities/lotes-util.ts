@@ -1,6 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
-import { cifradoDeCampos, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
-import { tienePermisoEfectivo, esRol } from "@opai/domain";
+import { cifradoDeCampos, INCLUIR_ACCESO, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { accesoDeMembresia, tienePermisoEfectivo } from "@opai/domain";
 
 import { codigoLote, type EstadoLote } from "../domain";
 import { PERMISO_APROBAR_LOTE } from "./permisos";
@@ -37,19 +37,10 @@ export async function anotarPasoLote(
 export async function aprobadoresDeLote(ctx: Contexto): Promise<string[]> {
   const ms = await ctx.db.membership.findMany({
     where: { tenantId: ctx.tenantId, estado: "activa" },
-    include: { rolTenant: true, excepciones: true },
+    include: INCLUIR_ACCESO,
   });
   return ms
-    .filter((m) =>
-      tienePermisoEfectivo(
-        {
-          rol: m.rolTenant || !esRol(m.rol) ? null : m.rol,
-          permisosRol: m.rolTenant ? (m.rolTenant.archivadoEn ? [] : m.rolTenant.permisos) : null,
-          excepciones: m.excepciones.map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
-        },
-        PERMISO_APROBAR_LOTE,
-      ),
-    )
+    .filter((m) => tienePermisoEfectivo(accesoDeMembresia(m), PERMISO_APROBAR_LOTE))
     .map((m) => m.userId);
 }
 

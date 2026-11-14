@@ -1,5 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
-import { ajuste, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { ajuste, INCLUIR_ACCESO, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
 import { claveDuplicado, codigoVisible, esFechaFutura, itemsSinRespaldo } from "../domain";
 import { puedeAprobarMembresia } from "./aprobadores";
@@ -55,7 +55,7 @@ export async function validarAprobador(
   if (aprobadorId === solicitanteId) throw reglaDeNegocio("Nadie aprueba su propia rendición.");
   const m = await ctx.db.membership.findFirst({
     where: { tenantId: ctx.tenantId, userId: aprobadorId, estado: "activa" },
-    include: { rolTenant: true, excepciones: true },
+    include: INCLUIR_ACCESO,
   });
   if (!m || !puedeAprobarMembresia(m))
     throw reglaDeNegocio("El aprobador elegido no puede aprobar rendiciones en esta empresa.");
