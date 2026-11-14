@@ -58,7 +58,8 @@ export default function IndicadoresPropios() {
           state={estadoPantalla(r)}
           titulo="Desempeño"
           filtros={<PestanasDesempeno activa="indicadores" />}
-          accionPrincipal={edita ? <EditarPropio propio={null} hechos={hechos} /> : undefined}
+          // Sin lista (módulo inactivo, sin permiso o error) no se ofrece crear: el estado ya dice por qué.
+          accionPrincipal={edita && r.ok ? <EditarPropio propio={null} hechos={hechos} /> : undefined}
           items={r.ok ? r.data : []}
           clave={(p) => p.id}
           {...(edita
