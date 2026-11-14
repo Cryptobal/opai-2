@@ -40,11 +40,14 @@ export const esGrupoCobro = (filaId: string) => filaId.startsWith(CLIENTE) || fi
 /** Las filas de cliente o instalación abren la hoja de «Cobros esperados» de su semana. */
 export const filaBase = (filaId: string) => (esGrupoCobro(filaId) ? FILA_COBROS_ESPERADOS : filaId);
 
-/** ¿Hay cobros con cliente para abrir la fila «Cobros esperados»? */
-export const hayGruposCobro = (p: Planilla) => p.celdas.some((c) => c.filaId === FILA_COBROS_ESPERADOS && !!c.cliente);
+/** La fila tal cual, o «Cobros esperados» plegable seguida de sus clientes abiertos (si hay cobros con cliente). */
+export function conGruposCobro(p: Planilla, fila: FilaPlanilla, abiertas: ReadonlySet<string> = new Set()): FilaPlanilla[] {
+  if (fila.id !== FILA_COBROS_ESPERADOS || !p.celdas.some((c) => c.filaId === FILA_COBROS_ESPERADOS && !!c.cliente)) return [fila];
+  return [{ ...fila, plegable: { abierta: abiertas.has(fila.id) } }, ...filasGrupoCobro(p, abiertas)];
+}
 
 /** Filas de cliente e instalación que van bajo «Cobros esperados», según qué filas están abiertas. */
-export function filasGrupoCobro(p: Planilla, abiertas: ReadonlySet<string>): FilaPlanilla[] {
+function filasGrupoCobro(p: Planilla, abiertas: ReadonlySet<string>): FilaPlanilla[] {
   if (!abiertas.has(FILA_COBROS_ESPERADOS)) return [];
   const out: FilaPlanilla[] = [];
   for (const g of agrupar(p)) {

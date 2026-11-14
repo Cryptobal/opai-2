@@ -7,7 +7,8 @@ import { Alerta, Badge, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
 import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
-import { celdaEditable, filaBase, type Planilla } from "./datos";
+import { celdaEditable, type Planilla } from "./datos";
+import { filaBase } from "./grupos-cobro";
 import type { ArmadoPlanilla } from "./datos";
 import { hojaEspecial, type HojaEspecial } from "./cobros-celda";
 

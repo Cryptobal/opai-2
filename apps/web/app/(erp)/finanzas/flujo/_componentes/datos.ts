@@ -1,9 +1,8 @@
-import { formatearClp } from "@opai/domain";
+import { formatearClp, formatearFecha } from "@opai/domain";
 import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
-import { type CobroApi, FILA_COBROS_ESPERADOS, hojaEspecial, type IvaApi } from "./cobros-celda";
-import { celdaGrupoCobro, esGrupoCobro, filaBase, filasGrupoCobro, hayGruposCobro } from "./grupos-cobro";
-export { filaBase } from "./grupos-cobro";
+import { type CobroApi, hojaEspecial, type IvaApi } from "./cobros-celda";
+import { celdaGrupoCobro, conGruposCobro, esGrupoCobro, filaBase } from "./grupos-cobro";
 
 export type FilaFlujo = {
   id: string;
@@ -25,7 +24,7 @@ export type CeldaFlujo = {
   iva?: IvaApi;
   cliente?: { cuentaId: string; cuenta: string; instalacionId: string | null; instalacion: string | null };
 };
-export type SemanaFlujo = {
+type SemanaFlujo = {
   semana: string;
   ingresos: number;
   egresos: number;
@@ -74,29 +73,20 @@ const CAPA: Record<CeldaFlujo["capa"], { tono: NonNullable<Celda["tono"]>; detal
 
 export const clp = (n: number) => formatearClp(n);
 
-/** ISO `aaaa-mm-dd` → `dd-mm-aaaa` para UI es-CL. */
-export function fechaDdMmAaaa(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
-}
+/** ISO `aaaa-mm-dd` → `dd-mm-aaaa` para UI es-CL (el formato común de `@opai/domain`). */
+export const fechaDdMmAaaa = (iso: string) => formatearFecha(iso);
 
 const corta = (iso: string) => fechaDdMmAaaa(iso).slice(0, 5);
 
 /** Columnas, filas y celdas para `PlanillaScreen`: filas del flujo, totales y saldo con su tono. */
 export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abiertas?: ReadonlySet<string> }) {
-  const abiertas = opts?.abiertas ?? new Set<string>();
-  const plegableCobros = hayGruposCobro(p);
   const columnas: ColumnaPlanilla[] = p.semanas.map((s) => ({
     id: s.semana,
     etiqueta: s.pasada ? `${corta(s.semana)} · real` : corta(s.semana),
     destacada: s.semana === p.columnaHoy,
   }));
   const filas: FilaPlanilla[] = [
-    ...p.filas.flatMap((f): FilaPlanilla[] => {
-      const fila: FilaPlanilla = { id: f.id, etiqueta: f.etiqueta, ...(f.vinculo ? { sub: f.vinculo } : {}) };
-      if (f.id !== FILA_COBROS_ESPERADOS || !plegableCobros) return [fila];
-      return [{ ...fila, plegable: { abierta: abiertas.has(f.id) } }, ...filasGrupoCobro(p, abiertas)];
-    }),
+    ...p.filas.flatMap((f) => conGruposCobro(p, { id: f.id, etiqueta: f.etiqueta, ...(f.vinculo ? { sub: f.vinculo } : {}) }, opts?.abiertas)),
     { id: TOTALES.ingresos, etiqueta: "Total ingresos" },
     { id: TOTALES.egresos, etiqueta: "Total egresos" },
     { id: TOTALES.saldo, etiqueta: "Saldo final" },
@@ -143,7 +133,7 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abiertas
 
 export type ArmadoPlanilla = ReturnType<typeof armarPlanilla>;
 
-export function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
+function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
   if (filaId.startsWith("total") || filaId === TOTALES.saldo || esFilaVirtual(filaId)) return false;
   const s = p.semanas.find((x) => x.semana === semana);
   if (!s || s.pasada) return false;
