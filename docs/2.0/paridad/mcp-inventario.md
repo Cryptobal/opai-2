@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 777 pares pantalla→capacidad · 698 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 779 pares pantalla→capacidad · 700 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -381,6 +381,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/cobranza/_componentes` | `finanzas.cobranza.resumen` | `finanzas_cobranza_resumen` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.asignar_centro` | `finanzas_compras_asignar_centro` | existe |
+| compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.get` | `finanzas_compras_get` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.importar` | `finanzas_compras_importar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.listar` | `finanzas_compras_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.registrar` | `finanzas_compras_registrar` | existe |
@@ -398,6 +399,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.cumplir` | `finanzas_celdas_cumplir` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.fijar` | `finanzas_celdas_fijar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.mover` | `finanzas_celdas_mover` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.cobros.fijar_fecha_esperada` | `finanzas_cobros_fijar_fecha_esperada` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
@@ -1150,7 +1152,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
-- `finanzas.cobros.fijar_fecha_esperada`
 - `finanzas.cuadratura.obtener`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`

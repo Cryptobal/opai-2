@@ -9,6 +9,7 @@ import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-to
 import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
 import { celdaEditable, type Planilla } from "./datos";
 import type { ArmadoPlanilla } from "./datos";
+import { cobrosDeSemana } from "./cobros-celda";
 
 const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
 const HojaImportar = dynamic(() => import("./hoja-importar").then((m) => ({ default: m.HojaImportar })));
@@ -24,6 +25,8 @@ type Props = {
   textosError: Record<string, unknown> | undefined;
   seleccion: { filaId: string; semana: string } | null;
   onSeleccion: (s: { filaId: string; semana: string } | null) => void;
+  /** Abre la hoja de «Cobros esperados» de la semana (CAR-396). */
+  onCobros: (semana: string) => void;
   importAbierta: boolean;
   onImportAbiertaChange: (v: boolean) => void;
 };
@@ -38,6 +41,7 @@ export function PlanillaFlujoEscritorio({
   textosError,
   seleccion,
   onSeleccion,
+  onCobros,
   importAbierta,
   onImportAbiertaChange,
 }: Props) {
@@ -77,6 +81,7 @@ export function PlanillaFlujoEscritorio({
           ? {
               onCelda: (filaId: string, semana: string) => {
                 if (celdaEditable(p, filaId, semana)) onSeleccion({ filaId, semana });
+                else if (cobrosDeSemana(p, filaId, semana).length) onCobros(semana);
               },
             }
           : {})}

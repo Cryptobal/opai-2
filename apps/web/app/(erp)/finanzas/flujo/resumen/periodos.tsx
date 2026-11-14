@@ -7,7 +7,7 @@ import type { Resumen, Vista } from "./datos";
 
 // Sin Intl ni toLocale en pantalla (regla F1): nombres de mes fijos, la semana como «Semana del 9 nov».
 const CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic"];
-const nombre = (clave: string, vista: Vista) => {
+export const nombrePeriodo = (clave: string, vista: Vista) => {
   const [a, m, d] = clave.split("-").map(Number);
   return vista === "mes" ? etiquetaPeriodo(a ?? 0, m ?? 1) : `Semana del ${d ?? 1} ${CORTOS[(m ?? 1) - 1] ?? ""}`;
 };
@@ -30,7 +30,7 @@ export function Periodos({ r, vista }: { r: Resumen; vista: Vista }) {
           {r.periodos.map((p) => (
             <Tr key={p.clave}>
               <Td>
-                {nombre(p.clave, vista)}
+                {nombrePeriodo(p.clave, vista)}
                 {vista === "mes" ? <span className="t-caption block">{p.semanas} {p.semanas === 1 ? "semana" : "semanas"}</span> : null}
               </Td>
               <Td className="t-numeric text-right">{pesos(p.ingresos)}</Td>

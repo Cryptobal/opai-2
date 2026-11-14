@@ -93,10 +93,9 @@ export const contactosList = defineCapability({
           : {}),
       },
       orderBy: [{ apellidos: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const p = pagina(filas, input.limite);
+    const p = pagina(filas, input.limite, input.cursor);
     const [extra, etiquetas] = await Promise.all([
       cuentasYNegocios(ctx, p.items),
       etiquetasDeFilas(ctx, "contacto", p.items.map((c) => c.id)),

@@ -15,6 +15,7 @@ type F29 = {
   compras: { documentos: number; iva: number; pendientesRevision: number; reclamados: number };
   debito: number;
   credito: number;
+  remanenteAnterior: number;
   ivaAPagar: number;
   remanenteMes: number;
   ppm: number;
@@ -96,7 +97,12 @@ describe.skipIf(omitirSuiteDb())("finanzas · borrador del F29 (db)", () => {
 
   it("si el crédito supera al débito queda remanente y no hay IVA a pagar", async () => {
     const r = await f29(tenantA, "2026-10");
-    expect(r).toMatchObject({ debito: 9_500, credito: 19_000, ivaAPagar: 0, remanenteMes: 9_500 });
+    expect(r).toMatchObject({ debito: 9_500, credito: 19_000, remanenteAnterior: 0, ivaAPagar: 0, remanenteMes: 9_500 });
+  });
+
+  it("el remanente se arrastra al mes siguiente y se descuenta del IVA a pagar", async () => {
+    const r = await f29(tenantA, "2026-11");
+    expect(r).toMatchObject({ debito: 0, credito: 0, remanenteAnterior: 9_500, ivaAPagar: 0, remanenteMes: 9_500 });
   });
 
   it("otra empresa ve su F29 en cero", async () => {

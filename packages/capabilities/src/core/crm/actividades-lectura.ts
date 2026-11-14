@@ -52,10 +52,9 @@ export const actividadesTimeline = defineCapability({
         ...(input.tipos ? { tipo: { in: input.tipos } } : {}),
       },
       orderBy: [{ ocurrioEn: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const p = pagina(filas, input.limite);
+    const p = pagina(filas, input.limite, input.cursor);
     return {
       items: await conNombres(ctx, await conRelaciones(ctx, p.items)),
       siguiente: p.siguiente,
@@ -115,10 +114,9 @@ export const actividadesTareas = defineCapability({
         estado: input.estado,
       },
       orderBy: [{ vencimiento: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const p = pagina(filas, input.limite);
+    const p = pagina(filas, input.limite, input.cursor);
     return {
       items: await conNombres(ctx, await conRelaciones(ctx, p.items)),
       siguiente: p.siguiente,

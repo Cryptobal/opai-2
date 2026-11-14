@@ -14,7 +14,7 @@ const mas = (iso: string, dias: number) => new Date(Date.parse(`${iso}T12:00:00Z
 const fecha = (iso: string) => new Date(`${iso}T00:00:00Z`);
 
 type Item = { documentoEmitidoId: string | null; semanaCobro: string; monto: number; fechaEsperada: string | null; origenFecha: string | null };
-type Planilla = { semanas: { semana: string; ingresos: number }[]; celdas: { filaId: string; semana: string; monto: number }[] };
+type Planilla = { semanas: { semana: string; ingresos: number }[]; celdas: { id: string; filaId: string; semana: string; monto: number; cobro?: { documentoId: string; fechaEsperada: string | null; origen: string } }[] };
 
 describe.skipIf(omitirSuiteDb())("flujo · fecha esperada de cobro (db)", () => {
   let e: Entorno;
@@ -121,6 +121,8 @@ describe.skipIf(omitirSuiteDb())("flujo · fecha esperada de cobro (db)", () => 
     const enSemana = pl.celdas.filter((c) => c.filaId === FILA_COBROS_ESPERADOS && c.semana === objetivo);
     expect(enSemana.reduce((t, c) => t + c.monto, 0)).toBeGreaterThanOrEqual(100_000);
     expect(pl.semanas.find((s) => s.semana === objetivo)?.ingresos).toBeGreaterThanOrEqual(100_000);
+    // CAR-396: la celda trae la factura y su fecha para cambiarla desde la planilla.
+    expect(enSemana.find((c) => c.id === f.id)?.cobro).toEqual({ documentoId: f.id, fechaEsperada: objetivo, origen: "manual" });
 
     const otra = await run(tenantB, "finanzas.cobros.fijar_fecha_esperada", { documentoId: f.id, fecha: objetivo });
     expect(otra.ok).toBe(false);
