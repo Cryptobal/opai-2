@@ -4,6 +4,7 @@ import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./ace
 import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
 import { capacidadesPush } from "./push";
+export { avisarAlCelular } from "./push-avisar";
 import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";

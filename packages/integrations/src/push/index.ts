@@ -1,3 +1,5 @@
+import type { webcrypto } from "node:crypto";
+
 // Web Push con VAPID (ADR-044.4) por HTTP y WebCrypto, sin SDK (ADR-031). El aviso va **sin contenido**: el
 // servicio de push del navegador (Google, Mozilla, Apple) solo recibe un «toque», nunca datos personales
 // (Ley 21.719); el service worker muestra «Tienes un aviso nuevo» y abre el portal, donde está el detalle.
@@ -38,11 +40,11 @@ const b64url = {
   },
 };
 
-async function importarPrivada(c: ClavesVapid): Promise<CryptoKey> {
+async function importarPrivada(c: ClavesVapid): Promise<webcrypto.CryptoKey> {
   const pub = b64url.aBytes(c.publica);
   if (pub.length !== 65 || pub[0] !== 4)
     throw new Error("push: la clave pública VAPID no es P-256 sin comprimir");
-  const jwk: JsonWebKey = {
+  const jwk: webcrypto.JsonWebKey = {
     kty: "EC",
     crv: "P-256",
     d: c.privada,
