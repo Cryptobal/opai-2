@@ -12,5 +12,17 @@ Regla de Carlos del 14-nov-2026 (ADR-114), para todas las sesiones de Claude Cod
 4. **Prompts ya enviados a bots.** Si mandaste prompts a algún bot («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0», «Chief of Staff») y siguen sin respuesta, reevalúalos con esta regla: lo que puedas hacer tú, hazlo y cierra el pedido; lo que sea decisión de Carlos, pásalo a «Decide Carlos»; lo que ya no sirva, descártalo y anótalo en `ESTADO.md`.
 5. **Identifícate siempre.** Cada PR, comentario e issue empieza con «`[Sesión <nombre>]`».
 
+## Código simple
+
+Regla de Carlos del 14-nov-2026 (ADR-115). El texto completo está en `AGENTS.md`, sección «Código simple».
+
+1. **La solución más simple que cumpla**, sin recortar tenant, permisos, auditoría, paridad ni pruebas.
+2. **Reutiliza antes de crear:** busca primero en `packages/*` y en el módulo; extiende, no copies.
+3. **Nada «por si acaso»:** sin abstracciones, parámetros ni capas para un uso que hoy no existe.
+4. **Borra el código muerto en el mismo PR** que lo deja sin uso.
+5. **Funciones y archivos cortos:** archivos de hasta 150 líneas, funciones de hasta 60.
+
+El check `simplicidad` falla si tu PR empeora las cifras de `simplicidad-base.json`. Las respuestas a Carlos ya no terminan con «Decisión tuya»: lo suyo va a Linear con «Decide Carlos».
+
 @AGENTS.md
 @docs/2.0/REGLAS-codigo.md

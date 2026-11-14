@@ -11,18 +11,11 @@ const entero = (clave: string, etiqueta: string, min: number, maxValor: number):
 
 export const HOJA_UNIFORME: ConfigSeccion = {
   param: "editar-uniforme",
-  titulo: "Editar uniforme",
+  titulo: "Editar medidas y notas",
   capacidad: "core.personas.laboral_actualizar",
-  exito: "Uniforme actualizado",
+  exito: "Medidas actualizadas",
   boton: "Guardar",
   campos: [
-    t("tallaCamisa", "Camisa", 20),
-    t("tallaPantalon", "Pantalón", 20),
-    t("tallaChaqueta", "Chaqueta", 20),
-    t("tallaPolera", "Polera", 20),
-    t("tallaGeologo", "Geólogo", 20),
-    t("tallaPolar", "Polar", 20),
-    t("tallaZapato", "Calzado", 20),
     entero("estaturaCm", "Estatura (cm)", 100, 230),
     entero("pesoKg", "Peso (kg)", 30, 250),
     t("notas", "Notas", 500),
