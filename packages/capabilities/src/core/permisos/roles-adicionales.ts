@@ -9,7 +9,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import { cursorDe, escribirConEvento, pagina } from "../maestros/comun";
+import { cursorDe, escribirConEvento, pagina, sinDuplicado } from "../maestros/comun";
 import { membresiaDe } from "./asignaciones";
 import { exigeGestionDeRoles, validarConcedibles } from "./comun";
 
@@ -42,6 +42,7 @@ export const rolesAdicionalesAsignar = defineCapability({
     exigeGestionDeRoles(ctx);
     const m = await membresiaDe(ctx, input.membershipId);
     if (m.rol === "owner") throw reglaDeNegocio("El rol owner ya tiene todos los permisos.");
+    if (m.estado !== "activa") throw reglaDeNegocio("El usuario está suspendido en la empresa.");
     await rolConcedible(ctx, input.roleId);
     const clave = { tenantId: m.tenantId, userId: m.userId, roleId: input.roleId };
     const ya = await ctx.db.rolMiembro.findFirst({ where: clave });
@@ -50,7 +51,7 @@ export const rolesAdicionalesAsignar = defineCapability({
       ctx,
       { tipo: "core.membresia.rol_adicional_asignado", entidadTipo: "membership" },
       async (tx) => {
-        await tx.rolMiembro.create({ data: clave });
+        await sinDuplicado(tx.rolMiembro.create({ data: clave }), "El usuario ya tiene ese rol.");
         return m;
       },
     );

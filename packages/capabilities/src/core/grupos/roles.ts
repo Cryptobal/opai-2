@@ -9,10 +9,10 @@ import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import { cursorDe, escribirConEvento, pagina } from "../maestros/comun";
+import { cursorDe, escribirConEvento, pagina, sinDuplicado } from "../maestros/comun";
 import { exigeGestionDeRoles, validarConcedibles } from "../permisos/comun";
 import { rolConcedible } from "../permisos/roles-adicionales";
-import { grupoDe, grupoVigente } from "./comun";
+import { exigeSinAlcance, grupoDe, grupoVigente } from "./comun";
 
 /** Permisos que un grupo concede a quien entra en él (roles vigentes). */
 export async function permisosDeGrupo(ctx: Contexto, grupoId: string): Promise<string[]> {
@@ -63,7 +63,7 @@ export const gruposRolesAsignar = defineCapability({
       ctx,
       { tipo: "core.grupo.rol_asignado", entidadTipo: "grupo_usuarios" },
       async (tx) => {
-        await tx.rolGrupo.create({ data: clave });
+        await sinDuplicado(tx.rolGrupo.create({ data: clave }), "El grupo ya tiene ese rol.");
         return g;
       },
     );
@@ -117,6 +117,7 @@ export const gruposRolesList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    exigeSinAlcance(ctx);
     const g = await grupoDe(ctx, input.grupoId);
     const filas = await ctx.db.rolGrupo.findMany({
       where: { grupoId: g.id },

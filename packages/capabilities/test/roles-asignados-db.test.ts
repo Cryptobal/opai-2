@@ -140,6 +140,42 @@ describe.skipIf(!urlPropietario)("roles adicionales y de grupo en base real (CAR
     expect(await e.admin.rolGrupo.count({ where: { tenantId: t.a } })).toBe(0);
   });
 
+  it("owner, rol archivado y agentes no pasan; quitar no exige poder conceder", async () => {
+    const owner = await e.admin.membership.findFirstOrThrow({
+      where: { tenantId: t.a, userId: u.adminA },
+    });
+    await e.admin.membership.update({ where: { id: owner.id }, data: { rol: "owner" } });
+    const r1 = await ejecutar(adminA(), "core.roles.adicional_asignar", {
+      membershipId: owner.id,
+      roleId: rolRendiciones,
+    });
+    expect(r1).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    await e.admin.membership.update({ where: { id: owner.id }, data: { rol: "admin" } });
+    const archivado = await e.admin.rol.create({
+      data: { tenantId: t.a, nombre: "Viejo", permisos: [], archivadoEn: new Date() },
+    });
+    const r2 = await ejecutar(adminA(), "core.roles.adicional_asignar", {
+      membershipId: m.viewerA,
+      roleId: archivado.id,
+    });
+    expect(r2).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const agente = ctx(t.a, u.adminA, "admin", {
+      actor: { tipo: "agent", id: randomUUID(), viaUserId: u.adminA },
+    });
+    await dato(adminA(), "core.grupos.rol_asignar", { grupoId: grupo, roleId: rolRendiciones });
+    const r3 = await ejecutar(agente, "core.grupos.agregar_miembros", {
+      grupoId: grupo,
+      userIds: [u.viewerA],
+    });
+    expect(r3).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    const sinCuentas = ctx(t.a, u.adminA, "admin", {
+      excepciones: [{ permiso: "core:cuentas.read", conceder: false }],
+    });
+    expect(
+      await dato(sinCuentas, "core.grupos.rol_quitar", { grupoId: grupo, roleId: rolRendiciones }),
+    ).toMatchObject({ cambio: true });
+  });
+
   it("otra empresa no ve ni asigna roles de la primera (RLS)", async () => {
     const adminB = ctx(t.b, u.adminB, "admin");
     const r = await ejecutar(adminB, "core.roles.adicional_asignar", {
