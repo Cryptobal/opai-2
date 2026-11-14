@@ -37,6 +37,12 @@ test.describe("@preview nómina: liquidaciones", () => {
       if (archivo) expect(archivo.suggestedFilename()).toMatch(/^\w+_\d{6}\.csv$/);
       await expect(page.getByText(/Formato por verificar: encabezado/)).toBeVisible({ timeout: 30_000 });
       await capturar(page, info, "nomina-lre");
+      // Previred: mismo patrón; el archivo es .txt de 105 campos.
+      const previred = page.waitForEvent("download", { timeout: 30_000 }).catch(() => null);
+      await page.getByRole("button", { name: "Descargar Previred" }).click();
+      const txt = await previred;
+      if (txt) expect(txt.suggestedFilename()).toMatch(/^previred_\w+_\d{6}\.txt$/);
+      await expect(page.getByText(/Formato por verificar: códigos de AFP/)).toBeVisible({ timeout: 30_000 });
     }
   });
 });
