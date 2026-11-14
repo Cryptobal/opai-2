@@ -69,7 +69,8 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
   await sembrado.click();
   // La primera visita compila la ruta del detalle en dev: más que los 5 s por defecto.
   await expect(page).toHaveURL(new RegExp(`/anexos/${anexoId}$`), { timeout: 30_000 });
-  await expect(page.getByText("Instalación navegación E2E")).toBeVisible();
+  // El destino del anexo en su tabla antes/después: el mismo nombre también aparece en la cabecera de la ficha.
+  await expect(page.getByRole("cell", { name: "Instalación navegación E2E" })).toBeVisible();
   await expect(page.getByText("Destino vínculo E2E")).toBeVisible();
   await expect(sinDesborde(page)).resolves.toBe(true);
   await page.screenshot({
@@ -144,5 +145,5 @@ test("29: rechazar pide motivo obligatorio (D14)", async ({ page }, info) => {
 test("el anexo no aparece bajo otra persona", async ({ page }) => {
   await entrar(page);
   await page.goto(`/personas/00000000-0000-7000-8000-000000000083/anexos/${anexoId}`);
-  await expect(page.getByText("Instalación navegación E2E")).not.toBeVisible();
+  await expect(page.getByRole("cell", { name: "Instalación navegación E2E" })).toHaveCount(0);
 });

@@ -5,6 +5,7 @@ import { DetailScreen, type EstadoPantalla, ParesGrid, SeccionTarjeta, Skeleton 
 import { PanelActividad } from "@/app/_components/actividad/panel-actividad";
 import { HistorialCorreos } from "@/app/_components/correos/historial-correos";
 import { PrivacidadTitular } from "@/app/_components/cumplimiento/privacidad-titular";
+import { CamposFicha } from "@/app/_components/campos/campos-ficha";
 import { EtiquetasFicha } from "@/app/_components/etiquetas/etiquetas-ficha";
 
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
@@ -70,6 +71,9 @@ export function FichaContacto(p: {
           ) : null}
           <Suspense fallback={<Skeleton className="h-16 w-full" />}>
             <EtiquetasFicha tipo="contacto" id={c.id} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <CamposFicha tipo="contacto" id={c.id} />
           </Suspense>
           <Suspense fallback={<Skeleton className="h-48 w-full" />}>
             <CuentasContacto contactoId={c.id} />

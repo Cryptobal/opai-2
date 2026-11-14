@@ -91,8 +91,12 @@ export async function guardarValores(
     else if (r.valor === null && campo.obligatorio) errores[clave] = "Es obligatorio.";
     else cambios.push({ campoId: campo.id, valor: r.valor });
   }
-  if (Object.keys(errores).length > 0)
-    throw reglaDeNegocio("Hay valores que no se pueden guardar.", { errores });
+  if (Object.keys(errores).length > 0) {
+    const detalle = Object.entries(errores)
+      .map(([clave, e]) => `${porClave.get(clave)?.etiqueta ?? clave}: ${e}`)
+      .join(" ");
+    throw reglaDeNegocio(`Revisa los campos. ${detalle}`, { errores });
+  }
 
   const actual = await leerValores(ctx, ficha);
   const mapa = new Map<string, Valor>(actual.campos.map((c) => [c.campoId, c.valor]));
