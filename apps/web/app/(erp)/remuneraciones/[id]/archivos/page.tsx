@@ -2,8 +2,7 @@ import { Alerta } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
-import { cargarPeriodos, permisosNomina } from "../../_componentes/datos";
-import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
+import { opcionesPeriodo, periodoDeRuta } from "../../_componentes/pagina-periodo";
 import { TarjetaArchivoLegal } from "../../_componentes/tarjeta-archivo-legal";
 
 export const metadata = { title: "Archivos y declaraciones" };
@@ -17,16 +16,8 @@ export default function ArchivosPeriodo({ params }: Props) {
       portal="erp"
       titulo="Archivos y declaraciones"
       ruta="/remuneraciones"
-      cargar={async () => {
-        const [{ id }, per, perm] = await Promise.all([params, cargarPeriodos(), permisosNomina()]);
-        const periodo = per.ok ? (per.data.find((p) => p.id === id) ?? null) : null;
-        return { id, periodo, perm };
-      }}
-      opciones={(d) => ({
-        insignia: <SegmentoRemuneraciones activa="periodos" />,
-        volver: { href: `/remuneraciones/${d.id}`, etiqueta: d.periodo?.etiqueta ?? "Período" },
-        ...(d.periodo ? { titulo: `Archivos · ${d.periodo.etiqueta}` } : {}),
-      })}
+      cargar={() => periodoDeRuta(params)}
+      opciones={opcionesPeriodo("Archivos")}
     >
       {(d) => {
         if (!d.perm.obligaciones) return <Alerta tono="warning" titulo="Tu rol no puede generar los archivos legales." />;

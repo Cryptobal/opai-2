@@ -17,14 +17,37 @@ const previsionSchema = z.object({
   afp: z.enum(AFP), salud: z.enum(["fonasa", "isapre"]), basePrevisional: z.number().int(), baseCesantia: z.number().int(),
 });
 
-export const errorArchivoSchema = z.object({ personaId: z.string().nullable(), personaNombre: z.string().nullable(), mensaje: z.string() });
+const errorArchivoSchema = z.object({ personaId: z.string().nullable(), personaNombre: z.string().nullable(), mensaje: z.string() });
 export type ErrorArchivo = { personaId: string | null; mensaje: string };
 
 /** Pone el nombre de la persona en cada observación (la pantalla la muestra en la tabla de errores). */
-export const conNombres = (errores: ErrorArchivo[], nombres: ReadonlyMap<string, string>) =>
+const conNombres = (errores: ErrorArchivo[], nombres: ReadonlyMap<string, string>) =>
   errores.map((e) => ({ ...e, personaNombre: e.personaId ? (nombres.get(e.personaId) ?? null) : null }));
 
 /** Todas las personas reveladas: las del archivo y las que salen en las observaciones. */
+/** Salida común de los archivos legales del período (LRE y Previred). */
+export const salidaArchivo = (nombre: string, contenido: string, porVerificar: string) =>
+  z.object({
+    nombre: z.string().describe(nombre),
+    contenido: z.string().describe(contenido),
+    filas: z.number().int(),
+    personaIds: z.array(z.string()).describe("Personas incluidas en el archivo."),
+    errores: z.array(errorArchivoSchema),
+    advertencias: z.array(z.string()),
+    formatoVerificado: z.literal(false).describe(`Siempre false: ${porVerificar}`),
+  });
+
+/** Junta los errores de carga con los del formato y agrega las personas incluidas. */
+export const resultadoArchivo = <A extends { errores: ErrorArchivo[] }>(
+  a: A,
+  datos: { errores: ErrorArchivo[]; nombres: ReadonlyMap<string, string>; filas: { personaId: string }[] },
+) => ({
+  ...a,
+  errores: conNombres([...datos.errores, ...a.errores], datos.nombres),
+  personaIds: datos.filas.map((f) => f.personaId),
+  formatoVerificado: false as const,
+});
+
 export const personasReveladas = (s: { personaIds: string[]; errores: ErrorArchivo[] }) =>
   [...new Set([...s.personaIds, ...s.errores.flatMap((e) => (e.personaId ? [e.personaId] : []))])];
 
