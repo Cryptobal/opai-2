@@ -7,7 +7,7 @@ export const RECURSOS: Record<string, string> = {
   cuentas: "Cuentas", cuentas_referencias: "Referencias de clientes", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
   patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos", procesos_persona: "Ingreso y salida",
   contexto: "Contexto comercial", campos: "Campos de documentos", cargos: "Cargos", conversaciones: "Conversaciones", estructuras: "Sueldos", buscar: "Búsqueda", actividades: "Actividades",
-  etiquetas: "Etiquetas", campos_personalizados: "Campos personalizados", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
+  etiquetas: "Etiquetas", campos_personalizados: "Campos personalizados", valores_personalizados: "Valores de campos personalizados", negocio_campos: "Campos del negocio", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
   actividad: "Actividad", resumen: "Resumen", inicio: "Inicio", permisos: "Permisos", roles: "Roles",
   excepciones: "Excepciones de permisos", supervisores: "Supervisores", documento_tipos: "Tipos de documento",
   documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", biometria: "Reconocimiento facial", terreno: "Terreno", personas_terreno: "Personas de terreno", listas: "Listas de acceso", registros: "Registros de acceso", config: "Ajustes", ajustes: "Ajustes",
