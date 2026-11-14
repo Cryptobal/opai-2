@@ -38,3 +38,11 @@
 - `rondas.novedades` no se borra en esta parte: el borrado se pide a Carlos en Linear (CAR-498).
 - Parte 2: el supervisor recibe `core:novedades.manage` porque es quien atiende las novedades de sus instalaciones; el lector no escribe. La sesión lo decidió (reversible: cada empresa lo cambia en sus roles).
 - Parte 2: una novedad registrada en línea emite `core.libro_novedades.registrada` (con la gravedad); `rondas.novedad.grave` queda solo para lo que llega desde una ronda, como dice el manifest de Rondas.
+
+## Parte 3 · Libro en Terreno (rama `brief/car-77-libro-terreno`, apilada sobre #826)
+
+- Hecho de cola nuevo `terreno.novedad` (resumen, detalle, gravedad): va al libro del núcleo con equipo, persona y hora, **sin depender de Rondas**, y emite `core.libro_novedades.registrada` una sola vez. Encolable sin conexión (`TIPOS_ENCOLABLES_OFFLINE`).
+- Capacidad interna `core.libro_novedades_equipo.listar` (el equipo emparejado lee el libro de su instalación; revocado no lee) y ruta `GET /api/terreno/libro` con límite por equipo.
+- Pantalla `/terreno/libro` sobre `export-terreno/Libro Novedades.dc.html`: «Nueva novedad» (reusa el formulario de la ronda, con su estado «guardada en el teléfono») y la lista con número NOV, fecha y hora, gravedad y estado; entrada «Libro de novedades» en el Inicio del equipo. Prueba `@preview` y entrada de novedades.
+- **Decisión nocturna/de sesión (revisar):** `/terreno/novedades` ya es el changelog del producto, así que el libro va en `/terreno/libro`.
+- **Fuera de esta parte:** la entrega de turno y las pestañas «Mi turno / Instalación» del diseño; tomar o resolver una novedad desde el teléfono (hoy se hace por API o MCP); fotos por `core.documentos` (T2 de CAR-226).

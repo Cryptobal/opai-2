@@ -28,7 +28,12 @@ async function Contenido() {
 
 export default function Pagina() {
   return (
-    <PaginaPortal portal="terreno" titulo="Marcar" ruta="/terreno/marcar" volver={{ href: "/terreno", etiqueta: "Inicio" }}>
+    <PaginaPortal
+      portal="terreno"
+      titulo="Marcar"
+      ruta="/terreno/marcar"
+      volver={{ href: "/terreno", etiqueta: "Inicio" }}
+    >
       <Suspense fallback={<Loading variante="detalle" />}>
         <Contenido />
       </Suspense>
