@@ -26,9 +26,18 @@ test.describe("@preview flujo de caja: postergar el IVA", () => {
       "La empresa de prueba no tiene IVA proyectado en el horizonte",
     );
 
-    await celda.click();
+    // En el teléfono la página puede no estar hidratada al primer toque: se reintenta hasta que abra la hoja.
     const hoja = page.getByRole("dialog");
-    await expect(hoja.getByText(/IVA de /).first()).toBeVisible();
+    await expect(async () => {
+      await celda.scrollIntoViewIfNeeded();
+      await celda.click();
+      await expect(hoja.getByText(/IVA de /).first()).toBeVisible({ timeout: 5_000 });
+    })
+      .toPass({ timeout: 60_000 })
+      .catch(async (e: unknown) => {
+        await capturar(page, info, "flujo-iva-sin-hoja");
+        throw e;
+      });
     await capturar(page, info, "flujo-iva-hoja");
     await hoja.getByRole("button", { name: /Postergar a M\+2|Volver a pagarlo en M\+1/ }).click();
     await expect(hoja.getByText("Revisa el cambio")).toBeVisible();

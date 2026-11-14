@@ -5,6 +5,7 @@ import { comprasAsignarCentro } from "./compras-centro";
 import { comprasRegistrar } from "./compras-escritura";
 import { comprasImportar } from "./compras-importar";
 import { comprasSincronizarRcv, trabajoSincronizarRcv } from "./compras-rcv";
+import { comprasGet } from "./compras-detalle";
 import { comprasListar } from "./compras-lectura";
 import { dteConfigActualizar, dteConfigObtener } from "./dte-config";
 import { foliosCargarCaf, foliosListar } from "./folios";
@@ -78,6 +79,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   proveedoresCrear,
   proveedoresActualizar,
   comprasListar,
+  comprasGet,
   comprasRegistrar,
   comprasImportar,
   comprasSincronizarRcv,

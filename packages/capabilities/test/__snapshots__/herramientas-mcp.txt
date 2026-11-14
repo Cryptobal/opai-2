@@ -456,6 +456,7 @@ finanzas_cobranza_resumen
 finanzas_cobros_fijar_fecha_esperada
 finanzas_cobros_manual
 finanzas_compras_asignar_centro
+finanzas_compras_get
 finanzas_compras_importar
 finanzas_compras_listar
 finanzas_compras_registrar
@@ -561,6 +562,8 @@ pauta_informes_instalaciones
 pauta_marca_registrar
 pauta_mes_leer
 pauta_ppc_listar
+pauta_publicaciones_listar
+pauta_publicaciones_publicar
 pauta_reemplazos_asignar
 pauta_reemplazos_sugerir
 pauta_refuerzos_agregar
@@ -878,6 +881,7 @@ preview_pauta_cobertura_deshacer
 preview_pauta_excepciones_anular
 preview_pauta_excepciones_crear
 preview_pauta_marca_registrar
+preview_pauta_publicaciones_publicar
 preview_pauta_reemplazos_asignar
 preview_pauta_refuerzos_agregar
 preview_pauta_series_fijar

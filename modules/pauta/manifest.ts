@@ -36,6 +36,10 @@ export const manifest = defineModule({
         "Se registró una excepción en la pauta (ausencia, licencia, vacaciones, permiso, reemplazo o refuerzo).",
     },
     { id: "pauta.excepcion.anulada", descripcion: "Se anularon excepciones de la pauta de un puesto." },
+    {
+      id: "pauta.publicada",
+      descripcion: "Se publicó la pauta de una instalación para un mes: se avisa a cada titular sus turnos (CAR-356).",
+    },
   ],
   capacidades: capacidadesPauta,
   // Indicador de gestión para el catálogo del núcleo (ADR-094, adenda CAR-309).

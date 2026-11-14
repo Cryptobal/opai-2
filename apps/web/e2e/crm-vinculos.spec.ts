@@ -34,7 +34,8 @@ test("CRM: segunda cuenta, roles por vínculo y principal", async ({ page }, inf
   await page.getByRole("link", { name: new RegExp(`Persona ficticia ${sufijo}`) }).click();
   await page.waitForURL(/\/contactos\/[0-9a-f-]{36}$/);
   const contacto = new URL(page.url()).pathname;
-  const cuentas = page.getByRole("list", { name: "Cuentas vinculadas" });
+  // Con la lista a todo el ancho y la ficha a la derecha, la ficha puede renderizarse dos veces; se usa la visible.
+  const cuentas = page.getByRole("list", { name: "Cuentas vinculadas" }).filter({ visible: true }).first();
   await expect(cuentas.getByRole("listitem")).toHaveCount(1);
   const vincular = page.getByRole("button", { name: "Vincular a otra cuenta", exact: true });
   await vincular.click();
