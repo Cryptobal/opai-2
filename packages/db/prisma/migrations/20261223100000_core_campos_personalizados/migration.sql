@@ -110,3 +110,8 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core"."campo_valores"
     'contacto_id', 'core.contactos', 'negocio_id', 'comercial.negocios');
 
 COMMIT;
+
+-- Reversión: tablas nuevas sin dependientes fuera de esta migración; se deshace en orden inverso con
+-- DROP TABLE IF EXISTS "core"."campo_valores"; DROP TABLE IF EXISTS "core"."campos_personalizados";
+-- (borra los campos definidos y sus valores). Si hubo datos que conservar, restaurar desde el snapshot
+-- previo de Neon.
