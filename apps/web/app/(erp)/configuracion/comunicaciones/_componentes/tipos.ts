@@ -27,12 +27,18 @@ export type Plantillas = {
 export const NOMBRE_CANAL: Record<string, string> = { correo: "Correo", inapp: "In-app" };
 
 /** Destinatarios predefinidos por roles; otra combinación se muestra como "Personalizado". */
-export const DESTINATARIOS = [
+const DESTINATARIOS = [
   { valor: "owner,admin", etiqueta: "Owners y admins" },
   { valor: "owner", etiqueta: "Solo owners" },
   { valor: "owner,admin,gerente", etiqueta: "Owners, admins y gerentes" },
   { valor: "owner,admin,gerente,supervisor", etiqueta: "Incluye supervisores" },
 ];
+
+/** Destinatarios para el selector; otra combinación de roles aparece como "Personalizado". */
+export const opcionesDestinatarios = (roles: string) =>
+  DESTINATARIOS.some((d) => d.valor === roles)
+    ? DESTINATARIOS
+    : [...DESTINATARIOS, { valor: roles, etiqueta: "Personalizado" }];
 
 /** Módulo del evento ("core.documento.vencido" → "Núcleo"). */
 export const grupoDe = (evento: string) =>
