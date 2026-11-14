@@ -3,7 +3,7 @@
 import { SeccionTarjeta, Switch } from "@opai/ds";
 import type { SeccionPortal } from "@opai/domain";
 
-/** Secciones del resumen que la cuenta puede ocultar o encender (CAR-491 a CAR-493 y CAR-502). */
+/** Secciones del resumen que la cuenta puede ocultar o encender (CAR-491 a CAR-493, CAR-502 y CAR-518). */
 const SECCIONES: { s: SeccionPortal; etiqueta: string; descripcion: string }[] = [
   {
     s: "cobertura",
@@ -25,6 +25,12 @@ const SECCIONES: { s: SeccionPortal; etiqueta: string; descripcion: string }[] =
     etiqueta: "Texto de las novedades",
     descripcion:
       "El cliente lee lo que escribe el guardia en el libro de cada instalación. Puede nombrar personas: actívalo solo si el contrato lo prevé.",
+  },
+  {
+    s: "facturas",
+    etiqueta: "Facturas",
+    descripcion:
+      "El cliente ve las facturas y notas emitidas a su cuenta, con su estado de cobro, y descarga el PDF.",
   },
 ];
 

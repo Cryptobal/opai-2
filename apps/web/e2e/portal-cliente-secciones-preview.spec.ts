@@ -29,6 +29,7 @@ test.describe("@preview portal cliente secciones", () => {
     }
     await expect(page.getByRole("switch", { name: "Cobertura de turnos" })).toBeVisible();
     await expect(page.getByRole("switch", { name: "Texto de las novedades" })).toBeVisible();
+    await expect(page.getByRole("switch", { name: "Facturas" })).toBeVisible();
     await tarjeta.scrollIntoViewIfNeeded();
     await capturar(page, info, "portal-cliente-secciones");
     expect(errores).toEqual([]);

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Receipt } from "lucide-react";
 
 import { Alerta, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/ds";
 
@@ -13,6 +13,7 @@ export type ResumenMes = {
   mesEnCurso: boolean;
   limitado: boolean;
   novedadesTexto: boolean;
+  facturas: boolean;
   instalaciones: {
     id: string;
     nombre: string;
@@ -23,6 +24,29 @@ export type ResumenMes = {
     novedades: Novedades | null;
   }[];
 };
+
+/** Mes anterior y siguiente del informe, y el acceso a las facturas si la cuenta las tiene (CAR-518). */
+function NavMes({ r }: { r: ResumenMes }) {
+  return (
+    <nav aria-label="Mes del informe" className="flex flex-wrap items-center gap-2">
+      <EnlaceBoton href={`/cliente?mes=${mesAnterior(r.mes)}`} variante="secondary" icono={ChevronLeft} aria-label="Mes anterior">
+        Anterior
+      </EnlaceBoton>
+      <span className="t-label min-w-32 text-center">{nombreDeMes(r.mes)}</span>
+      {r.mesEnCurso ? null : (
+        <EnlaceBoton href={`/cliente?mes=${mesSiguiente(r.mes)}`} variante="secondary" icono={ChevronRight} aria-label="Mes siguiente">
+          Siguiente
+        </EnlaceBoton>
+      )}
+      {r.mesEnCurso ? <span className="t-caption">Mes en curso</span> : null}
+      {r.facturas ? (
+        <EnlaceBoton href="/cliente/facturas" variante="secondary" icono={Receipt} className="sm:ml-auto">
+          Facturas
+        </EnlaceBoton>
+      ) : null}
+    </nav>
+  );
+}
 
 /**
  * Resumen del mes = informe mensual (01, B14): una tarjeta por instalación habilitada con cobertura, rondas y
@@ -38,18 +62,7 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
           Este resumen es tu informe mensual: la descarga traerá el mismo contenido.
         </p>
       </div>
-      <nav aria-label="Mes del informe" className="flex flex-wrap items-center gap-2">
-        <EnlaceBoton href={`/cliente?mes=${mesAnterior(r.mes)}`} variante="secondary" icono={ChevronLeft} aria-label="Mes anterior">
-          Anterior
-        </EnlaceBoton>
-        <span className="t-label min-w-32 text-center">{nombreDeMes(r.mes)}</span>
-        {r.mesEnCurso ? null : (
-          <EnlaceBoton href={`/cliente?mes=${mesSiguiente(r.mes)}`} variante="secondary" icono={ChevronRight} aria-label="Mes siguiente">
-            Siguiente
-          </EnlaceBoton>
-        )}
-        {r.mesEnCurso ? <span className="t-caption">Mes en curso</span> : null}
-      </nav>
+      <NavMes r={r} />
       {r.limitado ? (
         <Alerta tono="neutral" titulo={`Tu acceso incluye ${r.instalaciones.length} ${r.instalaciones.length === 1 ? "instalación" : "instalaciones"}`}>
           Si necesitas ver otra, pídeselo a tu empresa de seguridad.
