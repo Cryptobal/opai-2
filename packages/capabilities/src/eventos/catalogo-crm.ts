@@ -42,7 +42,10 @@ export const EVENTOS_CRM: readonly EventoDeDominio[] = [
   { id: "core.etiqueta.eliminada", descripcion: "Se eliminó una etiqueta del catálogo." },
   { id: "core.campo_personalizado.creado", descripcion: "Se definió un campo personalizado nuevo para cuentas, contactos o negocios." },
   { id: "core.campo_personalizado.actualizado", descripcion: "Cambió un campo personalizado (nombre, opciones, obligatorio, orden o archivado)." },
+<<<<<<< HEAD
   { id: "core.campos_personalizados.valores_guardados", descripcion: "Se guardaron valores de campos personalizados en la ficha de una cuenta, un contacto o un negocio (solo las claves)." },
+=======
+>>>>>>> origin/main
   {
     id: "core.etiqueta.asignada",
     descripcion: "Se asignaron etiquetas a negocios, cuentas o contactos.",
