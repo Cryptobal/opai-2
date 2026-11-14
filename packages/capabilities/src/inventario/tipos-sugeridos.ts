@@ -1,6 +1,7 @@
 import { nombreNormalizado, tiposSugeridos } from "@opai/domain";
 import { z } from "zod";
 
+import { prendasDeLaEmpresa } from "../core/maestros/uniforme-prendas";
 import { defineCapability } from "../define";
 import { PERMISOS_INVENTARIO } from "./comun";
 
@@ -18,12 +19,13 @@ export const tiposCargarSugeridos = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, _input, { dryRun }) {
-    const [tenant, existentes] = await Promise.all([
+    const [tenant, kit, existentes] = await Promise.all([
       ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { vertical: true } }),
+      prendasDeLaEmpresa(ctx),
       ctx.db.inventarioTipo.findMany({ select: { nombreNormalizado: true } }),
     ]);
     const hay = new Set(existentes.map((e) => e.nombreNormalizado));
-    const sugeridos = tiposSugeridos(tenant?.vertical ?? "");
+    const sugeridos = tiposSugeridos(tenant?.vertical ?? "", kit);
     const nuevos = sugeridos.filter((s) => !hay.has(nombreNormalizado(s.nombre)));
     const resultado = {
       agregados: nuevos.map((s) => s.nombre),

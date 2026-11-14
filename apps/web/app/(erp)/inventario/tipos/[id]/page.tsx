@@ -35,7 +35,7 @@ export default function TipoDetalle({ params, searchParams }: Props) {
       cargar={() => cargarFichaTipo(params, searchParams)}
       opciones={(d) => ({ volver: { href: conBusqueda("/inventario/tipos", d.p.q), etiqueta: "Tipos" } })}
     >
-      {({ id, p, datos, lista, puedeGestionar }) => (
+      {({ id, p, datos, lista, kit, puedeGestionar }) => (
         <>
           <SplitScreen
             telefono="detalle"
@@ -53,11 +53,11 @@ export default function TipoDetalle({ params, searchParams }: Props) {
             }
             detalle={
               <Suspense fallback={<Loading variante="detalle" />}>
-                <DetalleTipo datos={datos} puedeGestionar={puedeGestionar} />
+                <DetalleTipo datos={datos} kit={kit} puedeGestionar={puedeGestionar} />
               </Suspense>
             }
           />
-          {puedeGestionar ? <HojaTipo /> : null}
+          {puedeGestionar ? <HojaTipo kit={kit} /> : null}
         </>
       )}
     </PaginaPortal>

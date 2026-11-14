@@ -4,7 +4,7 @@ import { leerParametros, type Parametros, type SearchParams } from "@/lib/parame
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
-import type { TipoInventario } from "./tipos";
+import type { PrendaKit, TipoInventario } from "./tipos";
 
 const sinTildes = (t: string) =>
   t
@@ -45,6 +45,12 @@ export async function cargarTipos(p: Parametros) {
   return { state: estadoPantalla(r), items, total: todos.length };
 }
 
+/** Prendas del uniforme de la empresa (caben en una página: el kit tiene hasta 30). */
+export async function cargarKit(): Promise<PrendaKit[]> {
+  const r = await ejecutarComoUsuario<{ items: PrendaKit[] }>("erp", "inventario.prendas.list", { limite: 50 });
+  return r.ok ? r.data.items : [];
+}
+
 export async function cargarTipo(id: string) {
   requerirUuid(id);
   const r = await ejecutarComoUsuario<TipoInventario>("erp", "inventario.tipos.get", { id });
@@ -57,5 +63,6 @@ export async function cargarFichaTipo(params: Promise<{ id: string }>, searchPar
   const [{ id }, p, identidad] = await Promise.all([params, leerParametros(searchParams), requerirIdentidad("/inventario/tipos")]);
   const datos = cargarTipo(id);
   datos.catch(() => undefined);
-  return { id, p, datos, lista: await cargarTipos(p), puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage") };
+  const [lista, kit] = await Promise.all([cargarTipos(p), cargarKit()]);
+  return { id, p, datos, lista, kit, puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage") };
 }

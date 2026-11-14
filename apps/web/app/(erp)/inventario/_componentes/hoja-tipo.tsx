@@ -10,7 +10,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { AccionesHoja } from "./acciones-hoja";
 import { type CampoEditable, EditorCampos } from "./editor-campos";
-import { CATEGORIAS, type TipoInventario } from "./tipos";
+import { CATEGORIAS, type PrendaKit, type TipoInventario } from "./tipos";
 
 const aTallas = (texto: string) =>
   texto
@@ -19,13 +19,15 @@ const aTallas = (texto: string) =>
     .filter(Boolean);
 const tallasValidas = (t: string[]) => t.length > 0 && t.length <= 20 && t.every((x) => x.length <= 10);
 
-type Estado = { categoria: string; nombre: string; descripcion: string; tallas: string; campos: CampoEditable[] };
+type Estado = { categoria: string; nombre: string; descripcion: string; tallas: string; prenda: string; campos: CampoEditable[] };
+const SIN_PRENDA = "ninguna";
 
 const inicial = (t?: TipoInventario): Estado => ({
   categoria: t?.categoria ?? "activo",
   nombre: t?.nombre ?? "",
   descripcion: t?.descripcion ?? "",
   tallas: (t?.tallas ?? []).join(", "),
+  prenda: t?.prendaClave ?? SIN_PRENDA,
   campos: (t?.campos ?? []).map((c) => ({ ...c, llave: c.clave })),
 });
 
@@ -35,7 +37,7 @@ function datosDe(e: Estado, editando: boolean) {
     nombre: e.nombre.trim(),
     descripcion: e.descripcion.trim() || (editando ? null : undefined),
     ...(e.categoria === "ropa"
-      ? { tallas: aTallas(e.tallas) }
+      ? { tallas: aTallas(e.tallas), prendaClave: e.prenda === SIN_PRENDA ? (editando ? null : undefined) : e.prenda }
       : {
           campos: e.campos.map((c) => ({
             ...(c.clave ? { clave: c.clave } : {}),
@@ -48,7 +50,7 @@ function datosDe(e: Estado, editando: boolean) {
 }
 
 /** Nuevo tipo de inventario o editar uno (la categoría solo se elige al crear, R2). */
-export function HojaTipo({ tipo }: { tipo?: TipoInventario }) {
+export function HojaTipo({ tipo, kit }: { tipo?: TipoInventario; kit: PrendaKit[] }) {
   const hoja = useHojaUrl(tipo ? "editar" : "nuevo");
   const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -87,13 +89,21 @@ export function HojaTipo({ tipo }: { tipo?: TipoInventario }) {
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <CamposTipo e={e} fijar={fijar} creando={!tipo} />
+        <CamposTipo e={e} fijar={fijar} creando={!tipo} kit={kit} />
       </div>
     </Sheet>
   );
 }
 
-function CamposTipo({ e, fijar, creando }: { e: Estado; fijar: (p: Partial<Estado>) => void; creando: boolean }) {
+/** «Ninguna», el kit y, si el tipo apunta a una prenda que ya salió del kit, esa también. */
+function opcionesPrenda(kit: PrendaKit[], actual: string) {
+  const fuera = actual !== SIN_PRENDA && !kit.some((p) => p.clave === actual) ? [{ valor: actual, etiqueta: actual }] : [];
+  return [{ valor: SIN_PRENDA, etiqueta: "Ninguna" }, ...kit.map((p) => ({ valor: p.clave, etiqueta: p.nombre })), ...fuera];
+}
+
+type PropsCampos = { e: Estado; fijar: (p: Partial<Estado>) => void; creando: boolean; kit: PrendaKit[] };
+
+function CamposTipo({ e, fijar, creando, kit }: PropsCampos) {
   return (
     <>
       {creando ? (
@@ -112,9 +122,19 @@ function CamposTipo({ e, fijar, creando }: { e: Estado; fijar: (p: Partial<Estad
         <Textarea id="it-desc" rows={2} value={e.descripcion} onChange={(x) => fijar({ descripcion: x.target.value })} />
       </Campo>
       {e.categoria === "ropa" ? (
-        <Campo etiqueta="Tallas" htmlFor="it-tallas" ayuda="Separadas por coma, por ejemplo: S, M, L, XL. Hasta 20 tallas de 10 caracteres.">
-          <Input id="it-tallas" value={e.tallas} onChange={(x) => fijar({ tallas: x.target.value })} />
-        </Campo>
+        <>
+          <Campo etiqueta="Tallas" htmlFor="it-tallas" ayuda="Separadas por coma, por ejemplo: S, M, L, XL. Hasta 20 tallas de 10 caracteres.">
+            <Input id="it-tallas" value={e.tallas} onChange={(x) => fijar({ tallas: x.target.value })} />
+          </Campo>
+          <Campo etiqueta="Prenda del uniforme" htmlFor="it-prenda" ayuda="Al entregar a una persona se propone la talla que tiene en su ficha para esta prenda.">
+            <Select
+              id="it-prenda"
+              valor={e.prenda}
+              onCambiar={(v) => fijar({ prenda: v })}
+              opciones={opcionesPrenda(kit, e.prenda)}
+            />
+          </Campo>
+        </>
       ) : (
         <EditorCampos campos={e.campos} onCambiar={(campos) => fijar({ campos })} />
       )}

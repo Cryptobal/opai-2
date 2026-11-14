@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { prendasPorVertical } from "../uniforme/prendas";
 import { camposConClave, claveCampo, errorDeTipo, nombreNormalizado, normalizarTalla, tiposSugeridos } from ".";
 
 describe("inventario · tipos (CAR-235)", () => {
@@ -35,11 +36,27 @@ describe("inventario · tipos (CAR-235)", () => {
 
   it("R6: los sugeridos son válidos y sus nombres no se repiten", () => {
     for (const vertical of ["seguridad", "aseo", "mantenimiento", "outsourcing"]) {
-      const lista = tiposSugeridos(vertical);
+      const lista = tiposSugeridos(vertical, prendasPorVertical(vertical));
       expect(lista.length).toBeGreaterThan(3);
+      const ropa = lista.filter((t) => t.categoria === "ropa");
+      expect(ropa.map((t) => t.prendaClave)).toEqual(prendasPorVertical(vertical).map((p) => p.clave));
       expect(new Set(lista.map((t) => nombreNormalizado(t.nombre))).size).toBe(lista.length);
       for (const t of lista) expect(errorDeTipo(t)).toBeNull();
     }
+  });
+
+  it("CAR-504: la ropa sugerida sale del kit propio y elige tallas según la prenda", () => {
+    const kit = [
+      { clave: "pantalon_cargo", nombre: "Pantalón cargo" },
+      { clave: "zapato_de_seguridad", nombre: "Zapato de seguridad" },
+      { clave: "gorro", nombre: "Gorro" },
+    ];
+    const ropa = tiposSugeridos("seguridad", kit).filter((t) => t.categoria === "ropa");
+    expect(ropa.map((t) => [t.nombre, t.prendaClave, t.tallas[0]])).toEqual([
+      ["Pantalón cargo", "pantalon_cargo", "38"],
+      ["Zapato de seguridad", "zapato_de_seguridad", "36"],
+      ["Gorro", "gorro", "XS"],
+    ]);
   });
 
   it("normaliza tallas y no repite claves de campo", () => {
