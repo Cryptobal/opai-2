@@ -194,15 +194,17 @@ describe.skipIf(!urlPropietario)("correcciones de acceso en base real (CAR-477)"
     ).toBe(false);
   });
 
-  it("una salida del ERP sin equipo exige origen distinto de «dispositivo» (constraint de base)", async () => {
+  it("una salida del ERP o del cierre no puede traer equipo (constraint de base)", async () => {
     const id = await entrada("A", "Constraint");
     await expect(
       e.forTenant(t.A).salidaAcceso.create({
         data: {
           tenantId: t.A,
           instalacionId: inst.A,
+          dispositivoId: disp.A,
           registroId: id,
           clave: randomUUID(),
+          origen: "erp",
           horaCorregida: new Date(),
         },
       }),

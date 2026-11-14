@@ -46,9 +46,9 @@ ALTER TABLE "acceso"."salidas_acceso" ADD COLUMN "registrada_por" UUID;
 ALTER TABLE "acceso"."salidas_acceso" ADD COLUMN "motivo" TEXT;
 ALTER TABLE "acceso"."salidas_acceso" ADD CONSTRAINT "salidas_acceso_origen_check"
   CHECK ("origen" IN ('dispositivo', 'erp', 'cierre'));
--- Una salida del equipo trae su equipo; una del ERP o del cierre, no.
+-- Una salida del ERP o del cierre en bloque nunca lleva equipo (la del equipo lo trae siempre desde la ingesta).
 ALTER TABLE "acceso"."salidas_acceso" ADD CONSTRAINT "salidas_acceso_dispositivo_check"
-  CHECK (("origen" = 'dispositivo') = ("dispositivo_id" IS NOT NULL));
+  CHECK ("origen" = 'dispositivo' OR "dispositivo_id" IS NULL);
 
 COMMIT;
 
