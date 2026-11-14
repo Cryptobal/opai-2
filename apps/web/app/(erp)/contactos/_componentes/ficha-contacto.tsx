@@ -41,9 +41,14 @@ export function FichaContacto(p: {
             titulo="Datos de contacto"
             accion={
               p.gestionar ? (
-                <EnlaceBotonHoja variante="secondary" href={`?contacto=${c.id}`}>
-                  Editar datos
-                </EnlaceBotonHoja>
+                <span className="flex flex-wrap gap-2">
+                  <EnlaceBotonHoja variante="ghost" href="?fusionar=1">
+                    Fusionar con…
+                  </EnlaceBotonHoja>
+                  <EnlaceBotonHoja variante="secondary" href={`?contacto=${c.id}`}>
+                    Editar datos
+                  </EnlaceBotonHoja>
+                </span>
               ) : null
             }
           >

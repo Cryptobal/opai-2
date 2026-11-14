@@ -88,6 +88,22 @@ Cada paso usa la vista previa de `core.cuentas.fusionar`, así que los bloqueos 
 - El paso «Confirmar» del diseño (estado `agente`, aprobación de una propuesta de un agente) no se construyó aparte: las aprobaciones de agentes ya se resuelven en Configuración › Aprobaciones.
 - Las «sugeridas» buscan por la primera palabra del nombre (sin una capacidad propia de duplicados).
 
+## PR fusionar contactos (F4, pantalla) · rama `brief/car-27-fusionar-contactos-pantalla`
+
+- **Estado:** Abierto (apilado sobre F2 y F3)
+- **Migración:** No
+
+### Qué entra
+
+- **Fusionar con…** en la ficha del contacto, para quien tiene `core:cuentas.manage`.
+- Abre una hoja diferida (`?fusionar=1`) con los mismos 3 pasos que la de cuentas:
+  - **Elegir:** busca con `comercial.contactos.list`.
+  - **Comparar:** los campos que difieren.
+  - **Resumen:** lo que se mueve, y la casilla de irreversible.
+- Novedad y prueba `@preview`.
+
+**Decisión nocturna (revisar):** el botón va junto a «Editar datos», porque la ficha del contacto no tiene menú ⋯ como la de cuentas.
+
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
 - Con el diseño nuevo de listas de `main` fallan tres pruebas de Comercial que no tocaron estos PR: `crm-vinculos` (cuentas vinculadas), `cuenta-sii` (resumen «Lista para facturar», que queda oculto) y `actividad-tareas-car162` (la tarea no aparece en «Mis tareas»). Hay que revisarlas en un PR propio.
