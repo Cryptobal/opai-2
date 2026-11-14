@@ -8,6 +8,7 @@ import { avisar, Button, Campo, Combobox, Input, Select, Sheet, Textarea } from 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { InstalacionOpcion, TipoTicket } from "./datos";
+import { SIN_INSTALACION, useInstalacionesTicket } from "./instalaciones-ticket";
 
 // Solo el tipo viene de datos.ts: sus valores arrastran código de servidor al navegador.
 const PRIORIDADES = [
@@ -16,7 +17,6 @@ const PRIORIDADES = [
   { valor: "p3", etiqueta: "P3 · Media" },
   { valor: "p4", etiqueta: "P4 · Baja" },
 ];
-const SIN_INSTALACION = "sin";
 
 /**
  * Nuevo ticket (Sheet de la bandeja). Un ticket nace solo cuando una persona lo crea aquí o por
@@ -28,6 +28,7 @@ export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: Instalacion
   const { tipos, instalaciones } = p;
   const router = useRouter();
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const inst = useInstalacionesTicket(instalaciones);
   const [abierto, setAbierto] = useState(false);
   const [tipoId, setTipoId] = useState("");
   const [titulo, setTitulo] = useState("");
@@ -70,7 +71,11 @@ export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: Instalacion
         titulo="Nuevo ticket"
         acciones={
           <Button block size="lg" disabled={pendiente || !valido} onClick={() => void crear()}>
-            {pendiente ? "Creando…" : tipo?.requiereAprobacion ? "Enviar solicitud" : "Crear ticket"}
+            {pendiente
+              ? "Creando…"
+              : tipo?.requiereAprobacion
+                ? "Enviar solicitud"
+                : "Crear ticket"}
           </Button>
         }
       >
@@ -90,7 +95,12 @@ export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: Instalacion
             <p className="t-caption">Este tipo pasa por aprobación antes de resolverse.</p>
           ) : null}
           <Campo etiqueta="Título" htmlFor="nt-titulo" {...(error ? { error } : {})}>
-            <Input id="nt-titulo" value={titulo} maxLength={140} onChange={(e) => setTitulo(e.target.value)} />
+            <Input
+              id="nt-titulo"
+              value={titulo}
+              maxLength={140}
+              onChange={(e) => setTitulo(e.target.value)}
+            />
           </Campo>
           <Campo etiqueta="Descripción" htmlFor="nt-desc">
             <Textarea
@@ -107,10 +117,8 @@ export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: Instalacion
                 id="nt-inst"
                 valor={instalacionId}
                 onCambiar={([v]) => setInstalacionId(v ?? SIN_INSTALACION)}
-                opciones={[
-                  { valor: SIN_INSTALACION, etiqueta: "Sin instalación" },
-                  ...instalaciones.map((i) => ({ valor: i.id, etiqueta: i.nombre })),
-                ]}
+                opciones={inst.opciones}
+                onBuscar={inst.buscar}
                 placeholder="Sin instalación"
               />
             </Campo>

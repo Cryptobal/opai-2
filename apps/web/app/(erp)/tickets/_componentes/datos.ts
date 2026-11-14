@@ -113,10 +113,14 @@ export type InstalacionOpcion = { id: string; nombre: string };
  * ver instalaciones recibe una lista vacía y el campo no aparece.
  */
 export async function cargarInstalaciones(): Promise<InstalacionOpcion[]> {
-  const r = await ejecutarComoUsuario<{ items: InstalacionOpcion[] }>("erp", "core.instalaciones.list", {
-    estado: "activa",
-    limite: 100,
-  });
+  const r = await ejecutarComoUsuario<{ items: InstalacionOpcion[] }>(
+    "erp",
+    "core.instalaciones.list",
+    {
+      estado: "activa",
+      limite: 100,
+    },
+  );
   return r.ok ? r.data.items.map((i) => ({ id: i.id, nombre: i.nombre })) : [];
 }
 
