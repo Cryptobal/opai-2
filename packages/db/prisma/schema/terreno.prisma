@@ -133,7 +133,7 @@ model EnrolamientoBiometrico {
 /// para todos los módulos que dejan novedades (Rondas hoy; Control de acceso y Central después), sin copias. Una
 /// novedad grave es el incidente de terreno. `numero` lo asigna un trigger, correlativo por empresa (NOV-0001).
 /// Las referencias a Rondas (`ejecucion_id`, `punto_id`, `tipo_incidente_id`) no llevan FK: el núcleo no depende
-/// de un módulo. Reemplaza a `rondas.novedades`, que queda sin escrituras hasta retirarse.
+/// de un módulo (el trigger `mismo_tenant` sí verifica que sean de la misma empresa). Reemplaza a `rondas.novedades`, que queda sin escrituras hasta retirarse.
 model LibroNovedad {
   id              String   @id @default(uuid(7)) @db.Uuid
   tenantId        String   @map("tenant_id") @db.Uuid
@@ -167,6 +167,7 @@ model LibroNovedad {
   @@unique([tenantId, numero])
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, instalacionId, horaHecho(sort: Desc)])
+  @@index([tenantId, horaHecho(sort: Desc), id(sort: Desc)])
   @@map("libro_novedades")
   @@schema("core")
 }

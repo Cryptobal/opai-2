@@ -1,6 +1,7 @@
 // CAR-78 · E5a y CAR-77: novedades de ronda por la cola hacia el libro del núcleo, contra Postgres real con dos
 // empresas: gravedad por defecto del tipo, enlace a ronda y punto, equipo y hora del hecho, número NOV correlativo,
-// evento de la grave, rechazos (punto o tipo ajeno, módulo inactivo), idempotencia, lectura por alcance.
+// evento de la grave, rechazos (punto o tipo ajeno, módulo inactivo) e idempotencia. La lectura del libro se prueba
+// en libro-novedades-db.test.ts.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -150,6 +151,27 @@ describe.skipIf(!urlPropietario)("novedades de ronda en base real (CAR-78 E5a)",
     expect(ev).toHaveLength(1);
   });
 
+  it("si la novedad ya está en el libro (carrera entre dos envíos), no se duplica ni se reemite el evento", async () => {
+    const g = novedad({ gravedad: "alta" });
+    // La otra petición ganó la carrera y ya escribió la fila, pero este hecho aún no está en la cola del servidor.
+    await e.admin.libroNovedad.create({
+      data: {
+        tenantId: t.A,
+        instalacionId: inst.A,
+        resumen: "ganó",
+        gravedad: "alta",
+        idempotencyKey: g.clave,
+      },
+    });
+    expect((await recibir("A", [g]))[0]?.estado).toBe("recibido");
+    const f = (await filas("A")).filter((x) => x.idempotencyKey === g.clave);
+    expect(f).toHaveLength(1);
+    const ev = await e.admin.evento.count({
+      where: { tenantId: t.A, tipo: "rondas.novedad.grave", entidadId: f[0]?.id ?? "" },
+    });
+    expect(ev).toBe(0);
+  });
+
   it("rechaza el punto o el tipo de otra empresa y no escribe nada", async () => {
     const antes = (await filas("A")).length;
     const r = await recibir("A", [
@@ -174,41 +196,5 @@ describe.skipIf(!urlPropietario)("novedades de ronda en base real (CAR-78 E5a)",
     await recibir("B", [novedad({ puntoId: puntoB })]);
     expect(await filas("B")).toHaveLength(1);
     expect((await filas("B"))[0]).toMatchObject({ instalacionId: inst.B, numero: 1 });
-  });
-
-  const listar = async (k: "A" | "B", input: object, alcance: string[] | null = null) => {
-    const ctx = mod.crearContexto({
-      tenantId: t[k],
-      actor: { tipo: "system" },
-      rol: alcance ? "supervisor" : "owner",
-      alcance: alcance ? { instalaciones: alcance } : null,
-      medidor: { registrar: async () => undefined },
-      modulosActivos: ["rondas"],
-    });
-    return mod.executeCapability(ctx, "core.libro_novedades.listar", input);
-  };
-  type Pagina = { items: { codigo: string; instalacionId: string }[]; siguiente: string | null };
-
-  it("el libro se lee por instalación con su código NOV y pagina", async () => {
-    const r = await listar("A", { instalacionId: inst.A, limite: 2 });
-    if (!r.ok) throw new Error(JSON.stringify(r.error));
-    const p = (r.ok ? r.data : null) as Pagina;
-    expect(p.items).toHaveLength(2);
-    expect(p.items[0]?.codigo).toMatch(/^NOV-\d{4}$/);
-    expect(p.siguiente).not.toBeNull();
-    const r2 = await listar("A", { instalacionId: inst.A, limite: 2, cursor: p.siguiente });
-    const p2 = (r2.ok ? r2.data : null) as Pagina;
-    expect(p2.items.some((x) => p.items.some((y) => y.codigo === x.codigo))).toBe(false);
-  });
-
-  it("el alcance va en la consulta y otra empresa no ve nada", async () => {
-    const fuera = await listar("A", { instalacionId: inst.A }, [randomUUID()]);
-    expect(fuera.ok ? null : fuera.error.code).toBe("NOT_FOUND");
-    const todas = await listar("A", {}, [randomUUID()]);
-    expect(((todas.ok ? todas.data : null) as Pagina).items).toHaveLength(0);
-    const ajena = await listar("B", { instalacionId: inst.A });
-    expect(ajena.ok ? null : ajena.error.code).toBe("NOT_FOUND");
-    const b = (await listar("B", {})) as { ok: true; data: Pagina };
-    expect(b.data.items.every((x) => x.instalacionId === inst.B)).toBe(true);
   });
 });

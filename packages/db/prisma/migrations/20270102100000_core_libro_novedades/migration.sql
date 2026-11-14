@@ -7,7 +7,10 @@
 --     desde core.hechos_terreno por la clave de idempotencia. Verifica que se copiaron todas.
 --   · rondas.novedades NO se borra en esta migración: queda sin escrituras nuevas y se retira en un PR posterior,
 --     que vuelve a copiar lo que falte antes de borrarla (decisión que espera a Carlos, por ser un borrado).
--- Tabla con tenant_id: RLS + FORCE + política tenant_isolation; referencias del mismo tenant por trigger.
+-- Tabla con tenant_id: RLS + FORCE + política tenant_isolation; referencias del mismo tenant por trigger (también
+-- las de Rondas, que no llevan FK para que el núcleo no dependa del módulo, pero sí se verifican de la misma empresa).
+-- Los CHECK de gravedad y estado son nuevos: si rondas.novedades tuviera un valor fuera de lista, la copia falla
+-- entera (falla cerrada) y se corrige antes de reintentar.
 -- Migración de datos con FORCE RLS: exige BYPASSRLS o superusuario y verifica el conteo (REGLAS-codigo.md).
 BEGIN;
 SET LOCAL lock_timeout = '5s';
@@ -44,6 +47,8 @@ CREATE UNIQUE INDEX "libro_novedades_tenant_id_idempotency_key_key"
     ON "core"."libro_novedades"("tenant_id", "idempotency_key");
 CREATE INDEX "libro_novedades_tenant_id_instalacion_id_hora_hecho_idx"
     ON "core"."libro_novedades"("tenant_id", "instalacion_id", "hora_hecho" DESC);
+CREATE INDEX "libro_novedades_tenant_id_hora_hecho_id_idx"
+    ON "core"."libro_novedades"("tenant_id", "hora_hecho" DESC, "id" DESC);
 
 ALTER TABLE "core"."libro_novedades" ADD CONSTRAINT "libro_novedades_tenant_id_fkey"
     FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -64,6 +69,12 @@ GRANT SELECT, INSERT, UPDATE ON "core"."libro_novedades" TO opai_app;
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core"."libro_novedades"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
     'instalacion_id', 'core.instalaciones', 'dispositivo_id', 'core.dispositivos', 'persona_id', 'core.personas');
+-- Referencias a Rondas: solo al insertar (sin FK, una fila de Rondas borrada después no debe impedir actualizar el
+-- estado de la novedad).
+CREATE TRIGGER mismo_tenant_rondas BEFORE INSERT ON "core"."libro_novedades"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
+    'punto_id', 'rondas.puntos_control', 'tipo_incidente_id', 'rondas.tipos_incidente',
+    'ejecucion_id', 'rondas.ejecuciones');
 
 -- Número visible correlativo por empresa (NOV-0001). El candado de la transacción ordena las inserciones
 -- concurrentes de la misma empresa; las filas anteriores del mismo comando ya son visibles para el trigger.
@@ -103,7 +114,7 @@ BEGIN
       SELECT x."dispositivo_id", x."persona_id", x."hora_corregida"
         FROM "core"."hechos_terreno" x
        WHERE x."tenant_id" = n."tenant_id" AND x."tipo" = 'rondas.novedad'
-         AND x."clave"::text = n."idempotency_key"
+         AND x."clave"::text = lower(n."idempotency_key")
        ORDER BY x."recibido_en" LIMIT 1) h ON true
    ORDER BY n."tenant_id", n."created_at", n."id"
   ON CONFLICT DO NOTHING;

@@ -58,7 +58,7 @@ export async function resolverNovedades(
       : [],
   ]);
   const puntoOk = new Set(puntos.map((p) => p.id));
-  const gravedadDe = new Map(tipos.map((t) => [t.id, t.gravedadDefecto]));
+  const gravedadDe = new Map(tipos.map((ti) => [ti.id, ti.gravedadDefecto]));
   const validas = nov.filter(({ h, p }) => {
     if (p.puntoId && !puntoOk.has(p.puntoId)) rechazos.set(h.clave, "punto_invalido");
     else if (p.tipoIncidenteId && !gravedadDe.has(p.tipoIncidenteId))
@@ -112,7 +112,7 @@ export async function resolverNovedades(
       for (const n of nuevas.filter((x) => x.gravedad === "alta")) {
         await ctx.eventos.emitir(tx, {
           tipo: "rondas.novedad.grave",
-          entidadTipo: "novedad",
+          entidadTipo: "libro_novedad",
           entidadId: n.id,
           payload: { instalacionId: equipo.instalacionId, numero: n.numero },
         });
