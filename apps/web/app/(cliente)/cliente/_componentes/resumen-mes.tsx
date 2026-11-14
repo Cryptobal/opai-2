@@ -4,7 +4,7 @@ import { Alerta, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/d
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { type Cobertura, FilaSeccion, type Seccion } from "./fila-seccion";
+import { type Cobertura, FilaSeccion, type Rondas, type Seccion } from "./fila-seccion";
 import { mesAnterior, mesSiguiente, nombreDeMes } from "./mes";
 
 export type ResumenMes = {
@@ -18,6 +18,7 @@ export type ResumenMes = {
     direccion: string | null;
     secciones: Seccion[];
     cobertura: Cobertura | null;
+    rondas: Rondas | null;
   }[];
 };
 
@@ -75,7 +76,7 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
                 <CardContent>
                   <ul className="flex flex-col">
                     {i.secciones.map((s) => (
-                      <FilaSeccion key={s.seccion} s={s} cobertura={i.cobertura} />
+                      <FilaSeccion key={s.seccion} s={s} cobertura={i.cobertura} rondas={i.rondas} />
                     ))}
                   </ul>
                 </CardContent>

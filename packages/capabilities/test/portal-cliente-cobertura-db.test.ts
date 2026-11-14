@@ -13,7 +13,8 @@ import type * as ModuloCapacidades from "../src";
 
 type Capacidades = typeof ModuloCapacidades;
 type Cob = { programados: number; cubiertos: number; porCubrir: number; porcentaje: number | null };
-type Resumen = { instalaciones: { id: string; cobertura: Cob | null; secciones: { seccion: string; disponibilidad: string }[] }[] };
+type Rondas = { realizadas: number; completas: number; incompletas: number; porcentaje: number | null };
+type Resumen = { instalaciones: { id: string; cobertura: Cob | null; rondas: Rondas | null; secciones: { seccion: string; disponibilidad: string }[] }[] };
 
 const MES = "2026-10"; // 22 días hábiles
 
@@ -55,6 +56,17 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
     await puestoCon(t.a, inst.y1, "13.131.313-1");
     await puestoCon(t.b, inst.b1, "22.222.222-2");
     await e.admin.excepcionPauta.create({ data: { tenantId: t.a, puestoId: x1.puesto, fecha: new Date("2026-10-09"), tipo: "ausencia", motivo: "No llegó", personaId: x1.titular } });
+    // Rondas de octubre: X1 con una completa y una incompleta; X2 (fuera del acceso de X) con una completa.
+    const ronda = async (instalacionId: string, estado: string, marcados: number, dia: string) => {
+      const plantilla = await e.admin.plantillaRonda.create({ data: { tenantId: t.a, instalacionId, nombre: `R ${randomUUID().slice(0, 6)}`, tiempoMaxMin: 60 } });
+      const disp = (await e.admin.dispositivo.create({ data: { tenantId: t.a, instalacionId, identificador: `D-${randomUUID().slice(0, 6)}`, tokenHash: randomUUID(), estado: "activo" } })).id;
+      const ej = await e.admin.ejecucionRonda.create({ data: { tenantId: t.a, instalacionId, plantillaId: plantilla.id, dispositivoId: disp, clave: randomUUID(), horaInicio: new Date(`${dia}T03:00:00Z`) } });
+      await e.admin.cierreRonda.create({ data: { tenantId: t.a, instalacionId, ejecucionId: ej.id, dispositivoId: disp, clave: randomUUID(), estado, puntosObligatorios: 4, puntosMarcados: marcados, horaCierre: new Date(`${dia}T04:00:00Z`) } });
+    };
+    await ronda(inst.x1, "completada", 4, "2026-10-10");
+    await ronda(inst.x1, "incompleta", 3, "2026-10-11");
+    await ronda(inst.x2, "completada", 4, "2026-10-12");
+    await ronda(inst.x1, "completada", 4, "2026-11-02"); // otro mes
     const acceso = async (tenantId: string, userId: string, cuentaId: string, instalacionId: string) => {
       await e.admin.user.create({ data: { id: userId, name: "c", email: `${userId}@prueba.cl` } });
       const m = await e.admin.membership.create({ data: { tenantId, userId, rol: "viewer", portales: ["cliente"] } });
@@ -70,7 +82,7 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
     await e?.cerrar();
   });
 
-  const ctx = (tenantId: string, userId: string, modulosActivos = ["portal_cliente", "pauta"]) =>
+  const ctx = (tenantId: string, userId: string, modulosActivos = ["portal_cliente", "pauta", "rondas"]) =>
     mod.crearContexto({
       tenantId, actor: { tipo: "user", id: userId }, usuario: { id: userId, nombre: "c", email: `${userId}@prueba.cl`, platformRole: null }, rol: "viewer", permisosRol: ["portal_cliente:read"],
       portal: "cliente", portalesMembresia: ["cliente"], modulosActivos, medidor: { registrar: async () => undefined },
@@ -86,6 +98,7 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
     expect(r.instalaciones.map((i) => i.id)).toEqual([inst.x1]);
     expect(r.instalaciones[0]?.cobertura).toEqual({ programados: 22, cubiertos: 21, porCubrir: 1, porcentaje: 95.5 });
     expect(r.instalaciones[0]?.secciones.find((s) => s.seccion === "cobertura")?.disponibilidad).toBe("disponible");
+    expect(r.instalaciones[0]?.rondas).toEqual({ realizadas: 2, completas: 1, incompletas: 1, porcentaje: 50 });
     expect(JSON.stringify(r)).not.toMatch(/Titular|Secreto|11\.111/);
   });
 
@@ -97,6 +110,7 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
   it("sin Pauta activa o con el ajuste de la empresa apagado, la sección queda pendiente y sin cifras", async () => {
     const sinPauta = await resumen(ctx(t.a, u.x, ["portal_cliente"]));
     expect(sinPauta.instalaciones[0]?.cobertura).toBeNull();
+    expect(sinPauta.instalaciones[0]?.rondas).toBeNull();
     expect(sinPauta.instalaciones[0]?.secciones.find((s) => s.seccion === "cobertura")?.disponibilidad).toBe("pendiente");
     const owner = mod.crearContexto({
       tenantId: t.a, actor: { tipo: "system" }, rol: "owner", portal: "erp", portalesMembresia: ["erp"],
