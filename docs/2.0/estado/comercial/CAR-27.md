@@ -32,7 +32,7 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 
 ### Pendiente
 
-- PR 3: pantallas de configuración y de ficha, y tokens de documentos.
+- Tokens de documentos para los campos personalizados (`{{cuenta.campo.<clave>}}`).
 
 ## PR campos personalizados 2/3 · rama `brief/car-27-campos-valores`
 
@@ -42,6 +42,23 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 ### Qué entra
 
 Valores por ficha: `core.valores_personalizados.get/set` (cuentas y contactos, permisos `core:cuentas.read`/`core:cuentas.manage` y alcance de la cuenta o del contacto) y `comercial.negocio_campos.get/set` (negocios, permisos de Comercial). `set` cambia solo las claves enviadas, `null` borra, valida tipo y opciones contra el catálogo activo de **esa** entidad (una clave de otra entidad se rechaza), no deja vaciar un obligatorio, acepta `dryRun` y emite un evento sin valores (solo las claves). La lectura se audita con el id de la ficha.
+
+## PR campos personalizados 3/3 · rama `brief/car-27-campos-pantallas`
+
+- **Estado:** Abierto (apilado sobre el PR 2/3)
+- **Migración:** No
+
+### Qué entra
+
+- **Configuración › Operación › Campos personalizados** (`/configuracion/campos-personalizados`, permiso `core:campos.config`): campos por entidad (Cuentas, Contactos, Negocios), con «Nuevo campo» y «Editar» en una hoja (nombre, tipo, opciones de lista, obligatorio y archivar).
+- **Tarjeta «Campos propios»** en las fichas de cuenta, contacto y negocio. Solo aparece si hay campos definidos para esa entidad; muestra los valores y tiene un botón «Editar» (con el permiso de edición de la ficha) que guarda solo lo que cambió.
+- El error de guardado nombra cada campo que falló.
+- Entrada de novedades y prueba `@preview`.
+
+**Decisiones nocturnas (revisar):**
+1. Sin diseño aprobado: se usaron los patrones del DS (lista con hoja, como Planes de seguimiento; tarjeta de ficha como Etiquetas).
+2. La entrada va en el grupo **Operación** porque Empresa ya tiene el máximo de 7.
+3. Los tokens de documentos para estos campos quedan pendientes.
 
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
