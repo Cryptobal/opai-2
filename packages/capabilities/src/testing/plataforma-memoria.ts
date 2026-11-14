@@ -130,6 +130,8 @@ function plataformaEnMemoria(delegado: (m: string) => Delegado) {
       capability?: string;
       tenantObjetivoId?: string;
       antesDeSeq?: number;
+      desde?: Date;
+      hasta?: Date;
       limite: number;
     }) =>
       delegado("auditoriaGlobal").findMany({
@@ -138,6 +140,14 @@ function plataformaEnMemoria(delegado: (m: string) => Delegado) {
           ...(f.capability ? { capability: { startsWith: f.capability } } : {}),
           ...(f.tenantObjetivoId ? { tenantObjetivoId: f.tenantObjetivoId } : {}),
           ...(f.antesDeSeq ? { seq: { lt: f.antesDeSeq } } : {}),
+          ...(f.desde || f.hasta
+            ? {
+                createdAt: {
+                  ...(f.desde ? { gte: f.desde } : {}),
+                  ...(f.hasta ? { lt: f.hasta } : {}),
+                },
+              }
+            : {}),
         },
         orderBy: { seq: "desc" },
         take: f.limite,

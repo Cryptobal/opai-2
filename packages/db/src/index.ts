@@ -53,6 +53,7 @@ export {
   operacionesEmpresa,
   type OperacionesEmpresa,
 } from "./plataforma-empresa";
+export { operacionesMiembros } from "./plataforma-empresa-miembros";
 export {
   agregarABitacora,
   type HechoBitacora,

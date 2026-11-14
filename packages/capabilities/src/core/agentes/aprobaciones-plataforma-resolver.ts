@@ -3,8 +3,10 @@ import { z } from "zod";
 import { PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { conflicto } from "../../errores";
+import { tienePermisoDeCapacidad } from "../../autorizacion";
+import { conflicto, prohibido } from "../../errores";
 import { executeCapability } from "../../execute";
+import { obtenerCapacidad } from "../../registry";
 import type { Contexto } from "../../types";
 import { requierePlataforma } from "../comun";
 import { uuidSchema } from "../esquemas";
@@ -15,6 +17,18 @@ import { pendiente } from "./aprobaciones-pendiente";
 // vería el id y el motivo) y se pueden resolver sin elegir empresa.
 
 const json = (v: unknown) => JSON.parse(JSON.stringify(v)) as object;
+
+/**
+ * Aprobar o rechazar exige el permiso de la acción pedida (CAR-323, §2.9): el rol «support» (solo
+ * lectura) no decide sobre acciones que no podría ejecutar, ni para aprobarlas ni para rechazarlas.
+ */
+function exigirPermisoDeLaAccion(ctx: Contexto, capability: string) {
+  const c = obtenerCapacidad(capability);
+  if (!c || !tienePermisoDeCapacidad(ctx, c))
+    throw prohibido(
+      "Solo quien puede ejecutar esta acción de plataforma puede aprobarla o rechazarla.",
+    );
+}
 
 /** Pasa de pendiente al estado final en la transacción de la capacidad (con su auditoría). */
 async function decidir(
@@ -45,6 +59,7 @@ export const platformAprobacionesAprobar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const { a } = await pendiente(ctx, input.id, true, "plataforma");
+    exigirPermisoDeLaAccion(ctx, a.capability);
     if (dryRun)
       return {
         estado: "pendiente",
@@ -82,6 +97,7 @@ export const platformAprobacionesRechazar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const { a } = await pendiente(ctx, input.id, false, "plataforma");
+    exigirPermisoDeLaAccion(ctx, a.capability);
     if (dryRun) return { estado: "pendiente" };
     await decidir(ctx, a.id, { estado: "rechazada", motivo: input.motivo });
     return { estado: "rechazada" };
