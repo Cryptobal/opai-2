@@ -21,7 +21,7 @@
     "/(erp)/configuracion/modulo/[id]": 192,
     "/(erp)/instalaciones/nueva": 181,
     "/(erp)/negocios/[id]/seguimiento": 176,
-    "/(erp)/pauta": 178,
+    "/(erp)/pauta": 179,
     "/(erp)/personas/vencimientos": 176,
     "/(erp)/personas/[id]": 173,
     "/(erp)/personas/[id]/laboral": 173,
