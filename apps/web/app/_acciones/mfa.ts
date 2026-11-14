@@ -11,6 +11,8 @@ import {
   verificarSegundoFactor,
 } from "@opai/auth";
 import { destinoSeguro } from "@/app/(auth)/destino";
+import { verificarMfaDe } from "@/lib/mfa";
+import { identidadActual } from "@/lib/servidor";
 import { qrSvg } from "@/lib/qr";
 import { normalizarCodigoRespaldo } from "@/lib/codigo-mfa";
 
