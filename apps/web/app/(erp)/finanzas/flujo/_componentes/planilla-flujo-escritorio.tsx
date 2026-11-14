@@ -8,6 +8,7 @@ import { Alerta, Badge, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
 import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
 import { celdaEditable, type Planilla } from "./datos";
+import { filaBase } from "./grupos-cobro";
 import type { ArmadoPlanilla } from "./datos";
 import { hojaEspecial, type HojaEspecial } from "./cobros-celda";
 
@@ -29,6 +30,8 @@ type Props = {
   onHoja: (h: HojaEspecial) => void;
   importAbierta: boolean;
   onImportAbiertaChange: (v: boolean) => void;
+  /** Abre o cierra el detalle por cliente e instalación de los cobros (CAR-456). */
+  onAlternarFila: (filaId: string) => void;
 };
 
 export function PlanillaFlujoEscritorio({
@@ -44,6 +47,7 @@ export function PlanillaFlujoEscritorio({
   onHoja,
   importAbierta,
   onImportAbiertaChange,
+  onAlternarFila,
 }: Props) {
   return (
     <div className="flex min-w-0 flex-col gap-4">
@@ -77,12 +81,13 @@ export function PlanillaFlujoEscritorio({
         columnas={armado.columnas}
         celda={armado.celda}
         celdaEditable={armado.celdaEditable}
+        onAlternarFila={onAlternarFila}
         {...(gestiona
           ? {
               onCelda: (filaId: string, semana: string) => {
                 if (celdaEditable(p, filaId, semana)) onSeleccion({ filaId, semana });
                 else {
-                  const h = hojaEspecial(p, filaId, semana);
+                  const h = hojaEspecial(p, filaBase(filaId), semana);
                   if (h) onHoja(h);
                 }
               },

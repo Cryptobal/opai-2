@@ -70,6 +70,15 @@ export const celdaSchema = z.object({
       origen: z.enum(["manual", "promedio", "vencimiento", "emision"]),
     })
     .optional(),
+  /** Solo en cobros proyectados: cliente e instalación de la factura, para agrupar los ingresos (CAR-456). */
+  cliente: z
+    .object({
+      cuentaId: uuidSchema,
+      cuenta: z.string(),
+      instalacionId: uuidSchema.nullable(),
+      instalacion: z.string().nullable(),
+    })
+    .optional(),
   /** Solo en «IVA a pagar»: mes del IVA y si su pago está postergado a M+2 (CAR-397). */
   iva: z.object({ periodo: z.string(), postergado: z.boolean(), fechaPago: z.string() }).optional(),
 });
