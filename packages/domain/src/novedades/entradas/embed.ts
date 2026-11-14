@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- archivo generado: una línea por novedad, crece con cada entrada */
 /** Generado por `pnpm --filter @opai/domain gen:novedades-embed`. No editar. */
 export const NOVEDADES_MARKDOWN: readonly string[] = [
   "---\nid: menu-bandeja\nfecha: 2026-11-03\nmodulo: core\ntitulo: Menú más claro y Bandeja única\ncar: CAR-182\nruta: /bandeja\n---\nEl menú lateral se ordenó por **cómo trabajas** (Comercial, Operaciones, Personas, Finanzas y Documentos). **Bandeja** quedó como entrada propia, con su contador, y ya no se repite dentro de Inicio.\n\nLa campana de avisos sigue en la barra superior; «Ver todo» te lleva siempre a la misma Bandeja.\n",
