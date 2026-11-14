@@ -2240,3 +2240,18 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 5. **Identifícate siempre.** Cada PR, comentario e issue empieza con «`[Sesión <nombre>]`».
 
 **Consecuencias.** Ante un choque con otra sección de `AGENTS.md`, manda «Autonomía de las sesiones», salvo lo que no cambia (abajo). Lo que antes se preguntaba en el chat o con `DECISIÓN CARLOS:` en el PR (ADR-095) va al issue «Decide Carlos», y el párrafo «Decisión tuya» solo lo enlaza. No cambian el veto de Carlos, las condiciones de «Integración a `main`», lo «Prohibido» (producción de Gard, OPAI 1.0, secretos) ni el punto 4 del Modo noche (ADR-111). Desde ADR-108 la anotación «en `ESTADO.md`» de un PR de construcción va en su archivo de `docs/2.0/estado/`. La etiqueta «Decide Carlos» queda creada en el equipo CAR de Linear.
+
+## ADR-116 · Inventario sale del backlog como módulo vendible (CAR-235, 14-nov-2026)
+
+**Fecha:** 14-nov-2026 · **Estado:** vigente · **Decide:** Carlos, al crear el proyecto Linear «07 · Inventario» (10-nov-2026) con CAR-235 a CAR-238 para la Versión 1.0 · **Registra:** Claude («Sesión Inventario»). **Modifica** ADR-030 (backlog) y la lista «No se portan de 1.0» de `CONTEXTO-agentes.md`.
+
+**Contexto.** ADR-030 dejó Inventario en el backlog y la línea base de paridad lo marcó «no copiar». Carlos lo pidió después como módulo de la Versión 1.0: activos (teléfonos y otros), ropa con tipos configurables para uniformes, asignación a persona o instalación, vendible aparte.
+
+**Decisión.** Inventario es un módulo vendible (`inventario`), sin dependencias de otros módulos, en el área Operaciones del ERP. Alcance en [`modulos/inventario.md`](modulos/inventario.md), decidido por la sesión con autonomía (ADR-114) y en revisión de Carlos en el issue «Decide Carlos» CAR-487:
+
+1. Catálogo de tipos por empresa en dos categorías: **activo** (por unidad, con campos propios) y **ropa** (por existencias y talla, ligada a las prendas del uniforme de Personas, CAR-408).
+2. La línea telefónica de 1.0 es un tipo de activo más; no se portan los datos técnicos de MDM.
+3. Se asigna a **personas o instalaciones** del núcleo, nunca a usuarios.
+4. Se cobra por instalación activa (entrada del catálogo de cobro, editable en Plataforma).
+
+**Referente.** Rippling (equipos asignados al empleado, con devolución al salir) y Snipe-IT (categorías con campos propios, activos por unidad y artículos por existencias). Se aparta en la ropa por talla, por regla del rubro.
