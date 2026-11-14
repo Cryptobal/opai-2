@@ -529,7 +529,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/instalaciones/_componentes` | `pauta.informes.instalaciones` | `pauta_informes_instalaciones` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `asistencia.telefono.habilitar` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.anular` | `core_ausencias_anular` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.aprobar` | `core_ausencias_aprobar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.listar` | `core_ausencias_listar` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.ausencias.rechazar` | `core_ausencias_rechazar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.registrar` | `core_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.borrar` | `core_biometria_borrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.estado` | `core_biometria_estado` | existe |

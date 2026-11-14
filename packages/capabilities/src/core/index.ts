@@ -52,6 +52,8 @@ import { capacidadesCorreos } from "./correos";
 import { capacidadesImportar } from "./importar";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
+import { consumidorAusenciaPedida, consumidorAusenciaRespondida } from "./maestros/ausencias-avisos";
+import { ausenciasAprobar, ausenciasRechazar } from "./maestros/ausencias-responder";
 import { capacidadesAusencias } from "./maestros/personas-ausencias";
 import { capacidadesPanel } from "./panel";
 import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";
@@ -146,6 +148,8 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   platformIntegracionesEstado,
   ...capacidadesMaestros,
   ...capacidadesAusencias,
+  ausenciasAprobar,
+  ausenciasRechazar,
   ...capacidadesCrm,
   ...capacidadesCorreos,
   ...capacidadesImportar,
@@ -191,6 +195,8 @@ export const consumidoresDelNucleo = [
   consumidorRevocacionBiometria,
   ...consumidoresSlack,
   consumidorProcesosPersona,
+  consumidorAusenciaPedida,
+  consumidorAusenciaRespondida,
   consumidorWebhooks,
 ];
 

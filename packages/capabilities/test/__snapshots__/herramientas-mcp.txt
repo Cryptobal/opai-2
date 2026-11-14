@@ -101,8 +101,10 @@ core_aprobaciones_list
 core_aprobaciones_reglas_list
 core_audit_list
 core_ausencias_anular
+core_ausencias_aprobar
 core_ausencias_clases
 core_ausencias_listar
+core_ausencias_rechazar
 core_ausencias_registrar
 core_biometria_borrar
 core_biometria_estado
@@ -670,6 +672,8 @@ preview_core_actividades_delete
 preview_core_actividades_update
 preview_core_anexos_generar
 preview_core_ausencias_anular
+preview_core_ausencias_aprobar
+preview_core_ausencias_rechazar
 preview_core_ausencias_registrar
 preview_core_biometria_borrar
 preview_core_calendario_actualizar
