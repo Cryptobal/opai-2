@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import { ventasProgramadasPorPeriodo, type Contexto } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
+import { formatearFecha } from "@opai/domain";
 import type { z } from "zod";
 
 import type { CeldaFlujo } from "../domain";
@@ -79,7 +80,7 @@ export async function celdasRecurrentes(
       const m = montos.get(r.id)?.get(c.fecha);
       const extra = m?.detalle ? ` · ${m.detalle}` : "";
       dominio.push({ filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto });
-      vista.push({ id: idEstable(`recurrente:${r.id}:${c.fecha}`), filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto, nota: `${r.concepto} · cuota del ${c.fecha} · ${ETIQUETA[c.estado]}${extra}` });
+      vista.push({ id: idEstable(`recurrente:${r.id}:${c.fecha}`), filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto, nota: `${r.concepto} · cuota del ${formatearFecha(c.fecha)} · ${ETIQUETA[c.estado]}${extra}` });
     }
   }
   return { dominio, vista };
