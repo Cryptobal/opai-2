@@ -26,19 +26,39 @@ export function ipv4Interna(ip: string): boolean {
   );
 }
 
-/** IPv6 de loopback, sin especificar, local única, link-local o IPv4 mapeada a una interna. */
-export function ipv6Interna(ip: string): boolean {
-  const s = ip.toLowerCase().replace(/^\[|\]$/g, "");
-  if (s === "::" || s === "::1") return true;
-  const mapeada = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(s);
-  if (mapeada?.[1]) return ipv4Interna(mapeada[1]);
-  // `new URL` normaliza la IPv4 mapeada a hexadecimal: ::ffff:a00:1 es 10.0.0.1.
-  const hex = /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(s);
-  if (hex?.[1] && hex[2]) {
-    const [alto, bajo] = [parseInt(hex[1], 16), parseInt(hex[2], 16)];
-    return ipv4Interna(`${alto >> 8}.${alto & 255}.${bajo >> 8}.${bajo & 255}`);
+/** Las 8 partes de una IPv6 (admite «::» y una IPv4 al final), o null si no se puede leer. */
+export function partesIpv6(ip: string): number[] | null {
+  let s = ip.toLowerCase().replace(/^\[|\]$/g, "");
+  const v4 = /(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(s);
+  if (v4) {
+    const [a, b, c, d] = v4.slice(1).map(Number);
+    s = `${s.slice(0, v4.index)}${(((a ?? 0) << 8) | (b ?? 0)).toString(16)}:${(((c ?? 0) << 8) | (d ?? 0)).toString(16)}`;
   }
-  return /^f[cd][0-9a-f]{2}:/.test(s) || /^fe[89ab][0-9a-f]:/.test(s);
+  const lados = s.split("::");
+  if (lados.length > 2) return null;
+  const leer = (t: string | undefined) => (t ? t.split(":").map((g) => parseInt(g, 16)) : []);
+  const izq = leer(lados[0]);
+  const der = leer(lados[1]);
+  const relleno = lados.length === 2 ? 8 - izq.length - der.length : 0;
+  const partes = [...izq, ...Array<number>(Math.max(relleno, 0)).fill(0), ...der];
+  if (partes.length !== 8 || partes.some((g) => Number.isNaN(g) || g < 0 || g > 0xffff))
+    return null;
+  return partes;
+}
+
+/**
+ * Lista permitida, no prohibida: solo IPv6 global unicast (2000::/3). Así quedan fuera loopback,
+ * IPv4 mapeada o compatible, NAT64, local única, link-local, site-local y multicast. Dentro de
+ * 2000::/3 se excluyen además 6to4 (2002::/16), Teredo (2001::/32) y documentación (2001:db8::/32),
+ * que llevan o simulan una IPv4 adentro.
+ */
+export function ipv6Interna(ip: string): boolean {
+  const p = partesIpv6(ip);
+  if (!p) return true;
+  const [g0 = 0, g1 = 0] = p;
+  if (g0 < 0x2000 || g0 > 0x3fff) return true;
+  if (g0 === 0x2002) return true;
+  return g0 === 0x2001 && (g1 === 0 || g1 === 0xdb8);
 }
 
 export function ipInterna(ip: string): boolean {
@@ -57,7 +77,7 @@ export function problemaUrlWebhook(texto: string): string | null {
   if (u.protocol !== "https:") return "La dirección debe empezar con https://.";
   if (u.username || u.password) return "La dirección no puede llevar usuario ni contraseña.";
   if (u.hash) return "La dirección no puede llevar un fragmento (#).";
-  const host = u.hostname.replace(/\.$/, "");
+  const host = u.hostname.replace(/\.+$/, "");
   if (!host.includes(".") && !host.includes(":"))
     return "La dirección debe usar un dominio público.";
   if (NOMBRES_INTERNOS.test(host)) return "La dirección no puede apuntar a una red interna.";
@@ -65,4 +85,9 @@ export function problemaUrlWebhook(texto: string): string | null {
     if (ipInterna(host)) return "La dirección no puede apuntar a una red interna.";
   }
   return null;
+}
+
+/** Forma canónica que se guarda (esquema y dominio en minúsculas): la misma que se revisa al enviar. */
+export function normalizarUrlWebhook(texto: string): string {
+  return new URL(texto.trim()).href;
 }

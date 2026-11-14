@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ipInterna, problemaUrlWebhook } from "./url";
+import { ipInterna, normalizarUrlWebhook, problemaUrlWebhook } from "./url";
 
 describe("dirección de un destino de eventos (CAR-352)", () => {
   it("acepta https a un dominio público", () => {
@@ -34,6 +34,17 @@ describe("dirección de un destino de eventos (CAR-352)", () => {
       "https://[::1]/x",
       "https://[fd00::1]/x",
       "https://[::ffff:10.0.0.1]/x",
+      "https://[::127.0.0.1]/x",
+      "https://[::a9fe:a9fe]/x",
+      "https://[64:ff9b::169.254.169.254]/x",
+      "https://[2002:a9fe:a9fe::]/x",
+      "https://[::ffff:0:127.0.0.1]/x",
+      "https://[fec0::1]/x",
+      "https://[ff02::1]/x",
+      "https://[2001:db8::1]/x",
+      "https://[2001:0:4136:e378::1]/x",
+      "https://localhost../x",
+      "https://metadata.google.internal../x",
     ]) {
       expect(problemaUrlWebhook(url), url).not.toBeNull();
     }
@@ -48,5 +59,11 @@ describe("dirección de un destino de eventos (CAR-352)", () => {
 
   it("rechaza direcciones demasiado largas", () => {
     expect(problemaUrlWebhook(`https://a.cl/${"x".repeat(2100)}`)).toMatch(/larga/);
+  });
+
+  it("guarda la dirección en su forma canónica", () => {
+    expect(normalizarUrlWebhook(" HTTPS://Hooks.Ejemplo.CL/Ruta?x=1 ")).toBe(
+      "https://hooks.ejemplo.cl/Ruta?x=1",
+    );
   });
 });

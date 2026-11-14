@@ -4,7 +4,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 
 import { cifrar, descifrar } from "@opai/integrations";
-import { problemaUrlWebhook } from "@opai/domain";
+import { normalizarUrlWebhook, problemaUrlWebhook } from "@opai/domain";
 
 import type { TenantTx } from "@opai/db";
 
@@ -76,9 +76,11 @@ export function exigeSinAlcance(ctx: Contexto): void {
   if (ctx.alcance) throw prohibido("Los destinos de eventos son de toda la empresa.");
 }
 
-export function exigeUrl(url: string): void {
-  const problema = problemaUrlWebhook(url);
+/** Valida la dirección y devuelve su forma canónica, que es la que se guarda. */
+export function urlValida(url: string): string {
+  const problema = problemaUrlWebhook(url.trim());
   if (problema) throw reglaDeNegocio(problema);
+  return normalizarUrlWebhook(url);
 }
 
 /** Sin repetidos y solo eventos del catálogo (núcleo y módulos). */

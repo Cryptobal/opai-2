@@ -105,6 +105,14 @@ describe.skipIf(!urlPropietario)("destinos de eventos salientes (CAR-352)", () =
     );
   });
 
+  it("guarda la dirección en su forma canónica", async () => {
+    const d = await dato<Creado>("a", "core.webhooks.destino_crear", {
+      ...nuevo,
+      url: "HTTPS://Hooks.Ejemplo.CL/Canonica",
+    });
+    expect(d.url).toBe("https://hooks.ejemplo.cl/Canonica");
+  });
+
   it("rota el secreto, pausa y elimina", async () => {
     const d = await dato<Creado>("a", "core.webhooks.destino_crear", nuevo);
     const r = await dato<Creado>("a", "core.webhooks.destino_rotar_secreto", { id: d.id });

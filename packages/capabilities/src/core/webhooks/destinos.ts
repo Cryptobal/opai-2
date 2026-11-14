@@ -14,11 +14,11 @@ import {
   eventosSchema,
   eventosValidos,
   exigeSinAlcance,
-  exigeUrl,
   generarSecreto,
   MAX_DESTINOS,
   SELECT_DESTINO,
   urlSchema,
+  urlValida,
   vistaDestino,
 } from "./comun";
 
@@ -68,13 +68,15 @@ export const webhooksDestinoCreate = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     exigeSinAlcance(ctx);
-    exigeUrl(input.url);
+    const url = urlValida(input.url);
     const eventos = eventosValidos(input.eventos);
-    if ((await ctx.db.webhookDestino.count()) >= MAX_DESTINOS) {
-      throw reglaDeNegocio(`La empresa ya tiene el máximo de ${MAX_DESTINOS} destinos de eventos.`);
-    }
+    const lleno = async (db: Pick<typeof ctx.db, "webhookDestino">) =>
+      (await db.webhookDestino.count()) >= MAX_DESTINOS;
+    const tope = () =>
+      reglaDeNegocio(`La empresa ya tiene el máximo de ${MAX_DESTINOS} destinos de eventos.`);
+    if (await lleno(ctx.db)) throw tope();
     const base = {
-      url: input.url,
+      url,
       descripcion: input.descripcion || null,
       eventos,
       activo: true,
@@ -92,8 +94,11 @@ export const webhooksDestinoCreate = defineCapability({
       };
     }
     const secreto = generarSecreto();
-    const d = await ctx.transaccion(async (tx) =>
-      tx.webhookDestino.create({
+    const d = await ctx.transaccion(async (tx) => {
+      // Cuenta y alta bajo el mismo candado: dos altas simultáneas no pasan el tope.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${ctx.tenantId} || ':webhooks'))`;
+      if (await lleno(tx)) throw tope();
+      return tx.webhookDestino.create({
         data: {
           tenantId: ctx.tenantId,
           ...base,
@@ -101,8 +106,8 @@ export const webhooksDestinoCreate = defineCapability({
           creadoPor: ctx.usuario?.id ?? null,
         },
         select: SELECT_DESTINO,
-      }),
-    );
+      });
+    });
     return { ...vistaDestino(d), secreto };
   },
 });
@@ -126,9 +131,8 @@ export const webhooksDestinoUpdate = defineCapability({
   async handler(ctx, input, { dryRun }) {
     exigeSinAlcance(ctx);
     const actual = await destinoDe(ctx, input.id);
-    if (input.url !== undefined) exigeUrl(input.url);
     const cambios = {
-      ...(input.url !== undefined ? { url: input.url } : {}),
+      ...(input.url !== undefined ? { url: urlValida(input.url) } : {}),
       ...(input.eventos !== undefined ? { eventos: eventosValidos(input.eventos) } : {}),
       ...(input.descripcion !== undefined ? { descripcion: input.descripcion || null } : {}),
       ...(input.activo !== undefined ? { activo: input.activo } : {}),
