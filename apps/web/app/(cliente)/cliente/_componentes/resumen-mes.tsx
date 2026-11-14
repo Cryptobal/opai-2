@@ -1,9 +1,10 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { Alerta, Badge, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/ds";
+import { Alerta, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
+import { type Cobertura, FilaSeccion, type Novedades, type Rondas, type Seccion } from "./fila-seccion";
 import { mesAnterior, mesSiguiente, nombreDeMes } from "./mes";
 
 export type ResumenMes = {
@@ -15,19 +16,16 @@ export type ResumenMes = {
     id: string;
     nombre: string;
     direccion: string | null;
-    secciones: { seccion: string; disponibilidad: "disponible" | "pendiente" }[];
+    secciones: Seccion[];
+    cobertura: Cobertura | null;
+    rondas: Rondas | null;
+    novedades: Novedades | null;
   }[];
 };
 
-const SECCION: Record<string, string> = {
-  cobertura: "Cobertura",
-  rondas: "Rondas realizadas",
-  novedades: "Novedades por gravedad",
-};
-
 /**
- * Resumen del mes = informe mensual (01, B14): una tarjeta por instalación habilitada. Las secciones
- * cuya fuente aún no está integrada se marcan «Pendiente», sin cifras ni porcentajes inventados.
+ * Resumen del mes = informe mensual (01, B14): una tarjeta por instalación habilitada con cobertura, rondas y
+ * novedades (CAR-491 a CAR-493). Una sección apagada por la empresa o sin su módulo se marca «Pendiente», sin cifras.
  */
 export function ResumenDelMes({ r }: { r: ResumenMes }) {
   return (
@@ -63,10 +61,6 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
         />
       ) : (
         <>
-          <Alerta tono="info" titulo="Datos en conexión">
-            Cobertura, rondas y novedades se irán conectando a este resumen. Mientras tanto cada
-            sección aparece como pendiente, sin cifras.
-          </Alerta>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {r.instalaciones.map((i) => (
               <Card key={i.id}>
@@ -79,10 +73,7 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
                 <CardContent>
                   <ul className="flex flex-col">
                     {i.secciones.map((s) => (
-                      <li key={s.seccion} className="flex min-h-11 items-center justify-between gap-2 border-t border-border">
-                        <span className="t-body-sm">{SECCION[s.seccion] ?? s.seccion}</span>
-                        <Badge tono="neutro">{s.disponibilidad === "pendiente" ? "Pendiente" : "Disponible"}</Badge>
-                      </li>
+                      <FilaSeccion key={s.seccion} s={s} datos={i} />
                     ))}
                   </ul>
                 </CardContent>

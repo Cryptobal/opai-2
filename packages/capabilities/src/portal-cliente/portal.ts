@@ -1,11 +1,13 @@
 import { z } from "zod";
 
-import { disponibilidadSeccion, type SeccionPortal } from "@opai/domain";
-
 import { tenantActual } from "../core/comun";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
+import { coberturaSchema } from "./cobertura";
 import { configDeCuenta } from "./config-datos";
+import { novedadesSchema } from "./novedades";
+import { rondasSchema } from "./rondas";
+import { seccionesDelResumen } from "./secciones";
 import { PERMISO_PORTAL, accesoDelActor, seccionSchema } from "./comun";
 
 const MES = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -87,7 +89,7 @@ const seccionResumen = z.object({
 export const resumenLeer = defineCapability({
   id: "portal_cliente.resumen.leer",
   descripcion:
-    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). Las secciones sin datos aún se marcan como pendientes, sin cifras.",
+    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). Trae la cobertura (turnos programados, cubiertos y por cubrir del mes, hasta hoy en el mes en curso), las rondas (realizadas, completas e incompletas) y las novedades por gravedad (solo cantidades), sin personas ni costos. Una sección apagada por la empresa o sin su módulo se marca como pendiente, sin cifras.",
   permiso: PERMISO_PORTAL,
   input: z.object({ mes: z.string().regex(MES).optional() }),
   output: z.object({
@@ -102,6 +104,12 @@ export const resumenLeer = defineCapability({
         nombre: z.string(),
         direccion: z.string().nullable(),
         secciones: z.array(seccionResumen),
+        /** Cifras de cobertura del mes (CAR-491); null si la sección no está activa para la empresa o la cuenta. */
+        cobertura: coberturaSchema.nullable(),
+        /** Rondas cerradas en el mes (CAR-492); null si la sección no está activa. */
+        rondas: rondasSchema.nullable(),
+        /** Novedades del mes por gravedad (CAR-493), solo cantidades; null si la sección no está activa. */
+        novedades: novedadesSchema.nullable(),
       }),
     ),
   }),
@@ -115,10 +123,7 @@ export const resumenLeer = defineCapability({
     if (mes > actual) throw reglaDeNegocio("El informe de un mes futuro aún no existe.");
     const { config } = await configDeCuenta(ctx, a.cuentaId);
     const total = await ctx.db.instalacion.count({ where: { cuentaId: a.cuentaId, estado: "activa", archivadaEn: null } });
-    const secciones = config.seccionesVisibles.filter(
-      (s): s is Extract<SeccionPortal, "cobertura" | "rondas" | "novedades"> =>
-        s === "cobertura" || s === "rondas" || s === "novedades",
-    );
+    const datos = await seccionesDelResumen(ctx, a.instalaciones, config.seccionesVisibles, mes, tenant.timezone);
     return {
       cuentaId: a.cuentaId,
       cuentaNombre: a.cuentaNombre,
@@ -129,7 +134,7 @@ export const resumenLeer = defineCapability({
         id: i.id,
         nombre: i.nombre,
         direccion: i.direccionFormateada ?? i.comuna ?? null,
-        secciones: secciones.map((s) => ({ seccion: s, disponibilidad: disponibilidadSeccion(s) })),
+        ...datos(i.id),
       })),
     };
   },
