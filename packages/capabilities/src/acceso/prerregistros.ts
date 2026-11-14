@@ -108,7 +108,7 @@ export const prerregistrosCancelar = defineCapability({
     if (p.canceladoEn) throw reglaDeNegocio("El prerregistro ya está cancelado.");
     if (p.hasta < fechaDia(await hoyEmpresa(ctx)))
       throw reglaDeNegocio("El prerregistro ya terminó.");
-    if (p.creadoPor !== quien(ctx) && !ctx.autorizar(PERMISO_REGISTROS))
+    if ((p.creadoPor === null || p.creadoPor !== quien(ctx)) && !ctx.autorizar(PERMISO_REGISTROS))
       throw prohibido(
         "Solo quien creó el prerregistro o quien gestiona los registros puede cancelarlo.",
       );

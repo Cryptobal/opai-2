@@ -9,7 +9,14 @@ import type { Contexto } from "../types";
 /** Prerregistrar visitas (R13): contactos del cliente con permiso, usuarios con alcance y agentes con ese permiso. */
 export const PERMISO_PRERREGISTRO = "acceso:prerregistros.create";
 
-export const diaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato aaaa-mm-dd.");
+/** Día `aaaa-mm-dd` que existe en el calendario (rechaza «2026-02-31» en vez de correrlo al 3 de marzo). */
+export const diaSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato aaaa-mm-dd.")
+  .refine((v) => {
+    const t = Date.parse(`${v}T00:00:00Z`);
+    return !Number.isNaN(t) && new Date(t).toISOString().slice(0, 10) === v;
+  }, "Ese día no existe.");
 
 /** Un prerregistro tal como se muestra: documentos enmascarados y estado por día (R15). */
 export const prerregistroSchema = z.object({

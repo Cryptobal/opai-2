@@ -144,6 +144,7 @@ describe.skipIf(!urlPropietario)("prerregistros de visitas en base real (CAR-478
       { ...base, visitantes: [v], desde: masDias(hoy, -1) },
       { ...base, visitantes: [v], desdeMin: 540 },
       { ...base, visitantes: [v, { ...v, nombre: "Dos" }] },
+      { ...base, visitantes: [v], desde: "2026-02-31" },
     ];
     for (const c of casos)
       expect((await run(ctx("A"), "acceso.prerregistros.crear", c)).ok).toBe(false);

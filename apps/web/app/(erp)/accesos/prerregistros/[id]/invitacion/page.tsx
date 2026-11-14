@@ -33,7 +33,8 @@ export default function Invitacion({ params, searchParams }: Props) {
           cargarPrerregistro(id),
           cargarInvitacion(visitante, d),
         ]);
-        if (!pr.ok) notFound();
+        // El visitante de la URL debe ser de este prerregistro: si no, la página mezclaría dos visitas.
+        if (!pr.ok || !pr.data.visitantes.some((v) => v.id === visitante)) notFound();
         return { id, visitante, d, pr: pr.data, inv };
       }}
       opciones={(x) => ({
