@@ -48,7 +48,7 @@ export const viajeSchema = z.object({
 });
 export type Viaje = z.infer<typeof viajeSchema>;
 
-export const desgloseSchema = z.object({
+const desgloseSchema = z.object({
   concepto: z.string(), montoClp: z.number().int(), detalle: z.string(),
 });
 
@@ -77,7 +77,7 @@ export async function configDeEmpresa(ctx: Contexto): Promise<ConfigKilometraje>
   });
 }
 
-export type Calculo = z.infer<typeof calculoSchema>;
+type Calculo = z.infer<typeof calculoSchema>;
 export type CalculoViaje = { calculo: Calculo; config: ConfigKilometraje };
 
 /** Valida la configuración y la distancia, y calcula el monto. Falla con un error de negocio claro. */

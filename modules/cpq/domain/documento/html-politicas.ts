@@ -30,7 +30,7 @@ export const ELEMENTOS_RECURSO: ReadonlySet<string> = new Set([
 export const ELEMENTOS_IGNORADOS: ReadonlySet<string> = new Set(["html", "head", "body"]);
 
 const GLOBALES = ["class", "style", "title", "lang", "dir", "aria-label", "aria-hidden"];
-export const ATRIBUTOS_POR_ELEMENTO: Readonly<Record<string, readonly string[]>> = {
+const ATRIBUTOS_POR_ELEMENTO: Readonly<Record<string, readonly string[]>> = {
   a: ["href"],
   td: ["colspan", "rowspan", "headers"],
   th: ["colspan", "rowspan", "scope", "headers"],

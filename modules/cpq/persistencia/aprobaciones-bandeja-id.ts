@@ -12,7 +12,3 @@ export function parseIdBandejaCpq(id: string): { tipo: TipoBandejaCpq; refId: st
   if (id.startsWith(PREFIJOS.envio)) return { tipo: "envio", refId: id.slice(PREFIJOS.envio.length) };
   return null;
 }
-
-export function esIdBandejaCpq(id: string) {
-  return parseIdBandejaCpq(id) !== null;
-}

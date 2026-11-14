@@ -16,10 +16,10 @@ export type EntradaEstadoFicha = {
   margenBajo: boolean;
 };
 
-export type CodigoBloqueo = "sin_lineas" | "costos_pendientes" | "desactualizada" | "margen_bajo";
+type CodigoBloqueo = "sin_lineas" | "costos_pendientes" | "desactualizada" | "margen_bajo";
 export type Bloqueo = { codigo: CodigoBloqueo; mensaje: string };
 
-export type EstadoFicha =
+type EstadoFicha =
   | "incompleta"
   | "desactualizada"
   | "margen_bajo"
@@ -33,7 +33,7 @@ export type EstadoFicha =
   | "reemplazada"
   | "archivada";
 
-export type AccionSiguiente =
+type AccionSiguiente =
   | "completar"
   | "recalcular"
   | "pedir_aprobacion"
@@ -49,7 +49,7 @@ export type SalidaEstadoFicha = {
   bloqueos: Bloqueo[];
 };
 
-export const MENSAJE_BLOQUEO: Record<CodigoBloqueo, string> = {
+const MENSAJE_BLOQUEO: Record<CodigoBloqueo, string> = {
   sin_lineas: "Agrega al menos un puesto antes de dejar la cotización lista.",
   costos_pendientes: "Hay costos o UF pendientes: completa lo que falta antes de continuar.",
   desactualizada: "Los valores legales cambiaron desde el último cálculo: recalcula antes de continuar.",

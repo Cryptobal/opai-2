@@ -16,7 +16,7 @@ import {
 } from "../domain/documento/correo-envio";
 
 /** Evento comunicable del correo al cliente (el evento de dominio `cpq.cotizacion.enviada` no se renombra). */
-export const EVENTO_CORREO_CLIENTE = "cpq.cotizacion.enviada_cliente";
+const EVENTO_CORREO_CLIENTE = "cpq.cotizacion.enviada_cliente";
 const SIETE_DIAS = 7 * 24 * 60 * 60;
 
 export type PdfParaCorreo = PdfEnvio & { contenido: Uint8Array | null; storageKey: string | null };

@@ -11,7 +11,7 @@ import { leerVersionEsperada } from "./version-esperada";
 
 export type EvaluacionAprobacionEnvio = EvaluacionAprobacionEnvioPropuesta;
 
-export async function aprobacionMargenAprobada(ctx: Contexto, versionId: string) {
+async function aprobacionMargenAprobada(ctx: Contexto, versionId: string) {
   return ctx.db.cpqAprobacion.findFirst({
     where: { versionId, estado: "aprobada" },
     select: { id: true },
@@ -24,7 +24,7 @@ export async function fueraDeMargenesEnvio(ctx: Contexto, versionId: string) {
 }
 
 /** Decisor para envío pendiente (solo aplica fuera de márgenes). */
-export function evaluarAprobacionEnvio(ctx: Contexto, solicitadoPorId: string): EvaluacionAprobacionEnvio {
+function evaluarAprobacionEnvio(ctx: Contexto, solicitadoPorId: string): EvaluacionAprobacionEnvio {
   return evaluarAprobacionEnvioPropuesta({
     actorTipo: ctx.actor.tipo,
     actorId: usuarioReal(ctx),

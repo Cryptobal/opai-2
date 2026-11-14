@@ -22,7 +22,7 @@ export const loteResumenSchema = z.object({
   creadoEn: z.string(),
 });
 
-export const loteItemSchema = z.object({
+const loteItemSchema = z.object({
   rendicionId: uuidSchema,
   codigoVisible: z.string(),
   personaId: uuidSchema,

@@ -14,7 +14,7 @@ const rateo = z.discriminatedUnion("tipo", [z.object({ tipo: z.literal("unico") 
 const item = z.object({ id, categoria: id, costoUnitario: entero, moneda: z.enum(["CLP", "UF"]),
   modo: z.enum(["mensual_fijo", "por_persona_mes", "por_puesto_mes", "inversion", "formula"]),
   rateo, formula: formula.optional() });
-export const instrumentosSchema = z.object({
+const instrumentosSchema = z.object({
   financiero: z.object({ habilitado: z.boolean(), tasaPct: pct }),
   garantia: z.object({ habilitada: z.boolean(), modo: z.enum(["porcentaje", "fija"]), meses,
     contratoPct: z.number().int().min(0).max(1_000_000), tasaAnualPct: pct, administracionPct: pct,

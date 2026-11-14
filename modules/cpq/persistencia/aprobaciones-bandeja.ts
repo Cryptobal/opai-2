@@ -8,8 +8,6 @@ import {
 } from "./aprobaciones-bandeja-enriquecer";
 import type { ItemBandejaCpq } from "./aprobaciones-bandeja-tipos";
 
-export type { ItemBandejaCpq } from "./aprobaciones-bandeja-tipos";
-
 async function nombresUsuarios(ctx: Contexto, ids: string[]) {
   if (!ids.length) return new Map<string, string>();
   const rows = await ctx.db.membership.findMany({

@@ -10,7 +10,7 @@ import { juegoParaFecha, mutualParaCalculo } from "./proveedor";
 type LineaReq = { tipo: string; habilitada: boolean; sueldoBaseClp: number | null; huellaJuegoValores: string | null };
 
 /** Los valores legales de hoy difieren de los que guardó el último cálculo de alguna línea. */
-export async function valoresDesactualizados(ctx: Contexto, lineas: readonly LineaReq[]): Promise<boolean> {
+async function valoresDesactualizados(ctx: Contexto, lineas: readonly LineaReq[]): Promise<boolean> {
   const resuelto = await juegoParaFecha(ctx, fechaCalculoHoy());
   const mutual = await mutualParaCalculo(ctx);
   return juegoDesactualizado(huellaJuego(resuelto.juego), lineas, mutual.confirmada);

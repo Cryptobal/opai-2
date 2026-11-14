@@ -37,7 +37,7 @@ export function debeQuedarPendienteAprobacionEnvio(
 }
 
 /** Owner/admin envían en el acto aunque esté fuera de márgenes (auditado). */
-export function rolPuedeEnviarFueraDeMargenes(rol: string | null): boolean {
+function rolPuedeEnviarFueraDeMargenes(rol: string | null): boolean {
   return rol === "owner" || rol === "admin";
 }
 

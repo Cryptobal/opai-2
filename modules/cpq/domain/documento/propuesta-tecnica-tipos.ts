@@ -15,7 +15,7 @@ export const TIPOS_BLOQUE_PROPUESTA = [
   "salto_pagina",
 ] as const;
 
-export type TipoBloquePropuesta = (typeof TIPOS_BLOQUE_PROPUESTA)[number];
+type TipoBloquePropuesta = (typeof TIPOS_BLOQUE_PROPUESTA)[number];
 
 export type AperturaPropuesta = "por_instalacion" | "por_categoria" | "por_item";
 
