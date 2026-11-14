@@ -33,6 +33,22 @@ export const ajustesNomina = z.object({
     permiso: PERMISO_CONFIG,
     control: "numero",
   }),
+  sueldo_dia_pago: z.number().int().min(1).max(31).default(31).meta({
+    etiqueta: "Día de pago de sueldos",
+    ayuda: "Día en que se pagan los sueldos del mes; si el mes es más corto, el último día. Lo usa el flujo de caja.",
+    grupo: "Pago",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "numero",
+  }),
+  sueldo_pago_mes_siguiente: z.boolean().default(false).meta({
+    etiqueta: "Los sueldos se pagan el mes siguiente",
+    ayuda: "Actívalo si los sueldos de un mes se pagan en el mes siguiente (por ejemplo, el día 5).",
+    grupo: "Pago",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "switch",
+  }),
   banco_pago: texto(80).meta({
     etiqueta: "Banco del archivo de pago",
     ayuda: "Formato de nómina masiva del banco: por verificar.",
