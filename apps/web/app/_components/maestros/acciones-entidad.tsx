@@ -6,7 +6,8 @@ import { useState } from "react";
 
 import { avisar, type ItemMenu, Menu } from "@opai/ds";
 
-import { abrirAgente, useAgenteListo } from "../agente/abrir-agente";
+import { useAgenteListo } from "../agente/abrir-agente";
+import { BotonAgenteFicha } from "../agente/boton-agente-ficha";
 import type { Contexto } from "../agente/tipos";
 import { useBajoLg, usePinFicha } from "../pin-ficha-contexto";
 import { useCapacidad } from "../use-capacidad";
@@ -71,14 +72,6 @@ export function AccionesEntidad({
       else void correr(a);
     },
   }));
-  if (agente && hayAgente) {
-    items.push({
-      id: "preguntar-agente",
-      etiqueta: `Preguntar a OPAI sobre ${agente.articulo}`,
-      separador: true,
-      onSelect: () => abrirAgente({ contexto: agente.contexto, etiqueta: agente.nombre }),
-    });
-  }
   // Bajo 1024 px «Fijar» deja la cabecera y va aquí, tras la primera acción (CAR-65): así no cae bajo
   // el encabezado de un grupo («Cambiar estado») ni junto a lo destructivo.
   if (pin && bajoLg) {
@@ -89,9 +82,15 @@ export function AccionesEntidad({
     });
   }
   // Sin acciones (p. ej. un cargo de solo lectura) y sin «Fijar», no hay menú que mostrar.
-  if (items.length === 0) return null;
+  // «Preguntar a OPAI» va a la vista, junto al menú (CAR-335 D5): responde dentro de la ficha.
+  const preguntar =
+    agente && hayAgente ? (
+      <BotonAgenteFicha contexto={agente.contexto} nombre={agente.nombre} />
+    ) : null;
+  if (items.length === 0) return preguntar;
   return (
     <>
+      {preguntar}
       <Menu
         etiqueta={etiqueta}
         items={items}
