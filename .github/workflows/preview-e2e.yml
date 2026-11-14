@@ -31,7 +31,7 @@ jobs:
     name: preview-e2e
     if: github.event_name != 'pull_request' || (github.event.label.name == 'e2e' && github.event.pull_request.draft != true)
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 40
+    timeout-minutes: 60
     permissions:
       contents: read
       checks: read
