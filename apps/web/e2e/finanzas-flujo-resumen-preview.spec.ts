@@ -25,6 +25,8 @@ test.describe("@preview finanzas: resumen del flujo de caja", () => {
     await page.getByRole("link", { name: "Por semana", exact: true }).click();
     await expect(page).toHaveURL(/vista=semana/);
     await expect(page.getByText("Semana a semana")).toBeVisible();
+    // CAR-398: con dos o más semanas, el gráfico del saldo va sobre la tabla.
+    await expect(page.getByRole("img", { name: "Saldo al cierre de cada semana" })).toBeVisible();
     await capturar(page, info, "flujo-resumen-semana-atraso");
   });
 });
