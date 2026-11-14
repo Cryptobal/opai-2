@@ -545,26 +545,27 @@
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
 }
-/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro, con la
-   ruta a la izquierda y el tema, el agente y la campana a la derecha. */
+/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro exacto de
+   la barra, con la ruta a la izquierda y las acciones, el tema, el agente y la campana a la derecha.
+   Va centrado sobre la barra (no en el flujo) para que «Atrás» o las acciones de una ficha no lo
+   corran de lugar entre vistas (CAR-12, CA1). La ruta se corta antes de llegar al buscador. */
 @media (min-width: 64rem) {
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"],
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
-    flex: 1 1 0%;
-  }
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
-    justify-content: flex-end;
-    order: 4;
-  }
-  /* Las acciones de la página van a la derecha del buscador, para no correrlo del centro. */
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
-    order: 1;
-  }
   [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="buscar"] {
-    order: 2;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="acciones"] {
-    order: 3;
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
+    max-width: calc(50% - 140px - 6rem);
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="acciones"],
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] + [data-shell="buscar"] + [data-shell="grupo"] {
+    margin-left: auto;
+  }
+}
+@media (min-width: 80rem) {
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
+    max-width: calc(50% - 160px - 6rem);
   }
 }
 /* Teléfono del diseño nuevo (CAR-335 D2c): la barra inferior es Inicio, Agente, Menú y Yo
