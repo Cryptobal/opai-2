@@ -33,7 +33,7 @@ describe.skipIf(!urlPropietario)("paginación por cursor sin saltos (CAR-400)", 
 
   afterAll(async () => await e?.cerrar());
 
-  const listar = async (input: Record<string, unknown>) => {
+  const listar = async (input: Record<string, unknown>, id = "core.etiquetas.list") => {
     const ctx = mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
@@ -43,7 +43,7 @@ describe.skipIf(!urlPropietario)("paginación por cursor sin saltos (CAR-400)", 
       portalesMembresia: ["erp"],
       medidor: { registrar: async () => undefined },
     });
-    const r = await mod.executeCapability(ctx, "core.etiquetas.list", input);
+    const r = await mod.executeCapability(ctx, id, input);
     if (!r.ok) throw new Error(JSON.stringify(r.error));
     return r.data as Pagina;
   };
@@ -75,5 +75,24 @@ describe.skipIf(!urlPropietario)("paginación por cursor sin saltos (CAR-400)", 
       cursor = p.siguiente;
     } while (cursor);
     expect(vistos).toEqual(["Alfa", "Beta", "Gama"]);
+  });
+
+  it("instalaciones: si la del cursor se archiva, la lista sigue en vez de cortarse", async () => {
+    const cuentaId = (await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente cursor" } }))
+      .id;
+    for (const nombre of ["Alfa", "Beta", "Gama"]) {
+      await e.admin.instalacion.create({ data: { tenantId, cuentaId, nombre } });
+    }
+    const p1 = await listar({ limite: 1, cuentaId }, "core.instalaciones.list");
+    expect(p1.items.map((i) => i.nombre)).toEqual(["Alfa"]);
+    await e.admin.instalacion.updateMany({
+      where: { tenantId, cuentaId, nombre: "Alfa" },
+      data: { archivadaEn: new Date() },
+    });
+    const p2 = await listar(
+      { limite: 1, cuentaId, cursor: p1.siguiente },
+      "core.instalaciones.list",
+    );
+    expect(p2.items.map((i) => i.nombre)).toEqual(["Beta"]);
   });
 });
