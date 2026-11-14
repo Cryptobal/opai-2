@@ -20,6 +20,9 @@ test.describe("@preview trabajador avisos al celular", () => {
     await page.goto("/trabajador/notificaciones");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     const guardar = page.getByRole("button", { name: "Guardar cambios" });
+    const sinFicha = page.getByText("Tu cuenta aún no tiene una ficha");
+    // La pantalla llega después del esqueleto: se espera el formulario o el estado sin ficha.
+    await expect(guardar.or(sinFicha)).toBeVisible();
     if (!(await guardar.count())) {
       info.annotations.push({ type: "omitido", description: "qa-e2e sin ficha de trabajador" });
       await capturar(page, info, "trabajador-avisos-sin-ficha");
