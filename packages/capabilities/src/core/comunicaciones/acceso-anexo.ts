@@ -1,11 +1,24 @@
-import { accesoDeMembresia, INCLUIR_ACCESO, PERMISOS_CORE, tienePermisoEfectivo } from "@opai/domain";
+import {
+  accesoDeMembresia,
+  INCLUIR_ACCESO,
+  PERMISOS_CORE,
+  tienePermisoEfectivo,
+} from "@opai/domain";
 
 import type { Contexto } from "../../types";
+import { NIVELES_VERSION_ANEXO, sinAnexo } from "../documentos/sensibles";
 import type { Destinatario } from "./destinatarios";
 
-/** Si el documento es el final de un anexo de contrato (R15): trae datos de sueldo. */
+/**
+ * Si el documento es el final de un anexo de contrato (R15) o una versión suya, como la copia
+ * firmada (CAR-512): trae datos de sueldo.
+ */
 export async function esDocumentoDeAnexo(ctx: Contexto, documentoId: string): Promise<boolean> {
-  return (await ctx.db.anexoContrato.count({ where: { documentoId } })) > 0;
+  return (
+    (await ctx.db.documento.count({
+      where: { id: documentoId, NOT: sinAnexo(NIVELES_VERSION_ANEXO) },
+    })) > 0
+  );
 }
 
 /**
