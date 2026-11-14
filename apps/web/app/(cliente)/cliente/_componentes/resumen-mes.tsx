@@ -12,6 +12,7 @@ export type ResumenMes = {
   mes: string;
   mesEnCurso: boolean;
   limitado: boolean;
+  novedadesTexto: boolean;
   instalaciones: {
     id: string;
     nombre: string;
@@ -73,7 +74,12 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
                 <CardContent>
                   <ul className="flex flex-col">
                     {i.secciones.map((s) => (
-                      <FilaSeccion key={s.seccion} s={s} datos={i} />
+                      <FilaSeccion
+                        key={s.seccion}
+                        s={s}
+                        datos={i}
+                        libro={r.novedadesTexto ? `/cliente/libro/${i.id}?mes=${r.mes}` : undefined}
+                      />
                     ))}
                   </ul>
                 </CardContent>

@@ -1,6 +1,8 @@
 import { Badge } from "@opai/ds";
 import { formatearNumero } from "@opai/domain";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+
 export type Cobertura = { programados: number; cubiertos: number; porCubrir: number; porcentaje: number | null };
 export type Rondas = { realizadas: number; completas: number; incompletas: number; porcentaje: number | null };
 export type Novedades = { total: number; alta: number; media: number; baja: number; abiertas: number };
@@ -64,11 +66,20 @@ function Cifra({ s, d }: { s: Seccion; d: Datos }) {
   return <Badge tono="neutro">Pendiente</Badge>;
 }
 
-export function FilaSeccion({ s, datos }: { s: Seccion; datos: Datos }) {
+/** `libro`: enlace al libro de novedades de la instalación, si la empresa encendió el texto para la cuenta (CAR-502). */
+export function FilaSeccion({ s, datos, libro }: { s: Seccion; datos: Datos; libro?: string | undefined }) {
+  const conLibro = libro && s.seccion === "novedades" && s.disponibilidad === "disponible";
   return (
     <li className="flex min-h-11 items-center justify-between gap-2 border-t border-border py-2">
       <span className="t-body-sm">{SECCION[s.seccion] ?? s.seccion}</span>
-      <Cifra s={s} d={datos} />
+      <span className="flex flex-col items-end gap-1">
+        <Cifra s={s} d={datos} />
+        {conLibro ? (
+          <EnlaceBoton href={libro} variante="ghost" className="-mr-2">
+            Ver el libro
+          </EnlaceBoton>
+        ) : null}
+      </span>
     </li>
   );
 }
