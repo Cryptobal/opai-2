@@ -3,6 +3,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { clasesPorVertical } from "@opai/domain";
+
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -81,9 +83,7 @@ describe.skipIf(omitirSuiteDb())("Personas · catálogo propio de clases de ause
       { nombre: "Día de cumpleaños", tipo: "permiso" },
       { nombre: "Licencia médica", tipo: "licencia" },
     ]);
-    const deLaOtra = await clases(otra);
-    expect(deLaOtra.length).toBeGreaterThan(2);
-    expect(deLaOtra.map((c) => c.nombre)).not.toContain("Día de cumpleaños");
+    expect(await clases(otra)).toEqual(clasesPorVertical("aseo"));
   });
 
   it("la escritura valida contra el catálogo de la propia empresa y guarda la clase", async () => {
@@ -124,5 +124,9 @@ describe.skipIf(omitirSuiteDb())("Personas · catálogo propio de clases de ause
       hasta: "2026-12-15",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(JSON.stringify(r)).toContain("no existe para ese tipo");
+    expect(await e.admin.ausencia.count({ where: { tenantId: propia, tipo: "vacaciones" } })).toBe(
+      0,
+    );
   });
 });
