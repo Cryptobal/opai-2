@@ -62,7 +62,10 @@ export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos:
             : {
                 titulo: "El libro de compras está vacío",
                 descripcion: "Sincroniza con el SII, importa el archivo del RCV o registra un documento recibido.",
-                accion: acciones,
+                // Las tres acciones ya están arriba; el vacío ofrece solo la más común, como antes del maestro-detalle.
+                ...(d.gestiona
+                  ? { accion: <EnlaceBotonHoja href="?sii=1" variante="secondary">Sincronizar con el SII</EnlaceBotonHoja> }
+                  : {}),
               }
         }
         filas={items.map((c) => ({
