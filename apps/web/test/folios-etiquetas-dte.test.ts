@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { cafVencido } from "@opai/domain";
 
-import { estadoFolio, foliosUsados, nombreTipoDte } from "./etiquetas-dte";
+import {
+  estadoFolio,
+  foliosUsados,
+  nombreTipoDte,
+} from "../app/(erp)/finanzas/folios/_componentes/etiquetas-dte";
 
 describe("folios · etiquetas UI", () => {
   it("nombre de tipo DTE", () => {
@@ -18,9 +22,9 @@ describe("folios · etiquetas UI", () => {
   it("estado vigente y vencido", () => {
     const base = { activo: true, restantes: 10, alerta: false, cafVenceEn: "2030-01-01" };
     expect(estadoFolio(base, "2026-01-01").etiqueta).toBe("Vigente");
-    expect(
-      estadoFolio({ ...base, cafVenceEn: "2020-01-01" }, "2026-01-01").etiqueta,
-    ).toBe("CAF vencido");
+    expect(estadoFolio({ ...base, cafVenceEn: "2020-01-01" }, "2026-01-01").etiqueta).toBe(
+      "CAF vencido",
+    );
     expect(cafVencido("2020-01-01", "2026-01-01")).toBe(true);
   });
 });

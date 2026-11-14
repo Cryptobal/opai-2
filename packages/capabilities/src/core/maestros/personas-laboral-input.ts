@@ -1,17 +1,17 @@
 import { z } from "zod";
 
+import { CLAVE_PRENDA } from "@opai/domain";
+
 import { diaSchema, telefonoSchema, textoOpcional } from "./comun";
 
 export const actualizarLaboralInput = z.object({
   uniforme: z
     .object({
-      tallaCamisa: textoOpcional(20),
-      tallaPantalon: textoOpcional(20),
-      tallaChaqueta: textoOpcional(20),
-      tallaZapato: textoOpcional(20),
-      tallaPolera: textoOpcional(20),
-      tallaGeologo: textoOpcional(20),
-      tallaPolar: textoOpcional(20),
+      /** Talla por prenda del uniforme de la empresa (clave de la prenda → talla; null la borra). CAR-408. */
+      tallas: z
+        .record(z.string().regex(CLAVE_PRENDA), z.string().trim().max(20).nullable())
+        .refine((t) => Object.keys(t).length <= 30, "Demasiadas prendas.")
+        .optional(),
       estaturaCm: z.number().int().min(100).max(230).nullable().optional(),
       pesoKg: z.number().int().min(30).max(250).nullable().optional(),
       notas: textoOpcional(500),
