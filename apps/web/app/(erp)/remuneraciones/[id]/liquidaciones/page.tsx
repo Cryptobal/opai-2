@@ -5,6 +5,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { CalcularLiquidaciones } from "../../_componentes/calcular-liquidaciones";
 import { cargarPeriodos, permisosNomina } from "../../_componentes/datos";
+import { DescargarLre } from "../../_componentes/descargar-lre";
 import { pesos } from "../../_componentes/etiquetas";
 import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
 import { TablaLiquidaciones } from "../../_componentes/tabla-liquidaciones";
@@ -51,6 +52,7 @@ export default function LiquidacionesPeriodo({ params }: Props) {
             {!abierto && d.periodo ? (
               <p className="t-caption text-fg-muted">El período está {d.periodo.estado.replace("_", " ")}: las liquidaciones ya no se recalculan.</p>
             ) : null}
+            {d.perm.obligaciones && items.length > 0 ? <DescargarLre periodoId={d.id} /> : null}
             <TablaLiquidaciones periodoId={d.id} items={items} />
             <p className="t-caption text-fg-muted">
               Cálculo con el motor de sueldos y las novedades del período. Los montos se confirman contra las liquidaciones de referencia antes de usarlos para pagar.
