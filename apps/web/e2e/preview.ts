@@ -30,3 +30,19 @@ export async function capturar(page: Page, info: TestInfo, nombre: string): Prom
   const carpeta = EN_PREVIEW ? "test-results/capturas" : "e2e/__screenshots__";
   await page.screenshot({ path: `${carpeta}/${nombre}-${info.project.name}.png`, fullPage: true });
 }
+
+/**
+ * Captura una hoja o diálogo recién abierto después de que termine su animación de entrada, para que no
+ * quede semitransparente sobre la pantalla (CAR-417). Ignora animaciones infinitas (indicadores de carga).
+ */
+export async function capturarHoja(page: Page, info: TestInfo, nombre: string): Promise<void> {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
+  await capturar(page, info, nombre);
+}

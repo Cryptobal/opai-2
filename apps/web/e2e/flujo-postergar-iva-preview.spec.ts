@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar } from "./preview";
+import { capturar, capturarHoja } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-397: tocar la celda «IVA a pagar» abre la hoja para postergar el pago a M+2 (o volverlo a M+1) con vista previa.
@@ -38,9 +38,9 @@ test.describe("@preview flujo de caja: postergar el IVA", () => {
         await capturar(page, info, "flujo-iva-sin-hoja");
         throw e;
       });
-    await capturar(page, info, "flujo-iva-hoja");
+    await capturarHoja(page, info, "flujo-iva-hoja");
     await hoja.getByRole("button", { name: /Postergar a M\+2|Volver a pagarlo en M\+1/ }).click();
     await expect(hoja.getByText("Revisa el cambio")).toBeVisible();
-    await capturar(page, info, "flujo-iva-revisar");
+    await capturarHoja(page, info, "flujo-iva-revisar");
   });
 });

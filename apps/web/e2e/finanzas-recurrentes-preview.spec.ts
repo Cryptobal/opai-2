@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar } from "./preview";
+import { capturar, capturarHoja } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Gastos recurrentes del flujo de caja (CAR-382): lista y hoja de nuevo gasto. El primer test no guarda nada;
@@ -29,7 +29,7 @@ test.describe("@preview finanzas: gastos recurrentes", () => {
     await expect(page.getByRole("dialog").getByText("Nuevo gasto recurrente")).toBeVisible();
     await page.getByLabel("Concepto").fill("Arriendo de prueba");
     await page.getByLabel("Monto por cuota ($)").fill("80.000");
-    await capturar(page, info, "flujo-recurrentes-nuevo");
+    await capturarHoja(page, info, "flujo-recurrentes-nuevo");
   });
 
   // CAR-413: cambiar la frecuencia desde una fecha, solo hasta la vista previa (no confirma).
@@ -63,9 +63,9 @@ test.describe("@preview finanzas: gastos recurrentes", () => {
     // Elige una frecuencia distinta de la actual (el combo es Radix, no un select nativo).
     await hoja.getByLabel("Frecuencia").click();
     await page.getByRole("option", { selected: false }).first().click();
-    await capturar(page, info, "flujo-recurrentes-cambio");
+    await capturarHoja(page, info, "flujo-recurrentes-cambio");
     await hoja.getByRole("button", { name: "Revisar cambio" }).click();
     await expect(hoja.getByText("Revisa el cambio").or(hoja.getByRole("alert")).first()).toBeVisible();
-    await capturar(page, info, "flujo-recurrentes-cambio-revisar");
+    await capturarHoja(page, info, "flujo-recurrentes-cambio-revisar");
   });
 });
