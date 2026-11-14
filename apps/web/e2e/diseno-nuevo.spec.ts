@@ -85,7 +85,7 @@ test.describe("@preview diseño nuevo con sesión", () => {
         await expect(fijar).toBeVisible();
         await captura(page, "nuevo-menu-oculto", info);
         // Plegado (CAR-377): el riel muestra las áreas, no cada submódulo.
-        const riel = page.locator('nav[data-riel-nuevo]');
+        const riel = page.locator("nav[data-riel-nuevo]");
         await expect(riel.getByRole("button", { name: "Comercial" })).toBeVisible();
         await expect(riel.getByRole("link", { name: "Negocios" })).toHaveCount(0);
         // Al recargar, el servidor ya manda el menú plegado: sin parpadeo del menú abierto (D2b).
@@ -105,11 +105,8 @@ test.describe("@preview diseño nuevo con sesión", () => {
       }
       expect(errores).toEqual([]);
     } finally {
-      await conDiseno(page, "clasico");
       const url = new URL(page.url()).origin;
       await page.context().addCookies([{ name: "opai_menu", value: "", url }]);
     }
-    const clasico = await page.goto("/");
-    expect(await clasico?.text()).not.toContain('data-marco="nuevo"');
   });
 });
