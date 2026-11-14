@@ -457,6 +457,7 @@ finanzas_cobranza_resumen
 finanzas_cobros_fijar_fecha_esperada
 finanzas_cobros_manual
 finanzas_compras_asignar_centro
+finanzas_compras_get
 finanzas_compras_importar
 finanzas_compras_listar
 finanzas_compras_registrar
