@@ -72,13 +72,13 @@ describe("insignias del Resumen de la ficha (CAR-124)", () => {
     expect(estadoUniforme(null).etiqueta).toBe("Faltan 4 tallas");
   });
   it("jornada: manda el plazo fijo; sin plazo, completa con horas y distribución", () => {
-    const j = { horasSemanales: "42", distribucion: "4x4", terminoPlazoFijo: null };
+    const j = { horasSemanales: "42", distribucion: "4x4" };
     expect(estadoJornada(HOY, j).etiqueta).toBe("Completo");
     expect(estadoJornada(HOY, { ...j, distribucion: null }).etiqueta).toBe("Incompleto");
-    expect(estadoJornada(HOY, { ...j, terminoPlazoFijo: "2026-11-26" }).etiqueta).toBe(
+    expect(estadoJornada(HOY, j, "2026-11-26").etiqueta).toBe(
       "Vence en 15 días",
     );
-    expect(estadoJornada(HOY, { ...j, terminoPlazoFijo: "2027-06-01" }).etiqueta).toBe("Al día");
+    expect(estadoJornada(HOY, j, "2027-06-01").etiqueta).toBe("Al día");
   });
   it("OS-10 sin fecha queda «Sin registro»", () => {
     expect(estadoOs10(HOY, null)).toEqual({ tono: "neutro", etiqueta: "Sin registro" });
