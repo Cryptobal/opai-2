@@ -87,6 +87,38 @@ describe.skipIf(omitirSuiteDb())("flujo · semana en curso (abonos) (db)", () =>
     expect(p.avisos.map((a) => a.mensaje)).toEqual([expect.stringContaining("Posible cobro ya recibido")]);
   });
 
+  it("factura vencida pagada hace dos semanas con el abono sin conciliar: no se vuelve a proyectar (CAR-399)", async () => {
+    const { t, cliente, banco } = await empresa();
+    await factura(t, cliente, 700_000);
+    await abono(t, banco, 700_000, "TRANSF DE 76.111.111-6 CLIENTE", { fecha: fecha(mas(lunes, -10)) });
+    const p = await planilla(t);
+    expect(p.celdas.some((c) => c.filaId === FILA_COBROS_ESPERADOS && c.semana === lunes)).toBe(false);
+    expect(p.avisos).toEqual([]);
+  });
+
+  it("vencida con un abono antiguo del mismo monto sin RUT: se proyecta y avisa; fuera de 4 semanas no empareja (CAR-399)", async () => {
+    const { t, cliente, banco } = await empresa();
+    await factura(t, cliente, 650_000);
+    await abono(t, banco, 650_000, "DEPOSITO VARIOS", { fecha: fecha(mas(lunes, -12)) });
+    const p = await planilla(t);
+    expect(p.celdas.find((c) => c.filaId === FILA_COBROS_ESPERADOS && c.semana === lunes)).toMatchObject({ monto: 650_000 });
+    expect(p.avisos.map((a) => a.mensaje)).toEqual([expect.stringContaining("Posible cobro ya recibido")]);
+    const otra = await empresa();
+    await factura(otra.t, otra.cliente, 640_000);
+    await abono(otra.t, otra.banco, 640_000, "TRANSF DE 76.111.111-6 CLIENTE", { fecha: fecha(mas(lunes, -40)) });
+    const q = await planilla(otra.t);
+    expect(q.celdas.find((c) => c.filaId === FILA_COBROS_ESPERADOS && c.semana === lunes)).toMatchObject({ monto: 640_000 });
+    expect(q.avisos).toEqual([]);
+  });
+
+  it("factura no vencida esperada esta semana: un abono de semanas anteriores no la empareja", async () => {
+    const { t, cliente, banco } = await empresa();
+    await factura(t, cliente, 630_000, { fechaEmision: fecha(mas(hoy, -20)), fechaVencimiento: fecha(lunes) });
+    await abono(t, banco, 630_000, "TRANSF DE 76.111.111-6 CLIENTE", { fecha: fecha(mas(lunes, -10)) });
+    const p = await planilla(t);
+    expect(p.celdas.find((c) => c.filaId === FILA_COBROS_ESPERADOS && c.semana === lunes)).toMatchObject({ monto: 630_000 });
+  });
+
   it("un abono ya conciliado esta semana sigue sumando a la semana (antes faltaba y el saldo final quedaba corto)", async () => {
     const { t, cliente, banco } = await empresa();
     const doc = await factura(t, cliente, 1_000_000, { estadoCobro: "pagada", montoCobrado: 1_000_000 });

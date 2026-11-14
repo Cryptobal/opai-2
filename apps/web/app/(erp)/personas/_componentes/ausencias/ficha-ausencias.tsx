@@ -32,10 +32,10 @@ export async function FichaAusencias({
   puedeEditar: boolean;
   conPauta: boolean;
 }) {
-  const r = await ejecutarComoUsuario<{ grupos: GrupoAusencia[] }>("erp", "core.ausencias.listar", {
+  const r = await ejecutarComoUsuario<{ items: GrupoAusencia[] }>("erp", "core.ausencias.listar", {
     personaId,
   });
-  const grupos = r.ok ? r.data.grupos : [];
+  const grupos = r.ok ? r.data.items : [];
   return (
     <Estado
       state={r.ok && grupos.length === 0 ? "empty" : estadoPantalla(r)}

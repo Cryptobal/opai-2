@@ -22,7 +22,7 @@ export const cuentasReferenciasList = defineCapability({
   auditarLectura: (s) => [...new Set([...s.items, ...s.historial].map((r) => r.cuentaId))],
   id: "core.cuentas_referencias.list",
   descripcion:
-    "Lista los clientes que consintieron ser referencia comercial, con su estado (otorgado o revocado), si está vigente para documentos, cómo aparecen (nombre o anonimizado) y la evidencia del consentimiento (el detalle, el motivo y el contacto solo para quien gestiona cuentas o autoriza referencias). Con una cuenta, puede traer su historial completo.",
+    "Lista los clientes que consintieron ser referencia comercial, con su estado (otorgado o revocado), si está vigente para documentos, cómo aparecen (nombre o anonimizado) y la evidencia del consentimiento (el detalle, el motivo y el contacto solo para quien gestiona cuentas o autoriza referencias). Con una cuenta, puede traer su historial completo. Paginada por cursor (la última cuenta de la página); si esa cuenta deja de estar en la lista entre páginas, la lista termina: conviene volver a empezar.",
   permiso: PERMISOS_CORE.cuentasRead,
   portales: ["erp"],
   input: z.object({
