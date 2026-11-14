@@ -6,7 +6,7 @@ import { ajuste } from "../core/config/valores";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido } from "../errores";
-import { pdfDeDocumento } from "../finanzas/ventas-pdf-doc";
+import { pdfEnBase64 } from "../finanzas/ventas-pdf-doc";
 import type { Contexto } from "../types";
 import { type AccesoResuelto, PERMISO_PORTAL, accesoDelActor } from "./comun";
 import { configDeCuenta } from "./config-datos";
@@ -127,7 +127,6 @@ export const facturasPdf = defineCapability({
       where: { ...dondeFacturas(a), id: input.documentoId },
     });
     if (!doc) throw noEncontrado("El documento");
-    const bytes = await pdfDeDocumento(ctx, doc);
-    return { base64: Buffer.from(bytes).toString("base64"), mime: "application/pdf" as const };
+    return pdfEnBase64(ctx, doc);
   },
 });

@@ -24,6 +24,38 @@ const COBRO: Record<string, { tono: "success" | "warning" | "neutro" | "info"; t
   cedida: { tono: "neutro", texto: "Cedida" },
 };
 
+/** Una factura o nota: tipo y folio, estado de cobro, fechas, instalación, total y PDF. */
+function FilaFactura({ f }: { f: Factura }) {
+  // Una nota de crédito no se paga: no lleva estado de cobro.
+  const cobro =
+    f.estadoDte === "anulado_nc"
+      ? { tono: "neutro" as const, texto: "Anulada" }
+      : f.tipo.startsWith("Nota de crédito")
+        ? null
+        : COBRO[f.estadoCobro];
+  return (
+    <li className="flex min-h-16 items-center gap-3 border-b border-border px-4 py-2.5 last:border-b-0">
+      <span className="min-w-0 flex-1">
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="text-base font-medium text-fg">{`${f.tipo} N° ${f.folio}`}</span>
+          {cobro ? <Badge tono={cobro.tono}>{cobro.texto}</Badge> : null}
+        </span>
+        <span className="block truncate text-sm text-fg-muted">
+          {[
+            `Emitida el ${formatearFecha(f.fechaEmision)}`,
+            f.fechaVencimiento ? `vence el ${formatearFecha(f.fechaVencimiento)}` : null,
+            f.instalacion,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </span>
+      </span>
+      <span className="t-numeric font-medium text-fg">{formatearClp(f.montoTotal)}</span>
+      <BotonPdf documentoId={f.id} nombre={`documento-${f.folio}.pdf`} />
+    </li>
+  );
+}
+
 /** Facturas y notas emitidas a la cuenta (CAR-518), de la más reciente a la más antigua, con su PDF. */
 export function ListaFacturas({
   items,
@@ -42,39 +74,9 @@ export function ListaFacturas({
   return (
     <div className="flex flex-col gap-4">
       <ul className="overflow-hidden rounded-lg border border-border bg-surface">
-        {items.map((f) => {
-          // Una nota de crédito no se paga: no lleva estado de cobro.
-          const cobro =
-            f.estadoDte === "anulado_nc"
-              ? { tono: "neutro" as const, texto: "Anulada" }
-              : f.tipo.startsWith("Nota de crédito")
-                ? null
-                : COBRO[f.estadoCobro];
-          return (
-            <li
-              key={f.id}
-              className="flex min-h-16 items-center gap-3 border-b border-border px-4 py-2.5 last:border-b-0"
-            >
-              <span className="min-w-0 flex-1">
-                <span className="flex flex-wrap items-center gap-2">
-                  <span className="text-base font-medium text-fg">{`${f.tipo} N° ${f.folio}`}</span>
-                  {cobro ? <Badge tono={cobro.tono}>{cobro.texto}</Badge> : null}
-                </span>
-                <span className="block truncate text-sm text-fg-muted">
-                  {[
-                    `Emitida el ${formatearFecha(f.fechaEmision)}`,
-                    f.fechaVencimiento ? `vence el ${formatearFecha(f.fechaVencimiento)}` : null,
-                    f.instalacion,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
-              </span>
-              <span className="t-numeric font-medium text-fg">{formatearClp(f.montoTotal)}</span>
-              <BotonPdf documentoId={f.id} nombre={`documento-${f.folio}.pdf`} />
-            </li>
-          );
-        })}
+        {items.map((f) => (
+          <FilaFactura key={f.id} f={f} />
+        ))}
       </ul>
       {siguiente ? (
         <div>
