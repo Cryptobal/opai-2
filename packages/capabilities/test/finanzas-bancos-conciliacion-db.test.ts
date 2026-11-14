@@ -81,19 +81,36 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     e = await prepararEntorno();
     mod = await import("../src");
     mod.limpiarRegistro();
-    mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesFinanzas, ...capacidades]);
+    mod.registrarCapacidades([
+      ...mod.capacidadesDelNucleo,
+      ...mod.capacidadesFinanzas,
+      ...capacidades,
+    ]);
     tenantId = (
       await e.admin.tenant.create({
-        data: { slug: `bco-${randomUUID().slice(0, 8)}`, nombre: "Bancos Test SpA", vertical: "seguridad" },
+        data: {
+          slug: `bco-${randomUUID().slice(0, 8)}`,
+          nombre: "Bancos Test SpA",
+          vertical: "seguridad",
+        },
       })
     ).id;
     tenantB = (
       await e.admin.tenant.create({
-        data: { slug: `bcob-${randomUUID().slice(0, 8)}`, nombre: "Otra Banca SpA", vertical: "seguridad" },
+        data: {
+          slug: `bcob-${randomUUID().slice(0, 8)}`,
+          nombre: "Otra Banca SpA",
+          vertical: "seguridad",
+        },
       })
     ).id;
-    clienteId = (await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente", rut: "76111222-8" } })).id;
-    await dato("finanzas.dte_config.actualizar", { ambiente: "certificacion", rutEmisor: "76111222-8" });
+    clienteId = (
+      await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente", rut: "76111222-8" } })
+    ).id;
+    await dato("finanzas.dte_config.actualizar", {
+      ambiente: "certificacion",
+      rutEmisor: "76111222-8",
+    });
     await dato("finanzas.folios.cargar_caf", {
       cafXml: cafXmlSintetico({ folioDesde: 7000, folioHasta: 7020 }),
     });
@@ -105,7 +122,10 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     documentoId = borrador.id;
     await dato("finanzas.ventas.emitir", { documentoId });
     cuentaId = (
-      await dato<{ id: string }>("finanzas.bancos.guardar", { banco: "Santander", numeroVisible: "1234567890" })
+      await dato<{ id: string }>("finanzas.bancos.guardar", {
+        banco: "Santander",
+        numeroVisible: "1234567890",
+      })
     ).id;
   });
 
@@ -139,7 +159,10 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     });
     let doc = await e.admin.documentoEmitido.findFirst({ where: { id: docC3.id } });
     expect(doc?.montoCobrado).toBe(docC3.montoTotal);
-    await dato("finanzas.conciliaciones.deshacer", { movimientoId: mov.id, motivo: "Prueba de reversión" });
+    await dato("finanzas.conciliaciones.deshacer", {
+      movimientoId: mov.id,
+      motivo: "Prueba de reversión",
+    });
     doc = await e.admin.documentoEmitido.findFirst({ where: { id: docC3.id } });
     expect(doc?.montoCobrado).toBe(0);
     expect(doc?.estadoCobro).toBe("pendiente");
@@ -207,7 +230,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     expect(prev.aplicados).toBe(0);
     expect(prev.duplicados).toBe(1);
     expect(prev.filas.filter((f) => f.estado === "duplicada")).toHaveLength(1);
-    expect(await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: base } })).toBe(1);
+    expect(
+      await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: base } }),
+    ).toBe(1);
   });
 
   it("C6 · reimportar CSV sin saldo no inserta movimientos", async () => {
@@ -234,7 +259,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     });
     expect(r2.aplicados).toBe(0);
     expect(r2.duplicados).toBe(1);
-    expect(await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: base } })).toBe(1);
+    expect(
+      await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: base } }),
+    ).toBe(1);
   });
 
   it("C6 · tres filas iguales con dos guardadas inserta una", async () => {
@@ -248,7 +275,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     await dato("finanzas.cartolas.importar", {
       cuentaId,
       formato: "generico",
-      contenidoBase64: Buffer.from(`${`fecha,monto,glosa\n${fila}${fila}`}`, "utf8").toString("base64"),
+      contenidoBase64: Buffer.from(`${`fecha,monto,glosa\n${fila}${fila}`}`, "utf8").toString(
+        "base64",
+      ),
       mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa" },
       idempotencyKey: `cartola-${randomUUID()}`,
     });
@@ -262,13 +291,18 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     expect(r.aplicados).toBe(1);
     expect(r.duplicados).toBe(2);
     expect(
-      await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: { startsWith: base } } }),
+      await e.admin.movimientoBancario.count({
+        where: { tenantId, cuentaId, claveDedupe: { startsWith: base } },
+      }),
     ).toBe(3);
   });
 
   it("C5 · no concilia un documento de otro tenant (RLS)", async () => {
-    const cuentaB = (await e.admin.cuenta.create({ data: { tenantId: tenantB, nombre: "Cliente B", rut: "77999999-9" } }))
-      .id;
+    const cuentaB = (
+      await e.admin.cuenta.create({
+        data: { tenantId: tenantB, nombre: "Cliente B", rut: "77999999-9" },
+      })
+    ).id;
     const docB = (
       await e.admin.documentoEmitido.create({
         data: {
@@ -306,16 +340,22 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
       cuentaId,
       monto: 60_000,
     });
-    await dato("finanzas.conciliaciones.deshacer", { movimientoId: r.movimientoId, motivo: "Revertir cobro manual P1" });
+    await dato("finanzas.conciliaciones.deshacer", {
+      movimientoId: r.movimientoId,
+      motivo: "Revertir cobro manual P1",
+    });
     const mov = await e.admin.movimientoBancario.findFirst({ where: { id: r.movimientoId } });
     expect(mov?.estado).toBe("ignorado");
     const sug = await dato<{ sugerencias: unknown[] }>("finanzas.conciliaciones.sugerir", {
       movimientoId: r.movimientoId,
     });
     expect(sug.sugerencias).toHaveLength(0);
-    const derivadas = await dato<{ fuentes: { id: string; celdas: { id: string }[] }[] }>("finanzas.derivadas.listar", {
-      semana: "2026-10-26",
-    });
+    const derivadas = await dato<{ fuentes: { id: string; celdas: { id: string }[] }[] }>(
+      "finanzas.derivadas.listar",
+      {
+        semana: "2026-10-26",
+      },
+    );
     const ids = derivadas.fuentes.find((f) => f.id === "banco")?.celdas.map((c) => c.id) ?? [];
     expect(ids).not.toContain(r.movimientoId);
   });
@@ -338,16 +378,28 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
       })
     ).id;
     const mov56 = await movimiento(55_555, `p2-56-${randomUUID()}`);
-    const sug56 = await dato<{ sugerencias: { documentoId: string }[] }>("finanzas.conciliaciones.sugerir", {
-      movimientoId: mov56.id,
-    });
+    const sug56 = await dato<{ sugerencias: { documentoId: string }[] }>(
+      "finanzas.conciliaciones.sugerir",
+      {
+        movimientoId: mov56.id,
+      },
+    );
     expect(sug56.sugerencias.some((s) => s.documentoId === doc56)).toBe(false);
 
     const docOk = await emitirFactura(77_000, "Factura P2 sugerir");
-    const movOk = await movimiento(docOk.montoTotal, `p2-ok-${randomUUID()}`);
-    const sugOk = await dato<{ sugerencias: { documentoId: string }[] }>("finanzas.conciliaciones.sugerir", {
-      movimientoId: movOk.id,
+    // Los movimientos de prueba son del 29-oct y sugerir mira ±15 días: la factura se emite hoy, así que se fecha
+    // junto al movimiento para que la prueba no dependa del día en que corre.
+    await e.admin.documentoEmitido.update({
+      where: { id: docOk.id },
+      data: { fechaEmision: new Date("2026-10-29") },
     });
+    const movOk = await movimiento(docOk.montoTotal, `p2-ok-${randomUUID()}`);
+    const sugOk = await dato<{ sugerencias: { documentoId: string }[] }>(
+      "finanzas.conciliaciones.sugerir",
+      {
+        movimientoId: movOk.id,
+      },
+    );
     expect(sugOk.sugerencias.some((s) => s.documentoId === docOk.id)).toBe(true);
   });
 
@@ -418,7 +470,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
         activa: true,
       },
     });
-    const cuentaSinNombre = (await e.admin.cuenta.create({ data: { tenantId, nombre: "", rut: "77000001-9" } })).id;
+    const cuentaSinNombre = (
+      await e.admin.cuenta.create({ data: { tenantId, nombre: "", rut: "77000001-9" } })
+    ).id;
     const docSinFila = (
       await e.admin.documentoEmitido.create({
         data: {
@@ -457,8 +511,12 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
       fuentes: { id: string; celdas: { filaId: string; monto: number; id: string }[] }[];
     }>("finanzas.derivadas.listar", { semana });
     const banco = derivadas.fuentes.find((f) => f.id === "banco")?.celdas ?? [];
-    expect(banco.some((c) => c.id === movConc.id && c.filaId === filaCobros && c.monto === 33_333)).toBe(true);
-    expect(banco.some((c) => c.id === movAuth.id && c.filaId === FILA_SIN_CONCILIAR_INGRESO)).toBe(true);
+    expect(
+      banco.some((c) => c.id === movConc.id && c.filaId === filaCobros && c.monto === 33_333),
+    ).toBe(true);
+    expect(banco.some((c) => c.id === movAuth.id && c.filaId === FILA_SIN_CONCILIAR_INGRESO)).toBe(
+      true,
+    );
   });
 
   it("Paridad 5 · saldo sugerido avisa cuentas sin saldo en cartola", async () => {
@@ -513,7 +571,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
 
   it("Paridad · sin fila «Cobros» el cobro va a «Sin clasificar» y la lectura no crea filas", async () => {
     await e.admin.flujoFila.deleteMany({ where: { tenantId, etiqueta: "Cobros" } });
-    const cuentaSinNombre = (await e.admin.cuenta.create({ data: { tenantId, nombre: "", rut: "77000002-0" } })).id;
+    const cuentaSinNombre = (
+      await e.admin.cuenta.create({ data: { tenantId, nombre: "", rut: "77000002-0" } })
+    ).id;
     const doc = (
       await e.admin.documentoEmitido.create({
         data: {
@@ -539,7 +599,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     const derivadas = await dato<{
       fuentes: { id: string; celdas: { filaId: string; id: string }[] }[];
     }>("finanzas.derivadas.listar", { semana: "2026-10-26" });
-    const celda = derivadas.fuentes.find((f) => f.id === "banco")?.celdas.find((c) => c.id === mov.id);
+    const celda = derivadas.fuentes
+      .find((f) => f.id === "banco")
+      ?.celdas.find((c) => c.id === mov.id);
     expect(celda?.filaId).toBe("00000000-0000-4000-8000-000000000001");
     expect(await e.admin.flujoFila.count({ where: { tenantId, etiqueta: "Cobros" } })).toBe(0);
   });
@@ -582,7 +644,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
       ],
     });
     expect(repetido).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-    expect((await e.admin.movimientoBancario.findUniqueOrThrow({ where: { id: mov.id } })).estado).toBe("pendiente");
+    expect(
+      (await e.admin.movimientoBancario.findUniqueOrThrow({ where: { id: mov.id } })).estado,
+    ).toBe("pendiente");
   });
 
   it("N:M · cobro manual no puede superar lo pendiente y otra empresa no ve el documento", async () => {
@@ -593,14 +657,29 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
       cuentaId,
     });
     expect(sobre).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-    await dato("finanzas.cobros.manual", { documentoId: doc.id, monto: doc.montoTotal - 1_000, cuentaId });
-    const resto = await mod.executeCapability(ctx(), "finanzas.cobros.manual", { documentoId: doc.id, monto: 2_000, cuentaId });
+    await dato("finanzas.cobros.manual", {
+      documentoId: doc.id,
+      monto: doc.montoTotal - 1_000,
+      cuentaId,
+    });
+    const resto = await mod.executeCapability(ctx(), "finanzas.cobros.manual", {
+      documentoId: doc.id,
+      monto: 2_000,
+      cuentaId,
+    });
     expect(resto).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     const cuentaB = await e.admin.cuentaBancaria.create({
       data: { tenantId: tenantB, banco: "Chile", numeroVisible: "9990001", moneda: "CLP" },
     });
-    const ajena = await mod.executeCapability(ctx(tenantB), "finanzas.cobros.manual", { documentoId: doc.id, monto: 1_000, cuentaId: cuentaB.id });
-    expect(ajena).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE", message: "El documento no existe." } });
+    const ajena = await mod.executeCapability(ctx(tenantB), "finanzas.cobros.manual", {
+      documentoId: doc.id,
+      monto: 1_000,
+      cuentaId: cuentaB.id,
+    });
+    expect(ajena).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE", message: "El documento no existe." },
+    });
   });
 
   it("N:M · varios cobros simultáneos sobre el mismo documento no superan su total", async () => {
@@ -608,7 +687,11 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     const parte = Math.ceil(doc.montoTotal * 0.3);
     const rs = await Promise.all(
       Array.from({ length: 8 }, () =>
-        mod.executeCapability(ctx(), "finanzas.cobros.manual", { documentoId: doc.id, monto: parte, cuentaId }),
+        mod.executeCapability(ctx(), "finanzas.cobros.manual", {
+          documentoId: doc.id,
+          monto: parte,
+          cuentaId,
+        }),
       ),
     );
     // 60.000 neto = 71.400 con IVA; cada cobro es 21.420: caben exactamente 3 (64.260); el 4.º (85.680) no.
@@ -624,13 +707,22 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
   it("T2 · dos confirmaciones simultáneas sobre el mismo documento: solo cabe una", async () => {
     const doc = await emitirFactura(50_000, "Factura carrera confirmar"); // 59.500 con IVA
     const monto = 40_000;
-    const [m1, m2] = await Promise.all([movimiento(monto, `t2a-${randomUUID()}`), movimiento(monto, `t2b-${randomUUID()}`)]);
+    const [m1, m2] = await Promise.all([
+      movimiento(monto, `t2a-${randomUUID()}`),
+      movimiento(monto, `t2b-${randomUUID()}`),
+    ]);
     const confirmar = (id: string) =>
-      mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", { movimientoId: id, enlaces: [{ tipo: "documento_emitido", id: doc.id, monto }] });
+      mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", {
+        movimientoId: id,
+        enlaces: [{ tipo: "documento_emitido", id: doc.id, monto }],
+      });
     const rs = await Promise.all([confirmar(m1.id), confirmar(m2.id)]);
     expect(rs.filter((r) => r.ok)).toHaveLength(1);
     expect(rs.find((r) => !r.ok)).toMatchObject({ error: { code: "UNPROCESSABLE" } });
-    const conciliado = await e.admin.conciliacionBanco.aggregate({ where: { enlaceId: doc.id, activa: true }, _sum: { monto: true } });
+    const conciliado = await e.admin.conciliacionBanco.aggregate({
+      where: { enlaceId: doc.id, activa: true },
+      _sum: { monto: true },
+    });
     expect(Number(conciliado._sum.monto)).toBe(monto);
   });
 
@@ -639,12 +731,24 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     const monto = 40_000;
     const mov = await movimiento(monto, `t2c-${randomUUID()}`);
     const rs = await Promise.all([
-      mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", { movimientoId: mov.id, enlaces: [{ tipo: "documento_emitido", id: doc.id, monto }] }),
-      mod.executeCapability(ctx(), "finanzas.cobros.manual", { documentoId: doc.id, monto, cuentaId }),
+      mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", {
+        movimientoId: mov.id,
+        enlaces: [{ tipo: "documento_emitido", id: doc.id, monto }],
+      }),
+      mod.executeCapability(ctx(), "finanzas.cobros.manual", {
+        documentoId: doc.id,
+        monto,
+        cuentaId,
+      }),
     ]);
     expect(rs.filter((r) => r.ok)).toHaveLength(1);
-    const conciliado = await e.admin.conciliacionBanco.aggregate({ where: { enlaceId: doc.id, activa: true }, _sum: { monto: true } });
+    const conciliado = await e.admin.conciliacionBanco.aggregate({
+      where: { enlaceId: doc.id, activa: true },
+      _sum: { monto: true },
+    });
     expect(Number(conciliado._sum.monto)).toBe(monto);
-    expect((await e.admin.documentoEmitido.findUniqueOrThrow({ where: { id: doc.id } })).montoCobrado).toBe(monto);
+    expect(
+      (await e.admin.documentoEmitido.findUniqueOrThrow({ where: { id: doc.id } })).montoCobrado,
+    ).toBe(monto);
   });
 });

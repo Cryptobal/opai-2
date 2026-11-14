@@ -6,10 +6,9 @@ export const INVENTARIO_AUSENCIAS = defineDatosPersonales("core", [
     tabla: "ausencias",
     finalidad:
       "Permisos, licencias, vacaciones y ausencias de la persona trabajadora, para la pauta, la asistencia y las remuneraciones. El motivo va sin diagnósticos y su lectura queda auditada.",
-    categorias: ["laboral", "sensible"],
+    categorias: ["laboral"],
     campos: ["tipo", "clase", "desde", "hasta", "motivo", "estado"],
-    // La clase de una licencia (p. ej. «Accidente del trabajo») revela un dato de salud (CAR-393 parte 3).
-    camposSensibles: ["clase"],
+    // «clase» (CAR-393 parte 3) va en claro como `tipo`: es un catálogo cerrado de la empresa, sin diagnóstico.
     baseLicitud: "relacion_laboral",
   },
 ]);
