@@ -28,3 +28,31 @@ model InventarioTipo {
   @@map("tipos")
   @@schema("inventario")
 }
+
+/// Una unidad física de un tipo «activo» (CAR-236): un teléfono, una radio. Se identifica por su código
+/// interno (único por empresa) y guarda los valores de los campos propios de su tipo. Nunca se borra:
+/// se da de baja con motivo (R12).
+model InventarioActivo {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  tipoId            String    @map("tipo_id") @db.Uuid
+  codigo            String
+  /// Código sin mayúsculas ni espacios de más: único por empresa (R10).
+  codigoNormalizado String    @map("codigo_normalizado")
+  numeroSerie       String?   @map("numero_serie")
+  /// "disponible" | "asignado" | "en_reparacion" | "de_baja" (R12).
+  estado            String    @default("disponible")
+  /// Valores de los campos propios del tipo, por clave (R11).
+  valores           Json      @default("{}")
+  notas             String?
+  bajaEn            DateTime? @map("baja_en") @db.Timestamptz(6)
+  motivoBaja        String?   @map("motivo_baja")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, codigoNormalizado])
+  @@unique([tenantId, id])
+  @@index([tenantId, tipoId])
+  @@map("activos")
+  @@schema("inventario")
+}

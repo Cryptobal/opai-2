@@ -47,6 +47,7 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "finanzas:read": "-",
   "finanzas:ventas.configure": "-",
   "finanzas:ventas.manage": "-",
+  "inventario:gestionar": "G",
   "inventario:read": "GLS",
   "inventario:tipos.manage": "-",
   "nomina:anticipos.manage": "-",

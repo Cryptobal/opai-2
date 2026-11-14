@@ -8,6 +8,8 @@ export const PERMISOS_INVENTARIO = {
   read: "inventario:read",
   /** Configurar el catálogo de tipos de la empresa. */
   tiposManage: "inventario:tipos.manage",
+  /** Registrar y mantener activos, existencias y entregas. */
+  gestionar: "inventario:gestionar",
 } as const;
 
 export const campoSchema = z.object({
