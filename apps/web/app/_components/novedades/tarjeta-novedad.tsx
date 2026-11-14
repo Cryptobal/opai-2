@@ -71,6 +71,7 @@ export function TarjetaNovedad({
             variant="ghost"
             className="h-11 md:h-9"
             aria-expanded={abierta}
+            data-sin-marcar=""
             onClick={() => setAbierta((v) => !v)}
           >
             {abierta ? "Ver menos" : "Ver más"}
