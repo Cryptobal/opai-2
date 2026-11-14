@@ -19,6 +19,7 @@ test.describe("@preview flujo de caja: reprogramar desde la fila", () => {
     test.skip((await accion.count()) === 0, "La empresa de prueba no tiene filas con plan en el flujo");
 
     const nombre = (await accion.getAttribute("aria-label"))?.replace(/^Reprogramar /, "") ?? "";
+    expect(nombre).not.toBe("");
     const fila = page.locator("tbody tr").filter({ has: accion });
     if (!info.project.name.includes("telefono")) await fila.hover();
     await expect(accion).toBeVisible();
