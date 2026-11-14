@@ -136,4 +136,12 @@ describe.skipIf(omitirSuiteDb())("Finanzas · cartola y sincronización sin dupl
     const r = await mod.executeCapability(ctx(), "finanzas.descartes_bancarios.restaurar", { descarteId: id }, { dryRun: false });
     expect(r.ok).toBe(false);
   });
+
+  it("lo que volvió por la cartola con otra huella no se duplica al restaurar", async () => {
+    const r = await dato<{ descarteId: string }>("finanzas.movimientos_bancarios.borrar_rango", { cuentaId, desde: "2026-11-01", hasta: "2026-11-30", origen: "web4leads", motivo: "Prueba sintética" });
+    expect((await importar(noviembre)).aplicados).toBeGreaterThan(0);
+    const antes = (await movimientos()).length;
+    expect(await dato("finanzas.descartes_bancarios.restaurar", { descarteId: r.descarteId })).toMatchObject({ restaurados: 0, restaurado: true });
+    expect(await movimientos()).toHaveLength(antes);
+  });
 });

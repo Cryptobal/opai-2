@@ -11,6 +11,8 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fechaDdMmAaaa } from "../../../flujo/_componentes/datos";
 import type { DescarteMovimientos, VistaRestaurar } from "./tipos";
 
+const movs = (n: number) => `${n} ${n === 1 ? "movimiento" : "movimientos"}`;
+
 /**
  * Movimientos sacados con «Borrar por fechas» (CAR-412). Cada descarte se puede restaurar, con vista previa: vuelven a
  * la cuenta tal como estaban, salvo los que ya volvieron por una cartola o por la sincronización.
@@ -28,7 +30,7 @@ export function ListaDescartes({ descartes, gestiona }: { descartes: DescarteMov
     if (!vista) return;
     const r = await ejecutar<VistaRestaurar>("finanzas.descartes_bancarios.restaurar", { descarteId: vista.descarteId });
     if (!r) return;
-    avisar.exito(`Se restauraron ${r.restaurados} movimientos`);
+    avisar.exito(r.restaurados === 1 ? "Se restauró 1 movimiento" : `Se restauraron ${r.restaurados} movimientos`);
     setVista(null);
     router.refresh();
   }
@@ -43,7 +45,7 @@ export function ListaDescartes({ descartes, gestiona }: { descartes: DescarteMov
           <li key={d.id} className="rowcard grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 p-3">
             <div className="min-w-0">
               <p className="t-body-sm font-medium">
-                {`${fechaDdMmAaaa(d.desde)} al ${fechaDdMmAaaa(d.hasta)} · ${d.movimientos} movimientos`}
+                {`${fechaDdMmAaaa(d.desde)} al ${fechaDdMmAaaa(d.hasta)} · ${movs(d.movimientos)}`}
               </p>
               <p className="t-caption text-fg-muted">{`Borrados el ${formatearFechaHora(d.descartadoEn)}`}</p>
             </div>
@@ -71,14 +73,14 @@ export function ListaDescartes({ descartes, gestiona }: { descartes: DescarteMov
                 Cancelar
               </Button>
               <Button disabled={pendiente || vista.restaurados === 0} onClick={() => void restaurar()}>
-                Restaurar {vista.restaurados} movimientos
+                {`Restaurar ${movs(vista.restaurados)}`}
               </Button>
             </>
           }
         >
           {error ? <Alerta tono="danger" titulo={error} /> : null}
           {vista.yaPresentes ? (
-            <Alerta tono="info" titulo={`${vista.yaPresentes} ya están de vuelta`}>
+            <Alerta tono="info" titulo={vista.yaPresentes === 1 ? "1 ya está de vuelta" : `${vista.yaPresentes} ya están de vuelta`}>
               Volvieron por una cartola o por la sincronización con el banco; no se duplican.
             </Alerta>
           ) : null}

@@ -1,9 +1,10 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { sincronizarAvisosEnTx } from "../aviso";
-import { copiasDe, filaDeCopia } from "./descartes-copia";
+import { filaDeCopia } from "./descartes-copia";
+import { planRestaurar } from "./descartes-plan";
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_VER } from "./permisos";
 import { aIso, cuentaDe } from "./util";
 
@@ -26,7 +27,7 @@ export const bancosDescartesListar = defineCapability({
   permiso: PERMISO_BANCOS_VER,
   input: z.object({
     cuentaId: z.uuid(),
-    cursor: z.string().optional(),
+    cursor: z.uuid().optional().describe("Id del último descarte de la página anterior."),
     limite: z.number().int().min(1).max(100).default(20),
   }),
   output: z.object({ items: z.array(descarteSchema), siguiente: z.string().nullable() }),
@@ -61,7 +62,8 @@ export const bancosDescartesListar = defineCapability({
 
 /**
  * CAR-412: devuelve a la cuenta los movimientos de un descarte. Los que ya volvieron por otra vía (una cartola o la
- * sincronización los trajo de nuevo) se omiten y se informan, para no duplicar.
+ * sincronización los trajo de nuevo, aun con otra huella o fecha) se omiten y se informan, para no duplicar. Un
+ * movimiento vuelve con el estado que tenía, salvo «sugerido», que vuelve a «pendiente» (su propuesta se borró).
  */
 export const bancosDescartesRestaurar = defineCapability({
   id: "finanzas.descartes_bancarios.restaurar",
@@ -78,48 +80,41 @@ export const bancosDescartesRestaurar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const plan = async (db: typeof ctx.db) => {
-      const d = await db.movimientoBancarioDescarte.findFirst({ where: { id: input.descarteId } });
-      if (!d) throw noEncontrado("El descarte");
-      if (d.restauradoEn) throw reglaDeNegocio("Este descarte ya se restauró.");
-      const copias = copiasDe(d.movimientos);
-      const presentes = await db.movimientoBancario.findMany({
-        where: {
-          cuentaId: d.cuentaId,
-          OR: [
-            { id: { in: copias.map((c) => c.id) } },
-            { claveDedupe: { in: copias.map((c) => c.claveDedupe) } },
-            { idExterno: { in: copias.flatMap((c) => (c.idExterno ? [c.idExterno] : [])) } },
-          ],
-        },
-        select: { id: true, claveDedupe: true, idExterno: true },
-      });
-      const choca = (c: (typeof copias)[number]) =>
-        presentes.some((p) => p.id === c.id || p.claveDedupe === c.claveDedupe || (c.idExterno !== null && p.idExterno === c.idExterno));
-      return { d, nuevos: copias.filter((c) => !choca(c)), yaPresentes: copias.filter(choca).length };
-    };
-    const previa = await plan(ctx.db);
-    const base = { descarteId: previa.d.id };
-    if (dryRun) return { ...base, restaurados: previa.nuevos.length, yaPresentes: previa.yaPresentes, restaurado: false };
+    if (dryRun) {
+      const p = await planRestaurar(ctx.db, input.descarteId);
+      return { descarteId: p.d.id, restaurados: p.nuevos.length, yaPresentes: p.yaPresentes, restaurado: false };
+    }
     return ctx.transaccion(async (tx) => {
-      const p = await plan(tx);
-      if (p.nuevos.length) {
-        await tx.movimientoBancario.createMany({ data: p.nuevos.map((c) => filaDeCopia(c, ctx.tenantId, p.d.cuentaId)) });
-      }
-      // Guarda optimista: si otro restauró entre el plan y aquí, no se marca dos veces (y la unicidad ya abortó los duplicados).
-      const marcado = await tx.movimientoBancarioDescarte.updateMany({
-        where: { id: p.d.id, restauradoEn: null },
+      // Primero se reclama el descarte: bloquea su fila, así un segundo «Restaurar» simultáneo espera y luego no reclama.
+      const reclamo = await tx.movimientoBancarioDescarte.updateMany({
+        where: { id: input.descarteId, restauradoEn: null },
         data: { restauradoEn: new Date(), restauradoPor: ctx.usuario?.id ?? null },
       });
-      if (marcado.count !== 1) throw reglaDeNegocio("Este descarte ya se restauró.");
+      if (reclamo.count !== 1) {
+        await planRestaurar(tx, input.descarteId); // no existe → NOT_FOUND; ya restaurado → regla de negocio
+        throw reglaDeNegocio("Este descarte ya se restauró.");
+      }
+      const plan = await planRestaurar(tx, input.descarteId, true);
+      const d = plan.d;
+      if (plan.nuevos.length) {
+        // Una cartola de la cuenta ya deshecha no existe: el movimiento vuelve sin ese vínculo.
+        const cartolas = new Set(
+          (await tx.cartolaImportada.findMany({ where: { id: { in: plan.nuevos.flatMap((c) => (c.cartolaId ? [c.cartolaId] : [])) } }, select: { id: true } })).map((c) => c.id),
+        );
+        await tx.movimientoBancario.createMany({
+          data: plan.nuevos.map((c) => filaDeCopia({ ...c, cartolaId: c.cartolaId && cartolas.has(c.cartolaId) ? c.cartolaId : null }, ctx.tenantId, d.cuentaId)),
+        });
+      }
+      // Ley 21.719: restaurado el descarte, la copia (glosas) ya no se necesita.
+      await tx.movimientoBancarioDescarte.update({ where: { id: d.id }, data: { movimientos: [] } });
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.banco.movimientos_restaurados",
         entidadTipo: "cuentaBancaria",
-        entidadId: p.d.cuentaId,
-        payload: { descarteId: p.d.id, restaurados: p.nuevos.length, yaPresentes: p.yaPresentes },
+        entidadId: d.cuentaId,
+        payload: { descarteId: d.id, restaurados: plan.nuevos.length, yaPresentes: plan.yaPresentes },
       });
       await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
-      return { ...base, restaurados: p.nuevos.length, yaPresentes: p.yaPresentes, restaurado: true };
+      return { descarteId: d.id, restaurados: plan.nuevos.length, yaPresentes: plan.yaPresentes, restaurado: true };
     });
   },
 });

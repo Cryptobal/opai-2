@@ -65,6 +65,7 @@ export const bancosMovimientosBorrarRango = defineCapability({
     const actual = await ctx.transaccion(async (tx) => {
       // Se vuelve a contar dentro de la transacción: lo que se concilió entre la vista previa y ahora se conserva.
       const ahora = await contar(tx);
+      if (!ahora.libres.length) throw reglaDeNegocio("No hay movimientos sin conciliar en ese rango.");
       const ids = ahora.libres.map((m) => m.id);
       const descarte = await tx.movimientoBancarioDescarte.create({
         data: {
