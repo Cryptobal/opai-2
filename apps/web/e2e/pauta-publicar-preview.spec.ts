@@ -5,7 +5,7 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Pauta · Publicar (CAR-356) en `preview-e2e`: desde la pauta mensual de una instalación de `qa-e2e`, el botón
 // «Publicar» abre la vista previa con el alcance del aviso; se cancela sin publicar. Si la empresa ficticia
-// no tiene instalaciones con pauta, se anota como omitido. A 375, 1024 y 1280 px.
+// no tiene instalaciones, se anota como omitido. A 375, 1024 y 1280 px.
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
@@ -17,15 +17,21 @@ test.describe("@preview pauta publicar", () => {
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
 
-    await page.goto("/pauta/instalaciones");
+    // Cualquier instalación sirve: el botón aparece al elegirla en la vista mensual, tenga o no pauta.
+    await page.goto("/instalaciones");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
-    const fila = page.locator('a[href^="/pauta?inst="]').filter({ visible: true }).first();
-    if (!(await fila.count())) {
-      info.annotations.push({ type: "omitido", description: "qa-e2e sin instalaciones con pauta" });
+    const enlace = page
+      .locator('a[href^="/instalaciones/"]:not([href^="/instalaciones/nueva"])')
+      .filter({ visible: true })
+      .first();
+    const href = (await enlace.count()) ? await enlace.getAttribute("href") : null;
+    const inst = href?.split("/")[2]?.split("?")[0];
+    if (!inst) {
+      info.annotations.push({ type: "omitido", description: "qa-e2e sin instalaciones" });
       return;
     }
-    await fila.click();
-    await page.waitForURL(/\/pauta\?inst=/);
+    await page.goto(`/pauta?inst=${inst}`);
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     const publicar = page.getByRole("button", { name: "Publicar", exact: true });
     await expect(publicar).toBeVisible();
     await capturar(page, info, "pauta-publicar-barra");
