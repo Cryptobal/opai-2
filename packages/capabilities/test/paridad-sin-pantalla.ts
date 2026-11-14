@@ -8,6 +8,12 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "central.alertas.hacerse_cargo": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo:
+      "«Me hago cargo» de una alerta de la central: llega con la ficha de la alerta (pantallas de la Central). Mientras tanto la cadena sigue escalando sola.",
+  },
   "core.roles.adicional_asignar": {
     encargo: "CAR-359",
     desde: "2026-11-14",
