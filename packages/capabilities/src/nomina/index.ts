@@ -14,6 +14,7 @@ import { prestamosCancelar, prestamosCrear } from "./prestamos-escritura";
 import { prestamosListar } from "./prestamos-lectura";
 
 export { ajustesNomina } from "./ajustes";
+export { buscadoresNomina } from "./buscadores";
 
 export const capacidadesNomina: readonly Capacidad[] = [
   periodosListar,
