@@ -6,7 +6,7 @@ import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
-import { capacidadesDe, mostrarValor, type CampoFicha, type EntidadCampos } from "./tipos";
+import { entradaDe, mostrarValor, type CampoFicha, type EntidadCampos } from "./tipos";
 
 // El editor (hoja y controles) se carga aparte del primer JS de la ficha (ADR-037).
 const EditarCampos = dynamic(() => import("./editar-campos").then((m) => m.EditarCampos));
@@ -25,8 +25,12 @@ export async function CamposFicha(p: { tipo: EntidadCampos; id: string }) {
   const identidad = await identidadActual();
   const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
   if (!puede(PERMISOS[p.tipo].ver)) return null;
-  const cap = capacidadesDe(p.tipo, p.id);
-  const r = await ejecutarComoUsuario<{ campos: CampoFicha[] }>("erp", cap.get, cap.entrada);
+  type R = { campos: CampoFicha[] };
+  const entrada = entradaDe(p.tipo, p.id);
+  const r =
+    p.tipo === "negocio"
+      ? await ejecutarComoUsuario<R>("erp", "comercial.negocio_campos.get", entrada)
+      : await ejecutarComoUsuario<R>("erp", "core.valores_personalizados.get", entrada);
   if (!r.ok || r.data.campos.length === 0) return null;
   const campos = r.data.campos;
   return (

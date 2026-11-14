@@ -6,7 +6,7 @@ import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from 
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { capacidadesDe, type CampoFicha, type EntidadCampos, type ValorCampo } from "./tipos";
+import { entradaDe, type CampoFicha, type EntidadCampos, type ValorCampo } from "./tipos";
 
 const VACIO = "_vacio";
 type Borrador = Record<string, string>;
@@ -39,8 +39,12 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
         .map((c) => [c.clave, aValor(c, b[c.clave] ?? "")]),
     );
     if (Object.keys(valores).length === 0) return cerrar();
-    const cap = capacidadesDe(p.tipo, p.id);
-    if (await ejecutar(cap.set, { ...cap.entrada, valores })) {
+    const input = { ...entradaDe(p.tipo, p.id), valores };
+    const ok =
+      p.tipo === "negocio"
+        ? await ejecutar("comercial.negocio_campos.set", input)
+        : await ejecutar("core.valores_personalizados.set", input);
+    if (ok) {
       avisar.exito("Campos guardados");
       cerrar();
     }

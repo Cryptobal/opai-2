@@ -12,20 +12,9 @@ export type CampoFicha = {
   valor: ValorCampo;
 };
 
-/** Lectura y escritura de cada ficha: cuentas y contactos en el núcleo, negocios en Comercial. */
-export function capacidadesDe(tipo: EntidadCampos, id: string) {
-  return tipo === "negocio"
-    ? {
-        get: "comercial.negocio_campos.get",
-        set: "comercial.negocio_campos.set",
-        entrada: { negocioId: id },
-      }
-    : {
-        get: "core.valores_personalizados.get",
-        set: "core.valores_personalizados.set",
-        entrada: { entidad: tipo, id },
-      };
-}
+/** Entrada de la capacidad de cada ficha: cuentas y contactos en el núcleo, negocios en Comercial. */
+export const entradaDe = (tipo: EntidadCampos, id: string) =>
+  tipo === "negocio" ? { negocioId: id } : { entidad: tipo, id };
 
 /** Texto para mostrar un valor en la ficha (null si está vacío). */
 export function mostrarValor(c: CampoFicha): string | null {
