@@ -74,6 +74,20 @@ describe.skipIf(!urlPropietario)("Portal Cliente · propuesta al aceptar la invi
     expect(await vigentes(p.membershipId)).toHaveLength(1);
   });
 
+  it("con el contexto real del despacho (sin módulos cargados) decide por los módulos de la empresa", async () => {
+    // El outbox entrega los eventos con un contexto de sistema sin `modulosActivos`: el consumidor no puede
+    // darlo por apagado por eso (14-nov, qa-e2e: el prospecto aceptó y quedó sin acceso).
+    const despacho = (tenantId = tA) => mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: [], medidor });
+    const sin = await aceptado("sinmodulo", "prospecto");
+    await enviada(sin.cuentaId, "SINM", new Date());
+    expect(await mod.propuestaAlAceptar(despacho(), sin.membershipId)).toEqual([]);
+    await e.admin.tenantModule.create({ data: { tenantId: tA, moduloId: "portal_cliente", estado: "activo" } });
+    const p = await aceptado("despacho", "prospecto");
+    const cot = await enviada(p.cuentaId, "DESP", new Date());
+    expect(await mod.propuestaAlAceptar(despacho(), p.membershipId)).toEqual([{ cuentaId: p.cuentaId, cotizacionId: cot }]);
+    expect(await vigentes(p.membershipId)).toEqual([{ cotizacionId: cot }]);
+  });
+
   it("una cuenta cliente activo no recibe nada por esta vía", async () => {
     const p = await aceptado("cliente", "cliente_activo");
     await enviada(p.cuentaId, "CLI", new Date());

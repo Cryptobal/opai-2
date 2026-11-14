@@ -98,6 +98,15 @@ export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
     reguladoNoBorrable: true,
   },
   {
+    tabla: "contrato_periodos",
+    finalidad:
+      "Historia de períodos del contrato de la persona (plazo fijo y paso a indefinido), con quién los registró o anuló (CAR-409).",
+    categorias: ["laboral"],
+    campos: ["tipo", "inicio", "termino", "registrado_por", "anulado_por", "motivo_anulacion"],
+    baseLicitud: "obligacion_legal",
+    reguladoNoBorrable: true,
+  },
+  {
     tabla: "credenciales_terreno",
     finalidad:
       "PIN de terreno de la persona (solo su hash) como identificación secundaria sin biometría; el RUT es copia del de la persona para el ingreso.",
