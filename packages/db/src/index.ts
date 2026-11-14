@@ -13,6 +13,7 @@ export {
   borrarUsuario,
   clienteAuth,
   clienteBloqueoLogin,
+  membresiaBloqueada,
   type ResultadoBorrado,
   restablecerSegundoFactor,
   estadoSesionEnTransaccion,

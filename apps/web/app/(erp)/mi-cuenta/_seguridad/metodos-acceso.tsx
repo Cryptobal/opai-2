@@ -9,6 +9,7 @@ import { Badge, Button, estilosBoton } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import type { Quitar } from "@/app/_acciones/metodos-acceso";
 
+import { RegenerarCodigos } from "../regenerar-codigos";
 import { AgregarPasskey } from "./agregar-passkey";
 import type { Metodos } from "./tipos";
 
@@ -122,6 +123,7 @@ export function MetodosAcceso({ m }: { m: Metodos }) {
             </LinkNext>
           )}
         </div>
+        {m.appAutenticadora ? <RegenerarCodigos /> : null}
       </section>
       {accion?.tipo === "quitar" ? (
         <QuitarMetodo quitar={accion.quitar} etiqueta={accion.etiqueta} m={m} onCerrar={cerrar} />

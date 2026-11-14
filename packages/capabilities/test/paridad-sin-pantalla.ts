@@ -53,7 +53,8 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
   "core.push.quitar": {
     encargo: "CAR-356",
     desde: "2026-11-13",
-    motivo: "Apagar los avisos al celular: llega con el mismo interruptor del PR 4b. Sin pantalla nadie se suscribe, así que no hay nada que quitar.",
+    motivo:
+      "Apagar los avisos al celular: llega con el mismo interruptor del PR 4b. Sin pantalla nadie se suscribe, así que no hay nada que quitar.",
   },
   "core.cuentas_referencias.otorgar": {
     encargo: "CAR-138",
@@ -89,12 +90,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-10-29",
     motivo:
       "Revocar la firma automática del representante (R16): su pantalla de configuración va en el PR 2 de firma; aquí entra la capacidad de gobernanza.",
-  },
-  "core.users.restablecer_mfa": {
-    encargo: "CAR-54",
-    desde: "2026-10-29",
-    motivo:
-      "Restablecer el MFA de un usuario desde su ficha (owner): las pantallas de MFA no tienen diseño aprobado en Claude Design (export-acceso/README.md).",
   },
   "platform.usuarios.restablecer_mfa": {
     encargo: "CAR-54",

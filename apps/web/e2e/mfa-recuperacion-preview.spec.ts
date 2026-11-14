@@ -1,0 +1,35 @@
+import { expect, test } from "@playwright/test";
+
+import { capturar } from "./preview";
+import { E2E_PASSWORD, entrar } from "./sesion";
+
+// CAR-54 (Sesión Núcleo): recuperar el segundo factor. Solo mira las pantallas; no regenera códigos
+// ni restablece a nadie (la cuenta de QA usa su app autenticadora en las demás pruebas).
+test.describe("@preview recuperar el segundo factor", () => {
+  test.skip(!E2E_PASSWORD, "Falta E2E_PASSWORD");
+
+  test("Mi cuenta ofrece regenerar los códigos de respaldo", async ({ page }, info) => {
+    await entrar(page);
+    await page.goto("/mi-cuenta");
+    await expect(page.getByRole("heading", { name: "App autenticadora" })).toBeVisible({
+      timeout: 60_000,
+    });
+    const boton = page.getByRole("button", { name: "Regenerar códigos de respaldo" });
+    await expect(boton).toBeVisible();
+    await boton.scrollIntoViewIfNeeded();
+    await capturar(page, info, "mfa-regenerar-codigos");
+  });
+
+  test("el owner ve «Restablecer MFA» con su advertencia", async ({ page }, info) => {
+    await entrar(page);
+    await page.goto("/configuracion/usuarios");
+    await page.locator('a[href*="?editar="]').first().click();
+    await page.waitForURL(/\?editar=/, { timeout: 60_000 });
+    await page.getByRole("button", { name: "Restablecer MFA" }).click();
+    const dialogo = page.getByRole("dialog", { name: /^¿Restablecer MFA de / });
+    await expect(dialogo.getByText(/Esta acción es irreversible/)).toBeVisible();
+    await capturar(page, info, "mfa-restablecer-dialogo");
+    await dialogo.getByRole("button", { name: "Cancelar" }).click();
+    await expect(dialogo).toBeHidden();
+  });
+});

@@ -7,6 +7,7 @@ import { avisar, Button, Dialog, Sheet, Switch } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fechaHora } from "@/lib/formato";
 
+import { RestablecerMfa } from "./restablecer-mfa";
 import { CampoRolUsuario, permisosDeSeleccion, seleccionDe } from "./campo-rol-usuario";
 import { CampoPortales } from "./campos";
 import { ExcepcionesUsuario } from "./excepciones-usuario";
@@ -87,6 +88,7 @@ function Formulario(p: Props & { miembro: Miembro }) {
       >
         <div className="flex flex-col gap-5">
           {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
+          {p.miRol === "owner" ? <RestablecerMfa miembro={miembro} /> : null}
           <CampoRolUsuario
             miembro={miembro}
             valor={rolSel}

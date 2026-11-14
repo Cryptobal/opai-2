@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 793 pares pantalla→capacidad · 714 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 794 pares pantalla→capacidad · 714 con herramienta · 80 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -718,6 +718,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.invite` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios` | `core.users.remove` | `core_users_remove` | existe |
+| erp | `/configuracion/usuarios` | `core.users.restablecer_mfa` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
@@ -829,6 +830,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/metodos-acceso.ts#accionRenombrarPasskey` | Invoca core.metodos_acceso.renombrar_passkey (herramienta MCP existente). |
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
 | `app/_acciones/mfa.ts#accionIniciarMfa` | Identidad: enrola el segundo factor propio. |
+| `app/_acciones/mfa.ts#accionRegenerarCodigos` | Identidad: regenera los códigos de respaldo de la propia cuenta con contraseña. |
 | `app/_acciones/mfa.ts#accionVerificar` | Identidad: segundo factor de la sesión humana. |
 | `app/_acciones/oauth.ts#accionAutorizarOAuth` | Identidad: la persona autoriza a una app a entrar por OAuth con su cuenta (CAR-247). |
 | `app/_acciones/oauth.ts#accionElegirEmpresaOAuth` | Identidad: la persona elige la empresa con la que entra la app por OAuth (CAR-247). |
@@ -1067,7 +1069,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.desconectar` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
-| `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
+| `core.users.restablecer_mfa` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.webhooks.destino_actualizar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
 | `core.webhooks.destino_crear` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
 | `core.webhooks.destino_eliminar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
