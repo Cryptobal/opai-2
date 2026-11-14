@@ -213,4 +213,46 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
     );
     expect(g?.clase).toBe("Feriado legal");
   });
+
+  it("al anonimizar a la persona, el motivo de sus ausencias se reemplaza y el resto queda (CAR-393)", async () => {
+    const otra = (
+      await e.admin.persona.create({
+        data: {
+          tenantId: tenant,
+          nombres: "Otra",
+          apellidos: "Ficticia",
+          rut: "17777777-7",
+          estado: "activa",
+        },
+      })
+    ).id;
+    const r = await run(ctx(tenant), "core.ausencias.registrar", {
+      personaId: otra,
+      tipo: "licencia",
+      clase: "Enfermedad común",
+      motivo: "Folio ficticio 999",
+      desde: "2027-03-01",
+      hasta: "2027-03-03",
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const { anonimizarPersona, MARCA_ANONIMO } =
+      await import("../src/core/cumplimiento/retencion-anonimizar");
+    const hecho = await ctx(tenant).transaccion((tx) =>
+      anonimizarPersona(tx, otra, new Date(), null),
+    );
+    expect(hecho).toBe(true);
+    const fila = await e.admin.ausencia.findFirst({ where: { personaId: otra } });
+    expect(fila).toMatchObject({
+      motivo: MARCA_ANONIMO,
+      tipo: "licencia",
+      clase: "Enfermedad común",
+    });
+    // La ausencia de otra persona no cambia.
+    const ajenas = await e.admin.ausencia.findMany({
+      where: { personaId: persona },
+      select: { motivo: true },
+    });
+    expect(ajenas.length).toBeGreaterThan(0);
+    expect(ajenas.every((a) => a.motivo !== MARCA_ANONIMO)).toBe(true);
+  });
 });
