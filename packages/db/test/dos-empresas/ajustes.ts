@@ -146,6 +146,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Publicación de la pauta (CAR-356): CHECK del mes aaaa-mm.
   "pauta.publicaciones": { fijas: ["mes"], valores: () => ({ mes: "2026-12" }) },
+  // Visitas de supervisión (CAR-83): CHECK de estado, geocerca y cierre (cerrada ⇔ cerrada_en).
+  "pauta.visitas": {
+    valores: () => ({ estado: "cerrada", cerrada_en: "2026-12-01T12:00:00Z", geocerca: "sin_gps", precision_m: null, distancia_m: null }),
+  },
   // Períodos del contrato (CAR-409): CHECK de tipo, término según el tipo y anulación con motivo.
   "core.contrato_periodos": {
     valores: () => ({
