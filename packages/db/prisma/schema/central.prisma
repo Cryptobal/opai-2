@@ -168,3 +168,31 @@ model CentralPausa {
   @@map("pausas")
   @@schema("central")
 }
+
+/// Propuesta del agente (R10, CA3): una acción que el agente prepara y el responsable acepta o
+/// rechaza con un toque. Al aceptarla se ejecuta con la identidad de la persona.
+model CentralPropuesta {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  alertaId       String    @map("alerta_id") @db.Uuid
+  /// "resolver" | "falsa_alarma" | "reabrir" | "posponer" | "bajar_severidad".
+  accion         String
+  nota           String?
+  minutos        Int?
+  severidad      String?
+  /// "pendiente" | "aceptada" | "rechazada".
+  estado         String    @default("pendiente")
+  /// Key del agente que la propuso (null si la dejó una persona).
+  apiKeyId       String?   @map("api_key_id") @db.Uuid
+  propuestaPorId String?   @map("propuesta_por_id") @db.Uuid
+  resueltaPorId  String?   @map("resuelta_por_id") @db.Uuid
+  resueltaEn     DateTime? @map("resuelta_en") @db.Timestamptz(6)
+  motivoRechazo  String?   @map("motivo_rechazo")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, estado])
+  @@index([tenantId, alertaId])
+  @@map("propuestas")
+  @@schema("central")
+}

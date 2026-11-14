@@ -198,6 +198,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: devolver una alerta tomada garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
   "central.agente.reanudar":
     "Solo personas: reanudar al agente de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.propuestas.resolver":
+    "Solo personas: aceptar o rechazar una propuesta del agente es la decisión humana que la propuesta espera (spec central R10, CA3).",
   "central.alertas.hacerse_cargo":
     "Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala.",
   "asistencia.marcas.verificar":

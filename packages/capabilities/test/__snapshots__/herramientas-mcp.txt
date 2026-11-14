@@ -32,11 +32,13 @@ central_alertas_falsa_alarma
 central_alertas_listar
 central_alertas_obtener
 central_alertas_posponer
+central_alertas_proponer
 central_alertas_reabrir
 central_alertas_resolver
 central_cadenas_guardar
 central_cadenas_listar
 central_estado
+central_propuestas_listar
 central_reglas_guardar
 central_reglas_listar
 central_turno_estado
@@ -642,6 +644,7 @@ preview_central_alertas_contactar
 preview_central_alertas_escalar
 preview_central_alertas_falsa_alarma
 preview_central_alertas_posponer
+preview_central_alertas_proponer
 preview_central_alertas_reabrir
 preview_central_alertas_resolver
 preview_central_cadenas_guardar

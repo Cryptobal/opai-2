@@ -27,6 +27,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   "central.turnos": { valores: () => ({ estado: "abierto", entrega_a_id: null, cerrado_en: null }) },
   "central.pausas": { valores: () => ({ instalacion_id: null, reanudada_en: null, reanudada_por_id: null }) },
+  "central.propuestas": {
+    dependencias: ["central.alertas"],
+    fijas: ["accion", "alerta_id"],
+    valores: (ctx) => ({ accion: "resolver", minutos: null, severidad: null, estado: "pendiente", resuelta_en: null, alerta_id: id(ctx, "central.alertas") }),
+  },
   "central.reglas": { valores: () => ({ evento: "rondas.ejecucion.atrasada", severidad: "media", activa: true }) },
   "central.cadenas": {
     valores: () => ({
