@@ -6,7 +6,7 @@ import { defineCapability } from "../define";
 import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
 import { nombresInstalacion, PERMISO_READ } from "./comun";
 
-export const MOTIVOS_INTENTO = [
+const MOTIVOS_INTENTO = [
   "bloqueado",
   "fuera_de_lista",
   "fuera_de_horario",

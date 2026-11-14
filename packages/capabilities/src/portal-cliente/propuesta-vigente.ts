@@ -2,6 +2,7 @@ import { esMembresiaDeCliente, type Rol } from "@opai/domain";
 
 import type { Contexto } from "../types";
 import { cuentaDe } from "./comun";
+import { portalClienteActivo } from "./modulo-activo";
 
 export type ResultadoPropuesta = "registrada" | "no_aplica";
 
@@ -15,7 +16,7 @@ export async function registrarPropuestaEnviada(
   ctx: Contexto,
   input: { cuentaId: string; contactoId: string; cotizacionId: string; vigenteHasta: Date | null },
 ): Promise<ResultadoPropuesta> {
-  if (!ctx.modulosActivos.includes("portal_cliente")) return "no_aplica";
+  if (!(await portalClienteActivo(ctx))) return "no_aplica";
   const cuenta = await cuentaDe(ctx, input.cuentaId);
   const contacto = await ctx.db.contacto.findFirst({
     where: { id: input.contactoId, cuentaId: cuenta.id },

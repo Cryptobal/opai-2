@@ -4,7 +4,9 @@ import { LinkNext } from "@/app/_components/link-next";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { conFiltros, type Parametros } from "@/lib/parametros";
 
-import type { Registro } from "./datos";
+import { estadoPantalla } from "@/lib/formato";
+
+import type { DatosRegistros, Registro } from "./datos";
 import { cuando, estadoRegistro, OPCIONES_TIPO, tipoDe } from "./etiquetas";
 
 type Props = {
@@ -29,8 +31,36 @@ export function rutaAccesos(
   return url.pathname + url.search;
 }
 
+const VACIO = {
+  en_sitio: {
+    titulo: "Nadie en sitio",
+    descripcion: "Quien entre por la portería aparecerá aquí hasta que salga.",
+  },
+  registros: {
+    titulo: "Aún no hay registros",
+    descripcion: "Las entradas que registre la portería de tus instalaciones aparecerán aquí.",
+  },
+};
+
+/** Fila de la lista; abrir la ficha conserva la página de la lista (cursor), para no volver a la primera. */
+function filaDe(r: Registro, p: Parametros) {
+  const e = estadoRegistro(r);
+  return {
+    id: r.id,
+    href: rutaAccesos(`/accesos/${r.id}`, p, p["cursor"] ? { cursor: p["cursor"] } : {}),
+    titulo: r.nombre,
+    secundario: [tipoDe(r.tipoRegistro), r.empresa].filter(Boolean).join(" · "),
+    terciario: `${r.instalacion} · ${cuando(r.entradaEn)}`,
+    fin: (
+      <Badge tono={e.tono} punto>
+        {e.etiqueta}
+      </Badge>
+    ),
+  };
+}
+
 /** Columna de registros (diseño `Accesos`): nombre, tipo y empresa, instalación y hora, estado. */
-export function ListaRegistros({ state, items, siguiente, p, instalaciones, seleccionado }: Props) {
+function ListaRegistros({ state, items, siguiente, p, instalaciones, seleccionado }: Props) {
   const enSitio = p["estado"] === "en_sitio";
   return (
     <ListaMaestro
@@ -50,18 +80,7 @@ export function ListaRegistros({ state, items, siguiente, p, instalaciones, sele
         derecha: "Más reciente primero",
       }}
       seleccionada={seleccionado}
-      vacio={
-        enSitio
-          ? {
-              titulo: "Nadie en sitio",
-              descripcion: "Quien entre por la portería aparecerá aquí hasta que salga.",
-            }
-          : {
-              titulo: "Aún no hay registros",
-              descripcion:
-                "Las entradas que registre la portería de tus instalaciones aparecerán aquí.",
-            }
-      }
+      vacio={enSitio ? VACIO.en_sitio : VACIO.registros}
       pie={
         siguiente ? (
           <LinkNext
@@ -72,22 +91,21 @@ export function ListaRegistros({ state, items, siguiente, p, instalaciones, sele
           </LinkNext>
         ) : undefined
       }
-      filas={items.map((r) => {
-        const e = estadoRegistro(r);
-        return {
-          id: r.id,
-          // Abrir la ficha conserva la página de la lista (cursor), para no volver a la primera.
-          href: rutaAccesos(`/accesos/${r.id}`, p, p["cursor"] ? { cursor: p["cursor"] } : {}),
-          titulo: r.nombre,
-          secundario: [tipoDe(r.tipoRegistro), r.empresa].filter(Boolean).join(" · "),
-          terciario: `${r.instalacion} · ${cuando(r.entradaEn)}`,
-          fin: (
-            <Badge tono={e.tono} punto>
-              {e.etiqueta}
-            </Badge>
-          ),
-        };
-      })}
+      filas={items.map((r) => filaDe(r, p))}
+    />
+  );
+}
+
+/** La lista a partir de lo que carga `cargarRegistros` (la usan `/accesos` y `/accesos/[id]`). */
+export function ListaDeAccesos({ d, seleccionado }: { d: DatosRegistros; seleccionado?: string }) {
+  return (
+    <ListaRegistros
+      state={estadoPantalla(d.r)}
+      items={d.r.ok ? d.r.data.items : []}
+      siguiente={d.r.ok ? d.r.data.siguiente : null}
+      p={d.p}
+      instalaciones={d.instalaciones}
+      {...(seleccionado ? { seleccionado } : {})}
     />
   );
 }

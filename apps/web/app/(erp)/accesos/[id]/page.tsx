@@ -6,7 +6,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarRegistro, cargarRegistros } from "../_componentes/datos";
 import { DetalleRegistro } from "../_componentes/detalle-registro";
-import { ListaRegistros, rutaAccesos } from "../_componentes/lista-registros";
+import { ListaDeAccesos, rutaAccesos } from "../_componentes/lista-registros";
 import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 
 export const metadata = { title: "Accesos" };
@@ -42,16 +42,7 @@ export default function AccesoRegistro({ params, searchParams }: Props) {
             unPanelHastaLg
             etiquetaLista="Lista de accesos"
             etiquetaDetalle="Registro de acceso"
-            lista={
-              <ListaRegistros
-                state={estadoPantalla(d.r)}
-                items={d.r.ok ? d.r.data.items : []}
-                siguiente={d.r.ok ? d.r.data.siguiente : null}
-                p={d.p}
-                instalaciones={d.instalaciones}
-                seleccionado={d.id}
-              />
-            }
+            lista={<ListaDeAccesos d={d} seleccionado={d.id} />}
             detalle={
               <DetalleRegistro
                 r={d.ficha.ok ? d.ficha.data : null}
