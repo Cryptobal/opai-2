@@ -4,39 +4,25 @@ import { hidratado } from "./hidratacion";
 import { captura, erroresDeConsola } from "./hilo-apoyo";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Diseño nuevo (ADR-109, CAR-335 D2, D2b y D2c) con el usuario de la empresa ficticia `qa-e2e`: pinta la piel
-// nueva desde el servidor, Preferencias lo muestra elegido, el menú lateral se oculta y se asoma al
-// pasar el mouse, y se vuelve al clásico. Las capturas se comparan con docs/2.0/design/export-diseno-nuevo/.
+// Diseño nuevo (ADR-109, CAR-335 D2, D2b y D2c) con el usuario de la empresa ficticia `qa-e2e`: desde D6c es
+// el único diseño del ERP. Pinta la piel nueva desde el servidor (sin cookie), y el menú lateral se oculta
+// y se asoma al pasar el mouse. Las capturas se comparan con docs/2.0/design/export-diseno-nuevo/.
 const marco = (page: Page) => page.locator('div[data-marco="nuevo"]');
 const ancho = (page: Page) => page.viewportSize()?.width ?? 0;
-
-/**
- * El diseño se elige por la cookie de este navegador (lo que hace Preferencias tras guardar), así la
- * prueba no cambia la preferencia guardada de qa-e2e: no choca con `hilo.spec.ts`, que corre en
- * paralelo, ni deja a qa-e2e en el diseño nuevo si falla a mitad. El guardado se prueba en unidad.
- */
-async function conDiseno(page: Page, valor: string) {
-  const url = new URL(page.url()).origin;
-  await page.context().addCookies([{ name: "opai_marco", value: valor, url }]);
-}
 
 test.describe("@preview diseño nuevo con sesión", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
-  test("pinta la piel nueva, el menú se oculta y se asoma, y se vuelve al clásico", async ({
-    page,
-  }, info) => {
+  test("pinta la piel nueva y el menú se oculta y se asoma", async ({ page }, info) => {
     test.setTimeout(240_000);
     await entrar(page);
     try {
-      await conDiseno(page, "nuevo");
-      // Sin parpadeo: con la cookie, el servidor ya manda la piel nueva en el HTML del documento.
+      // Sin parpadeo y sin cookie: el servidor ya manda la piel nueva en el HTML del documento.
       const documento = await page.goto("/mi-cuenta/preferencias");
       expect(await documento?.text()).toContain('data-marco="nuevo"');
       await expect(marco(page)).toBeVisible({ timeout: 60_000 });
-      const opcion = page.getByRole("radio", { name: /^Nuevo/ });
-      await hidratado(opcion);
-      await expect(opcion).toBeChecked();
+      // Preferencias ya no ofrece elegir diseño (D6c).
+      await expect(page.getByRole("radio", { name: /^Nuevo/ })).toHaveCount(0);
       await expect(page.locator("html")).toHaveAttribute("data-marco", "nuevo");
       expect(await marco(page).evaluate((el) => getComputedStyle(el).fontFamily)).toContain(
         "Geist",
@@ -85,7 +71,7 @@ test.describe("@preview diseño nuevo con sesión", () => {
         await expect(fijar).toBeVisible();
         await captura(page, "nuevo-menu-oculto", info);
         // Plegado (CAR-377): el riel muestra las áreas, no cada submódulo.
-        const riel = page.locator('nav[data-riel-nuevo]');
+        const riel = page.locator("nav[data-riel-nuevo]");
         await expect(riel.getByRole("button", { name: "Comercial" })).toBeVisible();
         await expect(riel.getByRole("link", { name: "Negocios" })).toHaveCount(0);
         // Al recargar, el servidor ya manda el menú plegado: sin parpadeo del menú abierto (D2b).
@@ -105,11 +91,8 @@ test.describe("@preview diseño nuevo con sesión", () => {
       }
       expect(errores).toEqual([]);
     } finally {
-      await conDiseno(page, "clasico");
       const url = new URL(page.url()).origin;
       await page.context().addCookies([{ name: "opai_menu", value: "", url }]);
     }
-    const clasico = await page.goto("/");
-    expect(await clasico?.text()).not.toContain('data-marco="nuevo"');
   });
 });

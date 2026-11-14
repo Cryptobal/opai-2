@@ -157,6 +157,23 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     expect(r.ok && r.data).toMatchObject({ nuevos: 0, duplicados: 1 });
   });
 
+  // Fechas pasadas: el receptor descarta las futuras.
+  it("CAR-450: lo que ya vino por cartola con otra glosa se reconoce por monto único; con dos iguales no adivina", async () => {
+    const cartola = (fecha: string, monto: bigint, glosa: string) =>
+      e.admin.movimientoBancario.create({
+        data: { tenantId: tenantA, cuentaId: cuentaA, fecha: new Date(`${fecha}T00:00:00Z`), monto, glosa, claveDedupe: `k-${randomUUID()}`, origen: "cartola" },
+      });
+    const unico = await cartola("2026-11-07", -43_210n, "PAGO PROVEEDORES 0099");
+    const r1 = await recibir(tenantA, payload([{ externalId: "m450", transactionDate: "2026-11-05", description: "TEF PROVEEDOR FICT", amount: -43_210 }]));
+    expect(r1.ok && r1.data).toMatchObject({ nuevos: 0, duplicados: 1 });
+    expect((await e.admin.movimientoBancario.findUniqueOrThrow({ where: { id: unico.id } })).idExterno).toBe("m450");
+
+    await cartola("2026-11-09", -12_340n, "CARGO A");
+    await cartola("2026-11-10", -12_340n, "CARGO B");
+    const r2 = await recibir(tenantA, payload([{ externalId: "m451", transactionDate: "2026-11-09", description: "TEF OTRA", amount: -12_340 }]));
+    expect(r2.ok && r2.data).toMatchObject({ nuevos: 1 });
+  });
+
   it("misma huella sin saldo se inserta y queda como sospechosa; cuenta desconocida se ignora", async () => {
     const cuerpo = payload([mov("s1", -50_000)]);
     const r = await recibir(tenantA, cuerpo);
