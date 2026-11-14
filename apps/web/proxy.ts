@@ -1,6 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { COOKIE_DISPOSITIVO } from "./lib/cookie-dispositivo";
 import { consultaDeRuta } from "./lib/existencia-ruta";
 import { loginDe } from "./lib/login-destino";
 import { destino404, esIdInvalido } from "./lib/rutas-invalidas";
@@ -105,7 +106,9 @@ export async function proxy(request: NextRequest) {
       "/terreno/cola",
       "/terreno/porteria",
       "/terreno/rondas",
-    ].includes(request.nextUrl.pathname);
+    ].includes(request.nextUrl.pathname) ||
+    // Un equipo de terreno emparejado no tiene sesión: `/entrar` lo lleva a Terreno (Brief 17).
+    (request.nextUrl.pathname === "/entrar" && request.cookies.has(COOKIE_DISPOSITIVO));
   if (publica) return responder(NextResponse.next({ request: { headers } }));
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
     // La cabecera se fija en el servidor y sobrescribe cualquier `x-opai-t0` del cliente: en ninguna
