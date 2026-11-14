@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -7,6 +8,7 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 // empresa ficticia `qa-e2e` (nunca Gard), ve el paso «Elegir» y cancela. No fusiona nada.
 test.describe("@preview comercial: fusionar cuentas", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  test.beforeEach(({ page }) => ocultarIndicadorDev(page));
 
   test("la hoja Fusionar cuentas abre en el paso Elegir y se cancela sin cambios", async ({ page }, info) => {
     const errores: string[] = [];
