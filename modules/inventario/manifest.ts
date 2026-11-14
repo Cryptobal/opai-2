@@ -25,7 +25,7 @@ export const manifest = defineModule({
       area: "operaciones",
       href: "/inventario",
       etiqueta: "Inventario",
-      icono: "Package",
+      icono: "LayoutGrid",
       orden: 60,
       permiso: PERMISOS_INVENTARIO.read,
     },
