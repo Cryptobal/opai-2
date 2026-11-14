@@ -1,6 +1,11 @@
 import { PERMISOS_CORE } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
+import { Ruler } from "lucide-react";
+
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+
+import { HojaTallas } from "./diferidas-laboral";
 import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { conDatos, SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
 import { laboralDe } from "./lecturas-ficha";
@@ -18,19 +23,9 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
   const r = await laboralDe(personaId);
   if (!r.ok) return <SeccionError titulo={TITULO} que="el uniforme" />;
   const u = r.data.uniforme;
+  const tallas = r.data.tallas;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
-  const vacio = !conDatos(
-    u?.tallaCamisa,
-    u?.tallaPantalon,
-    u?.tallaChaqueta,
-    u?.tallaZapato,
-    u?.tallaPolera,
-    u?.tallaGeologo,
-    u?.tallaPolar,
-    u?.estaturaCm,
-    u?.pesoKg,
-    u?.notas,
-  );
+  const vacio = !conDatos(...tallas.map((t) => t.talla), u?.estaturaCm, u?.pesoKg, u?.notas);
   // CAR-124: las entregas ya estaban en la capacidad y no se mostraban (export «Secciones», tarjeta «Entregadas»).
   const entregas = u?.entregas ?? [];
   return (
@@ -49,18 +44,24 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
       ) : null}
       <ParesGrid
         items={[
-          { etiqueta: "Camisa", valor: u?.tallaCamisa },
-          { etiqueta: "Pantalón", valor: u?.tallaPantalon },
-          { etiqueta: "Chaqueta", valor: u?.tallaChaqueta },
-          { etiqueta: "Polera", valor: u?.tallaPolera },
-          { etiqueta: "Geólogo", valor: u?.tallaGeologo },
-          { etiqueta: "Polar", valor: u?.tallaPolar },
-          { etiqueta: "Calzado", valor: u?.tallaZapato },
+          // CAR-408: una fila por prenda del uniforme de la empresa (las de su rubro si no definió las suyas).
+          ...tallas.map((t) => ({
+            etiqueta: t.enKit ? t.nombre : `${t.nombre} (ya no se usa)`,
+            valor: t.talla,
+          })),
           { etiqueta: "Estatura", valor: u?.estaturaCm ? `${u.estaturaCm} cm` : null },
           { etiqueta: "Peso", valor: u?.pesoKg ? `${u.pesoKg} kg` : null },
           { etiqueta: "Notas", valor: u?.notas, ancho: true },
         ]}
       />
+      {puede ? (
+        <div className="mt-3">
+          <EnlaceBotonHoja variante="secondary" icono={Ruler} href="?editar-tallas=1">
+            Editar tallas
+          </EnlaceBotonHoja>
+          <HojaTallas personaId={personaId} tallas={tallas} />
+        </div>
+      ) : null}
       <h4 className="t-label mt-4 mb-2">Entregadas</h4>
       {entregas.length ? (
         <ParesGrid
@@ -78,13 +79,6 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
           seccion="uniforme"
           personaId={personaId}
           inicial={{
-            tallaCamisa: u?.tallaCamisa,
-            tallaPantalon: u?.tallaPantalon,
-            tallaChaqueta: u?.tallaChaqueta,
-            tallaZapato: u?.tallaZapato,
-            tallaPolera: u?.tallaPolera,
-            tallaGeologo: u?.tallaGeologo,
-            tallaPolar: u?.tallaPolar,
             estaturaCm: u?.estaturaCm?.toString(),
             pesoKg: u?.pesoKg?.toString(),
             notas: u?.notas,

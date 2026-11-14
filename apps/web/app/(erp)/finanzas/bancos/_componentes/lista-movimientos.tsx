@@ -35,10 +35,11 @@ export function ListaMovimientos({
         <li
           key={m.id}
           {...(m.id === seleccionado ? { "aria-current": "true" as const } : {})}
-          className={`rowcard flex flex-wrap items-center gap-2 p-3 ${m.id === seleccionado ? "ring-2 ring-accent" : ""}`}
+          className={`rowcard grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 p-3 ${m.id === seleccionado ? "ring-2 ring-accent" : ""}`}
         >
-          {/* La glosa ocupa su propia línea y el monto, el estado y la acción van debajo: la lista es una columna angosta junto al panel (CAR-257). */}
-          <div className="min-w-0 grow basis-full">
+          {/* Dos columnas fijas (CAR-443): glosa y fecha a la izquierda y el monto alineado a la derecha; debajo, el estado
+              y la acción. Mantiene el orden igual con la lista a todo el ancho o junto al panel (CAR-257). */}
+          <div className="min-w-0">
             <p className="t-body-sm font-medium break-words">{m.glosa}</p>
             <p className="t-caption text-fg-muted">
               {fechaDdMmAaaa(m.fecha)}
@@ -51,15 +52,19 @@ export function ListaMovimientos({
               </p>
             ) : null}
           </div>
-          <span className={`t-mono t-body-sm ${m.monto >= 0 ? "text-success-fg" : "text-danger-fg"}`}>{clp(m.monto)}</span>
-          <Badge tono={m.estado === "conciliado" ? "success" : m.estado === "por_autorizar" ? "warning" : "neutro"}>
-            {ETIQUETA_ESTADO[m.estado] ?? m.estado}
-          </Badge>
+          <span className={`self-start text-right t-mono t-body-sm tabular-nums ${m.monto >= 0 ? "text-success-fg" : "text-danger-fg"}`}>{clp(m.monto)}</span>
+          <div>
+            <Badge tono={m.estado === "conciliado" ? "success" : m.estado === "por_autorizar" ? "warning" : "neutro"}>
+              {ETIQUETA_ESTADO[m.estado] ?? m.estado}
+            </Badge>
+          </div>
           {gestiona ? (
-            <EnlaceBoton href={hrefMov(m.id)} variante="secondary">
+            <EnlaceBoton href={hrefMov(m.id)} variante="secondary" className="justify-self-end">
               {m.estado === "conciliado" ? "Ver" : "Reconocer"}
             </EnlaceBoton>
-          ) : null}
+          ) : (
+            <span />
+          )}
         </li>
       ))}
     </ul>

@@ -6,6 +6,7 @@ import { crearInvitacion } from "../core/invitar";
 import type { Contexto } from "../types";
 import { vincularAcceso } from "./accesos-vincular-logica";
 import { cuentaDe } from "./comun";
+import { portalClienteActivo } from "./modulo-activo";
 
 /**
  * Qué pasó (o pasaría, en vista previa) con el acceso al Portal Cliente de un contacto:
@@ -40,7 +41,7 @@ export async function asegurarAccesoContacto(
   input: { cuentaId: string; contactoId: string },
   dryRun: boolean,
 ): Promise<ResultadoAccesoContacto> {
-  if (!ctx.modulosActivos.includes("portal_cliente")) return no("portal_cliente_apagado");
+  if (!(await portalClienteActivo(ctx))) return no("portal_cliente_apagado");
   const cuenta = await cuentaDe(ctx, input.cuentaId);
   if (cuenta.archivadaEn) return no("cuenta_archivada");
   const contacto = await ctx.db.contacto.findFirst({

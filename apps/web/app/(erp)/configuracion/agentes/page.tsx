@@ -21,9 +21,15 @@ export default function Agentes() {
       cargar={cargarKeys}
       cabecera={() => ({
         subtitulo: (
-          <Enlace Link={LinkNext} href="/configuracion/agentes/conectar" className="underline">
-            Conectar tu IA
-          </Enlace>
+          <>
+            <Enlace Link={LinkNext} href="/configuracion/agentes/conectar" className="underline">
+              Conectar tu IA
+            </Enlace>
+            {" · "}
+            <Enlace Link={LinkNext} href="/configuracion/agentes/eventos" className="underline">
+              Eventos salientes
+            </Enlace>
+          </>
         ),
         acciones: (
           <EnlaceBotonHoja href="?crear=1" icono={Plus}>

@@ -26,7 +26,7 @@ const sugerenciaSchema = z.object({
 export const bancosConciliacionSugerir = defineCapability({
   id: "finanzas.conciliaciones.sugerir",
   descripcion:
-    "Sugiere conciliaciones para un movimiento bancario (facturas por RUT o monto único y reglas del banco) sin marcar nada pagado.",
+    "Sugiere conciliaciones para un movimiento bancario (facturas por RUT o monto único, incluidas las facturas por cobrar del último año, y reglas del banco) sin marcar nada pagado.",
   permiso: PERMISO_BANCOS_VER,
   input: z.object({ movimientoId: z.uuid() }),
   output: z.object({
@@ -45,12 +45,16 @@ export const bancosConciliacionSugerir = defineCapability({
     desde.setUTCDate(desde.getUTCDate() - 15);
     const hasta = new Date(mov.fecha);
     hasta.setUTCDate(hasta.getUTCDate() + 15);
+    const haceUnAno = new Date(mov.fecha);
+    haceUnAno.setUTCDate(haceUnAno.getUTCDate() - 365);
 
     const [emitidos, recibidos] = await Promise.all([
       ctx.db.documentoEmitido.findMany({
         where: {
           estadoDte: { not: "borrador" },
-          fechaEmision: { gte: desde, lte: hasta },
+          // CAR-490: además de la ventana, toda factura (33/34) con saldo por cobrar del último año: el pago de una vencida.
+          fechaEmision: { gte: haceUnAno, lte: hasta },
+          OR: [{ fechaEmision: { gte: desde } }, { tipoDte: { in: [33, 34] }, estadoCobro: { in: ["pendiente", "pagada_parcial"] } }],
         },
         select: {
           id: true,
