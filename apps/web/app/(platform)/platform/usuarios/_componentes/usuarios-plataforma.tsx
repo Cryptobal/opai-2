@@ -33,7 +33,6 @@ export function UsuariosPlataforma(props: {
       <ListScreen<UsuarioPlataforma>
         state={props.state}
         titulo="Usuarios de plataforma"
-        soloTelefono
         accionPrincipal={
           <Button onClick={() => setObjetivo({ email: "", nombre: null, rol: null })}>
             Dar rol a un correo

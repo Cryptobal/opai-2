@@ -53,11 +53,10 @@ test.describe("@preview plataforma: paridad con el MCP (CAR-323)", () => {
     await expect(page.getByText("Revisa antes de confirmar")).toBeVisible();
     await capturar(page, info, "plataforma-editar-empresa");
     await page.getByRole("button", { name: "Cancelar" }).click();
-    await page
-      .getByRole("tab", { name: "Auditoría" })
-      .or(page.getByRole("link", { name: "Auditoría" }))
-      .first()
-      .click();
+    // La pestaña de la empresa, no la Auditoría global del menú lateral (que también se llama así).
+    const ficha = new URL(page.url()).pathname.match(/^\/platform\/tenants\/[^/]+/)?.[0];
+    expect(ficha).toBeTruthy();
+    await page.goto(`${ficha}/auditoria`);
     await expect(page.getByText("Estado de las cadenas")).toBeVisible();
     await capturar(page, info, "plataforma-empresa-auditoria");
   });
