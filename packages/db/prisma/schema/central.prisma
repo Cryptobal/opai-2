@@ -32,6 +32,9 @@ model CentralAlerta {
   /// Quién dijo «me hago cargo» y hasta cuándo tiene para resolver (R8).
   atencionPorId  String?   @map("atencion_por_id") @db.Uuid
   atencionVenceEn DateTime? @map("atencion_vence_en") @db.Timestamptz(6)
+  /// Operador que tomó la alerta (R13): mientras esté tomada, el agente no actúa en ella.
+  tomadaPorId    String?   @map("tomada_por_id") @db.Uuid
+  tomadaEn       DateTime? @map("tomada_en") @db.Timestamptz(6)
   cerradaEn      DateTime? @map("cerrada_en") @db.Timestamptz(6)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -127,5 +130,41 @@ model CentralRegla {
 
   @@unique([tenantId, evento])
   @@map("reglas")
+  @@schema("central")
+}
+
+/// Turno de central (R12, R15): quién está a cargo. Uno solo abierto o en entrega por empresa.
+model CentralTurno {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  operadorId    String    @map("operador_id") @db.Uuid
+  /// "abierto" | "en_entrega" | "cerrado".
+  estado        String    @default("abierto")
+  /// A quién se entrega (en_entrega) y nota de la entrega.
+  entregaAId    String?   @map("entrega_a_id") @db.Uuid
+  notaEntrega   String?   @map("nota_entrega")
+  cerradoEn     DateTime? @map("cerrado_en") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, estado])
+  @@map("turnos")
+  @@schema("central")
+}
+
+/// Pausa del agente de central (R13), por instalación o para toda la empresa (instalacionId null).
+model CentralPausa {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  instalacionId  String?   @map("instalacion_id") @db.Uuid
+  pausadaPorId   String?   @map("pausada_por_id") @db.Uuid
+  motivo         String?
+  reanudadaPorId String?   @map("reanudada_por_id") @db.Uuid
+  reanudadaEn    DateTime? @map("reanudada_en") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId])
+  @@map("pausas")
   @@schema("central")
 }

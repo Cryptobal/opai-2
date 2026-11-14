@@ -8,6 +8,41 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "central.turno.abrir": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
+  "central.turno.entregar": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
+  "central.turno.aceptar": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
+  "central.turno.cerrar": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
+  "central.alertas.tomar": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
+  "central.alertas.devolver": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
+  "central.agente.reanudar": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
   "central.alertas.hacerse_cargo": {
     encargo: "CAR-472",
     desde: "2026-11-14",

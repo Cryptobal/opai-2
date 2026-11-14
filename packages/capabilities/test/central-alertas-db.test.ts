@@ -152,6 +152,7 @@ describe.skipIf(omitirSuiteDb())("Central · alertas (db)", () => {
 
   it("el agente de central abre alertas pero no las cierra por su cuenta (R10)", async () => {
     const agente = () => ctx(admin, "admin", t.A, null, true);
+    await ok(adminA(), "central.turno.abrir", {}); // R12: sin una persona a cargo el agente solo mira.
     const { id } = await abrir(agente(), inst.A1);
     const r = await run(agente(), "central.alertas.resolver", { id, nota: "Lo cierro yo" });
     expect(r).toMatchObject({ ok: false });

@@ -24,6 +24,7 @@ asistencia_jornadas_fijar_tipo
 asistencia_marcas_listar
 asistencia_marcas_obtener
 asistencia_rostro_textos
+central_agente_pausar
 central_alertas_abrir
 central_alertas_contactar
 central_alertas_escalar
@@ -38,6 +39,7 @@ central_cadenas_listar
 central_estado
 central_reglas_guardar
 central_reglas_listar
+central_turno_estado
 comercial_canales_get
 comercial_canales_update
 comercial_config_actualizar_etapa
@@ -634,6 +636,7 @@ preview_asistencia_dias_recalcular
 preview_asistencia_incidentes_cerrar
 preview_asistencia_incidentes_registrar
 preview_asistencia_jornadas_fijar_tipo
+preview_central_agente_pausar
 preview_central_alertas_abrir
 preview_central_alertas_contactar
 preview_central_alertas_escalar
