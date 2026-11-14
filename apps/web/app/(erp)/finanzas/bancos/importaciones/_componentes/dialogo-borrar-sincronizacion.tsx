@@ -11,7 +11,8 @@ type Vista = { movimientos: number; conciliados: number };
 
 /**
  * Diálogo de «Borrar por fechas» (se descarga recién al abrirlo, ADR-037). Borrar los movimientos que llegaron por la sincronización con el banco entre dos fechas (CAR-341), para volver a
- * cargarlos limpios desde la cartola. Primero cuenta (vista previa) y después borra; los conciliados se conservan.
+ * cargarlos limpios desde la cartola. Primero cuenta (vista previa) y después borra; los conciliados se conservan. Desde
+ * CAR-412 el borrado se puede restaurar (`ListaDescartes`).
  */
 export function DialogoBorrarSincronizacion({
   cuentaId,
@@ -42,7 +43,7 @@ export function DialogoBorrarSincronizacion({
   async function borrar() {
     const r = await ejecutar<Vista>("finanzas.movimientos_bancarios.borrar_rango", entrada);
     if (!r) return;
-    avisar.exito(`Se borraron ${r.movimientos} movimientos de la sincronización`);
+    avisar.exito(`Se borraron ${r.movimientos} movimientos. Puedes restaurarlos más abajo.`);
     cerrar();
     router.refresh();
   }
@@ -108,7 +109,7 @@ export function DialogoBorrarSincronizacion({
                 : "No hay movimientos para borrar"
             }
           >
-            {`${vista.conciliados ? `${vista.conciliados} conciliados se conservan. ` : ""}Esta acción no se puede revertir y queda en la auditoría.`}
+            {`${vista.conciliados ? `${vista.conciliados} conciliados se conservan. ` : ""}Dejan de contar en saldos y conciliación. Puedes restaurarlos desde esta misma pantalla, y queda en la auditoría.`}
           </Alerta>
         ) : null}
       </div>

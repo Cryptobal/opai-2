@@ -22,3 +22,18 @@ export type VistaDeshacer = {
   conciliados: number;
   deshecha: boolean;
 };
+
+/** Un «Borrar por fechas» que se puede restaurar (CAR-412). */
+export type DescarteMovimientos = {
+  id: string;
+  desde: string;
+  hasta: string;
+  origen: string;
+  motivo: string;
+  movimientos: number;
+  descartadoEn: string;
+  restauradoEn: string | null;
+};
+
+/** Vista previa de «Restaurar». */
+export type VistaRestaurar = { descarteId: string; restaurados: number; yaPresentes: number; restaurado: boolean };
