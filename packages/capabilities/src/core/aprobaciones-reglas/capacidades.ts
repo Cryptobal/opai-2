@@ -65,7 +65,8 @@ export const reglasAprobacionList = defineCapability({
   async handler(ctx, input) {
     const filas = await ctx.db.reglaAprobacion.findMany({
       where: input.incluirInactivas ? {} : { activa: true },
-      orderBy: [{ accion: "asc" }, { montoMinimo: "asc" }, { id: "asc" }],
+      // `montoMinimo` admite nulo: con nulls last el orden es total y el cursor no salta filas.
+      orderBy: [{ accion: "asc" }, { montoMinimo: { sort: "asc", nulls: "last" } }, { id: "asc" }],
       take: input.limite + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     });

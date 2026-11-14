@@ -24,3 +24,6 @@ La hoja «Editar negocio» suma el campo **Responsable** (personas del ERP de `c
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
 - Con el diseño nuevo de listas de `main` fallan tres pruebas de Comercial que no tocaron estos PR: `crm-vinculos` (cuentas vinculadas), `cuenta-sii` (resumen «Lista para facturar», que queda oculto) y `actividad-tareas-car162` (la tarea no aparece en «Mis tareas»). Hay que revisarlas en un PR propio.
+- Avance (13-nov, noche): #682 arregla `cuenta-sii` (pasa a 375, 1024 y 1280 px) y `crm-vinculos` (pasa a 375 y 1280; en iPad falló en un shard cortado por tiempo, sin informe). `actividad-tareas-car162` no era un problema de localizadores: dejó de pasar entre el e2e nocturno del 12-nov (verde) y el 13-nov; la tarea sale en la actividad del negocio pero «Mi equipo» queda vacío. La capacidad `core.actividades.tareas` con `equipo` devuelve la tarea en una prueba contra Postgres, así que la causa está en la pantalla o en el contexto de la sesión. Investigación en curso con diagnóstico en el spec.
+- `negocios-car33 › nuevo negocio` fallaba el primer intento porque la hoja diferida se compila al abrirse: #691 la calienta en `e2e/calentar.ts`.
+- #688 corrige `finanzas-flujo-resumen-db.test.ts` (esperaba `ajustes`, que CAR-391 retiró), que tenía rojo `test:db` en `main` para todos.

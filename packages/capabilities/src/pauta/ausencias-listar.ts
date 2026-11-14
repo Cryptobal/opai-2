@@ -52,12 +52,31 @@ export const ausenciasListar = defineCapability({
 /** Registros de ausencia de la persona (CAR-393); la comparten la ficha de la pauta y la del Núcleo. */
 export async function listarAusencias(
   ctx: Contexto,
-  { personaId, limite }: z.output<typeof entradaListaAusencias>,
-): Promise<z.infer<typeof salidaListaAusencias>> {
+  { personaId, limite, cursor }: z.output<typeof entradaListaAusencias> & { cursor?: string | undefined },
+): Promise<z.infer<typeof salidaListaAusencias> & { siguiente: string | null }> {
   await personaParaAusencia(ctx, personaId);
+  // Cursor opaco = id del último registro de la página anterior (CAR-353); mismo orden estable que la lista.
+  const desdeCursor = cursor
+    ? await ctx.db.ausencia.findFirst({
+        where: { id: cursor, personaId },
+        select: { id: true, createdAt: true },
+      })
+    : null;
+  if (cursor && !desdeCursor) return { personaId, grupos: [], siguiente: null };
   const registros = await ctx.db.ausencia.findMany({
-    where: { personaId, estado: { in: ["aprobada", "anulada"] } },
-    orderBy: [{ createdAt: "desc" }, { desde: "desc" }],
+    where: {
+      personaId,
+      estado: { in: ["aprobada", "anulada"] },
+      ...(desdeCursor
+        ? {
+            OR: [
+              { createdAt: { lt: desdeCursor.createdAt } },
+              { createdAt: desdeCursor.createdAt, id: { lt: desdeCursor.id } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 500,
   });
   const turnos = await ctx.db.excepcionPauta.findMany({
@@ -70,8 +89,12 @@ export async function listarAusencias(
   });
   const instalacionDe = new Map(puestos.map((p) => [p.id, p.instalacion.nombre]));
   const grupos: z.infer<typeof grupoSchema>[] = [];
+  let siguiente: string | null = null;
   for (const r of registros) {
-    if (grupos.length >= limite) break;
+    if (grupos.length >= limite) {
+      siguiente = grupos[grupos.length - 1]!.ausenciaId;
+      break;
+    }
     // Un registro vigente cuenta sus turnos activos; uno anulado, los que tuvo.
     const suyos = turnos.filter(
       (t) => t.ausenciaId === r.id && (r.estado === "anulada" || t.estado === "activa"),
@@ -94,5 +117,5 @@ export async function listarAusencias(
       instalaciones: [...new Set(visibles)],
     });
   }
-  return { personaId, grupos };
+  return { personaId, grupos, siguiente };
 }
