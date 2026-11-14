@@ -29,7 +29,8 @@ export function DescargarLre({ periodoId }: { periodoId: string }) {
     const r = await ejecutar<Archivo>("nomina.lre.generar", { periodoId });
     if (!r) return;
     setArchivo(r);
-    if (r.filas > 0) {
+    // Sin los datos del empleador el archivo no sirve: se muestran las observaciones y no se descarga.
+    if (r.filas > 0 && !r.errores.some((e) => e.personaId === null)) {
       descargar(r.nombre, r.contenido);
       avisar.exito(`LRE descargado: ${r.filas} personas`);
     }

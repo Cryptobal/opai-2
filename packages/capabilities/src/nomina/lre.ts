@@ -32,7 +32,8 @@ export const lreGenerar = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (s) => s.personaIds,
+  // Se auditan todas las personas reveladas: las del archivo y las que salen en las observaciones.
+  auditarLectura: (s) => [...new Set([...s.personaIds, ...s.errores.flatMap((e) => (e.personaId ? [e.personaId] : []))])],
   async handler(ctx, { periodoId }) {
     exigirVistaCompleta(ctx);
     const periodo = await periodoDe(ctx, periodoId);
@@ -48,24 +49,24 @@ export const lreGenerar = defineCapability({
         ? ctx.db.vinculoLaboral.findMany({
             where: {
               personaId: { in: ids },
-              tipo: { not: "honorarios" },
               inicio: { lte: periodo.fin },
               OR: [{ termino: null }, { termino: { gte: periodo.inicio } }],
             },
             orderBy: [{ inicio: "desc" }, { id: "asc" }],
-            select: { personaId: true, inicio: true, termino: true },
+            select: { personaId: true, tipo: true, inicio: true, termino: true },
           })
         : [],
-      ajuste<string>(ctx, "nomina", "empleador_rut").catch(() => ""),
+      ajuste<string>(ctx, "nomina", "empleador_rut"),
     ]);
     const rut = new Map(personas.map((p) => [p.id, p.rut]));
-    const vinculo = new Map<string, { inicio: Date; termino: Date | null }>();
+    const vinculo = new Map<string, { tipo: string; inicio: Date; termino: Date | null }>();
     for (const v of vinculos) if (!vinculo.has(v.personaId)) vinculo.set(v.personaId, v);
+    const honorarios: string[] = [];
     const sinVinculo: string[] = [];
     const filas: DatosLre[] = liqs.flatMap((l) => {
       const v = vinculo.get(l.personaId);
-      if (!v) {
-        sinVinculo.push(l.personaId);
+      if (!v || v.tipo === "honorarios") {
+        (v ? honorarios : sinVinculo).push(l.personaId);
         return [];
       }
       const d = (l.detalle ?? {}) as Record<string, unknown>;
@@ -88,6 +89,7 @@ export const lreGenerar = defineCapability({
     const errores = [
       ...(liqs.length === 0 ? [{ personaId: null, mensaje: "El período no tiene liquidaciones calculadas." }] : []),
       ...sinVinculo.map((personaId) => ({ personaId, mensaje: "Sin contrato vigente en el mes: no va en el archivo." })),
+      ...honorarios.map((personaId) => ({ personaId, mensaje: "Contrato a honorarios: no va en el LRE." })),
       ...a.errores,
     ];
     return { ...a, errores, personaIds: filas.map((f) => f.personaId), formatoVerificado: false as const };

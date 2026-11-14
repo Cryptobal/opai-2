@@ -77,6 +77,18 @@ describe("nomina.lre.generar", () => {
     expect(JSON.stringify(audit[0])).not.toContain("12345678-5");
   });
 
+  it("un contrato a honorarios queda fuera con su motivo y la persona queda auditada", async () => {
+    const c = como();
+    (c.tabla("vinculoLaboral") as { personaId: string; tipo: string }[]).forEach((v) => { if (v.personaId === P2) v.tipo = "honorarios"; });
+    const r = await generar(c);
+    if (!r.ok) throw new Error(r.error.message);
+    const s = r.data as Salida;
+    expect(s.filas).toBe(1);
+    expect(s.errores).toEqual([{ personaId: P2, mensaje: "Contrato a honorarios: no va en el LRE." }]);
+    const audit = (c.tabla("auditEvent") as { capability: string }[]).filter((e) => e.capability === "nomina.lre.generar");
+    expect(JSON.stringify(audit[0])).toContain(P2);
+  });
+
   it("sin RUT del empleador lo informa como error", async () => {
     const r = await generar(como("owner", null));
     if (!r.ok) throw new Error(r.error.message);

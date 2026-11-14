@@ -33,7 +33,7 @@ const CODIGO: Record<string, number> = {
   "Sueldo base": 2101, "Horas extra": 2102, "Gratificación": 2106, "Bonos imponibles": 2111,
   "Colación": 2301, "Movilización": 2302,
   AFP: 3141, Salud: 3143, "Seguro de cesantía": 3151, "Impuesto único": 3161,
-  Anticipos: 3188, "Cuotas de préstamo": 3188, Descuentos: 3183,
+  Anticipos: 3188, "Cuotas de préstamo": 3188, Descuentos: 3185,
   "Seguro de cesantía empleador": 4151, "Ley 16.744 y SANNA": 4152, SIS: 4155,
 };
 const NO_IMPONIBLES = new Set(["Colación", "Movilización", "Bonos no imponibles"]);
