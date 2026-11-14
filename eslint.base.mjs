@@ -13,6 +13,8 @@ export const ignores = [
   "**/dist/**",
   "**/coverage/**",
   "**/src/generated/**",
+  // Generado por `gen:novedades-embed`: una línea por entrada, crece con cada novedad.
+  "**/novedades/entradas/embed.ts",
   "**/next-env.d.ts",
 ];
 
