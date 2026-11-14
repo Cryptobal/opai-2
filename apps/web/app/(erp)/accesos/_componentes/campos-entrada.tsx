@@ -30,7 +30,12 @@ export function CamposEntrada({
       </Campo>
       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3">
         <Campo etiqueta="Documento" htmlFor="ae-doc">
-          <Select valor={b.docTipo} opciones={DOCS} onCambiar={(v) => set({ ...b, docTipo: v })} />
+          <Select
+            id="ae-doc"
+            valor={b.docTipo}
+            opciones={DOCS}
+            onCambiar={(v) => set({ ...b, docTipo: v })}
+          />
         </Campo>
         <Campo
           etiqueta="Número"
@@ -67,7 +72,7 @@ export function CamposEntrada({
         ))}
       </fieldset>
       <Campo etiqueta="Vigente hasta (opcional)" htmlFor="ae-hasta">
-        <InputFecha valor={b.hasta} onCambiar={(v) => set({ ...b, hasta: v })} />
+        <InputFecha id="ae-hasta" valor={b.hasta} onCambiar={(v) => set({ ...b, hasta: v })} />
       </Campo>
       {bloqueada ? null : (
         <>
@@ -84,7 +89,12 @@ export function CamposEntrada({
           </fieldset>
           <div className="grid grid-cols-2 gap-3">
             <Campo etiqueta="Desde (hora)" htmlFor="ae-desde">
-              <InputFecha tipo="time" valor={b.desde} onCambiar={(v) => set({ ...b, desde: v })} />
+              <InputFecha
+                id="ae-desde"
+                tipo="time"
+                valor={b.desde}
+                onCambiar={(v) => set({ ...b, desde: v })}
+              />
             </Campo>
             <Campo etiqueta="Hasta (hora)" htmlFor="ae-hasta-hora">
               <InputFecha

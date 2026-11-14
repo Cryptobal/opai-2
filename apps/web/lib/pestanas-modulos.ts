@@ -43,6 +43,12 @@ export async function verPestanaAccesos(): Promise<boolean> {
   return puedeDeIdentidad(identidad)("acceso:read");
 }
 
+/** ¿Puede ver y gestionar las listas de acceso? Oculta «Listas» a quien no puede (ADR-041.5). */
+export async function puedeGestionarListas(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("acceso:listas.manage") : false;
+}
+
 /** ¿Puede configurar puntos, plantillas y programación de rondas? Oculta acciones a quien solo lee. */
 export async function puedeConfigurarRondas(): Promise<boolean> {
   const identidad = await identidadActual();

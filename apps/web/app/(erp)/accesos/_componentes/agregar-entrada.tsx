@@ -34,6 +34,18 @@ export function entradaDe(instalacionId: string, tipo: "autorizada" | "bloqueada
   };
 }
 
+/** Qué falta para poder guardar (o null): se dice en la hoja en vez de descartar datos en silencio. */
+function avisoBorrador(b: Borrador, bloqueada: boolean): string | null {
+  if (!b.numero.trim()) return "Escribe el número del documento.";
+  if (b.docTipo !== "run" && b.pais.trim().length < 2) return "Indica el país del documento.";
+  if (bloqueada && b.motivo.trim().length < 3) return "El bloqueo necesita un motivo.";
+  if (!bloqueada && Boolean(b.desde) !== Boolean(b.hastaHora))
+    return "El horario necesita desde y hasta.";
+  if (!bloqueada && b.desde && b.desde >= b.hastaHora)
+    return "El horario debe terminar después de empezar (un horario que cruza la medianoche aún no se admite).";
+  return null;
+}
+
 /** «Agregar» de la lista (diseño `Listas`): hoja a la derecha, abajo en teléfono. */
 export function AgregarEntrada({
   instalacionId,
@@ -46,7 +58,8 @@ export function AgregarEntrada({
   const [abierto, setAbierto] = useState(false);
   const [b, setB] = useState<Borrador>(BORRADOR_VACIO);
   const bloqueada = tipo === "bloqueada";
-  const valido = b.numero.trim().length > 0 && (!bloqueada || b.motivo.trim().length >= 3);
+  const aviso = avisoBorrador(b, bloqueada);
+  const valido = aviso === null;
 
   async function guardar() {
     const r = await ejecutar("acceso.listas.agregar", entradaDe(instalacionId, tipo, b));
@@ -79,6 +92,7 @@ export function AgregarEntrada({
         }
       >
         {error ? <p className="t-caption mb-3 text-danger-fg">{error}</p> : null}
+        {aviso && b.numero.trim() ? <p className="t-caption mb-3 text-fg-muted">{aviso}</p> : null}
         <CamposEntrada b={b} set={setB} bloqueada={bloqueada} />
       </Sheet>
     </>

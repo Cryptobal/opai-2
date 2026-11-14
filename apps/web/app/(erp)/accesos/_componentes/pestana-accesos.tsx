@@ -3,6 +3,7 @@ import { Badge, ListScreen, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { estadoPantalla } from "@/lib/formato";
+import { puedeGestionarListas } from "@/lib/pestanas-modulos";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type { EntradaLista } from "./panel-listas";
@@ -15,8 +16,8 @@ type Sub = "registros" | "en_sitio" | "intentos" | "listas";
 const SUBS: readonly { id: Sub; etiqueta: string }[] = [
   { id: "registros", etiqueta: "Registros" },
   { id: "en_sitio", etiqueta: "En sitio" },
-  { id: "intentos", etiqueta: "Intentos denegados" },
   { id: "listas", etiqueta: "Listas" },
+  { id: "intentos", etiqueta: "Intentos denegados" },
 ];
 
 /**
@@ -34,6 +35,7 @@ export async function PestanaAccesos({
   sub: string | undefined;
   lista: string | undefined;
 }) {
+  const verListas = await puedeGestionarListas();
   const sub: Sub = SUBS.some((s) => s.id === subUrl) ? (subUrl as Sub) : "registros";
   const segmento = (
     <Segmentado
@@ -41,7 +43,10 @@ export async function PestanaAccesos({
       variante="plano"
       activa={sub}
       Link={LinkNext}
-      opciones={SUBS.map((s) => ({ ...s, href: `${base}?sub=${s.id}` }))}
+      opciones={SUBS.filter((s) => s.id !== "listas" || verListas).map((s) => ({
+        ...s,
+        href: `${base}?sub=${s.id}`,
+      }))}
     />
   );
   if (sub === "listas") {
