@@ -13,6 +13,7 @@ const grupoSchema = z.object({
   ausenciaId: z.string(),
   tipo: tipoExcepcionSchema,
   motivo: z.string(),
+  clase: z.string().nullable(),
   desde: z.string(),
   hasta: z.string(),
   dias: z.number().int().describe("Turnos marcados en la pauta."),
@@ -52,7 +53,11 @@ export const ausenciasListar = defineCapability({
 /** Registros de ausencia de la persona (CAR-393); la comparten la ficha de la pauta y la del Núcleo. */
 export async function listarAusencias(
   ctx: Contexto,
-  { personaId, limite, cursor }: z.output<typeof entradaListaAusencias> & { cursor?: string | undefined },
+  {
+    personaId,
+    limite,
+    cursor,
+  }: z.output<typeof entradaListaAusencias> & { cursor?: string | undefined },
 ): Promise<z.infer<typeof salidaListaAusencias> & { siguiente: string | null }> {
   await personaParaAusencia(ctx, personaId);
   // Cursor opaco = id del último registro de la página anterior (CAR-353); mismo orden estable que la lista.
@@ -109,6 +114,7 @@ export async function listarAusencias(
       ausenciaId: r.id,
       tipo: tipoExcepcionSchema.parse(r.tipo),
       motivo: r.motivo,
+      clase: r.clase,
       desde: fechas?.[0] ?? fechaIso(r.desde),
       hasta: fechas?.[fechas.length - 1] ?? fechaIso(r.hasta),
       dias: visibles.length,

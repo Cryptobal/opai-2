@@ -73,6 +73,7 @@ export const CLASES_NUCLEO: Readonly<Record<string, ClaseBase>> = {
   [P.etiquetasRead]: "GL",
   [P.etiquetasManage]: "G",
   [P.etiquetasConfig]: "-",
+  [P.camposConfig]: "-",
   [P.correosSinAsignar]: "-",
   [P.indicadoresGestionRead]: "G",
   [P.importarManage]: "G",
