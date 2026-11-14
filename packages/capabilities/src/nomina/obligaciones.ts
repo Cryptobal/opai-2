@@ -132,6 +132,8 @@ export const obligacionesActualizar = defineCapability({
     const limite = c.fechaLimite === undefined ? dia(o.fechaLimite) : c.fechaLimite;
     if ((c.plazoVerificado ?? o.plazoVerificado) && !limite)
       throw reglaDeNegocio("Para verificar el plazo hay que indicar la fecha límite.");
+    if (o.estado === "pagado" && c.comprobanteDocumentoId !== undefined && c.comprobanteDocumentoId !== o.comprobanteDocumentoId)
+      throw reglaDeNegocio("El comprobante de una obligación pagada queda fijo: no se reemplaza ni se quita.");
     if (c.comprobanteDocumentoId) await documentoExiste(ctx, c.comprobanteDocumentoId);
     const data = {
       ...(c.estado ? { estado: c.estado } : {}),

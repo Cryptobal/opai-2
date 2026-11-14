@@ -14,12 +14,15 @@ export function DetallePeriodo({
   gestiona,
   puedePagar,
   puedeVerNovedades,
+  puedeArchivos = false,
 }: {
   periodo: Periodo | null;
   state: EstadoPantalla;
   gestiona: boolean;
   puedePagar: boolean;
   puedeVerNovedades: boolean;
+  /** Generar LRE y Previred (diseño 06): obligaciones más sueldos sensibles; la capacidad lo vuelve a exigir. */
+  puedeArchivos?: boolean;
 }) {
   const est = periodo ? ESTADO_PERIODO[periodo.estado] : null;
   return (
@@ -49,15 +52,30 @@ export function DetallePeriodo({
             <p className="t-caption">Última devolución: {periodo.motivoReapertura}</p>
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
-            {puedeVerNovedades ? (
-              <EnlaceBoton href={`/remuneraciones/novedades?periodo=${periodo.id}`} variante="ghost">
-                Ver novedades
-              </EnlaceBoton>
-            ) : null}
+            {puedeVerNovedades ? <EnlacesPeriodo id={periodo.id} archivos={puedeArchivos} /> : null}
             {gestiona ? <AccionesPeriodo periodo={periodo} puedePagar={puedePagar} /> : null}
           </div>
         </div>
       ) : null}
     </DetailScreen>
+  );
+}
+
+/** Enlaces a las pantallas del período: novedades, liquidaciones y archivos legales. */
+function EnlacesPeriodo({ id, archivos }: { id: string; archivos: boolean }) {
+  return (
+    <>
+      <EnlaceBoton href={`/remuneraciones/novedades?periodo=${id}`} variante="ghost">
+        Ver novedades
+      </EnlaceBoton>
+      <EnlaceBoton href={`/remuneraciones/${id}/liquidaciones`} variante="ghost">
+        Ver liquidaciones
+      </EnlaceBoton>
+      {archivos ? (
+        <EnlaceBoton href={`/remuneraciones/${id}/archivos`} variante="ghost">
+          Archivos y declaraciones
+        </EnlaceBoton>
+      ) : null}
+    </>
   );
 }

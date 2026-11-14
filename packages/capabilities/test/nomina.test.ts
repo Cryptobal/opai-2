@@ -17,6 +17,8 @@ import { semillaTenant } from "./semilla";
 
 const P1 = "0192f3a0-0000-7000-8000-00000000d201";
 const P2 = "0192f3a0-0000-7000-8000-00000000d202";
+const DOC1 = "0192f3a0-0000-7000-8000-00000000d301";
+const DOC2 = "0192f3a0-0000-7000-8000-00000000d302";
 
 const semilla = () => ({
   ...semillaTenant(),
@@ -24,6 +26,7 @@ const semilla = () => ({
     { id: P1, tenantId: TENANT_DE_PRUEBA, nombres: "Camila", apellidos: "Herrera", rut: "11.111.111-1", estado: "activa" },
     { id: P2, tenantId: TENANT_DE_PRUEBA, nombres: "Luis", apellidos: "Pérez", rut: "22.222.222-2", estado: "activa" },
   ],
+  documento: [DOC1, DOC2].map((id) => ({ id, tenantId: TENANT_DE_PRUEBA })),
 });
 const como = (rol: "owner" | "admin" | "gerente" | "supervisor" | "viewer" = "owner") =>
   contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla() });
@@ -293,6 +296,18 @@ describe("conceptos y calendario", () => {
     const suelto = data<{ plazo: string | null }>(await run(c, "nomina.obligaciones.actualizar", { id: o.id, fechaLimite: "2026-12-13" }));
     expect(suelto.plazo).toBeNull();
     expect(data<{ plazo: string | null }>(await run(c, "nomina.obligaciones.actualizar", { id: o.id, plazoVerificado: true })).plazo).toBe("2026-12-13");
+  });
+
+  it("el comprobante de una obligación pagada no se reemplaza ni se quita", async () => {
+    const c = como();
+    await run(c, "nomina.obligaciones.generar_calendario", { anio: 2026 });
+    const [o] = data<{ id: string }[]>(await run(c, "nomina.obligaciones.listar", { anio: 2026 }));
+    if (!o) throw new Error("sin obligaciones");
+    const pagada = { id: o.id, estado: "pagado", comprobanteDocumentoId: DOC1 };
+    expect(data<{ comprobanteDocumentoId: string }>(await run(c, "nomina.obligaciones.actualizar", pagada)).comprobanteDocumentoId).toBe(DOC1);
+    for (const comprobanteDocumentoId of [DOC2, null])
+      expect(await run(c, "nomina.obligaciones.actualizar", { id: o.id, comprobanteDocumentoId })).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect((await run(c, "nomina.obligaciones.actualizar", { id: o.id, comprobanteDocumentoId: DOC1, nota: "Pagada el lunes" })).ok).toBe(true);
   });
 });
 
