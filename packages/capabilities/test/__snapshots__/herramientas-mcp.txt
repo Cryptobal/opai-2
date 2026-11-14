@@ -519,6 +519,7 @@ finanzas_reglas_banco_aplicar
 finanzas_reglas_banco_guardar
 finanzas_reglas_banco_listar
 finanzas_reglas_banco_probar
+finanzas_rentabilidad_get
 finanzas_reportes_resultados
 finanzas_ventas_actualizar_borrador
 finanzas_ventas_buscar
