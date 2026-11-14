@@ -30,3 +30,15 @@ export function mesSugerido(periodos: readonly Periodo[]): { anio: number; mes: 
   const hoy = new Date();
   return { anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 };
 }
+
+type ObligacionMes = { id: string; tipo: string; mes: number | null; estado: string; comprobanteDocumentoId: string | null };
+
+/** LRE y Previred del mes en el calendario de obligaciones, y la empresa a la que va el comprobante. */
+export async function obligacionesArchivos(anio: number, mes: number) {
+  const [r, identidad] = await Promise.all([
+    ejecutarComoUsuario<ObligacionMes[]>("erp", "nomina.obligaciones.listar", { anio }),
+    identidadActual(),
+  ]);
+  const del = (tipo: string) => (r.ok ? (r.data.find((o) => o.tipo === tipo && o.mes === mes) ?? null) : null);
+  return { ok: r.ok, lre: del("lre"), previred: del("previred"), tenantId: identidad?.actual?.tenantId ?? "" };
+}
