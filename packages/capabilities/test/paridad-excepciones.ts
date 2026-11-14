@@ -202,6 +202,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02).",
   "core.hechos_terreno.recibir":
     "Interna: el equipo de terreno emparejado la ejecuta sin sesión (su cookie de dispositivo es la credencial) al enviar su cola; un agente no registra hechos de terreno por el equipo. Su lectura es core.hechos_terreno.listar (CAR-78 B3).",
+  "core.libro_novedades_equipo.listar":
+    "Interna: la lee el equipo de terreno emparejado sin sesión (su cookie de dispositivo es la credencial) para la pantalla «Libro»; un agente lee el mismo libro con core.libro_novedades.listar, con permiso y alcance (CAR-77).",
   "core.personas_terreno.listar":
     "Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3).",
   "core.biometria.enrolar":

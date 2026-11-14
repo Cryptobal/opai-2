@@ -4,6 +4,7 @@ import type { Equipo, Hecho, Tiempo } from "./acceso-tipos";
 import type { MotivoRechazo } from "./hechos-evaluar";
 import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
+import { novedadesDelLibro } from "./libro-novedades-cola";
 import { resolverNovedades } from "./rondas-novedades";
 
 export type Proyecciones = {
@@ -21,7 +22,7 @@ export type Proyecciones = {
 };
 
 /**
- * Proyecciones de los hechos de terreno hacia los módulos (Rondas, Control de acceso). Cada hecho se guarda una
+ * Proyecciones de los hechos de terreno hacia los módulos (Rondas, Control de acceso) y el libro de novedades. Cada hecho se guarda una
  * sola vez en `core.hechos_terreno`; aquí se decide qué rechazar y qué fila inmutable nace junto con él.
  */
 export async function prepararProyecciones(
@@ -34,6 +35,7 @@ export async function prepararProyecciones(
   const acceso = await resolverAcceso(ctx, equipo, hechos, t);
   const rondas = await resolverEjecuciones(ctx, equipo, hechos, t);
   const novedades = await resolverNovedades(ctx, equipo, hechos, t);
+  const libro = novedadesDelLibro(ctx, equipo, hechos, t);
   const rechazos = new Map<string, MotivoRechazo>([
     ...acceso.rechazos,
     ...rondas.rechazos,
@@ -69,6 +71,7 @@ export async function prepararProyecciones(
       if (filas.length > 0) await tx.marcaRonda.createMany({ skipDuplicates: true, data: filas });
       await rondas.cerrar(tx, aceptadas, ids);
       await novedades.escribir(tx, aceptadas, ids);
+      await libro(tx, aceptadas);
       await acceso.escribir(tx, aceptadas);
     },
   };
