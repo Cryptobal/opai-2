@@ -45,6 +45,10 @@ export const AJUSTES: Record<string, Ajuste> = {
       motivo: "Prueba",
     }),
   },
+  // Libro de novedades (CAR-77): CHECK de la acción del historial de estados.
+  "core.libro_novedades_hechos": {
+    valores: () => ({ accion: "tomar", estado_anterior: "abierta", estado_nuevo: "en_atencion" }),
+  },
   "core.procesos_persona_pasos": {
     valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }),
   },
