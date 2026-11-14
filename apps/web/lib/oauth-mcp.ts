@@ -39,6 +39,7 @@ export async function contextoDeTokenOAuth(
     rol: actual.rol,
     permisosRol: identidad.acceso.permisosRol,
     excepciones: identidad.acceso.excepciones,
+    permisosAdicionales: identidad.acceso.permisosAdicionales ?? null,
     alcance: alcanceDe(identidad.acceso.instalaciones),
     portal,
     portalesMembresia: actual.portales,

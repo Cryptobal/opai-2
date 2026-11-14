@@ -70,6 +70,8 @@ export const celdaSchema = z.object({
       origen: z.enum(["manual", "promedio", "vencimiento", "emision"]),
     })
     .optional(),
+  /** Solo en «IVA a pagar»: mes del IVA y si su pago está postergado a M+2 (CAR-397). */
+  iva: z.object({ periodo: z.string(), postergado: z.boolean(), fechaPago: z.string() }).optional(),
 });
 
 export const ajustesSchema = z.object({
