@@ -6,6 +6,7 @@ import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { celdasCobrosEsperados } from "./cobros-esperados";
 import { celdasRecurrentes } from "./recurrentes-planilla";
+import { celdasRemuneraciones } from "./remuneraciones-planilla";
 import { celdasRendiciones } from "./rendiciones-planilla";
 import { celdasAbonosSemana } from "./abonos-semana";
 import { llevarSaldo } from "./saldo-llevado";
@@ -74,8 +75,9 @@ export async function serieSaldos(
   const abonos = await celdasAbonosSemana(ctx, hoy, movidos, tx);
   const recurrentes = await celdasRecurrentes(ctx, hoy, listaCalc, tx);
   const rendiciones = await celdasRendiciones(ctx, hoy, listaCalc, tx);
-  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio, ...recurrentes.dominio, ...rendiciones.dominio];
-  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...recurrentes.vista, ...rendiciones.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
+  const remuneraciones = await celdasRemuneraciones(ctx, listaCalc);
+  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio, ...recurrentes.dominio, ...rendiciones.dominio, ...remuneraciones.dominio];
+  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...recurrentes.vista, ...rendiciones.vista, ...remuneraciones.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,
