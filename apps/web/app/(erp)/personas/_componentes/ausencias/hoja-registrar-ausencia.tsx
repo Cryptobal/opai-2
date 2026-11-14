@@ -4,11 +4,11 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
 
+import { CampoClase } from "@/app/_components/campo-clase-ausencia";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { AvisoPlan, type PlanAusencia as Plan } from "./aviso-plan";
-import { CampoClase } from "./campo-clase";
 import { type ClaseAusencia, TIPOS_AUSENCIA } from "./tipos";
 
 /**

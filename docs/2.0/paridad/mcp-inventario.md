@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 785 pares pantalla→capacidad · 706 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 786 pares pantalla→capacidad · 707 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -506,6 +506,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.registrar_paso` | `comercial_seguimientos_registrar_paso` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.registrar_respuesta` | `comercial_seguimientos_registrar_respuesta` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `core.ausencias.clases` | `core_ausencias_clases` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.alertas.listar` | `pauta_alertas_listar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.cobertura.confirmar` | `pauta_cobertura_confirmar` | existe |
@@ -1120,6 +1121,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.campos_personalizados.list`
 - `core.campos_personalizados.update`
 - `core.consumos.por_recurso`
+- `core.contactos.fusionar`
 - `core.cuentas.fusionar`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
