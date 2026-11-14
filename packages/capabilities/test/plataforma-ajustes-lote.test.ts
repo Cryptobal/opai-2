@@ -25,7 +25,7 @@ const contexto = () => {
   });
 };
 
-const precio = { tipo: "precio", recurso: "ia.economica", unidad: "token", costoUnitarioMicro: 3 };
+const precio = { tipo: "precio", recurso: "ia.economica.entrada", unidad: "token", costoUnitarioMicro: 3 };
 const imm = { tipo: "ajuste", modulo: "core", clave: "remuneraciones_imm", valor: 560_000 };
 const ID = "platform.ajustes.guardar_lote";
 
@@ -39,7 +39,7 @@ describe("platform.ajustes.guardar_lote (CAR-329)", () => {
     const ev = tabla("auditoriaGlobal").filter((e) => e["capability"] === ID);
     expect(ev).toHaveLength(1);
     expect(ev[0]?.["despues"]).toEqual([
-      { clave: "ia.economica", valor: expect.objectContaining({ costoUnitarioMicro: 3 }) },
+      { clave: "ia.economica.entrada", valor: expect.objectContaining({ costoUnitarioMicro: 3 }) },
       { clave: "core.remuneraciones_imm", valor: { valor: 560_000, version: 1 } },
     ]);
   });
