@@ -45,3 +45,18 @@ SELECT '00000000-0000-7000-8000-000000320002'::uuid, t.id, '00000000-0000-7000-8
        DATE '2026-09-01', DATE '2026-10-01', 20000, 3800, 23800, 'aceptado', 'Servicio ficticio vencido para pruebas visuales', now()
 FROM core.tenants t WHERE t.slug = 'qa-e2e'
 ON CONFLICT (id) DO NOTHING;
+
+-- CAR-266: una factura ficticia anulada por nota de crédito, para comprobar que su PDF se puede descargar igual
+-- (e2e `@preview`). Folio fuera de rango CAF; idempotente; solo `qa-e2e`.
+INSERT INTO finanzas.documentos_emitidos
+  (id, tenant_id, cuenta_id, tipo_dte, folio, fecha_emision, monto_neto, monto_iva, monto_total, estado_dte, glosa, updated_at)
+SELECT '00000000-0000-7000-8000-000000266001'::uuid, t.id, '00000000-0000-7000-8000-000000267001'::uuid, 33, 990003,
+       DATE '2026-11-03', 10000, 1900, 11900, 'anulado_nc', 'Servicio ficticio anulado para pruebas visuales', now()
+FROM core.tenants t WHERE t.slug = 'qa-e2e'
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO finanzas.documentos_emitidos_lineas (id, tenant_id, documento_id, orden, glosa, monto)
+SELECT '00000000-0000-7000-8000-000000266002'::uuid, t.id, '00000000-0000-7000-8000-000000266001'::uuid, 0,
+       'Servicio ficticio anulado para pruebas visuales', 10000
+FROM core.tenants t WHERE t.slug = 'qa-e2e'
+ON CONFLICT (id) DO NOTHING;
