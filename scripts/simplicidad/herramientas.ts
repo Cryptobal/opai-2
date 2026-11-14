@@ -8,6 +8,9 @@ const MIN_TOKENS = "50";
 const IGNORAR_DUPLICADOS = [
   "**/node_modules/**",
   "**/.next/**",
+  "**/dist/**",
+  "**/.turbo/**",
+  "**/coverage/**",
   "**/src/generated/**",
   "**/*.test.ts",
   "**/*.test.tsx",

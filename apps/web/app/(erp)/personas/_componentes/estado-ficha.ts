@@ -78,16 +78,16 @@ export function estadoUniforme(u: DatosUniforme): EstadoTarjeta {
   return { tono: "warning", etiqueta: faltan === 1 ? "Falta 1 talla" : `Faltan ${faltan} tallas` };
 }
 
-/** Jornada DT: vigencia del plazo fijo si lo hay; si no, completo con horas semanales y distribución. */
+/**
+ * Jornada DT: vigencia del plazo fijo vigente si lo hay (calculado desde la historia del contrato,
+ * CAR-409); si no, completo con horas semanales y distribución.
+ */
 export function estadoJornada(
   hoy: string,
-  j: {
-    horasSemanales: string | null;
-    distribucion: string | null;
-    terminoPlazoFijo: string | null;
-  } | null,
+  j: { horasSemanales: string | null; distribucion: string | null } | null,
+  terminoPlazoFijo: string | null = null,
 ): EstadoTarjeta {
-  const plazo = estadoVencimiento(hoy, j?.terminoPlazoFijo, "Al día");
+  const plazo = estadoVencimiento(hoy, terminoPlazoFijo, "Al día");
   if (plazo) return plazo;
   return j?.horasSemanales && j.distribucion ? COMPLETO : INCOMPLETO;
 }

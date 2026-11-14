@@ -1,7 +1,7 @@
 import { crearContexto, executeCapability } from "@opai/capabilities";
 import { resolverBuzonCorreo, resolverTokenSeguimiento } from "@opai/db";
 
-import { type EventoEntrante, destinatariosVisibles, destinoDe, leerEventoEntrante, leerTextoCorreo } from "@/lib/correo-entrante";
+import { type CorreoRecibido, type EventoEntrante, destinatariosVisibles, destinoDe, leerCorreoRecibido, leerEventoEntrante, leerTextoCorreo } from "@/lib/correo-entrante";
 import { verificarFirmaSvix } from "@/lib/firma-svix";
 import { medidorDiferido } from "@/lib/medidor";
 import { soloLecturaDe } from "@/lib/solo-lectura";
@@ -40,9 +40,13 @@ async function alBuzon(ev: EventoEntrante, token: string): Promise<Response> {
   const dueno = await resolverBuzonCorreo(token);
   if (!dueno) return descartar();
   const ctx = crearContexto({ tenantId: dueno.tenantId, actor: { tipo: "system" }, medidor: medidorDiferido });
+  const apiKey = process.env["RESEND_API_KEY"];
+  const correo: CorreoRecibido = apiKey ? await leerCorreoRecibido(ev.emailId, apiKey) : { texto: null, para: [], copia: [] };
+  // En un CCO el webhook solo trae la dirección de OPAI: los destinatarios reales salen del correo recibido.
+  const destinatarios = destinatariosVisibles({ para: [...ev.para, ...correo.para], copia: [...ev.copia, ...correo.copia] });
   return responder(await executeCapability(ctx, "core.correos.recibir", {
-    mensajeId: ev.emailId, remitente: ev.desde.slice(0, 320), destinatarios: destinatariosVisibles(ev),
-    asunto: ev.asunto?.slice(0, 500) ?? null, texto: await texto(ev.emailId), recibidoEn: ev.recibidoEn,
+    mensajeId: ev.emailId, remitente: ev.desde.slice(0, 320), destinatarios,
+    asunto: ev.asunto?.slice(0, 500) ?? null, texto: correo.texto ?? SIN_TEXTO, recibidoEn: ev.recibidoEn,
   }));
 }
 

@@ -64,6 +64,28 @@ function explicar(metrica: Metrica, hallazgos: string[]): void {
   for (const h of lista.slice(0, 40)) console.error(`    - ${h}`);
 }
 
+/** Subir la base está permitido solo con justificación en el PR: se deja a la vista en el log. */
+function avisarSiSubioLaBase(base: Cifras): void {
+  try {
+    const previa = JSON.parse(
+      execFileSync("git", ["show", `${RAMA_BASE}:${BASE}`], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }),
+    ) as Partial<Cifras>;
+    for (const m of Object.keys(ETIQUETAS) as Metrica[]) {
+      const antes = previa[m];
+      if (typeof antes === "number" && base[m] > antes) {
+        console.warn(
+          `⚠ Este cambio SUBE la base de «${ETIQUETAS[m]}» (${antes} → ${base[m]}): justifícalo en el PR.`,
+        );
+      }
+    }
+  } catch {
+    // La rama base todavía no tiene línea base: nada que comparar.
+  }
+}
+
 const { cifras, detalle } = medir();
 const args = process.argv.slice(2);
 
@@ -81,6 +103,14 @@ if (args.includes("--actualizar")) {
 }
 
 const base = JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
+const faltantes = (Object.keys(ETIQUETAS) as Metrica[]).filter((m) => typeof base[m] !== "number");
+if (faltantes.length > 0) {
+  console.error(
+    `A ${BASE} le faltan cifras: ${faltantes.join(", ")}. Corre \`pnpm simplicidad --actualizar\`.`,
+  );
+  process.exit(1);
+}
+avisarSiSubioLaBase(base);
 let empeoro = false;
 let mejoro = false;
 for (const m of Object.keys(ETIQUETAS) as Metrica[]) {
