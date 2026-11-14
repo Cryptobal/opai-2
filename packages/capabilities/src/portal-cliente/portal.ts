@@ -7,13 +7,13 @@ import { coberturaSchema } from "./cobertura";
 import { configDeCuenta } from "./config-datos";
 import { novedadesSchema } from "./novedades";
 import { rondasSchema } from "./rondas";
-import { seccionesDelResumen } from "./secciones";
+import { activa, seccionesDelResumen } from "./secciones";
 import { PERMISO_PORTAL, accesoDelActor, seccionSchema } from "./comun";
 
 const MES = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /** Mes en curso («AAAA-MM») en la zona horaria de la empresa. */
-function mesActual(timezone: string, ahora: Date): string {
+export function mesActual(timezone: string, ahora: Date): string {
   const partes = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit" })
     .formatToParts(ahora);
   const get = (t: string) => partes.find((p) => p.type === t)?.value ?? "";
@@ -98,6 +98,8 @@ export const resumenLeer = defineCapability({
     mes: z.string(),
     mesEnCurso: z.boolean(),
     limitado: z.boolean(),
+    /** La empresa encendió el texto de las novedades para esta cuenta (CAR-502): hay libro por instalación. */
+    novedadesTexto: z.boolean(),
     instalaciones: z.array(
       z.object({
         id: z.string(),
@@ -123,13 +125,16 @@ export const resumenLeer = defineCapability({
     if (mes > actual) throw reglaDeNegocio("El informe de un mes futuro aún no existe.");
     const { config } = await configDeCuenta(ctx, a.cuentaId);
     const total = await ctx.db.instalacion.count({ where: { cuentaId: a.cuentaId, estado: "activa", archivadaEn: null } });
-    const datos = await seccionesDelResumen(ctx, a.instalaciones, config.seccionesVisibles, mes, tenant.timezone);
+    const visibles = config.seccionesVisibles;
+    const datos = await seccionesDelResumen(ctx, a.instalaciones, visibles, mes, tenant.timezone);
+    const novedadesTexto = visibles.includes("novedades_texto") && (await activa(ctx, "novedades", visibles));
     return {
       cuentaId: a.cuentaId,
       cuentaNombre: a.cuentaNombre,
       mes,
       mesEnCurso: mes === actual,
       limitado: !a.todasInstalaciones && a.instalacionIds.length < total,
+      novedadesTexto,
       instalaciones: a.instalaciones.map((i) => ({
         id: i.id,
         nombre: i.nombre,

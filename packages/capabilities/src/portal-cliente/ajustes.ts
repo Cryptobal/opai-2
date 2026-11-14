@@ -34,7 +34,7 @@ export const ajustesPortalCliente = z.object({
   seccion_novedades: z.boolean().default(true).meta({
     etiqueta: "Mostrar las novedades por gravedad a los clientes",
     ayuda:
-      "En el resumen del mes, cada instalación muestra cuántas novedades hubo por gravedad y cuántas siguen abiertas. Solo cantidades: el texto que escribe el guardia no se muestra al cliente.",
+      "En el resumen del mes, cada instalación muestra cuántas novedades hubo por gravedad y cuántas siguen abiertas. Solo cantidades; el texto que escribe el guardia se enciende aparte en cada cuenta (apagado por defecto).",
     grupo: "Secciones del portal",
     ambito: "tenant",
     permiso: "portal_cliente:config.manage",

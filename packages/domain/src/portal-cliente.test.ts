@@ -105,5 +105,8 @@ describe("configuración por defecto", () => {
   it("no muestra ningún tipo de documento y omite el RUT en reportes", () => {
     expect(CONFIG_PORTAL_DEFECTO.tiposDocumentoVisibles).toEqual([]);
     expect(CONFIG_PORTAL_DEFECTO.rutEnReportes).toBe("omitido");
+    // El texto de las novedades puede nombrar personas: se enciende por cuenta (CAR-502).
+    expect(CONFIG_PORTAL_DEFECTO.seccionesVisibles).not.toContain("novedades_texto");
+    expect(CONFIG_PORTAL_DEFECTO.seccionesVisibles).toContain("novedades");
   });
 });

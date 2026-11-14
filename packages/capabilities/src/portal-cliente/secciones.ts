@@ -20,7 +20,7 @@ const FUENTE = {
  * ¿La sección tiene datos para esta empresa y esta cuenta? Requiere el módulo de origen activo, el ajuste de la
  * empresa encendido y la sección visible en la configuración de la cuenta.
  */
-async function activa(ctx: Contexto, s: SeccionResumen, visibles: readonly string[]): Promise<boolean> {
+export async function activa(ctx: Contexto, s: SeccionResumen, visibles: readonly string[]): Promise<boolean> {
   if (!ctx.modulosActivos.includes(FUENTE[s].modulo) || !visibles.includes(s)) return false;
   return (await ajuste<boolean>(ctx, "portal_cliente", FUENTE[s].ajuste)) !== false;
 }

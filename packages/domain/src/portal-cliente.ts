@@ -10,8 +10,13 @@ export const SECCIONES_PORTAL = [
   "supervision",
   "accesos",
   "documentos",
+  // El texto de las novedades (CAR-502): puede nombrar personas, así que cada cuenta lo enciende aparte.
+  "novedades_texto",
 ] as const;
 export type SeccionPortal = (typeof SECCIONES_PORTAL)[number];
+
+/** Secciones que una cuenta ve solo si la empresa las enciende para ella (apagadas por defecto, CAR-502). */
+const SECCIONES_OPCIONALES: readonly SeccionPortal[] = ["novedades_texto"];
 
 /** Estados de un acceso: solo `activo` abre el portal; `suspendido` es reversible, `revocado` cierra. */
 export const ESTADOS_ACCESO = ["activo", "suspendido", "revocado"] as const;
@@ -38,7 +43,7 @@ export type ConfigPortal = {
 
 export const CONFIG_PORTAL_DEFECTO: ConfigPortal = {
   tiposDocumentoVisibles: [],
-  seccionesVisibles: [...SECCIONES_PORTAL],
+  seccionesVisibles: SECCIONES_PORTAL.filter((s) => !SECCIONES_OPCIONALES.includes(s)),
   muestraFotoGuardias: true,
   muestraRutGuardias: true,
   rutEnReportes: "omitido",
