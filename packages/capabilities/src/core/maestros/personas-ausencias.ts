@@ -40,15 +40,22 @@ export const personasAusenciasRegistrar = defineCapability({
 export const personasAusenciasListar = defineCapability({
   id: "core.ausencias.listar",
   descripcion:
-    "Lista los permisos, licencias, vacaciones y ausencias registrados de una persona, con sus fechas, si siguen vigentes o se anularon y, si la empresa usa la pauta, los turnos e instalaciones que marcan.",
+    "Lista los permisos, licencias, vacaciones y ausencias registrados de una persona, con sus fechas, si siguen vigentes o se anularon y, si la empresa usa la pauta, los turnos e instalaciones que marcan. Pagina con cursor.",
   permiso: PERMISOS_CORE.personasLaboralRead,
-  input: entradaListaAusencias,
-  output: salidaListaAusencias,
+  input: entradaListaAusencias.extend({ cursor: z.string().optional() }),
+  output: z.object({
+    personaId: z.string(),
+    items: salidaListaAusencias.shape.grupos,
+    siguiente: z.string().nullable(),
+  }),
   // El motivo es texto libre y puede ser de salud: la lectura queda auditada con lo revelado.
-  auditarLectura: (s) => [s.personaId, ...s.grupos.map((g) => g.ausenciaId)],
+  auditarLectura: (s) => [s.personaId, ...s.items.map((g) => g.ausenciaId)],
   efecto: "lectura",
   dryRun: false,
-  handler: (ctx, input) => listarAusencias(ctx, input),
+  handler: async (ctx, input) => {
+    const { personaId, grupos, siguiente } = await listarAusencias(ctx, input);
+    return { personaId, items: grupos, siguiente };
+  },
 });
 
 export const personasAusenciasAnular = defineCapability({
