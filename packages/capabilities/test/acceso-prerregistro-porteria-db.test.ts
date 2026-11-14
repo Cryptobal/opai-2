@@ -177,6 +177,23 @@ describe.skipIf(!urlPropietario)("prerregistro en la portería (CAR-478)", () =>
     );
   });
 
+  it("durante una rotación de la clave, la invitación sola no basta: se pide el documento (R7)", async () => {
+    const p = await prerregistrar("A", "En rotación");
+    const qr = await codigo("A", p.visitantes[0]?.id ?? "");
+    vi.stubEnv("ACCESO_HUELLA_SECRET_ANTERIOR", `${CLAVE_PRUEBA}-anterior`);
+    vi.stubEnv("ACCESO_HUELLA_KID_ANTERIOR", "v0");
+    try {
+      expect((await entrar("A", { invitacion: qr, nombre: "En rotación" })).r).toContain(
+        "invitacion_invalida",
+      );
+    } finally {
+      vi.stubEnv("ACCESO_HUELLA_SECRET_ANTERIOR", "");
+      vi.stubEnv("ACCESO_HUELLA_KID_ANTERIOR", "");
+    }
+    const x = await entrar("A", { documento: { tipo: "run", numero: RUN }, nombre: "En rotación" });
+    expect(await registroDe(x.clave)).not.toBeNull();
+  });
+
   it("el bloqueo gana al prerregistro (R7)", async () => {
     const run = "15.555.555-6";
     await ok("A", "acceso.prerregistros.crear", {

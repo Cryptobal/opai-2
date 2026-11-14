@@ -9,7 +9,7 @@ import { dispositivoActivo } from "./hechos-comun";
 /**
  * «Esperados hoy» para la portería del equipo de terreno (CAR-478, R14): los visitantes prerregistrados para hoy en
  * la instalación del equipo, con el documento enmascarado y si ya entraron. La portería los usa para llenar el
- * formulario al leer una invitación (también sin conexión, con lo último que bajó).
+ * formulario al leer una invitación (requiere conexión; sin señal se registra con el documento).
  */
 export const accesoEsperadosTerreno = defineCapability({
   id: "core.terreno.esperados",

@@ -75,13 +75,17 @@ export async function cruzarPrerregistros(
     texto(v.prerregistro.desde) <= dia &&
     dia <= texto(v.prerregistro.hasta) &&
     !usados.has(`${v.id}:${dia}`);
+  const rotacion = Boolean(process.env["ACCESO_HUELLA_SECRET_ANTERIOR"]);
   const salida = new Map<string, VisitanteDia>();
   for (const p of pedidos) {
     const leido = qr.get(p.clave);
     const v = p.invitacion
       ? vs.find((x) => leido && x.id === leido.visitanteId && leido.dia === p.dia)
       : vs.find((x) => p.huellas.includes(x.huella) && libre(x, p.dia));
-    const valido = v && libre(v, p.dia) && (p.huellas.length === 0 || p.huellas.includes(v.huella));
+    // Solo con la invitación (sin documento) se cruza con una sola huella: durante una rotación de la clave un
+    // bloqueo hecho con la otra versión no se vería (R7), así que entonces se pide el documento.
+    const soloQr = p.huellas.length === 0;
+    const valido = v && libre(v, p.dia) && (soloQr ? !rotacion : p.huellas.includes(v.huella));
     if (!valido) {
       if (p.invitacion) rechazos.set(p.clave, "invitacion_invalida");
       continue;
