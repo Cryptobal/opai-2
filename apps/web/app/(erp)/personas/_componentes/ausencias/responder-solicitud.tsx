@@ -1,21 +1,35 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
 
 import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fecha } from "@/lib/fechas";
 
+import { DialogoConfirmar } from "./dialogo-diferido";
 import { etiquetaTipo, type GrupoAusencia } from "./tipos";
 
-const DialogoConfirmar = lazy(() =>
-  import("@/app/_components/maestros/dialogo-confirmar").then((m) => ({
-    default: m.DialogoConfirmar,
-  })),
-);
-
 type Respuesta = "aprobar" | "rechazar";
+
+/** Texto del diálogo de aprobar o rechazar. */
+function confirmacion(r: Respuesta, g: GrupoAusencia, conPauta: boolean) {
+  const tipo = etiquetaTipo(g.tipo).toLowerCase();
+  const fechas =
+    g.desde === g.hasta ? `El ${fecha(g.desde)}.` : `Del ${fecha(g.desde)} al ${fecha(g.hasta)}.`;
+  return r === "aprobar"
+    ? {
+        titulo: `Aprobar ${tipo}`,
+        descripcion: `${fechas}${conPauta ? " Sus turnos de esas fechas quedan por cubrir en la pauta." : ""} La persona lo ve en su portal.`,
+        boton: "Aprobar",
+      }
+    : {
+        titulo: `Rechazar ${tipo}`,
+        descripcion: `${fechas} La persona lo ve en su portal y puede pedirlo de nuevo.`,
+        boton: "Rechazar",
+        peligro: true,
+      };
+}
 
 /**
  * Aprueba o rechaza una solicitud que la persona hizo desde su portal (CAR-508). Aprobar la registra como cualquier
@@ -44,9 +58,6 @@ export function ResponderSolicitud({
       setAbierto(null);
     }
   }
-  const tipo = etiquetaTipo(g.tipo).toLowerCase();
-  const fechas =
-    g.desde === g.hasta ? `El ${fecha(g.desde)}.` : `Del ${fecha(g.desde)} al ${fecha(g.hasta)}.`;
   return (
     <span className="flex flex-none gap-1">
       <Button variant="ghost" onClick={() => setAbierto("rechazar")}>
@@ -58,20 +69,7 @@ export function ResponderSolicitud({
       {abierto ? (
         <Suspense fallback={null}>
           <DialogoConfirmar
-            confirmacion={
-              abierto === "aprobar"
-                ? {
-                    titulo: `Aprobar ${tipo}`,
-                    descripcion: `${fechas}${conPauta ? " Sus turnos de esas fechas quedan por cubrir en la pauta." : ""} La persona lo ve en su portal.`,
-                    boton: "Aprobar",
-                  }
-                : {
-                    titulo: `Rechazar ${tipo}`,
-                    descripcion: `${fechas} La persona lo ve en su portal y puede pedirlo de nuevo.`,
-                    boton: "Rechazar",
-                    peligro: true,
-                  }
-            }
+            confirmacion={confirmacion(abierto, g, conPauta)}
             pendiente={pendiente}
             error={error}
             onCerrar={() => setAbierto(null)}
