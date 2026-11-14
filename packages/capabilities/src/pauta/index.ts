@@ -25,6 +25,7 @@ import { titularesListar } from "./titulares-listar";
 import { titularTrasladar } from "./titular-trasladar";
 
 export { ajustesPauta } from "./ajustes";
+export { buscadoresPauta } from "./buscadores";
 export { consumidorPautaCambio } from "./consumidor-cambio";
 export { consumidorPautaPublicada } from "./consumidor-publicada";
 export { indicadoresPauta } from "./indicadores-gestion";
