@@ -1,5 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
+import { marcarQrDesconocido } from "./terreno-apoyo";
+
 /**
  * E3e · «Mis rondas» de punta a punta: inicia una ronda, marca sus dos puntos con el código del QR (el servidor
  * confirma cada uno) y la cierra. Devuelve false si Rondas no está activo o la instalación no tiene la ronda de
@@ -33,6 +35,8 @@ export async function rondaIniciarMarcarYCerrar(
       });
     }).toPass({ timeout: 60_000 });
 
+  // E3b: un QR desconocido dentro de la ronda vuelve rechazado con su motivo y no cuenta como punto.
+  await marcarQrDesconocido(t, enCurso);
   await marcar(codigos[0]);
   await confirmados(1);
   await marcar(codigos[1]);
