@@ -125,3 +125,33 @@ model PublicacionPauta {
   @@map("publicaciones")
   @@schema("pauta")
 }
+
+/// Visita de supervisión a una instalación (CAR-83, Brief 12): llegada con hora del servidor y ubicación opcional
+/// que nunca bloquea (R2), lista de revisión y observaciones al cerrar (R3). Una sola en curso por supervisor
+/// (índice parcial de la migración). Cerrada no se edita. Fotos y firma llegan por core.documentos (PR 3).
+model VisitaSupervision {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  instalacionId String    @map("instalacion_id") @db.Uuid
+  supervisorId  String    @map("supervisor_id") @db.Uuid
+  /// "en_curso" | "cerrada" (CHECK en la migración).
+  estado        String    @default("en_curso")
+  iniciadaEn    DateTime  @map("iniciada_en") @db.Timestamptz(6)
+  cerradaEn     DateTime? @map("cerrada_en") @db.Timestamptz(6)
+  lat           Decimal?  @db.Decimal(10, 7)
+  lng           Decimal?  @db.Decimal(10, 7)
+  precisionM    Int?      @map("precision_m")
+  distanciaM    Int?      @map("distancia_m")
+  /// "dentro" | "fuera" | "sin_gps" | "sin_ubicacion" (CHECK en la migración).
+  geocerca      String
+  /// Lista de revisión al cerrar: [{ texto, resultado: "cumple" | "no_cumple" | "no_aplica", nota }].
+  checklist     Json      @default("[]")
+  observaciones String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, instalacionId, iniciadaEn])
+  @@index([tenantId, supervisorId, iniciadaEn])
+  @@map("visitas")
+  @@schema("pauta")
+}
