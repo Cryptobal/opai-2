@@ -1,4 +1,5 @@
 import { Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
+import { formatearFecha } from "@opai/domain";
 
 import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -7,9 +8,6 @@ import type { cargarActivo } from "./datos-activos";
 import { HojaActivo } from "./diferidas";
 import { type Entrega, estadoActivo, type FichaActivo } from "./tipos";
 
-const fecha = (iso: string) => iso.split("-").reverse().join("-");
-const dia = (iso: string) =>
-  new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(iso));
 
 function acciones(a: FichaActivo): AccionEntidad[] {
   if (a.estado === "de_baja") return [];
@@ -47,7 +45,7 @@ function LoTiene({ entrega, puedeGestionar }: { entrega: Entrega; puedeGestionar
     <SeccionTarjeta titulo="Lo tiene">
       <p>
         <span className="font-medium">{entrega.destino}</span>
-        <span className="text-fg-muted"> · desde el {dia(entrega.entregadaEn)}</span>
+        <span className="text-fg-muted"> · desde el {formatearFecha(entrega.entregadaEn)}</span>
       </p>
       {puedeGestionar ? (
         <EnlaceBoton href={`/inventario/entregas?devolver=${entrega.id}`} variante="secondary" className="mt-3">
@@ -94,7 +92,7 @@ export async function DetalleActivo({
             <dl className="flex flex-col divide-y divide-border">
               {a.campos.map((c) => {
                 const v = a.valores[c.clave];
-                const texto = v === undefined ? "—" : c.tipo === "fecha" ? fecha(String(v)) : String(v);
+                const texto = v === undefined ? "—" : c.tipo === "fecha" ? formatearFecha(String(v)) : String(v);
                 return (
                   <div key={c.clave} className="flex items-center justify-between gap-3 py-2.5">
                     <dt className="text-fg-muted">{c.etiqueta}</dt>

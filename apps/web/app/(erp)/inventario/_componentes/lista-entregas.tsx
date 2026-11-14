@@ -1,6 +1,7 @@
 import { Package, Plus, Shirt } from "lucide-react";
 
 import { Badge, type EstadoPantalla } from "@opai/ds";
+import { formatearFecha } from "@opai/domain";
 
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
@@ -9,7 +10,6 @@ import { conteo } from "@/lib/plural";
 import { PestanasInventario } from "./pestanas";
 import type { Entrega } from "./tipos";
 
-const dia = (iso: string) => new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(iso));
 
 function filaEntrega(x: Entrega, puedeGestionar: boolean) {
   const Icono = x.clase === "ropa" ? Shirt : Package;
@@ -23,8 +23,8 @@ function filaEntrega(x: Entrega, puedeGestionar: boolean) {
       </span>
     ),
     titulo: <span className="font-medium">{x.cantidad ? `${x.cantidad} × ${x.item}` : x.item}</span>,
-    secundario: `${x.destino} · ${dia(x.entregadaEn)}`,
-    fin: <Badge tono={abierta ? "info" : "neutro"}>{abierta ? "Entregado" : `Devuelto ${dia(x.devueltaEn ?? x.entregadaEn)}`}</Badge>,
+    secundario: `${x.destino} · ${formatearFecha(x.entregadaEn)}`,
+    fin: <Badge tono={abierta ? "info" : "neutro"}>{abierta ? "Entregado" : `Devuelto ${formatearFecha(x.devueltaEn ?? x.entregadaEn)}`}</Badge>,
   };
 }
 
