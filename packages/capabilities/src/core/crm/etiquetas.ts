@@ -7,7 +7,7 @@ import { defineCapability } from "../../define";
 import { conflicto, noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import type { Contexto } from "../../types";
-import { sinDuplicado } from "../maestros/comun";
+import { cursorDe, pagina, sinDuplicado } from "../maestros/comun";
 import { TONOS_ETIQUETA } from "./comun";
 
 export const etiquetaSchema = z.object({
@@ -42,21 +42,27 @@ export async function etiquetaDe(ctx: Contexto, id: string) {
 }
 
 export const etiquetasList = defineCapability({
-  auditarLectura: (s) => s.map((e) => e.id),
+  auditarLectura: (s) => s.items.map((e) => e.id),
   id: "core.etiquetas.list",
   descripcion: "Catálogo de etiquetas de la empresa (activas por defecto), ordenado por nombre.",
   permiso: PERMISOS_CORE.etiquetasRead,
   portales: ["erp"],
-  input: z.object({ incluirInactivas: z.boolean().default(false) }),
-  output: z.array(etiquetaSchema),
+  input: z.object({
+    incluirInactivas: z.boolean().default(false),
+    cursor: uuidSchema.optional(),
+    limite: z.number().int().min(1).max(200).default(200),
+  }),
+  output: z.object({ items: z.array(etiquetaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.etiqueta.findMany({
       where: input.incluirInactivas ? {} : { activa: true },
-      orderBy: { nombre: "asc" },
+      orderBy: [{ nombre: "asc" }, { id: "asc" }],
+      take: input.limite + 1,
+      ...cursorDe(input.cursor),
     });
-    return filas.map(vista);
+    return pagina(filas.map(vista), input.limite);
   },
 });
 
