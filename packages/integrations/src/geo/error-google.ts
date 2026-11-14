@@ -20,7 +20,7 @@ export class ErrorGoogle extends Error {
 }
 
 /** Quita la clave del texto (por si el proveedor la repite) y lo acota. */
-export function sinClave(texto: string, clave: string): string {
+function sinClave(texto: string, clave: string): string {
   const limpio = clave ? texto.split(clave).join("[clave]") : texto;
   return limpio.replace(/\s+/g, " ").trim().slice(0, MAX_MENSAJE);
 }

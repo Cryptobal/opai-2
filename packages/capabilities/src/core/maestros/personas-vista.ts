@@ -7,7 +7,7 @@ import { iso } from "../comun";
 import { dondePersona } from "./alcance";
 import { dia, diaSchema, rutSchema, telefonoSchema, textoOpcional } from "./comun";
 
-export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
+const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
 
 export const personaSchema = z.object({
   id: z.string(),

@@ -10,7 +10,7 @@
 export const HOST_PRODUCCION_TRIBUTARIA = "app.opai.cl";
 
 /** Valor que la variable debe tener para habilitar producción. */
-export const VALOR_PRODUCCION_HABILITADA = "habilitada";
+const VALOR_PRODUCCION_HABILITADA = "habilitada";
 
 export type AmbienteTributario = "certificacion" | "produccion";
 

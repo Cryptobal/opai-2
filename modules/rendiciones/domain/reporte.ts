@@ -13,7 +13,7 @@ export const ESTADOS_GASTO = ["aprobada", "pagada"] as const;
 export const CLAVE_ADMINISTRACION = "administracion";
 
 /** Tope de grupos que se devuelven; el resto se suma en «Otros» para no truncar el total. */
-export const MAX_GRUPOS = 100;
+const MAX_GRUPOS = 100;
 
 /** Período máximo del reporte: un año (366 días). */
 export const MAX_DIAS_REPORTE = 366;

@@ -46,7 +46,7 @@ export const vista = (r: RolFila, usuarios = 0) => ({
 });
 
 /** Membresías activas por rol personalizado (roleId). Una sola consulta para la lista. */
-export async function usuariosPorRol(ctx: Contexto): Promise<Map<string, number>> {
+async function usuariosPorRol(ctx: Contexto): Promise<Map<string, number>> {
   const g = await ctx.db.membership.groupBy({
     by: ["roleId"],
     where: { estado: "activa", roleId: { not: null } },

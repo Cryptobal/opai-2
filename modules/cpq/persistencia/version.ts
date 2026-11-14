@@ -1,7 +1,5 @@
 import { noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 import type { Contexto } from "@opai/capabilities";
-
-import { esEditable, type EstadoCotizacion } from "../domain";
 import { cotizacionDe } from "../capabilities/util";
 
 type FilaVersion = Awaited<ReturnType<typeof versionDeCotizacion>>;
@@ -39,11 +37,6 @@ export function exigirBorrador(v: { estado: string }) {
       MENSAJE_NO_BORRADOR[v.estado] ?? "Solo se editan versiones en borrador; esta ya no se puede editar.",
       { codigo: "no_es_borrador" },
     );
-}
-
-export function exigirEditable(v: { estado: string }) {
-  if (!esEditable(v.estado as EstadoCotizacion))
-    throw reglaDeNegocio("Esta versión ya no se puede editar.");
 }
 
 /** Enviar desde borrador (margen ok) o lista (aprobada). */

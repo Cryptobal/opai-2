@@ -6,7 +6,7 @@ import { valoresEfectivos } from "@opai/capabilities";
 import { CAMPOS_CPQ } from "./supuestos";
 
 /** Módulo del Portal Cliente: con él activo, la cotización llega al cliente por el portal. */
-export const MODULO_PORTAL_CLIENTE = "portal_cliente";
+const MODULO_PORTAL_CLIENTE = "portal_cliente";
 
 /** El enlace guarda solo el hash sha256 del token (64 hex); el token en claro se muestra al crearlo. */
 export const hashDeToken = (token: string) => createHash("sha256").update(token).digest("hex");

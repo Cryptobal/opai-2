@@ -13,7 +13,7 @@ import type { Contexto } from "../../types";
 import { AMBITO_FINANZAS, type DbOTx, LARGO_TEXTO, type OrigenCorreo, recortar } from "./comun";
 import { negocioDelHilo } from "./hilo";
 
-export type RefsCorreo = {
+type RefsCorreo = {
   cuentaId?: string | null;
   contactoId?: string | null;
   negocioId?: string | null;

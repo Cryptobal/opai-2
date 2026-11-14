@@ -10,20 +10,6 @@ export const alertasSchema = z
   .object({ vencidos: z.number(), porVencer: z.number() })
   .describe("Documentos vencidos y por vencer (30 días) de la ficha.");
 
-/** Puestos activos y dotación (suma) por instalación. */
-export async function resumenInstalaciones(ctx: Contexto, ids: string[]) {
-  const g = await ctx.db.puesto.groupBy({
-    by: ["instalacionId"],
-    where: { instalacionId: { in: ids }, estado: "activo" },
-    _count: { _all: true },
-    _sum: { dotacion: true },
-  });
-  const m = new Map(
-    g.map((x) => [x.instalacionId, { puestos: x._count._all, dotacion: x._sum.dotacion ?? 0 }]),
-  );
-  return (id: string) => m.get(id) ?? { puestos: 0, dotacion: 0 };
-}
-
 /** Documentos vencidos y por vencer de cada entidad (por su vínculo de propietario), en una consulta. */
 export async function alertasDocumentos(ctx: Contexto, tipo: string, ids: string[]) {
   const vinculos = await ctx.db.documentoVinculo.findMany({

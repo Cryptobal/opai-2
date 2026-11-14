@@ -25,7 +25,7 @@ export const destinatarioSchema = z.object({
   nombre: z.string().optional(),
 });
 
-export const basesPlantillaSchema = z.enum(BASES_PLANTILLA);
+const basesPlantillaSchema = z.enum(BASES_PLANTILLA);
 
 export const armadorPropuestaVistaSchema = z.object({
   id: z.string(),

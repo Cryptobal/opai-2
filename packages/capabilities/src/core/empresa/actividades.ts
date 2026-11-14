@@ -20,7 +20,7 @@ const actividadSchema = z.object({
   principal: z.boolean(),
 });
 
-export const actividadesSchema = z.object({
+const actividadesSchema = z.object({
   principal: z.number().int().nullable().describe("ACTECO principal: el que va en cada DTE. null si aún no se informa."),
   actividades: z.array(actividadSchema),
 });

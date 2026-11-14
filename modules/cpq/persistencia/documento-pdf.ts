@@ -19,7 +19,7 @@ import { membrete } from "./pdf/membrete";
 export type { EntradaPdfCotizacion, LineaPdfCotizacion } from "./documento-pdf-tipos";
 
 /** Marca de agua mientras la versión no se haya enviado, o si no hay precio. */
-export function marcaDeAgua(e: Pick<EntradaPdfCotizacion, "enviada" | "calculo">): string | null {
+function marcaDeAgua(e: Pick<EntradaPdfCotizacion, "enviada" | "calculo">): string | null {
   if (e.calculo.borradorSinPrecio) return "BORRADOR SIN PRECIO";
   return e.enviada ? null : "BORRADOR";
 }

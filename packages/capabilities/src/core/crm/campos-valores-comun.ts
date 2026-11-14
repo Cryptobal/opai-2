@@ -13,13 +13,13 @@ import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { sinDuplicado } from "../maestros/comun";
 
-export type EntidadCampo = (typeof ENTIDADES_CAMPO_PERSONALIZADO)[number];
+type EntidadCampo = (typeof ENTIDADES_CAMPO_PERSONALIZADO)[number];
 export type FichaCampos = { entidad: EntidadCampo; id: string };
 
 const COLUMNA = { cuenta: "cuentaId", contacto: "contactoId", negocio: "negocioId" } as const;
 
 const valorSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-export const valorCampoSchema = z.object({
+const valorCampoSchema = z.object({
   campoId: z.string(),
   clave: z.string(),
   etiqueta: z.string(),

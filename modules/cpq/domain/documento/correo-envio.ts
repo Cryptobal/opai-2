@@ -8,7 +8,7 @@
  */
 export const TOPE_ADJUNTOS_BYTES = 18 * 1024 * 1024;
 
-export type ClavePdfEnvio = "cotizacion" | "propuesta";
+type ClavePdfEnvio = "cotizacion" | "propuesta";
 export type PdfEnvio = { clave: ClavePdfEnvio; nombre: string; bytes: number };
 
 /**

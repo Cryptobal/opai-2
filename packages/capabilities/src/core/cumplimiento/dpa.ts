@@ -36,7 +36,7 @@ export async function leerDpaVigente(
 }
 
 /** Separa el "Nombre <correo>" guardado en aceptado_por en sus partes (para la ficha del historial). */
-export function partirAceptadoPor(s: string | null): {
+function partirAceptadoPor(s: string | null): {
   nombre: string | null;
   correo: string | null;
 } {

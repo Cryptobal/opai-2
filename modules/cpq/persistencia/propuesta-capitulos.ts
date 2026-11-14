@@ -27,7 +27,7 @@ type Linea = {
 };
 
 /** Personas que exige un puesto: la misma regla del motor (`personasPorPosicion`) × posiciones; nulo si no se puede calcular. */
-export function dotacionPuesto(l: Linea, patrones: ReadonlyMap<string, NonNullable<Puesto["patronDef"]>>): number | null {
+function dotacionPuesto(l: Linea, patrones: ReadonlyMap<string, NonNullable<Puesto["patronDef"]>>): number | null {
   try {
     const nombre = l.patron ?? "4x4";
     const p: Puesto = {
@@ -50,7 +50,7 @@ const turnoTexto = (l: Linea) =>
   [l.patron, l.horaInicio && l.horaFin ? `${l.horaInicio}–${l.horaFin}` : null].filter(Boolean).join(" · ");
 
 /** Instalaciones de la versión: secciones con `instalacionId` (la «Común» no tiene capítulo). */
-export async function instalacionesDeVersion(ctx: Contexto, versionId: string) {
+async function instalacionesDeVersion(ctx: Contexto, versionId: string) {
   const secs = await ctx.db.cpqSeccion.findMany({
     where: { versionId, instalacionId: { not: null } },
     orderBy: [{ orden: "asc" }],

@@ -116,7 +116,5 @@ export function mapearVersionCalculo(
   };
 }
 
-export { slugSeccion };
-
 /** Misma comparación que el motor: «4×4» y «4x4» son el mismo patrón. */
 export const claveDePatron = (nombre: string) => nombre.replace("×", "x");

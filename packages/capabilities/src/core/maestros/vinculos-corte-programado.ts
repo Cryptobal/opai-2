@@ -17,7 +17,7 @@ import type { Contexto } from "../../types";
 import { hoyEn, zonaDelTenant } from "../turnos/comun";
 import { type QuienCorta, cortarAccesos } from "./vinculos-corte";
 
-export const TIPO_CORTE_PROGRAMADO = "core.vinculos.cortar_accesos";
+const TIPO_CORTE_PROGRAMADO = "core.vinculos.cortar_accesos";
 const dia = (d: Date) => d.toISOString().slice(0, 10);
 
 const payloadSchema = z.object({

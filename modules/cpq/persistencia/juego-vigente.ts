@@ -1,7 +1,7 @@
 import type { JuegoDeValores } from "@opai/domain";
 
 /** Sufijo de la huella de línea cuando la mutual adicional se calculó con 0 % supuesto (CAR-162). */
-export const SUFIJO_MUTUAL_SUPUESTA = ":mutual-supuesta";
+const SUFIJO_MUTUAL_SUPUESTA = ":mutual-supuesta";
 
 /**
  * Huella que guarda cada línea de puesto: la del juego legal y, si la mutual no estaba confirmada,

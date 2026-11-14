@@ -24,7 +24,7 @@ const resumenSchema = z.object({
   avisos: z.number().int(),
 });
 
-export const turnosEsperadosRegenerar = defineCapability({
+const turnosEsperadosRegenerar = defineCapability({
   id: "core.turnos_esperados.regenerar",
   descripcion:
     "Recalcula los turnos esperados de un puesto (o de toda la empresa) en un rango de fechas desde la Pauta, o desde la jornada pactada si la empresa no usa Pauta. Solo cambia lo que difiere; repetirla da el mismo resultado. Con vista previa informa cuántos turnos cambiarían.",

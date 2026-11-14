@@ -3,7 +3,6 @@
 
 /** Tipos de documento que respaldan un gasto (decisión de Carlos del 5-nov-2026). */
 export const TIPOS_DOCUMENTO = ["boleta", "factura"] as const;
-export type TipoDocumento = (typeof TIPOS_DOCUMENTO)[number];
 
 export const ESTADOS = [
   "borrador",
@@ -35,9 +34,6 @@ export function puedeTransitar(desde: EstadoRendicion, hacia: EstadoRendicion): 
 export function esEditable(estado: EstadoRendicion): boolean {
   return estado === "borrador" || estado === "devuelta";
 }
-
-/** Los adjuntos se borran solo mientras la rendición sigue editable (mejora respecto de 1.0). */
-export const puedeBorrarAdjuntos = esEditable;
 
 export function codigoVisible(codigo: number): string {
   return `REN-${codigo}`;

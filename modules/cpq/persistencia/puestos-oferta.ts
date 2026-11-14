@@ -1,7 +1,7 @@
 import { type Contexto, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 /** «4x4», «4×4», «4 X 4» → «4x4», para casar el patrón de la línea con el catálogo del tenant. */
-export const normalizarPatron = (p: string) => p.toLowerCase().replace(/×/g, "x").replace(/\s/g, "");
+const normalizarPatron = (p: string) => p.toLowerCase().replace(/×/g, "x").replace(/\s/g, "");
 
 export type LineaOferta = {
   lineaId: string;

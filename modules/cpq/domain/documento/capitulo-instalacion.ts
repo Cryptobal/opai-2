@@ -52,7 +52,7 @@ export type EntradaCapitulo = {
   textos: Readonly<Partial<Record<ClaveSeccionCapitulo, string>>>;
 };
 
-export type Faltante = { clave: string; titulo: string };
+type Faltante = { clave: string; titulo: string };
 
 export type CapituloVista = {
   instalacionId: string;

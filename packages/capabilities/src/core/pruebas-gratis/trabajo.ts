@@ -6,7 +6,7 @@ import { defineTrabajo } from "../../trabajos/registro";
 import { aFecha } from "../maestros/comun";
 
 /** Días antes del último día de la prueba gratis en que se avisa a la empresa (Carlos, 12-nov-2026). */
-export const DIAS_AVISO_GRATIS = 2;
+const DIAS_AVISO_GRATIS = 2;
 
 /**
  * Cada día cierra las pruebas gratis vencidas de la empresa (CAR-222): el módulo queda en solo

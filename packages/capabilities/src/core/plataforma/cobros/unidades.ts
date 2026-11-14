@@ -35,7 +35,7 @@ const aAcceso = (m: DatosUnidades["miembros"][number]): Acceso => ({
 });
 
 /** Permiso por el que se cuenta «usuario que rinde»: los aprobadores no se cobran (ADR-071). */
-export const PERMISO_RENDIR = "rendiciones:rendir";
+const PERMISO_RENDIR = "rendiciones:rendir";
 
 /**
  * Unidades del mes de una condición, sin datos personales. `usuario_licencia` cuenta a quien tiene
