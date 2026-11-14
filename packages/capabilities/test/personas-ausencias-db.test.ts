@@ -84,7 +84,8 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
       personaId: persona,
     });
     const lista = await run(ctx(tenant), "core.ausencias.listar", { personaId: persona });
-    expect(lista.data?.["grupos"]).toEqual([
+    expect(lista.data?.["siguiente"]).toBeNull();
+    expect(lista.data?.["items"]).toEqual([
       expect.objectContaining({
         ausenciaId: id,
         desde: "2026-12-21",
@@ -148,5 +149,37 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
       ausenciaId: r.data?.["ausenciaId"],
     });
     expect(anular.error?.code).toBe("NOT_FOUND");
+  });
+
+  it("la lista pagina con cursor sin repetir ni saltar registros (CAR-353)", async () => {
+    for (const desde of ["2027-01-05", "2027-01-12"])
+      expect(
+        (
+          await run(ctx(tenant), "core.ausencias.registrar", {
+            personaId: persona,
+            tipo: "permiso",
+            motivo: "Trámite",
+            desde,
+          })
+        ).ok,
+      ).toBe(true);
+    const vistos: string[] = [];
+    let cursor: string | undefined;
+    for (let i = 0; i < 10; i++) {
+      const p = await run(ctx(tenant), "core.ausencias.listar", {
+        personaId: persona,
+        limite: 1,
+        ...(cursor ? { cursor } : {}),
+      });
+      const items = p.data?.["items"] as { ausenciaId: string }[];
+      vistos.push(...items.map((x) => x.ausenciaId));
+      cursor = (p.data?.["siguiente"] as string | null) ?? undefined;
+      if (!cursor) break;
+    }
+    const todos = await e.admin.ausencia.findMany({
+      where: { personaId: persona, estado: { in: ["aprobada", "anulada"] } },
+    });
+    expect(new Set(vistos).size).toBe(vistos.length);
+    expect(vistos.length).toBe(todos.length);
   });
 });
