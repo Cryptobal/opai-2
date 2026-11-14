@@ -121,7 +121,7 @@ export async function referencia(ctx: Contexto, e: Entrada) {
 }
 
 /** Conceptos a guardar: el cargo define todos (con valores por defecto); los demás, solo los enviados. */
-export function conceptosDe(e: Entrada) {
+function conceptosDe(e: Entrada) {
   const cargo = e.nivel === "cargo";
   return {
     sueldoBase: e.sueldoBase ?? null,

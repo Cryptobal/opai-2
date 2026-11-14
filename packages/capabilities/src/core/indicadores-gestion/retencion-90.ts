@@ -3,7 +3,7 @@ import { diaEnZona, PERMISOS_CORE, porcentajeDe, sumarDias } from "@opai/domain"
 import { defineIndicador, type MedicionIndicador } from "../../indicadores-gestion";
 
 /** Días que una persona tiene que seguir para contar como retenida (ADR-094, CAR-309). */
-export const DIAS_RETENCION = 90;
+const DIAS_RETENCION = 90;
 
 const aDia = (d: Date) => d.toISOString().slice(0, 10);
 const aFecha = (dia: string) => new Date(`${dia}T00:00:00Z`);

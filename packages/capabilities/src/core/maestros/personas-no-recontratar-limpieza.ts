@@ -10,7 +10,7 @@ import { defineTrabajo } from "../../trabajos/registro";
  * vencimiento) en la misma operación, para que ninguna lectura vuelva a mostrar una marca vencida ni
  * su motivo anterior. Devuelve cuántas filas cambiaron; nunca falla por no tener candidatas.
  */
-export async function limpiarNoRecontratarVencidas(tx: TenantTx, ahora: Date): Promise<number> {
+async function limpiarNoRecontratarVencidas(tx: TenantTx, ahora: Date): Promise<number> {
   const { count } = await tx.persona.updateMany({
     where: { noRecontratar: true, noRecontratarVenceEn: { lt: ahora } },
     data: {

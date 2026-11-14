@@ -5,8 +5,6 @@ import { microAUsd, PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../define";
 import { consumosDelMes, sumarPor, type GrupoConsumo } from "./consumos-fuente";
 
-export { rangoMes } from "./consumos-fuente";
-
 const mesSchema = z
   .string()
   .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Formato aaaa-mm.")

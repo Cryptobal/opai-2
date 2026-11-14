@@ -22,7 +22,7 @@ export const formaSchema = z.enum(FORMAS_COBRO);
 const unidades = Object.keys(UNIDADES_COBRO) as [UnidadCobro, ...UnidadCobro[]];
 export const unidadSchema = z.enum(unidades);
 const motivos = Object.keys(MOTIVOS_COBRO) as [MotivoCobro, ...MotivoCobro[]];
-export const motivoSchema = z.enum(motivos);
+const motivoSchema = z.enum(motivos);
 
 export const condicionSchema = z.object({
   moneda: monedaSchema,

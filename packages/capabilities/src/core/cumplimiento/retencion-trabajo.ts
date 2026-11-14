@@ -75,7 +75,7 @@ export async function correrRegla(
  * registra cuántas filas habría tocado. Respeta los hechos regulados (no tiene regla sobre ellos) y
  * no toca a quien tiene una solicitud del titular abierta. El registro lleva contadores, nunca datos.
  */
-export const trabajoRetencion = defineTrabajo({
+const trabajoRetencion = defineTrabajo({
   tipo: "core.cumplimiento.retencion",
   descripcion:
     "Aplica a diario la política de retención de datos personales: anonimiza o elimina lo vencido, o solo simula si la política no está activa.",

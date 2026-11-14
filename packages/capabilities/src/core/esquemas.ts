@@ -28,7 +28,7 @@ export const timezoneSchema = z.string().refine((tz) => {
   }
 }, "Zona horaria inválida.");
 
-export const SLUGS_RESERVADOS = ["www", "app", "test", "api", "platform", "admin", "opai"] as const;
+const SLUGS_RESERVADOS = ["www", "app", "test", "api", "platform", "admin", "opai"] as const;
 
 export const slugSchema = z
   .string()

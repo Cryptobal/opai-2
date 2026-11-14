@@ -6,7 +6,7 @@ import { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
 /** Precisión mínima aceptada cuando el punto no define una (R3: se calibra con marcas reales). */
 const PRECISION_MIN_DEFECTO_M = 20;
 
-export type MarcaResuelta = {
+type MarcaResuelta = {
   puntoId: string;
   geocerca: string;
   distanciaM: number | null;

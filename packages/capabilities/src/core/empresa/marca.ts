@@ -15,7 +15,7 @@ const color = z
   .nullable()
   .optional();
 
-export const marcaSchema = z.object({
+const marcaSchema = z.object({
   nombreComercial: z.string().nullable(),
   eslogan: z.string().nullable(),
   colorPrimario: z.string().nullable(),
