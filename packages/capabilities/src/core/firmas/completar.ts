@@ -7,6 +7,7 @@ import { selloDe } from "../../integraciones/sello";
 import type { Contexto } from "../../types";
 import { uuid7 } from "../documentos/uuid7";
 import { hashToken, registrarEvidencia } from "./comun-flujo";
+import { visibleParaFirmante } from "./visibilidad-firmado";
 
 const sha256Hex = (texto: string): string => createHash("sha256").update(texto).digest("hex");
 
@@ -14,6 +15,7 @@ type Firmante = {
   id: string;
   nombre: string;
   run: string | null;
+  personaId: string | null;
   firmadoEn: Date | null;
 };
 type Solicitud = {
@@ -69,6 +71,9 @@ export async function completarSolicitud(ctx: Contexto, s: Solicitud): Promise<v
   if (ctx.servicios.almacenamiento.disponible)
     await ctx.servicios.almacenamiento.subir(storageKey, sellado.bytes, sellado.mime, h2);
   await ctx.transaccion(async (tx) => {
+    const propietario = await tx.documentoVinculo.findFirst({
+      where: { documentoId: original.id, rol: "propietario" },
+    });
     const firmado = await tx.documento.create({
       data: {
         id: docId,
@@ -83,15 +88,12 @@ export async function completarSolicitud(ctx: Contexto, s: Solicitud): Promise<v
         estado: "disponible",
         version,
         reemplazaAId: original.id,
-        visibleEn: original.visibleEn,
+        visibleEn: visibleParaFirmante(original.visibleEn, propietario, s.firmantes),
         origen: "generado",
         moduloOrigen: "core",
         creadoPorTipo: "system",
         confirmadoEn: new Date(),
       },
-    });
-    const propietario = await tx.documentoVinculo.findFirst({
-      where: { documentoId: original.id, rol: "propietario" },
     });
     if (propietario)
       await tx.documentoVinculo.create({
