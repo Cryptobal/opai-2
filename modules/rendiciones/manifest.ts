@@ -1,5 +1,6 @@
 import { defineModule } from "@opai/capabilities";
 
+import { buscadoresRendiciones } from "./buscador";
 import { ajustesRendiciones, capacidades } from "./capabilities";
 import { fuentesAprobacionRendiciones } from "./fuente-aprobaciones";
 
@@ -46,4 +47,5 @@ export const manifest = defineModule({
   ],
   capacidades,
   aprobaciones: fuentesAprobacionRendiciones,
+  buscadores: buscadoresRendiciones,
 });
