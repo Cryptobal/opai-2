@@ -14,24 +14,26 @@ Mostrar, por mes y por instalación, cuánto se vendió, cuánto cuesta (estimad
 ## 3. Alcance
 - **Entra:**
   - capacidad `finanzas.rentabilidad.get` (mes aaaa-mm, hasta el mes actual);
-  - pantalla `/finanzas/informes` con la entrada «Informes» en el área Finanzas (NAVEGACION.md §2 ya la lista);
+  - pantalla `/finanzas/rentabilidad`, enlazada desde una tarjeta «Informes» al final de «Hoy en Finanzas» (no se suma otra entrada al menú de Finanzas, que ya está en su tope);
   - novedad y prueba `@preview`.
 - **No entra:** costo real de liquidaciones, gastos generales y compras por instalación, estado de resultados contable (adenda 5 del ADR-113).
 
 ## 4. Regla de cálculo
-- **Ventas netas:** documentos no borrador del mes por fecha de emisión, neto + exento, con las notas de crédito restando. Sin instalación → fila «Sin instalación».
+- **Ventas netas:** como en el F29, documentos 33, 34, 56 y 61 enviados, aceptados o anulados por NC, del mes por fecha de emisión, neto + exento, con las notas de crédito restando. Sin instalación → fila «Sin instalación».
 - **Costo estimado:**
   - Por cada puesto activo y vigente en el mes, se resuelve la capa puesto → instalación vigente al día de corte: el último día del mes, o hoy si es el mes en curso.
   - Se calcula el costo empresa mensual con supuestos fijos: contrato indefinido, AFP modelo, Fonasa, jornada del puesto (42 h si falta), mutual adicional del tenant (0 % si no está confirmada), y provisiones de vacaciones e indemnización como en CPQ.
   - Un puesto sin capa completa, o sin valores legales publicados, queda «sin costo» y se cuenta.
   - Los montos de sueldo solo se usan con `core:estructuras.read_sensible` (regla D7 vigente: sin ese permiso se ocultan todos los montos, no solo los de cargos sensibles). Sin él, el puesto se cuenta como «oculto».
-- **Margen:** ventas menos costo. El % sobre ventas se guarda como entero escalado (`PCT_ESCALA`) y es nulo si no hay ventas.
+- **Margen:** ventas menos costo. Es nulo si hay puestos ocultos por permiso de sueldos (sin sus montos sería engañoso). El % sobre ventas se guarda como entero escalado (`PCT_ESCALA`) y es nulo si no hay ventas.
 
 ## 5. Archivos
 - `packages/capabilities/src/finanzas/rentabilidad.ts`: la capacidad.
 - `rentabilidad-calculo.ts`: cálculo puro, con prueba.
 - `rentabilidad-costos.ts`: lee puestos y capas y calcula el costo.
-- La pantalla vive en `apps/web/app/(erp)/finanzas/informes/`.
+- La pantalla vive en `apps/web/app/(erp)/finanzas/rentabilidad/` y el enlace en `_hoy/hoy.tsx`.
+
+- Un puesto vigente parte del mes suma el costo del mes completo, y su capa se resuelve al día de corte. Es una estimación.
 
 ## 6. Modelo de datos
 Sin migración.

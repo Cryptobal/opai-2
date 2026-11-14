@@ -9,14 +9,14 @@ export type FilaRentabilidad = {
   puestosOcultos: number;
   ventasNetasClp: number;
   costoEstimadoClp: number;
-  margenClp: number;
+  margenClp: number | null;
   margenPct: number | null;
 };
 export type Rentabilidad = {
   mes: string;
   corte: string;
   sinValoresLegales: boolean;
-  totales: { ventasNetasClp: number; costoEstimadoClp: number; margenClp: number; margenPct: number | null; puestosSinCosto: number; puestosOcultos: number };
+  totales: { ventasNetasClp: number; costoEstimadoClp: number; margenClp: number | null; margenPct: number | null; puestosSinCosto: number; puestosOcultos: number };
   instalaciones: FilaRentabilidad[];
 };
 
@@ -34,4 +34,9 @@ export async function cargarRentabilidad(mes: string): Promise<Rentabilidad | nu
 export function porcentaje(pct: number | null): string {
   if (pct === null) return "—";
   return `${(pct / 10_000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} %`;
+}
+
+/** Margen en pesos, o «—» si hay puestos ocultos por permiso de sueldos. */
+export function margen(clp: number | null, pesos: (n: number) => string): string {
+  return clp === null ? "—" : pesos(clp);
 }

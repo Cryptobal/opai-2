@@ -55,6 +55,7 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
     await doc(t.a, cuenta.id, i.norte, 61, 500_000, "2026-10-20");
     await doc(t.a, cuenta.id, null, 33, 100_000, "2026-10-05");
     await doc(t.a, cuenta.id, i.norte, 33, 9_000_000, "2026-10-15", "borrador");
+    await doc(t.a, cuenta.id, i.norte, 33, 6_000_000, "2026-10-16", "rechazado");
     await doc(t.a, cuenta.id, i.norte, 33, 7_000_000, "2026-11-01");
     const cuentaB = await e.admin.cuenta.create({ data: { tenantId: t.b, nombre: "Otra" } });
     await doc(t.b, cuentaB.id, null, 33, 8_000_000, "2026-10-10");
@@ -91,6 +92,14 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
     expect(d.instalaciones.find((f) => f.instalacionId === i.sur)).toMatchObject({ puestos: 1, ventasNetasClp: 0 });
     const b = await mod.executeCapability(ctx(t.b), "finanzas.rentabilidad.get", { mes: "2026-10" }, {});
     expect(b.ok && (b.data as { totales: { ventasNetasClp: number } }).totales.ventasNetasClp).toBe(8_000_000);
+  });
+
+  it("sin permiso de sueldos no muestra margen (sería engañoso)", async () => {
+    const r = await mod.executeCapability(ctx(t.a, ["finanzas:read", "core:estructuras.read"]), "finanzas.rentabilidad.get", { mes: "2026-10" }, {});
+    if (!r.ok) throw new Error(JSON.stringify(r.error));
+    const d = r.data as { totales: { margenClp: number | null; puestosOcultos: number }; instalaciones: (Fila & { margenClp: number | null })[] };
+    expect(d.totales.margenClp).toBeNull();
+    expect(d.instalaciones.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0 });
   });
 
   it("exige permiso de Finanzas y no acepta meses futuros", async () => {

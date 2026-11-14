@@ -6,7 +6,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { etiquetaMes, mesActual, mesVecino } from "@/app/_components/rendiciones/reporte/periodo";
 import { pesos } from "@/lib/fechas";
 
-import { cargarRentabilidad, porcentaje } from "./datos";
+import { cargarRentabilidad, margen, porcentaje } from "./datos";
 
 type Q = Record<string, string | string[] | undefined>;
 const RUTA = "/finanzas/rentabilidad";
@@ -40,11 +40,11 @@ export function PaginaRentabilidad({ searchParams }: { searchParams: Promise<Q> 
               {mes < actual ? <EnlaceBoton href={`${RUTA}?mes=${mesVecino(mes, 1)}`} variante="ghost" icono={ChevronRight} etiqueta="Mes siguiente">{""}</EnlaceBoton> : null}
             </nav>
             {r.sinValoresLegales ? <Alerta tono="warning" titulo="Faltan valores legales del mes">Sin UF, topes y tasas publicados no se puede estimar el costo del personal.</Alerta> : null}
-            {ocultos > 0 ? <Alerta tono="info" titulo={`${ocultos} puesto(s) sin costo visible`}>Los montos de sueldo solo los ve quien tiene permiso para ver sueldos.</Alerta> : null}
+            {ocultos > 0 ? <Alerta tono="info" titulo={`${ocultos} puesto(s) sin costo visible`}>Los montos de sueldo solo los ve quien tiene permiso para ver sueldos. Sin ellos, el margen no se muestra.</Alerta> : null}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <KpiTile etiqueta="Ventas netas" valor={pesos(r.totales.ventasNetasClp)} />
               <KpiTile etiqueta="Costo estimado del personal" valor={pesos(r.totales.costoEstimadoClp)} />
-              <KpiTile etiqueta="Margen estimado" valor={`${pesos(r.totales.margenClp)} · ${porcentaje(r.totales.margenPct)}`} />
+              <KpiTile etiqueta="Margen estimado" valor={r.totales.margenClp === null ? "—" : `${margen(r.totales.margenClp, pesos)} · ${porcentaje(r.totales.margenPct)}`} />
             </div>
             <SeccionTarjeta titulo="Por instalación" sinRelleno>
               <Estado state={r.instalaciones.length === 0 ? "empty" : "ready"} variante="lista" textos={{ vacio: { titulo: `Sin ventas ni puestos en ${etiquetaMes(mes).toLowerCase()}`, descripcion: "Aparecen las instalaciones con ventas emitidas o puestos activos en el mes." } }}>
@@ -61,7 +61,7 @@ export function PaginaRentabilidad({ searchParams }: { searchParams: Promise<Q> 
                         </Td>
                         <Td className="hidden text-right tabular-nums md:table-cell">{pesos(f.ventasNetasClp)}</Td>
                         <Td className="hidden text-right tabular-nums md:table-cell">{pesos(f.costoEstimadoClp)}</Td>
-                        <Td className={`text-right font-medium tabular-nums ${f.margenClp < 0 ? "text-danger-fg" : ""}`}>{pesos(f.margenClp)}</Td>
+                        <Td className={`text-right font-medium tabular-nums ${f.margenClp !== null && f.margenClp < 0 ? "text-danger-fg" : ""}`}>{margen(f.margenClp, pesos)}</Td>
                         <Td className="text-right tabular-nums">{porcentaje(f.margenPct)}</Td>
                       </Tr>
                     ))}

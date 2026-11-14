@@ -14,7 +14,7 @@ const mesSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Mes aaaa-mm.");
 const montos = {
   ventasNetasClp: z.number().int(),
   costoEstimadoClp: z.number().int(),
-  margenClp: z.number().int(),
+  margenClp: z.number().int().nullable().describe("Nulo si hay puestos ocultos por permiso de sueldos."),
   margenPct: z.number().int().nullable().describe("Margen sobre ventas en millonésimas (1.000.000 = 100 %); nulo sin ventas."),
 };
 
@@ -24,7 +24,7 @@ const diaAntes = (d: string) => new Date(Date.parse(`${d}T00:00:00Z`) - 86_400_0
 export const rentabilidadInstalaciones = defineCapability({
   id: "finanzas.rentabilidad.get",
   descripcion:
-    "Rentabilidad del mes por instalación: ventas netas sin IVA (las notas de crédito restan) contra el costo laboral ESTIMADO de sus puestos activos, calculado con la capa de sueldo vigente y supuestos fijos (no son liquidaciones). Devuelve margen en pesos y en porcentaje, y cuántos puestos quedaron sin costo u ocultos por sueldo sensible.",
+    "Rentabilidad del mes por instalación: ventas netas sin IVA de facturas y notas enviadas al SII (las notas de crédito restan) contra el costo laboral ESTIMADO de sus puestos activos, calculado con la capa de sueldo vigente y supuestos fijos (no son liquidaciones). Devuelve margen en pesos y en porcentaje (nulo si hay puestos ocultos por permiso de sueldos) y cuántos puestos quedaron sin costo u ocultos.",
   permiso: PERMISO_READ,
   input: z.object({ mes: mesSchema.optional().describe("Mes aaaa-mm; por defecto, el actual. No se aceptan meses futuros.") }),
   output: z.object({
@@ -57,7 +57,8 @@ export const rentabilidadInstalaciones = defineCapability({
     const corte = mes === actual ? hoy() : diaAntes(fin);
     const [ventas, { costos, sinValoresLegales }] = await Promise.all([
       ctx.db.documentoEmitido.findMany({
-        where: { fechaEmision: { gte: aFecha(inicio), lt: aFecha(fin) }, estadoDte: { not: "borrador" } },
+        // Igual que el F29: solo documentos tributarios que valen ante el SII (sin borradores ni rechazados).
+        where: { fechaEmision: { gte: aFecha(inicio), lt: aFecha(fin) }, estadoDte: { in: ["enviado", "aceptado", "anulado_nc"] }, tipoDte: { in: [33, 34, 56, 61] } },
         select: { instalacionId: true, tipoDte: true, montoNeto: true, montoExento: true },
       }),
       costosDePuestos(ctx, inicio, fin, corte),

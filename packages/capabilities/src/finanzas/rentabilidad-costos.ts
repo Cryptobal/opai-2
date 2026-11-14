@@ -48,7 +48,10 @@ export async function costosDePuestos(ctx: Contexto, inicio: string, finExclusiv
     },
     include: { items: { orderBy: { orden: "asc" } } },
   });
-  const [ocultas, juego, mutual] = await Promise.all([ocultasDe(ctx, filas), juegoFijo !== undefined ? juegoFijo : juegoDe(ctx, corte), mutualAdicionalTenant(ctx)]);
+  const [juego, mutual] = await Promise.all([juegoFijo !== undefined ? juegoFijo : juegoDe(ctx, corte), mutualAdicionalTenant(ctx)]);
+  // Sin valores legales no se usa ningún monto: no se pasa por ocultasDe, que auditaría una lectura de sueldos.
+  if (!juego) return { costos: puestos.map((p): CostoPuesto => ({ instalacionId: p.instalacionId, estado: "sin_costo" })), sinValoresLegales: true };
+  const ocultas = await ocultasDe(ctx, filas);
   const costos = puestos.map((p): CostoPuesto => {
     const propias = filas.filter((f) => (f.nivel === "puesto" && f.puestoId === p.id) || (f.nivel === "instalacion" && f.instalacionId === p.instalacionId));
     const r = resolverEstructura(corte, {
@@ -57,7 +60,7 @@ export async function costosDePuestos(ctx: Contexto, inicio: string, finExclusiv
     });
     const elegida = r.estructura ? propias.find((f) => f.id === r.estructura?.id) : undefined;
     if (elegida && ocultas.get(elegida.id)) return { instalacionId: p.instalacionId, estado: "oculto" };
-    if (!r.estructura || !juego) return { instalacionId: p.instalacionId, estado: "sin_costo" };
+    if (!r.estructura) return { instalacionId: p.instalacionId, estado: "sin_costo" };
     try {
       const horas = p.horasSemanales ? Number(p.horasSemanales) : 42;
       const c = costoEmpleadorPorPersona(
@@ -77,5 +80,5 @@ export async function costosDePuestos(ctx: Contexto, inicio: string, finExclusiv
       return { instalacionId: p.instalacionId, estado: "sin_costo" };
     }
   });
-  return { costos, sinValoresLegales: !juego };
+  return { costos, sinValoresLegales: false };
 }

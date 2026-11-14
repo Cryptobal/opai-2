@@ -15,8 +15,9 @@ export type FilaRentabilidad = {
   puestos: number;
   puestosSinCosto: number;
   puestosOcultos: number;
-  margenClp: number;
-  /** Margen sobre ventas en PCT_ESCALA (1.000.000 = 100 %); null si no hay ventas positivas. */
+  /** Null si hay puestos ocultos: sin sus sueldos el margen sería engañoso. */
+  margenClp: number | null;
+  /** Margen sobre ventas en PCT_ESCALA (1.000.000 = 100 %); null sin ventas positivas o con puestos ocultos. */
   margenPct: number | null;
 };
 
@@ -46,11 +47,13 @@ export function rentabilidadPorInstalacion(ventas: readonly VentaParaRentabilida
   }
   return [...filas.values()]
     .map((f) => {
+      if (f.puestosOcultos > 0) return { ...f, margenClp: null, margenPct: null };
       const margenClp = f.ventasNetasClp - f.costoEstimadoClp;
       const margenPct = f.ventasNetasClp > 0 ? Math.round((margenClp * PCT_ESCALA) / f.ventasNetasClp) : null;
       return { ...f, margenClp, margenPct };
     })
-    .sort((a, b) => a.margenClp - b.margenClp || String(a.instalacionId).localeCompare(String(b.instalacionId)));
+    // Las que pierden plata primero; las de margen desconocido (puestos ocultos) al final.
+    .sort((a, b) => (a.margenClp ?? Infinity) - (b.margenClp ?? Infinity) || String(a.instalacionId).localeCompare(String(b.instalacionId)));
 }
 
 /** Totales de la empresa en el mes. */
@@ -58,11 +61,12 @@ export function totalesRentabilidad(filas: readonly FilaRentabilidad[]) {
   const s = (k: "ventasNetasClp" | "costoEstimadoClp" | "puestosSinCosto" | "puestosOcultos") => filas.reduce((t, f) => t + f[k], 0);
   const ventas = s("ventasNetasClp");
   const costo = s("costoEstimadoClp");
+  const completo = s("puestosOcultos") === 0;
   return {
     ventasNetasClp: ventas,
     costoEstimadoClp: costo,
-    margenClp: ventas - costo,
-    margenPct: ventas > 0 ? Math.round(((ventas - costo) * PCT_ESCALA) / ventas) : null,
+    margenClp: completo ? ventas - costo : null,
+    margenPct: completo && ventas > 0 ? Math.round(((ventas - costo) * PCT_ESCALA) / ventas) : null,
     puestosSinCosto: s("puestosSinCosto"),
     puestosOcultos: s("puestosOcultos"),
   };
