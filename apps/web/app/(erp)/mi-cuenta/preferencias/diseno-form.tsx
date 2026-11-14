@@ -8,22 +8,22 @@ import { cambiarMarco } from "@/app/_components/hilo/marco-cliente";
 import type { Marco } from "@/lib/marco";
 
 const DISENOS = [
-  { valor: "clasico", etiqueta: "Clásico", descripcion: "Menú lateral y barra superior" },
+  {
+    valor: "nuevo",
+    etiqueta: "Nuevo",
+    descripcion: "Blanco y negro, con el color de tu empresa",
+  },
+  { valor: "clasico", etiqueta: "Clásico", descripcion: "El diseño anterior: menú lateral y barra superior" },
   {
     valor: "hilo",
     etiqueta: "Hilo",
-    descripcion: "Tus pendientes, la pantalla de trabajo y la búsqueda al pie",
-  },
-  {
-    valor: "nuevo",
-    etiqueta: "Nuevo (vista previa)",
-    descripcion: "El diseño que viene: blanco y negro, con el color de tu empresa",
+    descripcion: "El diseño anterior con tus pendientes y la búsqueda al pie",
   },
 ];
 
 /**
- * Diseño de la aplicación (ADR-090, ADR-109): cada persona elige entre el clásico, el Hilo y el
- * nuevo, que está en vista previa mientras se construye. Al cambiar
+ * Diseño de la aplicación (ADR-090, ADR-109): el nuevo es el predeterminado (CAR-335 D6); el
+ * clásico y el Hilo siguen disponibles por un tiempo. Al cambiar
  * se guarda la preferencia y la página se recarga con el otro marco; si no se pudo guardar, vuelve a
  * la opción anterior y avisa.
  */
@@ -31,7 +31,7 @@ export function DisenoForm({ inicial }: { inicial: Marco }) {
   const [marco, setMarco] = useState<Marco>(inicial);
   const [guardando, setGuardando] = useState(false);
   function elegir(valor: string) {
-    const nuevo: Marco = valor === "hilo" || valor === "nuevo" ? valor : "clasico";
+    const nuevo: Marco = valor === "hilo" || valor === "clasico" ? valor : "nuevo";
     if (nuevo === marco || guardando) return;
     const anterior = marco;
     setMarco(nuevo);
