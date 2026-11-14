@@ -51,7 +51,7 @@ test.describe("@preview listas con ficha a la derecha en el diseño nuevo", () =
       await expandir.click();
       await expect(page.locator('[data-split] > [data-columna="lista"]').first()).toBeVisible();
     } finally {
-      await conDiseno(page, "");
+      await conDiseno(page, "clasico");
     }
   });
 });
