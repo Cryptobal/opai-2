@@ -6,13 +6,16 @@
  * entre dispositivos: se puede probar el Hilo en el computador y seguir con el clásico en el teléfono.
  * No es un permiso: quien cambie la cookie a mano solo cambia su propio marco.
  */
-/** «nuevo» es el diseño de ADR-109: mientras se construye solo lo ve quien lo elige (vista previa). */
+/**
+ * «nuevo» es el diseño de ADR-109 y, desde CAR-335 D6, el predeterminado: sin cookie se ve el nuevo.
+ * El clásico y el Hilo quedan elegibles en Preferencias hasta que se retiren (D6c).
+ */
 export type Marco = "clasico" | "hilo" | "nuevo";
 
 export const COOKIE_MARCO = "opai_marco";
 
 export function marcoDeCookie(valor: string | undefined): Marco {
-  return valor === "hilo" || valor === "nuevo" ? valor : "clasico";
+  return valor === "hilo" || valor === "clasico" ? valor : "nuevo";
 }
 
 /** En esta etapa (H1) el Hilo existe solo en el ERP y con acceso a la empresa actual. */
@@ -28,11 +31,11 @@ export function marcoResuelto(portal: string, acceso: boolean, cookie: string | 
   return portalAdmiteHilo(portal, acceso) ? marcoDeCookie(cookie) : "clasico";
 }
 
-/** Texto para `document.cookie`: un año para Hilo y el nuevo; el clásico es la ausencia de la cookie. */
+/** Texto para `document.cookie`: un año para el clásico y el Hilo; el nuevo es la ausencia de la cookie. */
 export function cookieMarco(marco: Marco): string {
   const seguro =
     typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
-  const guardado = marco === "clasico" ? "" : marco;
+  const guardado = marco === "nuevo" ? "" : marco;
   return `${COOKIE_MARCO}=${guardado}; Path=/; Max-Age=${guardado ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
 }
 

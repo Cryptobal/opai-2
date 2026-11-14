@@ -96,11 +96,11 @@ export const AJUSTES_NUCLEO = defineAjustes(
     // Marco de la aplicación (ADR-090, CAR-278): cada persona elige entre el clásico y el Hilo. Sin
     // migración (ADR-038): va en `core.ajuste`, igual que el tema. El navegador lo recuerda en una
     // cookie para que el servidor pinte el marco elegido sin parpadeo (`apps/web/lib/marco.ts`).
-    // «nuevo» (ADR-109, CAR-335 D2): el diseño nuevo, en vista previa hasta que se active para todos.
-    preferencias_marco: z.enum(["clasico", "hilo", "nuevo"]).default("clasico").meta({
+    // «nuevo» (ADR-109): el diseño nuevo, predeterminado desde CAR-335 D6.
+    preferencias_marco: z.enum(["clasico", "hilo", "nuevo"]).default("nuevo").meta({
       etiqueta: "Diseño",
       ayuda:
-        "Clásico: menú lateral. Hilo: pendientes, pantalla de trabajo y barra de búsqueda. Nuevo: el diseño que viene, en vista previa.",
+        "Nuevo: el diseño de OPAI. Clásico e Hilo: los diseños anteriores, disponibles por un tiempo.",
       grupo: "Preferencias",
       ambito: "usuario",
       control: "seleccion",
