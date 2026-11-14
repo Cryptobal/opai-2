@@ -3,6 +3,7 @@ import { z } from "zod";
 import { disponibilidadSeccion, type SeccionPortal } from "@opai/domain";
 
 import { tenantActual } from "../core/comun";
+import { hoyEn } from "../core/turnos/comun";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import { coberturaActiva, coberturaPorInstalacion, coberturaSchema } from "./cobertura";
@@ -123,7 +124,7 @@ export const resumenLeer = defineCapability({
         s === "cobertura" || s === "rondas" || s === "novedades",
     );
     const conCobertura = await coberturaActiva(ctx, config.seccionesVisibles);
-    const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: tenant.timezone }).format(new Date());
+    const hoy = hoyEn(tenant.timezone);
     const cobertura = conCobertura
       ? await coberturaPorInstalacion(ctx, a.instalaciones, mes, hoy)
       : new Map();

@@ -15,7 +15,7 @@ function CifraCobertura({ c }: { c: Cobertura }) {
   if (c.programados === 0) return <span className="t-caption">Sin turnos programados</span>;
   return (
     <span className="flex flex-col items-end gap-0.5 text-right">
-      <span className="t-numeric font-medium text-fg">{`${formatearNumero(c.porcentaje ?? 0, 1)} %`}</span>
+      <span className="t-numeric font-medium text-fg">{`${formatearNumero(c.porcentaje ?? 0, 1)}\u00a0%`}</span>
       <span className="t-caption t-numeric">{`${c.cubiertos} de ${c.programados} turnos`}</span>
       {c.porCubrir > 0 ? <Badge tono="warning">{`${c.porCubrir} por cubrir`}</Badge> : null}
     </span>
