@@ -1,4 +1,4 @@
-import { serieVigente } from "@opai/domain";
+import { serieVigente, trabajaEn } from "@opai/domain";
 import { z } from "zod";
 
 import { defineConsumidor } from "../eventos/consumidores";
@@ -13,6 +13,7 @@ const payloadSchema = z.object({
   desde: fechaSchema,
   hasta: fechaSchema.optional(),
   titularId: z.string().nullable().optional(),
+  tipo: z.string().optional(),
 });
 
 /** Día anterior (aaaa-mm-dd), en UTC: la serie que se reemplaza queda vigente hasta ese día. */
@@ -38,6 +39,8 @@ async function afectados(ctx: Contexto, p: z.output<typeof payloadSchema>, meses
     for (const f of diasDelMes(mes)) {
       if (f < p.desde || (p.hasta && f > p.hasta)) continue;
       const v = serieVigente(series, f);
+      // En excepciones solo cuentan los días que el titular trabajaba; en un cambio de serie, todos.
+      if (p.hasta && v && !trabajaEn(v.patron, v.inicioCiclo, f)) continue;
       if (v?.titularId) ids.add(v.titularId);
     }
   }
@@ -61,7 +64,8 @@ export const consumidorPautaCambio = defineConsumidor({
   eventos: ["pauta.excepcion.creada", "pauta.excepcion.anulada", "pauta.serie.fijada"],
   async handler(ctx, ev) {
     const p = payloadSchema.safeParse(ev.payload);
-    if (!p.success) return;
+    // Un refuerzo se suma al turno del titular: no le cambia sus días.
+    if (!p.success || p.data.tipo === "refuerzo") return;
     const puesto = await ctx.db.puesto.findFirst({
       where: { id: p.data.puestoId },
       select: { instalacionId: true },

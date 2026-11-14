@@ -226,7 +226,7 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
       });
       expect(r, JSON.stringify(r)).toMatchObject({ ok: true });
       const ev = await e.admin.evento.findFirstOrThrow({
-        where: { tenantId: tenantA, tipo: "pauta.excepcion.creada" },
+        where: { tenantId: tenantA, tipo: "pauta.excepcion.creada", entidadId: porteria },
         orderBy: { createdAt: "desc" },
       });
       const evento = { ...ev, actorTipo: ev.actorTipo, payload: ev.payload };
@@ -234,13 +234,15 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
       await mod.consumidorPautaCambio.handler(ctx(tenantA), evento);
       return e.admin.notificacion.findMany({ where: { tenantId: tenantA, eventoId: ev.id } });
     };
-    const enPublicado = await avisar(primero);
+    // `primero` ya tiene un refuerzo del primer test; el día siguiente también es de turno (4x4).
+    const masDias = (n: number) =>
+      new Date(Date.parse(`${primero}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+    const enPublicado = await avisar(masDias(1));
     expect(enPublicado).toHaveLength(1);
     expect(enPublicado[0]?.usuarioId).toBe(usuarioJuan);
     expect(enPublicado[0]?.titulo).toContain("Cambió tu pauta");
-    const lejos = new Date(`${primero}T00:00:00Z`);
-    lejos.setUTCMonth(lejos.getUTCMonth() + 2);
-    expect(await avisar(lejos.toISOString().slice(0, 10))).toHaveLength(0);
+    // 64 días = 8 ciclos completos: siempre de turno y fuera del mes publicado.
+    expect(await avisar(masDias(64))).toHaveLength(0);
   });
 
   it("otro tenant y un supervisor sin la instalación no la ven", async () => {
