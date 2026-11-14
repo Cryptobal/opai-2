@@ -63,6 +63,21 @@ export const AJUSTES_PERSONAS = defineAjustes(
         soloPersonas: true,
         control: "json",
       }),
+    // CAR-408: prendas del uniforme cuyas tallas guarda la ficha. Vacío = las de la vertical (@opai/domain).
+    personas_prendas_uniforme: z
+      .array(z.object({ nombre: z.string().trim().min(2).max(60) }))
+      .max(30)
+      .default([])
+      .meta({
+        etiqueta: "Prendas del uniforme",
+        ayuda:
+          'La ficha pide la talla de cada prenda. Vacío: las de tu rubro. Ej.: [{ "nombre": "Cotona" }, { "nombre": "Calzado" }]. Cambiar el nombre de una prenda la cuenta como nueva.',
+        grupo: "Personas",
+        ambito: "tenant",
+        permiso: PERMISOS_CORE.personasLaboralManage,
+        soloPersonas: true,
+        control: "json",
+      }),
     personas_no_recontratar_vigencia_maxima_dias: z
       .number()
       .int()
