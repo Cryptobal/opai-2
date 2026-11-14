@@ -10,6 +10,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "asistencia.rostro.textos",
   "comercial.config.get",
   "core.apps_conectadas.list",
+  "core.ausencias.clases",
   "core.bitacora.verificar",
   "core.calendario.listar",
   "core.campos.catalogo",
