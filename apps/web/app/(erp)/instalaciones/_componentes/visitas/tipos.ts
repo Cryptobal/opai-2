@@ -1,13 +1,13 @@
 import type { BadgeProps } from "@opai/ds";
 
-/** Visita de supervisión tal como la devuelve `pauta.visitas.listar` (fechas en ISO). */
+/** Visita de supervisión tal como la devuelve `pauta.visitas.listar` . */
 export type Visita = {
   id: string;
   instalacionId: string;
   supervisor: string | null;
   estado: "en_curso" | "cerrada";
-  iniciadaEn: string;
-  cerradaEn: string | null;
+  iniciadaEn: Date;
+  cerradaEn: Date | null;
   distanciaM: number | null;
   geocerca: "dentro" | "fuera" | "sin_gps" | "sin_ubicacion";
   checklist: {

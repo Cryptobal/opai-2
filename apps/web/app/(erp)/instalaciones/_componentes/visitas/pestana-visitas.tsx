@@ -5,9 +5,9 @@ import { cuandoCompleto } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 import type { Parametros } from "@/lib/parametros";
 
-import { Paginacion } from "../../../personas/_componentes/paginacion";
 import { cargarVisitas } from "./datos";
 import { HojaVisita } from "./diferidas";
+import { conVisitas, PaginasVisitas } from "./paginas-visitas";
 import { LLEGADA, resumenRevision, textoLlegada, type Visita } from "./tipos";
 
 /** Pestaña «Visitas» de la instalación (CAR-83): historial de visitas de supervisión y su detalle. */
@@ -20,13 +20,6 @@ export async function PestanaVisitas({
 }) {
   const r = await cargarVisitas(instalacionId, p);
   const items = r.ok ? r.data.items : [];
-  const ver = (v: Visita) => {
-    const q = new URLSearchParams({
-      ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
-      visita: v.id,
-    });
-    return `?${q.toString()}`;
-  };
   return (
     <div className="@container">
       <ListScreen<Visita>
@@ -35,16 +28,9 @@ export async function PestanaVisitas({
         sinCabecera
         items={items}
         clave={(v) => v.id}
-        href={ver}
+        href={(v) => conVisitas(p, { visita: v.id })}
         Link={LinkNext}
-        paginacion={
-          <Paginacion
-            p={p}
-            mostrados={items.length}
-            siguiente={r.ok ? r.data.siguiente : null}
-            total={null}
-          />
-        }
+        paginacion={<PaginasVisitas p={p} siguiente={r.ok ? r.data.siguiente : null} />}
         tarjeta={(v) => (
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="truncate text-base font-medium">{cuandoCompleto(v.iniciadaEn)}</span>

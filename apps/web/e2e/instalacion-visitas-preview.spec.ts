@@ -27,7 +27,7 @@ test.describe("@preview instalación: pestaña Visitas", () => {
     await expect(
       page
         .getByText("Aún no hay visitas", { exact: true })
-        .or(page.getByText("Supervisor", { exact: true }).first()),
+        .or(page.locator('a[href*="visita="]').first()),
     ).toBeVisible();
     await capturar(page, info, "instalacion-visitas");
   });
