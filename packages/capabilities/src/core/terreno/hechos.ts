@@ -90,8 +90,9 @@ export const hechosRecibir = defineCapability({
     if (!dryRun && nuevos.length > 0) {
       await ctx.transaccion(async (tx) => {
         // Doble envío simultáneo (la página y el service worker): la clave única lo deja pasar una sola vez.
-        const { count } = await tx.hechoTerreno.createMany({
+        const filas = await tx.hechoTerreno.createManyAndReturn({
           skipDuplicates: true,
+          select: { clave: true },
           data: nuevos.map((h) => ({
             tenantId: ctx.tenantId,
             dispositivoId: disp.id,
@@ -108,9 +109,11 @@ export const hechosRecibir = defineCapability({
             desfaseAlto: alto,
           })),
         });
-        await proyecciones.escribir(tx, nuevos, desfaseMs, new Set(nuevos.map((h) => h.clave)));
-        // Si otra petición ganó la carrera no se insertó nada: tampoco se anuncia.
-        if (count === 0) return;
+        // Solo proyecta lo que esta petición insertó: si otra ganó la carrera con un hecho, ella lo proyecta
+        // (y una señal como la emergencia no sale dos veces).
+        const insertadas = new Set(filas.map((f) => f.clave));
+        await proyecciones.escribir(tx, nuevos, desfaseMs, insertadas);
+        if (insertadas.size === 0) return;
         // Un evento por lote (no por hecho): los módulos de terreno leen sus hechos por tipo en la tabla.
         const porTipo: Record<string, number> = {};
         for (const h of nuevos) porTipo[h.tipo] = (porTipo[h.tipo] ?? 0) + 1;

@@ -103,6 +103,13 @@ describe.skipIf(!urlPropietario)("emergencia de ronda en base real (CAR-501)", (
     expect(ev[0]?.payload).not.toHaveProperty("personaId");
   });
 
+  it("dos envíos simultáneos de la misma alerta (página y service worker) emiten una sola señal", async () => {
+    const antes = (await alertas("A")).length;
+    const alerta = hecho("rondas.emergencia", {});
+    await Promise.all([recibir("A", [alerta]), recibir("A", [alerta])]);
+    expect(await alertas("A")).toHaveLength(antes + 1);
+  });
+
   it("sin ronda ni GPS igual avisa; sin Rondas activo se rechaza; la otra empresa no recibe nada", async () => {
     const antes = (await alertas("A")).length;
     expect((await recibir("A", [hecho("rondas.emergencia", {})]))[0]?.estado).toBe("recibido");
