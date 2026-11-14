@@ -88,3 +88,39 @@ describe("claveLibre", () => {
     expect(claveLibre("y", ocupadas)).toBe("y");
   });
 });
+
+describe("emparejarMovimientos: pasada por monto con el banco en línea (CAR-450)", () => {
+  const enLinea = (e: { id: string }) => e.id.startsWith("w");
+
+  it("empareja glosas distintas si el movimiento del banco en línea es el único candidato", () => {
+    const existentes = [ex("w1", "2026-11-03", -42_000, "TEF PROVEEDOR FICT")];
+    const r = emparejarMovimientos([ent("2026-11-05", -42_000, "PAGO PROVEEDORES 0099")], existentes, { porMontoSi: enLinea });
+    expect(r.get(0)).toEqual({ existenteId: "w1", por: "monto", fechaExistente: "2026-11-03" });
+  });
+
+  it("sin la opción, o con un existente que no es del banco en línea, la glosa distinta sigue siendo nueva", () => {
+    expect(emparejarMovimientos([ent("2026-11-05", -42_000, "PAGO PROVEEDORES")], [ex("w1", "2026-11-03", -42_000, "TEF X")]).size).toBe(0);
+    const r = emparejarMovimientos([ent("2026-11-05", -42_000, "PAGO PROVEEDORES")], [ex("c1", "2026-11-03", -42_000, "TEF X")], { porMontoSi: enLinea });
+    expect(r.size).toBe(0);
+  });
+
+  it("dos montos iguales en la ventana no se emparejan por monto (ambiguo)", () => {
+    const dosExistentes = [ex("w1", "2026-11-03", -10_000, "TEF A"), ex("w2", "2026-11-04", -10_000, "TEF B")];
+    expect(emparejarMovimientos([ent("2026-11-04", -10_000, "PAGO 1")], dosExistentes, { porMontoSi: enLinea }).size).toBe(0);
+    const dosEntrantes = [ent("2026-11-03", -10_000, "PAGO 1"), ent("2026-11-05", -10_000, "PAGO 2")];
+    expect(emparejarMovimientos(dosEntrantes, [ex("w1", "2026-11-04", -10_000, "TEF A")], { porMontoSi: enLinea }).size).toBe(0);
+  });
+
+  it("las pasadas por glosa van primero y liberan la ambigüedad", () => {
+    const existentes = [ex("w1", "2026-11-03", -10_000, "Pago luz ficticia"), ex("w2", "2026-11-04", -10_000, "TEF B")];
+    const entrantes = [ent("2026-11-04", -10_000, "PAGO LUZ FICTICIA"), ent("2026-11-05", -10_000, "CARGO 77")];
+    const r = emparejarMovimientos(entrantes, existentes, { porMontoSi: enLinea });
+    expect(r.get(0)).toMatchObject({ existenteId: "w1", por: "parecida" });
+    expect(r.get(1)).toMatchObject({ existenteId: "w2", por: "monto" });
+  });
+
+  it("fuera de la tolerancia no empareja", () => {
+    const r = emparejarMovimientos([ent("2026-11-08", -42_000, "PAGO")], [ex("w1", "2026-11-03", -42_000, "TEF")], { porMontoSi: enLinea });
+    expect(r.size).toBe(0);
+  });
+});
