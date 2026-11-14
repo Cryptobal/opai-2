@@ -85,6 +85,22 @@ describe("POST /api/webhooks/resend/entrante · dirección de la empresa", () =>
     expect((await pedir(evento({ from: "vendedor@empresa.cl", to: ["ana@cliente.cl"], bcc: [BUZON] }))).status).toBe(200);
     expect(ejecutar).toHaveBeenCalledWith(expect.anything(), "core.correos.recibir", expect.objectContaining({ destinatarios: ["ana@cliente.cl"] }));
   });
+  it("CCO real: el webhook solo trae la dirección de OPAI y los destinatarios salen del correo recibido", async () => {
+    resolverBuzon.mockResolvedValue({ tenantId: "t1" });
+    vi.stubEnv("RESEND_API_KEY", "re_prueba");
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ text: "hola", to: [], cc: [], headers: { to: "Ana Cliente <ana@cliente.cl>, jefe@cliente.cl", cc: "otro@cliente.cl" } })),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      expect((await pedir(evento({ from: "vendedor@empresa.cl", to: [BUZON] }))).status).toBe(200);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+    expect(ejecutar).toHaveBeenCalledWith(expect.anything(), "core.correos.recibir", expect.objectContaining({
+      destinatarios: ["ana@cliente.cl", "jefe@cliente.cl", "otro@cliente.cl"], texto: "hola",
+    }));
+  });
   it("token de empresa desconocido: 200 sin ejecutar", async () => {
     resolverBuzon.mockResolvedValue(null);
     expect((await pedir(evento({ to: [BUZON] }))).status).toBe(200);
