@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar } from "./preview";
+import { capturar, capturarHoja } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-352 (Sesión Núcleo): eventos salientes en Configuración › Agentes y API keys. Corre con la
@@ -25,14 +25,16 @@ test.describe("@preview eventos salientes", () => {
     const direccion = `https://hooks.qa-e2e.test/opai-${info.project.name}-${Date.now()}`;
     await url.fill(direccion);
     await page.getByLabel("Buscar evento").fill("core.cuenta.creada");
-    await page.getByRole("checkbox", { name: /core\.cuenta\.creada/ }).click();
-    await capturar(page, info, "eventos-salientes-agregar");
+    const casilla = page.getByRole("checkbox", { name: /core\.cuenta\.creada/ });
+    await casilla.click();
+    await expect(casilla).toBeChecked();
+    await capturarHoja(page, info, "eventos-salientes-agregar");
     await page.getByRole("button", { name: "Agregar destino" }).last().click();
 
     const dialogo = page.getByRole("dialog", { name: "Destino agregado" });
     await expect(dialogo).toBeVisible({ timeout: 60_000 });
     await expect(dialogo.getByText(/^whsec_/)).toBeVisible();
-    await capturar(page, info, "eventos-salientes-secreto");
+    await capturarHoja(page, info, "eventos-salientes-secreto");
     await dialogo.getByRole("button", { name: "Ya lo copié" }).click();
 
     try {
