@@ -21,6 +21,7 @@
     "scaffold:module": "tsx scripts/scaffold-module.ts",
     "iconos:pwa": "tsx scripts/generar-iconos-pwa.ts",
     "presupuesto": "tsx scripts/presupuesto-js.ts",
+    "simplicidad": "tsx scripts/simplicidad.ts",
     "mcp:verificar": "tsx scripts/mcp-verificar.ts"
   },
   "devDependencies": {
@@ -29,6 +30,8 @@
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.13.0",
+    "jscpd": "^5.4.3",
+    "knip": "^6.45.1",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "turbo": "^2.11.10",
