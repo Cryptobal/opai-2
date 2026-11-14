@@ -21,8 +21,10 @@ export const solicitudesCrear = defineCapability({
   input: solicitudInput,
   output: solicitudSchema,
   efecto: "escritura",
-  // El motivo es texto libre: no llega en claro a la auditoría (igual que core.ausencias, CAR-393).
+  // El motivo es texto libre: no llega en claro a la auditoría (igual que core.ausencias, CAR-393) ni a la tabla de
+  // idempotencia.
   sensibles: ["motivo"],
+  salidaIdempotente: (s) => ({ ...s, motivo: "[oculto]" }),
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const persona = await personaPropia(ctx);
@@ -38,18 +40,26 @@ export const solicitudesCrear = defineCapability({
       estado: "solicitada",
       registradaPor: usuarioId,
     };
-    const choca = await ctx.db.ausencia.findFirst({
-      where: {
-        personaId: persona.id,
-        estado: { in: ["solicitada", "aprobada"] },
-        desde: { lte: datos.hasta },
-        hasta: { gte: datos.desde },
-      },
-      select: { id: true },
-    });
-    if (choca) throw conflicto("Ya tienes un permiso, vacaciones o solicitud en esas fechas.");
-    if (dryRun) return vistaSolicitud({ ...datos, id: "vista-previa", clase: null, createdAt: new Date() }, usuarioId);
+    const chocaEn = async (db: typeof ctx.db) => {
+      const choca = await db.ausencia.findFirst({
+        where: {
+          personaId: persona.id,
+          estado: { in: ["solicitada", "aprobada"] },
+          desde: { lte: datos.hasta },
+          hasta: { gte: datos.desde },
+        },
+        select: { id: true },
+      });
+      if (choca) throw conflicto("Ya tienes un permiso, vacaciones o solicitud en esas fechas.");
+    };
+    if (dryRun) {
+      await chocaEn(ctx.db);
+      return vistaSolicitud({ ...datos, id: "vista-previa", clase: null, createdAt: new Date() }, usuarioId);
+    }
     const creada = await ctx.transaccion(async (tx) => {
+      // Mismo candado por persona que la pauta y RR. HH. (CAR-393): dos pedidos a la vez no quedan superpuestos.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`pauta:${ctx.tenantId}:${persona.id}`}, 0))::text`;
+      await chocaEn(tx);
       const a = await tx.ausencia.create({ data: datos });
       await ctx.eventos.emitir(tx, {
         tipo: "portal_trabajador.solicitud.creada",
@@ -73,6 +83,7 @@ export const solicitudesCancelar = defineCapability({
   input: z.object({ id: z.uuid() }),
   output: solicitudSchema,
   efecto: "escritura",
+  salidaIdempotente: (s) => ({ ...s, motivo: "[oculto]" }),
   dryRun: true,
   async handler(ctx, { id }, { dryRun }) {
     const persona = await personaPropia(ctx);
@@ -82,8 +93,16 @@ export const solicitudesCancelar = defineCapability({
     if (a.estado !== "solicitada") throw reglaDeNegocio("Esa solicitud ya fue resuelta: habla con tu jefatura.");
     const cambio = { estado: "anulada", anuladaPor: usuarioId, anuladaEn: new Date() };
     if (dryRun) return vistaSolicitud({ ...a, ...cambio }, usuarioId);
-    const r = await ctx.db.ausencia.updateMany({ where: { id, estado: "solicitada" }, data: cambio });
-    if (r.count !== 1) throw conflicto("La solicitud cambió. Recarga y vuelve a intentarlo.");
+    await ctx.transaccion(async (tx) => {
+      const r = await tx.ausencia.updateMany({ where: { id, estado: "solicitada" }, data: cambio });
+      if (r.count !== 1) throw conflicto("La solicitud cambió. Recarga y vuelve a intentarlo.");
+      await ctx.eventos.emitir(tx, {
+        tipo: "portal_trabajador.solicitud.retirada",
+        entidadTipo: "ausencia",
+        entidadId: id,
+        payload: { personaId: persona.id, tipo: a.tipo },
+      });
+    });
     return vistaSolicitud({ ...a, ...cambio }, usuarioId);
   },
 });
