@@ -87,6 +87,7 @@ export const SUSTANTIVO: Record<string, string> = {
   modules: "los módulos",
   biometria: "el enrolamiento biométrico",
   hechos_terreno: "los registros de terreno",
+  libro_novedades: "el libro de novedades",
   cuentas_referencias: "un acceso de referencia",
   importar: "la importación",
   supervisores: "el supervisor",

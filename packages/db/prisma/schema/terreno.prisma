@@ -128,3 +128,45 @@ model EnrolamientoBiometrico {
   @@map("enrolamientos_biometricos")
   @@schema("core")
 }
+
+/// Libro de novedades de una instalación, en el núcleo (CAR-77, ADR-024 nota del 29-oct-2026): una sola tabla
+/// para todos los módulos que dejan novedades (Rondas hoy; Control de acceso y Central después), sin copias. Una
+/// novedad grave es el incidente de terreno. `numero` lo asigna un trigger, correlativo por empresa (NOV-0001).
+/// Las referencias a Rondas (`ejecucion_id`, `punto_id`, `tipo_incidente_id`) no llevan FK: el núcleo no depende
+/// de un módulo. Reemplaza a `rondas.novedades`, que queda sin escrituras hasta retirarse.
+model LibroNovedad {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  numero          Int      @default(0)
+  instalacionId   String   @map("instalacion_id") @db.Uuid
+  /// Módulo que la dejó: "rondas" | "acceso" | "central" | "terreno".
+  modulo          String   @default("terreno")
+  /// "ronda" | "punto" | "manual".
+  origen          String   @default("manual")
+  ejecucionId     String?  @map("ejecucion_id") @db.Uuid
+  puntoId         String?  @map("punto_id") @db.Uuid
+  tipoIncidenteId String?  @map("tipo_incidente_id") @db.Uuid
+  /// "baja" | "media" | "alta" (alta = incidente).
+  gravedad        String   @default("media")
+  resumen         String
+  detalle         String?
+  /// "abierta" | "en_atencion" | "resuelta" | "cerrada" | "derivada".
+  estado          String   @default("abierta")
+  /// Equipo de terreno que la envió (si llegó por la cola).
+  dispositivoId   String?  @map("dispositivo_id") @db.Uuid
+  /// Persona declarada en «¿Quién eres?» del equipo (no autenticada).
+  personaId       String?  @map("persona_id") @db.Uuid
+  /// Usuario que la registró en línea (ERP o portal), si no vino de un equipo.
+  usuarioId       String?  @map("usuario_id") @db.Uuid
+  /// Hora del hecho llevada a la del servidor (la del equipo corregida por el desfase del envío).
+  horaHecho       DateTime @default(now()) @map("hora_hecho") @db.Timestamptz(6)
+  idempotencyKey  String?  @map("idempotency_key")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, numero])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, instalacionId, horaHecho(sort: Desc)])
+  @@map("libro_novedades")
+  @@schema("core")
+}

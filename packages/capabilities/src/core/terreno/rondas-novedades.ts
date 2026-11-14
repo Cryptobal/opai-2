@@ -1,10 +1,10 @@
 import type { Contexto } from "../../types";
-import type { Equipo, Hecho, Rechazos } from "./acceso-tipos";
+import type { Equipo, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
 import { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
 
 export type NovedadesResueltas = {
   rechazos: Rechazos;
-  /** Escribe en el libro de novedades las aceptadas; `ids` es clave de ronda → id (para enlazarlas). */
+  /** Escribe en el libro de novedades del núcleo las aceptadas; `ids` es clave de ronda → id (para enlazarlas). */
   escribir: (
     tx: Contexto["db"],
     aceptadas: ReadonlySet<string>,
@@ -13,15 +13,18 @@ export type NovedadesResueltas = {
 };
 
 /**
- * Novedades de ronda por la cola (CAR-78 · E5a). El punto debe ser de la instalación del equipo y el tipo de
- * incidente del tenant y activo; la gravedad por defecto es la del tipo. La clave del hecho es la clave de
- * idempotencia de la novedad, así que reenviar no duplica. Si la ronda a la que apunta no existe, la novedad se
- * guarda igual sin ronda: una novedad nunca se pierde. No marca presencia laboral.
+ * Novedades de ronda por la cola (CAR-78 · E5a) hacia el libro de novedades del núcleo (CAR-77,
+ * `core.libro_novedades`), con el equipo, la persona declarada y la hora del hecho corregida. El punto debe ser de
+ * la instalación del equipo y el tipo de incidente del tenant y activo; la gravedad por defecto es la del tipo. La
+ * clave del hecho es la clave de idempotencia de la novedad, así que reenviar no duplica. Si la ronda a la que
+ * apunta no existe, la novedad se guarda igual sin ronda: una novedad nunca se pierde. Una novedad grave emite
+ * `rondas.novedad.grave` (una vez, solo al insertarse). No marca presencia laboral.
  */
 export async function resolverNovedades(
   ctx: Contexto,
   equipo: Equipo,
   hechos: readonly Hecho[],
+  t: Tiempo,
 ): Promise<NovedadesResueltas> {
   const rechazos: Rechazos = new Map();
   const nov = hechos.flatMap((h) => {
@@ -84,6 +87,7 @@ export async function resolverNovedades(
       const data = aceptables.map(({ h, p }) => ({
         tenantId: ctx.tenantId,
         instalacionId: equipo.instalacionId,
+        modulo: "rondas",
         origen: p.puntoId ? "punto" : p.ejecucionClave ? "ronda" : "manual",
         ejecucionId: p.ejecucionClave ? (rondaDe.get(p.ejecucionClave) ?? null) : null,
         puntoId: p.puntoId ?? null,
@@ -94,9 +98,25 @@ export async function resolverNovedades(
           "media",
         resumen: p.resumen,
         detalle: p.detalle ?? null,
+        dispositivoId: equipo.id,
+        personaId: h.personaId ?? null,
+        horaHecho: t.corregir(new Date(h.horaHecho)),
         idempotencyKey: h.clave,
       }));
-      if (data.length > 0) await tx.novedad.createMany({ skipDuplicates: true, data });
+      if (data.length === 0) return;
+      const nuevas = await tx.libroNovedad.createManyAndReturn({
+        skipDuplicates: true,
+        data,
+        select: { id: true, numero: true, gravedad: true },
+      });
+      for (const n of nuevas.filter((x) => x.gravedad === "alta")) {
+        await ctx.eventos.emitir(tx, {
+          tipo: "rondas.novedad.grave",
+          entidadTipo: "novedad",
+          entidadId: n.id,
+          payload: { instalacionId: equipo.instalacionId, numero: n.numero },
+        });
+      }
     },
   };
 }
