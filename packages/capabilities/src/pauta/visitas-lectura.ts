@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { noEncontrado } from "../errores";
+import { noEncontrado, reglaDeNegocio } from "../errores";
 import { PERMISO_READ } from "./comun";
 import { dondeVisita, type Visita, visitaSchema, vistasDeVisitas } from "./visitas-comun";
 
@@ -25,6 +25,7 @@ export const visitasListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { instalacionId, supervisorId, estado, cursor, limite }) {
+    if (cursor && !uuidSchema.safeParse(cursor).success) throw reglaDeNegocio("El cursor no es válido.");
     const filas = await ctx.db.visitaSupervision.findMany({
       where: {
         AND: [dondeVisita(ctx)],

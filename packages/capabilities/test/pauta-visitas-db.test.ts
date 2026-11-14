@@ -88,6 +88,21 @@ describe.skipIf(omitirSuiteDb())("pauta.visitas (CAR-83)", () => {
     expect(items).toEqual([]);
     const { items: todas } = await data<{ items: V[] }>(run(ctx(u.sup2, "supervisor", t.a, [inst["sur"]!]), "pauta.visitas.listar", {}));
     expect(todas).toHaveLength(1);
+    const ver = await data<V>(run(ctx(u.sup2, "supervisor", t.a, [inst["sur"]!]), "pauta.visitas.obtener", { visitaId: todas[0]!.id }));
+    expect(ver.id).toBe(todas[0]!.id);
+  });
+
+  it("dos «iniciar» a la vez: uno entra y el otro es CONFLICT; quien perdió la instalación igual cierra la suya", async () => {
+    const c = ctx(u.sup2, "supervisor", t.a, [inst["sur"]!]);
+    const rs = await Promise.all([1, 2].map(() => run(c, "pauta.visitas.iniciar", { instalacionId: inst["sur"] })));
+    expect(rs.map((r) => (r.ok ? "ok" : r.error.code)).sort()).toEqual(["CONFLICT", "ok"]);
+    const ok = rs.find((r) => r.ok);
+    const id = ok && ok.ok ? (ok.data as { visita: V }).visita.id : "";
+    const sinAlcance = ctx(u.sup2, "supervisor", t.a, []);
+    const { visita } = await data<{ visita: V }>(run(sinAlcance, "pauta.visitas.cerrar", { visitaId: id, checklist: [] }));
+    expect(visita.estado).toBe("cerrada");
+    const mal = await run(c, "pauta.visitas.listar", { cursor: "no-es-uuid" });
+    expect(mal.ok ? null : mal.error.code).toBe("UNPROCESSABLE");
   });
 
   it("otra empresa no ve ni cierra las visitas de esta", async () => {

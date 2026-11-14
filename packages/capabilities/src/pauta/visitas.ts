@@ -4,6 +4,7 @@ import { clasificarLlegada } from "@opai/domain";
 
 import { uuidSchema } from "../core/esquemas";
 import { dondeInstalacion } from "../core/maestros/alcance";
+import { sinDuplicado } from "../core/maestros/comun";
 import { defineCapability } from "../define";
 import { conflicto, noEncontrado, prohibido } from "../errores";
 import type { Contexto } from "../types";
@@ -41,7 +42,8 @@ export const visitasIniciar = defineCapability({
     });
     if (!inst) throw noEncontrado("La instalación");
     const abierta = await ctx.db.visitaSupervision.findFirst({ where: { supervisorId, estado: "en_curso" }, select: { id: true } });
-    if (abierta) throw conflicto("Ya tienes una visita en curso: ciérrala antes de iniciar otra.");
+    const yaAbierta = "Ya tienes una visita en curso: ciérrala antes de iniciar otra.";
+    if (abierta) throw conflicto(yaAbierta);
     const u = input.ubicacion;
     const { distanciaM, geocerca } = clasificarLlegada({
       instalacion: { lat: inst.lat == null ? null : Number(inst.lat), lng: inst.lng == null ? null : Number(inst.lng), geocercaM: inst.geocercaM },
@@ -49,12 +51,13 @@ export const visitasIniciar = defineCapability({
     });
     const lista = await listaVisitaDe(ctx);
     if (dryRun) return { visita: null, distanciaM, geocerca, lista };
-    const fila = await ctx.db.visitaSupervision.create({
+    // Dos «iniciar» a la vez: el índice parcial deja pasar uno y el otro sale como CONFLICT, no como error interno.
+    const fila = await sinDuplicado(ctx.db.visitaSupervision.create({
       data: {
         tenantId: ctx.tenantId, instalacionId: inst.id, supervisorId, iniciadaEn: new Date(), geocerca, distanciaM,
         lat: u?.lat ?? null, lng: u?.lng ?? null, precisionM: u?.precisionM == null ? null : Math.round(u.precisionM),
       },
-    });
+    }), yaAbierta);
     const [visita] = await vistasDeVisitas(ctx, [fila]);
     return { visita: visita as Visita, distanciaM, geocerca, lista };
   },
@@ -77,7 +80,8 @@ export const visitasCerrar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const supervisorId = quien(ctx);
     const v = await ctx.db.visitaSupervision.findFirst({
-      where: { AND: [dondeVisita(ctx)], id: input.visitaId },
+      // Quien la inició puede cerrarla aunque haya perdido la instalación; si no, quedaría trabado sin poder iniciar otra.
+      where: { id: input.visitaId, OR: [dondeVisita(ctx), { supervisorId }] },
     });
     if (!v) throw noEncontrado("La visita");
     if (v.supervisorId !== supervisorId) throw prohibido("Solo quien inició la visita puede cerrarla.");
