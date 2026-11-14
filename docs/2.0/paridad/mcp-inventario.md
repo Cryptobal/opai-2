@@ -614,6 +614,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.personas.get` | `core_personas_get` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `core.credenciales_terreno.cambiar_pin` | — | excepción |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `core.push.quitar` | — | excepción |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `core.push.suscribir` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.arco.solicitar` | `portal_trabajador_arco_solicitar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
@@ -1054,8 +1056,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.metodos_acceso.quitar` | `app/_acciones` | no | reservada a personas |
 | `core.personas.pago_aprobar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.pago_rechazar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
-| `core.push.quitar` | sin pantalla todavía · CAR-356 · desde 2026-11-13 | no | reservada a personas |
-| `core.push.suscribir` | sin pantalla todavía · CAR-356 · desde 2026-11-13 | no | reservada a personas |
+| `core.push.quitar` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
+| `core.push.suscribir` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
 | `core.remuneraciones.confirmar_mutual` | `/configuracion/remuneraciones` | no | reservada a personas |
 | `core.roles.adicional_asignar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
