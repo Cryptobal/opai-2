@@ -7,8 +7,6 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 792 pares pantalla→capacidad · 713 con herramienta · 79 excepciones justificadas · 0 faltantes.
-
 ## Pantalla → herramienta MCP
 
 | Portal | Ruta o componente | Capacidad | Herramienta MCP | Estado |
@@ -21,6 +19,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/negocios/export` | `comercial.negocios.exportar` | `comercial_negocios_exportar` | existe |
 | — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
 | — | `/api/rendiciones/lotes/[id]/nomina` | `rendiciones.lotes.nomina_descargar` | — | excepción |
+| — | `/api/rendiciones/reporte/excel` | `rendiciones.reporte.excel` | `rendiciones_reporte_excel` | existe |
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
@@ -153,6 +152,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.rendiciones.listar` | `rendiciones_rendiciones_listar` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.rechazar` | `rendiciones_rendiciones_rechazar` | existe |
+| compartido | `app/_components` | `rendiciones.reporte.get` | `rendiciones_reporte_get` | existe |
 | compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
 | compartido | `app/(cliente)/cliente/cotizaciones/_componentes` | `cpq.portal_cotizaciones.descargar` | `cpq_portal_cotizaciones_descargar` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
@@ -273,6 +273,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.archive` | `core_contactos_archive` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.cuentas` | `core_contactos_cuentas` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.desvincular` | `core_contactos_desvincular` | existe |
+| compartido | `app/(erp)/contactos/_componentes` | `core.contactos.fusionar` | `core_contactos_fusionar` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.get` | `core_contactos_get` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.restaurar` | `core_contactos_restaurar` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.set_roles` | `core_contactos_set_roles` | existe |
@@ -862,6 +863,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/negocios/export/route.ts` | Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27). |
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
 | `app/api/rendiciones/lotes/[id]/nomina/route.ts` | Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208). |
+| `app/api/rendiciones/reporte/excel/route.ts` | Descarga de rendiciones.reporte.excel (Excel) con sesión; mismo permiso y datos que la herramienta MCP rendiciones_reporte_excel (CAR-179). |
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
 | `app/api/terreno/contexto/route.ts` | Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
@@ -1121,7 +1123,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.campos.catalogo`
 - `core.campos.valores`
 - `core.consumos.por_recurso`
-- `core.contactos.fusionar`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
