@@ -62,18 +62,12 @@ export function estadoPago(v: DatosPago, pendiente: boolean): EstadoTarjeta {
   return v.bancoCodigo && v.tipoCuenta && v.numeroCuenta && v.rutTitular ? COMPLETO : INCOMPLETO;
 }
 
-export type DatosUniforme = {
-  tallaCamisa: string | null;
-  tallaPantalon: string | null;
-  tallaChaqueta: string | null;
-  tallaZapato: string | null;
-} | null;
+/** Talla por prenda del uniforme de la empresa (CAR-408). */
+export type TallaPrenda = { prenda: string; nombre: string; talla: string | null; enKit: boolean };
 
-/** Cuántas de las 4 tallas registradas faltan. */
-export function estadoUniforme(u: DatosUniforme): EstadoTarjeta {
-  const faltan = [u?.tallaCamisa, u?.tallaPantalon, u?.tallaChaqueta, u?.tallaZapato].filter(
-    (t) => !t,
-  ).length;
+/** Cuántas prendas del uniforme de la empresa no tienen talla. */
+export function estadoUniforme(tallas: readonly TallaPrenda[]): EstadoTarjeta {
+  const faltan = tallas.filter((t) => t.enKit && !t.talla).length;
   if (faltan === 0) return COMPLETO;
   return { tono: "warning", etiqueta: faltan === 1 ? "Falta 1 talla" : `Faltan ${faltan} tallas` };
 }
