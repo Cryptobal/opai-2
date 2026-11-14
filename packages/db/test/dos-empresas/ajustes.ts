@@ -21,6 +21,14 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Central (CAR-461): CHECK de severidad, estado y coherencia de la pospuesta; actor del hecho.
+  "central.alertas": {
+    valores: () => ({ severidad: "alta", estado: "nueva", estado_previo: null, pospuesta_hasta: null }),
+  },
+  "central.alerta_eventos": {
+    dependencias: ["central.alertas"],
+    valores: (ctx) => ({ actor_tipo: "persona", alerta_id: id(ctx, "central.alertas") }),
+  },
   // Reglas de aprobación (CAR-252): CHECK de un solo aprobador (rol o grupo) y monto no negativo.
   "core.reglas_aprobacion": {
     valores: () => ({
@@ -160,6 +168,8 @@ export const AJUSTES: Record<string, Ajuste> = {
       motivo_anulacion: null,
     }),
   },
+  // Tallas por prenda (CAR-408): CHECK del formato de la clave y del largo de la talla.
+  "core.personas_tallas": { fijas: ["prenda"], valores: () => ({ prenda: "camisa", talla: "M" }) },
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },

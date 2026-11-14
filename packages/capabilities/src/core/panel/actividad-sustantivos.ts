@@ -28,6 +28,8 @@ export const SUSTANTIVO: Record<string, string> = {
   tickets: "el ticket",
   novedades: "la novedad",
   etiquetas: "la etiqueta",
+  // Eventos salientes (CAR-352): el id es `core.webhooks.destino_*`.
+  webhooks: "un destino de eventos salientes",
   documento_plantillas: "la plantilla de documento",
   plantillas: "la plantilla",
   users: "el usuario",

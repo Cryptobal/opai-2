@@ -16,6 +16,8 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "asistencia:reportes": "G",
   "asistencia:ver": "GS",
   "asistencia:ver_todo": "G",
+  "central:alertas.atender": "GS",
+  "central:alertas.ver": "GLS",
   "comercial:canales.manage": "-",
   "comercial:config.manage": "-",
   "comercial:negocios.exportar": "G",

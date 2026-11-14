@@ -4,7 +4,7 @@ import { Alerta, Badge } from "@opai/ds";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { fecha, hoyIso } from "@/lib/fechas";
 
-import { HojasPeriodoContrato } from "./diferidas";
+import { HojasPeriodoContrato } from "./diferidas-laboral";
 import { estadoVencimiento } from "./estado-ficha";
 import type { ContratoPeriodos, PeriodoContrato } from "./lecturas-ficha";
 
