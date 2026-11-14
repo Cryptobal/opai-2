@@ -416,4 +416,32 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     const registro = await e.admin.ausencia.findUnique({ where: { id: turnos[0]!.ausenciaId! } });
     expect(registro).toMatchObject({ personaId: ana, tipo: "licencia", clase: "Enfermedad común" });
   });
+
+  it("al anonimizar a la persona, el motivo de sus turnos en la pauta se reemplaza (CAR-393)", async () => {
+    // Elegible: su relación laboral terminó antes del corte.
+    await e.admin.vinculoLaboral.updateMany({
+      where: { personaId: ana },
+      data: { estado: "terminado", termino: new Date("2020-01-31") },
+    });
+    const antes = await e.admin.excepcionPauta.count({ where: { personaId: ana } });
+    expect(antes).toBeGreaterThan(0);
+    const { anonimizarPersona, MARCA_ANONIMO } =
+      await import("../src/core/cumplimiento/retencion-anonimizar");
+    const hecho = await ctx(tenantA).transaccion((tx) =>
+      anonimizarPersona(tx, ana, new Date(), new Date("2020-02-01")),
+    );
+    expect(hecho).toBe(true);
+    const turnos = await e.admin.excepcionPauta.findMany({
+      where: { personaId: ana },
+      select: { motivo: true },
+    });
+    expect(turnos).toHaveLength(antes);
+    expect(turnos.every((t) => t.motivo === MARCA_ANONIMO)).toBe(true);
+    // Los turnos de Juan no cambian.
+    const deJuan = await e.admin.excepcionPauta.findMany({
+      where: { personaId: juan },
+      select: { motivo: true },
+    });
+    expect(deJuan.some((t) => t.motivo !== MARCA_ANONIMO)).toBe(true);
+  });
 });

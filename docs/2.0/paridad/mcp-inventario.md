@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 794 pares pantalla→capacidad · 711 con herramienta · 83 excepciones justificadas · 0 faltantes.
+**Resumen:** 802 pares pantalla→capacidad · 719 con herramienta · 83 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -66,6 +66,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `asistencia.rostro.iniciar_vida` | — | excepción |
 | compartido | `app/_components` | `asistencia.rostro.revocar` | — | excepción |
 | compartido | `app/_components` | `asistencia.rostro.textos` | `asistencia_rostro_textos` | existe |
+| compartido | `app/_components` | `comercial.negocio_campos.get` | `comercial_negocio_campos_get` | existe |
+| compartido | `app/_components` | `comercial.negocio_campos.set` | `comercial_negocio_campos_set` | existe |
 | compartido | `app/_components` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/_components` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/_components` | `core.actividades.completar` | `core_actividades_completar` | existe |
@@ -125,6 +127,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.novedades.marcar_leidas` | `core_novedades_marcar_leidas` | existe |
 | compartido | `app/_components` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/_components` | `core.valores_personalizados.get` | `core_valores_personalizados_get` | existe |
+| compartido | `app/_components` | `core.valores_personalizados.set` | `core_valores_personalizados_set` | existe |
 | compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.listar` | `rendiciones_bandeja_listar` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.obtener` | `rendiciones_bandeja_obtener` | existe |
@@ -269,6 +273,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.archive` | `core_contactos_archive` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.cuentas` | `core_contactos_cuentas` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.desvincular` | `core_contactos_desvincular` | existe |
+| compartido | `app/(erp)/contactos/_componentes` | `core.contactos.fusionar` | `core_contactos_fusionar` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.get` | `core_contactos_get` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.restaurar` | `core_contactos_restaurar` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.set_roles` | `core_contactos_set_roles` | existe |
@@ -646,6 +651,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/calendario` | `core.calendario.archivar` | `core_calendario_archivar` | existe |
 | erp | `/configuracion/calendario` | `core.calendario.crear_feriado` | `core_calendario_crear_feriado` | existe |
 | erp | `/configuracion/calendario` | `core.calendario.listar` | `core_calendario_listar` | existe |
+| erp | `/configuracion/campos-personalizados` | `core.campos_personalizados.create` | `core_campos_personalizados_create` | existe |
+| erp | `/configuracion/campos-personalizados` | `core.campos_personalizados.list` | `core_campos_personalizados_list` | existe |
+| erp | `/configuracion/campos-personalizados` | `core.campos_personalizados.update` | `core_campos_personalizados_update` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
@@ -1111,8 +1119,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `comercial.contexto.sugerir_seccion`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
-- `comercial.negocio_campos.get`
-- `comercial.negocio_campos.set`
 - `comercial.negocios.alertas`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
@@ -1124,11 +1130,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
-- `core.campos_personalizados.create`
-- `core.campos_personalizados.list`
-- `core.campos_personalizados.update`
 - `core.consumos.por_recurso`
-- `core.contactos.fusionar`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
@@ -1159,8 +1161,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
-- `core.valores_personalizados.get`
-- `core.valores_personalizados.set`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`

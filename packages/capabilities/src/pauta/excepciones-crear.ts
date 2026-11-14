@@ -60,6 +60,8 @@ export const excepcionesCrear = defineCapability({
   input: crearInput,
   output: crearSalida,
   efecto: "escritura",
+  // El motivo es texto libre y puede ser de salud: no llega en claro a la auditoría (CAR-393).
+  sensibles: ["motivo"],
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const hasta = input.hasta ?? input.desde;
