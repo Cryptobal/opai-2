@@ -32,7 +32,6 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 
 ### Pendiente
 
-<<<<<<< HEAD
 - PR 3: pantallas de configuración y de ficha, y tokens de documentos.
 
 ## PR campos personalizados 2/3 · rama `brief/car-27-campos-valores`
@@ -44,11 +43,6 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 
 Valores por ficha: `core.valores_personalizados.get/set` (cuentas y contactos, permisos `core:cuentas.read`/`core:cuentas.manage` y alcance de la cuenta o del contacto) y `comercial.negocio_campos.get/set` (negocios, permisos de Comercial). `set` cambia solo las claves enviadas, `null` borra, valida tipo y opciones contra el catálogo activo de **esa** entidad (una clave de otra entidad se rechaza), no deja vaciar un obligatorio, acepta `dryRun` y emite un evento sin valores (solo las claves). La lectura se audita con el id de la ficha.
 
-=======
-- PR 2: valores por ficha (`core.campos_personalizados.valores.get/set`) con permiso y alcance de cada entidad.
-- PR 3: pantallas de configuración y de ficha, y tokens de documentos.
-
->>>>>>> origin/main
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
 - Con el diseño nuevo de listas de `main` fallan tres pruebas de Comercial que no tocaron estos PR: `crm-vinculos` (cuentas vinculadas), `cuenta-sii` (resumen «Lista para facturar», que queda oculto) y `actividad-tareas-car162` (la tarea no aparece en «Mis tareas»). Hay que revisarlas en un PR propio.
