@@ -74,6 +74,22 @@ Regla de Carlos del 11-nov-2026 (ADR-095), para todas las sesiones de Claude del
 - **«Ninguna, sigo» significa seguir (regla de Carlos del 11-nov-2026, 22:56):** sin una decisión suya pendiente, la sesión no se detiene ni cierra el turno; continúa con el trabajo. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión, una vista previa), programa una revisión a sí misma cada pocos minutos (`send_later`) y mientras tanto avanza con lo siguiente que no dependa de eso (siguiente bloque, siguiente brief apilado sobre su rama, pendientes de `ESTADO.md`). Los avisos automáticos de GitHub no se responden uno por uno: se leen, se arregla lo propio y se sigue. Solo se detiene por una decisión real de Carlos o porque no queda trabajo posible, y entonces dice por qué.
 - Además, la decisión queda como comentario `DECISIÓN CARLOS:` en el PR (mismo contenido) y el trabajo sigue en lo que no dependa de ella.
 
+## Pasos que dependen de Carlos
+
+Regla de Carlos del 14-nov-2026 (ADR-114), para todas las sesiones de Claude Code en `opai-2`.
+
+Cada vez que una tarea necesite algo que **solo puede hacer Carlos** (aprobar, decidir, pegar una clave o un secreto, conectar una cuenta, probar en producción, entrar a un portal, firmar, pagar), la sesión **no se queda esperando en silencio**. Le responde con este bloque fijo, en este orden:
+
+1. **Recomendación:** qué le recomienda hacer y cuál opción elegiría la sesión.
+2. **Qué tiene que hacer:** los pasos concretos, en orden y en lenguaje simple.
+3. **Por qué:** qué se destraba con eso y qué pasa si no se hace.
+4. **Prompt para el bot:** un texto listo para copiar en el bot de Grok Bot que corresponda («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0» o «Chief of Staff»), para que el bot haga todo lo que pueda hacer sin Carlos. Ese prompt le pide al bot que empiece su respuesta con **«[Sesión <nombre>] <issue de Linear o PR>»**, para que Carlos sepa a qué sesión devolverla.
+5. **Qué me devuelves:** qué parte de la respuesta del bot necesita la sesión que Carlos pegue en el chat.
+
+- **Nunca se piden claves ni secretos dentro del chat.** Esos los pega Carlos directo donde corresponde (GitHub, Vercel, 1Password o el almacén cifrado de la empresa). El prompt para el bot tampoco lleva secretos ni datos personales.
+- **Si nada depende de Carlos, el bloque no se usa.**
+- El bloque no reemplaza a «Decisiones de Carlos»: la respuesta sigue terminando con el párrafo «Decisión tuya», el comentario `DECISIÓN CARLOS:` queda en el PR y la sesión sigue con todo lo que no dependa de ese paso. De noche rige el «Modo noche»: el ticket queda en «Espera a Carlos» con este mismo bloque y la sesión pasa al siguiente.
+
 ## Revisiones largas: de noche o a pedido, nunca en cada push
 
 Regla permanente de Carlos (13-nov-2026, adenda de ADR-112), para bajar el gasto y la demora de GitHub Actions:
