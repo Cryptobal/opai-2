@@ -550,6 +550,7 @@ nomina_anticipos_reglas_listar
 nomina_conceptos_actualizar
 nomina_conceptos_crear
 nomina_conceptos_listar
+nomina_costo_proyectado_listar
 nomina_novedades_anular
 nomina_novedades_cargar
 nomina_novedades_crear

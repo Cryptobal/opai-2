@@ -1190,6 +1190,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.actualizar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
+- `nomina.costo_proyectado.listar`
 - `nomina.novedades.cargar`
 - `pauta.ausencias.anular`
 - `pauta.ausencias.listar`
