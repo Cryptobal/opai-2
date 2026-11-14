@@ -4,8 +4,10 @@ import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
+import { puedeGestionarRegistros } from "@/lib/pestanas-modulos";
 import type { SearchParams } from "@/lib/parametros";
 
+import { CerrarEnBloque } from "./_componentes/acciones-registro";
 import { cargarRegistros } from "./_componentes/datos";
 import { ListaRegistros } from "./_componentes/lista-registros";
 import { SegmentoAccesos } from "./_componentes/segmento-accesos";
@@ -20,7 +22,13 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
       titulo="Accesos"
       ruta="/accesos"
       completo
-      cargar={() => cargarRegistros(searchParams)}
+      cargar={async () => {
+        const [l, gestiona] = await Promise.all([
+          cargarRegistros(searchParams),
+          puedeGestionarRegistros(),
+        ]);
+        return { ...l, gestiona };
+      }}
     >
       {(d) => (
         <>
@@ -37,6 +45,16 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
                 siguiente={d.r.ok ? d.r.data.siguiente : null}
                 p={d.p}
                 instalaciones={d.instalaciones}
+                {...(d.gestiona && d.p["estado"] === "en_sitio" && d.p["instalacion"] && d.r.ok
+                  ? {
+                      accion: (
+                        <CerrarEnBloque
+                          instalacionId={d.p["instalacion"]}
+                          cuantos={d.r.data.items.length}
+                        />
+                      ),
+                    }
+                  : {})}
               />
             }
           />

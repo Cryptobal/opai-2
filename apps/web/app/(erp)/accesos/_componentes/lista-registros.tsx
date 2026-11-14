@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Badge, type EstadoPantalla } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
@@ -14,6 +16,8 @@ type Props = {
   p: Parametros;
   instalaciones: { id: string; nombre: string }[];
   seleccionado?: string;
+  /** Acción de la lista (p. ej. «Cerrar en bloque» en En sitio con una instalación elegida). */
+  accion?: ReactNode;
 };
 
 /** Ruta con los filtros de Accesos (instalación y tipo, además de búsqueda y estado). */
@@ -30,12 +34,21 @@ export function rutaAccesos(
 }
 
 /** Columna de registros (diseño `Accesos`): nombre, tipo y empresa, instalación y hora, estado. */
-export function ListaRegistros({ state, items, siguiente, p, instalaciones, seleccionado }: Props) {
+export function ListaRegistros({
+  state,
+  items,
+  siguiente,
+  p,
+  instalaciones,
+  seleccionado,
+  accion,
+}: Props) {
   const enSitio = p["estado"] === "en_sitio";
   return (
     <ListaMaestro
       state={state}
       titulo={enSitio ? "En sitio" : "Accesos"}
+      {...(accion ? { accion } : {})}
       buscar="Buscar por nombre, empresa o patente"
       filtros={[
         {

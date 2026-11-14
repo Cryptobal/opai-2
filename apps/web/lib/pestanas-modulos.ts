@@ -49,6 +49,12 @@ export async function puedeGestionarListas(): Promise<boolean> {
   return identidad ? puedeDeIdentidad(identidad)("acceso:listas.manage") : false;
 }
 
+/** ¿Puede registrar salidas, anular registros y cerrar en bloque (CAR-477)? Oculta esas acciones a quien no. */
+export async function puedeGestionarRegistros(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("acceso:registros.manage") : false;
+}
+
 /** ¿Puede configurar puntos, plantillas y programación de rondas? Oculta acciones a quien solo lee. */
 export async function puedeConfigurarRondas(): Promise<boolean> {
   const identidad = await identidadActual();

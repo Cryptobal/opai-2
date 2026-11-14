@@ -167,6 +167,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.quitar` | `acceso_listas_quitar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.get` | `acceso_registros_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
@@ -1095,9 +1098,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
-- `acceso.listas.agregar`
-- `acceso.listas.listar`
-- `acceso.listas.quitar`
+- `acceso.registros.anular`
+- `acceso.registros.cerrar_bloque`
+- `acceso.registros.salida`
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
 - `asistencia.correcciones.listar`

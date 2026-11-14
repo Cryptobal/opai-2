@@ -3,10 +3,11 @@ import { Badge, ListScreen, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { estadoPantalla } from "@/lib/formato";
-import { puedeGestionarListas } from "@/lib/pestanas-modulos";
+import { puedeGestionarListas, puedeGestionarRegistros } from "@/lib/pestanas-modulos";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type { EntradaLista } from "./panel-listas";
+import { CerrarEnBloque } from "./acciones-registro";
 import { PanelListas } from "./panel-listas";
 import { TablaIntentos, Tarjeta } from "./tablas-instalacion";
 import type { Intento, Pagina, Registro } from "./datos";
@@ -35,7 +36,10 @@ export async function PestanaAccesos({
   sub: string | undefined;
   lista: string | undefined;
 }) {
-  const verListas = await puedeGestionarListas();
+  const [verListas, gestiona] = await Promise.all([
+    puedeGestionarListas(),
+    puedeGestionarRegistros(),
+  ]);
   const sub: Sub = SUBS.some((s) => s.id === subUrl) ? (subUrl as Sub) : "registros";
   const segmento = (
     <Segmentado
@@ -89,6 +93,13 @@ export async function PestanaAccesos({
       <ListScreen<Registro>
         state={estadoPantalla(r)}
         titulo={sub === "en_sitio" ? "En sitio" : "Registros"}
+        {...(gestiona && sub === "en_sitio" && r.ok
+          ? {
+              accionPrincipal: (
+                <CerrarEnBloque instalacionId={instalacionId} cuantos={r.data.items.length} />
+              ),
+            }
+          : {})}
         items={r.ok ? r.data.items : []}
         clave={(x) => x.id}
         tarjeta={(x) => (

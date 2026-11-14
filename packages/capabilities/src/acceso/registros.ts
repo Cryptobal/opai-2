@@ -18,6 +18,7 @@ const item = z.object({
   documento: z.string(),
   patente: z.string().nullable(),
   origen: z.string(),
+  anulado: z.boolean(),
 });
 
 /**
@@ -52,7 +53,7 @@ export const registrosListar = defineCapability({
         AND: [
           dondeInstalacionId(ctx),
           input.instalacionId ? { instalacionId: input.instalacionId } : {},
-          input.soloEnSitio ? { salida: null } : {},
+          input.soloEnSitio ? { salida: null, anulacion: null } : {},
           input.tipoRegistro ? { tipoRegistro: input.tipoRegistro } : {},
           q
             ? {
@@ -66,7 +67,7 @@ export const registrosListar = defineCapability({
         ],
       },
       orderBy: [{ horaCorregida: "desc" }, { id: "desc" }],
-      include: { salida: { select: { horaCorregida: true } } },
+      include: { salida: { select: { horaCorregida: true } }, anulacion: { select: { id: true } } },
       ...cursorDe(input.cursor, input.limite),
     });
     const { items, siguiente } = pagina(filas, input.limite, input.cursor);
@@ -88,6 +89,7 @@ export const registrosListar = defineCapability({
         documento: r.mascara,
         patente: verPatente ? r.patente : null,
         origen: r.origen,
+        anulado: r.anulacion !== null,
       })),
     };
   },

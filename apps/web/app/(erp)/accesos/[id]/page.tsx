@@ -2,6 +2,7 @@ import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
+import { puedeGestionarRegistros } from "@/lib/pestanas-modulos";
 import type { SearchParams } from "@/lib/parametros";
 
 import { cargarRegistro, cargarRegistros } from "../_componentes/datos";
@@ -26,8 +27,12 @@ export default function AccesoRegistro({ params, searchParams }: Props) {
       volverBajoLg
       cargar={async () => {
         const { id } = await params;
-        const [l, r] = await Promise.all([cargarRegistros(searchParams), cargarRegistro(id)]);
-        return { ...l, id, ficha: r };
+        const [l, r, gestiona] = await Promise.all([
+          cargarRegistros(searchParams),
+          cargarRegistro(id),
+          puedeGestionarRegistros(),
+        ]);
+        return { ...l, id, ficha: r, gestiona };
       }}
       opciones={(d) => ({
         volver: { href: rutaAccesos("/accesos", d.p), etiqueta: "Accesos" },
@@ -56,6 +61,7 @@ export default function AccesoRegistro({ params, searchParams }: Props) {
               <DetalleRegistro
                 r={d.ficha.ok ? d.ficha.data : null}
                 state={estadoPantalla(d.ficha)}
+                gestiona={d.gestiona}
               />
             }
           />

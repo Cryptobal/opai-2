@@ -9,6 +9,7 @@ import {
   Timeline,
 } from "@opai/ds";
 
+import { AccionesRegistro } from "./acciones-registro";
 import type { RegistroFicha } from "./datos";
 import { DOC_TIPO, estadoRegistro, tipoDe } from "./etiquetas";
 
@@ -21,8 +22,17 @@ const LISTA: Record<string, string> = {
  * Ficha de un registro (diseño `AccesoDetalle`). Sin «Ver documento completo»: desde el 7-nov-2026 el número
  * no se guarda (solo huella y máscara), así que el aviso lo dice en vez de ofrecer revelarlo.
  */
-export function DetalleRegistro({ r, state }: { r: RegistroFicha | null; state: EstadoPantalla }) {
-  const e = r ? estadoRegistro(r) : null;
+export function DetalleRegistro({
+  r,
+  state,
+  gestiona = false,
+}: {
+  r: RegistroFicha | null;
+  state: EstadoPantalla;
+  /** `acceso:registros.manage`: muestra «Registrar salida» y «Anular registro» (CAR-477). */
+  gestiona?: boolean;
+}) {
+  const e = r ? estadoRegistro({ ...r, anulado: r.anulacion !== null }) : null;
   return (
     <DetailScreen
       state={r ? state : state === "ready" ? "error" : state}
@@ -41,6 +51,9 @@ export function DetalleRegistro({ r, state }: { r: RegistroFicha | null; state: 
               </Badge>
             ),
             subtitulo: [tipoDe(r.tipoRegistro), r.empresa].filter(Boolean).join(" · "),
+            ...(gestiona && !r.anulacion
+              ? { acciones: <AccionesRegistro id={r.id} nombre={r.nombre} enSitio={!r.salidaEn} /> }
+              : {}),
           }
         : {})}
     >
@@ -69,17 +82,40 @@ export function DetalleRegistro({ r, state }: { r: RegistroFicha | null; state: 
               ]}
             />
           </Seccion>
+          {r.anulacion ? (
+            <Alerta tono="danger" titulo={`Anulado el ${formatearFechaHora(r.anulacion.en)}`}>
+              {r.anulacion.motivo}
+            </Alerta>
+          ) : null}
           <Alerta tono="info" titulo="Documento enmascarado">
             OPAI guarda solo una huella del documento, nunca el número completo.
           </Alerta>
           <Seccion titulo="Historial">
             <Timeline
               items={[
+                ...(r.anulacion
+                  ? [
+                      {
+                        id: "anulacion",
+                        actor: { nombre: "ERP" },
+                        accion: "anuló el registro",
+                        cuando: formatearFechaHora(r.anulacion.en),
+                        meta: r.anulacion.motivo,
+                      },
+                    ]
+                  : []),
                 ...(r.salidaEn
                   ? [
                       {
                         id: "salida",
-                        actor: { nombre: r.dispositivo ?? "Portería" },
+                        actor: {
+                          nombre:
+                            r.salidaOrigen === "erp"
+                              ? "Desde el ERP"
+                              : r.salidaOrigen === "cierre"
+                                ? "Cierre en bloque"
+                                : (r.dispositivo ?? "Portería"),
+                        },
                         accion: "registró la salida",
                         cuando: formatearFechaHora(r.salidaEn),
                       },

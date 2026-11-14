@@ -57,8 +57,9 @@ model RegistroAcceso {
   recibidoEn     DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  entradaLista EntradaLista? @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
+  entradaLista EntradaLista?     @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
   salida       SalidaAcceso?
+  anulacion    AnulacionAcceso?
 
   @@unique([tenantId, dispositivoId, clave], map: "registros_acceso_clave_key")
   @@index([tenantId, instalacionId, horaCorregida(sort: Desc)], map: "registros_acceso_sitio_idx")
@@ -67,12 +68,17 @@ model RegistroAcceso {
   @@schema("acceso")
 }
 
-/// Salida de un registro (una por registro). Hecho inmutable.
+/// Salida de un registro (una por registro). Hecho inmutable. Sin equipo si la registró una persona desde el
+/// ERP o el cierre en bloque (CAR-477, R25).
 model SalidaAcceso {
   id            String   @id @default(uuid(7)) @db.Uuid
   tenantId      String   @map("tenant_id") @db.Uuid
   instalacionId String   @map("instalacion_id") @db.Uuid
-  dispositivoId String   @map("dispositivo_id") @db.Uuid
+  dispositivoId String?  @map("dispositivo_id") @db.Uuid
+  /// "dispositivo" | "erp" | "cierre".
+  origen        String   @default("dispositivo")
+  registradaPor String?  @map("registrada_por") @db.Uuid
+  motivo        String?
   registroId    String   @unique(map: "salidas_acceso_registro_key") @map("registro_id") @db.Uuid
   clave         String   @db.Uuid
   personaId     String?  @map("persona_id") @db.Uuid
@@ -107,5 +113,21 @@ model IntentoDenegado {
 
   @@unique([tenantId, dispositivoId, clave], map: "intentos_denegados_clave_key")
   @@map("intentos_denegados")
+  @@schema("acceso")
+}
+
+/// Anulación de un registro con motivo (CAR-477, R24): hecho nuevo, el registro original no se toca. Una por registro.
+model AnulacionAcceso {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  registroId    String   @unique(map: "anulaciones_registro_registro_key") @map("registro_id") @db.Uuid
+  motivo        String
+  anuladaPor    String?  @map("anulada_por") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  registro RegistroAcceso @relation(fields: [registroId], references: [id], onDelete: Restrict, map: "anulaciones_registro_registro_fkey")
+
+  @@map("anulaciones_registro")
   @@schema("acceso")
 }

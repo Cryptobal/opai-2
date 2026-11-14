@@ -40,10 +40,11 @@ export function cuando(valor: string): string {
 }
 
 /** Estado visible de un registro (diseño `Accesos`): en sitio, salió a una hora o diferido (sin conexión). */
-export function estadoRegistro(r: Pick<Registro, "salidaEn" | "origen">): {
+export function estadoRegistro(r: Pick<Registro, "salidaEn" | "origen"> & { anulado?: boolean }): {
   etiqueta: string;
   tono: Tono;
 } {
+  if (r.anulado) return { etiqueta: "Anulado", tono: "danger" };
   if (r.salidaEn) return { etiqueta: `Salió ${hora(r.salidaEn)}`, tono: "neutro" };
   if (r.origen === "diferido") return { etiqueta: "En sitio · diferido", tono: "info" };
   return { etiqueta: "En sitio", tono: "success" };

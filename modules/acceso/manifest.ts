@@ -22,6 +22,11 @@ export const manifest = defineModule({
       descripcion: "Gestionar las listas autorizada y bloqueada de una instalación",
     },
     {
+      id: "acceso:registros.manage",
+      descripcion:
+        "Registrar salidas desde el ERP, anular registros y cerrar en bloque a quienes siguen en sitio",
+    },
+    {
       id: "acceso:datos.ver_patente",
       descripcion: "Ver la patente completa de los vehículos registrados (acceso restringido)",
     },
