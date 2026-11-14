@@ -20,7 +20,6 @@ export const SIN_BUSCADOR: Readonly<Record<string, string>> = {
   pauta: "La pauta se abre por instalación, que ya se busca; pendiente su buscador.",
   portal_cliente: "Portal del cliente: no agrega entidades al ERP.",
   portal_trabajador: "Portal del trabajador: no agrega entidades al ERP.",
-  rondas: "CAR-405: rondas y puntos de control.",
   tickets: "CAR-404: tickets y puestos.",
 };
 
