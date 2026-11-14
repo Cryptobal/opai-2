@@ -2261,3 +2261,18 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 **Decisiones de la sesión (reversibles) y por qué.** Herramientas: `knip` (sin uso) y `jscpd` (duplicados), las de uso más extendido para TypeScript en monorepos; las funciones largas se cuentan con el analizador de TypeScript que el repo ya tiene, sin dependencia nueva. El tope de función es 60 líneas, medido y no error de lint, para no bloquear lo ya escrito. El check corre en el flujo rápido de cada PR y no pasa a obligatorio del ruleset: ese cambio es de Carlos (issue «Decide Carlos»).
 
 **Consecuencias.** Un PR que agrega duplicación, un archivo o función largos o algo sin uso falla `simplicidad` hasta que lo corrija o lo justifique. Las instrucciones del proyecto en claude.ai todavía piden «Decisión tuya»; cambiarlas es de Carlos (issue «Decide Carlos»). Mientras tanto manda el repositorio.
+
+## ADR-116 · Inventario sale del backlog como módulo vendible (CAR-235, 14-nov-2026)
+
+**Fecha:** 14-nov-2026 · **Estado:** vigente · **Decide:** Carlos, al crear el proyecto Linear «07 · Inventario» (10-nov-2026) con CAR-235 a CAR-238 para la Versión 1.0 · **Registra:** Claude («Sesión Inventario»). **Modifica** ADR-030 (backlog) y la lista «No se portan de 1.0» de `CONTEXTO-agentes.md`.
+
+**Contexto.** ADR-030 dejó Inventario en el backlog y la línea base de paridad lo marcó «no copiar». Carlos lo pidió después como módulo de la Versión 1.0: activos (teléfonos y otros), ropa con tipos configurables para uniformes, asignación a persona o instalación, vendible aparte.
+
+**Decisión.** Inventario es un módulo vendible (`inventario`), sin dependencias de otros módulos, en el área Operaciones del ERP. Alcance en [`modulos/inventario.md`](modulos/inventario.md), decidido por la sesión con autonomía (ADR-114) y en revisión de Carlos en el issue «Decide Carlos» CAR-487:
+
+1. Catálogo de tipos por empresa en dos categorías: **activo** (por unidad, con campos propios) y **ropa** (por existencias y talla, ligada a las prendas del uniforme de Personas, CAR-408).
+2. La línea telefónica de 1.0 es un tipo de activo más; no se portan los datos técnicos de MDM.
+3. Se asigna a **personas o instalaciones** del núcleo, nunca a usuarios.
+4. Se cobra por instalación activa (entrada del catálogo de cobro, editable en Plataforma).
+
+**Referente.** Rippling (equipos asignados al empleado, con devolución al salir) y Snipe-IT (categorías con campos propios, activos por unidad y artículos por existencias). Se aparta en la ropa por talla, por regla del rubro.

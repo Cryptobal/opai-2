@@ -474,6 +474,25 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.archivar` | `rondas_puntos_archivar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.crear` | `rondas_puntos_crear` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.listar` | `rondas_puntos_listar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `core.personas.list` | `core_personas_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.actualizar` | `inventario_activos_actualizar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.crear` | `inventario_activos_crear` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.get` | `inventario_activos_get` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.list` | `inventario_activos_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.devolver` | `inventario_entregas_devolver` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_activo` | `inventario_entregas_entregar_activo` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_ropa` | `inventario_entregas_entregar_ropa` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.list` | `inventario_entregas_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ajustar` | `inventario_ropa_ajustar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ingresar` | `inventario_ropa_ingresar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.list` | `inventario_ropa_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.movimientos` | `inventario_ropa_movimientos` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.actualizar` | `inventario_tipos_actualizar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.cargar_sugeridos` | `inventario_tipos_cargar_sugeridos` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.crear` | `inventario_tipos_crear` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.get` | `inventario_tipos_get` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.list` | `inventario_tipos_list` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.archivar` | `comercial_negocios_archivar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.create` | `comercial_negocios_create` | existe |
@@ -1197,6 +1216,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.actualizar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
+- `inventario.activos.cambiar_estado`
 - `nomina.novedades.cargar`
 - `pauta.ausencias.anular`
 - `pauta.ausencias.listar`
