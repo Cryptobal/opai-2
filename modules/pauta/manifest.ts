@@ -1,4 +1,4 @@
-import { ajustesPauta, capacidadesPauta, defineModule, indicadoresPauta } from "@opai/capabilities";
+import { ajustesPauta, buscadoresPauta, capacidadesPauta, defineModule, indicadoresPauta } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Pauta (Operaciones, Brief 11b · PR 1). El núcleo deriva navegación, permisos,
@@ -44,4 +44,6 @@ export const manifest = defineModule({
   capacidades: capacidadesPauta,
   // Indicador de gestión para el catálogo del núcleo (ADR-094, adenda CAR-309).
   indicadores: indicadoresPauta,
+  // Aporte al buscador general (CAR-404): puestos por nombre o instalación.
+  buscadores: buscadoresPauta,
 });
