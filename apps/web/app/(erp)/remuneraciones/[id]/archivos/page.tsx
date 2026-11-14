@@ -2,8 +2,8 @@ import { Alerta } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
-import { cargarPeriodos, obligacionesArchivos, permisosNomina } from "../../_componentes/datos";
-import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
+import { obligacionesArchivos } from "../../_componentes/datos";
+import { opcionesPeriodo, periodoDeRuta } from "../../_componentes/pagina-periodo";
 import { TarjetaArchivoLegal } from "../../_componentes/tarjeta-archivo-legal";
 
 export const metadata = { title: "Archivos y declaraciones" };
@@ -18,16 +18,12 @@ export default function ArchivosPeriodo({ params }: Props) {
       titulo="Archivos y declaraciones"
       ruta="/remuneraciones"
       cargar={async () => {
-        const [{ id }, per, perm] = await Promise.all([params, cargarPeriodos(), permisosNomina()]);
-        const periodo = per.ok ? (per.data.find((p) => p.id === id) ?? null) : null;
+        const base = await periodoDeRuta(params);
+        const { periodo, perm } = base;
         const obl = periodo && perm.obligaciones ? await obligacionesArchivos(periodo.anio, periodo.mes) : null;
-        return { id, periodo, perm, obl };
+        return { ...base, obl };
       }}
-      opciones={(d) => ({
-        insignia: <SegmentoRemuneraciones activa="periodos" />,
-        volver: { href: `/remuneraciones/${d.id}`, etiqueta: d.periodo?.etiqueta ?? "Período" },
-        ...(d.periodo ? { titulo: `Archivos · ${d.periodo.etiqueta}` } : {}),
-      })}
+      opciones={opcionesPeriodo("Archivos")}
     >
       {(d) => {
         if (!d.perm.obligaciones) return <Alerta tono="warning" titulo="Tu rol no puede generar los archivos legales." />;
