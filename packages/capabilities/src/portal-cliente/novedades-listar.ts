@@ -33,26 +33,14 @@ async function pagina(
   { cursor, limite }: { cursor?: string | undefined; limite: number },
 ) {
   const base = { instalacionId, createdAt: { gte: desde, lt: hasta } };
+  // uuid7: el id sigue el orden de creación, así que basta como cursor.
   const desdeCursor = cursor
-    ? await ctx.db.novedad.findFirst({
-        where: { ...base, id: cursor },
-        select: { id: true, createdAt: true },
-      })
+    ? await ctx.db.novedad.findFirst({ where: { ...base, id: cursor }, select: { id: true } })
     : null;
   if (cursor && !desdeCursor) throw noEncontrado("La página");
   return ctx.db.novedad.findMany({
-    where: {
-      ...base,
-      ...(desdeCursor
-        ? {
-            OR: [
-              { createdAt: { lt: desdeCursor.createdAt } },
-              { createdAt: desdeCursor.createdAt, id: { lt: desdeCursor.id } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    where: { ...base, ...(desdeCursor ? { id: { lt: desdeCursor.id } } : {}) },
+    orderBy: { id: "desc" },
     take: limite + 1,
     select: {
       id: true,
