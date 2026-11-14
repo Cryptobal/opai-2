@@ -578,6 +578,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.generar_calendario` | `nomina_obligaciones_generar_calendario` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.abrir` | `nomina_periodos_abrir` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.cambiar_estado` | `nomina_periodos_cambiar_estado` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.listar` | `nomina_periodos_listar` | existe |

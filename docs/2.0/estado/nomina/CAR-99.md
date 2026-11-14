@@ -47,4 +47,10 @@
 
 - `/remuneraciones/[id]/archivos`, enlazada desde el período («Archivos y declaraciones»): una tarjeta por archivo (LRE y Previred) con Validar, tabla de errores por persona y Descargar, que solo se habilita sin errores (como en el diseño aprobado). El botón que el PR del LRE había puesto en la página de liquidaciones sale de ahí.
 - Tope de JS propio de 174 KB para la ruta nueva, igual que liquidaciones.
-- Pendiente del diseño 06: subir el comprobante de carga o pago (obligaciones), libro de remuneraciones en PDF y Excel, F29 y archivo de pago del banco.
+- Pendiente del diseño 06: libro de remuneraciones en PDF y Excel, F29 y archivo de pago del banco.
+
+### Comprobantes y estado de obligaciones (PR apilado sobre el de Previred, rama `brief/car-99-nomina-comprobantes`)
+
+- **Qué entra:** al validar, la obligación del mes (LRE o Previred) pasa a «generado» o «con errores» con `nomina.obligaciones.actualizar` (solo desde por generar, generado o con errores); «Subir comprobante de carga» (LRE) o «de pago» (Previred) sube el archivo a los documentos de la empresa (`core.documentos.*`, entidad tenant) y lo deja en la obligación, que pasa a «cargado» o «pagado». Si el calendario del año no existe, la pantalla avisa cómo generarlo. Sin capacidades nuevas ni migración.
+- **Qué se decidió:** el comprobante se habilita solo con el archivo validado sin errores o con la obligación ya generada; el LRE cierra en «cargado» (no se paga) y Previred en «pagado».
+- **Pendiente:** ver o descargar el comprobante desde la tarjeta (hoy solo avisa que quedó guardado); permisos de documentos: quien no puede subir documentos de empresa verá el error de la capacidad.

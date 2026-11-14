@@ -2,7 +2,7 @@ import { Alerta } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
-import { cargarPeriodos, permisosNomina } from "../../_componentes/datos";
+import { cargarPeriodos, obligacionesArchivos, permisosNomina } from "../../_componentes/datos";
 import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
 import { TarjetaArchivoLegal } from "../../_componentes/tarjeta-archivo-legal";
 
@@ -20,7 +20,8 @@ export default function ArchivosPeriodo({ params }: Props) {
       cargar={async () => {
         const [{ id }, per, perm] = await Promise.all([params, cargarPeriodos(), permisosNomina()]);
         const periodo = per.ok ? (per.data.find((p) => p.id === id) ?? null) : null;
-        return { id, periodo, perm };
+        const obl = periodo && perm.obligaciones ? await obligacionesArchivos(periodo.anio, periodo.mes) : null;
+        return { id, periodo, perm, obl };
       }}
       opciones={(d) => ({
         insignia: <SegmentoRemuneraciones activa="periodos" />,
@@ -36,8 +37,13 @@ export default function ArchivosPeriodo({ params }: Props) {
             <Alerta tono="info" titulo="OPAI prepara y valida los archivos">
               El LRE lo sube en Mi DT el representante laboral electrónico con su ClaveÚnica. La declaración y el pago en Previred los hace la persona responsable. Los archivos salen de las liquidaciones calculadas del período.
             </Alerta>
-            <TarjetaArchivoLegal periodoId={d.id} tipo="lre" />
-            <TarjetaArchivoLegal periodoId={d.id} tipo="previred" />
+            {d.obl && !d.obl.lre && !d.obl.previred ? (
+              <Alerta tono="warning" titulo="El calendario de obligaciones de este año no está generado">
+                Genéralo en Remuneraciones › Calendario para guardar aquí los comprobantes de carga y pago.
+              </Alerta>
+            ) : null}
+            <TarjetaArchivoLegal periodoId={d.id} tipo="lre" obligacion={d.obl?.lre ?? null} tenantId={d.obl?.tenantId ?? ""} />
+            <TarjetaArchivoLegal periodoId={d.id} tipo="previred" obligacion={d.obl?.previred ?? null} tenantId={d.obl?.tenantId ?? ""} />
           </div>
         );
       }}

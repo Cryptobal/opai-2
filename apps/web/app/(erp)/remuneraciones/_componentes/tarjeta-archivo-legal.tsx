@@ -7,6 +7,8 @@ import { Alerta, avisar, Badge, Button, Card, Table, Td, Th } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { ComprobanteObligacion, type ObligacionArchivo } from "./comprobante-obligacion";
+
 type Archivo = {
   nombre: string;
   contenido: string;
@@ -28,7 +30,13 @@ function descargar(nombre: string, contenido: string, tipo: string) {
 }
 
 /** Un archivo legal del período (diseño 06): validar, ver los errores y descargar cuando no hay errores. */
-export function TarjetaArchivoLegal({ periodoId, tipo }: { periodoId: string; tipo: "lre" | "previred" }) {
+const CERRADA: Record<string, string> = { cargado: "Cargado con comprobante", pagado: "Pagado con comprobante" };
+/** Desde dónde el generador puede marcar el resultado de la validación (transiciones de `obligaciones.ts`). */
+const MARCABLE = new Set(["por_generar", "generado", "con_errores"]);
+
+type Props = { periodoId: string; tipo: "lre" | "previred"; obligacion: ObligacionArchivo | null; tenantId: string };
+
+export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: Props) {
   const t = TEXTOS[tipo];
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [archivo, setArchivo] = useState<Archivo | null>(null);
@@ -37,7 +45,12 @@ export function TarjetaArchivoLegal({ periodoId, tipo }: { periodoId: string; ti
     const r = tipo === "lre"
       ? await ejecutar<Archivo>("nomina.lre.generar", { periodoId })
       : await ejecutar<Archivo>("nomina.previred.generar", { periodoId });
-    if (r) setArchivo(r);
+    if (!r) return;
+    setArchivo(r);
+    // Deja el resultado en el calendario de obligaciones (generado o con errores), si el mes no está cerrado.
+    const estado = r.errores.length > 0 ? "con_errores" : "generado";
+    if (obligacion && MARCABLE.has(obligacion.estado) && obligacion.estado !== estado)
+      await ejecutar("nomina.obligaciones.actualizar", { id: obligacion.id, estado });
   }
   const conErrores = archivo !== null && archivo.errores.length > 0;
   const listo = archivo !== null && !conErrores && archivo.filas > 0;
@@ -46,7 +59,9 @@ export function TarjetaArchivoLegal({ periodoId, tipo }: { periodoId: string; ti
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="t-subheading">{t.titulo}</span>
-          {archivo ? (
+          {obligacion && CERRADA[obligacion.estado] ? (
+            <Badge tono="success" punto>{CERRADA[obligacion.estado]}</Badge>
+          ) : archivo ? (
             <Badge tono={conErrores ? "danger" : "success"} punto>{conErrores ? "Con errores" : "Validado"}</Badge>
           ) : (
             <Badge tono="neutro" punto>Sin validar</Badge>
@@ -96,6 +111,7 @@ export function TarjetaArchivoLegal({ periodoId, tipo }: { periodoId: string; ti
           Descargar
         </Button>
       </div>
+      {obligacion && tenantId && (listo || ["generado", "cargado", "pagado"].includes(obligacion.estado)) ? <ComprobanteObligacion obligacion={obligacion} tenantId={tenantId} tipo={tipo} /> : null}
     </Card>
   );
 }
