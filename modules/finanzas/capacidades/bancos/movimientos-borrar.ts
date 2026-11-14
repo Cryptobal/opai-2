@@ -4,6 +4,7 @@ import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 
 import { sincronizarAvisosEnTx } from "../aviso";
+import { descartarMovimientos } from "./descartes-crear";
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { aFecha, cuentaDe } from "./util";
 
@@ -11,14 +12,16 @@ const fechaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe ser AAAA
 const MAX_DIAS = 400;
 
 /**
- * CAR-341: borra los movimientos de una cuenta que entraron por la sincronización con el banco (o a mano) entre dos
+ * CAR-341: saca los movimientos de una cuenta que entraron por la sincronización con el banco (o a mano) entre dos
  * fechas, para volver a cargarlos limpios desde la cartola. Las cartolas se deshacen desde Importaciones. Los
  * movimientos con una conciliación confirmada se conservan y se informan.
+ * CAR-412: ya no es irreversible. Los movimientos quedan en un descarte (quién, cuándo, motivo y copia exacta) que se
+ * restaura con `finanzas.descartes_bancarios.restaurar`.
  */
 export const bancosMovimientosBorrarRango = defineCapability({
   id: "finanzas.movimientos_bancarios.borrar_rango",
   descripcion:
-    "Borra los movimientos de una cuenta bancaria que entraron por la sincronización con el banco en línea (o a mano) entre dos fechas, con vista previa del conteo. Los conciliados se conservan. Las cartolas se deshacen aparte. No se puede revertir.",
+    "Descarta los movimientos de una cuenta bancaria que entraron por la sincronización con el banco en línea (o a mano) entre dos fechas, con vista previa del conteo. Los conciliados se conservan. Dejan de contar en saldos, conciliación y flujo, y el descarte se puede restaurar. Las cartolas se deshacen aparte.",
   permiso: PERMISO_BANCOS_GESTIONAR,
   input: z
     .object({
@@ -36,11 +39,12 @@ export const bancosMovimientosBorrarRango = defineCapability({
     cuentaId: z.uuid(),
     desde: z.string(),
     hasta: z.string(),
-    movimientos: z.number().int().describe("Movimientos que se borran."),
+    movimientos: z.number().int().describe("Movimientos que se descartan."),
     conciliados: z.number().int().describe("Movimientos del rango con conciliación confirmada: se conservan."),
-    borrados: z.boolean(),
+    borrados: z.boolean().describe("true si se descartaron (se pueden restaurar)."),
+    descarteId: z.uuid().nullable().describe("Descarte para restaurar; null en la vista previa."),
   }),
-  efecto: "irreversible",
+  efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const cuenta = await cuentaDe(ctx, input.cuentaId);
@@ -48,31 +52,31 @@ export const bancosMovimientosBorrarRango = defineCapability({
     const contar = async (db: Pick<TenantTx, "movimientoBancario">) => {
       const movs = await db.movimientoBancario.findMany({
         where,
-        select: { id: true, conciliaciones: { where: { activa: true, confirmada: true }, select: { id: true } } },
+        include: { conciliaciones: { where: { activa: true, confirmada: true }, select: { id: true } } },
       });
-      const libres = movs.filter((m) => m.conciliaciones.length === 0).map((m) => m.id);
+      const libres = movs.filter((m) => m.conciliaciones.length === 0);
       return { libres, conciliados: movs.length - libres.length };
     };
     const previa = await contar(ctx.db);
     const base = { cuentaId: cuenta.id, desde: input.desde, hasta: input.hasta };
-    if (dryRun) return { ...base, movimientos: previa.libres.length, conciliados: previa.conciliados, borrados: false };
+    if (dryRun) return { ...base, movimientos: previa.libres.length, conciliados: previa.conciliados, borrados: false, descarteId: null };
     if (!previa.libres.length) throw reglaDeNegocio("No hay movimientos sin conciliar en ese rango.");
 
     const actual = await ctx.transaccion(async (tx) => {
       // Se vuelve a contar dentro de la transacción: lo que se concilió entre la vista previa y ahora se conserva.
       const ahora = await contar(tx);
-      // Solo propuestas sin confirmar: si alguien confirmó una entre el recuento y aquí, la FK Restrict aborta todo.
-      await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ahora.libres }, confirmada: false } });
-      await tx.movimientoBancario.deleteMany({ where: { id: { in: ahora.libres } } });
+      if (!ahora.libres.length) throw reglaDeNegocio("No hay movimientos sin conciliar en ese rango.");
+      const ids = ahora.libres.map((m) => m.id);
+      const descarteId = await descartarMovimientos(ctx, tx, { ...base, origen: input.origen, motivo: input.motivo, movimientos: ahora.libres });
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.banco.movimientos_borrados",
         entidadTipo: "cuentaBancaria",
         entidadId: cuenta.id,
-        payload: { movimientos: ahora.libres.length, conciliados: ahora.conciliados, desde: input.desde, hasta: input.hasta, origen: input.origen, motivo: input.motivo },
+        payload: { descarteId, movimientos: ids.length, conciliados: ahora.conciliados, desde: input.desde, hasta: input.hasta, origen: input.origen, motivo: input.motivo },
       });
       await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
-      return ahora;
+      return { ...ahora, descarteId };
     });
-    return { ...base, movimientos: actual.libres.length, conciliados: actual.conciliados, borrados: true };
+    return { ...base, movimientos: actual.libres.length, conciliados: actual.conciliados, borrados: true, descarteId: actual.descarteId };
   },
 });

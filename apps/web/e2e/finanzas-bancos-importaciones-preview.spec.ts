@@ -44,6 +44,8 @@ test.describe("@preview finanzas: historial de importaciones", () => {
     await dialogo.getByRole("textbox", { name: "Hasta" }).fill("31-10-2026");
     await dialogo.getByRole("button", { name: "Ver cuántos son" }).click();
     await expect(dialogo.getByText(/No hay movimientos para borrar|Se borrarán/)).toBeVisible({ timeout: 30_000 });
+    // CAR-412: el borrado ya no es irreversible; el aviso dice que se puede restaurar.
+    await expect(dialogo.getByText(/Puedes restaurarlos/)).toBeVisible();
     await capturar(page, info, "bancos-borrar-sincronizacion");
     await dialogo.getByRole("button", { name: "Cancelar" }).click();
     await expect(dialogo).toBeHidden();

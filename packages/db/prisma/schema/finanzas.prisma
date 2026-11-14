@@ -524,6 +524,7 @@ model CuentaBancaria {
 
   movimientos MovimientoBancario[]
   cartolas    CartolaImportada[]
+  descartes   MovimientoBancarioDescarte[]
 
   @@unique([tenantId, banco, numeroVisible])
   @@index([tenantId, activa])
@@ -592,6 +593,33 @@ model MovimientoBancario {
   @@unique([tenantId, cuentaId, idExterno])
   @@index([tenantId, cuentaId, estado, fecha])
   @@map("movimientos_bancarios")
+  @@schema("finanzas")
+}
+
+/// CAR-412: un «Borrar por fechas» de Bancos. Los movimientos salen de `movimientos_bancarios` (ningún saldo,
+/// conciliación ni flujo los cuenta) y su copia exacta queda en `movimientos` para «Restaurar».
+model MovimientoBancarioDescarte {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  cuentaId      String    @map("cuenta_id") @db.Uuid
+  desde         DateTime  @db.Date
+  hasta         DateTime  @db.Date
+  /// web4leads | manual
+  origen        String
+  motivo        String
+  cantidad      Int
+  /// Copia de cada movimiento descartado (montos como texto: BigInt no cabe en JSON).
+  movimientos   Json
+  descartadoPor String?   @map("descartado_por") @db.Uuid
+  restauradoEn  DateTime? @map("restaurado_en") @db.Timestamptz(6)
+  restauradoPor String?   @map("restaurado_por") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cuenta CuentaBancaria @relation(fields: [cuentaId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, cuentaId, createdAt])
+  @@map("movimientos_bancarios_descartes")
   @@schema("finanzas")
 }
 
