@@ -78,8 +78,10 @@ export const personasAusenciasAnular = defineCapability({
         select: { estado: true },
       });
       if (!a) throw noEncontrado("La ausencia");
-      if (a.estado !== "aprobada" && a.estado !== "solicitada")
-        throw reglaDeNegocio("La ausencia ya está anulada o rechazada.");
+      // Una solicitud del portal se responde con aprobar o rechazar (CAR-508), no se anula.
+      if (a.estado === "solicitada")
+        throw reglaDeNegocio("Es una solicitud por responder: apruébala o recházala.");
+      if (a.estado !== "aprobada") throw reglaDeNegocio("La ausencia ya está anulada o rechazada.");
       const turnos = await db.excepcionPauta.findMany({
         where: { ausenciaId, estado: "activa" },
         select: { id: true, puestoId: true, fecha: true },

@@ -1,19 +1,14 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
 
 import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fecha } from "@/lib/fechas";
 
+import { DialogoConfirmar } from "./dialogo-diferido";
 import { etiquetaTipo, type GrupoAusencia } from "./tipos";
-
-const DialogoConfirmar = lazy(() =>
-  import("@/app/_components/maestros/dialogo-confirmar").then((m) => ({
-    default: m.DialogoConfirmar,
-  })),
-);
 
 /** Anula un registro de la persona (CAR-393): si marcaba turnos, vuelven a la serie; no toca a otras personas. */
 export function AnularAusencia({ personaId, g }: { personaId: string; g: GrupoAusencia }) {

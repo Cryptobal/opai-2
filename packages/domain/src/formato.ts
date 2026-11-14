@@ -92,3 +92,20 @@ export function formatearFechaHora(valor: string | Date | null | undefined, zona
   }).format(aFecha(valor));
   return `${formatearFecha(valor, zona)} ${hora}`;
 }
+
+/** `HH:mm` (24 h) en la zona del tenant: «20:00». */
+export function formatearHora(valor: string | Date, zona = ZONA): string {
+  return new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: zona }).format(
+    aFecha(valor),
+  );
+}
+
+/** Nombre del día de la semana de una fecha civil `aaaa-mm-dd`, en minúscula: «lunes». */
+export function nombreDiaSemana(fechaCivil: string): string {
+  return new Intl.DateTimeFormat("es-CL", { weekday: "long", timeZone: "UTC" }).format(aFecha(`${fechaCivil}T00:00:00Z`));
+}
+
+/** Nombre del mes de una fecha civil `aaaa-mm-dd`, en minúscula: «noviembre». */
+export function nombreMesCivil(fechaCivil: string): string {
+  return new Intl.DateTimeFormat("es-CL", { month: "long", timeZone: "UTC" }).format(aFecha(`${fechaCivil}T00:00:00Z`));
+}

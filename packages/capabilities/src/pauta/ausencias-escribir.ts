@@ -11,6 +11,7 @@ import {
   planearAusencia,
   type PlanPuesto,
 } from "./ausencias-plan";
+import { guardarRegistro } from "./ausencias-guardar";
 import { aFechaDb } from "./comun";
 import { tipoExcepcionSchema } from "./vistas";
 
@@ -36,12 +37,19 @@ export const salidaAusencia = z.object({
 /**
  * Escribe una ausencia (CAR-393): el registro de la persona y, si `conPauta`, los turnos que tiene como titular en esas
  * fechas, en la misma transacción. Sin pauta (empresa sin el módulo o persona sin turnos con `exigirTurnos: false`) queda
- * solo el registro. La usan `pauta.ausencias.registrar` (exige turnos) y `core.ausencias.registrar`.
+ * solo el registro. La usan `pauta.ausencias.registrar` (exige turnos), `core.ausencias.registrar` y `core.ausencias.aprobar`.
  */
 export async function escribirAusencia(
   ctx: Contexto,
   input: AusenciaPersona,
-  o: { dryRun: boolean; conPauta: boolean; exigirTurnos: boolean; exigirPermisoPauta?: boolean },
+  o: {
+    dryRun: boolean;
+    conPauta: boolean;
+    exigirTurnos: boolean;
+    exigirPermisoPauta?: boolean;
+    /** Aprueba esta solicitud del portal (CAR-508) en vez de crear un registro nuevo. */
+    solicitudId?: string;
+  },
 ): Promise<z.infer<typeof salidaAusencia>> {
   // La clase se valida contra el catálogo y se guarda con su nombre del catálogo (CAR-393 parte 3).
   const clase = await claseValida(ctx, input.tipo, input.clase);
@@ -91,23 +99,7 @@ export async function escribirAusencia(
     const usuario = ctx.usuario?.id ?? null;
     // Mismo instante en el registro y sus turnos: `registradaEn` sigue identificando el registro al anular.
     const ahora = new Date();
-    const ausencia = await tx.ausencia.create({
-      data: {
-        tenantId: ctx.tenantId,
-        personaId: input.personaId,
-        tipo: input.tipo,
-        desde: aFechaDb(input.desde),
-        hasta: aFechaDb(hasta),
-        motivo: input.motivo,
-        clase: input.clase ?? null,
-        estado: "aprobada",
-        registradaPor: usuario,
-        aprobadaPor: usuario,
-        aprobadaEn: ahora,
-        createdAt: ahora,
-      },
-      select: { id: true },
-    });
+    const ausencia = await guardarRegistro(tx, ctx, { ...input, hasta }, ahora, o.solicitudId);
     await sinDuplicado(
       tx.excepcionPauta.createMany({
         data: plan.flatMap((p) =>

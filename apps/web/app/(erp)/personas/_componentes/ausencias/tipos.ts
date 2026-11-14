@@ -17,7 +17,7 @@ export type GrupoAusencia = {
   desde: string;
   hasta: string;
   dias: number;
-  estado: "activa" | "anulada";
+  estado: "activa" | "anulada" | "solicitada" | "rechazada" | "retirada";
   registradaEn: string;
   instalaciones: string[];
 };

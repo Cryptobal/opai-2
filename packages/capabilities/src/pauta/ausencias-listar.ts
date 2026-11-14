@@ -17,7 +17,8 @@ const grupoSchema = z.object({
   desde: z.string(),
   hasta: z.string(),
   dias: z.number().int().describe("Turnos marcados en la pauta."),
-  estado: z.enum(["activa", "anulada"]),
+  /** `solicitada`, `rechazada` y `retirada` vienen del portal de la persona (CAR-464/508) y no marcan turnos. */
+  estado: z.enum(["activa", "anulada", "solicitada", "rechazada", "retirada"]),
   registradaEn: z.string(),
   instalaciones: z.array(z.string()),
 });
@@ -71,7 +72,6 @@ export async function listarAusencias(
   const registros = await ctx.db.ausencia.findMany({
     where: {
       personaId,
-      estado: { in: ["aprobada", "anulada"] },
       ...(desdeCursor
         ? {
             OR: [
@@ -118,10 +118,20 @@ export async function listarAusencias(
       desde: fechas?.[0] ?? fechaIso(r.desde),
       hasta: fechas?.[fechas.length - 1] ?? fechaIso(r.hasta),
       dias: visibles.length,
-      estado: r.estado === "anulada" ? "anulada" : "activa",
+      estado: estadoDe(r),
       registradaEn: r.createdAt.toISOString(),
       instalaciones: [...new Set(visibles)],
     });
   }
   return { personaId, grupos, siguiente };
+}
+
+/** Una solicitud anulada sin haberse aprobado es la que la persona retiró desde su portal. */
+function estadoDe(r: {
+  estado: string;
+  aprobadaEn: Date | null;
+}): z.infer<typeof grupoSchema>["estado"] {
+  if (r.estado === "aprobada") return "activa";
+  if (r.estado === "anulada") return r.aprobadaEn ? "anulada" : "retirada";
+  return r.estado === "solicitada" ? "solicitada" : "rechazada";
 }

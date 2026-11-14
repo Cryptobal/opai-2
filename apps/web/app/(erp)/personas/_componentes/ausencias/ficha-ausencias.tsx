@@ -7,6 +7,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { AnularAusencia } from "./anular-ausencia";
+import { ResponderSolicitud } from "./responder-solicitud";
 import { etiquetaTipo, type GrupoAusencia } from "./tipos";
 
 const TONO = {
@@ -14,6 +15,14 @@ const TONO = {
   permiso: "info",
   vacaciones: "success",
   ausencia: "danger",
+} as const;
+
+// Las solicitudes del portal de la persona (CAR-508) se responden aquí; las demás son historial.
+const ESTADO = {
+  anulada: "Anulada",
+  solicitada: "Por responder",
+  rechazada: "Rechazada",
+  retirada: "Retirada",
 } as const;
 
 const rango = (g: GrupoAusencia) =>
@@ -66,8 +75,10 @@ export async function FichaAusencias({
                 <span className="text-base font-medium text-fg">
                   {g.clase ? `${etiquetaTipo(g.tipo)} · ${g.clase}` : etiquetaTipo(g.tipo)}
                 </span>
-                {g.estado === "anulada" ? (
-                  <Badge tono="neutro">Anulada</Badge>
+                {g.estado !== "activa" ? (
+                  <Badge tono={g.estado === "solicitada" ? "accent" : "neutro"}>
+                    {ESTADO[g.estado]}
+                  </Badge>
                 ) : g.dias > 0 ? (
                   <Badge tono={TONO[g.tipo]}>{g.dias === 1 ? "1 turno" : `${g.dias} turnos`}</Badge>
                 ) : (
@@ -81,6 +92,9 @@ export async function FichaAusencias({
             </span>
             {puedeEditar && g.estado === "activa" ? (
               <AnularAusencia personaId={personaId} g={g} />
+            ) : null}
+            {puedeEditar && g.estado === "solicitada" ? (
+              <ResponderSolicitud personaId={personaId} g={g} conPauta={conPauta} />
             ) : null}
           </li>
         ))}
