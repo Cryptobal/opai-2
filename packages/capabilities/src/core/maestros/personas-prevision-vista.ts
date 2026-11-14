@@ -67,7 +67,11 @@ type Fila = {
 
 const txt = (v: Dec | undefined) => (v == null ? null : v.toString());
 
-export async function vistaPrevision(ctx: Contexto, fila: Fila | null, personaId: string): Promise<VistaPrevision> {
+export async function vistaPrevision(
+  ctx: Contexto,
+  fila: Fila | null,
+  personaId: string,
+): Promise<VistaPrevision> {
   const ocultar = enmascararPlanIsapreEnLectura(ctx);
   let plan: string | null = null;
   if (fila?.planIsapre) {
@@ -76,6 +80,11 @@ export async function vistaPrevision(ctx: Contexto, fila: Fila | null, personaId
       : await cifradoDeCampos(ctx).descifrar("personas_prevision", "plan_isapre", fila.planIsapre);
   }
   const s = <T>(v: T) => (ocultar ? null : v);
+  // Tipo de pensión y discapacidad van cifrados (CAR-411): se descifran solo para quien ve los datos sensibles.
+  const salud = async (
+    col: "tipo_pension" | "discapacidad_invalidez",
+    v: string | null | undefined,
+  ) => (ocultar || !v ? null : cifradoDeCampos(ctx).descifrar("personas_prevision", col, v));
   return {
     personaId,
     afp: fila?.afp ?? null,
@@ -86,7 +95,7 @@ export async function vistaPrevision(ctx: Contexto, fila: Fila | null, personaId
     planUf: txt(fila?.planUf),
     cotizacionUfPct: txt(fila?.cotizacionUfPct),
     jubilado: fila?.jubilado ?? false,
-    tipoPension: s(fila?.tipoPension ?? null),
+    tipoPension: await salud("tipo_pension", fila?.tipoPension),
     cotizaAfp: fila?.cotizaAfp ?? true,
     cotizaAfc: fila?.cotizaAfc ?? true,
     cotizaSalud: fila?.cotizaSalud ?? true,
@@ -99,7 +108,7 @@ export async function vistaPrevision(ctx: Contexto, fila: Fila | null, personaId
     cargasSimples: s(fila?.cargasSimples ?? 0),
     cargasMaternales: s(fila?.cargasMaternales ?? 0),
     cargasInvalidez: s(fila?.cargasInvalidez ?? 0),
-    discapacidadInvalidez: s(fila?.discapacidadInvalidez ?? null),
+    discapacidadInvalidez: await salud("discapacidad_invalidez", fila?.discapacidadInvalidez),
     sensiblesOcultos: ocultar,
   };
 }
