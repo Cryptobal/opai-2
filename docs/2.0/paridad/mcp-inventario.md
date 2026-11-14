@@ -475,6 +475,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.archivar` | `rondas_puntos_archivar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.crear` | `rondas_puntos_crear` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.listar` | `rondas_puntos_listar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.actualizar` | `inventario_tipos_actualizar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.cargar_sugeridos` | `inventario_tipos_cargar_sugeridos` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.crear` | `inventario_tipos_crear` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.get` | `inventario_tipos_get` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.list` | `inventario_tipos_list` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.archivar` | `comercial_negocios_archivar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.create` | `comercial_negocios_create` | existe |
