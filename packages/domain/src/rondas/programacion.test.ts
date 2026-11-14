@@ -66,4 +66,21 @@ describe("ocurrencias de una programación de rondas (CAR-501)", () => {
       ocurrenciasProgramacion({ ...p, vigenciaDesde: "2026-11-14" }, desde, hasta, Z),
     ).toHaveLength(1);
   });
+
+  it("una hora pedida por dos horarios (turno de noche y de día) sale una sola vez", () => {
+    const p = {
+      ...base,
+      horarios: [
+        { cadaMin: 60, desde: "20:00", hasta: "08:00" },
+        { cadaMin: 60, desde: "08:00", hasta: "20:00" },
+      ],
+    };
+    const r = ocurrenciasProgramacion(
+      p,
+      new Date("2026-11-14T10:00:00Z"),
+      new Date("2026-11-14T12:00:00Z"),
+      Z,
+    );
+    expect(iso(r)).toEqual(["2026-11-14T10:00:00.000Z", "2026-11-14T11:00:00.000Z"]);
+  });
 });

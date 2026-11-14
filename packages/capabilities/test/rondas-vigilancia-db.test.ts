@@ -168,11 +168,14 @@ describe.skipIf(!urlPropietario)("vigilancia de rondas en base real (CAR-501)", 
 
   it("emite no realizada, atrasada y punto omitido de la hora revisada, una vez cada una", async () => {
     expect(await correr("A")).toEqual({ senales: 3 });
+    // Un reintento de la misma hora no repite nada.
+    expect(await correr("A")).toEqual({ senales: 0 });
     const [noHecha] = await eventos("A", "rondas.ejecucion.no_realizada");
     expect(noHecha?.payload).toEqual({
       instalacionId: inst.A,
       plantillaId: pl.atrasada,
       programadaPara: pedida.toISOString(),
+      hora,
     });
     const atrasadas = await eventos("A", "rondas.ejecucion.atrasada");
     expect(atrasadas.map((x) => x.entidadId)).toEqual([ejecucionAtrasada]);

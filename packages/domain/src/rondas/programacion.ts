@@ -59,5 +59,6 @@ export function ocurrenciasProgramacion(
       if (t >= desde && t < hasta) salida.push(t);
     }
   }
-  return salida.sort((a, b) => a.getTime() - b.getTime());
+  // Un turno nocturno y otro diurno pueden pedir la misma hora: cada instante sale una sola vez.
+  return [...new Set(salida.map((d) => d.getTime()))].sort((a, b) => a - b).map((t) => new Date(t));
 }

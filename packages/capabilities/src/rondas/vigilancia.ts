@@ -8,6 +8,11 @@ import type { Contexto } from "../types";
 import { noRealizadas, rondasRecientes, type Senal } from "./vigilancia-consultas";
 
 const HORA_MS = 3_600_000;
+const TIPOS: Senal["tipo"][] = [
+  "rondas.ejecucion.no_realizada",
+  "rondas.ejecucion.atrasada",
+  "rondas.punto.omitido",
+];
 
 async function rondasActivo(ctx: Contexto): Promise<boolean> {
   if (ctx.modulosActivos.includes("rondas")) return true;
@@ -45,8 +50,8 @@ async function atrasosYTramos(ctx: Contexto, desde: Date, hasta: Date): Promise<
  * Vigilancia horaria de Rondas (CAR-501): emite las señales que la Central convierte en alertas. Revisa la hora
  * anterior a `hora` («aaaa-mm-ddTHH» en la hora local del tenant, la que encola el programador): rondas programadas que no se
  * iniciaron, rondas que superaron su tiempo máximo y tramos vencidos con puntos obligatorios pendientes. La
- * ventana es fija por hora y el trabajo es único por hora, así que una señal sale una sola vez; todas van en una
- * transacción para que un reintento no las repita a medias.
+ * ventana es fija por hora, el trabajo es único por hora y las señales llevan la `hora`: un reintento de la misma
+ * hora no las repite, y todas van en una transacción.
  */
 export const trabajoVigilanciaRondas = defineTrabajo({
   tipo: "rondas.vigilancia.revisar",
@@ -63,10 +68,16 @@ export const trabajoVigilanciaRondas = defineTrabajo({
       ...(await noRealizadas(ctx, desde, hasta, zona)),
       ...(await atrasosYTramos(ctx, desde, hasta)),
     ];
-    if (senales.length > 0)
-      await ctx.transaccion(async (tx) => {
-        for (const s of senales) await ctx.eventos.emitir(tx, s);
+    if (senales.length === 0) return { senales: 0 };
+    return ctx.transaccion(async (tx) => {
+      // Un reintento de la misma hora (p. ej. si falló al cerrar el trabajo) no repite las señales.
+      const ya = await tx.evento.count({
+        where: { tipo: { in: TIPOS }, payload: { path: ["hora"], equals: hora } },
       });
-    return { senales: senales.length };
+      if (ya > 0) return { senales: 0 };
+      for (const s of senales)
+        await ctx.eventos.emitir(tx, { ...s, payload: { ...s.payload, hora } });
+      return { senales: senales.length };
+    });
   },
 });

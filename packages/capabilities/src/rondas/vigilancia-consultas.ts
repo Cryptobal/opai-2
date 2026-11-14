@@ -1,10 +1,11 @@
 import { ocurrenciasProgramacion, type HorarioRonda, type RondaVigilada } from "@opai/domain";
 
+import { senalRonda } from "../core/terreno/rondas-senales";
 import type { Contexto } from "../types";
 
 const MIN_MS = 60_000;
-/** Lo más que puede durar una ronda (tiempo máximo de plantilla, 480 min) con holgura. */
-const VENTANA_RONDA_MS = 9 * 60 * MIN_MS;
+/** Ronda más larga posible (tiempo máximo de plantilla, 480 min) más la hora revisada y una de margen. */
+const VENTANA_RONDA_MS = 10 * 60 * MIN_MS;
 
 export type Senal = {
   tipo: "rondas.ejecucion.no_realizada" | "rondas.ejecucion.atrasada" | "rondas.punto.omitido";
@@ -14,7 +15,6 @@ export type Senal = {
 };
 
 const fecha = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
-const conPersona = (personaId: string | null | undefined) => (personaId ? { personaId } : {});
 
 /** Persona responsable cuando la programación nombra a una sola (la Central agrupa por persona). */
 function responsableUnico(responsables: unknown): string | null {
@@ -78,8 +78,7 @@ export async function noRealizadas(ctx: Contexto, desde: Date, hasta: Date, zona
         entidadTipo: "programacion_ronda",
         entidadId: p.id,
         payload: {
-          instalacionId: p.instalacionId,
-          ...conPersona(responsableUnico(p.responsables)),
+          ...senalRonda(p.instalacionId, responsableUnico(p.responsables)),
           plantillaId: p.plantillaId,
           programadaPara: o.toISOString(),
         },
@@ -115,11 +114,7 @@ export async function rondasRecientes(ctx: Contexto, hasta: Date) {
     },
   });
   return filas.map((e) => ({
-    base: {
-      instalacionId: e.instalacionId,
-      ...conPersona(e.personaId),
-      plantillaId: e.plantillaId,
-    },
+    base: { ...senalRonda(e.instalacionId, e.personaId), plantillaId: e.plantillaId },
     id: e.id,
     ronda: {
       inicio: e.horaInicio,
