@@ -10,6 +10,8 @@ import { coberturaDeshacer } from "./cobertura-deshacer";
 import { excepcionesAnular } from "./excepciones-anular";
 import { excepcionesCrear } from "./excepciones-crear";
 import { exportarPauta } from "./exportar";
+import { visitasCerrar, visitasIniciar } from "./visitas";
+import { visitasListar, visitasObtener } from "./visitas-lectura";
 import { historialListar } from "./historial";
 import { informeInstalaciones } from "./informe-instalaciones";
 import { mesLeer } from "./lectura-mes";
@@ -54,4 +56,8 @@ export const capacidadesPauta: readonly Capacidad[] = [
   exportarPauta,
   publicacionesPublicar,
   publicacionesListar,
+  visitasIniciar,
+  visitasCerrar,
+  visitasListar,
+  visitasObtener,
 ];

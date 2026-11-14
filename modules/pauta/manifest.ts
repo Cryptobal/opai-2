@@ -40,6 +40,10 @@ export const manifest = defineModule({
       id: "pauta.publicada",
       descripcion: "Se publicó la pauta de una instalación para un mes: se avisa a cada titular sus turnos (CAR-356).",
     },
+    {
+      id: "pauta.visita.cerrada",
+      descripcion: "Un supervisor cerró una visita a una instalación con su lista de revisión (CAR-83).",
+    },
   ],
   capacidades: capacidadesPauta,
   // Indicador de gestión para el catálogo del núcleo (ADR-094, adenda CAR-309).
