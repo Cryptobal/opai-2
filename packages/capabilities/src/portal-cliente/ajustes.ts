@@ -31,4 +31,13 @@ export const ajustesPortalCliente = z.object({
     permiso: "portal_cliente:config.manage",
     control: "switch",
   }),
+  seccion_novedades: z.boolean().default(true).meta({
+    etiqueta: "Mostrar las novedades por gravedad a los clientes",
+    ayuda:
+      "En el resumen del mes, cada instalación muestra cuántas novedades hubo por gravedad y cuántas siguen abiertas. Solo cantidades: el texto que escribe el guardia no se muestra al cliente.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
 });

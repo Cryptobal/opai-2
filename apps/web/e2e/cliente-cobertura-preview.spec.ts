@@ -28,6 +28,7 @@ test.describe("@preview cliente cobertura", () => {
     await expect(page.getByText("Cobertura").first()).toBeVisible();
     await expect(page.getByText(/ de \d+ turnos|Sin turnos programados|Pendiente/).first()).toBeVisible();
     await expect(page.getByText("Rondas realizadas").first()).toBeVisible();
+    await expect(page.getByText("Novedades por gravedad").first()).toBeVisible();
     await capturar(page, info, "cliente-resumen-cobertura");
     expect(errores).toEqual([]);
   });

@@ -5,6 +5,7 @@ import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import { coberturaSchema } from "./cobertura";
 import { configDeCuenta } from "./config-datos";
+import { novedadesSchema } from "./novedades";
 import { rondasSchema } from "./rondas";
 import { seccionesDelResumen } from "./secciones";
 import { PERMISO_PORTAL, accesoDelActor, seccionSchema } from "./comun";
@@ -88,7 +89,7 @@ const seccionResumen = z.object({
 export const resumenLeer = defineCapability({
   id: "portal_cliente.resumen.leer",
   descripcion:
-    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). La cobertura trae turnos programados, cubiertos y por cubrir del mes (hasta hoy en el mes en curso) y las rondas, las realizadas, completas e incompletas; sin personas ni costos. Las secciones sin datos aún se marcan como pendientes, sin cifras.",
+    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). La cobertura trae turnos programados, cubiertos y por cubrir del mes (hasta hoy en el mes en curso) las rondas realizadas, completas e incompletas, y las novedades por gravedad (solo cantidades); sin personas ni costos. Las secciones sin datos aún se marcan como pendientes, sin cifras.",
   permiso: PERMISO_PORTAL,
   input: z.object({ mes: z.string().regex(MES).optional() }),
   output: z.object({
@@ -107,6 +108,8 @@ export const resumenLeer = defineCapability({
         cobertura: coberturaSchema.nullable(),
         /** Rondas cerradas en el mes (CAR-492); null si la sección no está activa. */
         rondas: rondasSchema.nullable(),
+        /** Novedades del mes por gravedad (CAR-493), solo cantidades; null si la sección no está activa. */
+        novedades: novedadesSchema.nullable(),
       }),
     ),
   }),

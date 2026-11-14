@@ -4,7 +4,7 @@ import { Alerta, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/d
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { type Cobertura, FilaSeccion, type Rondas, type Seccion } from "./fila-seccion";
+import { type Cobertura, FilaSeccion, type Novedades, type Rondas, type Seccion } from "./fila-seccion";
 import { mesAnterior, mesSiguiente, nombreDeMes } from "./mes";
 
 export type ResumenMes = {
@@ -19,12 +19,13 @@ export type ResumenMes = {
     secciones: Seccion[];
     cobertura: Cobertura | null;
     rondas: Rondas | null;
+    novedades: Novedades | null;
   }[];
 };
 
 /**
- * Resumen del mes = informe mensual (01, B14): una tarjeta por instalación habilitada. Las secciones
- * cuya fuente aún no está integrada se marcan «Pendiente», sin cifras ni porcentajes inventados.
+ * Resumen del mes = informe mensual (01, B14): una tarjeta por instalación habilitada con cobertura, rondas y
+ * novedades (CAR-491 a CAR-493). Una sección apagada por la empresa o sin su módulo se marca «Pendiente», sin cifras.
  */
 export function ResumenDelMes({ r }: { r: ResumenMes }) {
   return (
@@ -60,10 +61,6 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
         />
       ) : (
         <>
-          <Alerta tono="info" titulo="Datos en conexión">
-            Las secciones se van conectando a este resumen. Las que aún no tienen datos aparecen como
-            pendientes, sin cifras.
-          </Alerta>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {r.instalaciones.map((i) => (
               <Card key={i.id}>
@@ -76,7 +73,7 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
                 <CardContent>
                   <ul className="flex flex-col">
                     {i.secciones.map((s) => (
-                      <FilaSeccion key={s.seccion} s={s} cobertura={i.cobertura} rondas={i.rondas} />
+                      <FilaSeccion key={s.seccion} s={s} datos={i} />
                     ))}
                   </ul>
                 </CardContent>

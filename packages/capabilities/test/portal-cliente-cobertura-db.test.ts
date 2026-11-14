@@ -14,7 +14,8 @@ import type * as ModuloCapacidades from "../src";
 type Capacidades = typeof ModuloCapacidades;
 type Cob = { programados: number; cubiertos: number; porCubrir: number; porcentaje: number | null };
 type Rondas = { realizadas: number; completas: number; incompletas: number; porcentaje: number | null };
-type Resumen = { instalaciones: { id: string; cobertura: Cob | null; rondas: Rondas | null; secciones: { seccion: string; disponibilidad: string }[] }[] };
+type Nov = { total: number; alta: number; media: number; baja: number; abiertas: number };
+type Resumen = { instalaciones: { id: string; cobertura: Cob | null; rondas: Rondas | null; novedades: Nov | null; secciones: { seccion: string; disponibilidad: string }[] }[] };
 
 const MES = "2026-10"; // 22 días hábiles
 
@@ -67,6 +68,13 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
     await ronda(inst.x1, "incompleta", 3, "2026-10-11");
     await ronda(inst.x2, "completada", 4, "2026-10-12");
     await ronda(inst.x1, "completada", 4, "2026-11-02"); // otro mes
+    // Novedades de octubre: X1 con una alta abierta y una baja cerrada; X2 (fuera del acceso) con una; X1 en noviembre.
+    const novedad = (instalacionId: string, gravedad: string, estado: string, dia: string) =>
+      e.admin.novedad.create({ data: { tenantId: t.a, instalacionId, gravedad, estado, resumen: "Texto del guardia con Titular Secreto", createdAt: new Date(`${dia}T15:00:00Z`) } });
+    await novedad(inst.x1, "alta", "abierta", "2026-10-05");
+    await novedad(inst.x1, "baja", "cerrada", "2026-10-06");
+    await novedad(inst.x2, "media", "abierta", "2026-10-07");
+    await novedad(inst.x1, "media", "abierta", "2026-11-03");
     const acceso = async (tenantId: string, userId: string, cuentaId: string, instalacionId: string) => {
       await e.admin.user.create({ data: { id: userId, name: "c", email: `${userId}@prueba.cl` } });
       const m = await e.admin.membership.create({ data: { tenantId, userId, rol: "viewer", portales: ["cliente"] } });
@@ -99,6 +107,7 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
     expect(r.instalaciones[0]?.cobertura).toEqual({ programados: 22, cubiertos: 21, porCubrir: 1, porcentaje: 95.5 });
     expect(r.instalaciones[0]?.secciones.find((s) => s.seccion === "cobertura")?.disponibilidad).toBe("disponible");
     expect(r.instalaciones[0]?.rondas).toEqual({ realizadas: 2, completas: 1, incompletas: 1, porcentaje: 50 });
+    expect(r.instalaciones[0]?.novedades).toEqual({ total: 2, alta: 1, media: 0, baja: 1, abiertas: 1 });
     expect(JSON.stringify(r)).not.toMatch(/Titular|Secreto|11\.111/);
   });
 
@@ -111,6 +120,7 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
     const sinPauta = await resumen(ctx(t.a, u.x, ["portal_cliente"]));
     expect(sinPauta.instalaciones[0]?.cobertura).toBeNull();
     expect(sinPauta.instalaciones[0]?.rondas).toBeNull();
+    expect(sinPauta.instalaciones[0]?.novedades).toBeNull();
     expect(sinPauta.instalaciones[0]?.secciones.find((s) => s.seccion === "cobertura")?.disponibilidad).toBe("pendiente");
     const owner = mod.crearContexto({
       tenantId: t.a, actor: { tipo: "system" }, rol: "owner", portal: "erp", portalesMembresia: ["erp"],

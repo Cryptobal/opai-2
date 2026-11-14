@@ -136,16 +136,3 @@ export function instalacionesVisibles(
     .filter((i) => acceso.todasInstalaciones || habilitadas.has(i.id))
     .map((i) => i.id);
 }
-
-/** Estados posibles de una sección que aún no tiene datos en el sistema (vacío honesto, sin cifras). */
-export type DisponibilidadSeccion = "disponible" | "pendiente";
-
-/**
- * Secciones del portal que ya tienen datos propios en esta etapa. Las demás se muestran como
- * «pendiente de integración» y nunca con cifras inventadas (decisión del encargo, PR 1).
- */
-export const SECCIONES_CON_DATOS: readonly SeccionPortal[] = [];
-
-export function disponibilidadSeccion(s: SeccionPortal): DisponibilidadSeccion {
-  return SECCIONES_CON_DATOS.includes(s) ? "disponible" : "pendiente";
-}
