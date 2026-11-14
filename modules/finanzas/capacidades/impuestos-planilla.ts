@@ -37,7 +37,15 @@ export async function celdasImpuestos(
       p.tipo === "iva"
         ? `IVA de ${mesDe(p.periodo)} · se paga el ${p.fecha}${p.postergado ? " (postergado a M+2)" : ""}`
         : `PPM de ${mesDe(p.periodo)} · se paga el ${p.fecha}`;
-    vista.push({ id: idEstable(`${p.tipo}|${p.periodo}`), filaId, semana: p.semana, capa: "comprometido", monto: p.monto, nota });
+    vista.push({
+      id: idEstable(`${p.tipo}|${p.periodo}`),
+      filaId,
+      semana: p.semana,
+      capa: "comprometido",
+      monto: p.monto,
+      nota,
+      ...(p.tipo === "iva" ? { iva: { periodo: p.periodo, postergado: p.postergado, fechaPago: p.fecha } } : {}),
+    });
   }
   return { dominio, vista };
 }
