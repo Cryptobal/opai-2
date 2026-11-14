@@ -95,7 +95,8 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
   }
   if (lab && !lab.ok) fallo("Laboral");
   else if (lab) {
-    const { uniforme: u, jornadaDt: j, os10: o } = lab.data;
+    const { uniforme: u, jornadaDt: j, os10: o, contrato } = lab.data;
+    const termino = contrato?.terminoVigente ?? null;
     const ultima = u?.entregas.at(0);
     agregar({
       titulo: "Uniforme",
@@ -119,7 +120,7 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
     });
     agregar({
       titulo: "Jornada DT",
-      estado: E.estadoJornada(hoy, j),
+      estado: E.estadoJornada(hoy, j, termino),
       ancla: "jornada-dt",
       ir: "Ir a Jornada DT",
       filas: [
@@ -130,7 +131,7 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
         { etiqueta: "Distribución", valor: j?.distribucion },
         {
           etiqueta: "Término plazo fijo",
-          valor: j?.terminoPlazoFijo ? fecha(j.terminoPlazoFijo) : null,
+          valor: termino ? fecha(termino) : null,
         },
       ],
     });
