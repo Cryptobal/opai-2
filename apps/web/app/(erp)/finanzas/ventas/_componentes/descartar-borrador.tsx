@@ -8,7 +8,7 @@ import { Alerta, avisar, Button, Dialog } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 /** Diálogo de confirmación para descartar un borrador sin folio (CAR-248). Un documento emitido no se descarta. */
-export function DialogoDescartarBorrador({ documentoId, etiqueta, destino, abierto, onCerrar }: { documentoId: string; etiqueta: string; destino?: string; abierto: boolean; onCerrar: () => void }) {
+function DialogoDescartarBorrador({ documentoId, etiqueta, destino, abierto, onCerrar }: { documentoId: string; etiqueta: string; destino?: string; abierto: boolean; onCerrar: () => void }) {
   const router = useRouter();
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
 

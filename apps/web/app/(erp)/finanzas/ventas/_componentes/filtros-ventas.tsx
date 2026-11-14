@@ -1,6 +1,6 @@
-import { ChipsFiltro, type Filtro } from "@/app/_components/maestros/chips-filtro";
+import { type Filtro } from "@/app/_components/maestros/chips-filtro";
 
-/** Definición de los filtros del libro de ventas: la usan la lista en tabla y la lista maestra del panel (CAR-255). */
+/** Definición de los filtros del libro de ventas: la usa la lista maestra del panel (CAR-255). */
 export const filtrosVentas = (periodos: { valor: string; etiqueta: string }[]): Filtro[] => [
     {
       param: "orden",
@@ -37,8 +37,3 @@ export const filtrosVentas = (periodos: { valor: string; etiqueta: string }[]): 
       ],
     },
 ];
-
-/** Filtros del libro de ventas por URL: orden, período, tipo de documento y estado ante el SII. */
-export function FiltrosVentas({ periodos }: { periodos: { valor: string; etiqueta: string }[] }) {
-  return <ChipsFiltro filtros={filtrosVentas(periodos)} />;
-}

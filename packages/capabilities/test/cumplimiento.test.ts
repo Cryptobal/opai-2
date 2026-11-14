@@ -188,6 +188,7 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
       "personas_pago",
       "personas_pago_solicitudes",
       "personas_uniforme",
+      "personas_tallas",
       "personas_jornada_dt",
       "contrato_periodos",
       "personas_os10",
