@@ -104,13 +104,14 @@ export async function sincronizarMovimientos(ctx: Contexto, entrada: Sincronizar
   }
   // CAR-341: lo que ya entró por una cartola (aunque con otra fecha) no se duplica; queda vinculado a su id externo.
   const vinculados = await yaGuardadosPorCartola(ctx, cuenta.id, candidatos);
-  const nuevos = candidatos.filter((_, i) => !vinculados.has(i)).map(({ sospechoso: _s, ...m }) => m);
+  const sinMarca = candidatos.map(({ sospechoso: _s, ...m }) => m);
+  const nuevos = sinMarca.filter((_, i) => !vinculados.has(i));
   const sospechosos = candidatos.filter((c, i) => c.sospechoso && !vinculados.has(i)).length;
   const duplicados = plan.length - nuevos.length;
   const saldoBanco = saldoReportado(input);
   const base = { reconocida: true, cuentaId: cuenta.id, duplicados, sospechosos, saldoBanco };
   if (dryRun) return { ...base, nuevos: nuevos.length };
-  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, vinculos: [...vinculados.values()], duplicados, sospechosos, saldoBanco, saldoBancoEn: fechaSaldoReportado(input), saldoExplicito: input.saldoCuenta != null });
+  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, vinculos: [...vinculados.values()].map((v) => ({ ...v, movimiento: sinMarca[v.indice]! })), duplicados, sospechosos, saldoBanco, saldoBancoEn: fechaSaldoReportado(input), saldoExplicito: input.saldoCuenta != null });
   return { ...base, nuevos: insertados };
 }
 

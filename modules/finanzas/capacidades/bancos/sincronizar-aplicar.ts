@@ -23,25 +23,28 @@ export type MovimientoNuevo = {
  */
 export async function aplicarSincronizacion(
   ctx: Contexto,
-  p: { cuentaId: string; nuevos: MovimientoNuevo[]; vinculos?: VinculoExterno[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
+  p: { cuentaId: string; nuevos: MovimientoNuevo[]; vinculos?: (VinculoExterno & { movimiento: MovimientoNuevo })[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
 ): Promise<number> {
   return ctx.transaccion(async (tx) => {
-    // CAR-341: el movimiento que ya estaba por cartola recibe su id externo (si otro no lo tomó ya).
+    // CAR-341: el movimiento que ya estaba por cartola recibe su id externo. CAR-488: si otra entrega ya lo tomó, el
+    // entrante no se pierde: pasa a insertarse (si es la misma operación, su id externo repetido lo descarta).
+    const aInsertar = [...p.nuevos];
     for (const v of p.vinculos ?? []) {
-      await tx.movimientoBancario.updateMany({ where: { id: v.existenteId, idExterno: null }, data: { idExterno: v.idExterno } });
+      const r = await tx.movimientoBancario.updateMany({ where: { id: v.existenteId, idExterno: null }, data: { idExterno: v.idExterno } });
+      if (r.count === 0) aInsertar.push(v.movimiento);
     }
     // Ids externos que ya existían antes de este lote: una entrega repetida no vuelve a evaluar reglas sobre ellos.
-    const previos = p.nuevos.length
+    const previos = aInsertar.length
       ? await tx.movimientoBancario.findMany({
-          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno) } },
+          where: { cuentaId: p.cuentaId, idExterno: { in: aInsertar.map((m) => m.idExterno) } },
           select: { idExterno: true },
         })
       : [];
     const yaEstaban = new Set(previos.map((m) => m.idExterno));
-    const { count } = p.nuevos.length
+    const { count } = aInsertar.length
       ? await tx.movimientoBancario.createMany({
           skipDuplicates: true,
-          data: p.nuevos.map((m) => ({
+          data: aInsertar.map((m) => ({
             tenantId: ctx.tenantId,
             cuentaId: p.cuentaId,
             fecha: aFecha(m.fecha),
@@ -59,7 +62,7 @@ export async function aplicarSincronizacion(
     // Reglas del banco (ADR-074) sobre lo recién llegado: por id externo, dentro de la misma transacción.
     const llegados = count
       ? await tx.movimientoBancario.findMany({
-          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno).filter((x) => !yaEstaban.has(x)) } },
+          where: { cuentaId: p.cuentaId, idExterno: { in: aInsertar.map((m) => m.idExterno).filter((x) => !yaEstaban.has(x)) } },
           select: { id: true },
         })
       : [];
