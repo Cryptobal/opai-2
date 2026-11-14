@@ -44,6 +44,9 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `core.aprobaciones.list/get` | Responsable e input/resultado de la operación; IDs de aprobaciones |
 | `core.audit.list`, `core.actividad.list` | Historial con actores y payload de negocio; IDs de eventos revelados, sin centinela ni copiar payload |
 | `core.hilo.actividad`, `core.hilo.agenda` (CAR-331) | Actividad del hilo con alcance (empresa, instalaciones o propia): IDs de eventos revelados. Agenda: IDs de tareas y documentos revelados y de personas cuyo nombre se mostró |
+| `portal_cliente.novedades.listar` (CAR-502) | Texto del guardia, que puede nombrar personas; la instalación y las novedades reveladas en la página |
+| `portal_cliente.facturas.listar` (CAR-518) | Documentos emitidos a la cuenta, que puede ser una persona natural; documentos de la página |
+| `portal_cliente.facturas.pdf` (CAR-518) | PDF de un documento emitido a la cuenta del contacto; ID autorizado del input, igual que `finanzas.ventas.pdf` |
 
 La auditoría del historial anterior es **un evento de acceso a la página**, no
 una segunda implementación de la revelación salarial. El mecanismo salarial de

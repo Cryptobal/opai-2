@@ -13,4 +13,40 @@ export const ajustesPortalCliente = z.object({
     permiso: "portal_cliente:config.manage",
     control: "numero",
   }),
+  seccion_cobertura: z.boolean().default(true).meta({
+    etiqueta: "Mostrar la cobertura de turnos a los clientes",
+    ayuda:
+      "En el resumen del mes, cada instalación muestra los turnos programados, cubiertos y por cubrir (sin nombres ni costos). Cada cuenta puede ocultarla en su configuración del portal.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
+  seccion_rondas: z.boolean().default(true).meta({
+    etiqueta: "Mostrar las rondas realizadas a los clientes",
+    ayuda:
+      "En el resumen del mes, cada instalación muestra las rondas cerradas, cuántas quedaron completas y cuántas incompletas (sin nombres de los guardias). Cada cuenta puede ocultarla en su configuración del portal.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
+  seccion_novedades: z.boolean().default(true).meta({
+    etiqueta: "Mostrar las novedades por gravedad a los clientes",
+    ayuda:
+      "En el resumen del mes, cada instalación muestra cuántas novedades hubo por gravedad y cuántas siguen abiertas. Solo cantidades; el texto que escribe el guardia se enciende aparte en cada cuenta (apagado por defecto).",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
+  seccion_facturas: z.boolean().default(true).meta({
+    etiqueta: "Permitir que los clientes vean sus facturas",
+    ayuda:
+      "Cada cuenta enciende aparte sus facturas en su configuración del portal (apagadas por defecto). Apagado aquí, ningún cliente las ve.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
 });

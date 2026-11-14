@@ -7,6 +7,7 @@ import { normalizarCorreo, tipoNuncaVisibleParaCliente } from "@opai/domain";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { TarjetaSecciones } from "./tarjeta-secciones";
 import type { ConfigCuenta, TipoDocumentoOpcion } from "./tipos";
 
 /**
@@ -48,6 +49,7 @@ export function TarjetasConfiguracion({
 
   return (
     <div className="flex flex-col gap-4">
+      <TarjetaSecciones visibles={c.seccionesVisibles} onCambiar={(v) => setC({ ...c, seccionesVisibles: v })} />
       <SeccionTarjeta titulo="Documentos visibles para el cliente">
         <p className="t-caption pb-2">
           Ve solo los tipos marcados, de los guardias asignados a sus instalaciones. Liquidaciones,
