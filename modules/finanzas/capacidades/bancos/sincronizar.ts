@@ -16,7 +16,7 @@ import { yaGuardadosPorCartola } from "./sincronizar-cartola";
 
 const fechaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe ser AAAA-MM-DD.");
 
-export const movimientoEntradaSchema = z.object({
+const movimientoEntradaSchema = z.object({
   idExterno: z.string().trim().min(1).max(120),
   fecha: fechaIso,
   glosa: z.string().trim().min(1).max(500),
@@ -25,7 +25,7 @@ export const movimientoEntradaSchema = z.object({
   saldoDespues: z.number().int().nullish(),
 });
 
-export const sincronizarInput = z.object({
+const sincronizarInput = z.object({
   numeroCuenta: z.string().trim().min(3).max(40),
   codigoBanco: z.string().trim().max(60).optional(),
   movimientos: z.array(movimientoEntradaSchema).max(500),

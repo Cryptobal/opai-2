@@ -1,4 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
+import type { TenantTx } from "@opai/db";
 import { esRemuneracion } from "@opai/domain";
 
 import { sincronizarAvisoSaldoBajo } from "./aviso-banco";
@@ -23,16 +24,10 @@ export type MovimientoNuevo = {
  */
 export async function aplicarSincronizacion(
   ctx: Contexto,
-  p: { cuentaId: string; nuevos: MovimientoNuevo[]; vinculos?: (VinculoExterno & { movimiento: MovimientoNuevo })[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
+  p: { cuentaId: string; nuevos: MovimientoNuevo[]; vinculos?: Vinculo[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
 ): Promise<number> {
   return ctx.transaccion(async (tx) => {
-    // CAR-341: el movimiento que ya estaba por cartola recibe su id externo. CAR-488: si otra entrega ya lo tomó, el
-    // entrante no se pierde: pasa a insertarse (si es la misma operación, su id externo repetido lo descarta).
-    const aInsertar = [...p.nuevos];
-    for (const v of p.vinculos ?? []) {
-      const r = await tx.movimientoBancario.updateMany({ where: { id: v.existenteId, idExterno: null }, data: { idExterno: v.idExterno } });
-      if (r.count === 0) aInsertar.push(v.movimiento);
-    }
+    const aInsertar = [...p.nuevos, ...(await vincular(tx, p.vinculos ?? []))];
     // Ids externos que ya existían antes de este lote: una entrega repetida no vuelve a evaluar reglas sobre ellos.
     const previos = aInsertar.length
       ? await tx.movimientoBancario.findMany({
@@ -102,4 +97,19 @@ function saldoVigente(
   if (previo?.saldoBanco == null) return true;
   if (p.saldoExplicito && p.saldoBancoEn) return !previo.saldoBancoEn || p.saldoBancoEn >= previo.saldoBancoEn;
   return nuevos > 0;
+}
+
+type Vinculo = VinculoExterno & { movimiento: MovimientoNuevo };
+
+/**
+ * CAR-341: el movimiento que ya estaba por cartola recibe su id externo. CAR-488: si otra entrega ya lo tomó, el
+ * entrante no se pierde: se devuelve para insertarlo (si es la misma operación, su id externo repetido lo descarta).
+ */
+async function vincular(tx: Pick<TenantTx, "movimientoBancario">, vinculos: Vinculo[]): Promise<MovimientoNuevo[]> {
+  const perdidos: MovimientoNuevo[] = [];
+  for (const v of vinculos) {
+    const r = await tx.movimientoBancario.updateMany({ where: { id: v.existenteId, idExterno: null }, data: { idExterno: v.idExterno } });
+    if (r.count === 0) perdidos.push(v.movimiento);
+  }
+  return perdidos;
 }
