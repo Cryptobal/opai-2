@@ -7,7 +7,7 @@ import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/ent
 import { firmaWebhook } from "@opai/integrations";
 
 import type * as ModuloCapacidades from "../src";
-import { enviador } from "../src/core/webhooks/envio";
+import { enviador } from "../src/core/webhooks/envio-una";
 type Capacidades = typeof ModuloCapacidades;
 type Envio = Parameters<typeof enviador.enviar>[0];
 
@@ -127,6 +127,43 @@ describe.skipIf(!urlPropietario)("envío de eventos salientes (CAR-352)", () => 
       { estado: "ok" },
     );
     expect(lista.items.map((x) => x.id)).toContain(fallida.id);
+  });
+
+  it("cada entrega pendiente deja programado un trabajo a su hora, aunque coincidan en el minuto", async () => {
+    responde = { ok: false, codigo: 503, error: "Respondió 503" };
+    const [ev1, ev2] = [
+      await emitir("a", "core.cuenta.creada"),
+      await emitir("a", "core.cuenta.creada"),
+    ];
+    await mod.despacharPendientes(ctx("a"));
+    const base = new Date(Date.now() + 10 * 60_000);
+    base.setUTCSeconds(10, 0);
+    const tarde = new Date(base.getTime() + 40_000);
+    await e.admin.webhookEntrega.updateMany({
+      where: { eventoId: ev1.id },
+      data: { proximoIntentoEn: base },
+    });
+    await e.admin.webhookEntrega.updateMany({
+      where: { eventoId: ev2.id },
+      data: { proximoIntentoEn: tarde },
+    });
+    // Una vuelta sin nada vencido programa la primera; al llegar su hora, programa la segunda.
+    await enviar("a");
+    const programados = async () =>
+      (
+        await e.admin.trabajo.findMany({
+          where: { tenantId: t.a, tipo: "core.webhooks.enviar", programadoPara: { gte: base } },
+          select: { programadoPara: true },
+        })
+      ).map((x) => x.programadoPara.getTime());
+    expect(await programados()).toContain(base.getTime());
+    await e.admin.webhookEntrega.updateMany({
+      where: { eventoId: ev1.id },
+      data: { proximoIntentoEn: new Date(Date.now() - 1000) },
+    });
+    responde = { ok: true, codigo: 200, error: null };
+    await enviar("a");
+    expect(await programados()).toContain(tarde.getTime());
   });
 
   it("otra empresa no recibe ni ve las entregas", async () => {

@@ -60,7 +60,17 @@ export function enviarWebhook(e: EnvioWebhook): Promise<ResultadoWebhook> {
     ...r,
     duracionMs: Date.now() - inicio,
   });
-  return new Promise((resolver) => {
+  return new Promise((resolverUna) => {
+    // Se resuelve una sola vez, y siempre dentro del plazo total (DNS, conexión, cabeceras y cuerpo):
+    // `timeout` de `request` solo mide inactividad y un receptor lento podría retener la conexión.
+    let hecho = false;
+    const plazo: { id?: ReturnType<typeof setTimeout> } = {};
+    const resolver = (r: ResultadoWebhook) => {
+      if (hecho) return;
+      hecho = true;
+      clearTimeout(plazo.id);
+      resolverUna(r);
+    };
     let url: URL;
     try {
       url = new URL(e.url);
@@ -107,6 +117,7 @@ export function enviarWebhook(e: EnvioWebhook): Promise<ResultadoWebhook> {
       },
     );
     req.on("timeout", () => req.destroy(new Error("TIEMPO_AGOTADO")));
+    plazo.id = setTimeout(() => req.destroy(new Error("TIEMPO_AGOTADO")), timeout);
     req.on("error", (err) => {
       const motivo =
         err.message === "DESTINO_INTERNO"
