@@ -1,27 +1,15 @@
 import { PERMISOS_CORE } from "@opai/domain";
-import { Alerta, Badge, ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { Badge, ParesGrid, SeccionTarjeta } from "@opai/ds";
 
+import { BloqueContratoPeriodos } from "./bloque-contrato-periodos";
 import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { conDatos, SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
-import { estadoVencimiento } from "./estado-ficha";
 import { laboralDe } from "./lecturas-ficha";
-import { fecha, hoyIso } from "@/lib/fechas";
+import { fecha } from "@/lib/fechas";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { identidadActual } from "@/lib/servidor";
 
 const TITULO = "Jornada DT y contrato";
-
-type Jornada =
-  | { terminosPlazoFijo: string[]; terminoPlazoFijo: string | null; plazoFijoPeriodo: number | null }
-  | null
-  | undefined;
-/** Casillas del formulario: la lista por período o, en registros antiguos, el término en la casilla de su período. */
-function terminosIniciales(j: Jornada): Record<string, string | undefined> {
-  const lista: (string | undefined)[] = [];
-  if (j?.terminosPlazoFijo.length) lista.push(...j.terminosPlazoFijo);
-  else if (j?.terminoPlazoFijo) lista[Math.min(Math.max(j.plazoFijoPeriodo ?? 1, 1), 3) - 1] = j.terminoPlazoFijo;
-  return { termino1: lista[0], termino2: lista[1], termino3: lista[2] };
-}
 
 export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
@@ -32,15 +20,7 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
   if (!r.ok) return <SeccionError titulo={TITULO} que="la jornada DT" />;
   const j = r.data.jornadaDt;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
-  const vacia = !conDatos(
-    j?.resolucion,
-    j?.horasSemanales,
-    j?.distribucion,
-    j?.terminoPlazoFijo,
-    j?.articulo22,
-  );
-  // CAR-124 (export «Secciones» › Jornada DT): aviso cuando el plazo fijo vence pronto o ya venció.
-  const plazo = estadoVencimiento(hoyIso(), j?.terminoPlazoFijo);
+  const vacia = !conDatos(j?.resolucion, j?.horasSemanales, j?.distribucion, j?.articulo22);
   return (
     <SeccionTarjeta
       titulo={TITULO}
@@ -57,18 +37,6 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
     >
       {vacia ? (
         <VacioSeccion texto="Sin jornada registrada." accion={puede ? "Agregar" : null} />
-      ) : null}
-      {plazo && plazo.tono !== "success" && j?.terminoPlazoFijo ? (
-        <div className="mb-3">
-          <Alerta
-            tono={plazo.tono === "danger" ? "danger" : "warning"}
-            titulo={`Plazo fijo: ${plazo.etiqueta.toLowerCase()}`}
-          >
-            Término el {fecha(j.terminoPlazoFijo)}
-            {j.plazoFijoPeriodo ? `, período ${j.plazoFijoPeriodo} de 3` : ""}. Decide si se
-            renueva, pasa a indefinido o termina.
-          </Alerta>
-        </div>
       ) : null}
       <ParesGrid
         items={[
@@ -92,23 +60,12 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
                 : null,
           },
           {
-            etiqueta: "Plazo fijo (período)",
-            valor: j?.plazoFijoPeriodo ? `${j.plazoFijoPeriodo} de 3` : null,
-          },
-          {
-            etiqueta: "Términos de plazo fijo",
-            valor: j?.terminosPlazoFijo.length
-              ? j.terminosPlazoFijo.map((d, i) => `${i + 1}.º ${fecha(d)}`).join(" · ")
-              : j?.terminoPlazoFijo
-                ? fecha(j.terminoPlazoFijo)
-                : null,
-          },
-          {
             etiqueta: "Aviso de término",
             valor: j?.avisoTerminoDias != null ? `${j.avisoTerminoDias} días` : null,
           },
         ]}
       />
+      <BloqueContratoPeriodos personaId={personaId} contrato={r.data.contrato} puede={puede} />
       {puede ? (
         <HojaEditarSeccion
           seccion="jornada-dt"
@@ -120,8 +77,6 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
             horasSemanales: j?.horasSemanales,
             distribucion: j?.distribucion,
             articulo22: j?.articulo22 ? "si" : "no",
-            // Antes de CAR-277 solo había un término: va como el del período registrado.
-            ...terminosIniciales(j),
             avisoTerminoDias: j?.avisoTerminoDias?.toString(),
           }}
         />

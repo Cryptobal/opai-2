@@ -32,14 +32,28 @@ export type JornadaDt = {
   horasSemanales: string | null;
   distribucion: string | null;
   articulo22: boolean;
-  plazoFijoPeriodo: number | null;
-  terminoPlazoFijo: string | null;
-  terminosPlazoFijo: string[];
   avisoTerminoDias: number | null;
+};
+/** Período del contrato (CAR-409): renovación de plazo fijo o paso a indefinido. */
+export type PeriodoContrato = {
+  id: string;
+  tipo: "plazo_fijo" | "indefinido";
+  numero: number | null;
+  inicio: string;
+  termino: string | null;
+};
+export type ContratoPeriodos = {
+  vinculoId: string;
+  inicioContrato: string;
+  periodos: PeriodoContrato[];
+  periodoVigente: number | null;
+  terminoVigente: string | null;
+  indefinidoDesde: string | null;
 };
 export type Laboral = {
   uniforme: Uniforme | null;
   jornadaDt: JornadaDt | null;
+  contrato: ContratoPeriodos | null;
   os10: { credencial: string | null; venceEn: string | null } | null;
   contacto: {
     estadoCivil: string | null;

@@ -4,7 +4,7 @@ import { Alerta, Badge } from "@opai/ds";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { fecha, hoyIso } from "@/lib/fechas";
 
-import { HojaAnularPeriodo, HojaRegistrarPeriodo } from "./diferidas";
+import { HojasPeriodoContrato } from "./diferidas";
 import { estadoVencimiento } from "./estado-ficha";
 import type { ContratoPeriodos, PeriodoContrato } from "./lecturas-ficha";
 
@@ -91,18 +91,12 @@ export function BloqueContratoPeriodos({
               Anular último
             </EnlaceBotonHoja>
           ) : null}
-          <HojaRegistrarPeriodo
+          <HojasPeriodoContrato
             personaId={personaId}
             inicioSugerido={inicioSugerido}
             soloIndefinido={plazos >= MAX_PLAZOS}
+            ultimo={ultimo ? { id: ultimo.id, descripcion: textoPeriodo(ultimo) } : null}
           />
-          {ultimo ? (
-            <HojaAnularPeriodo
-              personaId={personaId}
-              periodoId={ultimo.id}
-              descripcion={textoPeriodo(ultimo)}
-            />
-          ) : null}
         </div>
       ) : null}
     </div>

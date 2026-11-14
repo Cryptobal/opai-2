@@ -16,7 +16,7 @@ export const VERBOS: Record<string, string> = {
   prevision_ver: "Ver previsión", prevision_actualizar: "Actualizar previsión", pago_ver: "Ver datos de pago",
   pago_solicitar_cambio: "Pedir cambio de pago", pago_aprobar_cambio: "Aprobar cambio de pago",
   pago_rechazar_cambio: "Rechazar cambio de pago", laboral_ver: "Ver datos laborales",
-  laboral_actualizar: "Actualizar datos laborales", paso_actualizar: "Actualizar paso", previsualizar: "Previsualizar", terminar: "Terminar",
+  laboral_actualizar: "Actualizar datos laborales", periodos_registrar: "Registrar período del contrato", periodos_anular: "Anular período del contrato", paso_actualizar: "Actualizar paso", previsualizar: "Previsualizar", terminar: "Terminar",
   montos_por_instalacion: "Montos por instalación", panel: "Panel", perfil_get: "Ver datos tributarios", prueba_abrir: "Abrir prueba", perfil_set: "Fijar datos tributarios", anular: "Anular", efectiva: "Vigente",
   cuentas: "Cuentas", contactos: "Contactos", vincular: "Vincular", set_roles: "Definir roles",
   desvincular: "Desvincular", completar: "Completar", delete: "Eliminar", timeline: "Línea de tiempo",
