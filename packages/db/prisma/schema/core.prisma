@@ -39,6 +39,8 @@ model Tenant {
   reglasAprobacion   ReglaAprobacion[]
   slackInstalacion   SlackInstalacion?
   grupoMiembros      GrupoUsuarioMiembro[]
+  rolesMiembro       RolMiembro[]
+  rolesGrupo         RolGrupo[]
   permisoExcepciones PermisoExcepcion[]
   modules            TenantModule[]
   apiKeys            ApiKey[]

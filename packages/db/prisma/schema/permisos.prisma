@@ -21,8 +21,13 @@ model Rol {
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id])
   memberships Membership[]
+  /// Asignaciones adicionales a miembros y a grupos (CAR-359).
+  asignadoAMiembros RolMiembro[]
+  asignadoAGrupos   RolGrupo[]
 
   @@unique([tenantId, nombre])
+  /// Destino de las FK compuestas de CAR-359: el rol asignado es de la misma empresa.
+  @@unique([tenantId, id])
   @@index([tenantId])
   @@map("roles")
   @@schema("core")
