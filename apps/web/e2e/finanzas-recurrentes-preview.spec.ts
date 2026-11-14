@@ -30,4 +30,26 @@ test.describe("@preview finanzas: gastos recurrentes", () => {
     await page.getByLabel("Monto por cuota ($)").fill("80.000");
     await capturar(page, info, "flujo-recurrentes-nuevo");
   });
+
+  // CAR-413: cambiar la frecuencia desde una fecha, solo hasta la vista previa (no confirma).
+  test("revisa un cambio de frecuencia desde una fecha sin guardarlo", async ({ page }, info) => {
+    await entrar(page);
+    await page.goto("/finanzas/flujo/recurrentes");
+    await expect(page.getByRole("heading", { name: "Gastos recurrentes", exact: true }).first()).toBeVisible({ timeout: 60_000 });
+    const fila = page.locator('a[href*="?editar="]').first();
+    test.skip((await fila.count()) === 0, "La empresa de prueba no tiene gastos recurrentes");
+    await fila.click();
+    const editar = page.getByRole("dialog");
+    await expect(editar.getByText("Editar gasto recurrente")).toBeVisible();
+    await editar.getByRole("button", { name: "Cambiar desde una fecha" }).click();
+    const hoja = page.getByRole("dialog");
+    await expect(hoja.getByText("Rige desde")).toBeVisible();
+    // Elige una frecuencia distinta de la actual (el combo es Radix, no un select nativo).
+    await hoja.getByLabel("Frecuencia").click();
+    await page.getByRole("option", { selected: false }).first().click();
+    await capturar(page, info, "flujo-recurrentes-cambio");
+    await hoja.getByRole("button", { name: "Revisar cambio" }).click();
+    await expect(hoja.getByText("Revisa el cambio").or(hoja.getByRole("alert")).first()).toBeVisible();
+    await capturar(page, info, "flujo-recurrentes-cambio-revisar");
+  });
 });
