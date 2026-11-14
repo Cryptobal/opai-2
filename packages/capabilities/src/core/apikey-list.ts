@@ -27,10 +27,9 @@ export const apikeysList = defineCapability({
     const filas = await ctx.db.apiKey.findMany({
       include: { user: true },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items: keys, siguiente } = pagina(filas, input.limite);
+    const { items: keys, siguiente } = pagina(filas, input.limite, input.cursor);
     const activas = new Set(
       (await ctx.db.membership.findMany({ where: { estado: "activa" } })).map((m) => m.userId),
     );

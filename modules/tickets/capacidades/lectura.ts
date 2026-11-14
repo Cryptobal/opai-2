@@ -92,10 +92,9 @@ export const ticketsListar = defineCapability({
         ...(input.tipoId ? { tipoId: input.tipoId } : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const p = pagina(filas, input.limite);
+    const p = pagina(filas, input.limite, input.cursor);
     const tipos = await tiposDe(ctx, p.items.map((t) => t.tipoId));
     return {
       items: p.items.map((t) => vistaTicket(t, tipos.get(t.tipoId) ?? TIPO_VACIO)),
