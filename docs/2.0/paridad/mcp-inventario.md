@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 788 pares pantalla→capacidad · 709 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 789 pares pantalla→capacidad · 710 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -748,6 +748,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/mi-cuenta` | `core.apps_conectadas.list` | `core_apps_conectadas_list` | existe |
 | erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/negocios/reportes` | `comercial.informes.tablero` | `comercial_informes_tablero` | existe |
+| erp | `/personas/[id]/ausencias` | `core.ausencias.clases` | `core_ausencias_clases` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |

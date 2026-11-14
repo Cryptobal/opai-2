@@ -101,6 +101,7 @@ core_aprobaciones_list
 core_aprobaciones_reglas_list
 core_audit_list
 core_ausencias_anular
+core_ausencias_clases
 core_ausencias_listar
 core_ausencias_registrar
 core_biometria_borrar

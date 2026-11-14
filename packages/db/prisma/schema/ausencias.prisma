@@ -10,6 +10,8 @@ model Ausencia {
   hasta         DateTime  @db.Date
   /// Texto libre, sin diagnósticos; en una licencia se lee con auditoría.
   motivo        String
+  /// Clase del catálogo de la empresa o de su vertical (CAR-393 parte 3); null en registros previos.
+  clase         String?
   /// "solicitada" | "aprobada" | "rechazada" | "anulada". Desde la ficha nace aprobada.
   estado        String    @default("aprobada")
   registradaPor String?   @map("registrada_por") @db.Uuid

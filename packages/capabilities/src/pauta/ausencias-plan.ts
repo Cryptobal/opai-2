@@ -21,6 +21,8 @@ export const ausenciaPersonaInput = z
       .min(3, "Cuenta brevemente el motivo.")
       .max(200)
       .describe("Sin diagnósticos ni datos médicos."),
+    /** Clase del catálogo de la empresa (CAR-393 parte 3), del mismo tipo; opcional. */
+    clase: z.string().trim().min(3).max(80).optional(),
   })
   .and(rangoSchema);
 export type AusenciaPersona = z.output<typeof ausenciaPersonaInput>;
