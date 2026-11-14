@@ -1,7 +1,7 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
 import { cargarRecurrentes } from "./_componentes/datos";
-import { HojaRecurrente } from "./_componentes/diferidas";
+import { HojaCambio, HojaRecurrente } from "./_componentes/diferidas";
 import { ListaRecurrentes } from "./_componentes/lista-recurrentes";
 
 export const metadata = { title: "Gastos recurrentes" };
@@ -20,6 +20,7 @@ export default function GastosRecurrentes() {
         <>
           <ListaRecurrentes state={d.state} items={d.items} filas={d.filas} configura={d.configura} />
           {d.configura ? <HojaRecurrente key={d.items.length} items={d.items} filas={d.filas} /> : null}
+          {d.configura ? <HojaCambio key={`c${d.items.length}`} items={d.items} filas={d.filas} /> : null}
         </>
       )}
     </PaginaPortal>
