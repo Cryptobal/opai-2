@@ -88,7 +88,7 @@ Regla de Carlos del 14-nov-2026 (ADR-115). Los cinco principios están en `AGENT
 - **Antes de escribir:** busca lo que ya existe (`grep` en `packages/domain`, `packages/capabilities`, `packages/ds` y el módulo). Dos copias casi iguales se unen en una; tres usos justifican moverla a `packages/*`.
 - **Sin anticipar:** no se agregan parámetros opcionales, banderas, genéricos, interfaces de una sola implementación ni envoltorios que solo reenvían. Si mañana hace falta, se agrega mañana.
 - **Límites:** archivos ≤ 150 líneas (ESLint `max-lines`, error) y funciones ≤ 60 líneas (lo mide `simplicidad`; no es error de lint para no bloquear lo ya escrito). Las pruebas y los archivos generados quedan fuera de la medición.
-- **Código muerto:** exportaciones, archivos y dependencias sin uso los detecta `knip` (configuración en `knip.json`); los duplicados, `jscpd` (bloques de 50 tokens o más). Un falso positivo se resuelve en la configuración con un comentario que diga por qué, nunca subiendo la base.
+- **Código muerto:** exportaciones, archivos y dependencias sin uso los detecta `knip` (configuración en `knip.jsonc`); los duplicados, `jscpd` (bloques de 50 tokens o más). Un falso positivo se resuelve en la configuración con un comentario que diga por qué, nunca subiendo la base.
 - **Comando:** `pnpm simplicidad` mide y compara con `simplicidad-base.json`; `pnpm simplicidad --actualizar` reescribe la base (solo para bajarla, o para subirla con la justificación en el PR).
 - **Simplificar código existente:** un tema por PR, sin cambiar el comportamiento, con las pruebas existentes en verde; si la parte no tiene pruebas, primero un commit con las pruebas que fijan el comportamiento actual y después la simplificación.
 
