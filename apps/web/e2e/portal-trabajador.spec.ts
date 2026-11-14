@@ -34,7 +34,7 @@ for (const { ruta, titulo } of PANTALLAS) {
     const conFicha = page.getByRole("button", { name: "Guardar cambios" });
     const privacidad = page.getByText("Quién cuida tus datos");
     const derechosArco = page.getByText("Tus derechos");
-    const documentos = page.getByText("Tu contrato, tus anexos y lo que tu empresa comparte contigo.");
+    const documentos = page.getByText("Los documentos que tu empresa comparte contigo, como tu contrato o tus anexos.");
     await expect(vacio.or(conFicha).or(privacidad).or(derechosArco).or(documentos).first()).toBeVisible();
     await expect(page.getByText("No pudimos cargar esta información")).toHaveCount(0);
     await expect(page.locator("main, [data-contenido]").first()).not.toContainText("undefined");

@@ -24,7 +24,7 @@ export default function Pagina() {
       volverSoloTelefono
       cargando="lista"
       cargar={async () => {
-        const r = await ejecutarComoUsuario<{ hoy: string; items: MiDocumento[] }>(
+        const r = await ejecutarComoUsuario<{ hoy: string; items: MiDocumento[]; siguiente: string | null }>(
           "trabajador",
           "portal_trabajador.mis_documentos.listar",
           { limite: 100 },
@@ -34,7 +34,7 @@ export default function Pagina() {
     >
       {({ state, datos }) => (
         <Estado state={state} variante="lista" textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}>
-          {datos ? <ListaDocumentos items={datos.items} hoy={datos.hoy} /> : null}
+          {datos ? <ListaDocumentos items={datos.items} hoy={datos.hoy} hayMas={datos.siguiente !== null} /> : null}
         </Estado>
       )}
     </PaginaPortal>

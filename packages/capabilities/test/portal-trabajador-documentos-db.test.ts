@@ -20,7 +20,7 @@ describe.skipIf(!urlPropietario)("portal trabajador · mis documentos (Postgres 
   const almacen = almacenamientoEnMemoria();
   const t = { a: "", b: "" };
   const u = { a1: "", a2: "", b1: "" };
-  const d = { visible: "", porTipo: "", oculto: "", archivado: "", companero: "", otraEmpresa: "" };
+  const d = { visible: "", porTipo: "", oculto: "", archivado: "", reemplazado: "", generado: "", companero: "", otraEmpresa: "" };
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -54,6 +54,8 @@ describe.skipIf(!urlPropietario)("portal trabajador · mis documentos (Postgres 
     d.porTipo = await doc(t.a, a1, "contrato.pdf", { tipoId: tipoContrato.id });
     d.oculto = await doc(t.a, a1, "evaluacion.pdf", { visibleEn: ["supervisor"], tipoId: tipoContrato.id });
     d.archivado = await doc(t.a, a1, "viejo.pdf", { visibleEn: ["trabajador"], estado: "archivado", archivadoEn: new Date() });
+    d.reemplazado = await doc(t.a, a1, "anexo-v1.pdf", { visibleEn: ["trabajador"], estado: "reemplazado" });
+    d.generado = await doc(t.a, a1, "generado.pdf", { origen: "generado" }); // sin tipo ni portales: no se ve
     d.companero = await doc(t.a, personas["a2"] ?? "", "otro.pdf", { visibleEn: ["trabajador"] });
     d.otraEmpresa = await doc(t.b, personas["b1"] ?? "", "ajeno.pdf", { visibleEn: ["trabajador"] });
   });
@@ -101,7 +103,7 @@ describe.skipIf(!urlPropietario)("portal trabajador · mis documentos (Postgres 
   it("descarga solo un documento propio y visible", async () => {
     const ok = await correr(t.a, u.a1, "portal_trabajador.mis_documentos.descargar", { id: d.visible });
     expect(ok.ok && (ok.data as { url: string }).url).toMatch(/^https:\/\/r2\.test\//);
-    for (const id of [d.oculto, d.archivado, d.companero, d.otraEmpresa]) {
+    for (const id of [d.oculto, d.archivado, d.reemplazado, d.generado, d.companero, d.otraEmpresa]) {
       const r = await correr(t.a, u.a1, "portal_trabajador.mis_documentos.descargar", { id });
       expect(r.ok ? "ok" : r.error.code).toBe("NOT_FOUND");
     }

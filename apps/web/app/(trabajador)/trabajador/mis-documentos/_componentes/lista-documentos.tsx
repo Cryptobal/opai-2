@@ -24,15 +24,15 @@ function vencimiento(venceEn: string | null, hoy: string): { texto: string; venc
 }
 
 /**
- * Mis documentos (CAR-463): contrato, anexos y lo que la empresa comparte con el trabajador. Cada fila abre el
+ * Mis documentos (CAR-463): lo que la empresa comparte con el trabajador (contrato, anexos u otros). Cada fila abre el
  * documento con una URL firmada pedida al tocar «Ver».
  */
-export function ListaDocumentos({ items, hoy }: { items: readonly MiDocumento[]; hoy: string }) {
+export function ListaDocumentos({ items, hoy, hayMas }: { items: readonly MiDocumento[]; hoy: string; hayMas: boolean }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="t-title mb-1 text-fg md:hidden">Mis documentos</h2>
-        <p className="t-body-sm">Tu contrato, tus anexos y lo que tu empresa comparte contigo.</p>
+        <p className="t-body-sm">Los documentos que tu empresa comparte contigo, como tu contrato o tus anexos.</p>
       </div>
       {items.length === 0 ? (
         <Empty
@@ -60,6 +60,7 @@ export function ListaDocumentos({ items, hoy }: { items: readonly MiDocumento[];
           })}
         </ul>
       )}
+      {hayMas ? <p className="t-caption">Se muestran tus {items.length} documentos más recientes.</p> : null}
     </div>
   );
 }

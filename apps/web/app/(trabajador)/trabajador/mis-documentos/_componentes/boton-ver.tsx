@@ -13,11 +13,19 @@ import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 export function BotonVer({ id, titulo }: { id: string; titulo: string }) {
   const [ocupado, setOcupado] = useState(false);
   async function ver() {
+    // La pestaña se abre dentro del toque (antes del await): Safari en iPhone bloquea las que se abren después.
+    const pestana = window.open("", "_blank");
+    if (pestana) pestana.opener = null;
     setOcupado(true);
     const r = await ejecutarCapacidad("trabajador", "portal_trabajador.mis_documentos.descargar", { id });
     setOcupado(false);
-    if (!r.ok) return avisar.error("No se pudo abrir el documento. Inténtalo de nuevo.");
-    window.open((r.data as { url: string }).url, "_blank", "noopener,noreferrer");
+    if (!r.ok) {
+      pestana?.close();
+      return avisar.error("No se pudo abrir el documento. Inténtalo de nuevo.");
+    }
+    const url = (r.data as { url: string }).url;
+    if (pestana) pestana.location.href = url;
+    else window.location.assign(url);
   }
   return (
     <Button variant="secondary" onClick={() => void ver()} disabled={ocupado} aria-label={`Ver ${titulo}`}>
