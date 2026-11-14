@@ -8,7 +8,8 @@ import { ajustesCentral } from "./capabilities/ajustes";
  * Se vende solo y suma reglas por cada fuente activa (pregunta 13). PR 1 (CAR-461): alertas manuales,
  * estados y bitácora. PR 2 (CAR-468): cadenas de escalamiento e intentos de contacto.
  * PR 3 (CAR-469): reglas de vigilancia y señales de Asistencia y Rondas.
- * PR 4 (CAR-470): humano a cargo (turno, responsable de respaldo, tomar y devolver, pausar al agente). La entrada de navegación llega con las pantallas (PR 6, CAR-472).
+ * PR 4 (CAR-470): humano a cargo (turno, responsable de respaldo, tomar y devolver, pausar al agente).
+ * PR 6 (CAR-472): cola en vivo y ficha de la alerta en el ERP, con su entrada en Operaciones.
  */
 export const manifest = defineModule({
   id: "central",
@@ -24,7 +25,17 @@ export const manifest = defineModule({
     { id: "central:agente.gobernar", descripcion: "Pausar al agente en toda la empresa, reanudarlo y devolver alertas tomadas por otros" },
     { id: "central:config.manage", descripcion: "Configurar las reglas de vigilancia y las cadenas de escalamiento de la central" },
   ],
-  navegacion: [],
+  navegacion: [
+    {
+      portal: "erp",
+      area: "operaciones",
+      href: "/central",
+      etiqueta: "Central",
+      icono: "BellRing",
+      orden: 60,
+      permiso: "central:alertas.ver",
+    },
+  ],
   configuracion: ajustesCentral,
   eventos: [
     { id: "central.alerta.abierta", descripcion: "Se abrió una alerta en la central." },
