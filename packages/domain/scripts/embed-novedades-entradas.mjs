@@ -8,6 +8,7 @@ const archivos = readdirSync(raiz)
   .sort();
 const cuerpos = archivos.map((f) => readFileSync(join(raiz, f), "utf8"));
 const lineas = [
+  "/* eslint-disable max-lines -- archivo generado: una línea por novedad, crece con cada entrada */",
   "/** Generado por `pnpm --filter @opai/domain gen:novedades-embed`. No editar. */",
   "/* eslint-disable max-lines -- una línea por novedad; crece con cada entrada. */",
   "export const NOVEDADES_MARKDOWN: readonly string[] = [",
