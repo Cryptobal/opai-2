@@ -36,8 +36,13 @@ export function TarjetaSecciones({
   visibles: SeccionPortal[];
   onCambiar: (visibles: SeccionPortal[]) => void;
 }) {
+  // Sin las novedades no hay texto que leer: apagarlas apaga también el texto.
   const marcar = (s: SeccionPortal, on: boolean) =>
-    onCambiar(on ? [...visibles.filter((x) => x !== s), s] : visibles.filter((x) => x !== s));
+    onCambiar(
+      on
+        ? [...visibles.filter((x) => x !== s), s]
+        : visibles.filter((x) => x !== s && !(s === "novedades" && x === "novedades_texto")),
+    );
   return (
     <SeccionTarjeta titulo="Secciones del resumen del mes">
       {SECCIONES.map(({ s, etiqueta, descripcion }) => (

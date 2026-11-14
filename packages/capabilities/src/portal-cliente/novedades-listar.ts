@@ -82,7 +82,7 @@ export const novedadesListar = defineCapability({
       .string()
       .regex(/^\d{4}-(0[1-9]|1[0-2])$/)
       .optional(),
-    cursor: z.string().optional(),
+    cursor: uuidSchema.optional(),
     limite: z.number().int().min(1).max(100).default(30),
   }),
   output: z.object({
