@@ -25,7 +25,7 @@ const turnoSchema = z.object({
   instalacion: z.object({ id: z.string(), nombre: z.string() }),
   puesto: z.string().nullable(),
 });
-export type MiTurno = z.output<typeof turnoSchema>;
+type MiTurno = z.output<typeof turnoSchema>;
 
 const sumarDias = (dia: string, n: number) =>
   new Date(Date.parse(`${dia}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
