@@ -590,8 +590,12 @@
     bottom: var(--ds-alto-barra-inferior);
     z-index: 30;
   }
+  /* La barra ya cubre la zona segura de abajo: sin un segundo margen sobre ella. */
+  [data-marco="nuevo"] aside[data-panel-lateral] > div:last-child {
+    padding-bottom: 0;
+  }
   [data-marco="nuevo"] aside[data-panel-lateral] [data-panel-cerrar],
-  [data-marco="nuevo"] header.md\:hidden button[aria-label="Preguntar a OPAI"] {
+  [data-marco="nuevo"] [data-agente-telefono] {
     display: none;
   }
 }

@@ -28,8 +28,9 @@ test.describe("@preview barra inferior del teléfono (CAR-416)", () => {
 
   test("la barra superior no repite el botón del agente", async ({ page }, info) => {
     await abrirInicioNuevo(page);
-    const arriba = page.locator("header").filter({ visible: true }).first();
-    await expect(arriba.getByRole("button", { name: "Preguntar a OPAI" })).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Preguntar a OPAI", exact: true }).filter({ visible: true }),
+    ).toHaveCount(0);
     await capturar(page, info, "inicio");
   });
 
@@ -61,7 +62,15 @@ test.describe("@preview barra inferior del teléfono (CAR-416)", () => {
     await expect(panel).toBeVisible();
     await expect(barra).toBeVisible();
     await expect(panel.locator("[data-panel-cerrar]")).toBeHidden();
+    const cajaPanel = await panel.boundingBox();
+    const cajaBarra = await barra.boundingBox();
+    if (cajaPanel && cajaBarra)
+      expect(cajaPanel.y + cajaPanel.height).toBeLessThanOrEqual(cajaBarra.y + 1);
     await capturar(page, info, "agente");
+    await page.keyboard.press("Escape");
+    await expect(panel).toBeHidden();
+    await agente.click();
+    await expect(panel).toBeVisible();
     await barra.getByRole("button", { name: /Menú/ }).click();
     await expect(panel).toBeHidden();
     await expect(page.locator("[data-sobre-barra]")).toBeVisible();

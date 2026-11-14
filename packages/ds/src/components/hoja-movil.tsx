@@ -59,7 +59,8 @@ export function HojaMovil({
           }
           onEscapeKeyDown={onEscape}
           // Sobre la barra, tocar la pestaña «Menú» la cierra con su propio clic (no cerrar y reabrir).
-          onPointerDownOutside={(e) => {
+          // Va en `onInteractOutside` para cubrir el toque y el foco que el toque deja en la pestaña.
+          onInteractOutside={(e) => {
             const t = e.target instanceof Element ? e.target : null;
             if (sobreBarra && t?.closest(`[${ATRIBUTO_DISPARADOR}]`)) e.preventDefault();
           }}
@@ -67,7 +68,7 @@ export function HojaMovil({
           className={cn(
             "fixed inset-x-0 flex flex-col bg-surface-raised text-fg outline-none",
             sobreBarra
-              ? "top-0 bottom-[var(--ds-alto-barra-inferior)] z-30 pt-safe"
+              ? "top-0 bottom-[var(--ds-alto-barra-inferior)] z-30 overscroll-contain pt-safe"
               : "bottom-0 z-50 h-[min(90dvh,720px)] rounded-t-xl shadow-overlay data-[state=open]:animate-[ds-subir_200ms_var(--ds-ease)] motion-reduce:animate-none",
           )}
         >

@@ -3,8 +3,6 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { HojaMovil } from "../../components/hoja-movil";
-import { HojaSobreBarra } from "../../components/hoja-sobre-barra";
 import { ShellNuevo, type ShellNuevoProps } from "./shell-nuevo";
 
 // CAR-416: en el teléfono Agente y Menú son pestañas de la barra inferior
@@ -29,15 +27,8 @@ describe("pestañas de la barra inferior (CAR-416)", () => {
     expect(h).toContain("data-pestana-menu");
   });
 
-  it("la hoja sobre la barra no tapa la barra: sin velo y por encima de ella", () => {
-    const h = renderToStaticMarkup(
-      <HojaSobreBarra.Provider value>
-        <HojaMovil abierto onCerrar={() => undefined} titulo="Menú">
-          <p>menu</p>
-        </HojaMovil>
-      </HojaSobreBarra.Provider>,
-    );
-    // Radix renderiza el portal solo en el cliente; en servidor no debe fallar.
-    expect(h).not.toContain("bg-overlay");
+  it("el botón del agente de la barra superior lleva su marca para ocultarlo en el teléfono", () => {
+    const h = renderToStaticMarkup(<ShellNuevo {...BASE} agente={<span>agente-arriba</span>} />);
+    expect(h).toMatch(/data-agente-telefono="[^"]*"[^>]*><span>agente-arriba<\/span>/);
   });
 });
