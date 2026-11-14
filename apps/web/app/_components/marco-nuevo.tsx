@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 
 import type { AppShellProps } from "@opai/ds";
 import { ShellNuevo } from "@opai/ds/shell-nuevo";
@@ -15,6 +15,9 @@ import type { DatosShell } from "./tipos-shell";
 
 type Props = { datos: DatosShell; menuPlegado: boolean; children: ReactNode };
 
+/** Logo de la empresa para el selector del menú (CAR-335 D6b); llega después de leer la marca. */
+const LogoEmpresa = createContext<string | undefined>(undefined);
+
 /**
  * Marco del diseño nuevo (ADR-109, CAR-335 D2): el mismo shell del clásico con `ShellNuevo` (piel,
  * menú plegable y barra con el buscador al centro y el tema) y el color de la empresa como acento.
@@ -23,16 +26,20 @@ type Props = { datos: DatosShell; menuPlegado: boolean; children: ReactNode };
  */
 export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
   const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
-  useAcentoEmpresa(enErp, datos.portal, datos.epoca);
+  const logo = useAcentoEmpresa(enErp, datos.portal, datos.epoca);
   // Un solo componente por montaje: `MarcoShell` lo usa como tipo y no debe cambiar entre renders.
   const [Shell] = useState(() => {
     const portal = datos.portal;
     // La pestaña «Agente» del teléfono abre el mismo panel que el botón de la barra (evento del shell).
     const conAgente = Boolean(datos.agente);
     return function ShellDelMarco(props: AppShellProps) {
+      const logoEmpresa = useContext(LogoEmpresa);
       return (
         <ShellNuevo
           {...props}
+          {...(props.tenant && logoEmpresa
+            ? { tenant: { ...props.tenant, logo: logoEmpresa } }
+            : {})}
           plegadoInicial={menuPlegado}
           onPlegado={(plegado) => {
             document.cookie = cookieMenu(plegado);
@@ -44,8 +51,10 @@ export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
     };
   });
   return (
-    <MarcoShell datos={datos} Shell={Shell}>
-      {children}
-    </MarcoShell>
+    <LogoEmpresa.Provider value={logo}>
+      <MarcoShell datos={datos} Shell={Shell}>
+        {children}
+      </MarcoShell>
+    </LogoEmpresa.Provider>
   );
 }
