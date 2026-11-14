@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Inventario (CAR-235 y CAR-236) en `preview-e2e`: Tipos (con los sugeridos del rubro si no hay ninguno),
-// la ficha de un tipo y su hoja; Activos con su hoja de registro y, si hay, la ficha de un activo; a 375,
+// Inventario (CAR-235 a CAR-237) en `preview-e2e`: Tipos (con los sugeridos del rubro si no hay ninguno),
+// la ficha de un tipo y su hoja; Activos con su hoja de registro y, si hay, la ficha de un activo; Ropa con su ficha y la hoja de ingreso; a 375,
 // 1024 y 1280 px. Entra con el usuario de la empresa ficticia `qa-e2e` (necesita Inventario activo).
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
@@ -54,6 +54,20 @@ test.describe("@preview inventario", () => {
       await page.waitForURL(/\/inventario\/activos\/[0-9a-f-]{36}/);
       await expect(page.getByText("Datos", { exact: true })).toBeVisible();
       await capturar(page, info, "inventario-activo");
+    }
+
+    await page.goto("/inventario/ropa");
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "inventario-ropa");
+    const prenda = page.locator('a[href^="/inventario/ropa/"]').filter({ visible: true }).first();
+    if (await prenda.count()) {
+      await prenda.click();
+      await page.waitForURL(/\/inventario\/ropa\/[0-9a-f-]{36}/);
+      await expect(page.getByText("Existencias", { exact: true })).toBeVisible();
+      await capturar(page, info, "inventario-prenda");
+      await page.goto(`${page.url().split("?")[0]}?ingreso=1`);
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await capturar(page, info, "inventario-prenda-ingreso");
     }
     expect(errores).toEqual([]);
   });

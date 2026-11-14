@@ -36,6 +36,8 @@
     "/(erp)/inventario/tipos": 169,
     "/(erp)/inventario/tipos/[id]": 171,
     "/(erp)/inventario/activos/[id]": 171,
+    "/(erp)/inventario/ropa": 169,
+    "/(erp)/inventario/ropa/[id]": 171,
     "/(erp)/cuentas/[id]": 176,
     "/(erp)/cuentas/[id]/actividad": 186,
     "/(erp)/cuentas/[id]/contactos": 174,

@@ -51,3 +51,20 @@ export const ESTADOS_ACTIVO: { valor: EstadoActivo; etiqueta: string; tono: "suc
 
 const DISPONIBLE = { valor: "disponible" as const, etiqueta: "Disponible", tono: "success" as const };
 export const estadoActivo = (v: EstadoActivo) => ESTADOS_ACTIVO.find((e) => e.valor === v) ?? DISPONIBLE;
+
+export type Prenda = {
+  tipoId: string;
+  nombre: string;
+  activo: boolean;
+  existencias: { talla: string; cantidad: number }[];
+  total: number;
+};
+
+export type MovimientoRopa = {
+  id: string;
+  talla: string;
+  delta: number;
+  motivoEtiqueta: string;
+  nota: string | null;
+  fecha: string;
+};

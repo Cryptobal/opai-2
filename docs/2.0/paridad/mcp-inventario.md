@@ -479,6 +479,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.crear` | `inventario_activos_crear` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.get` | `inventario_activos_get` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.list` | `inventario_activos_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ajustar` | `inventario_ropa_ajustar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ingresar` | `inventario_ropa_ingresar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.list` | `inventario_ropa_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.movimientos` | `inventario_ropa_movimientos` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.actualizar` | `inventario_tipos_actualizar` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.cargar_sugeridos` | `inventario_tipos_cargar_sugeridos` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.tipos.crear` | `inventario_tipos_crear` | existe |
