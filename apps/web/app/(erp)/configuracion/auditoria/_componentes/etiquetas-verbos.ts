@@ -24,7 +24,7 @@ export const VERBOS: Record<string, string> = {
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   estado_comercial: "Estado comercial", revocar: "Revocar", ver: "Ver", ofrecer: "Ofrecer",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
-  aplicar: "Aplicar", destinos: "Ver destinos", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
+  aplicar: "Aplicar", destinos: "Ver destinos", destinos_list: "Listar destinos", destino_crear: "Crear destino", destino_actualizar: "Editar destino", destino_rotar_secreto: "Rotar secreto", destino_eliminar: "Eliminar destino", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", valores: "Valores", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
   confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
@@ -86,6 +86,9 @@ export const VERBOS: Record<string, string> = {
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
   // Grupos o equipos de usuarios (CAR-251).
   agregar_miembros: "Agregar miembros", quitar_miembro: "Quitar miembro",
+  // Roles adicionales y de grupo (CAR-359).
+  adicional_asignar: "Sumar rol", adicional_quitar: "Quitar rol adicional", adicionales_list: "Ver roles adicionales",
+  rol_asignar: "Dar rol al grupo", rol_quitar: "Quitar rol al grupo", roles_list: "Ver roles del grupo",
   // Historial de correos del cliente (CAR-233).
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).

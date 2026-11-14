@@ -30,6 +30,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.push.quitar":
     "Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a).",
   "core.apikeys.create": "Solo personas: una key no se crea keys ni ve secretos (ADR-032).",
+  // CAR-352: un destino saca eventos de la empresa hacia afuera y lleva un secreto de firma.
+  "core.webhooks.destino_crear":
+    "Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032).",
+  "core.webhooks.destino_actualizar":
+    "Solo personas: cambiar la dirección de un destino redirige los eventos de la empresa (ADR-032).",
+  "core.webhooks.destino_rotar_secreto": "Solo personas: entrega un secreto de firma (ADR-032).",
+  "core.webhooks.destino_eliminar":
+    "Solo personas: gobierna una integración de la empresa (ADR-032).",
   "core.apikeys.revoke": "Solo personas: gobierno de keys y credenciales (ADR-032).",
   "core.apikeys.update":
     "Solo personas: cambiar alcances de una key es gobernar agentes (ADR-032).",
@@ -106,6 +114,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.roles.archive":
     "Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034).",
   "core.roles.assign": "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
+  "core.roles.adicional_asignar":
+    "Solo personas: sumar un rol a un usuario gobierna su acceso (ADR-034, CAR-359).",
+  "core.roles.adicional_quitar":
+    "Solo personas: quitar un rol a un usuario gobierna su acceso (ADR-034, CAR-359).",
+  "core.grupos.rol_asignar":
+    "Solo personas: dar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359).",
+  "core.grupos.rol_quitar":
+    "Solo personas: quitar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359).",
   "core.excepciones.set":
     "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
   "core.firmas.firmante_empresa_set":
