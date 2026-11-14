@@ -27,6 +27,11 @@ export const manifest = defineModule({
         "Registrar salidas desde el ERP, anular registros y cerrar en bloque a quienes siguen en sitio",
     },
     {
+      id: "acceso:prerregistros.create",
+      descripcion:
+        "Prerregistrar visitas con invitación QR y cancelar los prerregistros propios (o todos, si también gestiona registros)",
+    },
+    {
       id: "acceso:datos.ver_patente",
       descripcion: "Ver la patente completa de los vehículos registrados (acceso restringido)",
     },
