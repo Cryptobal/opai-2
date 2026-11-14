@@ -8,6 +8,7 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { huellasCandidatas, huellaVigente } from "./huella";
 import {
+  documentoSchema,
   entradaListaSchema,
   PERMISO_LISTAS,
   TIPOS_LISTA,
@@ -46,13 +47,7 @@ export const listasAgregar = defineCapability({
   input: z.object({
     instalacionId: uuidSchema,
     tipo: z.enum(TIPOS_LISTA),
-    documento: z
-      .object({
-        tipo: z.enum(["run", "pasaporte", "otro"]),
-        numero: z.string().min(1).max(40),
-        pais: z.string().min(2).max(3).optional(),
-      })
-      .strict(),
+    documento: documentoSchema,
     nombre: z.string().trim().min(2).max(120).optional(),
     motivo: z.string().trim().min(3).max(300).optional(),
     tiposRegistro: z.array(z.enum(TIPOS_REGISTRO)).max(5).default([]),

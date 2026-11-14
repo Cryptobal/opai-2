@@ -1,6 +1,5 @@
 [
   "acceso.listas.listar",
-  "acceso.registros.listar",
   "agente.conversaciones.list",
   "agente.historial.list",
   "agente.modelos.list",

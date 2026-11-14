@@ -7,7 +7,9 @@ import type { ClaseBase } from "./permisos-base-tipos";
 export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "acceso:datos.ver_patente": "G",
   "acceso:listas.manage": "G",
+  "acceso:prerregistros.create": "GS",
   "acceso:read": "GLS",
+  "acceso:registros.manage": "GS",
   "agente:configurar": "-",
   "agente:usar": "G",
   "asistencia:configurar": "G",
