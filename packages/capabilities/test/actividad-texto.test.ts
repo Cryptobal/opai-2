@@ -66,3 +66,12 @@ it("contrae «de el» y «a el», y la ficha sin nombre dice «de una persona» 
     "registró el pago de la rendición",
   );
 });
+
+it("eventos salientes (CAR-352): dice qué se hizo con el destino", () => {
+  expect(frase("core.webhooks.destino_crear", { url: "https://x.test" })).toBe(
+    "creó un destino de eventos salientes",
+  );
+  expect(frase("core.webhooks.destino_rotar_secreto", {})).toBe(
+    "rotó el secreto de un destino de eventos salientes",
+  );
+});
