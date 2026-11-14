@@ -151,3 +151,35 @@ self.addEventListener("fetch", (evento) => {
   }
   // RSC, datos y el resto: red directa, sin caché (la frescura y la seguridad quedan en el servidor).
 });
+
+/* Aviso al celular (CAR-356 PR 4b, ADR-044.4). El push llega SIN contenido: el servicio del navegador (Google,
+   Mozilla, Apple) no ve datos de nadie. Siempre se muestra una notificación (Safari lo exige) con un texto fijo;
+   el detalle está en la campana del portal. */
+self.addEventListener("push", (evento) => {
+  evento.waitUntil(
+    self.registration.showNotification("OPAI", {
+      body: "Tienes un aviso nuevo. Tócalo para verlo.",
+      icon: "/icono-192.png",
+      badge: "/icono-192.png",
+      tag: "opai-aviso",
+      data: { url: "/trabajador" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (evento) => {
+  evento.notification.close();
+  const url = (evento.notification.data && evento.notification.data.url) || "/trabajador";
+  evento.waitUntil(
+    (async () => {
+      const ventanas = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const abierta = ventanas.find((v) => new URL(v.url).origin === self.location.origin);
+      if (abierta) {
+        await abierta.focus();
+        if ("navigate" in abierta) await abierta.navigate(url).catch(() => undefined);
+        return;
+      }
+      await self.clients.openWindow(url);
+    })(),
+  );
+});

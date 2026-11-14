@@ -798,6 +798,8 @@ Reglas:
 
 ---
 
+**Adenda (CAR-356, 13-nov-2026; decisión de Carlos: aviso de la pauta en el portal y en el celular, sin WhatsApp).** El push se envía **sin contenido**: OPAI manda un POST vacío firmado con VAPID al servicio de push del navegador y el service worker muestra un texto fijo («Tienes un aviso nuevo») que abre el portal. Así ningún dato personal pasa por Google, Mozilla ni Apple (Ley 21.719) y no hace falta cifrar contenido. Solo se aceptan endpoints de servicios de push conocidos (sin SSRF). El celular se toca solo si la persona eligió «Aviso en el celular» en esa categoría y fuera de su horario de silencio (ADR-020, silencio por defecto). Las claves `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` las genera y guarda Carlos en Vercel; sin ellas el canal queda apagado.
+
 ## ADR-045 · Velocidad de navegación medida y con gate
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; contadores y caché de sesión decididos el 24-oct) · Completa ADR-037 y ADR-029 (punto 14).

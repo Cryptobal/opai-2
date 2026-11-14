@@ -9,6 +9,7 @@ import { FormScreenListo } from "@opai/ds/form-screen-listo";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { activarPush, apagarPush, mensajePush } from "./suscripcion-push";
 import type { Preferencias } from "./tipos";
 
 // Aparte (React.lazy, ADR-037): el interruptor sobre Radix no pesa en el JS inicial de la ruta;
@@ -38,9 +39,12 @@ const CATEGORIA: Record<CategoriaAviso, { titulo: string; detalle: string }> = {
 export function FormularioAvisos({
   inicial,
   cabecera,
+  clavePush,
 }: {
   inicial: Preferencias;
   cabecera: ReactNode;
+  /** Clave pública VAPID; null = el aviso al celular está apagado en el servidor (CAR-356 PR 4b). */
+  clavePush: string | null;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("trabajador");
   const [prefs, setPrefs] = useState(inicial.preferencias);
@@ -61,8 +65,16 @@ export function FormularioAvisos({
         silencio: conSilencio ? { desde, hasta } : null,
       },
     );
-    if (r) avisar.exito("Tus avisos quedaron guardados");
-    else avisar.error("No se pudo guardar. Inténtalo de nuevo.");
+    if (!r) {
+      avisar.error("No se pudo guardar. Inténtalo de nuevo.");
+      return;
+    }
+    avisar.exito("Tus avisos quedaron guardados");
+    // El permiso del celular se pide aquí, al activar un aviso, nunca al abrir (ADR-044.4).
+    const algunPush = Object.values(prefs).some((p) => p.push);
+    if (!algunPush) return void apagarPush(ejecutar);
+    const texto = mensajePush(await activarPush(clavePush, ejecutar));
+    if (texto) avisar.info(texto);
   }
 
   return (
