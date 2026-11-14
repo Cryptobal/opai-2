@@ -13,3 +13,7 @@
 ## Qué queda pendiente
 
 - D6c: retirar el clásico y el Hilo. D5: agente en la ficha.
+
+## Presupuesto de JS
+
+- `build · presupuesto de JS` marcó seis rutas que estaban justo en su tope (`/tareas`, `/instalaciones/[id]/rondas`, `/contactos/[id]`, `/terreno/porteria`, `/terreno/rondas`, `/trabajador*`): el `Monograma` con logo suma unas decenas de bytes al trozo compartido del DS (de 182,0 KB a 182,0x KB). Se sube 1 KB el tope de esas seis rutas (ADR-037: justificación en el PR). El resto de las rutas no cambia.
