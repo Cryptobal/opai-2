@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { formatearClp } from "@opai/domain";
 import { type EstadoPantalla, type FilaPlanilla, PlanillaScreen } from "@opai/ds";
 
 const COLUMNAS = [
@@ -16,7 +17,6 @@ const MONTOS: Record<string, Record<string, number>> = {
   "ins-a2": { s1: 600_000, s3: 1_000_000 },
   "cli-b": { s1: 350_000, s2: 920_000 },
 };
-const clp = (n: number) => `$ ${n.toLocaleString("es-CL")}`;
 
 /** Planilla con filas plegables (CAR-456): una fila abre su detalle por cliente y cada cliente sus instalaciones. */
 export function PlanillaPlegableMuestra({ state }: { state: EstadoPantalla }) {
@@ -46,7 +46,7 @@ export function PlanillaPlegableMuestra({ state }: { state: EstadoPantalla }) {
       columnas={COLUMNAS}
       celda={(f, c) => {
         const m = MONTOS[f]?.[c];
-        return m ? { texto: clp(m), tono: "info", detalle: "Comprometido" } : null;
+        return m ? { texto: formatearClp(m), tono: "info", detalle: "Comprometido" } : null;
       }}
       onAlternarFila={(id) =>
         setAbiertas((prev) => {
