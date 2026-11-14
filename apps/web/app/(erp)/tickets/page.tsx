@@ -8,6 +8,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { NuevoTicket } from "./_componentes/nuevo-ticket";
 import {
+  cargarInstalaciones,
   cargarTickets,
   cargarTipos,
   ETIQUETA_ESTADO,
@@ -37,17 +38,21 @@ export default function Tickets({ searchParams }: Props) {
       completo
       cargar={async () => {
         const p = await filtrosDe(searchParams);
-        const [r, tipos] = await Promise.all([cargarTickets(p), cargarTipos()]);
-        return { p, r, tipos: tipos.ok ? tipos.data : [] };
+        const [r, tipos, instalaciones] = await Promise.all([
+          cargarTickets(p),
+          cargarTipos(),
+          cargarInstalaciones(),
+        ]);
+        return { p, r, tipos: tipos.ok ? tipos.data : [], instalaciones };
       }}
     >
-      {({ r, tipos }) => {
+      {({ r, tipos, instalaciones }) => {
         const items = r.ok ? r.data.items : [];
         return (
           <ListScreen<Ticket>
             state={estadoPantalla(r)}
             titulo="Tickets"
-            accionPrincipal={<NuevoTicket tipos={tipos} />}
+            accionPrincipal={<NuevoTicket tipos={tipos} instalaciones={instalaciones} />}
             filtros={<ChipsFiltro filtros={[{ param: "vista", etiqueta: "Vista", opciones: OPCIONES_VISTA }]} />}
             items={items}
             clave={(t) => t.id}

@@ -17,13 +17,17 @@
 - Columna opcional `tickets.tickets.instalacion_id` con FK a `core.instalaciones` y el trigger de mismo tenant ampliado.
 - `tickets.tickets.crear` acepta `instalacionId` (de esta empresa, no archivada y dentro del alcance de quien crea; si no, NOT_FOUND); `listar` filtra por instalación; la ficha y la bandeja devuelven `instalacionId`.
 - Prueba `tickets-instalacion-db.test.ts`: filtro, otra empresa, alcance del supervisor y trigger de la base.
-- Sin pantalla todavía: elegir la instalación en «Nuevo ticket» y verla en la ficha va con la lista del portal del supervisor.
+
+## Qué entra (parte 3: instalación en pantalla, apilado sobre el PR de la parte 2)
+
+- «Nuevo ticket» trae el campo opcional «Instalación» (buscador con las instalaciones activas del alcance de quien crea, vía `core.instalaciones.list`); si no ve ninguna, el campo no aparece.
+- La ficha muestra la instalación, leída con `core.instalaciones.get`: si quien mira no la tiene en su alcance, no se muestra el nombre.
+- Prueba `@preview` `tickets-instalacion-preview.spec.ts` y novedad para usuarios.
 
 ## Qué queda pendiente (resto del PR 2 del Brief 13)
 
 - Correo al solicitante: declarar los comunicables de Tickets (ADR-020, silencio por defecto). Hoy el catálogo comunicable vive solo en el núcleo (`COMUNICABLES_NUCLEO`).
 - Vínculo a un negocio (Comercial): Tickets no depende de Comercial; se decide cuando haya un caso real.
-- Elegir la instalación en «Nuevo ticket» y mostrarla en la ficha.
 - Decidir si la bandeja «Todos» de un supervisor con `tickets:tickets.ver_todos` se acota a sus instalaciones (hoy ve todos, como antes de este PR).
 - Adjuntos vía `core.documentos`: espera CAR-496 (Documentos acepta el tipo `ticket`).
 - Lista de tickets en el portal del supervisor.
