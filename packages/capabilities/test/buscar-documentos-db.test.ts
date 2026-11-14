@@ -100,4 +100,21 @@ describe.skipIf(!urlPropietario)("core.buscar · documentos y plantillas (CAR-40
     const otros = await grupos(ctx(a.tenantId));
     expect(otros.find((g) => g.grupo === "documentos")).toBeUndefined();
   });
+
+  it("un documento de cumplimiento no aparece sin cumplimiento.read", async () => {
+    const a = await empresa("Epsilon");
+    await e.admin.documentoVinculo.create({
+      data: {
+        tenantId: a.tenantId,
+        documentoId: a.docId,
+        entidadTipo: "solicitud_arco",
+        entidadId: randomUUID(),
+        rol: "referencia",
+      },
+    });
+    const sin = await grupos(ctx(a.tenantId, "core:cumplimiento.read"));
+    expect(sin.find((g) => g.grupo === "documentos")).toBeUndefined();
+    const con = await grupos(ctx(a.tenantId));
+    expect(con.find((g) => g.grupo === "documentos")?.items).toHaveLength(1);
+  });
 });
