@@ -2,7 +2,8 @@ import { z } from "zod";
 
 import { defineCapability, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
-import { estadoEfectivo, pesoSeveridad, type Severidad } from "../domain";
+import { estadoEfectivo, pesoSeveridad, type Severidad, transicion } from "../domain";
+import { senalDe } from "../domain/senales";
 import { cursorDe, listaSchema, pagina, PERMISO_ATENDER, PERMISO_VER, severidadSchema, uuidSchema } from "./esquemas";
 import { falsa, posponer, reabrir, resolver } from "./escritura";
 import { exigirAgenteHabilitado, responsableActual } from "./humano";
@@ -31,6 +32,9 @@ export const alertasProponer = defineCapability({
     const a = await alertaVisible(ctx, i.id);
     await exigirAgenteHabilitado(ctx, ctx.db, a);
     if (i.severidad && pesoSeveridad(i.severidad) <= pesoSeveridad(a.severidad)) throw reglaDeNegocio("La severidad propuesta no es más baja.");
+    if (i.accion === "bajar_severidad" && senalDe(a.origen)?.fija) throw reglaDeNegocio("Un botón de emergencia es siempre crítico (R5).");
+    const estadoActual = estadoEfectivo(a, new Date());
+    if (i.accion !== "bajar_severidad" && !transicion(estadoActual, i.accion)) throw reglaDeNegocio(`No se puede proponer «${i.accion}» en una alerta «${estadoActual}».`);
     if (dryRun) return { id: a.id };
     const p = await ctx.transaccion(async (tx) => {
       const r = await tx.centralPropuesta.create({
@@ -60,7 +64,7 @@ const propuestaSchema = z.object({
 });
 
 export const propuestasListar = defineCapability({
-  auditarLectura: (s) => s.items.map((p) => p.alertaId),
+  auditarLectura: (s) => [...new Set(s.items.flatMap((p) => [p.id, p.alertaId]))],
   id: "central.propuestas.listar",
   descripcion: "Lista las propuestas del agente que esperan a la persona a cargo (o las ya resueltas), con la alerta, la acción y su porqué.",
   permiso: PERMISO_VER,
@@ -84,8 +88,12 @@ async function ejecutar(ctx: Parameters<typeof resolver>[0], p: { alertaId: stri
   if (p.accion === "reabrir") return reabrir(ctx, { id: p.alertaId, nota }, false);
   if (p.accion === "posponer") return posponer(ctx, { id: p.alertaId, nota, hasta: new Date(Date.now() + (p.minutos ?? 5) * 60_000) }, false);
   await ctx.transaccion(async (tx) => {
-    await tx.centralAlerta.update({ where: { id: p.alertaId }, data: p.severidad ? { severidad: p.severidad } : {} });
     const a = await tx.centralAlerta.findFirstOrThrow({ where: { id: p.alertaId } });
+    // Se revisa de nuevo al aceptar: la alerta pudo cambiar desde que se propuso (R5).
+    if (!p.severidad || senalDe(a.origen)?.fija || pesoSeveridad(p.severidad) <= pesoSeveridad(a.severidad))
+      throw reglaDeNegocio("La propuesta ya no baja la severidad de la alerta.");
+    const { count } = await tx.centralAlerta.updateMany({ where: { id: a.id, updatedAt: a.updatedAt }, data: { severidad: p.severidad } });
+    if (count !== 1) throw reglaDeNegocio("La alerta cambió mientras aceptabas: vuelve a abrirla.");
     const estado = estadoEfectivo(a, new Date());
     await registrarHecho(ctx, tx, { alertaId: a.id, tipo: "severidad_bajada", estadoDesde: estado, estadoHacia: estado, nota: p.severidad });
   });

@@ -77,4 +77,12 @@ describe.skipIf(omitirSuiteDb())("Central · escenario del manual del agente (db
     await ok(false, "central.propuestas.resolver", { id: p.id, aceptar: false, motivo: "La cámara cubre el acceso principal" });
     expect((await e.admin.centralAlerta.findUniqueOrThrow({ where: { id } })).severidad).toBe("alta");
   });
+
+  it("no se propone bajar la severidad de un botón de emergencia ni resolver una alerta cerrada", async () => {
+    const a = await e.admin.centralAlerta.create({ data: { tenantId: t, instalacionId: inst, titulo: "Emergencia", severidad: "critica", origen: "rondas.emergencia" } });
+    expect(await run(true, "central.alertas.proponer", { id: a.id, accion: "bajar_severidad", severidad: "baja", nota: "Parece un error del guardia" })).toMatchObject({ ok: false });
+    const { id } = await ok<{ id: string }>(false, "central.alertas.abrir", { instalacionId: inst, titulo: "Ruido", severidad: "baja" });
+    await ok(false, "central.alertas.resolver", { id, nota: "Era el viento" });
+    expect(await run(true, "central.alertas.proponer", { id, accion: "resolver", nota: "Ya está bien" })).toMatchObject({ ok: false });
+  });
 });
