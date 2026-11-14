@@ -36,7 +36,7 @@ export type Novedad = {
   motivoAnulacion: string | null;
 };
 
-export type Cuota = { id: string; numero: number; anio: number; mes: number; monto: number; estado: string };
+type Cuota = { id: string; numero: number; anio: number; mes: number; monto: number; estado: string };
 export type Prestamo = {
   id: string;
   personaId: string;
@@ -83,7 +83,6 @@ export type Concepto = {
   activo: boolean;
 };
 
-export type OpcionPersona = { id: string; nombre: string };
 
 /** Liquidación del período (Brief 27). */
 export type LiquidacionResumen = {
