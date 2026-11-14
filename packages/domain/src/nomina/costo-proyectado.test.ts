@@ -64,6 +64,20 @@ describe("nomina · costo proyectado", () => {
     expect(r.items.every((i) => i.personas === 1)).toBe(true);
   });
 
+  it("los sueldos de diciembre pagados el mes siguiente caen en enero", async () => {
+    const r = costoProyectadoDelMes({ anio: 2026, mes: 12 }, [persona()], await juego(), 0,
+      { sueldoDia: 5, sueldoMesSiguiente: true, previredFecha: previredPorDefecto({ anio: 2026, mes: 12 }) });
+    expect(r.items.map((i) => [i.concepto, i.fecha])).toEqual([["sueldos", "2027-01-05"], ["previred", "2027-01-13"]]);
+  });
+
+  it("isapre: cotiza al menos el plan en UF", async () => {
+    const j = await juego();
+    const fonasa = costoProyectadoDelMes(NOV, [persona()], j, 0, plazos).items.find((i) => i.concepto === "previred");
+    const isapre = costoProyectadoDelMes(NOV, [persona({ salud: { tipo: "isapre", planUf: 50_000 } })], j, 0, plazos)
+      .items.find((i) => i.concepto === "previred");
+    expect((isapre?.monto ?? 0)).toBeGreaterThan(fonasa?.monto ?? 0);
+  });
+
   it("sin personas no hay ítems", async () => {
     expect(costoProyectadoDelMes(NOV, [], await juego(), 0, plazos)).toEqual({ items: [], sinCalculo: 0 });
   });

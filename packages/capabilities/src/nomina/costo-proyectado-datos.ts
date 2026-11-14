@@ -13,6 +13,7 @@ import {
 } from "@opai/domain";
 
 import type { Contexto } from "../types";
+import { instalacionesEnAlcance } from "../core/maestros/alcance";
 import { aFecha, dia } from "../core/maestros/comun";
 import { dondeEstructura } from "../core/maestros/estructuras-alcance";
 import { ocultasDe } from "../core/maestros/estructuras-lectura";
@@ -38,8 +39,12 @@ export async function juegoDelMes(ctx: Contexto, fecha: string): Promise<JuegoDe
 
 /** Todo lo que se necesita del rango, en cinco consultas. */
 export async function cargarBase(ctx: Contexto, desde: string, hasta: string) {
+  const alcance = instalacionesEnAlcance(ctx);
+  // Del más reciente al más antiguo: si una persona tiene dos vínculos en un mes, manda el último.
   const vinculos = await ctx.db.vinculoLaboral.findMany({
+    orderBy: [{ inicio: "desc" }, { id: "asc" }],
     where: {
+      ...(alcance ? { instalacionId: { in: [...alcance] } } : {}),
       tipo: { not: "honorarios" },
       inicio: { lte: aFecha(hasta) },
       OR: [{ termino: null }, { termino: { gte: aFecha(desde) } }],
@@ -68,7 +73,13 @@ export async function cargarBase(ctx: Contexto, desde: string, hasta: string) {
     }),
     ctx.db.nominaReglaAnticipo.findMany({ where: { activa: true, personaId: { in: personas } } }),
   ]);
-  return { vinculos, estructuras, previsiones, anticipos };
+  // Capas por «nivel:id», una sola vez, para no recorrer todas por persona y mes.
+  const capas = new Map<string, ReturnType<typeof aDominio>[]>();
+  for (const e of estructuras) {
+    const k = `${e.nivel}:${e.personaId ?? e.puestoId ?? e.instalacionId}`;
+    capas.set(k, [...(capas.get(k) ?? []), aDominio(e, e.items)]);
+  }
+  return { vinculos, estructuras, capas, previsiones, anticipos };
 }
 
 export type Base = Awaited<ReturnType<typeof cargarBase>>;
@@ -85,12 +96,11 @@ export function personasDelMes(base: Base, m: MesCalendario, ocultas: Map<string
   for (const v of base.vinculos) {
     if ((dia(v.inicio) ?? "") > fin || (v.termino && (dia(v.termino) ?? "") < ini) || vistas.has(v.personaId)) continue;
     vistas.add(v.personaId);
-    const de = (nivel: string, campo: "personaId" | "puestoId" | "instalacionId", id: string | null) =>
-      base.estructuras.filter((e) => e.nivel === nivel && id && e[campo] === id).map((e) => aDominio(e, e.items));
+    const de = (nivel: string, id: string | null) => (id ? (base.capas.get(`${nivel}:${id}`) ?? []) : []);
     const r = resolverEstructura(fin, {
-      persona: de("persona", "personaId", v.personaId),
-      puesto: de("puesto", "puestoId", v.puestoId),
-      instalacion: de("instalacion", "instalacionId", v.instalacionId),
+      persona: de("persona", v.personaId),
+      puesto: de("puesto", v.puestoId),
+      instalacion: de("instalacion", v.instalacionId),
     });
     if (!r.estructura) { sinCapa += 1; continue; }
     if (ocultas.get(r.estructura.id)) { ocultasMes += 1; continue; }

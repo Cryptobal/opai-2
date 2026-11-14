@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   CONCEPTOS_COSTO_PROYECTADO,
   costoProyectadoDelMes,
+  fechaAnticipoQuincenal,
   mesesQueCubren,
   previredPorDefecto,
   type ItemCostoProyectado,
@@ -18,10 +19,11 @@ import { cargarBase, finMes, inicioMes, juegoDelMes, ocultasDe, personasDelMes }
 
 const MAX_MESES = 6;
 
+/** La misma fecha n meses después, con el día acotado al largo del mes (31-ago + 6 → 28-feb). */
 const masMeses = (d: string, n: number) => {
-  const f = new Date(`${d}T00:00:00Z`);
-  f.setUTCMonth(f.getUTCMonth() + n);
-  return f.toISOString().slice(0, 10);
+  const [a, m, dd] = d.split("-").map(Number) as [number, number, number];
+  const total = a * 12 + (m - 1) + n;
+  return fechaAnticipoQuincenal(Math.floor(total / 12), (total % 12) + 1, dd);
 };
 
 async function ajusteBool(ctx: Contexto, clave: string): Promise<boolean> {
@@ -51,7 +53,7 @@ export const costoProyectadoListar = defineCapability({
     .object({
       desde: diaSchema,
       hasta: diaSchema,
-      cursor: z.string().optional().describe("Posición devuelta en «siguiente»."),
+      cursor: z.string().regex(/^\d{1,6}$/, "Cursor inválido.").optional().describe("Posición devuelta en «siguiente»."),
       limite: z.number().int().min(1).max(200).default(100),
     })
     .refine((i) => i.hasta >= i.desde, { message: "«hasta» no puede ser anterior a «desde».", path: ["hasta"] })
@@ -76,7 +78,10 @@ export const costoProyectadoListar = defineCapability({
   async handler(ctx, { desde, hasta, cursor, limite }) {
     const meses = mesesQueCubren(desde, hasta);
     const [primero, ultimo] = [meses[0], meses[meses.length - 1]];
-    const advertencias: string[] = ["Turnos extra: aún no tienen monto en OPAI (CAR-96), por eso no se proyectan."];
+    const advertencias: string[] = [
+      "Turnos extra: aún no tienen monto en OPAI (CAR-96), por eso no se proyectan.",
+      "Impuesto único: se descuenta del líquido y se paga con el F29; no está en estos totales.",
+    ];
     const items: ItemCostoProyectado[] = [];
     if (primero && ultimo) {
       const base = await cargarBase(ctx, inicioMes(primero), finMes(ultimo));
@@ -92,7 +97,7 @@ export const costoProyectadoListar = defineCapability({
       ]);
       meses.forEach((m, i) => {
         const juego = juegos[i];
-        const etiqueta = inicioMes(m).slice(0, 7);
+        const etiqueta = inicioMes(m).slice(0, 7) + (i === 0 ? " (mes anterior)" : "");
         if (juego === undefined || typeof juego === "string") {
           advertencias.push(`${etiqueta}: faltan valores legales (${juego ?? "indicadores"}); el mes no se proyecta.`);
           return;
@@ -110,7 +115,7 @@ export const costoProyectadoListar = defineCapability({
     const enRango = items
       .filter((i) => i.fecha >= desde && i.fecha <= hasta)
       .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.concepto.localeCompare(b.concepto));
-    const inicio = Number(cursor ?? 0) || 0;
+    const inicio = Number(cursor ?? 0);
     const pagina = enRango.slice(inicio, inicio + limite);
     const siguiente = inicio + limite < enRango.length ? String(inicio + limite) : null;
     return { items: pagina, siguiente, advertencias };

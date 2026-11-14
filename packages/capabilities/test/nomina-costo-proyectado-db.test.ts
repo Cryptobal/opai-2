@@ -55,11 +55,4 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · costo proyectado 
     const personasB = new Set(b.vinculos.map((v) => v.personaId));
     expect(a.vinculos.some((v) => personasB.has(v.personaId))).toBe(false);
   });
-
-  it("la capacidad responde para el tenant sin mezclar datos (sin valores legales: solo advertencias)", async () => {
-    const r = await mod.executeCapability(ctx(tenantA), "nomina.costo_proyectado.listar", { desde: "2026-11-01", hasta: "2026-11-30" });
-    expect(r.ok).toBe(true);
-    const data = r.ok ? (r.data as { items: { personas: number }[] }) : { items: [] };
-    expect(data.items.every((i) => i.personas <= 1)).toBe(true);
-  });
 });

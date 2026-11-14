@@ -50,6 +50,8 @@ const semilla = (conIndicadores = true) => ({
     vinculo("0192f3a0-0000-7000-8000-00000000e311", P1),
     vinculo("0192f3a0-0000-7000-8000-00000000e312", P2),
     vinculo("0192f3a0-0000-7000-8000-00000000e313", P3, { tipo: "honorarios" }),
+    // Vínculo anterior de P1 que termina en noviembre: P1 cuenta una sola vez.
+    vinculo("0192f3a0-0000-7000-8000-00000000e314", P1, { tipo: "plazo_fijo", inicio: f("2024-01-01"), termino: f("2026-11-10"), estado: "terminado" }),
   ],
   estructuraSueldo: [
     estructura("0192f3a0-0000-7000-8000-00000000e321", P1, 553_553),
@@ -58,8 +60,10 @@ const semilla = (conIndicadores = true) => ({
   estructuraItem: [],
   nominaReglaAnticipo: [{ id: "a1", tenantId: T, personaId: P1, activa: true, modo: "monto_fijo", valor: 100_000, diaMes: 15 }],
 });
-const como = (rol: "owner" | "gerente" = "owner", conIndicadores = true) =>
-  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla(conIndicadores) });
+const como = (rol: "owner" | "gerente" = "owner", conIndicadores = true, extra: Parameters<typeof contextoDePrueba>[0] = {}) =>
+  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla(conIndicadores), ...extra });
+const sensibles = (c: ReturnType<typeof como>) =>
+  (c.tabla("auditEvent") as { capability: string }[]).filter((e) => e.capability === "core.estructuras.read_sensible");
 
 beforeEach(() => {
   limpiarRegistro();
@@ -90,6 +94,25 @@ describe("nomina.costo_proyectado.listar", () => {
     expect(r.advertencias.some((a) => a.includes("CAR-96"))).toBe(true);
   });
 
+  it("leer sueldos queda en la auditoría sensible", async () => {
+    const c = como();
+    await listar(c, { desde: "2026-11-01", hasta: "2026-11-30" });
+    expect(sensibles(c).length).toBeGreaterThan(0);
+  });
+
+  it("sin el permiso de sueldos sensibles no suma montos y lo advierte", async () => {
+    const c = como("owner", true, { permisosRol: ["nomina:read"] });
+    const r = await listar(c, { desde: "2026-11-01", hasta: "2026-11-30" });
+    expect(r.items).toEqual([]);
+    expect(r.advertencias.some((a) => a.includes("sueldo oculto por permisos"))).toBe(true);
+  });
+
+  it("con alcance por instalación solo suma el personal de sus instalaciones", async () => {
+    const r = await listar(como("owner", true, { alcance: { instalaciones: [] } }), { desde: "2026-11-01", hasta: "2026-11-30" });
+    expect(r.items).toEqual([]);
+    expect(r.advertencias.some((a) => a.includes("sin estructura"))).toBe(false);
+  });
+
   it("sin valores legales no proyecta ni lee sueldos, y lo advierte", async () => {
     const c = como("owner", false);
     const r = await listar(c, { desde: "2026-11-01", hasta: "2026-11-30" });
@@ -109,7 +132,12 @@ describe("nomina.costo_proyectado.listar", () => {
 
   it("rechaza un rango invertido o de más de 6 meses", async () => {
     const c = como();
-    for (const input of [{ desde: "2026-11-02", hasta: "2026-11-01" }, { desde: "2026-01-01", hasta: "2026-07-02" }])
+    for (const input of [
+      { desde: "2026-11-02", hasta: "2026-11-01" },
+      { desde: "2026-01-01", hasta: "2026-07-02" },
+      { desde: "2026-08-31", hasta: "2027-03-01" },
+      { desde: "2026-11-01", hasta: "2026-11-30", cursor: "-2" },
+    ])
       expect(await executeCapability(c.ctx, "nomina.costo_proyectado.listar", input)).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
   });
 
