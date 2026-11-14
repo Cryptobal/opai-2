@@ -118,6 +118,11 @@ export function TablaRemuneraciones({ data, puede, abrirMutual = false, onActual
           ))}
         </tbody>
       </Table>
+      <p className="t-caption text-fg-muted">
+        Se actualizan solos: UF y UTM cada día desde el SII; ingreso mínimo, topes, AFP, SIS y cesantía cada mes
+        desde Previred. El impuesto único, la reforma, la mutual básica y la jornada cambian por ley y los publica
+        OPAI.
+      </p>
 
       <DialogoMutual
         abierto={mutualAbierto}

@@ -115,11 +115,11 @@ test.describe("fichas en un solo panel bajo 1024 px", () => {
       expect(new URL(page.url()).searchParams.get("q")).toBe(q);
       expect(await ancho(page, m.lista)).toBeGreaterThanOrEqual(600);
 
-      // A 1024 nada cambia: lista de 360 px y detalle a la vista, sin «Volver» en la barra.
+      // A 1024 sigue dividida, sin «Volver» en la barra; en el diseño nuevo la ficha toma el 58 % (CAR-336).
       await page.setViewportSize({ width: 1024, height: 768 });
       await fila.click();
       await page.waitForURL((u) => /^\/[a-z]+\/[0-9a-f-]{36}/.test(u.pathname));
-      expect(await ancho(page, m.lista)).toBe(360);
+      expect(await ancho(page, m.lista)).toBeLessThan((await ancho(page, "Detalle")) ?? 0);
       await expect(
         page.getByRole("region", { name: "Detalle" }).filter({ visible: true }),
       ).toBeVisible();
