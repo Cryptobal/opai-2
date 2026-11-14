@@ -24,7 +24,7 @@ La hoja «Editar negocio» suma el campo **Responsable** (personas del ERP de `c
 ## PR campos personalizados 1/3 · rama `brief/car-27-campos-personalizados`
 
 - **Estado:** Abierto
-- **Migración:** Sí (`20261223100000_core_campos_personalizados`, aditiva)
+- **Migración:** Sí (`20261226100000_core_campos_personalizados`, aditiva)
 
 ### Qué entra
 
