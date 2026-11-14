@@ -28,6 +28,7 @@ describe("inventario · activos (CAR-236)", () => {
     });
     expect(validarValores(campos, { imei: "1", bateria: "mucho" })).toMatchObject({ ok: false });
     expect(validarValores(campos, { imei: "1", compra: "31-12-2026" })).toMatchObject({ ok: false });
+    expect(validarValores(campos, { imei: "1", compra: "2026-02-31" })).toMatchObject({ ok: false });
     expect(validarValores(campos, { imei: "1", color: "rojo" })).toMatchObject({ ok: false });
   });
 

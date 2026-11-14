@@ -106,7 +106,7 @@ export async function DetalleActivo({
               </div>
             </dl>
           </SeccionTarjeta>
-          {puedeGestionar && a.estado !== "de_baja" ? <HojaActivo activo={a} /> : null}
+          {puedeGestionar && a.estado !== "de_baja" ? <HojaActivo key={a.id} activo={a} /> : null}
         </div>
       ) : null}
     </DetailScreen>

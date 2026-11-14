@@ -121,7 +121,13 @@ export const activosActualizar = defineCapability({
     const guardado = await ctx.transaccion(async (tx) => {
       const { codigo: c, codigoNormalizado: cn, numeroSerie, notas } = f;
       const data = { codigo: c, codigoNormalizado: cn, numeroSerie, notas, valores: f.valores ?? {} };
-      const a = await sinDuplicado(tx.inventarioActivo.update({ where: { id: actual.id }, data }), duplicado(c));
+      // Solo si no se dio de baja mientras tanto (R12).
+      const r = await sinDuplicado(
+        tx.inventarioActivo.updateMany({ where: { id: actual.id, estado: { not: "de_baja" } }, data }),
+        duplicado(c),
+      );
+      if (r.count !== 1) throw conflicto("El activo cambió mientras tanto. Vuelve a cargarlo.");
+      const a = await tx.inventarioActivo.findFirstOrThrow({ where: { id: actual.id } });
       await ctx.eventos.emitir(tx, {
         tipo: "inventario.activo.actualizado",
         entidadTipo: "inventario_activo",
