@@ -56,33 +56,29 @@ test.describe("muestra del marco nuevo", () => {
     await capturar(page, info, "ds-nuevo-marco");
     if ((page.viewportSize()?.width ?? 0) >= 1024) {
       await page.getByRole("button", { name: "Ocultar el menú" }).click();
-      const fijar = page.getByRole("button", { name: "Dejar el menú fijo" });
-      await expect(fijar).toBeVisible();
-      // Plegado (CAR-377): el riel muestra los módulos, no cada submódulo; tocar uno lo abre.
+      // Plegado como en Linear (CAR-442): sin riel de íconos, queda el botón «Mostrar el menú».
+      const mostrar = page.getByRole("button", { name: "Mostrar el menú" });
+      await expect(mostrar).toBeVisible();
       await page.mouse.move(900, 500);
-      const riel = page.locator("nav[data-riel-nuevo]");
-      await expect(riel.getByRole("button", { name: "Comercial" })).toBeVisible();
-      await expect(riel.getByRole("link", { name: "Negocios" })).toHaveCount(0);
+      await expect(page.locator("nav[data-riel-nuevo]")).toBeHidden();
       await capturar(page, info, "ds-nuevo-marco-oculto");
-      // Con el teclado o en pantalla táctil (sin pasar el mouse por encima).
-      await riel.getByRole("button", { name: "Comercial" }).dispatchEvent("click");
-      await expect(page.getByRole("link", { name: "Negocios" })).toBeVisible();
-      await page.mouse.move(900, 500);
-      await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
-      await page.getByRole("navigation", { name: "Principal" }).filter({ has: fijar }).hover();
+      // Al pasar el mouse por el botón se asoma el menú completo; al alejarse se esconde.
+      await mostrar.hover();
       const completo = page
         .getByRole("navigation", { name: "Principal" })
         .filter({ hasText: "Cotizaciones" })
         .first();
       await expect(completo).toBeVisible();
       await capturar(page, info, "ds-nuevo-marco-asomado");
-      // El botón del riel queda tapado por el menú asomado: el menú trae el suyo.
-      await expect(page.getByRole("button", { name: "Dejar el menú fijo" })).toHaveCount(1);
       await page.mouse.move(900, 500);
-      // El riel también tiene sus enlaces: lo que se esconde es el menú completo, con la marca OPAI.
       await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
-      // Con el mouse sobre el riel se asoma el menú y su botón lo deja fijo.
-      await fijar.hover();
+      // El atajo «[» de Linear lo deja fijo y lo vuelve a plegar.
+      await page.keyboard.press("[");
+      await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
+      await page.keyboard.press("[");
+      await expect(mostrar).toBeVisible();
+      // Con el mouse en el borde izquierdo se asoma y su botón lo deja fijo.
+      await page.mouse.move(2, 400);
       await page.getByRole("button", { name: "Dejar el menú fijo" }).click();
       await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
       // El navegador recuerda la elección: vuelve fijo tras recargar.
