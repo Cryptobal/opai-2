@@ -323,6 +323,15 @@ Con este acuerdo la especificación queda **aprobada** (antes estaba en borrador
 - Anular también queda disponible para el gerente (en §6 decía supervisor y admin), para que alguien con oficina pueda corregir un error sin depender del supervisor de turno.
 - Un registro anulado no cuenta como «en sitio» y no admite salida, ni desde el ERP ni desde un equipo que sincroniza tarde (se rechaza con el motivo «entrada anulada»).
 
+## Adenda 14-nov-2026 (Sesión Acceso, CAR-478)
+
+- Los días de un prerregistro se cuentan en la **zona horaria de la empresa** (`core.tenants.timezone`), igual que el cruce de listas: hoy las instalaciones no tienen zona propia. Cuando la tengan, se cambia en un solo lugar (`hoyEmpresa`).
+- El QR de cada día no se guarda: es una **firma HMAC** del visitante y el día con una clave derivada de `ACCESO_HUELLA_SECRET` (otro dominio que la huella). Se puede volver a mostrar y la portería lo verifica sin buscar un secreto en la base.
+- «No llegó» se **calcula** al leer (un día que terminó sin uso), sin un trabajo nocturno.
+- Cancelar un prerregistro lo puede hacer quien lo creó o quien tiene `acceso:registros.manage` (en §6 decía «quien lo creó o un admin»).
+- Permiso nuevo **`acceso:prerregistros.create`** (gerente y supervisor de base, con alcance), como en §7.
+- **Entregas en dos partes:** esta trae los datos, las capacidades y las pantallas del ERP (`Prerregistrar`, ficha e `InvitacionQR`); el uso del QR en la portería (esperados de hoy, formulario lleno al escanear, día marcado «Ingresó») y el envío de la invitación por correo o WhatsApp llegan en la segunda parte del mismo ticket.
+
 ## Historial
 
 | Fecha | Cambio | Aprobó |

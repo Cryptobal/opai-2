@@ -52,7 +52,7 @@ export const VERBOS: Record<string, string> = {
   buscar_duplicadas: "Buscar duplicadas", acciones_agente: "Acciones del agente", derivar: "Derivar",
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
   pasar_a_cotizacion: "Pasar a cotización", rotar_token_formulario: "Renovar clave del formulario",
-  recibir_formulario_web: "Recibir formulario web", crear: "Crear", reemplazar_etiqueta: "Reemplazar etiqueta",
+  recibir_formulario_web: "Recibir formulario web", crear: "Crear", invitacion: "Ver invitación", reemplazar_etiqueta: "Reemplazar etiqueta",
   fijar: "Fijar", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
   cambiar_estado: "Cambiar estado", marcar_pagado: "Marcar como pagado", cargar: "Cargar",
   aplicar_cuotas: "Aplicar cuotas", reglas_listar: "Listar reglas", fijar_regla: "Fijar regla",

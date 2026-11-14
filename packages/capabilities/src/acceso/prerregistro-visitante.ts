@@ -4,18 +4,13 @@ import { normalizarDocumento, normalizarPatente } from "@opai/domain";
 
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+import { documentoSchema } from "./comun";
 import { huellaVigente } from "./huella";
 
 export const visitanteSchema = z
   .object({
     nombre: z.string().trim().min(2).max(120),
-    documento: z
-      .object({
-        tipo: z.enum(["run", "pasaporte", "otro"]),
-        numero: z.string().min(1).max(40),
-        pais: z.string().min(2).max(3).optional(),
-      })
-      .strict(),
+    documento: documentoSchema,
     empresa: z.string().trim().max(120).optional(),
     patente: z.string().trim().max(12).optional(),
   })

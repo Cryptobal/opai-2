@@ -6,12 +6,8 @@ import { avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { minutos } from "./borrador-entrada";
 import { BORRADOR_VACIO, type Borrador, CamposEntrada } from "./campos-entrada";
-
-const minutos = (hhmm: string) => {
-  const [h, m] = hhmm.split(":").map(Number);
-  return (h ?? 0) * 60 + (m ?? 0);
-};
 
 /** Entrada de la capacidad `acceso.listas.agregar` a partir del borrador de la hoja. */
 function entradaDe(instalacionId: string, tipo: "autorizada" | "bloqueada", b: Borrador) {

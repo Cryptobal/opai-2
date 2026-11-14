@@ -3,7 +3,11 @@ import type { Capacidad } from "../types";
 import { registrosAnular, registrosCerrarBloque, registrosSalida } from "./correcciones";
 import { intentosListar } from "./intentos";
 import { prerregistrosCancelar, prerregistrosCrear } from "./prerregistros";
-import { prerregistrosInvitacion, prerregistrosListar } from "./prerregistros-leer";
+import {
+  prerregistrosInvitacion,
+  prerregistrosListar,
+  prerregistrosObtener,
+} from "./prerregistros-leer";
 import { listasAgregar, listasListar, listasQuitar } from "./listas";
 import { registrosObtener } from "./registro-get";
 import { registrosListar } from "./registros";
@@ -19,6 +23,7 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   registrosSalida,
   registrosCerrarBloque,
   prerregistrosListar,
+  prerregistrosObtener,
   prerregistrosCrear,
   prerregistrosCancelar,
   prerregistrosInvitacion,

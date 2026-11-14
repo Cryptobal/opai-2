@@ -7,6 +7,7 @@ import type { SearchParams } from "@/lib/parametros";
 import { cargarIntentos } from "../_componentes/datos";
 import { OPCIONES_MOTIVO } from "../_componentes/etiquetas";
 import { rutaAccesos } from "../_componentes/lista-registros";
+import { filtroInstalacion } from "../_componentes/filtro-instalacion";
 import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 import { TablaIntentos } from "../_componentes/tabla-intentos";
 
@@ -31,11 +32,7 @@ export default function IntentosDenegados({ searchParams }: { searchParams: Sear
             filtros={
               <ChipsFiltro
                 filtros={[
-                  {
-                    param: "instalacion",
-                    etiqueta: "Instalación",
-                    opciones: d.instalaciones.map((i) => ({ valor: i.id, etiqueta: i.nombre })),
-                  },
+                  filtroInstalacion(d.instalaciones),
                   { param: "motivo", etiqueta: "Motivo", opciones: OPCIONES_MOTIVO },
                 ]}
               />

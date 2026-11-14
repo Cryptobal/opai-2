@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
+import { pagina } from "../core/maestros/comun";
 import type { Contexto } from "../types";
 
 /** Nombres de las instalaciones de una página (una sola consulta; la RLS acota a la empresa). */
@@ -19,6 +20,29 @@ export async function nombresInstalacion(
 /** Persona responsable de una escritura: el usuario o, si actúa un agente, el usuario por el que actúa. */
 export const quien = (ctx: Contexto) =>
   ctx.actor.tipo === "user" ? (ctx.actor.id ?? null) : (ctx.actor.viaUserId ?? null);
+
+/** Página de un listado con el nombre de la instalación de cada fila (una sola consulta de nombres). */
+export async function paginaConInstalacion<T extends { id: string; instalacionId: string }>(
+  ctx: Contexto,
+  filas: T[],
+  input: { limite: number; cursor?: string | undefined },
+) {
+  const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+  const nombres = await nombresInstalacion(
+    ctx,
+    items.map((r) => r.instalacionId),
+  );
+  return { items, siguiente, instalacion: (id: string) => nombres.get(id) ?? "" };
+}
+
+/** Documento tal como llega (el número nunca se guarda: solo su huella y su máscara). */
+export const documentoSchema = z
+  .object({
+    tipo: z.enum(["run", "pasaporte", "otro"]),
+    numero: z.string().min(1).max(40),
+    pais: z.string().min(2).max(3).optional(),
+  })
+  .strict();
 
 export const PERMISO_READ = "acceso:read";
 export const PERMISO_LISTAS = "acceso:listas.manage";

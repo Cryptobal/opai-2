@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
-import { cursorDe, pagina } from "../core/maestros/comun";
+import { cursorDe } from "../core/maestros/comun";
 import { defineCapability } from "../define";
 import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
-import { nombresInstalacion, PERMISO_PATENTE, PERMISO_READ, TIPOS_REGISTRO } from "./comun";
+import { paginaConInstalacion, PERMISO_PATENTE, PERMISO_READ, TIPOS_REGISTRO } from "./comun";
 
 const item = z.object({
   id: uuidSchema,
@@ -70,17 +70,13 @@ export const registrosListar = defineCapability({
       include: { salida: { select: { horaCorregida: true } }, anulacion: { select: { id: true } } },
       ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
-    const nombres = await nombresInstalacion(
-      ctx,
-      items.map((r) => r.instalacionId),
-    );
+    const { items, siguiente, instalacion } = await paginaConInstalacion(ctx, filas, input);
     return {
       siguiente,
       items: items.map((r) => ({
         id: r.id,
         instalacionId: r.instalacionId,
-        instalacion: nombres.get(r.instalacionId) ?? "",
+        instalacion: instalacion(r.instalacionId),
         entradaEn: r.horaCorregida.toISOString(),
         salidaEn: r.salida?.horaCorregida.toISOString() ?? null,
         tipoRegistro: r.tipoRegistro,

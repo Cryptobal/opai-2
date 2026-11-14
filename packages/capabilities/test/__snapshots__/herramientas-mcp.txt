@@ -4,6 +4,7 @@ acceso_listas_listar
 acceso_listas_quitar
 acceso_prerregistros_cancelar
 acceso_prerregistros_crear
+acceso_prerregistros_get
 acceso_prerregistros_invitacion
 acceso_prerregistros_listar
 acceso_registros_anular
