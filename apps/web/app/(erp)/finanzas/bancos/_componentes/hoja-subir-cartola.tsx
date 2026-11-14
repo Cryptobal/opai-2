@@ -6,6 +6,7 @@ import { Alerta, avisar, Button, Campo, Input, Select, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { AvisoSobrantes, hayQueImportar } from "./aviso-sobrantes";
 import { archivoABase64 } from "./cartola-archivo";
 import type { CuentaBanco } from "./bancos-tipos";
 import type { VistaCartolaPreview } from "./tipos-cartola";
@@ -27,6 +28,8 @@ export function HojaSubirCartola({
   const [formato, setFormato] = useState<"santander" | "generico">("santander");
   const [archivo, setArchivo] = useState<File | null>(null);
   const [vista, setVista] = useState<VistaCartolaPreview | null>(null);
+  // CAR-450: la cartola manda; lo del banco en línea sin par se quita por defecto (queda restaurable).
+  const [quitarSobrantes, setQuitarSobrantes] = useState(true);
   // Una clave nueva por cada archivo elegido: evita el doble clic, pero permite volver a importar el mismo archivo
   // después de deshacer su importación (CAR-341); con la clave anterior se devolvía el resultado ya guardado.
   const idempotencyKey = useMemo(
@@ -51,15 +54,15 @@ export function HojaSubirCartola({
     if (!archivo || !cuenta || !idempotencyKey) return;
     const contenidoBase64 = await archivoABase64(archivo);
     const fmt = formato === "santander" ? "santander" : "generico";
-    const r = await ejecutar<{ aplicados: number }>(
+    const r = await ejecutar<{ aplicados: number; sobrantesQuitados: number }>(
       "finanzas.cartolas.importar",
-      { cuentaId: cuenta, formato: fmt, contenidoBase64, nombreArchivo: archivo.name, idempotencyKey },
+      { cuentaId: cuenta, formato: fmt, contenidoBase64, nombreArchivo: archivo.name, idempotencyKey, quitarSobrantesEnLinea: quitarSobrantes },
       false,
       "layout",
       idempotencyKey,
     );
     if (!r) return;
-    avisar.exito(`Importados ${r.aplicados} movimientos`);
+    avisar.exito(r.sobrantesQuitados ? `Importados ${r.aplicados} movimientos · ${r.sobrantesQuitados} del banco en línea quitados` : `Importados ${r.aplicados} movimientos`);
     onAbiertaChange(false);
     setVista(null);
     setArchivo(null);
@@ -79,7 +82,7 @@ export function HojaSubirCartola({
             Cancelar
           </Button>
           {vista ? (
-            <Button disabled={pendiente || vista.aplicados === 0 || vista.cuadratura?.cuadra === false} onClick={() => void confirmar()}>
+            <Button disabled={pendiente || !hayQueImportar(vista, quitarSobrantes)} onClick={() => void confirmar()}>
               Importar
             </Button>
           ) : (
@@ -146,6 +149,7 @@ export function HojaSubirCartola({
             yaImportada={vista.yaImportada ?? null}
           />
         ) : null}
+        {vista ? <AvisoSobrantes sobrantes={vista.sobrantesEnLinea ?? []} quitar={quitarSobrantes} onQuitar={setQuitarSobrantes} /> : null}
       </div>
     </Sheet>
   );

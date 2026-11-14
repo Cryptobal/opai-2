@@ -4,7 +4,7 @@ import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 
 import { sincronizarAvisosEnTx } from "../aviso";
-import { copiaDe } from "./descartes-copia";
+import { descartarMovimientos } from "./descartes-crear";
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { aFecha, cuentaDe } from "./util";
 
@@ -67,31 +67,15 @@ export const bancosMovimientosBorrarRango = defineCapability({
       const ahora = await contar(tx);
       if (!ahora.libres.length) throw reglaDeNegocio("No hay movimientos sin conciliar en ese rango.");
       const ids = ahora.libres.map((m) => m.id);
-      const descarte = await tx.movimientoBancarioDescarte.create({
-        data: {
-          tenantId: ctx.tenantId,
-          cuentaId: cuenta.id,
-          desde: aFecha(input.desde),
-          hasta: aFecha(input.hasta),
-          origen: input.origen,
-          motivo: input.motivo,
-          cantidad: ids.length,
-          movimientos: ahora.libres.map(copiaDe),
-          descartadoPor: ctx.usuario?.id ?? null,
-        },
-        select: { id: true },
-      });
-      // Solo propuestas sin confirmar: si alguien confirmó una entre el recuento y aquí, la FK Restrict aborta todo.
-      await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ids }, confirmada: false } });
-      await tx.movimientoBancario.deleteMany({ where: { id: { in: ids } } });
+      const descarteId = await descartarMovimientos(ctx, tx, { ...base, origen: input.origen, motivo: input.motivo, movimientos: ahora.libres });
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.banco.movimientos_borrados",
         entidadTipo: "cuentaBancaria",
         entidadId: cuenta.id,
-        payload: { descarteId: descarte.id, movimientos: ids.length, conciliados: ahora.conciliados, desde: input.desde, hasta: input.hasta, origen: input.origen, motivo: input.motivo },
+        payload: { descarteId, movimientos: ids.length, conciliados: ahora.conciliados, desde: input.desde, hasta: input.hasta, origen: input.origen, motivo: input.motivo },
       });
       await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
-      return { ...ahora, descarteId: descarte.id };
+      return { ...ahora, descarteId };
     });
     return { ...base, movimientos: actual.libres.length, conciliados: actual.conciliados, borrados: true, descarteId: actual.descarteId };
   },

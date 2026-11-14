@@ -9,7 +9,7 @@ import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/ento
 
 import type * as ModuloCapacidades from "../src";
 
-type Res = { aplicados: number; duplicados: number; fechasAjustadas: number };
+type Res = { aplicados: number; duplicados: number; fechasAjustadas: number; sobrantesEnLinea: { id: string }[]; sobrantesQuitados: number };
 
 describe.skipIf(omitirSuiteDb())("Finanzas · cartola frente al banco en línea (db)", () => {
   let e: Entorno;
@@ -39,10 +39,10 @@ describe.skipIf(omitirSuiteDb())("Finanzas · cartola frente al banco en línea 
       data: { tenantId, cuentaId, fecha: new Date(`${fecha}T00:00:00Z`), monto: BigInt(monto), glosa, claveDedupe: `w-${randomUUID()}`, idExterno: randomUUID(), origen: "web4leads" },
     });
   // Las filas de cada cartola suman 235.000, lo que la cabecera sintética declara entre saldo inicial y final.
-  const importar = async (cuentaId: string, filas: (string | number)[][]): Promise<Res> => {
+  const importar = async (cuentaId: string, filas: (string | number)[][], dryRun = false, extra: Record<string, unknown> = {}): Promise<Res> => {
     const buf = await xlsxOfficeBanking(filasCartolaHistorica(filas));
-    const input = { cuentaId, formato: "santander", contenidoBase64: buf.toString("base64"), idempotencyKey: `c-${randomUUID()}` };
-    const r = await mod.executeCapability(ctx(), "finanzas.cartolas.importar", input, { dryRun: false });
+    const input = { cuentaId, formato: "santander", contenidoBase64: buf.toString("base64"), idempotencyKey: `c-${randomUUID()}`, ...extra };
+    const r = await mod.executeCapability(ctx(), "finanzas.cartolas.importar", input, { dryRun });
     if (!r.ok) throw new Error(`${r.error.code} ${r.error.message}`);
     return r.data as Res;
   };
@@ -95,5 +95,28 @@ describe.skipIf(omitirSuiteDb())("Finanzas · cartola frente al banco en línea 
       [277000, "Abono cliente ficticio", "06/11/2026", "2", "Santiago", "A"],
     ]);
     expect(r).toMatchObject({ aplicados: 2, duplicados: 0 });
+  });
+
+  it("los sobrantes del banco en línea del período se listan y se quitan como descarte restaurable", async () => {
+    const cuentaId = await nuevaCuenta("000000004");
+    await enLinea(cuentaId, "2026-10-03", -42_000, "TEF PROVEEDOR FICT");
+    const sobrante = await enLinea(cuentaId, "2026-10-10", -7_777, "TEF QUE LA CARTOLA NO TRAE");
+    await enLinea(cuentaId, "2026-11-20", -9_999, "FUERA DEL PERIODO");
+    const filas = [
+      [42000, "Pago proveedores 0099", "05/10/2026", "1", "Santiago", "C"],
+      [277000, "Abono cliente ficticio", "06/10/2026", "2", "Santiago", "A"],
+    ];
+    const vista = await importar(cuentaId, filas, true);
+    expect(vista.sobrantesEnLinea.map((x) => x.id)).toEqual([sobrante.id]);
+
+    const r = await importar(cuentaId, filas, false, { quitarSobrantesEnLinea: true });
+    expect(r).toMatchObject({ aplicados: 1, duplicados: 1, sobrantesQuitados: 1 });
+    expect(await e.admin.movimientoBancario.count({ where: { id: sobrante.id } })).toBe(0);
+    const descarte = await e.admin.movimientoBancarioDescarte.findFirstOrThrow({ where: { tenantId, cuentaId } });
+    expect(descarte).toMatchObject({ cantidad: 1, origen: "web4leads" });
+
+    const rest = await mod.executeCapability(ctx(), "finanzas.descartes_bancarios.restaurar", { descarteId: descarte.id }, { dryRun: false });
+    expect(rest.ok).toBe(true);
+    expect(await e.admin.movimientoBancario.count({ where: { id: sobrante.id } })).toBe(1);
   });
 });
