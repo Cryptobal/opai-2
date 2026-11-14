@@ -29,6 +29,7 @@ export function accionesCuenta(c: CuentaDetalle): AccionEntidad[] {
         exito: "Estado actualizado",
       },
     })),
+    { id: "fusionar", etiqueta: "Fusionar con…", parametro: { clave: "fusionar", valor: "1" } },
     {
       id: "archivar",
       etiqueta: "Archivar",
