@@ -177,7 +177,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.schema` | `core_config_schema` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
-| compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
@@ -555,6 +554,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_rechazar_cambio` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_solicitar_cambio` | `core_personas_pago_solicitar_cambio` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_ver` | `core_personas_pago_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_anular` | `core_personas_periodos_anular` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_registrar` | `core_personas_periodos_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
@@ -614,6 +615,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.personas.get` | `core_personas_get` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `core.credenciales_terreno.cambiar_pin` | — | excepción |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `core.push.quitar` | — | excepción |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `core.push.suscribir` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.arco.solicitar` | `portal_trabajador_arco_solicitar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
@@ -624,6 +627,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.set_autonomia` | — | excepción |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.update` | — | excepción |
 | erp | `/configuracion/agentes/conectar` | `core.tenant.get` | `core_tenant_get` | existe |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.destino_actualizar` | — | excepción |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.destino_eliminar` | — | excepción |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.destino_rotar_secreto` | — | excepción |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.entrega_reenviar` | `core_webhooks_entrega_reenviar` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.destino_crear` | — | excepción |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.destino_get` | `core_webhooks_destino_get` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.destinos_list` | `core_webhooks_destinos_list` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.entregas_list` | `core_webhooks_entregas_list` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.eventos_list` | `core_webhooks_eventos_list` | existe |
 | erp | `/configuracion/agentes` | `core.apikeys.create` | — | excepción |
 | erp | `/configuracion/agentes` | `core.apikeys.list` | `core_apikeys_list` | existe |
 | erp | `/configuracion/agentes` | `core.consumos.por_agente` | `core_consumos_por_agente` | existe |
@@ -1054,8 +1066,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.metodos_acceso.quitar` | `app/_acciones` | no | reservada a personas |
 | `core.personas.pago_aprobar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.pago_rechazar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
-| `core.push.quitar` | sin pantalla todavía · CAR-356 · desde 2026-11-13 | no | reservada a personas |
-| `core.push.suscribir` | sin pantalla todavía · CAR-356 · desde 2026-11-13 | no | reservada a personas |
+| `core.push.quitar` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
+| `core.push.suscribir` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
 | `core.remuneraciones.confirmar_mutual` | `/configuracion/remuneraciones` | no | reservada a personas |
 | `core.roles.adicional_asignar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
@@ -1069,10 +1081,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
-| `core.webhooks.destino_actualizar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
-| `core.webhooks.destino_crear` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
-| `core.webhooks.destino_eliminar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
-| `core.webhooks.destino_rotar_secreto` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
+| `core.webhooks.destino_actualizar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
+| `core.webhooks.destino_crear` | `/configuracion/agentes/eventos` | no | reservada a personas |
+| `core.webhooks.destino_eliminar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
+| `core.webhooks.destino_rotar_secreto` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
 | `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `finanzas.apertura.importar` | sin pantalla todavía · CAR-168 · desde 2026-11-04 | no | reservada a personas |
@@ -1153,10 +1165,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
-- `core.webhooks.destinos_list`
-- `core.webhooks.entrega_reenviar`
-- `core.webhooks.entregas_list`
-- `core.webhooks.eventos_list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`

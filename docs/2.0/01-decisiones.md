@@ -802,6 +802,8 @@ Reglas:
 
 ---
 
+**Adenda (CAR-356, 13-nov-2026; decisión de Carlos: aviso de la pauta en el portal y en el celular, sin WhatsApp).** El push se envía **sin contenido**: OPAI manda un POST vacío firmado con VAPID al servicio de push del navegador y el service worker muestra un texto fijo («Tienes un aviso nuevo») que abre el portal. Así ningún dato personal pasa por Google, Mozilla ni Apple (Ley 21.719) y no hace falta cifrar contenido. Solo se aceptan endpoints de servicios de push conocidos (sin SSRF). El celular se toca solo si la persona eligió «Aviso en el celular» en esa categoría y fuera de su horario de silencio (ADR-020, silencio por defecto). Las claves `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` las genera y guarda Carlos en Vercel; sin ellas el canal queda apagado.
+
 ## ADR-045 · Velocidad de navegación medida y con gate
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; contadores y caché de sesión decididos el 24-oct) · Completa ADR-037 y ADR-029 (punto 14).
@@ -1892,6 +1894,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
 
+> **Retirada el 14-nov-2026 por ADR-115** (la reemplaza «Autonomía de las sesiones», ADR-114). Sigue vigente solo su adenda «no detenerse», ahora en `AGENTS.md` § «Trabajo continuo».
+
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:22, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` (sección «Decisiones de Carlos») e `INSTRUCCIONES-proyecto-claude.md`. (ADR-093 y ADR-094 están reservados por los PRs abiertos #505 y #506.)
 
 **Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
@@ -2222,3 +2226,38 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 
 4. **Botón de Ventas confirmado.** Queda «Nueva factura», como se dejó de noche.
 5. **OPAI no lleva la contabilidad completa (CAR-354).** No se construye libro de partida doble, asientos, plan de cuentas, candado de mes, balance ni mayor. La contabilidad la lleva el contador de cada empresa. OPAI le entrega los datos que ya tiene: ventas y compras del SII, movimientos de banco conciliados, rendiciones y remuneraciones, exportables y por API/MCP. Quedan fuera del plan CAR-354 (libro y candado), CAR-171 (asientos y períodos) y CAR-172 (asientos automáticos). De CAR-174 sigue solo lo de gestión que no exige contabilidad: la rentabilidad por instalación (ventas contra costo laboral). El estado de resultados y el balance contables quedan fuera.
+
+## ADR-114 · Autonomía de las sesiones (14-nov-2026)
+
+**Fecha:** 14-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Proyecto (10:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` y `CLAUDE.md` (sección nueva «Autonomía de las sesiones»). **Reemplaza** la regla «Pasos que dependen de Carlos», que Carlos dictó a las 09:45 del mismo día y que no llegó a `main` (PR #769, cerrado sin integrar). **Ajusta** ADR-095 («Decisión tuya»).
+
+**Contexto.** La regla de las 09:45 hacía que cada paso que dependía de Carlos se convirtiera en un bloque en el chat con un prompt para que él lo copiara en un bot de Grok Bot. Eso lo dejaba de mensajero entre sesiones y bots, y las sesiones seguían preguntando en el momento cosas que podían decidir o hacer solas.
+
+**Decisión.** Rige para todas las sesiones de Claude Code en `opai-2`.
+
+1. **Decide por defecto.** Todo lo reversible lo decide la sesión: diseño, nombres, alcance de un PR, cuál opción tomar, migraciones con snapshot, integrar un PR listo. Anota la decisión y el porqué en el PR y en `ESTADO.md`. Solo se detiene ante lo que no tiene vuelta atrás: plata real, emitir o anular algo en el SII, temas legales o contractuales, borrar datos de producción o un secreto que no tenga.
+2. **Usa tus propias herramientas.** Lo que la sesión pueda hacer directo (GitHub, Linear, Neon, Vercel, vistas previas, pruebas) lo hace ella, sin pasar por bots ni por «Chief of Staff». Si le falta una llave, crea un solo ítem en Linear que diga cuál falta y dónde va. Nunca la pide en el chat.
+3. **Junta lo que depende de Carlos.** No le pregunta en el momento. Crea o actualiza un issue en Linear con la etiqueta «Decide Carlos» y el título «`[Sesión <nombre>] pregunta corta`», con su recomendación, las opciones en una línea cada una y qué pasa si no decide. Después sigue con otra tarea. Si Carlos no responde en 48 horas, aplica su recomendación cuando sea reversible y le avisa en el mismo issue.
+4. **Prompts ya enviados a bots.** Los prompts enviados a algún bot («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0», «Chief of Staff») que sigan sin respuesta se reevalúan con esta regla: lo que la sesión pueda hacer, lo hace y cierra el pedido; lo que sea decisión de Carlos pasa a «Decide Carlos»; lo que ya no sirva se descarta y se anota en `ESTADO.md`.
+5. **Identifícate siempre.** Cada PR, comentario e issue empieza con «`[Sesión <nombre>]`».
+
+**Consecuencias.** Ante un choque con otra sección de `AGENTS.md`, manda «Autonomía de las sesiones», salvo lo que no cambia (abajo). Lo que antes se preguntaba en el chat o con `DECISIÓN CARLOS:` en el PR (ADR-095) va al issue «Decide Carlos», y el párrafo «Decisión tuya» solo lo enlaza. No cambian el veto de Carlos, las condiciones de «Integración a `main`», lo «Prohibido» (producción de Gard, OPAI 1.0, secretos) ni el punto 4 del Modo noche (ADR-111). Desde ADR-108 la anotación «en `ESTADO.md`» de un PR de construcción va en su archivo de `docs/2.0/estado/`. La etiqueta «Decide Carlos» queda creada en el equipo CAR de Linear.
+
+## ADR-115 · Código simple, medido en cada PR; se retira «Decisión tuya» (CAR-432, 14-nov-2026)
+
+**Fecha:** 14-nov-2026 · **Estado:** vigente · **Decide:** Carlos, encargo a la Sesión Estándares (10:29, hora de Chile) · **Registra:** Claude («Sesión Estándares»). **Modifica** `AGENTS.md`, `CLAUDE.md` y `docs/2.0/REGLAS-codigo.md` (sección nueva «Código simple»). **Retira** ADR-095 («Decisión tuya»), salvo su adenda «no detenerse». **Completa** ADR-106 (la vara) y ADR-114 (autonomía).
+
+**Contexto.** Varias sesiones construyen en paralelo y el repositorio crece rápido. Sin una regla y una medida, se acumulan copias casi iguales, abstracciones para usos que no llegaron y código que quedó sin uso. Eso encarece cada cambio siguiente y esconde errores. Carlos pide código más simple sin perder calidad ni romper nada.
+
+**Decisión.**
+
+1. **Regla «Código simple»** para todo el repositorio: la solución más simple que cumpla; reutilizar antes de crear; nada de abstracciones «por si acaso»; el código muerto se borra en el mismo PR; funciones (hasta 60 líneas) y archivos (hasta 150) cortos. Simple no recorta tenant, permisos, auditoría, paridad ni pruebas.
+2. **Medición en cada PR.** El check `simplicidad` mide código duplicado, archivos y funciones largos, y exportaciones, archivos y dependencias sin uso. Compara con la línea base del repositorio (`simplicidad-base.json`): falla solo si el PR empeora una cifra, nunca por lo que ya existe. La base solo baja; subirla exige justificación en el PR.
+3. **Revisión general, una vez.** Informe en `docs/2.0/simplificacion/` con duplicados, código muerto, lo sobrecomplicado y dependencias sin uso, ordenado por beneficio y riesgo, y un issue de Linear por grupo.
+4. **Simplificación en PR chicos.** Un tema por PR, sin cambiar el comportamiento, con las pruebas existentes en verde; si una parte no tiene pruebas, primero las pruebas. No se toca código que otra sesión tenga en un PR abierto; se coordina por Linear. Se integran con la regla vigente (checks en verde, revisión final sin bloqueos y snapshot si hay migración).
+5. **Pasada semanal** de limpieza de la Sesión Estándares con el mismo método.
+6. **Se retira «Decisión tuya».** Las respuestas ya no terminan con ese párrafo ni con «Decisión tuya: ninguna, sigo», ni se deja `DECISIÓN CARLOS:` en el PR. Lo que depende de Carlos va a Linear con la etiqueta «Decide Carlos» (ADR-114). La regla de no detenerse sigue vigente como «Trabajo continuo».
+
+**Decisiones de la sesión (reversibles) y por qué.** Herramientas: `knip` (sin uso) y `jscpd` (duplicados), las de uso más extendido para TypeScript en monorepos; las funciones largas se cuentan con el analizador de TypeScript que el repo ya tiene, sin dependencia nueva. El tope de función es 60 líneas, medido y no error de lint, para no bloquear lo ya escrito. El check corre en el flujo rápido de cada PR y no pasa a obligatorio del ruleset: ese cambio es de Carlos (issue «Decide Carlos»).
+
+**Consecuencias.** Un PR que agrega duplicación, un archivo o función largos o algo sin uso falla `simplicidad` hasta que lo corrija o lo justifique. Las instrucciones del proyecto en claude.ai todavía piden «Decisión tuya»; cambiarlas es de Carlos (issue «Decide Carlos»). Mientras tanto manda el repositorio.

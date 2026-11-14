@@ -27,9 +27,9 @@ const UNIFORME = [
 ] as const;
 const JORNADA = [
   "resolucion", "resolucionVigenteDesde", "resolucionVigenteHasta", "horasSemanales",
-  "distribucion", "articulo22", "plazoFijoPeriodo", "terminoPlazoFijo", "avisoTerminoDias",
+  "distribucion", "articulo22", "avisoTerminoDias",
 ] as const;
-const JORNADA_FECHAS = ["resolucionVigenteDesde", "resolucionVigenteHasta", "terminoPlazoFijo"] as const;
+const JORNADA_FECHAS = ["resolucionVigenteDesde", "resolucionVigenteHasta"] as const;
 const CONTACTO = [
   "estadoCivil", "telefonoSecundario", "emergenciaNombre", "emergenciaRelacion",
   "emergenciaTelefono", "codigoInterno", "movilizacion",
@@ -68,20 +68,8 @@ export async function aplicarLaboralParcial(
     }
   }
   if (input.jornadaDt) {
-    const j = input.jornadaDt;
-    const patch = patchDe(j, JORNADA, JORNADA_FECHAS);
-    if (j.terminosPlazoFijo !== undefined) {
-      const terminos = [...j.terminosPlazoFijo].sort();
-      patch["terminosPlazoFijo"] = terminos.map(aFecha);
-      // El término vigente es el del último período registrado (compatibilidad con los avisos).
-      const ultimo = terminos.at(-1);
-      if (j.terminoPlazoFijo === undefined) patch["terminoPlazoFijo"] = ultimo ? aFecha(ultimo) : null;
-      if (j.plazoFijoPeriodo === undefined) patch["plazoFijoPeriodo"] = terminos.length || null;
-    } else if (j.terminoPlazoFijo !== undefined || j.plazoFijoPeriodo !== undefined) {
-      // Llegaron solo los campos antiguos (API o MCP): la lista ya no los representa y se vacía,
-      // para que la ficha muestre los campos antiguos y un guardado posterior no la reescriba.
-      patch["terminosPlazoFijo"] = [];
-    }
+    // Los períodos del contrato se registran aparte, como historia (CAR-409).
+    const patch = patchDe(input.jornadaDt, JORNADA, JORNADA_FECHAS);
     if (Object.keys(patch).length) {
       await tx.personaJornadaDt.upsert({
         where: { personaId: p.id },

@@ -3,6 +3,7 @@ import { Cabecera, Estado } from "@opai/ds";
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
+import { clavePublicaPush } from "@/lib/push";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { FormularioAvisos } from "../_componentes/formulario-avisos";
@@ -36,6 +37,7 @@ export default function Pagina() {
           {datos ? (
             <FormularioAvisos
               inicial={datos}
+              clavePush={clavePublicaPush()}
               cabecera={
                 <Cabecera
                   titulo="Notificaciones"
