@@ -33,3 +33,4 @@
 ## Presupuesto de JS (#727)
 
 - Tras traer `main` con #723, #725 y #726, `build · presupuesto de JS` marcó 25 rutas con 0,0 a 0,2 KB de más: el trozo común del shell creció con las novedades nuevas, no hay código nuevo en esas páginas. Se sube el tope de cada una al entero siguiente de su medida (ADR-037). Sigue pendiente para núcleo que las novedades no viajen en el trozo común.
+- Tras traer `main` con #735 (campos personalizados), `/(erp)/pauta` midió 179,2 KB contra un tope de 179: se sube a 180 por el mismo motivo.
