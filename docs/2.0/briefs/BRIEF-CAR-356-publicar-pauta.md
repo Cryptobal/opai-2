@@ -37,3 +37,9 @@
 - **Envío:** `avisarAlCelular(ctx, usuarios, modulo)` después del aviso en la campana; nunca lanza; borra suscripciones 404/410; mide `push.aviso` en `core.consumos`. Sin claves VAPID en el entorno no hace nada.
 - **Claves:** `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (base64url) y `VAPID_SUBJECT` (`mailto:`), en Vercel. Las genera y guarda Carlos (`npx web-push generate-vapid-keys` en su máquina); ningún agente las ve.
 - **PR 4b:** service worker (`push` muestra «Tienes un aviso nuevo en OPAI», `notificationclick` abre `/trabajador`), interruptor en el portal del trabajador que pide permiso en contexto (ADR-044.4), clave pública al cliente, novedad y `@preview`.
+## Reporte PR 3 · aviso de cambios (13-nov-2026)
+
+- Consumidor `pauta.cambio.avisar` (`consumidor-cambio.ts`) sobre `pauta.excepcion.creada`, `pauta.excepcion.anulada` y `pauta.serie.fijada`.
+- Solo avisa si alguno de los meses tocados por el cambio está publicado para la instalación del puesto (`pauta.publicaciones`). Excepciones: meses entre `desde` y `hasta`; cambio de serie: meses desde `desde` en adelante.
+- Afectados: titular vigente en cada día cambiado de los meses publicados; en un cambio de serie, también el titular nuevo y el de la serie que se cortó el día anterior. Solo personas con usuario; idempotente por evento y usuario.
+- Fuera: reemplazantes y refuerzos (el evento no trae la persona), titulares desvinculados (siguen en pendientes), push (PR 4).
