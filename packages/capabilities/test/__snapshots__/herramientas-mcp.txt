@@ -234,6 +234,7 @@ core_grupos_create
 core_grupos_get
 core_grupos_list
 core_grupos_quitar_miembro
+core_grupos_roles_list
 core_grupos_update
 core_hechos_terreno_listar
 core_hilo_actividad
@@ -320,6 +321,7 @@ core_puestos_update
 core_remuneraciones_historial
 core_remuneraciones_listar
 core_resumen_contadores
+core_roles_adicionales_list
 core_roles_list
 core_slack_canales
 core_slack_configurar
@@ -343,6 +345,7 @@ core_vinculos_list
 core_vinculos_previsualizar
 core_vinculos_terminar
 core_vinculos_update
+core_webhooks_destinos_list
 cpq_aprobaciones_contar
 cpq_aprobaciones_get
 cpq_aprobaciones_list
