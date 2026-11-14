@@ -27,7 +27,11 @@ test.describe("@preview campos personalizados", () => {
     const hoja = page.getByRole("dialog");
     await expect(hoja.getByText("Nuevo campo", { exact: true })).toBeVisible({ timeout: 15_000 });
     await hoja.getByLabel("Nombre").fill("Rubro");
-    await hoja.getByRole("combobox").first().click();
+    // El selector del DS es combobox en escritorio y botón que abre una hoja en táctil (iPad).
+    await hoja
+      .getByRole("combobox", { name: "Tipo" })
+      .or(hoja.getByRole("button", { name: "Tipo" }))
+      .click();
     await page.getByRole("option", { name: "Lista de opciones" }).click();
     await expect(hoja.getByLabel("Opciones")).toBeVisible();
     await capturar(page, info, "campos-personalizados-nuevo");
