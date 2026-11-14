@@ -85,7 +85,7 @@ describe.skipIf(omitirSuiteDb())("flujo · recurrentes en UF y % de ventas (db)"
     // Con día fijo, ambas cuotas usan la UF de ese día del mes (aquí, el de la primera cuota si es el mismo mes).
     const d0 = Number(dias[0].slice(8, 10));
     await ok("finanzas.recurrentes.crear", { filaId: fila, concepto: "Fijo UF", unidad: "uf", monto: 125_000, politicaUf: "dia_fijo", ufDiaFijo: d0, frecuencia: "semanal", inicio: dias[0], repeticiones: 1 });
-    expect((await cuotasDe("Fijo UF")).map((x) => [x.monto, x.nota?.includes(`UF del ${dias[0]}`)])).toEqual([[500_000, true]]);
+    expect((await cuotasDe("Fijo UF")).map((x) => [x.monto, x.nota?.includes(`UF del ${dias[0].split("-").reverse().join("-")}`)])).toEqual([[500_000, true]]);
     // Pasarla a CLP limpia sola el día de la UF (sin obligar a borrarlo a mano).
     const [fijo] = (await ok<{ id: string; concepto: string }[]>("finanzas.recurrentes.listar", {})).filter((r) => r.concepto === "Fijo UF");
     const clp = await ok<{ politicaUf: string; ufDiaFijo: number | null }>("finanzas.recurrentes.actualizar", { id: fijo?.id, unidad: "clp", monto: 500_000 });
