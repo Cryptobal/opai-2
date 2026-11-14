@@ -156,8 +156,9 @@ export function navegacionPortal(
     }
     return [
       { href, etiqueta: "Inicio", icono: "Home", exacta: true },
+      { href: `${href}/mi-pauta`, etiqueta: "Mi pauta", icono: "CalendarDays" },
       { href: `${href}/mis-datos`, etiqueta: "Mis datos", icono: "UserRound" },
-      { href: `${href}/notificaciones`, etiqueta: "Notificaciones", icono: "Bell" },
+      // «Notificaciones» sigue en «Más» (CAR-462): la barra inferior queda en 4 entradas.
       mas,
     ];
   }
