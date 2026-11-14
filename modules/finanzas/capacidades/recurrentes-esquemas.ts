@@ -42,6 +42,9 @@ export const recurrenteSchema = z.object({
   ...recurrenteDatos,
   activa: z.boolean(),
   claveOrigen: z.string().nullable(),
+  anteriorId: uuidSchema
+    .nullable()
+    .describe("Tramo anterior del mismo gasto: existe cuando la fila, la frecuencia o el día cambiaron desde una fecha (CAR-413)."),
 });
 
 type FilaDb = {
@@ -62,6 +65,7 @@ type FilaDb = {
   activa: boolean;
   nota: string | null;
   claveOrigen: string | null;
+  anteriorId?: string | null;
 };
 
 export function vistaRecurrente(r: FilaDb): z.infer<typeof recurrenteSchema> {
@@ -83,6 +87,7 @@ export function vistaRecurrente(r: FilaDb): z.infer<typeof recurrenteSchema> {
     nota: r.nota,
     activa: r.activa,
     claveOrigen: r.claveOrigen,
+    anteriorId: r.anteriorId ?? null,
   };
 }
 

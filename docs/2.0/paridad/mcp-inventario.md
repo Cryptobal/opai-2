@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 779 pares pantalla→capacidad · 700 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 781 pares pantalla→capacidad · 702 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -1147,6 +1147,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.cuadratura.obtener`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
+- `finanzas.recurrentes.cambiar_desde`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
