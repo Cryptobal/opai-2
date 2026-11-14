@@ -4,10 +4,11 @@ import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { requerirIdentidad } from "@/lib/servidor";
+import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { FichaAusencias } from "../../_componentes/ausencias/ficha-ausencias";
 import { HojaRegistrarDiferida } from "../../_componentes/ausencias/hoja-diferida";
+import type { ClaseAusencia } from "../../_componentes/ausencias/tipos";
 import { conHoja } from "../../_componentes/lista-personas";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 
@@ -29,6 +30,14 @@ export default function AusenciasPersona(props: Props) {
         const conPauta = identidad.modulosActivos.includes("pauta");
         const puedeVer = puede("core:personas.laboral.read");
         const puedeEditar = puede("core:personas.laboral.manage");
+        // Clases del catálogo de la empresa (CAR-393 parte 3): solo para quien registra.
+        const clases = puedeEditar
+          ? await ejecutarComoUsuario<{ items: ClaseAusencia[] }>(
+              "erp",
+              "core.ausencias.clases",
+              {},
+            )
+          : null;
         return (
           <div className="flex flex-col gap-4">
             {puedeEditar ? (
@@ -49,6 +58,7 @@ export default function AusenciasPersona(props: Props) {
                 nombre={p.nombreCompleto}
                 hoy={hoyIso()}
                 conPauta={conPauta}
+                clases={clases?.ok ? clases.data.items : []}
               />
             ) : null}
           </div>

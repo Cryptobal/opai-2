@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { PERMISOS_CORE, TIPOS_AUSENCIA_BASE } from "@opai/domain";
 
 import { defineAjustes } from "./registro";
 
@@ -12,7 +12,12 @@ import { defineAjustes } from "./registro";
  */
 const pasosProceso = (etiqueta: string, ayuda: string) =>
   z
-    .array(z.object({ titulo: z.string().trim().min(3).max(120), plazoDias: z.number().int().min(-30).max(90) }))
+    .array(
+      z.object({
+        titulo: z.string().trim().min(3).max(120),
+        plazoDias: z.number().int().min(-30).max(90),
+      }),
+    )
     .max(30)
     .default([])
     .meta({
@@ -37,6 +42,23 @@ export const AJUSTES_PERSONAS = defineAjustes(
       "Pasos de salida de una persona",
       'Se abren al terminar el último vínculo. Vacío: los de tu rubro. Ej.: [{ "titulo": "Firmar finiquito", "plazoDias": 10 }]. El plazo cuenta desde el término.',
     ),
+    // CAR-393 parte 3: clases de ausencia. Vacío = las de la vertical de la empresa (@opai/domain).
+    personas_clases_ausencia: z
+      .array(
+        z.object({ nombre: z.string().trim().min(3).max(80), tipo: z.enum(TIPOS_AUSENCIA_BASE) }),
+      )
+      .max(40)
+      .default([])
+      .meta({
+        etiqueta: "Clases de permisos, licencias y vacaciones",
+        ayuda:
+          'Se eligen al registrar una ausencia. Cada clase cuenta como uno de los tipos base (ausencia, licencia, vacaciones o permiso). Vacío: las de tu rubro. Ej.: [{ "nombre": "Licencia mutual", "tipo": "licencia" }].',
+        grupo: "Personas",
+        ambito: "tenant",
+        permiso: PERMISOS_CORE.personasLaboralManage,
+        soloPersonas: true,
+        control: "json",
+      }),
     personas_no_recontratar_vigencia_maxima_dias: z
       .number()
       .int()

@@ -1082,6 +1082,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.aprobaciones.get`
 - `core.aprobaciones.reglas_list`
 - `core.audit.list`
+- `core.ausencias.clases`
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
