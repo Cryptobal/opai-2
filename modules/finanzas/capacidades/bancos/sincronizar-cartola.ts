@@ -14,7 +14,8 @@ const sumarDias = (iso: string, n: number) => aIso(new Date(aFecha(iso).getTime(
 /**
  * CAR-341: lo que el banco en línea entrega y ya está guardado por una cartola o a mano (sin id externo), aunque con
  * otra fecha (±3 días) o glosa rotulada distinto, es el mismo movimiento: no se inserta y el existente queda con su
- * id externo para que las próximas entregas lo reconozcan. La fecha de la cartola se conserva. Solo lectura.
+ * id externo para que las próximas entregas lo reconozcan. Con glosa distinta basta el monto si es el único
+ * candidato (CAR-450). La fecha de la cartola se conserva. Solo lectura.
  */
 export async function yaGuardadosPorCartola(ctx: Contexto, cuentaId: string, entrantes: Entrante[]): Promise<Map<number, VinculoExterno>> {
   const out = new Map<number, VinculoExterno>();
@@ -29,7 +30,9 @@ export async function yaGuardadosPorCartola(ctx: Contexto, cuentaId: string, ent
     select: { id: true, fecha: true, monto: true, glosa: true, referencia: true },
   });
   const existentes = guardados.map((g) => ({ id: g.id, fecha: aIso(g.fecha), monto: Number(g.monto), glosa: g.glosa, referencia: g.referencia }));
-  for (const [i, par] of emparejarMovimientos(entrantes, existentes, { toleranciaDias: TOLERANCIA_DIAS })) {
+  // CAR-450: lo entrante es del banco en línea, así que basta el monto y la fecha cercana si no hay ambigüedad.
+  const pares = emparejarMovimientos(entrantes, existentes, { toleranciaDias: TOLERANCIA_DIAS, porMontoSi: () => true });
+  for (const [i, par] of pares) {
     out.set(i, { existenteId: par.existenteId, idExterno: entrantes[i]!.idExterno });
   }
   return out;
