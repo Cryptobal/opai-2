@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -8,6 +9,7 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 // opciones» para ver el campo de opciones y cancela.
 test.describe("@preview campos personalizados", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
+  test.beforeEach(({ page }) => ocultarIndicadorDev(page));
 
   test("lista las tres entidades y abre la hoja de un campo nuevo", async ({ page }, info) => {
     const errores: string[] = [];
