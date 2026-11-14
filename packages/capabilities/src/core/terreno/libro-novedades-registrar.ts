@@ -35,7 +35,7 @@ async function gravedadDeRondas(
     );
   if (e.puntoId) {
     const p = await ctx.db.puntoControl.findFirst({
-      where: { id: e.puntoId, instalacionId: e.instalacionId },
+      where: { id: e.puntoId, instalacionId: e.instalacionId, estado: "activo" },
       select: { id: true },
     });
     if (!p) throw noEncontrado("El punto de control");
@@ -59,6 +59,8 @@ export const libroNovedadesRegistrar = defineCapability({
   output: z.object({ aplicado: z.boolean(), novedad: novedadSchema.nullable() }),
   efecto: "escritura",
   dryRun: true,
+  // El texto lo escribe una persona y puede traer datos personales: la auditoría no lo copia.
+  sensibles: ["resumen", "detalle"],
   auditoriaPayload: (_ctx, e) => ({ instalacionId: e.instalacionId, gravedad: e.gravedad ?? null }),
   async handler(ctx, e, { dryRun }) {
     const inst = await ctx.db.instalacion.findFirst({

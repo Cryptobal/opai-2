@@ -40,6 +40,7 @@ export const libroNovedadesCambiarEstado = defineCapability({
   output: z.object({ aplicado: z.boolean(), novedad: novedadSchema }),
   efecto: "escritura",
   dryRun: true,
+  sensibles: ["nota"],
   auditoriaPayload: (_ctx, e) => ({ novedadId: e.novedadId, accion: e.accion }),
   async handler(ctx, e, { dryRun }) {
     const actual = await novedadEnAlcance(ctx, e.novedadId);
@@ -110,11 +111,14 @@ export const libroNovedadesObtener = defineCapability({
   auditarLectura: (s) => [s.novedad.id],
   async handler(ctx, { novedadId }) {
     const n = await novedadEnAlcance(ctx, novedadId);
-    const hechos = await ctx.db.libroNovedadHecho.findMany({
-      where: { novedadId: n.id },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      take: 200,
-    });
+    // Los 200 cambios más recientes, mostrados del más antiguo al más nuevo.
+    const hechos = (
+      await ctx.db.libroNovedadHecho.findMany({
+        where: { novedadId: n.id },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 200,
+      })
+    ).reverse();
     return {
       novedad: vistaNovedad(n),
       acciones: accionesNovedad(estadoNovedadSchema.parse(n.estado)),

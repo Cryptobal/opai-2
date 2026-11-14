@@ -17,7 +17,9 @@ describe.skipIf(!urlPropietario)("libro de novedades: registrar y estados (CAR-7
   const t = { A: "", B: "" };
   const inst = { A1: "", A2: "", B: "" };
   let puntoB = "";
+  let puntoA2 = "";
   let tipoAlta = "";
+  let tipoB = "";
 
   const correr = async (
     k: "A" | "B",
@@ -76,6 +78,12 @@ describe.skipIf(!urlPropietario)("libro de novedades: registrar y estados (CAR-7
         data: { tenantId: t.B, instalacionId: inst.B, nombre: "P", modo: "gps" },
       })
     ).id;
+    puntoA2 = (
+      await e.admin.puntoControl.create({
+        data: { tenantId: t.A, instalacionId: inst.A2, nombre: "P2", modo: "gps" },
+      })
+    ).id;
+    tipoB = (await e.admin.tipoIncidente.create({ data: { tenantId: t.B, nombre: "Daño" } })).id;
     tipoAlta = (
       await e.admin.tipoIncidente.create({
         data: { tenantId: t.A, nombre: "Intrusión", gravedadDefecto: "alta" },
@@ -99,6 +107,8 @@ describe.skipIf(!urlPropietario)("libro de novedades: registrar y estados (CAR-7
 
   it("rechaza punto de otra empresa, tipo sin Rondas activo, instalación fuera de alcance y quien no tiene permiso", async () => {
     expect(codigo(await registrar({ puntoId: puntoB }))).toBe("NOT_FOUND");
+    expect(codigo(await registrar({ puntoId: puntoA2 }))).toBe("NOT_FOUND");
+    expect(codigo(await registrar({ tipoIncidenteId: tipoB }))).toBe("NOT_FOUND");
     expect(codigo(await registrar({ tipoIncidenteId: tipoAlta }, { modulos: [] }))).toBe(
       "UNPROCESSABLE",
     );
@@ -163,6 +173,28 @@ describe.skipIf(!urlPropietario)("libro de novedades: registrar y estados (CAR-7
     const { novedad } = ok<{ novedad: Novedad }>(await registrar({}));
     const r = await Promise.all([cambiar(novedad.id, "tomar"), cambiar(novedad.id, "tomar")]);
     expect(r.filter((x) => x.ok)).toHaveLength(1);
+    expect(["CONFLICT", "UNPROCESSABLE"]).toContain(codigo(r.find((x) => !x.ok) ?? r[0]!));
     expect(await e.admin.libroNovedadHecho.count({ where: { novedadId: novedad.id } })).toBe(1);
+  });
+
+  it("la auditoría de las escrituras no copia el resumen, el detalle ni la nota", async () => {
+    const { novedad } = ok<{ novedad: Novedad }>(await registrar({ detalle: "Detalle privado" }));
+    await correr("A", "core.libro_novedades.cambiar_estado", {
+      novedadId: novedad.id,
+      accion: "tomar",
+      nota: "Nota privada",
+    });
+    const ev = await e.admin.auditEvent.findMany({
+      where: {
+        tenantId: t.A,
+        capability: {
+          in: ["core.libro_novedades.registrar", "core.libro_novedades.cambiar_estado"],
+        },
+      },
+    });
+    expect(ev.length).toBeGreaterThan(0);
+    expect(JSON.stringify(ev.map((x) => x.payload))).not.toMatch(
+      /Portón abierto|Detalle privado|Nota privada/,
+    );
   });
 });
