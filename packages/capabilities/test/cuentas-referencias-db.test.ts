@@ -247,6 +247,21 @@ describe.skipIf(!urlPropietario)("Referencias de clientes con opt-in · base rea
     expect(items.find((i) => i.cuentaId === ids.inactiva)?.vigente).toBe(false);
     const vig = await run(ctx(ids.tA), "core.cuentas_referencias.list", { soloVigentes: true });
     expect(vig.ok && (vig.data as Lista).items.map((i) => i.cuentaId)).toEqual([ids.uno]);
+    // CAR-353: de a 1 por página recorre las mismas cuentas, sin repetir; un cursor ajeno termina.
+    const todas = items.map((i) => i.cuentaId);
+    const vistas: string[] = [];
+    let cursor: string | undefined;
+    do {
+      const p = await run(ctx(ids.tA), "core.cuentas_referencias.list", { limite: 1, cursor });
+      const pag = p.ok ? (p.data as Lista & { siguiente: string | null }) : null;
+      vistas.push(...(pag?.items.map((i) => i.cuentaId) ?? []));
+      cursor = pag?.siguiente ?? undefined;
+    } while (cursor);
+    expect(vistas).toEqual(todas);
+    const ajeno = await run(ctx(ids.tA), "core.cuentas_referencias.list", {
+      cursor: ids.archivada,
+    });
+    expect(ajeno.ok && (ajeno.data as Lista).items).toEqual([]);
   });
 
   it("rechaza cuenta archivada, vigencia ya vencida y un contacto de otra cuenta", async () => {

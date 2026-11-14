@@ -73,6 +73,8 @@ export const auditList = defineCapability({
               : f.payload,
         };
       }),
+      // Cursor sobre la última fila leída, aunque la marca de no recontratar la oculte: así no se
+      // salta ninguna fila visible. Es opaco para el cliente (CAR-353).
       siguiente: filas.length > input.limite ? (eventos.at(-1)?.id ?? null) : null,
     };
   },
