@@ -59,6 +59,7 @@ export function BarraInferiorNueva(props: Props) {
               href={inicio.href}
               aria-current={enInicio ? "page" : undefined}
               className={clase(enInicio)}
+              data-tab="inicio"
             >
               <Home className={cn("size-5", enInicio && "text-accent")} aria-hidden />
               Inicio
@@ -72,6 +73,7 @@ export function BarraInferiorNueva(props: Props) {
               onClick={onAgente}
               className={clase(false)}
               data-pestana-agente=""
+              data-tab="agente"
             >
               <Sparkles className="size-5" aria-hidden />
               Agente
@@ -95,7 +97,7 @@ export function BarraInferiorNueva(props: Props) {
               {...(props.recientes ? { recientes: props.recientes } : {})}
               {...(props.onNavegar ? { onNavegar: props.onNavegar } : {})}
               disparador={
-                <span className={clase(!enInicio)}>
+                <span className={clase(!enInicio)} data-tab="menu">
                   <IconoMenu className={cn("size-5", !enInicio && "text-accent")} aria-hidden />
                   Menú
                 </span>
@@ -121,7 +123,7 @@ export function BarraInferiorNueva(props: Props) {
                 </div>
               }
               disparador={
-                <span className={clase(false)}>
+                <span className={clase(false)} data-tab="yo">
                   <span className="relative inline-flex">
                     <Avatar nombre={usuario.nombre} size="sm" />
                     <Punto visible={usuario.aviso} peligro />

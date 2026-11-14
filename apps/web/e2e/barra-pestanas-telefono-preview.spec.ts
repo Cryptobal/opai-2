@@ -40,6 +40,7 @@ test.describe("@preview barra inferior del teléfono (CAR-416)", () => {
     const hoja = page.locator("[data-sobre-barra]");
     await expect(hoja).toBeVisible();
     await expect(barra).toBeVisible();
+    await expect(hoja.getByRole("button", { name: "Cerrar" })).toHaveCount(0);
     const cajaHoja = await hoja.boundingBox();
     const cajaBarra = await barra.boundingBox();
     expect(cajaHoja && cajaBarra).toBeTruthy();
@@ -47,6 +48,7 @@ test.describe("@preview barra inferior del teléfono (CAR-416)", () => {
       expect(cajaHoja.y).toBeLessThanOrEqual(1);
       expect(cajaHoja.y + cajaHoja.height).toBeLessThanOrEqual(cajaBarra.y + 1);
     }
+    await page.waitForTimeout(300);
     await capturar(page, info, "menu");
     // Tocar Menú otra vez lo cierra, como una pestaña.
     await barra.getByRole("button", { name: /Menú/ }).click();
@@ -66,6 +68,7 @@ test.describe("@preview barra inferior del teléfono (CAR-416)", () => {
     const cajaBarra = await barra.boundingBox();
     if (cajaPanel && cajaBarra)
       expect(cajaPanel.y + cajaPanel.height).toBeLessThanOrEqual(cajaBarra.y + 1);
+    await page.waitForTimeout(300); // la captura, después de la animación de entrada
     await capturar(page, info, "agente");
     await page.keyboard.press("Escape");
     await expect(panel).toBeHidden();

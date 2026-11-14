@@ -595,6 +595,26 @@
     padding-bottom: 0;
   }
   [data-marco="nuevo"] aside[data-panel-lateral] [data-panel-cerrar],
+  /* Pestaña activa: con la hoja «Menú» o el panel del agente abiertos se marca esa pestaña. */
+  :root:has([data-sobre-barra], aside[data-panel-lateral]) [data-shell="inferior-nuevo"] [data-tab] {
+    color: var(--color-fg-muted);
+    font-weight: 500;
+  }
+  :root:has([data-sobre-barra], aside[data-panel-lateral])
+    [data-shell="inferior-nuevo"]
+    [data-tab]
+    > svg {
+    color: inherit;
+  }
+  :root:has([data-sobre-barra]) [data-shell="inferior-nuevo"] [data-tab="menu"],
+  :root:has(aside[data-panel-lateral]) [data-shell="inferior-nuevo"] [data-tab="agente"] {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+  :root:has([data-sobre-barra]) [data-shell="inferior-nuevo"] [data-tab="menu"] > svg,
+  :root:has(aside[data-panel-lateral]) [data-shell="inferior-nuevo"] [data-tab="agente"] > svg {
+    color: var(--color-accent);
+  }
   [data-marco="nuevo"] [data-agente-telefono] {
     display: none;
   }
