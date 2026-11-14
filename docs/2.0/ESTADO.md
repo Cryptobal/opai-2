@@ -10,6 +10,8 @@
 
 **Regla de operación (12-nov-2026, ADR-108):** los PR de construcción ya **no editan este archivo**. Cada uno escribe su avance en `docs/2.0/estado/<modulo>/CAR-<n>.md` ([cómo](estado/README.md)); este archivo queda como índice y foto histórica, y lo consolida un PR de documentación. Motivo: casi todos los PR agregaban su fila en el mismo lugar y chocaban entre sí. Regla completa de trabajo en paralelo: `OPERACION-agentes.md` A2.5.
 
+**Regla de operación (14-nov-2026, ADR-114): autonomía de las sesiones.** Las sesiones deciden por defecto todo lo reversible (diseño, nombres, alcance, migraciones con snapshot, integrar un PR listo) y lo anotan con su porqué; solo se detienen ante lo que no tiene vuelta atrás (plata real, SII, temas legales o contractuales, borrar datos de producción, un secreto que no tengan). Usan sus propias herramientas, sin pasar por bots ni por «Chief of Staff»; una llave que falta va en un solo ítem de Linear, nunca en el chat. Lo que depende de Carlos se junta en un issue de Linear con la etiqueta «Decide Carlos» y el título «`[Sesión <nombre>] pregunta corta`»; sin respuesta en 48 horas se aplica la recomendación si es reversible. Los prompts enviados a bots y sin respuesta se reevalúan con esta regla. Todo PR, comentario e issue empieza con «`[Sesión <nombre>]`». Reemplaza la regla «Pasos que dependen de Carlos» (PR #769, cerrado sin integrar). Ver `AGENTS.md` «Autonomía de las sesiones». **Sesión Proyecto, punto 4:** no tenía prompts pendientes con ningún bot; nada que descartar.
+
 ## En curso
 
 | PR | Qué | Estado | Migración |

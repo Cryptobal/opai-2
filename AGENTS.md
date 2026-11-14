@@ -74,6 +74,18 @@ Regla de Carlos del 11-nov-2026 (ADR-095), para todas las sesiones de Claude del
 - **«Ninguna, sigo» significa seguir (regla de Carlos del 11-nov-2026, 22:56):** sin una decisión suya pendiente, la sesión no se detiene ni cierra el turno; continúa con el trabajo. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión, una vista previa), programa una revisión a sí misma cada pocos minutos (`send_later`) y mientras tanto avanza con lo siguiente que no dependa de eso (siguiente bloque, siguiente brief apilado sobre su rama, pendientes de `ESTADO.md`). Los avisos automáticos de GitHub no se responden uno por uno: se leen, se arregla lo propio y se sigue. Solo se detiene por una decisión real de Carlos o porque no queda trabajo posible, y entonces dice por qué.
 - Además, la decisión queda como comentario `DECISIÓN CARLOS:` en el PR (mismo contenido) y el trabajo sigue en lo que no dependa de ella.
 
+## Autonomía de las sesiones
+
+Regla de Carlos del 14-nov-2026 (ADR-114), para todas las sesiones de Claude Code en `opai-2`. Reemplaza la regla «Pasos que dependen de Carlos» (PR #769, cerrado sin integrar). **Ante un choque con otra sección de este contrato, manda esta.**
+
+1. **Decide por defecto.** Todo lo reversible lo decide la sesión: diseño, nombres, alcance de un PR, cuál opción tomar, migraciones con snapshot, integrar un PR listo. Anota la decisión y el porqué en el PR y en `docs/2.0/ESTADO.md` (desde ADR-108, en el archivo de `docs/2.0/estado/` de ese PR). Solo se detiene ante lo que no tiene vuelta atrás: plata real, emitir o anular algo en el SII, temas legales o contractuales, borrar datos de producción o un secreto que no tenga.
+2. **Usa tus propias herramientas.** Lo que la sesión pueda hacer directo (GitHub, Linear, Neon, Vercel, vistas previas, pruebas) lo hace ella, sin pasar por bots ni por «Chief of Staff». Si le falta una llave, crea **un solo ítem en Linear** que diga cuál falta y dónde va. Nunca la pide en el chat.
+3. **Junta lo que depende de Carlos.** No le pregunta en el momento. Crea o actualiza un issue en Linear con la etiqueta **«Decide Carlos»** y el título «`[Sesión <nombre>] pregunta corta`». El issue lleva la recomendación de la sesión, las opciones en una línea cada una y qué pasa si no decide. Después sigue con otra tarea. Si Carlos no responde en **48 horas**, la sesión aplica su recomendación cuando sea reversible y le avisa en el mismo issue.
+4. **Prompts ya enviados a bots.** Si la sesión mandó prompts a algún bot («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0», «Chief of Staff») y siguen sin respuesta, los reevalúa con esta regla. Lo que pueda hacer ella, lo hace y cierra el pedido. Lo que sea decisión de Carlos pasa a «Decide Carlos». Lo que ya no sirva se descarta y se anota en `ESTADO.md`.
+5. **Identifícate siempre.** Cada PR, comentario e issue empieza con «`[Sesión <nombre>]`».
+
+Cómo calza con el resto del contrato: lo que antes se preguntaba en el chat o con `DECISIÓN CARLOS:` en el PR («Decisiones de Carlos», ADR-095) ahora va al issue «Decide Carlos», y el párrafo «Decisión tuya» de la respuesta solo enlaza ese issue. Siguen igual el veto de Carlos, las condiciones de «Integración a `main`» y todo «Prohibido» (producción de Gard, OPAI 1.0, secretos).
+
 ## Revisiones largas: de noche o a pedido, nunca en cada push
 
 Regla permanente de Carlos (13-nov-2026, adenda de ADR-112), para bajar el gasto y la demora de GitHub Actions:

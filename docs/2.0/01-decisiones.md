@@ -2222,3 +2222,19 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 
 4. **Botón de Ventas confirmado.** Queda «Nueva factura», como se dejó de noche.
 5. **OPAI no lleva la contabilidad completa (CAR-354).** No se construye libro de partida doble, asientos, plan de cuentas, candado de mes, balance ni mayor. La contabilidad la lleva el contador de cada empresa. OPAI le entrega los datos que ya tiene: ventas y compras del SII, movimientos de banco conciliados, rendiciones y remuneraciones, exportables y por API/MCP. Quedan fuera del plan CAR-354 (libro y candado), CAR-171 (asientos y períodos) y CAR-172 (asientos automáticos). De CAR-174 sigue solo lo de gestión que no exige contabilidad: la rentabilidad por instalación (ventas contra costo laboral). El estado de resultados y el balance contables quedan fuera.
+
+## ADR-114 · Autonomía de las sesiones (14-nov-2026)
+
+**Fecha:** 14-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Proyecto (10:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` y `CLAUDE.md` (sección nueva «Autonomía de las sesiones»). **Reemplaza** la regla «Pasos que dependen de Carlos», que Carlos dictó a las 09:45 del mismo día y que no llegó a `main` (PR #769, cerrado sin integrar). **Ajusta** ADR-095 («Decisión tuya»).
+
+**Contexto.** La regla de las 09:45 hacía que cada paso que dependía de Carlos se convirtiera en un bloque en el chat con un prompt para que él lo copiara en un bot de Grok Bot. Eso lo dejaba de mensajero entre sesiones y bots, y las sesiones seguían preguntando en el momento cosas que podían decidir o hacer solas.
+
+**Decisión.** Rige para todas las sesiones de Claude Code en `opai-2`.
+
+1. **Decide por defecto.** Todo lo reversible lo decide la sesión: diseño, nombres, alcance de un PR, cuál opción tomar, migraciones con snapshot, integrar un PR listo. Anota la decisión y el porqué en el PR y en `ESTADO.md`. Solo se detiene ante lo que no tiene vuelta atrás: plata real, emitir o anular algo en el SII, temas legales o contractuales, borrar datos de producción o un secreto que no tenga.
+2. **Usa tus propias herramientas.** Lo que la sesión pueda hacer directo (GitHub, Linear, Neon, Vercel, vistas previas, pruebas) lo hace ella, sin pasar por bots ni por «Chief of Staff». Si le falta una llave, crea un solo ítem en Linear que diga cuál falta y dónde va. Nunca la pide en el chat.
+3. **Junta lo que depende de Carlos.** No le pregunta en el momento. Crea o actualiza un issue en Linear con la etiqueta «Decide Carlos» y el título «`[Sesión <nombre>] pregunta corta`», con su recomendación, las opciones en una línea cada una y qué pasa si no decide. Después sigue con otra tarea. Si Carlos no responde en 48 horas, aplica su recomendación cuando sea reversible y le avisa en el mismo issue.
+4. **Prompts ya enviados a bots.** Los que sigan sin respuesta se reevalúan con esta regla: lo que la sesión pueda hacer, lo hace y cierra el pedido; lo que sea decisión de Carlos pasa a «Decide Carlos»; lo que ya no sirva se descarta y se anota en `ESTADO.md`.
+5. **Identifícate siempre.** Cada PR, comentario e issue empieza con «`[Sesión <nombre>]`».
+
+**Consecuencias.** Ante un choque con otra sección de `AGENTS.md`, manda «Autonomía de las sesiones». Lo que antes se preguntaba en el chat o con `DECISIÓN CARLOS:` en el PR (ADR-095) va al issue «Decide Carlos», y el párrafo «Decisión tuya» solo lo enlaza. No cambian el veto de Carlos, las condiciones de «Integración a `main`» ni lo «Prohibido» (producción de Gard, OPAI 1.0, secretos). Desde ADR-108 la anotación «en `ESTADO.md`» de un PR de construcción va en su archivo de `docs/2.0/estado/`. La etiqueta «Decide Carlos» queda creada en el equipo CAR de Linear.
