@@ -13,6 +13,7 @@ export {
   urlDeGoogle,
 } from "./acciones";
 export { canjearCodigoApp, emitirCodigoApp } from "./app-nativa";
+export { esRetoValido } from "./canje-app";
 export { auth, type Auth } from "./auth";
 export { LOGIN_RETENCION_DIAS, purgarIntentosLogin } from "./bloqueo-login";
 export {
