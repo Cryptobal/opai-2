@@ -71,10 +71,9 @@ export const turnosEsperadosListar = defineCapability({
         ...(input.personaId ? { personaId: input.personaId } : {}),
       },
       orderBy: [{ inicio: "asc" }, { version: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     return {
       siguiente,
       items: items.map((f) => ({
