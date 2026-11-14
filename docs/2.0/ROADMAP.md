@@ -75,7 +75,7 @@ Indicadores y metas por cargo, configurables por empresa: catálogo de indicador
 
 **En pausa hasta cerrar la migración de Gard:**
 - Central de monitoreo (CAR-85), Control de acceso (CAR-122), Portal Cliente PR 2, Licitaciones (CAR-93), Firma FEA (CAR-94).
-- Cálculo de Nómina y Previred (CAR-99), Asistencia y DT (CAR-89), empaquetado nativo (CAR-90).
+- Cálculo de Nómina y Previred (CAR-99), Asistencia y DT (CAR-89). El empaquetado nativo (CAR-90) se retomó el 14-nov-2026 con la Sesión Apps (Brief 17).
 - PR #213 (en conflicto y con Vercel en rojo) y PR #168: se retoman con un merge de `main`, sin rebase.
 
 **Descartar:**

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es-CL">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>OPAI · Sin conexión</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        padding-top: max(24px, env(safe-area-inset-top));
+        box-sizing: border-box;
+        text-align: center;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 0 0 24px;
+        opacity: 0.75;
+        line-height: 1.4;
+      }
+      button {
+        min-height: 44px;
+        padding: 0 24px;
+        border-radius: 8px;
+        border: 0;
+        font: inherit;
+        font-weight: 600;
+        background: CanvasText;
+        color: Canvas;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>No pudimos abrir OPAI</h1>
+      <p>Revisa la conexión a internet del teléfono e inténtalo de nuevo.</p>
+      <button type="button" onclick="history.back()">Reintentar</button>
+    </main>
+  </body>
+</html>
