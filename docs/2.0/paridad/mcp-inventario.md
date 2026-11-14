@@ -1136,6 +1136,14 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.jornadas.fijar_tipo`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
+- `central.alertas.abrir`
+- `central.alertas.falsa_alarma`
+- `central.alertas.listar`
+- `central.alertas.obtener`
+- `central.alertas.posponer`
+- `central.alertas.reabrir`
+- `central.alertas.resolver`
+- `central.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
@@ -1174,6 +1182,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.indicadores.uf_utm`
 - `core.indicadores_gestion.medir`
 - `core.invitations.revoke`
+- `core.libro_novedades.listar`
 - `core.patrones.get`
 - `core.personas.asignar_jefe`
 - `core.personas.list_a_cargo`
