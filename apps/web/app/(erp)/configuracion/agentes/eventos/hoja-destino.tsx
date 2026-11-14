@@ -85,7 +85,7 @@ export function HojaDestino({ catalogo }: { catalogo: EventoCatalogo[] }) {
               autoComplete="off"
             />
           </Campo>
-          <Campo etiqueta="Eventos" htmlFor="destino-eventos">
+          <Campo etiqueta="Eventos" htmlFor="destino-eventos-buscar">
             <SelectorEventos catalogo={catalogo} elegidos={eventos} onCambiar={setEventos} />
           </Campo>
         </div>

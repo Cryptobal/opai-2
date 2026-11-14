@@ -34,6 +34,7 @@ export function SelectorEventos({
   return (
     <div className="flex flex-col gap-3">
       <Input
+        id="destino-eventos-buscar"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Buscar evento (cuenta, persona, documento…)"

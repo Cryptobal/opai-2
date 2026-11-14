@@ -20,7 +20,9 @@ test.describe("@preview eventos salientes", () => {
     await page.goto("/configuracion/agentes/eventos?crear=1");
     const url = page.getByLabel("Dirección");
     await expect(url).toBeVisible({ timeout: 60_000 });
-    await url.fill(`https://hooks.qa-e2e.test/opai-${Date.now()}`);
+    // Dirección única por corrida: preview-e2e corre varios tamaños en paralelo y cada uno borra el suyo.
+    const direccion = `https://hooks.qa-e2e.test/opai-${info.project.name}-${Date.now()}`;
+    await url.fill(direccion);
     await page.getByLabel("Buscar evento").fill("core.cuenta.creada");
     await page.getByRole("checkbox", { name: /core\.cuenta\.creada/ }).click();
     await capturar(page, info, "eventos-salientes-agregar");
@@ -32,16 +34,16 @@ test.describe("@preview eventos salientes", () => {
     await capturar(page, info, "eventos-salientes-secreto");
     await dialogo.getByRole("button", { name: "Ya lo copié" }).click();
 
-    await page
-      .getByRole("link", { name: /hooks\.qa-e2e\.test/ })
-      .first()
-      .click();
-    await expect(page.getByText("Eventos suscritos (1)")).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByText("Aún no hay entregas")).toBeVisible();
-    await capturar(page, info, "eventos-salientes-ficha");
-
-    await page.getByRole("button", { name: "Eliminar" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Eliminar" }).click();
-    await expect(page).toHaveURL(/\/configuracion\/agentes\/eventos$/, { timeout: 60_000 });
+    try {
+      await page.getByRole("link", { name: direccion, exact: true }).click();
+      await expect(page.getByText("Eventos suscritos (1)")).toBeVisible({ timeout: 60_000 });
+      await expect(page.getByText("Aún no hay entregas")).toBeVisible();
+      await capturar(page, info, "eventos-salientes-ficha");
+    } finally {
+      // Limpieza: el destino de prueba no queda activo en la empresa de QA.
+      await page.getByRole("button", { name: "Eliminar" }).click();
+      await page.getByRole("dialog").getByRole("button", { name: "Eliminar" }).click();
+      await expect(page).toHaveURL(/\/configuracion\/agentes\/eventos$/, { timeout: 60_000 });
+    }
   });
 });

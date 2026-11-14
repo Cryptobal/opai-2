@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Dialog, SeccionTarjeta } from "@opai/ds";
+import { Alerta, avisar, Button, Dialog, SeccionTarjeta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -14,8 +14,13 @@ type Confirmar = "rotar" | "eliminar" | null;
 /** Pausar o reanudar, rotar el secreto y eliminar un destino de eventos (CAR-352). */
 export function AccionesDestino({ id, activo }: { id: string; activo: boolean }) {
   const router = useRouter();
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const [confirmar, setConfirmar] = useState<Confirmar>(null);
+  const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const [confirmar, setConfirmarEstado] = useState<Confirmar>(null);
+  // Al abrir o cerrar un diálogo se limpia el error de la acción anterior.
+  const setConfirmar = (c: Confirmar) => {
+    limpiarError();
+    setConfirmarEstado(c);
+  };
   const [secreto, setSecreto] = useState<string | null>(null);
 
   async function pausar() {
@@ -50,6 +55,11 @@ export function AccionesDestino({ id, activo }: { id: string; activo: boolean })
           Eliminar
         </Button>
       </div>
+      {error && confirmar === null ? (
+        <Alerta tono="danger" titulo="No se pudo completar la acción">
+          {error}
+        </Alerta>
+      ) : null}
       <p className="t-caption mt-2">
         {activo
           ? "Si lo pausas, deja de recibir eventos hasta que lo reanudes."
