@@ -24,7 +24,7 @@ describe.skipIf(!urlPropietario)("destinos de eventos salientes (CAR-352)", () =
 
   beforeAll(async () => {
     process.env.OPAI_SECRETS_KEY = randomBytes(32).toString("base64");
-    process.env.OPAI_SECRETS_KEY_VERSION = "1";
+    process.env.OPAI_SECRETS_KEY_VERSION = "99"; // fuera del alcance de la prueba de rotación de KEK (versión 2)
     delete process.env.OPAI_SECRETS_KEY_ANTERIOR;
     e = await prepararEntorno();
     mod = await import("../src");
