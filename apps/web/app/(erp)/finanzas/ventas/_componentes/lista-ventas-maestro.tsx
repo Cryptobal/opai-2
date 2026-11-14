@@ -28,7 +28,7 @@ export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: 
   const items = d.libro?.items ?? [];
   const emitir = d.gestiona ? (
     <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
-      Emitir
+      Nueva factura
     </EnlaceBoton>
   ) : undefined;
   return (
