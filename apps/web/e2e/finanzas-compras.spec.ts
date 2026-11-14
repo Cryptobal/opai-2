@@ -90,7 +90,7 @@ test.describe("Finanzas · Compras", () => {
     await guardar("Registrar", "finanzas.compras.registrar");
     await page.goto("/finanzas/compras");
     await expect(page.getByText("Sin centro de costo").filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("Sin conciliar").filter({ visible: true }).first()).toBeVisible();
+    await expect(page.getByText("Por pagar").filter({ visible: true }).first()).toBeVisible();
     await sinScrollHorizontal();
     await page.screenshot({ path: info.outputPath("libro-compras.png"), fullPage: true });
 

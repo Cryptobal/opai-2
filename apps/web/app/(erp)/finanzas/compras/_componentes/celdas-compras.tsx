@@ -28,3 +28,12 @@ export function Plazo({ c }: { c: Compra }) {
     </Badge>
   );
 }
+
+/** Estado de pago derivado de la conciliación bancaria; la nota de crédito no se paga y no lleva insignia. */
+export function EstadoPago({ c }: { c: Compra }) {
+  if (c.estadoPago === "no_aplica") return null;
+  if (c.estadoPago === "pagada") return <Badge tono="success">Pagada</Badge>;
+  if (c.pagoVencido) return <Badge tono="danger">{c.estadoPago === "parcial" ? "Saldo vencido" : "Pago vencido"}</Badge>;
+  if (c.estadoPago === "parcial") return <Badge tono="warning">Pago parcial</Badge>;
+  return <Badge>Por pagar</Badge>;
+}

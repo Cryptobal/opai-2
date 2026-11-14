@@ -14,7 +14,7 @@ const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa
 export const comprasListar = defineCapability({
   id: "finanzas.compras.listar",
   descripcion:
-    "Lista el libro de compras: documentos recibidos con folio, proveedor, montos, centro de costo, plazo para aceptar o reclamar y la sugerencia de centro de costo cuando falta. Filtra por período de recepción, proveedor, estado o solo los sin centro de costo; incluye totales del filtro. El estado de pago llega con la conciliación.",
+    "Lista el libro de compras: documentos recibidos con folio, proveedor, montos, centro de costo, plazo para aceptar o reclamar y la sugerencia de centro de costo cuando falta. Filtra por período de recepción, proveedor, estado o solo los sin centro de costo; incluye totales del filtro. Cada documento trae su estado de pago (por pagar, parcial o pagada) y el saldo, derivados de lo conciliado con el banco.",
   permiso: PERMISO_READ,
   input: z.object({
     periodo: periodoSchema.optional().describe("Mes de recepción, aaaa-mm."),

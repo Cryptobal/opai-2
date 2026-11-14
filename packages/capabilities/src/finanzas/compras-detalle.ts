@@ -11,7 +11,7 @@ import { compraSchema } from "./vistas-compra";
 export const comprasGet = defineCapability({
   id: "finanzas.compras.get",
   descripcion:
-    "Muestra un documento recibido del libro de compras: tipo, folio, proveedor, fechas, montos, centro de costo (o el sugerido), estado de recepción y plazo para aceptar o reclamar.",
+    "Muestra un documento recibido del libro de compras: tipo, folio, proveedor, fechas, montos, centro de costo (o el sugerido), estado de recepción, plazo para aceptar o reclamar, vencimiento de pago y estado de pago con lo pagado y el saldo según la conciliación bancaria.",
   permiso: PERMISO_READ,
   input: z.object({ id: uuidSchema }),
   output: compraSchema,
