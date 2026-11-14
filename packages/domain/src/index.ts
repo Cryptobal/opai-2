@@ -50,6 +50,7 @@ export * from "./cumplimiento";
 export * from "./indicadores-gestion";
 export * from "./jefatura";
 export * from "./procesos-persona";
+export * from "./ausencias";
 export * from "./desempeno";
 export * from "./incidentes";
 export * from "./documento-subida";
