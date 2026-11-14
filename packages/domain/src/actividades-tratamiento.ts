@@ -57,6 +57,7 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
     "personas_pago_solicitudes",
     "personas_uniforme",
     "personas_jornada_dt",
+    "contrato_periodos",
     "personas_os10",
     "credenciales_terreno",
     "personas_contacto_laboral",

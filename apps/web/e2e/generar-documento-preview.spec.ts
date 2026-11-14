@@ -28,8 +28,13 @@ test.describe("@preview personas: generar documento", () => {
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     const vacio = page.getByText("Aún no hay plantillas laborales");
     if (await vacio.isVisible()) return void (await capturar(page, info, "generar-documento-vacio"));
-    await page.getByLabel("Plantilla").click();
-    await page.getByRole("option").first().click();
+    // Hasta que la página hidrata, el clic solo enfoca el botón: se repite hasta que aparece la lista (CAR-431).
+    const opcion = page.getByRole("option").first();
+    await expect(async () => {
+      await page.getByLabel("Plantilla").click();
+      await expect(opcion).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    await opcion.click();
     await expect(page.locator("article.bg-paper")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("button", { name: "Generar PDF" })).toBeVisible();
     await capturar(page, info, "generar-documento-vista");
