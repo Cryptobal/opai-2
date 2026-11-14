@@ -80,6 +80,12 @@ async function calentarConSesion(base: string) {
       .then(() => page.locator('a[href^="/instalaciones/"][href*="-"]').first().getAttribute("href", { timeout: 20_000 }))
       .catch(() => null);
     if (ficha) await page.goto(`${ficha}/puestos?puesto=calentar`, { timeout: 120_000 }).catch(() => undefined);
+    // La hoja «Nuevo negocio» también es diferida: se compila al abrirse. Sin calentarla, la primera prueba
+    // que la abre (negocios-car33) agota los 30 s esperando el diálogo y pasa recién en el reintento.
+    await page
+      .goto("/negocios?nuevo=1", { timeout: 120_000 })
+      .then(() => page.getByRole("dialog").first().waitFor({ timeout: 120_000 }))
+      .catch(() => undefined);
   } catch {
     // Si no entra, que lo diga la prueba que lo necesite.
   } finally {

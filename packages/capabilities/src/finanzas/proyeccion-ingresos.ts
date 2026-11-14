@@ -8,8 +8,9 @@ import { cesionesEsperadas, type DiferenciaFactoring } from "./factoring-esperad
 
 export type AvisoFlujo = { tipo: "posible_cobro_recibido"; mensaje: string; abonoId: string; monto: number };
 
-/** Ventana hacia atrás para los abonos que pudieron ser el depósito de un factor aún no conciliado. */
-const DIAS_VENTANA_FACTOR = 28;
+/** Ventana hacia atrás para los abonos que pudieron ser el depósito de un factor aún no conciliado o el pago de una
+ * factura vencida (que se proyecta en la semana en curso aunque el cliente haya pagado antes; CAR-399). */
+const DIAS_VENTANA_ATRAS = 28;
 const clp = (n: number) => `$ ${n.toLocaleString("es-CL")}`;
 
 export type ProyeccionIngresos = { items: IngresoEsperado[]; avisos: AvisoFlujo[]; diferenciasFactoring: DiferenciaFactoring[] };
@@ -29,7 +30,10 @@ export async function proyeccionDeIngresos(ctx: Contexto, hoy: string = hoyChile
     ? await ctx.db.cuenta.findMany({ where: { id: { in: [...new Set(reales.map((i) => i.cuentaId))] } }, select: { id: true, rut: true } })
     : [];
   const rutDe = new Map(cuentas.map((c) => [c.id, c.rut] as const));
-  const desde = depositos.length ? sumarDiasCobro(lunesActual, -DIAS_VENTANA_FACTOR) : lunesActual;
+  const ventana = sumarDiasCobro(lunesActual, -DIAS_VENTANA_ATRAS);
+  // Vencida: su fecha esperada quedó antes de esta semana; el pago pudo llegar cualquier día de la ventana.
+  const desdeFactura = (i: IngresoEsperado) => (i.fechaEsperada && i.fechaEsperada < lunesActual ? ventana : lunesActual);
+  const desde = depositos.length || reales.some((i) => desdeFactura(i) === ventana) ? ventana : lunesActual;
   const movs = await ctx.db.movimientoBancario.findMany({
     where: { monto: { gt: 0n }, estado: { in: ["pendiente", "sugerido"] }, fecha: { gte: new Date(`${desde}T00:00:00Z`) } },
     select: { id: true, fecha: true, monto: true, glosa: true },
@@ -40,7 +44,7 @@ export async function proyeccionDeIngresos(ctx: Contexto, hoy: string = hoyChile
   const emparejados = emparejarAbonosConCobros({
     abonos,
     cobros: [
-      ...reales.map((i) => ({ id: `f:${i.documentoEmitidoId}`, monto: i.monto, rut: rutDe.get(i.cuentaId) ?? null, desde: lunesActual })),
+      ...reales.map((i) => ({ id: `f:${i.documentoEmitidoId}`, monto: i.monto, rut: rutDe.get(i.cuentaId) ?? null, desde: desdeFactura(i) })),
       ...depositos.map((d) => ({ id: `d:${d.cesionId}`, monto: d.monto, rut: d.rutFactor })),
     ],
   });

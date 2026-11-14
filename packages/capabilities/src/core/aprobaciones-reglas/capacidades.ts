@@ -63,13 +63,16 @@ export const reglasAprobacionList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const filas = await ctx.db.reglaAprobacion.findMany({
+    const crudas = await ctx.db.reglaAprobacion.findMany({
       where: input.incluirInactivas ? {} : { activa: true },
       // `montoMinimo` admite nulo: con nulls last el orden es total y el cursor no salta filas.
       orderBy: [{ accion: "asc" }, { montoMinimo: { sort: "asc", nulls: "last" } }, { id: "asc" }],
-      take: input.limite + 1,
-      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+      // Sin `skip: 1` (CAR-400): la fila del cursor viene si aún cumple el filtro y se descarta abajo.
+      ...(input.cursor
+        ? { cursor: { id: input.cursor }, take: input.limite + 2 }
+        : { take: input.limite + 1 }),
     });
+    const filas = input.cursor && crudas[0]?.id === input.cursor ? crudas.slice(1) : crudas;
     const pagina = filas.slice(0, input.limite);
     const siguiente = filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null;
     return { items: pagina.map(vista), siguiente };

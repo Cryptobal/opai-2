@@ -15,7 +15,12 @@ async function base() {
     nombres: "Elena",
     apellidos: "Ríos",
     rut: "17.123.456-5",
-    vinculo: { ...(await destinoVinculo(p.ctx)), cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+    vinculo: {
+      ...(await destinoVinculo(p.ctx)),
+      cargoId: cargo.id,
+      tipo: "indefinido",
+      inicio: "2026-01-05",
+    },
   });
   return { ...p, personaId: persona.id };
 }
@@ -55,7 +60,13 @@ describe("core.anexos.generar", () => {
       nombres: "Ana",
       apellidos: "Paz",
       rut: "19.876.543-0",
-      vinculo: { ...(await destinoVinculo(ctx)), cargoId: (await dato<{ id: string }>(ctx, "core.cargos.create", { nombre: "Supervisor" })).id, tipo: "indefinido", inicio: "2026-01-05" },
+      vinculo: {
+        ...(await destinoVinculo(ctx)),
+        cargoId: (await dato<{ id: string }>(ctx, "core.cargos.create", { nombre: "Supervisor" }))
+          .id,
+        tipo: "indefinido",
+        inicio: "2026-01-05",
+      },
     });
     const preview = await dato<{ id: string; estado: string }>(
       ctx,
@@ -64,14 +75,18 @@ describe("core.anexos.generar", () => {
       { dryRun: true },
     );
     expect(preview.id).toBe("");
-    const lista0 = await dato<unknown[]>(ctx, "core.anexos.list", { personaId: persona.id });
+    const lista0 = (
+      await dato<{ items: unknown[] }>(ctx, "core.anexos.list", { personaId: persona.id })
+    ).items;
     expect(lista0).toHaveLength(0);
     await dato(ctx, "core.anexos.generar", {
       personaId: persona.id,
       motivoCambio: "monto",
       snapshotDespues: { nota: "x" },
     });
-    const lista1 = await dato<unknown[]>(ctx, "core.anexos.list", { personaId: persona.id });
+    const lista1 = (
+      await dato<{ items: unknown[] }>(ctx, "core.anexos.list", { personaId: persona.id })
+    ).items;
     expect(lista1).toHaveLength(1);
   });
 
@@ -93,11 +108,22 @@ describe("consumidorAnexos", () => {
     const { ctx, personaId } = await base();
     await consumidorAnexos.handler(
       ctx,
-      evento("core.estructura.creada", { nivel: "persona", ref: personaId, desde: "2026-02-01", cierra: null }),
+      evento("core.estructura.creada", {
+        nivel: "persona",
+        ref: personaId,
+        desde: "2026-02-01",
+        cierra: null,
+      }),
     );
-    const lista = await dato<{ motivoCambio: string; personaId: string }[]>(ctx, "core.anexos.list", {
-      personaId,
-    });
+    const lista = (
+      await dato<{ items: { motivoCambio: string; personaId: string }[] }>(
+        ctx,
+        "core.anexos.list",
+        {
+          personaId,
+        },
+      )
+    ).items;
     expect(lista).toMatchObject([{ motivoCambio: "capa", personaId }]);
   });
 
@@ -112,16 +138,23 @@ describe("consumidorAnexos", () => {
         cierra: "0192f3a0-0000-7000-8000-00000000aaaa",
       }),
     );
-    const lista = await dato<{ motivoCambio: string }[]>(ctx, "core.anexos.list", { personaId });
+    const lista = (
+      await dato<{ items: { motivoCambio: string }[] }>(ctx, "core.anexos.list", { personaId })
+    ).items;
     expect(lista[0]?.motivoCambio).toBe("monto");
   });
 
   it("el mismo evento reintentado no duplica el borrador (idempotencia del outbox)", async () => {
     const { ctx, personaId } = await base();
-    const ev = evento("core.estructura.creada", { nivel: "persona", ref: personaId, desde: "2026-02-01", cierra: null });
+    const ev = evento("core.estructura.creada", {
+      nivel: "persona",
+      ref: personaId,
+      desde: "2026-02-01",
+      cierra: null,
+    });
     await consumidorAnexos.handler(ctx, ev);
     await consumidorAnexos.handler(ctx, ev);
-    const lista = await dato<unknown[]>(ctx, "core.anexos.list", { personaId });
+    const lista = (await dato<{ items: unknown[] }>(ctx, "core.anexos.list", { personaId })).items;
     expect(lista).toHaveLength(1);
   });
 
@@ -136,7 +169,7 @@ describe("consumidorAnexos", () => {
         cierra: null,
       }),
     );
-    const lista = await dato<unknown[]>(ctx, "core.anexos.list", {});
+    const lista = (await dato<{ items: unknown[] }>(ctx, "core.anexos.list", {})).items;
     expect(lista).toHaveLength(0);
   });
 
@@ -157,17 +190,24 @@ describe("consumidorAnexos", () => {
         { entidadId: vinculo.id, entidadTipo: "vinculo" },
       ),
     );
-    const trasInstalacion = await dato<unknown[]>(ctx, "core.anexos.list", { personaId });
+    const trasInstalacion = (
+      await dato<{ items: unknown[] }>(ctx, "core.anexos.list", { personaId })
+    ).items;
     expect(trasInstalacion).toHaveLength(1);
     await consumidorAnexos.handler(
       ctx,
       evento(
         "core.vinculo.actualizado",
         { personaId, antes: {}, despues: {}, campos: ["horasSemanales", "distribucion"] },
-        { entidadId: vinculo.id, entidadTipo: "vinculo", id: "0192f3a0-0000-7000-8000-0000000000e9" },
+        {
+          entidadId: vinculo.id,
+          entidadTipo: "vinculo",
+          id: "0192f3a0-0000-7000-8000-0000000000e9",
+        },
       ),
     );
-    const trasJornada = await dato<unknown[]>(ctx, "core.anexos.list", { personaId });
+    const trasJornada = (await dato<{ items: unknown[] }>(ctx, "core.anexos.list", { personaId }))
+      .items;
     expect(trasJornada).toHaveLength(1); // Sin cambio nuevo: la jornada sola no genera anexo.
   });
 });
