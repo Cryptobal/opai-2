@@ -123,8 +123,7 @@ export const gruposRolesList = defineCapability({
       where: { grupoId: g.id },
       include: { rol: { select: { nombre: true, archivadoEn: true } } },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
     const p = pagina(
       filas.map((f) => ({
@@ -134,6 +133,7 @@ export const gruposRolesList = defineCapability({
         archivado: !!f.rol.archivadoEn,
       })),
       input.limite,
+      input.cursor,
     );
     return { items: p.items.map(({ id: _id, ...r }) => r), siguiente: p.siguiente };
   },

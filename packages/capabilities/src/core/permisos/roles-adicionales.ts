@@ -112,8 +112,7 @@ export const rolesAdicionalesList = defineCapability({
       where: { userId: m.userId },
       include: { rol: { select: { nombre: true, archivadoEn: true } } },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
     const vista = filas.map((f) => ({
       id: f.id,
@@ -121,7 +120,7 @@ export const rolesAdicionalesList = defineCapability({
       nombre: f.rol.nombre,
       archivado: f.rol.archivadoEn !== null,
     }));
-    const p = pagina(vista, input.limite);
+    const p = pagina(vista, input.limite, input.cursor);
     return { items: p.items.map(({ id: _id, ...r }) => r), siguiente: p.siguiente };
   },
 });
