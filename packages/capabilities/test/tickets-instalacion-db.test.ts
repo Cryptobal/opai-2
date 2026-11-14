@@ -67,7 +67,7 @@ describe.skipIf(omitirSuiteDb())("tickets · instalación del ticket (CAR-84)", 
 
   it("la base rechaza una instalación de otra empresa aunque se salte la capacidad", async () => {
     await expect(
-      e.admin.ticket.create({ data: { tenantId: t.a, tipoId, titulo: "x", descripcion: "x", solicitanteId: u.ger, responsableId: u.ger, instalacionId: inst["beta"] } }),
+      e.admin.ticket.create({ data: { tenantId: t.a, tipoId, titulo: "x", descripcion: "x", solicitanteId: u.ger, responsableId: u.ger, instalacionId: inst["beta"]! } }),
     ).rejects.toThrow();
   });
 });
