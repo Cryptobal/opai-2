@@ -86,7 +86,7 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-fusionar.md`. Capacidad `core.cuentas.fusion
 
 ## PR fusionar contactos (F3) · rama `brief/car-27-fusionar-contactos`
 
-- **Estado:** Abierto (F1 ya está en main)
+- **Estado:** Integrado (#744)
 - **Migración:** No
 
 ### Qué entra
