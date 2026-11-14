@@ -151,6 +151,7 @@ core_cuentas_consultar_sii
 core_cuentas_contactos
 core_cuentas_create
 core_cuentas_facturable
+core_cuentas_fusionar
 core_cuentas_get
 core_cuentas_list
 core_cuentas_referencias_list
@@ -669,6 +670,7 @@ preview_core_correos_crear_direccion
 preview_core_cuentas_aplicar_sii
 preview_core_cuentas_archive
 preview_core_cuentas_create
+preview_core_cuentas_fusionar
 preview_core_cuentas_referencias_revocar
 preview_core_cuentas_set_estado
 preview_core_cuentas_set_representantes
