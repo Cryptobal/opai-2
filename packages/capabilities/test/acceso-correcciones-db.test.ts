@@ -194,6 +194,56 @@ describe.skipIf(!urlPropietario)("correcciones de acceso en base real (CAR-477)"
     ).toBe(false);
   });
 
+  it("un supervisor fuera de alcance recibe NOT_FOUND; el cierre salta a los anulados", async () => {
+    const id = await entrada("A", "Fuera de alcance");
+    const sup = ctx("A", { rol: "supervisor", alcance: { instalaciones: [] } });
+    const codigo = async (cap: string, input: unknown) => {
+      const r = await run(sup, cap, input);
+      return r.ok ? "ok" : r.error.code;
+    };
+    expect(await codigo("acceso.registros.salida", { id })).toBe("NOT_FOUND");
+    expect(await codigo("acceso.registros.anular", { id, motivo: "Fuera de alcance" })).toBe(
+      "NOT_FOUND",
+    );
+    expect(
+      await codigo("acceso.registros.cerrar_bloque", { instalacionId: inst.A, motivo: "Cierre" }),
+    ).toBe("NOT_FOUND");
+    await ok(ctx("A"), "acceso.registros.anular", { id, motivo: "Anulado antes del cierre" });
+    await ok(ctx("A"), "acceso.registros.cerrar_bloque", {
+      instalacionId: inst.A,
+      motivo: "Cierre",
+    });
+    const f = await ok<{ salidaEn: string | null }>(ctx("A"), "acceso.registros.get", { id });
+    expect(f.salidaEn).toBeNull();
+  });
+
+  it("Terreno no guarda la salida de un registro anulado ni lo muestra en sitio", async () => {
+    const id = await entrada("A", "Anulado en Terreno");
+    const reg = await e.admin.registroAcceso.findUniqueOrThrow({ where: { id } });
+    await ok(ctx("A"), "acceso.registros.anular", { id, motivo: "Anulado en la oficina" });
+    const sitio = await ok<{ items: { id: string }[] }>(ctx("A"), "core.terreno.en_sitio", {
+      dispositivoId: disp.A,
+    });
+    expect(sitio.items.map((x) => x.id)).not.toContain(id);
+    const r = await ok<{ rechazados: { motivo: string }[] }>(
+      ctx("A"),
+      "core.hechos_terreno.recibir",
+      {
+        dispositivoId: disp.A,
+        horaEnvio: new Date().toISOString(),
+        hechos: [
+          {
+            clave: randomUUID(),
+            tipo: "acceso.salida",
+            payload: { entradaClave: reg.clave },
+            horaHecho: new Date(Date.now() - 1_000).toISOString(),
+          },
+        ],
+      },
+    );
+    expect(JSON.stringify(r)).toContain("entrada_anulada");
+  });
+
   it("una salida del ERP o del cierre no puede traer equipo (constraint de base)", async () => {
     const id = await entrada("A", "Constraint");
     await expect(

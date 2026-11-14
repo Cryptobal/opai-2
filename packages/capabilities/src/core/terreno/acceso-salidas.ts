@@ -17,14 +17,17 @@ export async function validarSalidas(
       instalacionId: equipo.instalacionId,
       clave: { in: salidas.map((s) => s.entradaClave) },
     },
-    select: { clave: true, salida: { select: { id: true } } },
+    select: { clave: true, salida: { select: { id: true } }, anulacion: { select: { id: true } } },
   });
   const existentes = new Map(previas.map((r) => [r.clave, r.salida !== null]));
+  // Un registro anulado desde el ERP (CAR-477) no admite salida, tampoco la que llega tarde sin conexión.
+  const anuladas = new Set(previas.filter((r) => r.anulacion !== null).map((r) => r.clave));
   const usadas = new Set<string>();
   return salidas.filter((s) => {
     const k = s.entradaClave;
     if (!existentes.has(k) && !aceptadasEnLote.has(k))
       rechazos.set(s.h.clave, "entrada_desconocida");
+    else if (anuladas.has(k)) rechazos.set(s.h.clave, "entrada_anulada");
     else if (existentes.get(k) === true || usadas.has(k))
       rechazos.set(s.h.clave, "salida_repetida");
     else {

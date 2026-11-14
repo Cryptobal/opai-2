@@ -9,6 +9,10 @@ import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
 import type { Contexto } from "../types";
 import { PERMISO_REGISTROS } from "./comun";
 
+/** Violación de unicidad de Prisma (P2002): otra escritura llegó primero. */
+const esUnica = (e: unknown) =>
+  typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "P2002";
+
 const motivo = z.string().trim().min(3).max(300);
 /** Persona responsable de la corrección: el usuario o, si actúa un agente, el usuario por el que actúa. */
 const quien = (ctx: Contexto) =>
@@ -44,15 +48,20 @@ export const registrosAnular = defineCapability({
   async handler(ctx, { id, motivo: m }, { dryRun }) {
     const r = await registroEnAlcance(ctx, id);
     if (dryRun) return { id, anuladoEn: new Date().toISOString() };
-    const a = await ctx.db.anulacionAcceso.create({
-      data: {
-        tenantId: ctx.tenantId,
-        instalacionId: r.instalacionId,
-        registroId: id,
-        motivo: m,
-        anuladaPor: quien(ctx),
-      },
-    });
+    const a = await ctx.db.anulacionAcceso
+      .create({
+        data: {
+          tenantId: ctx.tenantId,
+          instalacionId: r.instalacionId,
+          registroId: id,
+          motivo: m,
+          anuladaPor: quien(ctx),
+        },
+      })
+      .catch((e: unknown) => {
+        if (esUnica(e)) throw reglaDeNegocio("El registro ya está anulado.");
+        throw e;
+      });
     return { id, anuladoEn: a.createdAt.toISOString() };
   },
 });
@@ -72,18 +81,24 @@ export const registrosSalida = defineCapability({
     if (r.salida) throw reglaDeNegocio("Este registro ya tiene salida.");
     const ahora = new Date();
     if (dryRun) return { id, salidaEn: ahora.toISOString() };
-    await ctx.db.salidaAcceso.create({
-      data: {
-        tenantId: ctx.tenantId,
-        instalacionId: r.instalacionId,
-        registroId: id,
-        clave: randomUUID(),
-        origen: "erp",
-        registradaPor: quien(ctx),
-        motivo: m ?? null,
-        horaCorregida: ahora,
-      },
-    });
+    // Si la portería registra la misma salida a la vez, la unicidad por registro la frena: se dice como regla.
+    await ctx.db.salidaAcceso
+      .create({
+        data: {
+          tenantId: ctx.tenantId,
+          instalacionId: r.instalacionId,
+          registroId: id,
+          clave: randomUUID(),
+          origen: "erp",
+          registradaPor: quien(ctx),
+          motivo: m ?? null,
+          horaCorregida: ahora,
+        },
+      })
+      .catch((e: unknown) => {
+        if (esUnica(e)) throw reglaDeNegocio("Este registro ya tiene salida.");
+        throw e;
+      });
     return { id, salidaEn: ahora.toISOString() };
   },
 });

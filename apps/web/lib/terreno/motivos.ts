@@ -31,6 +31,7 @@ export const MOTIVO_RECHAZO: Record<string, string> = {
   punto_invalido: "El punto de la novedad no existe en esta instalación.",
   tipo_incidente_invalido: "El tipo de incidente ya no está disponible.",
   salida_repetida: "Esta entrada ya tenía su salida registrada.",
+  entrada_anulada: "La entrada se anuló desde la oficina; su salida no se guarda.",
   lote_invalido: "El envío no era válido y el servidor lo devolvió.",
 };
 
