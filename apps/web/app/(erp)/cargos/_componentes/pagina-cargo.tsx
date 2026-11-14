@@ -5,6 +5,8 @@ import { Loading, SplitScreen } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EncabezadoGrupo } from "@/app/(erp)/configuracion/_centro/encabezado-grupo";
+import { GRUPO_CARGOS } from "@/app/(erp)/configuracion/_centro/grupo-cargos";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { conBusqueda, leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -22,7 +24,7 @@ export function PaginaCargo({ params, searchParams }: Props) {
   return (
     <PaginaPortal
       portal="erp"
-      titulo="Cargos"
+      titulo="Configuración"
       ruta="/cargos"
       completo
       cargando="detalle"
@@ -56,6 +58,7 @@ export function PaginaCargo({ params, searchParams }: Props) {
     >
       {({ id, p, datos, lista, puedeGestionar, puedeVerSensible }) => (
         <>
+          {GRUPO_CARGOS ? <EncabezadoGrupo grupo={GRUPO_CARGOS} entrada /> : null}
           <SplitScreen
             telefono="detalle"
             unPanelHastaLg
