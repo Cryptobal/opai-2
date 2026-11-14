@@ -58,6 +58,7 @@ describe.skipIf(!urlPropietario)("inventario · ropa ligada al uniforme en base 
     const kit = await dato<{ items: { clave: string }[]; siguiente: string | null }>(ctx(a), "inventario.prendas.list", { limite: 2 });
     expect(kit.items.map((p) => p.clave)).toEqual(["camisa", "pantalon"]);
     expect(kit.siguiente).toBe("pantalon");
+    expect(await codigo(ctx(a), "inventario.prendas.list", { cursor: "no_existe" })).toBe("UNPROCESSABLE");
     const fuera = { categoria: "ropa", nombre: "Gorro", tallas: ["U"], prendaClave: "gorro" };
     expect(await codigo(ctx(a), "inventario.tipos.crear", fuera)).toBe("UNPROCESSABLE");
   });

@@ -42,6 +42,7 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `core.invitations.list` | Destinatarios invitados; IDs de invitaciones efectivamente devueltas |
 | `core.apikeys.list/get` | Nombre y correo del responsable, nunca el secreto; IDs de keys |
 | `core.aprobaciones.list/get` | Responsable e input/resultado de la operación; IDs de aprobaciones |
+| `inventario.entregas.talla_persona` (CAR-504) | Talla de la ficha de una persona para la prenda del tipo de ropa (exige `inventario:gestionar` y el alcance del supervisor; decisión: la talla es un dato laboral de baja sensibilidad que quien entrega ropa necesita, como en BambooHR/Rippling); ID de la persona, sin la talla |
 | `core.audit.list`, `core.actividad.list` | Historial con actores y payload de negocio; IDs de eventos revelados, sin centinela ni copiar payload |
 | `core.hilo.actividad`, `core.hilo.agenda` (CAR-331) | Actividad del hilo con alcance (empresa, instalaciones o propia): IDs de eventos revelados. Agenda: IDs de tareas y documentos revelados y de personas cuyo nombre se mostró |
 

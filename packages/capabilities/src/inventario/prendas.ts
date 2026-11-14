@@ -34,7 +34,9 @@ export const prendasList = defineCapability({
   dryRun: false,
   async handler(ctx, { cursor, limite }) {
     const kit = await prendasDeLaEmpresa(ctx);
-    const desde = cursor ? kit.findIndex((p) => p.clave === cursor) + 1 : 0;
+    const indice = cursor ? kit.findIndex((p) => p.clave === cursor) : -1;
+    if (cursor && indice < 0) throw reglaDeNegocio("El cursor no corresponde a una prenda del uniforme.");
+    const desde = indice + 1;
     const pagina = kit.slice(desde, desde + limite);
     return { items: pagina, siguiente: desde + limite < kit.length ? (pagina.at(-1)?.clave ?? null) : null };
   },

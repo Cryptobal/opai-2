@@ -20,7 +20,7 @@ function comunes(e: Estado) {
 }
 
 /** CAR-504: con ropa y una persona elegidas, propone la talla de su ficha si hay existencias de ella. */
-function useTallaDeFicha(e: Estado, ropa: Prenda[], fijar: (p: Partial<Estado>) => void) {
+function useTallaDeFicha(e: Estado, ropa: Prenda[], proponer: (talla: string) => void) {
   const { ejecutar } = useCapacidad("erp");
   const [ficha, setFicha] = useState<{ de: string; talla: string } | null>(null);
   const [clave, personaId] = e.destino.split(":");
@@ -33,12 +33,12 @@ function useTallaDeFicha(e: Estado, ropa: Prenda[], fijar: (p: Partial<Estado>) 
       if (!vigente || !r?.talla) return;
       setFicha({ de: `${tipoId}:${personaId}`, talla: r.talla });
       const hay = ropa.find((p) => p.tipoId === tipoId)?.existencias.some((x) => x.talla === r.talla && x.cantidad > 0);
-      if (hay) fijar({ talla: r.talla });
+      if (hay) proponer(r.talla);
     });
     return () => {
       vigente = false;
     };
-  }, [ejecutar, tipoId, clave, personaId, ropa, fijar]);
+  }, [ejecutar, tipoId, clave, personaId, ropa, proponer]);
   // Solo vale la respuesta de la prenda y la persona elegidas ahora.
   return ficha?.de === de ? ficha.talla : null;
 }
@@ -49,7 +49,9 @@ export function HojaEntrega({ opciones }: { opciones: Opciones }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [e, setE] = useState<Estado>({ clase: "activo", activoId: "", tipoId: "", talla: "", cantidad: "1", destino: "", nota: "" });
   const fijar = useCallback((p: Partial<Estado>) => setE((x) => ({ ...x, ...p })), []);
-  const deFicha = useTallaDeFicha(e, opciones.ropa, fijar);
+  // La propuesta nunca pisa una talla que la persona ya eligió.
+  const proponer = useCallback((talla: string) => setE((x) => (x.talla ? x : { ...x, talla })), []);
+  const deFicha = useTallaDeFicha(e, opciones.ropa, proponer);
   const prenda = opciones.ropa.find((p) => p.tipoId === e.tipoId);
   const stock = prenda?.existencias.find((x) => x.talla === e.talla)?.cantidad ?? 0;
   const cantidad = Number(e.cantidad);
