@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 781 pares pantalla→capacidad · 702 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 782 pares pantalla→capacidad · 703 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -741,6 +741,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/mi-cuenta` | `core.apps_conectadas.list` | `core_apps_conectadas_list` | existe |
 | erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/negocios/reportes` | `comercial.informes.tablero` | `comercial_informes_tablero` | existe |
+| erp | `/personas/[id]/ausencias` | `core.ausencias.clases` | `core_ausencias_clases` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
@@ -958,6 +959,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
+| `core.webhooks.destino_actualizar` | Solo personas: cambiar la dirección de un destino redirige los eventos de la empresa (ADR-032). |
+| `core.webhooks.destino_crear` | Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032). |
+| `core.webhooks.destino_eliminar` | Solo personas: gobierna una integración de la empresa (ADR-032). |
+| `core.webhooks.destino_rotar_secreto` | Solo personas: entrega un secreto de firma (ADR-032). |
 | `cpq.compartir.ver` | Interna: la abre el cliente en /p/<slug>/<token> sin sesión, con el enlace revocable y con vencimiento como credencial; los agentes gestionan el enlace con cpq.compartir.crear y revocar. |
 | `cpq.cotizaciones.aprobar` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
 | `cpq.cotizaciones.enviar` | Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad. |
@@ -1052,6 +1057,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
+| `core.webhooks.destino_actualizar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
+| `core.webhooks.destino_crear` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
+| `core.webhooks.destino_eliminar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
+| `core.webhooks.destino_rotar_secreto` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
 | `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `finanzas.apertura.importar` | sin pantalla todavía · CAR-168 · desde 2026-11-04 | no | reservada a personas |
@@ -1101,6 +1110,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
+- `core.campos_personalizados.create`
+- `core.campos_personalizados.list`
+- `core.campos_personalizados.update`
 - `core.consumos.por_recurso`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
@@ -1132,6 +1144,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
+- `core.webhooks.destinos_list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`

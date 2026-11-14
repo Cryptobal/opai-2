@@ -7,7 +7,7 @@ export const RECURSOS: Record<string, string> = {
   cuentas: "Cuentas", cuentas_referencias: "Referencias de clientes", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
   patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos", procesos_persona: "Ingreso y salida",
   contexto: "Contexto comercial", campos: "Campos de documentos", cargos: "Cargos", conversaciones: "Conversaciones", estructuras: "Sueldos", buscar: "Búsqueda", actividades: "Actividades",
-  etiquetas: "Etiquetas", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
+  etiquetas: "Etiquetas", campos_personalizados: "Campos personalizados", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
   actividad: "Actividad", resumen: "Resumen", inicio: "Inicio", permisos: "Permisos", roles: "Roles",
   excepciones: "Excepciones de permisos", supervisores: "Supervisores", documento_tipos: "Tipos de documento",
   documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", biometria: "Reconocimiento facial", terreno: "Terreno", personas_terreno: "Personas de terreno", listas: "Listas de acceso", registros: "Registros de acceso", config: "Ajustes", ajustes: "Ajustes",
@@ -37,6 +37,7 @@ export const RECURSOS: Record<string, string> = {
   informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
   // Grupos o equipos de usuarios (CAR-251).
   grupos: "Grupos",
+  webhooks: "Eventos salientes",
   // Slack (CAR-291, ADR-093).
   slack: "Slack",
   // Historial de correos del cliente (CAR-233).

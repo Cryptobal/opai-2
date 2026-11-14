@@ -7,6 +7,8 @@ import { actividadesTareas, actividadesTimeline } from "./actividades-lectura";
 import { contactosCuentas, cuentasContactos } from "./contactos-cuentas";
 import { contactosDesvincular } from "./contactos-desvincular";
 import { contactosSetRoles, contactosVincular } from "./contactos-vinculos";
+import { camposPersonalizadosCreate, camposPersonalizadosList } from "./campos-personalizados";
+import { camposPersonalizadosUpdate } from "./campos-personalizados-editar";
 import { etiquetasAsignar, etiquetasDeEntidad, etiquetasQuitar } from "./etiquetas-asignar";
 import { etiquetasCreate, etiquetasList, etiquetasUpdate } from "./etiquetas";
 import { etiquetasDelete } from "./etiquetas-eliminar";
@@ -30,4 +32,7 @@ export const capacidadesCrm: readonly Capacidad[] = [
   etiquetasAsignar,
   etiquetasQuitar,
   etiquetasDeEntidad,
+  camposPersonalizadosList,
+  camposPersonalizadosCreate,
+  camposPersonalizadosUpdate,
 ];
