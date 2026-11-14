@@ -88,7 +88,6 @@ function Formulario(p: Props & { miembro: Miembro }) {
       >
         <div className="flex flex-col gap-5">
           {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
-          {p.miRol === "owner" ? <RestablecerMfa miembro={miembro} /> : null}
           <CampoRolUsuario
             miembro={miembro}
             valor={rolSel}
@@ -121,6 +120,8 @@ function Formulario(p: Props & { miembro: Miembro }) {
           {miembro.rol === "supervisor" && (p.miRol === "owner" || p.miRol === "admin") ? (
             <InstalacionesACargo membershipId={miembro.id} />
           ) : null}
+          {/* CAR-54: si perdió el teléfono y sus códigos; la capacidad rechaza la ficha propia. */}
+          {p.miRol === "owner" ? <RestablecerMfa miembro={miembro} /> : null}
         </div>
       </Sheet>
       <Dialog

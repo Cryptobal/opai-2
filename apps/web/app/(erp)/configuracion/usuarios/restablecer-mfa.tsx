@@ -17,13 +17,13 @@ export function RestablecerMfa({ miembro }: { miembro: Miembro }) {
   return (
     <>
       <Button variant="secondary" onClick={() => setAbierto(true)}>
-        Restablecer MFA
+        Restablecer segundo factor
       </Button>
       <Dialog
         abierto={abierto}
         onCerrar={() => setAbierto(false)}
-        titulo={`¿Restablecer MFA de ${miembro.nombre}?`}
-        descripcion="Esta acción es irreversible: elimina su segundo factor, cierra sus sesiones y le avisa por correo. Deberá configurarlo nuevamente."
+        titulo={`¿Restablecer el segundo factor de ${miembro.nombre}?`}
+        descripcion="Esta acción es irreversible: borra su app autenticadora y sus passkeys, cierra sus sesiones y le avisa por correo. Deberá configurarlo de nuevo al entrar."
         acciones={
           <>
             <Button variant="secondary" onClick={() => setAbierto(false)}>
@@ -35,7 +35,7 @@ export function RestablecerMfa({ miembro }: { miembro: Miembro }) {
               cargando={pendiente}
               disabled={pendiente}
             >
-              Restablecer MFA
+              Restablecer
             </Button>
           </>
         }

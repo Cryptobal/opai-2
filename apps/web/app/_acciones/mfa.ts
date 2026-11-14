@@ -12,6 +12,7 @@ import {
 } from "@opai/auth";
 import { destinoSeguro } from "@/app/(auth)/destino";
 import { verificarMfaDe } from "@/lib/mfa";
+import { LIMITES, permitir } from "@/lib/rate-limit";
 import { identidadActual } from "@/lib/servidor";
 import { qrSvg } from "@/lib/qr";
 import { normalizarCodigoRespaldo } from "@/lib/codigo-mfa";
@@ -107,6 +108,13 @@ export async function accionRegenerarCodigos(
   const identidad = await identidadActual();
   if (!identidad || !identidad.mfaActiva || (await verificarMfaDe(identidad)))
     return { ok: false, error: "Falta verificar el segundo factor de la sesión." };
+  // Los códigos de respaldo son de la app autenticadora; una cuenta solo con passkey no los tiene.
+  if (identidad.totpActiva !== true)
+    return { ok: false, error: "Activa la app autenticadora para tener códigos de respaldo." };
+  // Mismo límite que confirmar la identidad en Métodos de acceso: frena adivinar la contraseña.
+  const { maximo, ventanaMs } = LIMITES.confirmarIdentidad;
+  if (!(await permitir(`confirmar-identidad:${identidad.usuario.id}`, maximo, ventanaMs)))
+    return { ok: false, error: "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos." };
   const r = await regenerarCodigosRespaldo(String(form.get("password") ?? ""));
   return r.ok ? r : { ok: false, error: r.mensaje };
 }

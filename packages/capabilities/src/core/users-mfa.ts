@@ -122,6 +122,8 @@ export const usersRestablecerMfa = defineCapability({
         if (!vigente || vigente.tenantId !== ctx.tenantId || vigente.userId !== u.id) {
           throw noEncontrado("El usuario");
         }
+        // Mejor esfuerzo: corre en otra conexión (`forUser`), fuera del lock; una membresía en otra
+        // empresa creada en este instante no se ve, pero sí en la comprobación inicial.
         if (await ctx.identidad.enOtrasEmpresas(u.id, ctx.tenantId)) {
           throw prohibido(
             "Tiene acceso a otras empresas en OPAI: pídele a Plataforma que lo restablezca.",

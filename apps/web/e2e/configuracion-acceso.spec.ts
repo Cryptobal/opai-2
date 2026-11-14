@@ -64,10 +64,12 @@ test.describe("configuración · acceso", () => {
     await page.goto("/configuracion/usuarios");
     await page.getByRole("link", { name: "Restablecer MFA E2E" }).click();
     await page.waitForURL(/\?editar=/);
-    await page.getByRole("button", { name: "Restablecer MFA" }).click();
-    const dialogo = page.getByRole("dialog", { name: "¿Restablecer MFA de Restablecer MFA E2E?" });
+    await page.getByRole("button", { name: "Restablecer segundo factor" }).click();
+    const dialogo = page.getByRole("dialog", {
+      name: "¿Restablecer el segundo factor de Restablecer MFA E2E?",
+    });
     await expect(dialogo.getByText("Esta acción es irreversible")).toBeVisible();
-    await dialogo.getByRole("button", { name: "Restablecer MFA" }).click();
+    await dialogo.getByRole("button", { name: "Restablecer", exact: true }).click();
     await expect(page.getByText("Segundo factor restablecido")).toBeVisible();
   });
 });

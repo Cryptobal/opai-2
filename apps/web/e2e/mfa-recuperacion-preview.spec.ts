@@ -20,13 +20,13 @@ test.describe("@preview recuperar el segundo factor", () => {
     await capturar(page, info, "mfa-regenerar-codigos");
   });
 
-  test("el owner ve «Restablecer MFA» con su advertencia", async ({ page }, info) => {
+  test("el owner ve «Restablecer segundo factor» con su advertencia", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/usuarios");
     await page.locator('a[href*="?editar="]').first().click();
     await page.waitForURL(/\?editar=/, { timeout: 60_000 });
-    await page.getByRole("button", { name: "Restablecer MFA" }).click();
-    const dialogo = page.getByRole("dialog", { name: /^¿Restablecer MFA de / });
+    await page.getByRole("button", { name: "Restablecer segundo factor" }).click();
+    const dialogo = page.getByRole("dialog", { name: /^¿Restablecer el segundo factor de / });
     await expect(dialogo.getByText(/Esta acción es irreversible/)).toBeVisible();
     await capturar(page, info, "mfa-restablecer-dialogo");
     await dialogo.getByRole("button", { name: "Cancelar" }).click();
