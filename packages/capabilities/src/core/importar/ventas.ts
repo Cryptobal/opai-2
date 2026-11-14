@@ -1,6 +1,7 @@
 // Importador de facturas, notas de crédito y notas de débito ya emitidas (CAR-283, épica CAR-279).
 // Registra el historial en el libro de ventas sin llamar al SII, sin firmar y sin usar folios de los CAF.
 import { PERMISO_VENTAS } from "../../finanzas/ventas-comun";
+import { ajusteFinanzas } from "../../finanzas/ajuste-finanzas";
 import { resolverCuentas } from "./comun";
 import type { FilaPlan, Importador } from "./tipos";
 import { DEF_DOCUMENTOS_VENTA, type DatosDocumentoVenta, datosDocumento, TIPOS_NOTA } from "./ventas-campos";
@@ -50,12 +51,13 @@ export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
   async planificar(ctx, filas, o) {
     const cuentaDe = await resolverCuentas(ctx, filas, o.sistema);
     const folios = filas.map((f) => Number(f.datos["folio"] ?? 0)).filter((n) => Number.isInteger(n) && n > 0);
-    const [existentes, cafs] = await Promise.all([
+    const [existentes, cafs, plazo] = await Promise.all([
       ctx.db.documentoEmitido.findMany({
         where: { folio: { in: [...new Set([...folios, ...filas.map((f) => Number(f.datos["ref_folio"] ?? 0))])] } },
         select: { id: true, tipoDte: true, folio: true, cuentaId: true },
       }),
       ctx.db.dteFolio.findMany({ select: { tipoDte: true, folioHasta: true, folioActual: true } }),
+      ajusteFinanzas(ctx, "cobranza_plazo_cobro_dias"),
     ]);
     const enOpai = new Map(existentes.map((d) => [clave(d.tipoDte, d.folio ?? 0), d]));
     const vistos = new Map<string, number>();
@@ -85,6 +87,11 @@ export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
       const avisos: string[] = [];
       if (!conDesglose) avisos.push("Sin neto ni IVA: se calcularon desde el total.");
       if (supuestaCobrada) avisos.push("Sin monto cobrado: se asume cobrada entera. Escribe 0 si todavía se debe.");
+      // Sin vencimiento, la factura caería en la semana de su emisión en el flujo de caja (CAR-342): se usa el plazo de cobro.
+      if (!datos.fechaVencimiento && !TIPOS_NOTA.has(datos.tipoDte)) {
+        datos.fechaVencimiento = new Date(datos.fechaEmision.getTime() + plazo * 86_400_000);
+        avisos.push(`Sin fecha de vencimiento: se calculó a ${plazo} días de la emisión (plazo de cobro de la empresa).`);
+      }
       if (TIPOS_NOTA.has(datos.tipoDte)) {
         const kRef = datos.refTipoDte && datos.refFolio ? clave(datos.refTipoDte, datos.refFolio) : null;
         const cuentaRef = kRef ? (enOpai.get(kRef)?.cuentaId ?? cuentaDeVisto.get(kRef)) : undefined;

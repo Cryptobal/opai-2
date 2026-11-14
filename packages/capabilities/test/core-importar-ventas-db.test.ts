@@ -44,6 +44,7 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     const sim = await ventas(true);
     expect(sim.conteos).toMatchObject({ crear: 4, error: 2 });
     expect(sim.filas.find((f) => f.fila === 7)?.mensajes.join(" ")).toMatch(/se asume cobrada/);
+    expect(sim.filas.find((f) => f.fila === 3)?.mensajes.join(" ")).toMatch(/a 30 días de la emisión/);
     expect(sim.filas.find((f) => f.fila === 5)?.mensajes.join(" ")).toMatch(/cuenta|RUT/i);
     expect(sim.filas.find((f) => f.fila === 6)?.mensajes.join(" ")).toMatch(/fila 3/);
 
@@ -57,6 +58,8 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
       [61, 9101, "aceptado", "pendiente"],
     ]);
     expect(docs.every((d) => d.trackIdSii === null && d.xmlStorageKey === null)).toBe(true);
+    // CAR-342: sin vencimiento, la factura vence al plazo de cobro de la empresa (30 días por defecto); la nota no.
+    expect(docs.map((d) => d.fechaVencimiento?.toISOString().slice(0, 10) ?? null)).toEqual(["2026-10-31", "2026-11-04", "2026-11-07", null]);
     const nc = docs.find((d) => d.folio === 9101);
     expect(nc?.documentoReferenciaId).toBe(docs.find((d) => d.folio === 9002)?.id);
     expect(nc?.codigoReferencia).toBe(3);
