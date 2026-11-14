@@ -99,4 +99,18 @@ describe.skipIf(!urlPropietario)("Portal Cliente · facturas (Postgres real)", (
     const otra = await run(ctx(t.b, u.b), "portal_cliente.facturas.listar", {});
     expect(!otra.ok && otra.error.code).toBe("FORBIDDEN");
   });
+
+  it("con acceso a todas las instalaciones ve también lo de la cuenta; la empresa puede apagarlas para todos", async () => {
+    await e.admin.accesoCliente.updateMany({ where: { tenantId: t.a, cuentaId: cx }, data: { todasInstalaciones: true } });
+    const l = await run(ctx(t.a, u.x), "portal_cliente.facturas.listar", {});
+    expect(l.ok && (l.data as Lista).items.map((f) => f.folio)).toEqual([104, 103, 102, 101]);
+    const owner = mod.crearContexto({
+      tenantId: t.a, actor: { tipo: "system" }, rol: "owner", portal: "erp", portalesMembresia: ["erp"],
+      modulosActivos: ["portal_cliente", "finanzas"], medidor: { registrar: async () => undefined },
+    });
+    const set = await mod.executeCapability(owner, "core.config.set", { modulo: "portal_cliente", clave: "seccion_facturas", valor: false }, {});
+    expect(set.ok, JSON.stringify(set)).toBe(true);
+    const apagada = await run(ctx(t.a, u.x), "portal_cliente.facturas.listar", {});
+    expect(!apagada.ok && apagada.error.code).toBe("FORBIDDEN");
+  });
 });
