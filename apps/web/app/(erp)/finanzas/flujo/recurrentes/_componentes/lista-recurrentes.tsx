@@ -1,6 +1,7 @@
 import { Plus, Repeat } from "lucide-react";
 
 import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
+import { formatearFecha } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
@@ -8,6 +9,8 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import { cuando, type FilaEgreso, montoLegible, type Recurrente } from "./tipos";
 
+/** Con un cambio «desde una fecha» (CAR-413), desde cuándo rige el tramo vigente. */
+const cuandoTramo = (r: Recurrente) => (r.anteriorId ? `${cuando(r)} desde el ${formatearFecha(r.inicio)}` : cuando(r));
 const Estado = ({ r }: { r: Recurrente }) => <Badge tono={r.activa ? "success" : "neutro"}>{r.activa ? "Activo" : "Pausado"}</Badge>;
 
 /** Lista de gastos recurrentes (CAR-382): fila, monto con su unidad, frecuencia y estado. */
@@ -35,7 +38,7 @@ export function ListaRecurrentes(p: { state: EstadoPantalla; items: Recurrente[]
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate font-medium">{x.concepto}</span>
-            <span className="truncate text-sm text-fg-muted">{montoLegible(x)} · {cuando(x)}</span>
+            <span className="truncate text-sm text-fg-muted">{montoLegible(x)} · {cuandoTramo(x)}</span>
           </span>
           <Estado r={x} />
         </>
@@ -44,7 +47,7 @@ export function ListaRecurrentes(p: { state: EstadoPantalla; items: Recurrente[]
         { id: "c", etiqueta: "Concepto", render: (x) => <span className="font-medium">{x.concepto}</span> },
         { id: "f", etiqueta: "Fila del flujo", render: fila },
         { id: "m", etiqueta: "Monto por cuota", className: "t-numeric", render: montoLegible },
-        { id: "q", etiqueta: "Cuándo", render: cuando },
+        { id: "q", etiqueta: "Cuándo", render: cuandoTramo },
         { id: "e", etiqueta: "Estado", render: (x) => <Estado r={x} /> },
       ]}
     />

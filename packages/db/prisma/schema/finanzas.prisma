@@ -912,10 +912,15 @@ model FlujoRecurrente {
   nota          String?
   /// Clave del origen al importar (p. ej. «opai1:<id>»): hace idempotente la importación.
   claveOrigen   String?   @map("clave_origen")
+  /// Tramo anterior del mismo gasto (CAR-413): un cambio de fila, frecuencia o día «rige desde» una fecha cierra
+  /// el tramo anterior el día antes y crea este. Las cuotas del tramo anterior no cambian.
+  anteriorId    String?   @unique @map("anterior_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  fila FlujoFila @relation(fields: [filaId], references: [id], onDelete: Restrict)
+  fila      FlujoFila        @relation(fields: [filaId], references: [id], onDelete: Restrict)
+  anterior  FlujoRecurrente? @relation("TramoRecurrente", fields: [anteriorId], references: [id], onDelete: SetNull)
+  siguiente FlujoRecurrente? @relation("TramoRecurrente")
 
   @@unique([tenantId, claveOrigen])
   @@index([tenantId, activa])

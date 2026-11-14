@@ -40,6 +40,7 @@ export async function registrarDesdePauta(
     tenantId: string;
     tipo: string;
     motivo: string;
+    clase?: string | null;
     usuarioId: string | null;
     ahora: Date;
     dias: readonly { fecha: Date; personaId: string | null }[];
@@ -65,6 +66,7 @@ export async function registrarDesdePauta(
         desde,
         hasta,
         motivo: r.motivo,
+        clase: r.clase ?? null,
         estado: "aprobada",
         registradaPor: r.usuarioId,
         aprobadaPor: r.usuarioId,
