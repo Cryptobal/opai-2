@@ -370,6 +370,15 @@ export const AJUSTES: Record<string, Ajuste> = {
     fijas: ["grupo_id", "user_id"],
     valores: (ctx) => ({ user_id: ctx.usuario, grupo_id: id(ctx, "core.grupos_usuarios") }),
   },
+  // CAR-352: CHECK de https y de eventos no vacíos; la entrega cuelga del destino por FK compuesta.
+  "core.webhook_destinos": {
+    valores: () => ({ url: "https://ejemplo.test/hook", eventos: ["core.cuenta.creada"] }),
+  },
+  "core.webhook_entregas": {
+    dependencias: ["core.webhook_destinos"],
+    fijas: ["destino_id"],
+    valores: (ctx) => ({ estado: "pendiente", destino_id: id(ctx, "core.webhook_destinos") }),
+  },
   // CAR-359: (tenant_id, user_id) → memberships, (tenant_id, grupo_id) → grupos y
   // (tenant_id, role_id) → roles, todas compuestas.
   "core.roles_miembro": {
@@ -581,6 +590,15 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.etiqueta_asignaciones": {
     dependencias: ["core.etiquetas", "core.cuentas"],
     valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas") }),
+  },
+  // CAR-27: campos personalizados (CHECK de entidad, tipo, clave y opciones; un valor por entidad).
+  "core.campos_personalizados": {
+    fijas: ["entidad", "clave"],
+    valores: () => ({ entidad: "cuenta", clave: "rubro", etiqueta: "Rubro", tipo: "texto", opciones: [] }),
+  },
+  "core.campo_valores": {
+    dependencias: ["core.campos_personalizados", "core.cuentas"],
+    valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas"), contacto_id: null, negocio_id: null, valor: JSON.stringify("Salud") }),
   },
   // CAR-157: vocabularios cerrados en corrida y fila de registro.
   "core.importaciones": {
