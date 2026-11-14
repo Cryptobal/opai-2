@@ -14,9 +14,6 @@ import { exigirPrendasDelKit } from "./uniforme-prendas";
 /** Períodos del contrato (CAR-409): se registran aparte de la ficha laboral, como historia. */
 export { capacidadesContratoPeriodos } from "./contrato-periodos";
 
-/** Períodos del contrato (CAR-409): se registran aparte de la ficha laboral, como historia. */
-export { capacidadesContratoPeriodos } from "./contrato-periodos";
-
 export const personasLaboralVer = defineCapability({
   auditarLectura: (s) => [s.personaId],
   id: "core.personas.laboral_ver",
