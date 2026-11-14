@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, Sheet, Textarea } from "@opai/ds";
 
+import { formatearFecha } from "@opai/domain";
+
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { clp } from "./datos";
@@ -82,7 +84,7 @@ function HojaCeldaForm({ onCerrar, contexto }: { onCerrar: () => void; contexto:
       abierto
       onCerrar={onCerrar}
       titulo={ctx.fila.etiqueta}
-      descripcion={`Semana ${ctx.semana} · ${ctx.fila.seccion}`}
+      descripcion={`Planificado · semana del ${formatearFecha(ctx.semana)} · ${ctx.fila.seccion}`}
       acciones={
         <>
           <Button variant="secondary" onClick={onCerrar}>
@@ -109,7 +111,10 @@ function HojaCeldaForm({ onCerrar, contexto }: { onCerrar: () => void; contexto:
             ) : null}
           </Alerta>
         ) : null}
-        <Campo etiqueta="Monto (CLP)" htmlFor="fc-monto" error={errorMonto ?? undefined}>
+        <p className="text-sm text-fg-muted">
+          Es una proyección: cuando llegue el movimiento del banco, la semana muestra lo real.
+        </p>
+        <Campo etiqueta="Monto planificado (CLP)" htmlFor="fc-monto" error={errorMonto ?? undefined}>
           <Input id="fc-monto" value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="numeric" />
         </Campo>
         <Campo etiqueta="Nota" htmlFor="fc-nota">
