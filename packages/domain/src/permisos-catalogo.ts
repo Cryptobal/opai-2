@@ -96,6 +96,9 @@ export const PERMISOS_CORE = {
   etiquetasRead: "core:etiquetas.read",
   etiquetasManage: "core:etiquetas.manage",
   etiquetasConfig: "core:etiquetas.config",
+  // CAR-27: catálogo de campos personalizados de cuentas, contactos y negocios (crear, editar,
+  // archivar). Como el catálogo de etiquetas, es de owner y admin. Leerlo usa `core:cuentas.read`.
+  camposConfig: "core:campos.config",
   // CAR-233: bandeja «sin asignar» del historial de correos del cliente (verla y asociar a mano). Quién
   // lo tiene es DECISIÓN CARLOS: por defecto solo owner y admin, porque la bandeja muestra correos que
   // todavía no pertenecen a ninguna ficha (sin alcance que filtrar). El historial de cada ficha usa

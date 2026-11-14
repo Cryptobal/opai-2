@@ -18,6 +18,7 @@ import { ausenciaPersonaInput, personaParaAusencia } from "../../pauta/ausencias
 import { fechaIso } from "../../pauta/comun";
 import { uuidSchema } from "../esquemas";
 import { dondePuesto } from "./alcance";
+import { ausenciasClases } from "./ausencias-clases";
 
 export const personasAusenciasRegistrar = defineCapability({
   id: "core.ausencias.registrar",
@@ -145,4 +146,5 @@ export const capacidadesAusencias = [
   personasAusenciasRegistrar,
   personasAusenciasListar,
   personasAusenciasAnular,
+  ausenciasClases,
 ];
