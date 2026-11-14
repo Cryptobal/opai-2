@@ -36,10 +36,13 @@ async function caja(loc: Locator) {
 }
 
 const campanaDe = (page: Page) =>
-  page.locator("header").getByRole("button", { name: /^Notificaciones(?:, hay avisos sin leer)?$/ });
-// A 1280 el usuario está al pie de la barra lateral; en 375 y 1024, en la cabecera.
+  page
+    .locator("header")
+    .getByRole("button", { name: /^Notificaciones(?:, hay avisos sin leer)?$/ });
+// A 1280 el usuario está al pie de la barra lateral; en 1024, en la cabecera. En el teléfono del diseño
+// nuevo (CAR-335 D2c) la cuenta vive en «Yo», en la barra de abajo.
 const usuarioDe = (page: Page) =>
-  page.locator("header, nav").getByRole("button", { name: "Menú de usuario" });
+  page.locator("header, nav").getByRole("button", { name: /^(Menú de usuario|Yo)/ });
 
 test.describe("cabecera estable (CAR-12, CA1)", () => {
   test.beforeEach(() => {
