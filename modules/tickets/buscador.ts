@@ -36,18 +36,14 @@ export const buscadoresTickets: readonly Buscador[] = [
       if (!filtro) return [];
       const filas = await ctx.db.ticket.findMany({
         where: { AND: [filtro, { titulo: { contains: q, mode: "insensitive" } }] },
-        select: { id: true, titulo: true, estado: true, tipoId: true },
+        select: { id: true, titulo: true, estado: true, tipo: { select: { nombre: true } } },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: MAX,
       });
-      const tipos = filas.length
-        ? await ctx.db.tipoTicket.findMany({ where: { id: { in: [...new Set(filas.map((f) => f.tipoId))] } }, select: { id: true, nombre: true } })
-        : [];
-      const nombreTipo = new Map(tipos.map((t) => [t.id, t.nombre]));
       return filas.map((f) => ({
         id: f.id,
         titulo: f.titulo,
-        detalle: [nombreTipo.get(f.tipoId), ESTADO[f.estado] ?? f.estado].filter(Boolean).join(" · ") || null,
+        detalle: [f.tipo.nombre, ESTADO[f.estado] ?? f.estado].filter(Boolean).join(" · ") || null,
         href: `/tickets/${f.id}`,
       }));
     },
