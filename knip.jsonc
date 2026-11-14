@@ -12,6 +12,10 @@
     ".": { "entry": ["scripts/*.{ts,mjs}"] },
     // Los scripts manuales y las semillas de e2e se ejecutan por ruta (`tsx scripts/<nombre>.ts`).
     "packages/*": { "entry": ["scripts/*.ts"] },
+    // @prisma/client lo importa el cliente generado (src/generated, fuera del análisis).
+    "packages/db": { "entry": ["scripts/*.ts"], "ignoreDependencies": ["@prisma/client"] },
+    // tailwindcss se importa desde styles.css, que knip no lee.
+    "packages/ds": { "ignoreDependencies": ["tailwindcss"] },
     "modules/*": {},
     "apps/web": { "entry": ["e2e/**/*.ts", "scripts/*.ts"] },
   },
