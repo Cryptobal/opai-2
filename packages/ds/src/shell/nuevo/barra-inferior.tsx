@@ -4,6 +4,7 @@ import { Home, Menu as IconoMenu, Sparkles } from "lucide-react";
 
 import { cn } from "../../cn";
 import { Avatar } from "../../components/avatar";
+import { EVENTO_PESTANA_BARRA, HojaSobreBarra } from "../../components/hoja-sobre-barra";
 import { type ItemMenu, Menu } from "../../components/menu";
 import { Punto } from "../contador";
 import { MenuMas } from "../menu-mas";
@@ -39,10 +40,16 @@ export function BarraInferiorNueva(props: Props) {
     ...(onTema ? [{ id: "tema", etiqueta: "Cambiar entre día y noche", onSelect: onTema }] : []),
     ...(props.menuUsuario ?? []),
   ];
+  // Tocar Inicio, Menú o Yo deja la pestaña Agente (el panel del agente escucha y se cierra).
+  const otraPestana = () => window.dispatchEvent(new Event(EVENTO_PESTANA_BARRA));
   return (
     <nav
       aria-label="Principal"
       data-shell="inferior-nuevo"
+      onClickCapture={(e) => {
+        const t = e.target instanceof Element ? e.target : null;
+        if (!t?.closest("[data-pestana-agente]")) otraPestana();
+      }}
       className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface md:hidden"
     >
       <ul className="flex px-1">
@@ -60,34 +67,41 @@ export function BarraInferiorNueva(props: Props) {
         ) : null}
         {onAgente ? (
           <li className="flex-1">
-            <button type="button" onClick={onAgente} className={clase(false)}>
+            <button
+              type="button"
+              onClick={onAgente}
+              className={clase(false)}
+              data-pestana-agente=""
+            >
               <Sparkles className="size-5" aria-hidden />
               Agente
             </button>
           </li>
         ) : null}
         <li className="flex-1">
-          <MenuMas
-            items={nav.filter((i) => i.href !== inicio?.href)}
-            rutaActual={rutaActual}
-            extras={[]}
-            etiqueta="Menú"
-            {...(props.fijados ? { fijados: props.fijados } : {})}
-            {...(props.errorFijados ? { errorFijados: true } : {})}
-            {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
-            {...(props.onFijar ? { onFijar: props.onFijar } : {})}
-            {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
-            {...(props.epoca ? { epoca: props.epoca } : {})}
-            {...(props.busquedaMas ? { busqueda: props.busquedaMas } : {})}
-            {...(props.recientes ? { recientes: props.recientes } : {})}
-            {...(props.onNavegar ? { onNavegar: props.onNavegar } : {})}
-            disparador={
-              <span className={clase(!enInicio)}>
-                <IconoMenu className={cn("size-5", !enInicio && "text-accent")} aria-hidden />
-                Menú
-              </span>
-            }
-          />
+          <HojaSobreBarra.Provider value>
+            <MenuMas
+              items={nav.filter((i) => i.href !== inicio?.href)}
+              rutaActual={rutaActual}
+              extras={[]}
+              etiqueta="Menú"
+              {...(props.fijados ? { fijados: props.fijados } : {})}
+              {...(props.errorFijados ? { errorFijados: true } : {})}
+              {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
+              {...(props.onFijar ? { onFijar: props.onFijar } : {})}
+              {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
+              {...(props.epoca ? { epoca: props.epoca } : {})}
+              {...(props.busquedaMas ? { busqueda: props.busquedaMas } : {})}
+              {...(props.recientes ? { recientes: props.recientes } : {})}
+              {...(props.onNavegar ? { onNavegar: props.onNavegar } : {})}
+              disparador={
+                <span className={clase(!enInicio)}>
+                  <IconoMenu className={cn("size-5", !enInicio && "text-accent")} aria-hidden />
+                  Menú
+                </span>
+              }
+            />
+          </HojaSobreBarra.Provider>
         </li>
         {usuario && yo.length ? (
           <li className="flex-1">
