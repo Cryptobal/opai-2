@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { formatearFecha } from "@opai/domain";
 import { Button } from "@opai/ds";
 
-import { DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { claveMes, nombreMes } from "./etiquetas";
+
+// Aparte (React.lazy, ADR-037): el diálogo solo se baja al tocar «Publicar»; la ruta /pauta está al tope de JS.
+const DialogoConfirmar = lazy(() =>
+  import("@/app/_components/maestros/dialogo-confirmar").then((m) => ({
+    default: m.DialogoConfirmar,
+  })),
+);
 
 type Resumen = {
   instalacion: string;
@@ -86,17 +92,19 @@ export function PublicarPauta({ inst, anio, mes }: Props) {
         {hecho ?? (!resumen && error ? error : "")}
       </span>
       {resumen ? (
-        <DialogoConfirmar
-          confirmacion={{
-            titulo: "Publicar la pauta",
-            descripcion: descripcion(resumen, mesTexto),
-            boton: resumen.publicadaAntes ? "Publicar de nuevo" : "Publicar y avisar",
-          }}
-          pendiente={pendiente}
-          error={error}
-          onCerrar={cerrar}
-          onConfirmar={() => void confirmar()}
-        />
+        <Suspense fallback={null}>
+          <DialogoConfirmar
+            confirmacion={{
+              titulo: "Publicar la pauta",
+              descripcion: descripcion(resumen, mesTexto),
+              boton: resumen.publicadaAntes ? "Publicar de nuevo" : "Publicar y avisar",
+            }}
+            pendiente={pendiente}
+            error={error}
+            onCerrar={cerrar}
+            onConfirmar={() => void confirmar()}
+          />
+        </Suspense>
       ) : null}
     </>
   );
