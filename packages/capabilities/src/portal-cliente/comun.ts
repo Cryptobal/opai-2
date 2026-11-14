@@ -61,6 +61,7 @@ export async function instalacionesDeCuenta(ctx: Contexto, cuentaId: string) {
       cuentaId: true,
       direccionFormateada: true,
       comuna: true,
+      region: true,
     },
     orderBy: { nombre: "asc" },
   });

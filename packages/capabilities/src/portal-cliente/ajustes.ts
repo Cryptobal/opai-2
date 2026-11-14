@@ -13,4 +13,22 @@ export const ajustesPortalCliente = z.object({
     permiso: "portal_cliente:config.manage",
     control: "numero",
   }),
+  seccion_cobertura: z.boolean().default(true).meta({
+    etiqueta: "Mostrar la cobertura de turnos a los clientes",
+    ayuda:
+      "En el resumen del mes, cada instalación muestra los turnos programados, cubiertos y por cubrir (sin nombres ni costos). Cada cuenta puede ocultarla en su configuración del portal.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
+  seccion_rondas: z.boolean().default(true).meta({
+    etiqueta: "Mostrar las rondas realizadas a los clientes",
+    ayuda:
+      "En el resumen del mes, cada instalación muestra las rondas cerradas, cuántas quedaron completas y cuántas incompletas (sin nombres de los guardias). Cada cuenta puede ocultarla en su configuración del portal.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
 });

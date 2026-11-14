@@ -1,9 +1,10 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { Alerta, Badge, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/ds";
+import { Alerta, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
+import { type Cobertura, FilaSeccion, type Rondas, type Seccion } from "./fila-seccion";
 import { mesAnterior, mesSiguiente, nombreDeMes } from "./mes";
 
 export type ResumenMes = {
@@ -15,14 +16,10 @@ export type ResumenMes = {
     id: string;
     nombre: string;
     direccion: string | null;
-    secciones: { seccion: string; disponibilidad: "disponible" | "pendiente" }[];
+    secciones: Seccion[];
+    cobertura: Cobertura | null;
+    rondas: Rondas | null;
   }[];
-};
-
-const SECCION: Record<string, string> = {
-  cobertura: "Cobertura",
-  rondas: "Rondas realizadas",
-  novedades: "Novedades por gravedad",
 };
 
 /**
@@ -64,8 +61,8 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
       ) : (
         <>
           <Alerta tono="info" titulo="Datos en conexión">
-            Cobertura, rondas y novedades se irán conectando a este resumen. Mientras tanto cada
-            sección aparece como pendiente, sin cifras.
+            Las secciones se van conectando a este resumen. Las que aún no tienen datos aparecen como
+            pendientes, sin cifras.
           </Alerta>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {r.instalaciones.map((i) => (
@@ -79,10 +76,7 @@ export function ResumenDelMes({ r }: { r: ResumenMes }) {
                 <CardContent>
                   <ul className="flex flex-col">
                     {i.secciones.map((s) => (
-                      <li key={s.seccion} className="flex min-h-11 items-center justify-between gap-2 border-t border-border">
-                        <span className="t-body-sm">{SECCION[s.seccion] ?? s.seccion}</span>
-                        <Badge tono="neutro">{s.disponibilidad === "pendiente" ? "Pendiente" : "Disponible"}</Badge>
-                      </li>
+                      <FilaSeccion key={s.seccion} s={s} cobertura={i.cobertura} rondas={i.rondas} />
                     ))}
                   </ul>
                 </CardContent>
