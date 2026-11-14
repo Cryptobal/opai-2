@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE, TIPOS_AUSENCIA_BASE } from "@opai/domain";
+import { PERMISOS_CORE, prendasValidas, TIPOS_AUSENCIA_BASE } from "@opai/domain";
 
 import { defineAjustes } from "./registro";
 
@@ -67,6 +67,11 @@ export const AJUSTES_PERSONAS = defineAjustes(
     personas_prendas_uniforme: z
       .array(z.object({ nombre: z.string().trim().min(2).max(60) }))
       .max(30)
+      // Dos nombres con la misma clave («Pantalón» y «pantalon») harían que la ficha volviera en silencio al rubro.
+      .refine(
+        (xs) => prendasValidas(xs) !== null,
+        "Hay prendas repetidas (mismo nombre sin tildes ni mayúsculas).",
+      )
       .default([])
       .meta({
         etiqueta: "Prendas del uniforme",

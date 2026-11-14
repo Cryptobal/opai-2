@@ -97,6 +97,7 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
   else if (lab) {
     const { uniforme: u, jornadaDt: j, os10: o, contrato, tallas } = lab.data;
     const termino = contrato?.terminoVigente ?? null;
+    const kitTallas = tallas.filter((t) => t.enKit);
     const ultima = u?.entregas.at(0);
     agregar({
       titulo: "Uniforme",
@@ -105,7 +106,7 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
       ir: "Ir a Uniforme y tallas",
       filas: [
         // Las primeras prendas del uniforme de la empresa, de a dos (CAR-408).
-        ...[tallas.slice(0, 2), tallas.slice(2, 4)]
+        ...[kitTallas.slice(0, 2), kitTallas.slice(2, 4)]
           .filter((par) => par.length)
           .map((par) => ({
             etiqueta: par.map((t) => t.nombre).join(" · "),

@@ -23,6 +23,12 @@ export function HojaTallas({
   const kit = tallas.filter((t) => t.enKit);
   const inicial = Object.fromEntries(kit.map((t) => [t.prenda, t.talla ?? ""]));
   const [v, setV] = useState<Record<string, string>>(inicial);
+  // Al volver a abrir la hoja parte de lo guardado, no de lo que quedó escrito al cancelar.
+  const [abierta, setAbierta] = useState(hoja.abierta);
+  if (hoja.abierta !== abierta) {
+    setAbierta(hoja.abierta);
+    if (hoja.abierta) setV(inicial);
+  }
   const cambios = Object.fromEntries(
     kit
       .filter((t) => (v[t.prenda] ?? "").trim() !== (inicial[t.prenda] ?? "").trim())

@@ -39,18 +39,43 @@ CREATE POLICY tenant_isolation ON "core"."personas_tallas" AS PERMISSIVE FOR ALL
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core"."personas_tallas"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('persona_id', 'core.personas');
 
--- Copia de las tallas ya guardadas (corre como dueño de la migración; ver «Migraciones de datos después de FORCE
--- RLS»: un INSERT sin tenant fijado lo rechazaría la política si el rol no tiene BYPASSRLS, y lo reporta).
-INSERT INTO "core"."personas_tallas" ("id", "tenant_id", "persona_id", "prenda", "talla", "updated_at")
-SELECT gen_random_uuid(), u."tenant_id", u."persona_id", x.prenda, btrim(x.talla), CURRENT_TIMESTAMP
-FROM "core"."personas_uniforme" u
-CROSS JOIN LATERAL (VALUES
-  ('camisa', u."talla_camisa"), ('pantalon', u."talla_pantalon"), ('chaqueta', u."talla_chaqueta"),
-  ('calzado', u."talla_zapato"), ('polera', u."talla_polera"), ('geologo', u."talla_geologo"),
-  ('polar', u."talla_polar")
-) AS x(prenda, talla)
-WHERE x.talla IS NOT NULL AND char_length(btrim(x.talla)) BETWEEN 1 AND 20
-ON CONFLICT ("persona_id", "prenda") DO NOTHING;
+-- Copia de las tallas ya guardadas. Con FORCE RLS y un rol sin BYPASSRLS, el SELECT sobre `personas_uniforme` no ve
+-- filas y la copia quedaría en 0 sin aviso («Migraciones de datos después de FORCE RLS»): se cuenta el origen y se
+-- aborta si no coincide con lo copiado.
+DO $$
+DECLARE
+  esperadas integer;
+  copiadas integer;
+BEGIN
+  SELECT count(*) INTO esperadas
+  FROM "core"."personas_uniforme" u
+  CROSS JOIN LATERAL (VALUES
+    (u."talla_camisa"), (u."talla_pantalon"), (u."talla_chaqueta"), (u."talla_zapato"),
+    (u."talla_polera"), (u."talla_geologo"), (u."talla_polar")
+  ) AS x(talla)
+  WHERE x.talla IS NOT NULL AND char_length(btrim(x.talla)) BETWEEN 1 AND 20;
+
+  INSERT INTO "core"."personas_tallas" ("id", "tenant_id", "persona_id", "prenda", "talla", "updated_at")
+  SELECT gen_random_uuid(), u."tenant_id", u."persona_id", x.prenda, btrim(x.talla), CURRENT_TIMESTAMP
+  FROM "core"."personas_uniforme" u
+  CROSS JOIN LATERAL (VALUES
+    ('camisa', u."talla_camisa"), ('pantalon', u."talla_pantalon"), ('chaqueta', u."talla_chaqueta"),
+    ('calzado', u."talla_zapato"), ('polera', u."talla_polera"), ('geologo', u."talla_geologo"),
+    ('polar', u."talla_polar")
+  ) AS x(prenda, talla)
+  WHERE x.talla IS NOT NULL AND char_length(btrim(x.talla)) BETWEEN 1 AND 20;
+  GET DIAGNOSTICS copiadas = ROW_COUNT;
+
+  -- Sin filas visibles en el origen pero con filas reales (RLS filtrando): el rol no puede leerlas.
+  IF esperadas = 0 AND EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+      WHERE n.nspname = 'core' AND c.relname = 'personas_uniforme' AND c.reltuples > 0)
+     AND NOT (SELECT rolbypassrls OR rolsuper FROM pg_roles WHERE rolname = current_user) THEN
+    RAISE EXCEPTION 'El rol % no ve core.personas_uniforme (FORCE RLS): aplique con un rol BYPASSRLS', current_user;
+  END IF;
+  IF copiadas <> esperadas THEN
+    RAISE EXCEPTION 'Copia de tallas incompleta: % de %', copiadas, esperadas;
+  END IF;
+END $$;
 
 COMMIT;
 

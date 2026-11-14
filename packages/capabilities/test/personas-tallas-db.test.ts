@@ -123,6 +123,12 @@ describe.skipIf(omitirSuiteDb())("Personas · tallas por prenda CAR-408 (db)", (
   });
 
   it("con prendas propias de la empresa, una talla antigua queda marcada como fuera del kit", async () => {
+    const repetidas = await ejecutar(0, "core.config.set", {
+      modulo: "core",
+      clave: "personas_prendas_uniforme",
+      valor: [{ nombre: "Pantalón" }, { nombre: "pantalon" }],
+    });
+    expect(repetidas.ok).toBe(false);
     const set = await ejecutar(0, "core.config.set", {
       modulo: "core",
       clave: "personas_prendas_uniforme",
