@@ -20,7 +20,8 @@ const grupoAgente = (hay: boolean, q: string): GrupoPaleta[] =>
   hay
     ? [{ titulo: "Agente", items: [{ id: ASK + q, etiqueta: q ? `Preguntar a OPAI: «${q}»` : "Preguntar a OPAI", icono: Sparkles, href: "#" }] }]
     : [];
-const iconoGrupo = (g: string) => (g === "negocios" ? Handshake : g === "cotizaciones" ? FileText : Inbox);
+const DOCUMENTALES = new Set(["cotizaciones", "documentos", "plantillas_documento"]);
+const iconoGrupo = (g: string) => (g === "negocios" ? Handshake : DOCUMENTALES.has(g) ? FileText : Inbox);
 type Resultado = { id: string; titulo: string; detalle: string | null; href: string };
 type Busqueda = Record<"cuentas" | "instalaciones" | "personas" | "contactos", Resultado[]> & {
   otros?: { grupo: string; titulo: string; items: Resultado[] }[];

@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { enScope } from "../../autorizacion";
 import { defineCapability } from "../../define";
 import { externo } from "../../externo";
+import { buscadoresDocumentos } from "../documentos/buscadores";
 import { listarBuscadores, resultadoBusquedaSchema } from "./buscadores";
 import { dondeContacto, dondeCuenta, dondeInstalacion, dondePersona } from "./alcance";
 
@@ -19,7 +20,7 @@ export const buscar = defineCapability({
   auditarLectura: (s) => [...s.cuentas, ...s.personas, ...s.contactos, ...s.otros.flatMap((g) => g.items)].map((r) => r.id),
   id: "core.buscar",
   descripcion:
-    "Búsqueda global (paleta ⌘K y agentes): cuentas, instalaciones, personas y contactos, más lo que aportan los módulos activos (negocios, cotizaciones y solicitudes de Comercial), hasta 5 de cada uno y solo de lo que el actor puede ver.",
+    "Búsqueda global (paleta ⌘K y agentes): cuentas, instalaciones, personas y contactos, documentos y plantillas de documento, más lo que aportan los módulos activos (negocios, cotizaciones y solicitudes de Comercial), hasta 5 de cada uno y solo de lo que el actor puede ver.",
   permiso: null,
   input: z.object({ q: z.string().trim().min(2).max(120) }),
   output: z.object({
@@ -36,7 +37,9 @@ export const buscar = defineCapability({
     const puede = (p: string) => ctx.autorizar(p);
     const rut = q.replace(/[.\s]/g, "").toUpperCase();
     const vacio = Promise.resolve([]);
-    const aportes = listarBuscadores().filter((b) => ctx.modulosActivos.includes(b.modulo) && enScope(ctx, b.modulo) && puede(b.permiso));
+    // El núcleo (Documentos, CAR-407) siempre está activo; los módulos, solo si la empresa los tiene.
+    const activo = (m: string) => m === "core" || ctx.modulosActivos.includes(m);
+    const aportes = [...buscadoresDocumentos, ...listarBuscadores()].filter((b) => activo(b.modulo) && enScope(ctx, b.modulo) && puede(b.permiso));
     const [cuentas, instalaciones, personas, contactos, otros] = await Promise.all([
       puede(PERMISOS_CORE.cuentasRead)
         ? ctx.db.cuenta.findMany({
