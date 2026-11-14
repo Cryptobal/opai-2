@@ -10,13 +10,25 @@ export const puedeVerCumplimiento = (ctx: Contexto): boolean =>
   ctx.autorizar(PERMISOS_CORE.cumplimientoRead);
 
 /**
+ * Ni el documento ni sus versiones anteriores, hasta `niveles`, son de un anexo. CAR-512: la copia
+ * firmada y las versiones nuevas no heredan la relación con el anexo, que apunta al original.
+ */
+export const sinAnexo = (niveles: number): Prisma.DocumentoWhereInput => ({
+  anexos: { none: {} },
+  ...(niveles > 0 && {
+    OR: [{ reemplazaAId: null }, { reemplazaA: { is: sinAnexo(niveles - 1) } }],
+  }),
+});
+
+/**
  * Documentos de anexos de contrato (sueldos): solo con `anexos.read` o `estructuras.read_sensible`.
- * La relación con el anexo identifica también documentos generados antes de este arreglo.
+ * La relación con el anexo identifica también documentos generados antes de este arreglo, y la cadena
+ * de versiones cubre la copia firmada y hasta tres versiones posteriores.
  */
 export const filtroDocumentoAnexo = (ctx: Contexto): Prisma.DocumentoWhereInput[] =>
   ctx.autorizar(PERMISOS_CORE.anexosRead) || ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
     ? []
-    : [{ anexos: { none: {} } }];
+    : [sinAnexo(3)];
 
 /** Filtra en la misma consulta que obtiene los metadatos, también para versiones/vencimientos. */
 export const filtroDocumentoSensible = (ctx: Contexto): Prisma.DocumentoWhereInput => ({
