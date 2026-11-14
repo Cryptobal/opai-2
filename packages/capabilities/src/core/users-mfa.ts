@@ -100,18 +100,8 @@ export const usersRestablecerMfa = defineCapability({
       },
     });
     if (!u) throw noEncontrado("El usuario");
-    if (u.platformRole) {
-      throw prohibido(
-        "Es un usuario de Plataforma: solo Plataforma puede restablecer su segundo factor.",
-      );
-    }
-    if (await ctx.identidad.enOtrasEmpresas(u.id, ctx.tenantId)) {
-      throw prohibido(
-        "Tiene acceso a otras empresas en OPAI: pídele a Plataforma que lo restablezca.",
-      );
-    }
-    if (!u.twoFactorEnabled && !u.passkeyEnabled)
-      throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
+    exigirRestablecible(u);
+    if (await ctx.identidad.enOtrasEmpresas(u.id, ctx.tenantId)) throw prohibido(EN_OTRAS);
     if (dryRun) return { userId: u.id, nombre: u.name, email: u.email, sesionesCerradas: 0 };
     return restablecerYAvisar(ctx, u, "Un owner de tu empresa", {
       // Repite, ya bajo el lock de la membresía y del usuario, las condiciones que autorizaron la
@@ -124,22 +114,27 @@ export const usersRestablecerMfa = defineCapability({
         }
         // Mejor esfuerzo: corre en otra conexión (`forUser`), fuera del lock; una membresía en otra
         // empresa creada en este instante no se ve, pero sí en la comprobación inicial.
-        if (await ctx.identidad.enOtrasEmpresas(u.id, ctx.tenantId)) {
-          throw prohibido(
-            "Tiene acceso a otras empresas en OPAI: pídele a Plataforma que lo restablezca.",
-          );
-        }
+        if (await ctx.identidad.enOtrasEmpresas(u.id, ctx.tenantId)) throw prohibido(EN_OTRAS);
       },
-      reverificar: (fresco) => {
-        if (fresco.platformRole) {
-          throw prohibido(
-            "Es un usuario de Plataforma: solo Plataforma puede restablecer su segundo factor.",
-          );
-        }
-        if (!fresco.twoFactorEnabled && !fresco.passkeyEnabled) {
-          throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
-        }
-      },
+      reverificar: exigirRestablecible,
     });
   },
 });
+
+const EN_OTRAS = "Tiene acceso a otras empresas en OPAI: pídele a Plataforma que lo restablezca.";
+
+/** Lo que permite a un owner restablecer el segundo factor de otro usuario (antes y bajo el lock). */
+function exigirRestablecible(u: {
+  platformRole: string | null;
+  twoFactorEnabled: boolean | null;
+  passkeyEnabled: boolean | null;
+}) {
+  if (u.platformRole) {
+    throw prohibido(
+      "Es un usuario de Plataforma: solo Plataforma puede restablecer su segundo factor.",
+    );
+  }
+  if (!u.twoFactorEnabled && !u.passkeyEnabled) {
+    throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
+  }
+}

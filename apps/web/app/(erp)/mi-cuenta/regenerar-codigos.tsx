@@ -11,22 +11,7 @@ export function RegenerarCodigos() {
   );
   // Cerrado muestra solo el botón: así no se confunde con «Contraseña» de más arriba.
   const [abierto, setAbierto] = useState(false);
-  const foco = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    if (estado?.ok) foco.current?.focus();
-  }, [estado]);
-  if (estado?.ok)
-    return (
-      <div className="flex flex-col gap-3">
-        <h3 ref={foco} tabIndex={-1} className="t-label text-fg">
-          Nuevos códigos de respaldo
-        </h3>
-        <Alerta tono="warning" titulo="Guarda tus códigos de respaldo">
-          Guárdalos ahora. No los verás de nuevo. Los códigos anteriores dejaron de funcionar.
-        </Alerta>
-        <CodigosRespaldo codigos={estado.codigos} />
-      </div>
-    );
+  if (estado?.ok) return <CodigosNuevos codigos={estado.codigos} />;
   if (!abierto)
     return (
       <div>
@@ -64,5 +49,21 @@ export function RegenerarCodigos() {
         </Button>
       </div>
     </form>
+  );
+}
+
+function CodigosNuevos({ codigos }: { codigos: string[] }) {
+  const foco = useRef<HTMLHeadingElement>(null);
+  useEffect(() => foco.current?.focus(), []);
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 ref={foco} tabIndex={-1} className="t-label text-fg">
+        Nuevos códigos de respaldo
+      </h3>
+      <Alerta tono="warning" titulo="Guarda tus códigos de respaldo">
+        Guárdalos ahora. No los verás de nuevo. Los códigos anteriores dejaron de funcionar.
+      </Alerta>
+      <CodigosRespaldo codigos={codigos} />
+    </div>
   );
 }
