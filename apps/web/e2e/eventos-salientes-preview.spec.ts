@@ -18,7 +18,8 @@ test.describe("@preview eventos salientes", () => {
     await capturar(page, info, "eventos-salientes-lista");
 
     await page.goto("/configuracion/agentes/eventos?crear=1");
-    const url = page.getByLabel("Dirección");
+    // Por rol: «Dirección» también aparece en el texto de algunos eventos de la lista.
+    const url = page.getByRole("textbox", { name: "Dirección", exact: true });
     await expect(url).toBeVisible({ timeout: 60_000 });
     // Dirección única por corrida: preview-e2e corre varios tamaños en paralelo y cada uno borra el suyo.
     const direccion = `https://hooks.qa-e2e.test/opai-${info.project.name}-${Date.now()}`;
