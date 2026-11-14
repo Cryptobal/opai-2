@@ -66,10 +66,14 @@ describe("menú de usuario sin atajo de diseño (CAR-335 D6c)", () => {
 });
 
 describe("marco que se monta: una sola regla para el layout y las páginas", () => {
-  it("en el ERP con acceso es siempre el nuevo (CAR-335 D6c); fuera del ERP, el clásico", async () => {
+  it("con acceso, el ERP y los portales de oficina usan el diseño nuevo; terreno sigue (CAR-335 D6)", async () => {
     const { marcoResuelto } = await import("@/lib/marco");
     expect(marcoResuelto("erp", true)).toBe("nuevo");
     expect(marcoResuelto("erp", false)).toBe("clasico");
-    expect(marcoResuelto("supervisor", true)).toBe("clasico");
+    expect(marcoResuelto("supervisor", true)).toBe("nuevo");
+    expect(marcoResuelto("cliente", true)).toBe("nuevo");
+    expect(marcoResuelto("terreno", true)).toBe("clasico");
+    expect(marcoResuelto("trabajador", true)).toBe("clasico");
+    expect(marcoResuelto("platform", false)).toBe("clasico");
   });
 });
