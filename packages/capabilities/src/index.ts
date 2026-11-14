@@ -1,5 +1,6 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
+export { avisarAlCelular } from "./core/push-avisar";
 export {
   consumidorAvisoPrueba,
   consumidorAvisoPruebaEmpresa,

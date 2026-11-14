@@ -2,7 +2,7 @@ import type { ConAprobable, EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, HechoPlataforma, TenantTx, VerificacionAuditoria } from "@opai/db";
 
 import type { EmpresaPlataforma } from "./plataforma-empresa";
-import type { Almacenamiento, Mailer } from "@opai/integrations";
+import type { Almacenamiento, EmisorPush, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
 import type { Idempotencia } from "./idempotencia";
@@ -63,6 +63,8 @@ export type Servicios = {
   almacenamiento: Almacenamiento;
   /** URL pública de la app, para enlaces en correos ("https://test.opai.cl"). */
   urlBase: string;
+  /** Web Push sin contenido (CAR-356 PR 4a); `null` sin claves VAPID: el aviso queda solo en la campana. */
+  push?: EmisorPush | null;
 };
 
 /**

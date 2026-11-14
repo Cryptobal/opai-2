@@ -28,3 +28,12 @@
    - el aviso único a quien tiene usuario;
    - el listado;
    - el aislamiento por tenant y por alcance.
+
+## PR 4a · base del aviso al celular (13-nov-2026)
+
+- **Decisión técnica:** Web Push **sin contenido**. El navegador entrega un endpoint de su servicio de push (Google, Mozilla, Apple); OPAI le manda un POST vacío firmado con VAPID (JWT ES256 por WebCrypto, sin SDK, ADR-031). El celular muestra un texto fijo y abre el portal, donde está el detalle. Así ningún dato personal sale a terceros (Ley 21.719) y no hace falta cifrar contenido.
+- **Datos:** `core.suscripciones_push` (tenant, usuario, endpoint único por empresa, dispositivo, último aviso). RLS, FORCE y `tenant_isolation`. Migración aditiva `20261221140000_core_suscripciones_push`.
+- **Capacidades:** `core.push.suscribir` y `core.push.quitar`, solo personas (el dispositivo es de quien tiene la sesión), con vista previa, sobre el usuario del actor. En `paridad-sin-pantalla.ts` hasta el PR 4b.
+- **Envío:** `avisarAlCelular(ctx, usuarios, modulo)` después del aviso en la campana; nunca lanza; borra suscripciones 404/410; mide `push.aviso` en `core.consumos`. Sin claves VAPID en el entorno no hace nada.
+- **Claves:** `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (base64url) y `VAPID_SUBJECT` (`mailto:`), en Vercel. Las genera y guarda Carlos (`npx web-push generate-vapid-keys` en su máquina); ningún agente las ve.
+- **PR 4b:** service worker (`push` muestra «Tienes un aviso nuevo en OPAI», `notificationclick` abre `/trabajador`), interruptor en el portal del trabajador que pide permiso en contexto (ADR-044.4), clave pública al cliente, novedad y `@preview`.
