@@ -5,13 +5,13 @@ import { mensajePush } from "@/app/(trabajador)/trabajador/_componentes/suscripc
 
 // Brief 17: la web reconoce que está dentro de la app nativa por su user agent.
 describe("esAppNativa", () => {
-  it("reconoce las dos variantes", () => {
+  it("reconoce la app en Android y en iPhone", () => {
     expect(esAppNativa("Mozilla/5.0 (Linux; Android 15) Chrome/140 Mobile OPAIApp/opai")).toBe(
       true,
     );
-    expect(
-      esAppNativa("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0) Mobile/15E148 OPAIApp/terreno"),
-    ).toBe(true);
+    expect(esAppNativa("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0) Mobile/15E148 OPAIApp/opai")).toBe(
+      true,
+    );
   });
 
   it("un navegador normal no es la app", () => {

@@ -7,7 +7,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "sincronizar": "cap sync",
-    "apk": "cap sync android && cd \"$(node scripts/carpeta.mjs)/android\" && ./gradlew assembleDebug"
+    "apk": "cap sync android && cd nativo/android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@capacitor/android": "8.6.2",
