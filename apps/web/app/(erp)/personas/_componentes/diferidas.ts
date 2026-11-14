@@ -29,8 +29,3 @@ export const HojaLaboral = hojaDiferida(
   ],
   () => import("./hoja-laboral").then((m) => m.HojaLaboral),
 );
-
-// Períodos del contrato (CAR-409): registrar y anular comparten módulo (una sola carga diferida).
-export const HojasPeriodoContrato = hojaDiferida(["registrar-periodo", "anular-periodo"], () =>
-  import("./hojas-periodo-contrato").then((m) => m.HojasPeriodoContrato),
-);
