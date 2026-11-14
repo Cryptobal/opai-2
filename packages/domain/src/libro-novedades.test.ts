@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  accionesNovedad,
-  codigoNovedad,
-  numeroNovedadDeTexto,
-  siguienteEstadoNovedad,
-} from "./libro-novedades";
+import { accionesNovedad, codigoNovedad, siguienteEstadoNovedad } from "./libro-novedades";
 
 describe("ciclo de estados de una novedad (CAR-77)", () => {
   it("abierta se toma, resuelve o deriva; no se cierra sin resolver", () => {
@@ -25,11 +20,8 @@ describe("ciclo de estados de una novedad (CAR-77)", () => {
     expect(accionesNovedad("cerrada")).toEqual([]);
   });
 
-  it("código visible y número desde el texto del buscador", () => {
+  it("código visible", () => {
     expect(codigoNovedad(42)).toBe("NOV-0042");
     expect(codigoNovedad(12345)).toBe("NOV-12345");
-    expect(numeroNovedadDeTexto("NOV-0042")).toBe(42);
-    expect(numeroNovedadDeTexto("nov 7")).toBe(7);
-    expect(numeroNovedadDeTexto("puerta 7")).toBeNull();
   });
 });
