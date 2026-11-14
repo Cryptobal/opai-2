@@ -71,10 +71,9 @@ export const ventasListar = defineCapability({
       where,
       include: { lineas: { orderBy: { orden: "asc" } } },
       orderBy: ordenVentas(input.orden),
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     return { items: await vistasDeVentas(ctx, items), siguiente };
   },
 });
