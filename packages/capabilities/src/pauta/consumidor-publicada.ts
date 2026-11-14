@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { avisarAlCelular } from "../core/push-avisar";
 import { defineConsumidor } from "../eventos/consumidores";
 
 const payloadSchema = z.object({
@@ -37,7 +38,8 @@ export function listaDias(dias: readonly string[]): string {
 
 /**
  * Aviso en la campana del portal a cada titular con usuario cuando se publica la pauta (CAR-356). Idempotente por
- * evento y usuario (el despacho reintenta). Sin WhatsApp (decisión de Carlos del 13-nov-2026); el push va aparte.
+ * evento y usuario (el despacho reintenta). Sin WhatsApp (decisión de Carlos del 13-nov-2026). Además toca el celular
+ * de quien activó los avisos en su dispositivo (sin contenido, PR 4a).
  */
 export const consumidorPautaPublicada = defineConsumidor({
   id: "pauta.publicada.avisar",
@@ -56,6 +58,7 @@ export const consumidorPautaPublicada = defineConsumidor({
       where: { id: { in: personas.map((x) => x.personaId) }, usuarioId: { not: null } },
       select: { id: true, usuarioId: true },
     });
+    const avisados: string[] = [];
     for (const persona of conUsuario) {
       const usuarioId = persona.usuarioId;
       const dias = personas.find((x) => x.personaId === persona.id)?.dias ?? [];
@@ -71,6 +74,9 @@ export const consumidorPautaPublicada = defineConsumidor({
           enlace: "/trabajador",
         },
       });
+      avisados.push(usuarioId);
     }
+    // Celular (PR 4a): solo a quien recibió el aviso ahora; un reintento del despacho no vuelve a tocar.
+    await avisarAlCelular(ctx, avisados, "pauta", "pauta");
   },
 });
