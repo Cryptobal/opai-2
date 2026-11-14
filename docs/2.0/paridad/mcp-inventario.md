@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 779 pares pantalla→capacidad · 700 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 780 pares pantalla→capacidad · 701 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -937,6 +937,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.personas_terreno.listar` | Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3). |
 | `core.personas.pago_aprobar_cambio` | Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01). |
 | `core.personas.pago_rechazar_cambio` | Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01). |
+| `core.push.quitar` | Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a). |
+| `core.push.suscribir` | Solo personas: la suscripción de Web Push es del navegador de quien tiene la sesión; un agente no tiene celular (CAR-356 PR 4a). |
 | `core.remuneraciones.confirmar` | Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034). |
 | `core.remuneraciones.confirmar_mutual` | Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034). |
 | `core.roles.archive` | Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034). |
@@ -1029,6 +1031,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.metodos_acceso.quitar` | `app/_acciones` | no | reservada a personas |
 | `core.personas.pago_aprobar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.pago_rechazar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `core.push.quitar` | sin pantalla todavía · CAR-356 · desde 2026-11-13 | no | reservada a personas |
+| `core.push.suscribir` | sin pantalla todavía · CAR-356 · desde 2026-11-13 | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
 | `core.remuneraciones.confirmar_mutual` | `/configuracion/remuneraciones` | no | reservada a personas |
 | `core.roles.archive` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
