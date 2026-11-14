@@ -306,6 +306,8 @@ decisiones atribuidas a Carlos.
 
 **Adenda del 14-nov-2026 (CAR-359, sesión Núcleo, modo noche; referente GitHub: roles que se suman y roles a equipos).** Un miembro puede tener, además de su rol (base o personalizado), **roles personalizados adicionales** (`core.roles_miembro`), y un grupo de CAR-251 puede recibir roles personalizados (`core.roles_grupo`) que heredan sus miembros mientras estén en él. Los permisos se **suman** (`Acceso.permisosAdicionales`); una excepción que deniega sigue ganando; un rol o grupo archivado no concede nada; `platform:*` nunca sale de ahí. El rol base sigue siendo uno por miembro, porque fija la jerarquía y el alcance del supervisor. **Decisión nocturna: los roles adicionales y de grupo son solo roles personalizados de la empresa, no roles base (revisar).** Primera parte: modelo, migración aditiva sin datos y cálculo en el acceso de sesión, API key y MCP. Siguen la asignación por pantalla, API y MCP (con «nadie concede más de lo que tiene») y la vista del origen de cada permiso.
 
+**Decisión de Carlos del 14-nov-2026, 22:04 CLT (CAR-359, chat de la sesión Núcleo, respuesta «Si»).** Quien recibe acceso a un módulo por un rol adicional o por un grupo cuenta como licencia de ese módulo en el cobro mensual (CAR-323, «usuario con licencia»), igual que si el permiso viniera de su rol principal. Un rol o grupo archivado no cuenta.
+
 ---
 
 ## ADR-023 · Cumplimiento DT desde el diseño (Res. Ex. N°38/2024)
