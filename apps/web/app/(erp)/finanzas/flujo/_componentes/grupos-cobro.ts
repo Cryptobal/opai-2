@@ -14,7 +14,9 @@ const SIN_INSTALACION = "sin";
 
 type Grupo = { id: string; etiqueta: string; total: number; instalaciones: Map<string, { etiqueta: string; total: number }> };
 
-const deCobro = (c: CeldaFlujo) => c.filaId === FILA_COBROS_ESPERADOS && c.cliente;
+const SIN_CLIENTE = { cuentaId: "sin", cuenta: "Sin cliente", instalacionId: null, instalacion: null };
+/** Cliente del cobro; los cobros sin cliente resuelto van a «Sin cliente» para que las hijas sumen lo mismo que la fila. */
+const deCobro = (c: CeldaFlujo) => (c.filaId === FILA_COBROS_ESPERADOS ? (c.cliente ?? SIN_CLIENTE) : null);
 
 function agrupar(p: Planilla): Grupo[] {
   const grupos = new Map<string, Grupo>();
@@ -39,7 +41,7 @@ export const esGrupoCobro = (filaId: string) => filaId.startsWith(CLIENTE) || fi
 export const filaBase = (filaId: string) => (esGrupoCobro(filaId) ? FILA_COBROS_ESPERADOS : filaId);
 
 /** ¿Hay cobros con cliente para abrir la fila «Cobros esperados»? */
-export const hayGruposCobro = (p: Planilla) => p.celdas.some((c) => !!deCobro(c));
+export const hayGruposCobro = (p: Planilla) => p.celdas.some((c) => c.filaId === FILA_COBROS_ESPERADOS && !!c.cliente);
 
 /** Filas de cliente e instalación que van bajo «Cobros esperados», según qué filas están abiertas. */
 export function filasGrupoCobro(p: Planilla, abiertas: ReadonlySet<string>): FilaPlanilla[] {
@@ -55,7 +57,9 @@ export function filasGrupoCobro(p: Planilla, abiertas: ReadonlySet<string>): Fil
       ...(conDetalle ? { plegable: { abierta: abiertas.has(idCli) }, sub: `${g.instalaciones.size} instalaciones` } : {}),
     });
     if (!conDetalle || !abiertas.has(idCli)) continue;
-    const insts = [...g.instalaciones.entries()].sort((a, b) => b[1].total - a[1].total);
+    const insts = [...g.instalaciones.entries()].sort(
+      (a, b) => b[1].total - a[1].total || a[1].etiqueta.localeCompare(b[1].etiqueta, "es"),
+    );
     for (const [instId, inst] of insts) {
       out.push({ id: `${INSTALACION}${g.id}:${instId}`, etiqueta: inst.etiqueta, nivel: 2 });
     }

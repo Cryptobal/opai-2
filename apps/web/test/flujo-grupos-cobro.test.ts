@@ -82,6 +82,13 @@ describe("ingresos agrupados por cliente (CAR-456)", () => {
     expect(armarPlanilla(p).celdaEditable(cli, S)).toBe(false);
   });
 
+  it("un cobro sin cliente resuelto va a «Sin cliente»: las hijas suman lo mismo que la fila", () => {
+    const mixta = planilla([cobro(1, S, 300_000, clienteB), cobro(2, S, 20_000, undefined)]);
+    const a = armarPlanilla(mixta, { abiertas: new Set([FILA_COBROS_ESPERADOS]) });
+    expect(a.filas.filter((f) => f.nivel === 1).map((f) => f.etiqueta)).toEqual(["Bodegas del Sur", "Sin cliente"]);
+    expect(a.celda("cobro-cli:sin", S)?.texto).toContain("20.000");
+  });
+
   it("sin cobros con cliente la fila no se abre", () => {
     const sinCliente = planilla([cobro(9, S, 10_000, undefined)]);
     expect(armarPlanilla(sinCliente).filas[0]?.plegable).toBeUndefined();

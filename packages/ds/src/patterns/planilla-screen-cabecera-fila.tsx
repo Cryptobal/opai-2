@@ -30,7 +30,8 @@ export function CabeceraFila({ fila, onAlternar }: { fila: FilaPlanilla; onAlter
             aria-expanded={plegable.abierta}
             aria-label={`${plegable.abierta ? "Ocultar" : "Ver"} detalle de ${fila.etiqueta}`}
             onClick={() => onAlternar?.(fila.id)}
-            className="-ml-1 flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-sm text-fg-subtle hover:bg-fill hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
+            // Área de toque de 44 px (iPad usa esta vista); el ícono sigue chico.
+            className="-my-2 -ml-2 flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm text-fg-subtle hover:bg-fill hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
           >
             <ChevronRight
               aria-hidden
