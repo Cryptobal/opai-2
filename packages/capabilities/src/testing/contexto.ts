@@ -30,6 +30,8 @@ export type OpcionesPrueba = {
   rol?: Rol | null;
   /** Rol personalizado del tenant (null = rol base). ADR-022. */
   permisosRol?: readonly string[] | null;
+  /** Permisos de roles adicionales y de grupo (CAR-359). */
+  permisosAdicionales?: readonly string[] | null;
   /** Excepciones de permiso por usuario. ADR-022. */
   excepciones?: readonly Excepcion[] | null;
   usuario?: UsuarioContexto | null;
@@ -137,6 +139,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
             rol: o.permisosRol != null ? null : rol,
             permisosRol: o.permisosRol ?? null,
             excepciones: o.excepciones ?? null,
+            permisosAdicionales: o.permisosAdicionales ?? null,
           },
           usuario,
           o.claveApi ?? null,
