@@ -855,6 +855,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/negocios/export/route.ts` | Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27). |
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
 | `app/api/rendiciones/lotes/[id]/nomina/route.ts` | Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208). |
+| `app/api/rendiciones/reporte/excel/route.ts` | Descarga de rendiciones.reporte.excel (Excel) con sesión; mismo permiso y datos que la herramienta MCP rendiciones_reporte_excel (CAR-179). |
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
 | `app/api/terreno/contexto/route.ts` | Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |

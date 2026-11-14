@@ -28,6 +28,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27).",
   "app/api/rendiciones/lotes/[id]/nomina/route.ts":
     "Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208).",
+  "app/api/rendiciones/reporte/excel/route.ts":
+    "Descarga de rendiciones.reporte.excel (Excel) con sesión; mismo permiso y datos que la herramienta MCP rendiciones_reporte_excel (CAR-179).",
   "app/api/marca/[slug]/[asset]/route.ts":
     "URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP.",
   "app/api/existe/route.ts":

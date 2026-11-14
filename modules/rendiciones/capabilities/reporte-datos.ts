@@ -9,7 +9,10 @@ const ZONA = "America/Santiago";
 /** Más filas que esto en un período no se suman en línea: se pide acortarlo (nunca se trunca en silencio). */
 export const MAX_FILAS_REPORTE = 20_000;
 
-const fechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato aaaa-mm-dd.");
+const fechaSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato aaaa-mm-dd.")
+  .refine((d) => !Number.isNaN(Date.parse(`${d}T00:00:00Z`)) && new Date(`${d}T00:00:00Z`).toISOString().slice(0, 10) === d, { message: "Esa fecha no existe." });
 
 export const periodoSchema = z
   .object({

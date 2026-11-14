@@ -78,6 +78,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · reporte (db)", () => {
     expect(await como(u.viewer, "viewer", t.a)("rendiciones.reporte.get", { periodo })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(await como(u.ana, "gerente", t.a)("rendiciones.reporte.get", { periodo: { desde: "2026-10-31", hasta: "2026-10-01" } })).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
     expect(await como(u.ana, "gerente", t.a)("rendiciones.reporte.get", { periodo: { desde: "2025-01-01", hasta: "2026-10-31" } })).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
+    expect(await como(u.ana, "gerente", t.a)("rendiciones.reporte.get", { periodo: { desde: "2026-02-01", hasta: "2026-02-31" } })).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
     expect(await como(u.duenoB, "owner", t.b)("rendiciones.reporte.get", { periodo })).toMatchObject({ ok: true, data: { cantidad: 1, totalClp: 55_000 } });
   });
 
