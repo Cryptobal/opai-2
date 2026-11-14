@@ -5,7 +5,7 @@
  */
 export const COOKIE_ANCHO_MENU = "opai_menu_ancho";
 const MIN = 200;
-const MAX = 360;
+const MAX = 330;
 
 export function anchoMenuDeCookie(valor: string | undefined): number | undefined {
   if (!valor || !/^\d{3}$/.test(valor)) return undefined;

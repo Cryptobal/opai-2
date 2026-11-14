@@ -2151,6 +2151,15 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 - El color por empresa usa el perfil de marca del núcleo (ADR-028); no se agregan colores fijos de Gard.
 - `DISENO.md` §3c lo deja como regla.
 
+**Adenda (14-nov-2026, Carlos, chat de la Sesión Diseño, 10:57): menú lateral como Linear (CAR-442).** En escritorio con mouse o trackpad, el menú lateral se comporta igual que el de Linear:
+
+- se cambia de ancho arrastrando su borde (200 a 330 px);
+- se esconde del todo, sin riel, al arrastrarlo a la izquierda o con la tecla «[»;
+- se asoma sobre la página al pasar el mouse por el botón «Mostrar el menú» (arriba a la izquierda) o por el borde izquierdo de la ventana;
+- su botón lo deja fijo otra vez.
+
+En pantallas táctiles se mantiene el riel de íconos del prototipo. Registro: `docs/2.0/estado/diseno/CAR-442.md`.
+
 
 ## ADR-110 · El ingreso y la salida de una persona son listas de pasos con responsable (CAR-355, 12-nov-2026)
 

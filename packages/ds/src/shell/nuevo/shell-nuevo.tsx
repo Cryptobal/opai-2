@@ -5,6 +5,7 @@ import { type CSSProperties, type PointerEvent, useCallback, useEffect, useState
 import { AppShell, type AppShellProps } from "../app-shell";
 import { LinkPorDefecto } from "../types";
 import { ANCHO_BASE, AsaMenu, anchoValido } from "./asa-menu";
+import { PlegadoLinear, useAtajoMenu } from "./plegado-linear";
 import { useCierreAsomado } from "./use-cierre-asomado";
 import { BandaConexion } from "./banda-conexion";
 import { BarraInferiorNueva } from "./barra-inferior";
@@ -63,6 +64,15 @@ export function ShellNuevo({
     setAsomado(false);
     onPlegado?.(valor);
   };
+  const alternar = useCallback(() => {
+    setAnimar(true);
+    setAsomado(false);
+    setPlegado((antes) => {
+      onPlegado?.(!antes);
+      return !antes;
+    });
+  }, [onPlegado]);
+  useAtajoMenu(alternar);
   const cambiarAncho = (valor: number) => {
     setAncho(valor);
     onAncho?.(valor);
@@ -101,9 +111,12 @@ export function ShellNuevo({
       style={{ "--ancho-menu": `${ancho}px` } as CSSProperties}
       className="flex"
     >
-      {plegado ? null : (
+      {plegado ? (
+        <PlegadoLinear onAsomar={() => setAsomado(true)} onFijar={() => cambiar(false)} />
+      ) : (
         <AsaMenu ancho={ancho} onAncho={cambiarAncho} onPlegar={() => cambiar(true)} />
       )}
+      {asomado ? <div data-shell="velo-menu" aria-hidden className="bg-scrim" /> : null}
       <RielNuevo
         items={props.nav}
         rutaActual={props.rutaActual}

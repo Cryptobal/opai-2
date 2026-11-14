@@ -6,7 +6,7 @@ import { ANCHO_BASE, ANCHO_MAX, ANCHO_MIN, alSoltar, anchoValido } from "./asa-m
 import { ShellNuevo } from "./shell-nuevo";
 
 describe("ancho del menú del diseño nuevo (CAR-442)", () => {
-  it("el ancho queda entre 200 y 360 px", () => {
+  it("el ancho queda entre 200 y 330 px", () => {
     expect(anchoValido(100)).toBe(ANCHO_MIN);
     expect(anchoValido(999)).toBe(ANCHO_MAX);
     expect(anchoValido(281.4)).toBe(281);

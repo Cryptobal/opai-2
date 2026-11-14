@@ -2,8 +2,15 @@
 id: menu-lateral-ancho
 fecha: 2026-11-14
 modulo: core
-titulo: El menú lateral se ajusta a tu medida
+titulo: El menú lateral funciona como en Linear
 car: CAR-442
 ruta: /
 ---
-En el computador puedes **arrastrar el borde derecho del menú lateral** para hacerlo más ancho o más angosto, y OPAI recuerda la medida en ese navegador. Con doble clic en el borde vuelve a su ancho normal. Si lo arrastras hasta la izquierda, el menú se esconde y quedan solo los íconos: al pasar el mouse por ellos el menú se asoma, y con el botón de arriba lo dejas fijo otra vez. Ahora el menú entra y sale con un movimiento suave. Además, el menú de tu cuenta (tu nombre, abajo a la izquierda) también lleva a **Configuración**, junto a Novedades y Cerrar sesión.
+En el computador, el menú lateral ahora se maneja como en Linear:
+
+- **Ancho a tu medida:** arrastra su borde derecho para hacerlo más ancho o más angosto. OPAI recuerda la medida en ese navegador, y con doble clic en el borde vuelve al ancho normal.
+- **Esconderlo:** arrástralo hasta la izquierda o presiona la tecla **[**. El menú desaparece del todo y deja la pantalla completa para tu trabajo.
+- **Volver a verlo:** pasa el mouse por el botón de arriba a la izquierda, o por el borde izquierdo de la pantalla, y el menú aparece encima de la página. Con su botón «Dejar el menú fijo», o con **[**, queda fijo otra vez.
+- **Configuración más a mano:** el menú de tu cuenta (tu nombre, abajo a la izquierda) también lleva a Configuración, junto a Novedades y Cerrar sesión.
+
+En el iPad y en pantallas táctiles no cambia: el menú escondido deja los íconos de las áreas.

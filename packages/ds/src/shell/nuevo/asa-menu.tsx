@@ -5,7 +5,7 @@ import { type KeyboardEvent, type PointerEvent, useRef } from "react";
 /** Ancho del menú lateral del diseño nuevo (CAR-442): base, mínimo y máximo, en píxeles. */
 export const ANCHO_BASE = 248;
 export const ANCHO_MIN = 200;
-export const ANCHO_MAX = 360;
+export const ANCHO_MAX = 330;
 /** Soltado más a la izquierda que esto, el menú se pliega (como en Linear). */
 export const UMBRAL_PLEGAR = 140;
 const PASO_TECLADO = 16;
@@ -39,7 +39,7 @@ type Props = {
 
 /**
  * Borde del menú lateral fijo, en escritorio (CAR-442, referente Linear): arrastrarlo cambia el ancho
- * entre 200 y 360 px; soltarlo muy a la izquierda pliega el menú y deja el riel. Mientras se arrastra,
+ * entre 200 y 330 px (como Linear); soltarlo muy a la izquierda pliega el menú. Mientras se arrastra,
  * el ancho cambia directo en la variable CSS, sin pintar de nuevo el shell. Doble clic vuelve al ancho
  * base. Solo con mouse o trackpad (`pointer: fine`): en pantallas táctiles no hay borde que tomar.
  */

@@ -7,17 +7,17 @@ import { anchoMenuDeCookie, COOKIE_ANCHO_MENU, cookieAnchoMenu } from "@/lib/men
 vi.mock("@/app/_acciones/auth", () => ({ accionSalir: () => undefined }));
 
 describe("ancho del menú del diseño nuevo (CAR-442)", () => {
-  it("solo acepta un ancho entre 200 y 360 px", () => {
+  it("solo acepta un ancho entre 200 y 330 px", () => {
     expect(anchoMenuDeCookie("280")).toBe(280);
     expect(anchoMenuDeCookie("200")).toBe(200);
-    expect(anchoMenuDeCookie("360")).toBe(360);
-    for (const malo of [undefined, "", "199", "361", "abc", "2800", "28.5"])
+    expect(anchoMenuDeCookie("330")).toBe(330);
+    for (const malo of [undefined, "", "199", "331", "abc", "2800", "28.5"])
       expect(anchoMenuDeCookie(malo)).toBeUndefined();
   });
 
   it("guarda el ancho redondeado y dentro de los límites, por un año", () => {
     expect(cookieAnchoMenu(281.6)).toContain(`${COOKIE_ANCHO_MENU}=282; Path=/; Max-Age=31536000`);
-    expect(cookieAnchoMenu(900)).toContain(`${COOKIE_ANCHO_MENU}=360;`);
+    expect(cookieAnchoMenu(900)).toContain(`${COOKIE_ANCHO_MENU}=330;`);
     expect(cookieAnchoMenu(10)).toContain(`${COOKIE_ANCHO_MENU}=200;`);
   });
 });

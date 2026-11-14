@@ -52,8 +52,14 @@ test.describe("@preview menú lateral: ancho y cuenta", () => {
       await page.mouse.up();
       // Lejos del riel, para que el menú no quede asomado bajo el mouse en la captura.
       await page.mouse.move(anchoVentana(page) - 40, 500);
-      await expect(page.getByRole("button", { name: "Dejar el menú fijo" })).toBeVisible();
+      // Como en Linear: sin riel; queda «Mostrar el menú» arriba a la izquierda.
+      await expect(page.getByRole("button", { name: "Mostrar el menú" })).toBeVisible();
+      await expect(page.locator("nav[data-riel-nuevo]")).toBeHidden();
       await captura(page, "menu-lateral-plegado", info);
+      // Al pasar el mouse por el botón se asoma el menú sobre la página.
+      await page.getByRole("button", { name: "Mostrar el menú" }).hover();
+      await expect(page.getByRole("button", { name: "Dejar el menú fijo" })).toBeVisible();
+      await captura(page, "menu-lateral-asomado", info);
       expect(errores).toEqual([]);
     } finally {
       await page.context().addCookies([
