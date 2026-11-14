@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, type Page } from "@playwright/test";
 
 import { E2E_PASSWORD, entrar } from "./sesion";
 
@@ -86,9 +86,47 @@ async function calentarConSesion(base: string) {
       .goto("/negocios?nuevo=1", { timeout: 120_000 })
       .then(() => page.getByRole("dialog").first().waitFor({ timeout: 120_000 }))
       .catch(() => undefined);
+    await calentarComercial(page);
   } catch {
     // Si no entra, que lo diga la prueba que lo necesite.
   } finally {
     await navegador.close();
   }
+}
+
+/**
+ * Comercial: la actividad del negocio carga su compositor aparte y la hoja «Editar etapa» del embudo
+ * es diferida. Si su primera compilación cae dentro de la prueba, la hidratación agota los 30 s en
+ * iPad y la prueba pasa recién en el reintento (actividad-tareas-car162, comercial-tablero). Solo se
+ * abren: no se guarda nada.
+ */
+async function calentarComercial(page: Page) {
+  const negocio = await page
+    .goto("/negocios?vista=lista", { timeout: 120_000 })
+    .then(() =>
+      page
+        .getByRole("region", { name: "Lista de negocios" })
+        .locator('a[href^="/negocios/"]')
+        .first()
+        .getAttribute("href", { timeout: 60_000 }),
+    )
+    .catch(() => null);
+  if (negocio) {
+    await page
+      .goto(`${negocio}/actividad`, { timeout: 120_000 })
+      .then(() =>
+        page.getByRole("region", { name: "Registrar actividad" }).waitFor({ timeout: 120_000 }),
+      )
+      .catch(() => undefined);
+  }
+  await page
+    .goto("/configuracion/modulo/comercial?seccion=embudo", { timeout: 120_000 })
+    .then(() =>
+      page
+        .getByRole("listitem", { name: "Calificado" })
+        .getByRole("button", { name: "Editar" })
+        .click({ timeout: 60_000 }),
+    )
+    .then(() => page.getByRole("dialog").first().waitFor({ timeout: 120_000 }))
+    .catch(() => undefined);
 }
