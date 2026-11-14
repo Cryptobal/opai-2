@@ -38,8 +38,19 @@ export async function emparejarTerreno(erp: Page, terreno: Page): Promise<string
     : null;
 }
 
-/** Entra al portal del trabajador con un PIN temporal de la primera persona con PIN posible. */
+/**
+ * Entra al portal del trabajador con un PIN temporal de la primera persona con PIN posible. Los dos
+ * anchos corren en paralelo sobre la misma persona: si el otro ancho le cambió el PIN entremedio, se
+ * reintenta una vez después de una pausa.
+ */
 export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<string | null> {
+  const nota = await intentarTrabajador(erp, trabajador);
+  if (!nota?.startsWith("no entró")) return nota;
+  await trabajador.waitForTimeout(20_000);
+  return intentarTrabajador(erp, trabajador);
+}
+
+async function intentarTrabajador(erp: Page, trabajador: Page): Promise<string | null> {
   conLimite(erp, trabajador);
   // La persona ficticia de `auditoria-datos.spec.ts` (con RUT y vínculo); si no está, la primera.
   const re = /^\/personas\/[0-9a-f-]{36}$/;
