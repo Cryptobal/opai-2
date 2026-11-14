@@ -31,6 +31,34 @@ export const recifradoresInventarioNucleo: Readonly<Record<string, Recifrador>> 
       recifrar,
     );
   },
+  "personas_prevision.tipo_pension": async (tx, recifrar) => {
+    const filas = await tx.personaPrevision.findMany({
+      where: { tipoPension: { not: null } },
+      select: { id: true, tipoPension: true },
+    });
+    return recifrarStringColumna(
+      filas.map((f) => ({ id: f.id, valor: f.tipoPension })),
+      (id, valor) =>
+        tx.personaPrevision
+          .update({ where: { id }, data: { tipoPension: valor } })
+          .then(() => undefined),
+      recifrar,
+    );
+  },
+  "personas_prevision.discapacidad_invalidez": async (tx, recifrar) => {
+    const filas = await tx.personaPrevision.findMany({
+      where: { discapacidadInvalidez: { not: null } },
+      select: { id: true, discapacidadInvalidez: true },
+    });
+    return recifrarStringColumna(
+      filas.map((f) => ({ id: f.id, valor: f.discapacidadInvalidez })),
+      (id, valor) =>
+        tx.personaPrevision
+          .update({ where: { id }, data: { discapacidadInvalidez: valor } })
+          .then(() => undefined),
+      recifrar,
+    );
+  },
   "personas_pago.numero_cuenta": async (tx, recifrar) => {
     const filas = await tx.personaPago.findMany({
       where: { numeroCuenta: { not: null } },
@@ -72,5 +100,4 @@ export const recifradoresInventarioNucleo: Readonly<Record<string, Recifrador>> 
       recifrar,
     );
   },
-
 };

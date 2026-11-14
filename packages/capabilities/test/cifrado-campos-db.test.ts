@@ -8,7 +8,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
-import { crearCifradoDeCampos, kidDe, recifrarValor } from "../src/core/cumplimiento/cifrado-campos";
+import {
+  crearCifradoDeCampos,
+  kidDe,
+  recifrarValor,
+} from "../src/core/cumplimiento/cifrado-campos";
 import type * as ModuloCapacidades from "../src";
 
 const generarDekPrueba = () => randomBytes(32);
@@ -78,7 +82,9 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
 
   it("solo cifra lo que el inventario declara sensible (el RUT queda como está)", async () => {
     const c = crearCifradoDeCampos(ctx(tA), INVENTARIO);
-    await expect(c.cifrar("personas", "rut", "11111111-1")).rejects.toThrow(/no está declarado como sensible/);
+    await expect(c.cifrar("personas", "rut", "11111111-1")).rejects.toThrow(
+      /no está declarado como sensible/,
+    );
     await expect(c.cifrar("fichas_salud", "otro", "x")).rejects.toThrow(/no está declarado/);
     // El inventario real del Núcleo hoy no declara campos sensibles: nada se cifra por accidente.
     const real = mod.cifradoDeCampos(ctx(tA));
@@ -90,29 +96,50 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     const g = await a.cifrar("fichas_salud", "diagnostico", "dato reservado");
     await expect(a.descifrar("fichas_salud", "huella", g)).rejects.toThrow(/No se pudo descifrar/);
     const b = crearCifradoDeCampos(ctx(tB), INVENTARIO);
-    await expect(b.descifrar("fichas_salud", "diagnostico", g)).rejects.toThrow(/No se pudo descifrar/);
+    await expect(b.descifrar("fichas_salud", "diagnostico", g)).rejects.toThrow(
+      /No se pudo descifrar/,
+    );
     const alterado = `${g.slice(0, -2)}${g.endsWith("AA") ? "BB" : "AA"}`;
-    await expect(a.descifrar("fichas_salud", "diagnostico", alterado)).rejects.toThrow(/No se pudo descifrar/);
-    await expect(a.descifrar("fichas_salud", "diagnostico", "en claro")).rejects.toThrow(/no está cifrado/);
+    await expect(a.descifrar("fichas_salud", "diagnostico", alterado)).rejects.toThrow(
+      /No se pudo descifrar/,
+    );
+    await expect(a.descifrar("fichas_salud", "diagnostico", "en claro")).rejects.toThrow(
+      /no está cifrado/,
+    );
     await expect(a.cifrar("fichas_salud", "diagnostico", g)).rejects.toThrow(/ya está cifrado/);
   });
 
   it("sigue legible tras rotar la KEK: la rotación recifra la DEK, no los datos", async () => {
     const dato = "Dato sensible de la persona";
-    const g = await crearCifradoDeCampos(ctx(tA), INVENTARIO).cifrar("fichas_salud", "huella", dato);
+    const g = await crearCifradoDeCampos(ctx(tA), INVENTARIO).cifrar(
+      "fichas_salud",
+      "huella",
+      dato,
+    );
     const v2 = randomBytes(32).toString("base64");
     // Lo que hace `rotar-kek` para este tenant (sin lanzar el script, que recorre TODOS los tenants
     // y chocaría con otros tests de base en paralelo): reenvolver la DEK con la KEK nueva.
     const fila = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
-    const dek = descifrar(Buffer.from(v1, "base64"), { cifrado: fila.dekCifrada, iv: fila.iv, tag: fila.tag });
+    const dek = descifrar(Buffer.from(v1, "base64"), {
+      cifrado: fila.dekCifrada,
+      iv: fila.iv,
+      tag: fila.tag,
+    });
     const nueva = cifrar(Buffer.from(v2, "base64"), dek);
     await e.admin.claveTenant.update({
       where: { tenantId: tA },
-      data: { dekCifrada: Uint8Array.from(nueva.cifrado), iv: Uint8Array.from(nueva.iv), tag: Uint8Array.from(nueva.tag), kekVersion: 100 },
+      data: {
+        dekCifrada: Uint8Array.from(nueva.cifrado),
+        iv: Uint8Array.from(nueva.iv),
+        tag: Uint8Array.from(nueva.tag),
+        kekVersion: 100,
+      },
     });
     Object.assign(process.env, { OPAI_SECRETS_KEY: v2, OPAI_SECRETS_KEY_VERSION: "100" });
     delete process.env["OPAI_SECRETS_KEY_ANTERIOR"];
-    expect(await crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "huella", g)).toBe(dato);
+    expect(
+      await crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "huella", g),
+    ).toBe(dato);
   }, 60_000);
 
   it("el valor lleva el kid de la DEK y cifra también la cadena vacía (§21)", async () => {
@@ -125,23 +152,47 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
   it("rotar la DEK recifra secretos y campos sensibles en una transacción (§22)", async () => {
     const { rotarDek } = await import("../src/core/cumplimiento/rotar-dek");
     const { leerSecreto } = await import("../src/integraciones/secretos");
-    const r = await mod.executeCapability(ctx(tA), "core.integraciones.set_secreto", { proveedor: "resend", nombre: "api_key", valor: "re_rotar_123" });
+    const r = await mod.executeCapability(ctx(tA), "core.integraciones.set_secreto", {
+      proveedor: "resend",
+      nombre: "api_key",
+      valor: "re_rotar_123",
+    });
     expect(r.ok ? null : r.error).toBeNull();
-    const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } })).integracionId;
-    const g = await crearCifradoDeCampos(ctx(tA), INVENTARIO).cifrar("fichas_salud", "diagnostico", "dato a rotar");
+    const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } }))
+      .integracionId;
+    const g = await crearCifradoDeCampos(ctx(tA), INVENTARIO).cifrar(
+      "fichas_salud",
+      "diagnostico",
+      "dato a rotar",
+    );
     const rot = await rotarDek(ctx(tA));
     expect(rot.secretos).toBe(1);
     expect(rot.kidAnterior).not.toBe(rot.kidNuevo);
     // Queda constancia en el outbox, en la misma transacción que la rotación.
-    expect(await e.admin.evento.count({ where: { tenantId: tA, tipo: "core.cumplimiento.dek_rotada" } })).toBe(1);
+    expect(
+      await e.admin.evento.count({ where: { tenantId: tA, tipo: "core.cumplimiento.dek_rotada" } }),
+    ).toBe(1);
     expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
     // Lo cifrado con la DEK anterior ya no se lee (mismo error genérico): hay que recifrarlo al rotar.
-    await expect(crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "diagnostico", g)).rejects.toThrow(/No se pudo descifrar/);
+    await expect(
+      crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "diagnostico", g),
+    ).rejects.toThrow(/No se pudo descifrar/);
     const fila = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
-    const nueva = descifrar(Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64"), { cifrado: fila.dekCifrada, iv: fila.iv, tag: fila.tag });
+    const nueva = descifrar(Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64"), {
+      cifrado: fila.dekCifrada,
+      iv: fila.iv,
+      tag: fila.tag,
+    });
     expect(kidDe(nueva)).toBe(rot.kidNuevo);
     // Sin la DEK vieja ya no se puede recifrar: por eso la rotación recifra dentro de su transacción.
-    expect(() => recifrarValor({ tenantId: tA, tabla: "fichas_salud", campo: "diagnostico" }, g, nueva, generarDekPrueba())).toThrow();
+    expect(() =>
+      recifrarValor(
+        { tenantId: tA, tabla: "fichas_salud", campo: "diagnostico" },
+        g,
+        nueva,
+        generarDekPrueba(),
+      ),
+    ).toThrow();
   }, 60_000);
 
   it("rotar DEK recifra plan ISAPRE y cuentas bancarias del núcleo (PR2)", async () => {
@@ -167,7 +218,13 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     const prevAct = await mod.executeCapability(
       ctxP,
       "core.personas.prevision_actualizar",
-      { id: persona.id, planIsapre: "plan sensible rotar dek", afp: "modelo" },
+      {
+        id: persona.id,
+        planIsapre: "plan sensible rotar dek",
+        afp: "modelo",
+        tipoPension: "vejez",
+        discapacidadInvalidez: "no",
+      },
       { dryRun: false },
     );
     expect(prevAct.ok, `core.personas.prevision_actualizar: ${JSON.stringify(prevAct)}`).toBe(true);
@@ -182,21 +239,32 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
       },
       { dryRun: false },
     );
-    expect(pagoSol.ok, `core.personas.pago_solicitar_cambio: ${JSON.stringify(pagoSol)}`).toBe(true);
-    const prev = await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } });
+    expect(pagoSol.ok, `core.personas.pago_solicitar_cambio: ${JSON.stringify(pagoSol)}`).toBe(
+      true,
+    );
+    const prev = await e.admin.personaPrevision.findUniqueOrThrow({
+      where: { personaId: persona.id },
+    });
     const kidViejo = prev.planIsapre?.match(/^enc:v2:([\w-]+):/)?.[1];
     expect(kidViejo).toBeTruthy();
     const { rotarDek } = await import("../src/core/cumplimiento/rotar-dek");
     const rot = await rotarDek(ctx(tA));
     expect(rot.campos).toBeGreaterThanOrEqual(2);
     const c = mod.cifradoDeCampos(ctxP);
-    expect(await c.descifrar("personas_prevision", "plan_isapre", (await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } })).planIsapre!)).toBe(
-      "plan sensible rotar dek",
-    );
-    const solicitud = await e.admin.personaPagoSolicitud.findFirstOrThrow({ where: { personaId: persona.id } });
-    expect(await c.descifrar("personas_pago_solicitudes", "numero_cuenta", solicitud.numeroCuenta!)).toBe(
-      "123456789012",
-    );
+    expect(
+      await c.descifrar(
+        "personas_prevision",
+        "plan_isapre",
+        (await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } }))
+          .planIsapre!,
+      ),
+    ).toBe("plan sensible rotar dek");
+    const solicitud = await e.admin.personaPagoSolicitud.findFirstOrThrow({
+      where: { personaId: persona.id },
+    });
+    expect(
+      await c.descifrar("personas_pago_solicitudes", "numero_cuenta", solicitud.numeroCuenta!),
+    ).toBe("123456789012");
     const fila = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
     const dek = descifrar(Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64"), {
       cifrado: fila.dekCifrada,
@@ -205,23 +273,44 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     });
     expect(kidDe(dek)).toBe(rot.kidNuevo);
     expect(kidViejo).not.toBe(rot.kidNuevo);
-    const planNuevo = (await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } }))
-      .planIsapre!;
+    const planNuevo = (
+      await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } })
+    ).planIsapre!;
     expect(planNuevo).toContain(`enc:v2:${rot.kidNuevo}:`);
     expect(planNuevo).not.toContain(`enc:v2:${kidViejo}:`);
+    const prevRot = await e.admin.personaPrevision.findUniqueOrThrow({
+      where: { personaId: persona.id },
+    });
+    expect(prevRot.tipoPension).toContain(`enc:v2:${rot.kidNuevo}:`);
+    expect(prevRot.discapacidadInvalidez).toContain(`enc:v2:${rot.kidNuevo}:`);
+    expect(await c.descifrar("personas_prevision", "tipo_pension", prevRot.tipoPension!)).toBe(
+      "vejez",
+    );
+    expect(
+      await c.descifrar(
+        "personas_prevision",
+        "discapacidad_invalidez",
+        prevRot.discapacidadInvalidez!,
+      ),
+    ).toBe("no");
   }, 60_000);
 
   it("rotar la KEK y rotar la DEK cruzadas no guardan la DEK vieja (rev. 5689206639)", async () => {
     const { rotarDek } = await import("../src/core/cumplimiento/rotar-dek");
     const { reenvolverFila } = await import("../scripts/reenvolver-dek");
     const { leerSecreto } = await import("../src/integraciones/secretos");
-    const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } })).integracionId;
+    const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } }))
+      .integracionId;
     const kekA = () => Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64");
     const verA = () => Number(process.env["OPAI_SECRETS_KEY_VERSION"]);
     const usar = (kek: Buffer, version: number) =>
-      Object.assign(process.env, { OPAI_SECRETS_KEY: kek.toString("base64"), OPAI_SECRETS_KEY_VERSION: String(version) });
+      Object.assign(process.env, {
+        OPAI_SECRETS_KEY: kek.toString("base64"),
+        OPAI_SECRETS_KEY_VERSION: String(version),
+      });
     const fila = () => e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
-    const dekCon = (kek: Buffer, f: Awaited<ReturnType<typeof fila>>) => kidDe(descifrar(kek, { cifrado: f.dekCifrada, iv: f.iv, tag: f.tag }));
+    const dekCon = (kek: Buffer, f: Awaited<ReturnType<typeof fila>>) =>
+      kidDe(descifrar(kek, { cifrado: f.dekCifrada, iv: f.iv, tag: f.tag }));
 
     // 1) Intercalado: `rotar-kek` lista la fila, `rotar-dek` reemplaza la DEK y recién entonces se reenvuelve.
     let anterior = kekA();
@@ -230,7 +319,9 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     const { id } = await fila();
     await rotarDek(ctx(tA));
     const dekRotada = dekCon(anterior, await fila());
-    expect(await reenvolverFila(e.admin, id, { actual: nueva, anterior, version: version + 1 })).toBe(true);
+    expect(
+      await reenvolverFila(e.admin, id, { actual: nueva, anterior, version: version + 1 }),
+    ).toBe(true);
     expect(dekCon(nueva, await fila())).toBe(dekRotada); // la DEK nueva, no la que se listó
     usar(nueva, version + 1);
     expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
@@ -243,11 +334,14 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     let tomado: () => void = () => undefined;
     const enEspera = new Promise<void>((r) => (soltar = r));
     const bloqueado = new Promise<void>((r) => (tomado = r));
-    const bloqueo = e.admin.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE id = ${id}::uuid FOR UPDATE`;
-      tomado();
-      await enEspera;
-    }, { timeout: 30_000 });
+    const bloqueo = e.admin.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE id = ${id}::uuid FOR UPDATE`;
+        tomado();
+        await enEspera;
+      },
+      { timeout: 30_000 },
+    );
     await bloqueado;
     const carrera = Promise.allSettled([
       rotarDek(ctx(tA)),
@@ -270,7 +364,12 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     nueva = randomBytes(32);
     const envolver = (dek: Buffer) => {
       const c = cifrar(anterior, dek);
-      return { dekCifrada: Uint8Array.from(c.cifrado), iv: Uint8Array.from(c.iv), tag: Uint8Array.from(c.tag), kekVersion: version };
+      return {
+        dekCifrada: Uint8Array.from(c.cifrado),
+        iv: Uint8Array.from(c.iv),
+        tag: Uint8Array.from(c.tag),
+        kekVersion: version,
+      };
     };
     const filaB =
       (await e.admin.claveTenant.findUnique({ where: { tenantId: tB } })) ??
@@ -281,14 +380,21 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     let tomadoB: () => void = () => undefined;
     const enEsperaB = new Promise<void>((r) => (soltarB = r));
     const bloqueadoB = new Promise<void>((r) => (tomadoB = r));
-    const rotando = e.admin.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE id = ${filaB.id}::uuid FOR UPDATE`;
-      tomadoB();
-      await enEsperaB;
-      await tx.claveTenant.update({ where: { id: filaB.id }, data: envolver(dekNueva) });
-    }, { timeout: 30_000 });
+    const rotando = e.admin.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE id = ${filaB.id}::uuid FOR UPDATE`;
+        tomadoB();
+        await enEsperaB;
+        await tx.claveTenant.update({ where: { id: filaB.id }, data: envolver(dekNueva) });
+      },
+      { timeout: 30_000 },
+    );
     await bloqueadoB;
-    const reenvuelta = reenvolverFila(e.admin, filaB.id, { actual: nueva, anterior, version: version + 1 });
+    const reenvuelta = reenvolverFila(e.admin, filaB.id, {
+      actual: nueva,
+      anterior,
+      version: version + 1,
+    });
     await new Promise((r) => setTimeout(r, 300));
     soltarB();
     await rotando;
