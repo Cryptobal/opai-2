@@ -10,7 +10,7 @@ export const FICHAS = [
   { base: ["cuentas"], coleccion: "cuentas", fijos: ["nueva"] },
   { base: ["instalaciones"], coleccion: "instalaciones", fijos: ["nueva"] },
   { base: ["cargos"], coleccion: "cargos", fijos: ["nuevo", "nueva"] },
-  { base: ["configuracion", "agentes"], coleccion: "agentes", fijos: ["conectar"] },
+  { base: ["configuracion", "agentes"], coleccion: "agentes", fijos: ["conectar", "eventos"] },
   { base: ["supervisor", "instalaciones"], coleccion: "terreno-instalaciones", fijos: [] },
   { base: ["supervisor", "personas"], coleccion: "terreno-personas", fijos: [] },
 ] as const;

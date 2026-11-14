@@ -1,0 +1,22 @@
+// Configuración de knip para el check `simplicidad` (ADR-115): exportaciones, archivos y dependencias sin uso.
+// Un falso positivo se resuelve aquí, con un comentario que diga por qué; nunca subiendo `simplicidad-base.json`.
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // docs/: exports de Claude Design (referencia visual, no código). public/: service workers que carga el navegador.
+  "ignore": ["docs/**", "apps/web/public/**", "**/src/generated/**"],
+  // Binarios del sistema que usan los e2e y las pruebas de certificados; no son dependencias de npm.
+  "ignoreBinaries": ["psql", "openssl", "playwright"],
+  // server-only lo provee Next. jscpd lo ejecuta scripts/simplicidad/herramientas.ts con `pnpm exec`.
+  "ignoreDependencies": ["server-only", "jscpd"],
+  "workspaces": {
+    ".": { "entry": ["scripts/*.{ts,mjs}"] },
+    // Los scripts manuales y las semillas de e2e se ejecutan por ruta (`tsx scripts/<nombre>.ts`).
+    "packages/*": { "entry": ["scripts/*.ts"] },
+    // @prisma/client lo importa el cliente generado (src/generated, fuera del análisis).
+    "packages/db": { "entry": ["scripts/*.ts"], "ignoreDependencies": ["@prisma/client"] },
+    // tailwindcss se importa desde styles.css, que knip no lee.
+    "packages/ds": { "ignoreDependencies": ["tailwindcss"] },
+    "modules/*": {},
+    "apps/web": { "entry": ["e2e/**/*.ts", "scripts/*.ts"] },
+  },
+}
