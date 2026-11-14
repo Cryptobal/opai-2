@@ -28,9 +28,14 @@ export function VistaF29({ f }: { f: BorradorF29 }) {
         <KpiTile etiqueta="Total a pagar" valor={pesos(f.totalAPagar)} />
         <KpiTile etiqueta="Se paga el" valor={fecha(f.fechaPago)} />
       </div>
+      {f.remanenteAnterior > 0 ? (
+        <Alerta tono="info" titulo="Remanente de meses anteriores">
+          {`Se descuentan ${pesos(f.remanenteAnterior)} de crédito a favor de meses anteriores (sin reajuste por UTM).`}
+        </Alerta>
+      ) : null}
       {f.remanenteMes > 0 ? (
         <Alerta tono="info" titulo="Este mes queda IVA a favor">
-          {`El crédito supera al débito en ${pesos(f.remanenteMes)}. Ese remanente se usa en los meses siguientes; este borrador todavía no lo arrastra.`}
+          {`Quedan ${pesos(f.remanenteMes)} de crédito a favor, que se descuentan en el F29 del mes siguiente.`}
         </Alerta>
       ) : null}
       {f.ivaPostergado ? (
