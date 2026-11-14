@@ -50,6 +50,7 @@ export const TIPOS_ENCOLABLES_OFFLINE = [
   "rondas.inicio",
   "rondas.cierre",
   "rondas.novedad",
+  "rondas.emergencia",
   "acceso.entrada",
   "acceso.salida",
 ] as const;

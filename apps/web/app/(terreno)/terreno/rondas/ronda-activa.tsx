@@ -15,6 +15,11 @@ const MarcarPunto = dynamic(
   { ssr: false },
 );
 
+const BotonEmergencia = dynamic(
+  () => import("../_componentes/boton-emergencia").then((m) => m.BotonEmergencia),
+  { ssr: false },
+);
+
 const ReportarNovedad = dynamic(
   () => import("../_componentes/reportar-novedad").then((m) => m.ReportarNovedad),
   { ssr: false },
@@ -64,6 +69,7 @@ export function RondaActiva({
   return (
     <section aria-label="Ronda en curso" className="flex flex-col gap-3">
       <h2 className="t-heading text-fg">{plantilla.nombre}</h2>
+      <BotonEmergencia personaId={personaId} ejecucionClave={clave} />
       <p className="text-sm text-fg-muted">
         {confirmados} de {plantilla.puntos.length} puntos confirmados por el servidor
       </p>

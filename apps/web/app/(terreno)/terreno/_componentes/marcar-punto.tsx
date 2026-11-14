@@ -6,23 +6,10 @@ import { useState } from "react";
 import { Alerta, Button, Campo, Input } from "@opai/ds";
 
 import { encolarHecho } from "@/lib/terreno/cola";
+import { leerGps } from "@/lib/terreno/gps";
 
 // El lector de la cámara se carga solo si el navegador lo soporta, para no pesar en el JS inicial.
 const EscanearQr = dynamic(() => import("./escanear-qr").then((m) => m.EscanearQr), { ssr: false });
-
-type Lectura = { lat: number; lng: number; precisionM: number };
-
-/** Una lectura GPS puntual; sin permiso o sin señal devuelve null: el GPS suma, nunca bloquea (R2). */
-function leerGps(): Promise<Lectura | null> {
-  return new Promise((ok) => {
-    if (!("geolocation" in navigator)) return ok(null);
-    navigator.geolocation.getCurrentPosition(
-      (p) => ok({ lat: p.coords.latitude, lng: p.coords.longitude, precisionM: p.coords.accuracy }),
-      () => ok(null),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 5000 },
-    );
-  });
-}
 
 /**
  * «Marcar punto» (CAR-78 · E3b): el guardia lee el código del QR del punto y la marca queda en el teléfono.

@@ -2,6 +2,7 @@ import type { Contexto } from "../../types";
 import { resolverAcceso } from "./acceso-ingesta";
 import type { Equipo, Hecho, Tiempo } from "./acceso-tipos";
 import type { MotivoRechazo } from "./hechos-evaluar";
+import { resolverEmergencias } from "./rondas-emergencia";
 import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
 import { resolverNovedades } from "./rondas-novedades";
@@ -35,10 +36,12 @@ export async function prepararProyecciones(
   const acceso = await resolverAcceso(ctx, equipo, hechos, t);
   const rondas = await resolverEjecuciones(ctx, equipo, hechos, t);
   const novedades = await resolverNovedades(ctx, equipo, hechos, t);
+  const emergencias = resolverEmergencias(ctx, equipo, hechos, t);
   const rechazos = new Map<string, MotivoRechazo>([
     ...acceso.rechazos,
     ...rondas.rechazos,
     ...novedades.rechazos,
+    ...emergencias.rechazos,
   ]);
   for (const [clave, m] of marcas) if ("motivo" in m) rechazos.set(clave, m.motivo);
   return {
@@ -83,6 +86,7 @@ export async function prepararProyecciones(
       await emitirAnomalias(tx, ctx.eventos, equipo.instalacionId, creadas);
       await rondas.cerrar(tx, aceptadas, ids);
       await novedades.escribir(tx, aceptadas, ids);
+      await emergencias.emitir(tx, aceptadas, ids);
       await acceso.escribir(tx, aceptadas);
     },
   };

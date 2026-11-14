@@ -5,6 +5,7 @@ export const ETIQUETA_TIPO: Record<string, string> = {
   "rondas.inicio": "Inicio de una ronda",
   "rondas.cierre": "Cierre de una ronda",
   "rondas.novedad": "Novedad de ronda",
+  "rondas.emergencia": "Alerta de emergencia",
   "acceso.entrada": "Entrada a la instalación",
   "acceso.salida": "Salida de la instalación",
 };

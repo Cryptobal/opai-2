@@ -2,6 +2,15 @@ import { z } from "zod";
 
 import { esTipoSoloEnLinea } from "@opai/domain";
 
+/** Lectura GPS puntual del teléfono (marca de punto, emergencia). */
+const lecturaGps = z
+  .object({
+    lat: z.number().min(-90).max(90),
+    lng: z.number().min(-180).max(180),
+    precisionM: z.number().min(0).max(100_000),
+  })
+  .strict();
+
 /**
  * Lista blanca de hechos que un equipo de terreno puede encolar sin conexión (CAR-78 · B3). Un tipo que no
  * está aquí se rechaza y el resto del lote sigue. Cada módulo de terreno (Rondas, Asistencia, Novedades,
@@ -20,14 +29,7 @@ export const TIPOS_HECHO_TERRENO = {
       puntoId: z.string().uuid().optional(),
       /** Clave del hecho `rondas.inicio` de la ronda a la que pertenece la marca (opcional). */
       ejecucionClave: z.string().uuid().optional(),
-      lectura: z
-        .object({
-          lat: z.number().min(-90).max(90),
-          lng: z.number().min(-180).max(180),
-          precisionM: z.number().min(0).max(100_000),
-        })
-        .strict()
-        .optional(),
+      lectura: lecturaGps.optional(),
     })
     .strict()
     .refine((p) => p.codigo !== undefined || p.puntoId !== undefined),
@@ -50,6 +52,13 @@ export const TIPOS_HECHO_TERRENO = {
       /** Clave del hecho `rondas.inicio` de la ronda en curso (opcional). */
       ejecucionClave: z.string().uuid().optional(),
     })
+    .strict(),
+  /**
+   * Botón «Emergencia» de la ronda (CAR-501, decisión 21 de Rondas: siempre avisa). Con la ubicación si el teléfono
+   * la tiene; la señal `rondas.emergencia` va a la Central. No marca presencia laboral.
+   */
+  "rondas.emergencia": z
+    .object({ ejecucionClave: z.string().uuid().optional(), lectura: lecturaGps.optional() })
     .strict(),
   /**
    * Entrada a una instalación (portería, CAR-78 · E4b-2). Del documento solo se guardan su huella y su máscara:
