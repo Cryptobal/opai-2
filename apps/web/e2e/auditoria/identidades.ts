@@ -50,6 +50,12 @@ export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<str
     (await primerEnlace(erp, "/personas", re));
   if (!ficha) return "sin personas en qa-e2e";
   await erp.goto(`${ficha}/laboral`);
+  // La cabecera de la ficha llega por streaming: se espera el RUT antes de leer el texto (CAR-401).
+  await erp
+    .getByText(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)
+    .first()
+    .waitFor({ timeout: 20_000 })
+    .catch(() => undefined);
   const rut = (await erp.locator("body").innerText()).match(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)?.[0];
   const asignar = erp.getByRole("button", { name: /^(Asignar|Cambiar) PIN$/ });
   if (!rut) return "la persona no muestra RUT en Laboral";
