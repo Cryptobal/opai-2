@@ -32,7 +32,6 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 
 ### Pendiente
 
-- PR 2: valores por ficha (`core.campos_personalizados.valores.get/set`) con permiso y alcance de cada entidad.
 - PR 3: pantallas de configuración y de ficha, y tokens de documentos.
 
 ## PR fusionar cuentas (F1) · rama `brief/car-27-fusionar`
