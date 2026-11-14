@@ -84,12 +84,23 @@ export async function cargarBase(ctx: Contexto, desde: string, hasta: string) {
 
 export type Base = Awaited<ReturnType<typeof cargarBase>>;
 
+/** Días del mes con vínculo vigente (mes completo = 30, como la liquidación). */
+function diasDelVinculo(ini: string, fin: string, inicio: string, termino: string | null): number {
+  const desde = inicio > ini ? inicio : ini;
+  const hasta = termino && termino < fin ? termino : fin;
+  if (desde === ini && hasta === fin) return 30;
+  return Math.min(30, Math.round((Date.parse(hasta) - Date.parse(desde)) / 86_400_000) + 1);
+}
+
+export type PersonaDelMes = PersonaACostear & { personaId: string; diasVinculo: number };
+
 /** Quienes tienen vínculo en el mes, con su capa al último día; `ocultas` y `sinCapa` sin identificar. */
 export function personasDelMes(base: Base, m: MesCalendario, ocultas: Map<string, boolean>) {
   const [ini, fin] = [inicioMes(m), finMes(m)];
   const prevision = new Map(base.previsiones.map((p) => [p.personaId, p]));
   const anticipo = new Map(base.anticipos.map((a) => [a.personaId, a]));
-  const personas: PersonaACostear[] = [];
+  const personas: PersonaDelMes[] = [];
+  const omitidas: { personaId: string; motivo: "sin_capa" | "oculta" }[] = [];
   let sinCapa = 0;
   let ocultasMes = 0;
   const vistas = new Set<string>();
@@ -102,12 +113,14 @@ export function personasDelMes(base: Base, m: MesCalendario, ocultas: Map<string
       puesto: de("puesto", v.puestoId),
       instalacion: de("instalacion", v.instalacionId),
     });
-    if (!r.estructura) { sinCapa += 1; continue; }
-    if (ocultas.get(r.estructura.id)) { ocultasMes += 1; continue; }
+    if (!r.estructura) { sinCapa += 1; omitidas.push({ personaId: v.personaId, motivo: "sin_capa" }); continue; }
+    if (ocultas.get(r.estructura.id)) { ocultasMes += 1; omitidas.push({ personaId: v.personaId, motivo: "oculta" }); continue; }
     const p = prevision.get(v.personaId);
     const a = anticipo.get(v.personaId);
     const planUf = p?.planUf ? Math.round(Number(p.planUf) * UF_ESCALA) : 0;
     personas.push({
+      personaId: v.personaId,
+      diasVinculo: diasDelVinculo(ini, fin, dia(v.inicio) ?? ini, dia(v.termino)),
       capa: r.estructura,
       contrato: v.tipo === "indefinido" ? "indefinido" : "plazo_fijo",
       afp: normalizarAfp(p?.afp) ?? "modelo",
@@ -116,7 +129,7 @@ export function personasDelMes(base: Base, m: MesCalendario, ocultas: Map<string
       anticipo: a ? { modo: a.modo as ModoAnticipo, valor: a.valor, diaMes: a.diaMes } : null,
     });
   }
-  return { personas, sinCapa, ocultas: ocultasMes };
+  return { personas, omitidas, sinCapa, ocultas: ocultasMes };
 }
 
 export { ocultasDe };
