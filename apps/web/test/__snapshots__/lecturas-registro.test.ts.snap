@@ -102,6 +102,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "finanzas.ventas.proyeccion_flujo",
   "inventario.activos.get",
   "inventario.activos.list",
+  "inventario.prendas.list",
   "inventario.ropa.list",
   "inventario.ropa.movimientos",
   "inventario.tipos.get",

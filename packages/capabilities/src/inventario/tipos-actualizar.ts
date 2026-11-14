@@ -17,6 +17,7 @@ import {
   tipoSchema,
   vistaTipo,
 } from "./comun";
+import { exigirPrendaDelKit } from "./prendas";
 
 export const tiposActualizar = defineCapability({
   id: "inventario.tipos.actualizar",
@@ -58,6 +59,8 @@ export const tiposActualizar = defineCapability({
     if (error) throw reglaDeNegocio(error);
     if (categoria === "activo" && f.prendaClave)
       throw reglaDeNegocio("La prenda del uniforme es solo para tipos de ropa.");
+    // Solo una prenda nueva se valida: una que salió del kit no impide editar lo demás.
+    if (f.prendaClave && f.prendaClave !== actual.prendaClave) await exigirPrendaDelKit(ctx, f.prendaClave);
     if (f.nombreNormalizado !== actual.nombreNormalizado) {
       const otro = await ctx.db.inventarioTipo.findFirst({
         where: { nombreNormalizado: f.nombreNormalizado, id: { not: actual.id } },

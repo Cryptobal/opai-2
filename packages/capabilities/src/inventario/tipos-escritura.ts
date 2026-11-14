@@ -23,6 +23,7 @@ import {
   tipoSchema,
   vistaTipo,
 } from "./comun";
+import { exigirPrendaDelKit } from "./prendas";
 
 
 export const tiposCrear = defineCapability({
@@ -48,6 +49,7 @@ export const tiposCrear = defineCapability({
     if (error) throw reglaDeNegocio(error);
     if (input.categoria === "activo" && input.prendaClave)
       throw reglaDeNegocio("La prenda del uniforme es solo para tipos de ropa.");
+    if (input.prendaClave) await exigirPrendaDelKit(ctx, input.prendaClave);
     const normal = nombreNormalizado(input.nombre);
     if (await ctx.db.inventarioTipo.findFirst({ where: { nombreNormalizado: normal } }))
       throw conflicto(duplicado(input.nombre));

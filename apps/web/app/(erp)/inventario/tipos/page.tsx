@@ -7,7 +7,7 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { requerirIdentidad } from "@/lib/servidor";
 
-import { cargarTipos } from "../_componentes/datos";
+import { cargarKit, cargarTipos } from "../_componentes/datos";
 import { HojaTipo } from "../_componentes/diferidas";
 import { ListaTipos } from "../_componentes/lista-tipos";
 
@@ -23,8 +23,10 @@ export default function TiposInventario({ searchParams }: { searchParams: Search
       completo
       cargar={async () => {
         const [p, identidad] = await Promise.all([leerParametros(searchParams), requerirIdentidad("/inventario/tipos")]);
+        const [tipos, kit] = await Promise.all([cargarTipos(p), cargarKit()]);
         return {
-          ...(await cargarTipos(p)),
+          ...tipos,
+          kit,
           q: p.q,
           puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage"),
         };
@@ -47,7 +49,7 @@ export default function TiposInventario({ searchParams }: { searchParams: Search
               />
             }
           />
-          {d.puedeGestionar ? <HojaTipo /> : null}
+          {d.puedeGestionar ? <HojaTipo kit={d.kit} /> : null}
         </>
       )}
     </PaginaPortal>

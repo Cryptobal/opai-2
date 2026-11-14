@@ -4,12 +4,12 @@ import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { conteo } from "@/lib/plural";
 
 import type { cargarTipo } from "./datos";
-import { etiquetaCategoria, type TipoInventario } from "./tipos";
+import { etiquetaCategoria, type PrendaKit, type TipoInventario } from "./tipos";
 import { HojaTipo } from "./diferidas";
 
 const TIPO_CAMPO = { texto: "Texto", numero: "Número", fecha: "Fecha" } as const;
 
-function Contenido({ t }: { t: TipoInventario }) {
+function Contenido({ t, kit }: { t: TipoInventario; kit: PrendaKit[] }) {
   if (t.categoria === "ropa") {
     return (
       <SeccionTarjeta titulo="Tallas">
@@ -20,7 +20,8 @@ function Contenido({ t }: { t: TipoInventario }) {
         </div>
         {t.prendaClave ? (
           <p className="t-caption mt-3">
-            Corresponde a una prenda del uniforme: al entregar se propone la talla de la ficha de la persona.
+            Prenda del uniforme: {kit.find((p) => p.clave === t.prendaClave)?.nombre ?? t.prendaClave}. Al entregar a
+            una persona se propone la talla de su ficha.
           </p>
         ) : null}
       </SeccionTarjeta>
@@ -50,9 +51,11 @@ function Contenido({ t }: { t: TipoInventario }) {
 /** Panel derecho de un tipo de inventario (CAR-235). */
 export async function DetalleTipo({
   datos,
+  kit,
   puedeGestionar,
 }: {
   datos: ReturnType<typeof cargarTipo>;
+  kit: PrendaKit[];
   puedeGestionar: boolean;
 }) {
   const { state, tipo: t } = await datos;
@@ -94,8 +97,8 @@ export async function DetalleTipo({
       {t ? (
         <div className="flex flex-col gap-4">
           {t.descripcion ? <p className="text-fg-muted">{t.descripcion}</p> : null}
-          <Contenido t={t} />
-          {puedeGestionar ? <HojaTipo tipo={t} /> : null}
+          <Contenido t={t} kit={kit} />
+          {puedeGestionar ? <HojaTipo tipo={t} kit={kit} /> : null}
         </div>
       ) : null}
     </DetailScreen>

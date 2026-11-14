@@ -557,6 +557,8 @@ inventario_entregas_devolver
 inventario_entregas_entregar_activo
 inventario_entregas_entregar_ropa
 inventario_entregas_list
+inventario_entregas_talla_persona
+inventario_prendas_list
 inventario_ropa_ajustar
 inventario_ropa_ingresar
 inventario_ropa_list

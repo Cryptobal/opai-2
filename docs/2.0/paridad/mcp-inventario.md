@@ -484,6 +484,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_activo` | `inventario_entregas_entregar_activo` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_ropa` | `inventario_entregas_entregar_ropa` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.list` | `inventario_entregas_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.talla_persona` | `inventario_entregas_talla_persona` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.prendas.list` | `inventario_prendas_list` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ajustar` | `inventario_ropa_ajustar` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ingresar` | `inventario_ropa_ingresar` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.list` | `inventario_ropa_list` | existe |
