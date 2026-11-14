@@ -69,7 +69,7 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-fusionar.md`. Capacidad `core.cuentas.fusion
 
 ## PR fusionar contactos (F3) · rama `brief/car-27-fusionar-contactos`
 
-- **Estado:** Abierto (F1 ya está en main)
+- **Estado:** Integrado (#744)
 - **Migración:** No
 
 ### Qué entra
@@ -82,6 +82,26 @@ Capacidad `core.contactos.fusionar` (`efecto: "irreversible"`, `dryRun`), con la
 - Se bloquea si el duplicado firmó un consentimiento de referencia comercial, porque ese registro es append-only.
 
 Una prueba compara el inventario de FK con la base. Falta la pantalla.
+
+## PR fusionar cuentas (F2, pantalla) · rama `brief/car-27-fusionar-pantalla`
+
+- **Estado:** Abierto (F1 ya está en main)
+- **Migración:** No
+
+### Qué entra
+
+Nueva acción **⋯ › Fusionar con…** en la ficha de la cuenta. Abre una hoja diferida (`?fusionar=1`) con el diseño CuentaV2 · fusionar y tres pasos:
+
+1. **Elegir:** combobox de búsqueda, con sugerencias por la primera palabra del nombre.
+2. **Comparar:** solo los campos que difieren, con radio esta / duplicado.
+3. **Resumen:** lo que se mueve, alerta de irreversible y casilla «Entiendo que es irreversible».
+
+Cada paso usa la vista previa de `core.cuentas.fusionar`, así que los bloqueos aparecen antes de confirmar. Trae entrada de novedades y prueba `@preview`.
+
+**Decisiones nocturnas (revisar):**
+
+- El paso «Confirmar» del diseño (estado `agente`, aprobación de una propuesta de un agente) no se construyó aparte: las aprobaciones de agentes ya se resuelven en Configuración › Aprobaciones.
+- Las «sugeridas» buscan por la primera palabra del nombre (sin una capacidad propia de duplicados).
 
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
