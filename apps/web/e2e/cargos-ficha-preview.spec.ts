@@ -20,6 +20,9 @@ test.describe("@preview cargos: ficha del cargo", () => {
     const migas = page.getByRole("navigation", { name: "Ruta de configuración" });
     if ((page.viewportSize()?.width ?? 0) >= 768) {
       await expect(migas.getByRole("link", { name: "Operación" })).toBeVisible();
+    } else {
+      // En teléfono, el «atrás» de la barra superior vuelve a Configuración › Operación.
+      await expect(page.locator('a[href="/configuracion/grupo/operacion"]').first()).toBeVisible();
     }
     await capturar(page, info, "cargos-lista");
     const primero = page.locator('a[href^="/cargos/"]').filter({ visible: true }).first();

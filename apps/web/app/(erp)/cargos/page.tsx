@@ -28,7 +28,7 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
       ruta="/cargos"
       completo
       volverSoloTelefono
-      opciones={() => ({ volver: VOLVER_CARGOS })}
+      volver={VOLVER_CARGOS}
       cargar={async () => {
         const [p, identidad] = await Promise.all([
           leerParametros(searchParams),
