@@ -45,5 +45,7 @@ export async function cargarBancos(sp: SearchParams) {
     movId,
     gestiona,
     ver,
+    /** Lista sin el movimiento abierto: destino de «Atrás» en teléfono (CAR-257). */
+    volverA: `/finanzas/bancos?${new URLSearchParams({ ...(activa ? { cuenta: activa } : {}), estado, ...(tipo ? { tipo } : {}) }).toString()}`,
   };
 }

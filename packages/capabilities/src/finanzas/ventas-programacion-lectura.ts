@@ -44,10 +44,9 @@ export const ventasProgramacionesListar = defineCapability({
         destinatarios: { orderBy: { orden: "asc" } },
       },
       orderBy: [{ activa: "desc" }, { nombre: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items: slice, siguiente } = pagina(filas, input.limite);
+    const { items: slice, siguiente } = pagina(filas, input.limite, input.cursor);
     const cuentaMap = new Map(
       (
         await ctx.db.cuenta.findMany({
