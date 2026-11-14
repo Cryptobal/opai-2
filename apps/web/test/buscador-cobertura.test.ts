@@ -19,11 +19,6 @@ export const SIN_BUSCADOR: Readonly<Record<string, string>> = {
   nomina: "CAR-406: procesos de remuneraciones.",
   portal_cliente: "Portal del cliente: no agrega entidades al ERP.",
   portal_trabajador: "Portal del trabajador: no agrega entidades al ERP.",
-<<<<<<< HEAD
-  tickets: "CAR-404: tickets y puestos.",
-=======
-  rondas: "CAR-405: rondas y puntos de control.",
->>>>>>> origin/main
 };
 
 asegurarRegistro();
