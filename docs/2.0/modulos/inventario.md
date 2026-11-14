@@ -28,7 +28,7 @@ Se nota que funciona cuando: (1) cada guardia nuevo recibe su uniforme registrad
 - **Ropa ligada al uniforme de Personas** (CAR-504 con CAR-408): un tipo de ropa apunta a una prenda del kit del uniforme de la empresa (validada contra ese kit); los sugeridos de ropa salen del kit; al entregar a una persona, se propone la talla de su ficha (lectura auditada, con alcance).
 - **Existencias por talla** de cada tipo de ropa (CAR-237).
 - **Entrega y devolución** a persona o instalación, con historial; la ropa entregada descuenta existencias (CAR-238).
-- **Módulo vendible**: entrada propia en el catálogo de cobro, por instalación activa.
+- **Módulo vendible**: la forma de cobro queda en espera de Carlos (CAR-487; propuesta: por instalación activa). Sin entrada en el catálogo de cobro hasta que decida.
 
 ## 3. Entidades y relaciones
 
