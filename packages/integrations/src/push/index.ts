@@ -75,15 +75,41 @@ export async function firmarVapid(
   return `${cabeza}.${cuerpo}.${b64url.deBytes(new Uint8Array(firma))}`;
 }
 
+/**
+ * Servicios de push de los navegadores. El endpoint lo entrega el navegador, pero llega por la capacidad:
+ * solo se acepta uno de estos hosts, para que OPAI nunca haga un POST a una URL cualquiera (SSRF).
+ */
+const HOSTS_PUSH = [
+  /^fcm\.googleapis\.com$/,
+  /^updates\.push\.services\.mozilla\.com$/,
+  /^(web\.push|[a-z0-9-]+\.push)\.apple\.com$/,
+  /^[a-z0-9-]+\.notify\.windows\.com$/,
+];
+
+/** ¿Es un endpoint https de un servicio de push conocido? */
+export function endpointPushValido(endpoint: string): boolean {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === "https:" && !u.port && HOSTS_PUSH.some((h) => h.test(u.hostname));
+  } catch {
+    return false;
+  }
+}
+
 /** Emisor con claves VAPID. `fetch` se inyecta en las pruebas. */
 export function emisorPush(c: ClavesVapid, f: typeof fetch = fetch): EmisorPush {
+  // Clave pública en base64url sin relleno, aunque en Vercel venga con `=` o en base64 estándar.
+  const clave = b64url.deBytes(b64url.aBytes(c.publica));
   return {
     async avisar(endpoint) {
+      if (!endpointPushValido(endpoint)) return { ok: false, estado: 0, vencida: true };
       const jwt = await firmarVapid(c, endpoint);
       const r = await f(endpoint, {
         method: "POST",
+        // Un servicio que no responde no debe colgar el despacho de eventos.
+        signal: AbortSignal.timeout(5000),
         headers: {
-          Authorization: `vapid t=${jwt}, k=${c.publica}`,
+          Authorization: `vapid t=${jwt}, k=${clave}`,
           TTL: "86400",
           Urgency: "normal",
         },

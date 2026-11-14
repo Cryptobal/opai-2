@@ -47,7 +47,11 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
     const tenant = async (slug: string) =>
       (
         await e.admin.tenant.create({
-          data: { slug: `${slug}-${randomUUID().slice(0, 8)}`, nombre: slug, vertical: "seguridad" },
+          data: {
+            slug: `${slug}-${randomUUID().slice(0, 8)}`,
+            nombre: slug,
+            vertical: "seguridad",
+          },
         })
       ).id;
     tenantA = await tenant("push-a");
@@ -59,30 +63,51 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
   });
 
   it("la vista previa no escribe; suscribir guarda el dispositivo del propio usuario", async () => {
-    const previo = await run(ctx(tenantA, ana), "core.push.suscribir", { endpoint: "https://push.example/ana" }, { dryRun: true });
+    const previo = await run(
+      ctx(tenantA, ana),
+      "core.push.suscribir",
+      { endpoint: "https://fcm.googleapis.com/fcm/send/ana" },
+      { dryRun: true },
+    );
     expect(previo).toMatchObject({ ok: true, data: { suscrito: true } });
     expect(await e.admin.suscripcionPush.count({ where: { tenantId: tenantA } })).toBe(0);
-    for (const endpoint of ["https://push.example/ana", "https://push.example/vieja"]) {
-      expect(await run(ctx(tenantA, ana), "core.push.suscribir", { endpoint })).toMatchObject({ ok: true });
+    for (const endpoint of [
+      "https://fcm.googleapis.com/fcm/send/ana",
+      "https://fcm.googleapis.com/fcm/send/vieja",
+    ]) {
+      expect(await run(ctx(tenantA, ana), "core.push.suscribir", { endpoint })).toMatchObject({
+        ok: true,
+      });
     }
-    expect(await e.admin.suscripcionPush.count({ where: { tenantId: tenantA, usuarioId: ana } })).toBe(2);
-    const http = await run(ctx(tenantA, ana), "core.push.suscribir", { endpoint: "http://push.example/x" });
-    expect(http).toMatchObject({ ok: false });
+    expect(
+      await e.admin.suscripcionPush.count({ where: { tenantId: tenantA, usuarioId: ana } }),
+    ).toBe(2);
+    const ajeno = await run(ctx(tenantA, ana), "core.push.suscribir", {
+      endpoint: "https://ejemplo.cl/x",
+    });
+    expect(ajeno).toMatchObject({ ok: false });
   });
 
   it("otro usuario no quita una suscripción ajena y otra empresa no la ve", async () => {
-    const ajeno = await run(ctx(tenantA, beto), "core.push.quitar", { endpoint: "https://push.example/ana" });
+    const ajeno = await run(ctx(tenantA, beto), "core.push.quitar", {
+      endpoint: "https://fcm.googleapis.com/fcm/send/ana",
+    });
     expect(ajeno).toMatchObject({ ok: true, data: { quitadas: 0 } });
-    const otra = await run(ctx(tenantB, ana), "core.push.quitar", { endpoint: "https://push.example/ana" });
+    const otra = await run(ctx(tenantB, ana), "core.push.quitar", {
+      endpoint: "https://fcm.googleapis.com/fcm/send/ana",
+    });
     expect(otra).toMatchObject({ ok: true, data: { quitadas: 0 } });
     expect(await e.admin.suscripcionPush.count({ where: { tenantId: tenantA } })).toBe(2);
   });
 
   it("el aviso toca solo los dispositivos del usuario y borra la suscripción vencida", async () => {
     await mod.avisarAlCelular(ctx(tenantA, ana), [ana, beto], "pauta");
-    expect(tocados.sort()).toEqual(["https://push.example/ana", "https://push.example/vieja"]);
+    expect(tocados.sort()).toEqual([
+      "https://fcm.googleapis.com/fcm/send/ana",
+      "https://fcm.googleapis.com/fcm/send/vieja",
+    ]);
     const quedan = await e.admin.suscripcionPush.findMany({ where: { tenantId: tenantA } });
-    expect(quedan.map((s) => s.endpoint)).toEqual(["https://push.example/ana"]);
+    expect(quedan.map((s) => s.endpoint)).toEqual(["https://fcm.googleapis.com/fcm/send/ana"]);
     expect(quedan[0]?.ultimoAvisoEn).not.toBeNull();
     tocados.length = 0;
     await mod.avisarAlCelular(ctx(tenantB, ana), [ana], "pauta");
@@ -90,7 +115,9 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
   });
 
   it("quitar borra la suscripción propia", async () => {
-    const r = await run(ctx(tenantA, ana), "core.push.quitar", { endpoint: "https://push.example/ana" });
+    const r = await run(ctx(tenantA, ana), "core.push.quitar", {
+      endpoint: "https://fcm.googleapis.com/fcm/send/ana",
+    });
     expect(r).toMatchObject({ ok: true, data: { quitadas: 1 } });
   });
 });

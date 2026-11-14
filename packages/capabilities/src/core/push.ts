@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { endpointPushValido } from "@opai/integrations";
+
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
@@ -9,6 +11,7 @@ const PORTALES = ["erp", "supervisor", "trabajador", "terreno"] as const;
 const endpointSchema = z
   .url({ protocol: /^https$/ })
   .max(1000)
+  .refine(endpointPushValido, "No es el endpoint de un servicio de push de un navegador.")
   .describe("Endpoint que entrega el navegador al suscribirse (PushSubscription.endpoint).");
 
 function usuarioDe(ctx: Contexto): string {
@@ -26,6 +29,8 @@ export const pushSuscribir = defineCapability({
   id: "core.push.suscribir",
   // Solo personas: la suscripción es del navegador de quien tiene la sesión; un agente no tiene celular.
   soloPersonas: true,
+  // El endpoint identifica el dispositivo: no se copia a la auditoría.
+  sensibles: ["endpoint"],
   descripcion:
     "Activa los avisos al celular en este dispositivo: guarda la suscripción de Web Push del navegador del usuario. Los avisos llegan sin contenido y abren el portal.",
   permiso: null,
@@ -57,6 +62,8 @@ export const pushQuitar = defineCapability({
   id: "core.push.quitar",
   // Solo personas, como suscribir: el dispositivo es de quien tiene la sesión.
   soloPersonas: true,
+  // El endpoint identifica el dispositivo: no se copia a la auditoría.
+  sensibles: ["endpoint"],
   descripcion:
     "Apaga los avisos al celular en este dispositivo: borra la suscripción de Web Push del usuario.",
   permiso: null,

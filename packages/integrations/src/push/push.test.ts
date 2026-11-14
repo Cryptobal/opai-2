@@ -61,12 +61,12 @@ describe("push · VAPID sin contenido", () => {
       return new Response(null, { status: llamadas.length === 1 ? 201 : 410 });
     };
     const e = emisorPush(claves, f);
-    expect(await e.avisar("https://push.example/a")).toEqual({
+    expect(await e.avisar("https://fcm.googleapis.com/fcm/send/a")).toEqual({
       ok: true,
       estado: 201,
       vencida: false,
     });
-    expect(await e.avisar("https://push.example/b")).toEqual({
+    expect(await e.avisar("https://updates.push.services.mozilla.com/wpush/v2/b")).toEqual({
       ok: false,
       estado: 410,
       vencida: true,
@@ -75,6 +75,15 @@ describe("push · VAPID sin contenido", () => {
     expect(String((llamadas[0]?.headers as Record<string, string>)["Authorization"])).toMatch(
       /^vapid t=.+, k=/,
     );
+  });
+
+  it("solo acepta endpoints de servicios de push conocidos (sin SSRF)", async () => {
+    const { endpointPushValido } = await import(".");
+    expect(endpointPushValido("https://web.push.apple.com/abc")).toBe(true);
+    expect(endpointPushValido("https://fcm.googleapis.com.evil.cl/x")).toBe(false);
+    expect(endpointPushValido("https://169.254.169.254/latest")).toBe(false);
+    expect(endpointPushValido("http://fcm.googleapis.com/x")).toBe(false);
+    expect(endpointPushValido("https://fcm.googleapis.com:8443/x")).toBe(false);
   });
 
   it("sin las tres variables del entorno, el push queda apagado", () => {
