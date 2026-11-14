@@ -545,6 +545,11 @@
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
 }
+/* Sin logo, la inicial de la empresa va con su color (ADR-109, CAR-335 D6b). */
+[data-marco="nuevo"] [data-monograma] {
+  background: var(--ds-accent);
+  color: var(--ds-accent-fg);
+}
 /* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro exacto de
    la barra, con la ruta a la izquierda y las acciones, el tema, el agente y la campana a la derecha.
    Va centrado sobre la barra (no en el flujo) para que «Atrás» o las acciones de una ficha no lo

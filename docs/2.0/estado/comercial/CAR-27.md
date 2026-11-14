@@ -21,6 +21,20 @@ Botón **Transferir cartera** en Negocios (tablero y lista; diseño `export-crm-
 
 La hoja «Editar negocio» suma el campo **Responsable** (personas del ERP de `comercial.negocios.responsables`); guarda con `comercial.negocios.update`, que ya aceptaba `responsableId`. Antes no había forma de cambiar el responsable desde la pantalla. Sin capacidad nueva ni migración. **Decisión nocturna (revisar):** sin prueba `@preview` porque `qa-e2e` no tiene negocios que editar.
 
+## PR campos personalizados 1/3 · rama `brief/car-27-campos-personalizados`
+
+- **Estado:** Abierto
+- **Migración:** Sí (`20261226100000_core_campos_personalizados`, aditiva)
+
+### Qué entra
+
+Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, valores, pantallas). Este primero trae el catálogo: tablas `core.campos_personalizados` y `core.campo_valores` (RLS con FORCE, `tenant_isolation`, trigger de mismo tenant, CHECK de entidad, tipo, clave y opciones), permiso nuevo `core:campos.config` (owner y admin), dominio puro (`claveCampoPersonalizado`, `validarValorCampo`, `normalizarOpcionesCampo`) y capacidades `core.campos_personalizados.list` (contrato de listas), `.create` y `.update` con `dryRun` (el tipo y la clave no cambian; archivar con `activo`). Herramientas MCP nuevas en la instantánea y el inventario. **Decisión nocturna (revisar):** no hay diseño aprobado para estas pantallas; el PR 3 usará los patrones del DS (FormScreen y la ficha) y se marcará para tu revisión.
+
+### Pendiente
+
+- PR 2: valores por ficha (`core.campos_personalizados.valores.get/set`) con permiso y alcance de cada entidad.
+- PR 3: pantallas de configuración y de ficha, y tokens de documentos.
+
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
 - Con el diseño nuevo de listas de `main` fallan tres pruebas de Comercial que no tocaron estos PR: `crm-vinculos` (cuentas vinculadas), `cuenta-sii` (resumen «Lista para facturar», que queda oculto) y `actividad-tareas-car162` (la tarea no aparece en «Mis tareas»). Hay que revisarlas en un PR propio.
