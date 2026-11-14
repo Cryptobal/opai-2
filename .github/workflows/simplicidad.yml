@@ -6,6 +6,7 @@ name: Simplicidad
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
   workflow_dispatch:
 
 permissions:
@@ -40,7 +41,7 @@ jobs:
       - name: Medir contra la línea base
         if: steps.solo_docs.outputs.only_docs != 'true'
         env:
-          SIMPLICIDAD_RAMA_BASE: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+          SIMPLICIDAD_RAMA_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || 'origin/main' }}
         run: pnpm simplicidad
       - name: Solo documentación
         if: steps.solo_docs.outputs.only_docs == 'true'
