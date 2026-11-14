@@ -61,7 +61,7 @@ import {
   personasPagoAprobarCambio,
   personasPagoRechazarCambio,
 } from "./personas-pago-aprobacion";
-import { personasLaboralActualizar, personasLaboralVer } from "./personas-laboral";
+import { capacidadesContratoPeriodos, personasLaboralActualizar, personasLaboralVer } from "./personas-laboral";
 import { cargosMontosPorInstalacion } from "./cargos-montos-instalacion";
 import { puestosCreate, puestosUpdate } from "./puestos-escritura";
 import { puestosSetEstado } from "./puestos-estado";
@@ -129,6 +129,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasPagoRechazarCambio,
   personasLaboralVer,
   personasLaboralActualizar,
+  ...capacidadesContratoPeriodos,
   vinculosPrevisualizar,
   vinculosList,
   vinculosCreate,

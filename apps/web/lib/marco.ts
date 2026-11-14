@@ -27,8 +27,10 @@ export function portalAdmiteHilo(portal: string, acceso: boolean): boolean {
  * Marco que se monta para un portal, un acceso y el valor de la cookie. Una sola regla para el layout
  * y para las páginas que cambian con el marco (Inicio, Preferencias): nunca deciden por separado.
  */
-export function marcoResuelto(portal: string, acceso: boolean, cookie: string | undefined): Marco {
-  return portalAdmiteHilo(portal, acceso) ? marcoDeCookie(cookie) : "clasico";
+export function marcoResuelto(portal: string, acceso: boolean): Marco {
+  // CAR-335 D6c: en el ERP el diseño nuevo es el único; el clásico y el Hilo se retiraron. Los demás
+  // portales siguen con el clásico hasta su propio bloque.
+  return portalAdmiteHilo(portal, acceso) ? "nuevo" : "clasico";
 }
 
 /** Texto para `document.cookie`: un año para el clásico y el Hilo; el nuevo es la ausencia de la cookie. */
