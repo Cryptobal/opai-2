@@ -49,6 +49,7 @@
     "/(erp)/remuneraciones/calendario": 178,
     "/(erp)/remuneraciones/novedades": 177,
     "/(erp)/remuneraciones/[id]": 173,
+    "/(erp)/remuneraciones/[id]/liquidaciones": 174,
     "/(platform)/platform/tenants/[id]/*": 168,
     "/(terreno)/terreno*": 162,
     "/(trabajador)/trabajador*": 165,

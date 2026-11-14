@@ -4,6 +4,10 @@
 import type { Capacidad } from "../types";
 import { anticiposReglaFijar, anticiposReglasListar } from "./anticipos";
 import { anticiposGenerar, prestamosAplicarCuotas } from "./automaticas";
+import { costoProyectadoListar } from "./costo-proyectado";
+import { liquidacionesCalcular } from "./liquidaciones-calcular";
+import { liquidacionesListar, liquidacionesObtener } from "./liquidaciones-lectura";
+import { lreGenerar } from "./lre";
 import { conceptosActualizar, conceptosCrear, conceptosListar } from "./conceptos";
 import { novedadesAnular, novedadesCargar, novedadesCrear } from "./novedades-escritura";
 import { novedadesListar } from "./novedades-lectura";
@@ -37,4 +41,9 @@ export const capacidadesNomina: readonly Capacidad[] = [
   obligacionesListar,
   obligacionesGenerarCalendario,
   obligacionesActualizar,
+  costoProyectadoListar,
+  liquidacionesCalcular,
+  liquidacionesListar,
+  liquidacionesObtener,
+  lreGenerar,
 ];
