@@ -65,6 +65,17 @@ export const AJUSTES: Record<string, Ajuste> = {
       motivo_baja: null,
     }),
   },
+  // Inventario (CAR-237): FK compuesta al tipo; movimiento con delta distinto de cero y motivo válido.
+  "inventario.existencias": {
+    dependencias: ["inventario.tipos"],
+    fijas: ["tipo_id"],
+    valores: (ctx) => ({ tipo_id: id(ctx, "inventario.tipos"), talla: "M", cantidad: 1 }),
+  },
+  "inventario.movimientos": {
+    dependencias: ["inventario.tipos"],
+    fijas: ["tipo_id"],
+    valores: (ctx) => ({ tipo_id: id(ctx, "inventario.tipos"), talla: "M", delta: 1, motivo: "ingreso" }),
+  },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],

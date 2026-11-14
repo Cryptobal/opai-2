@@ -37,6 +37,8 @@ export const manifest = defineModule({
     { id: "inventario.activo.creado", descripcion: "Se registró un activo." },
     { id: "inventario.activo.actualizado", descripcion: "Se corrigieron los datos de un activo." },
     { id: "inventario.activo.estado_cambiado", descripcion: "Un activo pasó a reparación, volvió o se dio de baja." },
+    { id: "inventario.ropa.ingresada", descripcion: "Ingresaron unidades de ropa a las existencias." },
+    { id: "inventario.ropa.ajustada", descripcion: "Se corrigió la cantidad de una talla de ropa." },
   ],
   capacidades: capacidadesInventario,
 });

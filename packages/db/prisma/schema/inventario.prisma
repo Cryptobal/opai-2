@@ -56,3 +56,41 @@ model InventarioActivo {
   @@map("activos")
   @@schema("inventario")
 }
+
+/// Cantidad disponible de un tipo de ropa en una talla (CAR-237). Cambia solo junto con un
+/// movimiento en la misma transacción; nunca queda bajo cero (R17).
+model InventarioExistencia {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  tipoId    String   @map("tipo_id") @db.Uuid
+  /// Talla normalizada (R8).
+  talla     String
+  cantidad  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, tipoId, talla])
+  @@map("existencias")
+  @@schema("inventario")
+}
+
+/// Movimiento de existencias de ropa (CAR-237): ingreso, ajuste, entrega o devolución. Solo se
+/// agrega: una corrección es un movimiento nuevo (R18).
+model InventarioMovimiento {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  tipoId    String   @map("tipo_id") @db.Uuid
+  talla     String
+  /// Unidades que suma (positivo) o resta (negativo).
+  delta     Int
+  /// "ingreso" | "ajuste" | "entrega" | "devolucion".
+  motivo    String
+  nota      String?
+  /// Usuario que lo registró (null si fue un agente sin usuario).
+  actorId   String?  @map("actor_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, tipoId, createdAt])
+  @@map("movimientos")
+  @@schema("inventario")
+}
