@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Alerta, Button, Campo, CodigosRespaldo, InputPassword } from "@opai/ds";
 import { accionRegenerarCodigos, type EstadoCodigos } from "@/app/_acciones/mfa";
 
@@ -9,6 +9,8 @@ export function RegenerarCodigos() {
     accionRegenerarCodigos,
     null,
   );
+  // Cerrado muestra solo el botón: así no se confunde con «Contraseña» de más arriba.
+  const [abierto, setAbierto] = useState(false);
   const foco = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (estado?.ok) foco.current?.focus();
@@ -25,6 +27,14 @@ export function RegenerarCodigos() {
         <CodigosRespaldo codigos={estado.codigos} />
       </div>
     );
+  if (!abierto)
+    return (
+      <div>
+        <Button variant="secondary" onClick={() => setAbierto(true)}>
+          Regenerar códigos de respaldo
+        </Button>
+      </div>
+    );
   return (
     <form action={accion} className="flex max-w-sm flex-col gap-3">
       {estado && !estado.ok ? (
@@ -33,7 +43,7 @@ export function RegenerarCodigos() {
         </Alerta>
       ) : null}
       <Campo
-        etiqueta="Contraseña"
+        etiqueta="Tu contraseña"
         htmlFor="password-regenerar"
         ayuda="Confirma tu contraseña para reemplazar tus códigos de respaldo."
       >
@@ -45,9 +55,14 @@ export function RegenerarCodigos() {
           disabled={pendiente}
         />
       </Campo>
-      <Button type="submit" variant="secondary" cargando={pendiente}>
-        Regenerar códigos de respaldo
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" cargando={pendiente}>
+          Regenerar
+        </Button>
+        <Button variant="ghost" onClick={() => setAbierto(false)} disabled={pendiente}>
+          Cancelar
+        </Button>
+      </div>
     </form>
   );
 }

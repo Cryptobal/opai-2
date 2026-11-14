@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar } from "./preview";
+import { capturar, capturarHoja } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-54 (Sesión Núcleo): recuperar el segundo factor. Solo mira las pantallas; no regenera códigos
@@ -16,8 +16,10 @@ test.describe("@preview recuperar el segundo factor", () => {
     });
     const boton = page.getByRole("button", { name: "Regenerar códigos de respaldo" });
     await expect(boton).toBeVisible();
-    await boton.scrollIntoViewIfNeeded();
+    await boton.click();
+    await expect(page.getByLabel("Tu contraseña", { exact: true })).toBeVisible();
     await capturar(page, info, "mfa-regenerar-codigos");
+    await page.getByRole("button", { name: "Cancelar" }).click();
   });
 
   test("el owner ve «Restablecer segundo factor» con su advertencia", async ({ page }, info) => {
@@ -28,7 +30,7 @@ test.describe("@preview recuperar el segundo factor", () => {
     await page.getByRole("button", { name: "Restablecer segundo factor" }).click();
     const dialogo = page.getByRole("dialog", { name: /^¿Restablecer el segundo factor de / });
     await expect(dialogo.getByText(/Esta acción es irreversible/)).toBeVisible();
-    await capturar(page, info, "mfa-restablecer-dialogo");
+    await capturarHoja(page, info, "mfa-restablecer-dialogo");
     await dialogo.getByRole("button", { name: "Cancelar" }).click();
     await expect(dialogo).toBeHidden();
   });
