@@ -8,6 +8,27 @@ import { etiquetaDia, horario, horas, type MisTurnos, porSemana, sumarDias } fro
 
 const DIAS = 28;
 
+/** Ventanas anterior y siguiente de 4 semanas, y vuelta a hoy. */
+function NavSemanas({ desde, desdeHoy }: { desde: string; desdeHoy: boolean }) {
+  return (
+    <nav aria-label="Semanas" className="flex flex-wrap items-center gap-2">
+      {desdeHoy ? null : (
+        <EnlaceBoton href={`/trabajador/mi-pauta?desde=${sumarDias(desde, -DIAS)}`} variante="secondary" icono={ChevronLeft}>
+          Anteriores
+        </EnlaceBoton>
+      )}
+      <EnlaceBoton href={`/trabajador/mi-pauta?desde=${sumarDias(desde, DIAS)}`} variante="secondary" icono={ChevronRight}>
+        Siguientes
+      </EnlaceBoton>
+      {desdeHoy ? null : (
+        <EnlaceBoton href="/trabajador/mi-pauta" variante="ghost">
+          Volver a hoy
+        </EnlaceBoton>
+      )}
+    </nav>
+  );
+}
+
 /**
  * «Mi pauta» del portal del trabajador (CAR-462): sus turnos de 4 semanas, agrupados por semana. Cada fila dice el día,
  * el horario en la zona de la empresa, la instalación y el puesto. Sin JavaScript de cliente: la navegación entre
@@ -23,21 +44,7 @@ export function ListaTurnos({ r }: { r: MisTurnos }) {
         <h2 className="t-title mb-1 text-fg md:hidden">Mi pauta</h2>
         <p className="t-body-sm">Tus turnos de las próximas 4 semanas. Si algo cambia, te avisamos.</p>
       </div>
-      <nav aria-label="Semanas" className="flex flex-wrap items-center gap-2">
-        {desdeHoy ? null : (
-          <EnlaceBoton href={`/trabajador/mi-pauta?desde=${sumarDias(r.desde, -DIAS)}`} variante="secondary" icono={ChevronLeft}>
-            Anteriores
-          </EnlaceBoton>
-        )}
-        <EnlaceBoton href={`/trabajador/mi-pauta?desde=${sumarDias(r.desde, DIAS)}`} variante="secondary" icono={ChevronRight}>
-          Siguientes
-        </EnlaceBoton>
-        {desdeHoy ? null : (
-          <EnlaceBoton href="/trabajador/mi-pauta" variante="ghost">
-            Volver a hoy
-          </EnlaceBoton>
-        )}
-      </nav>
+      <NavSemanas desde={r.desde} desdeHoy={desdeHoy} />
       {semanas.length === 0 ? (
         <Empty
           titulo="No tienes turnos en estas semanas"
