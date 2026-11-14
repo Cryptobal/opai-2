@@ -2,19 +2,13 @@ import { z } from "zod";
 
 import type { Contexto } from "@opai/capabilities";
 
+import { fechaCivil } from "./mis-turnos";
+
 /** Lo que el trabajador puede pedir desde su portal (CAR-464). Licencias y ausencias las registra RR. HH. */
-export const TIPOS_SOLICITUD = ["permiso", "vacaciones"] as const;
+const TIPOS_SOLICITUD = ["permiso", "vacaciones"] as const;
 
 const DIAS_MAX = 60;
 const DIA_MS = 86_400_000;
-
-/** Fecha civil que existe en el calendario (2026-02-30 se rechaza). */
-export const fechaCivil = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha va como aaaa-mm-dd.")
-  .refine((d) => !Number.isNaN(Date.parse(`${d}T00:00:00Z`)) && new Date(`${d}T00:00:00Z`).toISOString().startsWith(d), {
-    message: "Esa fecha no existe.",
-  });
 
 export const solicitudInput = z
   .object({
