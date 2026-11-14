@@ -7,7 +7,7 @@ import { aFecha, aIso } from "./util";
 type Entrante = { idExterno: string; fecha: string; monto: number; glosa: string; referencia: string | null; sospechoso?: boolean };
 
 /** Un movimiento del banco en línea que ya estaba por cartola o registro manual: se le asigna su id externo. */
-export type VinculoExterno = { existenteId: string; idExterno: string };
+export type VinculoExterno = { existenteId: string; idExterno: string; indice: number };
 
 const sumarDias = (iso: string, n: number) => aIso(new Date(aFecha(iso).getTime() + n * 86_400_000));
 
@@ -36,7 +36,7 @@ export async function yaGuardadosPorCartola(ctx: Contexto, cuentaId: string, ent
   const porMontoSi = (e: { id: string }, m: Entrante) => deCartola.has(e.id) && !m.sospechoso;
   const pares = emparejarMovimientos(entrantes, existentes, { toleranciaDias: TOLERANCIA_DIAS, porMontoSi });
   for (const [i, par] of pares) {
-    out.set(i, { existenteId: par.existenteId, idExterno: entrantes[i]!.idExterno });
+    out.set(i, { existenteId: par.existenteId, idExterno: entrantes[i]!.idExterno, indice: i });
   }
   return out;
 }

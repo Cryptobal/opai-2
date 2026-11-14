@@ -1,4 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
+import type { TenantTx } from "@opai/db";
 import { esRemuneracion } from "@opai/domain";
 
 import { sincronizarAvisoSaldoBajo } from "./aviso-banco";
@@ -23,43 +24,28 @@ export type MovimientoNuevo = {
  */
 export async function aplicarSincronizacion(
   ctx: Contexto,
-  p: { cuentaId: string; nuevos: MovimientoNuevo[]; vinculos?: VinculoExterno[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
+  p: { cuentaId: string; nuevos: MovimientoNuevo[]; vinculos?: Vinculo[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null; saldoExplicito?: boolean },
 ): Promise<number> {
   return ctx.transaccion(async (tx) => {
-    // CAR-341: el movimiento que ya estaba por cartola recibe su id externo (si otro no lo tomó ya).
-    for (const v of p.vinculos ?? []) {
-      await tx.movimientoBancario.updateMany({ where: { id: v.existenteId, idExterno: null }, data: { idExterno: v.idExterno } });
-    }
+    const aInsertar = [...p.nuevos, ...(await vincular(tx, p.vinculos ?? []))];
     // Ids externos que ya existían antes de este lote: una entrega repetida no vuelve a evaluar reglas sobre ellos.
-    const previos = p.nuevos.length
+    const previos = aInsertar.length
       ? await tx.movimientoBancario.findMany({
-          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno) } },
+          where: { cuentaId: p.cuentaId, idExterno: { in: aInsertar.map((m) => m.idExterno) } },
           select: { idExterno: true },
         })
       : [];
     const yaEstaban = new Set(previos.map((m) => m.idExterno));
-    const { count } = p.nuevos.length
+    const { count } = aInsertar.length
       ? await tx.movimientoBancario.createMany({
           skipDuplicates: true,
-          data: p.nuevos.map((m) => ({
-            tenantId: ctx.tenantId,
-            cuentaId: p.cuentaId,
-            fecha: aFecha(m.fecha),
-            monto: BigInt(m.monto),
-            glosa: m.glosa,
-            referencia: m.referencia,
-            saldoDespues: m.saldoDespues != null ? BigInt(m.saldoDespues) : null,
-            claveDedupe: m.claveDedupe,
-            idExterno: m.idExterno,
-            estado: esRemuneracion(m.glosa) ? "por_autorizar" : "pendiente",
-            origen: "web4leads",
-          })),
+          data: aInsertar.map((m) => filaNueva(ctx.tenantId, p.cuentaId, m)),
         })
       : { count: 0 };
     // Reglas del banco (ADR-074) sobre lo recién llegado: por id externo, dentro de la misma transacción.
     const llegados = count
       ? await tx.movimientoBancario.findMany({
-          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno).filter((x) => !yaEstaban.has(x)) } },
+          where: { cuentaId: p.cuentaId, idExterno: { in: aInsertar.map((m) => m.idExterno).filter((x) => !yaEstaban.has(x)) } },
           select: { id: true },
         })
       : [];
@@ -99,4 +85,36 @@ function saldoVigente(
   if (previo?.saldoBanco == null) return true;
   if (p.saldoExplicito && p.saldoBancoEn) return !previo.saldoBancoEn || p.saldoBancoEn >= previo.saldoBancoEn;
   return nuevos > 0;
+}
+
+type Vinculo = VinculoExterno & { movimiento: MovimientoNuevo };
+
+/** Fila de un movimiento del banco en línea; la remuneración queda por autorizar. */
+function filaNueva(tenantId: string, cuentaId: string, m: MovimientoNuevo) {
+  return {
+    tenantId,
+    cuentaId,
+    fecha: aFecha(m.fecha),
+    monto: BigInt(m.monto),
+    glosa: m.glosa,
+    referencia: m.referencia,
+    saldoDespues: m.saldoDespues != null ? BigInt(m.saldoDespues) : null,
+    claveDedupe: m.claveDedupe,
+    idExterno: m.idExterno,
+    estado: esRemuneracion(m.glosa) ? "por_autorizar" : "pendiente",
+    origen: "web4leads",
+  };
+}
+
+/**
+ * CAR-341: el movimiento que ya estaba por cartola recibe su id externo. CAR-488: si otra entrega ya lo tomó, el
+ * entrante no se pierde: se devuelve para insertarlo (si es la misma operación, su id externo repetido lo descarta).
+ */
+async function vincular(tx: Pick<TenantTx, "movimientoBancario">, vinculos: Vinculo[]): Promise<MovimientoNuevo[]> {
+  const perdidos: MovimientoNuevo[] = [];
+  for (const v of vinculos) {
+    const r = await tx.movimientoBancario.updateMany({ where: { id: v.existenteId, idExterno: null }, data: { idExterno: v.idExterno } });
+    if (r.count === 0) perdidos.push(v.movimiento);
+  }
+  return perdidos;
 }
