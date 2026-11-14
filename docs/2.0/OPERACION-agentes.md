@@ -70,7 +70,7 @@ La **primera línea** del comentario es exactamente una de:
 
 | Señal | Cuándo |
 |---|---|
-| **`DECISIÓN CARLOS:`** | Falta una decisión de negocio que solo Carlos puede tomar. |
+| ~~`DECISIÓN CARLOS:`~~ | En desuso desde el 14-nov-2026 (ADR-114 y ADR-115): lo que decide Carlos va a un issue de Linear con la etiqueta «Decide Carlos». |
 | **`BLOQUEO OPAI:`** | Bloqueo operativo que la sesión no puede resolver (infra, cola, migración, permisos de bot, etc.). |
 | **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, checks obligatorios verdes y migración pendiente de aplicar. |
 | ~~`REVISIÓN VISUAL CARLOS:`~~ | En desuso desde el 11-nov-2026 (ADR-092): el chequeo visual es el run `preview-e2e` y sus capturas (A2.10). |
