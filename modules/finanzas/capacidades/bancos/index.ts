@@ -1,5 +1,6 @@
 import { bancosCartolaImportar } from "./cartola-importar";
 import { bancosCartolasDeshacer, bancosCartolasListar } from "./cartolas";
+import { bancosDescartesListar, bancosDescartesRestaurar } from "./descartes";
 import { bancosMovimientosBorrarRango } from "./movimientos-borrar";
 import { bancosCobroManual } from "./cobro-manual";
 import { bancosConciliacionConfirmar } from "./conciliacion-confirmar";
@@ -24,6 +25,8 @@ export const capacidadesBancos = [
   bancosCartolasListar,
   bancosCartolasDeshacer,
   bancosMovimientosBorrarRango,
+  bancosDescartesListar,
+  bancosDescartesRestaurar,
   bancosSincronizar,
   bancosRecibirWeb4leads,
   bancosConciliacionSugerir,

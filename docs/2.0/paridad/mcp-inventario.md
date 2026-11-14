@@ -373,6 +373,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.deshacer` | `finanzas_cartolas_deshacer` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.listar` | `finanzas_cartolas_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.descartes_bancarios.list` | `finanzas_descartes_bancarios_list` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.descartes_bancarios.restaurar` | `finanzas_descartes_bancarios_restaurar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.movimientos_bancarios.borrar_rango` | `finanzas_movimientos_bancarios_borrar_rango` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |

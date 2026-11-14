@@ -102,7 +102,7 @@ export const VERBOS: Record<string, string> = {
   // Hilo (CAR-331).
   actividad: "Ver actividad", agenda: "Ver agenda",
   // Bancos (CAR-341).
-  borrar_rango: "Borrar por fechas",
+  borrar_rango: "Borrar por fechas (restaurable)",
   // Impuestos (CAR-173).
   borrador_f29: "Borrador del F29",
 };
