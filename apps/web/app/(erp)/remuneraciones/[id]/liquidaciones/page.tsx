@@ -4,9 +4,8 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { CalcularLiquidaciones } from "../../_componentes/calcular-liquidaciones";
-import { cargarPeriodos, permisosNomina } from "../../_componentes/datos";
 import { pesos } from "../../_componentes/etiquetas";
-import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
+import { opcionesPeriodo, periodoDeRuta } from "../../_componentes/pagina-periodo";
 import { TablaLiquidaciones } from "../../_componentes/tabla-liquidaciones";
 import type { ListaLiquidaciones } from "../../_componentes/tipos";
 
@@ -22,18 +21,13 @@ export default function LiquidacionesPeriodo({ params }: Props) {
       titulo="Liquidaciones"
       ruta="/remuneraciones"
       cargar={async () => {
-        const [{ id }, per, perm] = await Promise.all([params, cargarPeriodos(), permisosNomina()]);
-        const periodo = per.ok ? (per.data.find((p) => p.id === id) ?? null) : null;
+        const { id, periodo, perm } = await periodoDeRuta(params);
         const lista = perm.novedadesRead
           ? await ejecutarComoUsuario<ListaLiquidaciones>("erp", "nomina.liquidaciones.listar", { periodoId: id, limite: 200 })
           : null;
         return { id, periodo, perm, lista };
       }}
-      opciones={(d) => ({
-        insignia: <SegmentoRemuneraciones activa="periodos" />,
-        volver: { href: `/remuneraciones/${d.id}`, etiqueta: d.periodo?.etiqueta ?? "Período" },
-        ...(d.periodo ? { titulo: `Liquidaciones · ${d.periodo.etiqueta}` } : {}),
-      })}
+      opciones={opcionesPeriodo("Liquidaciones")}
     >
       {(d) => {
         const abierto = d.periodo?.estado === "abierto" || d.periodo?.estado === "en_revision";
