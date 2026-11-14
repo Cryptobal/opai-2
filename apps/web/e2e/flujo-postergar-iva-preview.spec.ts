@@ -19,11 +19,8 @@ test.describe("@preview flujo de caja: postergar el IVA", () => {
     await expect(page.getByRole("heading", { name: "Flujo de caja" }).first()).toBeVisible({
       timeout: 60_000,
     });
-    const celda = page
-      .locator("tr", { hasText: "IVA a pagar" })
-      .getByRole("button")
-      .or(page.locator("li", { hasText: "IVA a pagar" }).getByRole("button"))
-      .first();
+    // Solo la fila de la planilla: la novedad de este cambio también nombra «IVA a pagar».
+    const celda = page.locator("tbody tr", { hasText: "IVA a pagar" }).getByRole("button").first();
     test.skip(
       (await celda.count()) === 0,
       "La empresa de prueba no tiene IVA proyectado en el horizonte",
