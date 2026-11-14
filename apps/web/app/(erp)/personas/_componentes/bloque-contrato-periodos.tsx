@@ -43,7 +43,10 @@ export function BloqueContratoPeriodos({
       </p>
     );
   }
-  const { periodos, terminoVigente, periodoVigente, indefinidoDesde } = contrato;
+  const { periodos, terminoVigente, periodoVigente, tipoContrato } = contrato;
+  // Solo un contrato a plazo fijo admite registrar períodos; un indefinido sin historia es anterior a CAR-409.
+  const indefinido = tipoContrato === "indefinido";
+  const admite = tipoContrato === "plazo_fijo";
   const ultimo = periodos.at(-1);
   const plazo = estadoVencimiento(hoyIso(), terminoVigente);
   const plazos = periodos.filter((p) => p.tipo === "plazo_fijo").length;
@@ -63,7 +66,7 @@ export function BloqueContratoPeriodos({
       <div className="flex items-center gap-2">
         <History className="size-4 text-fg-muted" aria-hidden />
         <span className="t-label">Períodos del contrato</span>
-        {indefinidoDesde ? <Badge tono="success">Indefinido</Badge> : null}
+        {indefinido ? <Badge tono="success">Indefinido</Badge> : null}
         {periodoVigente ? (
           <Badge tono="info">{`Plazo fijo ${periodoVigente} de ${MAX_PLAZOS}`}</Badge>
         ) : null}
@@ -77,11 +80,13 @@ export function BloqueContratoPeriodos({
           ))}
         </ol>
       ) : (
-        <p className="t-body-sm text-fg-muted">Sin períodos registrados.</p>
+        <p className="t-body-sm text-fg-muted">
+          {admite ? "Sin períodos registrados." : "Este contrato no lleva períodos de plazo fijo."}
+        </p>
       )}
       {puede ? (
         <div className="flex flex-wrap gap-2">
-          {!indefinidoDesde ? (
+          {admite ? (
             <EnlaceBotonHoja variante="secondary" icono={Plus} href="?registrar-periodo=1">
               Registrar período
             </EnlaceBotonHoja>

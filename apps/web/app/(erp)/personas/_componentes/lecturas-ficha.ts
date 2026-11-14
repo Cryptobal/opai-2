@@ -45,6 +45,7 @@ export type PeriodoContrato = {
 export type ContratoPeriodos = {
   vinculoId: string;
   inicioContrato: string;
+  tipoContrato: string;
   periodos: PeriodoContrato[];
   periodoVigente: number | null;
   terminoVigente: string | null;

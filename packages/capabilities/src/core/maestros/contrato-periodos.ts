@@ -5,8 +5,12 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { diaSchema, escribirConEvento } from "./comun";
-import { planearPeriodo, sincronizarTipoVinculo } from "./contrato-periodos-reglas";
+import { diaSchema, escribirConEvento, sinDuplicado } from "./comun";
+import {
+  planearPeriodo,
+  sincronizarTipoVinculo,
+  vinculoBloqueado,
+} from "./contrato-periodos-reglas";
 import {
   cargarContrato,
   contratoSchema,
@@ -63,8 +67,8 @@ export const personasPeriodosRegistrar = defineCapability({
         payload: () => ({ tipo: input.tipo }),
       },
       async (tx) => {
-        const plan = await planearPeriodo(tx, p.id, input);
-        await tx.contratoPeriodo.create({
+        const plan = await planearPeriodo(tx, p.id, input, true);
+        const crear = tx.contratoPeriodo.create({
           data: {
             tenantId: p.tenantId,
             personaId: p.id,
@@ -75,6 +79,7 @@ export const personasPeriodosRegistrar = defineCapability({
             registradoPorId: reclutadorPorDefecto(ctx),
           },
         });
+        await sinDuplicado(crear, "Ya hay un período del contrato que empieza ese día.");
         await sincronizarTipoVinculo(tx, plan.vinculo.id, plan.vinculo.tipo);
         return { id: p.id };
       },
@@ -98,8 +103,8 @@ export const personasPeriodosAnular = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const p = await personaFicha(ctx, input.id);
-    const ultimoDe = async (db: typeof ctx.db) => {
-      const v = await vinculoVigente(db, p.id);
+    const ultimoDe = async (db: typeof ctx.db, bloquear = false) => {
+      const v = bloquear ? await vinculoBloqueado(db, p.id) : await vinculoVigente(db, p.id);
       if (!v) throw conflicto("La persona no tiene un contrato vigente.");
       const ultimo = (await periodosValidos(db, v.id)).at(-1);
       if (!ultimo || ultimo.id !== input.periodoId) {
@@ -119,7 +124,7 @@ export const personasPeriodosAnular = defineCapability({
       ctx,
       { tipo: "core.persona.contrato_periodo_anulado", entidadTipo: "persona" },
       async (tx) => {
-        const v = await ultimoDe(tx);
+        const v = await ultimoDe(tx, true);
         await tx.contratoPeriodo.update({
           where: { id: input.periodoId },
           data: {

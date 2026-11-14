@@ -53,6 +53,8 @@ ALTER TABLE "core"."contrato_periodos" ADD CONSTRAINT "contrato_periodos_vinculo
     FOREIGN KEY ("vinculo_id") REFERENCES "core"."vinculos_laborales"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 GRANT SELECT, INSERT, UPDATE ON "core"."contrato_periodos" TO opai_app;
+-- Los privilegios por defecto del schema dan DELETE: se quita, un período no se borra (se anula).
+REVOKE DELETE ON "core"."contrato_periodos" FROM opai_app;
 ALTER TABLE "core"."contrato_periodos" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core"."contrato_periodos" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "core"."contrato_periodos" AS PERMISSIVE FOR ALL TO opai_app

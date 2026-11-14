@@ -14,22 +14,37 @@ export type NuevoPeriodo = {
   termino?: string | null | undefined;
 };
 
-/** Tipos de vínculo que llevan períodos (honorarios y por obra no los tienen). */
-const TIPOS_CON_PERIODOS = new Set(["plazo_fijo", "indefinido"]);
+/**
+ * Bloquea el contrato vigente de la persona hasta el fin de la transacción, para que dos registros o
+ * anulaciones simultáneos no pasen la validación a la vez (solo dentro de `ctx.transaccion`).
+ */
+export async function vinculoBloqueado(tx: TenantTx, personaId: string) {
+  const v = await vinculoVigente(tx, personaId);
+  if (!v) return null;
+  await tx.$queryRaw`SELECT id FROM core.vinculos_laborales WHERE id = ${v.id}::uuid FOR UPDATE`;
+  // Releer después del bloqueo: el tipo pudo cambiar en la transacción que esperábamos.
+  return vinculoVigente(tx, personaId);
+}
 
 /**
  * Valida un período nuevo contra la historia del contrato vigente (CAR-409): sin contrato vigente, ya
  * indefinido, más de 3 plazos fijos, o un inicio que no viene después del término anterior.
  */
-export async function planearPeriodo(tx: TenantTx, personaId: string, p: NuevoPeriodo) {
-  const v = await vinculoVigente(tx, personaId);
+export async function planearPeriodo(
+  tx: TenantTx,
+  personaId: string,
+  p: NuevoPeriodo,
+  bloquear = false,
+) {
+  const v = bloquear ? await vinculoBloqueado(tx, personaId) : await vinculoVigente(tx, personaId);
   if (!v) throw conflicto("La persona no tiene un contrato vigente.");
-  if (!TIPOS_CON_PERIODOS.has(v.tipo)) {
+  // Un contrato indefinido no vuelve a plazo fijo, tenga o no historia registrada.
+  if (v.tipo === "indefinido") throw conflicto("El contrato ya es indefinido.");
+  if (v.tipo !== "plazo_fijo") {
     throw reglaDeNegocio("Los contratos a honorarios o por obra no llevan períodos de plazo fijo.");
   }
   const previos = await periodosValidos(tx, v.id);
   const ultimo = previos.at(-1);
-  if (ultimo?.tipo === "indefinido") throw conflicto("El contrato ya es indefinido.");
   const inicio = aFecha(p.inicio);
   if (inicio < v.inicio)
     throw reglaDeNegocio("El período no puede empezar antes del inicio del contrato.");
@@ -49,10 +64,14 @@ export async function planearPeriodo(tx: TenantTx, personaId: string, p: NuevoPe
   };
 }
 
-/** El tipo del contrato sigue a su historia: el del último período válido. */
+/**
+ * El tipo del contrato sigue a su historia: el del último período válido. Sin períodos válidos (se anuló
+ * el único) vuelve a plazo fijo: solo un contrato a plazo fijo admite registrar períodos.
+ */
 export async function sincronizarTipoVinculo(tx: TenantTx, vinculoId: string, tipoActual: string) {
   const ultimo = (await periodosValidos(tx, vinculoId)).at(-1);
-  if (ultimo && ultimo.tipo !== tipoActual) {
-    await tx.vinculoLaboral.update({ where: { id: vinculoId }, data: { tipo: ultimo.tipo } });
+  const tipo = ultimo?.tipo ?? "plazo_fijo";
+  if (tipo !== tipoActual) {
+    await tx.vinculoLaboral.update({ where: { id: vinculoId }, data: { tipo } });
   }
 }

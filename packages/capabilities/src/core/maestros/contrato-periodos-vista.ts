@@ -23,6 +23,8 @@ export const contratoSchema = z.object({
   vinculoId: z.string(),
   /** Inicio del contrato vigente. */
   inicioContrato: z.string(),
+  /** Tipo actual del contrato (sigue a la historia; un indefinido sin historia es de antes de CAR-409). */
+  tipoContrato: z.string(),
   periodos: z.array(periodoSchema),
   /** N.º del período de plazo fijo vigente; nulo si no hay o si ya es indefinido. */
   periodoVigente: z.number().nullable(),
@@ -45,7 +47,7 @@ type FilaPeriodo = {
 
 /** Calcula numeración y estado actual desde los períodos válidos (sin anular), en orden de inicio. */
 export function calcularContrato(
-  vinculo: { id: string; inicio: Date },
+  vinculo: { id: string; inicio: Date; tipo: string },
   filas: readonly FilaPeriodo[],
 ): Contrato {
   const orden = [...filas].sort((a, b) => a.inicio.getTime() - b.inicio.getTime());
@@ -68,6 +70,7 @@ export function calcularContrato(
   return {
     vinculoId: vinculo.id,
     inicioContrato: dia(vinculo.inicio)!,
+    tipoContrato: vinculo.tipo,
     periodos,
     periodoVigente: ultimo && !indefinido ? ultimo.numero : null,
     terminoVigente: ultimo && !indefinido ? ultimo.termino : null,
