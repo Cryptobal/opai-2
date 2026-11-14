@@ -18,11 +18,9 @@ export const SIN_BUSCADOR: Readonly<Record<string, string>> = {
   inventario: "Activos y tipos se buscan en su propia lista (código o serie); pendiente su aporte al buscador general.",
   finanzas: "CAR-402: facturas, notas y documentos de compra.",
   nomina: "CAR-406: procesos de remuneraciones.",
-  pauta: "La pauta se abre por instalación, que ya se busca; pendiente su buscador.",
   portal_cliente: "Portal del cliente: no agrega entidades al ERP.",
   portal_trabajador: "Portal del trabajador: no agrega entidades al ERP.",
   rondas: "CAR-405: rondas y puntos de control.",
-  tickets: "CAR-404: tickets y puestos.",
 };
 
 asegurarRegistro();
