@@ -1,16 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Alerta, avisar, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
-
-import { useHojaUrl } from "@/app/_components/maestros/use-url";
-import { useCapacidad } from "@/app/_components/use-capacidad";
+import { Alerta, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
 
 import { AccionesHoja } from "./acciones-hoja";
 import { type CampoEditable, EditorCampos } from "./editor-campos";
 import { CATEGORIAS, type PrendaKit, type TipoInventario } from "./tipos";
+import { useHojaEntidad } from "./use-hoja-entidad";
 
 const aTallas = (texto: string) =>
   texto
@@ -51,9 +48,7 @@ function datosDe(e: Estado, editando: boolean) {
 
 /** Nuevo tipo de inventario o editar uno (la categoría solo se elige al crear, R2). */
 export function HojaTipo({ tipo, kit }: { tipo?: TipoInventario; kit: PrendaKit[] }) {
-  const hoja = useHojaUrl(tipo ? "editar" : "nuevo");
-  const router = useRouter();
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const { hoja, ejecutar, pendiente, error, terminar } = useHojaEntidad(Boolean(tipo), "/inventario/tipos");
   const [e, setE] = useState<Estado>(() => inicial(tipo));
   const fijar = (parcial: Partial<Estado>) => setE((x) => ({ ...x, ...parcial }));
   const esRopa = e.categoria === "ropa";
@@ -66,10 +61,7 @@ export function HojaTipo({ tipo, kit }: { tipo?: TipoInventario; kit: PrendaKit[
       tipo ? "inventario.tipos.actualizar" : "inventario.tipos.crear",
       tipo ? { id: tipo.id, ...datos } : { categoria: e.categoria, ...datos },
     );
-    if (!r) return;
-    avisar.exito(tipo ? "Tipo actualizado" : "Tipo creado");
-    hoja.cerrar();
-    if (!tipo) router.push(`/inventario/tipos/${r.id}`);
+    terminar(r, tipo ? "Tipo actualizado" : "Tipo creado");
   }
 
   return (

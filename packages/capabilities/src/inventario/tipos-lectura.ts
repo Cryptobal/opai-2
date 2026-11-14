@@ -4,7 +4,14 @@ import { z } from "zod";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
-import { PERMISOS_INVENTARIO, tipoSchema, vistaTipo } from "./comun";
+import {
+  entradaLista,
+  PERMISOS_INVENTARIO,
+  salidaLista,
+  tipoSchema,
+  tiposPorNombre,
+  vistaTipo,
+} from "./comun";
 
 export const tiposList = defineCapability({
   id: "inventario.tipos.list",
@@ -14,27 +21,18 @@ export const tiposList = defineCapability({
   input: z.object({
     categoria: z.enum(CATEGORIAS_TIPO).optional(),
     incluirInactivos: z.boolean().default(false),
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(100),
+    ...entradaLista(100),
   }),
-  output: z.object({ items: z.array(tipoSchema), siguiente: z.string().nullable() }),
+  output: salidaLista(tipoSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { categoria, incluirInactivos, cursor, limite }) {
-    const filas = await ctx.db.inventarioTipo.findMany({
-      where: {
-        ...(categoria ? { categoria } : {}),
-        ...(incluirInactivos ? {} : { activo: true }),
-        ...(cursor ? { nombreNormalizado: { gt: cursor } } : {}),
-      },
-      orderBy: { nombreNormalizado: "asc" },
-      take: limite + 1,
-    });
-    const pagina = filas.slice(0, limite);
-    return {
-      items: pagina.map(vistaTipo),
-      siguiente: filas.length > limite ? (pagina.at(-1)?.nombreNormalizado ?? null) : null,
+    const filtro = {
+      ...(categoria ? { categoria } : {}),
+      ...(incluirInactivos ? {} : { activo: true }),
     };
+    const { items, siguiente } = await tiposPorNombre(ctx, filtro, cursor, limite);
+    return { items: items.map(vistaTipo), siguiente };
   },
 });
 

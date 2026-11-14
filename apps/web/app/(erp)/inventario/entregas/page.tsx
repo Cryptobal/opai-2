@@ -3,13 +3,12 @@ import { HandCoins } from "lucide-react";
 import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { requerirIdentidad } from "@/lib/servidor";
+import type { SearchParams } from "@/lib/parametros";
 
 import { cargarEntregas, cargarOpcionesEntrega } from "../_componentes/datos-entregas";
 import { HojaDevolver, HojaEntrega } from "../_componentes/diferidas";
 import { ListaEntregas } from "../_componentes/lista-entregas";
+import { contextoPagina } from "../_componentes/paginas";
 
 export const metadata = { title: "Entregas" };
 
@@ -22,8 +21,7 @@ export default function Entregas({ searchParams }: { searchParams: SearchParams 
       ruta="/inventario"
       completo
       cargar={async () => {
-        const [p, identidad] = await Promise.all([leerParametros(searchParams), requerirIdentidad("/inventario/entregas")]);
-        const puedeGestionar = puedeDeIdentidad(identidad)("inventario:gestionar");
+        const { p, puede: puedeGestionar } = await contextoPagina(searchParams, "/inventario/entregas", "inventario:gestionar");
         // Las opciones de la hoja solo se cargan con la hoja abierta (consultas por navegación, ADR-045).
         const opciones = puedeGestionar && p["nueva"] ? await cargarOpcionesEntrega() : null;
         return { ...(await cargarEntregas(p)), puedeGestionar, opciones };

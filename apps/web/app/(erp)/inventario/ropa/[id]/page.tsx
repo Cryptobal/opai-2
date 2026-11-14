@@ -1,12 +1,10 @@
-import { Suspense } from "react";
-
-import { Loading, SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { conBusqueda, type SearchParams } from "@/lib/parametros";
 
 import { cargarFichaRopa } from "../../_componentes/datos-ropa";
 import { DetalleRopa } from "../../_componentes/detalle-ropa";
+import { DivisionFicha } from "../../_componentes/division-ficha";
 import { ListaRopa } from "../../_componentes/lista-ropa";
 
 export const metadata = { title: "Ropa" };
@@ -28,17 +26,9 @@ export default function RopaDetalle({ params, searchParams }: Props) {
       opciones={(d) => ({ volver: { href: conBusqueda("/inventario/ropa", d.p.q), etiqueta: "Ropa" } })}
     >
       {({ id, p, datos, lista, puedeGestionar }) => (
-        <SplitScreen
-          telefono="detalle"
-          unPanelHastaLg
-          etiquetaLista="Lista de ropa"
-          lista={<ListaRopa state={lista.state} items={lista.items} seleccionada={id} {...(p.q ? { q: p.q } : {})} />}
-          detalle={
-            <Suspense fallback={<Loading variante="detalle" />}>
-              <DetalleRopa datos={datos} puedeGestionar={puedeGestionar} />
-            </Suspense>
-          }
-        />
+        <DivisionFicha etiqueta="Lista de ropa" lista={<ListaRopa state={lista.state} items={lista.items} seleccionada={id} {...(p.q ? { q: p.q } : {})} />}>
+          <DetalleRopa datos={datos} puedeGestionar={puedeGestionar} />
+        </DivisionFicha>
       )}
     </PaginaPortal>
   );

@@ -8,7 +8,7 @@ import { prendasDeLaEmpresa } from "../core/maestros/uniforme-prendas";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
-import { PERMISOS_INVENTARIO } from "./comun";
+import { entradaLista, PERMISOS_INVENTARIO, salidaLista } from "./comun";
 import { exigirDestino } from "./entregas-comun";
 
 /** Error si la prenda no es del kit del uniforme de la empresa. */
@@ -22,23 +22,21 @@ export const prendasList = defineCapability({
   descripcion:
     "Lista las prendas del uniforme de la empresa (las propias o las de su rubro), para ligar un tipo de ropa del inventario a una de ellas.",
   permiso: PERMISOS_INVENTARIO.read,
-  input: z.object({
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(50).default(50),
-  }),
-  output: z.object({
-    items: z.array(z.object({ clave: z.string(), nombre: z.string() })),
-    siguiente: z.string().nullable(),
-  }),
+  input: z.object(entradaLista(50)),
+  output: salidaLista(z.object({ clave: z.string(), nombre: z.string() })),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { cursor, limite }) {
     const kit = await prendasDeLaEmpresa(ctx);
     const indice = cursor ? kit.findIndex((p) => p.clave === cursor) : -1;
-    if (cursor && indice < 0) throw reglaDeNegocio("El cursor no corresponde a una prenda del uniforme.");
+    if (cursor && indice < 0)
+      throw reglaDeNegocio("El cursor no corresponde a una prenda del uniforme.");
     const desde = indice + 1;
     const pagina = kit.slice(desde, desde + limite);
-    return { items: pagina, siguiente: desde + limite < kit.length ? (pagina.at(-1)?.clave ?? null) : null };
+    return {
+      items: pagina,
+      siguiente: desde + limite < kit.length ? (pagina.at(-1)?.clave ?? null) : null,
+    };
   },
 });
 
@@ -55,10 +53,16 @@ export const tallaDePersona = defineCapability({
   dryRun: false,
   async handler(ctx, { tipoId, personaId }) {
     await exigirDestino(ctx, { personaId });
-    const tipo = await ctx.db.inventarioTipo.findFirst({ where: { id: tipoId }, select: { categoria: true, prendaClave: true } });
+    const tipo = await ctx.db.inventarioTipo.findFirst({
+      where: { id: tipoId },
+      select: { categoria: true, prendaClave: true },
+    });
     if (!tipo || tipo.categoria !== "ropa") throw noEncontrado("El tipo de ropa");
     if (!tipo.prendaClave) return { personaId, talla: null };
-    const fila = await ctx.db.personaTalla.findFirst({ where: { personaId, prenda: tipo.prendaClave }, select: { talla: true } });
+    const fila = await ctx.db.personaTalla.findFirst({
+      where: { personaId, prenda: tipo.prendaClave },
+      select: { talla: true },
+    });
     return { personaId, talla: fila?.talla.trim() ? normalizarTalla(fila.talla) : null };
   },
 });

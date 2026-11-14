@@ -3,13 +3,12 @@ import { Package } from "lucide-react";
 import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { requerirIdentidad } from "@/lib/servidor";
+import type { SearchParams } from "@/lib/parametros";
 
 import { cargarActivos } from "./_componentes/datos-activos";
 import { HojaActivo } from "./_componentes/diferidas";
 import { ListaActivos } from "./_componentes/lista-activos";
+import { contextoPagina } from "./_componentes/paginas";
 
 export const metadata = { title: "Inventario" };
 
@@ -22,11 +21,11 @@ export default function Inventario({ searchParams }: { searchParams: SearchParam
       ruta="/inventario"
       completo
       cargar={async () => {
-        const [p, identidad] = await Promise.all([leerParametros(searchParams), requerirIdentidad("/inventario")]);
+        const { p, puede } = await contextoPagina(searchParams, "/inventario", "inventario:gestionar");
         return {
           ...(await cargarActivos(p)),
           q: p.q,
-          puedeGestionar: puedeDeIdentidad(identidad)("inventario:gestionar"),
+          puedeGestionar: puede,
         };
       }}
     >

@@ -5,7 +5,13 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
 import { activoSchema, fichaActivoSchema, vistaActivo } from "./activos-comun";
-import { camposGuardados, PERMISOS_INVENTARIO } from "./comun";
+import {
+  camposGuardados,
+  entradaLista,
+  paginaPor,
+  PERMISOS_INVENTARIO,
+  salidaLista,
+} from "./comun";
 
 export const activosList = defineCapability({
   id: "inventario.activos.list",
@@ -17,10 +23,9 @@ export const activosList = defineCapability({
     estado: z.enum(ESTADOS_ACTIVO).optional(),
     q: z.string().trim().max(60).optional().describe("Texto en el código o el número de serie."),
     incluirBaja: z.boolean().default(false),
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(100),
+    ...entradaLista(100),
   }),
-  output: z.object({ items: z.array(activoSchema), siguiente: z.string().nullable() }),
+  output: salidaLista(activoSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { tipoId, estado, q, incluirBaja, cursor, limite }) {
@@ -44,7 +49,7 @@ export const activosList = defineCapability({
       orderBy: { codigoNormalizado: "asc" },
       take: limite + 1,
     });
-    const pagina = filas.slice(0, limite);
+    const { items: pagina, siguiente } = paginaPor(filas, limite, (f) => f.codigoNormalizado);
     const tipos = await ctx.db.inventarioTipo.findMany({
       where: { id: { in: [...new Set(pagina.map((f) => f.tipoId))] } },
       select: { id: true, nombre: true },
@@ -52,7 +57,7 @@ export const activosList = defineCapability({
     const nombre = new Map(tipos.map((t) => [t.id, t.nombre]));
     return {
       items: pagina.map((f) => vistaActivo(f, nombre.get(f.tipoId) ?? "")),
-      siguiente: filas.length > limite ? (pagina.at(-1)?.codigoNormalizado ?? null) : null,
+      siguiente,
     };
   },
 });
