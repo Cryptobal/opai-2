@@ -1,6 +1,7 @@
 import type { Contexto } from "../../types";
 import type { Equipo, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
 import { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
+import { senalRonda } from "./rondas-senales";
 
 export type NovedadesResueltas = {
   rechazos: Rechazos;
@@ -107,14 +108,14 @@ export async function resolverNovedades(
       const nuevas = await tx.libroNovedad.createManyAndReturn({
         skipDuplicates: true,
         data,
-        select: { id: true, numero: true, gravedad: true },
+        select: { id: true, numero: true, gravedad: true, personaId: true },
       });
       for (const n of nuevas.filter((x) => x.gravedad === "alta")) {
         await ctx.eventos.emitir(tx, {
           tipo: "rondas.novedad.grave",
           entidadTipo: "libro_novedad",
           entidadId: n.id,
-          payload: { instalacionId: equipo.instalacionId, numero: n.numero },
+          payload: { ...senalRonda(equipo.instalacionId, n.personaId), numero: n.numero },
         });
       }
     },

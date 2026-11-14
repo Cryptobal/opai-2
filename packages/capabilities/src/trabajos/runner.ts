@@ -135,7 +135,7 @@ export async function programarCapturaSii(ctx: Contexto, hoy: string): Promise<b
   return sii;
 }
 
-/** Encola trabajos horarios (`hora` = «aaaa-mm-ddTHH» en UTC). */
+/** Encola trabajos horarios (`hora` = «aaaa-mm-ddTHH» en la hora local del tenant, ver `horaEn`). */
 export async function programarHorarios(ctx: Contexto, hora: string): Promise<string[]> {
   const encolados: string[] = [];
   for (const t of listarTrabajos().filter((x) => x.periodicidad === "horaria")) {

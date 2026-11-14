@@ -5,6 +5,7 @@ import type { MotivoRechazo } from "./hechos-evaluar";
 import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
 import { resolverNovedades } from "./rondas-novedades";
+import { emitirAnomalias } from "./rondas-senales";
 
 export type Proyecciones = {
   /** Hechos que el servidor no puede resolver (QR ajeno, documento inválido, módulo inactivo…). */
@@ -66,7 +67,20 @@ export async function prepararProyecciones(
           },
         ];
       });
-      if (filas.length > 0) await tx.marcaRonda.createMany({ skipDuplicates: true, data: filas });
+      const creadas = filas.length
+        ? await tx.marcaRonda.createManyAndReturn({
+            skipDuplicates: true,
+            data: filas,
+            select: {
+              id: true,
+              puntoId: true,
+              personaId: true,
+              anomalias: true,
+              ejecucionId: true,
+            },
+          })
+        : [];
+      await emitirAnomalias(tx, ctx.eventos, equipo.instalacionId, creadas);
       await rondas.cerrar(tx, aceptadas, ids);
       await novedades.escribir(tx, aceptadas, ids);
       await acceso.escribir(tx, aceptadas);

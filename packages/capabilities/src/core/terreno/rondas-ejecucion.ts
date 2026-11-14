@@ -150,7 +150,7 @@ export async function resolverEjecuciones(
       return new Map(todas.map((e) => [e.clave, e.id]));
     },
     cerrar: (tx, aceptadas, ids) =>
-      escribirCierres(tx, {
+      escribirCierres(tx, ctx.eventos, {
         base,
         conocidas,
         cierres: cierresOk,
