@@ -81,6 +81,17 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - Paridad UI↔MCP (ADR-004, ADR-034 §4): el MCP puede hacer todo lo que se hace en pantalla. Cada brief cierra con `tools/list` en `main` y el gate de paridad en verde; una pantalla sin capacidad expuesta no se integra. El gate es `packages/capabilities/test/paridad.test.ts` (y `apps/web/test/paridad-registro.test.ts` sobre el registro completo): toda capacidad que no sea `platform.*` produce una herramienta MCP salvo las de `paridad-excepciones.ts` (solo `interna` o `soloPersonas`, con motivo), todo id que la UI pasa a un ejecutor existe y no es interno, y `apps/web/app/**` y `apps/web/lib/**` no importan `@opai/db` (ESLint `no-restricted-imports`) salvo la infraestructura de `apps/web/paridad-permitidos.json`. Cambiar la lista de herramientas exige actualizar la instantánea `test/__snapshots__/herramientas-mcp.txt`. Tras desplegar, `OPAI_MCP_KEY=<key> pnpm mcp:verificar` compara `tools/list` con lo que el servidor declara.
 - Vocabulario genérico en código (persona, instalación, puesto, servicio, recorrido, novedad). Los textos visibles pasan por el diccionario de la vertical del tenant (Brief 01).
 
+## Código simple
+
+Regla de Carlos del 14-nov-2026 (ADR-115). Los cinco principios están en `AGENTS.md` § «Código simple»; aquí va cómo se aplican.
+
+- **Antes de escribir:** busca lo que ya existe (`grep` en `packages/domain`, `packages/capabilities`, `packages/ds` y el módulo). Dos copias casi iguales se unen en una; tres usos justifican moverla a `packages/*`.
+- **Sin anticipar:** no se agregan parámetros opcionales, banderas, genéricos, interfaces de una sola implementación ni envoltorios que solo reenvían. Si mañana hace falta, se agrega mañana.
+- **Límites:** archivos ≤ 150 líneas (ESLint `max-lines`, error) y funciones ≤ 60 líneas (lo mide `simplicidad`; no es error de lint para no bloquear lo ya escrito). Las pruebas y los archivos generados quedan fuera de la medición.
+- **Código muerto:** exportaciones, archivos y dependencias sin uso los detecta `knip` (configuración en `knip.json`); los duplicados, `jscpd` (bloques de 50 tokens o más). Un falso positivo se resuelve en la configuración con un comentario que diga por qué, nunca subiendo la base.
+- **Comando:** `pnpm simplicidad` mide y compara con `simplicidad-base.json`; `pnpm simplicidad --actualizar` reescribe la base (solo para bajarla, o para subirla con la justificación en el PR).
+- **Simplificar código existente:** un tema por PR, sin cambiar el comportamiento, con las pruebas existentes en verde; si la parte no tiene pruebas, primero un commit con las pruebas que fijan el comportamiento actual y después la simplificación.
+
 ## UI
 
 - Solo tokens y componentes de `@opai/ds`. Sin hex, sin estilos inline, sin componentes propios por módulo cuando el DS tiene uno. `grep -rn "#[0-9a-fA-F]\{6\}" apps packages modules --include=*.tsx --include=*.ts --include=*.css` debe devolver solo `tokens.css`.

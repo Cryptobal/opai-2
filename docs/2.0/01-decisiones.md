@@ -1892,6 +1892,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
 
+> **Retirada el 14-nov-2026 por ADR-115** (la reemplaza «Autonomía de las sesiones», ADR-114). Sigue vigente solo su adenda «no detenerse», ahora en `AGENTS.md` § «Trabajo continuo».
+
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:22, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` (sección «Decisiones de Carlos») e `INSTRUCCIONES-proyecto-claude.md`. (ADR-093 y ADR-094 están reservados por los PRs abiertos #505 y #506.)
 
 **Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
@@ -2238,3 +2240,22 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 5. **Identifícate siempre.** Cada PR, comentario e issue empieza con «`[Sesión <nombre>]`».
 
 **Consecuencias.** Ante un choque con otra sección de `AGENTS.md`, manda «Autonomía de las sesiones», salvo lo que no cambia (abajo). Lo que antes se preguntaba en el chat o con `DECISIÓN CARLOS:` en el PR (ADR-095) va al issue «Decide Carlos», y el párrafo «Decisión tuya» solo lo enlaza. No cambian el veto de Carlos, las condiciones de «Integración a `main`», lo «Prohibido» (producción de Gard, OPAI 1.0, secretos) ni el punto 4 del Modo noche (ADR-111). Desde ADR-108 la anotación «en `ESTADO.md`» de un PR de construcción va en su archivo de `docs/2.0/estado/`. La etiqueta «Decide Carlos» queda creada en el equipo CAR de Linear.
+
+## ADR-115 · Código simple, medido en cada PR; se retira «Decisión tuya» (CAR-432, 14-nov-2026)
+
+**Fecha:** 14-nov-2026 · **Estado:** vigente · **Decide:** Carlos, encargo a la Sesión Estándares (10:29, hora de Chile) · **Registra:** Claude («Sesión Estándares»). **Modifica** `AGENTS.md`, `CLAUDE.md` y `docs/2.0/REGLAS-codigo.md` (sección nueva «Código simple»). **Retira** ADR-095 («Decisión tuya»), salvo su adenda «no detenerse». **Completa** ADR-106 (la vara) y ADR-114 (autonomía).
+
+**Contexto.** Varias sesiones construyen en paralelo y el repositorio crece rápido. Sin una regla y una medida, se acumulan copias casi iguales, abstracciones para usos que no llegaron y código que quedó sin uso. Eso encarece cada cambio siguiente y esconde errores. Carlos pide código más simple sin perder calidad ni romper nada.
+
+**Decisión.**
+
+1. **Regla «Código simple»** para todo el repositorio: la solución más simple que cumpla; reutilizar antes de crear; nada de abstracciones «por si acaso»; el código muerto se borra en el mismo PR; funciones (hasta 60 líneas) y archivos (hasta 150) cortos. Simple no recorta tenant, permisos, auditoría, paridad ni pruebas.
+2. **Medición en cada PR.** El check `simplicidad` mide código duplicado, archivos y funciones largos, y exportaciones, archivos y dependencias sin uso. Compara con la línea base del repositorio (`simplicidad-base.json`): falla solo si el PR empeora una cifra, nunca por lo que ya existe. La base solo baja; subirla exige justificación en el PR.
+3. **Revisión general, una vez.** Informe en `docs/2.0/simplificacion/` con duplicados, código muerto, lo sobrecomplicado y dependencias sin uso, ordenado por beneficio y riesgo, y un issue de Linear por grupo.
+4. **Simplificación en PR chicos.** Un tema por PR, sin cambiar el comportamiento, con las pruebas existentes en verde; si una parte no tiene pruebas, primero las pruebas. No se toca código que otra sesión tenga en un PR abierto; se coordina por Linear. Se integran con la regla vigente (checks en verde, revisión final sin bloqueos y snapshot si hay migración).
+5. **Pasada semanal** de limpieza de la Sesión Estándares con el mismo método.
+6. **Se retira «Decisión tuya».** Las respuestas ya no terminan con ese párrafo ni con «Decisión tuya: ninguna, sigo», ni se deja `DECISIÓN CARLOS:` en el PR. Lo que depende de Carlos va a Linear con la etiqueta «Decide Carlos» (ADR-114). La regla de no detenerse sigue vigente como «Trabajo continuo».
+
+**Decisiones de la sesión (reversibles) y por qué.** Herramientas: `knip` (sin uso) y `jscpd` (duplicados), las de uso más extendido para TypeScript en monorepos; las funciones largas se cuentan con el analizador de TypeScript que el repo ya tiene, sin dependencia nueva. El tope de función es 60 líneas, medido y no error de lint, para no bloquear lo ya escrito. El check corre en el flujo rápido de cada PR y no pasa a obligatorio del ruleset: ese cambio es de Carlos (issue «Decide Carlos»).
+
+**Consecuencias.** Un PR que agrega duplicación, un archivo o función largos o algo sin uso falla `simplicidad` hasta que lo corrija o lo justifique. Las instrucciones del proyecto en claude.ai todavía piden «Decisión tuya»; cambiarlas es de Carlos (issue «Decide Carlos»). Mientras tanto manda el repositorio.
