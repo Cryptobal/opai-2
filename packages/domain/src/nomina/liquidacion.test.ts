@@ -30,6 +30,7 @@ describe("nomina · liquidación del mes", () => {
     expect(l.totalHaberes - l.totalDescuentosLegales).toBe(l.liquido);
     expect(l.haberes.find((h) => h.concepto === "Sueldo base")?.monto).toBe(553_553);
     // Los aportes del empleador (para el LRE) más haberes y provisiones dan el costo empresa.
+    expect(l.prevision.basePrevisional).toBeGreaterThan(0);
     expect(l.aportesEmpleador.map((a) => a.concepto)).toEqual(expect.arrayContaining(["SIS", "Seguro de cesantía empleador"]));
     expect(l.aportesEmpleador.reduce((s, a) => s + a.monto, 0) + l.totalHaberes).toBeLessThanOrEqual(l.costoEmpresa);
   });

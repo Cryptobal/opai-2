@@ -7,3 +7,4 @@ export * from "./liquidacion";
 export * from "./costo-proyectado";
 export * from "./lre-columnas";
 export * from "./lre";
+export * from "./previred";
