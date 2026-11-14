@@ -40,6 +40,8 @@ export const EVENTOS_CRM: readonly EventoDeDominio[] = [
   { id: "core.etiqueta.creada", descripcion: "Se creó una etiqueta del catálogo." },
   { id: "core.etiqueta.actualizada", descripcion: "Cambió una etiqueta del catálogo." },
   { id: "core.etiqueta.eliminada", descripcion: "Se eliminó una etiqueta del catálogo." },
+  { id: "core.contacto.fusionado", descripcion: "Un contacto duplicado se fusionó en otro y se borró (payload: duplicadoId)." },
+  { id: "core.cuenta.fusionada", descripcion: "Una cuenta duplicada se fusionó en otra y se borró (payload: duplicadoId)." },
   { id: "core.campo_personalizado.creado", descripcion: "Se definió un campo personalizado nuevo para cuentas, contactos o negocios." },
   { id: "core.campo_personalizado.actualizado", descripcion: "Cambió un campo personalizado (nombre, opciones, obligatorio, orden o archivado)." },
   { id: "core.campos_personalizados.valores_guardados", descripcion: "Se guardaron valores de campos personalizados en la ficha de una cuenta, un contacto o un negocio (solo las claves)." },

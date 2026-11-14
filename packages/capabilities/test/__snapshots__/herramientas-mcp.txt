@@ -136,6 +136,7 @@ core_contactos_archive
 core_contactos_create
 core_contactos_cuentas
 core_contactos_desvincular
+core_contactos_fusionar
 core_contactos_get
 core_contactos_list
 core_contactos_restaurar
@@ -154,6 +155,7 @@ core_cuentas_consultar_sii
 core_cuentas_contactos
 core_cuentas_create
 core_cuentas_facturable
+core_cuentas_fusionar
 core_cuentas_get
 core_cuentas_list
 core_cuentas_referencias_list
@@ -670,6 +672,7 @@ preview_core_config_set
 preview_core_contactos_archive
 preview_core_contactos_create
 preview_core_contactos_desvincular
+preview_core_contactos_fusionar
 preview_core_contactos_restaurar
 preview_core_contactos_set_roles
 preview_core_contactos_update
@@ -679,6 +682,7 @@ preview_core_correos_crear_direccion
 preview_core_cuentas_aplicar_sii
 preview_core_cuentas_archive
 preview_core_cuentas_create
+preview_core_cuentas_fusionar
 preview_core_cuentas_referencias_revocar
 preview_core_cuentas_set_estado
 preview_core_cuentas_set_representantes

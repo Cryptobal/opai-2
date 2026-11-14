@@ -29,7 +29,7 @@ describe("montoCuota", () => {
   it("UF de una fecha sin valor publicado (futura): usa la última UF y lo marca estimado", () => {
     const r = montoCuota({ unidad: "uf", monto: 10_000 }, "2027-01-05", base);
     expect(r).toMatchObject({ monto: 40_050, estimado: true });
-    expect(r.detalle).toContain("2026-11-30");
+    expect(r.detalle).toContain("30-11-2026");
   });
 
   it("UF sin ninguna publicada: monto 0 y estimado, nunca inventa", () => {
@@ -89,7 +89,7 @@ describe("fechaUf (paridad con OPAI 1)", () => {
   });
   it("la cuota en UF usa la UF del día que dice la política", () => {
     const r = montoCuota({ unidad: "uf", monto: 10_000, politicaUf: "fin_mes_anterior" }, "2026-12-05", { ...base, ufDelDia: (f) => (f === "2026-11-30" ? 4_020_000 : null) });
-    expect(r).toMatchObject({ monto: 40_200, estimado: false, detalle: "UF del 2026-11-30" });
+    expect(r).toMatchObject({ monto: 40_200, estimado: false, detalle: "UF del 30-11-2026" });
   });
 });
 
