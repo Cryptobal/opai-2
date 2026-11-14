@@ -43,7 +43,9 @@ export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<str
   conLimite(erp, trabajador);
   // La persona ficticia de `auditoria-datos.spec.ts` (con RUT y vínculo); si no está, la primera.
   const re = /^\/personas\/[0-9a-f-]{36}$/;
+  // Primero la de `seed:guardia-qa` (CAR-401), la única con usuario de OPAI; luego la de la preparación.
   const ficha =
+    (await primerEnlace(erp, "/personas?q=Guardia%20QA", re)) ??
     (await primerEnlace(erp, "/personas?q=Auditor%C3%ADa", re)) ??
     (await primerEnlace(erp, "/personas", re));
   if (!ficha) return "sin personas en qa-e2e";
