@@ -1,6 +1,7 @@
 import { serieVigente, trabajaEn } from "@opai/domain";
 import { z } from "zod";
 
+import { avisarAlCelular } from "../core/push-avisar";
 import { defineConsumidor } from "../eventos/consumidores";
 import type { Contexto } from "../types";
 import { cargarSeriesDe } from "./cargar";
@@ -98,9 +99,11 @@ export const consumidorPautaCambio = defineConsumidor({
     });
     const primerMes = publicadas[0]?.mes ?? mesDesde;
     const desde = p.data.desde > `${primerMes}-01` ? p.data.desde : `${primerMes}-01`;
+    const avisados: string[] = [];
     for (const { usuarioId } of personas) {
       if (!usuarioId) continue;
       if (await ctx.db.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId } })) continue;
+      avisados.push(usuarioId);
       await ctx.db.notificacion.create({
         data: {
           tenantId: ctx.tenantId,
@@ -112,5 +115,7 @@ export const consumidorPautaCambio = defineConsumidor({
         },
       });
     }
+    // Celular (PR 4a): solo a quien recibió el aviso ahora, si eligió push de pauta y no está en silencio.
+    await avisarAlCelular(ctx, avisados, "pauta", "pauta");
   },
 });
