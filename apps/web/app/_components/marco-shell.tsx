@@ -15,6 +15,7 @@ import { iconoShell } from "./icono-shell";
 import { LinkMenu } from "./link-menu";
 import { empresasShell } from "./empresas-shell";
 import { usePendiente } from "./navegacion-pendiente";
+import { AgenteDisponible } from "./agente/agente-disponible";
 import { useAgenteShell } from "./agente/use-agente-shell";
 import { AccesosProveedor, useBusquedaShell } from "./busqueda-mas-shell";
 import { PinFichaContexto, pinDeFicha } from "./pin-ficha-contexto";
@@ -189,7 +190,7 @@ export function MarcoShell({
           ruta={rutaActual}
           onNavegar={router.push}
         >
-          {children}
+          <AgenteDisponible disponible={Boolean(datos.agente)}>{children}</AgenteDisponible>
         </AccesosProveedor>
         {enErp ? (
           <Preferencias

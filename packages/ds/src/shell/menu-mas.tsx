@@ -3,6 +3,7 @@
 import { lazy, type ReactNode, Suspense, useRef, useState } from "react";
 
 import { Button } from "../components/button";
+import { ATRIBUTO_DISPARADOR } from "../components/hoja-sobre-barra";
 import type { ItemMenu } from "../components/menu";
 import type { BusquedaMasRender, NavItem } from "./types";
 import type { ItemFijado } from "./fijados";
@@ -39,13 +40,29 @@ export function MenuMas({ items, extras, disparador, onNavegar, etiqueta, ...otr
         className="h-14 w-full p-0"
         aria-haspopup="dialog"
         aria-expanded={abierto}
-        onClick={(e) => { disparadorRef.current = e.currentTarget; setMontado(true); setAbierto(true); }}
+        {...{ [ATRIBUTO_DISPARADOR]: "" }}
+        // Con la hoja sobre la barra (CAR-416) la pestaña alterna; con la hoja modal solo abre.
+        onClick={(e) => {
+          disparadorRef.current = e.currentTarget;
+          setMontado(true);
+          setAbierto((a) => !a);
+        }}
       >
         {disparador}
       </Button>
-      {montado ? <Suspense fallback={null}>
-        <Contenido items={items} extras={extras} {...otros} abierto={abierto} onCerrar={() => setAbierto(false)} onNavegar={onNavegar} onRestaurarFoco={() => disparadorRef.current?.focus()} />
-      </Suspense> : null}
+      {montado ? (
+        <Suspense fallback={null}>
+          <Contenido
+            items={items}
+            extras={extras}
+            {...otros}
+            abierto={abierto}
+            onCerrar={() => setAbierto(false)}
+            onNavegar={onNavegar}
+            onRestaurarFoco={() => disparadorRef.current?.focus()}
+          />
+        </Suspense>
+      ) : null}
     </>
   );
 }

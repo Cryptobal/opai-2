@@ -39,6 +39,8 @@ model ExcepcionPauta {
   /// "ausencia" | "licencia" | "vacaciones" | "permiso" | "reemplazo" | "refuerzo" (CHECK en la migración).
   tipo       String
   motivo     String
+  /// Clase de la ausencia que la originó (CAR-393 parte 3), copiada del registro.
+  clase      String?
   /// Titular que faltó ese día (para alertas y trazabilidad); no cambia aunque cambie la serie.
   personaId  String?   @map("persona_id") @db.Uuid
   /// Registro de ausencia de la persona que originó la excepción (CAR-393); null en reemplazos y refuerzos.

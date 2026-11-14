@@ -21,6 +21,8 @@ export type Recurrente = {
   nota: string | null;
   activa: boolean;
   claveOrigen: string | null;
+  /** Tramo anterior del mismo gasto cuando cambió desde una fecha (CAR-413). */
+  anteriorId?: string | null;
 };
 export type FilaEgreso = { id: string; etiqueta: string; seccion: string; activa: boolean };
 
@@ -55,6 +57,12 @@ export function cuando(r: Recurrente): string {
   if (r.frecuencia === "mensual") return `Mensual, ${DIA(r.diaDelMes ?? Number(r.inicio.slice(8, 10)))}`;
   return r.frecuencia === "semanal" ? "Cada semana" : "Cada dos semanas";
 }
+
+export const FRECUENCIAS = [
+  { valor: "mensual", etiqueta: "Mensual" },
+  { valor: "quincenal", etiqueta: "Cada dos semanas" },
+  { valor: "semanal", etiqueta: "Semanal" },
+];
 
 export const POLITICAS: { valor: PoliticaUf; etiqueta: string }[] = [
   { valor: "dia_cuota", etiqueta: "UF del día de la cuota" },

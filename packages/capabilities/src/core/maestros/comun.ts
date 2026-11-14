@@ -50,12 +50,24 @@ export const listaSchema = z.object({
   incluirArchivadas: z.boolean().default(false),
 });
 
-export function pagina<T extends { id: string }>(filas: T[], limite: number) {
-  const items = filas.slice(0, limite);
-  return { items, siguiente: filas.length > limite ? (items.at(-1)?.id ?? null) : null };
+/**
+ * Página por cursor (CAR-400). Sin `skip: 1`: Prisma ubica la fila del cursor aunque ya no cumpla el
+ * filtro, y si dejó de cumplirlo `skip: 1` se comía la primera fila válida de la página siguiente.
+ * Se pide una fila de más por el cursor (`cursorDe`) y aquí se descarta solo si vino.
+ */
+export function pagina<T extends { id: string }>(
+  filas: T[],
+  limite: number,
+  cursor: string | undefined,
+) {
+  const resto = cursor && filas[0]?.id === cursor ? filas.slice(1) : filas;
+  const items = resto.slice(0, limite);
+  return { items, siguiente: resto.length > limite ? (items.at(-1)?.id ?? null) : null };
 }
 
-export const cursorDe = (cursor?: string) => (cursor ? { cursor: { id: cursor }, skip: 1 } : {});
+/** Tramo de la consulta: `take` y cursor (incluida su propia fila, que `pagina` descarta). */
+export const cursorDe = (cursor: string | undefined, limite: number) =>
+  cursor ? { cursor: { id: cursor }, take: limite + 2 } : { take: limite + 1 };
 
 /** Escritura con su evento de dominio en la misma transacción (outbox, ADR-029). */
 export async function escribirConEvento<T extends { id: string }>(

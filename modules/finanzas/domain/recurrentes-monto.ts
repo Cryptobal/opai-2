@@ -1,7 +1,7 @@
 // Monto de cada cuota de un gasto recurrente según su unidad (CAR-349, bloque 2). Puro y entero: la UF va escalada
 // (`UF_ESCALA`, 10.000 = 1 UF) y el porcentaje también (`PCT_ESCALA`, 1.000.000 = 100 %). Nunca inventa un valor:
 // si falta la UF del día o las ventas del mes, usa el último dato conocido y marca la cuota como estimada.
-import { PCT_ESCALA, UF_ESCALA } from "@opai/domain";
+import { formatearFecha, PCT_ESCALA, UF_ESCALA } from "@opai/domain";
 
 export type UnidadRecurrente = "clp" | "uf" | "pct_ventas";
 /** Qué día de UF se usa en cada cuota (paridad con OPAI 1). Por defecto, el día de la cuota. */
@@ -60,9 +60,9 @@ const DIVISOR_PCT = BigInt(PCT_ESCALA);
 
 function enUf(monto: number, fecha: string, b: BaseMonto): MontoCuota {
   const exacta = b.ufDelDia(fecha);
-  if (exacta != null) return { monto: escalar(monto, exacta, DIVISOR_UF), estimado: false, detalle: `UF del ${fecha}` };
+  if (exacta != null) return { monto: escalar(monto, exacta, DIVISOR_UF), estimado: false, detalle: `UF del ${formatearFecha(fecha)}` };
   if (!b.ufUltima) return { monto: 0, estimado: true, detalle: "sin UF publicada" };
-  return { monto: escalar(monto, b.ufUltima.centavos, DIVISOR_UF), estimado: true, detalle: `estimado con la UF del ${b.ufUltima.fecha}` };
+  return { monto: escalar(monto, b.ufUltima.centavos, DIVISOR_UF), estimado: true, detalle: `estimado con la UF del ${formatearFecha(b.ufUltima.fecha)}` };
 }
 
 function enPctVentas(monto: number, fecha: string, b: BaseMonto): MontoCuota {

@@ -16,6 +16,7 @@ export { canonicalizarReciente, normalizarHref, unirAccesos } from "./unir-acces
 export { EncabezadoAreaMas } from "./encabezado-area-mas";
 export { EntradaMas } from "./entrada-mas";
 export { PanelLateral } from "./panel-lateral";
+export { EVENTO_PESTANA_BARRA } from "../components/hoja-sobre-barra";
 export { UserMenu } from "./user-menu";
 export {
   esActivo,

@@ -1,4 +1,4 @@
-import { type Acceso, esRol, PERMISOS_CORE, tienePermisoEfectivo } from "@opai/domain";
+import { accesoDeMembresia, INCLUIR_ACCESO, PERMISOS_CORE, tienePermisoEfectivo } from "@opai/domain";
 
 import type { Contexto } from "../../types";
 import type { Destinatario } from "./destinatarios";
@@ -21,22 +21,13 @@ export async function conAccesoAnexo(
   if (!para.length) return [];
   const membresias = await ctx.db.membership.findMany({
     where: { estado: "activa", userId: { in: para.map((p) => p.id) } },
-    include: { rolTenant: true, excepciones: true },
+    include: INCLUIR_ACCESO,
   });
   const permitidos = new Set(
     membresias
       .filter((m) => {
-        const personalizado = m.rolTenant;
-        const acceso: Acceso = {
-          rol: personalizado || !esRol(m.rol) ? null : m.rol,
-          // Un rol personalizado archivado deniega por defecto, igual que en la sesión (§16.2).
-          permisosRol: personalizado
-            ? personalizado.archivadoEn
-              ? []
-              : personalizado.permisos
-            : null,
-          excepciones: m.excepciones.map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
-        };
+        // Igual que en la sesión: rol (archivado deniega), excepciones y roles que se suman.
+        const acceso = accesoDeMembresia(m);
         return (
           tienePermisoEfectivo(acceso, PERMISOS_CORE.anexosRead) ||
           tienePermisoEfectivo(acceso, PERMISOS_CORE.estructurasReadSensible)

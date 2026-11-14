@@ -373,7 +373,10 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
 
   it("desde el Núcleo, marcar turnos sin permiso de editar la pauta se rechaza y no escribe (CAR-393)", async () => {
     const base = ctx(tenantA);
-    const sinPauta = { ...base, autorizar: (p: string) => p !== "pauta:write" && base.autorizar(p) };
+    const sinPauta = {
+      ...base,
+      autorizar: (p: string) => p !== "pauta:write" && base.autorizar(p),
+    };
     const antes = await e.admin.ausencia.count({ where: { personaId: ana } });
     const r = await run(sinPauta, "core.ausencias.registrar", {
       personaId: ana,
@@ -384,5 +387,61 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     });
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(await e.admin.ausencia.count({ where: { personaId: ana } })).toBe(antes);
+  });
+
+  it("la excepción desde la pauta guarda la clase en el registro y los turnos; una clase de otro tipo se rechaza (CAR-393)", async () => {
+    const base = {
+      puestoId: puestoOtro,
+      tipo: "licencia",
+      motivo: "Reposo",
+      desde: dia(41),
+      hasta: dia(48),
+    };
+    const malo = await run(ctx(tenantA), "pauta.excepciones.crear", {
+      ...base,
+      clase: "Feriado legal",
+    });
+    expect(malo).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const r = await run(ctx(tenantA), "pauta.excepciones.crear", {
+      ...base,
+      clase: "enfermedad común",
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const turnos = await e.admin.excepcionPauta.findMany({
+      where: { puestoId: puestoOtro, estado: "activa", motivo: "Reposo" },
+      select: { clase: true, ausenciaId: true },
+    });
+    expect(turnos.length).toBeGreaterThan(0);
+    expect(new Set(turnos.map((t) => t.clase))).toEqual(new Set(["Enfermedad común"]));
+    const registro = await e.admin.ausencia.findUnique({ where: { id: turnos[0]!.ausenciaId! } });
+    expect(registro).toMatchObject({ personaId: ana, tipo: "licencia", clase: "Enfermedad común" });
+  });
+
+  it("al anonimizar a la persona, el motivo de sus turnos en la pauta se reemplaza (CAR-393)", async () => {
+    // Elegible: su relación laboral terminó antes del corte.
+    await e.admin.vinculoLaboral.updateMany({
+      where: { personaId: ana },
+      data: { estado: "terminado", termino: new Date("2020-01-31") },
+    });
+    const antes = await e.admin.excepcionPauta.count({ where: { personaId: ana } });
+    expect(antes).toBeGreaterThan(0);
+    const { anonimizarPersona, MARCA_ANONIMO } =
+      await import("../src/core/cumplimiento/retencion-anonimizar");
+    const hecho = await ctx(tenantA).transaccion((tx) =>
+      anonimizarPersona(tx, ana, new Date(), new Date("2020-02-01")),
+    );
+    expect(hecho).toBe(true);
+    const turnos = await e.admin.excepcionPauta.findMany({
+      where: { personaId: ana },
+      select: { motivo: true },
+    });
+    expect(turnos).toHaveLength(antes);
+    expect(turnos.every((t) => t.motivo === MARCA_ANONIMO)).toBe(true);
+    // Los turnos de Juan no cambian.
+    const deJuan = await e.admin.excepcionPauta.findMany({
+      where: { personaId: juan },
+      select: { motivo: true },
+    });
+    expect(deJuan.some((t) => t.motivo !== MARCA_ANONIMO)).toBe(true);
   });
 });

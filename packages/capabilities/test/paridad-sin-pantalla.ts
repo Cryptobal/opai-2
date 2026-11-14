@@ -8,6 +8,30 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "core.roles.adicional_asignar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Sumar un rol a un usuario: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.roles.adicional_quitar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Quitar un rol adicional a un usuario: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.grupos.rol_asignar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Dar un rol a un grupo: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.grupos.rol_quitar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Quitar un rol a un grupo: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
   "core.aprobaciones.reglas_guardar": {
     encargo: "CAR-252",
     desde: "2026-11-12",
@@ -20,6 +44,17 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Desactivar una regla de aprobación: llega con la misma pantalla de reglas (diseño pendiente). Mientras no haya pantalla nadie crea reglas, así que no hay nada que desactivar.",
   },
+  "core.push.suscribir": {
+    encargo: "CAR-356",
+    desde: "2026-11-13",
+    motivo:
+      "Activar los avisos al celular: el interruptor del portal del trabajador llega en el PR 4b con el service worker. Sin suscripciones, el aviso sigue solo en la campana.",
+  },
+  "core.push.quitar": {
+    encargo: "CAR-356",
+    desde: "2026-11-13",
+    motivo: "Apagar los avisos al celular: llega con el mismo interruptor del PR 4b. Sin pantalla nadie se suscribe, así que no hay nada que quitar.",
+  },
   "core.cuentas_referencias.otorgar": {
     encargo: "CAR-138",
     desde: "2026-11-10",
@@ -29,7 +64,8 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
   "finanzas.apertura.importar": {
     encargo: "CAR-168",
     desde: "2026-11-04",
-    motivo: "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
+    motivo:
+      "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
   },
   "finanzas.apertura.revertir": {
     encargo: "CAR-168",
@@ -101,5 +137,29 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-11-10",
     motivo:
       "La verificación con prueba de vida se invoca desde la marcación de Asistencia (frente «Face ID»), que aporta la cámara; B4 deja el adaptador y la capacidad.",
+  },
+  "core.webhooks.destino_crear": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
+  },
+  "core.webhooks.destino_actualizar": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
+  },
+  "core.webhooks.destino_rotar_secreto": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
+  },
+  "core.webhooks.destino_eliminar": {
+    encargo: "CAR-352",
+    desde: "2026-11-14",
+    motivo:
+      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
   },
 };

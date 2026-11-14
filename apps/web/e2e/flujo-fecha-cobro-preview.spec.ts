@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar } from "./preview";
+import { capturar, capturarHoja } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-396: tocar la celda «Cobros esperados» abre las facturas de la semana y deja cambiar la fecha de cobro con vista
@@ -49,7 +49,7 @@ test.describe("@preview flujo de caja: fecha de cobro desde la celda", () => {
         await capturar(page, info, "flujo-cobros-sin-hoja");
         throw e;
       });
-    await capturar(page, info, "flujo-cobros-esperados");
+    await capturarHoja(page, info, "flujo-cobros-esperados");
 
     const cambiar = hoja.getByRole("button", { name: "Cambiar fecha" }).first();
     if (await cambiar.isVisible()) await cambiar.click();
@@ -58,6 +58,6 @@ test.describe("@preview flujo de caja: fecha de cobro desde la celda", () => {
     await hoja.getByRole("button", { name: "Revisar cambio" }).click();
     await expect(hoja.getByText("Revisa el cambio")).toBeVisible();
     await expect(hoja.getByText(/pasa a la semana del/)).toBeVisible();
-    await capturar(page, info, "flujo-cobro-revisar-cambio");
+    await capturarHoja(page, info, "flujo-cobro-revisar-cambio");
   });
 });

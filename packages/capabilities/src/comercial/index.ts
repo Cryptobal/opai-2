@@ -16,6 +16,7 @@ import { informesTablero } from "./informes-tablero";
 import { negociosEmbudo } from "./negocios-embudo";
 import { negociosExportar } from "./negocios-exportar";
 import { negociosResponsables } from "./negocios-responsables";
+import { negociosCamposGet, negociosCamposSet } from "./negocios-campos";
 import { negociosTransferir } from "./negocios-transferir";
 import { negociosList } from "./negocios-lectura";
 import { negociosGanar, negociosMover } from "./negocios-mover";
@@ -53,6 +54,8 @@ export const capacidadesComercial: readonly Capacidad[] = [
   negociosExportar,
   negociosTransferir,
   negociosResponsables,
+  negociosCamposGet,
+  negociosCamposSet,
   negociosGet,
   negociosEmbudo,
   negociosAlertas,
