@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Button, Campo, Input, InputFecha, Select } from "@opai/ds";
 
 const TIPOS = [
@@ -14,7 +16,9 @@ export function CamposExcepcionMensual({
   setHasta,
   motivo,
   setMotivo,
+  campoClase,
 }: {
+  campoClase?: ReactNode;
   tipo: string;
   setTipo: (v: string) => void;
   hasta: string;
@@ -27,6 +31,7 @@ export function CamposExcepcionMensual({
       <Campo etiqueta="Tipo" htmlFor="ex-tipo">
         <Select id="ex-tipo" valor={tipo} onCambiar={setTipo} opciones={TIPOS} />
       </Campo>
+      {campoClase}
       <Campo
         etiqueta="Hasta"
         htmlFor="ex-hasta"
@@ -53,6 +58,7 @@ export function CamposExcepcionDiaria({
   setHasta,
   motivo,
   setMotivo,
+  campoClase,
   fecha,
   pendiente,
   onRegistrar,
@@ -63,6 +69,7 @@ export function CamposExcepcionDiaria({
   setHasta: (v: string) => void;
   motivo: string;
   setMotivo: (v: string) => void;
+  campoClase?: ReactNode;
   fecha: string;
   pendiente: boolean;
   onRegistrar: () => void;
@@ -73,13 +80,18 @@ export function CamposExcepcionDiaria({
       <Campo etiqueta="Tipo" htmlFor="ex-tipo-d">
         <Select id="ex-tipo-d" valor={tipo} onCambiar={setTipo} opciones={TIPOS} />
       </Campo>
+      {campoClase}
       <Campo etiqueta="Hasta" htmlFor="ex-hasta-d">
         <InputFecha id="ex-hasta-d" valor={hasta} onCambiar={setHasta} />
       </Campo>
       <Campo etiqueta="Motivo" htmlFor="ex-motivo-d">
         <Input id="ex-motivo-d" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
       </Campo>
-      <Button onClick={onRegistrar} cargando={pendiente} disabled={motivo.trim().length < 3 || hasta < fecha}>
+      <Button
+        onClick={onRegistrar}
+        cargando={pendiente}
+        disabled={motivo.trim().length < 3 || hasta < fecha}
+      >
         Registrar excepción
       </Button>
     </>

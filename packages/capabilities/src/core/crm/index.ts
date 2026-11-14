@@ -1,5 +1,6 @@
 // Capacidades de CRM PR 2a (CAR-26): contacto en varias cuentas, actividad unificada y etiquetas.
 import type { Capacidad } from "../../types";
+import { contactosFusionar } from "../maestros/contactos-fusion";
 import { cuentasFusionar } from "../maestros/cuentas-fusion";
 import { actividadesCompletar, actividadesUpdate } from "./actividades-editar";
 import { actividadesDelete } from "./actividades-eliminar";
@@ -40,4 +41,5 @@ export const capacidadesCrm: readonly Capacidad[] = [
   camposValoresGet,
   camposValoresSet,
   cuentasFusionar,
+  contactosFusionar,
 ];
