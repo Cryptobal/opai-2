@@ -20,3 +20,10 @@
 - Supervisor y cliente pasan al diseño nuevo (`marcoResuelto`).
 - **Decisión nocturna: trabajador y terreno siguen con el marco clásico** hasta un bloque propio. Tienen su barra inferior con «Marcar» y rondas, y el tope de JS de la PWA (ADR-044). El diseño aprobado no trae todavía su barra inferior. (revisar)
 - Plataforma (sin empresa) sigue con el marco base.
+
+## Trabajador y terreno (D6e, PR apilado sobre #730)
+
+- **Decisión de Carlos (13-nov-2026, 23:45): «Sí. Todo».** Trabajador y terreno pasan al diseño nuevo; reemplaza la decisión nocturna anterior.
+- `marcoResuelto`: todo portal con empresa usa el diseño nuevo; sin empresa (Plataforma, «Sin permisos») queda el marco base.
+- `ShellNuevo` recibe `pestanasDelPortal` (lo pasa `MarcoNuevo` en trabajador y terreno): en el teléfono no monta Inicio/Agente/Menú/Yo y deja visible la barra de pestañas del portal y el avatar de arriba (`data-pestanas="portal"` en `styles.css`).
+- Presupuesto de JS de terreno (ADR-044): medido en local tras el build (ver el PR).

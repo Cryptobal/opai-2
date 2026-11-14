@@ -27,17 +27,12 @@ export function portalAdmiteHilo(portal: string, acceso: boolean): boolean {
  * Marco que se monta para un portal, un acceso y el valor de la cookie. Una sola regla para el layout
  * y para las páginas que cambian con el marco (Inicio, Preferencias): nunca deciden por separado.
  */
-/**
- * Portales de terreno (trabajador y terreno) con su propia barra inferior (marcar, rondas) y su tope de
- * JS de PWA (ADR-044): pasan al diseño nuevo en su propio bloque, con su barra rediseñada.
- */
-const PORTALES_TERRENO = new Set(["trabajador", "terreno"]);
-
-export function marcoResuelto(portal: string, acceso: boolean): Marco {
-  // CAR-335 D6: el diseño nuevo es el único en el ERP y en los portales de oficina (supervisor,
-  // cliente). Sin acceso a una empresa (p. ej. Plataforma o «Sin permisos») queda el marco base, que
-  // es el que muestra ese aviso.
-  return acceso && !PORTALES_TERRENO.has(portal) ? "nuevo" : "clasico";
+export function marcoResuelto(_portal: string, acceso: boolean): Marco {
+  // CAR-335 D6: el diseño nuevo es el único en todos los portales con empresa (decisión de Carlos del
+  // 13-nov-2026: «Sí. Todo»). Trabajador y terreno lo usan con sus propias pestañas en el teléfono.
+  // Sin acceso a una empresa (p. ej. Plataforma o «Sin permisos») queda el marco base, que es el que
+  // muestra ese aviso.
+  return acceso ? "nuevo" : "clasico";
 }
 
 /** Texto para `document.cookie`: un año para el clásico y el Hilo; el nuevo es la ausencia de la cookie. */
