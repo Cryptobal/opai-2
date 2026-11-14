@@ -554,6 +554,7 @@ nomina_costo_proyectado_listar
 nomina_liquidaciones_calcular
 nomina_liquidaciones_listar
 nomina_liquidaciones_obtener
+nomina_lre_generar
 nomina_novedades_anular
 nomina_novedades_cargar
 nomina_novedades_crear
