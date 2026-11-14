@@ -1,0 +1,100 @@
+"use client";
+
+import { useState } from "react";
+
+import { Alerta, avisar, Campo, Combobox, Input, Segmentado, Select, Sheet } from "@opai/ds";
+
+import { useHojaUrl } from "@/app/_components/maestros/use-url";
+import { useCapacidad } from "@/app/_components/use-capacidad";
+
+import { AccionesHoja } from "./acciones-hoja";
+import type { Opcion, Prenda } from "./tipos";
+
+type Opciones = { activos: Opcion[]; ropa: Prenda[]; destinos: Opcion[] };
+type Estado = { clase: "activo" | "ropa"; activoId: string; tipoId: string; talla: string; cantidad: string; destino: string; nota: string };
+
+/** Destino y nota comunes a las dos entregas (R19). */
+function comunes(e: Estado) {
+  const [clave, id] = e.destino.split(":");
+  return { ...(clave === "persona" ? { personaId: id } : { instalacionId: id }), ...(e.nota.trim() ? { nota: e.nota.trim() } : {}) };
+}
+
+/** Nueva entrega (CAR-238): un activo disponible o unidades de una talla de ropa, a una persona o una instalación. */
+export function HojaEntrega({ opciones }: { opciones: Opciones }) {
+  const hoja = useHojaUrl("nueva");
+  const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const [e, setE] = useState<Estado>({ clase: "activo", activoId: "", tipoId: "", talla: "", cantidad: "1", destino: "", nota: "" });
+  const fijar = (p: Partial<Estado>) => setE((x) => ({ ...x, ...p }));
+  const prenda = opciones.ropa.find((p) => p.tipoId === e.tipoId);
+  const stock = prenda?.existencias.find((x) => x.talla === e.talla)?.cantidad ?? 0;
+  const cantidad = Number(e.cantidad);
+  const itemListo = e.clase === "activo" ? e.activoId !== "" : e.talla !== "" && cantidad > 0 && cantidad <= stock;
+
+  async function guardar() {
+    const r =
+      e.clase === "activo"
+        ? await ejecutar("inventario.entregas.entregar_activo", { activoId: e.activoId, ...comunes(e) })
+        : await ejecutar("inventario.entregas.entregar_ropa", { tipoId: e.tipoId, talla: e.talla, cantidad, ...comunes(e) });
+    if (!r) return;
+    avisar.exito("Entrega registrada");
+    hoja.cerrar();
+  }
+
+  return (
+    <Sheet
+      abierto={hoja.abierta}
+      onCerrar={hoja.cerrar}
+      titulo="Nueva entrega"
+      acciones={<AccionesHoja onCancelar={hoja.cerrar} onGuardar={() => void guardar()} listo={itemListo && e.destino !== ""} pendiente={pendiente} texto="Entregar" />}
+    >
+      <div className="flex flex-col gap-4">
+        {error ? <Alerta tono="danger" titulo={error} /> : null}
+        <Segmentado
+          etiqueta="Qué se entrega"
+          activa={e.clase}
+          opciones={[
+            { id: "activo", etiqueta: "Activo", onClick: () => fijar({ clase: "activo" }) },
+            { id: "ropa", etiqueta: "Ropa", onClick: () => fijar({ clase: "ropa" }) },
+          ]}
+        />
+        {e.clase === "activo" ? (
+          <Campo etiqueta="Activo disponible" htmlFor="en-activo">
+            <Combobox id="en-activo" opciones={opciones.activos} valor={e.activoId} onCambiar={(v) => fijar({ activoId: v[0] ?? "" })} placeholder="Buscar por código" />
+          </Campo>
+        ) : (
+          <CamposRopa e={e} fijar={fijar} ropa={opciones.ropa} stock={stock} />
+        )}
+        <Campo etiqueta="Entregar a" htmlFor="en-destino">
+          <Combobox id="en-destino" opciones={opciones.destinos} valor={e.destino} onCambiar={(v) => fijar({ destino: v[0] ?? "" })} placeholder="Persona o instalación" />
+        </Campo>
+        <Campo etiqueta="Nota" htmlFor="en-nota">
+          <Input id="en-nota" value={e.nota} onChange={(x) => fijar({ nota: x.target.value })} />
+        </Campo>
+      </div>
+    </Sheet>
+  );
+}
+
+function CamposRopa({ e, fijar, ropa, stock }: { e: Estado; fijar: (p: Partial<Estado>) => void; ropa: Prenda[]; stock: number }) {
+  const prenda = ropa.find((p) => p.tipoId === e.tipoId);
+  return (
+    <>
+      <Campo etiqueta="Prenda" htmlFor="en-prenda">
+        <Select id="en-prenda" valor={e.tipoId} onCambiar={(v) => fijar({ tipoId: v, talla: "" })} opciones={ropa.map((p) => ({ valor: p.tipoId, etiqueta: p.nombre }))} />
+      </Campo>
+      <div className="grid grid-cols-2 gap-3">
+        <Campo etiqueta="Talla" htmlFor="en-talla">
+          <Select
+            id="en-talla"
+            valor={e.talla}
+            onCambiar={(v) => fijar({ talla: v })}
+            opciones={(prenda?.existencias ?? []).map((x) => ({ valor: x.talla, etiqueta: `${x.talla} (${x.cantidad})` }))}
+          />
+        </Campo>
+        <Campo etiqueta="Cantidad" htmlFor="en-cantidad" {...(e.talla ? { ayuda: `Hay ${stock}` } : {})}>
+          <Input id="en-cantidad" inputMode="numeric" value={e.cantidad} onChange={(x) => fijar({ cantidad: x.target.value.replace(/\D/g, "") })} />
+        </Campo>
+      </div>
+    </>
+  );
+}

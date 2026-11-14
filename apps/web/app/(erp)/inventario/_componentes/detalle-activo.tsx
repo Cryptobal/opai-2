@@ -1,10 +1,11 @@
 import { Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
 
 import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import type { cargarActivo } from "./datos-activos";
 import { HojaActivo } from "./diferidas";
-import { estadoActivo, type FichaActivo } from "./tipos";
+import { type Entrega, estadoActivo, type FichaActivo } from "./tipos";
 
 const fecha = (iso: string) => iso.split("-").reverse().join("-");
 
@@ -39,6 +40,22 @@ function acciones(a: FichaActivo): AccionEntidad[] {
   return lista;
 }
 
+function LoTiene({ entrega, puedeGestionar }: { entrega: Entrega; puedeGestionar: boolean }) {
+  return (
+    <SeccionTarjeta titulo="Lo tiene">
+      <p>
+        <span className="font-medium">{entrega.destino}</span>
+        <span className="text-fg-muted"> · desde el {fecha(entrega.entregadaEn.slice(0, 10))}</span>
+      </p>
+      {puedeGestionar ? (
+        <EnlaceBoton href={`/inventario/entregas?devolver=${entrega.id}`} variante="secondary" className="mt-3">
+          Registrar devolución
+        </EnlaceBoton>
+      ) : null}
+    </SeccionTarjeta>
+  );
+}
+
 /** Panel derecho de un activo (CAR-236): datos, campos propios del tipo y estado. */
 export async function DetalleActivo({
   datos,
@@ -47,7 +64,7 @@ export async function DetalleActivo({
   datos: ReturnType<typeof cargarActivo>;
   puedeGestionar: boolean;
 }) {
-  const { state, activo: a } = await datos;
+  const { state, activo: a, entrega } = await datos;
   const estado = a ? estadoActivo(a.estado) : null;
   return (
     <DetailScreen
@@ -65,6 +82,7 @@ export async function DetalleActivo({
     >
       {a ? (
         <div className="flex flex-col gap-4">
+          {entrega ? <LoTiene entrega={entrega} puedeGestionar={puedeGestionar} /> : null}
           {a.motivoBaja ? (
             <SeccionTarjeta titulo="Dado de baja">
               <p>{a.motivoBaja}</p>

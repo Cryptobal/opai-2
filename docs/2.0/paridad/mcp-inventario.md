@@ -475,10 +475,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.archivar` | `rondas_puntos_archivar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.crear` | `rondas_puntos_crear` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.listar` | `rondas_puntos_listar` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.actualizar` | `inventario_activos_actualizar` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.crear` | `inventario_activos_crear` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.get` | `inventario_activos_get` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.list` | `inventario_activos_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.devolver` | `inventario_entregas_devolver` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_activo` | `inventario_entregas_entregar_activo` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_ropa` | `inventario_entregas_entregar_ropa` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.list` | `inventario_entregas_list` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ajustar` | `inventario_ropa_ajustar` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.ingresar` | `inventario_ropa_ingresar` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.ropa.list` | `inventario_ropa_list` | existe |

@@ -4,7 +4,7 @@ import { leerParametros, type Parametros, type SearchParams } from "@/lib/parame
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
-import type { Activo, FichaActivo, TipoInventario } from "./tipos";
+import type { Activo, Entrega, FichaActivo, TipoInventario } from "./tipos";
 
 type Pagina = { items: Activo[]; siguiente: string | null };
 type Resultado = Awaited<ReturnType<typeof ejecutarComoUsuario<Pagina>>>;
@@ -41,9 +41,12 @@ export async function cargarActivos(p: Parametros) {
 
 export async function cargarActivo(id: string) {
   requerirUuid(id);
-  const r = await ejecutarComoUsuario<FichaActivo>("erp", "inventario.activos.get", { id });
+  const [r, e] = await Promise.all([
+    ejecutarComoUsuario<FichaActivo>("erp", "inventario.activos.get", { id }),
+    ejecutarComoUsuario<{ items: Entrega[] }>("erp", "inventario.entregas.list", { activoId: id, limite: 1 }),
+  ]);
   requerirEncontrado(r);
-  return { state: estadoPantalla(r), activo: r.ok ? r.data : null };
+  return { state: estadoPantalla(r), activo: r.ok ? r.data : null, entrega: e.ok ? (e.data.items[0] ?? null) : null };
 }
 
 /** Datos de la página de la ficha: la lista de la izquierda, la ficha (sin esperar) y el permiso. */

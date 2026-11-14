@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Inventario (CAR-235 a CAR-237) en `preview-e2e`: Tipos (con los sugeridos del rubro si no hay ninguno),
-// la ficha de un tipo y su hoja; Activos con su hoja de registro y, si hay, la ficha de un activo; Ropa con su ficha y la hoja de ingreso; a 375,
+// Inventario (CAR-235 a CAR-238) en `preview-e2e`: Tipos (con los sugeridos del rubro si no hay ninguno),
+// la ficha de un tipo y su hoja; Activos con su hoja de registro y, si hay, la ficha de un activo; Ropa con su ficha y la hoja de ingreso; Entregas con su hoja; a 375,
 // 1024 y 1280 px. Entra con el usuario de la empresa ficticia `qa-e2e` (necesita Inventario activo).
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
@@ -69,6 +69,13 @@ test.describe("@preview inventario", () => {
       await expect(page.getByRole("dialog")).toBeVisible();
       await capturar(page, info, "inventario-prenda-ingreso");
     }
+
+    await page.goto("/inventario/entregas");
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "inventario-entregas");
+    await page.goto("/inventario/entregas?nueva=1");
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await capturar(page, info, "inventario-entrega-nueva");
     expect(errores).toEqual([]);
   });
 });

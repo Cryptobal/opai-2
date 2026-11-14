@@ -68,3 +68,19 @@ export type MovimientoRopa = {
   nota: string | null;
   fecha: string;
 };
+
+export type Entrega = {
+  id: string;
+  clase: "activo" | "ropa";
+  item: string;
+  activoId: string | null;
+  cantidad: number | null;
+  personaId: string | null;
+  instalacionId: string | null;
+  destino: string;
+  nota: string | null;
+  entregadaEn: string;
+  devueltaEn: string | null;
+};
+
+export type Opcion = { valor: string; etiqueta: string; detalle?: string };

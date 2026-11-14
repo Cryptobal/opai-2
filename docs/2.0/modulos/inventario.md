@@ -46,7 +46,7 @@ Se nota que funciona cuando: (1) cada guardia nuevo recibe su uniforme registrad
 | Activos | `/inventario` (ficha en `/inventario/activos/<id>`) | Lista + ficha a la derecha y hoja para registrar o editar | Área **Operaciones** › Inventario, pestaña «Activos» (CAR-236) |
 | Tipos | `/inventario/tipos` (ficha en `/inventario/tipos/<id>`) | Lista + ficha a la derecha (como Cargos) y hoja para crear o editar | Pestaña «Tipos» (CAR-235) |
 | Ropa | `/inventario/ropa` (ficha en `/inventario/ropa/<tipo>`) | Lista de tipos de ropa con existencias por talla; ficha con tabla de tallas, ingreso, ajuste e historial | Pestaña «Ropa» (CAR-237) |
-| Asignaciones | En la ficha del activo, en la ropa y en la ficha de la persona y de la instalación | Tarjeta | CAR-238 |
+| Entregas | `/inventario/entregas` | Lista de entregas (abiertas, devueltas o todas), hoja «Nueva entrega» y hoja de devolución; en la ficha del activo, la tarjeta «Lo tiene» | Pestaña «Entregas» (CAR-238) |
 
 Mismo diseño que el resto de OPAI (diseño nuevo, ADR-109). No hay diseño aprobado propio del módulo: se usa el de Cargos (catálogo con lista y ficha) como el más cercano.
 
@@ -72,7 +72,7 @@ Mismo diseño que el resto de OPAI (diseño nuevo, ADR-109). No hay diseño apro
 - **R6.** «Cargar tipos sugeridos» solo agrega los que faltan por nombre; nunca cambia los existentes. Es idempotente.
 - **R7.** Toda escritura tiene vista previa (`dryRun`, MCP `preview_…`), clave de idempotencia y auditoría.
 - **R8.** Las tallas se guardan sin espacios y en mayúsculas («x l» → «XL»): son la clave de las existencias (CAR-237). La clave de un campo nuevo nunca repite una clave en uso.
-- **R9.** Las reglas de las entregas y devoluciones se agregan con CAR-238.
+- **R9.** Las entregas y devoluciones siguen R19 a R23.
 - **R10.** El código del activo es obligatorio y único por empresa, sin distinguir mayúsculas ni espacios de más. El número de serie es opcional.
 - **R11.** Un activo guarda los valores de los campos propios de su tipo: los obligatorios no pueden faltar, un número es número, una fecha es aaaa-mm-dd y no se aceptan campos que el tipo no tiene. Solo los tipos de categoría «activo» y activos (no desactivados) reciben activos nuevos.
 - **R12.** Estados del activo: Disponible → En reparación → Disponible; Disponible o En reparación → De baja (con motivo, sin vuelta atrás; a un agente le pide aprobación humana). «Asignado» lo ponen y lo quitan la entrega y la devolución (CAR-238). Un activo de baja ya no se edita.
@@ -81,6 +81,11 @@ Mismo diseño que el resto de OPAI (diseño nuevo, ADR-109). No hay diseño apro
 - **R15.** La ropa se controla por existencias: cuántas unidades hay de cada talla de un tipo de ropa. Un ingreso suma unidades a una o varias tallas (enteros mayores que cero), con nota opcional.
 - **R16.** Solo se ingresan tallas que el tipo ofrece; las líneas de la misma talla se suman. Un tipo desactivado no recibe ingresos.
 - **R17.** El ajuste fija la cantidad real contada de una talla, con motivo obligatorio. Las existencias nunca quedan bajo cero: un movimiento que restaría de más falla sin cambiar nada.
+- **R19.** Una entrega va a una persona o a una instalación de la empresa, nunca a las dos ni a ninguna.
+- **R20.** Solo se entrega un activo «Disponible»; queda «Asignado» con a lo más una entrega abierta, y no se puede dar de baja mientras esté entregado.
+- **R21.** La ropa se entrega por talla y cantidad y descuenta las existencias en la misma operación; si no alcanzan, no se entrega nada.
+- **R22.** Devolver cierra la entrega: el activo vuelve a «Disponible» o a «En reparación» si vuelve dañado; la ropa devuelta vuelve a su talla. Una entrega se devuelve una sola vez.
+- **R23.** Un supervisor ve solo las entregas a sus instalaciones o a personas con vínculo vigente en ellas; entregar exige `inventario:gestionar` y que el destino esté en su alcance.
 - **R18.** Todo cambio de existencias (ingreso, ajuste, entrega, devolución) queda como movimiento que solo se agrega; la app no puede cambiarlo ni borrarlo.
 
 ## 7. Permisos
@@ -95,7 +100,7 @@ Alcance de filas: el catálogo de tipos es de toda la empresa. El alcance por in
 
 ## 8. Eventos
 
-`inventario.tipo.creado`, `inventario.tipo.actualizado`, `inventario.activo.creado`, `inventario.activo.actualizado`, `inventario.activo.estado_cambiado`, `inventario.ropa.ingresada`, `inventario.ropa.ajustada`. Silencio por defecto (ADR-020): nadie recibe avisos.
+`inventario.tipo.creado`, `inventario.tipo.actualizado`, `inventario.activo.creado`, `inventario.activo.actualizado`, `inventario.activo.estado_cambiado`, `inventario.ropa.ingresada`, `inventario.ropa.ajustada`, `inventario.entrega.registrada`, `inventario.entrega.devuelta`. Silencio por defecto (ADR-020): nadie recibe avisos.
 
 ## 9. Referente
 
@@ -106,3 +111,4 @@ No hay capa de inventario en [`REFERENTES-saas.md`](../REFERENTES-saas.md). Se s
 - 14-nov-2026: primera versión (Sesión Inventario).
 - 14-nov-2026: R10 a R14, activos (CAR-236); Activos pasa a ser la pestaña principal.
 - 14-nov-2026: R15 a R18, existencias de ropa (CAR-237).
+- 14-nov-2026: R19 a R23, entregas y devoluciones (CAR-238). Activación por empresa (núcleo) y cobro por instalación activa (catálogo).
