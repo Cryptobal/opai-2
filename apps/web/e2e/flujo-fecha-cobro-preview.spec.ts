@@ -18,16 +18,24 @@ function fechaEscrita(dias: number): string {
 test.describe("@preview flujo de caja: fecha de cobro desde la celda", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
-  test("abre los cobros esperados y revisa un cambio de fecha sin guardarlo", async ({ page }, info) => {
+  test("abre los cobros esperados y revisa un cambio de fecha sin guardarlo", async ({
+    page,
+  }, info) => {
     await entrar(page);
     await page.goto("/finanzas/flujo");
-    await expect(page.getByRole("heading", { name: "Flujo de caja" }).first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("heading", { name: "Flujo de caja" }).first()).toBeVisible({
+      timeout: 60_000,
+    });
+    // Solo la fila de la planilla: la novedad de este cambio también nombra «Cobros esperados» y, en el teléfono,
+    // su lista queda antes en la página.
     const celda = page
-      .locator("tr", { hasText: "Cobros esperados" })
+      .locator("tbody tr", { hasText: "Cobros esperados" })
       .getByRole("button")
-      .or(page.locator("li", { hasText: "Cobros esperados" }).getByRole("button"))
       .first();
-    test.skip((await celda.count()) === 0, "La empresa de prueba no tiene facturas por cobrar en el horizonte");
+    test.skip(
+      (await celda.count()) === 0,
+      "La empresa de prueba no tiene facturas por cobrar en el horizonte",
+    );
 
     await celda.click();
     const hoja = page.getByRole("dialog");
