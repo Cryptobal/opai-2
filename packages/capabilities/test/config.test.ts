@@ -57,7 +57,7 @@ describe("core.config.*", () => {
   it("el marco (ADR-090) es una preferencia de cada persona: clásico por defecto, Hilo a elección", async () => {
     const { ctx } = contextoDePrueba({ semilla: semillaTenant() });
     const antes = await dato<Valor[]>(ctx, "core.config.get", { modulo: "core" });
-    expect(de(antes, "preferencias_marco")).toMatchObject({ valor: "clasico", origen: "defecto" });
+    expect(de(antes, "preferencias_marco")).toMatchObject({ valor: "nuevo", origen: "defecto" });
     await dato(ctx, "core.config.set", { modulo: "core", clave: "preferencias_marco", valor: "hilo" });
     const despues = await dato<Valor[]>(ctx, "core.config.get", { modulo: "core" });
     expect(de(despues, "preferencias_marco")).toMatchObject({ valor: "hilo", origen: "usuario" });

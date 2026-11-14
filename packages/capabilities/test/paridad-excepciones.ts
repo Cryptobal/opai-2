@@ -114,6 +114,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.roles.archive":
     "Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034).",
   "core.roles.assign": "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
+  "core.roles.adicional_asignar":
+    "Solo personas: sumar un rol a un usuario gobierna su acceso (ADR-034, CAR-359).",
+  "core.roles.adicional_quitar":
+    "Solo personas: quitar un rol a un usuario gobierna su acceso (ADR-034, CAR-359).",
+  "core.grupos.rol_asignar":
+    "Solo personas: dar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359).",
+  "core.grupos.rol_quitar":
+    "Solo personas: quitar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359).",
   "core.excepciones.set":
     "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
   "core.firmas.firmante_empresa_set":

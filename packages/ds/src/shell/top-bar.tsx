@@ -87,7 +87,11 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
               <Search className="size-5" />
             </Button>
           ) : null}
-          {props.agente}
+          {props.agente ? (
+            <span data-agente-telefono="" className="contents">
+              {props.agente}
+            </span>
+          ) : null}
           {campana}
           <MenuUsuarioBarra {...props} lado="abajo-derecha" />
         </div>

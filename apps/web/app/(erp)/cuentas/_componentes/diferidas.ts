@@ -10,3 +10,6 @@ export const HojaContacto = hojaDiferida(["contacto"], () =>
   import("./hoja-contacto").then((m) => m.HojaContacto),
 );
 export const HojaSii = hojaDiferida(["sii"], () => import("./hoja-sii").then((m) => m.HojaSii));
+export const HojaFusionar = hojaDiferida(["fusionar"], () =>
+  import("./hoja-fusionar").then((m) => m.HojaFusionar),
+);

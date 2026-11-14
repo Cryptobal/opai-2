@@ -2,13 +2,13 @@
 export const VERBOS: Record<string, string> = {
   portal_inicio: "Portal de inicio", get: "Ver", update: "Editar", list: "Listar", invite: "Invitar",
   remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
-  accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
+  clases: "Ver clases", accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
   summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen", instalaciones: "Por instalación",
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado", iniciar_vida: "Iniciar prueba de vida", consentir: "Dar consentimiento", habilitar: "Habilitar", textos: "Textos vigentes",
   reintentar: "Reintentar", cancelar: "Cancelar", configurar: "Configurar", set_secreto: "Guardar clave",
   guardar_certificado_dte: "Guardar certificado", probar: "Probar", autocompletar: "Autocompletar",
   acteco_get: "Ver actividad económica (ACTECO)", acteco_set: "Fijar actividad económica (ACTECO)", acteco_buscar: "Buscar actividad económica del SII",
-  detalle: "Detalle", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar", otorgar: "Otorgar",
+  detalle: "Detalle", fusionar: "Fusionar", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar", otorgar: "Otorgar",
   consultar_sii: "Consultar al SII", facturable: "Ver si está lista para facturar", aplicar_sii: "Aplicar datos del SII",
   set_representantes: "Definir representantes", set_activo: "Activar o desactivar", bloquear: "Bloquear",
   desbloquear: "Desbloquear", vincular_usuario: "Vincular usuario", no_recontratar_ver: "Ver no recontratar",
@@ -60,7 +60,7 @@ export const VERBOS: Record<string, string> = {
   sugerir: "Sugerir", sugerir_seccion: "Sugerir sección con IA", agregar: "Agregar", candidatos: "Candidatos", dar_acceso: "Dar acceso al portal", inicializar: "Inicializar",
   importar: "Importar", revertir: "Revertir", sincronizar: "Sincronizar con el banco", sincronizar_rcv: "Sincronizar con el RCV del SII", recibir_web4leads: "Recibir movimientos del banco (Web4Leads)", asignar_centro: "Asignar centro de costo", libro_resumen: "Resumen del libro",
   vista_previa: "Vista previa", crear_borrador: "Crear borrador", guardar_borrador: "Guardar borrador", actualizar_borrador: "Editar borrador", descartar_borrador: "Descartar borrador", emitir: "Emitir", emitir_lote: "Emitir en lote", tablero: "Tablero del mes", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
-  emitir_nota_credito: "Emitir nota de crédito", emitir_nota_debito: "Emitir nota de débito", crear_borrador_nota_debito: "Crear borrador de nota de débito", destinatarios_sugeridos: "Sugerir destinatarios del documento", guardar_destinatarios: "Guardar destinatarios del documento", proyeccion_flujo: "Proyección de flujo", postergar_iva: "Postergar IVA", fijar_fecha_esperada: "Fijar fecha esperada de cobro",
+  emitir_nota_credito: "Emitir nota de crédito", emitir_nota_debito: "Emitir nota de débito", crear_borrador_nota_debito: "Crear borrador de nota de débito", destinatarios_sugeridos: "Sugerir destinatarios del documento", guardar_destinatarios: "Guardar destinatarios del documento", proyeccion_flujo: "Proyección de flujo", postergar_iva: "Postergar IVA", fijar_fecha_esperada: "Fijar fecha esperada de cobro", cambiar_desde: "Cambiar desde una fecha",
   cesion_simular: "Simular cesión", cesion_ceder: "Ceder", cargar_caf: "Cargar folios (CAF)",
   crear_base: "Crear plan base", iniciar: "Iniciar", controlar: "Pausar, reanudar o cancelar",
   registrar_respuesta: "Registrar respuesta del cliente", registrar_paso: "Registrar paso",
@@ -86,6 +86,9 @@ export const VERBOS: Record<string, string> = {
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
   // Grupos o equipos de usuarios (CAR-251).
   agregar_miembros: "Agregar miembros", quitar_miembro: "Quitar miembro",
+  // Roles adicionales y de grupo (CAR-359).
+  adicional_asignar: "Sumar rol", adicional_quitar: "Quitar rol adicional", adicionales_list: "Ver roles adicionales",
+  rol_asignar: "Dar rol al grupo", rol_quitar: "Quitar rol al grupo", roles_list: "Ver roles del grupo",
   // Historial de correos del cliente (CAR-233).
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).

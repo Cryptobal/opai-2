@@ -71,6 +71,7 @@ export function PanelLateral({ abierto, onCerrar, titulo, acciones, retener, chi
         tabIndex={-1}
         role="dialog"
         aria-label={titulo}
+        data-panel-lateral=""
         className={cn(
           "pt-safe fixed inset-0 z-50 flex flex-col bg-bg outline-none",
           "md:inset-y-auto md:top-[60px] md:right-0 md:bottom-0 md:left-auto md:w-[400px] md:border-l md:border-border md:pt-0 md:shadow-overlay",
@@ -80,7 +81,13 @@ export function PanelLateral({ abierto, onCerrar, titulo, acciones, retener, chi
         <header className="flex h-[52px] flex-none items-center gap-1 border-b border-border px-2 md:h-14 md:px-3">
           <h2 className="t-title min-w-0 flex-1 truncate px-1 text-fg">{titulo}</h2>
           {acciones}
-          <Button variant="ghost" aria-label="Cerrar" className="size-11 p-0" onClick={onCerrar}>
+          <Button
+            variant="ghost"
+            aria-label="Cerrar"
+            className="size-11 p-0"
+            data-panel-cerrar=""
+            onClick={onCerrar}
+          >
             <X className="size-5" aria-hidden />
           </Button>
         </header>

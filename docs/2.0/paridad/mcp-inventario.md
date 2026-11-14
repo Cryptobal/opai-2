@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 790 pares pantalla→capacidad · 707 con herramienta · 83 excepciones justificadas · 0 faltantes.
+**Resumen:** 794 pares pantalla→capacidad · 711 con herramienta · 83 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -323,6 +323,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.create` | `core_cuentas_create` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.facturable` | `core_cuentas_facturable` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.fusionar` | `core_cuentas_fusionar` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_estado` | `core_cuentas_set_estado` | existe |
@@ -405,6 +406,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.actualizar` | `finanzas_recurrentes_actualizar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.cambiar_desde` | `finanzas_recurrentes_cambiar_desde` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.crear` | `finanzas_recurrentes_crear` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.listar` | `finanzas_recurrentes_listar` | existe |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.cargar_caf` | — | excepción |
@@ -503,6 +505,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.registrar_paso` | `comercial_seguimientos_registrar_paso` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.registrar_respuesta` | `comercial_seguimientos_registrar_respuesta` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `core.ausencias.clases` | `core_ausencias_clases` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.alertas.listar` | `pauta_alertas_listar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.cobertura.confirmar` | `pauta_cobertura_confirmar` | existe |
@@ -750,6 +753,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/mi-cuenta` | `core.apps_conectadas.list` | `core_apps_conectadas_list` | existe |
 | erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/negocios/reportes` | `comercial.informes.tablero` | `comercial_informes_tablero` | existe |
+| erp | `/personas/[id]/ausencias` | `core.ausencias.clases` | `core_ausencias_clases` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
@@ -935,6 +939,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.firmas.rechazar` | Interna y solo personas: rechazar es un acto personal del firmante con su enlace como credencial; un agente nunca rechaza por nadie (firma.md R9, R19, §10). |
 | `core.firmas.ver_firmante` | Interna: se mira antes de existir sesión con el enlace personal como credencial, igual que core.invitations.peek (firma.md §5). |
 | `core.geo.mapa` | Interna: entrega la imagen del mapa al proxy `/api/geo/mapa` con la clave del tenant; una imagen no sirve a un agente y la clave nunca sale. |
+| `core.grupos.rol_asignar` | Solo personas: dar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359). |
+| `core.grupos.rol_quitar` | Solo personas: quitar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359). |
 | `core.hechos_terreno.recibir` | Interna: el equipo de terreno emparejado la ejecuta sin sesión (su cookie de dispositivo es la credencial) al enviar su cola; un agente no registra hechos de terreno por el equipo. Su lectura es core.hechos_terreno.listar (CAR-78 B3). |
 | `core.integraciones.configurar` | Solo personas: credenciales del tenant; nunca salen ni se cambian por API ni MCP (ADR-027). |
 | `core.integraciones.guardar_certificado_dte` | Solo personas: certificado .pfx cifrado del tenant; nunca sale ni se cambia por API ni MCP (ADR-027, CAR-149). |
@@ -950,6 +956,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.push.suscribir` | Solo personas: la suscripción de Web Push es del navegador de quien tiene la sesión; un agente no tiene celular (CAR-356 PR 4a). |
 | `core.remuneraciones.confirmar` | Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034). |
 | `core.remuneraciones.confirmar_mutual` | Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034). |
+| `core.roles.adicional_asignar` | Solo personas: sumar un rol a un usuario gobierna su acceso (ADR-034, CAR-359). |
+| `core.roles.adicional_quitar` | Solo personas: quitar un rol a un usuario gobierna su acceso (ADR-034, CAR-359). |
 | `core.roles.archive` | Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034). |
 | `core.roles.assign` | Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034). |
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
@@ -1038,6 +1046,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.firmas.firmante_empresa_set` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
 | `core.firmas.firmar` | `/firmar/[slug]/[token]` | no | reservada a personas |
 | `core.firmas.rechazar` | `/firmar/[slug]/[token]` | no | reservada a personas |
+| `core.grupos.rol_asignar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
+| `core.grupos.rol_quitar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.guardar_certificado_dte` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
@@ -1048,6 +1058,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.push.suscribir` | sin pantalla todavía · CAR-356 · desde 2026-11-13 | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
 | `core.remuneraciones.confirmar_mutual` | `/configuracion/remuneraciones` | no | reservada a personas |
+| `core.roles.adicional_asignar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
+| `core.roles.adicional_quitar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
 | `core.roles.archive` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.assign` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
@@ -1099,6 +1111,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `comercial.contexto.sugerir_seccion`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
+- `comercial.negocio_campos.get`
+- `comercial.negocio_campos.set`
 - `comercial.negocios.alertas`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
@@ -1110,7 +1124,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
+- `core.campos_personalizados.create`
+- `core.campos_personalizados.list`
+- `core.campos_personalizados.update`
 - `core.consumos.por_recurso`
+- `core.contactos.fusionar`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
@@ -1124,6 +1142,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.firmas.verificar`
 - `core.funciones.get`
 - `core.geo.geocodificar`
+- `core.grupos.roles_list`
 - `core.hechos_terreno.listar`
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
@@ -1135,10 +1154,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.procesos_persona.paso_actualizar`
 - `core.puestos.get`
+- `core.roles.adicionales_list`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
+- `core.valores_personalizados.get`
+- `core.valores_personalizados.set`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`

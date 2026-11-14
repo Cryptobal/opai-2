@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import type { Contexto } from "@opai/capabilities";
 import { ajusteFinanzas, type DiferenciaFactoring, hoyChile, pagosImpuestosEsperados } from "@opai/capabilities";
+import { formatearFecha } from "@opai/domain";
 
 import type { CeldaFlujo } from "../domain";
 import type { celdaSchema } from "./esquemas";
@@ -35,8 +36,8 @@ export async function celdasImpuestos(
     dominio.push({ filaId, semana: p.semana, capa: "comprometido", monto: p.monto });
     const nota =
       p.tipo === "iva"
-        ? `IVA de ${mesDe(p.periodo)} · se paga el ${p.fecha}${p.postergado ? " (postergado a M+2)" : ""}`
-        : `PPM de ${mesDe(p.periodo)} · se paga el ${p.fecha}`;
+        ? `IVA de ${mesDe(p.periodo)} · se paga el ${formatearFecha(p.fecha)}${p.postergado ? " (postergado a M+2)" : ""}`
+        : `PPM de ${mesDe(p.periodo)} · se paga el ${formatearFecha(p.fecha)}`;
     vista.push({
       id: idEstable(`${p.tipo}|${p.periodo}`),
       filaId,

@@ -21,6 +21,88 @@ Botón **Transferir cartera** en Negocios (tablero y lista; diseño `export-crm-
 
 La hoja «Editar negocio» suma el campo **Responsable** (personas del ERP de `comercial.negocios.responsables`); guarda con `comercial.negocios.update`, que ya aceptaba `responsableId`. Antes no había forma de cambiar el responsable desde la pantalla. Sin capacidad nueva ni migración. **Decisión nocturna (revisar):** sin prueba `@preview` porque `qa-e2e` no tiene negocios que editar.
 
+## PR campos personalizados 1/3 · rama `brief/car-27-campos-personalizados`
+
+- **Estado:** Integrado (#722)
+- **Migración:** Sí (`20261226100000_core_campos_personalizados`, aditiva)
+
+### Qué entra
+
+Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, valores, pantallas). Este primero trae el catálogo: tablas `core.campos_personalizados` y `core.campo_valores` (RLS con FORCE, `tenant_isolation`, trigger de mismo tenant, CHECK de entidad, tipo, clave y opciones), permiso nuevo `core:campos.config` (owner y admin), dominio puro (`claveCampoPersonalizado`, `validarValorCampo`, `normalizarOpcionesCampo`) y capacidades `core.campos_personalizados.list` (contrato de listas), `.create` y `.update` con `dryRun` (el tipo y la clave no cambian; archivar con `activo`). Herramientas MCP nuevas en la instantánea y el inventario. **Decisión nocturna (revisar):** no hay diseño aprobado para estas pantallas; el PR 3 usará los patrones del DS (FormScreen y la ficha) y se marcará para tu revisión.
+
+### Pendiente
+
+- PR 3: pantallas de configuración y de ficha, y tokens de documentos.
+
+## PR campos personalizados 2/3 · rama `brief/car-27-campos-valores`
+
+- **Estado:** Integrado (#724)
+- **Migración:** No
+
+### Qué entra
+
+Valores por ficha: `core.valores_personalizados.get/set` (cuentas y contactos, permisos `core:cuentas.read`/`core:cuentas.manage` y alcance de la cuenta o del contacto) y `comercial.negocio_campos.get/set` (negocios, permisos de Comercial). `set` cambia solo las claves enviadas, `null` borra, valida tipo y opciones contra el catálogo activo de **esa** entidad (una clave de otra entidad se rechaza), no deja vaciar un obligatorio, acepta `dryRun` y emite un evento sin valores (solo las claves). La lectura se audita con el id de la ficha.
+
+## PR fusionar cuentas (F1) · rama `brief/car-27-fusionar`
+
+- **Estado:** Integrado (#739)
+- **Migración:** No
+
+### Qué entra
+
+Brief `docs/2.0/briefs/BRIEF-CAR-27-fusionar.md`. Capacidad `core.cuentas.fusionar` (`efecto: "irreversible"`, así que un agente necesita aprobación humana; acepta `dryRun`).
+
+- **Vista previa:** devuelve la comparación campo por campo y cuánto se mueve.
+- **Al ejecutar:** mueve todo lo del duplicado (contactos, instalaciones, negocios, documentos, actividad, etiquetas, campos personalizados, portal, correos y facturas), resuelve los choques a favor de la cuenta que queda y borra el duplicado.
+- **Se bloquea con explicación cuando:**
+  - hay contactos con el mismo correo en las dos cuentas;
+  - el duplicado tiene facturas emitidas y el RUT final es otro;
+  - el duplicado tiene consentimiento de referencia comercial (registro legal append-only).
+- Una prueba compara el inventario de tablas con FK a cuentas contra la base.
+
+**Decisiones nocturnas (revisar):** las tres reglas de bloqueo; renombrar a « (fusionada)» la instalación movida si su nombre choca; el estado de la cuenta que queda no cambia.
+
+### Pendiente
+
+- F2: hoja de 4 pasos en la cuenta.
+- F3: fusión de contactos.
+
+## PR fusionar contactos (F3) · rama `brief/car-27-fusionar-contactos`
+
+- **Estado:** Integrado (#744)
+- **Migración:** No
+
+### Qué entra
+
+Capacidad `core.contactos.fusionar` (`efecto: "irreversible"`, `dryRun`), con la misma forma que la de cuentas. Todo pasa en una transacción con los dos contactos bloqueados. Funciona así:
+
+- Pasan al contacto que queda: los vínculos con cuentas, negocios, actividad, etiquetas, campos personalizados, documentos, firmas, correos, accesos al portal, seguimientos y solicitudes.
+- Si el duplicado era el contacto principal de una cuenta compartida, el que queda pasa a ser el principal.
+- El correo del duplicado se libera antes de asignarlo.
+- Se bloquea si el duplicado firmó un consentimiento de referencia comercial, porque ese registro es append-only.
+
+Una prueba compara el inventario de FK con la base. Falta la pantalla.
+
+## PR fusionar cuentas (F2, pantalla) · rama `brief/car-27-fusionar-pantalla`
+
+- **Estado:** Abierto (F1 ya está en main)
+- **Migración:** No
+
+### Qué entra
+
+Nueva acción **⋯ › Fusionar con…** en la ficha de la cuenta. Abre una hoja diferida (`?fusionar=1`) con el diseño CuentaV2 · fusionar y tres pasos:
+
+1. **Elegir:** combobox de búsqueda, con sugerencias por la primera palabra del nombre.
+2. **Comparar:** solo los campos que difieren, con radio esta / duplicado.
+3. **Resumen:** lo que se mueve, alerta de irreversible y casilla «Entiendo que es irreversible».
+
+Cada paso usa la vista previa de `core.cuentas.fusionar`, así que los bloqueos aparecen antes de confirmar. Trae entrada de novedades y prueba `@preview`.
+
+**Decisiones nocturnas (revisar):**
+
+- El paso «Confirmar» del diseño (estado `agente`, aprobación de una propuesta de un agente) no se construyó aparte: las aprobaciones de agentes ya se resuelven en Configuración › Aprobaciones.
+- Las «sugeridas» buscan por la primera palabra del nombre (sin una capacidad propia de duplicados).
+
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 
 - Con el diseño nuevo de listas de `main` fallan tres pruebas de Comercial que no tocaron estos PR: `crm-vinculos` (cuentas vinculadas), `cuenta-sii` (resumen «Lista para facturar», que queda oculto) y `actividad-tareas-car162` (la tarea no aparece en «Mis tareas»). Hay que revisarlas en un PR propio.

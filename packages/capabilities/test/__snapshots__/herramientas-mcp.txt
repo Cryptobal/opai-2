@@ -40,6 +40,8 @@ comercial_contexto_sugerir_seccion
 comercial_informes_cierre
 comercial_informes_perdidos_por_motivo
 comercial_informes_tablero
+comercial_negocio_campos_get
+comercial_negocio_campos_set
 comercial_negocios_alertas
 comercial_negocios_archivar
 comercial_negocios_create
@@ -99,6 +101,7 @@ core_aprobaciones_list
 core_aprobaciones_reglas_list
 core_audit_list
 core_ausencias_anular
+core_ausencias_clases
 core_ausencias_listar
 core_ausencias_registrar
 core_biometria_borrar
@@ -110,6 +113,9 @@ core_calendario_archivar
 core_calendario_crear_feriado
 core_calendario_listar
 core_campos_catalogo
+core_campos_personalizados_create
+core_campos_personalizados_list
+core_campos_personalizados_update
 core_campos_valores
 core_cargos_create
 core_cargos_get
@@ -130,6 +136,7 @@ core_contactos_archive
 core_contactos_create
 core_contactos_cuentas
 core_contactos_desvincular
+core_contactos_fusionar
 core_contactos_get
 core_contactos_list
 core_contactos_restaurar
@@ -148,6 +155,7 @@ core_cuentas_consultar_sii
 core_cuentas_contactos
 core_cuentas_create
 core_cuentas_facturable
+core_cuentas_fusionar
 core_cuentas_get
 core_cuentas_list
 core_cuentas_referencias_list
@@ -234,6 +242,7 @@ core_grupos_create
 core_grupos_get
 core_grupos_list
 core_grupos_quitar_miembro
+core_grupos_roles_list
 core_grupos_update
 core_hechos_terreno_listar
 core_hilo_actividad
@@ -320,6 +329,7 @@ core_puestos_update
 core_remuneraciones_historial
 core_remuneraciones_listar
 core_resumen_contadores
+core_roles_adicionales_list
 core_roles_list
 core_slack_canales
 core_slack_configurar
@@ -338,6 +348,8 @@ core_usage_summary
 core_users_list
 core_users_remove
 core_users_update
+core_valores_personalizados_get
+core_valores_personalizados_set
 core_vinculos_create
 core_vinculos_list
 core_vinculos_previsualizar
@@ -496,6 +508,7 @@ finanzas_proveedores_crear
 finanzas_proveedores_listar
 finanzas_proveedores_obtener
 finanzas_recurrentes_actualizar
+finanzas_recurrentes_cambiar_desde
 finanzas_recurrentes_crear
 finanzas_recurrentes_listar
 finanzas_reglas_banco_aplicar
@@ -614,6 +627,7 @@ preview_comercial_config_reordenar_etapas
 preview_comercial_contexto_agregar
 preview_comercial_contexto_archivar
 preview_comercial_contexto_confirmar
+preview_comercial_negocio_campos_set
 preview_comercial_negocios_archivar
 preview_comercial_negocios_create
 preview_comercial_negocios_desvincular_instalacion
@@ -652,6 +666,8 @@ preview_core_biometria_borrar
 preview_core_calendario_actualizar
 preview_core_calendario_archivar
 preview_core_calendario_crear_feriado
+preview_core_campos_personalizados_create
+preview_core_campos_personalizados_update
 preview_core_cargos_create
 preview_core_cargos_set_activo
 preview_core_cargos_set_jefatura
@@ -660,6 +676,7 @@ preview_core_config_set
 preview_core_contactos_archive
 preview_core_contactos_create
 preview_core_contactos_desvincular
+preview_core_contactos_fusionar
 preview_core_contactos_restaurar
 preview_core_contactos_set_roles
 preview_core_contactos_update
@@ -669,6 +686,7 @@ preview_core_correos_crear_direccion
 preview_core_cuentas_aplicar_sii
 preview_core_cuentas_archive
 preview_core_cuentas_create
+preview_core_cuentas_fusionar
 preview_core_cuentas_referencias_revocar
 preview_core_cuentas_set_estado
 preview_core_cuentas_set_representantes
@@ -759,6 +777,7 @@ preview_core_tenant_update
 preview_core_turnos_esperados_regenerar
 preview_core_users_remove
 preview_core_users_update
+preview_core_valores_personalizados_set
 preview_core_vinculos_create
 preview_core_vinculos_terminar
 preview_core_vinculos_update
@@ -847,6 +866,7 @@ preview_finanzas_plan_inicializar
 preview_finanzas_proveedores_actualizar
 preview_finanzas_proveedores_crear
 preview_finanzas_recurrentes_actualizar
+preview_finanzas_recurrentes_cambiar_desde
 preview_finanzas_recurrentes_crear
 preview_finanzas_reglas_banco_aplicar
 preview_finanzas_reglas_banco_guardar
