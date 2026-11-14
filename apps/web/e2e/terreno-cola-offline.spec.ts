@@ -3,7 +3,7 @@ import { digitoVerificador } from "@opai/domain";
 import { entrar } from "./sesion";
 import { porteriaEntradaYSalida } from "./terreno-porteria-apoyo";
 import { rondaIniciarMarcarYCerrar } from "./terreno-rondas-apoyo";
-import { capturasDeInicioYCola, inyectarRechazado, marcarQrDesconocido } from "./terreno-apoyo";
+import { capturasDeInicioYCola, inicioSinMarcarPunto, inyectarRechazado } from "./terreno-apoyo";
 
 // CAR-78 · B3: un equipo de terreno emparejado captura sin señal y el hecho llega UNA sola vez al volver la
 // conexión, con la hora del servidor y el desfase del reloj. Recorre todo con las pantallas reales: el
@@ -124,8 +124,8 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   await t.getByRole("button", { name: "Quitar de la lista" }).click();
   await expect(t.getByRole("heading", { name: /^No se enviaron/ })).toHaveCount(0);
 
-  // E3b · una marca de ronda con un QR desconocido vuelve rechazada, con su motivo (si Rondas está activo).
-  await marcarQrDesconocido(t);
+  // CAR-395 · el Inicio ya no ofrece «Marcar punto» suelto (el QR desconocido se prueba dentro de la ronda).
+  await inicioSinMarcarPunto(t);
   // E4d · portería: entrada, «En sitio» y salida (si Control de acceso está activo en la empresa).
   await porteriaEntradaYSalida(t);
   // E3e · «Mis rondas»: iniciar, marcar dos puntos y cerrar (si la instalación tiene la ronda de prueba).

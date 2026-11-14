@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   cobrosDeSemana,
   FILA_COBROS_ESPERADOS,
+  FILA_IVA,
+  hojaEspecial,
+  ivaDeSemana,
 } from "@/app/(erp)/finanzas/flujo/_componentes/cobros-celda";
 import { armarPlanilla, type Planilla } from "@/app/(erp)/finanzas/flujo/_componentes/datos";
 
@@ -99,5 +102,41 @@ describe("cobrosDeSemana (CAR-396)", () => {
     expect(
       armarPlanilla(planilla(), { gestiona: false }).celdaEditable(FILA_COBROS_ESPERADOS, S),
     ).toBe(false);
+  });
+});
+
+describe("ivaDeSemana y hojaEspecial (CAR-397)", () => {
+  const conIva = (): Planilla => {
+    const p = planilla();
+    p.filas.push({
+      id: FILA_IVA,
+      etiqueta: "IVA a pagar",
+      seccion: "egreso",
+      vinculo: null,
+      arrastre: false,
+      orden: 1,
+      activa: true,
+    });
+    p.celdas.push({
+      id: doc(4),
+      filaId: FILA_IVA,
+      semana: S,
+      capa: "comprometido",
+      monto: 114_000,
+      nota: "IVA de octubre 2026 · se paga el 2026-11-20",
+      iva: { periodo: "2026-10", postergado: false, fechaPago: "2026-11-20" },
+    });
+    return p;
+  };
+  it("la celda de IVA trae el mes, el monto y si está postergado", () => {
+    expect(ivaDeSemana(conIva(), FILA_IVA, S)).toEqual([
+      { periodo: "2026-10", postergado: false, fechaPago: "2026-11-20", monto: 114_000 },
+    ]);
+  });
+  it("cada celda abre su hoja; una fila normal no abre ninguna", () => {
+    expect(hojaEspecial(conIva(), FILA_IVA, S)).toEqual({ tipo: "iva", semana: S });
+    expect(hojaEspecial(conIva(), FILA_COBROS_ESPERADOS, S)).toEqual({ tipo: "cobros", semana: S });
+    expect(hojaEspecial(conIva(), "otra", S)).toBeNull();
+    expect(armarPlanilla(conIva(), { gestiona: true }).celdaEditable(FILA_IVA, S)).toBe(true);
   });
 });

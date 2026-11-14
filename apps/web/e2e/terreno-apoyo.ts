@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /** Mete en la cola local un hecho de un tipo que el servidor ya no acepta y pide enviarlo (CAR-78 · E1). */
 export async function inyectarRechazado(t: Page) {
@@ -58,16 +58,23 @@ export async function capturasDeInicioYCola(t: Page) {
 }
 
 /**
- * E3b · Marca un QR que el servidor no conoce: queda guardada en el teléfono, se envía y vuelve rechazada con
- * su motivo (nunca se pierde en silencio). Devuelve false si el módulo Rondas no está activo en la empresa.
+ * CAR-395 · El Inicio del equipo no ofrece «Marcar punto»: la marca se hace solo dentro de la ronda en curso
+ * (una marca desde el Inicio quedaba sin ronda). Si Rondas está activo, el Inicio lleva a «Mis rondas».
  */
-export async function marcarQrDesconocido(t: Page): Promise<boolean> {
+export async function inicioSinMarcarPunto(t: Page): Promise<void> {
   await t.goto("/terreno");
-  const seccion = t.getByRole("region", { name: "Marcar punto" });
-  if (!(await seccion.isVisible({ timeout: 20_000 }).catch(() => false))) return false;
-  await seccion.getByLabel("Código del punto (QR)").fill(`QR-DESCONOCIDO-${Date.now()}`);
-  await seccion.getByRole("button", { name: "Marcar" }).click();
-  await expect(seccion.getByText("Marca guardada en el teléfono")).toBeVisible();
+  await expect(t.getByRole("heading", { name: "Turno de ahora" })).toBeVisible({ timeout: 20_000 });
+  await expect(t.getByRole("region", { name: "Marcar punto" })).toHaveCount(0);
+}
+
+/**
+ * E3b · Dentro de la ronda en curso, marca un QR que el servidor no conoce: queda guardada en el teléfono, se
+ * envía y vuelve rechazada con su motivo (nunca se pierde en silencio). La ronda sigue en curso al volver.
+ */
+export async function marcarQrDesconocido(t: Page, enCurso: Locator): Promise<void> {
+  await enCurso.getByLabel("Código del punto (QR)").fill(`QR-DESCONOCIDO-${Date.now()}`);
+  await enCurso.getByRole("button", { name: "Marcar", exact: true }).click();
+  await expect(enCurso.getByText("Marca guardada en el teléfono")).toBeVisible();
   await t.goto("/terreno/cola");
   await expect(t.getByRole("heading", { name: /^No se enviaron \(1\)/ })).toBeVisible({
     timeout: 30_000,
@@ -75,5 +82,6 @@ export async function marcarQrDesconocido(t: Page): Promise<boolean> {
   await expect(t.getByText(/No se reconoce este código QR/)).toBeVisible();
   await t.getByRole("button", { name: "Quitar de la lista" }).click();
   await expect(t.getByRole("heading", { name: /^No se enviaron/ })).toHaveCount(0);
-  return true;
+  await t.goto("/terreno/rondas");
+  await expect(enCurso).toBeVisible({ timeout: 15_000 });
 }
