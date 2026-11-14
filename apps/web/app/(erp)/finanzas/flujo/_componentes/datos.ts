@@ -1,7 +1,9 @@
 import { formatearClp } from "@opai/domain";
 import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
-import { type CobroApi, hojaEspecial, type IvaApi } from "./cobros-celda";
+import { type CobroApi, FILA_COBROS_ESPERADOS, hojaEspecial, type IvaApi } from "./cobros-celda";
+import { celdaGrupoCobro, esGrupoCobro, filaBase, filasGrupoCobro, hayGruposCobro } from "./grupos-cobro";
+export { filaBase } from "./grupos-cobro";
 
 export type FilaFlujo = {
   id: string;
@@ -21,6 +23,7 @@ export type CeldaFlujo = {
   nota: string | null;
   cobro?: CobroApi;
   iva?: IvaApi;
+  cliente?: { cuentaId: string; cuenta: string; instalacionId: string | null; instalacion: string | null };
 };
 export type SemanaFlujo = {
   semana: string;
@@ -80,18 +83,20 @@ export function fechaDdMmAaaa(iso: string): string {
 const corta = (iso: string) => fechaDdMmAaaa(iso).slice(0, 5);
 
 /** Columnas, filas y celdas para `PlanillaScreen`: filas del flujo, totales y saldo con su tono. */
-export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
+export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abiertas?: ReadonlySet<string> }) {
+  const abiertas = opts?.abiertas ?? new Set<string>();
+  const plegableCobros = hayGruposCobro(p);
   const columnas: ColumnaPlanilla[] = p.semanas.map((s) => ({
     id: s.semana,
     etiqueta: s.pasada ? `${corta(s.semana)} · real` : corta(s.semana),
     destacada: s.semana === p.columnaHoy,
   }));
   const filas: FilaPlanilla[] = [
-    ...p.filas.map((f) => ({
-      id: f.id,
-      etiqueta: f.etiqueta,
-      ...(f.vinculo ? { sub: f.vinculo } : {}),
-    })),
+    ...p.filas.flatMap((f): FilaPlanilla[] => {
+      const fila: FilaPlanilla = { id: f.id, etiqueta: f.etiqueta, ...(f.vinculo ? { sub: f.vinculo } : {}) };
+      if (f.id !== FILA_COBROS_ESPERADOS || !plegableCobros) return [fila];
+      return [{ ...fila, plegable: { abierta: abiertas.has(f.id) } }, ...filasGrupoCobro(p, abiertas)];
+    }),
     { id: TOTALES.ingresos, etiqueta: "Total ingresos" },
     { id: TOTALES.egresos, etiqueta: "Total egresos" },
     { id: TOTALES.saldo, etiqueta: "Saldo final" },
@@ -115,6 +120,7 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
               ? "Bajo el umbral"
               : "Proyectado",
       };
+    if (esGrupoCobro(filaId)) return celdaGrupoCobro(p, filaId, semana);
     const c = celdaAgregada(p.celdas, filaId, semana, s.pasada);
     if (!c) {
       if (opts?.gestiona && esFilaMonto(filaId) && !s.pasada) {
@@ -131,7 +137,7 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
     };
   };
   const celdaEditable = (filaId: string, semana: string) =>
-    Boolean(opts?.gestiona && (celdaEditablePlan(p, filaId, semana) || hojaEspecial(p, filaId, semana)));
+    Boolean(opts?.gestiona && (celdaEditablePlan(p, filaId, semana) || hojaEspecial(p, filaBase(filaId), semana)));
   return { columnas, filas, celda, celdaEditable, totales: TOTALES };
 }
 

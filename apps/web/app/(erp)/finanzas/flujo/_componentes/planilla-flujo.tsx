@@ -31,8 +31,17 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
   const [seleccion, setSeleccion] = useState<{ filaId: string; semana: string } | null>(null);
   const [importAbierta, setImportAbierta] = useState(false);
   const [hoja, setHoja] = useState<HojaEspecial | null>(null);
+  // Filas abiertas: «Cobros esperados» por cliente y cada cliente por instalación (CAR-456).
+  const [abiertas, setAbiertas] = useState<ReadonlySet<string>>(() => new Set());
   const p = planilla;
-  const armado = useMemo(() => (p ? armarPlanilla(p, { gestiona }) : null), [p, gestiona]);
+  const armado = useMemo(() => (p ? armarPlanilla(p, { gestiona, abiertas }) : null), [p, gestiona, abiertas]);
+  const alternarFila = (filaId: string) =>
+    setAbiertas((prev) => {
+      const sig = new Set(prev);
+      if (sig.has(filaId)) sig.delete(filaId);
+      else sig.add(filaId);
+      return sig;
+    });
 
   const avisoTitulo =
     p && p.aviso.semanas.length
@@ -126,6 +135,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
         importAbierta={importAbierta}
         onImportAbiertaChange={setImportAbierta}
         onHoja={setHoja}
+        onAlternarFila={alternarFila}
       />
       {hojaCobros}
     </>

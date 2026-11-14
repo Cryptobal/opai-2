@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "../cn";
+import { CabeceraFila } from "./planilla-screen-cabecera-fila";
 import {
   claseCeldaNumero,
   TONO,
@@ -16,6 +17,7 @@ type Props = {
   celda: (filaId: string, columnaId: string) => Celda | null;
   celdaEditable?: (filaId: string, columnaId: string) => boolean;
   onCelda?: (filaId: string, columnaId: string) => void;
+  onAlternarFila?: (filaId: string) => void;
   onSeleccion: (seleccion: SeleccionPlanilla) => void;
 };
 
@@ -25,6 +27,7 @@ export function PlanillaTabla({
   celda,
   celdaEditable,
   onCelda,
+  onAlternarFila,
   onSeleccion,
 }: Props) {
   return (
@@ -51,10 +54,7 @@ export function PlanillaTabla({
         <tbody>
           {filas.map((f) => (
             <tr key={f.id}>
-              <th className="sticky left-0 z-10 border-r border-b border-border bg-surface px-3 py-1.5 text-left text-base font-medium text-fg">
-                <div className="truncate">{f.etiqueta}</div>
-                {f.sub ? <div className="text-xs font-normal text-fg-muted">{f.sub}</div> : null}
-              </th>
+              <CabeceraFila fila={f} {...(onAlternarFila ? { onAlternar: onAlternarFila } : {})} />
               {columnas.map((c) => {
                 const valor = celda(f.id, c.id);
                 const editable = Boolean(onCelda && celdaEditable?.(f.id, c.id));
