@@ -24,8 +24,10 @@ test.describe("@preview buscador general", () => {
     const paleta = page.getByRole("dialog");
     // Espera a que termine de buscar: aparece algún grupo.
     await expect(paleta.getByText(/^(Acciones|Ir a|Cuentas|Instalaciones|Personas|Contactos|Negocios|Cotizaciones|Solicitudes|Ajustes)$/).first()).toBeVisible({ timeout: 20_000 });
+    // El título de grupo es un encabezado: «Cotizaciones» también aparece como enlace en «Ir a».
     for (const grupo of ["Negocios", "Cotizaciones", "Solicitudes"]) {
-      if (await paleta.getByText(grupo, { exact: true }).count()) await expect(paleta.getByText(grupo, { exact: true })).toBeVisible();
+      const titulo = paleta.getByRole("heading", { name: grupo, exact: true });
+      if (await titulo.count()) await expect(titulo).toBeVisible();
     }
     await capturar(page, info, "buscador-general");
     await page.keyboard.press("Escape");
