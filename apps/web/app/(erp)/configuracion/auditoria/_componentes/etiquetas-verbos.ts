@@ -86,6 +86,9 @@ export const VERBOS: Record<string, string> = {
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
   // Grupos o equipos de usuarios (CAR-251).
   agregar_miembros: "Agregar miembros", quitar_miembro: "Quitar miembro",
+  // Roles adicionales y de grupo (CAR-359).
+  adicional_asignar: "Sumar rol", adicional_quitar: "Quitar rol adicional", adicionales_list: "Ver roles adicionales",
+  rol_asignar: "Dar rol al grupo", rol_quitar: "Quitar rol al grupo", roles_list: "Ver roles del grupo",
   // Historial de correos del cliente (CAR-233).
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).
