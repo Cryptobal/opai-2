@@ -80,6 +80,15 @@ describe.skipIf(omitirSuiteDb())("Central · señales y reglas (db)", () => {
     expect(await e.admin.evento.count({ where: { tenantId: t.con, tipo: "central.alerta.abierta" } })).toBe(1);
   });
 
+  it("una instalación de otra empresa en el payload no abre nada", async () => {
+    const antes = (await alertas("con")).length;
+    await senales.handler(ctx(t.con), {
+      id: randomUUID(), tenantId: t.con, tipo: "rondas.novedad.grave", entidadTipo: null, entidadId: null,
+      payload: { instalacionId: inst.sin }, actorTipo: "system",
+    } as never);
+    expect(await alertas("con")).toHaveLength(antes);
+  });
+
   it("la regla apagada de la empresa no abre alertas; la emergencia no se puede apagar", async () => {
     const c = ctx(t.con, admin);
     const ok = await mod.executeCapability(c, "central.reglas.guardar", { evento: "rondas.ejecucion.atrasada", severidad: "baja", activa: false });

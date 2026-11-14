@@ -42,6 +42,7 @@ export const reglasListar = defineCapability({
       };
     });
     const desde = input.cursor ? todas.findIndex((r) => r.evento === input.cursor) + 1 : 0;
+    if (input.cursor && desde === 0) return { items: [], siguiente: null };
     const items = todas.slice(desde, desde + input.limite);
     return { items, siguiente: desde + input.limite < todas.length ? (items.at(-1)?.evento ?? null) : null };
   },

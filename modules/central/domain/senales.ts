@@ -26,12 +26,12 @@ export const senalDe = (evento: string) => SENALES.find((s) => s.evento === even
 /** Ventana en que señales de la misma instalación y persona se juntan en una alerta (R4). */
 export const VENTANA_AGRUPACION_MIN = 10;
 
-type Abierta = { id: string; instalacionId: string; personaId: string | null; origen: string; createdAt: Date };
+type Abierta = { id: string; instalacionId: string; personaId: string | null; origen: string; estado: string; createdAt: Date };
 
 /**
  * Alerta abierta a la que se suma una señal nueva, o null si hay que abrir otra (R4, R4a): misma
  * instalación y misma persona (o ambas sin persona), y además el mismo evento (una sola alerta por
- * guardia y evento) o abierta hace menos de la ventana.
+ * guardia y evento), una pospuesta (vuelve con la señal nueva) o abierta hace menos de la ventana.
  */
 export function alertaParaAgrupar<A extends Abierta>(
   abiertas: readonly A[],
@@ -43,7 +43,7 @@ export function alertaParaAgrupar<A extends Abierta>(
     (a) =>
       a.instalacionId === s.instalacionId &&
       a.personaId === s.personaId &&
-      (a.origen === s.evento || a.createdAt.getTime() >= desde),
+      (a.origen === s.evento || a.estado === "pospuesta" || a.createdAt.getTime() >= desde),
   );
   return candidatas.sort((x, y) => y.createdAt.getTime() - x.createdAt.getTime())[0] ?? null;
 }

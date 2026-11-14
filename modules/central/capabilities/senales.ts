@@ -4,6 +4,7 @@ import { type Contexto, defineConsumidor } from "@opai/capabilities";
 
 import { ESTADOS_ACTIVOS, type Severidad } from "../domain";
 import { alertaParaAgrupar, masGrave, SENALES, senalDe } from "../domain/senales";
+import { bloquearAlerta, TRABAJO_REVISAR } from "./motor";
 import { registrarHecho } from "./util";
 
 const payloadSchema = z.looseObject({
@@ -21,11 +22,15 @@ async function centralActiva(ctx: Contexto) {
 }
 
 /** Instalación de la señal: la del evento o, si no viene, la del vínculo vigente de la persona. */
-async function instalacionDe(ctx: Contexto, p: z.infer<typeof payloadSchema>) {
-  if (p.instalacionId) return p.instalacionId;
-  if (!p.personaId) return null;
+async function instalacionDe(ctx: Contexto, instalacionId: string | undefined, personaId: string | null) {
+  if (instalacionId) {
+    const i = await ctx.db.instalacion.findFirst({ where: { id: instalacionId }, select: { id: true } });
+    return i?.id ?? null;
+  }
+  if (!personaId) return null;
   const v = await ctx.db.vinculoLaboral.findFirst({
-    where: { personaId: p.personaId, estado: "vigente", instalacionId: { not: null } },
+    where: { personaId, estado: "vigente", instalacionId: { not: null } },
+    orderBy: { inicio: "desc" },
     select: { instalacionId: true },
   });
   return v?.instalacionId ?? null;
@@ -47,29 +52,36 @@ export const consumidorSenales = defineConsumidor({
     const regla = await ctx.db.centralRegla.findFirst({ where: { evento: senal.evento } });
     if (regla && !regla.activa && !senal.fija) return;
     const severidad = (senal.fija ? senal.severidad : (regla?.severidad ?? senal.severidad)) as Severidad;
-    const instalacionId = await instalacionDe(ctx, p.data);
-    if (!instalacionId) return;
     const persona = p.data.personaId
       ? await ctx.db.persona.findFirst({ where: { id: p.data.personaId }, select: { id: true } })
       : null;
     const personaId = persona?.id ?? null;
+    // La instalación y la persona se validan en la empresa: un id ajeno no abre nada.
+    const instalacionId = await instalacionDe(ctx, p.data.instalacionId, personaId);
+    if (!instalacionId) return;
     await ctx.transaccion(async (tx) => {
       if (await tx.centralAlertaEvento.findFirst({ where: { tipo: "senal", nota: { startsWith: `${ev.id} ` } } })) return;
       const abiertas = await tx.centralAlerta.findMany({
         where: { instalacionId, personaId, estado: { in: [...ESTADOS_ACTIVOS, "pospuesta"] } },
       });
-      const destino = alertaParaAgrupar(abiertas, { instalacionId, personaId, evento: senal.evento }, new Date());
+      const candidata = alertaParaAgrupar(abiertas, { instalacionId, personaId, evento: senal.evento }, new Date());
+      // Se bloquea y se relee: si un operador la cerró entretanto, se abre una nueva.
+      const releida = candidata ? await bloquearAlerta(ctx, tx, candidata.id) : null;
+      const destino = releida && [...ESTADOS_ACTIVOS, "pospuesta"].includes(releida.estado) ? releida : null;
       const nota = `${ev.id} ${senal.nombre}`;
       if (destino) {
         const nueva = masGrave(destino.severidad as Severidad, severidad);
         // Una pospuesta vuelve a la cola apenas llega una señal nueva (R4a).
         const estado = (destino.estado === "pospuesta" ? (destino.estadoPrevio ?? "nueva") : destino.estado) as (typeof ESTADOS_ACTIVOS)[number];
+        const pospuesta = destino.estado === "pospuesta";
         await tx.centralAlerta.update({
           where: { id: destino.id },
-          data: { severidad: nueva, estado, estadoPrevio: null, pospuestaHasta: null },
+          data: pospuesta ? { severidad: nueva, estado, estadoPrevio: null, pospuestaHasta: null } : { severidad: nueva },
         });
-        if (destino.estado === "pospuesta")
+        if (pospuesta) {
           await registrarHecho(ctx, tx, { alertaId: destino.id, tipo: "reactivada", estadoDesde: "pospuesta", estadoHacia: estado, sistema: true });
+          await ctx.trabajos.encolar(tx, { tipo: TRABAJO_REVISAR, payload: { alertaId: destino.id }, programadoPara: new Date(), claveUnica: `${destino.id}:senal:${ev.id}` });
+        }
         await registrarHecho(ctx, tx, { alertaId: destino.id, tipo: "senal", estadoDesde: estado, estadoHacia: estado, nota, sistema: true });
         return;
       }
