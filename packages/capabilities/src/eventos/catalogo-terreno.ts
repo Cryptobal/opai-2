@@ -22,4 +22,14 @@ export const EVENTOS_TERRENO: readonly EventoDeDominio[] = [
     descripcion:
       "Se anonimizó a una persona con el rostro enrolado: hay que borrar su rostro en el proveedor y la referencia local.",
   },
+  {
+    id: "core.libro_novedades.registrada",
+    descripcion:
+      "Se registró en línea una novedad en el libro de una instalación; trae la instalación, el número NOV y la gravedad (alta = incidente).",
+  },
+  {
+    id: "core.libro_novedades.estado_cambiado",
+    descripcion:
+      "Cambió el estado de una novedad del libro (tomada, resuelta, cerrada, derivada o reabierta); trae el estado anterior y el nuevo.",
+  },
 ];

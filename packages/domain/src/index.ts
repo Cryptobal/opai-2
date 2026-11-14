@@ -1,4 +1,5 @@
 export * from "./novedades/catalogo";
+export * from "./libro-novedades";
 export * from "./inicio/indicadores";
 export * from "./bloqueo-login";
 export * from "./catalogos";

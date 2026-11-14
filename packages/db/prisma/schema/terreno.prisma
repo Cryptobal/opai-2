@@ -164,10 +164,33 @@ model LibroNovedad {
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  hechos LibroNovedadHecho[]
+
   @@unique([tenantId, numero])
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, instalacionId, horaHecho(sort: Desc)])
   @@index([tenantId, horaHecho(sort: Desc), id(sort: Desc)])
   @@map("libro_novedades")
+  @@schema("core")
+}
+
+/// Cambio de estado de una novedad del libro (CAR-77 parte 2): hecho inmutable con autor, nota y hora del servidor.
+/// El estado de `LibroNovedad` es la proyección del último hecho. `opai_app` solo lee e inserta.
+model LibroNovedadHecho {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  tenantId       String       @map("tenant_id") @db.Uuid
+  novedadId      String       @map("novedad_id") @db.Uuid
+  /// "tomar" | "resolver" | "cerrar" | "derivar" | "reabrir".
+  accion         String
+  estadoAnterior String       @map("estado_anterior")
+  estadoNuevo    String       @map("estado_nuevo")
+  nota           String?
+  usuarioId      String?      @map("usuario_id") @db.Uuid
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  novedad LibroNovedad @relation(fields: [novedadId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, novedadId, createdAt])
+  @@map("libro_novedades_hechos")
   @@schema("core")
 }

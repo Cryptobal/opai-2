@@ -1146,7 +1146,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.indicadores.uf_utm`
 - `core.indicadores_gestion.medir`
 - `core.invitations.revoke`
+- `core.libro_novedades.cambiar_estado`
 - `core.libro_novedades.listar`
+- `core.libro_novedades.obtener`
+- `core.libro_novedades.registrar`
 - `core.patrones.get`
 - `core.personas.asignar_jefe`
 - `core.personas.list_a_cargo`

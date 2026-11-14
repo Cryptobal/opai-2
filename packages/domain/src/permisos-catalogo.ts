@@ -19,6 +19,9 @@ export const PERMISOS_CORE = {
   cuentasReferenciasAutorizar: "core:cuentas.referencias.autorizar",
   instalacionesRead: "core:instalaciones.read",
   instalacionesManage: "core:instalaciones.manage",
+  // CAR-77 parte 2: registrar novedades en el libro de una instalación y cambiar su estado (tomar, resolver,
+  // cerrar, derivar, reabrir). El alcance por instalación lo pone la consulta (ADR-022).
+  novedadesManage: "core:novedades.manage",
   // Puestos (Brief 11): catálogos de patrones de turno y funciones, con lectura, edición y
   // desactivación separadas (permisos finos del #47). viewer lee por su lista (`permisos-base-nucleo.ts`).
   patronesRead: "core:patrones.read",
