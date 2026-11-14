@@ -39,11 +39,11 @@ describe.skipIf(omitirSuiteDb())("Personas · campos de la ficha CAR-277 (db)", 
     await e?.cerrar();
   });
 
-  it("guarda tallas, medidas, código interno, movilización y los términos de plazo fijo", async () => {
+  it("guarda tallas, medidas, código interno y movilización", async () => {
     const r = await ejecutar("core.personas.laboral_actualizar", {
       id: personaId,
       uniforme: { tallaPolera: "M", tallaGeologo: "L", tallaPolar: "XL", estaturaCm: 172, pesoKg: 80 },
-      jornadaDt: { resolucionVigenteHasta: "2027-06-30", terminosPlazoFijo: ["2026-09-30", "2026-03-31"] },
+      jornadaDt: { resolucionVigenteHasta: "2027-06-30" },
       contacto: { codigoInterno: "G-0042", movilizacion: "Bus de acercamiento" },
     });
     expect(r.ok, JSON.stringify(r)).toBe(true);
@@ -51,44 +51,12 @@ describe.skipIf(omitirSuiteDb())("Personas · campos de la ficha CAR-277 (db)", 
     expect(v.ok, JSON.stringify(v)).toBe(true);
     expect(v.data).toMatchObject({
       uniforme: { tallaPolera: "M", tallaGeologo: "L", tallaPolar: "XL", estaturaCm: 172, pesoKg: 80 },
-      jornadaDt: {
-        resolucionVigenteHasta: "2027-06-30",
-        terminosPlazoFijo: ["2026-03-31", "2026-09-30"],
-        // El período y el término vigente se derivan de la lista (avisos de vencimiento).
-        plazoFijoPeriodo: 2,
-        terminoPlazoFijo: "2026-09-30",
-      },
+      jornadaDt: { resolucionVigenteHasta: "2027-06-30" },
       contacto: { codigoInterno: "G-0042", movilizacion: "Bus de acercamiento" },
     });
   });
 
-  it("rechaza medidas fuera de rango y más de tres períodos", async () => {
+  it("rechaza medidas fuera de rango", async () => {
     expect((await ejecutar("core.personas.laboral_actualizar", { id: personaId, uniforme: { estaturaCm: 20 } })).ok).toBe(false);
-    const cuatro = ["2026-01-31", "2026-02-28", "2026-03-31", "2026-04-30"];
-    expect((await ejecutar("core.personas.laboral_actualizar", { id: personaId, jornadaDt: { terminosPlazoFijo: cuatro } })).ok).toBe(false);
-  });
-
-  it("conserva el período de un registro antiguo y no deja la lista desfasada", async () => {
-    // Solo los campos antiguos (como un cliente de API): la lista queda vacía.
-    const antiguo = await ejecutar("core.personas.laboral_actualizar", {
-      id: personaId, jornadaDt: { terminoPlazoFijo: "2026-08-31", plazoFijoPeriodo: 2 },
-    });
-    expect(antiguo.ok, JSON.stringify(antiguo)).toBe(true);
-    let v = await ejecutar("core.personas.laboral_ver", { id: personaId });
-    expect(v.data).toMatchObject({ jornadaDt: { terminosPlazoFijo: [], plazoFijoPeriodo: 2, terminoPlazoFijo: "2026-08-31" } });
-    // Lo que envía el formulario al guardar sin tocar el plazo: el término en su casilla y el período.
-    const form = await ejecutar("core.personas.laboral_actualizar", {
-      id: personaId, jornadaDt: { resolucion: "R-1", terminosPlazoFijo: ["2026-08-31"], plazoFijoPeriodo: 2 },
-    });
-    expect(form.ok, JSON.stringify(form)).toBe(true);
-    v = await ejecutar("core.personas.laboral_ver", { id: personaId });
-    expect(v.data).toMatchObject({ jornadaDt: { plazoFijoPeriodo: 2, terminoPlazoFijo: "2026-08-31" } });
-  });
-
-  it("rechaza términos de plazo fijo repetidos", async () => {
-    const r = await ejecutar("core.personas.laboral_actualizar", {
-      id: personaId, jornadaDt: { terminosPlazoFijo: ["2026-03-31", "2026-03-31"] },
-    });
-    expect(r.ok).toBe(false);
   });
 });

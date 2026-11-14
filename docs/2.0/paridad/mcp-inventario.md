@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 793 pares pantalla→capacidad · 714 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 795 pares pantalla→capacidad · 716 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -555,6 +555,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_rechazar_cambio` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_solicitar_cambio` | `core_personas_pago_solicitar_cambio` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_ver` | `core_personas_pago_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_anular` | `core_personas_periodos_anular` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_registrar` | `core_personas_periodos_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
