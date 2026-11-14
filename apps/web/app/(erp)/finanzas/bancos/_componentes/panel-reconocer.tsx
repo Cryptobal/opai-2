@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { diferenciaAsignada } from "@opai/domain";
@@ -91,9 +92,15 @@ export function PanelReconocer({ movimiento, onCerrar }: { movimiento: Movimient
   return (
     <>
       <Card className="flex flex-col gap-4 p-4">
-        <div>
-          <h2 className="t-subheading text-fg">{esConciliado ? "Conciliación" : "Reconocer movimiento"}</h2>
-          <p className="t-body-sm text-fg-muted break-words">{`${movimiento.glosa} · ${clp(movimiento.monto)}`}</p>
+        {/* Cierre visible arriba a la derecha (CAR-443): vuelve a la lista en web y en teléfono sin tocar otra pestaña. */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="t-subheading text-fg">{esConciliado ? "Conciliación" : "Reconocer movimiento"}</h2>
+            <p className="t-body-sm text-fg-muted break-words">{`${movimiento.glosa} · ${clp(movimiento.monto)}`}</p>
+          </div>
+          <Button variant="ghost" size="iconSm" aria-label="Cerrar" className="-mt-2 -mr-2 flex-none" onClick={onCerrar}>
+            <X className="size-5" aria-hidden />
+          </Button>
         </div>
         <CuerpoHojaReconocer
           movimiento={movimiento}
@@ -113,7 +120,7 @@ export function PanelReconocer({ movimiento, onCerrar }: { movimiento: Movimient
           ) : (
             <>
               <Button variant="secondary" onClick={onCerrar}>
-                Sin conciliar
+                Cancelar
               </Button>
               <Button disabled={pendiente || !cuadra} onClick={() => void confirmar()}>
                 Confirmar conciliación
