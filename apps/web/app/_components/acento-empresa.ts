@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { acentoDeMarca, type Modo, type TonoAcento } from "@opai/domain/marca-acento";
 
 import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
+
+import { logoDeMarca } from "./logo-marca";
 
 type Tonos = Record<Modo, TonoAcento>;
 
@@ -34,7 +36,14 @@ function pintar(tonos: Tonos) {
  * `acentoDeMarca` y lo vuelve a pintar si cambia el tema. Sin color o sin permiso queda el acento por
  * defecto de la piel.
  */
-export function useAcentoEmpresa(activo: boolean, portal: string, epoca: string) {
+export function useAcentoEmpresa(
+  activo: boolean,
+  portal: string,
+  epoca: string,
+): string | undefined {
+  // El logo queda ligado a la empresa y la época que lo leyeron: al cambiar no se muestra el anterior.
+  const clave = `${portal}|${epoca}`;
+  const [leido, setLeido] = useState<{ clave: string; logo: string | undefined } | null>(null);
   useEffect(() => {
     if (!activo) return;
     let tonos: Tonos | null = null;
@@ -47,6 +56,8 @@ export function useAcentoEmpresa(activo: boolean, portal: string, epoca: string)
             : null;
         tonos = acentoDeMarca(typeof color === "string" ? color : null);
         if (vivo && tonos) pintar(tonos);
+        if (vivo)
+          setLeido({ clave: `${portal}|${epoca}`, logo: logoDeMarca(r.ok ? r.data : null) });
       })
       .catch(() => undefined);
     const repintar = () => tonos && pintar(tonos);
@@ -66,4 +77,5 @@ export function useAcentoEmpresa(activo: boolean, portal: string, epoca: string)
       sistema.removeEventListener("change", repintar);
     };
   }, [activo, portal, epoca]);
+  return activo && leido?.clave === clave ? leido.logo : undefined;
 }
