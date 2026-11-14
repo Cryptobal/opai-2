@@ -63,6 +63,11 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "central"."cadenas"
 
 ALTER TABLE "central"."alertas" ADD CONSTRAINT "alertas_cadena_id_fkey"
   FOREIGN KEY ("cadena_id") REFERENCES "central"."cadenas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- La cadena de una alerta es siempre de su misma empresa (se rehace el trigger de central_base).
+DROP TRIGGER mismo_tenant ON "central"."alertas";
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "central"."alertas"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
+    'instalacion_id', 'core.instalaciones', 'persona_id', 'core.personas', 'cadena_id', 'central.cadenas');
 ALTER TABLE "central"."alertas" ADD CONSTRAINT "alertas_atencion_por_id_fkey"
   FOREIGN KEY ("atencion_por_id") REFERENCES "core"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 

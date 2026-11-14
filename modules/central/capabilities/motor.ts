@@ -45,13 +45,21 @@ export async function cadenaDe(tx: TenantTx, a: Alerta) {
   };
 }
 
+/** Bloquea la alerta y la vuelve a leer dentro de la transacción (trabajo, consumidor y personas no se pisan). */
+export async function bloquearAlerta(ctx: Contexto, tx: TenantTx, id: string) {
+  await tx.$queryRaw`SELECT id FROM central.alertas WHERE id = ${id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+  return tx.centralAlerta.findFirst({ where: { id } });
+}
+
 /** Usuarios a contactar en un paso: solo miembros activos de la empresa. */
 async function destinatarios(tx: TenantTx, a: Alerta, paso: Paso): Promise<string[]> {
   const d = paso.destinatario;
   if (d.tipo === "guardia") {
     if (!a.personaId) return [];
     const p = await tx.persona.findFirst({ where: { id: a.personaId }, select: { usuarioId: true } });
-    return p?.usuarioId ? [p.usuarioId] : [];
+    if (!p?.usuarioId) return [];
+    const activa = await tx.membership.findFirst({ where: { userId: p.usuarioId, estado: "activa" }, select: { userId: true } });
+    return activa ? [activa.userId] : [];
   }
   const where =
     d.tipo === "supervisores"

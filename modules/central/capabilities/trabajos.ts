@@ -4,7 +4,7 @@ import { defineConsumidor, defineTrabajo, type Contexto } from "@opai/capabiliti
 
 import type { EstadoAlerta, Severidad } from "../domain";
 import { siguientePaso } from "../domain/cadena";
-import { cadenaDe, contactarPaso, TRABAJO_REVISAR } from "./motor";
+import { bloquearAlerta, cadenaDe, contactarPaso, TRABAJO_REVISAR } from "./motor";
 import { registrarHecho } from "./util";
 
 /** Al abrirse una alerta se contacta el paso 1 de su cadena (R7). Idempotente: solo si sigue nueva. */
@@ -14,9 +14,11 @@ export const consumidorAlertaAbierta = defineConsumidor({
   eventos: ["central.alerta.abierta"],
   async handler(ctx, ev) {
     if (!ev.entidadId) return;
-    const a = await ctx.db.centralAlerta.findFirst({ where: { id: ev.entidadId } });
-    if (!a || a.estado !== "nueva" || a.pasoActual !== 0) return;
-    await ctx.transaccion((tx) => contactarPaso(ctx, tx, a, 1));
+    const id = ev.entidadId;
+    await ctx.transaccion(async (tx) => {
+      const a = await bloquearAlerta(ctx, tx, id);
+      if (a && a.estado === "nueva" && a.pasoActual === 0) await contactarPaso(ctx, tx, a, 1);
+    });
   },
 });
 
@@ -27,7 +29,7 @@ export const consumidorAlertaAbierta = defineConsumidor({
 async function revisar(ctx: Contexto, alertaId: string) {
   const ahora = new Date();
   await ctx.transaccion(async (tx) => {
-    let a = await tx.centralAlerta.findFirst({ where: { id: alertaId } });
+    let a = await bloquearAlerta(ctx, tx, alertaId);
     if (!a) return;
     if (a.estado === "pospuesta" && a.pospuestaHasta && a.pospuestaHasta <= ahora) {
       const previo = (a.estadoPrevio ?? "nueva") as EstadoAlerta;
@@ -40,7 +42,8 @@ async function revisar(ctx: Contexto, alertaId: string) {
     const atencionVencida = a.estado === "en_atencion" && a.atencionVenceEn && a.atencionVenceEn <= ahora;
     if (a.estado === "nueva" && a.pasoActual === 0) return contactarPaso(ctx, tx, a, 1);
     if (!pasoVencido && !atencionVencida) return;
-    const siguiente = siguientePaso(a.pasoActual, total, sev) ?? (atencionVencida ? Math.max(a.pasoActual, 1) : null);
+    // Si la cadena se acortó a mitad de la alerta, se retoma desde su último paso.
+    const siguiente = siguientePaso(a.pasoActual, total, sev) ?? (atencionVencida ? Math.min(Math.max(a.pasoActual, 1), total) : null);
     if (siguiente) await contactarPaso(ctx, tx, a, siguiente);
   });
 }

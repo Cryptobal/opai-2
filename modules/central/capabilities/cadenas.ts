@@ -63,7 +63,7 @@ export const cadenasGuardar = defineCapability({
     if (i.instalacionId && !(await ctx.db.instalacion.findFirst({ where: { id: i.instalacionId }, select: { id: true } })))
       throw noEncontrado("La instalación");
     for (const p of i.pasos)
-      if (p.destinatario.tipo === "usuario" && !(await ctx.db.membership.findFirst({ where: { userId: p.destinatario.usuarioId }, select: { id: true } })))
+      if (p.destinatario.tipo === "usuario" && !(await ctx.db.membership.findFirst({ where: { userId: p.destinatario.usuarioId, estado: "activa" }, select: { id: true } })))
         throw noEncontrado("La persona de un paso");
     const existente = await ctx.db.centralCadena.findFirst({ where: { instalacionId: i.instalacionId, severidad: i.severidad } });
     if (dryRun) return { id: existente?.id ?? null };
