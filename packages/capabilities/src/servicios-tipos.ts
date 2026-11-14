@@ -106,10 +106,27 @@ export type Identidad = {
   ultimosAccesos(userIds: readonly string[]): Promise<Map<string, Date>>;
   /** Si el usuario es miembro de alguna empresa distinta de `tenantId`. */
   enOtrasEmpresas(userId: string, tenantId: string): Promise<boolean>;
-  /** Borra su enrolamiento de MFA y cierra todas sus sesiones, en la transacción del llamador. */
+  /**
+   * Bloquea la fila de membresía (`FOR UPDATE`) en la transacción del llamador y devuelve a qué
+   * tenant y usuario sigue perteneciendo; `null` si ya no existe (CAR-54, carrera §I-15).
+   */
+  membresiaBloqueada(
+    tx: TenantTx,
+    membershipId: string,
+  ): Promise<{ tenantId: string; userId: string } | null>;
+  /**
+   * Borra su enrolamiento de MFA y cierra todas sus sesiones, en la transacción del llamador.
+   * Bloquea antes la fila de `core.users` y, con `reverificar`, le entrega su estado recién leído
+   * para repetir ahí las condiciones de autorización (CAR-54, carrera §I-15).
+   */
   restablecerSegundoFactor(
     tx: TenantTx,
     userId: string,
+    reverificar?: (u: {
+      platformRole: string | null;
+      twoFactorEnabled: boolean;
+      passkeyEnabled: boolean;
+    }) => void,
   ): Promise<{ enrolamientos: number; passkeys?: number; sesiones: number }>;
   /** Métodos de autenticación propios (CAR-286): solo metadatos, nunca claves ni secretos. */
   metodosDe(userId: string): Promise<MetodosUsuario>;

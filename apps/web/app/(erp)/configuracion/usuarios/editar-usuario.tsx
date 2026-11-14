@@ -7,6 +7,7 @@ import { avisar, Button, Dialog, Sheet, Switch } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fechaHora } from "@/lib/formato";
 
+import { RestablecerMfa } from "./restablecer-mfa";
 import { CampoRolUsuario, permisosDeSeleccion, seleccionDe } from "./campo-rol-usuario";
 import { CampoPortales } from "./campos";
 import { ExcepcionesUsuario } from "./excepciones-usuario";
@@ -119,6 +120,8 @@ function Formulario(p: Props & { miembro: Miembro }) {
           {miembro.rol === "supervisor" && (p.miRol === "owner" || p.miRol === "admin") ? (
             <InstalacionesACargo membershipId={miembro.id} />
           ) : null}
+          {/* CAR-54: si perdió el teléfono y sus códigos; la capacidad rechaza la ficha propia. */}
+          {p.miRol === "owner" ? <RestablecerMfa miembro={miembro} /> : null}
         </div>
       </Sheet>
       <Dialog

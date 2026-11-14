@@ -6,6 +6,7 @@ import {
   consumirReautenticacion,
   desactivarTotp,
   desconectarApp,
+  membresiaBloqueada,
   metodosDeUsuario,
   quitarPasskey,
   renombrarPasskey,
@@ -19,6 +20,7 @@ import type { Identidad } from "./types";
 export const identidadEnDb: Identidad = {
   ultimosAccesos,
   enOtrasEmpresas: usuarioEnOtrasEmpresas,
+  membresiaBloqueada,
   restablecerSegundoFactor,
   borrarUsuario,
   metodosDe: metodosDeUsuario,

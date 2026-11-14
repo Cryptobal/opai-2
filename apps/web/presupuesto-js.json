@@ -146,7 +146,7 @@
     "/(erp)/finanzas/compras": 169,
     "/(erp)/finanzas/compras/[id]": 169,
     "/(erp)/finanzas/compras/proveedores": 169,
-    "/(erp)/mi-cuenta": 169,
+    "/(erp)/mi-cuenta": 171,
     "/(platform)/platform/tenants/[id]/trabajos": 169
   }
 }

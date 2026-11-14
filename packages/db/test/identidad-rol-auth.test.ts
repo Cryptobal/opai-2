@@ -113,7 +113,8 @@ describe.skipIf(!urlPropietario)("identidad con rol propio (CAR-43)", () => {
 
   it("restablecer el MFA borra el enrolamiento y las sesiones, y la transacción sigue como opai_app", async () => {
     const ok = await tx.enTransaccion(tenantId, async (t) => {
-      const res = await db.restablecerSegundoFactor(t, conMfa);
+      const { restablecerSegundoFactor } = await import("../src/identidad-mfa");
+      const res = await restablecerSegundoFactor(t, conMfa);
       // Volvió al rol de la sesión (opai_app), con la RLS del tenant: nunca queda como opai_auth.
       const [rol] = await t.$queryRaw<{ r: string }[]>`SELECT current_user::text AS r`;
       expect(rol?.r).not.toBe("opai_auth");

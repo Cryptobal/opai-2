@@ -118,4 +118,18 @@ test.describe("invitación y Mi cuenta", () => {
     await expect(page.getByText("Activa", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Desactivar" })).toBeVisible();
   });
+
+  // CAR-54: regenerar los códigos de respaldo con la contraseña, mostrados una sola vez.
+  test("Mi cuenta del owner: regenera los códigos de respaldo con su contraseña", async ({
+    page,
+  }) => {
+    await entrar(page);
+    await abrirMiCuenta(page);
+    await page.getByRole("button", { name: "Regenerar códigos de respaldo" }).click();
+    await page.getByLabel("Tu contraseña", { exact: true }).fill(password ?? "");
+    await page.getByRole("button", { name: "Regenerar", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Nuevos códigos de respaldo" })).toBeVisible();
+    await expect(page.getByText(/Guárdalos ahora\. No los verás de nuevo\./)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Copiar todos" })).toBeVisible();
+  });
 });
