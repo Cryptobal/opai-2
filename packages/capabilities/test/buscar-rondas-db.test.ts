@@ -18,7 +18,12 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Rondas (CAR-405)", ()
   const t = { a: "", b: "" };
   const inst = { norte: "", sur: "", beta: "" };
   const r: Record<string, string> = {};
-  const ctx = (tid: string, rol: string, alcance: string[] | null = null, permisosRol?: string[]) =>
+  const ctx = (
+    tid: string,
+    rol: "owner" | "supervisor" | "viewer",
+    alcance: string[] | null = null,
+    permisosRol?: string[],
+  ) =>
     mod.crearContexto({
       ...(permisosRol ? { permisosRol } : {}),
       tenantId: tid,
