@@ -3,8 +3,10 @@ import { z } from "zod";
 import { disponibilidadSeccion, type SeccionPortal } from "@opai/domain";
 
 import { tenantActual } from "../core/comun";
+import { hoyEn } from "../core/turnos/comun";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
+import { coberturaActiva, coberturaPorInstalacion, coberturaSchema } from "./cobertura";
 import { configDeCuenta } from "./config-datos";
 import { PERMISO_PORTAL, accesoDelActor, seccionSchema } from "./comun";
 
@@ -87,7 +89,7 @@ const seccionResumen = z.object({
 export const resumenLeer = defineCapability({
   id: "portal_cliente.resumen.leer",
   descripcion:
-    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). Las secciones sin datos aún se marcan como pendientes, sin cifras.",
+    "Resumen del mes del Portal Cliente: una tarjeta por instalación habilitada para el contacto, con el estado de cada sección (cobertura, rondas, novedades). La cobertura trae turnos programados, cubiertos y por cubrir del mes (hasta hoy en el mes en curso), sin personas ni costos; las secciones sin datos aún se marcan como pendientes, sin cifras.",
   permiso: PERMISO_PORTAL,
   input: z.object({ mes: z.string().regex(MES).optional() }),
   output: z.object({
@@ -102,6 +104,8 @@ export const resumenLeer = defineCapability({
         nombre: z.string(),
         direccion: z.string().nullable(),
         secciones: z.array(seccionResumen),
+        /** Cifras de cobertura del mes (CAR-491); null si la sección no está activa para la empresa o la cuenta. */
+        cobertura: coberturaSchema.nullable(),
       }),
     ),
   }),
@@ -119,6 +123,11 @@ export const resumenLeer = defineCapability({
       (s): s is Extract<SeccionPortal, "cobertura" | "rondas" | "novedades"> =>
         s === "cobertura" || s === "rondas" || s === "novedades",
     );
+    const conCobertura = await coberturaActiva(ctx, config.seccionesVisibles);
+    const hoy = hoyEn(tenant.timezone);
+    const cobertura = conCobertura
+      ? await coberturaPorInstalacion(ctx, a.instalaciones, mes, hoy)
+      : new Map();
     return {
       cuentaId: a.cuentaId,
       cuentaNombre: a.cuentaNombre,
@@ -129,7 +138,11 @@ export const resumenLeer = defineCapability({
         id: i.id,
         nombre: i.nombre,
         direccion: i.direccionFormateada ?? i.comuna ?? null,
-        secciones: secciones.map((s) => ({ seccion: s, disponibilidad: disponibilidadSeccion(s) })),
+        secciones: secciones.map((s) => ({
+          seccion: s,
+          disponibilidad: s === "cobertura" && conCobertura ? ("disponible" as const) : disponibilidadSeccion(s),
+        })),
+        cobertura: cobertura.get(i.id) ?? null,
       })),
     };
   },
