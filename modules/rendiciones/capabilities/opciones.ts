@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { Contexto } from "@opai/capabilities";
 import { ajuste, defineCapability } from "@opai/capabilities";
-import { PERMISOS_CORE } from "@opai/domain";
+import { INCLUIR_ACCESO, PERMISOS_CORE } from "@opai/domain";
 
 import { METODOS_KM } from "../domain";
 import { puedeAprobarMembresia } from "./aprobadores";
@@ -94,7 +94,7 @@ export const rendicionesOpciones = defineCapability({
     const membresias = candidatos.length
       ? await ctx.db.membership.findMany({
           where: { tenantId: ctx.tenantId, estado: "activa", userId: { in: candidatos } },
-          include: { rolTenant: true, excepciones: true },
+          include: INCLUIR_ACCESO,
         })
       : [];
     const ids = membresias.filter(puedeAprobarMembresia).map((m) => m.userId);
