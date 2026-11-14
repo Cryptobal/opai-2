@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import type { Contexto } from "@opai/capabilities";
-import { ajuste, defineCapability, INCLUIR_ACCESO } from "@opai/capabilities";
-import { PERMISOS_CORE } from "@opai/domain";
+import { ajuste, defineCapability } from "@opai/capabilities";
+import { INCLUIR_ACCESO, PERMISOS_CORE } from "@opai/domain";
 
 import { METODOS_KM } from "../domain";
 import { puedeAprobarMembresia } from "./aprobadores";

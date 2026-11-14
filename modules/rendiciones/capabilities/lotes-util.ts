@@ -1,6 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
-import { cifradoDeCampos, INCLUIR_ACCESO, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
-import { accesoDeMembresia, tienePermisoEfectivo } from "@opai/domain";
+import { cifradoDeCampos, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { accesoDeMembresia, INCLUIR_ACCESO, tienePermisoEfectivo } from "@opai/domain";
 
 import { codigoLote, type EstadoLote } from "../domain";
 import { PERMISO_APROBAR_LOTE } from "./permisos";

@@ -1,7 +1,6 @@
-import { accesoDeMembresia, PERMISOS_CORE, tienePermisoEfectivo } from "@opai/domain";
+import { accesoDeMembresia, INCLUIR_ACCESO, PERMISOS_CORE, tienePermisoEfectivo } from "@opai/domain";
 
 import type { Contexto } from "../../types";
-import { INCLUIR_ACCESO } from "../permisos/acceso-membresia";
 import type { Destinatario } from "./destinatarios";
 
 /** Si el documento es el final de un anexo de contrato (R15): trae datos de sueldo. */

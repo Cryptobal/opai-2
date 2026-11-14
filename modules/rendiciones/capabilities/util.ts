@@ -1,5 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
-import { ajuste, INCLUIR_ACCESO, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { ajuste, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { INCLUIR_ACCESO } from "@opai/domain";
 
 import { claveDuplicado, codigoVisible, esFechaFutura, itemsSinRespaldo } from "../domain";
 import { puedeAprobarMembresia } from "./aprobadores";

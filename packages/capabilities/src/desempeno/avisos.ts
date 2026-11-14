@@ -2,12 +2,11 @@
 // `desempeno.aviso_bajo_meta` (silencio por defecto, ADR-020), el cierre emite un evento por persona
 // bajo la meta y uno por jefatura directa (la de su ficha más la de la jerarquía de cargos). Son transaccionales: solo este consumidor los
 // envía, a la persona o a la jefatura, y solo si puede ver ese resultado. Nunca llevan el puntaje.
-import { accesoDeMembresia, renderizar, tienePermisoEfectivo } from "@opai/domain";
+import { accesoDeMembresia, INCLUIR_ACCESO, renderizar, tienePermisoEfectivo } from "@opai/domain";
 
 import { valoresEfectivos } from "../core/config";
 import { campoAjuste } from "../core/config/catalogo";
 import { equipoDe } from "../core/jefatura";
-import { INCLUIR_ACCESO } from "../core/permisos/acceso-membresia";
 import { comunicableDe, plantillaVigente } from "../core/comunicaciones/resolver";
 import { defineConsumidor, type EventoPublicado } from "../eventos/consumidores";
 import type { Contexto } from "../types";
