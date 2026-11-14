@@ -31,7 +31,7 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "/finanzas/flujo",
     ]);
     expect(manifest.eventos).toHaveLength(58);
-    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(57);
+    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(58);
     expect(manifest.configuracion).toBe(ajustesFinanzas);
   });
 
