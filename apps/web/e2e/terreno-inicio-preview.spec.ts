@@ -12,7 +12,9 @@ test.setTimeout(120_000);
 test.describe("@preview terreno inicio", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
-  test("el Inicio del equipo no ofrece marcar un punto fuera de la ronda", async ({ page }, info) => {
+  test("el Inicio del equipo no ofrece marcar un punto fuera de la ronda", async ({
+    page,
+  }, info) => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
@@ -26,7 +28,10 @@ test.describe("@preview terreno inicio", () => {
       .catch(() => false);
     await capturar(page, info, "terreno-inicio");
     if (!llego) {
-      info.annotations.push({ type: "omitido", description: "qa-e2e no llega al Inicio del equipo" });
+      info.annotations.push({
+        type: "omitido",
+        description: "qa-e2e no llega al Inicio del equipo",
+      });
       expect(errores).toEqual([]);
       return;
     }
