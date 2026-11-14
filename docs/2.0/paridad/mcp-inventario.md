@@ -1122,6 +1122,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
 - `central.estado`
+- `central.reglas.guardar`
+- `central.reglas.listar`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
