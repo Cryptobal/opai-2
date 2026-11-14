@@ -21,7 +21,7 @@ export type Variante = keyof typeof VARIANTES;
 export type Entorno = keyof typeof ENTORNOS;
 
 /** Ruta con que abre la app: la entrada única de la PWA (ADR-044.1). */
-export const RUTA_ENTRADA = "/entrar";
+const RUTA_ENTRADA = "/entrar";
 
 function esVariante(valor: string): valor is Variante {
   return Object.hasOwn(VARIANTES, valor);
