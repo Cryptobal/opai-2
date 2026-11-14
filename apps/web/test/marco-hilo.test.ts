@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { COOKIE_MARCO, cookieMarco, marcoDeCookie, portalAdmiteHilo, rutaAncha } from "@/lib/marco";
+import { COOKIE_MARCO, cookieMarco, marcoDeCookie, rutaAncha } from "@/lib/marco";
 
 // El menú importa la acción de salir (servidor); aquí solo se arma la lista.
 vi.mock("@/app/_acciones/auth", () => ({ accionSalir: () => undefined }));
@@ -19,13 +19,6 @@ describe("elección del marco (ADR-090)", () => {
     expect(cookieMarco("clasico")).toContain(`${COOKIE_MARCO}=clasico`);
     expect(cookieMarco("clasico")).toContain("Max-Age=31536000");
     expect(cookieMarco("nuevo")).toContain("Max-Age=0");
-  });
-
-  it("en esta etapa el Hilo solo existe en el ERP y con acceso a la empresa", () => {
-    expect(portalAdmiteHilo("erp", true)).toBe(true);
-    expect(portalAdmiteHilo("erp", false)).toBe(false);
-    expect(portalAdmiteHilo("supervisor", true)).toBe(false);
-    expect(portalAdmiteHilo("platform", true)).toBe(false);
   });
 
   it("la cookie dura un año, vale en todo el sitio y no viaja a otros sitios", () => {
