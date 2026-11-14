@@ -36,8 +36,3 @@ export const slugSchema = z
   .max(40)
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Solo minúsculas, dígitos y guiones.")
   .refine((s) => !(SLUGS_RESERVADOS as readonly string[]).includes(s), "Ese slug está reservado.");
-
-export const fecha = z
-  .date()
-  .or(z.string())
-  .transform((d) => (typeof d === "string" ? d : d.toISOString()));

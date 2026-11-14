@@ -10,11 +10,6 @@ const TECHO_VARIACION_UF = 0.03;
 const TASA_MENSUAL_UTM = 0.05;
 const TECHO_VARIACION_UTM = 0.06;
 
-/** @deprecated Usar TASA_DIARIA_UF; conservado para tests que importaban el nombre. */
-export const VARIACION_MAX_UF = TASA_DIARIA_UF;
-/** @deprecated Usar TASA_MENSUAL_UTM. */
-export const VARIACION_MAX_UTM = TASA_MENSUAL_UTM;
-
 export function fuenteEsSii(fuente: string): boolean {
   return /^https:\/\/(www\.)?sii\.cl\//i.test(fuente);
 }

@@ -19,14 +19,6 @@ const firmanteVistaSchema = z.object({
 });
 type FirmanteVista = z.infer<typeof firmanteVistaSchema>;
 
-export const evidenciaVistaSchema = z.object({
-  tipo: z.string(),
-  nivel: z.string().nullable(),
-  metodo: z.string().nullable(),
-  firmanteId: z.string().nullable(),
-  fecha: z.string(),
-});
-
 export const solicitudVistaSchema = z.object({
   id: z.string(),
   documentoId: z.string(),
