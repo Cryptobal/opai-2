@@ -14,7 +14,7 @@ const PERMISOS: Record<EntidadCampos, { ver: string; editar: string }> = {
 };
 
 /**
- * Tarjeta «Campos propios» de una ficha (CAR-27): los campos personalizados que definió la empresa en
+ * Tarjeta «Campos de <empresa>» de una ficha (CAR-27, `DESIGN-PROMPT-crm-pr3.md` §3): los campos personalizados que definió la empresa en
  * Configuración. Si la empresa no definió ninguno para esta entidad, no se muestra.
  */
 export async function CamposFicha(p: { tipo: EntidadCampos; id: string }) {
@@ -27,7 +27,7 @@ export async function CamposFicha(p: { tipo: EntidadCampos; id: string }) {
   const campos = r.data.campos;
   return (
     <SeccionTarjeta
-      titulo="Campos propios"
+      titulo={`Campos de ${identidad?.actual?.tenant.nombre ?? "la empresa"}`}
       accion={
         puede(PERMISOS[p.tipo].editar) ? (
           <EditarCampos tipo={p.tipo} id={p.id} campos={campos} />

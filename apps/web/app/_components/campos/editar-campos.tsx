@@ -87,7 +87,7 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
       <Sheet
         abierto={abierto}
         onCerrar={cerrar}
-        titulo="Campos propios"
+        titulo="Editar campos"
         acciones={
           <>
             <Button variant="secondary" onClick={cerrar}>

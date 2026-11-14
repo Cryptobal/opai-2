@@ -51,7 +51,7 @@ Valores por ficha: `core.valores_personalizados.get/set` (cuentas y contactos, p
 ### Qué entra
 
 - **Configuración › Operación › Campos personalizados** (`/configuracion/campos-personalizados`, permiso `core:campos.config`): campos por entidad (Cuentas, Contactos, Negocios), con «Nuevo campo» y «Editar» en una hoja (nombre, tipo, opciones de lista, obligatorio y archivar).
-- **Tarjeta «Campos propios»** en las fichas de cuenta, contacto y negocio. Solo aparece si hay campos definidos para esa entidad; muestra los valores y tiene un botón «Editar» (con el permiso de edición de la ficha) que guarda solo lo que cambió.
+- **Tarjeta «Campos de <empresa>» (título del Design Prompt del PR 3 §3)** en las fichas de cuenta, contacto y negocio. Solo aparece si hay campos definidos para esa entidad; muestra los valores y tiene un botón «Editar» (con el permiso de edición de la ficha) que guarda solo lo que cambió.
 - El error de guardado nombra cada campo que falló.
 - Entrada de novedades y prueba `@preview`.
 
