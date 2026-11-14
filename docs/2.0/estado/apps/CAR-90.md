@@ -11,13 +11,15 @@
 - `apps/movil`: contenedor Capacitor 8.6 en modo servidor remoto, con dos variantes: «OPAI» (`cl.opai.app`) y «OPAI Terreno» (`cl.opai.terreno`). Ambas abren `/entrar` en `test.opai.cl` por defecto; `app.opai.cl` solo al preparar tiendas. Navegación limitada al dominio del entorno, sin tráfico en claro, página propia «No pudimos abrir OPAI» sin conexión.
 - Proyectos Android e iOS generados por variante. Las dos variantes compilan un APK de prueba en Android (verificado en la sesión con `assembleDebug`).
 - `/entrar` atiende al equipo de terreno emparejado sin sesión: va a Terreno (o a emparejar si lo revocaron). El proxy deja pasar `/entrar` sin sesión solo con la cookie del equipo.
-- Prueba de que cada perfil cae en su portal (guardia, cliente, supervisor, administrativo, equipo emparejado) y e2e `@preview` con el user agent de la app.
+- Prueba de que cada perfil cae en su portal (guardia, cliente, supervisor, administrativo, equipo emparejado): función pura y página `/entrar` con sesión y equipo simulados, más e2e `@preview` con el user agent de la app.
+- Android sin respaldo automático (`allowBackup=false`): el respaldo copiaría la cookie del equipo emparejado a otro teléfono (hallazgo de la autorrevisión).
 
 ## Qué queda pendiente
 
 - **Parte 2:** íconos y pantalla de carga con la marca; push nativo (APNs/FCM) por el adaptador del núcleo; GPS en segundo plano para rondas; botón atrás de Android con historial; ocultar «Instalar» y el aviso de iPhone dentro de la app (user agent `OPAIApp/`); ingreso con Google por el navegador del sistema (Google lo bloquea en vistas web embebidas).
 - Compilar iOS en un Mac con Xcode.
-- Probar en un teléfono real que «Reintentar» de la página sin conexión vuelve a cargar.
+- Probar en un teléfono real que «Reintentar» de la página sin conexión vuelve a cargar (usa `history.back()`; si al arrancar sin red no hay historial, cambiar a recargar la entrada).
+- El e2e `@preview` acepta el portal del usuario `qa-e2e` o el selector; afirmar el portal exacto cuando haya usuarios de prueba por perfil.
 - Publicar en tiendas: firma, cuentas de desarrollador y fichas (Carlos; ver «Decide Carlos»).
 
 ## Qué se decidió

@@ -107,7 +107,8 @@ export async function proxy(request: NextRequest) {
       "/terreno/porteria",
       "/terreno/rondas",
     ].includes(request.nextUrl.pathname) ||
-    // Un equipo de terreno emparejado no tiene sesión: `/entrar` lo lleva a Terreno (Brief 17).
+    // Un equipo de terreno emparejado no tiene sesión: `/entrar` lo lleva a Terreno (Brief 17). Con
+    // sesión también pasa por aquí; la página resuelve la sesión y `/entrar` no usa el chequeo de 404.
     (request.nextUrl.pathname === "/entrar" && request.cookies.has(COOKIE_DISPOSITIVO));
   if (publica) return responder(NextResponse.next({ request: { headers } }));
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
