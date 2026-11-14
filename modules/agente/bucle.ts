@@ -20,8 +20,8 @@ export type Paso = {
 };
 export type Plan = { id: string; pasos: Paso[]; texto: string; tokens: number };
 export type Conversador = { conversar(s: SolicitudConversacion): Promise<RespuestaConversacion> };
-export const MAX_PASOS = 12;
-export const MAX_TOKENS = 128_000;
+const MAX_PASOS = 12;
+const MAX_TOKENS = 128_000;
 /** El borde comprueba sesión y acceso actuales; un contexto antiguo no acredita vigencia. */
 export async function revalidarAccesoDelTurno(ctx: Contexto): Promise<string> {
   if (!ctx.revalidarAccesoSolicitud)
