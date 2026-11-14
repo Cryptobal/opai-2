@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
+import { EVENTO_PESTANA_BARRA } from "@opai/ds";
+
 import type { SolicitudAgente } from "./abrir-agente";
 
 // Ni el botón ni el panel pesan en el JS inicial: se descargan solo donde el agente existe (ADR-037).
@@ -31,8 +33,14 @@ export function useAgenteShell(disponible: boolean, portal: string) {
         setAbierto((v) => !v);
       }
     };
+    // Teléfono del diseño nuevo (CAR-416): tocar Inicio, Menú o Yo en la barra deja la pestaña Agente.
+    const salir = () => setAbierto(false);
     window.addEventListener("keydown", tecla);
-    return () => window.removeEventListener("keydown", tecla);
+    window.addEventListener(EVENTO_PESTANA_BARRA, salir);
+    return () => {
+      window.removeEventListener("keydown", tecla);
+      window.removeEventListener(EVENTO_PESTANA_BARRA, salir);
+    };
   }, [disponible]);
   useEffect(() => {
     if (!disponible) return;

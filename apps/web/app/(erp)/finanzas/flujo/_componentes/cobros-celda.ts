@@ -42,3 +42,27 @@ export function cobrosDeSemana(p: Planilla, filaId: string, semana: string): Cob
   }
   return out.sort((a, b) => b.monto - a.monto || a.documentoId.localeCompare(b.documentoId));
 }
+
+/** Fila del sistema «IVA a pagar» (igual que `FILA_IVA` del módulo Finanzas). */
+export const FILA_IVA = "00000000-0000-4000-8000-000000000006";
+
+/** Lo que trae la celda de IVA desde `finanzas.planilla.obtener` (CAR-397). */
+export type IvaApi = { periodo: string; postergado: boolean; fechaPago: string };
+export type IvaCelda = IvaApi & { monto: number };
+
+/** IVA a pagar en la semana: mes del IVA, si está postergado a M+2 y el día de pago. */
+export function ivaDeSemana(p: Planilla, filaId: string, semana: string): IvaCelda[] {
+  if (filaId !== FILA_IVA) return [];
+  return p.celdas.flatMap((c) =>
+    c.filaId === filaId && c.semana === semana && c.iva ? [{ ...c.iva, monto: c.monto }] : [],
+  );
+}
+
+/** Hoja que abre una celda que no se edita a mano: los cobros esperados o el IVA. */
+export type HojaEspecial = { tipo: "cobros" | "iva"; semana: string };
+
+export function hojaEspecial(p: Planilla, filaId: string, semana: string): HojaEspecial | null {
+  if (cobrosDeSemana(p, filaId, semana).length) return { tipo: "cobros", semana };
+  if (ivaDeSemana(p, filaId, semana).length) return { tipo: "iva", semana };
+  return null;
+}

@@ -56,7 +56,7 @@ export async function marcarAusenciasDelTitular(
   if (!titular) return 0;
   const ausencias = await tx.ausencia.findMany({
     where: { personaId: titular, estado: "aprobada", hasta: { gte: aFechaDb(d.desde) } },
-    select: { id: true, tipo: true, motivo: true, desde: true, hasta: true },
+    select: { id: true, tipo: true, motivo: true, clase: true, desde: true, hasta: true },
     orderBy: { desde: "asc" },
   });
   let total = 0;
@@ -74,6 +74,7 @@ export async function marcarAusenciasDelTitular(
         fecha: aFechaDb(f),
         tipo: a.tipo,
         motivo: a.motivo,
+        clase: a.clase,
         personaId: titular,
         ausenciaId: a.id,
         creadaPor: usuario,

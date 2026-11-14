@@ -545,6 +545,11 @@
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
 }
+/* Sin logo, la inicial de la empresa va con su color (ADR-109, CAR-335 D6b). */
+[data-marco="nuevo"] [data-monograma] {
+  background: var(--ds-accent);
+  color: var(--ds-accent-fg);
+}
 /* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único queda al centro exacto de
    la barra, con la ruta a la izquierda y las acciones, el tema, el agente y la campana a la derecha.
    Va centrado sobre la barra (no en el flujo) para que «Atrás» o las acciones de una ficha no lo
@@ -575,6 +580,48 @@
 [data-marco="nuevo"] header.md\:hidden div:has(> button[aria-label^="Menú de usuario"]) {
   display: none;
 }
+/* Teléfono del diseño nuevo (CAR-416, `export-diseno-nuevo/Telefono`): la barra inferior se ve siempre.
+   Agente, Menú y Yo son pestañas: el panel del agente y la hoja «Menú» van de arriba hasta la barra,
+   sin «X» (se sale tocando otra pestaña), y el agente no se repite en la barra superior. */
+:root {
+  --ds-alto-barra-inferior: calc(3.5rem + 1px + env(safe-area-inset-bottom));
+}
+@media (max-width: 47.999rem) {
+  [data-marco="nuevo"] aside[data-panel-lateral] {
+    bottom: var(--ds-alto-barra-inferior);
+    z-index: 30;
+  }
+  /* La barra ya cubre la zona segura de abajo: sin un segundo margen sobre ella. */
+  [data-marco="nuevo"] aside[data-panel-lateral] > div:last-child {
+    padding-bottom: 0;
+  }
+  /* Pestaña activa: con la hoja «Menú» o el panel del agente abiertos se marca esa pestaña. */
+  :root:has([data-sobre-barra], aside[data-panel-lateral])
+    [data-shell="inferior-nuevo"]
+    [data-tab] {
+    color: var(--color-fg-muted);
+    font-weight: 500;
+  }
+  :root:has([data-sobre-barra], aside[data-panel-lateral])
+    [data-shell="inferior-nuevo"]
+    [data-tab]
+    > svg {
+    color: inherit;
+  }
+  :root:has([data-sobre-barra]) [data-shell="inferior-nuevo"] [data-tab="menu"],
+  :root:has(aside[data-panel-lateral]) [data-shell="inferior-nuevo"] [data-tab="agente"] {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+  :root:has([data-sobre-barra]) [data-shell="inferior-nuevo"] [data-tab="menu"] > svg,
+  :root:has(aside[data-panel-lateral]) [data-shell="inferior-nuevo"] [data-tab="agente"] > svg {
+    color: var(--color-accent);
+  }
+  [data-marco="nuevo"] aside[data-panel-lateral] [data-panel-cerrar],
+  [data-marco="nuevo"] [data-agente-telefono] {
+    display: none;
+  }
+}
 /* Fondo propio del menú lateral y del riel en el diseño nuevo (`--ds-side`, D2c). */
 [data-marco="nuevo"] nav[data-shell="sidebar"],
 [data-marco="nuevo"] nav[data-shell="riel"] {
@@ -596,12 +643,16 @@
   [data-marco="nuevo"] [data-split]:not([data-contenido]) > [data-columna="lista"] {
     width: 42%;
   }
-  [data-marco="nuevo"] [data-split][data-sin-detalle]:not([data-contenido]) > [data-columna="lista"] {
+  [data-marco="nuevo"]
+    [data-split][data-sin-detalle]:not([data-contenido])
+    > [data-columna="lista"] {
     width: 100%;
     flex: 1 1 auto;
     border-right-width: 0;
   }
-  [data-marco="nuevo"] [data-split][data-sin-detalle]:not([data-contenido]) > [data-columna="detalle"] {
+  [data-marco="nuevo"]
+    [data-split][data-sin-detalle]:not([data-contenido])
+    > [data-columna="detalle"] {
     display: none;
   }
   /* «Ver a pantalla completa» (CAR-335 D4b): sin JS; la casilla de la ficha esconde la lista. */

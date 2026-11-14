@@ -1,8 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import { serieVigente, trabajaEn } from "@opai/domain";
 
-import { uuidSchema } from "../core/esquemas";
+import { claseValida } from "../core/maestros/ausencias-clases";
 import { sinDuplicado } from "../core/maestros/comun";
 import { defineCapability } from "../define";
 import { conflicto, reglaDeNegocio } from "../errores";
@@ -10,41 +10,16 @@ import type { Contexto } from "../types";
 import { anotar } from "./anotar";
 import { registrarDesdePauta } from "./ausencias-registro";
 import { cargarSeries } from "./cargar";
-import {
-  aFechaDb,
-  diasDelRango,
-  fechaIso,
-  PERMISO_WRITE,
-  puestoParaPauta,
-  rangoSchema,
-} from "./comun";
+import { aFechaDb, diasDelRango, fechaIso, PERMISO_WRITE, puestoParaPauta } from "./comun";
 import { nombresDePersonas } from "./nombres";
-import { tipoExcepcionSchema } from "./vistas";
-
-const crearInput = z
-  .object({
-    puestoId: uuidSchema,
-    tipo: tipoExcepcionSchema,
-    motivo: z.string().trim().min(3, "Cuenta brevemente el motivo.").max(200),
-  })
-  .and(rangoSchema);
-
-const crearSalida = z.object({
-  puestoId: z.string(),
-  tipo: tipoExcepcionSchema,
-  desde: z.string(),
-  hasta: z.string(),
-  /** Días de turno registrados (los libres del rango se omiten). */
-  dias: z.number().int(),
-  /** Titulares a los que el sistema avisará (notificación, sin confirmar). */
-  avisarA: z.array(z.string()),
-});
+import { crearInput, crearSalida } from "./excepciones-crear-esquemas";
 
 type Entrada = z.output<typeof crearInput>;
 
 /** Valida el rango contra la serie vigente y arma lo que se registra; sirve a la vista previa y a la real. */
 async function planear(ctx: Contexto, i: Entrada) {
   const puesto = await puestoParaPauta(ctx, i.puestoId);
+  const clase = await claseValida(ctx, i.tipo, i.clase);
   const series = await cargarSeries(ctx, puesto.id);
   // Solo cuentan los días de turno según la serie vigente: un día libre no tiene qué quedar por cubrir.
   const dias = diasDelRango(i.desde, i.hasta).flatMap((f) => {
@@ -73,7 +48,7 @@ async function planear(ctx: Contexto, i: Entrada) {
     ctx,
     dias.map((d) => d.personaId),
   );
-  return { puesto, dias, avisarA: [...nombres.values()] };
+  return { puesto, dias, clase, avisarA: [...nombres.values()] };
 }
 
 /** Registra una ausencia, licencia, vacaciones o permiso: los turnos de esos días quedan PPC. */
@@ -107,6 +82,7 @@ export const excepcionesCrear = defineCapability({
         tenantId: ctx.tenantId,
         tipo: input.tipo,
         motivo: input.motivo,
+        clase: plan.clase,
         usuarioId: ctx.usuario?.id ?? null,
         ahora,
         dias: plan.dias.map((d) => ({ fecha: aFechaDb(d.fecha), personaId: d.personaId })),
@@ -119,6 +95,7 @@ export const excepcionesCrear = defineCapability({
             fecha: aFechaDb(d.fecha),
             tipo: input.tipo,
             motivo: input.motivo,
+            clase: plan.clase,
             personaId: d.personaId,
             ausenciaId: d.personaId ? (registros.get(d.personaId) ?? null) : null,
             creadaPor: ctx.usuario?.id ?? null,

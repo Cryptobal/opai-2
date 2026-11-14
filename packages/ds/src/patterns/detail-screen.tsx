@@ -51,7 +51,7 @@ export function DetailScreen({
     />
   );
   return (
-    <section>
+    <section data-detalle>
       {inicio ? (
         <div className="flex items-start gap-4">
           <div className="flex-none">{inicio}</div>
@@ -60,6 +60,8 @@ export function DetailScreen({
       ) : (
         cabecera
       )}
+      {/* Ranura del agente dentro de la ficha (CAR-335 D5): la llena «Preguntar a OPAI». */}
+      <div data-ficha-agente />
       <Estado state={state} variante="detalle" {...(textos ? { textos } : {})}>
         {tabs && tabs.length > 0 ? (
           <Tabs

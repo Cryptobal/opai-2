@@ -13,6 +13,7 @@ export type GrupoAusencia = {
   ausenciaId: string;
   tipo: TipoAusencia;
   motivo: string;
+  clase: string | null;
   desde: string;
   hasta: string;
   dias: number;
@@ -20,3 +21,6 @@ export type GrupoAusencia = {
   registradaEn: string;
   instalaciones: string[];
 };
+
+/** Clase del catálogo de la empresa (CAR-393 parte 3), ligada a un tipo base. */
+export type ClaseAusencia = { nombre: string; tipo: TipoAusencia };
