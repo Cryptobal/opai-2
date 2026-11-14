@@ -14,6 +14,7 @@ export type Ticket = {
   estado: string;
   solicitanteId: string;
   responsableId: string;
+  instalacionId: string | null;
   motivoRechazo: string | null;
   slaVenceEn: string | null;
   resueltoEn: string | null;
@@ -103,4 +104,25 @@ export async function cargarTicket(id: string) {
 
 export async function cargarTipos() {
   return ejecutarComoUsuario<TipoTicket[]>("erp", "tickets.tipos.listar", {});
+}
+
+export type InstalacionOpcion = { id: string; nombre: string };
+
+/**
+ * Instalaciones activas que quien crea puede elegir (su alcance, ADR-022). Quien no tiene permiso de
+ * ver instalaciones recibe una lista vacía y el campo no aparece.
+ */
+export async function cargarInstalaciones(): Promise<InstalacionOpcion[]> {
+  const r = await ejecutarComoUsuario<{ items: InstalacionOpcion[] }>("erp", "core.instalaciones.list", {
+    estado: "activa",
+    limite: 100,
+  });
+  return r.ok ? r.data.items.map((i) => ({ id: i.id, nombre: i.nombre })) : [];
+}
+
+/** Nombre de la instalación del ticket, solo si quien mira la tiene en su alcance. */
+export async function nombreInstalacion(id: string | null): Promise<string | null> {
+  if (!id) return null;
+  const r = await ejecutarComoUsuario<{ nombre: string }>("erp", "core.instalaciones.get", { id });
+  return r.ok ? r.data.nombre : null;
 }
