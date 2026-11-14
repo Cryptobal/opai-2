@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, FileCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Alerta, avisar, Badge, Button, Card, Table, Td, Th } from "@opai/ds";
@@ -39,6 +40,7 @@ type Props = { periodoId: string; tipo: "lre" | "previred"; obligacion: Obligaci
 export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: Props) {
   const t = TEXTOS[tipo];
   const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const router = useRouter();
   const [archivo, setArchivo] = useState<Archivo | null>(null);
   async function validar() {
     // Ids literales: el escáner de paridad verifica cada capacidad que llama la pantalla.
@@ -49,8 +51,10 @@ export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: P
     setArchivo(r);
     // Deja el resultado en el calendario de obligaciones (generado o con errores), si el mes no está cerrado.
     const estado = r.errores.length > 0 ? "con_errores" : "generado";
-    if (obligacion && MARCABLE.has(obligacion.estado) && obligacion.estado !== estado)
+    if (obligacion && MARCABLE.has(obligacion.estado) && obligacion.estado !== estado) {
       await ejecutar("nomina.obligaciones.actualizar", { id: obligacion.id, estado });
+      router.refresh();
+    }
   }
   const conErrores = archivo !== null && archivo.errores.length > 0;
   const listo = archivo !== null && !conErrores && archivo.filas > 0;
@@ -111,7 +115,7 @@ export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: P
           Descargar
         </Button>
       </div>
-      {obligacion && tenantId && (listo || ["generado", "cargado", "pagado"].includes(obligacion.estado)) ? <ComprobanteObligacion obligacion={obligacion} tenantId={tenantId} tipo={tipo} /> : null}
+      {obligacion && tenantId && ["generado", "cargado", "pagado"].includes(obligacion.estado) ? <ComprobanteObligacion obligacion={obligacion} tenantId={tenantId} tipo={tipo} /> : null}
     </Card>
   );
 }

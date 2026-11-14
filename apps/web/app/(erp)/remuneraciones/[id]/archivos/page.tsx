@@ -37,7 +37,8 @@ export default function ArchivosPeriodo({ params }: Props) {
             <Alerta tono="info" titulo="OPAI prepara y valida los archivos">
               El LRE lo sube en Mi DT el representante laboral electrónico con su ClaveÚnica. La declaración y el pago en Previred los hace la persona responsable. Los archivos salen de las liquidaciones calculadas del período.
             </Alerta>
-            {d.obl && !d.obl.lre && !d.obl.previred ? (
+            {d.obl && !d.obl.ok ? <Alerta tono="danger" titulo="No pudimos leer el calendario de obligaciones del mes." /> : null}
+            {d.obl?.ok && !d.obl.lre && !d.obl.previred ? (
               <Alerta tono="warning" titulo="El calendario de obligaciones de este año no está generado">
                 Genéralo en Remuneraciones › Calendario para guardar aquí los comprobantes de carga y pago.
               </Alerta>
