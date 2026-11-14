@@ -143,6 +143,10 @@ describe.skipIf(!urlPropietario)("libro de novedades: registrar y estados (CAR-7
     );
     expect(det.acciones).toEqual([]);
     expect(det.historia.map((h) => h.accion)).toEqual(["tomar", "resolver", "cerrar"]);
+    // Los hechos son inmutables para la aplicación: no se editan ni se borran.
+    const app = e.forTenant(t.A);
+    await expect(app.libroNovedadHecho.updateMany({ data: { nota: "x" } })).rejects.toThrow();
+    await expect(app.libroNovedadHecho.deleteMany({})).rejects.toThrow();
   });
 
   it("la vista previa no cambia el estado; otra empresa ni el supervisor ajeno la ven", async () => {
