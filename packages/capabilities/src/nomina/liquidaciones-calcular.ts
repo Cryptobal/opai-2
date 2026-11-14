@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { liquidacionDelMes, type NovedadesLiquidacion } from "@opai/domain";
+import { liquidacionDelMes, type Liquidacion, type NovedadesLiquidacion } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { prohibido, reglaDeNegocio } from "../errores";
@@ -105,19 +105,7 @@ export const liquidacionesCalcular = defineCapability({
       // Se conservan las de quien falló el cálculo; se borran las de quien ya no tiene vínculo o capa.
       const conservar = [...filas.map((f) => f.personaId), ...salida.omitidas.filter((o) => o.motivo === "error_calculo").map((o) => o.personaId)];
       await tx.nominaLiquidacion.deleteMany({ where: { periodoId, personaId: { notIn: conservar } } });
-      for (const { personaId, l } of filas) {
-        const datos = {
-          estado: "calculada", diasTrabajados: l.diasTrabajados, haberes: l.totalHaberes, imponible: l.imponible,
-          descuentosLegales: l.totalDescuentosLegales, otrosDescuentos: l.totalOtrosDescuentos, liquido: l.liquido,
-          costoEmpresa: l.costoEmpresa, capaId: l.capaId, juegoHuella: l.huellaJuego, calculadaEn: new Date(),
-          detalle: { haberes: l.haberes, descuentosLegales: l.descuentosLegales, otrosDescuentos: l.otrosDescuentos,
-            aportesEmpleador: l.aportesEmpleador, diasLicencia: l.diasLicencia, prevision: l.prevision },
-          advertencias: l.advertencias,
-        };
-        const previa = await tx.nominaLiquidacion.findFirst({ where: { periodoId, personaId }, select: { id: true } });
-        if (previa) await tx.nominaLiquidacion.update({ where: { id: previa.id }, data: datos });
-        else await tx.nominaLiquidacion.create({ data: { tenantId: ctx.tenantId, periodoId, personaId, ...datos } });
-      }
+      await guardarLiquidaciones(tx, ctx.tenantId, periodoId, filas);
       await ctx.eventos.emitir(tx, {
         tipo: "nomina.liquidaciones.calculadas",
         entidadTipo: "periodo",
@@ -128,3 +116,20 @@ export const liquidacionesCalcular = defineCapability({
     });
   },
 });
+
+/** Guarda (crea o actualiza) la liquidación de cada persona dentro de la transacción del cálculo. */
+async function guardarLiquidaciones(tx: TenantTx, tenantId: string, periodoId: string, filas: { personaId: string; l: Liquidacion }[]) {
+  for (const { personaId, l } of filas) {
+    const datos = {
+      estado: "calculada", diasTrabajados: l.diasTrabajados, haberes: l.totalHaberes, imponible: l.imponible,
+      descuentosLegales: l.totalDescuentosLegales, otrosDescuentos: l.totalOtrosDescuentos, liquido: l.liquido,
+      costoEmpresa: l.costoEmpresa, capaId: l.capaId, juegoHuella: l.huellaJuego, calculadaEn: new Date(),
+      detalle: { haberes: l.haberes, descuentosLegales: l.descuentosLegales, otrosDescuentos: l.otrosDescuentos,
+        aportesEmpleador: l.aportesEmpleador, diasLicencia: l.diasLicencia, prevision: l.prevision },
+      advertencias: l.advertencias,
+    };
+    const previa = await tx.nominaLiquidacion.findFirst({ where: { periodoId, personaId }, select: { id: true } });
+    if (previa) await tx.nominaLiquidacion.update({ where: { id: previa.id }, data: datos });
+    else await tx.nominaLiquidacion.create({ data: { tenantId, periodoId, personaId, ...datos } });
+  }
+}

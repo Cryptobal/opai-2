@@ -1,6 +1,6 @@
-import { redondearCLP } from "../dinero";
-import type { Estructura } from "../estructuras";
 import { costoEmpleadorPorPersona } from "../remuneraciones/costo-empresa";
+import { capaDelMes, lineasDe } from "./liquidacion-partes";
+import type { Estructura } from "../estructuras";
 import { horasExtraClp } from "../remuneraciones/horas-extra";
 import type { AdministradoraAFP } from "../remuneraciones/indicadores";
 import { minimoPorJornada } from "../remuneraciones/jornada";
@@ -59,11 +59,7 @@ export type Liquidacion = {
   advertencias: string[];
 };
 
-const proporcional = (monto: number | null | undefined, dias: number) =>
-  monto == null ? monto ?? null : redondearCLP((monto * dias) / DIAS_MES_LIQUIDACION);
-
 const sumar = (l: LineaLiquidacion[]) => l.reduce((s, x) => s + x.monto, 0);
-const conMonto = (l: LineaLiquidacion[]) => l.filter((x) => x.monto !== 0);
 
 export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores): Liquidacion {
   const n = e.novedades;
@@ -75,53 +71,14 @@ export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores):
     ? horasExtraClp({ sueldoBaseClp: baseCompleta, immClp: imm, jornadaLegalHoras: jornadaLegal,
       jornadaMinutosSemanales: e.jornadaMinutosSemanales, minutosExtra: n.minutosExtra })
     : 0;
-  const capa: Estructura = {
-    ...e.capa,
-    sueldoBase: proporcional(e.capa.sueldoBase, dias),
-    colacion: proporcional(e.capa.colacion, dias),
-    movilizacion: proporcional(e.capa.movilizacion, dias),
-    gratificacionMonto: proporcional(e.capa.gratificacionMonto, dias),
-    items: [
-      ...e.capa.items.map((i) => (i.tipo === "bono_fijo" ? { ...i, monto: proporcional(i.monto, dias) } : i)),
-      ...(horasExtra > 0
-        ? [{ tipo: "bono_fijo" as const, nombre: "Horas extra", monto: horasExtra, porcentaje: null, imponible: true }]
-        : []),
-    ],
-  };
   const r = costoEmpleadorPorPersona({
-    sueldo: { capa }, contrato: e.contrato, afp: e.afp, salud: e.salud,
+    sueldo: { capa: capaDelMes(e.capa, dias, horasExtra) }, contrato: e.contrato, afp: e.afp, salud: e.salud,
     jornadaMinutosSemanales: e.jornadaMinutosSemanales, mutualAdicional: e.mutualAdicional,
     provisiones: { diasVacacionesCorridosAnuales: 21, baseVacaciones: "sin_gratificacion",
       baseIndemnizacion: "imponible", mesesAntiguedad: 0, probabilidadIndemnizacion: 1_000_000 },
   }, juego);
   const h = r.desglose.haberes;
-  const d = r.desglose;
-  const haberes = conMonto([
-    { concepto: "Sueldo base", monto: h.sueldoBase },
-    { concepto: "Gratificación", monto: h.gratificacion },
-    { concepto: "Horas extra", monto: horasExtra },
-    { concepto: "Bonos imponibles", monto: h.bonosImponibles - horasExtra },
-    { concepto: "Colación", monto: h.colacion },
-    { concepto: "Movilización", monto: h.movilizacion },
-    { concepto: "Bonos no imponibles", monto: h.bonosNoImponibles },
-  ]);
-  const descuentosLegales = conMonto([
-    { concepto: "AFP", monto: d.afpClp },
-    { concepto: "Salud", monto: d.saludClp },
-    { concepto: "Seguro de cesantía", monto: d.cesantiaTrabajadorClp },
-    { concepto: "Impuesto único", monto: d.impuestoUnicoClp },
-  ]);
-  const otrosDescuentos = conMonto([
-    { concepto: "Anticipos", monto: n.anticipos },
-    { concepto: "Cuotas de préstamo", monto: n.prestamos },
-    { concepto: "Descuentos", monto: n.descuentos },
-  ]);
-  const aportesEmpleador = conMonto([
-    { concepto: "Seguro de cesantía empleador", monto: d.cesantiaEmpleadorClp },
-    { concepto: "Ley 16.744 y SANNA", monto: d.mutualClp },
-    { concepto: "SIS", monto: d.sisClp },
-    { concepto: "Aporte de la reforma", monto: d.reformaClp },
-  ]);
+  const { haberes, descuentosLegales, otrosDescuentos, aportesEmpleador } = lineasDe(r.desglose, n, horasExtra);
   const totalOtros = sumar(otrosDescuentos);
   const liquido = r.liquidoEstimadoClp - totalOtros;
   const minimo = minimoPorJornada(imm, e.jornadaMinutosSemanales, jornadaLegal);
@@ -135,7 +92,7 @@ export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores):
   return {
     diasTrabajados: dias, haberes, descuentosLegales, otrosDescuentos, aportesEmpleador,
     diasLicencia: Math.min(n.diasLicencia, DIAS_MES_LIQUIDACION),
-    prevision: { afp: e.afp, salud: e.salud.tipo, basePrevisional: d.basePrevisionalClp, baseCesantia: d.baseCesantiaClp },
+    prevision: { afp: e.afp, salud: e.salud.tipo, basePrevisional: r.desglose.basePrevisionalClp, baseCesantia: r.desglose.baseCesantiaClp },
     totalHaberes: h.total, imponible: h.imponible,
     totalDescuentosLegales: sumar(descuentosLegales), totalOtrosDescuentos: totalOtros,
     liquido, costoEmpresa: r.costoEmpresaMensualClp,
