@@ -5,7 +5,7 @@ import { defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai
 import { ESTADOS_VIVOS } from "../domain";
 import { prioridadSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR, PERMISO_VER_TODOS } from "./permisos";
-import { exigirMiembroActivo, ID_VISTA_PREVIA, instalacionVisible, responsablePorDefecto, ticketDe, vistaDeFila } from "./util";
+import { exigirMiembroActivo, ID_VISTA_PREVIA, insertarTicket, rolPuedeUsar, instalacionVisible, responsablePorDefecto, ticketDe, vistaDeFila } from "./util";
 
 export const ticketsCrear = defineCapability({
   id: "tickets.tickets.crear",
@@ -27,8 +27,7 @@ export const ticketsCrear = defineCapability({
     if (!ctx.usuario) throw prohibido("Se necesita una sesión de usuario para crear un ticket.");
     const tipo = await ctx.db.tipoTicket.findFirst({ where: { id: input.tipoId, activo: true } });
     if (!tipo) throw noEncontrado("El tipo de ticket");
-    const rol = ctx.rol;
-    if (tipo.rolesPermitidos.length > 0 && !(rol && tipo.rolesPermitidos.includes(rol)))
+    if (!rolPuedeUsar(tipo.rolesPermitidos, ctx.rol))
       throw prohibido("Tu rol no puede crear este tipo de ticket.");
     let responsableId: string;
     if (input.responsableId && ctx.autorizar(PERMISO_VER_TODOS)) {
@@ -39,32 +38,14 @@ export const ticketsCrear = defineCapability({
     }
     const instalacionId = input.instalacionId ? await instalacionVisible(ctx, input.instalacionId) : null;
     if (dryRun) return { id: ID_VISTA_PREVIA };
-    const creado = await ctx.transaccion(async (tx) => {
-      const t = await tx.ticket.create({
-        data: {
-          tenantId: ctx.tenantId,
-          tipoId: tipo.id,
-          titulo: input.titulo,
-          descripcion: input.descripcion,
-          prioridad: input.prioridad,
-          estado: "abierto",
-          solicitanteId: ctx.usuario!.id,
-          responsableId,
-          instalacionId,
-        },
-      });
-      await tx.ticketEvento.create({
-        data: { tenantId: ctx.tenantId, ticketId: t.id, tipo: "creado", actorId: ctx.usuario!.id },
-      });
-      await ctx.eventos.emitir(tx, {
-        tipo: "tickets.ticket.creado",
-        entidadTipo: "ticket",
-        entidadId: t.id,
-        payload: { tipoId: tipo.id, prioridad: t.prioridad, responsableId, instalacionId },
-      });
-      return t;
+    return insertarTicket(ctx, {
+      tipoId: tipo.id,
+      titulo: input.titulo,
+      descripcion: input.descripcion,
+      prioridad: input.prioridad,
+      responsableId,
+      instalacionId,
     });
-    return { id: creado.id };
   },
 });
 

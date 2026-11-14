@@ -39,6 +39,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
 | cliente | `/cliente/facturas` | `portal_cliente.facturas.listar` | `portal_cliente_facturas_listar` | existe |
 | cliente | `/cliente/libro/[instalacionId]` | `portal_cliente.novedades.listar` | `portal_cliente_novedades_listar` | existe |
+| cliente | `/cliente/tickets` | `tickets.portal_tickets.listar` | `tickets_portal_tickets_listar` | existe |
 | cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
 | compartido | `app/_acciones` | `core.apps_conectadas.desconectar` | — | excepción |
@@ -158,6 +159,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
 | compartido | `app/(cliente)/cliente/cotizaciones/_componentes` | `cpq.portal_cotizaciones.descargar` | `cpq_portal_cotizaciones_descargar` | existe |
 | compartido | `app/(cliente)/cliente/facturas/_componentes` | `portal_cliente.facturas.pdf` | `portal_cliente_facturas_pdf` | existe |
+| compartido | `app/(cliente)/cliente/tickets/_componentes` | `tickets.portal_tickets.crear` | `tickets_portal_tickets_crear` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |

@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 import { conflicto, defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
-import { esRol } from "@opai/domain";
 
 import { sinDuplicado, tipoSchema, uuidSchema, vistaTipo } from "./esquemas";
 import { PERMISO_TIPOS_MANAGE } from "./permisos";
-import { exigirMiembroActivo } from "./util";
+import { exigirMiembroActivo, validarRoles } from "./util";
 
 /**
  * Cambia un tipo de ticket existente: nombre, dueño por defecto, aprobación, SLA, roles y
@@ -53,9 +52,7 @@ export const tiposActualizar = defineCapability({
       ...(cambios.orden !== undefined && { orden: cambios.orden }),
     };
     const f = { ...actual, ...data };
-    for (const r of [...f.rolesPermitidos, f.responsableDefectoRol, f.aprobadorRol]) {
-      if (r && !esRol(r)) throw reglaDeNegocio(`"${r}" no es un rol válido.`);
-    }
+    validarRoles(f.rolesPermitidos, [f.responsableDefectoRol, f.aprobadorRol]);
     if (f.responsableDefectoTipo === "rol" && !f.responsableDefectoRol)
       throw reglaDeNegocio("Falta el rol responsable por defecto.");
     if (f.responsableDefectoTipo === "usuario") {

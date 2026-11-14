@@ -21,6 +21,7 @@ export { ajustesPauta, ausenteSinJustificar, capacidadesPauta, consumidorPautaCa
 export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
+export { accesoConSeccion } from "./portal-cliente/seccion-opcional";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
 export { registrarPropuestaEnviada, type ResultadoPropuesta } from "./portal-cliente/propuesta-vigente";
 export { propuestaAlAceptar } from "./portal-cliente/propuesta-al-aceptar";

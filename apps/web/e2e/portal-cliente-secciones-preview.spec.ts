@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Configuración del Portal Cliente · secciones del resumen (CAR-502) en `preview-e2e`: la tarjeta lista cobertura,
+// Configuración del Portal Cliente · secciones del resumen (CAR-502, CAR-518, CAR-519) en `preview-e2e`: la tarjeta lista cobertura,
 // rondas, novedades y el texto de las novedades; el texto parte apagado y depende de «Novedades por gravedad». No
 // guarda nada. Sin el módulo en `qa-e2e`, se anota como omitido. A 375, 1024 y 1280 px.
 test.use({ actionTimeout: 30_000 });
@@ -30,6 +30,7 @@ test.describe("@preview portal cliente secciones", () => {
     await expect(page.getByRole("switch", { name: "Cobertura de turnos" })).toBeVisible();
     await expect(page.getByRole("switch", { name: "Texto de las novedades" })).toBeVisible();
     await expect(page.getByRole("switch", { name: "Facturas" })).toBeVisible();
+    await expect(page.getByRole("switch", { name: "Tickets" })).toBeVisible();
     await tarjeta.scrollIntoViewIfNeeded();
     await capturar(page, info, "portal-cliente-secciones");
     expect(errores).toEqual([]);

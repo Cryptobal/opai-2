@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { diaEnZona } from "@opai/domain";
+
 import { tenantActual } from "../core/comun";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
@@ -7,7 +9,7 @@ import { coberturaSchema } from "./cobertura";
 import { configDeCuenta } from "./config-datos";
 import { novedadesSchema } from "./novedades";
 import { rondasSchema } from "./rondas";
-import { facturasActivas } from "./facturas";
+import { seccionOpcionalActiva } from "./seccion-opcional";
 import { activa, seccionesDelResumen } from "./secciones";
 import { PERMISO_PORTAL, accesoDelActor, seccionSchema } from "./comun";
 
@@ -15,10 +17,7 @@ const MES = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /** Mes en curso («AAAA-MM») en la zona horaria de la empresa. */
 export function mesActual(timezone: string, ahora: Date): string {
-  const partes = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit" })
-    .formatToParts(ahora);
-  const get = (t: string) => partes.find((p) => p.type === t)?.value ?? "";
-  return `${get("year")}-${get("month")}`;
+  return diaEnZona(ahora, timezone).slice(0, 7);
 }
 
 const perfilSchema = z.object({
@@ -101,8 +100,9 @@ export const resumenLeer = defineCapability({
     limitado: z.boolean(),
     /** La empresa encendió el texto de las novedades para esta cuenta (CAR-502): hay libro por instalación. */
     novedadesTexto: z.boolean(),
-    /** La cuenta ve sus facturas (CAR-518). */
+    /** La cuenta ve sus facturas (CAR-518) y abre y sigue sus tickets (CAR-519). */
     facturas: z.boolean(),
+    tickets: z.boolean(),
     instalaciones: z.array(
       z.object({
         id: z.string(),
@@ -138,7 +138,8 @@ export const resumenLeer = defineCapability({
       mesEnCurso: mes === actual,
       limitado: !a.todasInstalaciones && a.instalacionIds.length < total,
       novedadesTexto,
-      facturas: await facturasActivas(ctx, visibles),
+      facturas: await seccionOpcionalActiva(ctx, visibles, "facturas"),
+      tickets: await seccionOpcionalActiva(ctx, visibles, "tickets"),
       instalaciones: a.instalaciones.map((i) => ({
         id: i.id,
         nombre: i.nombre,

@@ -1,5 +1,8 @@
 import type { Contexto } from "@opai/capabilities";
-import { noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+import { noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { esRol } from "@opai/domain";
+
+import { ROL_PORTAL_CLIENTE } from "../domain";
 
 import { PERMISO_VER_TODOS } from "./permisos";
 
@@ -32,7 +35,8 @@ export async function responsablePorDefecto(ctx: Contexto, tipo: Tipo): Promise<
     return tipo.responsableDefectoUsuarioId;
   }
   const miembro = await ctx.db.membership.findFirst({
-    where: { tenantId: ctx.tenantId, rol: tipo.responsableDefectoRol ?? "", estado: "activa" },
+    // Solo equipo del ERP: un contacto del cliente también es «viewer» y no puede recibir tickets.
+    where: { tenantId: ctx.tenantId, rol: tipo.responsableDefectoRol ?? "", estado: "activa", portales: { has: "erp" } },
     orderBy: { createdAt: "asc" },
   });
   if (!miembro)
@@ -67,4 +71,47 @@ export async function instalacionVisible(ctx: Contexto, id: string): Promise<str
   const i = await ctx.db.instalacion.findFirst({ where: { id, archivadaEn: null }, select: { id: true } });
   if (!i) throw noEncontrado("La instalación");
   return i.id;
+}
+
+/** Los roles de un tipo son roles del sistema; `rolesPermitidos` admite además la marca del Portal Cliente (CAR-519). */
+export function validarRoles(permitidos: readonly string[], otros: readonly (string | null | undefined)[]): void {
+  for (const r of [...permitidos.filter((p) => p !== ROL_PORTAL_CLIENTE), ...otros])
+    if (r && !esRol(r)) throw reglaDeNegocio(`"${r}" no es un rol válido.`);
+}
+
+type NuevoTicket = {
+  tipoId: string;
+  titulo: string;
+  descripcion: string;
+  prioridad: string;
+  responsableId: string;
+  instalacionId: string | null;
+};
+
+/** Única escritura de tickets: crea el ticket abierto a nombre del usuario actual, con su evento «creado» y el aviso por outbox. */
+export async function insertarTicket(ctx: Contexto, d: NuevoTicket): Promise<{ id: string }> {
+  // Ningún ticket se crea solo (regla de Carlos, 30-oct-2026): siempre a nombre de una persona con sesión.
+  if (!ctx.usuario) throw prohibido("Se necesita una sesión de usuario para crear un ticket.");
+  const usuarioId = ctx.usuario.id;
+  return ctx.transaccion(async (tx) => {
+    const t = await tx.ticket.create({
+      data: { tenantId: ctx.tenantId, ...d, estado: "abierto", solicitanteId: usuarioId },
+    });
+    await tx.ticketEvento.create({
+      data: { tenantId: ctx.tenantId, ticketId: t.id, tipo: "creado", actorId: usuarioId },
+    });
+    await ctx.eventos.emitir(tx, {
+      tipo: "tickets.ticket.creado",
+      entidadTipo: "ticket",
+      entidadId: t.id,
+      payload: { tipoId: d.tipoId, prioridad: d.prioridad, responsableId: d.responsableId, instalacionId: d.instalacionId },
+    });
+    return { id: t.id };
+  });
+}
+
+/** ¿El rol del ERP puede usar el tipo? La marca del Portal Cliente no cuenta: `["cliente"]` sigue abierto a todo el ERP. */
+export function rolPuedeUsar(permitidos: readonly string[], rol: string | null): boolean {
+  const internos = permitidos.filter((p) => p !== ROL_PORTAL_CLIENTE);
+  return internos.length === 0 || (rol !== null && internos.includes(rol));
 }

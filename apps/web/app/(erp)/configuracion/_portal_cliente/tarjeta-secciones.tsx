@@ -3,7 +3,7 @@
 import { SeccionTarjeta, Switch } from "@opai/ds";
 import type { SeccionPortal } from "@opai/domain";
 
-/** Secciones del resumen que la cuenta puede ocultar o encender (CAR-491 a CAR-493, CAR-502 y CAR-518). */
+/** Secciones del resumen que la cuenta puede ocultar o encender (CAR-491 a CAR-493, CAR-502, CAR-518 y CAR-519). */
 const SECCIONES: { s: SeccionPortal; etiqueta: string; descripcion: string }[] = [
   {
     s: "cobertura",
@@ -31,6 +31,12 @@ const SECCIONES: { s: SeccionPortal; etiqueta: string; descripcion: string }[] =
     etiqueta: "Facturas",
     descripcion:
       "El cliente ve las facturas y notas emitidas a su cuenta, con su estado de cobro, y descarga el PDF.",
+  },
+  {
+    s: "tickets",
+    etiqueta: "Tickets",
+    descripcion:
+      "El cliente abre tickets de sus instalaciones con los tipos marcados para clientes y sigue su estado, sin notas internas.",
   },
 ];
 

@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
-import { esRol } from "@opai/domain";
 
 import { sinDuplicado, tipoSchema, vistaTipo } from "./esquemas";
 import { PERMISO_TIPOS_MANAGE, PERMISO_VER } from "./permisos";
-import { exigirMiembroActivo, ID_VISTA_PREVIA } from "./util";
+import { exigirMiembroActivo, ID_VISTA_PREVIA, rolPuedeUsar, validarRoles } from "./util";
 
 /**
  * Tipos activos visibles para el rol actual (sin tipos ocultos, modulos/tickets.md §3): un
@@ -25,10 +24,7 @@ export const tiposListar = defineCapability({
       where: { ...(input.incluirInactivos ? {} : { activo: true }) },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
     });
-    const rol = ctx.rol;
-    return filas
-      .filter((t) => t.rolesPermitidos.length === 0 || (rol && t.rolesPermitidos.includes(rol)))
-      .map(vistaTipo);
+    return filas.filter((t) => rolPuedeUsar(t.rolesPermitidos, ctx.rol)).map(vistaTipo);
   },
 });
 
@@ -52,9 +48,7 @@ export const tiposCrear = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    for (const r of [...input.rolesPermitidos, input.responsableDefectoRol, input.aprobadorRol]) {
-      if (r && !esRol(r)) throw reglaDeNegocio(`"${r}" no es un rol válido.`);
-    }
+    validarRoles(input.rolesPermitidos, [input.responsableDefectoRol, input.aprobadorRol]);
     if (input.responsableDefectoTipo === "rol" && !input.responsableDefectoRol)
       throw reglaDeNegocio("Falta el rol responsable por defecto.");
     if (input.responsableDefectoTipo === "usuario" && !input.responsableDefectoUsuarioId)

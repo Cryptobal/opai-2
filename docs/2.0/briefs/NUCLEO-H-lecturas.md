@@ -47,6 +47,7 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `portal_cliente.novedades.listar` (CAR-502) | Texto del guardia, que puede nombrar personas; la instalación y las novedades reveladas en la página |
 | `portal_cliente.facturas.listar` (CAR-518) | Documentos emitidos a la cuenta, que puede ser una persona natural; documentos de la página |
 | `portal_cliente.facturas.pdf` (CAR-518) | PDF de un documento emitido a la cuenta del contacto; ID autorizado del input, igual que `finanzas.ventas.pdf` |
+| `tickets.portal_tickets.listar` (CAR-519) | Tickets que abrió el contacto; el asunto es texto libre que puede nombrar personas; tickets de la página |
 
 La auditoría del historial anterior es **un evento de acceso a la página**, no
 una segunda implementación de la revelación salarial. El mecanismo salarial de

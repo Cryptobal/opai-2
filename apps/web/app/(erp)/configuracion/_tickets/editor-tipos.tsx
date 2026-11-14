@@ -9,6 +9,10 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { TipoTicket } from "@/app/(erp)/tickets/_componentes/datos";
 
 const ROLES_OPCIONES = ROLES.map((r) => ({ valor: r, etiqueta: r }));
+/** Marca de los tipos que los contactos abren desde el Portal Cliente (CAR-519); misma que `ROL_PORTAL_CLIENTE` de `modules/tickets/domain`. */
+const PORTAL = "cliente";
+const marcar = (t: TipoTicket, on: boolean) =>
+  on ? [...t.rolesPermitidos.filter((r) => r !== PORTAL), PORTAL] : t.rolesPermitidos.filter((r) => r !== PORTAL);
 
 /**
  * Tipos de ticket: agregar (dueño por defecto = un rol, aprobación opcional con su rol aprobador,
@@ -44,7 +48,8 @@ export function EditorTipos({ tipos }: { tipos: TipoTicket[] }) {
     <SeccionTarjeta titulo="Tipos de ticket" sinRelleno>
       <p className="t-caption px-4 pt-3">
         Cada tipo define quién es el responsable al crear y si exige aprobación. El SLA es opcional y
-        está apagado salvo que lo enciendas. Los inactivos no se ofrecen al crear.
+        está apagado salvo que lo enciendas. Los inactivos no se ofrecen al crear. «Clientes» lo ofrece en el Portal
+        Cliente a las cuentas que tienen los tickets encendidos.
       </p>
       {error ? <Alerta tono="danger" titulo={error} className="mx-4 mt-3" /> : null}
       <ul className="flex flex-col">
@@ -53,6 +58,14 @@ export function EditorTipos({ tipos }: { tipos: TipoTicket[] }) {
             <span className={`min-w-0 flex-1 truncate ${t.activo ? "" : "text-fg-subtle"}`}>{t.nombre}</span>
             {t.requiereAprobacion ? <Badge tono="info">Con aprobación</Badge> : null}
             {t.slaHoras ? <Badge tono="neutro">{`SLA ${t.slaHoras} h`}</Badge> : null}
+            {t.requiereAprobacion ? null : (
+              <Switch
+                etiqueta="Clientes"
+                activo={t.rolesPermitidos.includes(PORTAL)}
+                disabled={pendiente}
+                onCambiar={(on) => void ejecutar("tickets.tipos.actualizar", { id: t.id, rolesPermitidos: marcar(t, on) })}
+              />
+            )}
             <Switch
               soloControl
               etiqueta={`${t.nombre} activo`}
