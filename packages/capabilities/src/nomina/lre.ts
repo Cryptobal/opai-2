@@ -4,7 +4,7 @@ import { archivoLre } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { datosArchivoPeriodo, errorArchivoSchema, personasReveladas } from "./archivos-datos";
+import { conNombres, datosArchivoPeriodo, errorArchivoSchema, personasReveladas } from "./archivos-datos";
 import { PERMISO_OBLIGACIONES } from "./comun";
 
 // Libro de Remuneraciones Electrónico (CAR-99, ADR-057): arma el archivo del período con sus
@@ -29,7 +29,7 @@ export const lreGenerar = defineCapability({
   dryRun: false,
   auditarLectura: personasReveladas,
   async handler(ctx, { periodoId }) {
-    const { periodo, filas, errores, rutEmpleador } = await datosArchivoPeriodo(ctx, periodoId, "LRE");
+    const { periodo, filas, errores, rutEmpleador, nombres } = await datosArchivoPeriodo(ctx, periodoId, "LRE");
     const a = archivoLre({
       rutEmpleador, anio: periodo.anio, mes: periodo.mes,
       filas: filas.map((f) => ({
@@ -39,6 +39,6 @@ export const lreGenerar = defineCapability({
         aportesEmpleador: f.aportesEmpleador, liquido: f.liquido,
       })),
     });
-    return { ...a, errores: [...errores, ...a.errores], personaIds: filas.map((f) => f.personaId), formatoVerificado: false as const };
+    return { ...a, errores: conNombres([...errores, ...a.errores], nombres), personaIds: filas.map((f) => f.personaId), formatoVerificado: false as const };
   },
 });

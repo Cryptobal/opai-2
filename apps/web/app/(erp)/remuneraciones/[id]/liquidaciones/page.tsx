@@ -1,11 +1,10 @@
-import { Alerta, Badge, GRILLA_KPI_HILO, KpiTile } from "@opai/ds";
+import { Alerta, GRILLA_KPI_HILO, KpiTile } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { CalcularLiquidaciones } from "../../_componentes/calcular-liquidaciones";
 import { cargarPeriodos, permisosNomina } from "../../_componentes/datos";
-import { DescargarArchivoLegal } from "../../_componentes/descargar-archivo-legal";
 import { pesos } from "../../_componentes/etiquetas";
 import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
 import { TablaLiquidaciones } from "../../_componentes/tabla-liquidaciones";
@@ -51,16 +50,6 @@ export default function LiquidacionesPeriodo({ params }: Props) {
             {abierto && d.perm.periodos ? <CalcularLiquidaciones periodoId={d.id} /> : null}
             {!abierto && d.periodo ? (
               <p className="t-caption text-fg-muted">El período está {d.periodo.estado.replace("_", " ")}: las liquidaciones ya no se recalculan.</p>
-            ) : null}
-            {d.perm.obligaciones && items.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="t-label">Archivos legales</span>
-                  <Badge tono="neutro">Formato por verificar</Badge>
-                </div>
-                <DescargarArchivoLegal periodoId={d.id} tipo="lre" />
-                <DescargarArchivoLegal periodoId={d.id} tipo="previred" />
-              </div>
             ) : null}
             <TablaLiquidaciones periodoId={d.id} items={items} />
             <p className="t-caption text-fg-muted">

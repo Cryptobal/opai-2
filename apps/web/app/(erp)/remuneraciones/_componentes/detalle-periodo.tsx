@@ -14,12 +14,15 @@ export function DetallePeriodo({
   gestiona,
   puedePagar,
   puedeVerNovedades,
+  puedeArchivos = false,
 }: {
   periodo: Periodo | null;
   state: EstadoPantalla;
   gestiona: boolean;
   puedePagar: boolean;
   puedeVerNovedades: boolean;
+  /** Generar LRE y Previred (diseño 06): obligaciones más sueldos sensibles; la capacidad lo vuelve a exigir. */
+  puedeArchivos?: boolean;
 }) {
   const est = periodo ? ESTADO_PERIODO[periodo.estado] : null;
   return (
@@ -57,6 +60,11 @@ export function DetallePeriodo({
             {puedeVerNovedades ? (
               <EnlaceBoton href={`/remuneraciones/${periodo.id}/liquidaciones`} variante="ghost">
                 Ver liquidaciones
+              </EnlaceBoton>
+            ) : null}
+            {puedeArchivos && puedeVerNovedades ? (
+              <EnlaceBoton href={`/remuneraciones/${periodo.id}/archivos`} variante="ghost">
+                Archivos y declaraciones
               </EnlaceBoton>
             ) : null}
             {gestiona ? <AccionesPeriodo periodo={periodo} puedePagar={puedePagar} /> : null}

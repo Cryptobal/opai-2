@@ -27,23 +27,5 @@ test.describe("@preview nómina: liquidaciones", () => {
       await expect(page.getByText(/Se calcularían|Faltan valores legales/).first()).toBeVisible({ timeout: 30_000 });
       await capturar(page, info, "nomina-liquidaciones-previa");
     }
-    // CAR-99: el LRE se genera solo con liquidaciones guardadas; descarga el archivo y avisa qué revisar.
-    const lre = page.getByRole("button", { name: "Descargar LRE" });
-    if ((await lre.count()) > 0) {
-      await expect(page.getByText("Formato por verificar").first()).toBeVisible();
-      const descarga = page.waitForEvent("download", { timeout: 30_000 }).catch(() => null);
-      await lre.click();
-      const archivo = await descarga;
-      if (archivo) expect(archivo.suggestedFilename()).toMatch(/^\w+_\d{6}\.csv$/);
-      await expect(page.getByText(/Formato por verificar: encabezado/)).toBeVisible({ timeout: 30_000 });
-      await capturar(page, info, "nomina-lre");
-      // Previred: mismo patrón; el archivo es .txt de 105 campos.
-      const previred = page.waitForEvent("download", { timeout: 30_000 }).catch(() => null);
-      await page.getByRole("button", { name: "Descargar Previred" }).click();
-      const txt = await previred;
-      if (txt) expect(txt.suggestedFilename()).toMatch(/^previred_\w+_\d{6}\.txt$/);
-      await expect(page.getByText(/Formato por verificar: códigos de AFP/)).toBeVisible({ timeout: 30_000 });
-      await capturar(page, info, "nomina-previred");
-    }
   });
 });

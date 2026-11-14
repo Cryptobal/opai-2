@@ -4,7 +4,7 @@ import { archivoPrevired } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { datosArchivoPeriodo, errorArchivoSchema, personasReveladas } from "./archivos-datos";
+import { conNombres, datosArchivoPeriodo, errorArchivoSchema, personasReveladas } from "./archivos-datos";
 import { PERMISO_OBLIGACIONES } from "./comun";
 
 // Nómina de Previred (CAR-99): archivo de 105 campos del período para declarar y pagar cotizaciones.
@@ -29,7 +29,7 @@ export const previredGenerar = defineCapability({
   dryRun: false,
   auditarLectura: personasReveladas,
   async handler(ctx, { periodoId }) {
-    const { periodo, filas, errores, rutEmpleador } = await datosArchivoPeriodo(ctx, periodoId, "Previred");
+    const { periodo, filas, errores, rutEmpleador, nombres } = await datosArchivoPeriodo(ctx, periodoId, "Previred");
     const a = archivoPrevired({
       rutEmpleador, anio: periodo.anio, mes: periodo.mes,
       filas: filas.map((f) => ({
@@ -41,6 +41,6 @@ export const previredGenerar = defineCapability({
         prevision: f.prevision, descuentosLegales: f.descuentosLegales, aportesEmpleador: f.aportesEmpleador,
       })),
     });
-    return { ...a, errores: [...errores, ...a.errores], personaIds: filas.map((f) => f.personaId), formatoVerificado: false as const };
+    return { ...a, errores: conNombres([...errores, ...a.errores], nombres), personaIds: filas.map((f) => f.personaId), formatoVerificado: false as const };
   },
 });

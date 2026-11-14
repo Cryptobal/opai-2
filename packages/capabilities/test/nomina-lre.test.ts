@@ -47,7 +47,7 @@ const semilla = (rutEmpleador: string | null) => ({
 });
 const como = (rol: "owner" | "gerente" = "owner", rut: string | null = "76.543.210-3", extra: Parameters<typeof contextoDePrueba>[0] = {}) =>
   contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla(rut), ...extra });
-type Salida = { nombre: string; contenido: string; filas: number; personaIds: string[]; errores: { personaId: string | null; mensaje: string }[]; advertencias: string[]; formatoVerificado: boolean };
+type Salida = { nombre: string; contenido: string; filas: number; personaIds: string[]; errores: { personaId: string | null; personaNombre: string | null; mensaje: string }[]; advertencias: string[]; formatoVerificado: boolean };
 const generar = (c: ReturnType<typeof como>) => executeCapability(c.ctx, "nomina.lre.generar", { periodoId: PER });
 
 beforeEach(() => {
@@ -70,7 +70,7 @@ describe("nomina.lre.generar", () => {
     expect(lineas).toHaveLength(3);
     // P2 termina el 20 de noviembre: va la fecha de término.
     expect(lineas[2]?.split(";").slice(0, 3)).toEqual(["11111111-1", "01/06/2026", "20/11/2026"]);
-    expect(s.errores).toEqual([{ personaId: P2, mensaje: "Liquidación sin aportes del empleador: recalcula el período." }]);
+    expect(s.errores).toEqual([{ personaId: P2, personaNombre: "N B", mensaje: "Liquidación sin aportes del empleador: recalcula el período." }]);
     const audit = (c.tabla("auditEvent") as { capability: string; payload?: unknown }[]).filter((e) => e.capability === "nomina.lre.generar");
     expect(audit).toHaveLength(1);
     expect(JSON.stringify(audit[0])).toContain(P1);
@@ -84,7 +84,7 @@ describe("nomina.lre.generar", () => {
     if (!r.ok) throw new Error(r.error.message);
     const s = r.data as Salida;
     expect(s.filas).toBe(1);
-    expect(s.errores).toEqual([{ personaId: P2, mensaje: "Contrato a honorarios: no va en el LRE." }]);
+    expect(s.errores).toEqual([{ personaId: P2, personaNombre: "N B", mensaje: "Contrato a honorarios: no va en el LRE." }]);
     const audit = (c.tabla("auditEvent") as { capability: string }[]).filter((e) => e.capability === "nomina.lre.generar");
     expect(JSON.stringify(audit[0])).toContain(P2);
   });
@@ -99,7 +99,7 @@ describe("nomina.lre.generar", () => {
   it("sin RUT del empleador lo informa como error", async () => {
     const r = await generar(como("owner", null));
     if (!r.ok) throw new Error(r.error.message);
-    expect((r.data as Salida).errores[0]).toEqual({ personaId: null, mensaje: expect.stringMatching(/RUT válido de la empresa/) });
+    expect((r.data as Salida).errores[0]).toEqual({ personaId: null, personaNombre: null, mensaje: expect.stringMatching(/RUT válido de la empresa/) });
   });
 
   it("gerente (sin sueldos sensibles) no puede generarlo", async () => {

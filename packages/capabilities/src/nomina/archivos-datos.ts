@@ -17,8 +17,12 @@ const previsionSchema = z.object({
   afp: z.enum(AFP), salud: z.enum(["fonasa", "isapre"]), basePrevisional: z.number().int(), baseCesantia: z.number().int(),
 });
 
-export const errorArchivoSchema = z.object({ personaId: z.string().nullable(), mensaje: z.string() });
-export type ErrorArchivo = z.infer<typeof errorArchivoSchema>;
+export const errorArchivoSchema = z.object({ personaId: z.string().nullable(), personaNombre: z.string().nullable(), mensaje: z.string() });
+export type ErrorArchivo = { personaId: string | null; mensaje: string };
+
+/** Pone el nombre de la persona en cada observación (la pantalla la muestra en la tabla de errores). */
+export const conNombres = (errores: ErrorArchivo[], nombres: ReadonlyMap<string, string>) =>
+  errores.map((e) => ({ ...e, personaNombre: e.personaId ? (nombres.get(e.personaId) ?? null) : null }));
 
 /** Todas las personas reveladas: las del archivo y las que salen en las observaciones. */
 export const personasReveladas = (s: { personaIds: string[]; errores: ErrorArchivo[] }) =>
@@ -105,5 +109,6 @@ export async function datosArchivoPeriodo(ctx: Contexto, periodoId: string, lega
       ficha: f ? { tramo: f.tramoAsignacion, simples: f.cargasSimples, maternales: f.cargasMaternales, invalidez: f.cargasInvalidez, jubilado: f.jubilado } : null,
     }];
   });
-  return { periodo, filas, errores, rutEmpleador };
+  const nombres = new Map(personas.map((p) => [p.id, `${p.nombres} ${p.apellidos}`.trim()]));
+  return { periodo, filas, errores, rutEmpleador, nombres };
 }
