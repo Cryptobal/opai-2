@@ -13,11 +13,11 @@
     "lint": "eslint .",
     "seed:platform-owner": "tsx scripts/seed-platform-owner.ts",
     "seed:e2e-mfa": "tsx scripts/seed-e2e-mfa.ts",
+    "seed:guardia-qa": "tsx scripts/seed-guardia-qa.ts",
     "seed:multiempresa-e2e": "tsx scripts/seed-multiempresa-e2e.ts",
     "seed:qa-finanzas-usuarios": "tsx scripts/seed-qa-finanzas-usuarios.ts",
     "seed:rendiciones-r3-e2e": "tsx scripts/seed-rendiciones-r3-e2e.ts",
-    "test": "vitest run",
-    "seed:guardia-qa": "tsx scripts/seed-guardia-qa.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "@better-auth/oauth-provider": "^1.7.21",

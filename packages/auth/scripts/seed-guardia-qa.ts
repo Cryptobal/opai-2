@@ -70,9 +70,9 @@ async function main(): Promise<void> {
     const cargo =
       (await db.cargo.findFirst({ where: { tenantId, nombre: "Guardia QA" } })) ??
       (await db.cargo.create({ data: { tenantId, nombre: "Guardia QA" } }));
-    let persona = await db.persona.findFirst({ where: { tenantId, rut: RUT } });
-    if (!persona) {
-      persona = await db.persona.create({
+    const persona =
+      (await db.persona.findFirst({ where: { tenantId, rut: RUT } })) ??
+      (await db.persona.create({
         data: {
           tenantId,
           nombres: "Guardia QA",
@@ -80,7 +80,11 @@ async function main(): Promise<void> {
           rut: RUT,
           estado: "activa",
         },
-      });
+      }));
+    const vigente = await db.vinculoLaboral.findFirst({
+      where: { tenantId, personaId: persona.id, estado: "vigente" },
+    });
+    if (!vigente)
       await db.vinculoLaboral.create({
         data: {
           tenantId,
@@ -90,20 +94,13 @@ async function main(): Promise<void> {
           inicio: new Date("2026-11-01"),
         },
       });
-    }
-    const membresia = await db.membership.findUnique({
+    // Converge al estado esperado aunque la membresía exista (suspendida, otro rol u otros portales).
+    const acceso = { rol: "viewer", portales: ["trabajador", "terreno"], estado: "activa" };
+    await db.membership.upsert({
       where: { tenantId_userId: { tenantId, userId: usuario.id } },
+      update: acceso,
+      create: { tenantId, userId: usuario.id, ...acceso },
     });
-    if (!membresia)
-      await db.membership.create({
-        data: {
-          tenantId,
-          userId: usuario.id,
-          rol: "viewer",
-          portales: ["trabajador", "terreno"],
-          estado: "activa",
-        },
-      });
     await db.persona.update({ where: { id: persona.id }, data: { usuarioId: usuario.id } });
     return persona.id;
   });
