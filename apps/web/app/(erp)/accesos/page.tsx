@@ -7,7 +7,7 @@ import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
 import { cargarRegistros } from "./_componentes/datos";
-import { ListaRegistros } from "./_componentes/lista-registros";
+import { ListaDeAccesos } from "./_componentes/lista-registros";
 import { SegmentoAccesos } from "./_componentes/segmento-accesos";
 
 export const metadata = { title: "Accesos" };
@@ -30,15 +30,7 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
             unPanelHastaLg
             etiquetaLista="Lista de accesos"
             vacio={{ texto: "Elige un registro", icono: DoorOpen }}
-            lista={
-              <ListaRegistros
-                state={estadoPantalla(d.r)}
-                items={d.r.ok ? d.r.data.items : []}
-                siguiente={d.r.ok ? d.r.data.siguiente : null}
-                p={d.p}
-                instalaciones={d.instalaciones}
-              />
-            }
+            lista={<ListaDeAccesos d={d} />}
           />
         </>
       )}

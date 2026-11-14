@@ -4,7 +4,7 @@ import type { Registro } from "./datos";
 
 type Tono = "neutro" | "success" | "warning" | "danger" | "info" | "accent";
 
-export const TIPO_REGISTRO: Record<string, string> = {
+const TIPO_REGISTRO: Record<string, string> = {
   visita: "Visita",
   contratista: "Contratista",
   proveedor: "Proveedor",
@@ -29,7 +29,7 @@ export const DOC_TIPO: Record<string, string> = {
 export const tipoDe = (t: string) => TIPO_REGISTRO[t] ?? t;
 
 /** Hora «HH:mm» (24 h) en la zona de la empresa, con el formato común de `@opai/domain`. */
-export const hora = (valor: string) => formatearFechaHora(valor).slice(11);
+const hora = (valor: string) => formatearFechaHora(valor).slice(11);
 
 /** Hora si es de hoy; si no, «dd-mm · HH:mm» para que una fila de otro día no se lea como de hoy. */
 export function cuando(valor: string): string {
