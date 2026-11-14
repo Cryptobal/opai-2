@@ -11,7 +11,7 @@ Si una tarea necesita algo que solo puede hacer Carlos (aprobar, decidir, pegar 
 1. **Recomendación:** qué le recomiendas hacer y cuál opción elegirías tú.
 2. **Qué tiene que hacer:** los pasos concretos, en orden y en lenguaje simple.
 3. **Por qué:** qué se destraba con eso y qué pasa si no se hace.
-4. **Prompt para el bot:** un texto listo para copiar en el bot de Grok Bot que corresponda («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0» o «Chief of Staff»), para que el bot haga todo lo que pueda sin Carlos. El prompt le pide al bot que empiece su respuesta con «[Sesión <nombre>] <issue de Linear o PR>».
+4. **Prompt para el bot:** un texto listo para copiar en el bot de Grok Bot que corresponda («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0» o «Chief of Staff»), para que el bot haga todo lo que pueda sin Carlos. El prompt le pide al bot que empiece su respuesta con «`[Sesión <nombre>] <issue de Linear o PR>`», para que Carlos sepa a qué sesión devolverla.
 5. **Qué me devuelves:** qué parte de la respuesta del bot necesitas que Carlos pegue en el chat.
 
 Nunca pidas claves ni secretos dentro del chat: los pega Carlos directo donde corresponde. Si nada depende de Carlos, no uses el bloque.

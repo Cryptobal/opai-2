@@ -83,12 +83,12 @@ Cada vez que una tarea necesite algo que **solo puede hacer Carlos** (aprobar, d
 1. **Recomendación:** qué le recomienda hacer y cuál opción elegiría la sesión.
 2. **Qué tiene que hacer:** los pasos concretos, en orden y en lenguaje simple.
 3. **Por qué:** qué se destraba con eso y qué pasa si no se hace.
-4. **Prompt para el bot:** un texto listo para copiar en el bot de Grok Bot que corresponda («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0» o «Chief of Staff»), para que el bot haga todo lo que pueda hacer sin Carlos. Ese prompt le pide al bot que empiece su respuesta con **«[Sesión <nombre>] <issue de Linear o PR>»**, para que Carlos sepa a qué sesión devolverla.
+4. **Prompt para el bot:** un texto listo para copiar en el bot de Grok Bot que corresponda («OPAI 2.0», «Revisor OPAI 2.0», «Diseño y QA OPAI 2.0» o «Chief of Staff»), para que el bot haga todo lo que pueda hacer sin Carlos. Ese prompt le pide al bot que empiece su respuesta con «`[Sesión <nombre>] <issue de Linear o PR>`», para que Carlos sepa a qué sesión devolverla.
 5. **Qué me devuelves:** qué parte de la respuesta del bot necesita la sesión que Carlos pegue en el chat.
 
-- **Nunca se piden claves ni secretos dentro del chat.** Esos los pega Carlos directo donde corresponde (GitHub, Vercel, 1Password o el almacén cifrado de la empresa). El prompt para el bot tampoco lleva secretos ni datos personales.
+- **Nunca se piden claves ni secretos dentro del chat.** Esos los pega Carlos directo donde corresponde (GitHub, Vercel, 1Password o el almacén cifrado del tenant). El prompt para el bot tampoco lleva secretos ni datos personales.
 - **Si nada depende de Carlos, el bloque no se usa.**
-- El bloque no reemplaza a «Decisiones de Carlos»: la respuesta sigue terminando con el párrafo «Decisión tuya», el comentario `DECISIÓN CARLOS:` queda en el PR y la sesión sigue con todo lo que no dependa de ese paso. De noche rige el «Modo noche»: el ticket queda en «Espera a Carlos» con este mismo bloque y la sesión pasa al siguiente.
+- El bloque no reemplaza a «Decisiones de Carlos»: la respuesta sigue terminando con el párrafo «Decisión tuya», el comentario `DECISIÓN CARLOS:` queda en el PR y la sesión sigue con todo lo que no dependa de ese paso. De noche rige el «Modo noche»: las dudas de producto o diseño se resuelven como «Decisión nocturna» (punto 2) y solo lo que su punto 4 deja en «Espera a Carlos» lleva este bloque, en el ticket; la sesión pasa al siguiente.
 
 ## Revisiones largas: de noche o a pedido, nunca en cada push
 

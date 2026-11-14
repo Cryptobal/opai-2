@@ -10,7 +10,7 @@
 
 **Regla de operación (12-nov-2026, ADR-108):** los PR de construcción ya **no editan este archivo**. Cada uno escribe su avance en `docs/2.0/estado/<modulo>/CAR-<n>.md` ([cómo](estado/README.md)); este archivo queda como índice y foto histórica, y lo consolida un PR de documentación. Motivo: casi todos los PR agregaban su fila en el mismo lugar y chocaban entre sí. Regla completa de trabajo en paralelo: `OPERACION-agentes.md` A2.5.
 
-**Regla de operación (14-nov-2026, ADR-114):** cuando una tarea necesita algo que solo puede hacer Carlos (aprobar, decidir, pegar una clave, conectar una cuenta, probar en producción, entrar a un portal, firmar, pagar), la sesión no espera en silencio: responde con el bloque fijo de cinco partes (recomendación, qué tiene que hacer, por qué, prompt para el bot y qué devolver). Nunca se piden claves en el chat. Ver `AGENTS.md` «Pasos que dependen de Carlos» y `CLAUDE.md`.
+**Regla de operación (14-nov-2026, ADR-114):** cuando una tarea necesita algo que solo puede hacer Carlos (aprobar, decidir, pegar una clave o un secreto, conectar una cuenta, probar en producción, entrar a un portal, firmar, pagar), la sesión no espera en silencio: responde con el bloque fijo de cinco partes (recomendación, qué tiene que hacer, por qué, prompt para el bot, que empieza su respuesta con «`[Sesión <nombre>] <issue de Linear o PR>`», y qué devolver). Nunca se piden claves ni secretos en el chat. Si nada depende de Carlos, el bloque no se usa. Ver `AGENTS.md` «Pasos que dependen de Carlos» y `CLAUDE.md`.
 
 ## En curso
 
