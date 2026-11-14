@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { obtenerCapacidad } from "@opai/capabilities";
@@ -9,6 +12,7 @@ import {
 import {
   cambiosDe,
   faltantes,
+  hayCambios,
   valorDeCampo,
 } from "@/app/(erp)/personas/_componentes/valores-hoja-laboral";
 import { asegurarRegistro } from "../lib/registro";
@@ -59,15 +63,15 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
   });
 
   it("rechaza texto no numérico en los campos enteros", () => {
-    expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "dos" })).toBe(true);
-    expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "2" })).toBe(false);
+    expect(faltantes(cfg.uniforme, { estaturaCm: "uno" })).toBe(true);
+    expect(faltantes(cfg.uniforme, { estaturaCm: "172" })).toBe(false);
   });
 
   it("valida decimales y rangos antes de enviar", () => {
     expect(faltantes(cfg.prevision, { planUf: "abc" })).toBe(true);
     expect(faltantes(cfg.prevision, { planUf: "12,5" })).toBe(false);
     expect(valorDeCampo("decimal", "12,5")).toBe("12.5");
-    expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "4" })).toBe(true);
+    expect(faltantes(cfg.uniforme, { pesoKg: "400" })).toBe(true);
     expect(faltantes(cfg["jornada-dt"], { avisoTerminoDias: "400" })).toBe(true);
     expect(faltantes(cfg["jornada-dt"], { avisoTerminoDias: "30" })).toBe(false);
   });
@@ -84,7 +88,7 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
           f.tipo === "fecha"
             ? "2026-12-31"
             : f.tipo === "entero"
-              ? "2"
+              ? String(f.min ?? 2)
               : f.tipo === "decimal"
                 ? "12.5"
                 : f.tipo === "si_no"
@@ -96,9 +100,45 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
       );
       if (seccion === "contacto-laboral")
         valores.telefonoSecundario = valores.emergenciaTelefono = "+56912345678";
-      if (seccion === "pago") valores.rutTitular = "";
+      if (seccion === "pago" || seccion === "pago-agregar") valores.rutTitular = "";
+      if (seccion === "jornada-dt") Object.assign(valores, { termino1: "2026-03-31", termino2: "2026-06-30" });
       const input = c.armar(ID, cambiosDe(c, {}, valores));
       expect(capacidad?.input.safeParse(input).error?.issues ?? []).toEqual([]);
     },
   );
+
+  it("jornada DT envía los tres términos de plazo fijo como una lista ordenada (CAR-277)", () => {
+    const c = cfg["jornada-dt"];
+    const input = c.armar(ID, cambiosDe(c, {}, { termino1: "2026-03-31", termino2: "", termino3: "2026-09-30" }));
+    expect((input as { jornadaDt: { terminosPlazoFijo: string[] } }).jornadaDt.terminosPlazoFijo).toEqual([
+      "2026-03-31",
+      "2026-09-30",
+    ]);
+    // El período es la casilla del último término (3), no la cantidad (2).
+    expect((input as { jornadaDt: { plazoFijoPeriodo: number | null } }).jornadaDt.plazoFijoPeriodo).toBe(3);
+    expect(obtenerCapacidad(c.capacidad)?.input.safeParse(input).success).toBe(true);
+  });
+
+  it("jornada DT de un registro antiguo de período 2 conserva el período al guardar (CAR-277)", () => {
+    const c = cfg["jornada-dt"];
+    const input = c.armar(ID, cambiosDe(c, {}, { termino1: "", termino2: "2026-08-31", termino3: "" }));
+    expect(input).toMatchObject({ jornadaDt: { terminosPlazoFijo: ["2026-08-31"], plazoFijoPeriodo: 2 } });
+  });
+
+  it("toda hoja de Laboral se carga al abrir su enlace (la carga diferida conoce su parámetro)", () => {
+    const diferidas = readFileSync(
+      join(__dirname, "../app/(erp)/personas/_componentes/diferidas.ts"),
+      "utf8",
+    );
+    for (const c of Object.values(SECCIONES_LABORAL))
+      expect(diferidas, c.param).toContain(`"${c.param}"`);
+  });
+
+  it("una hoja que envía todos los campos no se puede guardar sin cambios (CAR-277)", () => {
+    const c = cfg["pago-agregar"];
+    const inicial = { bancoCodigo: "", tipoCuenta: "", numeroCuenta: "", porDefecto: "no" };
+    expect(c.todos).toBe(true);
+    expect(hayCambios(c, inicial, { ...inicial })).toBe(false);
+    expect(hayCambios(c, inicial, { ...inicial, numeroCuenta: "123" })).toBe(true);
+  });
 });

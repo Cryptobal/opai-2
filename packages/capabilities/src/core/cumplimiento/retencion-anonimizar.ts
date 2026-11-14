@@ -56,6 +56,8 @@ export async function anonimizarPersona(
       lat: null,
       lng: null,
       usuarioId: null,
+      // Jefatura (CAR-314): no queda «reportaba a X» colgado de una identidad borrada.
+      jefePersonaId: null,
       bloqueoMotivo: null,
       // Marca P1 "No recontratar": al anonimizar al titular no queda ni la marca ni su motivo
       // (corrección del Revisor, 30-oct 15:33 CLT). El motivo nunca llegó en claro a `audit_events`
@@ -69,6 +71,14 @@ export async function anonimizarPersona(
     },
   });
   if (count !== 1) return false;
+  // Su resultado guardado de meses cerrados de Desempeño (CAR-322) es un dato de la persona: se borra.
+  await tx.desempenoResultadoCerrado.deleteMany({ where: { personaId: id } });
+  // El motivo de sus ausencias es texto libre que puede ser de salud (CAR-393): se reemplaza por la marca, en el
+  // registro y en los turnos de la pauta. Tipo, clase, fechas y estado quedan: son hechos laborales.
+  await tx.ausencia.updateMany({ where: { personaId: id }, data: { motivo: MARCA_ANONIMO } });
+  await tx.excepcionPauta.updateMany({ where: { personaId: id }, data: { motivo: MARCA_ANONIMO } });
+  // Ni queda como jefe de nadie: quienes la tenían de jefe quedan sin asignar.
+  await tx.persona.updateMany({ where: { jefePersonaId: id }, data: { jefePersonaId: null } });
   // Los ids de otros sistemas llevan de vuelta a la identidad: se sueltan.
   await tx.idExterno.deleteMany({ where: { entidadTipo: "persona", entidadId: id } });
   // Un rostro enrolado es un dato biométrico: se borra también (aquí y en el proveedor, que no se llama

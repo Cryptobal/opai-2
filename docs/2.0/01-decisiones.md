@@ -223,6 +223,11 @@ cambio de empresa, salvo `next` explícito seguro. Matriz, adaptación a #68 y p
 en `briefs/ENCARGO-nucleo-d1.md`; criterios técnicos del constructor, sin nuevas
 decisiones atribuidas a Carlos.
 
+
+**Adenda CAR-350 (13-nov-2026, Sesión Núcleo, modo noche; Estándares P-1).** Los roles base **gerente** y **lector** dejan de definirse por «todo menos…» (`*` con 40 denegaciones; `*:read`/`*:*.read`) y pasan a **lista explícita**: cada permiso del catálogo (núcleo en `permisos-base-nucleo.ts`, módulos en `permisos-base-modulos.ts`) lleva su clase (`GL`, `G`, `L` o `-`). Un permiso nuevo no lo recibe ninguno de los dos hasta que alguien lo clasifica en el mismo PR, y `apps/web/test/permisos-base.test.ts` falla si un permiso del catálogo real no está clasificado o si la clasificación nombra uno que ya no existe. La matriz no cambió: la misma prueba compara, permiso por permiso, contra los patrones anteriores. Owner, admin y supervisor siguen con sus patrones (supervisor conserva `ops:*`, `rondas:*`, `pauta:*` y `tickets:*`; pasarlo a lista es un pendiente aparte). Sin migración.
+
+**Adenda CAR-387 (13-nov-2026, Sesión Núcleo; Estándares P-1b).** El rol **supervisor** también pasa a lista explícita: la clase de cada permiso suma la letra `S` (`GLS`, `GS`, `LS`, `S`…), y se eliminan sus comodines `ops:*`, `rondas:*`, `pauta:*` y `tickets:*` junto con sus denegaciones. Un permiso nuevo de esos módulos no lo recibe el supervisor hasta que se clasifica en el mismo PR. La matriz no cambió: `apps/web/test/permisos-base.test.ts` la compara, permiso por permiso, contra los patrones anteriores (32 permisos). Owner y admin siguen con `*`. Sin migración.
+
 ---
 
 ## ADR-017 · Calidad visual: primitivas accesibles, pulido y lint del DS
@@ -298,6 +303,10 @@ decisiones atribuidas a Carlos.
 **Nota del 26-oct-2026.** Los roles personalizados salen del backlog: van en el Brief 07c «Acceso y permisos», con permisos finos al menos tan completos como en 1.0 (Decisión de Carlos del 24-oct-2026, confirmada el 26-oct-2026 9:20 CLT). El alcance del supervisor por instalación y de los portales (brecha B3) también va en el Brief 07c, movido desde el Brief 12 (Decisión de Carlos, 26-oct-2026 9:36 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), y es condición para cerrar el Núcleo.
 
 **Precisión del 26-oct-2026 11:57 CLT (Carlos, t310u, chat del bot OPAI 2.0).** Al decidir las opciones del Brief 07c §16 («ok a todo» a las recomendaciones), Carlos acotó la brecha B3 en el Brief 07c **solo al alcance del supervisor** (la brecha Alta y el criterio de cierre del Núcleo). El alcance de los portales Cliente y Trabajador se construye con sus portales en la fase 3 y queda **pendiente para sus briefs**, reusando el mismo mecanismo (el vínculo trabajador ↔ persona ya existe: `Persona.usuarioId`, `core.personas.vincular_usuario`). Es decir, 07c entrega el mecanismo de alcance y lo aplica al supervisor, pero **no cierra B3 entero**. Esto precisa la frase de las 9:36 CLT («el alcance del supervisor por instalación y de los portales … también va en el Brief 07c»): de los portales queda solo el mecanismo preparado.
+
+**Adenda del 14-nov-2026 (CAR-359, sesión Núcleo, modo noche; referente GitHub: roles que se suman y roles a equipos).** Un miembro puede tener, además de su rol (base o personalizado), **roles personalizados adicionales** (`core.roles_miembro`), y un grupo de CAR-251 puede recibir roles personalizados (`core.roles_grupo`) que heredan sus miembros mientras estén en él. Los permisos se **suman** (`Acceso.permisosAdicionales`); una excepción que deniega sigue ganando; un rol o grupo archivado no concede nada; `platform:*` nunca sale de ahí. El rol base sigue siendo uno por miembro, porque fija la jerarquía y el alcance del supervisor. **Decisión nocturna: los roles adicionales y de grupo son solo roles personalizados de la empresa, no roles base (revisar).** Primera parte: modelo, migración aditiva sin datos y cálculo en el acceso de sesión, API key y MCP. Siguen la asignación por pantalla, API y MCP (con «nadie concede más de lo que tiene») y la vista del origen de cada permiso.
+
+**Decisión de Carlos del 14-nov-2026, 22:04 CLT (CAR-359, chat de la sesión Núcleo, respuesta «Si»).** Quien recibe acceso a un módulo por un rol adicional o por un grupo cuenta como licencia de ese módulo en el cobro mensual (CAR-323, «usuario con licencia»), igual que si el permiso viniera de su rol principal. Un rol o grupo archivado no cuenta.
 
 ---
 
@@ -442,6 +451,8 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 **Nota del 26-oct-2026 (ADR-049, propuesto en PR #38).** Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07: OPAI sí tendrá un **agente interno** propio, en el celular y en el escritorio, que convive con los agentes externos. No contradice el fondo de este ADR: es un cliente más de las mismas capacidades y del MCP, sin lógica ni herramientas propias, actúa como «agente vía usuario» con los permisos del usuario conectado y pide confirmación antes de escribir y su consumo se mide como cualquier otro (ADR-031). Lo demás sigue igual: sin copilotos por módulo, sin clientes de correo, calendarios ni bases de conocimiento.
 
+**Adenda del 12-nov-2026 (CAR-333, sesión Hilo; decisión técnica, sin cambio de negocio).** El agente interno ya no envía al modelo los esquemas de todo el registro: con ~590 herramientas pesaban ~146.000 tokens y el tope del turno es 128.000, así que ninguna pregunta llegaba a responderse. Ahora recibe un índice con los nombres por módulo y dos herramientas de transporte, `cargar-herramientas` (entrega descripción y esquema de las que pida) y `usar-herramienta` (ejecuta una por su nombre). No son «herramientas propias» en el sentido de la nota anterior: no agregan lógica, datos ni permisos; toda ejecución sigue pasando por `executeCapability` con el mismo filtro de `herramientasDelAgente`, la vista previa de las escrituras y la confirmación humana. La lista que ve el proveedor es fija durante el turno porque el adaptador de Anthropic exige las mismas herramientas para continuar una respuesta. Riesgo que queda: el presupuesto del turno suma la entrada de cada llamada, así que un turno largo con resultados grandes puede volver a agotarlo; queda en pendientes medirlo y, si hace falta, enviar el índice por módulos.
+
 **Nota del 11-nov-2026 (CAR-233, historial de correos del cliente; alcance de Carlos del 10-nov-2026 23:51 America/Santiago).** OPAI **sigue sin ser un cliente de correo**: no hay bandeja completa, ni redactar, responder o reenviar desde el sistema. Lo que sí hace desde la v1.0 es **registrar** en el historial de la cuenta, el contacto y el negocio (a) los correos que salen de OPAI (cotización, documento tributario y seguimiento) y (b) los que entran por el receptor de Resend: la respuesta del cliente a la **dirección de registro de la empresa** (`t<token>@respuestas.opai.cl`, reply-to de los salientes junto a la dirección que ya recibía las respuestas) y los correos que el vendedor envía desde su casilla con esa dirección en **CCO**. Asociación (decisión de Carlos): correo exacto del contacto; si no, dominio del `sitioWeb` de la cuenta; dominios genéricos solo por correo exacto; lo demás a una bandeja «sin asignar» que se asocia a mano. El texto es contenido externo (dato, nunca instrucción). Sin OAuth ni lectura de Gmail en la v1.0: eso es CAR-265. Esta nota precisa ADR-032; no lo invierte. En `modulos/comercial.md` §14, pregunta 10 («los correos no se registran solos en la v1») queda enmendada en este sentido.
 
 ---
@@ -511,6 +522,8 @@ revisados en `briefs/ENCARGO-portal-sesion.md`.
 5. **Manuales probados.** Cada manual de `docs/2.0/agentes/` tiene un escenario de prueba determinista (la secuencia de herramientas MCP del manual contra el contexto de prueba de `@opai/capabilities/testing`) que corre en `pnpm test`. Si una capacidad cambia y rompe un manual, falla CI. Las evaluaciones con modelos reales quedan en backlog.
 
 **Consecuencias.** La auditoría distingue a cada agente. La inyección de instrucciones desde correos o documentos no puede producir efectos irreversibles. Cualquier modelo elige bien las herramientas porque las descripciones son explícitas. Los manuales no se desactualizan en silencio.
+
+**Adenda CAR-353 (13-nov-2026, Sesión Núcleo; Estándares N-2, referente Stripe).** Todas las capacidades de lista comparten un contrato: entrada `cursor` (opcional) y `limite` con tope ≤ 200; salida `{ items, siguiente }`, con `siguiente` nulo en la última página. Es «lista» toda lectura que devuelve un arreglo, cuya salida trae `items` o cuyo último segmento nombra una lista (`list`, `…_listar`, `list_a_cargo`). `apps/web/test/listas-contrato.test.ts` lo verifica sobre el registro completo: una lista nueva fuera del contrato hace fallar `pnpm test`. Las 152 que existían sin cumplirlo quedan congeladas en `apps/web/test/listas-pendientes.json`; solo pueden salir de ahí al migrarse (la prueba también falla si una ya cumple y sigue en la lista). Para lo nuevo, los verbos son `list` y `get` (no `listar`/`obtener`); lo existente no se renombra para no romper clientes.
 
 ---
 
@@ -1383,6 +1396,14 @@ identidad de servicio en main.
 
 6. **Prueba gratis por empresa (CAR-222, 6-nov-2026).** Cada empresa activa **una sola vez**, desde su ERP, la prueba gratis de un módulo o de una parte de Finanzas; dura **10 días** (el primero cuenta) y **se desactiva sola**: el módulo queda en solo lectura, sin borrar nada. Plataforma puede extenderla o reactivarla. No es un cobro: no tiene precio ni genera cargos (`core.pruebas_gratis`, único por empresa y módulo). Una parte de Finanzas se prueba aunque Finanzas no esté contratado; hasta que la Sesión 5 filtre por partes, eso abre todo el módulo durante la prueba (riesgo aceptado, acotado a 10 días). Ver BRIEF-40.
 
+
+7. **Decisiones de Carlos del 12-nov-2026, 10:54 (CAR-323, bloque D).**
+   1. **El Agente interno se cobra aparte**, como cualquier módulo del catálogo (no viene incluido en el plan base). Responde el punto (1) de «Pendiente de Carlos» de ADR-090 para el agente interno.
+   2. **«Usuario con licencia» = cualquier usuario con algún permiso efectivo del módulo**, contando roles de sistema, roles personalizados y excepciones (la que deniega gana). Sin permisos efectivos del módulo, no cuenta. Ya lo hacía `contarUnidades`; queda con prueba.
+   3. **El aviso de prueba por vencer también llega por correo a la empresa** (dueños y administradores), además de a Plataforma: las pruebas que abre Plataforma avisan a 7 días y la prueba gratis de 10 días avisa a 2 días. Evento comunicable declarado en el manifiesto con plantilla por defecto (ADR-020), con un solo envío por evento y destinatario (`core.envios`).
+   4. **Un módulo en solo lectura oculta sus herramientas de escritura en el conector MCP**: `tools/list` no lista sus escrituras ni sus `preview_…`; las lecturas siguen, y `executeCapability` las sigue rechazando. Ya estaba así desde CAR-188; queda con prueba.
+   5. **Solo lectura en rutas públicas y webhooks:** las rutas públicas que escriben en ese módulo (formularios, enlaces de aprobación, firmas) responden «Este módulo está en solo lectura» sin escribir; los webhooks salientes del módulo se pausan; los webhooks e integraciones entrantes (banco, SII, proveedores) siguen registrando lo que llega, para no perder datos, pero no disparan acciones del módulo.
+   6. **Control de acceso se cobra por instalación activa** (12-nov-2026, 13:56).
 ---
 
 ## ADR-072 · Finanzas es un módulo con siete partes contratables por separado
@@ -1433,11 +1454,18 @@ identidad de servicio en main.
 - **Doble conteo en la semana en curso.** Un abono del banco sin conciliar ya está en el saldo de hoy. En la semana en curso, la proyección no suma una factura (ni el depósito esperado de una cesión) cuando un abono sin conciliar coincide con su monto pendiente y con el RUT de quien paga (cliente o factor) en la glosa. Con el mismo monto pero sin RUT que calce se mantiene la proyección y la planilla avisa «Posible cobro ya recibido: concilia el abono de $ X». Cada abono se usa una sola vez.
 - **Factoring.** El ingreso de una factura cedida es el depósito neto del factor (monto menos su descuento), por la fecha del banco si ya está en la cartola y, si no, en la semana de la cesión (o la actual si ya pasó); la factura cedida sale de «Cobros esperados». La diferencia (monto − depósito) va a la cuenta configurable y es solo informativa.
 
+**Adenda del 13-nov-2026 (Carlos, en el chat de la Sesión Caja; registrada en CAR-391).**
+- **No hay saldo de partida.** El flujo es una proyección desde lo que hay hoy en el banco: la suma de las cuentas activas, leída del endpoint de Web4Leads (hoy reenviado por OPAI 1.0) o de los movimientos cargados por cartola (históricos o provisorios, sin duplicar). No se pide un saldo inicial ni una semana desde en Configuración, para Gard ni para ninguna otra empresa.
+- **Sin saldo del banco** (ninguna cuenta activa con saldo), la planilla parte en $0 y avisa «Todavía no hay saldo del banco». La ventana por defecto empieza unas semanas antes de la semana en curso, no en una fecha de ajustes.
+- Las columnas `saldo_inicial` y `desde` de los ajustes dejaron de entrar en el saldo (CAR-391) y se retiraron de la base en CAR-394, con autorización de Carlos del 13-nov-2026 y respaldo previo.
+
 ## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
 
 **Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (respuesta 5 del comentario «DECISIÓN CARLOS» en #318, 21:22 CLT), registrada por Claude (Sesión 5, CAR-189). · Cierra la pregunta abierta desde CAR-169 (#287).
 
 **Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
+
+**Adenda del 12-nov-2026 (CAR-328, pedido de Carlos del 12-nov; registrada por la sesión de Finanzas).** Implementación: toda regla clasifica a una **fila del flujo** (obligatoria) y, opcional, a una **cuenta contable** de movimiento, con alcance abonos, cargos o ambos; la fila debe ser de la sección que corresponde al signo. Se aplica la primera regla que calce por prioridad (mayor primero). Concilia sola solo con modo «todas», monto exacto y referencia igual; lo demás queda «sugerido» y «Reconocer» ofrece la regla para confirmar con un clic. «Reconocer» permite además conciliar a mano contra una fila del flujo con su cuenta contable y crear la regla en el mismo paso. «Aplicar a lo pendiente» vuelve a evaluar los movimientos sin reconocer. Las reglas sugeridas por patrón (diseño «Reglas sugeridas», variante B) quedan fuera hasta que Carlos las apruebe.
 
 ---
 
@@ -1723,6 +1751,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 ## ADR-090 · Base «Hilo»: marco agéntico con interruptor y barra del agente en los portales (CAR-274, 11-nov-2026)
 
+> **Reemplazado como diseño de destino por ADR-109 (12-nov-2026).** Lo construido con Hilo sigue funcionando hasta que su pantalla pase al diseño nuevo.
+
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» · **Registra:** Claude («Sesión Hilo»). **Modifica** ADR-046 y `NAVEGACION.md` (el marco), ADR-049 y `modulos/agente.md` (portales del agente: R1 y la decisión del 29-oct sobre la pregunta 9) y ADR-014 y `DISENO.md` (la piel del DS, en la etapa H2). **Extiende** a la base Hilo el proceso de diseño de ADR-076. **No modifica** ADR-032 §3, ADR-033, ADR-045 ni ADR-055 §2.
 
 **Fuente (11-nov-2026, hora de Chile).** 10:56, sobre la propuesta: «me gusta». 11:50: «si que esten en todos los portales». 11:55: «lo apruebo para que lo hagas y poder verlo en produccion […] quiero que este nuevo diseño sea COPIA FIEL a lo que estoy viendo ahora, 100% identica. Mi objetivo y tuyo es que sea un saas 100% agentico, que se pueda conectar a IA externas y que desde ahi se pueda comandar, operar». 11:57: «hoy en dia la IA lo es todo, quiero que opai 2 sea asi». Aquí «producción» es `test.opai.cl`: la producción de Gard sigue prohibida para los agentes (`AGENTS.md`).
@@ -1835,7 +1865,30 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Hallazgo (verificado en `main` el 11-nov-2026).** Un usuario del sistema no está unido a su ficha de Persona: el responsable de un negocio es un usuario (`comercial.negocios.responsable_id`) y el cargo vive en el vínculo laboral de una Persona, sin relación entre ambos. La unión usuario–Persona entra en CAR-314, como aplicación del punto 7. Mientras no exista, cada indicador declara si se atribuye a un usuario o a una Persona.
 
+**Corrección del hallazgo (11-nov-2026, 21:10, Sesión Desempeño, CAR-314).** El hallazgo anterior estaba mal: la unión entre un usuario y su ficha de Persona **ya existe** en `main` (`core.personas.usuario_id`, 1 a 1 por empresa, índice único `personas_tenant_usuario_key` y capacidad `core.personas.vincular_usuario`). Lo cierto es más acotado: Comercial atribuye los negocios a un usuario y hoy nada obliga a que ese usuario tenga su Persona vinculada. CAR-314 no crea la unión, la usa (`personaDelUsuario`), y agrega la jefatura por cargo (`core.cargos.set_jefatura`, `core.personas.asignar_jefe`, `core.personas.a_cargo`). Los indicadores siguen declarando `sujeto` usuario o Persona; el scorecard (CAR-306) cruza ambos por esa unión.
+
+**Adenda (11-nov-2026, 22:28, Carlos confirma las dos reglas de jefatura de CAR-314, PR #528).** (a) Una persona que no tiene jefe asignado no queda invisible: la ve el nivel de arriba (un vendedor sin jefe asignado lo ve el gerente, no los jefes de venta). (b) Ser jefatura **no** amplía el alcance por filas de ADR-022: un supervisor ve, de su equipo, solo a las personas de sus instalaciones a cargo. Ambas quedan como se construyeron.
+
+**Adenda (11-nov-2026, CAR-306, Sesión Desempeño): scorecard y resultado.** (a) El scorecard de un cargo se guarda por versiones con mes de vigencia: el primero rige desde el mes en curso y cada cambio desde el mes siguiente; un mes ya medido no cambia de reglas. (b) El puntaje va de 0 a 120 y un indicador sin hechos no cuenta como cero: queda fuera y se informa la cobertura. (c) El resultado de una persona no depende de quién lo mira: los indicadores se miden sin los permisos ni el alcance del consultante, y a quién puede ver cada uno lo decide antes la capacidad (permiso de ver a todos, o lo propio y las personas a cargo por jefatura, siempre dentro del alcance por filas). (d) Quedan para después las plantillas por vertical (hasta tener más indicadores), el cierre de período (CAR-322) y el aviso a los trabajadores de la Ley 21.719 (con las pantallas, antes de encender el módulo en una empresa real).
+
+**Adenda (12-nov-2026, CAR-313, Sesión Desempeño): indicadores propios.** (a) Un módulo ofrece **hechos** en su manifiesto (qué ocurrió, a quién se atribuye, montos sumables y atributos para filtrar); lo que no declara no se puede usar. (b) La empresa combina hechos con cuatro formas acotadas (contar, sumar, tiempo entre dos hechos de la misma entidad, porcentaje); la definición es configuración versionada por mes y se evalúa en dominio puro (ADR-021). (c) Para armar un indicador hace falta el permiso del módulo dueño de cada hecho. (d) La vista previa con datos reales va en cada guardado y es agregada: con menos de tres sujetos solo dice cuántos son. El sentido y la meta viven en la versión, así un borrador no altera un indicador publicado. (e) Un indicador propio se archiva, no se borra, y no se puede archivar mientras esté en un scorecard publicado.
+
+**Adenda (12-nov-2026, CAR-322, Sesión Desempeño): cierre de período.** (a) Al **cerrar un mes** se guarda el resultado de cada persona (puntaje, cobertura y detalle por indicador) con el cargo, la jefatura y la versión del scorecard de ese mes; desde ahí el mes no se recalcula aunque cambien los hechos, el responsable de un negocio o el cargo de la persona. (b) **Un mes cerrado no se reabre** y solo se cierra un mes ya terminado; cerrar es irreversible y a un agente siempre le pide aprobación humana. (c) Si nadie lo cierra, **OPAI cierra solo el mes anterior** el día de cierre de la empresa (ajuste «Día de cierre del mes», por defecto el **5**), para dejar unos días a hechos atrasados. (d) Entra quien tuvo un vínculo laboral que tocó el mes; si cambió de cargo dentro del mes, cuenta el último cargo. (e) Quién ve a quién en un mes cerrado se decide con la jefatura de hoy; se guarda el jefe asignado a la persona al momento de cerrar, como referencia. (g) El cierre automático queda en la auditoría igual que el manual, y lee los módulos activos de la empresa para medir con los mismos indicadores que ve una persona. (f) Al anonimizar a una persona se borra su resultado guardado (Ley 21.719). **Confirmado por Carlos el 12-nov-2026 (08:27, hora de Chile):** el día de cierre es configurable por empresa, con el 5 por defecto, y un mes cerrado no se puede reabrir.
+
+**Adenda (12-nov-2026, CAR-309, Sesión Desempeño): indicadores de Personas.** (a) **Quién reclutó a cada persona:** el vínculo laboral guarda «Reclutado por» (un usuario). Se llena solo con quien registra el ingreso y se puede cambiar; cada cambio queda en la auditoría como toda escritura. Los vínculos anteriores quedan sin reclutador y no cuentan para la retención. (b) **Vacante:** un puesto de la pauta queda sin persona desde que rige una serie sin titular o desde el día siguiente a que su titular dejó la empresa (lo que pase antes; un traslado no es salida), y se cubre cuando rige la siguiente serie con titular; los días para cubrirla se cuentan entre esas dos fechas y se atribuyen a quien reclutó a la persona que la tomó. (c) «Fichas con documentos al día» se mide sobre quienes reportan a cada jefatura (criterio de la sesión). **Decidido por Carlos el 12-nov-2026 (10:43, hora de Chile):** opción (a) en ambas reglas, con auditoría de los cambios.
+
+**Adenda (12-nov-2026, CAR-310, Sesión Desempeño): indicadores de Operaciones.** Los resultados de una instalación (cobertura de pauta, turnos descubiertos, turnos extra, novedades cerradas a tiempo y reclamos de cliente) se cargan **a ambos**: al supervisor que tiene la instalación a cargo y al jefe de zona por todas las instalaciones de los supervisores que le reportan (jefatura por cargo, CAR-314). «Rondas completas» se atribuye al guardia que cerró la ronda. Las visitas de supervisión entran cuando exista su dato en 2.0. **Decidido por Carlos el 12-nov-2026 (12:00, hora de Chile):** «un supervisor tiene una o más instalaciones, pero un jefe zonal puede tener a varios supervisores, obvio que a ambos».
+
+**Adenda (12-nov-2026, CAR-311, Sesión Desempeño): indicadores de Asistencia.** Leen el consolidado diario (`asistencia.dias`), los turnos esperados y las ausencias registradas en la Pauta; nunca marcas ni bitácora, y no tocan el reporte para la DT. Un día cuenta solo si su turno esperado sigue vigente y ya terminó (una licencia o vacación registrada tarde anula el turno y saca el día). Son indicadores **de cada persona** (se ponen en el scorecard de su cargo, que cada empresa define según su rubro); al supervisor y al jefe de zona no se les cargan. **Decidido por Carlos el 12-nov-2026 (13:10, hora de Chile):** (a) en el ausentismo no cuentan ni a favor ni en contra las licencias médicas, accidentes del trabajo, pre y postnatal, vacaciones, permisos con y sin goce y ausencias justificadas; cuentan en contra la ausencia injustificada y el día con turno sin marca; (b) «Marcas a la hora» usa una **tolerancia de atraso configurable por empresa, 15 minutos por defecto** (ajuste `asistencia.tolerancia_atraso_min`; no cambia el atraso registrado ni el reporte para la DT); (c) se hace un **informe de Operaciones por instalación** (cobertura, turnos por cubrir, ausentismo y atrasos por instalación, ordenable) para comparar instalaciones, primero como capacidad con MCP y la pantalla después de su diseño; (d) los permisos y licencias se ingresan en la ficha del guardia y deben verse en la pauta mensual y diaria, para saber si una falta está justificada (pendiente de Personas y Pauta).
+
+**Adenda (12-nov-2026, CAR-312, Sesión Desempeño): el agente y Desempeño.** (1) **Propuestas del agente:** no se crea una cola propia. Un agente que guarda un scorecard como borrador deja una propuesta; publicarlo (sumar un indicador, mover una meta) exige siempre aprobación humana por la cola existente de `core.aprobaciones` (`exigeAprobacion` de `desempeno.scorecards.guardar`), que el hilo ya muestra en Pendientes. El agente nunca cambia una meta solo. (2) **Responder con los mismos números:** el agente usa las mismas capacidades que la pantalla (`desempeno.resultados.*`, `core.indicadores_gestion.*`). (3) **Avisos bajo la meta:** con el ajuste `desempeno.aviso_bajo_meta` encendido (**apagado por defecto**, ADR-020), al cerrar el mes se emite `desempeno.resultado.bajo_meta` por persona bajo la meta y `desempeno.equipo.bajo_meta` por la jefatura directa de su ficha. Son transaccionales (sin reglas de Comunicaciones): la campana llega a la persona solo si su cargo le muestra su resultado y tiene el permiso de ver resultados, y a la jefatura solo por las personas que la jefatura de cargos le deja ver. Nunca llevan el puntaje. (4) **Indicador nuevo del núcleo** `core.respuesta_escalados`: horas promedio desde que un agente pide una aprobación hasta que alguien la aprueba o rechaza, atribuido a quien decide; las vencidas sin decisión y las de plataforma no cuentan. (5) **Parte del agente:** el resultado de cada persona muestra qué parte de sus acciones auditadas del mes hizo un agente que actúa por ella; el resultado se atribuye igual a la persona. Sin migración.
+
+**Adenda (12-nov-2026, CAR-330, Sesión Desempeño): informe por instalación y su pantalla.** Carlos aprobó el 12-nov a las 23:25 (hora de Chile; «que recomiendas? avanza con eso») la propuesta de pantalla hecha con el diseño nuevo (ADR-109). (a) Va como **pestaña de la Pauta**, «Por instalación», junto a Mensual y Diaria, en `/pauta/instalaciones`: el área Operaciones ya tiene sus 7 entradas de menú (`NAVEGACION.md`). (b) Una fila por instalación con la cobertura del mes destacada y, debajo, turnos por cubrir, refuerzos, ausentismo y atrasos. Cada fila abre la pauta mensual de esa instalación. (c) Selector de mes, orden (menor cobertura, más turnos por cubrir, más ausentismo o más atrasos) y descarga CSV del mes en pantalla. (d) El color solo marca el estado y no es una meta de la empresa: cobertura bien ≥ 95 % y alerta < 88 %; ausentismo bien ≤ 3 % y alerta > 8 %; atrasos bien ≤ 5 % y alerta > 10 %. (e) Ausentismo y atrasos salen solo con Asistencia activa y permiso para verla. (f) Carlos también asignó a la Sesión Desempeño que los permisos y licencias de la ficha se vean en la pauta mensual y diaria; va en su propio PR.
+
 **Pendiente de Carlos.** Nada.
+
+**Adenda CAR-383 (13-nov-2026, decide Carlos en el chat de la sesión Desempeño, 18:02):** cada persona ve solo su propio resultado, sin su posición frente a los compañeros de cargo (la opción «la persona ve su posición» del scorecard queda sin uso en pantalla), y los scorecards siguen siendo mensuales, sin trimestre ni semestre. Un trimestre se lee sumando meses cerrados.
+
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
 
@@ -1844,6 +1897,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
 
 **Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
+
+**Adenda a ADR-095 (11-nov-2026, 22:56, Carlos, para la Sesión Desempeño por el resto de esa sesión).** Si no hay una decisión de Carlos pendiente, la sesión no se detiene: «Decisión tuya: ninguna, sigo» significa seguir en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una comprobación cada 5 minutos y mientras avanza con lo que no dependa de eso; al destrabarse completa lo pendiente (integrar, verificar en test.opai.cl). No responde uno por uno los avisos automáticos de GitHub: los lee y arregla lo suyo. Solo se detiene con una decisión real de Carlos o si no queda trabajo posible, y dice por qué. Copia en el proyecto de Claude: `claude/regla-no-detenerse.md`.
 
 ## ADR-096 · Emitir un documento lo envía al SII de inmediato (CAR-270, 11-nov-2026)
 
@@ -1888,6 +1943,34 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
 8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.
 
+### ADR-097 · Adenda 1 (12-nov-2026, CAR-315 parte 2)
+
+**Decide:** Carlos («CAR 315 parte 2, hazlo ahora», 12-nov-2026, 07:26, hora de Chile) · **Registra:** Claude («Sesión Personas y Documentos»), en el PR de CAR-315 parte 2.
+
+1. **Dos clases nuevas de plantilla: `contrato_servicio` (ámbito cuenta) y `acta` (ámbito instalación)**, reutilizando las clases de firma que ya existían. Cada clase tiene un **ámbito** (persona, cuenta o instalación) que decide qué variables valen: persona = persona, vínculo, instalación, sueldo, contrato; cuenta = cuenta, contrato; instalación = instalación, cuenta, contrato. El servidor rechaza al guardar una variable fuera del ámbito y el panel del editor solo ofrece las del ámbito.
+2. **Generación sobre la entidad:** `core.documento_plantillas.rellenar_entidad` y `generar_entidad` (vista previa, dryRun, PDF con la marca del tenant, vínculo «propietario» a la cuenta o instalación). Las capacidades de persona rechazan plantillas de otro ámbito y al revés. Pantalla «Generar documento» en la pestaña Documentos de la cuenta y de la instalación.
+3. **Sigue pendiente:** Configuración › Módulos › Documentos (tipos configurables por tenant) y el editor con más formato, ambos con diseño.
+
+## ADR-098 · Entrar a OPAI desde Claude con la cuenta propia: OAuth del MCP adelantado (CAR-247, 11-nov-2026)
+
+**Decide:** Carlos, en el chat del proyecto «Opai 2.0», 11-nov-2026 a las 20:16 (hora de Chile) · **Registra:** Claude («Sesión Hilo»).
+
+**Contexto.** El 10-nov Carlos decidió hacer OAuth para el MCP después de v1.0 (9-dic). El 11-nov pidió adelantar el conector interactivo de Claude (CAR-287), y Claude exige que cada persona entre con su cuenta para agregar un conector propio.
+
+**Decisión.**
+1. Se adelanta CAR-247: OAuth por usuario para `/api/mcp`, antes de v1.0. El token actúa como agente vía la persona (permisos, alcance, empresa y aprobaciones de ADR-032), atado a la empresa que elige después de entrar. Diseño en `briefs/BRIEF-CAR-247-oauth-mcp.md`.
+2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
+
+**Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
+
+### Adenda 1 a ADR-098 · Tope de gasto de las apps conectadas (Carlos, 12-nov-2026, 07:28)
+
+Respuesta de Carlos («Opción 1») a la `DECISIÓN CARLOS:` del PR #535: las apps conectadas por OAuth (Claude u otras) **comparten el presupuesto mensual del agente de la empresa** (ajuste `agente.presupuestoMensualMicro`, el mismo del agente interno). No hay un tope por cada app. El medidor cobra su consumo en el mismo registro del agente interno (`agente-interno`); al agotarse, tanto el agente interno como las apps reciben `BUDGET_EXCEEDED` hasta el mes siguiente o hasta que suba el tope. Código: `esAgenteSinKey` en `packages/db/src/presupuesto.ts`.
+
+### Adenda a ADR-095 · «Ninguna, sigo» significa seguir (Carlos, 11-nov-2026, 22:56)
+
+Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con el trabajo en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una revisión a sí misma cada pocos minutos y avanza mientras tanto con lo que no dependa de eso. Los avisos automáticos de GitHub no se responden uno por uno. Solo se detiene por una decisión real o porque no queda trabajo posible, y dice por qué. Regla escrita en `AGENTS.md` («Decisiones de Carlos»).
+
 ## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)
@@ -1905,6 +1988,22 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
 - La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).
 
+## ADR-100 · Varias cuentas bancarias por persona; el anticipo vive solo en Nómina (CAR-275, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026, opción A).** Una persona puede tener varias cuentas bancarias; una sola es «por defecto» y es la que lee la nómina de pago (Rendiciones). El **anticipo** no se modela en la ficha: vive únicamente en Nómina, sin cambios.
+
+**Cómo.** `core.personas_pago` pasa de 1:1 a 1:N (índice único parcial `WHERE por_defecto`, a lo más una por defecto por persona) y suma `titular_nombre`. Las solicitudes (`personas_pago_solicitudes`) suman `tipo` (`reemplazar`, `agregar`, `marcar_defecto`, `quitar`), `cuenta_id`, `titular_nombre` y `por_defecto`. Se reutiliza `core.personas.pago_solicitar_cambio` con esos campos opcionales: sin capacidades nuevas, la aprobación sigue siendo de otra persona (`pago_aprobar_cambio`, solo personas). No se puede quitar la cuenta por defecto. El número de cuenta sigue cifrado por campo. La migración es aditiva y reversible (reversión en su cabecera) y marca la cuenta actual de cada persona como por defecto con verificación de filas.
+
+**Fuera de alcance.** Que la persona valide sus cuentas desde el Portal Trabajador (B1): Carlos no lo decidió.
+
+## ADR-101 · Las personas de OPAI 1 llegan por Excel, sin tocar el exportador de 1.0 (CAR-282, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026).** La importación de personas desde OPAI 1 se hace **vía Excel**: se exporta la lista de guardias y personas desde OPAI 1 a una planilla y se carga en Configuración › Importar datos con el motor común. No se amplía el exportador de OPAI 1 (no se toca 1.0).
+
+**Cómo se usa.** 1) Importar **Personas** (ficha, previsión y cuenta bancaria; se reconocen por RUT, reimportar no duplica; la simulación muestra los errores fila por fila). 2) Importar **Contratos vigentes** (cargo, instalación, tipo, inicio, horas y distribución) con las personas e instalaciones ya creadas. Ambos importadores reconocen los nombres de columna de 1.0 (`firstName`, `lastName`, `hiredAt`, `contractType`…) y se revierten por lote. La cuenta bancaria importada queda como cuenta por defecto (ADR-100).
+
+**Fuera de alcance.** Anexos y finiquitos (CAR-58) y el adaptador JSON de contratos (el export de 1.0 no trae `OpsGuardia`).
+
 ## Adenda ADR-099 · Gard queda habilitada para «OPAI 1 (traer datos)» (CAR-279, 12-nov-2026, pedido de Carlos)
 
 **Decisión.** Para traer los datos de Gard desde OPAI 1, la empresa Gard se agrega a `core.integraciones_habilitadas` (clave «opai1») con una migración de datos aditiva, aplicada por el bot «OPAI 2.0» con respaldo (dev y luego main). La migración no pisa otras empresas, no hace nada si la base no tiene la empresa «gard» y se puede repetir sin efecto.
@@ -1912,3 +2011,214 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Por qué.** El ajuste es de plataforma y no aparece en Plataforma › Ajustes, así que no se podía habilitar por pantalla. Arreglar esa pantalla queda para la sesión Proyecto (CAR-321).
 
 **Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.
+
+## ADR-103 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 06:54, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** La programación de facturas primero genera un borrador que no se manda a nadie. Si tiene activada la proforma o el estado de pago, esos documentos se mandan a los destinatarios de la cuenta. Cuando el cliente aprueba (un OK por correo), se emite la factura y va a los mismos destinatarios. Hasta hoy, OPAI 2 mandaba a un solo destinatario principal y el resto en copia. OPAI 1 admite 10 PARA y 10 CC. El importador de facturas históricas (CAR-283) dejó abierta qué hacer con una factura que no trae el monto cobrado.
+
+**Decisión.**
+1. **Todos los destinatarios reciben por igual.** Los contactos de facturación asignados (los de la programación o, si no hay, los de la cuenta) van todos como destinatarios principales (PARA), hasta 10. El resto va en copia. Lo mismo vale para la proforma, el estado de pago y la factura con su XML.
+2. **La casilla DTE del cliente va siempre en copia.** Es la casilla que recibe el XML y el DTE. Se agrega en copia aunque no esté en la lista guardada. Si el cliente no tiene ningún contacto de facturación, va como PARA.
+3. **Facturas importadas: todas cobradas.** Toda factura importada sin monto cobrado se da por cobrada entera, porque así están las de Gard. Si alguna no lo está, Carlos lo avisa y se corrige a mano.
+
+**Consecuencias.**
+- La migración `20261130100000_finanzas_destinatarios_varios_para` quita el índice que permitía un solo PARA por documento. El tope de 10 lo valida el dominio (`MAX_PARA`).
+- El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
+- La regla por defecto del importador (#542) queda confirmada.
+- Este ADR se numeró primero como ADR-100, número que en `main` tomó antes CAR-275; el comentario de la migración `20261130100000` conserva «ADR-100» porque ya está aplicada y su checksum no puede cambiar.
+- El recordatorio de cobro de una factura vencida usa los mismos destinatarios que la factura (`destinosDeDocumento`): así el cliente recibe la cobranza en las mismas casillas que la factura, con la casilla DTE en copia.
+
+## ADR-102 · Hilo es el sistema de diseño predeterminado para todo diseño nuevo (CAR-324, 12-nov-2026)
+
+> **Reemplazado por ADR-109 (12-nov-2026):** el sistema predeterminado es el diseño nuevo.
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 10:57, hora de Chile) · **Registra:** Claude. (ADR-098 a ADR-101 están reservados por PRs abiertos.)
+
+**Decisión.** Todo diseño nuevo de OPAI 2.0 (Design Prompts, pantallas y piezas) se hace en Claude Design con el sistema «OPAI 2.0 Design System · Hilo». «OPAI 2.0 V2» y los sistemas anteriores quedan solo como referencia de lo ya construido; no se diseñan pantallas nuevas con ellos.
+
+**Por qué.** Hilo es la base visual que se está construyendo (ADR-090). Diseñar con un solo sistema evita mezclar dos estilos y que una pantalla aprobada en V2 tenga que rehacerse.
+
+**Consecuencias.** `DISENO.md` §3b lo deja como regla. El sistema en Claude Design se mantiene al día con `packages/ds`: si cambia la piel Hilo, se actualiza en el mismo PR o en el siguiente. Las pantallas ya construidas con la base clásica no se rediseñan por esta regla; se pasan a Hilo cuando su módulo entre en un bloque de Hilo (H3 y siguientes).
+
+## ADR-104 · Las sesiones de Claude no dependen del bot «OPAI 2.0» (12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 11:26 y 11:40, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** El bot «OPAI 2.0» (Grok) dejó de responder la noche del 11-nov y varios PR quedaron esperando que aplicara su migración (#527, #528, #537, #558).
+
+**Decisión.** Ni esta sesión ni ninguna otra sesión de Claude depende del bot «OPAI 2.0». Cada sesión aplica la migración de su propio PR con el procedimiento de siempre (respaldo de `dev` y `main`, `dev` antes que `main`, `lock_timeout` corto, verificación y aviso en el PR) y quita `migracion-pendiente`. Reemplaza en esto a ADR-054 y ADR-070.
+
+**Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
+
+**Adenda del 13-nov-2026 (Carlos, 00:12 hora de Chile, chat de la «Sesión Diseño»: «nunca más hace nada OPAI 2.0, tú integras todo»).** El bot «OPAI 2.0» queda fuera del flujo: no vigila, no migra, no integra ni revisa. Toda sesión de Claude integra a `main` sus propios PR (squash, con las condiciones de «Integración a `main`») y aplica sus migraciones. Donde un encargo, brief o documento diga que el bot integra, migra o revisa, lo hace la sesión que construyó el PR.
+
+
+## ADR-105 · Hilo es la fuente única de diseño, con reglas verificables (CAR-334, 12-nov-2026)
+
+**Decidió:** Carlos (encargo a la «Sesión Diseño», 12-nov-2026, 16:20, hora de Chile: «La referencia única es el "OPAI 2.0 Design System · Hilo" de Claude Design. V1, V2 y el "OPAI Design System" antiguo quedan obsoletos») · **Registra:** Claude («Sesión Diseño»). **Extiende** ADR-102 (Hilo para todo diseño nuevo) a la revisión de lo ya construido; **no cambia** ADR-090 (el interruptor de marco y las etapas H1–H7 siguen como están).
+
+**Decisión.**
+1. La única referencia de diseño de OPAI 2.0 es el sistema «OPAI 2.0 Design System · Hilo» de Claude Design, con su copia en el repo (`docs/2.0/design/export-base-hilo/`, `packages/ds`). V1, V2 y el «OPAI Design System» antiguo quedan obsoletos: no se usan para diseñar ni para juzgar una pantalla.
+2. Hilo se aplica como reglas verificables (`docs/2.0/DISENO-hilo.md`): los tokens en `packages/ds/src/hilo/tokens-hilo.ts` con una prueba que los compara con `tokens.css`, y las reglas de uso (un primario por vista, ubicación de acciones, estados, formatos chilenos, textos) como trinquete en `pnpm test` y como mediciones de la auditoría visual.
+3. La «Sesión Diseño» es dueña de Diseño y experiencia: audita los cuatro portales, corrige lo transversal (DS, marco, navegación, tipografía, botones, textos) y asigna lo de cada módulo a su sesión. No cambia decisiones de producto ni flujos de negocio; si Hilo y una pantalla aprobada se contradicen, pregunta a Carlos.
+
+**Consecuencias.** Un PR que cambie la piel en `tokens.css` sin cambiar `tokens-hilo.ts` (o al revés) falla. Un archivo no puede sumar formatos propios, tamaños fuera de escala, botones genéricos ni estilos en línea respecto de `apps/web/test/reglas-diseno/base.json`. El marco clásico sigue hasta H7; la auditoría se hace en el marco Hilo.
+
+**Adenda (12-nov-2026, Sesión Diseño, con ADR-109 a la vista; confirmada por Carlos en el chat de la sesión, 12-nov-2026, 20:36, hora de Chile: «seguir el nuevo diseño»).** ADR-109 reemplaza a Hilo como referencia visual. De este ADR quedan las reglas verificables que no dependen de la piel (un solo botón primario por vista, ubicación de acciones, estados, formatos chilenos de RUT, fecha y monto, escala tipográfica, accesibilidad), el trinquete de `apps/web/test/reglas-diseno` y la auditoría `@auditoria`: desde hoy se miden contra el diseño nuevo (`docs/2.0/design/export-diseno-nuevo/`). Los tokens de `@opai/ds/hilo` y su prueba solo cuidan la piel Hilo mientras exista (hasta D6). La Sesión Diseño no abre más correcciones de piel Hilo; los hallazgos de piel (tarjetas o líneas, cabecera del teléfono, índigo) pasan a los bloques D1 a D6 de `BRIEF-CAR-335-diseno-nuevo.md`.
+
+## ADR-106 · La vara: OPAI 2.0 sigue a los mejores SaaS de cada capa (CAR-348, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 17:58, hora de Chile) · **Registra:** Claude («Sesión Estándares»).  (ADR-105 lo usa el PR #584, abierto antes.)
+
+**Contexto.** OPAI 2.0 lo construyen varias sesiones en paralelo. Cada una resuelve bien su módulo, pero sin una referencia común cada módulo inventa su forma de dar permisos, de listar, de aprobar o de mostrar un error. Carlos pidió que todo siga el estándar de los mejores SaaS y que no se reinvente la rueda.
+
+**Decisión.**
+1. [`REFERENTES-saas.md`](REFERENTES-saas.md) es la vara oficial. Para cada capa nombra el referente, el patrón concreto que se copia y cómo se mide: permisos (GitHub, Google Workspace, Rippling), multi-tenant (Linear, Slack, Stripe), API y MCP (Stripe), Comercial (HubSpot, Salesforce, Pipedrive), Finanzas (Stripe Billing, Xero, QuickBooks), Personas (Rippling, Deel, BambooHR), terreno (Connecteam, Deputy, ServiceTitan), UX (Linear, Notion) e IA (la IA propone y una persona aprueba, con registro).
+2. Vale para todo: diseño, lógica, permisos, Núcleo y módulos. Si un módulo ya construido se aparta sin motivo, se ajusta o se rehace; rehacer un módulo lo decide Carlos con la auditoría a la vista.
+3. El aspecto lo decide el sistema visual oficial vigente: el diseño nuevo de ADR-109, que reemplazó a Hilo el mismo 12-nov-2026. Los referentes de UX fijan el comportamiento, no el aspecto.
+4. Apartarse del referente exige una razón escrita: ley chilena (DT, SII, Ley 21.719), una regla de negocio de Carlos, agent-first (ADR-034) o costo desproporcionado.
+5. Un referente se cambia con una adenda a este ADR.
+
+**Consecuencias.**
+- La auditoría por capa y módulo vive en `docs/2.0/auditoria-estandares/` y sus brechas altas y críticas van a Linear, en el proyecto del módulo y enlazadas a «22 · Estándares y arquitectura».
+- Todo PR que toque arquitectura, permisos, modelo de datos o UX declara «Referente seguido y en qué se aparta» (plantilla del PR y `AGENTS.md`, en un PR posterior de esta misma serie).
+- La Sesión Estándares revisa cada ADR y cada PR de esos temas contra la vara y comenta las brechas.
+- No reemplaza a `AGENTS.md`, `REGLAS-codigo.md` ni a los ADR vigentes: ante un choque, mandan ellos y se anota la diferencia aquí.
+
+**Adenda (Carlos, 13-nov-2026, 23:10, chat de la Sesión Estándares; CAR-410).** Las brechas **medias** que la Sesión Estándares encuentra en un PR **ya integrado** también van a Linear: prioridad normal, en el proyecto del módulo y enlazadas a CAR-348. Motivo: un comentario en un PR cerrado no lo retoma nadie. En un PR abierto basta el comentario, porque la sesión que lo construye lo lee antes de integrar; si el PR se integra sin resolverla, la media pasa a Linear en la revisión siguiente. Las bajas siguen solo en el comentario y en la auditoría.
+
+## ADR-107 · Reglas de aprobación por empresa, versión 1 (CAR-252, 12-nov-2026)
+
+**Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»).
+
+**Contexto.** Hasta hoy solo los agentes pasaban por la cola de aprobaciones (ADR-032), y aprobaba cualquiera con `core:aprobaciones.manage` (dueños y administradores). Carlos pidió poder elegir, por empresa, qué acciones necesitan aprobación y quién las aprueba (CAR-252), y que valga también para las personas (CAR-253).
+
+**Decisión (versión 1 simple, como lo hacen las herramientas de gastos y facturación).**
+
+1. **Una regla = acción + monto mínimo opcional + quién aprueba.** Acciones de la versión 1: `emitir_dte` (emitir al SII una factura, nota de crédito, nota de débito o el lote del cierre) y `enviar_cotizacion` (enviar una propuesta de CPQ). Quién aprueba: un rol (base o propio de la empresa) o un grupo (CAR-251), nunca los dos a la vez.
+2. **Vale igual para personas y agentes.** Si una regla aplica, la acción queda en la cola de aprobaciones (`core.aprobaciones`, con `regla_id`) aunque la pida una persona desde la pantalla o un agente con autonomía «directo». Sin reglas, todo sigue como antes.
+3. **Basta una aprobación.** Con varias reglas para la misma acción, aplica la de monto mínimo más alto que se cumpla. Si el monto no se puede calcular, aplica cualquier regla de la acción (ante la duda, se pide).
+4. **Dueños y administradores aprueban todo, siempre** (también lo propio, para no trabar a una empresa chica). Los aprobadores de una regla ven y resuelven solo las solicitudes de sus reglas, y nunca la propia.
+5. **La regla se vuelve a evaluar al aprobar.** Si el monto o las reglas cambiaron desde que se pidió (por ejemplo, alguien editó el borrador), quien aprueba debe poder resolver la regla vigente; si no, la aprobación se rechaza con un conflicto y la resuelve quien corresponde.
+5 bis. **Quien aprueba también necesita el permiso de la acción**, porque la acción se ejecuta a su nombre (como hasta hoy). La ejecución que resulta de aprobar no vuelve a pedir aprobación.
+6. **Configurar reglas es solo para personas** (`soloPersonas`): un agente no puede cambiar la regla que lo frena. La lista de reglas sí está en el MCP.
+7. **Fuera de la versión 1:** varias aprobaciones («N de M»), el reemplazo por vacaciones, otras condiciones y unir las aprobaciones propias de CPQ, Rendiciones y tickets (CAR-253).
+
+**Consecuencias.**
+
+- La pantalla Configuración › Aprobaciones › Reglas espera su diseño en Claude Design (`docs/2.0/design/DESIGN-PROMPT-reglas-aprobacion.md`). Como crear reglas es solo para personas, hasta que llegue la pantalla ninguna empresa tiene reglas y todo funciona como antes.
+- Los aprobadores sin `core:aprobaciones.manage` ven sus solicitudes en la Bandeja y por el MCP, pero la pantalla de la cola requiere ese permiso hasta que llegue el diseño.
+- **Pendiente antes de construir la pantalla de reglas** (hallazgos de la autorrevisión, no bloqueantes mientras nadie pueda crear reglas): que la aprobación de una emisión pedida por una persona también envíe el documento al SII (hoy lo hace la pantalla de quien emite); que los aprobadores sin `core:aprobaciones.manage` tengan dónde resolver; avisos a los aprobadores de la regla; que editar una regla no cambie el aprobador de las solicitudes ya pendientes; y evitar dos reglas activas iguales.
+- **Adenda CAR-253 (12-nov-2026, Sesión Núcleo).** Resueltos dos de esos pendientes: (1) al aprobar una solicitud **pedida por una regla**, la aprobación encadena los pasos que la pantalla de quien pidió habría hecho sola (`aprobable.siguientes`): las emisiones (factura, nota de crédito, nota de débito y lote del cierre) envían el documento al SII como quien aprueba, igual que ADR-096; si el envío falla, la emisión aprobada no se deshace y el motivo queda en el resultado de la aprobación (`siguientes`), para reintentar desde la ficha. Las solicitudes de un agente sin regla no encadenan: el agente da sus propios pasos. (2) No se aceptan dos reglas activas con la misma acción y el mismo monto mínimo. Siguen pendientes: pantalla para aprobadores sin `core:aprobaciones.manage`, avisos a los aprobadores y que editar una regla no cambie el aprobador de solicitudes ya pendientes. **Unificación con CPQ, Rendiciones y Tickets (decisión de Carlos del 12-nov-2026, 20:38, opción A):** una sola bandeja «Por aprobar» y cada módulo conserva su flujo y su criterio de quién aprueba. El núcleo define el contrato `FuenteAprobaciones` (el módulo lo declara en su manifest como `aprobaciones`, igual que `buscadores`): cuenta y lista lo que espera al actor con su propio criterio y alcance, y da el enlace a la pantalla donde se resuelve. `core.por_aprobar.list` (lectura auditada, en UI, API y MCP) junta la cola del núcleo y las fuentes de los módulos activos en el scope de la key y con permiso; `core.resumen.contadores.aprobacionesPendientes` usa la misma cuenta. Fuentes: CPQ (margen y envíos, como su bandeja), Rendiciones (enviadas asignadas al actor, o todas con `ver_todas`) y Tickets (tipos con aprobación cuyo rol aprobador es el del actor, en estado aprobable). Remuneraciones (`core:remuneraciones.aprobar`) queda fuera: no es una cola de solicitudes. Un motor de reglas único para todos los módulos (opción B) queda para después, módulo por módulo, si se pide.
+- En la versión 1, el envío de propuestas de CPQ no calcula el monto: una regla de «enviar cotización» aplica a todos los envíos. CPQ conserva su propia aprobación de envíos hasta CAR-253.
+
+## ADR-108 · Trabajo en paralelo sin esperas y sin choques entre sesiones (12-nov-2026)
+
+**Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»). **Modifica** `OPERACION-agentes.md` (A2.5), `AGENTS.md`, `CONTEXTO-agentes.md` e `INSTRUCCIONES-proyecto-claude.md`. (ADR-105 a ADR-107 están reservados por PR abiertos: #584, #591 a #594 y #595.)
+
+**Contexto.** El 12-nov había 25 PR abiertos de ocho sesiones. Dos problemas: sesiones que se detenían a esperar la revisión del bot «OPAI 2.0» o la integración, y PR que chocaban entre sí. Casi todos editaban la misma tabla de `ESTADO.md`, el inventario de paridad y `embed.ts`; tres pares editaban el mismo `.prisma`; y cuatro PR tomaron el mismo número de ADR (106).
+
+**Decisión.**
+
+1. **Las sesiones avanzan solas.** Al abrir un PR siguen con su próximo ticket, apilando si depende del anterior. La revisión del bot y la integración ocurren en paralelo y no son una puerta. Solo se detienen por una decisión de negocio o producto de Carlos, o por algo irreversible, plata, datos reales, producción, OPAI 1.0, el tenant Gard o un secreto.
+2. **Archivos sensibles.** Antes de tocar un `.prisma`, una migración, un registro central, un archivo generado o numerar un ADR, la sesión revisa los PR abiertos. Si otro ya edita ese archivo, apila sobre él o espera, y lo dice en la descripción («apilado sobre #N» o «espera #N»).
+3. **Migraciones de a una y en orden de fecha.** Dos PR no editan el mismo `.prisma` con migraciones distintas sin apilarse.
+4. **`ESTADO.md` deja de editarse en cada PR.** Cada PR escribe un archivo propio, `docs/2.0/estado/<modulo>/CAR-<n>.md`. `ESTADO.md` queda como índice y lo consolida un PR de documentación. Se eligió esto, y no «solo actualiza quien integra», porque quien integra es la misma sesión que construye: el choque seguiría igual, solo más tarde.
+5. **Dueños por módulo** en una tabla de `OPERACION-agentes.md` (A2.5.5). No se usa `CODEOWNERS` de GitHub porque todas las sesiones operan con la misma cuenta.
+6. **Dependencias en Linear.** Antes de tomar un ticket se revisan sus «blocked by»; el orden entre módulos vive en las relaciones de Linear.
+
+**Consecuencias.** El orden propuesto para los PR abiertos al 12-nov está en `docs/2.0/estado/orden-integracion-2026-11-12.md`. Carlos aprobó el 12-nov (18:28) un aviso automático: el workflow `choque-prisma.yml` avisa, sin bloquear, cuando dos PR abiertos editan el mismo `.prisma` sin estar apilados.
+
+## ADR-109 · Diseño nuevo de OPAI 2.0: reemplaza a Hilo (CAR-335, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 18:27, hora de Chile) · **Registra:** Claude. (ADR-105 a ADR-108 están reservados por PRs abiertos.)
+
+**Decisión.** El diseño oficial de OPAI 2.0 pasa a ser el prototipo `docs/2.0/design/export-diseno-nuevo/` («cambio total», en palabras de Carlos). Reemplaza al marco Hilo (ADR-090) y a la regla de diseñar todo con Hilo (ADR-102). En resumen: blanco y negro con líneas finas y un solo color de acento, que es **el color de cada empresa**; menú lateral con íconos y acordeón, que se puede cerrar y se asoma al pasar el mouse; el agente como sección propia y dentro de cada ficha; buscador único; listas y fichas idénticas en todos los módulos; y el teléfono y el iPad al mismo nivel que el escritorio. El detalle está en el README del export.
+
+**Por qué.** Carlos probó dos propuestas de color sobre Hilo y ninguna lo convenció («hay algo que no me cierra»). Pidió partir de referentes reconocidos (Vercel, Linear) y rehacer la propuesta completa. Tras cinco rondas sobre el prototipo lo aprobó como diseño oficial.
+
+**Consecuencias.**
+- Todo diseño nuevo se hace con este sistema. Hilo y «OPAI 2.0 V2» quedan solo como referencia de lo ya construido.
+- No se empiezan bloques nuevos de Hilo. Los PR de Hilo ya abiertos (H3, reglas y auditoría) se integran o se cierran según decida su sesión; lo que construyan sigue funcionando hasta que su pantalla pase al diseño nuevo.
+- **También reemplaza a ADR-105** («Hilo es la fuente única de diseño, con reglas verificables», PR #584 abierto): sus reglas y su auditoría se adaptan al diseño nuevo o el PR se cierra; lo decide su sesión con este ADR a la vista.
+- **Qué más modifica.** `NAVEGACION.md` §3 y D11: vuelve el menú lateral, el agente es una sección del menú y la barra inferior del teléfono es Inicio, Agente, Menú y Yo. `DISENO.md` §1: las fuentes pasan a Geist y Geist Mono. ADR-090 punto 2: mientras se construye hay una tercera piel. Esos archivos se actualizan en el bloque que construye cada cosa (D1 las fuentes, D2 la navegación), no antes, para que sigan describiendo lo que está en `main`.
+- **Plataforma** usa el mismo marco, pero sin la sección Agente: el agente interno no entra a Plataforma (ADR-090 punto 4 y ADR-055).
+- CAR-336 a CAR-340 siguen abiertas: son mejoras de comportamiento (detalle a la derecha, botón de alta en todas las listas, vistas que se actualizan al tiro, actividad con más contexto, estados vacíos). El diseño nuevo ya contempla 336, 337 y 340; se construyen dentro de D4 con este diseño, no sobre Hilo.
+- La etapa H4 de Hilo (barra del agente) no se construye; su objetivo lo cubren D2 (Agente como sección) y D5 (agente en la ficha).
+- La construcción va por bloques, en `briefs/BRIEF-CAR-335-diseno-nuevo.md`: primero el sistema de diseño (tokens, fuentes, color por empresa y piezas), después el marco e Inicio, y luego módulo por módulo. Mientras tanto la aplicación sigue como está: ningún bloque deja pantallas a medio cambiar.
+- El color por empresa usa el perfil de marca del núcleo (ADR-028); no se agregan colores fijos de Gard.
+- `DISENO.md` §3c lo deja como regla.
+
+
+## ADR-110 · El ingreso y la salida de una persona son listas de pasos con responsable (CAR-355, 12-nov-2026)
+
+**Decidió:** la sesión dueña de Personas y Documentos, con la autonomía que Carlos le dio para esos módulos (11-nov-2026), sobre la brecha H-1 de la Sesión Estándares (referente: Rippling) · **Registra:** Claude.
+
+**Decisión.**
+- Crear un vínculo abre una lista de ingreso y terminar el último vínculo vigente abre una de salida, una de cada tipo por vínculo.
+- Cada paso es una fila propia (`core.procesos_persona_pasos`) con responsable, plazo y estado. Su bandeja es una tarea del núcleo (`core.actividades`), con el mismo patrón paso → tarea que el seguimiento comercial (CAR-160).
+- No se abre lista en contratos importados ni cuando hay continuidad (traslado o recontratación al día siguiente).
+- La plantilla es configurable por empresa y, si está vacía, se usa la de la vertical.
+
+**Por qué no extender Actividades con «persona».** La visibilidad de Actividades es comercial (cuentas, contactos, negocios, instalaciones; ADR-022). Mezclar datos laborales ahí abriría la ficha de una persona a quien solo tiene alcance comercial. La tarea solo lleva el nombre, y lo pierde al anonimizar (Ley 21.719).
+
+**Consecuencias.**
+- El corte automático de acceso al terminar (membresía, credencial de terreno, llaves) queda para la parte 2 de CAR-355.
+- La plantilla se edita como lista JSON hasta que haya diseño de editor (diseño nuevo, ADR-109).
+
+## ADR-111 · Modo noche: de 21:00 a 07:00 las sesiones trabajan e integran solas (CAR-375, 13-nov-2026)
+
+**Fecha:** 13-nov-2026 · **Estado:** vigente · **Decidió:** Carlos (chat de la Sesión Núcleo, 13-nov-2026, 00:30, hora de Chile) · **Registra:** Claude («Sesión Núcleo»). **Modifica** `AGENTS.md` (sección nueva «Modo noche», roles y migraciones), `docs/2.0/CONTEXTO-agentes.md` y `docs/2.0/OPERACION-agentes.md`.
+
+**Decisión.** Todas las noches, de 21:00 a 07:00 (America/Santiago), rige el «Modo noche» de `AGENTS.md`:
+1. Las sesiones trabajan sin pausa los tickets de Linear de su módulo por prioridad, sin esperar a Carlos ni al bot «OPAI 2.0».
+2. Las dudas de producto o diseño se resuelven con `docs/2.0/REFERENTES-saas.md` y el sistema de diseño vigente, y se anotan como «Decisión nocturna: … (revisar)» en el ticket y en el PR.
+3. Cada sesión integra sus PRs sin esperar revisión cuando cumplen los cuatro checks, no tienen conflictos, tienen revisión final sin bloqueos y, si hay migración, snapshot de Neon previo. Arregla sus checks rotos y resuelve choques trayendo `main`.
+4. De noche nunca se tocan: producción (`app.opai.cl`), OPAI 1.0, datos reales del tenant Gard, plata o emisiones reales al SII, secretos ni borrados irreversibles. Lo que dependa de eso queda en «Espera a Carlos» con la pregunta concreta.
+5. El PC de Carlos se puede usar para probar `test.opai.cl`, sin escribir datos de Gard.
+6. A las 07:00, resumen en el ticket padre del módulo: PRs integrados, decisiones nocturnas, «Espera a Carlos» y riesgos.
+
+**Alineación.** Quedan corregidas las frases que aún decían que el bot «OPAI 2.0» aplica las migraciones o que la sesión no las aplica: desde ADR-104 las aplica la sesión con respaldo, y el bot no integra ni migra. El veto de Carlos y la condición de `preview-e2e` para cambios visuales siguen vigentes también de noche. `REFERENTES-saas.md` llega con el PR #591 (CAR-348); mientras no esté en `main`, se usa el referente SaaS más cercano.
+
+
+## ADR-112 · Integración sin GitHub Actions mientras dure el bloqueo de pago, y ahorro de Actions (13-nov-2026)
+
+**Fecha:** 13-nov-2026 · **Estado:** vigente (la parte A es temporal) · **Decidió:** Carlos (chat de la Sesión Diseño, 13-nov-2026, 11:23, hora de Chile) · **Registra:** Claude («Sesión Diseño»). **Modifica** `.github/workflows/*`, `docs/2.0/OPERACION-agentes.md` (A2.11) y agrega `scripts/gate-local.sh` y `scripts/gate-local-visual.sh`.
+
+**Contexto.** Desde el 13-nov a las 05:36 (Chile) GitHub Actions no arranca ningún job («recent account payments have failed or your spending limit needs to be increased»). El gasto de Actions del mes iba en ~US$1.150 en 13 días, casi todo de `opai-2`: diez shards de e2e por cada push a `main` y por cada PR con la etiqueta `e2e`, más la revisión de diseño con Claude en cada push.
+
+**Decisión A (temporal, mientras Actions esté bloqueado; Carlos, 13-nov-2026, 12:42: «revisión mínima»).** Carlos desactivó la regla «Proteger main» (sus cuatro checks solo los puede cumplir GitHub Actions). Mientras siga desactivada:
+1. Ninguna sesión usa GitHub Actions: no relanza jobs ni empuja commits vacíos. Las fallas por pago no se comentan.
+2. Cada sesión trae `main` a su rama con merge, empuja y corre `scripts/gate-local.sh` en su propio espacio de trabajo, sobre el **head exacto**. Es una revisión mínima de lo que el PR cambia: typecheck y lint de los paquetes afectados y sus dependientes, `pnpm test` completo, `test:db` solo si el PR toca `packages/db`, `packages/capabilities`, `packages/auth` o `modules/`, secretos con gitleaks y aviso de migraciones nuevas.
+3. El build lo cubre la vista previa de Vercel del PR, que debe quedar «Ready». Si el PR toca pantallas, se agrega `--presupuesto` (build local y presupuesto de JS).
+4. Si el PR tiene cambio visual, la sesión revisa las capturas de sus pantallas en la vista previa de Vercel o con `scripts/gate-local-visual.sh e2e/<spec>.spec.ts`: reemplaza a `preview-e2e`.
+5. Deja en el PR un comentario «Gate local» con el SHA completo y el resultado de cada paso, más la revisión final sin bloqueos sobre ese SHA, e integra con squash fijando `sha=<head>`. Si `main` cambió entre medio, repite desde el paso 2.
+6. Para varios PR propios listos, puede juntarlos en una rama de prueba, correr el gate una vez sobre el conjunto e integrarlos uno tras otro, siempre que cada uno quede sin conflictos.
+7. Siguen iguales: el veto de Carlos, las migraciones con respaldo (ADR-104), un PR a la vez y nunca push directo a `main`.
+8. Cuando Actions vuelva, Carlos reactiva la regla y esta parte queda sin efecto.
+
+**Decisión B (permanente, ahorro).**
+1. Los e2e completos (10 shards) ya no corren en cada push a `main`: corren de noche (03:00), a mano (`workflow_dispatch`) y en PRs con la etiqueta `e2e`.
+2. `revision-diseno` (Claude) corre solo en PRs con la etiqueta `revision-diseno`.
+3. Todos los jobs usan `runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}`. Para usar un runner propio (Linux con Docker; los minutos no se cobran) basta definir la variable de repositorio `RUNNER_LINUX=self-hosted`. Los pasos que amplían swap con `sudo` corren solo en runners de GitHub.
+
+**Riesgo aceptado.** Mientras dure A, nada impide técnicamente integrar sin gate; el control es este contrato y el comentario de evidencia en cada PR.
+
+**Adenda C (permanente; Carlos, 13-nov-2026, 14:43, chat de la Sesión Núcleo).** Las revisiones largas corren de noche o a pedido, nunca en cada push (regla en `AGENTS.md`, «Revisiones largas»). En cada PR: `typecheck`, `lint`, `test` y `secretos`, con `concurrency` que cancela la corrida anterior del mismo PR y sin correr en borradores. `test:db`, «Choque de tablas» y «Migración pendiente» solo si el PR toca Prisma o migraciones (`test:db` siempre al integrar y de noche). Build y presupuesto de JS solo al integrar a `main` o a pedido. e2e, `preview-e2e` y `rendimiento` de noche contra `main` y a pedido (`workflow_dispatch` o etiqueta `e2e`). `revision-diseno` y `auditoria-diseno` solo con la etiqueta `diseño` (antes `revision-diseno` y `auditoria-diseno`). «Proteger main» pasa a exigir solo `typecheck · lint · test · test:db` y `secretos` cuando Carlos la reactive. Medición antes y después en el PR. **Riesgos aceptados:** sin «migración pendiente» como check obligatorio, la etiqueta `migracion-pendiente` frena por contrato (regla 5 de «Veto y migración pendiente»), no por el ruleset; un PR que cambia capacidades con base sin tocar Prisma no corre `test:db` en CI (sí en `scripts/gate-local.sh`); `preview-e2e` nocturno prueba el despliegue de `main` (test.opai.cl) con la empresa ficticia `qa-e2e`. El e2e a pedido lo lanza `e2e-a-pedido.yml` como `workflow_dispatch` de `CI`, para que `CI` no escuche etiquetas y un check omitido nunca figure en verde. Al reactivar «Proteger main», Carlos deja solo esos dos checks como obligatorios.
+
+**Adenda D (Carlos, 13-nov-2026, 15:14 y 15:47, chat de la Sesión Diseño).** (1) El repo `Cryptobal/opai-2` queda **público** desde el 13-nov-2026 hasta que Carlos lo vuelva a privado (anunciado para el lunes 16-nov). Mientras sea público: cero secretos, `.env`, URLs de base de datos, cartolas ni datos reales de Gard (RUT, montos, glosas, nombres de clientes o guardias) en commits; si alguien encuentra algo así en el código o el historial, para y avisa. PR chicos, un ticket por PR (idealmente menos de unas 400 líneas). (2) Con el repo público GitHub Actions vuelve a correr sin costo: **termina la decisión A** (revisión mínima local de A2.11). Las sesiones ya no corren el gate en su máquina ni dejan el comentario «Gate local»: empujan, abren el PR listo y siguen con el siguiente ticket; integran cuando los checks de GitHub están en verde, sin conflictos y con la revisión final sin bloqueos, de a uno y con snapshot de Neon si hay migración. Un check que falla se arregla en el mismo PR, sin relanzar corridas en loop. La decisión B y la adenda C siguen vigentes. `scripts/gate-local.sh` queda como herramienta opcional. Escaneo de secretos de todo el historial de `main` al publicarlo (gitleaks, 768 commits): sin hallazgos.
+
+## ADR-113 · Finanzas: vistas de Ventas, panel de Compras y rendiciones pagadas en el flujo (Carlos, 14-nov-2026)
+
+Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre las propuestas de la noche del 13-nov:
+
+1. **Vistas de Ventas (CAR-258): opción A.** Libro, Programación y Tablero del mes son botones juntos (control segmentado del DS, cada uno con su ruta) y la acción de crear va aparte, arriba a la derecha. Propuesta: https://claude.ai/artifact/CUny4BRTUKREndsVZYr3XP. *Decisión nocturna (revisar):* el botón dice «Nueva factura» y no «Emitir factura», para no confundirse con el «Emitir factura» que confirma un borrador en la ficha.
+2. **Panel de Compras (CAR-256): se deja así.** El panel muestra el documento recibido y permite asignar centro de costo; no corrige ni borra el documento (viene del SII; se reclama allá).
+3. **Rendiciones pagadas en el flujo de caja (CAR-178): la primera opción.** Un lote de pago aprobado entra al flujo como egreso **comprometido** en la semana en que se espera pagar, y la cartola lo confirma cuando se paga (las semanas pasadas se leen de la cartola, así que no se cuenta dos veces). Si el lote se anula antes de pagarse, el compromiso se retira. Solo con Finanzas activo; con Finanzas apagado, Rendiciones funciona igual.
+
+**Adenda (Carlos, 14-nov-2026, 09:14, chat de la Sesión Finanzas):**
+
+4. **Botón de Ventas confirmado.** Queda «Nueva factura», como se dejó de noche.
+5. **OPAI no lleva la contabilidad completa (CAR-354).** No se construye libro de partida doble, asientos, plan de cuentas, candado de mes, balance ni mayor. La contabilidad la lleva el contador de cada empresa. OPAI le entrega los datos que ya tiene: ventas y compras del SII, movimientos de banco conciliados, rendiciones y remuneraciones, exportables y por API/MCP. Quedan fuera del plan CAR-354 (libro y candado), CAR-171 (asientos y períodos) y CAR-172 (asientos automáticos). De CAR-174 sigue solo lo de gestión que no exige contabilidad: la rentabilidad por instalación (ventas contra costo laboral). El estado de resultados y el balance contables quedan fuera.

@@ -1,16 +1,13 @@
 import { LinkNext } from "@/app/_components/link-next";
 
-/** Pie del login: accesos a los otros portales. */
+/**
+ * Pie del login: acceso al ingreso propio del trabajador (RUT y PIN). El cliente entra con su correo en
+ * este mismo formulario hasta que exista su ingreso propio (CAR-347).
+ */
 export function PiePortales() {
   return (
-    <>
-      <LinkNext href="/trabajador/login" className="font-medium text-accent">
-        Entrar como trabajador
-      </LinkNext>
-      <span className="text-fg-subtle">·</span>
-      <LinkNext href="/cliente/login" className="font-medium text-accent">
-        Portal cliente
-      </LinkNext>
-    </>
+    <LinkNext href="/trabajador/login" className="font-medium text-accent">
+      Entrar como trabajador
+    </LinkNext>
   );
 }

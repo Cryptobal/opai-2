@@ -4,30 +4,36 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
+import { cursorDe, pagina } from "../maestros/comun";
 import { exigeSinAlcance, grupoDe, grupoSchema, vistaGrupo } from "./comun";
 
 export const gruposList = defineCapability({
   id: "core.grupos.list",
   descripcion:
-    "Grupos o equipos de usuarios de la empresa (para nombrarlos luego como aprobadores), con cuántos miembros tiene cada uno.",
+    "Grupos o equipos de usuarios de la empresa (para nombrarlos luego como aprobadores), con cuántos miembros tiene cada uno. Paginada por cursor, en orden alfabético.",
   permiso: PERMISOS_CORE.usersRead,
   input: z.object({
     incluirArchivados: z
       .boolean()
       .default(false)
       .describe("Incluye también los grupos archivados."),
+    // CAR-353: contrato único de listas (cursor + limite; items + siguiente).
+    cursor: z.uuid().optional().describe("Id del último grupo de la página anterior."),
+    limite: z.number().int().min(1).max(200).default(200),
   }),
-  output: z.array(grupoSchema),
+  output: z.object({ items: z.array(grupoSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     exigeSinAlcance(ctx);
-    const grupos = await ctx.db.grupoUsuarios.findMany({
+    const filas = await ctx.db.grupoUsuarios.findMany({
       where: input.incluirArchivados ? {} : { archivadoEn: null },
-      orderBy: { nombre: "asc" },
+      orderBy: [{ nombre: "asc" }, { id: "asc" }],
       include: { _count: { select: { miembros: true } } },
+      ...cursorDe(input.cursor, input.limite),
     });
-    return grupos.map((g) => vistaGrupo(g, g._count.miembros));
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    return { items: items.map((g) => vistaGrupo(g, g._count.miembros)), siguiente };
   },
 });
 

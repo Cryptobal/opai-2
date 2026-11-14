@@ -6,6 +6,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useParametros } from "@/app/_components/maestros/use-url";
 
 import { claveMes, mesVecino, nombreMes } from "./etiquetas";
+import { PublicarPauta } from "./publicar-pauta";
 import type { OpcionInstalacion } from "./tipos";
 
 function urlExportar(
@@ -35,10 +36,11 @@ type Props = {
   verPpc: boolean;
   diaria: boolean;
   fecha: string;
+  puedeEditar: boolean;
 };
 
 /** Selector de instalación y de mes, filtro «Sin cubrir» y acceso al historial (todo en la URL). */
-export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha }: Props) {
+export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha, puedeEditar }: Props) {
   const { fijar } = useParametros();
   const irA = (delta: number) => {
     const m = mesVecino(anio, mes, delta);
@@ -49,6 +51,7 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
       <nav aria-label="Vistas de pauta" className="flex w-full gap-2">
         <Button variant={diaria ? "secondary" : "primary"} aria-current={!diaria ? "page" : undefined} onClick={() => fijar({ vista: null, ver: null, dia: null })}>Mensual</Button>
         <Button variant={diaria ? "primary" : "secondary"} aria-current={diaria ? "page" : undefined} onClick={() => fijar({ vista: "diaria", ver: null, dia: null })}>Diaria</Button>
+        <EnlaceBoton variante="secondary" href={`/pauta/instalaciones?mes=${claveMes(anio, mes)}`}>Por instalación</EnlaceBoton>
       </nav>
       <Select
         aria-label="Instalación"
@@ -88,6 +91,7 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
             <Button variant="secondary" onClick={() => fijar({ alertas: "1" })}>
               Alertas
             </Button>
+            {!diaria && puedeEditar ? <PublicarPauta key={`${inst}-${anio}-${mes}`} inst={inst} anio={anio} mes={mes} /> : null}
           </>
         ) : null}
       </div>

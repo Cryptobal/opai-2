@@ -27,6 +27,7 @@ Un solo archivo con colores: `packages/ds/src/tokens.css`. Fuera de él no hay h
 - **Modo oscuro verdadero:** cada token se redefine para oscuro. Las pantallas no usan `dark:` salvo casos ya presentes en el DS. Única excepción: el papel de documento (`paper*`) no cambia con el tema, porque es el papel del contrato y no la UI.
 - **Tipografía:**
   - Inter Variable para textos y JetBrains Mono Variable para RUT, folios y montos en planillas, ambas autoalojadas.
+  - **Por piel (ADR-109):** la familia sale de `--ds-font-sans` y `--ds-font-mono`. La piel clásica y Hilo usan Inter y JetBrains Mono; la piel nueva (`[data-marco="nuevo"]`) usa Geist Variable y Geist Mono Variable, también autoalojadas (`@fontsource-variable/geist*`, se descargan solo cuando una pantalla las usa).
   - Escala: `xs` 12, `sm` 13, `base` 14, `md` 16, `lg` 18, `xl` 22, `2xl` 28 y `3xl` 36 px.
   - Se usan solo los estilos `t-display`, `t-title`, `t-heading`, `t-subheading`, `t-body`, `t-body-sm`, `t-label`, `t-label-sm`, `t-caption`, `t-overline`, `t-mono` y `t-numeric`, o la escala. Nunca tamaños arbitrarios.
 - **Radios:** `rounded-sm` 6, `rounded-md` 10, `rounded-lg` 16 y `rounded-xl` 20 px.
@@ -70,6 +71,31 @@ Toda pantalla compone un patrón del DS. Los patrones reciben `state` y resuelve
 | Error | `ErrorState` | Mensaje en lenguaje de usuario, sin detalles técnicos, con «Reintentar» |
 | Sin permisos | `Forbidden` | Explica que no tiene acceso; nunca muestra datos parciales |
 | No encontrado (404) | `NoEncontrado` (`apps/web/app/_components/no-encontrado.tsx`, usado por el `not-found.tsx` de cada ruta con `[id]`) | Dentro del shell, con «Ir al inicio». Un id inválido o de otro tenant da 404, nunca un error |
+
+## 3b. Piel del marco Hilo (ADR-090)
+
+Con el marco Hilo activo (preferencia «Diseño» en Mi cuenta), las mismas piezas y patrones toman la piel del diseño aprobado `docs/2.0/design/export-base-hilo/`. El marco clásico no cambia. La piel vive en el DS, con alcance: tokens bajo `[data-marco="hilo"]` (`tokens.css`), la variante de Tailwind `marco-hilo:` y, para estados, indicadores y esqueleto, utilidades `ds-*` en `styles.css` (así no pesan en el JS compartido, ADR-037). Ningún módulo la reimplementa; una pantalla que arma su propia grilla de indicadores le suma `GRILLA_KPI_HILO`.
+
+| Pieza | En el marco Hilo |
+|---|---|
+| Neutros y tema | Fondo `#FAFAF9`, línea `#E3E3E0`, tinta `#0D0D0E` y su versión oscura. Los controles tienen radio de 12 px (`--ds-radius-md`) |
+| Botón principal | En tinta (fondo `fg`, texto `bg`), semibold y de 44 px de alto |
+| Etiquetas de estado | Píldora sin punto, 11/14 semibold |
+| Tablas y listas | Filas sin tarjeta, separadas por una línea; cabecera en mayúsculas pequeñas |
+| Pestañas de ficha | Subrayado de 2 px en la pestaña activa |
+| Indicadores (`KpiTile`, `DashboardScreen`) | Sin tarjeta. Una línea encima de cada indicador, etiqueta 13/18, valor de hasta 26 px y nota 12/16 en su tono. En el tablero, las filas van sin espacio vertical y cierran con una línea (el «Pulso» del diseño) |
+| Estados (`Empty`, `ErrorState`, `Forbidden`, `SinConexion`) | Alineados a la izquierda, sin borde punteado. Ícono de 44 px con radio 14 y fondo de su tono (vacío y sin conexión en gris, error en rojo, sin permiso en ámbar), título 18/26 y debajo la acción que pase la pantalla (por lo general, un botón secundario) |
+| Cargando (`Loading`) | Filas de 61 px separadas por una línea, con monograma de 36 px en las listas y dos líneas de texto (también en planillas y formularios, que en el clásico tienen otra altura); el tablero, indicadores bajo una línea |
+
+Muestra sin sesión: `/ds/hilo` (con `?vista=piezas` para las piezas, los indicadores y los estados).
+
+**Sistema de diseño en Claude Design:** «OPAI 2.0 Design System · Hilo» (<https://claude.ai/artifact/NySPx8Tq4LRChyYVadAnFa>, privado de Carlos). Lo armó Claude el 12-nov-2026 desde `packages/ds` y el prototipo `export-base-hilo`, con tokens en claro y oscuro, fuentes, la guía del marco y 13 piezas con vista previa estática: marco, barra, decisión, botón, campo, etiqueta, pestañas, lista, tabla, indicadores, estados, aviso y diálogo. **Fue el sistema predeterminado para diseño nuevo (ADR-102) hasta el 12-nov-2026; lo reemplaza §3c (ADR-109).** Regla original: todo Design Prompt y toda pantalla nueva se diseñan con Hilo en Claude Design. «OPAI 2.0 V2» y los anteriores quedan solo como referencia de lo ya construido, sin diseños nuevos. Si cambia la piel en `packages/ds`, se actualiza también este sistema.
+
+## 3c. Diseño nuevo (ADR-109): el sistema vigente para todo diseño
+
+Desde el 12-nov-2026 el diseño oficial es `docs/2.0/design/export-diseno-nuevo/` (prototipo en vivo: <https://claude.ai/artifact/DymV6LrNy727k7PtCDjb9b>, privado de Carlos). **Reemplaza a §3b como sistema predeterminado:** todo Design Prompt y toda pantalla nueva se diseñan con él; Hilo y V2 quedan como referencia de lo ya construido. Reglas que fija: un solo color de acento, el de la empresa (perfil de marca, ADR-028); el resto del color solo marca estados; fuentes Geist y Geist Mono (§1, por piel); menú lateral con acordeón que se asoma al pasar el mouse; «+ Nuevo» siempre arriba a la derecha; ficha a la derecha, ampliable y editable; estados de carga, vacío, sin permiso, error y sin conexión iguales en todos los módulos. **Piel en el código (D1):** `[data-marco="nuevo"]` en `tokens.css` (claro y oscuro, radio de 8 px, Geist) y el color de cada empresa con `acentoDeMarca` de `@opai/domain/marca-acento`: toma el color de la marca (`core.marca`, ADR-028) y lo oscurece de día o lo aclara de noche hasta 4,5:1 sobre los fondos de la piel; sin color válido manda el acento por defecto. Muestra sin sesión en `/ds/nuevo` (fuera de producción). Nadie ve la piel en la aplicación hasta D6; las pantallas ya construidas no cambian.
+
+**Sistema en Claude Design:** «OPAI 2.0 · Sistema de diseño nuevo» (<https://claude.ai/artifact/Ejhhoupy5AmfvCGV57TmoQ>, privado de Carlos), armado desde la piel de `tokens.css`: colores de día y de noche, tipografía, espaciado, radios, sombra, guía de uso y las piezas Botones, Estados y Menú lateral. Es el sistema para todo diseño nuevo; si cambia la piel en `packages/ds`, se actualiza en el mismo PR o en el siguiente. Las piezas del marco se agregan a medida que se construyen (D2 a D5).
 
 ## 4. Celular primero
 

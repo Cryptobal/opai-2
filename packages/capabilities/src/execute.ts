@@ -1,7 +1,7 @@
 import { ocultarSensibles } from "./idempotencia-sensibles";
 import { auditarRechazoSensible } from "./execute-rechazo";
-import { controlAgente } from "./agentes/control";
-import { denegar, falla } from "./autorizacion";
+import { controlAprobacion } from "./agentes/reglas";
+import { contextoEntrante, denegar, falla } from "./autorizacion";
 import { conAuditoriaAlFinal } from "./execute-auditoria-final";
 import { ejecutarLecturaAuditada } from "./execute-lectura";
 import { resultadoDeError } from "./execute-log";
@@ -41,7 +41,7 @@ async function correr(
   let modo: ModoEjecucion = opciones.idempotencyKey
     ? { dryRun, idempotencyKey: opciones.idempotencyKey }
     : { dryRun };
-  const bloqueo = await controlAgente(ctx, c, entrada.data, opciones);
+  const bloqueo = await controlAprobacion(ctx, c, entrada.data, opciones);
   if (bloqueo) return { resultado: bloqueo, entrada: entrada.data };
   // Plataforma no reserva idempotencia: la reserva guardaría su input y su salida (correos, datos
   // de otra empresa) en la empresa de la key durante 24 h (CAR-36).
@@ -133,13 +133,14 @@ async function correr(
  * de lectura queda en `audit_events`; toda ejecución queda en `usage_events`.
  */
 export async function executeCapability(
-  ctx: Contexto,
+  ctxEntrada: Contexto,
   id: string,
   input: unknown,
   opciones: OpcionesEjecucion = {},
 ): Promise<Resultado> {
   const c = obtenerCapacidad(id);
   if (!c) return falla("NOT_FOUND", `Capacidad "${id}" no existe.`);
+  const ctx = contextoEntrante(ctxEntrada, c);
 
   const inicio = Date.now();
   let r: Awaited<ReturnType<typeof correr>>;

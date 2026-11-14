@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Campo, Combobox } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 type Opcion = { valor: string; etiqueta: string };
 

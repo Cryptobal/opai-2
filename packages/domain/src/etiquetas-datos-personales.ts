@@ -3,7 +3,10 @@
 // test exige que cada columna declarada en el inventario tenga etiqueta aquí, para que ninguna
 // filtre su nombre técnico a la pantalla (hallazgo C10/C11 de la QA, Parte C).
 
+import { ETIQUETAS_PREVISION } from "./etiquetas-datos-prevision";
+
 export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
+  ...ETIQUETAS_PREVISION,
   // personas
   nombres: "nombres",
   apellidos: "apellidos",
@@ -41,9 +44,18 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   talla_pantalon: "talla de pantalón",
   talla_chaqueta: "talla de chaqueta",
   talla_zapato: "talla de calzado",
+  talla_polera: "talla de polera",
+  talla_geologo: "talla de geólogo",
+  talla_polar: "talla de polar",
+  estatura_cm: "estatura",
+  peso_kg: "peso",
   notas: "notas de uniforme",
   resolucion: "resolución DT",
   resolucion_vigente_desde: "vigencia de la resolución",
+  resolucion_vigente_hasta: "fin de vigencia de la resolución",
+  plazo_fijo_periodo: "período de plazo fijo",
+  terminos_plazo_fijo: "términos de cada plazo fijo",
+  articulo_22: "artículo 22",
   horas_semanales: "horas semanales",
   distribucion: "distribución de jornada",
   termino_plazo_fijo: "término de plazo fijo",
@@ -55,15 +67,22 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   emergencia_nombre: "contacto de emergencia",
   emergencia_relacion: "relación del contacto de emergencia",
   emergencia_telefono: "teléfono de emergencia",
+  codigo_interno: "código interno",
   solicitado_por_id: "quien solicitó",
   motivo_rechazo: "motivo de rechazo",
   // vinculos_laborales
   persona_id: "persona",
   cargo_id: "cargo",
-  tipo: "tipo de vínculo",
+  tipo: "tipo de vínculo o de ausencia",
   inicio: "fecha de inicio",
   termino: "fecha de término",
   motivo_termino: "motivo de término",
+  // ausencias (CAR-393)
+  desde: "primer día",
+  hasta: "último día",
+  motivo: "motivo",
+  clase: "clase de ausencia",
+  estado: "estado",
   // estructuras_sueldo
   sueldo_base: "sueldo base",
   colacion: "colación",
@@ -84,6 +103,7 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   password: "contraseña (hash)",
   access_token: "token de acceso",
   refresh_token: "token de refresco",
+  token: "token de acceso (hash)",
   id_token: "token de identidad",
   // envios
   destinatario: "destinatario de la notificación",

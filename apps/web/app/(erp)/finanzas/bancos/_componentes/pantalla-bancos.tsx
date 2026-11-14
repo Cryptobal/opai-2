@@ -1,20 +1,19 @@
 "use client";
 
+import { ArrowLeftRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Badge, Button, Empty, Estado, Tabs, type EstadoPantalla } from "@opai/ds";
-
-import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { Button, Empty, Estado, SplitScreen, type EstadoPantalla } from "@opai/ds";
 
 import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
-import { PESTANAS_ESTADO_BANCO } from "./bancos-tipos";
-import { fechaHora } from "@/lib/formato";
-import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/datos";
+import { CabeceraCuenta } from "./cabecera-cuenta";
+import { FiltrosMovimientos } from "./filtros-movimientos";
+import { ListaMovimientos } from "./lista-movimientos";
+import { PestanasBancos } from "./pestanas-bancos";
 
-const HojaReconocer = dynamic(() => import("./hoja-reconocer").then((m) => ({ default: m.HojaReconocer })));
+const PanelReconocer = dynamic(() => import("./panel-reconocer").then((m) => ({ default: m.PanelReconocer })));
 const HojaSubirCartola = dynamic(() => import("./hoja-subir-cartola").then((m) => ({ default: m.HojaSubirCartola })));
 const HojaAgregarCuenta = dynamic(() =>
   import("./hoja-agregar-cuenta").then((m) => ({ default: m.HojaAgregarCuenta })),
@@ -25,22 +24,18 @@ type Props = {
   cuentas: CuentaBanco[];
   cuentaId: string | null;
   estado: string;
+  tipo: "ingresos" | "egresos" | null;
   movimientos: MovimientoBanco[];
   movId: string | null;
   gestiona: boolean;
   ver: boolean;
 };
 
-export function PantallaBancos({
-  state,
-  cuentas,
-  cuentaId,
-  estado,
-  movimientos,
-  movId,
-  gestiona,
-  ver,
-}: Props) {
+/**
+ * Movimientos de Bancos con maestro-detalle (CAR-257), como Ventas (CAR-255): la lista queda a la izquierda y el
+ * movimiento elegido se reconoce o revisa a la derecha. En teléfono y bajo 1024 px es una pantalla a la vez.
+ */
+export function PantallaBancos({ state, cuentas, cuentaId, estado, tipo, movimientos, movId, gestiona, ver }: Props) {
   const router = useRouter();
   const [subirAbierta, setSubirAbierta] = useState(false);
   const [crearAbierta, setCrearAbierta] = useState(false);
@@ -50,97 +45,72 @@ export function PantallaBancos({
   }
 
   const cuenta = cuentas.find((c) => c.id === cuentaId) ?? cuentas[0];
-  const params = (e: string) => {
+  const params = (e: string, t: string | null = tipo) => {
     const q = new URLSearchParams();
     if (cuenta?.id) q.set("cuenta", cuenta.id);
     q.set("estado", e);
+    if (t) q.set("tipo", t);
     return `/finanzas/bancos?${q.toString()}`;
   };
   const movSeleccionado = movId ? (movimientos.find((m) => m.id === movId) ?? null) : null;
-  const cerrarReconocer = () => {
-    router.push(params(estado));
-  };
+  const detalle =
+    gestiona && movSeleccionado ? (
+      <PanelReconocer key={movSeleccionado.id} movimiento={movSeleccionado} onCerrar={() => router.push(params(estado))} />
+    ) : null;
 
   return (
     <Estado state={state} variante="lista" textos={{ error: { titulo: "No pudimos cargar Bancos" } }}>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="t-body-sm text-fg-muted">
-              {cuenta ? `${cuenta.banco} · ${cuenta.numeroVisible}` : "Configura una cuenta para importar cartolas."}
-            </p>
-            {cuenta?.ultimaSyncEn ? (
-              <p className="t-body-sm text-fg-muted">
-                Sincronizado con el banco el {fechaHora(cuenta.ultimaSyncEn)}
-                {cuenta.saldoBanco !== null ? ` · saldo ${clp(cuenta.saldoBanco)}` : ""}
-              </p>
-            ) : null}
-          </div>
-          {gestiona && cuentas.length > 0 ? (
-            <Button variant="primary" onClick={() => setSubirAbierta(true)}>
-              Subir cartola
-            </Button>
-          ) : null}
-        </div>
-        {cuentas.length === 0 ? (
-          <Empty
-            titulo="Sin cuentas bancarias"
-            descripcion="Crea una cuenta para importar movimientos desde cartola Santander o CSV genérico."
-            accion={
-              gestiona ? (
-                <Button variant="primary" onClick={() => setCrearAbierta(true)}>
-                  Agregar cuenta
-                </Button>
-              ) : undefined
-            }
-          />
-        ) : (
-          <>
-            <Tabs
-              Link={LinkNext}
-              activa={estado}
-              tabs={PESTANAS_ESTADO_BANCO.map((e) => ({ id: e.id, etiqueta: e.etiqueta, href: params(e.id) }))}
+      <SplitScreen
+        telefono={detalle ? "detalle" : "lista"}
+        unPanelHastaLg
+        etiquetaLista="Movimientos"
+        etiquetaDetalle="Detalle del movimiento"
+        vacio={{ texto: "Elige un movimiento", icono: ArrowLeftRight }}
+        {...(detalle ? { detalle: <div className="md:p-4">{detalle}</div> } : {})}
+        lista={
+          <div className="flex flex-col gap-4 md:p-4">
+            <PestanasBancos activa="movimientos" />
+            <CabeceraCuenta
+              cuenta={cuenta}
+              accion={
+                gestiona && cuentas.length > 0 ? (
+                  <Button variant="primary" onClick={() => setSubirAbierta(true)}>
+                    Subir cartola
+                  </Button>
+                ) : undefined
+              }
             />
-            {movimientos.length === 0 ? (
-              <Empty titulo="Sin movimientos en esta pestaña" descripcion="Importa una cartola o cambia el filtro de estado." />
+            {cuentas.length === 0 ? (
+              <Empty
+                titulo="Sin cuentas bancarias"
+                descripcion="Crea una cuenta para importar movimientos desde cartola Santander o CSV genérico."
+                accion={
+                  gestiona ? (
+                    <Button variant="primary" onClick={() => setCrearAbierta(true)}>
+                      Agregar cuenta
+                    </Button>
+                  ) : undefined
+                }
+              />
             ) : (
-              <ul className="flex flex-col gap-2">
-                {movimientos.map((m) => (
-                  <li key={m.id} className="rowcard flex flex-wrap items-center gap-2 p-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="t-body-sm font-medium">{m.glosa}</p>
-                      <p className="t-caption text-fg-muted">
-                        {fechaDdMmAaaa(m.fecha)}
-                        {m.referencia ? ` · ${m.referencia}` : ""}
-                      </p>
-                    </div>
-                    <span className="t-mono t-body-sm">{clp(m.monto)}</span>
-                    <Badge tono={m.estado === "conciliado" ? "success" : "neutro"}>{m.estado}</Badge>
-                    {gestiona ? (
-                      <EnlaceBoton href={`${params(estado)}&mov=${m.id}`} variante="secondary">
-                        {m.estado === "conciliado" ? "Ver" : "Reconocer"}
-                      </EnlaceBoton>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
+              <>
+                <FiltrosMovimientos estado={estado} tipo={tipo} href={params} />
+                <ListaMovimientos
+                  movimientos={movimientos}
+                  gestiona={gestiona}
+                  hrefMov={(id) => `${params(estado)}&mov=${id}`}
+                  seleccionado={movSeleccionado?.id}
+                />
+              </>
             )}
-          </>
-        )}
-      </div>
+          </div>
+        }
+      />
       {gestiona ? (
         <>
           <HojaAgregarCuenta abierta={crearAbierta} onAbiertaChange={setCrearAbierta} />
-          <HojaSubirCartola
-            cuentas={cuentas}
-            cuentaId={cuenta?.id ?? null}
-            abierta={subirAbierta}
-            onAbiertaChange={setSubirAbierta}
-          />
+          <HojaSubirCartola cuentas={cuentas} cuentaId={cuenta?.id ?? null} abierta={subirAbierta} onAbiertaChange={setSubirAbierta} />
         </>
-      ) : null}
-      {gestiona && movSeleccionado ? (
-        <HojaReconocer movimiento={movSeleccionado} abierta onCerrar={cerrarReconocer} />
       ) : null}
     </Estado>
   );

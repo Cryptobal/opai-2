@@ -1,6 +1,7 @@
 import { formatearClp } from "@opai/domain";
 import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
+import { type CobroApi, hojaEspecial, type IvaApi } from "./cobros-celda";
 
 export type FilaFlujo = {
   id: string;
@@ -18,6 +19,8 @@ export type CeldaFlujo = {
   capa: "plan" | "comprometido" | "real";
   monto: number;
   nota: string | null;
+  cobro?: CobroApi;
+  iva?: IvaApi;
 };
 export type SemanaFlujo = {
   semana: string;
@@ -30,9 +33,7 @@ export type SemanaFlujo = {
   pasada: boolean;
 };
 export type AjustesFlujo = {
-  saldoInicial: number;
   umbral: number;
-  desde: string;
   horizonteSemanas: number;
   calendarioPagos: Record<string, number | undefined>;
   avisoActivo: boolean;
@@ -52,7 +53,7 @@ export type Planilla = {
     semanas: { semana: string; saldoFinal: number; emitido: boolean }[];
   };
   saldoBanco: {
-    fuente: "banco" | "ajustes";
+    fuente: "banco" | "sin_banco";
     saldo: number | null;
     cuentasSinSaldo: { cuentaId: string; banco: string }[];
   };
@@ -130,7 +131,7 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
     };
   };
   const celdaEditable = (filaId: string, semana: string) =>
-    Boolean(opts?.gestiona && celdaEditablePlan(p, filaId, semana));
+    Boolean(opts?.gestiona && (celdaEditablePlan(p, filaId, semana) || hojaEspecial(p, filaId, semana)));
   return { columnas, filas, celda, celdaEditable, totales: TOTALES };
 }
 

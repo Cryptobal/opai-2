@@ -1,11 +1,7 @@
 import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
 
 import { capacidades as capacidadesFlujo } from "./capacidades";
-import {
-  PERMISO_CONFIGURAR,
-  PERMISO_GESTIONAR,
-  PERMISO_VER,
-} from "./capacidades/permisos";
+import { PERMISO_CONFIGURAR, PERMISO_GESTIONAR, PERMISO_VER } from "./capacidades/permisos";
 import {
   PERMISO_BANCOS_AUTORIZAR,
   PERMISO_BANCOS_GESTIONAR,
@@ -39,7 +35,7 @@ export const manifest = defineModule({
     },
     { id: PERMISO_VER, descripcion: "Ver la planilla del flujo de caja" },
     { id: PERMISO_GESTIONAR, descripcion: "Fijar, mover y dar por cumplidas las celdas del flujo" },
-    { id: PERMISO_CONFIGURAR, descripcion: "Configurar filas, saldo inicial y umbral del flujo" },
+    { id: PERMISO_CONFIGURAR, descripcion: "Configurar filas y umbral del flujo" },
     { id: PERMISO_BANCOS_VER, descripcion: "Ver cuentas bancarias, movimientos y sugerencias de conciliación" },
     { id: PERMISO_BANCOS_GESTIONAR, descripcion: "Importar cartolas, conciliar movimientos y administrar reglas" },
     { id: PERMISO_BANCOS_AUTORIZAR, descripcion: "Autorizar movimientos de remuneraciones y pagos sensibles" },
@@ -111,6 +107,8 @@ export const manifest = defineModule({
     { id: "finanzas.compras.importadas", descripcion: "Se importó un lote de documentos recibidos." },
     { id: "finanzas.compras.centro_asignado", descripcion: "Se asignó un centro de costo a documentos del libro de compras." },
     { id: "finanzas.flujo.fila_creada", descripcion: "Se creó una fila del flujo de caja." },
+    { id: "finanzas.flujo.recurrente_creado", descripcion: "Se creó un gasto recurrente del flujo de caja." },
+    { id: "finanzas.flujo.recurrente_actualizado", descripcion: "Se cambió un gasto recurrente del flujo de caja." },
     { id: "finanzas.flujo.fila_actualizada", descripcion: "Se cambió una fila del flujo de caja." },
     { id: "finanzas.flujo.fila_archivada", descripcion: "Se archivó o restauró una fila del flujo de caja." },
     { id: "finanzas.flujo.celda_fijada", descripcion: "Se fijó la cifra de una celda del flujo." },
@@ -124,9 +122,12 @@ export const manifest = defineModule({
     { id: "finanzas.banco.cuenta_creada", descripcion: "Se creó una cuenta bancaria." },
     { id: "finanzas.banco.cuenta_actualizada", descripcion: "Se actualizó una cuenta bancaria." },
     { id: "finanzas.banco.cartola_importada", descripcion: "Se importó una cartola bancaria." },
+    { id: "finanzas.banco.cartola_deshecha", descripcion: "Se deshizo una cartola importada: se borraron sus movimientos para volver a cargarla." },
+    { id: "finanzas.banco.movimientos_borrados", descripcion: "Se borraron movimientos de la sincronización con el banco (o manuales) de una cuenta entre dos fechas." },
     { id: "finanzas.banco.movimientos_sincronizados", descripcion: "El banco en línea (Web4Leads) entregó movimientos." },
     { id: "finanzas.banco.conciliacion_confirmada", descripcion: "Se confirmó una conciliación bancaria." },
     { id: "finanzas.banco.conciliacion_deshecha", descripcion: "Se deshizo una conciliación bancaria." },
+    { id: "finanzas.banco.regla_guardada", descripcion: "Se creó o cambió una regla de conciliación del banco." },
     { id: "finanzas.banco.cobro_manual", descripcion: "Se registró un cobro manual sin movimiento bancario." },
     { id: "finanzas.banco.saldo_bajo_avisado", descripcion: "La suma de las cuentas activas quedó bajo el umbral único de saldo bajo (campana in-app)." },
     { id: "finanzas.venta.borrador_creado", descripcion: "Se creó un borrador de factura o nota en el libro de ventas." },

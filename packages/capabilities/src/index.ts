@@ -1,23 +1,30 @@
-export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
+export { avisarAlCelular, capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
 export {
   consumidorAvisoPrueba,
+  consumidorAvisoPruebaEmpresa,
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
 export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
+export { type FuenteAprobaciones, type ItemPorAprobar } from "./core/aprobaciones-fuentes";
 export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
+export { hechosComercial } from "./comercial/hechos-gestion";
+export { defineHecho, type HechoGestion } from "./hechos-gestion";
+export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/hechos";
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
-export { ajustesRondas, capacidadesRondas } from "./rondas";
+export { ajustesRondas, capacidadesRondas, indicadoresRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
-export { ajustesPauta, capacidadesPauta } from "./pauta";
+export { ajustesPauta, ausenteSinJustificar, capacidadesPauta, consumidorPautaCambio, consumidorPautaPublicada, diasConTurno, type DiaConTurno, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
+export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
 export { registrarPropuestaEnviada, type ResultadoPropuesta } from "./portal-cliente/propuesta-vigente";
-export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
+export { propuestaAlAceptar } from "./portal-cliente/propuesta-al-aceptar";
+export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas, ventasProgramadasPorPeriodo } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
 export { pagosImpuestosEsperados, type PagoImpuestoEsperado } from "./finanzas/impuestos-esperados-datos";
@@ -89,6 +96,7 @@ export {
   type MedicionIndicador,
 } from "./indicadores-gestion";
 export { indicadoresDeclarados, indicadoresDelNucleo } from "./core/indicadores-gestion";
+export { equipoDe, personaDelUsuario, type Equipo } from "./core/jefatura";
 export { dondeCuenta, dondeInstalacion, dondePersona } from "./core/maestros/alcance";
 export {
   type Consumidor,
@@ -121,7 +129,7 @@ export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./c
 export { camposExternos, externo } from "./externo";
 export { biometriaDe, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
-export { comoAgenteInterno } from "./agentes/interno";
+export { comoAgenteInterno, comoAppOAuth } from "./agentes/interno";
 export {
   iaElegidaDelAgente,
   modelosDelAgente,

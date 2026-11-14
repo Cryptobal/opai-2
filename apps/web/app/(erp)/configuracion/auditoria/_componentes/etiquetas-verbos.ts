@@ -1,14 +1,14 @@
 /** Verbo (resto del código de la capacidad) → acción en español. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const VERBOS: Record<string, string> = {
-  portal_inicio: "Portal de inicio", get: "Ver", update: "Editar", list: "Listar", invite: "Invitar",
+  portal_inicio: "Portal de inicio", get: "Ver", excel: "Exportar a Excel", update: "Editar", list: "Listar", invite: "Invitar",
   remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
-  accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
-  summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen",
+  clases: "Ver clases", accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
+  summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen", instalaciones: "Por instalación",
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado", iniciar_vida: "Iniciar prueba de vida", consentir: "Dar consentimiento", habilitar: "Habilitar", textos: "Textos vigentes",
   reintentar: "Reintentar", cancelar: "Cancelar", configurar: "Configurar", set_secreto: "Guardar clave",
   guardar_certificado_dte: "Guardar certificado", probar: "Probar", autocompletar: "Autocompletar",
   acteco_get: "Ver actividad económica (ACTECO)", acteco_set: "Fijar actividad económica (ACTECO)", acteco_buscar: "Buscar actividad económica del SII",
-  detalle: "Detalle", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar", otorgar: "Otorgar",
+  detalle: "Detalle", fusionar: "Fusionar", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar", otorgar: "Otorgar",
   consultar_sii: "Consultar al SII", facturable: "Ver si está lista para facturar", aplicar_sii: "Aplicar datos del SII",
   set_representantes: "Definir representantes", set_activo: "Activar o desactivar", bloquear: "Bloquear",
   desbloquear: "Desbloquear", vincular_usuario: "Vincular usuario", no_recontratar_ver: "Ver no recontratar",
@@ -16,15 +16,15 @@ export const VERBOS: Record<string, string> = {
   prevision_ver: "Ver previsión", prevision_actualizar: "Actualizar previsión", pago_ver: "Ver datos de pago",
   pago_solicitar_cambio: "Pedir cambio de pago", pago_aprobar_cambio: "Aprobar cambio de pago",
   pago_rechazar_cambio: "Rechazar cambio de pago", laboral_ver: "Ver datos laborales",
-  laboral_actualizar: "Actualizar datos laborales", previsualizar: "Previsualizar", terminar: "Terminar",
+  laboral_actualizar: "Actualizar datos laborales", paso_actualizar: "Actualizar paso", previsualizar: "Previsualizar", terminar: "Terminar",
   montos_por_instalacion: "Montos por instalación", panel: "Panel", perfil_get: "Ver datos tributarios", prueba_abrir: "Abrir prueba", perfil_set: "Fijar datos tributarios", anular: "Anular", efectiva: "Vigente",
   cuentas: "Cuentas", contactos: "Contactos", vincular: "Vincular", set_roles: "Definir roles",
   desvincular: "Desvincular", completar: "Completar", delete: "Eliminar", timeline: "Línea de tiempo",
-  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar", recibir: "Recibir", enrolar: "Enrolar", contexto: "Contexto", en_sitio: "En sitio", rondas: "Rondas", regenerar: "Regenerar",
+  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", suscribir: "Suscribir", de_entidad: "De la entidad", listar: "Listar", recibir: "Recibir", enrolar: "Enrolar", contexto: "Contexto", en_sitio: "En sitio", rondas: "Rondas", regenerar: "Regenerar",
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   estado_comercial: "Estado comercial", revocar: "Revocar", ver: "Ver", ofrecer: "Ofrecer",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
-  aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
+  aplicar: "Aplicar", destinos: "Ver destinos", destinos_list: "Listar destinos", destino_crear: "Crear destino", destino_actualizar: "Editar destino", destino_rotar_secreto: "Rotar secreto", destino_eliminar: "Eliminar destino", entregas_list: "Listar entregas", entrega_reenviar: "Reenviar entrega", eventos_list: "Ver catálogo de eventos", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", valores: "Valores", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
   confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
@@ -46,7 +46,8 @@ export const VERBOS: Record<string, string> = {
   set_autonomia: "Definir autonomía", set_role: "Cambiar rol", borrar: "Borrar", preparar: "Preparar",
   embudo: "Embudo", mover: "Mover", ganar: "Marcar como ganado", perder: "Marcar como perdido",
   reabrir: "Reabrir", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
-  set_contactos: "Definir contactos", actualizar_etapa: "Actualizar etapa", guardar_catalogo: "Guardar catálogo",
+  set_contactos: "Definir contactos", actualizar_etapa: "Actualizar etapa", guardar_catalogo: "Guardar catálogo", guardar_lote: "Guardar en lote",
+  reglas_list: "Ver reglas de aprobación", reglas_guardar: "Guardar regla de aprobación", reglas_desactivar: "Desactivar regla de aprobación",
   crear_etapa: "Crear etapa", reordenar_etapas: "Reordenar etapas", enriquecer: "Enriquecer",
   buscar_duplicadas: "Buscar duplicadas", acciones_agente: "Acciones del agente", derivar: "Derivar",
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
@@ -59,7 +60,7 @@ export const VERBOS: Record<string, string> = {
   sugerir: "Sugerir", sugerir_seccion: "Sugerir sección con IA", agregar: "Agregar", candidatos: "Candidatos", dar_acceso: "Dar acceso al portal", inicializar: "Inicializar",
   importar: "Importar", revertir: "Revertir", sincronizar: "Sincronizar con el banco", sincronizar_rcv: "Sincronizar con el RCV del SII", recibir_web4leads: "Recibir movimientos del banco (Web4Leads)", asignar_centro: "Asignar centro de costo", libro_resumen: "Resumen del libro",
   vista_previa: "Vista previa", crear_borrador: "Crear borrador", guardar_borrador: "Guardar borrador", actualizar_borrador: "Editar borrador", descartar_borrador: "Descartar borrador", emitir: "Emitir", emitir_lote: "Emitir en lote", tablero: "Tablero del mes", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
-  emitir_nota_credito: "Emitir nota de crédito", emitir_nota_debito: "Emitir nota de débito", crear_borrador_nota_debito: "Crear borrador de nota de débito", destinatarios_sugeridos: "Sugerir destinatarios del documento", guardar_destinatarios: "Guardar destinatarios del documento", proyeccion_flujo: "Proyección de flujo", postergar_iva: "Postergar IVA", fijar_fecha_esperada: "Fijar fecha esperada de cobro",
+  emitir_nota_credito: "Emitir nota de crédito", emitir_nota_debito: "Emitir nota de débito", crear_borrador_nota_debito: "Crear borrador de nota de débito", destinatarios_sugeridos: "Sugerir destinatarios del documento", guardar_destinatarios: "Guardar destinatarios del documento", proyeccion_flujo: "Proyección de flujo", postergar_iva: "Postergar IVA", fijar_fecha_esperada: "Fijar fecha esperada de cobro", cambiar_desde: "Cambiar desde una fecha",
   cesion_simular: "Simular cesión", cesion_ceder: "Ceder", cargar_caf: "Cargar folios (CAF)",
   crear_base: "Crear plan base", iniciar: "Iniciar", controlar: "Pausar, reanudar o cancelar",
   registrar_respuesta: "Registrar respuesta del cliente", registrar_paso: "Registrar paso",
@@ -71,11 +72,11 @@ export const VERBOS: Record<string, string> = {
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
-  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", sync_servicio: "Sincronizar servicio",
+  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", rellenar_entidad: "Rellenar con datos de la entidad", generar_entidad: "Generar documento de la entidad", sync_servicio: "Sincronizar servicio",
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
   prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
-  resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar",
+  resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar", transferir: "Transferir cartera", responsables: "Responsables posibles",
   // Cobro por módulo (CAR-188).
   condiciones_set: "Fijar condición comercial", cargos_generar: "Generar cargos del mes",
   cargos_list: "Listar cargos", cargo_anular: "Anular cargo",
@@ -85,14 +86,25 @@ export const VERBOS: Record<string, string> = {
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
   // Grupos o equipos de usuarios (CAR-251).
   agregar_miembros: "Agregar miembros", quitar_miembro: "Quitar miembro",
+  // Roles adicionales y de grupo (CAR-359).
+  adicional_asignar: "Sumar rol", adicional_quitar: "Quitar rol adicional", adicionales_list: "Ver roles adicionales",
+  rol_asignar: "Dar rol al grupo", rol_quitar: "Quitar rol al grupo", roles_list: "Ver roles del grupo",
   // Historial de correos del cliente (CAR-233).
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).
   plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
   // Slack (CAR-291, ADR-093).
   canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
+  usuarios: "Ver personas en Slack", vincular_usuarios: "Vincular personas con Slack",
   // Plataforma (CAR-323).
   miembros: "Ver miembros", reenviar: "Reenviar",
   // Indicadores de gestión (CAR-305).
-  medir: "Medir",
+  medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
+  set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
+  // Hilo (CAR-331).
+  actividad: "Ver actividad", agenda: "Ver agenda",
+  // Bancos (CAR-341).
+  borrar_rango: "Borrar por fechas",
+  // Impuestos (CAR-173).
+  borrador_f29: "Borrador del F29",
 };

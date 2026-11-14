@@ -227,7 +227,7 @@ describe("aprobaciones de plataforma fuera de la empresa (CAR-36)", () => {
       }),
     );
     const empresa = await executeCapability(ctx, "core.audit.list", {});
-    expect(empresa).toMatchObject({ ok: true, data: { eventos: [] } });
+    expect(empresa).toMatchObject({ ok: true, data: { items: [] } });
     expect(
       tabla("auditEvent").filter((e) => e["capability"] === "platform.users.set_role"),
     ).toHaveLength(1);

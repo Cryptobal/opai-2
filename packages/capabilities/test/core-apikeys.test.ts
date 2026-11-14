@@ -27,7 +27,7 @@ describe("core.apikeys.*", () => {
           await executeCapability(
             ctx,
             "core.apikeys.create",
-            { nombre: "Prueba", scopes: ["*"] },
+            { nombre: "Prueba", scopes: ["*"], heredarPermisos: true },
             { dryRun },
           ),
         ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
@@ -40,6 +40,7 @@ describe("core.apikeys.*", () => {
     const r = await executeCapability(ctx, "core.apikeys.create", {
       nombre: "Grokbot",
       scopes: ["*"],
+      heredarPermisos: true,
     });
     if (!r.ok) throw new Error(r.error.message);
     const { secreto, prefijo } = r.data as { secreto: string; prefijo: string };
@@ -56,7 +57,10 @@ describe("core.apikeys.*", () => {
 
     const lista = await executeCapability(ctx, "core.apikeys.list", {});
     expect(JSON.stringify(lista)).not.toContain(secreto);
-    expect(lista).toMatchObject({ ok: true, data: [{ nombre: "Grokbot", valida: true }] });
+    expect(lista).toMatchObject({
+      ok: true,
+      data: { items: [{ nombre: "Grokbot", valida: true }], siguiente: null },
+    });
   });
 
   it("dryRun no crea ni revela secreto", async () => {
@@ -64,7 +68,7 @@ describe("core.apikeys.*", () => {
     const r = await executeCapability(
       ctx,
       "core.apikeys.create",
-      { nombre: "Xa", scopes: ["core"] },
+      { nombre: "Xa", scopes: ["core"], heredarPermisos: true },
       { dryRun: true },
     );
     expect(r).toMatchObject({ ok: true, data: { secreto: null } });
@@ -91,6 +95,7 @@ describe("core.apikeys.*", () => {
     const c = await executeCapability(ctx, "core.apikeys.create", {
       nombre: "Ka",
       scopes: ["core"],
+      heredarPermisos: true,
     });
     const id = c.ok ? (c.data as { id: string }).id : "";
     expect(await executeCapability(ctx, "core.apikeys.revoke", { apiKeyId: id })).toMatchObject({
@@ -98,7 +103,7 @@ describe("core.apikeys.*", () => {
     });
     expect(await executeCapability(ctx, "core.apikeys.list", {})).toMatchObject({
       ok: true,
-      data: [{ valida: false }],
+      data: { items: [{ valida: false }], siguiente: null },
     });
   });
 });

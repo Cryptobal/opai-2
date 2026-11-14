@@ -14,6 +14,7 @@ export const inputImportar10 = z.object({
     .array(z.object({ origen1Id: z.string().min(1), email: z.string().email() }))
     .default([]),
   desdeOpai1: z.boolean().default(false).describe("En vez de `origen`: trae el export desde OPAI 1 con la llave guardada en la integración «opai1» de la empresa."),
+  soloCotizaciones: z.boolean().default(false).describe("Importa únicamente las cotizaciones de OPAI 1, colgadas de los negocios que ya están en la empresa; no crea ni completa cuentas, contactos, instalaciones ni negocios."),
   soloComercial: z.boolean().default(false).describe("Importa solo cuentas, contactos, instalaciones y negocios; deja fuera las programaciones de Finanzas."),
 });
 

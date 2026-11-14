@@ -14,7 +14,7 @@ import {
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { type CampoLaboral, SECCIONES_LABORAL, type SeccionLaboral } from "./config-hojas-laboral";
-import { cambiosDe, errorDeCampo, faltantes } from "./valores-hoja-laboral";
+import { cambiosDe, errorDeCampo, faltantes, hayCambios } from "./valores-hoja-laboral";
 
 type Props = {
   seccion: SeccionLaboral;
@@ -87,13 +87,14 @@ export function HojaLaboral({ seccion, personaId, inicial, bloqueo }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [v, setV] = useState<Record<string, string>>(inicial);
   const cambios = cambiosDe(cfg, inicial, v);
-  const sinCambios = Object.keys(cambios).length === 0;
+  // Con `todos` la hoja envía todos los campos: igual se compara con lo guardado (CAR-277).
+  const sinCambios = !hayCambios(cfg, inicial, v);
   const invalido = faltantes(cfg, v);
   async function guardar() {
     const input = cfg.armar(personaId, cambios);
     // Ids literales: el gate de paridad exige ver qué capacidad invoca la pantalla.
     const r = await ejecutar(
-      seccion === "pago"
+      seccion === "pago" || seccion === "pago-agregar"
         ? "core.personas.pago_solicitar_cambio"
         : seccion === "prevision"
           ? "core.personas.prevision_actualizar"

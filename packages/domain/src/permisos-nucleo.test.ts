@@ -15,6 +15,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.etiquetasRead]: [true, true, true, false, true],
   [P.etiquetasManage]: [true, true, true, false, false],
   [P.etiquetasConfig]: [true, true, false, false, false],
+  // CAR-27: el catálogo de campos personalizados, como el de etiquetas, es de owner y admin.
+  [P.camposConfig]: [true, true, false, false, false],
   // CAR-233: la bandeja «sin asignar» de correos, por defecto solo owner y admin (DECISIÓN CARLOS).
   [P.correosSinAsignar]: [true, true, false, false, false],
   [P.instalacionesRead]: [true, true, true, true, true],

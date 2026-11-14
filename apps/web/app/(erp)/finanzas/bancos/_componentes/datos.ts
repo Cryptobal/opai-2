@@ -16,6 +16,8 @@ export async function cargarBancos(sp: SearchParams) {
   const cuentaId = p["cuenta"] ?? null;
   const estado = p["estado"] ?? "pendiente";
   const movId = p["mov"] ?? null;
+  const tipoParam = p["tipo"];
+  const tipo: "ingresos" | "egresos" | null = tipoParam === "ingresos" || tipoParam === "egresos" ? tipoParam : null;
 
   const cuentas = ver
     ? await ejecutarComoUsuario<{ items: CuentaBanco[] }>("erp", "finanzas.bancos.listar", {})
@@ -28,6 +30,7 @@ export async function cargarBancos(sp: SearchParams) {
       ? await ejecutarComoUsuario<{ items: MovimientoBanco[] }>("erp", "finanzas.movimientos_bancarios.listar", {
           cuentaId: activa,
           estado,
+          ...(tipo ? { tipo } : {}),
           limite: 50,
         })
       : null;
@@ -37,9 +40,12 @@ export async function cargarBancos(sp: SearchParams) {
     cuentas: items,
     cuentaId: activa,
     estado,
+    tipo,
     movimientos: movs?.ok ? movs.data.items : [],
     movId,
     gestiona,
     ver,
+    /** Lista sin el movimiento abierto: destino de «Atrás» en teléfono (CAR-257). */
+    volverA: `/finanzas/bancos?${new URLSearchParams({ ...(activa ? { cuenta: activa } : {}), estado, ...(tipo ? { tipo } : {}) }).toString()}`,
   };
 }

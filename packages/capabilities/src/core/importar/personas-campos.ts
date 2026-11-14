@@ -1,6 +1,6 @@
 // Importador de personas (CAR-282): qué columnas acepta la planilla y cómo se leen. La ficha, la
 // previsión y la cuenta bancaria viajan en una sola fila por persona; el RUT es la clave.
-import { codigoSbif, tipoCuentaCanonico } from "@opai/domain";
+import { codigoSbif, normalizarAfp, normalizarRegimen, tipoCuentaCanonico } from "@opai/domain";
 import type { DefinicionImportador, FilaNormalizada } from "@opai/domain/importacion";
 
 import { CAMPO_ID_EXTERNO, fecha, texto } from "./comun";
@@ -95,8 +95,9 @@ export function datosDePersona(f: FilaNormalizada): DatosPersona {
     calle: d("calle"),
     comuna: d("comuna"),
     region: d("region"),
-    afp: d("afp"),
-    regimen: d("regimen"),
+    // CAR-276: se guarda el código del catálogo si el texto calza; si no, el texto tal cual (queda por verificar).
+    afp: normalizarAfp(d("afp")) ?? d("afp"),
+    regimen: normalizarRegimen(d("regimen")) ?? d("regimen"),
     sistemaSalud: d("sistema_salud"),
     isapreNombre: d("isapre"),
     bancoCodigo: codigoSbif(d("banco")),

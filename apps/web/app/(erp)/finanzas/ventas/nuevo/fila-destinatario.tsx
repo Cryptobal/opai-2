@@ -24,7 +24,7 @@ export function FilaDestinatario({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
-      <span className="min-w-0 flex-1 break-all text-sm">{d.email}</span>
+      <span className="min-w-0 grow basis-full break-all text-sm sm:basis-0">{d.email}</span>
       <Badge tono="neutro">{ORIGEN[d.origen]}</Badge>
       <div className="w-28 shrink-0">
         <Select

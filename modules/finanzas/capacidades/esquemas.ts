@@ -62,13 +62,21 @@ export const celdaSchema = z.object({
   capa: capaSchema,
   monto: z.number().int(),
   nota: z.string().nullable(),
+  /** Solo en «Cobros esperados»: la factura detrás de la celda y su fecha esperada de cobro (CAR-396). */
+  cobro: z
+    .object({
+      documentoId: uuidSchema,
+      fechaEsperada: z.string().nullable(),
+      origen: z.enum(["manual", "promedio", "vencimiento", "emision"]),
+    })
+    .optional(),
+  /** Solo en «IVA a pagar»: mes del IVA y si su pago está postergado a M+2 (CAR-397). */
+  iva: z.object({ periodo: z.string(), postergado: z.boolean(), fechaPago: z.string() }).optional(),
 });
 
 export const ajustesSchema = z.object({
-  saldoInicial: saldoSchema,
   /** Un solo umbral de saldo bajo (planilla, aviso semanal y aviso de banco); su valor por defecto vive en `ajustesDe`. */
   umbral: saldoSchema,
-  desde: semanaSchema,
   horizonteSemanas: z.number().int().min(1).max(52),
   calendarioPagos: z
     .object({

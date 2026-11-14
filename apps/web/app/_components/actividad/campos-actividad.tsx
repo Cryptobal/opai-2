@@ -1,6 +1,6 @@
 "use client";
 
-import { Campo, Combobox, Input, InputFecha, InputHora, Segmentado, Switch, Textarea } from "@opai/ds";
+import { Campo, Combobox, Input, InputFecha, SelectorHora, Segmentado, Switch, Textarea } from "@opai/ds";
 
 import type { TipoCompositor } from "@opai/ds";
 
@@ -58,7 +58,7 @@ export function CamposActividad({ id, tipo, b, cambiar, miembros }: Props) {
         </Campo>
         {tarea && b.todoElDia ? null : (
           <Campo etiqueta="Hora" htmlFor={`${id}-hora`}>
-            <InputHora
+            <SelectorHora
               id={`${id}-hora`}
               valor={b.hora}
               onCambiar={(hora) => cambiar({ hora, tocoFecha: true })}

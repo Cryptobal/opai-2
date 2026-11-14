@@ -28,6 +28,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27).",
   "app/api/rendiciones/lotes/[id]/nomina/route.ts":
     "Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208).",
+  "app/api/rendiciones/reporte/excel/route.ts":
+    "Descarga de rendiciones.reporte.excel (Excel) con sesión; mismo permiso y datos que la herramienta MCP rendiciones_reporte_excel (CAR-179).",
   "app/api/marca/[slug]/[asset]/route.ts":
     "URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP.",
   "app/api/existe/route.ts":
@@ -48,6 +50,10 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/_acciones/auth.ts#accionRestablecer":
     "Identidad: restablece la contraseña con el token del correo.",
   "app/_acciones/mfa.ts#accionVerificar": "Identidad: segundo factor de la sesión humana.",
+  "app/_acciones/oauth.ts#accionAutorizarOAuth":
+    "Identidad: la persona autoriza a una app a entrar por OAuth con su cuenta (CAR-247).",
+  "app/_acciones/oauth.ts#accionElegirEmpresaOAuth":
+    "Identidad: la persona elige la empresa con la que entra la app por OAuth (CAR-247).",
   "app/_acciones/mfa.ts#accionIniciarMfa": "Identidad: enrola el segundo factor propio.",
   "app/_acciones/mfa.ts#accionConfirmarMfa":
     "Identidad: confirma el enrolamiento del segundo factor.",
@@ -63,6 +69,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Invoca core.metodos_acceso.renombrar_passkey (herramienta MCP existente).",
   "app/_acciones/metodos-acceso.ts#accionOpcionesConfirmarPasskey":
     "Identidad: desafío WebAuthn para confirmar la identidad antes de quitar un método.",
+  "app/_acciones/apps-conectadas.ts#accionDesconectarApp":
+    "Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247).",
   "app/_acciones/metodos-acceso.ts#accionQuitarMetodo":
     "Confirma la identidad y luego invoca core.metodos_acceso.quitar (herramienta MCP existente).",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion":
@@ -111,6 +119,14 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas.",
   // Infraestructura: sin datos de negocio.
   "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
+  "app/.well-known/oauth-protected-resource/route.ts":
+    "Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio.",
+  "app/.well-known/oauth-protected-resource/api/mcp/route.ts":
+    "Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247).",
+  "app/.well-known/oauth-authorization-server/route.ts":
+    "Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad.",
+  "app/.well-known/oauth-authorization-server/api/auth/route.ts":
+    "Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247).",
   "app/api/cron/programador/route.ts":
     "Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029).",
   "app/api/cron/trabajos/route.ts": "Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029).",

@@ -34,6 +34,7 @@ export const PARAMS_HOJA = [
   "reabrir",
   "instalaciones",
   "contactos",
+  "transferir",
 ] as const;
 export type ParamHoja = (typeof PARAMS_HOJA)[number];
 
@@ -47,4 +48,9 @@ export type DatosHojas = {
   cuentaInicial: string | null;
   /** Instalaciones y contactos de la cuenta del negocio (hojas de vínculos). */
   cuenta: CuentaDetalle | null;
+  /** Personas para «Transferir cartera» (CAR-27); solo con esa hoja abierta. */
+  responsables: Responsable[];
 };
+
+/** Salida de `comercial.negocios.responsables`. */
+export type Responsable = { id: string; nombre: string; abiertos: number };

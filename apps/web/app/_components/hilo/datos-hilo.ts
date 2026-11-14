@@ -32,7 +32,9 @@ export function estadoDeFallo(code: string): EstadoLista {
 
 export function saludoHilo(ahora: Date, nombre: string): string {
   const h = Number(
-    new Intl.DateTimeFormat("es-CL", { hour: "numeric", hourCycle: "h23", timeZone: ZONA }).format(ahora),
+    new Intl.DateTimeFormat("es-CL", { hour: "numeric", hourCycle: "h23", timeZone: ZONA }).format(
+      ahora,
+    ),
   );
   const saludo = h < 12 ? "Buen día" : h < 20 ? "Buenas tardes" : "Buenas noches";
   return `${saludo}, ${nombreDePila(nombre)}.`;
@@ -106,16 +108,22 @@ export function tituloDeRuta(nav: readonly EntradaNav[], ruta: string): string {
 }
 
 /** Línea sobre el título del lienzo: adónde se vuelve o el área de la pantalla abierta. */
-export function subLienzo(nav: readonly EntradaNav[], ruta: string, volver: Volver | undefined): string {
+export function subLienzo(
+  nav: readonly EntradaNav[],
+  ruta: string,
+  volver: Volver | undefined,
+): string {
   if (volver) return volver.etiqueta;
   const bajo = (base: string) => base !== "/" && (ruta === base || ruta.startsWith(`${base}/`));
-  const activo = [...nav].filter((n) => bajo(n.href)).sort((a, b) => b.href.length - a.href.length)[0];
+  const activo = [...nav]
+    .filter((n) => bajo(n.href))
+    .sort((a, b) => b.href.length - a.href.length)[0];
   return activo?.grupo ?? "";
 }
 
 const dia = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(d);
 /** Hora si es de hoy; si no, día y mes («10-11»). */
-function cuandoCorto(iso: string, ahora: Date): string {
+export function cuandoCorto(iso: string, ahora: Date): string {
   const d = new Date(iso);
   if (dia(d) === dia(ahora)) return hora(d);
   return new Intl.DateTimeFormat("es-CL", { day: "2-digit", month: "2-digit", timeZone: ZONA })
@@ -123,46 +131,30 @@ function cuandoCorto(iso: string, ahora: Date): string {
     .replace(/\//g, "-");
 }
 
-type ItemActividad = {
+type ItemAgenda = {
   id: string;
+  origen: "tarea" | "documento";
   cuando: string;
-  actor: { nombre: string; agente: boolean };
-  accion: string;
+  titulo: string;
+  nota: string | null;
+  vencido: boolean;
+  href: string;
 };
 
-/** «Actividad»: lo último que hicieron las personas y los agentes (salida de `core.actividad.list`). */
-export function actividadHilo(items: readonly ItemActividad[], ahora: Date): FilaHilo[] {
-  return items.map((i) => ({
-    id: i.id,
-    cuando: cuandoCorto(i.cuando, ahora),
-    quien: i.actor.nombre,
-    ...(i.actor.agente ? { agente: true } : {}),
-    texto: i.accion,
-  }));
+/** Un día sin hora («aaaa-mm-dd», vencimiento de documento) se muestra tal cual, sin zona. */
+function cuandoAgenda(cuando: string, ahora: Date): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(cuando);
+  if (!m) return cuandoCorto(cuando, ahora);
+  return `${m[1]}-${m[2]}-${m[3]}` === dia(ahora) ? "Hoy" : `${m[3]}-${m[2]}`;
 }
 
-type Tarea = {
-  id: string;
-  titulo: string;
-  vencimiento: string | null;
-  completadaEn: string | null;
-  vinculosDetalle: readonly { nombre: string }[];
-};
-
-/** «Agenda»: las tareas propias con fecha, de la más próxima a la más lejana; las vencidas, primero. */
-export function agendaHilo(tareas: readonly Tarea[], ahora: Date): FilaHilo[] {
-  return tareas
-    .filter((t): t is Tarea & { vencimiento: string } => Boolean(t.vencimiento) && !t.completadaEn)
-    .sort((a, b) => a.vencimiento.localeCompare(b.vencimiento))
-    .map((t) => {
-      const vencida = new Date(t.vencimiento).getTime() < ahora.getTime();
-      const vinculo = t.vinculosDetalle[0]?.nombre;
-      return {
-        id: t.id,
-        cuando: cuandoCorto(t.vencimiento, ahora),
-        texto: t.titulo,
-        ...(vencida ? { nota: "Vencida", tono: "alerta" as const } : vinculo ? { nota: vinculo } : {}),
-        href: "/tareas",
-      };
-    });
+/** «Agenda»: lo que viene (salida de `core.hilo.agenda`, ya ordenada); lo vencido se marca. */
+export function agendaHilo(items: readonly ItemAgenda[], ahora: Date): FilaHilo[] {
+  return items.map((i) => ({
+    id: `${i.origen}-${i.id}`,
+    cuando: cuandoAgenda(i.cuando, ahora),
+    texto: i.titulo,
+    ...(i.vencido ? { nota: "Vencido", tono: "alerta" as const } : i.nota ? { nota: i.nota } : {}),
+    href: i.href,
+  }));
 }

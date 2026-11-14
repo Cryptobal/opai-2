@@ -8,7 +8,7 @@
 
 ## A. Flujo nuevo (acordado con Carlos el 28-oct-2026)
 
-> **Frente único (Carlos, 4-nov-2026, ADR-070).** Las sesiones de Claude **planifican, construyen e integran sus propios PRs**. El bot «OPAI 2.0» **no integra ni escribe encargos o briefs**: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:` y toma capturas) y **aplica las migraciones de Neon con respaldo cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos»** sobre el head del PR. Donde más abajo se diga que el bot integra, o que Claude también aplica migraciones (ADR-060, ADR-063), rige esta nota.
+> **Frente único (Carlos, 4-nov-2026, ADR-070).** Las sesiones de Claude **planifican, construyen e integran sus propios PRs**. El bot «OPAI 2.0» **no integra ni escribe encargos o briefs**: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:` y toma capturas). **Desde ADR-104 (12-nov-2026) las migraciones de Neon las aplica la sesión que construyó el PR**, con respaldo previo, y ninguna sesión espera al bot. Donde más abajo se diga que el bot integra o aplica migraciones, rigen esta nota, ADR-104 y el «Modo noche» de `AGENTS.md` (ADR-111).
 
 1. **El repo es la fuente única.** Briefs, decisiones, estado y pendientes viven en `docs/2.0/`.
 2. **Quién hace qué.**
@@ -26,7 +26,7 @@
    - El Revisor hace **una sola pasada**.
    - Solo **bloquea** por **seguridad, migraciones o datos** (RLS, permisos, pérdida o mezcla de datos entre tenants).
    - Todo lo demás es no bloqueante y va a un **PR de pendientes**, no a otra vuelta del mismo PR.
-   - Se integra (la **sesión de Claude** que lleva el PR) con los cuatro checks obligatorios en verde sobre el head (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`), sin conflictos con `main` (traer `main` con merge solo si hay conflicto; decisión 4-nov-2026), sin veto de Carlos, migración ya aplicada con aviso en el PR y etiqueta `migracion-pendiente` quitada si corresponde, y —solo si el PR trae migración o toca RLS, permisos o datos de tenants— tras el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head.
+   - Se integra (la **sesión de Claude** que lleva el PR) con los checks obligatorios en verde sobre el head (`typecheck · lint · test · test:db` y `secretos`; ver AGENTS.md «Revisiones largas», ADR-112 adenda C), sin conflictos con `main` (traer `main` con merge solo si hay conflicto; decisión 4-nov-2026), sin veto de Carlos, migración ya aplicada con aviso en el PR y etiqueta `migracion-pendiente` quitada si corresponde, y —solo si el PR trae migración o toca RLS, permisos o datos de tenants— tras el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head.
    - Cuando Carlos active la **cola de merge** en el ruleset «Proteger main», la sesión de Claude encola el PR ahí: GitHub vuelve a correr los checks obligatorios en el evento `merge_group` (sin e2e ni rendimiento) y hace el squash sin reiniciar el CI de todos los demás PR abiertos.
 7. **QA en vivo va después de integrar** (en test.opai.cl) y **no frena nada**. Sus hallazgos van al PR de pendientes, salvo que sean de seguridad o datos: en ese caso se abre un arreglo inmediato.
 8. **Capturas.** Cuando Carlos quiera ver algo, se las pide al bot OPAI 2.0, que las toma en test.opai.cl.
@@ -50,7 +50,7 @@
 
 Cuando un PR está **listo para revisión** (constructor terminó, `ESTADO.md` actualizado si aplica):
 
-1. Los **cuatro checks obligatorios** del ruleset «Proteger main» deben estar **en verde sobre el head exacto** del PR (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`; ADR-061).
+1. Los **checks obligatorios** del ruleset «Proteger main» deben estar **en verde sobre el head exacto** del PR: `typecheck · lint · test · test:db` y `secretos` (ADR-112, adenda C; antes eran cuatro, ADR-061). `build · presupuesto de JS` corre al integrar a `main`; `migración pendiente`, solo si el PR toca Prisma o migraciones.
 2. La **sesión de Claude Code que construyó el PR** deja un **comentario nuevo** en el PR con:
    - el **SHA completo** del commit revisado;
    - **`sin bloqueos`** si no hay impedimentos en **seguridad, RLS/tenant, permisos, migraciones e integridad de datos**; o **bloqueos concretos** numerados si los hay (misma checklist que `docs/2.0/checklists/revision.md` en esos ejes).
@@ -58,9 +58,9 @@ Cuando un PR está **listo para revisión** (constructor terminó, `ESTADO.md` a
 
 ### A2.3 Migraciones
 
-- Las aplican **solo OPAI 2.0**, **después** de la revisión final **sin bloqueos** sobre el head y con CI verde, con el procedimiento de A.5 (respaldo, `dev` → `main`, aviso en español, quitar `migracion-pendiente`).
-- Las **sesiones no aplican** migraciones en Neon; piden al bot con `@opai-2.0:` si hace falta.
-- **Excepción acotada (Carlos, 11-nov-2026, ADR-093 §12):** los PR de la serie Slack (CAR-290 a CAR-296) los migra la «Sesión Núcleo» con este mismo procedimiento y el aviso en el PR antes de retirar `migracion-pendiente`. El bot puede hacerlo si llega antes.
+- **Desde ADR-104 (Carlos, 12-nov-2026):** ninguna sesión de Claude depende del bot «OPAI 2.0» (Grok). Cada migración la aplica **la sesión que construyó el PR**, **después** de la revisión final **sin bloqueos** sobre el head y con CI verde, con el procedimiento de A.5: ramas Neon de respaldo de `dev` y `main`, aplicar en `dev` y luego en `main` en una transacción con `lock_timeout` corto junto con su fila en `_prisma_migrations` (checksum sha256 del archivo), verificar en ambas, dejar el aviso en el PR y quitar `migracion-pendiente`.
+- Si el PR necesita datos ficticios de `qa-e2e` para `preview-e2e`, la misma sesión los carga en `main` y en la rama `preview/pr-<n>`.
+- El bot «OPAI 2.0» puede seguir vigilando, pero ninguna sesión depende de él: la sesión sigue con su próximo ticket (A2.5.1).
 
 ### A2.4 Señales en PR (escalado 24 h)
 
@@ -72,17 +72,91 @@ La **primera línea** del comentario es exactamente una de:
 |---|---|
 | **`DECISIÓN CARLOS:`** | Falta una decisión de negocio que solo Carlos puede tomar. |
 | **`BLOQUEO OPAI:`** | Bloqueo operativo que la sesión no puede resolver (infra, cola, migración, permisos de bot, etc.). |
-| **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, cuatro checks verdes y migración pendiente de aplicar por el bot. |
+| **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, checks obligatorios verdes y migración pendiente de aplicar. |
 | ~~`REVISIÓN VISUAL CARLOS:`~~ | En desuso desde el 11-nov-2026 (ADR-092): el chequeo visual es el run `preview-e2e` y sus capturas (A2.10). |
 
 En el cuerpo (breve): resumen mínimo, enlace a Linear (`CAR-n`) si existe, qué se intentó y qué se necesita. **Sin secretos ni datos personales.** En **`REVISIÓN VISUAL CARLOS:`** incluir siempre preview usable, rutas y checklist de usabilidad.
 
 OPAI 2.0 actúa **24 h** ante estas señales (no repite la revisión técnica de la sesión).
 
-### A2.5 Sesiones en paralelo
+### A2.5 Sesiones en paralelo (Carlos, 12-nov-2026 · ADR-108)
 
-- Las sesiones **no esperan** a OPAI 2.0 para seguir construyendo **otros frentes independientes**.
-- **Nunca** integran con bloqueos pendientes (revisión final, veto, `migracion-pendiente` sin retirar) ni **tocan datos de OPAI 1.0** (`Cryptobal/opai`, opai.gard.cl).
+**Regla de fondo.** Las sesiones avanzan solas y no se frenan entre sí. Una sesión se detiene **solo** cuando Carlos tiene que decidir negocio o producto, o cuando el paso es irreversible, toca plata, datos reales, producción, OPAI 1.0 o el tenant Gard, o necesita un secreto. Ni la revisión del bot «OPAI 2.0» ni la integración a `main` son una puerta para seguir trabajando. **De 21:00 a 07:00 rige el «Modo noche»** (`AGENTS.md`, ADR-111): las dudas de producto o diseño tampoco detienen a la sesión (se deciden como «Decisión nocturna: … (revisar)») y lo que solo Carlos puede resolver queda en «Espera a Carlos» mientras la sesión pasa al ticket siguiente.
+
+#### A2.5.1 Avance continuo
+
+- Al abrir un PR, la sesión sigue **de inmediato** con su próximo ticket.
+- Si el ticket siguiente depende del PR anterior, **apila**: rama nueva desde la rama de ese PR y PR con esa rama como base. Para ponerse al día se usa merge, nunca rebase ni force-push. Cuando el PR de abajo se integra, la sesión trae `main` con merge y cambia la base a `main`.
+- La revisión del bot «OPAI 2.0», el CI, `preview-e2e` y la integración ocurren **en paralelo**. Si el bot o una revisión comentan algo, la sesión lo corrige en el mismo PR cuando le toque, sin soltar lo que está haciendo si no es un bloqueo de seguridad o de datos.
+- Lo que sigue prohibido: integrar con bloqueos (revisión final, veto, `migracion-pendiente` sin retirar) y tocar datos de OPAI 1.0 (`Cryptobal/opai`, opai.gard.cl).
+
+#### A2.5.2 Archivos sensibles (donde chocan las sesiones)
+
+Casi todo PR los toca, así que dos PR abiertos a la vez chocan:
+
+| Archivo | Por qué choca |
+|---|---|
+| `packages/db/prisma/schema/*.prisma` | Dos PR que editan el mismo modelo generan migraciones incompatibles. |
+| `packages/db/prisma/migrations/*` | El orden de fecha es el orden de aplicación en Neon. |
+| `packages/capabilities/src/index.ts`, `src/core/index.ts` y `apps/web/lib/registro.ts` | Registros centrales: todos agregan una línea en el mismo lugar. |
+| `packages/domain/src/novedades/entradas/embed.ts` | Archivo generado: siempre choca. |
+| `docs/2.0/paridad/mcp-inventario.md` y `packages/capabilities/test/__snapshots__/herramientas-mcp*.txt` | Generados por las pruebas de paridad: siempre chocan. |
+| `docs/2.0/01-decisiones.md` | Dos PR toman el mismo número de ADR. |
+| `apps/web/presupuesto-js.json` y `apps/web/app/(erp)/configuracion/auditoria/_componentes/etiquetas-verbos.ts` | Listas compartidas de una línea por ruta o por verbo. |
+
+**Antes de tocar uno**, la sesión revisa los PR abiertos y sus archivos:
+
+```bash
+gh pr list --state open --json number,title,headRefName,baseRefName
+gh pr view <n> --json files --jq '.files[].path'
+```
+
+- Si otro PR abierto **ya edita el mismo `.prisma`** o trae una migración sobre las mismas tablas: la sesión **apila sobre ese PR** o **espera a que se integre**, y lo dice en la primera línea de la descripción de su PR: «apilado sobre #N» o «espera #N».
+- **Aviso automático:** el workflow `choque de tablas (aviso)` (`.github/workflows/choque-prisma.yml`, pedido por Carlos el 12-nov) revisa cada PR y avisa si edita un `.prisma` que otro PR abierto también edita sin estar apilados. Solo avisa; no bloquea el merge.
+- **Archivos generados** (`embed.ts`, `mcp-inventario.md`, instantáneas MCP): no se resuelven a mano. Al traer `main` con merge, se toma la versión de `main` y se **regeneran** (`pnpm --filter @opai/domain gen:novedades-embed`; `vitest run test/paridad -u` en `packages/capabilities`).
+- **Registros centrales**: cada módulo agrega su línea en su bloque y en orden alfabético, para que dos líneas nuevas no caigan en el mismo lugar.
+- **ADR**: antes de numerar, la sesión mira el último número en `main` **y en los PR abiertos**, y toma el siguiente libre. El número se dice en la descripción del PR.
+
+#### A2.5.3 Migraciones: de a una y en orden de fecha
+
+- Las migraciones se integran **de a una y en orden de fecha**. El prefijo de fecha de una migración nueva es posterior al de toda migración en `main` y en los PR abiertos.
+- Dos PR **no pueden** editar el mismo `.prisma` con migraciones distintas sin apilarse.
+- Si un PR con migración se integra antes que otro de fecha anterior, el segundo trae `main` con merge y **renombra su carpeta de migración** a una fecha posterior antes de aplicarla en Neon (solo si todavía no está aplicada; una migración aplicada nunca se renombra).
+- Aplicar en Neon sigue A2.3 (ADR-104): la sesión que construyó el PR, con respaldo, primero `dev` y después `main`.
+
+#### A2.5.4 `ESTADO.md` ya no lo edita cada PR
+
+Hasta el 12-nov casi todos los PR agregaban una fila a la tabla «En curso» de `docs/2.0/ESTADO.md`, en el mismo lugar, y chocaban entre sí. Desde ADR-108:
+
+- **Cada PR escribe su avance en un archivo propio:** `docs/2.0/estado/<modulo>/CAR-<n>.md` (qué entró, qué quedó pendiente, qué se decidió, migración). Un archivo por ticket: dos PR nunca editan el mismo. La plantilla está en `docs/2.0/estado/README.md`.
+- **`ESTADO.md` queda como índice y foto histórica.** Ningún PR de construcción lo edita. Lo consolida, de vez en cuando, un PR solo de documentación (pasa los archivos de `estado/` ya integrados a las secciones «Integrado» y los borra).
+- Los PR abiertos antes de esta regla conservan su fila en `ESTADO.md`; al traer `main` y encontrar conflicto ahí, mueven su fila a su archivo de `estado/` y dejan `ESTADO.md` como está en `main`.
+- Donde `AGENTS.md`, `CONTEXTO-agentes.md` o un brief digan «el PR actualiza `ESTADO.md`», vale el archivo de `estado/`.
+
+#### A2.5.5 Quién es dueño de qué
+
+No se usa `CODEOWNERS` de GitHub: todas las sesiones operan con la misma cuenta, así que no distinguiría a nadie. Vale esta tabla. Una sesión que necesita tocar carpetas de otra lo dice en la descripción del PR y revisa antes los PR abiertos de la sesión dueña.
+
+| Módulo | Sesión | Carpetas |
+|---|---|---|
+| Núcleo y Plataforma | Sesión Núcleo | `packages/capabilities/src/core/**`, `packages/capabilities/src/agentes/**`, `packages/capabilities/src/*.ts`, `packages/auth/**`, `packages/db/prisma/schema/{core,tenancy,permisos,agentes,grupos,slack,reglas-aprobacion}.prisma`, `apps/web/app/(platform)/**`, `apps/web/app/(erp)/configuracion/**` (salvo lo de otro módulo), `packages/integrations/**` |
+| Marco, Hilo y Design System | Sesión Hilo y Sesión Diseño | `packages/ds/**`, `apps/web/app/_components/**` del marco, `portal-layout.tsx`, `marco-shell.tsx`, `docs/2.0/design/**`, `docs/2.0/diseño/**` |
+| Agente interno | Sesión Hilo | `modules/agente/**`, `apps/web/app/api/agente/**` |
+| Comercial y CPQ | Sesión Comercial | `modules/comercial/**`, `modules/cpq/**`, `packages/capabilities/src/comercial/**`, `apps/web/app/(erp)/{negocios,solicitudes,cotizaciones,cpq}/**`, `apps/web/app/p/**` |
+| Finanzas, Caja y Rendiciones | Sesión Finanzas y Sesión Caja | `modules/finanzas/**`, `modules/rendiciones/**`, `packages/capabilities/src/finanzas/**`, `apps/web/app/(erp)/{finanzas,rendiciones}/**` |
+| Personas, Documentos y Nómina | Sesión Personas y Documentos | `packages/capabilities/src/core/{maestros,documentos,firmas,anexos,remuneraciones}/**`, `modules/nomina/**`, `packages/capabilities/src/nomina/**`, `apps/web/app/(erp)/personas/**`, `apps/web/app/(erp)/documentos/**`, `apps/web/app/(erp)/remuneraciones/**` |
+| Operaciones: pauta, asistencia, rondas, acceso y terreno | La sesión que lleve Operaciones (hoy sin nombre fijo en los PR; por confirmar) | `modules/{pauta,asistencia,rondas,acceso}/**`, `packages/capabilities/src/{pauta,rondas,acceso}/**`, `apps/web/app/(terreno)/**`, `apps/web/app/(supervisor)/**` |
+| Desempeño | Sesión Desempeño | `modules/desempeno/**`, `packages/capabilities/src/desempeno/**`, `packages/domain/src/desempeno/**` |
+| Portales de cliente y trabajador, Tickets | Sesión Proyecto, hasta que tengan sesión propia | `modules/{portal_cliente,portal_trabajador,tickets}/**`, `apps/web/app/(cliente)/**`, `apps/web/app/(trabajador)/**` |
+| Reglas, operación y estándares | Sesión Proyecto y Sesión Estándares | `AGENTS.md`, `CLAUDE.md`, `docs/2.0/*.md`, `.github/**` (solo en un PR de operación pedido por Carlos) |
+
+Las carpetas `core/maestros` (personas, cargos y estructuras), `core/documentos`, `core/firmas`, `core/anexos` y `core/remuneraciones` están dentro del Núcleo, pero su dueña es la Sesión Personas y Documentos (decisión de Carlos). Los nombres de sesión son los que hoy aparecen en los títulos de los PR; si una sesión cambia, se corrige esta tabla.
+
+#### A2.5.6 Dependencias en Linear
+
+- **Antes de tomar un ticket**, la sesión revisa sus «blocked by» en Linear. Si alguno sigue abierto, toma otro ticket.
+- Si al trabajar descubre que depende de otro ticket, **lo marca en Linear** (relación «blocked by») y lo avisa en la descripción del PR.
+- El **orden entre módulos vive en las relaciones de Linear** («blocks» y «blocked by»), no solo en la descripción de los proyectos. Quien crea o deriva tickets deja esas relaciones puestas.
 
 ### A2.6 Vigilancia de avance (OPAI 2.0)
 
@@ -114,7 +188,7 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 **El primer vistazo visual ya no lo hace Carlos.** Lo reemplazan las pruebas visuales automáticas y sus capturas (CAR-285):
 
-1. **Workflow `preview-e2e`** (`.github/workflows/preview-e2e.yml`): en cada PR corre los e2e de Playwright marcados **`@preview`** contra la vista previa de Vercel de ese commit, a **375, 1024 y 1280 px**, y sube las capturas como artefacto `preview-e2e-capturas`.
+1. **Workflow `preview-e2e`** (`.github/workflows/preview-e2e.yml`): a pedido (etiqueta `e2e`), de noche contra `main` o a mano (ADR-112, adenda C) corre los e2e de Playwright marcados **`@preview`** contra la vista previa de Vercel de ese commit, a **375, 1024 y 1280 px**, y sube las capturas como artefacto `preview-e2e-capturas`.
 2. **Usuario de pruebas:** siempre el de la empresa ficticia **`qa-e2e`** («QA E2E (ficticia)», 13 módulos activos, sin datos de Gard). **Nunca** Gard ni datos reales. Los secretos (`E2E_EMAIL`, `E2E_PASSWORD`, `E2E_TOTP_SECRET`, `VERCEL_AUTOMATION_BYPASS_SECRET`) solo existen en GitHub Actions; no se muestran ni se escriben en logs, capturas, PRs ni en el repo.
 3. **Cada PR con cambio visual** agrega o actualiza las pruebas `@preview` de sus pantallas (flujo principal y captura con `capturar` de `apps/web/e2e/preview.ts`). Las pruebas crean sus propios datos en `qa-e2e` y no dependen de datos sembrados de otra empresa.
 4. **Integración:** un PR se integra solo con el run de `preview-e2e` **en verde sobre el head** y las **capturas revisadas por la propia sesión** contra el diseño aprobado y `DISENO.md`. La sesión deja en el PR qué revisó. La revisión final técnica (A2.2) sigue aparte.
@@ -123,6 +197,18 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 
 ---
 
+### A2.11 Sin GitHub Actions: revisión mínima local (Carlos, 13-nov-2026, ADR-112; temporal)
+
+> **Terminada el 13-nov-2026 a las 15:47 (ADR-112, adenda D):** Actions vuelve a correr. No se corre el gate local ni se deja el comentario «Gate local»; se integra con los checks de GitHub en verde. Se conserva el texto por si el bloqueo vuelve.
+
+Mientras GitHub Actions esté bloqueado y la regla «Proteger main» desactivada, **ninguna sesión integra sin esto** (detalle en ADR-112, decisión A):
+
+1. No uses Actions: no relances jobs ni empujes commits vacíos.
+2. Trae `main` a la rama con merge, empuja y corre `scripts/gate-local.sh` sobre el head exacto, en tu espacio de trabajo. Revisa solo lo afectado; `test:db` solo si tocas base, capacidades, auth o módulos.
+3. La vista previa de Vercel del PR debe estar «Ready». Si tocas pantallas, agrega `--presupuesto`.
+4. Si hay cambio visual, revisa las capturas en la vista previa o con `scripts/gate-local-visual.sh e2e/<spec>.spec.ts`.
+5. Comenta «Gate local» en el PR con el SHA completo y cada resultado, más la revisión final sin bloqueos, e integra con squash fijando `sha=<head>`.
+
 ### ⚠ Contradicciones con el repo (se resuelven a favor de esta sección)
 
 | # | Dónde | Qué dice hoy | Qué rige desde el 28-oct |
@@ -130,7 +216,7 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 | 1 | `01-decisiones.md` ADR-043 «Segunda modificación (24-oct)» e `INSTRUCCIONES-proyecto-claude.md` (Ejecución, paso 4); cabecera de `ESTADO.md` | Las tareas viven en Linear (`Fixes CAR-n`). `ESTADO.md` se toca solo si cambia la foto técnica. | **Cada PR actualiza `ESTADO.md`** (A.3). Linear puede seguir como referencia (`Fixes CAR-n`), pero no reemplaza a `ESTADO.md`. |
 | 2 | `AGENTS.md`, «Prohibido» y etiqueta `migracion-pendiente` | «Las migraciones de Neon las aplica Carlos desde su Mac»; «Solo Carlos» quita la etiqueta y ningún bot la pone ni la quita. | **El bot aplica la migración con respaldo, dev → main, y quita la etiqueta** (A.5). Esto ya se hacía así por los mandatos t500u (26-oct) y t682u (28-oct); por ejemplo, el #91. |
 | 3 | `AGENTS.md` y ADR-043 v3 (Revisor) | Se exige APROBAR sin condiciones, y cualquier push invalida la aprobación. | **Una pasada; solo bloquea por seguridad, migraciones o datos** (A.6). Tras un push, el Revisor revisa solo el delta. |
-| 4 | `AGENTS.md`, checks del ruleset «Proteger main» | 3 obligatorios: `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`. | Desde el 4-nov-2026 (ADR-061) son **4** obligatorios, incluido `migración pendiente` (CAR-61). `rendimiento` (ADR-045) sigue por confirmar aparte (E.4). |
+| 4 | `AGENTS.md`, checks del ruleset «Proteger main» | 3 obligatorios: `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`. | Desde el 13-nov-2026 (ADR-112, adenda C) son **2**: `typecheck · lint · test · test:db` y `secretos` (antes 4, ADR-061). `rendimiento` (ADR-045) sigue por confirmar aparte (E.4). |
 | 5 | Práctica del 27-oct (t618u) | QA sin bloqueantes **antes** de integrar. | **QA en vivo después de integrar, sin frenar** (A.7). Esto coincide con ADR-043 v3. |
 | 6 | ADR-043 v3 §8 / `REGLAS-codigo.md` (e2e) | La e2e no es obligatoria. | Igual (sigue sin ser check obligatorio del ruleset). En CI (PR #257 / CAR-181): **e2e** (6 shards), informe, **`e2e (Playwright)`** y **rendimiento** corren en cron nocturno (03:00 Santiago), `workflow_dispatch`, push a `main` o PR con etiqueta **`e2e`** (la pone Carlos); no en cada `pull_request`. El gate **`typecheck · lint · test · test:db`** corre en cuatro jobs paralelos más un agregador con el mismo nombre. Regla t611u (27-oct): en local, specs tocados + gate completo antes del push. |
 | 7 | `CONTEXTO-agentes.md` (rol del bot) | El bot «prepara los prompts de cada encargo». | **Claude escribe los briefs** (A.2). El bot opera la cola. |

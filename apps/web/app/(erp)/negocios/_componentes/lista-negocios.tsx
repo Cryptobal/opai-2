@@ -1,11 +1,9 @@
-import { Download } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Badge, ChipsEtiquetas, type EstadoPantalla, MonoAv } from "@opai/ds";
 
 import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etiquetas/opciones";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { pesos } from "@/lib/fechas";
@@ -13,6 +11,7 @@ import type { Parametros } from "@/lib/parametros";
 
 import type { NegocioFila } from "./datos";
 import { consultaLista, urlExportarNegocios } from "./rutas";
+import { AccionesNegocios } from "./acciones-negocios";
 import { VistaNegocios } from "./vista-negocios";
 
 const TONO = { abierto: "info", ganado: "success", perdido: "danger" } as const;
@@ -34,6 +33,8 @@ export function ListaNegocios(p: {
   etiquetas?: OpcionEtiqueta[];
   /** Con `comercial:negocios.exportar`: botón «Exportar a Excel» con los filtros de la lista. */
   puedeExportar?: boolean;
+  /** Con `comercial:negocios.manage`: «Transferir cartera» (CAR-27). */
+  puedeTransferir?: boolean;
 }) {
   const abiertos = p.items.filter((n) => n.estado === "abierto").length;
   const consulta = consultaLista(p.p);
@@ -45,11 +46,14 @@ export function ListaNegocios(p: {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <VistaNegocios activa="lista" />
           {p.nuevo ? <span className="md:hidden">{p.nuevo}</span> : null}
-          {p.puedeExportar ? (
-            <EnlaceBoton href={urlExportarNegocios(p.p)} variante="secondary" icono={Download}>
-              Exportar a Excel
-            </EnlaceBoton>
-          ) : null}
+          <AccionesNegocios
+            acciones={[
+              ...(p.puedeTransferir
+                ? [{ id: "transferir" as const, href: "/negocios?vista=lista&transferir=1" }]
+                : []),
+              ...(p.puedeExportar ? [{ id: "exportar" as const, href: urlExportarNegocios(p.p) }] : []),
+            ]}
+          />
         </div>
       }
       buscar="Buscar por título"

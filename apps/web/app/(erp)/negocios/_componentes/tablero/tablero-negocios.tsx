@@ -1,10 +1,11 @@
-import { ChartColumn, Download, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Cabecera, Empty, Estado, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos } from "@/lib/fechas";
 
+import { AccionesNegocios } from "../acciones-negocios";
 import type { NegocioFila } from "../datos";
 import { VistaNegocios } from "../vista-negocios";
 import { ArrastreTablero } from "./arrastre-tablero";
@@ -48,17 +49,16 @@ export function TableroNegocios(p: {
       />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <VistaNegocios activa="tablero" />
-        <EnlaceBoton href="/negocios/seguimiento" variante="secondary">
-          Pendientes de seguimiento
-        </EnlaceBoton>
-        <EnlaceBoton href="/negocios/reportes" variante="secondary" icono={ChartColumn}>
-          Reportes
-        </EnlaceBoton>
-        {p.exportar ? (
-          <EnlaceBoton href={p.exportar} variante="secondary" icono={Download}>
-            Exportar a Excel
-          </EnlaceBoton>
-        ) : null}
+        <div className="flex items-center gap-2 md:contents">
+          <AccionesNegocios
+            acciones={[
+              { id: "seguimiento", href: "/negocios/seguimiento" },
+              { id: "reportes", href: "/negocios/reportes" },
+              ...(p.gestiona ? [{ id: "transferir" as const, href: "/negocios?transferir=1" }] : []),
+              ...(p.exportar ? [{ id: "exportar" as const, href: p.exportar }] : []),
+            ]}
+          />
+        </div>
         <SelectorEtapa
           etapas={p.etapas.map((e) => ({ id: e.id, nombre: e.nombre, n: de(e.id).length }))}
           inicial={p.etapa}
@@ -67,9 +67,13 @@ export function TableroNegocios(p: {
       <Estado state={p.state} variante="lista">
         {p.etapas.length ? (
           <ArrastreTablero etapas={etapas}>
+            {/* Zona desplazable alcanzable con el teclado aunque una etapa esté vacía (CAR-364). */}
             <div
               id="columnas-tablero"
-              className="-mx-4 flex min-w-0 max-w-[calc(100%+2rem)] items-start snap-x snap-mandatory data-[arrastrando]:snap-none gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:max-w-full md:items-stretch md:px-0"
+              role="region"
+              aria-label="Etapas del tablero"
+              tabIndex={0}
+              className="-mx-4 flex min-w-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-w-[calc(100%+2rem)] items-start snap-x snap-mandatory data-[arrastrando]:snap-none gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:max-w-full md:items-stretch md:px-0"
             >
               {p.etapas.map((e) => (
                 <ColumnaEtapa

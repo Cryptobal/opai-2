@@ -11,6 +11,11 @@ export const laboralSchema = z.object({
       tallaPantalon: z.string().nullable(),
       tallaChaqueta: z.string().nullable(),
       tallaZapato: z.string().nullable(),
+      tallaPolera: z.string().nullable(),
+      tallaGeologo: z.string().nullable(),
+      tallaPolar: z.string().nullable(),
+      estaturaCm: z.number().nullable(),
+      pesoKg: z.number().nullable(),
       notas: z.string().nullable(),
       entregas: z.array(
         z.object({
@@ -28,11 +33,13 @@ export const laboralSchema = z.object({
     .object({
       resolucion: z.string().nullable(),
       resolucionVigenteDesde: z.string().nullable(),
+      resolucionVigenteHasta: z.string().nullable(),
       horasSemanales: z.string().nullable(),
       distribucion: z.string().nullable(),
       articulo22: z.boolean(),
       plazoFijoPeriodo: z.number().nullable(),
       terminoPlazoFijo: z.string().nullable(),
+      terminosPlazoFijo: z.array(z.string()),
       avisoTerminoDias: z.number().nullable(),
     })
     .nullable(),
@@ -49,6 +56,8 @@ export const laboralSchema = z.object({
       emergenciaNombre: z.string().nullable(),
       emergenciaRelacion: z.string().nullable(),
       emergenciaTelefono: z.string().nullable(),
+      codigoInterno: z.string().nullable(),
+      movilizacion: z.string().nullable(),
     })
     .nullable(),
 });
@@ -71,6 +80,11 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
           tallaPantalon: uniforme.tallaPantalon,
           tallaChaqueta: uniforme.tallaChaqueta,
           tallaZapato: uniforme.tallaZapato,
+          tallaPolera: uniforme.tallaPolera ?? null,
+          tallaGeologo: uniforme.tallaGeologo ?? null,
+          tallaPolar: uniforme.tallaPolar ?? null,
+          estaturaCm: uniforme.estaturaCm ?? null,
+          pesoKg: uniforme.pesoKg ?? null,
           notas: uniforme.notas,
           entregas: uniforme.entregas.map((e) => ({
             id: e.id,
@@ -86,11 +100,13 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
       ? {
           resolucion: jornada.resolucion,
           resolucionVigenteDesde: dia(jornada.resolucionVigenteDesde),
+          resolucionVigenteHasta: dia(jornada.resolucionVigenteHasta ?? null),
           horasSemanales: jornada.horasSemanales?.toString() ?? null,
           distribucion: jornada.distribucion,
           articulo22: jornada.articulo22,
           plazoFijoPeriodo: jornada.plazoFijoPeriodo,
           terminoPlazoFijo: dia(jornada.terminoPlazoFijo),
+          terminosPlazoFijo: (jornada.terminosPlazoFijo ?? []).map((d) => dia(d)!),
           avisoTerminoDias: jornada.avisoTerminoDias,
         }
       : null,
@@ -102,6 +118,8 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
           emergenciaNombre: contacto.emergenciaNombre,
           emergenciaRelacion: contacto.emergenciaRelacion,
           emergenciaTelefono: contacto.emergenciaTelefono,
+          codigoInterno: contacto.codigoInterno ?? null,
+          movilizacion: contacto.movilizacion ?? null,
         }
       : null,
   };

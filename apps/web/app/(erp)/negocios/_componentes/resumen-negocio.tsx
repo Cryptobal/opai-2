@@ -7,6 +7,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { fecha, pesos } from "@/lib/fechas";
 
 import type { NegocioDetalle } from "./datos";
+import { CamposFicha } from "@/app/_components/campos/campos-ficha";
 import { EtiquetasFicha } from "@/app/_components/etiquetas/etiquetas-ficha";
 import { ROL_CONTACTO as ROL, TIPO_VINCULO } from "./etiquetas";
 import { TarjetasActividad } from "./tarjetas-actividad";
@@ -56,6 +57,9 @@ export function ResumenNegocio({ n }: { n: NegocioDetalle }) {
       </SeccionTarjeta>
       <Suspense fallback={<Skeleton className="h-16 w-full" />}>
         <EtiquetasFicha tipo="negocio" id={n.id} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <CamposFicha tipo="negocio" id={n.id} />
       </Suspense>
       <Suspense fallback={<Skeleton className="h-24 w-full" />}>
         <TarjetasActividad negocioId={n.id} />

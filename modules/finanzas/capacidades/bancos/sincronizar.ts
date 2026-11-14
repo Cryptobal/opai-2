@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio, type Contexto } from "@opai/capabilities";
 import {
+  acotarFechaAHoy,
   normalizarBanco,
   normalizarNumeroCuenta,
   planificarMovimientosApi,
@@ -11,6 +12,7 @@ import {
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { aFecha } from "./util";
 import { aplicarSincronizacion, type MovimientoNuevo } from "./sincronizar-aplicar";
+import { yaGuardadosPorCartola } from "./sincronizar-cartola";
 
 const fechaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe ser AAAA-MM-DD.");
 
@@ -71,7 +73,8 @@ function fechaSaldoReportado(i: SincronizarInput): Date | null {
   return fecha && !Number.isNaN(fecha.getTime()) ? fecha : null;
 }
 
-export async function sincronizarMovimientos(ctx: Contexto, input: SincronizarInput, dryRun: boolean): Promise<Salida> {
+export async function sincronizarMovimientos(ctx: Contexto, entrada: SincronizarInput, dryRun: boolean): Promise<Salida> {
+  const input = await sinFechasFuturas(ctx, entrada);
   const cuenta = await resolverCuenta(ctx, input.numeroCuenta, input.codigoBanco);
   if (!cuenta) return sinCuenta;
   // Serializa entregas simultáneas de la misma cuenta: el UPDATE toma el bloqueo de la fila hasta el COMMIT
@@ -93,19 +96,21 @@ export async function sincronizarMovimientos(ctx: Contexto, input: SincronizarIn
       })
     : [];
   const plan = planificarMovimientosApi(entrantes, existentes);
-  const nuevos: MovimientoNuevo[] = [];
-  let sospechosos = 0;
+  const candidatos: (MovimientoNuevo & { sospechoso: boolean })[] = [];
   for (const p of plan) {
     const m = input.movimientos[p.indice];
     if (p.estado !== "nuevo" || !m) continue;
-    if (p.sospechoso) sospechosos += 1;
-    nuevos.push({ ...m, referencia: m.referencia ?? null, saldoDespues: m.saldoDespues ?? null, claveDedupe: p.claveDedupe });
+    candidatos.push({ ...m, referencia: m.referencia ?? null, saldoDespues: m.saldoDespues ?? null, claveDedupe: p.claveDedupe, sospechoso: p.sospechoso });
   }
+  // CAR-341: lo que ya entró por una cartola (aunque con otra fecha) no se duplica; queda vinculado a su id externo.
+  const vinculados = await yaGuardadosPorCartola(ctx, cuenta.id, candidatos);
+  const nuevos = candidatos.filter((_, i) => !vinculados.has(i)).map(({ sospechoso: _s, ...m }) => m);
+  const sospechosos = candidatos.filter((c, i) => c.sospechoso && !vinculados.has(i)).length;
   const duplicados = plan.length - nuevos.length;
   const saldoBanco = saldoReportado(input);
   const base = { reconocida: true, cuentaId: cuenta.id, duplicados, sospechosos, saldoBanco };
   if (dryRun) return { ...base, nuevos: nuevos.length };
-  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, duplicados, sospechosos, saldoBanco, saldoBancoEn: fechaSaldoReportado(input) });
+  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, vinculos: [...vinculados.values()], duplicados, sospechosos, saldoBanco, saldoBancoEn: fechaSaldoReportado(input), saldoExplicito: input.saldoCuenta != null });
   return { ...base, nuevos: insertados };
 }
 
@@ -122,3 +127,10 @@ export const bancosSincronizar = defineCapability({
     return sincronizarMovimientos(ctx, input, dryRun);
   },
 });
+
+/** Fechas posteriores a hoy (zona de la empresa) se acotan a hoy antes de deduplicar y guardar (CAR-341). */
+async function sinFechasFuturas(ctx: Contexto, input: SincronizarInput): Promise<SincronizarInput> {
+  const t = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { timezone: true } });
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: t?.timezone ?? "America/Santiago" }).format(new Date());
+  return { ...input, movimientos: input.movimientos.map((m) => ({ ...m, fecha: acotarFechaAHoy(m.fecha, hoy) })) };
+}

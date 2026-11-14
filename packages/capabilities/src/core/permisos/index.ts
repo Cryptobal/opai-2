@@ -1,6 +1,11 @@
 import type { Capacidad } from "../../types";
 import { rolesAssign } from "./asignaciones";
 import { permisosCatalogo } from "./catalogo";
+import {
+  rolesAdicionalesAsignar,
+  rolesAdicionalesList,
+  rolesAdicionalesQuitar,
+} from "./roles-adicionales";
 import { excepcionesList, excepcionesSet } from "./excepciones";
 import { rolesArchive, rolesUpdate } from "./roles-edicion";
 import { rolesCreate, rolesList } from "./roles";
@@ -15,6 +20,9 @@ export const capacidadesPermisos: readonly Capacidad[] = [
   rolesUpdate,
   rolesArchive,
   rolesAssign,
+  rolesAdicionalesList,
+  rolesAdicionalesAsignar,
+  rolesAdicionalesQuitar,
   excepcionesList,
   excepcionesSet,
   supervisoresList,

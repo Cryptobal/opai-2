@@ -1,19 +1,19 @@
 /** Recurso (segunda parte de «modulo.recurso.verbo») → nombre de negocio. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const RECURSOS: Record<string, string> = {
-  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", bandeja: "Bandeja del aprobador", lotes: "Lotes de pago", nomina: "Nómina de pago", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", metodos_acceso: "Métodos de acceso", invitations: "Invitaciones",
+  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", bandeja: "Bandeja del aprobador", lotes: "Lotes de pago", nomina: "Nómina de pago", reporte: "Reporte de rendiciones", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", metodos_acceso: "Métodos de acceso", apps_conectadas: "Apps conectadas", invitations: "Invitaciones",
   modules: "Módulos", apikeys: "API keys", audit: "Auditoría", usage: "Uso", tenants: "Empresas",
   admins: "Administradores", invitaciones: "Invitaciones", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",
   cuentas: "Cuentas", cuentas_referencias: "Referencias de clientes", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
-  patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos",
+  patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos", procesos_persona: "Ingreso y salida",
   contexto: "Contexto comercial", campos: "Campos de documentos", cargos: "Cargos", conversaciones: "Conversaciones", estructuras: "Sueldos", buscar: "Búsqueda", actividades: "Actividades",
-  etiquetas: "Etiquetas", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
+  etiquetas: "Etiquetas", campos_personalizados: "Campos personalizados", valores_personalizados: "Valores de campos personalizados", negocio_campos: "Campos del negocio", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
   actividad: "Actividad", resumen: "Resumen", inicio: "Inicio", permisos: "Permisos", roles: "Roles",
   excepciones: "Excepciones de permisos", supervisores: "Supervisores", documento_tipos: "Tipos de documento",
   documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", biometria: "Reconocimiento facial", terreno: "Terreno", personas_terreno: "Personas de terreno", listas: "Listas de acceso", registros: "Registros de acceso", config: "Ajustes", ajustes: "Ajustes",
   cumplimiento: "Cumplimiento", empresa: "Empresa", marca: "Marca", comunicaciones: "Comunicaciones",
-  plantillas: "Plantillas", notificacion_reglas: "Reglas de aviso", notificaciones: "Notificaciones",
-  aprobaciones: "Aprobaciones", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
+  plantillas: "Plantillas", notificacion_reglas: "Reglas de aviso", notificaciones: "Notificaciones", push: "Avisos al celular",
+  aprobaciones: "Aprobaciones", por_aprobar: "Por aprobar", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
   turno: "Turnos", plan: "Plan", historial: "Historial", negocios: "Negocios", solicitudes: "Solicitudes",
   seguimiento_planes: "Planes de seguimiento", seguimientos: "Seguimientos", canales: "Canales", importar_1_0: "Importación desde OPAI 1.0", puntos: "Puntos de ronda",
   programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos",
@@ -24,7 +24,7 @@ export const RECURSOS: Record<string, string> = {
   alertas: "Alertas", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
-  planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja",
+  planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura", recurrentes: "Gastos recurrentes",
   derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios",
   cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", reglas_banco: "Reglas del banco",
   tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", compartir: "Compartir cotización", lineas: "Líneas",
@@ -33,10 +33,11 @@ export const RECURSOS: Record<string, string> = {
   marca_documento: "Marca de documentos", plantillas_documento: "Plantillas de documento",
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
   propuestas_tecnica: "Propuestas técnicas", propuestas_html: "Plantillas HTML de propuesta", envios_propuesta: "Envíos de propuesta",
-  cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0",
+  cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0", impuestos: "Impuestos",
   informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
   // Grupos o equipos de usuarios (CAR-251).
   grupos: "Grupos",
+  webhooks: "Eventos salientes",
   // Slack (CAR-291, ADR-093).
   slack: "Slack",
   // Historial de correos del cliente (CAR-233).
@@ -44,5 +45,10 @@ export const RECURSOS: Record<string, string> = {
   // Importación de datos desde planillas (CAR-279).
   importar: "Importación de datos",
   // Indicadores de gestión de las personas (CAR-305, ADR-094).
-  indicadores_gestion: "Indicadores de gestión",
+  indicadores_gestion: "Indicadores de gestión", scorecards: "Scorecards de desempeño", resultados: "Resultados de desempeño", hechos: "Hechos medibles", propios: "Indicadores propios",
+  // Hilo del marco «Hilo»: actividad y agenda (CAR-331).
+  hilo: "Hilo",
+  // Permisos y licencias de una persona en la pauta (CAR-373).
+  ausencias: "Permisos y licencias",
+  publicaciones: "Publicaciones de la pauta",
 };

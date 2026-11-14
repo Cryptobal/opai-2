@@ -2,7 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 
-import { Alerta, Campo, Input, InputHora, Switch } from "@opai/ds";
+import { Alerta, Campo, Input, SelectorHora, Switch } from "@opai/ds";
 
 import { conCambio, type DatosPuesto } from "./puesto-datos";
 
@@ -17,10 +17,10 @@ export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         <Campo etiqueta="Inicio" htmlFor="p-ini">
-          <InputHora id="p-ini" valor={d.inicio} onCambiar={(v) => set("inicio", v)} />
+          <SelectorHora id="p-ini" valor={d.inicio} onCambiar={(v) => set("inicio", v)} />
         </Campo>
         <Campo etiqueta="Término" htmlFor="p-fin">
-          <InputHora id="p-fin" valor={d.fin} onCambiar={(v) => set("fin", v)} />
+          <SelectorHora id="p-fin" valor={d.fin} onCambiar={(v) => set("fin", v)} />
         </Campo>
       </div>
       {cruza ? (
@@ -37,14 +37,14 @@ export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
       {d.rota ? (
         <div className="grid grid-cols-2 gap-3">
           <Campo etiqueta="Inicio noche" htmlFor="p-ini-n">
-            <InputHora
+            <SelectorHora
               id="p-ini-n"
               valor={d.inicioNoche}
               onCambiar={(v) => set("inicioNoche", v)}
             />
           </Campo>
           <Campo etiqueta="Término noche" htmlFor="p-fin-n">
-            <InputHora id="p-fin-n" valor={d.finNoche} onCambiar={(v) => set("finNoche", v)} />
+            <SelectorHora id="p-fin-n" valor={d.finNoche} onCambiar={(v) => set("finNoche", v)} />
           </Campo>
         </div>
       ) : null}

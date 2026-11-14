@@ -4,6 +4,8 @@ import type { Capacidad } from "@opai/capabilities";
 import { ajustesActualizar, ajustesObtener } from "./ajustes";
 import { celdasCumplir, celdasFijar } from "./celdas";
 import { cobroEsperadoFijar } from "./cobro-esperado";
+import { cuadraturaMensualObtener } from "./cuadratura";
+import { planillaResumen } from "./resumen";
 import { flujoDerivadasListar } from "./derivadas";
 import { capacidadesBancos } from "./bancos";
 import { filasActualizar, filasArchivar, filasCrear } from "./filas";
@@ -11,6 +13,8 @@ import { flujoImportar } from "./importar";
 import { impuestosPostergarIva } from "./impuestos-postergar";
 import { filasListar, planillaObtener } from "./lectura";
 import { celdasMover } from "./mover";
+import { recurrentesActualizar, recurrentesCrear, recurrentesListar } from "./recurrentes";
+import { recurrentesCambiarDesde } from "./recurrentes-cambio";
 
 export const capacidades: readonly Capacidad[] = [
   planillaObtener,
@@ -27,5 +31,11 @@ export const capacidades: readonly Capacidad[] = [
   ajustesActualizar,
   flujoImportar,
   flujoDerivadasListar,
+  cuadraturaMensualObtener,
+  planillaResumen,
+  recurrentesListar,
+  recurrentesCrear,
+  recurrentesActualizar,
+  recurrentesCambiarDesde,
   ...capacidadesBancos,
 ];

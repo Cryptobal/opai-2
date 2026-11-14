@@ -28,7 +28,8 @@ export type DatosNegocioContacto = {
   esPrincipal: boolean;
 };
 
-export type DatosCotizacion = { code: string; createdAt: string };
+export type { DatosCotizacion } from "./cotizaciones-tipos";
+import type { DatosCotizacion } from "./cotizaciones-tipos";
 
 export type PlanComercial = {
   etapas: Decision<DatosEtapa>[];

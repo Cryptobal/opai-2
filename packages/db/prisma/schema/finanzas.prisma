@@ -20,7 +20,8 @@ model FlujoFila {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  celdas FlujoCelda[]
+  celdas      FlujoCelda[]
+  recurrentes FlujoRecurrente[]
 
   @@unique([tenantId, etiqueta])
   @@index([tenantId, seccion, orden])
@@ -104,15 +105,12 @@ model FlujoIvaPostergado {
   @@schema("finanzas")
 }
 
-/// Ajustes del flujo por empresa (una fila por tenant): saldo inicial del horizonte y umbral de alerta.
+/// Ajustes del flujo por empresa (una fila por tenant): umbral de alerta, horizonte y calendario. El saldo parte del banco (ADR-073; sin saldo inicial, CAR-394).
 model FlujoAjustes {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @unique @map("tenant_id") @db.Uuid
-  saldoInicial BigInt   @default(0) @map("saldo_inicial")
   /// Umbral único de saldo bajo (planilla, aviso semanal y aviso de banco; ADR-073). Defecto 10.000.000, configurable por empresa (decisión de Carlos del 5-nov-2026).
   umbral       BigInt   @default(10000000)
-  /// Semana (lunes) desde la que parte el saldo inicial.
-  desde        DateTime @db.Date
   toleranciaCierre     BigInt   @default(1000) @map("tolerancia_cierre")
   horizonteSemanas     Int      @default(12) @map("horizonte_semanas")
   calendarioPagos      Json     @default("{}") @map("calendario_pagos")
@@ -542,7 +540,14 @@ model CartolaImportada {
   nombreArchivo   String?  @map("nombre_archivo")
   fechaDesde      DateTime? @map("fecha_desde") @db.Date
   fechaHasta      DateTime? @map("fecha_hasta") @db.Date
-  saldoFinal      BigInt   @map("saldo_final")
+  /// Saldo final de la cartola; null si no lo trae (CAR-341).
+  saldoFinal      BigInt?  @map("saldo_final")
+  /// Saldo inicial del bloque «Saldos» de la cartola; null si no lo trae (CAR-341).
+  saldoInicial    BigInt?  @map("saldo_inicial")
+  /// Persona que importó (o por quien actuó el agente) y su nombre al momento de importar.
+  creadoPorId     String?  @map("creado_por_id") @db.Uuid
+  creadoPorNombre String?  @map("creado_por_nombre")
+  viaAgente       Boolean  @default(false) @map("via_agente")
   movimientosNuevos Int    @default(0) @map("movimientos_nuevos")
   duplicados      Int      @default(0)
   rechazados      Int      @default(0)
@@ -604,10 +609,14 @@ model ConciliacionBanco {
   propuesta     Boolean  @default(false)
   confirmada    Boolean  @default(false)
   explicacion   Json?
+  /// Cuenta contable elegida al conciliar contra una fila del flujo (CAR-328); null en documentos.
+  cuentaContableId String? @map("cuenta_contable_id") @db.Uuid
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   createdById   String?  @map("created_by_id") @db.Uuid
 
   movimiento MovimientoBancario @relation(fields: [movimientoId], references: [id], onDelete: Restrict)
+
+  @@index([cuentaContableId])
 
   @@index([tenantId, movimientoId, activa])
   @@index([tenantId, tipoEnlace, enlaceId])
@@ -624,10 +633,15 @@ model ReglaConciliacion {
   modo        String   @default("todas")
   condiciones Json
   activa      Boolean  @default(true)
+  /// Destino (CAR-328): fila del flujo y, opcional, cuenta contable. Sin fila la regla no clasifica.
+  flujoFilaId      String?  @map("flujo_fila_id") @db.Uuid
+  cuentaContableId String?  @map("cuenta_contable_id") @db.Uuid
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([tenantId, activa, prioridad])
+  @@index([flujoFilaId])
+  @@index([cuentaContableId])
   @@map("reglas_conciliacion")
   @@schema("finanzas")
 }
@@ -866,5 +880,51 @@ model VentasCierreSeguimiento {
 
   @@index([tenantId, estado])
   @@map("ventas_cierre_seguimientos")
+  @@schema("finanzas")
+}
+
+/// Gasto recurrente del flujo de caja (CAR-349): una regla por fila que se expande al leer (ADR-026); nada se copia
+/// a celdas. Cada cuota queda pagada cuando un cargo conciliado a su fila cae en su ventana.
+model FlujoRecurrente {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  filaId        String    @map("fila_id") @db.Uuid
+  concepto      String
+  /// Entero en positivo; el signo lo da la sección de la fila. Según `unidad`: CLP, UF × 10.000 o % × 10.000.
+  monto         BigInt
+  /// "clp" | "uf" (UF del día de cada cuota) | "pct_ventas" (% de las ventas netas del mes anterior).
+  unidad        String    @default("clp")
+  /// Solo UF: "dia_cuota" | "fin_de_mes" | "fin_mes_anterior" | "inicio_de_mes" | "dia_fijo" (paridad con OPAI 1).
+  politicaUf    String    @default("dia_cuota") @map("politica_uf")
+  /// Solo con politicaUf "dia_fijo": 1 a 31 (se ajusta en meses cortos).
+  ufDiaFijo     Int?      @map("uf_dia_fijo")
+  /// "semanal" | "quincenal" | "mensual".
+  frecuencia    String
+  /// Solo mensual: 1 a 31 (se ajusta al último día del mes) o −1 = último día del mes.
+  diaDelMes     Int?      @map("dia_del_mes")
+  inicio        DateTime  @db.Date
+  fin           DateTime? @db.Date
+  repeticiones  Int?
+  /// Días antes y después de cada cuota en que un cargo de la fila la da por pagada.
+  ventanaAntes   Int      @default(5) @map("ventana_antes")
+  ventanaDespues Int      @default(10) @map("ventana_despues")
+  activa        Boolean   @default(true)
+  nota          String?
+  /// Clave del origen al importar (p. ej. «opai1:<id>»): hace idempotente la importación.
+  claveOrigen   String?   @map("clave_origen")
+  /// Tramo anterior del mismo gasto (CAR-413): un cambio de fila, frecuencia o día «rige desde» una fecha cierra
+  /// el tramo anterior el día antes y crea este. Las cuotas del tramo anterior no cambian.
+  anteriorId    String?   @unique @map("anterior_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fila      FlujoFila        @relation(fields: [filaId], references: [id], onDelete: Restrict)
+  anterior  FlujoRecurrente? @relation("TramoRecurrente", fields: [anteriorId], references: [id], onDelete: SetNull)
+  siguiente FlujoRecurrente? @relation("TramoRecurrente")
+
+  @@unique([tenantId, claveOrigen])
+  @@index([tenantId, activa])
+  @@index([filaId])
+  @@map("flujo_recurrentes")
   @@schema("finanzas")
 }

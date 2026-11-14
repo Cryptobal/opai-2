@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-import { Empty, Estado, KpiTile } from "@opai/ds";
+import { cn, Empty, Estado, GRILLA_KPI_HILO, KpiTile } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 
@@ -23,7 +23,7 @@ const AlertasPauta = dynamic(() => import("./alertas-pauta").then((m) => ({ defa
 
 function Resumen({ r }: { r: ResumenCobertura }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+    <div className={cn("grid grid-cols-2 gap-3 md:grid-cols-3", GRILLA_KPI_HILO)}>
       <KpiTile etiqueta="Cobertura del mes" valor={pct(r.cobertura)} />
       <KpiTile etiqueta="Turnos sin cubrir" valor={String(r.ppc)} />
       <div className="col-span-2 md:col-span-1">
@@ -47,7 +47,7 @@ export function ContenidoPauta({
   const sinDatos = d.mensual ? d.mensual.puestos.length === 0 : (d.todas?.instalaciones.length ?? 0) === 0;
   return (
     <div className="flex flex-col gap-4">
-      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} diaria={d.diaria} fecha={d.fecha} />
+      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} diaria={d.diaria} fecha={d.fecha} puedeEditar={puedeEditar} />
       <Estado
         state={d.state}
         variante="planilla"

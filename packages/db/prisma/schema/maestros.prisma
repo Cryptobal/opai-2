@@ -191,6 +191,12 @@ model Cargo {
   sueldoSensible Boolean  @default(false) @map("sueldo_sensible")
   activo         Boolean  @default(true)
   orden          Int      @default(0)
+  /// Jefatura (CAR-314, ADR-094): el cargo al que reporta. null = no reporta a nadie (gerencia).
+  jefaturaCargoId String? @map("jefatura_cargo_id") @db.Uuid
+  /// A quiénes de este cargo ve cada persona de la jefatura: "asignadas" (solo las que tiene
+  /// asignadas en `personas.jefe_persona_id`) | "equipo" (todas) | "instalaciones" (las de sus
+  /// instalaciones a cargo, ADR-022).
+  jefaturaVe     String   @default("asignadas") @map("jefatura_ve")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -198,7 +204,12 @@ model Cargo {
   puestos     Puesto[]
   vinculos    VinculoLaboral[]
   estructuras EstructuraSueldo[]
+  /// FK compuesta por tenant: la jefatura siempre es un cargo de la MISMA empresa.
+  jefatura    Cargo?  @relation("CargoJefatura", fields: [tenantId, jefaturaCargoId], references: [tenantId, id], onDelete: Restrict)
+  reportan    Cargo[] @relation("CargoJefatura")
 
+  @@unique([tenantId, id])
+  @@index([tenantId, jefaturaCargoId])
   @@unique([tenantId, nombre])
   @@map("cargos")
   @@schema("core")
@@ -291,6 +302,9 @@ model Persona {
   bloqueadaEn         DateTime? @map("bloqueada_en") @db.Timestamptz(6)
   /// Usuario de OPAI vinculado (1:1), si la persona entra al sistema.
   usuarioId           String?   @map("usuario_id") @db.Uuid
+  /// Jefe directo (CAR-314): la persona que la tiene a su cargo cuando el cargo se ve por
+  /// "asignadas". null = sin asignar.
+  jefePersonaId       String?   @map("jefe_persona_id") @db.Uuid
   archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
   /// Anonimizada por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
   anonimizadaEn       DateTime? @map("anonimizada_en") @db.Timestamptz(6)
@@ -311,14 +325,19 @@ model Persona {
   estructuras EstructuraSueldo[]
   anexos      AnexoContrato[]
   prevision   PersonaPrevision?
-  pago        PersonaPago?
+  pagos       PersonaPago[]
   pagoSolicitudes PersonaPagoSolicitud[]
   uniforme    PersonaUniforme?
   uniformeEntregas PersonaUniformeEntrega[]
   jornadaDt   PersonaJornadaDt?
   os10        PersonaOs10?
   contactoLaboral PersonaContactoLaboral?
+  /// FK compuesta por tenant: el jefe siempre es una persona de la MISMA empresa.
+  jefe        Persona?  @relation("PersonaJefe", fields: [tenantId, jefePersonaId], references: [tenantId, id], onDelete: Restrict)
+  aCargo      Persona[] @relation("PersonaJefe")
 
+  @@unique([tenantId, id])
+  @@index([tenantId, jefePersonaId])
   @@unique([tenantId, rut])
   @@index([tenantId, estado])
   @@index([tenantId, apellidos])
@@ -346,6 +365,8 @@ model VinculoLaboral {
   motivoTermino String?   @map("motivo_termino")
   /// "vigente" | "terminado". Un solo vigente por persona (índice parcial en la migración).
   estado        String    @default("vigente")
+  /// Usuario que reclutó a la persona (CAR-309). Lo llena quien registra el ingreso; se puede cambiar.
+  reclutadoPorId String?  @map("reclutado_por") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -356,6 +377,7 @@ model VinculoLaboral {
 
   @@index([tenantId, personaId])
   @@index([tenantId, instalacionId, estado], map: "vinculos_tenant_instalacion_idx")
+  @@index([tenantId, reclutadoPorId], map: "vinculos_tenant_reclutado_idx")
   @@map("vinculos_laborales")
   @@schema("core")
 }
@@ -438,6 +460,22 @@ model PersonaPrevision {
   planIsapre      String?  @map("plan_isapre")
   planUf          Decimal? @map("plan_uf") @db.Decimal(10, 4)
   cotizacionUfPct Decimal? @map("cotizacion_uf_pct") @db.Decimal(10, 4)
+  /// CAR-276: previsión completa (códigos de los catálogos de `@opai/domain`, prevision-catalogos).
+  jubilado              Boolean  @default(false)
+  tipoPension           String?  @map("tipo_pension")
+  saludAdicionalPct     Decimal? @map("salud_adicional_pct") @db.Decimal(6, 3)
+  cotizaAfp             Boolean  @default(true) @map("cotiza_afp")
+  cotizaAfc             Boolean  @default(true) @map("cotiza_afc")
+  cotizaSalud           Boolean  @default(true) @map("cotiza_salud")
+  apvInstitucion        String?  @map("apv_institucion")
+  apvRegimen            String?  @map("apv_regimen")
+  apvMonto              Decimal? @map("apv_monto") @db.Decimal(14, 4)
+  apvMoneda             String?  @map("apv_moneda")
+  tramoAsignacion       String?  @map("tramo_asignacion")
+  cargasSimples         Int      @default(0) @map("cargas_simples") @db.SmallInt
+  cargasMaternales      Int      @default(0) @map("cargas_maternales") @db.SmallInt
+  cargasInvalidez       Int      @default(0) @map("cargas_invalidez") @db.SmallInt
+  discapacidadInvalidez String?  @map("discapacidad_invalidez")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -449,15 +487,18 @@ model PersonaPrevision {
   @@schema("core")
 }
 
-/// Cuenta bancaria vigente de la persona (número cifrado en aplicación).
+/// Cuentas bancarias de la persona (número cifrado en aplicación). A lo más una es la «por defecto»
+/// (índice parcial único en la migración): la nómina de pago usa esa (CAR-275).
 model PersonaPago {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @map("tenant_id") @db.Uuid
-  personaId    String   @unique @map("persona_id") @db.Uuid
+  personaId    String   @map("persona_id") @db.Uuid
   bancoCodigo  String?  @map("banco_codigo")
   tipoCuenta   String?  @map("tipo_cuenta")
   numeroCuenta String?  @map("numero_cuenta")
   rutTitular   String?  @map("rut_titular")
+  titularNombre String? @map("titular_nombre")
+  porDefecto   Boolean  @default(false) @map("por_defecto")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -465,6 +506,7 @@ model PersonaPago {
   persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, personaId])
+  @@index([personaId], map: "personas_pago_persona_id_idx2")
   @@map("personas_pago")
   @@schema("core")
 }
@@ -478,6 +520,13 @@ model PersonaPagoSolicitud {
   tipoCuenta       String?   @map("tipo_cuenta")
   numeroCuenta     String?   @map("numero_cuenta")
   rutTitular       String?   @map("rut_titular")
+  titularNombre    String?   @map("titular_nombre")
+  /// "reemplazar" (cambia la cuenta por defecto) | "agregar" | "marcar_defecto" | "quitar" (CAR-275).
+  tipo             String    @default("reemplazar")
+  /// Cuenta a la que apunta «marcar_defecto» o «quitar».
+  cuentaId         String?   @map("cuenta_id") @db.Uuid
+  /// Con «agregar»: la cuenta nueva pasa a ser la por defecto.
+  porDefecto       Boolean   @default(false) @map("por_defecto")
   /// "pendiente" | "aprobada" | "rechazada"
   estado           String    @default("pendiente")
   solicitadoPorId  String    @map("solicitado_por_id") @db.Uuid
@@ -503,6 +552,12 @@ model PersonaUniforme {
   tallaPantalon String? @map("talla_pantalon")
   tallaChaqueta String? @map("talla_chaqueta")
   tallaZapato  String?  @map("talla_zapato")
+  /// CAR-277: tallas de polera, geólogo y polar; estatura y peso para el pedido de uniforme.
+  tallaPolera  String?  @map("talla_polera")
+  tallaGeologo String?  @map("talla_geologo")
+  tallaPolar   String?  @map("talla_polar")
+  estaturaCm   Int?     @map("estatura_cm")
+  pesoKg       Int?     @map("peso_kg")
   notas        String?
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -543,11 +598,15 @@ model PersonaJornadaDt {
   personaId          String    @unique @map("persona_id") @db.Uuid
   resolucion         String?
   resolucionVigenteDesde DateTime? @map("resolucion_vigente_desde") @db.Date
+  /// CAR-277: hasta cuándo rige la resolución de jornada.
+  resolucionVigenteHasta DateTime? @map("resolucion_vigente_hasta") @db.Date
   horasSemanales     Decimal?  @map("horas_semanales") @db.Decimal(5, 2)
   distribucion       String?
   articulo22         Boolean   @default(false) @map("articulo_22")
   plazoFijoPeriodo   Int?      @map("plazo_fijo_periodo")
   terminoPlazoFijo   DateTime? @map("termino_plazo_fijo") @db.Date
+  /// CAR-277: término de cada período de plazo fijo (hasta 3, en orden).
+  terminosPlazoFijo  DateTime[] @default([]) @map("terminos_plazo_fijo") @db.Date
   avisoTerminoDias   Int?      @map("aviso_termino_dias")
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -586,6 +645,9 @@ model PersonaContactoLaboral {
   emergenciaNombre    String?  @map("emergencia_nombre")
   emergenciaRelacion  String?  @map("emergencia_relacion")
   emergenciaTelefono  String?  @map("emergencia_telefono")
+  /// CAR-277: código interno de la empresa y movilización.
+  codigoInterno       String?  @map("codigo_interno")
+  movilizacion        String?
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

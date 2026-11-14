@@ -8,6 +8,8 @@ export type AdjuntoCorreo = {
 
 export type Correo = {
   para: string;
+  /** Más destinatarios principales, que reciben igual que `para` (p. ej. todos los contactos de facturación). */
+  paraAdicionales?: readonly string[];
   asunto: string;
   texto: string;
   html?: string;

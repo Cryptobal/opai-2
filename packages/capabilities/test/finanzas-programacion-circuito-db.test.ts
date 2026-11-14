@@ -10,6 +10,7 @@ import { sumarDiasIso } from "@opai/domain";
 import type { Correo } from "@opai/integrations";
 
 import { capacidades as capacidadesBancos } from "../../../modules/finanzas/capacidades";
+import { ufDelPrevio } from "../src/finanzas/ventas-pdf-previo-uf";
 import { urlPropietario } from "../../db/test/entorno";
 
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
@@ -68,8 +69,9 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     const [proforma, ep] = [mios.find((c) => c.asunto.startsWith("Proforma")), mios.find((c) => c.asunto.startsWith("Estado de pago"))];
     expect(proforma?.asunto).toMatch(/^Proforma - .+ - [A-Za-zé]+ - \d{4}$/);
     expect(ep?.asunto).toMatch(/^Estado de pago - .+ - [A-Za-zé]+ - \d{4}$/);
+    // ADR-103: todos los destinatarios de la programación reciben por igual como PARA.
     expect(proforma?.para).toBe("pagos@cliente-ficticio.test");
-    expect(proforma?.cc).toEqual(["contabilidad@cliente-ficticio.test"]);
+    expect(proforma?.paraAdicionales).toEqual(["contabilidad@cliente-ficticio.test"]);
     // CAR-320: cada correo lleva su PDF con número interno (sin folio del SII), el mismo para ambos tipos del período.
     const [pdfPf, pdfEp] = [proforma?.adjuntos?.[0], ep?.adjuntos?.[0]];
     expect(pdfPf).toMatchObject({ mime: "application/pdf", nombre: expect.stringMatching(/^Proforma PF-\d{4}-\d{2}-\d{4}\.pdf$/) });
@@ -95,7 +97,7 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     expect(nuevos).toEqual(["Proforma"]); // el estado de pago no estaba activado
   });
 
-  it("sin flags no se manda nada, y sin destinatarios el envío queda fallido sin detener el borrador", async () => {
+  it("sin flags no se manda nada, y sin destinatarios en la programación va a los contactos de facturación de la cuenta", async () => {
     const antes = enviados.length;
     const sinFlags = await generar({ destinatarioIds: [c1] });
     expect(sinFlags.res?.documentoId).toBeTruthy();
@@ -103,15 +105,53 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     const sinDest = await generar({ autoEnvioProforma: true });
     expect(sinDest.res?.documentoId).toBeTruthy();
     const e = await s.e.admin.documentoEmitidoEnvio.findFirstOrThrow({ where: { documentoId: sinDest.res!.documentoId! } });
-    expect([e.estado, e.error]).toEqual(["fallido", "El borrador no tiene destinatarios."]);
-    expect(enviados.length).toBe(antes);
+    expect([e.estado, e.error]).toEqual(["enviado", null]);
+    expect(e.destinatarios).toEqual(["pagos@cliente-ficticio.test", "contabilidad@cliente-ficticio.test"]);
+    expect(enviados.length).toBe(antes + 1);
   });
 
   it("cada borrador conserva su lista: cambiar la programación después no altera los ya generados", async () => {
     const { id, res } = await generar({ destinatarioIds: [c1, c2] });
     await s.dato("finanzas.ventas_programacion.actualizar", { ...base({ destinatarioIds: [c2] }), programacionId: id });
     const guardados = await s.e.admin.documentoEmitidoDestinatario.findMany({ where: { documentoId: res!.documentoId! }, orderBy: { orden: "asc" } });
-    expect(guardados.map((g) => [g.tipo, g.email])).toEqual([["PARA", "pagos@cliente-ficticio.test"], ["CC", "contabilidad@cliente-ficticio.test"]]);
+    expect(guardados.map((g) => [g.tipo, g.email])).toEqual([["PARA", "pagos@cliente-ficticio.test"], ["PARA", "contabilidad@cliente-ficticio.test"]]);
+  });
+
+  it("la casilla DTE del cliente queda en copia del borrador y recibe la proforma (ADR-103)", async () => {
+    await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { emailDte: "DTE@cliente-ficticio.test" } });
+    try {
+      const { res } = await generar({ autoEnvioProforma: true, destinatarioIds: [c1, c2] });
+      const guardados = await s.e.admin.documentoEmitidoDestinatario.findMany({ where: { documentoId: res!.documentoId! }, orderBy: { orden: "asc" } });
+      expect(guardados.map((g) => [g.tipo, g.email, g.origen])).toEqual([
+        ["PARA", "pagos@cliente-ficticio.test", "contacto_facturacion"],
+        ["PARA", "contabilidad@cliente-ficticio.test", "contacto_facturacion"],
+        ["CC", "dte@cliente-ficticio.test", "casilla_dte"],
+      ]);
+      expect(enviados.at(-1)).toMatchObject({ para: "pagos@cliente-ficticio.test", cc: ["dte@cliente-ficticio.test"] });
+    } finally {
+      await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { emailDte: null } });
+    }
+  });
+
+  it("un contacto archivado después de programar no recibe el borrador", async () => {
+    const datos = { tenantId: s.tenantId, cuentaId: s.cuentaId, nombres: "Leo", apellidos: "Ficticio", roles: ["facturacion"] };
+    const c3 = (await s.e.admin.contacto.create({ data: { ...datos, email: "ex@cliente-ficticio.test" } })).id;
+    const p = await s.dato<{ id: string }>("finanzas.ventas_programacion.crear", base({ destinatarioIds: [c1, c3] }));
+    await s.e.admin.contacto.update({ where: { id: c3 }, data: { archivadoEn: new Date() } });
+    await s.dato("finanzas.ventas_programacion.cambiar_estado", { programacionId: p.id, activa: true });
+    const g = await s.dato<Gen>("finanzas.ventas_programacion.generar", { programacionId: p.id });
+    const doc = g.resultados.find((r) => r.estado === "generado")!.documentoId!;
+    const guardados = await s.e.admin.documentoEmitidoDestinatario.findMany({ where: { documentoId: doc }, orderBy: { orden: "asc" } });
+    expect(guardados.map((x) => x.email)).toEqual(["pagos@cliente-ficticio.test"]);
+  });
+
+  it("la proforma de una programación en UF dice con qué UF se valorizó, y que es estimada sin la oficial", async () => {
+    const { res } = await generar({});
+    const doc = res!.documentoId!;
+    expect(await ufDelPrevio(s.ctx(), doc, hoy)).toBeNull(); // en pesos: sin UF
+    await s.e.admin.ventasProgramacionCorrida.updateMany({ where: { documentoId: doc }, data: { ufCentavos: 3_812_345n } });
+    expect(await ufDelPrevio(s.ctx(), doc, hoy)).toMatchObject({ valor: "38.123,45", estimada: true });
+    expect(await ufDelPrevio(s.ctx(s.tenantB), doc, hoy)).toBeNull(); // otra empresa no la ve
   });
 
   it("se sigue hasta la factura emitida y el cobro en caja", async () => {

@@ -5,6 +5,7 @@ import { comprasAsignarCentro } from "./compras-centro";
 import { comprasRegistrar } from "./compras-escritura";
 import { comprasImportar } from "./compras-importar";
 import { comprasSincronizarRcv, trabajoSincronizarRcv } from "./compras-rcv";
+import { comprasGet } from "./compras-detalle";
 import { comprasListar } from "./compras-lectura";
 import { dteConfigActualizar, dteConfigObtener } from "./dte-config";
 import { foliosCargarCaf, foliosListar } from "./folios";
@@ -28,6 +29,7 @@ import {
 } from "./ventas-escritura";
 import { reporteResultados } from "./reportes-resultados";
 import { ventasBuscar } from "./ventas-buscar";
+import { impuestosBorradorF29 } from "./impuestos-f29";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
 import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
@@ -61,6 +63,7 @@ import { cierreActualizar } from "./cierre-actualizar";
 import { cierreEmitirLote } from "./cierre-emitir-lote";
 
 export { ajustesFinanzas } from "./ajustes";
+export { ventasProgramadasPorPeriodo } from "./ventas-programacion-netas";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
 export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones, trabajoRecordatoriosCobranza, trabajoSincronizarRcv];
@@ -76,6 +79,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   proveedoresCrear,
   proveedoresActualizar,
   comprasListar,
+  comprasGet,
   comprasRegistrar,
   comprasImportar,
   comprasSincronizarRcv,
@@ -83,6 +87,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasListar,
   ventasObtener,
   ventasLibroResumen,
+  impuestosBorradorF29,
   ventasBuscar,
   reporteResultados,
   cobranzaResumen,

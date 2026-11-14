@@ -1,6 +1,8 @@
 import {
   type Acceso,
   moduloDe,
+  permisosAdicionalesDe,
+  type RolesQueSuman,
   type Rol,
   tienePermisoEfectivo,
   type UnidadCobro,
@@ -10,12 +12,12 @@ import { catalogoPermisos } from "../../me";
 
 /** Lo que cuenta `unidadesCobro()` de @opai/db: accesos de miembros activos, trabajadores e instalaciones. */
 export type DatosUnidades = {
-  miembros: readonly {
+  miembros: readonly ({
     rol: string;
     roleId: string | null;
     rolTenant: { permisos: readonly string[] } | null;
     excepciones: readonly { permiso: string; conceder: boolean }[];
-  }[];
+  } & Partial<RolesQueSuman>)[];
   trabajadores: number;
   instalaciones: number;
 };
@@ -24,6 +26,12 @@ const aAcceso = (m: DatosUnidades["miembros"][number]): Acceso => ({
   rol: m.roleId ? null : (m.rol as Rol),
   permisosRol: m.rolTenant?.permisos ?? null,
   excepciones: m.excepciones,
+  // Decisión de Carlos (14-nov-2026, CAR-359): quien recibe acceso a un módulo por un rol adicional o
+  // por un grupo cuenta como licencia de ese módulo, igual que por su rol principal.
+  permisosAdicionales: permisosAdicionalesDe({
+    rolesAdicionales: m.rolesAdicionales ?? [],
+    gruposUsuarios: m.gruposUsuarios ?? [],
+  }),
 });
 
 /** Permiso por el que se cuenta «usuario que rinde»: los aprobadores no se cobran (ADR-071). */
