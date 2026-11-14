@@ -58,6 +58,8 @@ export const bancosCartolaImportar = defineCapability({
     reglas: z.object({ conciliados: z.number().int(), sugeridos: z.number().int() }).optional(),
     /** CAR-450: del banco en línea, en el período de una cartola que cuadra, sin par en ella (vacío si no cuadra). */
     sobrantesEnLinea: z.array(sobranteSchema).max(500),
+    /** Total de sobrantes (la lista se corta en 500; al quitar se quitan todos). */
+    sobrantesTotal: z.number().int(),
     sobrantesQuitados: z.number().int(),
   }),
   efecto: "escritura",
@@ -80,7 +82,7 @@ export const bancosCartolaImportar = defineCapability({
     const { previews, nuevos, ajustes, duplicados, emparejados } = await emparejarCartola(ctx, cuenta.id, parsedFilas);
     const fechas = parsedFilas.map((f) => f.fecha).sort();
     const periodo = { desde: fechaDesde ?? fechas[0] ?? "", hasta: fechaHasta ?? fechas.at(-1) ?? "" };
-    const sobrantes = cuadratura?.cuadra && periodo.desde ? (await sobrantesEnLinea(ctx, cuenta.id, periodo, emparejados)).slice(0, 500) : [];
+    const sobrantes = cuadratura?.cuadra && periodo.desde && periodo.hasta ? await sobrantesEnLinea(ctx, cuenta.id, periodo, emparejados) : [];
     for (const r of rechazadas) {
       previews.push({ indice: r.indice, estado: "rechazada", motivo: r.motivo, fecha: null, monto: null, glosa: null });
     }
@@ -94,7 +96,8 @@ export const bancosCartolaImportar = defineCapability({
       filas: previews,
       cuadratura,
       yaImportada: dryRun ? await cartolaRepetida(ctx, cuenta.id, fechaDesde, fechaHasta) : null,
-      sobrantesEnLinea: sobrantes,
+      sobrantesEnLinea: sobrantes.slice(0, 500),
+      sobrantesTotal: sobrantes.length,
       sobrantesQuitados: 0,
     };
 

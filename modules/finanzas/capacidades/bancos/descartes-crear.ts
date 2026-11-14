@@ -9,7 +9,8 @@ type Fila = Awaited<ReturnType<TenantTx["movimientoBancario"]["findFirstOrThrow"
 /**
  * CAR-412: saca movimientos de la cuenta dejando un descarte restaurable (quién, cuándo, motivo y copia exacta).
  * Lo usan «Borrar por fechas» y los sobrantes del banco en línea al importar una cartola (CAR-450). Corre dentro de
- * la transacción de quien llama; borra solo propuestas sin confirmar (una confirmada aborta todo por la FK).
+ * la transacción de quien llama. Borra las propuestas sin confirmar y las conciliaciones deshechas (CAR-453): una
+ * confirmada y vigente aborta todo por la FK.
  */
 export async function descartarMovimientos(
   ctx: Contexto,
@@ -31,7 +32,7 @@ export async function descartarMovimientos(
     },
     select: { id: true },
   });
-  await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ids }, confirmada: false } });
+  await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ids }, OR: [{ confirmada: false }, { activa: false }] } });
   await tx.movimientoBancario.deleteMany({ where: { id: { in: ids } } });
   return descarte.id;
 }

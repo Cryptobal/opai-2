@@ -17,7 +17,7 @@ const enLineaSinConciliar = (cuentaId: string, p: Periodo) => ({
   cuentaId,
   origen: "web4leads",
   fecha: { gte: aFecha(p.desde), lte: aFecha(p.hasta) },
-  conciliaciones: { none: { activa: true, confirmada: true } },
+  conciliaciones: { none: { activa: true, confirmada: true } }, // las deshechas no cuentan (CAR-453)
 });
 
 /**
@@ -36,13 +36,13 @@ export async function sobrantesEnLinea(ctx: Contexto, cuentaId: string, p: Perio
 
 /**
  * Quita los sobrantes como un descarte restaurable (CAR-412). Se vuelven a leer en la transacción: lo que se concilió
- * o ya no está desde la vista previa se conserva. Devuelve cuántos se quitaron.
+ * o ya no está desde la vista previa se conserva. Devuelve cuántos se quitaron y el descarte (null si ninguno).
  */
 export async function quitarSobrantes(ctx: Contexto, tx: TenantTx, p: { cuentaId: string; periodo: Periodo; ids: string[]; archivo: string | null }) {
-  if (!p.ids.length) return 0;
+  if (!p.ids.length) return { cantidad: 0, descarteId: null };
   const movs = await tx.movimientoBancario.findMany({ where: { ...enLineaSinConciliar(p.cuentaId, p.periodo), id: { in: p.ids } } });
-  if (!movs.length) return 0;
+  if (!movs.length) return { cantidad: 0, descarteId: null };
   const motivo = `Sobrantes del banco en línea frente a la cartola ${p.archivo ?? "importada"}.`;
-  await descartarMovimientos(ctx, tx, { cuentaId: p.cuentaId, ...p.periodo, origen: "web4leads", motivo, movimientos: movs });
-  return movs.length;
+  const descarteId = await descartarMovimientos(ctx, tx, { cuentaId: p.cuentaId, ...p.periodo, origen: "web4leads", motivo, movimientos: movs });
+  return { cantidad: movs.length, descarteId };
 }

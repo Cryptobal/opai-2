@@ -136,6 +136,7 @@ export function HojaSubirCartola({
             onChange={(e) => {
               setArchivo(e.target.files?.[0] ?? null);
               setVista(null);
+              setQuitarSobrantes(true);
             }}
           />
         </Campo>
@@ -149,7 +150,7 @@ export function HojaSubirCartola({
             yaImportada={vista.yaImportada ?? null}
           />
         ) : null}
-        {vista ? <AvisoSobrantes sobrantes={vista.sobrantesEnLinea ?? []} quitar={quitarSobrantes} onQuitar={setQuitarSobrantes} /> : null}
+        {vista ? <AvisoSobrantes sobrantes={vista.sobrantesEnLinea ?? []} total={vista.sobrantesTotal ?? 0} quitar={quitarSobrantes} onQuitar={setQuitarSobrantes} /> : null}
       </div>
     </Sheet>
   );

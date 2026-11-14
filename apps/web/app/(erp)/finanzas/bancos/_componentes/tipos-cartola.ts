@@ -15,6 +15,7 @@ export type VistaCartolaPreview = {
   yaImportada?: { nombreArchivo: string | null; creadaEn: string } | null;
   /** Del banco en línea, en el período de una cartola que cuadra, sin par en ella (CAR-450). */
   sobrantesEnLinea: { id: string; fecha: string; monto: number; glosa: string }[];
+  sobrantesTotal: number;
   filas: {
     indice: number;
     estado: string;

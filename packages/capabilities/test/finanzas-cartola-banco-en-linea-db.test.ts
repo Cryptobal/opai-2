@@ -119,4 +119,39 @@ describe.skipIf(omitirSuiteDb())("Finanzas · cartola frente al banco en línea 
     expect(rest.ok).toBe(true);
     expect(await e.admin.movimientoBancario.count({ where: { id: sobrante.id } })).toBe(1);
   });
+
+  it("conserva los conciliados, quita sin fallar uno con conciliación deshecha y sin la casilla no toca nada", async () => {
+    const cuentaId = await nuevaCuenta("000000005");
+    const conc = (movimientoId: string, activa: boolean) =>
+      e.admin.conciliacionBanco.create({ data: { tenantId, movimientoId, tipoEnlace: "flujo_fila", enlaceId: randomUUID(), monto: -1n, activa, confirmada: true } });
+    const conciliado = await enLinea(cuentaId, "2026-10-08", -5_555, "TEF CONCILIADA");
+    await conc(conciliado.id, true);
+    const deshecho = await enLinea(cuentaId, "2026-10-09", -6_666, "TEF CONCILIACION DESHECHA");
+    await conc(deshecho.id, false);
+    const filas = [
+      [42000, "Pago proveedores 0099", "05/10/2026", "1", "Santiago", "C"],
+      [277000, "Abono cliente ficticio", "06/10/2026", "2", "Santiago", "A"],
+    ];
+    const vista = await importar(cuentaId, filas, true);
+    expect(vista.sobrantesEnLinea.map((x) => x.id)).toEqual([deshecho.id]);
+
+    const sinQuitar = await importar(cuentaId, filas, false);
+    expect(sinQuitar.sobrantesQuitados).toBe(0);
+    expect(await e.admin.movimientoBancario.count({ where: { id: deshecho.id } })).toBe(1);
+  });
+
+  it("con la casilla, el movimiento con una conciliación deshecha se quita sin abortar la importación (CAR-453)", async () => {
+    const cuentaId = await nuevaCuenta("000000006");
+    const deshecho = await enLinea(cuentaId, "2026-10-09", -6_666, "TEF CONCILIACION DESHECHA");
+    await e.admin.conciliacionBanco.create({
+      data: { tenantId, movimientoId: deshecho.id, tipoEnlace: "flujo_fila", enlaceId: randomUUID(), monto: -1n, activa: false, confirmada: true },
+    });
+    const filas = [
+      [42000, "Pago proveedores 0099", "05/10/2026", "1", "Santiago", "C"],
+      [277000, "Abono cliente ficticio", "06/10/2026", "2", "Santiago", "A"],
+    ];
+    const r = await importar(cuentaId, filas, false, { quitarSobrantesEnLinea: true });
+    expect(r).toMatchObject({ aplicados: 2, sobrantesQuitados: 1 });
+    expect(await e.admin.movimientoBancario.count({ where: { id: deshecho.id } })).toBe(0);
+  });
 });
