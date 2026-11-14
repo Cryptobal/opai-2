@@ -11,7 +11,7 @@ const passkeySchema = z.object({
   sincronizada: z.boolean(),
 });
 
-export const metodosSchema = z.object({
+const metodosSchema = z.object({
   appAutenticadora: z.boolean(),
   passkeys: z.array(passkeySchema),
   tieneContrasena: z.boolean(),

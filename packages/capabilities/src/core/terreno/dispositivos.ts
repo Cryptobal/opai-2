@@ -53,7 +53,7 @@ async function dispositivoVisible(ctx: Contexto, id: string) {
   return d;
 }
 
-export const dispositivosListar = defineCapability({
+const dispositivosListar = defineCapability({
   id: "core.dispositivos.listar",
   descripcion:
     "Lista los dispositivos de terreno emparejados a una instalación, con su estado (activo o revocado), último contacto y versión de la app. Nunca muestra el token del dispositivo.",
@@ -74,7 +74,7 @@ export const dispositivosListar = defineCapability({
   },
 });
 
-export const dispositivosEstado = defineCapability({
+const dispositivosEstado = defineCapability({
   id: "core.dispositivos.estado",
   descripcion:
     "Muestra el estado de un dispositivo de terreno: si sigue emparejado o fue revocado, cuándo contactó por última vez y qué versión de la app usa.",
@@ -98,7 +98,7 @@ const codigoSchema = z.object({
   url: z.string().nullable(),
 });
 
-export const dispositivosGenerarCodigo = defineCapability({
+const dispositivosGenerarCodigo = defineCapability({
   id: "core.dispositivos.generar_codigo",
   descripcion:
     "Genera el código de 6 caracteres para emparejar un dispositivo de terreno a una instalación. Vence a los 10 minutos y sirve una sola vez; se muestra una sola vez junto con su QR.",
@@ -133,7 +133,7 @@ export const dispositivosGenerarCodigo = defineCapability({
   },
 });
 
-export const dispositivosRevocar = defineCapability({
+const dispositivosRevocar = defineCapability({
   id: "core.dispositivos.revocar",
   descripcion:
     "Revoca un dispositivo de terreno: corta su acceso al instante. En su siguiente petición el equipo avisa que ya no está emparejado y borra los datos de la instalación. Para volver a usarlo hay que emparejarlo de nuevo.",

@@ -10,12 +10,12 @@ import { ESQUEMAS_PREVIRED } from "./previsional-esquemas";
 import { auditarCapturaPrevisional } from "./previsional-auditoria";
 import { primerDiaMes } from "./sii-parse";
 
-export const URL_PREVIRED = "https://www.previred.com/indicadores-previsionales/";
+const URL_PREVIRED = "https://www.previred.com/indicadores-previsionales/";
 const TIMEOUT_MS = 20_000;
 
 export type ConsultaPrevired = (url: string, signal?: AbortSignal) => Promise<string>;
 
-export const consultaPreviredPorDefecto: ConsultaPrevired = async (url, signal) => {
+const consultaPreviredPorDefecto: ConsultaPrevired = async (url, signal) => {
   const señal = signal ? AbortSignal.any([signal, AbortSignal.timeout(TIMEOUT_MS)]) : AbortSignal.timeout(TIMEOUT_MS);
   const res = await fetch(url, { redirect: "error", signal: señal });
   if (!res.ok) throw new Error(`Previred respondió ${res.status}`);

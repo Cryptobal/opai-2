@@ -36,7 +36,7 @@ const campos = {
 };
 const CLAVES = Object.keys(campos) as (keyof typeof campos)[];
 
-export const empresaSchema = z.object(
+const empresaSchema = z.object(
   Object.fromEntries(CLAVES.map((k) => [k, z.string().nullable()])) as Record<
     keyof typeof campos,
     z.ZodNullable<z.ZodString>

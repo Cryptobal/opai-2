@@ -4,7 +4,7 @@ import { enmascararRun } from "@opai/domain";
 
 const iso = (d: Date | null | undefined): string | null => (d ? d.toISOString() : null);
 
-export const firmanteVistaSchema = z.object({
+const firmanteVistaSchema = z.object({
   id: z.string(),
   orden: z.number().int(),
   rol: z.string(),
@@ -17,15 +17,7 @@ export const firmanteVistaSchema = z.object({
   firmadoEn: z.string().nullable(),
   motivoRechazo: z.string().nullable(),
 });
-export type FirmanteVista = z.infer<typeof firmanteVistaSchema>;
-
-export const evidenciaVistaSchema = z.object({
-  tipo: z.string(),
-  nivel: z.string().nullable(),
-  metodo: z.string().nullable(),
-  firmanteId: z.string().nullable(),
-  fecha: z.string(),
-});
+type FirmanteVista = z.infer<typeof firmanteVistaSchema>;
 
 export const solicitudVistaSchema = z.object({
   id: z.string(),
@@ -60,7 +52,7 @@ type FilaFirmante = {
   motivoRechazo: string | null;
 };
 
-export function vistaFirmante(f: FilaFirmante): FirmanteVista {
+function vistaFirmante(f: FilaFirmante): FirmanteVista {
   return {
     id: f.id,
     orden: f.orden,

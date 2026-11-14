@@ -7,7 +7,7 @@ import type { Contexto } from "../../types";
 import { dondeContacto, dondeCuenta } from "../maestros/alcance";
 import { ENTIDADES_ACTIVIDAD, type EntidadActividad } from "./comun";
 
-export const PERMISO_NEGOCIOS = "comercial:negocios.read";
+const PERMISO_NEGOCIOS = "comercial:negocios.read";
 
 export type Visibilidad = {
   /** null = sin acotar por filas. */

@@ -51,5 +51,3 @@ export function importadorDe(id: string): Importador<Datos> {
   if (!i) throw noEncontrado("El importador");
   return i;
 }
-
-export const importadorDeEntidad = (entidad: string) => IMPORTADORES.find((x) => x.entidad === entidad);

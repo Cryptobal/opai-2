@@ -17,7 +17,7 @@ import {
 import { cuentasReferenciasOtorgar } from "./referencias-escritura";
 import { cuentasReferenciasRevocar } from "./referencias-revocar";
 
-export const cuentasReferenciasList = defineCapability({
+const cuentasReferenciasList = defineCapability({
   // Revela qué clientes consintieron ser referencia y la evidencia: se auditan las cuentas entregadas.
   auditarLectura: (s) => [...new Set([...s.items, ...s.historial].map((r) => r.cuentaId))],
   id: "core.cuentas_referencias.list",

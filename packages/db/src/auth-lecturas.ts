@@ -50,7 +50,7 @@ type FilaUsuario = {
 };
 
 /** Valor de una igualdad simple (`{campo: v}` o `{campo: {equals: v}}`) y nada más; si no, null. */
-export function soloIgualdad(where: unknown, campo: string): string | null {
+function soloIgualdad(where: unknown, campo: string): string | null {
   if (!where || typeof where !== "object") return null;
   const w = where as Record<string, unknown>;
   const claves = Object.keys(w);
@@ -86,7 +86,7 @@ function usuario(f: FilaSesion) {
  * No avisa al contador de consultas: se invoca desde el hook de modelos de `clienteAuth()`, que ya
  * contó esta operación (`Session.findFirst`); avisar aquí la contaría dos veces (CAR-50).
  */
-export async function leerSesionPorToken(base: ClienteApp, token: string, incluirUser: boolean) {
+async function leerSesionPorToken(base: ClienteApp, token: string, incluirUser: boolean) {
   const filas = await base.$queryRaw<FilaSesion[]>`
     SELECT * FROM core.auth_sesion_por_token(${token})`;
   const f = filas[0];

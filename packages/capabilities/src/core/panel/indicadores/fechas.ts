@@ -1,5 +1,5 @@
 /** Cortes del «facturado del mes»: del 1 al día de hoy, contra el mismo tramo del mes anterior. */
-export type CorteMes = {
+type CorteMes = {
   /** Primer día del mes ("aaaa-mm-dd"). */
   desde: string;
   /** Día siguiente al corte, para acotar con `<` (exclusivo). */

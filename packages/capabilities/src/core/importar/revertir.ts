@@ -7,7 +7,7 @@ import { exigirAcceso } from "./plan";
 import { importadorDe } from "./registro";
 import { VERSION_MOTOR } from "./tipos";
 
-export type Bloqueada = { registro: string; motivo: string };
+type Bloqueada = { registro: string; motivo: string };
 export type ResultadoReversion = { revertido: boolean; aBorrar: number; aRestaurar: number; bloqueadas: Bloqueada[] };
 
 const TOLERANCIA_MS = 2000;

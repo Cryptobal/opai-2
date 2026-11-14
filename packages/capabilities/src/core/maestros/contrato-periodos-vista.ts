@@ -7,7 +7,7 @@ import { dia } from "./comun";
 /** Máximo de períodos de plazo fijo antes del indefinido (parámetro de 1.0: períodos 1–3). */
 export const MAX_PERIODOS_PLAZO_FIJO = 3;
 
-export const periodoSchema = z.object({
+const periodoSchema = z.object({
   id: z.string(),
   tipo: z.enum(["plazo_fijo", "indefinido"]),
   /** N.º del período de plazo fijo (1 a 3); nulo en el indefinido. */
@@ -33,7 +33,7 @@ export const contratoSchema = z.object({
   indefinidoDesde: z.string().nullable(),
 });
 
-export type Periodo = z.infer<typeof periodoSchema>;
+type Periodo = z.infer<typeof periodoSchema>;
 export type Contrato = z.infer<typeof contratoSchema>;
 
 type FilaPeriodo = {
@@ -46,7 +46,7 @@ type FilaPeriodo = {
 };
 
 /** Calcula numeración y estado actual desde los períodos válidos (sin anular), en orden de inicio. */
-export function calcularContrato(
+function calcularContrato(
   vinculo: { id: string; inicio: Date; tipo: string },
   filas: readonly FilaPeriodo[],
 ): Contrato {

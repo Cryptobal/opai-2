@@ -44,7 +44,7 @@ async function contratoDe(ctx: Parameters<typeof cargarContrato>[0], personaId: 
   return c;
 }
 
-export const personasPeriodosRegistrar = defineCapability({
+const personasPeriodosRegistrar = defineCapability({
   id: "core.personas.periodos_registrar",
   descripcion:
     "Registra un período del contrato vigente de una persona: una renovación de plazo fijo (inicio y término) o el paso a contrato indefinido. Queda en la historia con quién lo registró.",
@@ -88,7 +88,7 @@ export const personasPeriodosRegistrar = defineCapability({
   },
 });
 
-export const personasPeriodosAnular = defineCapability({
+const personasPeriodosAnular = defineCapability({
   id: "core.personas.periodos_anular",
   descripcion:
     "Anula el último período registrado del contrato de una persona cuando se registró mal. No se borra: queda en la auditoría con el motivo, y el contrato vuelve al período anterior.",
