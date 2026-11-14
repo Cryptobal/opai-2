@@ -68,6 +68,8 @@ export async function cargarRegistros(sp: SearchParams) {
   return { p, r, instalaciones: inst };
 }
 
+export type DatosRegistros = Awaited<ReturnType<typeof cargarRegistros>>;
+
 export async function cargarIntentos(sp: SearchParams) {
   const p = await leerParametros(sp);
   const { tipoRegistro: _t, q: _q, ...base } = filtros(p);

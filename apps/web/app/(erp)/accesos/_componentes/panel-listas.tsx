@@ -1,5 +1,5 @@
 import { formatearFecha } from "@opai/domain";
-import { Badge, type EstadoPantalla, ListScreen, Segmentado } from "@opai/ds";
+import { Badge, type Columna, type EstadoPantalla, ListScreen, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
@@ -40,6 +40,47 @@ const vigencia = (e: EntradaLista) =>
 const tipos = (e: EntradaLista) =>
   e.tiposRegistro.length ? e.tiposRegistro.map(tipoDe).join(", ") : "Todos";
 
+/** Columnas de la tabla: en bloqueadas, el motivo (solo lo ve quien gestiona listas) en vez de días y horario. */
+function columnasDe(bloq: boolean): Columna<EntradaLista>[] {
+  return [
+    { id: "nombre", etiqueta: "Nombre", render: (e) => e.nombre ?? "—" },
+    {
+      id: "doc",
+      etiqueta: "Documento",
+      render: (e) => <span className="t-numeric">{e.mascara}</span>,
+    },
+    { id: "tipos", etiqueta: "Tipos", render: tipos },
+    { id: "vig", etiqueta: "Vigencia", render: vigencia },
+    bloq
+      ? { id: "motivo", etiqueta: "Motivo", render: (e) => e.motivo ?? "—" }
+      : { id: "dias", etiqueta: "Días y horario", render: diasYHorario },
+    ...(bloq
+      ? []
+      : [
+          {
+            id: "uso",
+            etiqueta: "Uso",
+            render: (e: EntradaLista) => (
+              <Badge tono={e.usoUnico ? "warning" : "neutro"}>
+                {e.usoUnico ? "Uso único" : "Permanente"}
+              </Badge>
+            ),
+          },
+        ]),
+  ];
+}
+
+function TarjetaEntrada({ e }: { e: EntradaLista }) {
+  return (
+    <span className="flex min-w-0 flex-1 flex-col gap-1">
+      <span className="truncate text-base font-medium text-fg">{e.nombre ?? e.mascara}</span>
+      <span className="t-caption">
+        {tipos(e)} · <span className="t-numeric">{e.mascara}</span> · {vigencia(e)}
+      </span>
+    </span>
+  );
+}
+
 type Props = {
   state: EstadoPantalla;
   instalacionId: string;
@@ -70,44 +111,8 @@ export function PanelListas({ state, instalacionId, tipo, entradas, href }: Prop
         items={entradas}
         acciones={(e) => <QuitarEntrada id={e.id} nombre={e.nombre ?? e.mascara} />}
         clave={(e) => e.id}
-        tarjeta={(e) => (
-          <span className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="flex items-center justify-between gap-2">
-              <span className="truncate text-base font-medium text-fg">
-                {e.nombre ?? e.mascara}
-              </span>
-            </span>
-            <span className="t-caption">
-              {tipos(e)} · <span className="t-numeric">{e.mascara}</span> · {vigencia(e)}
-            </span>
-          </span>
-        )}
-        columnas={[
-          { id: "nombre", etiqueta: "Nombre", render: (e) => e.nombre ?? "—" },
-          {
-            id: "doc",
-            etiqueta: "Documento",
-            render: (e) => <span className="t-numeric">{e.mascara}</span>,
-          },
-          { id: "tipos", etiqueta: "Tipos", render: tipos },
-          { id: "vig", etiqueta: "Vigencia", render: vigencia },
-          bloq
-            ? { id: "motivo", etiqueta: "Motivo", render: (e) => e.motivo ?? "—" }
-            : { id: "dias", etiqueta: "Días y horario", render: diasYHorario },
-          ...(bloq
-            ? []
-            : [
-                {
-                  id: "uso",
-                  etiqueta: "Uso",
-                  render: (e: EntradaLista) => (
-                    <Badge tono={e.usoUnico ? "warning" : "neutro"}>
-                      {e.usoUnico ? "Uso único" : "Permanente"}
-                    </Badge>
-                  ),
-                },
-              ]),
-        ]}
+        tarjeta={(e) => <TarjetaEntrada e={e} />}
+        columnas={columnasDe(bloq)}
         textos={{
           vacio: {
             titulo: "Esta lista está vacía",

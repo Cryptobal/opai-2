@@ -10,25 +10,8 @@ if (existsSync(envRaiz)) process.loadEnvFile(envRaiz);
 
 const BASE = process.env["BASE_URL"] ?? "http://localhost:3000";
 
-// Desde CAR-335 D6 el diseño nuevo es el predeterminado. Las pruebas escritas para el clásico lo fijan
-// con la cookie de marco; las del diseño nuevo o del Hilo la reemplazan con la suya (`addCookies`).
-// Cuando D6c retire el clásico y el Hilo, esta cookie se quita y cada prueba se pasa al nuevo.
-const MARCO_CLASICO = {
-  cookies: [
-    {
-      name: "opai_marco",
-      value: "clasico",
-      domain: new URL(BASE).hostname,
-      path: "/",
-      expires: -1,
-      httpOnly: false,
-      secure: BASE.startsWith("https:"),
-      sameSite: "Lax" as const,
-    },
-  ],
-  origins: [],
-};
-
+// Desde CAR-335 D6c todas las pruebas corren con el diseño nuevo, el único del ERP. Las que prueban
+// otro marco ponen su propia cookie (`addCookies`).
 // Evidencia visual a 375 y 1024 (y revisión a 1280). No es regresión visual todavía.
 export default defineConfig({
   testDir: "./e2e",
@@ -44,7 +27,6 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   use: {
     baseURL: BASE,
-    storageState: MARCO_CLASICO,
     // La traza se escribe sin parar en `test-results`, dentro del árbol que vigila `next dev`: cada escritura
     // lo hace recompilar y recargar páginas aún sin hidratar (bucle en `/login`). Se activa solo a pedido.
     trace: process.env["E2E_TRACE"] ? "retain-on-failure" : "off",

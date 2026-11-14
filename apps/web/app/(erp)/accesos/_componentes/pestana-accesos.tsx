@@ -1,15 +1,17 @@
+import type { ReactNode } from "react";
+
 import { formatearFechaHora } from "@opai/domain";
-import { Badge, ListScreen, Segmentado } from "@opai/ds";
+import { Badge, type Columna, ListScreen, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { estadoPantalla } from "@/lib/formato";
 import { puedeGestionarListas, puedeGestionarRegistros } from "@/lib/pestanas-modulos";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import type { EntradaLista } from "./panel-listas";
 import { CerrarEnBloque } from "./acciones-registro";
-import { PanelListas } from "./panel-listas";
-import { TablaIntentos, Tarjeta } from "./tablas-instalacion";
+import { SeccionListas } from "./seccion-listas";
+import { TablaIntentos } from "./tabla-intentos";
+import { Tarjeta } from "./tablas-instalacion";
 import type { Intento, Pagina, Registro } from "./datos";
 import { estadoRegistro, tipoDe } from "./etiquetas";
 
@@ -36,10 +38,7 @@ export async function PestanaAccesos({
   sub: string | undefined;
   lista: string | undefined;
 }) {
-  const [verListas, gestiona] = await Promise.all([
-    puedeGestionarListas(),
-    puedeGestionarRegistros(),
-  ]);
+  const verListas = await puedeGestionarListas();
   const sub: Sub = SUBS.some((s) => s.id === subUrl) ? (subUrl as Sub) : "registros";
   const segmento = (
     <Segmentado
@@ -53,25 +52,10 @@ export async function PestanaAccesos({
       }))}
     />
   );
-  if (sub === "listas") {
-    const tipo = lista === "bloqueada" ? "bloqueada" : "autorizada";
-    const r = await ejecutarComoUsuario<EntradaLista[]>("erp", "acceso.listas.listar", {
-      instalacionId,
-      tipo,
-    });
+  if (sub === "listas")
     return (
-      <div className="flex flex-col gap-3">
-        {segmento}
-        <PanelListas
-          state={estadoPantalla(r)}
-          instalacionId={instalacionId}
-          tipo={tipo}
-          entradas={r.ok ? r.data : []}
-          href={(t) => `${base}?sub=listas&lista=${t}`}
-        />
-      </div>
+      <SeccionListas instalacionId={instalacionId} base={base} lista={lista} segmento={segmento} />
     );
-  }
   if (sub === "intentos") {
     const r = await ejecutarComoUsuario<Pagina<Intento>>("erp", "acceso.intentos.listar", {
       instalacionId,
@@ -83,17 +67,55 @@ export async function PestanaAccesos({
       </div>
     );
   }
-  const r = await ejecutarComoUsuario<Pagina<Registro>>("erp", "acceso.registros.listar", {
-    instalacionId,
-    soloEnSitio: sub === "en_sitio",
-  });
+  return (
+    <SeccionRegistros
+      instalacionId={instalacionId}
+      enSitio={sub === "en_sitio"}
+      segmento={segmento}
+    />
+  );
+}
+
+const COLUMNAS: Columna<Registro>[] = [
+  { id: "nombre", etiqueta: "Nombre", render: (x) => x.nombre },
+  { id: "tipo", etiqueta: "Tipo", render: (x) => tipoDe(x.tipoRegistro) },
+  { id: "empresa", etiqueta: "Empresa", render: (x) => x.empresa ?? "—" },
+  { id: "entrada", etiqueta: "Entrada", render: (x) => formatearFechaHora(x.entradaEn) },
+  {
+    id: "estado",
+    etiqueta: "Estado",
+    render: (x) => (
+      <Badge tono={estadoRegistro(x).tono} punto>
+        {estadoRegistro(x).etiqueta}
+      </Badge>
+    ),
+  },
+];
+
+/** Registros o «en sitio» de la instalación, con enlace a la ficha en Accesos. */
+async function SeccionRegistros({
+  instalacionId,
+  enSitio,
+  segmento,
+}: {
+  instalacionId: string;
+  enSitio: boolean;
+  segmento: ReactNode;
+}) {
+  const [r, gestiona] = await Promise.all([
+    ejecutarComoUsuario<Pagina<Registro>>("erp", "acceso.registros.listar", {
+      instalacionId,
+      soloEnSitio: enSitio,
+    }),
+    puedeGestionarRegistros(),
+  ]);
   return (
     <div className="flex flex-col gap-3">
       {segmento}
       <ListScreen<Registro>
         state={estadoPantalla(r)}
-        titulo={sub === "en_sitio" ? "En sitio" : "Registros"}
-        {...(gestiona && sub === "en_sitio" && r.ok
+        titulo={enSitio ? "En sitio" : "Registros"}
+        {...(gestiona && enSitio && r.ok
           ? {
               accionPrincipal: (
                 <CerrarEnBloque instalacionId={instalacionId} cuantos={r.data.items.length} />
@@ -111,24 +133,10 @@ export async function PestanaAccesos({
         )}
         href={(x) => `/accesos/${x.id}?instalacion=${instalacionId}`}
         Link={LinkNext}
-        columnas={[
-          { id: "nombre", etiqueta: "Nombre", render: (x) => x.nombre },
-          { id: "tipo", etiqueta: "Tipo", render: (x) => tipoDe(x.tipoRegistro) },
-          { id: "empresa", etiqueta: "Empresa", render: (x) => x.empresa ?? "—" },
-          { id: "entrada", etiqueta: "Entrada", render: (x) => formatearFechaHora(x.entradaEn) },
-          {
-            id: "estado",
-            etiqueta: "Estado",
-            render: (x) => (
-              <Badge tono={estadoRegistro(x).tono} punto>
-                {estadoRegistro(x).etiqueta}
-              </Badge>
-            ),
-          },
-        ]}
+        columnas={COLUMNAS}
         textos={{
           vacio: {
-            titulo: sub === "en_sitio" ? "Nadie en sitio" : "Aún no hay registros",
+            titulo: enSitio ? "Nadie en sitio" : "Aún no hay registros",
             descripcion:
               "Las entradas que registre la portería de esta instalación aparecerán aquí.",
           },

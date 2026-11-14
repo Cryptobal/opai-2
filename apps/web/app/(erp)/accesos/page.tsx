@@ -3,13 +3,11 @@ import { DoorOpen } from "lucide-react";
 import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
 import { puedeGestionarRegistros } from "@/lib/pestanas-modulos";
 import type { SearchParams } from "@/lib/parametros";
 
-import { CerrarEnBloque } from "./_componentes/acciones-registro";
 import { cargarRegistros } from "./_componentes/datos";
-import { ListaRegistros } from "./_componentes/lista-registros";
+import { ListaDeAccesos } from "./_componentes/lista-registros";
 import { SegmentoAccesos } from "./_componentes/segmento-accesos";
 
 export const metadata = { title: "Accesos" };
@@ -38,25 +36,7 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
             unPanelHastaLg
             etiquetaLista="Lista de accesos"
             vacio={{ texto: "Elige un registro", icono: DoorOpen }}
-            lista={
-              <ListaRegistros
-                state={estadoPantalla(d.r)}
-                items={d.r.ok ? d.r.data.items : []}
-                siguiente={d.r.ok ? d.r.data.siguiente : null}
-                p={d.p}
-                instalaciones={d.instalaciones}
-                {...(d.gestiona && d.p["estado"] === "en_sitio" && d.p["instalacion"] && d.r.ok
-                  ? {
-                      accion: (
-                        <CerrarEnBloque
-                          instalacionId={d.p["instalacion"]}
-                          cuantos={d.r.data.items.length}
-                        />
-                      ),
-                    }
-                  : {})}
-              />
-            }
+            lista={<ListaDeAccesos d={d} />}
           />
         </>
       )}

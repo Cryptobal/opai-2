@@ -14,7 +14,7 @@ const minutos = (hhmm: string) => {
 };
 
 /** Entrada de la capacidad `acceso.listas.agregar` a partir del borrador de la hoja. */
-export function entradaDe(instalacionId: string, tipo: "autorizada" | "bloqueada", b: Borrador) {
+function entradaDe(instalacionId: string, tipo: "autorizada" | "bloqueada", b: Borrador) {
   const horario = tipo === "autorizada" && b.desde && b.hastaHora;
   return {
     instalacionId,
