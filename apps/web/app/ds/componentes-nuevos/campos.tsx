@@ -12,6 +12,7 @@ import {
   InputFecha,
   InputFechaRango,
   InputMonto,
+  LineaSaldo,
   MapaEstatico,
   SelectorHora,
   Uploader,
@@ -125,6 +126,17 @@ export function MuestraCampos() {
             { etiqueta: "Nov", valor: "$ 38,4 M", fraccion: 1 },
             { etiqueta: "Dic", valor: "$ 15,2 M", fraccion: 0.4 },
             { etiqueta: "Ene", valor: "$ 0", fraccion: 0 },
+          ]}
+        />
+        <LineaSaldo
+          etiqueta="Saldo proyectado por semana"
+          umbral={{ valor: 10_000_000, texto: "$ 10 M" }}
+          puntos={[
+            { etiqueta: "Semana del 16 nov", valor: 18_000_000, texto: "$ 18 M" },
+            { etiqueta: "Semana del 23 nov", valor: 12_500_000, texto: "$ 12,5 M" },
+            { etiqueta: "Semana del 30 nov", valor: 7_000_000, texto: "$ 7 M", tono: "alerta" },
+            { etiqueta: "Semana del 7 dic", valor: -2_000_000, texto: "−$ 2 M", tono: "peligro" },
+            { etiqueta: "Semana del 14 dic", valor: 11_000_000, texto: "$ 11 M" },
           ]}
         />
       </div>
