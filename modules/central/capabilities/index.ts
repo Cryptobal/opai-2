@@ -2,6 +2,7 @@ import { alertasAbrir } from "./abrir";
 import { alertasContactar, alertasEscalar, alertasHacerseCargo } from "./atencion";
 import { cadenasGuardar, cadenasListar } from "./cadenas";
 import { agentePausar, agenteReanudar, alertasDevolver, alertasTomar } from "./control";
+import { alertasProponer, propuestasListar, propuestasResolver } from "./propuestas";
 import { reglasGuardar, reglasListar } from "./reglas";
 import { turnoAbrir, turnoAceptar, turnoCerrar, turnoEntregar } from "./turno";
 import { turnoEstado } from "./turno-estado";
@@ -40,4 +41,7 @@ export const capacidades = [
   alertasDevolver,
   agentePausar,
   agenteReanudar,
+  alertasProponer,
+  propuestasListar,
+  propuestasResolver,
 ];

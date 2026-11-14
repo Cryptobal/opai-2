@@ -904,6 +904,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `central.alertas.devolver` | Solo personas: devolver una alerta tomada garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
 | `central.alertas.hacerse_cargo` | Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala. |
 | `central.alertas.tomar` | Solo personas: tomar una alerta garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
+| `central.propuestas.resolver` | Solo personas: aceptar o rechazar una propuesta del agente es la decisión humana que la propuesta espera (spec central R10, CA3). |
 | `central.turno.abrir` | Solo personas: abrir el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
 | `central.turno.aceptar` | Solo personas: aceptar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
 | `central.turno.cerrar` | Solo personas: cerrar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
@@ -1025,6 +1026,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `central.alertas.devolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.alertas.hacerse_cargo` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.alertas.tomar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.propuestas.resolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.turno.abrir` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.turno.aceptar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.turno.cerrar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
@@ -1132,11 +1134,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.alertas.listar`
 - `central.alertas.obtener`
 - `central.alertas.posponer`
+- `central.alertas.proponer`
 - `central.alertas.reabrir`
 - `central.alertas.resolver`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
 - `central.estado`
+- `central.propuestas.listar`
 - `central.reglas.guardar`
 - `central.reglas.listar`
 - `central.turno.estado`

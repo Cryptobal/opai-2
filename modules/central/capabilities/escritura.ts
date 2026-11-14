@@ -52,10 +52,10 @@ function cambiarEstado(accion: Accion, tipoHecho: string, evento: string, verbo:
   };
 }
 
-const resolver = cambiarEstado("resolver", "resuelta", "central.alerta.resuelta", "resolver");
-const falsa = cambiarEstado("falsa_alarma", "falsa_alarma", "central.alerta.resuelta", "marcar como falsa alarma");
-const reabrir = cambiarEstado("reabrir", "reabierta", "central.alerta.reabierta", "reabrir");
-const posponer = cambiarEstado("posponer", "pospuesta", "central.alerta.pospuesta", "posponer");
+export const resolver = cambiarEstado("resolver", "resuelta", "central.alerta.resuelta", "resolver");
+export const falsa = cambiarEstado("falsa_alarma", "falsa_alarma", "central.alerta.resuelta", "marcar como falsa alarma");
+export const reabrir = cambiarEstado("reabrir", "reabierta", "central.alerta.reabierta", "reabrir");
+export const posponer = cambiarEstado("posponer", "pospuesta", "central.alerta.pospuesta", "posponer");
 
 const nota = (min: number) => z.string().trim().min(min).max(1000);
 

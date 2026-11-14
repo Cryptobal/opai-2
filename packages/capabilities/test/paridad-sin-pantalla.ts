@@ -8,6 +8,11 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "central.propuestas.resolver": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo: "Aceptar o rechazar propuestas del agente: llega con la ficha de la alerta. Mientras tanto las propuestas quedan pendientes y nadie las ejecuta.",
+  },
   "central.turno.abrir": {
     encargo: "CAR-472",
     desde: "2026-11-14",

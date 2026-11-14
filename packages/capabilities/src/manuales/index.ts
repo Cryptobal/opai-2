@@ -1,6 +1,7 @@
 import { MANUAL_OPERAR_EL_NUCLEO } from "./operar-el-nucleo";
 import { MANUAL_AGENTE_INTERNO } from "./agente-interno";
 import { MANUAL_OPERAR_GROKBOT } from "./operar-grokbot";
+import { MANUAL_CENTRAL } from "./central";
 
 /** Manuales para agentes (ADR-032), publicados como recursos MCP `opai://manuales/<id>`. */
 export const MANUALES = [
@@ -18,5 +19,10 @@ export const MANUALES = [
     id: "operar-grokbot",
     titulo: "Operar Comercial y Finanzas con Grokbot",
     texto: MANUAL_OPERAR_GROKBOT,
+  },
+  {
+    id: "central",
+    titulo: "Operar la Central de monitoreo como agente",
+    texto: MANUAL_CENTRAL,
   },
 ] as const;
