@@ -205,6 +205,8 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     expect(await ver()).toMatchObject({ estadoPago: "pagada", montoPagado: 119_000, saldoPorPagar: 0 });
     const enLibro = (await libro()).items.find((i) => i.id === c.id);
     expect(enLibro?.estadoPago).toBe("pagada");
+    const ficha = await dato<{ compras: Compra[] }>("finanzas.proveedores.obtener", { id: proveedorId });
+    expect(ficha.compras.find((i) => i.id === c.id)?.estadoPago).toBe("pagada");
   });
 });
 

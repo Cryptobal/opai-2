@@ -29,7 +29,7 @@ test.describe("@preview finanzas: compras maestro-detalle", () => {
     // Siembra `compras-estado-pago.sql`: el folio 990102 está pagado por una conciliación y el 990101 sigue por pagar y vencido.
     await page.goto("/finanzas/compras?q=990102");
     const pagada = page.locator('a[href^="/finanzas/compras/"]').filter({ hasText: "990102" }).filter({ visible: true }).first();
-    if ((await pagada.count()) === 0) return; // Sin la siembra en qa-e2e: no hay nada que mirar.
+    test.skip((await pagada.count()) === 0, "Falta la siembra compras-estado-pago.sql en qa-e2e");
     await expect(pagada.getByText("Pagada")).toBeVisible({ timeout: 60_000 });
     await pagada.click();
     await expect(page.getByText("Saldo por pagar")).toBeVisible({ timeout: 60_000 });
