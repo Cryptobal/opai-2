@@ -17,13 +17,13 @@ test.describe("@preview rendiciones: reporte", () => {
     await page.goto(`/rendiciones/reporte?mes=${mes}`);
     await expect(page.getByRole("heading", { name: "Reporte de rendiciones" }).first()).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Total rendido")).toBeVisible();
-    await expect(page.getByText(etiquetaMes(mes))).toBeVisible();
+    await expect(page.getByText(etiquetaMes(mes), { exact: true })).toBeVisible();
     await capturar(page, info, "rendiciones-reporte-persona");
     await page.getByRole("group", { name: "Agrupar por" }).getByRole("link", { name: "Centro de costo" }).click();
     await expect(page).toHaveURL(/por=centro/, { timeout: 30_000 });
     await page.getByRole("link", { name: "Mes anterior" }).click();
     await expect(page).toHaveURL(new RegExp(`mes=${anterior}`), { timeout: 30_000 });
-    await expect(page.getByText(etiquetaMes(anterior))).toBeVisible();
+    await expect(page.getByText(etiquetaMes(anterior), { exact: true })).toBeVisible();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "rendiciones-reporte-centro");
   });
