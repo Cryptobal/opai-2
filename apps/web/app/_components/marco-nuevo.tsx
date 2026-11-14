@@ -32,6 +32,8 @@ export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
     const portal = datos.portal;
     // La pestaña «Agente» del teléfono abre el mismo panel que el botón de la barra (evento del shell).
     const conAgente = Boolean(datos.agente);
+    // Trabajador y terreno conservan sus pestañas en el teléfono (CAR-335 D6e).
+    const terreno = portal === "trabajador" || portal === "terreno";
     return function ShellDelMarco(props: AppShellProps) {
       const logoEmpresa = useContext(LogoEmpresa);
       return (
@@ -46,6 +48,7 @@ export function MarcoNuevo({ datos, menuPlegado, children }: Props) {
           }}
           onTema={() => alternarTema(portal)}
           {...(conAgente ? { onAgente: () => abrirAgente() } : {})}
+          pestanasDelPortal={terreno}
         />
       );
     };
