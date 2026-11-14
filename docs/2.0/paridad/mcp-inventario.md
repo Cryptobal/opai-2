@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 778 pares pantalla→capacidad · 699 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 787 pares pantalla→capacidad · 704 con herramienta · 83 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -613,6 +613,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.set_autonomia` | — | excepción |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.update` | — | excepción |
 | erp | `/configuracion/agentes/conectar` | `core.tenant.get` | `core_tenant_get` | existe |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.destino_actualizar` | — | excepción |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.destino_eliminar` | — | excepción |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.destino_rotar_secreto` | — | excepción |
+| erp | `/configuracion/agentes/eventos/[id]` | `core.webhooks.entrega_reenviar` | `core_webhooks_entrega_reenviar` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.destino_crear` | — | excepción |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.destino_get` | `core_webhooks_destino_get` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.destinos_list` | `core_webhooks_destinos_list` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.entregas_list` | `core_webhooks_entregas_list` | existe |
+| erp | `/configuracion/agentes/eventos` | `core.webhooks.eventos_list` | `core_webhooks_eventos_list` | existe |
 | erp | `/configuracion/agentes` | `core.apikeys.create` | — | excepción |
 | erp | `/configuracion/agentes` | `core.apikeys.list` | `core_apikeys_list` | existe |
 | erp | `/configuracion/agentes` | `core.consumos.por_agente` | `core_consumos_por_agente` | existe |
@@ -1041,10 +1050,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
-| `core.webhooks.destino_actualizar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
-| `core.webhooks.destino_crear` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
-| `core.webhooks.destino_eliminar` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
-| `core.webhooks.destino_rotar_secreto` | sin pantalla todavía · CAR-352 · desde 2026-11-14 | no | reservada a personas |
+| `core.webhooks.destino_actualizar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
+| `core.webhooks.destino_crear` | `/configuracion/agentes/eventos` | no | reservada a personas |
+| `core.webhooks.destino_eliminar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
+| `core.webhooks.destino_rotar_secreto` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
 | `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `finanzas.apertura.importar` | sin pantalla todavía · CAR-168 · desde 2026-11-04 | no | reservada a personas |
@@ -1123,11 +1132,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
-- `core.webhooks.destino_get`
-- `core.webhooks.destinos_list`
-- `core.webhooks.entrega_reenviar`
-- `core.webhooks.entregas_list`
-- `core.webhooks.eventos_list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
