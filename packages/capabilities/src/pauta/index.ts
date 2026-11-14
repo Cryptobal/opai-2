@@ -25,6 +25,7 @@ import { titularesListar } from "./titulares-listar";
 import { titularTrasladar } from "./titular-trasladar";
 
 export { ajustesPauta } from "./ajustes";
+export { consumidorPautaCambio } from "./consumidor-cambio";
 export { consumidorPautaPublicada } from "./consumidor-publicada";
 export { indicadoresPauta } from "./indicadores-gestion";
 export { ausenteSinJustificar, diasConTurno, type DiaConTurno, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./dias-con-turno";
