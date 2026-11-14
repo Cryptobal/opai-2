@@ -173,6 +173,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.set_activo` | `core_cargos_set_activo` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.update` | `core_cargos_update` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.estructuras.list` | `core_estructuras_list` | existe |
+| compartido | `app/(erp)/central/_componentes` | `central.alertas.listar` | `central_alertas_listar` | existe |
+| compartido | `app/(erp)/central/_componentes` | `central.alertas.obtener` | `central_alertas_obtener` | existe |
+| compartido | `app/(erp)/central/_componentes` | `central.estado` | `central_estado` | existe |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.escalar` | `central_alertas_escalar` | existe |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.falsa_alarma` | `central_alertas_falsa_alarma` | existe |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.hacerse_cargo` | — | excepción |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.posponer` | `central_alertas_posponer` | existe |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.reabrir` | `central_alertas_reabrir` | existe |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.resolver` | `central_alertas_resolver` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.schema` | `core_config_schema` | existe |
@@ -1024,7 +1033,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `central.agente.reanudar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.alertas.devolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
-| `central.alertas.hacerse_cargo` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.alertas.hacerse_cargo` | `app/(erp)/central/alertas/[id]/_componentes` | no | reservada a personas |
 | `central.alertas.tomar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.propuestas.resolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.turno.abrir` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
@@ -1129,17 +1138,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.agente.pausar`
 - `central.alertas.abrir`
 - `central.alertas.contactar`
-- `central.alertas.escalar`
-- `central.alertas.falsa_alarma`
-- `central.alertas.listar`
-- `central.alertas.obtener`
-- `central.alertas.posponer`
 - `central.alertas.proponer`
-- `central.alertas.reabrir`
-- `central.alertas.resolver`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
-- `central.estado`
 - `central.propuestas.listar`
 - `central.reglas.guardar`
 - `central.reglas.listar`
