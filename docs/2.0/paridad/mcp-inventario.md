@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 783 pares pantalla→capacidad · 704 con herramienta · 79 excepciones justificadas · 0 faltantes.
+**Resumen:** 785 pares pantalla→capacidad · 706 con herramienta · 79 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -21,6 +21,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/negocios/export` | `comercial.negocios.exportar` | `comercial_negocios_exportar` | existe |
 | — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
 | — | `/api/rendiciones/lotes/[id]/nomina` | `rendiciones.lotes.nomina_descargar` | — | excepción |
+| — | `/api/rendiciones/reporte/excel` | `rendiciones.reporte.excel` | `rendiciones_reporte_excel` | existe |
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
@@ -149,6 +150,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.rendiciones.listar` | `rendiciones_rendiciones_listar` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.rechazar` | `rendiciones_rendiciones_rechazar` | existe |
+| compartido | `app/_components` | `rendiciones.reporte.get` | `rendiciones_reporte_get` | existe |
 | compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
 | compartido | `app/(cliente)/cliente/cotizaciones/_componentes` | `cpq.portal_cotizaciones.descargar` | `cpq_portal_cotizaciones_descargar` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
