@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import type { ItemMenu } from "@opai/ds";
 import { accionSalir } from "@/app/_acciones/auth";
-import type { Marco } from "@/lib/marco";
 import { trasLimpiarCaches } from "./limpiar-cache-diferido";
 import { iconoShell } from "./icono-shell";
 
@@ -13,8 +12,6 @@ export function menuCuentaShell(
   iconos?: Record<string, ReactNode>,
   portalInicio?: () => void,
   novedades?: { href: string; noLeidas: number },
-  /** Atajo para alternar entre el marco clásico y el Hilo (ADR-090); solo en el ERP. */
-  diseno?: { actual: Marco; onCambiar: (marco: Marco) => void },
 ): ItemMenu[] {
   const Settings2 = iconoShell("Settings2", iconos);
   const UserRound = iconoShell("UserRound", iconos);
@@ -36,21 +33,9 @@ export function menuCuentaShell(
           {
             id: "pref",
             etiqueta: "Preferencias",
-            descripcion: "Tema y diseño",
+            descripcion: "Tema y avisos",
             icono: Sun,
             onSelect: () => navegar("/mi-cuenta/preferencias"),
-          },
-        ]
-      : []),
-    ...(enErp && diseno
-      ? [
-          {
-            id: "diseno",
-            // Desde Hilo o el nuevo (ADR-109) se vuelve al clásico; desde el clásico se prueba el nuevo.
-            etiqueta:
-              diseno.actual === "clasico" ? "Probar el diseño nuevo" : "Volver al diseño clásico",
-            icono: Sparkles,
-            onSelect: () => diseno.onCambiar(diseno.actual === "clasico" ? "nuevo" : "clasico"),
           },
         ]
       : []),
