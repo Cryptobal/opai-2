@@ -6,7 +6,7 @@ import { uuidSchema } from "../esquemas";
 import type { ENTIDADES_ETIQUETA } from "./comun";
 import { TONOS_ETIQUETA } from "./comun";
 
-export const etiquetaFilaSchema = z.object({
+const etiquetaFilaSchema = z.object({
   id: z.string(),
   nombre: z.string(),
   tono: z.enum(TONOS_ETIQUETA),

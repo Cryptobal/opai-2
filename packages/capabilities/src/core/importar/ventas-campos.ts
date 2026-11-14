@@ -26,7 +26,7 @@ export type DatosDocumentoVenta = {
   codigoReferencia: number | null;
 };
 
-export const TIPOS_FACTURA = new Set([33, 34]);
+const TIPOS_FACTURA = new Set([33, 34]);
 export const TIPOS_NOTA = new Set([56, 61]);
 
 export const DEF_DOCUMENTOS_VENTA: DefinicionImportador = {

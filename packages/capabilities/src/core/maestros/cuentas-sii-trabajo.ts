@@ -10,7 +10,7 @@ import type { Contexto } from "../../types";
 import { cacheSiiEnBloque, guardarCacheSii } from "./cuentas-sii-cache";
 import { consultarProveedor, contribuyenteConfigurado } from "./cuentas-sii-fuente";
 
-export const TIPO_TRABAJO_SII = "core.sii.consultar_contribuyente";
+const TIPO_TRABAJO_SII = "core.sii.consultar_contribuyente";
 
 /**
  * Si hay proveedor de consulta (key de SimpleAPI RUT cargada o fuente de prueba), sin descifrar la key.
@@ -58,7 +58,7 @@ export const trabajoConsultarContribuyenteSii = defineTrabajo({
 
 /** Qué pasa con el SII al crear una cuenta (salida de `core.cuentas.create`). */
 export const SII_AL_CREAR = ["sin_rut", "en_cache", "en_cola", "no_configurado"] as const;
-export type SiiAlCrear = (typeof SII_AL_CREAR)[number];
+type SiiAlCrear = (typeof SII_AL_CREAR)[number];
 
 /**
  * Al crear una cuenta con RUT (CAR-156): dice si hay datos del SII que ofrecer y deja lista la función

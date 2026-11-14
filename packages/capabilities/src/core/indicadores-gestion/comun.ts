@@ -24,7 +24,7 @@ export function indicadoresDeclarados(): readonly IndicadorGestion[] {
  * ¿El módulo dueño está disponible para este actor? El núcleo siempre está activo; un módulo apagado
  * o fuera de los scopes de la API key no aporta indicadores (ADR-094 §1).
  */
-export function moduloDisponible(ctx: Contexto, indicador: IndicadorGestion): boolean {
+function moduloDisponible(ctx: Contexto, indicador: IndicadorGestion): boolean {
   const modulo = moduloDeIndicador(indicador.id);
   if (!enScope(ctx, modulo)) return false;
   return modulo === "core" || ctx.modulosActivos.includes(modulo);

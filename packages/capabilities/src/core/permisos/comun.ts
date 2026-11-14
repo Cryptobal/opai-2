@@ -49,7 +49,7 @@ export function validarEnCatalogo(permisos: readonly string[]): void {
  * rol personalizado nunca hereda permisos que se agreguen al catálogo después (no se regalan). Rechaza
  * plataforma y lo que no exista. Devuelve la lista concreta, sin duplicados.
  */
-export function expandirPermisos(permisos: readonly string[]): string[] {
+function expandirPermisos(permisos: readonly string[]): string[] {
   rechazarPlataforma(permisos);
   const catalogo = catalogoPermisos();
   const salida = new Set<string>();
