@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { formatearFecha } from "@opai/domain";
 import { Button } from "@opai/ds";
 
 import { DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
@@ -17,12 +18,6 @@ type Resumen = {
   publicadaAntes: string | null;
   publicadaEn: string | null;
 };
-
-const CAP = "pauta.publicaciones.publicar";
-
-function fechaCorta(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CL", { day: "numeric", month: "long" });
-}
 
 function plural(n: number, uno: string, varios: string) {
   return `${n} ${n === 1 ? uno : varios}`;
@@ -42,7 +37,7 @@ function descripcion(r: Resumen, mesTexto: string) {
       `${plural(sinUsuario, "persona no tiene", "personas no tienen")} usuario en OPAI y no recibirá aviso.`,
     );
   if (r.publicadaAntes)
-    partes.push(`Ya se publicó el ${fechaCorta(r.publicadaAntes)}: se volverá a avisar.`);
+    partes.push(`Ya se publicó el ${formatearFecha(r.publicadaAntes)}: se volverá a avisar.`);
   return partes.join(" ");
 }
 
@@ -58,7 +53,7 @@ export function PublicarPauta({ inst, anio, mes }: Props) {
 
   const abrir = async () => {
     setHecho(null);
-    const r = await ejecutar<Resumen>(CAP, input, true, "ninguna");
+    const r = await ejecutar<Resumen>("pauta.publicaciones.publicar", input, true, "ninguna");
     if (r) setResumen(r);
   };
   const cerrar = () => {
@@ -66,7 +61,13 @@ export function PublicarPauta({ inst, anio, mes }: Props) {
     limpiarError();
   };
   const confirmar = async () => {
-    const r = await ejecutar<Resumen>(CAP, input, false, "ninguna", crypto.randomUUID());
+    const r = await ejecutar<Resumen>(
+      "pauta.publicaciones.publicar",
+      input,
+      false,
+      "ninguna",
+      crypto.randomUUID(),
+    );
     if (!r) return;
     setResumen(null);
     setHecho(
