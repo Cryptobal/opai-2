@@ -48,7 +48,9 @@ CREATE POLICY tenant_isolation ON "inventario"."activos" AS PERMISSIVE FOR ALL T
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON "inventario"."activos" TO opai_app;
+GRANT SELECT, INSERT, UPDATE ON "inventario"."activos" TO opai_app;
+-- Un activo nunca se borra (R12): se da de baja con motivo.
+REVOKE DELETE ON "inventario"."activos" FROM opai_app;
 
 COMMIT;
 

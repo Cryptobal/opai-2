@@ -31,6 +31,8 @@ export function codigoNormalizado(codigo: string): string {
 }
 
 const FECHA = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+/** Fecha aaaa-mm-dd que existe en el calendario (rechaza 2026-02-31). */
+const esFecha = (t: string) => FECHA.test(t) && new Date(`${t}T00:00:00Z`).toISOString().startsWith(t);
 
 export type ValoresActivo = Record<string, string | number>;
 
@@ -58,7 +60,7 @@ export function validarValores(
       if (!Number.isFinite(n)) return { ok: false, error: `«${c.etiqueta}» debe ser un número.` };
       valores[c.clave] = n;
     } else if (c.tipo === "fecha") {
-      if (typeof crudo !== "string" || !FECHA.test(crudo))
+      if (typeof crudo !== "string" || !esFecha(crudo))
         return { ok: false, error: `«${c.etiqueta}» debe ser una fecha (aaaa-mm-dd).` };
       valores[c.clave] = crudo;
     } else {
