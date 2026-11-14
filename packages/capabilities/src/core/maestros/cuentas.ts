@@ -53,8 +53,7 @@ export const cuentasList = defineCapability({
           : {}),
       },
       orderBy: [{ nombre: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
       include: {
         _count: {
           select: {
@@ -76,7 +75,7 @@ export const cuentasList = defineCapability({
         },
       },
     });
-    const p = pagina(filas, input.limite);
+    const p = pagina(filas, input.limite, input.cursor);
     return {
       items: p.items.map((c) => {
         const principal = c.contactos[0];

@@ -49,4 +49,17 @@ describe("usuario con licencia", () => {
     // Un permiso de otro módulo no da licencia en este.
     expect(contar([base({ roleId: "r5", rolTenant: { permisos: [p] } })], "comercial")).toBe(0);
   });
+
+  it("cuenta a quien recibe el permiso por un rol adicional o un grupo (CAR-359)", () => {
+    const p = permiso as string;
+    const rol = (archivadoEn: Date | null = null) => ({ rol: { permisos: [p], archivadoEn } });
+    const sinRol = { roleId: "r6", rolTenant: { permisos: [] } };
+    expect(contar([base({ ...sinRol, rolesAdicionales: [rol()] })], "core")).toBe(1);
+    const enGrupo = { grupo: { archivadoEn: null, roles: [rol()] } };
+    expect(contar([base({ ...sinRol, gruposUsuarios: [enGrupo] })], "core")).toBe(1);
+    // Un rol o un grupo archivado no da licencia.
+    expect(contar([base({ ...sinRol, rolesAdicionales: [rol(new Date())] })], "core")).toBe(0);
+    const grupoArchivado = { grupo: { archivadoEn: new Date(), roles: [rol()] } };
+    expect(contar([base({ ...sinRol, gruposUsuarios: [grupoArchivado] })], "core")).toBe(0);
+  });
 });

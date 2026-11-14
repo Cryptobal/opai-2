@@ -18,6 +18,7 @@ import { ausenciaPersonaInput, personaParaAusencia } from "../../pauta/ausencias
 import { fechaIso } from "../../pauta/comun";
 import { uuidSchema } from "../esquemas";
 import { dondePuesto } from "./alcance";
+import { ausenciasClases } from "./ausencias-clases";
 
 export const personasAusenciasRegistrar = defineCapability({
   id: "core.ausencias.registrar",
@@ -27,6 +28,8 @@ export const personasAusenciasRegistrar = defineCapability({
   input: ausenciaPersonaInput,
   output: salidaAusencia,
   efecto: "escritura",
+  // El motivo es texto libre y puede ser de salud: no llega en claro a la auditoría (CAR-393).
+  sensibles: ["motivo"],
   dryRun: true,
   handler: (ctx, input, { dryRun }) =>
     escribirAusencia(ctx, input, {
@@ -145,4 +148,5 @@ export const capacidadesAusencias = [
   personasAusenciasRegistrar,
   personasAusenciasListar,
   personasAusenciasAnular,
+  ausenciasClases,
 ];

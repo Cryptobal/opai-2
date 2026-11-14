@@ -1,5 +1,5 @@
 // CAR-276: previsión completa (catálogos, pensión, cotiza, APV, cargas y discapacidad) con Postgres real. Datos ficticios.
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
@@ -14,6 +14,8 @@ describe.skipIf(omitirSuiteDb())("Personas · previsión completa CAR-276 (db)",
   let tenant = "";
   let personaId = "";
   const uid = randomUUID();
+  // Tipo de pensión y discapacidad van cifrados (CAR-411): la prueba usa una clave efímera y deja la anterior.
+  const previas = { k: process.env["OPAI_SECRETS_KEY"], v: process.env["OPAI_SECRETS_KEY_VERSION"] };
   const ejecutar = async (id: string, input: Record<string, unknown>) =>
     (await mod.executeCapability(
       mod.crearContexto({
@@ -26,6 +28,7 @@ describe.skipIf(omitirSuiteDb())("Personas · previsión completa CAR-276 (db)",
     )) as R;
 
   beforeAll(async () => {
+    Object.assign(process.env, { OPAI_SECRETS_KEY: randomBytes(32).toString("base64"), OPAI_SECRETS_KEY_VERSION: "98" });
     e = await prepararEntorno();
     mod = await import("../src");
     mod.limpiarRegistro();
@@ -36,6 +39,10 @@ describe.skipIf(omitirSuiteDb())("Personas · previsión completa CAR-276 (db)",
     personaId = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut: "11111111-1", estado: "activa" } })).id;
   });
   afterAll(async () => {
+    if (previas.k === undefined) delete process.env["OPAI_SECRETS_KEY"];
+    else process.env["OPAI_SECRETS_KEY"] = previas.k;
+    if (previas.v === undefined) delete process.env["OPAI_SECRETS_KEY_VERSION"];
+    else process.env["OPAI_SECRETS_KEY_VERSION"] = previas.v;
     await e?.cerrar();
   });
 
@@ -73,6 +80,19 @@ describe.skipIf(omitirSuiteDb())("Personas · previsión completa CAR-276 (db)",
     // Vaciar el campo en la hoja manda null: queda en 0.
     expect((await ejecutar("core.personas.prevision_actualizar", { id: personaId, cargasSimples: null })).ok).toBe(true);
     expect((await ejecutar("core.personas.prevision_ver", { id: personaId })).data).toMatchObject({ cargasSimples: 0 });
+  });
+
+  it("el tipo de pensión y la discapacidad quedan cifrados en la base; en claro, la base los rechaza (CAR-411)", async () => {
+    const fila = await e.admin.personaPrevision.findUnique({ where: { personaId } });
+    expect(fila?.tipoPension).toMatch(/^enc:v2:/);
+    expect(fila?.discapacidadInvalidez).toMatch(/^enc:v2:/);
+    expect(JSON.stringify(fila)).not.toContain("vejez");
+    await expect(
+      e.admin.personaPrevision.update({ where: { personaId }, data: { tipoPension: "invalidez" } }),
+    ).rejects.toThrow(/personas_prevision_salud_cifrada/);
+    // Vaciarlos sigue permitido.
+    expect((await ejecutar("core.personas.prevision_actualizar", { id: personaId, tipoPension: null })).ok).toBe(true);
+    expect((await ejecutar("core.personas.prevision_ver", { id: personaId })).data).toMatchObject({ tipoPension: null });
   });
 
   it("rechaza valores fuera del catálogo o del rango", async () => {

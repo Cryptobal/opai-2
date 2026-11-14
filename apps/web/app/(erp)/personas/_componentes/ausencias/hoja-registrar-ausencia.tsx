@@ -4,15 +4,12 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
 
+import { CampoClase } from "@/app/_components/campo-clase-ausencia";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { TIPOS_AUSENCIA } from "./tipos";
-
-type Plan = {
-  dias: number;
-  puestos: { puestoId: string; puesto: string; instalacion: string; dias: number }[];
-};
+import { AvisoPlan, type PlanAusencia as Plan } from "./aviso-plan";
+import { type ClaseAusencia, TIPOS_AUSENCIA } from "./tipos";
 
 /**
  * Registrar un permiso, licencia, vacaciones o ausencia desde la ficha (ADR-094, adenda CAR-311 d; CAR-393): queda en
@@ -23,11 +20,13 @@ export function HojaRegistrarAusencia({
   nombre,
   hoy,
   conPauta,
+  clases,
 }: {
   personaId: string;
   nombre: string;
   hoy: string;
   conPauta: boolean;
+  clases: readonly ClaseAusencia[];
 }) {
   const { abierta, cerrar } = useHojaUrl("registrar");
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
@@ -35,13 +34,22 @@ export function HojaRegistrarAusencia({
   const [desde, setDesde] = useState(hoy);
   const [hasta, setHasta] = useState(hoy);
   const [motivo, setMotivo] = useState("");
+  const [clase, setClase] = useState("");
   const [plan, setPlan] = useState<Plan | null>(null);
   if (!abierta) return null;
   const fechasMal = hasta < desde;
-  const entrada = { personaId, tipo, motivo: motivo.trim(), desde, hasta };
+  const entrada = {
+    personaId,
+    tipo,
+    motivo: motivo.trim(),
+    desde,
+    hasta,
+    ...(clase ? { clase } : {}),
+  };
   const salir = () => {
     setPlan(null);
     setMotivo("");
+    setClase("");
     setDesde(hoy);
     setHasta(hoy);
     limpiarError();
@@ -101,10 +109,14 @@ export function HojaRegistrarAusencia({
           <Select
             id="aus-tipo"
             valor={tipo}
-            onCambiar={cambiar(setTipo)}
+            onCambiar={cambiar((v: string) => {
+              setTipo(v);
+              setClase("");
+            })}
             opciones={TIPOS_AUSENCIA}
           />
         </Campo>
+        <CampoClase clases={clases} tipo={tipo} valor={clase} onCambiar={cambiar(setClase)} />
         <div className="grid grid-cols-2 gap-3">
           <Campo etiqueta="Desde" htmlFor="aus-desde">
             <InputFecha
@@ -137,20 +149,7 @@ export function HojaRegistrarAusencia({
             onChange={(e) => cambiar(setMotivo)(e.target.value)}
           />
         </Campo>
-        {plan && plan.dias === 0 ? (
-          <Alerta tono="info" titulo="Queda solo el registro">
-            {conPauta ? "No tiene turnos en la pauta en esas fechas." : "Lista para registrar."}
-          </Alerta>
-        ) : plan ? (
-          <Alerta
-            tono="info"
-            titulo={
-              plan.dias === 1 ? "1 turno queda por cubrir" : `${plan.dias} turnos quedan por cubrir`
-            }
-          >
-            {plan.puestos.map((p) => `${p.instalacion} · ${p.puesto}: ${p.dias}`).join(" · ")}
-          </Alerta>
-        ) : null}
+        <AvisoPlan plan={plan} conPauta={conPauta} />
         {error ? <Alerta tono="danger" titulo={error} /> : null}
       </div>
     </Sheet>

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { claseValida } from "../core/maestros/ausencias-clases";
 import { sinDuplicado } from "../core/maestros/comun";
 import { conflicto, prohibido } from "../errores";
 import type { Contexto } from "../types";
@@ -42,6 +43,9 @@ export async function escribirAusencia(
   input: AusenciaPersona,
   o: { dryRun: boolean; conPauta: boolean; exigirTurnos: boolean; exigirPermisoPauta?: boolean },
 ): Promise<z.infer<typeof salidaAusencia>> {
+  // La clase se valida contra el catálogo y se guarda con su nombre del catálogo (CAR-393 parte 3).
+  const clase = await claseValida(ctx, input.tipo, input.clase);
+  input = { ...input, ...(clase ? { clase } : {}) };
   const planear = async (c: Contexto): Promise<PlanPuesto[]> => {
     if (!o.conPauta) {
       await personaParaAusencia(c, input.personaId);
@@ -95,6 +99,7 @@ export async function escribirAusencia(
         desde: aFechaDb(input.desde),
         hasta: aFechaDb(hasta),
         motivo: input.motivo,
+        clase: input.clase ?? null,
         estado: "aprobada",
         registradaPor: usuario,
         aprobadaPor: usuario,
@@ -112,6 +117,7 @@ export async function escribirAusencia(
             fecha: aFechaDb(f),
             tipo: input.tipo,
             motivo: input.motivo,
+            clase: input.clase ?? null,
             personaId: input.personaId,
             ausenciaId: ausencia.id,
             creadaPor: usuario,

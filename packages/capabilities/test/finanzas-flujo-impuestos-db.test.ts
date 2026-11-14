@@ -23,7 +23,7 @@ const lunesDe = (iso: string) => {
 
 type Planilla = {
   semanas: { semana: string; ingresos: number; egresos: number }[];
-  celdas: { filaId: string; semana: string; monto: number; nota: string | null }[];
+  celdas: { filaId: string; semana: string; monto: number; nota: string | null; iva?: { periodo: string; postergado: boolean } }[];
   filas: { id: string; etiqueta: string }[];
 };
 
@@ -111,6 +111,9 @@ describe.skipIf(omitirSuiteDb())("flujo · IVA y PPM (db)", () => {
     expect(total(p, FILA_IVA, lunesDe(pagoM2))).toBe(114_000);
     expect(total(p, FILA_PPM, lunesDe(pagoM1))).toBe(30_000); // el PPM no se posterga
     expect(p.celdas.find((c) => c.filaId === FILA_IVA)?.nota).toContain("postergado");
+    expect(p.celdas.find((c) => c.filaId === FILA_IVA)?.nota).toMatch(/se paga el \d{2}-\d{2}-\d{4}/);
+    // CAR-397: la celda dice qué mes es y si está postergado, para cambiarlo desde la planilla.
+    expect(p.celdas.find((c) => c.filaId === FILA_IVA)?.iva).toMatchObject({ periodo: mesActual, postergado: true });
     expect(await e.admin.flujoIvaPostergado.count({ where: { tenantId: tenantB } })).toBe(0);
 
     await ok(tenantA, "finanzas.flujo.postergar_iva", { periodo: mesActual, postergar: false });
