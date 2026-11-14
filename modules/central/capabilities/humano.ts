@@ -13,7 +13,8 @@ export async function responsableActual(ctx: Contexto, db: TenantTx = ctx.db): P
   const turno = await db.centralTurno.findFirst({ where: { estado: { not: "cerrado" } }, select: { operadorId: true } });
   if (turno) return { tipo: "turno", usuarioId: turno.operadorId };
   const respaldo = (await ajuste<string>(ctx, "central", "responsable_respaldo", db)).trim();
-  if (!respaldo) return null;
+  // Un valor que no es id de usuario cuenta como «sin respaldo» (el ajuste es texto libre).
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(respaldo)) return null;
   const m = await db.membership.findFirst({ where: { userId: respaldo, estado: "activa" }, select: { userId: true } });
   return m ? { tipo: "respaldo", usuarioId: m.userId } : null;
 }

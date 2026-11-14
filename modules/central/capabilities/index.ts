@@ -3,7 +3,8 @@ import { alertasContactar, alertasEscalar, alertasHacerseCargo } from "./atencio
 import { cadenasGuardar, cadenasListar } from "./cadenas";
 import { agentePausar, agenteReanudar, alertasDevolver, alertasTomar } from "./control";
 import { reglasGuardar, reglasListar } from "./reglas";
-import { turnoAbrir, turnoAceptar, turnoCerrar, turnoEntregar, turnoEstado } from "./turno";
+import { turnoAbrir, turnoAceptar, turnoCerrar, turnoEntregar } from "./turno";
+import { turnoEstado } from "./turno-estado";
 import {
   alertasFalsaAlarma,
   alertasPosponer,

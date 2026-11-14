@@ -63,7 +63,8 @@ export const alertasDevolver = defineCapability({
       if (dryRun) return { id: a.id, estado: a.estado };
       const venceEn = new Date(Date.now() + (await cadenaDe(tx, a)).plazoMin * 60_000);
       await tx.centralAlerta.update({ where: { id: a.id }, data: { tomadaPorId: null, tomadaEn: null, atencionVenceEn: venceEn } });
-      await registrarHecho(ctx, tx, { alertaId: a.id, tipo: "devuelta", estadoDesde: "en_atencion", estadoHacia: "en_atencion" });
+      const estado = estadoEfectivo(a, new Date());
+      await registrarHecho(ctx, tx, { alertaId: a.id, tipo: "devuelta", estadoDesde: estado, estadoHacia: estado });
       await ctx.trabajos.encolar(tx, { tipo: TRABAJO_REVISAR, payload: { alertaId: a.id }, programadoPara: venceEn, claveUnica: `${a.id}:${venceEn.toISOString()}` });
       return { id: a.id, estado: a.estado };
     });
@@ -80,7 +81,8 @@ export const agentePausar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
-    if (!i.instalacionId && !ctx.agente && !ctx.autorizar(PERMISO_GOBERNAR))
+    // R13: el agente de servicio puede pausarse a sí mismo; una persona necesita gobernar al agente.
+    if (!i.instalacionId && ctx.principal?.tipo !== "servicio" && !ctx.autorizar(PERMISO_GOBERNAR))
       throw prohibido("Pausar al agente en toda la empresa requiere gobernar al agente.");
     if (i.instalacionId) {
       if (ctx.alcance && !ctx.alcance.instalaciones.includes(i.instalacionId)) throw noEncontrado("La instalación");
@@ -88,9 +90,13 @@ export const agentePausar = defineCapability({
     }
     const vigente = await ctx.db.centralPausa.findFirst({ where: { instalacionId: i.instalacionId, reanudadaEn: null }, select: { id: true } });
     if (vigente || dryRun) return { pausada: true };
-    await ctx.transaccion((tx) =>
-      tx.centralPausa.create({ data: { tenantId: ctx.tenantId, instalacionId: i.instalacionId, pausadaPorId: ctx.usuario?.id ?? null, motivo: i.motivo || null } }),
-    );
+    await ctx
+      .transaccion((tx) =>
+        tx.centralPausa.create({ data: { tenantId: ctx.tenantId, instalacionId: i.instalacionId, pausadaPorId: ctx.usuario?.id ?? null, motivo: i.motivo || null } }),
+      )
+      .catch((e: unknown) => {
+        if ((e as { code?: string }).code !== "P2002") throw e; // Otra pausa simultánea ya quedó: idempotente.
+      });
     return { pausada: true };
   },
 });

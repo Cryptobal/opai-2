@@ -2,47 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
-import { PERMISO_ATENDER, PERMISO_VER, uuidSchema } from "./esquemas";
-import { responsableActual } from "./humano";
-
-const turnoSchema = z.object({
-  id: uuidSchema,
-  operadorId: uuidSchema,
-  estado: z.enum(["abierto", "en_entrega", "cerrado"]),
-  entregaAId: uuidSchema.nullable(),
-  notaEntrega: z.string().nullable(),
-  createdAt: z.date(),
-});
-
-export const turnoEstado = defineCapability({
-  auditarLectura: (s) => (s.responsable ? [s.responsable.usuarioId] : []),
-  id: "central.turno.estado",
-  descripcion:
-    "Quién está a cargo de la central ahora (operador de turno o responsable de respaldo), el turno vivo y si el agente está en pausa en la empresa o en alguna instalación.",
-  permiso: PERMISO_VER,
-  input: z.object({}),
-  output: z.object({
-    responsable: z.object({ tipo: z.enum(["turno", "respaldo"]), usuarioId: uuidSchema }).nullable(),
-    turno: turnoSchema.nullable(),
-    pausadaEmpresa: z.boolean(),
-    instalacionesPausadas: z.number().int(),
-  }),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx) {
-    const [responsable, turno, pausas] = await Promise.all([
-      responsableActual(ctx),
-      ctx.db.centralTurno.findFirst({ where: { estado: { not: "cerrado" } } }),
-      ctx.db.centralPausa.findMany({ where: { reanudadaEn: null }, select: { instalacionId: true } }),
-    ]);
-    return {
-      responsable,
-      turno: turno ? { ...turno, estado: turno.estado as "abierto" | "en_entrega" } : null,
-      pausadaEmpresa: pausas.some((p) => p.instalacionId === null),
-      instalacionesPausadas: pausas.filter((p) => p.instalacionId !== null).length,
-    };
-  },
-});
+import { PERMISO_ATENDER, uuidSchema } from "./esquemas";
 
 const salida = z.object({ id: uuidSchema, estado: z.string() });
 const persona = (ctx: { usuario: { id: string } | null }) => {
@@ -64,7 +24,12 @@ export const turnoAbrir = defineCapability({
     if (await ctx.db.centralTurno.findFirst({ where: { estado: { not: "cerrado" } }, select: { id: true } }))
       throw reglaDeNegocio("Ya hay un turno de central abierto: pide que te lo entreguen.");
     if (dryRun) return { id: yo, estado: "abierto" };
-    const t = await ctx.transaccion((tx) => tx.centralTurno.create({ data: { tenantId: ctx.tenantId, operadorId: yo } }));
+    const t = await ctx
+      .transaccion((tx) => tx.centralTurno.create({ data: { tenantId: ctx.tenantId, operadorId: yo } }))
+      .catch((e: unknown) => {
+        // Dos aperturas a la vez: el índice único deja una sola.
+        throw (e as { code?: string }).code === "P2002" ? reglaDeNegocio("Ya hay un turno de central abierto.") : e;
+      });
     return { id: t.id, estado: t.estado };
   },
 });
@@ -87,9 +52,13 @@ export const turnoEntregar = defineCapability({
     if (!(await ctx.db.membership.findFirst({ where: { userId: i.aUsuarioId, estado: "activa" }, select: { id: true } })))
       throw noEncontrado("La persona");
     if (dryRun) return { id: t.id, estado: "en_entrega" };
-    await ctx.transaccion((tx) =>
-      tx.centralTurno.update({ where: { id: t.id }, data: { estado: "en_entrega", entregaAId: i.aUsuarioId, notaEntrega: i.nota || null } }),
-    );
+    await ctx.transaccion(async (tx) => {
+      const { count } = await tx.centralTurno.updateMany({
+        where: { id: t.id, estado: "abierto", operadorId: yo },
+        data: { estado: "en_entrega", entregaAId: i.aUsuarioId, notaEntrega: i.nota || null },
+      });
+      if (count !== 1) throw reglaDeNegocio("Tu turno cambió mientras lo entregabas.");
+    });
     return { id: t.id, estado: "en_entrega" };
   },
 });
@@ -110,7 +79,11 @@ export const turnoAceptar = defineCapability({
     if (!t) throw reglaDeNegocio("No hay un turno de central entregado a ti.");
     if (dryRun) return { id: t.id, estado: "abierto" };
     const nuevo = await ctx.transaccion(async (tx) => {
-      await tx.centralTurno.update({ where: { id: t.id }, data: { estado: "cerrado", cerradoEn: new Date(), entregaAId: null } });
+      const { count } = await tx.centralTurno.updateMany({
+        where: { id: t.id, estado: "en_entrega", entregaAId: yo },
+        data: { estado: "cerrado", cerradoEn: new Date(), entregaAId: null },
+      });
+      if (count !== 1) throw reglaDeNegocio("El turno ya no está en entrega.");
       await tx.centralAlerta.updateMany({ where: { tomadaPorId: t.operadorId }, data: { tomadaPorId: yo, tomadaEn: new Date() } });
       return tx.centralTurno.create({ data: { tenantId: ctx.tenantId, operadorId: yo } });
     });
@@ -134,7 +107,10 @@ export const turnoCerrar = defineCapability({
     if (!t) throw reglaDeNegocio("No tienes un turno de central abierto.");
     if (dryRun) return { id: t.id, estado: "cerrado" };
     await ctx.transaccion((tx) =>
-      tx.centralTurno.update({ where: { id: t.id }, data: { estado: "cerrado", cerradoEn: new Date(), entregaAId: null } }),
+      tx.centralTurno.updateMany({
+        where: { id: t.id, operadorId: yo, estado: { not: "cerrado" } },
+        data: { estado: "cerrado", cerradoEn: new Date(), entregaAId: null },
+      }),
     );
     return { id: t.id, estado: "cerrado" };
   },
