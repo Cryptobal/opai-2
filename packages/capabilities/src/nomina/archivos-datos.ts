@@ -89,26 +89,34 @@ export async function datosArchivoPeriodo(ctx: Contexto, periodoId: string, lega
       errores.push({ personaId: l.personaId, mensaje });
       return [];
     }
-    const d = (l.detalle ?? {}) as Record<string, unknown>;
-    const prev = previsionSchema.safeParse(d.prevision);
-    const f = ficha.get(l.personaId);
-    return [{
-      personaId: l.personaId,
-      persona: { rut: p.rut, nombres: p.nombres, apellidos: p.apellidos, sexo: p.sexo ?? null, nacionalidad: p.nacionalidad },
-      inicio: dia(v.inicio) ?? "",
-      ingresoEnMes: v.inicio >= periodo.inicio ? dia(v.inicio) : null,
-      terminoEnMes: v.termino && v.termino <= periodo.fin ? dia(v.termino) : null,
-      diasTrabajados: l.diasTrabajados,
-      diasLicencia: typeof d.diasLicencia === "number" ? d.diasLicencia : 0,
-      liquido: l.liquido,
-      haberes: lineas(d.haberes),
-      descuentosLegales: lineas(d.descuentosLegales),
-      otrosDescuentos: lineas(d.otrosDescuentos),
-      aportesEmpleador: Array.isArray(d.aportesEmpleador) ? lineas(d.aportesEmpleador) : null,
-      prevision: prev.success ? prev.data : null,
-      ficha: f ? { tramo: f.tramoAsignacion, simples: f.cargasSimples, maternales: f.cargasMaternales, invalidez: f.cargasInvalidez, jubilado: f.jubilado } : null,
-    }];
+    return [filaDe(l, p, v, ficha.get(l.personaId) ?? null, periodo)];
   });
   const nombres = new Map(personas.map((p) => [p.id, `${p.nombres} ${p.apellidos}`.trim()]));
   return { periodo, filas, errores, rutEmpleador, nombres };
+}
+
+type Liq = { personaId: string; diasTrabajados: number; liquido: number; detalle: unknown };
+type PersonaArchivo = { rut: string; nombres: string; apellidos: string; sexo: string | null; nacionalidad: string };
+type Ficha = { tramoAsignacion: string | null; cargasSimples: number; cargasMaternales: number; cargasInvalidez: number; jubilado: boolean };
+
+/** Fila de un archivo legal: liquidación guardada, persona, contrato del mes y ficha previsional. */
+function filaDe(l: Liq, p: PersonaArchivo, v: { inicio: Date; termino: Date | null }, f: Ficha | null, periodo: { inicio: Date; fin: Date }): FilaArchivo {
+  const d = (l.detalle ?? {}) as Record<string, unknown>;
+  const prev = previsionSchema.safeParse(d.prevision);
+  return {
+    personaId: l.personaId,
+    persona: { rut: p.rut, nombres: p.nombres, apellidos: p.apellidos, sexo: p.sexo ?? null, nacionalidad: p.nacionalidad },
+    inicio: dia(v.inicio) ?? "",
+    ingresoEnMes: v.inicio >= periodo.inicio ? dia(v.inicio) : null,
+    terminoEnMes: v.termino && v.termino <= periodo.fin ? dia(v.termino) : null,
+    diasTrabajados: l.diasTrabajados,
+    diasLicencia: typeof d.diasLicencia === "number" ? d.diasLicencia : 0,
+    liquido: l.liquido,
+    haberes: lineas(d.haberes),
+    descuentosLegales: lineas(d.descuentosLegales),
+    otrosDescuentos: lineas(d.otrosDescuentos),
+    aportesEmpleador: Array.isArray(d.aportesEmpleador) ? lineas(d.aportesEmpleador) : null,
+    prevision: prev.success ? prev.data : null,
+    ficha: f ? { tramo: f.tramoAsignacion, simples: f.cargasSimples, maternales: f.cargasMaternales, invalidez: f.cargasInvalidez, jubilado: f.jubilado } : null,
+  };
 }
