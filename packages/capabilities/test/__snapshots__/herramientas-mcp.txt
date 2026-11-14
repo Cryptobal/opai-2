@@ -570,6 +570,7 @@ nomina_prestamos_aplicar_cuotas
 nomina_prestamos_cancelar
 nomina_prestamos_crear
 nomina_prestamos_listar
+nomina_previred_generar
 pauta_alertas_listar
 pauta_ausencias_anular
 pauta_ausencias_listar
