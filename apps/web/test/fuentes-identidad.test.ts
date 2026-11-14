@@ -23,6 +23,8 @@ vi.mock("@opai/db", () => ({
 }));
 import { fuentesReales } from "../lib/fuentes";
 
+const SIN_ROLES_EXTRA = { rolesAdicionales: [], gruposUsuarios: [] };
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -33,6 +35,7 @@ it("carga módulos y acceso del tenant/usuario elegido con una sola consulta", a
     portales: ["erp"],
     rolTenant: { archivadoEn: null, permisos: ["core:cuentas.read"] },
     excepciones: [{ permiso: "core:personas.read", conceder: false }],
+    ...SIN_ROLES_EXTRA,
     tenant: { modules: [{ moduloId: "comercial" }] },
   });
   expect(await fuentesReales.accesoConModulos!("tenant-propio", "usuario")).toEqual({
@@ -42,6 +45,7 @@ it("carga módulos y acceso del tenant/usuario elegido con una sola consulta", a
       permisosRol: ["core:cuentas.read"],
       excepciones: [{ permiso: "core:personas.read", conceder: false }],
       instalaciones: null,
+      permisosAdicionales: [],
     },
   });
   expect(mocks.tenant).toHaveBeenCalledWith("tenant-propio");
@@ -68,6 +72,7 @@ it("un rol archivado no hereda permisos; un supervisor sin asignaciones conserva
     rol: "supervisor",
     rolTenant: { archivadoEn: new Date(), permisos: ["*"] },
     excepciones: [],
+    ...SIN_ROLES_EXTRA,
     tenant: { modules: [] },
   });
   mocks.instalaciones.mockResolvedValue([]);
@@ -87,6 +92,7 @@ const contacto = {
   portales: ["cliente"],
   rolTenant: { archivadoEn: null, permisos: ["portal_cliente:read"] },
   excepciones: [],
+  ...SIN_ROLES_EXTRA,
   tenant: { modules: [{ moduloId: "portal_cliente" }] },
 };
 const instalaciones = [
@@ -133,6 +139,7 @@ it("un módulo en solo lectura sigue activo y además se informa aparte (CAR-188
     portales: ["erp"],
     rolTenant: null,
     excepciones: [],
+    ...SIN_ROLES_EXTRA,
     tenant: {
       modules: [
         { moduloId: "comercial", estado: "activo" },
