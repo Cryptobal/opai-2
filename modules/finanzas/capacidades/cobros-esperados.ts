@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
 import type { Contexto } from "@opai/capabilities";
-import { type AvisoFlujo, type DiferenciaFactoring, hoyChile, proyeccionDeIngresos } from "@opai/capabilities";
+import { type AvisoFlujo, type DiferenciaFactoring, hoyChile, type IngresoEsperado, proyeccionDeIngresos } from "@opai/capabilities";
 
 import type { CeldaFlujo } from "../domain";
 import type { celdaSchema } from "./esquemas";
@@ -21,6 +21,12 @@ const ORIGEN: Record<string, string> = {
   emision: "emisión",
   programacion: "programación",
 };
+
+type OrigenEditable = "manual" | "promedio" | "vencimiento" | "emision";
+/** Factura (o borrador) con fecha propia: su fecha esperada se puede fijar a mano. Programaciones y cesiones no. */
+function cobroEditable(i: IngresoEsperado): i is IngresoEsperado & { documentoEmitidoId: string; origenFecha: OrigenEditable } {
+  return !!i.documentoEmitidoId && (i.origenFecha === "manual" || i.origenFecha === "promedio" || i.origenFecha === "vencimiento" || i.origenFecha === "emision");
+}
 
 /**
  * Cobros esperados de las facturas por cobrar (ADR-073): un solo criterio de semana, la fecha esperada de cobro.
@@ -46,6 +52,7 @@ export async function celdasCobrosEsperados(
       capa: "comprometido",
       monto: i.monto,
       nota: `${i.etiqueta}${cuando}`,
+      ...(cobroEditable(i) ? { cobro: { documentoId: i.documentoEmitidoId, fechaEsperada: i.fechaEsperada, origen: i.origenFecha } } : {}),
     });
   }
   return { dominio, vista, avisos: proy.avisos, diferencias: proy.diferenciasFactoring.filter((d) => enRango.has(d.semana)) };

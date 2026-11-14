@@ -62,6 +62,14 @@ export const celdaSchema = z.object({
   capa: capaSchema,
   monto: z.number().int(),
   nota: z.string().nullable(),
+  /** Solo en «Cobros esperados»: la factura detrás de la celda y su fecha esperada de cobro (CAR-396). */
+  cobro: z
+    .object({
+      documentoId: uuidSchema,
+      fechaEsperada: z.string().nullable(),
+      origen: z.enum(["manual", "promedio", "vencimiento", "emision"]),
+    })
+    .optional(),
 });
 
 export const ajustesSchema = z.object({
