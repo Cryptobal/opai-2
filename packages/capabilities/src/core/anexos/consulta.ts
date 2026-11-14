@@ -34,10 +34,9 @@ export const anexosList = defineCapability({
         persona: dondePersona(ctx),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    return pagina(filas.map(vistaAnexo), input.limite);
+    return pagina(filas.map(vistaAnexo), input.limite, input.cursor);
   },
 });
 
