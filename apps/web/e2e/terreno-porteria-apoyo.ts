@@ -10,8 +10,12 @@ export async function porteriaEntradaYSalida(t: Page): Promise<boolean> {
   await t.goto("/terreno/porteria");
   const inactivo = t.getByText("Control de acceso no está activo");
   const formulario = t.getByRole("region", { name: "Registrar entrada" });
-  await expect(formulario.or(inactivo)).toBeVisible({ timeout: 30_000 });
+  // El formulario aparece antes de saber si el módulo está activo: se espera la respuesta del servidor
+  // («En sitio» o «no está activo») antes de decidir, si no la entrada se rechaza en silencio (CAR-497).
+  const cargado = t.getByRole("region", { name: "En sitio" });
+  await expect(cargado.or(inactivo)).toBeVisible({ timeout: 30_000 });
   if (await inactivo.isVisible()) return false;
+  await expect(formulario).toBeVisible();
 
   const cuerpo = String(14_000_000 + (Date.now() % 9_000_000));
   const nombre = `Visita Prueba ${Date.now()}`;

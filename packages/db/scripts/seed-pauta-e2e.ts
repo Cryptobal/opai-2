@@ -27,9 +27,9 @@ async function main() {
 }
 
 async function sembrar(db: TenantTx, tenantId: string) {
-  // Pauta y Desempeño se activan en la empresa de pruebas (navegación y capacidades). Sin Desempeño
-  // activo sus capacidades responden «Módulo inactivo» y sus e2e no prueban nada (CAR-507).
-  for (const moduloId of ["pauta", "desempeno"]) {
+  // Pauta, Desempeño y Control de acceso se activan en la empresa de pruebas (navegación y capacidades).
+  // Sin ellos sus capacidades responden «Módulo inactivo» y sus e2e no prueban nada (CAR-507, CAR-497).
+  for (const moduloId of ["pauta", "desempeno", "acceso"]) {
     await db.tenantModule.upsert({
       where: { tenantId_moduloId: { tenantId, moduloId } },
       update: { estado: "activo" },
