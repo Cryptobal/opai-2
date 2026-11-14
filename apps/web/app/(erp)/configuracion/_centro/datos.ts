@@ -1,3 +1,6 @@
+import { listarModulos } from "@opai/capabilities";
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { datosSiHayPermiso } from "@/lib/carga";
 import type { Contadores } from "@/lib/navegacion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -6,8 +9,6 @@ import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import { type Grupo, GRUPOS, grupoPorId } from "./grupos";
 import { seccionModulo } from "./seccion-modulo";
 import { SECCIONES, type Seccion } from "./secciones";
-
-type Modulo = { id: string; nombre: string; estado: string | null };
 
 export type GrupoConEntradas = { grupo: Grupo; entradas: Seccion[] };
 
@@ -40,17 +41,19 @@ export async function cargarIndice() {
   const rol = identidad.actual?.rol;
   // Permisos efectivos (ADR-022): rol personalizado y excepciones, no solo el rol base (QA 1.1).
   const puede = puedeDeIdentidad(identidad);
-  const [mods, esquema, n] = await Promise.all([
-    ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list"),
+  // Los módulos activos (activo, trial o solo lectura) ya vienen en la identidad del request; con el
+  // catálogo de manifests se evita leer `core.modules.list` otra vez (ADR-045: ≤ 8 consultas).
+  const [esquema, n] = await Promise.all([
     ejecutarComoUsuario<{ modulo: string }[]>("erp", "core.config.schema", {}),
     ejecutarComoUsuario<Contadores>("erp", "core.resumen.contadores", {
       campos: ["aprobacionesPendientes"],
     }),
   ]);
   const conAjustes = new Set(datosSiHayPermiso(esquema, []).map((c) => c.modulo));
-  const activos = datosSiHayPermiso(mods, []).filter(
-    (m) => m.estado === "activo" || m.estado === "trial" || m.estado === "solo_lectura",
-  );
+  const enEmpresa = new Set(identidad.modulosActivos);
+  const activos = puede(PERMISOS_CORE.tenantRead)
+    ? listarModulos().filter((m) => enEmpresa.has(m.id))
+    : [];
   const idsActivos = new Set(activos.map((m) => m.id));
   const modulos = activos
     .filter((m) => conAjustes.has(m.id))
