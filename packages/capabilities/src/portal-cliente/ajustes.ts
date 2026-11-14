@@ -40,4 +40,13 @@ export const ajustesPortalCliente = z.object({
     permiso: "portal_cliente:config.manage",
     control: "switch",
   }),
+  seccion_facturas: z.boolean().default(true).meta({
+    etiqueta: "Permitir que los clientes vean sus facturas",
+    ayuda:
+      "Cada cuenta enciende aparte sus facturas en su configuración del portal (apagadas por defecto). Apagado aquí, ningún cliente las ve.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
 });

@@ -7,6 +7,7 @@ import { coberturaSchema } from "./cobertura";
 import { configDeCuenta } from "./config-datos";
 import { novedadesSchema } from "./novedades";
 import { rondasSchema } from "./rondas";
+import { facturasActivas } from "./facturas";
 import { activa, seccionesDelResumen } from "./secciones";
 import { PERMISO_PORTAL, accesoDelActor, seccionSchema } from "./comun";
 
@@ -100,6 +101,8 @@ export const resumenLeer = defineCapability({
     limitado: z.boolean(),
     /** La empresa encendió el texto de las novedades para esta cuenta (CAR-502): hay libro por instalación. */
     novedadesTexto: z.boolean(),
+    /** La cuenta ve sus facturas (CAR-518). */
+    facturas: z.boolean(),
     instalaciones: z.array(
       z.object({
         id: z.string(),
@@ -135,6 +138,7 @@ export const resumenLeer = defineCapability({
       mesEnCurso: mes === actual,
       limitado: !a.todasInstalaciones && a.instalacionIds.length < total,
       novedadesTexto,
+      facturas: await facturasActivas(ctx, visibles),
       instalaciones: a.instalaciones.map((i) => ({
         id: i.id,
         nombre: i.nombre,
