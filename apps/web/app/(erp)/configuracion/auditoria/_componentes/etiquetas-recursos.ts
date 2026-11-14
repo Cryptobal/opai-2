@@ -19,7 +19,7 @@ export const RECURSOS: Record<string, string> = {
   programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos",
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
-  conceptos: "Conceptos", obligaciones: "Obligaciones", mes: "Mes", ppc: "Puestos por cubrir",
+  conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", liquidaciones: "Liquidaciones", mes: "Mes", ppc: "Puestos por cubrir",
   series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos",
   alertas: "Alertas", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
