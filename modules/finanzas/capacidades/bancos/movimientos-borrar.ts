@@ -82,7 +82,8 @@ export const bancosMovimientosBorrarRango = defineCapability({
         select: { id: true },
       });
       // Solo propuestas sin confirmar: si alguien confirmó una entre el recuento y aquí, la FK Restrict aborta todo.
-      await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ids }, confirmada: false } });
+      // CAR-453: también las conciliaciones deshechas (activa=false): ya no valen y su FK Restrict abortaba el borrado.
+      await tx.conciliacionBanco.deleteMany({ where: { movimientoId: { in: ids }, OR: [{ confirmada: false }, { activa: false }] } });
       await tx.movimientoBancario.deleteMany({ where: { id: { in: ids } } });
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.banco.movimientos_borrados",
