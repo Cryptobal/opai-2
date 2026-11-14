@@ -3,10 +3,12 @@ import { z } from "zod";
 import { liquidacionDelMes, type NovedadesLiquidacion } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { reglaDeNegocio } from "../errores";
+import { prohibido, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { dia } from "../core/maestros/comun";
 import { mutualAdicionalTenant } from "../core/remuneraciones";
+import type { TenantTx } from "@opai/db";
+
 import type { Contexto } from "../types";
 import { bloquearPeriodoAbierto } from "./bloqueos";
 import { PERMISO_PERIODOS, periodoDe } from "./comun";
@@ -16,9 +18,9 @@ import { exigirPeriodoAbierto } from "./novedades-util";
 const vacias = (): NovedadesLiquidacion =>
   ({ diasLicencia: 0, diasAusencia: 0, minutosExtra: 0, anticipos: 0, prestamos: 0, descuentos: 0 });
 
-/** Novedades vigentes del período sumadas por persona, en las unidades del cálculo. */
-async function novedadesPorPersona(ctx: Contexto, periodoId: string) {
-  const filas = await ctx.db.nominaNovedad.findMany({
+/** Novedades vigentes del período sumadas por persona, en las unidades del cálculo (se redondea al final). */
+async function novedadesPorPersona(db: Contexto["db"] | TenantTx, periodoId: string) {
+  const filas = await db.nominaNovedad.findMany({
     where: { periodoId, estado: "vigente" },
     select: { personaId: true, tipo: true, cantidad: true, montoClp: true },
   });
@@ -27,13 +29,18 @@ async function novedadesPorPersona(ctx: Contexto, periodoId: string) {
     const n = porPersona.get(f.personaId) ?? vacias();
     const cantidad = Number(f.cantidad ?? 0);
     const monto = f.montoClp ?? 0;
-    if (f.tipo === "licencia") n.diasLicencia += Math.round(cantidad);
-    else if (f.tipo === "ausencia") n.diasAusencia += Math.round(cantidad);
-    else if (f.tipo === "horas_extra") n.minutosExtra += Math.round(cantidad * 60);
+    if (f.tipo === "licencia") n.diasLicencia += cantidad;
+    else if (f.tipo === "ausencia") n.diasAusencia += cantidad;
+    else if (f.tipo === "horas_extra") n.minutosExtra += cantidad * 60;
     else if (f.tipo === "anticipo") n.anticipos += monto;
     else if (f.tipo === "prestamo") n.prestamos += monto;
     else if (f.tipo === "descuento") n.descuentos += monto;
     porPersona.set(f.personaId, n);
+  }
+  for (const n of porPersona.values()) {
+    n.diasLicencia = Math.round(n.diasLicencia);
+    n.diasAusencia = Math.round(n.diasAusencia);
+    n.minutosExtra = Math.round(n.minutosExtra);
   }
   return porPersona;
 }
@@ -56,6 +63,8 @@ export const liquidacionesCalcular = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, { periodoId }, { dryRun }) {
+    // Recalcular reemplaza las liquidaciones del período: exige ver a todo el personal y sus sueldos.
+    if (ctx.alcance) throw prohibido("Calcular el período exige ver a todo el personal; tu rol tiene alcance por instalación.");
     const periodo = await periodoDe(ctx, periodoId);
     exigirPeriodoAbierto(periodo);
     const m = { anio: periodo.anio, mes: periodo.mes };
@@ -64,29 +73,38 @@ export const liquidacionesCalcular = defineCapability({
     if (typeof juego === "string") throw reglaDeNegocio(`Faltan valores legales para el mes (${juego}).`);
     const base = await cargarBase(ctx, ini, fin);
     const ocultas = base.estructuras.length ? await ocultasDe(ctx, base.estructuras) : new Map<string, boolean>();
+    if ([...ocultas.values()].some(Boolean))
+      throw prohibido("Calcular el período exige ver los sueldos de todo el personal (permiso de montos sensibles).");
     const grupo = personasDelMes(base, m, ocultas);
-    const [novedades, mutual] = await Promise.all([novedadesPorPersona(ctx, periodoId), mutualAdicionalTenant(ctx)]);
-    const omitidas: z.infer<typeof omitidaSchema>[] = [...grupo.omitidas];
-    const filas = grupo.personas.flatMap((p) => {
-      try {
-        const l = liquidacionDelMes({ ...p, mutualAdicional: mutual ?? 0, novedades: novedades.get(p.personaId) ?? vacias() }, juego);
-        return [{ personaId: p.personaId, l }];
-      } catch {
-        omitidas.push({ personaId: p.personaId, motivo: "error_calculo" });
-        return [];
-      }
-    });
-    const salida = {
-      calculadas: filas.length,
-      omitidas,
-      totalLiquido: filas.reduce((s, f) => s + f.l.liquido, 0),
-      advertencias: mutual == null ? ["Mutual adicional sin confirmar: se usa 0 %."] : [],
+    const mutual = await mutualAdicionalTenant(ctx);
+    const calcular = async (db: Contexto["db"] | TenantTx) => {
+      const novedades = await novedadesPorPersona(db, periodoId);
+      const omitidas: z.infer<typeof omitidaSchema>[] = [...grupo.omitidas];
+      const filas = grupo.personas.flatMap((p) => {
+        try {
+          const l = liquidacionDelMes({ ...p, mutualAdicional: mutual ?? 0, novedades: novedades.get(p.personaId) ?? vacias() }, juego);
+          return [{ personaId: p.personaId, l }];
+        } catch {
+          omitidas.push({ personaId: p.personaId, motivo: "error_calculo" });
+          return [];
+        }
+      });
+      const salida = {
+        calculadas: filas.length,
+        omitidas,
+        totalLiquido: filas.reduce((s, f) => s + f.l.liquido, 0),
+        advertencias: mutual == null ? ["Mutual adicional sin confirmar: se usa 0 %."] : [],
+      };
+      return { filas, salida };
     };
-    if (dryRun) return salida;
-    await ctx.transaccion(async (tx) => {
+    if (dryRun) return (await calcular(ctx.db)).salida;
+    return ctx.transaccion(async (tx) => {
       await bloquearPeriodoAbierto(tx, ctx.tenantId, periodoId);
-      const calculadas = filas.map((f) => f.personaId);
-      await tx.nominaLiquidacion.deleteMany({ where: { periodoId, personaId: { notIn: calculadas } } });
+      // Con el período bloqueado, las novedades ya no cambian: se calcula con ellas.
+      const { filas, salida } = await calcular(tx);
+      // Se conservan las de quien falló el cálculo; se borran las de quien ya no tiene vínculo o capa.
+      const conservar = [...filas.map((f) => f.personaId), ...salida.omitidas.filter((o) => o.motivo === "error_calculo").map((o) => o.personaId)];
+      await tx.nominaLiquidacion.deleteMany({ where: { periodoId, personaId: { notIn: conservar } } });
       for (const { personaId, l } of filas) {
         const datos = {
           estado: "calculada", diasTrabajados: l.diasTrabajados, haberes: l.totalHaberes, imponible: l.imponible,
@@ -105,7 +123,7 @@ export const liquidacionesCalcular = defineCapability({
         entidadId: periodoId,
         payload: { periodoId, cantidad: filas.length },
       });
+      return salida;
     });
-    return salida;
   },
 });

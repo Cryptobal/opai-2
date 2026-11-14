@@ -1,7 +1,7 @@
 # CAR-99 · Nómina II · Liquidaciones (parte 1 de Nómina II + Cumplimiento DT)
 
 - **Sesión:** Sesión Payroll
-- **PR:** por abrir · rama `brief/car-99-nomina-liquidaciones`
+- **PR:** #801 · rama `brief/car-99-nomina-liquidaciones`
 - **Estado:** En PR
 - **Migración:** `20261231100000_nomina_liquidaciones` (aditiva; se aplica en dev y main con snapshot antes de integrar)
 - **Apilado sobre / espera:** apilado sobre #799 (CAR-344): reutiliza la carga de vínculos y capas del costo proyectado.
@@ -26,3 +26,6 @@
 - Días trabajados desde las novedades (licencia y ausencia) mientras Asistencia no entrega días: reversible y es lo que exige el PR 2 de la especificación.
 - Mes de 30 días para proporcionar (práctica chilena y la de la especificación).
 - Los descuentos no recortan el líquido: solo avisan (CAR-455).
+- Calcular y ver liquidaciones exige acceso a todo el personal (sin alcance por instalación) y el permiso de sueldos sensibles: recalcular reemplaza el período completo y no debe borrar ni revelar lo que el usuario no ve.
+- Días en base 30: 30 menos los días calendario fuera del vínculo (mes de 31 y febrero dan lo mismo que un mes de 30).
+- Las novedades se leen con el período bloqueado, dentro de la misma transacción que guarda.

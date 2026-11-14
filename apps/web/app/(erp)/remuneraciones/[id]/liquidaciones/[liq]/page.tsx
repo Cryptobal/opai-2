@@ -43,7 +43,7 @@ export default function LiquidacionPersona({ params }: Props) {
       opciones={(d) => ({ volver: { href: `/remuneraciones/${d.id}/liquidaciones`, etiqueta: "Liquidaciones" } })}
     >
       {(d) => {
-        if (!d.r.ok) return <Alerta tono="danger" titulo={d.r.error.message} />;
+        if (!d.r.ok) return <DetailScreen state="error" titulo="Liquidación">{d.r.error.message}</DetailScreen>;
         const l = d.r.data;
         const sum = (x: LineaLiquidacion[]) => x.reduce((s, y) => s + y.monto, 0);
         const descuentos = [...l.detalle.descuentosLegales, ...l.detalle.otrosDescuentos];

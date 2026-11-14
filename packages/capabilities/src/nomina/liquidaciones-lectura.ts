@@ -1,13 +1,22 @@
 import { z } from "zod";
 
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { defineCapability } from "../define";
-import { noEncontrado } from "../errores";
+import { noEncontrado, prohibido } from "../errores";
+import type { Contexto } from "../types";
 import { uuidSchema } from "../core/esquemas";
 import { PERMISO_NOVEDADES_READ, iso, periodoDe } from "./comun";
 import { nombresDe } from "./novedades-vista";
 
 // Lecturas de liquidaciones (Brief 27): montos de remuneración por persona, dato sensible. Se auditan por
 // los IDs revelados (NÚCLEO-H) y quedan fuera para gerente, supervisor y viewer (bloqueo financiero).
+/** Los montos por persona exigen ver todo el personal y el permiso de sueldos sensibles (como las capas). */
+function exigirVistaCompleta(ctx: Contexto): void {
+  if (ctx.alcance || !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
+    throw prohibido("Ver liquidaciones exige el permiso de sueldos sensibles y acceso a todo el personal.");
+}
+
 const lineaSchema = z.object({ concepto: z.string(), monto: z.number().int() });
 
 const resumenSchema = z.object({
@@ -59,6 +68,7 @@ export const liquidacionesListar = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.items.map((i) => i.id),
   async handler(ctx, { periodoId, cursor, limite }) {
+    exigirVistaCompleta(ctx);
     await periodoDe(ctx, periodoId);
     const filas = await ctx.db.nominaLiquidacion.findMany({
       where: { periodoId, ...(cursor ? { id: { gt: cursor } } : {}) },
@@ -102,6 +112,7 @@ export const liquidacionesObtener = defineCapability({
   dryRun: false,
   auditarLectura: (s) => [s.id],
   async handler(ctx, { id }) {
+    exigirVistaCompleta(ctx);
     const f = await ctx.db.nominaLiquidacion.findUnique({ where: { id } });
     if (!f) throw noEncontrado("La liquidación");
     const nombres = await nombresDe(ctx.db, [f.personaId]);

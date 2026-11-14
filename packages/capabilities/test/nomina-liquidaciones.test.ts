@@ -14,6 +14,7 @@ import {
   registrarCapacidades,
 } from "../src";
 import { TENANT_DE_PRUEBA as T, contextoDePrueba } from "../src/testing";
+import { diasDelVinculo } from "../src/nomina/costo-proyectado-datos";
 import { semillaTenant } from "./semilla";
 
 const P1 = "0192f3a0-0000-7000-8000-00000000f401";
@@ -50,8 +51,8 @@ const semilla = (estado = "abierto") => {
     nominaLiquidacion: [],
   };
 };
-const como = (rol: "owner" | "gerente" = "owner", estado = "abierto") =>
-  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla(estado) });
+const como = (rol: "owner" | "gerente" = "owner", estado = "abierto", extra: Parameters<typeof contextoDePrueba>[0] = {}) =>
+  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla(estado), ...extra });
 type Ctx = ReturnType<typeof como>;
 const run = (c: Ctx, id: string, input: unknown, opts?: { dryRun?: boolean }) => executeCapability(c.ctx, id, input, opts);
 const data = <T>(r: Awaited<ReturnType<typeof run>>) => {
@@ -109,5 +110,29 @@ describe("nomina.liquidaciones", () => {
     const c = como("gerente");
     for (const [id, input] of [["nomina.liquidaciones.calcular", { periodoId: PER }], ["nomina.liquidaciones.listar", { periodoId: PER }]] as const)
       expect(await run(c, id, input)).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("con alcance o sin el permiso de sueldos sensibles no calcula ni lee", async () => {
+    const alcance = como("owner", "abierto", { alcance: { instalaciones: [] } });
+    const sinSensible = como("owner", "abierto", { permisosRol: ["nomina:*"] });
+    for (const c of [alcance, sinSensible]) {
+      expect(await run(c, "nomina.liquidaciones.calcular", { periodoId: PER })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+      expect(await run(c, "nomina.liquidaciones.listar", { periodoId: PER })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+      expect(c.tabla("nominaLiquidacion")).toHaveLength(0);
+    }
+  });
+
+  it("recalcular borra solo a quien ya no tiene vínculo o capa", async () => {
+    const c = como();
+    (c.tabla("nominaLiquidacion") as Record<string, unknown>[]).push({ id: "vieja", tenantId: T, periodoId: PER, personaId: P2, liquido: 1, costoEmpresa: 1 });
+    await run(c, "nomina.liquidaciones.calcular", { periodoId: PER });
+    expect((c.tabla("nominaLiquidacion") as { personaId: string }[]).map((l) => l.personaId)).toEqual([P1]);
+  });
+
+  it("días en base 30: mes de 31 y febrero", () => {
+    expect(diasDelVinculo("2026-12-01", "2026-12-31", "2026-12-02", null)).toBe(29);
+    expect(diasDelVinculo("2026-02-01", "2026-02-28", "2026-02-15", null)).toBe(16);
+    expect(diasDelVinculo("2026-11-01", "2026-11-30", "2025-01-01", "2026-11-10")).toBe(10);
+    expect(diasDelVinculo("2026-11-01", "2026-11-30", "2025-01-01", null)).toBe(30);
   });
 });

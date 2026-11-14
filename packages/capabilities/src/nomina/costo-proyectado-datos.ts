@@ -84,12 +84,11 @@ export async function cargarBase(ctx: Contexto, desde: string, hasta: string) {
 
 export type Base = Awaited<ReturnType<typeof cargarBase>>;
 
-/** Días del mes con vínculo vigente (mes completo = 30, como la liquidación). */
-function diasDelVinculo(ini: string, fin: string, inicio: string, termino: string | null): number {
-  const desde = inicio > ini ? inicio : ini;
-  const hasta = termino && termino < fin ? termino : fin;
-  if (desde === ini && hasta === fin) return 30;
-  return Math.min(30, Math.round((Date.parse(hasta) - Date.parse(desde)) / 86_400_000) + 1);
+/** Días del mes con vínculo vigente en base 30: 30 menos los días calendario fuera del vínculo. */
+export function diasDelVinculo(ini: string, fin: string, inicio: string, termino: string | null): number {
+  const dias = (a: string, b: string) => Math.max(0, Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000));
+  const fuera = (inicio > ini ? dias(ini, inicio) : 0) + (termino && termino < fin ? dias(termino, fin) : 0);
+  return Math.max(0, 30 - fuera);
 }
 
 export type PersonaDelMes = PersonaACostear & { personaId: string; diasVinculo: number };
