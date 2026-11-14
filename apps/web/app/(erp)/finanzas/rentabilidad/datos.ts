@@ -1,3 +1,5 @@
+import { formatearPorcentaje } from "@opai/domain";
+
 import { CargaFallida, exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -33,7 +35,7 @@ export async function cargarRentabilidad(mes: string): Promise<Rentabilidad | nu
 /** Margen en millonésimas → «12,5 %». */
 export function porcentaje(pct: number | null): string {
   if (pct === null) return "—";
-  return `${(pct / 10_000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} %`;
+  return formatearPorcentaje(pct);
 }
 
 /** Margen en pesos, o «—» si hay puestos ocultos por permiso de sueldos. */
