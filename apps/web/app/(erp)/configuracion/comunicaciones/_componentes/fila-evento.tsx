@@ -18,6 +18,8 @@ import {
 } from "./tipos";
 
 const ICONO = { correo: Mail, inapp: Inbox } as const;
+// En el teléfono la fila se apila (CAR-366): nombre e interruptor arriba; canales y destinatarios abajo.
+const CELDA_TEL = "max-md:h-auto max-md:border-0 max-md:p-0";
 
 /** Fila de un evento (30): canales, destinatarios y activo; los transaccionales van "Siempre". */
 export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reglas: Regla[] }) {
@@ -46,8 +48,8 @@ export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reg
     ? DESTINATARIOS
     : [...DESTINATARIOS, { valor: roles, etiqueta: "Personalizado" }];
   return (
-    <Tr>
-      <Td className="whitespace-normal">
+    <Tr className="max-md:grid max-md:grid-cols-[auto_1fr_auto] max-md:items-center max-md:gap-x-3 max-md:gap-y-2 max-md:border-b max-md:border-border max-md:px-3 max-md:py-3">
+      <Td className={cn("whitespace-normal max-md:col-span-2", CELDA_TEL)}>
         <span className="flex flex-col">
           <span className="font-medium">{e.nombre}</span>
           {canales.includes("correo") ? (
@@ -57,11 +59,22 @@ export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reg
           ) : null}
         </span>
       </Td>
-      <Td>
+      <Td className={cn("max-md:row-start-2", CELDA_TEL)}>
         <span className="flex gap-1.5">
           {canales.map((c) => {
             const I = ICONO[c];
             const on = e.transaccional || Boolean(de(c)?.activa);
+            // Los transaccionales no se pueden apagar: el canal se muestra, no es un botón.
+            if (e.transaccional)
+              return (
+                <span
+                  key={c}
+                  title={NOMBRE_CANAL[c]}
+                  className="grid size-9 place-items-center rounded-md border border-border-strong text-fg"
+                >
+                  <I className="size-4" aria-label={NOMBRE_CANAL[c]} role="img" />
+                </span>
+              );
             return (
               <Button
                 key={c}
@@ -69,7 +82,7 @@ export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reg
                 size="icon"
                 aria-label={`${NOMBRE_CANAL[c]}: ${on ? "activo" : "apagado"}`}
                 aria-pressed={on}
-                disabled={e.transaccional || pendiente}
+                disabled={pendiente}
                 onClick={() => void fijar([{ canal: c, activa: !on }])}
                 className={cn(
                   "rounded-md border",
@@ -84,7 +97,7 @@ export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reg
           })}
         </span>
       </Td>
-      <Td className="min-w-52">
+      <Td className={cn("min-w-52 max-md:col-span-2 max-md:row-start-2 max-md:min-w-0", CELDA_TEL)}>
         {e.transaccional ? (
           <span className="text-fg-muted">Su destinatario</span>
         ) : (
@@ -101,7 +114,9 @@ export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reg
           />
         )}
       </Td>
-      <Td>
+      <Td
+        className={cn("max-md:col-start-3 max-md:row-start-1 max-md:justify-self-end", CELDA_TEL)}
+      >
         {e.transaccional ? (
           <Badge punto={false}>
             <Lock className="size-3" aria-hidden /> Siempre
