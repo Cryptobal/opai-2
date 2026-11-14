@@ -112,4 +112,14 @@ describe.skipIf(!urlPropietario)("portal trabajador · mis turnos (Postgres real
     const conPersona = await pagina(t.a, u.a2, { personaId: p.a1, desde: "2026-12-01", dias: 31 });
     expect(conPersona.personaId).toBe(p.a2);
   });
+
+  it("rechaza una fecha que no existe y un cursor que no es un turno propio", async () => {
+    const malo = await correr(t.a, u.a1, { desde: "2026-02-30" });
+    expect(malo.ok).toBe(false);
+    if (!malo.ok) expect(malo.error.code).toBe("INVALID_INPUT");
+    const ajeno = (await pagina(t.a, u.a2, { desde: "2026-12-01", dias: 31 })).items[0]?.id;
+    const r = await correr(t.a, u.a1, { desde: "2026-12-01", dias: 31, cursor: ajeno });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error.code).toBe("NOT_FOUND");
+  });
 });

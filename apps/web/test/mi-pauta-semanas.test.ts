@@ -51,3 +51,13 @@ describe("Mi pauta · semanas (CAR-462)", () => {
     expect(horas(12)).toBe("12 h");
   });
 });
+
+describe("Mi pauta · fecha de ?desde=", () => {
+  it("acepta solo fechas que existen", async () => {
+    const { fechaValida } = await import("../app/(trabajador)/trabajador/mi-pauta/_componentes/semanas");
+    expect(fechaValida("2026-11-16")).toBe(true);
+    expect(fechaValida("2026-02-30")).toBe(false);
+    expect(fechaValida("2026-13-45")).toBe(false);
+    expect(fechaValida(undefined)).toBe(false);
+  });
+});

@@ -21,6 +21,13 @@ const DIA_MS = 86_400_000;
 const aFecha = (dia: string) => new Date(`${dia}T00:00:00Z`);
 export const sumarDias = (dia: string, n: number) => new Date(aFecha(dia).getTime() + n * DIA_MS).toISOString().slice(0, 10);
 
+/** ¿Es una fecha civil `aaaa-mm-dd` que existe? (`?desde=2026-02-30` se ignora). */
+export function fechaValida(dia: string | undefined): dia is string {
+  if (!dia || !/^\d{4}-\d{2}-\d{2}$/.test(dia)) return false;
+  const t = Date.parse(`${dia}T00:00:00Z`);
+  return !Number.isNaN(t) && new Date(t).toISOString().startsWith(dia);
+}
+
 /** Lunes de la semana del día civil `aaaa-mm-dd`. */
 export function lunesDe(dia: string): string {
   const semana = (aFecha(dia).getUTCDay() + 6) % 7; // lunes = 0

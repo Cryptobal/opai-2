@@ -1,12 +1,18 @@
 import { z } from "zod";
 
-import { defineCapability } from "@opai/capabilities";
+import { defineCapability, noEncontrado } from "@opai/capabilities";
 import { horasDeTurnoEsperado } from "@opai/domain";
 
 import { personaPropia } from "./persona-propia";
 
 const DIAS_MAX = 62;
-const fechaCivil = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha va como aaaa-mm-dd.");
+/** Fecha civil que existe en el calendario (2026-02-30 o 2026-13-45 se rechazan). */
+const fechaCivil = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha va como aaaa-mm-dd.")
+  .refine((d) => !Number.isNaN(Date.parse(`${d}T00:00:00Z`)) && new Date(`${d}T00:00:00Z`).toISOString().startsWith(d), {
+    message: "Esa fecha no existe.",
+  });
 
 const turnoSchema = z.object({
   id: z.string(),
@@ -60,6 +66,11 @@ export const misTurnosListar = defineCapability({
     const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date());
     const desde = input.desde ?? hoy;
     const hasta = sumarDias(desde, input.dias - 1);
+    // Un cursor solo vale si es un turno propio: así no se puede ubicar el turno de otra persona por su id.
+    if (input.cursor) {
+      const propio = await ctx.db.turnoEsperado.findFirst({ where: { id: input.cursor, personaId: persona.id }, select: { id: true } });
+      if (!propio) throw noEncontrado("El turno de la página anterior");
+    }
     const filas = await ctx.db.turnoEsperado.findMany({
       where: {
         personaId: persona.id,

@@ -29,14 +29,15 @@ export default function Pagina() {
           ejecutarComoUsuario<{ items: Aviso[]; noLeidas: number }>("trabajador", "core.notificaciones.list", {
             limite: 5,
           }),
-          ejecutarComoUsuario<MisTurnos>("trabajador", "portal_trabajador.mis_turnos.listar", { dias: 14, limite: 1 }),
+          ejecutarComoUsuario<MisTurnos>("trabajador", "portal_trabajador.mis_turnos.listar", { dias: 14, limite: 3 }),
         ]);
         return {
           state: estadoTrabajador(datos, avisos),
           datos: datos.ok ? datos.data : null,
           avisos: avisos.ok ? avisos.data.items : [],
           // Tarjeta secundaria (CAR-462): si su carga falla, el Inicio sigue sin ella.
-          turnos: turnos.ok ? turnos.data : null,
+          // El próximo turno es el primero que aún no termina (uno de hoy ya cumplido no cuenta).
+          turnos: turnos.ok ? { ...turnos.data, items: turnos.data.items.filter((t) => Date.parse(t.fin) > Date.now()) } : null,
         };
       }}
     >

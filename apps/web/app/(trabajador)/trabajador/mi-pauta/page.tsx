@@ -8,11 +8,9 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { estadoTrabajador, SIN_FICHA } from "../_componentes/estado";
 import { ListaTurnos } from "./_componentes/lista-turnos";
-import type { MisTurnos } from "./_componentes/semanas";
+import { fechaValida, type MisTurnos } from "./_componentes/semanas";
 
 export const metadata = { title: tituloPagina("trabajador", "Mi pauta") };
-
-const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * Mi pauta (CAR-462, parte 1 de CAR-357): los turnos de la propia persona. El alcance (solo los suyos) lo aplica la
@@ -31,7 +29,7 @@ export default function Pagina({ searchParams }: { searchParams: SearchParams })
         const r = await ejecutarComoUsuario<MisTurnos>("trabajador", "portal_trabajador.mis_turnos.listar", {
           dias: 28,
           limite: 200,
-          ...(desde && FECHA.test(desde) ? { desde } : {}),
+          ...(fechaValida(desde) ? { desde } : {}),
         });
         return { state: estadoTrabajador(r), datos: r.ok ? r.data : null };
       }}
