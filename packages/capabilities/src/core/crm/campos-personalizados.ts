@@ -79,10 +79,9 @@ export const camposPersonalizadosList = defineCapability({
         ...(input.incluirArchivados ? {} : { activo: true }),
       },
       orderBy: [{ entidad: "asc" }, { orden: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    return pagina(filas.map(vistaCampo), input.limite);
+    return pagina(filas.map(vistaCampo), input.limite, input.cursor);
   },
 });
 

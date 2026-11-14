@@ -47,7 +47,7 @@ export function ContenidoPauta({
   const sinDatos = d.mensual ? d.mensual.puestos.length === 0 : (d.todas?.instalaciones.length ?? 0) === 0;
   return (
     <div className="flex flex-col gap-4">
-      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} diaria={d.diaria} fecha={d.fecha} />
+      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} diaria={d.diaria} fecha={d.fecha} puedeEditar={puedeEditar} />
       <Estado
         state={d.state}
         variante="planilla"

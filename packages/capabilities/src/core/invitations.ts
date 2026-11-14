@@ -87,13 +87,11 @@ export const invitationsList = defineCapability({
     const filas = await ctx.db.invitation.findMany({
       where: input.soloPendientes ? pendientes : {},
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
     return pagina(
       filas.map((i) => ({ ...i, estado: estadoInvitacion(i) })),
-      input.limite,
-    );
+      input.limite, input.cursor);
   },
 });
 

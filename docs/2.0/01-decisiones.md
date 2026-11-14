@@ -2083,6 +2083,8 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 - La Sesión Estándares revisa cada ADR y cada PR de esos temas contra la vara y comenta las brechas.
 - No reemplaza a `AGENTS.md`, `REGLAS-codigo.md` ni a los ADR vigentes: ante un choque, mandan ellos y se anota la diferencia aquí.
 
+**Adenda (Carlos, 13-nov-2026, 23:10, chat de la Sesión Estándares; CAR-410).** Las brechas **medias** que la Sesión Estándares encuentra en un PR **ya integrado** también van a Linear: prioridad normal, en el proyecto del módulo y enlazadas a CAR-348. Motivo: un comentario en un PR cerrado no lo retoma nadie. En un PR abierto basta el comentario, porque la sesión que lo construye lo lee antes de integrar; si el PR se integra sin resolverla, la media pasa a Linear en la revisión siguiente. Las bajas siguen solo en el comentario y en la auditoría.
+
 ## ADR-107 · Reglas de aprobación por empresa, versión 1 (CAR-252, 12-nov-2026)
 
 **Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»).

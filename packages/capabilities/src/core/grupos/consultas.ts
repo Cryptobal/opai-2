@@ -30,10 +30,9 @@ export const gruposList = defineCapability({
       where: input.incluirArchivados ? {} : { archivadoEn: null },
       orderBy: [{ nombre: "asc" }, { id: "asc" }],
       include: { _count: { select: { miembros: true } } },
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     return { items: items.map((g) => vistaGrupo(g, g._count.miembros)), siguiente };
   },
 });
