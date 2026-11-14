@@ -73,7 +73,7 @@ describe.skipIf(!urlPropietario)("portal trabajador · solicitudes (Postgres rea
 
   it("la vista previa no escribe y pedir deja una solicitud propia pendiente", async () => {
     await dato(t.a, u.a1, "portal_trabajador.solicitudes.crear", pedir, true);
-    expect(await e.admin.ausencia.count({ where: { personaId: p["a1"], tipo: "vacaciones" } })).toBe(0);
+    expect(await e.admin.ausencia.count({ where: { personaId: p["a1"] ?? "", tipo: "vacaciones" } })).toBe(0);
     const s = await dato<Sol>(t.a, u.a1, "portal_trabajador.solicitudes.crear", pedir);
     expect([s.estado, s.propia, s.tipo]).toEqual(["solicitada", true, "vacaciones"]);
     expect((await e.admin.ausencia.findUniqueOrThrow({ where: { id: s.id } })).personaId).toBe(p["a1"]);
