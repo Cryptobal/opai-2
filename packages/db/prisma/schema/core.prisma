@@ -42,6 +42,8 @@ model Tenant {
   permisoExcepciones PermisoExcepcion[]
   modules            TenantModule[]
   apiKeys            ApiKey[]
+  webhookDestinos    WebhookDestino[]
+  webhookEntregas    WebhookEntrega[]
   invitations        Invitation[]
   usage              UsageEvent[]
 
