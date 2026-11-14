@@ -48,6 +48,10 @@ export const AJUSTES_PERSONAS = defineAjustes(
         z.object({ nombre: z.string().trim().min(3).max(80), tipo: z.enum(TIPOS_AUSENCIA_BASE) }),
       )
       .max(40)
+      .refine(
+        (xs) => new Set(xs.map((x) => x.nombre.toLocaleLowerCase("es"))).size === xs.length,
+        "Hay clases con el mismo nombre.",
+      )
       .default([])
       .meta({
         etiqueta: "Clases de permisos, licencias y vacaciones",

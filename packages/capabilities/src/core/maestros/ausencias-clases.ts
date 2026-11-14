@@ -52,7 +52,7 @@ export const ausenciasClases = defineCapability({
   async handler(ctx, { cursor, limite }) {
     const todas = await clasesDeLaEmpresa(ctx);
     // Cursor opaco: posición en el catálogo (el catálogo es corto y ordenado por la empresa).
-    const desde = cursor ? Number.parseInt(cursor, 10) || 0 : 0;
+    const desde = Math.max(0, cursor ? Number.parseInt(cursor, 10) || 0 : 0);
     const items = todas.slice(desde, desde + limite);
     const fin = desde + items.length;
     return { items, siguiente: fin < todas.length ? String(fin) : null };
