@@ -3,8 +3,8 @@ import { Badge, Chip, DetailScreen, SeccionTarjeta } from "@opai/ds";
 import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { conteo } from "@/lib/plural";
 
-import type { cargarTipo, TipoInventario } from "./datos";
-import { etiquetaCategoria } from "./datos";
+import type { cargarTipo } from "./datos";
+import { etiquetaCategoria, type TipoInventario } from "./tipos";
 import { HojaTipo } from "./diferidas";
 
 const TIPO_CAMPO = { texto: "Texto", numero: "Número", fecha: "Fecha" } as const;

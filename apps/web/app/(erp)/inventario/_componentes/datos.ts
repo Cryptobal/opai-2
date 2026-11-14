@@ -3,30 +3,7 @@ import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-export type CampoTipo = {
-  clave: string;
-  etiqueta: string;
-  tipo: "texto" | "numero" | "fecha";
-  obligatorio: boolean;
-};
-
-export type TipoInventario = {
-  id: string;
-  categoria: "activo" | "ropa";
-  nombre: string;
-  descripcion: string | null;
-  campos: CampoTipo[];
-  tallas: string[];
-  prendaClave: string | null;
-  activo: boolean;
-};
-
-export const CATEGORIAS = [
-  { valor: "activo", etiqueta: "Activo" },
-  { valor: "ropa", etiqueta: "Ropa" },
-];
-
-export const etiquetaCategoria = (v: string) => CATEGORIAS.find((c) => c.valor === v)?.etiqueta ?? v;
+import type { TipoInventario } from "./tipos";
 
 const sinTildes = (t: string) =>
   t

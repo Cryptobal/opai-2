@@ -7,7 +7,7 @@ import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { conBusqueda } from "@/lib/parametros";
 import { conteo } from "@/lib/plural";
 
-import { CATEGORIAS, etiquetaCategoria, type TipoInventario } from "./datos";
+import { CATEGORIAS, etiquetaCategoria, type TipoInventario } from "./tipos";
 import { CargarSugeridos } from "./diferidas";
 import { PestanasInventario } from "./pestanas";
 

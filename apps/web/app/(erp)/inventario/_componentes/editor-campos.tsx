@@ -4,7 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 
 import { Button, Input, Select, Switch } from "@opai/ds";
 
-import type { CampoTipo } from "./datos";
+import type { CampoTipo } from "./tipos";
 
 export type CampoEditable = Omit<CampoTipo, "clave"> & { clave?: string; llave: string };
 

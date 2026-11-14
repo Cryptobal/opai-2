@@ -8,7 +8,7 @@ import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Textarea } from "@
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { CATEGORIAS, type TipoInventario } from "./datos";
+import { CATEGORIAS, type TipoInventario } from "./tipos";
 import { type CampoEditable, EditorCampos } from "./editor-campos";
 
 const aTallas = (texto: string) =>
