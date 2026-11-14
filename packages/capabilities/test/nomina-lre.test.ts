@@ -89,10 +89,17 @@ describe("nomina.lre.generar", () => {
     expect(JSON.stringify(audit[0])).toContain(P2);
   });
 
+  it("sin RUT en Remuneraciones usa el de los datos de la empresa", async () => {
+    const c = como("owner", null, { semilla: { ...semilla(null), perfilEmpresa: [{ id: "pe", tenantId: T, rut: "76543210-3" }] } });
+    const r = await generar(c);
+    if (!r.ok) throw new Error(r.error.message);
+    expect((r.data as Salida).nombre).toBe("76543210_202611.csv");
+  });
+
   it("sin RUT del empleador lo informa como error", async () => {
     const r = await generar(como("owner", null));
     if (!r.ok) throw new Error(r.error.message);
-    expect((r.data as Salida).errores[0]).toEqual({ personaId: null, mensaje: expect.stringMatching(/RUT del empleador/) });
+    expect((r.data as Salida).errores[0]).toEqual({ personaId: null, mensaje: expect.stringMatching(/RUT válido de la empresa/) });
   });
 
   it("gerente (sin sueldos sensibles) no puede generarlo", async () => {

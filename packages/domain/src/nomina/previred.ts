@@ -42,7 +42,10 @@ export type ArchivoPrevired = { nombre: string; contenido: string; filas: number
 
 const monto = (l: LineaLiquidacion[] | null, concepto: string) => (l ?? []).find((x) => x.concepto === concepto)?.monto ?? 0;
 const fecha = (iso: string) => { const [a, m, d] = iso.split("-"); return `${d}/${m}/${a}`; };
-const texto = (s: string) => s.replace(/[;\r\n]/g, " ").trim().slice(0, 30);
+/** Texto en ASCII (sin tildes; Ñ→N) y sin «;» ni saltos de línea: Previred no acepta otros caracteres (por verificar). */
+const texto = (s: string) =>
+  s.normalize("NFD").replace(/\p{M}/gu, "").replace(/[;\s]+/g, " ").replace(/[^\x20-\x7E]/g, "").trim().slice(0, 30);
+const TRAMOS = new Set(["A", "B", "C", "D"]);
 /** Primer apellido y el resto (el maestro guarda los apellidos juntos): por verificar con la persona. */
 const apellidosDe = (s: string) => { const [p = "", ...r] = s.trim().split(/\s+/); return [p, r.join(" ")] as const; };
 
@@ -56,7 +59,7 @@ export function lineaPrevired(d: DatosPrevired, anio: number, mes: number): { ca
   const rut = normalizarRut(d.rut);
   if (!rut) errores.push({ personaId: d.personaId, mensaje: "RUT inválido." });
   const [cuerpo = "", dv = ""] = (rut ?? "").split("-");
-  const [paterno, materno] = apellidosDe(d.apellidos);
+  const [paterno, materno] = apellidosDe(d.apellidos.replace(/;/g, " "));
   set(1, cuerpo); set(2, dv); set(3, texto(paterno)); set(4, texto(materno)); set(5, texto(d.nombres));
   const sexo = d.sexo === "femenino" ? "F" : d.sexo === "masculino" ? "M" : "";
   if (!sexo) errores.push({ personaId: d.personaId, mensaje: "Falta el sexo (F o M) que pide Previred." });
@@ -65,7 +68,9 @@ export function lineaPrevired(d: DatosPrevired, anio: number, mes: number): { ca
   set(11, "AFP"); set(12, d.pensionado ? 1 : 0); set(13, d.diasTrabajados); set(14, "00");
   if (d.ingresoEnMes) { set(15, 1); set(16, fecha(d.ingresoEnMes)); }
   if (d.retiroEnMes) { set(15, 2); set(17, fecha(d.retiroEnMes)); }
-  set(18, (d.tramoAsignacion ?? "D").slice(0, 1).toUpperCase());
+  const tramo = (d.tramoAsignacion ?? "D").trim().toUpperCase();
+  if (!TRAMOS.has(tramo)) errores.push({ personaId: d.personaId, mensaje: "Tramo de asignación familiar fuera de A–D: se informa D." });
+  set(18, TRAMOS.has(tramo) ? tramo : "D");
   set(19, d.cargas.simples); set(20, d.cargas.maternales); set(21, d.cargas.invalidez); set(25, "N");
   const p = d.prevision;
   if (!p) errores.push({ personaId: d.personaId, mensaje: "Liquidación sin datos de previsión: recalcula el período." });
@@ -90,7 +95,7 @@ export function lineaPrevired(d: DatosPrevired, anio: number, mes: number): { ca
 export function archivoPrevired(e: { rutEmpleador: string; anio: number; mes: number; filas: DatosPrevired[] }): ArchivoPrevired {
   const errores: ErrorPrevired[] = [];
   const rutEmp = normalizarRut(e.rutEmpleador);
-  if (!rutEmp) errores.push({ personaId: null, mensaje: "Falta el RUT del empleador válido en Configuración → Remuneraciones." });
+  if (!rutEmp) errores.push({ personaId: null, mensaje: "Falta un RUT válido de la empresa (Configuración → Remuneraciones o datos de la empresa)." });
   const lineas = e.filas.map((d) => {
     const l = lineaPrevired(d, e.anio, e.mes);
     errores.push(...l.errores);

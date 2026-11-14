@@ -81,7 +81,7 @@ describe("LRE", () => {
 
   it("sin RUT del empleador lo informa como error general", () => {
     const a = archivoLre({ rutEmpleador: "", anio: 2026, mes: 1, filas: [] });
-    expect(a.errores).toEqual([{ personaId: null, mensaje: expect.stringMatching(/RUT del empleador/) }]);
+    expect(a.errores).toEqual([{ personaId: null, mensaje: expect.stringMatching(/RUT válido de la empresa/) }]);
     expect(a.nombre).toBe("rut_202601.csv");
   });
 });

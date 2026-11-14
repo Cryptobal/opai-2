@@ -51,7 +51,7 @@ export async function datosArchivoPeriodo(ctx: Contexto, periodoId: string, lega
   });
   const ids = liqs.map((l) => l.personaId);
   const hay = ids.length > 0;
-  const [personas, vinculos, fichas, rutEmpleador] = await Promise.all([
+  const [personas, vinculos, fichas, rutAjuste, perfil] = await Promise.all([
     hay ? ctx.db.persona.findMany({ where: { id: { in: ids } }, select: { id: true, rut: true, nombres: true, apellidos: true, sexo: true, nacionalidad: true } }) : [],
     hay
       ? ctx.db.vinculoLaboral.findMany({
@@ -67,7 +67,10 @@ export async function datosArchivoPeriodo(ctx: Contexto, periodoId: string, lega
         })
       : [],
     ajuste<string>(ctx, "nomina", "empleador_rut"),
+    ctx.db.perfilEmpresa.findFirst({ select: { rut: true } }),
   ]);
+  // El RUT del empleador de Remuneraciones manda; si está vacío, el de los datos de la empresa.
+  const rutEmpleador = rutAjuste?.trim() || perfil?.rut || "";
   const persona = new Map(personas.map((p) => [p.id, p]));
   const ficha = new Map(fichas.map((f) => [f.personaId, f]));
   const vinculo = new Map<string, { tipo: string; inicio: Date; termino: Date | null }>();
@@ -77,7 +80,9 @@ export async function datosArchivoPeriodo(ctx: Contexto, periodoId: string, lega
     const v = vinculo.get(l.personaId);
     const p = persona.get(l.personaId);
     if (!v || !p || v.tipo === "honorarios") {
-      errores.push({ personaId: l.personaId, mensaje: v?.tipo === "honorarios" ? `Contrato a honorarios: no va en el ${legal}.` : "Sin contrato vigente en el mes: no va en el archivo." });
+      const mensaje = !p ? "Persona no encontrada: no va en el archivo."
+        : v?.tipo === "honorarios" ? `Contrato a honorarios: no va en el ${legal}.` : "Sin contrato vigente en el mes: no va en el archivo.";
+      errores.push({ personaId: l.personaId, mensaje });
       return [];
     }
     const d = (l.detalle ?? {}) as Record<string, unknown>;
@@ -100,5 +105,5 @@ export async function datosArchivoPeriodo(ctx: Contexto, periodoId: string, lega
       ficha: f ? { tramo: f.tramoAsignacion, simples: f.cargasSimples, maternales: f.cargasMaternales, invalidez: f.cargasInvalidez, jubilado: f.jubilado } : null,
     }];
   });
-  return { periodo, filas, errores, rutEmpleador: rutEmpleador ?? "" };
+  return { periodo, filas, errores, rutEmpleador };
 }

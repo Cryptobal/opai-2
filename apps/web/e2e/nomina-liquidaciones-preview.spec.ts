@@ -43,6 +43,7 @@ test.describe("@preview nómina: liquidaciones", () => {
       const txt = await previred;
       if (txt) expect(txt.suggestedFilename()).toMatch(/^previred_\w+_\d{6}\.txt$/);
       await expect(page.getByText(/Formato por verificar: códigos de AFP/)).toBeVisible({ timeout: 30_000 });
+      await capturar(page, info, "nomina-previred");
     }
   });
 });

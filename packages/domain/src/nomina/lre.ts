@@ -82,7 +82,7 @@ export function filaLre(d: DatosLre): { valores: Map<number, number | string>; e
 export function archivoLre(e: { rutEmpleador: string; anio: number; mes: number; filas: DatosLre[] }): ArchivoLre {
   const errores: ErrorLre[] = [];
   const rutEmp = normalizarRut(e.rutEmpleador);
-  if (!rutEmp) errores.push({ personaId: null, mensaje: "Falta el RUT del empleador válido en Configuración → Remuneraciones." });
+  if (!rutEmp) errores.push({ personaId: null, mensaje: "Falta un RUT válido de la empresa (Configuración → Remuneraciones o datos de la empresa)." });
   const encabezado = COLUMNAS_LRE.map(([c, n]) => `${n}(${c})`).join(";");
   const lineas = e.filas.map((d) => {
     const f = filaLre(d);

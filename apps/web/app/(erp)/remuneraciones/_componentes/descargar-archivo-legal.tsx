@@ -15,7 +15,8 @@ type Archivo = {
 };
 
 function descargar(nombre: string, contenido: string) {
-  const url = URL.createObjectURL(new Blob([contenido], { type: "text/csv;charset=utf-8" }));
+  const tipo = nombre.endsWith(".txt") ? "text/plain;charset=utf-8" : "text/csv;charset=utf-8";
+  const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
   const a = Object.assign(document.createElement("a"), { href: url, download: nombre });
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 0);

@@ -34,7 +34,7 @@ describe("Previred (105 campos)", () => {
     const { campos, errores } = lineaPrevired(base, 2026, 11);
     expect(errores).toEqual([]);
     expect(campos).toHaveLength(CAMPOS_PREVIRED);
-    expect([1, 2, 3, 4, 5, 6].map((n) => campo(campos, n))).toEqual(["12345678", "5", "Pérez", "Soto", "Ana María", "F"]);
+    expect([1, 2, 3, 4, 5, 6].map((n) => campo(campos, n))).toEqual(["12345678", "5", "Perez", "Soto", "Ana Maria", "F"]);
     expect(campo(campos, 9)).toBe("112026");
     expect(campo(campos, 14)).toBe("00");
     expect(campo(campos, 18)).toBe("D");
@@ -66,6 +66,18 @@ describe("Previred (105 campos)", () => {
       "Liquidación sin datos de previsión: recalcula el período.",
       "Liquidación sin aportes del empleador: recalcula el período.",
     ]);
+  });
+
+  it("nombres con tildes, ñ, «;» o saltos de línea no rompen la línea", () => {
+    const { campos } = lineaPrevired({ ...base, apellidos: "Muñoz;Núñez", nombres: "José\nÁngel" }, 2026, 11);
+    expect(campos).toHaveLength(CAMPOS_PREVIRED);
+    expect([3, 4, 5].map((n) => campo(campos, n))).toEqual(["Munoz", "Nunez", "Jose Angel"]);
+  });
+
+  it("un tramo fuera de A–D se informa como D con observación", () => {
+    const { campos, errores } = lineaPrevired({ ...base, tramoAsignacion: "Z" }, 2026, 11);
+    expect(campo(campos, 18)).toBe("D");
+    expect(errores[0]?.mensaje).toMatch(/Tramo/);
   });
 
   it("el archivo no lleva encabezado y el nombre lleva el mes", () => {
