@@ -35,7 +35,7 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 - Tokens de documentos para los campos personalizados (`{{cuenta.campo.<clave>}}`).
 
 ## PR campos personalizados 3/3 · rama `brief/car-27-campos-pantallas`
-
+- **Estado:** Integrado (#735 `62f01359`, 14-nov-2026)
 - **Estado:** Abierto (el PR 2/3 ya está en main)
 - **Migración:** No
 
@@ -102,7 +102,7 @@ Una prueba compara el inventario de FK con la base. Falta la pantalla.
 
 ## PR fusionar cuentas (F2, pantalla) · rama `brief/car-27-fusionar-pantalla`
 
-- **Estado:** Abierto (F1 ya está en main)
+- **Estado:** Integrado (#742)
 - **Migración:** No
 
 ### Qué entra
@@ -119,6 +119,22 @@ Cada paso usa la vista previa de `core.cuentas.fusionar`, así que los bloqueos 
 
 - El paso «Confirmar» del diseño (estado `agente`, aprobación de una propuesta de un agente) no se construyó aparte: las aprobaciones de agentes ya se resuelven en Configuración › Aprobaciones.
 - Las «sugeridas» buscan por la primera palabra del nombre (sin una capacidad propia de duplicados).
+
+## PR fusionar contactos (F4, pantalla) · rama `brief/car-27-fusionar-contactos-pantalla`
+- **Estado:** Abierto (F2, F3 y campos 3/3 ya están en main)
+- **Estado:** Abierto (F2 y F3 ya están en main)
+- **Migración:** No
+
+### Qué entra
+
+- **Fusionar con…** en la ficha del contacto, para quien tiene `core:cuentas.manage`.
+- Abre una hoja diferida (`?fusionar=1`) con los mismos 3 pasos que la de cuentas:
+  - **Elegir:** busca con `comercial.contactos.list`.
+  - **Comparar:** los campos que difieren.
+  - **Resumen:** lo que se mueve, y la casilla de irreversible.
+- Novedad y prueba `@preview`.
+
+**Decisión nocturna (revisar):** el botón va junto a «Editar datos», porque la ficha del contacto no tiene menú ⋯ como la de cuentas.
 
 ## Pendientes vistos en el e2e completo (13-nov-2026)
 

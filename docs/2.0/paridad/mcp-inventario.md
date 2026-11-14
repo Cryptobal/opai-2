@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 794 pares pantalla→capacidad · 713 con herramienta · 81 excepciones justificadas · 0 faltantes.
+**Resumen:** 795 pares pantalla→capacidad · 714 con herramienta · 81 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -273,6 +273,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.archive` | `core_contactos_archive` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.cuentas` | `core_contactos_cuentas` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.desvincular` | `core_contactos_desvincular` | existe |
+| compartido | `app/(erp)/contactos/_componentes` | `core.contactos.fusionar` | `core_contactos_fusionar` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.get` | `core_contactos_get` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.restaurar` | `core_contactos_restaurar` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.set_roles` | `core_contactos_set_roles` | existe |
@@ -1123,7 +1124,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.campos.catalogo`
 - `core.campos.valores`
 - `core.consumos.por_recurso`
-- `core.contactos.fusionar`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
