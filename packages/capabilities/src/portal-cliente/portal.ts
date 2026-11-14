@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 import { tenantActual } from "../core/comun";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";

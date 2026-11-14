@@ -35,15 +35,18 @@ export async function rondasPorInstalacion(
     where: { instalacionId: { in: [...instalacionIds] }, horaCierre: { gte: desde, lt: hasta } },
     select: { instalacionId: true, estado: true, puntosObligatorios: true, puntosMarcados: true },
   });
-  for (const id of instalacionIds) {
-    const suyas = cierres.filter((c) => c.instalacionId === id);
-    const completas = suyas.filter((c) => c.estado === "completada" && c.puntosMarcados >= c.puntosObligatorios).length;
-    out.set(id, {
-      realizadas: suyas.length,
-      completas,
-      incompletas: suyas.length - completas,
-      porcentaje: suyas.length === 0 ? null : Math.round((completas / suyas.length) * 1000) / 10,
-    });
+  const cuenta = new Map(instalacionIds.map((id) => [id, { realizadas: 0, completas: 0 }]));
+  for (const c of cierres) {
+    const k = cuenta.get(c.instalacionId);
+    if (!k) continue;
+    k.realizadas += 1;
+    if (c.estado === "completada" && c.puntosMarcados >= c.puntosObligatorios) k.completas += 1;
   }
+  for (const [id, k] of cuenta)
+    out.set(id, {
+      ...k,
+      incompletas: k.realizadas - k.completas,
+      porcentaje: k.realizadas === 0 ? null : Math.round((k.completas / k.realizadas) * 1000) / 10,
+    });
   return out;
 }

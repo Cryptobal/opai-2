@@ -42,7 +42,7 @@ export async function seccionesDelResumen(
   ]);
   const secciones = visibles.filter((s): s is SeccionResumen => s === "cobertura" || s === "rondas" || s === "novedades");
   const disponibilidad = (s: SeccionResumen) =>
-    (s === "cobertura" && cobertura) || (s === "rondas" && rondas) ? ("disponible" as const) : disponibilidadSeccion(s);
+    (s === "cobertura" && conCobertura) || (s === "rondas" && conRondas) ? ("disponible" as const) : disponibilidadSeccion(s);
   return (id: string) => ({
     secciones: secciones.map((s) => ({ seccion: s, disponibilidad: disponibilidad(s) })),
     cobertura: cobertura?.get(id) ?? null,
