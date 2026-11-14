@@ -32,7 +32,24 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-campos-personalizados.md` (3 PR: catálogo, 
 
 ### Pendiente
 
-- PR 3: pantallas de configuración y de ficha, y tokens de documentos.
+- Tokens de documentos para los campos personalizados (`{{cuenta.campo.<clave>}}`).
+
+## PR campos personalizados 3/3 · rama `brief/car-27-campos-pantallas`
+
+- **Estado:** Abierto (el PR 2/3 ya está en main)
+- **Migración:** No
+
+### Qué entra
+
+- **Configuración › Operación › Campos personalizados** (`/configuracion/campos-personalizados`, permiso `core:campos.config`): campos por entidad (Cuentas, Contactos, Negocios), con «Nuevo campo» y «Editar» en una hoja (nombre, tipo, opciones de lista, obligatorio y archivar).
+- **Tarjeta «Campos de <empresa>» (título del Design Prompt del PR 3 §3)** en las fichas de cuenta, contacto y negocio. Solo aparece si hay campos definidos para esa entidad; muestra los valores y tiene un botón «Editar» (con el permiso de edición de la ficha) que guarda solo lo que cambió.
+- El error de guardado nombra cada campo que falló.
+- Entrada de novedades y prueba `@preview`.
+
+**Decisiones nocturnas (revisar):**
+1. Sin diseño aprobado: se usaron los patrones del DS (lista con hoja, como Planes de seguimiento; tarjeta de ficha como Etiquetas).
+2. La entrada va en el grupo **Operación** porque Empresa ya tiene el máximo de 7.
+3. Los tokens de documentos para estos campos quedan pendientes.
 
 ## PR campos personalizados 2/3 · rama `brief/car-27-campos-valores`
 
