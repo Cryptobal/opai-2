@@ -92,7 +92,8 @@ describe("core · fusionar cuentas contra Postgres real", () => {
     expect(vinculos.find((v) => v.contactoId === movido.id)?.esPrincipal).toBe(false);
     expect(await e.admin.etiquetaAsignacion.count({ where: { cuentaId: queda } })).toBe(1);
     const nombres = (await e.admin.instalacion.findMany({ where: { cuentaId: queda } })).map((i) => i.nombre).sort();
-    expect(nombres).toEqual(["Casa matriz", "Casa matriz (fusionada)"]);
+    expect(nombres[0]).toBe("Casa matriz");
+    expect(nombres[1]).toMatch(/^Casa matriz \(fusionada [0-9a-f]{4}\)$/);
     expect(await e.admin.negocio.count({ where: { cuentaId: queda } })).toBe(1);
   });
 

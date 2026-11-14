@@ -10,7 +10,8 @@ import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { cuentaDe } from "./cuentas-acceso";
 import { CAMPOS_FUSION, comparar, valoresFinales, type Lado } from "./cuentas-fusion-campos";
-import { CONTEOS_FUSION, CORREOS_REPETIDOS, PASOS_FUSION } from "./cuentas-fusion-sql";
+import { BLOQUEAR_CUENTAS, CONTEOS_FUSION, CORREOS_REPETIDOS, PASOS_FUSION } from "./cuentas-fusion-sql";
+import { SIN_CONTEOS, validarFusion, type Conteos } from "./cuentas-fusion-reglas";
 
 const lado = z.enum(["esta", "duplicado"]);
 const conteosSchema = z.object({
@@ -57,30 +58,25 @@ export const cuentasFusionar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     if (input.cuentaId === input.duplicadoId)
       throw reglaDeNegocio("Elige una cuenta distinta para fusionar.");
-    const [a, b] = await Promise.all([cuentaDe(ctx, input.cuentaId), cuentaDe(ctx, input.duplicadoId)]);
+    // Alcance (ADR-022): las dos cuentas deben ser visibles para quien fusiona.
+    await Promise.all([cuentaDe(ctx, input.cuentaId), cuentaDe(ctx, input.duplicadoId)]);
     const elegir = input.elegir as Partial<Record<string, Lado>>;
-    const finales = valoresFinales(a, b, elegir);
-    const { mueve, correos } = await ctx.transaccion(async (tx) => {
-      const [c] = await tx.$queryRawUnsafe<z.infer<typeof conteosSchema>[]>(CONTEOS_FUSION, b.id);
-      const r = await tx.$queryRawUnsafe<{ email: string }[]>(CORREOS_REPETIDOS, a.id, b.id);
-      return { mueve: c ?? { contactos: 0, instalaciones: 0, negocios: 0, documentos: 0, actividad: 0, facturas: 0, referencias: 0 }, correos: r.map((x) => x.email) };
-    });
-    if (correos.length > 0)
-      throw reglaDeNegocio(
-        `Primero fusiona los contactos con el mismo correo en las dos cuentas: ${correos.join(", ")}.`,
-      );
-    if (mueve.referencias > 0)
-      throw reglaDeNegocio(
-        "El duplicado tiene registrado el consentimiento para usarlo como referencia comercial. Ese registro no se mueve: fusiona en sentido contrario (que quede el duplicado).",
-      );
-    if (mueve.facturas > 0 && b.rut && finales.rut !== b.rut)
-      throw reglaDeNegocio(
-        "El duplicado tiene facturas emitidas a su RUT. Para fusionar, el RUT que queda debe ser el del duplicado.",
-      );
-    const salida = { cuentaId: a.id, duplicadoId: b.id, comparacion: comparar(a, b, elegir), mueve };
-    if (dryRun) return { ...salida, aplicada: false };
-
-    await ctx.transaccion(async (tx) => {
+    // Todo en una transacción: bloquea ambas cuentas, relee, valida y recién entonces escribe. Así
+    // nada cambia entre la validación y la escritura, y dos fusiones cruzadas se esperan en orden.
+    return ctx.transaccion(async (tx) => {
+      await tx.$queryRawUnsafe(BLOQUEAR_CUENTAS, input.cuentaId, input.duplicadoId);
+      const [a, b] = await Promise.all([
+        tx.cuenta.findFirst({ where: { id: input.cuentaId } }),
+        tx.cuenta.findFirst({ where: { id: input.duplicadoId } }),
+      ]);
+      if (!a || !b) throw reglaDeNegocio("Una de las cuentas ya no existe; recarga la ficha.");
+      const finales = valoresFinales(a, b, elegir);
+      const [c] = await tx.$queryRawUnsafe<Conteos[]>(CONTEOS_FUSION, b.id, a.id);
+      const correos = await tx.$queryRawUnsafe<{ email: string }[]>(CORREOS_REPETIDOS, a.id, b.id);
+      const { facturasQueda, ...mueve } = c ?? SIN_CONTEOS;
+      validarFusion({ a, b, rutFinal: finales.rut, mueve, facturasQueda, correos: correos.map((x) => x.email) });
+      const salida = { cuentaId: a.id, duplicadoId: b.id, comparacion: comparar(a, b, elegir), mueve };
+      if (dryRun) return { ...salida, aplicada: false };
       if (b.rut && finales.rut === b.rut) await tx.cuenta.update({ where: { id: b.id }, data: { rut: null } });
       for (const sql of PASOS_FUSION) await tx.$executeRawUnsafe(sql, a.id, b.id);
       await tx.cuenta.update({ where: { id: a.id }, data: finales });
@@ -91,7 +87,7 @@ export const cuentasFusionar = defineCapability({
         entidadId: a.id,
         payload: { duplicadoId: b.id },
       });
+      return { ...salida, aplicada: true };
     });
-    return { ...salida, aplicada: true };
   },
 });

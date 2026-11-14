@@ -62,7 +62,7 @@ export const PASOS_FUSION: readonly string[] = [
   ]),
   `DELETE FROM portal_cliente.config_cuentas WHERE cuenta_id = $2::uuid AND EXISTS (SELECT 1 FROM portal_cliente.config_cuentas k WHERE k.cuenta_id = $1::uuid)`,
   `UPDATE portal_cliente.config_cuentas SET cuenta_id = $1::uuid WHERE cuenta_id = $2::uuid`,
-  `UPDATE core.instalaciones SET nombre = nombre || ' (fusionada)' WHERE cuenta_id = $2::uuid AND nombre IN (SELECT nombre FROM core.instalaciones WHERE cuenta_id = $1::uuid)`,
+  `UPDATE core.instalaciones SET nombre = nombre || ' (fusionada ' || substr(md5(id::text), 1, 4) || ')' WHERE cuenta_id = $2::uuid AND nombre IN (SELECT nombre FROM core.instalaciones WHERE cuenta_id = $1::uuid)`,
   `UPDATE core.instalaciones SET cuenta_id = $1::uuid WHERE cuenta_id = $2::uuid`,
   ...SIMPLES.map((t) => `UPDATE ${t} SET cuenta_id = $1::uuid WHERE cuenta_id = $2::uuid`),
   // Polimórficas: documentos y equivalencias con otros sistemas (1.0) pasan a la que queda.
@@ -79,6 +79,7 @@ export const CONTEOS_FUSION = `SELECT
   (SELECT count(*) FROM core.documento_vinculos WHERE entidad_tipo = 'cuenta' AND entidad_id = $1::uuid)::int AS documentos,
   (SELECT count(*) FROM core.actividad_vinculos WHERE cuenta_id = $1::uuid)::int AS actividad,
   (SELECT count(*) FROM finanzas.documentos_emitidos WHERE cuenta_id = $1::uuid)::int AS facturas,
+  (SELECT count(*) FROM finanzas.documentos_emitidos WHERE cuenta_id = $2::uuid)::int AS "facturasQueda",
   (SELECT count(*) FROM core.cuentas_referencias WHERE cuenta_id = $1::uuid)::int AS referencias`;
 
 /** Correos de contactos del duplicado que ya existen en la cuenta que queda ($1::uuid queda, $2::uuid duplicado). */
@@ -86,3 +87,6 @@ export const CORREOS_REPETIDOS = `SELECT d.email FROM core.contactos d
   WHERE d.cuenta_id = $2::uuid AND d.email IS NOT NULL
     AND EXISTS (SELECT 1 FROM core.contactos k WHERE k.cuenta_id = $1::uuid AND k.email = d.email)
   LIMIT 5`;
+
+/** Bloquea las dos cuentas en orden fijo (evita deadlocks entre fusiones cruzadas). */
+export const BLOQUEAR_CUENTAS = `SELECT id FROM core.cuentas WHERE id IN ($1::uuid, $2::uuid) ORDER BY id FOR UPDATE`;
