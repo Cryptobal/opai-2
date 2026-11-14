@@ -10,7 +10,7 @@ export const PERMISOS_INVENTARIO = {
   tiposManage: "inventario:tipos.manage",
 } as const;
 
-export const campoSchema = z.object({
+const campoSchema = z.object({
   clave: z.string(),
   etiqueta: z.string(),
   tipo: z.enum(TIPOS_CAMPO_INVENTARIO),

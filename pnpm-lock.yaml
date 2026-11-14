@@ -378,15 +378,6 @@ importers:
       '@opai/capabilities':
         specifier: workspace:*
         version: link:../../packages/capabilities
-      '@opai/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@opai/domain':
-        specifier: workspace:*
-        version: link:../../packages/domain
-      '@opai/ds':
-        specifier: workspace:*
-        version: link:../../packages/ds
       zod:
         specifier: 4.6.7
         version: 4.6.7

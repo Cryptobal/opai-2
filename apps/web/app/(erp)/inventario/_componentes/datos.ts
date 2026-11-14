@@ -1,7 +1,8 @@
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
-import type { Parametros } from "@/lib/parametros";
-import { ejecutarComoUsuario } from "@/lib/servidor";
+import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
+import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import type { TipoInventario } from "./tipos";
 
@@ -49,4 +50,12 @@ export async function cargarTipo(id: string) {
   const r = await ejecutarComoUsuario<TipoInventario>("erp", "inventario.tipos.get", { id });
   requerirEncontrado(r);
   return { state: estadoPantalla(r), tipo: r.ok ? r.data : null };
+}
+
+/** Datos de la página de la ficha: la lista de la izquierda, la ficha (sin esperar) y el permiso. */
+export async function cargarFichaTipo(params: Promise<{ id: string }>, searchParams: SearchParams) {
+  const [{ id }, p, identidad] = await Promise.all([params, leerParametros(searchParams), requerirIdentidad("/inventario")]);
+  const datos = cargarTipo(id);
+  datos.catch(() => undefined);
+  return { id, p, datos, lista: await cargarTipos(p), puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage") };
 }
