@@ -39,19 +39,7 @@ export async function aplicarSincronizacion(
     const { count } = aInsertar.length
       ? await tx.movimientoBancario.createMany({
           skipDuplicates: true,
-          data: aInsertar.map((m) => ({
-            tenantId: ctx.tenantId,
-            cuentaId: p.cuentaId,
-            fecha: aFecha(m.fecha),
-            monto: BigInt(m.monto),
-            glosa: m.glosa,
-            referencia: m.referencia,
-            saldoDespues: m.saldoDespues != null ? BigInt(m.saldoDespues) : null,
-            claveDedupe: m.claveDedupe,
-            idExterno: m.idExterno,
-            estado: esRemuneracion(m.glosa) ? "por_autorizar" : "pendiente",
-            origen: "web4leads",
-          })),
+          data: aInsertar.map((m) => filaNueva(ctx.tenantId, p.cuentaId, m)),
         })
       : { count: 0 };
     // Reglas del banco (ADR-074) sobre lo recién llegado: por id externo, dentro de la misma transacción.
@@ -100,6 +88,23 @@ function saldoVigente(
 }
 
 type Vinculo = VinculoExterno & { movimiento: MovimientoNuevo };
+
+/** Fila de un movimiento del banco en línea; la remuneración queda por autorizar. */
+function filaNueva(tenantId: string, cuentaId: string, m: MovimientoNuevo) {
+  return {
+    tenantId,
+    cuentaId,
+    fecha: aFecha(m.fecha),
+    monto: BigInt(m.monto),
+    glosa: m.glosa,
+    referencia: m.referencia,
+    saldoDespues: m.saldoDespues != null ? BigInt(m.saldoDespues) : null,
+    claveDedupe: m.claveDedupe,
+    idExterno: m.idExterno,
+    estado: esRemuneracion(m.glosa) ? "por_autorizar" : "pendiente",
+    origen: "web4leads",
+  };
+}
 
 /**
  * CAR-341: el movimiento que ya estaba por cartola recibe su id externo. CAR-488: si otra entrega ya lo tomó, el
