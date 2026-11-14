@@ -85,7 +85,7 @@ Una prueba compara el inventario de FK con la base. Falta la pantalla.
 
 ## PR fusionar cuentas (F2, pantalla) · rama `brief/car-27-fusionar-pantalla`
 
-- **Estado:** Abierto (F1 ya está en main)
+- **Estado:** Integrado (#742)
 - **Migración:** No
 
 ### Qué entra
@@ -105,7 +105,7 @@ Cada paso usa la vista previa de `core.cuentas.fusionar`, así que los bloqueos 
 
 ## PR fusionar contactos (F4, pantalla) · rama `brief/car-27-fusionar-contactos-pantalla`
 
-- **Estado:** Abierto (apilado sobre F2 #742; F3 ya está en main)
+- **Estado:** Abierto (F2 y F3 ya están en main)
 - **Migración:** No
 
 ### Qué entra
