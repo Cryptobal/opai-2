@@ -806,6 +806,8 @@ Reglas:
 
 **Adenda (CAR-90, Brief 17, 14-nov-2026; Sesión Apps, decisión reversible bajo ADR-114).** El empaquetado (punto 8) parte con Capacitor 8 en modo servidor remoto: el contenedor abre `https://<entorno>/entrar` y no lleva una copia de la web, así cada versión llega sin pasar por la tienda. El proyecto de Linear «18 · Apps» pide dos apps (Terreno y ERP) y la decisión 13 de este ADR decía una sola: se construyen **dos variantes del mismo contenedor**, «OPAI» (`cl.opai.app`) y «OPAI Terreno» (`cl.opai.terreno`), que abren la misma entrada; publicar una, las dos o solo «OPAI» lo decide Carlos al publicar (issue «Decide Carlos»). `/entrar` atiende además al equipo de terreno emparejado sin sesión (va a Terreno). El contenedor solo navega en el dominio del entorno y marca su user agent con `OPAIApp/<variante>`. Detalle en `briefs/BRIEF-17-empaquetado-nativo.md`.
 
+**Adenda 2 (CAR-495, 14-nov-2026, 15:34; decisión de Carlos).** En las tiendas se publica **solo «OPAI»** (`cl.opai.app`); «OPAI Terreno» no se publica. Vuelve a regir la decisión 13 de este ADR: una sola app para todos. La Sesión Apps quita la variante «OPAI Terreno» del código (regla «Código simple», ADR-115; se recupera desde git si hiciera falta) y prepara las fichas en `apps/fichas-tiendas.md`, sin publicar.
+
 ## ADR-045 · Velocidad de navegación medida y con gate
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; contadores y caché de sesión decididos el 24-oct) · Completa ADR-037 y ADR-029 (punto 14).
