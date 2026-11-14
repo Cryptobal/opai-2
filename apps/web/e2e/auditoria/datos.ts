@@ -9,6 +9,7 @@ import { digitoVerificador } from "@opai/domain";
 export const CUENTA_QA = "Cuenta QA auditoría";
 const INSTALACION_QA = "Instalación QA auditoría";
 const NEGOCIO_QA = "Negocio QA auditoría";
+const PLANTILLA_QA = "Plantilla QA auditoría";
 
 /** RUT válido y único por corrida (cuerpo de 8 dígitos desde la hora). */
 function rutNuevo() {
@@ -26,13 +27,30 @@ async function buscar(page: Page, ruta: string, q: string, nombre: RegExp): Prom
   return href.split("/")[2] ?? "";
 }
 
+/** Espera la ficha nueva; si no llega, el error dice qué aviso mostró la pantalla (o la URL a la que quedó). */
+async function esperarFicha(page: Page, ruta: string): Promise<string> {
+  const re = new RegExp(`/${ruta}/([0-9a-f-]{36})(?:[/?#]|$)`);
+  try {
+    await page.waitForURL(re, { timeout: 60_000 });
+  } catch {
+    const aviso = await page
+      .getByRole("alert")
+      .first()
+      .textContent({ timeout: 2_000 })
+      .catch(() => null);
+    throw new Error(
+      `no abrió /${ruta}/<id>; quedó en ${new URL(page.url()).pathname}; aviso: ${aviso?.trim() || "ninguno"}`,
+    );
+  }
+  return re.exec(page.url())?.[1] ?? "";
+}
+
 async function crearCuenta(page: Page): Promise<string> {
   await page.goto("/cuentas?nueva=1");
   const hoja = page.getByRole("dialog", { name: "Nueva cuenta" });
   await hoja.getByRole("group", { name: "Identificación" }).getByLabel("Nombre").fill(CUENTA_QA);
   await hoja.getByRole("button", { name: "Crear cuenta", exact: true }).click();
-  await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}$/, { timeout: 60_000 });
-  return new URL(page.url()).pathname.split("/").pop() ?? "";
+  return esperarFicha(page, "cuentas");
 }
 
 async function crearInstalacion(page: Page, cuentaId: string) {
@@ -41,11 +59,15 @@ async function crearInstalacion(page: Page, cuentaId: string) {
   const crear = page.getByRole("button", { name: "Crear instalación", exact: true });
   // Si el botón sigue deshabilitado, la nota dice qué pide la pantalla («Falta …»).
   if (await crear.isDisabled().catch(() => false)) {
-    const falta = await page.getByText(/^Falta /).first().textContent().catch(() => null);
+    const falta = await page
+      .getByText(/^Falta /)
+      .first()
+      .textContent()
+      .catch(() => null);
     throw new Error(`«Crear instalación» deshabilitado: ${falta ?? "sin aviso de lo que falta"}`);
   }
   await crear.click();
-  await page.waitForURL(/\/instalaciones\/[0-9a-f-]{36}$/, { timeout: 60_000 });
+  await esperarFicha(page, "instalaciones");
 }
 
 async function crearPersona(page: Page) {
@@ -65,7 +87,7 @@ async function crearPersona(page: Page) {
   await hoja.getByLabel("Horas semanales").fill("45");
   await hoja.getByLabel("Distribución").fill("Lunes a sábado");
   await hoja.getByRole("button", { name: "Crear persona" }).click();
-  await page.waitForURL(/\/personas\/[0-9a-f-]{36}$/, { timeout: 60_000 });
+  await esperarFicha(page, "personas");
 }
 
 async function crearNegocio(page: Page, cuentaId: string): Promise<string> {
@@ -74,8 +96,7 @@ async function crearNegocio(page: Page, cuentaId: string): Promise<string> {
   await hoja.waitFor({ timeout: 60_000 });
   await hoja.getByLabel("Nombre del negocio").fill(NEGOCIO_QA);
   await hoja.getByRole("button", { name: "Crear negocio", exact: true }).click();
-  await page.waitForURL(/\/negocios\/[0-9a-f-]{36}$/, { timeout: 60_000 });
-  return new URL(page.url()).pathname.split("/").pop() ?? "";
+  return esperarFicha(page, "negocios");
 }
 
 async function crearCotizacion(page: Page, negocioId: string) {
@@ -83,7 +104,16 @@ async function crearCotizacion(page: Page, negocioId: string) {
   await page.getByLabel("Título").fill("Cotización QA auditoría");
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  await esperarFicha(page, "cotizaciones");
+}
+
+/** Plantilla en blanco para que la auditoría abra el editor (CAR-364). */
+async function crearPlantilla(page: Page) {
+  await page.goto("/documentos/plantillas");
+  await page.getByRole("button", { name: "Nueva plantilla" }).click();
+  await page.getByLabel("Nombre", { exact: true }).fill(PLANTILLA_QA);
+  await page.getByRole("button", { name: "Crear y editar" }).click();
+  await esperarFicha(page, "documentos/plantillas");
 }
 
 /** Crea la cuenta, la instalación, la persona, el negocio y la cotización que falten; devuelve notas de lo que no se pudo. */
@@ -119,5 +149,7 @@ export async function prepararDatos(page: Page): Promise<string[]> {
     return notas;
   const cotizacion = await buscar(page, "cotizaciones", "Cotización QA", /Cotización QA/);
   if (!cotizacion) await paso("cotización", () => crearCotizacion(page, negocioId));
+  const plantilla = await buscar(page, "documentos/plantillas", PLANTILLA_QA, /Plantilla QA/);
+  if (!plantilla) await paso("plantilla", () => crearPlantilla(page));
   return notas;
 }

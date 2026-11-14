@@ -52,10 +52,9 @@ export const solicitudesList = defineCapability({
           : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     const nombres = await nombresDeResponsables(
       ctx,
       items.map((x) => x.responsableId),

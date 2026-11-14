@@ -206,7 +206,12 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       nombres: "Ajena",
       apellidos: "Persona",
       rut: "22.222.222-2",
-      vinculo: { ...(await destinoVinculo(ctx())), cargoId, tipo: "indefinido", inicio: "2026-01-05" },
+      vinculo: {
+        ...(await destinoVinculo(ctx())),
+        cargoId,
+        tipo: "indefinido",
+        inicio: "2026-01-05",
+      },
     });
     const estructuraAjena = await e.admin.estructuraSueldo.create({
       data: {
@@ -277,10 +282,31 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
     const otro = ctxOtro();
     const get = await mod.executeCapability(otro, "core.anexos.get", { id: a.id });
     expect(!get.ok && get.error.code).toBe("NOT_FOUND");
-    const lista = await dato<unknown[]>(otro, "core.anexos.list", {});
+    const lista = (await dato<{ items: unknown[] }>(otro, "core.anexos.list", {})).items;
     expect(lista).toEqual([]);
     const aprobar = await mod.executeCapability(otro, "core.anexos.aprobar", { id: a.id });
     expect(!aprobar.ok && aprobar.error.code).toBe("NOT_FOUND");
+  });
+
+  it("pagina por cursor sin repetir ni saltar anexos (CAR-353)", async () => {
+    for (const nota of ["p1", "p2", "p3"]) {
+      await dato(ctx(), "core.anexos.generar", {
+        personaId,
+        motivoCambio: "monto",
+        snapshotDespues: { nota },
+      });
+    }
+    type Pagina = { items: { id: string }[]; siguiente: string | null };
+    const todos = (await dato<Pagina>(ctx(), "core.anexos.list", { personaId, limite: 100 })).items;
+    const vistos: string[] = [];
+    let cursor: string | undefined;
+    do {
+      const p = await dato<Pagina>(ctx(), "core.anexos.list", { personaId, limite: 2, cursor });
+      vistos.push(...p.items.map((a) => a.id));
+      cursor = p.siguiente ?? undefined;
+    } while (cursor);
+    expect(vistos).toEqual(todos.map((a) => a.id));
+    expect(new Set(vistos).size).toBe(vistos.length);
   });
 
   it("aprueba y materializa el documento final con SHA-256 y bitácora (R15)", async () => {
@@ -411,14 +437,12 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       vigenteDesde: "2026-03-01",
     });
     await mod.despacharPendientes(ctx());
-    const pendientes = await dato<{ motivoCambio: string; estado: string }[]>(
-      ctx(),
-      "core.anexos.list",
-      {
+    const pendientes = (
+      await dato<{ items: { motivoCambio: string; estado: string }[] }>(ctx(), "core.anexos.list", {
         personaId,
         estado: "borrador",
-      },
-    );
+      })
+    ).items;
     expect(pendientes.some((p) => p.motivoCambio === "capa" || p.motivoCambio === "monto")).toBe(
       true,
     );
@@ -430,10 +454,12 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       distribucion: "Lunes a sábado",
     });
     await mod.despacharPendientes(ctx());
-    const despues = await dato<unknown[]>(ctx(), "core.anexos.list", {
-      personaId,
-      estado: "borrador",
-    });
+    const despues = (
+      await dato<{ items: unknown[] }>(ctx(), "core.anexos.list", {
+        personaId,
+        estado: "borrador",
+      })
+    ).items;
     expect(despues.length).toBe(antes); // Jornada sola: R11 no la incluye, sin anexo nuevo.
   });
 });

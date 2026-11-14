@@ -7,6 +7,7 @@ export type BorradorF29 = {
   compras: Libro & { pendientesRevision: number; reclamados: number };
   debito: number;
   credito: number;
+  remanenteAnterior: number;
   ivaAPagar: number;
   remanenteMes: number;
   tasaPpmBps: number;

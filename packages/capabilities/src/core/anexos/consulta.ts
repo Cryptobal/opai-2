@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { dondePersona } from "../maestros/alcance";
+import { cursorDe, pagina } from "../maestros/comun";
 import { anexoDe } from "./comun";
 import { filasParaDocumento } from "./documento";
 import { anexoSchema, ESTADOS_ANEXO, vistaAnexo } from "./vista";
@@ -11,7 +12,7 @@ import { anexoSchema, ESTADOS_ANEXO, vistaAnexo } from "./vista";
 const filaDocSchema = z.object({ concepto: z.string(), antes: z.string(), despues: z.string() });
 
 export const anexosList = defineCapability({
-  auditarLectura: (s) => s.map((a) => a.id),
+  auditarLectura: (s) => s.items.map((a) => a.id),
   id: "core.anexos.list",
   descripcion:
     "Lista los anexos de contrato de una persona o los pendientes de todo el tenant (sin personaId), del más reciente al más antiguo, con su estado y motivo del cambio.",
@@ -19,9 +20,10 @@ export const anexosList = defineCapability({
   input: z.object({
     personaId: z.uuid().optional(),
     estado: z.enum(ESTADOS_ANEXO).optional(),
+    cursor: z.uuid().optional(),
     limite: z.number().int().min(1).max(100).default(50),
   }),
-  output: z.array(anexoSchema),
+  output: z.object({ items: z.array(anexoSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -31,10 +33,10 @@ export const anexosList = defineCapability({
         ...(input.estado ? { estado: input.estado } : {}),
         persona: dondePersona(ctx),
       },
-      orderBy: { createdAt: "desc" },
-      take: input.limite,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
-    return filas.map(vistaAnexo);
+    return pagina(filas.map(vistaAnexo), input.limite, input.cursor);
   },
 });
 

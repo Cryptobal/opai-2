@@ -5,7 +5,7 @@ import { capturar, EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-328: Bancos filtra por ingresos y egresos, «Reconocer» concilia contra una fila del flujo con su cuenta
-// contable, y la pestaña Reglas crea reglas con vista previa. Usa los movimientos ficticios de
+// contable (desde CAR-257 en el panel derecho, con la lista a la vista), y la pestaña Reglas crea reglas con vista previa. Usa los movimientos ficticios de
 // `packages/db/scripts/qa-e2e/bancos-reglas.sql`; no confirma ni guarda nada.
 test.setTimeout(120_000);
 test.skip(!E2E_PASSWORD, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
@@ -29,7 +29,9 @@ test.describe("@preview finanzas: bancos, fila del flujo y reglas", () => {
     await expect(boton).toBeVisible({ timeout: 60_000 });
     await hidratado(boton);
     await boton.click();
-    const hoja = page.getByRole("dialog");
+    // CAR-257: el movimiento se abre en el panel derecho, no en una hoja; la lista sigue a la vista en escritorio.
+    await expect(page).toHaveURL(/mov=/);
+    const hoja = page.getByRole("region", { name: "Detalle del movimiento" });
     const modo = hoja.getByRole("button", { name: "Fila del flujo" });
     await expect(modo).toBeVisible({ timeout: 30_000 });
     await modo.click();
@@ -38,6 +40,7 @@ test.describe("@preview finanzas: bancos, fila del flujo y reglas", () => {
     await expect(hoja.getByText("Cuenta contable (opcional)")).toBeVisible();
     await expect(hoja.getByText("Crear una regla con este movimiento")).toBeVisible();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await capturar(page, info, "bancos-reconocer-fila");
   });
 

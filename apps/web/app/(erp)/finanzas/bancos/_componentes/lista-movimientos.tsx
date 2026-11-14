@@ -18,10 +18,13 @@ export function ListaMovimientos({
   movimientos,
   gestiona,
   hrefMov,
+  seleccionado,
 }: {
   movimientos: MovimientoBanco[];
   gestiona: boolean;
   hrefMov: (id: string) => string;
+  /** Movimiento abierto en el panel derecho (CAR-257): se marca en la lista. */
+  seleccionado?: string | undefined;
 }) {
   if (movimientos.length === 0) {
     return <Empty titulo="Sin movimientos con este filtro" descripcion="Importa una cartola o cambia el estado o el tipo." />;
@@ -29,9 +32,13 @@ export function ListaMovimientos({
   return (
     <ul className="flex flex-col gap-2">
       {movimientos.map((m) => (
-        <li key={m.id} className="rowcard flex flex-wrap items-center gap-2 p-3">
-          {/* En teléfono la glosa ocupa su propia línea y el monto, el estado y la acción van debajo. */}
-          <div className="min-w-0 grow basis-full sm:basis-0">
+        <li
+          key={m.id}
+          {...(m.id === seleccionado ? { "aria-current": "true" as const } : {})}
+          className={`rowcard flex flex-wrap items-center gap-2 p-3 ${m.id === seleccionado ? "ring-2 ring-accent" : ""}`}
+        >
+          {/* La glosa ocupa su propia línea y el monto, el estado y la acción van debajo: la lista es una columna angosta junto al panel (CAR-257). */}
+          <div className="min-w-0 grow basis-full">
             <p className="t-body-sm font-medium break-words">{m.glosa}</p>
             <p className="t-caption text-fg-muted">
               {fechaDdMmAaaa(m.fecha)}

@@ -66,3 +66,5 @@ No las decide esta sesión. Están numeradas de la más urgente a la menos urgen
 ## Cómo se mantiene
 
 Una vez por semana se repasa lo integrado a `main` y se actualiza el archivo de cada capa: brechas cerradas (con el PR), brechas nuevas y «por verificar» resueltos.
+
+En la revisión diaria de PR, las brechas altas y críticas van a Linear siempre. Las medias van a Linear cuando el PR ya está integrado (prioridad normal, proyecto del módulo, enlazadas a CAR-348); en un PR abierto quedan en el comentario (ADR-106, adenda del 13-nov-2026).

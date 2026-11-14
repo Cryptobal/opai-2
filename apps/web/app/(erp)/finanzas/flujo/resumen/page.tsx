@@ -7,6 +7,7 @@ import { fecha, pesos } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 
 import { ATRASOS, cargarResumen, rutaResumen, VISTAS, type Resumen } from "./datos";
+import { GraficoSaldo } from "./grafico";
 import { Periodos } from "./periodos";
 
 export const metadata = { title: "Resumen del flujo de caja" };
@@ -52,6 +53,7 @@ export default function ResumenFlujo({ searchParams }: { searchParams: SearchPar
               kpis={r ? kpis(r) : []}
               textos={{ vacio: { titulo: "Sin semanas para resumir", descripcion: "Revisa el horizonte en los ajustes del flujo.", accion: <EnlaceBoton href="/finanzas/flujo" variante="secondary">Ir al flujo</EnlaceBoton> } }}
             >
+              {r ? <GraficoSaldo r={r} vista={d.vista} /> : null}
               {r ? <Periodos r={r} vista={d.vista} /> : null}
             </DashboardScreen>
           </>
