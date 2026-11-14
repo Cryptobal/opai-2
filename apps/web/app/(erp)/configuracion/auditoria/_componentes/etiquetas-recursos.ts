@@ -16,7 +16,7 @@ export const RECURSOS: Record<string, string> = {
   aprobaciones: "Aprobaciones", por_aprobar: "Por aprobar", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
   turno: "Turnos", plan: "Plan", historial: "Historial", negocios: "Negocios", solicitudes: "Solicitudes",
   seguimiento_planes: "Planes de seguimiento", seguimientos: "Seguimientos", canales: "Canales", importar_1_0: "Importación desde OPAI 1.0", puntos: "Puntos de ronda",
-  programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos", mis_turnos: "Mis turnos",
+  programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos", mis_turnos: "Mis turnos", mis_documentos: "Mis documentos",
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
   conceptos: "Conceptos", obligaciones: "Obligaciones", mes: "Mes", ppc: "Puestos por cubrir",

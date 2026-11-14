@@ -4,6 +4,7 @@ import { arcoListar } from "./arco-listar";
 import { arcoSolicitar } from "./arco-solicitar";
 import { misDatosActualizar, misDatosObtener } from "./mis-datos";
 import { misDatosExportar } from "./mis-datos-exportar";
+import { misDocumentosDescargar, misDocumentosListar } from "./mis-documentos";
 import { misTurnosListar } from "./mis-turnos";
 import { privacidadObtener } from "./privacidad";
 import { preferenciasActualizar, preferenciasObtener } from "./preferencias";
@@ -14,6 +15,8 @@ export const capacidades: readonly Capacidad[] = [
   misDatosActualizar,
   misDatosExportar,
   misTurnosListar,
+  misDocumentosListar,
+  misDocumentosDescargar,
   preferenciasObtener,
   preferenciasActualizar,
   privacidadObtener,
