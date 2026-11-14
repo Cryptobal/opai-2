@@ -591,6 +591,15 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["core.etiquetas", "core.cuentas"],
     valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas") }),
   },
+  // CAR-27: campos personalizados (CHECK de entidad, tipo, clave y opciones; un valor por entidad).
+  "core.campos_personalizados": {
+    fijas: ["entidad", "clave"],
+    valores: () => ({ entidad: "cuenta", clave: "rubro", etiqueta: "Rubro", tipo: "texto", opciones: [] }),
+  },
+  "core.campo_valores": {
+    dependencias: ["core.campos_personalizados", "core.cuentas"],
+    valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas"), contacto_id: null, negocio_id: null, valor: JSON.stringify("Salud") }),
+  },
   // CAR-157: vocabularios cerrados en corrida y fila de registro.
   "core.importaciones": {
     valores: () => ({
