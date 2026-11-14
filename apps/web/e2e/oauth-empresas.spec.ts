@@ -9,6 +9,10 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 // (Gard y Atlas, ficticio), solo en local y en el e2e de CI.
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 
+// El registro de apps (DCR) es un POST sin Origin: con la cookie de marco que fija la configuración,
+// Better Auth lo rechaza por CSRF (403). Estas pruebas van sin cookies previas (CAR-335 D6a).
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe("OAuth del MCP con varias empresas", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 

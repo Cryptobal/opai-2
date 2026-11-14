@@ -182,4 +182,35 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
     expect(new Set(vistos).size).toBe(vistos.length);
     expect(vistos.length).toBe(todos.length);
   });
+
+  it("la clase se valida contra el catálogo de la vertical y se guarda con su nombre (CAR-393)", async () => {
+    const clases = await run(ctx(tenant), "core.ausencias.clases", {});
+    const items = clases.data?.["items"] as { nombre: string; tipo: string }[];
+    expect(items).toContainEqual({ nombre: "Feriado legal", tipo: "vacaciones" });
+    const base = {
+      personaId: persona,
+      tipo: "vacaciones",
+      motivo: "Feriado anual",
+      desde: "2027-02-01",
+      hasta: "2027-02-05",
+    };
+    const mal = await run(ctx(tenant), "core.ausencias.registrar", {
+      ...base,
+      clase: "Con goce de sueldo",
+    });
+    expect(mal.error?.code).toBe("UNPROCESSABLE");
+    const r = await run(ctx(tenant), "core.ausencias.registrar", {
+      ...base,
+      clase: "feriado legal",
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const lista = await run(ctx(tenant), "core.ausencias.listar", {
+      personaId: persona,
+      limite: 100,
+    });
+    const g = (lista.data?.["items"] as { ausenciaId: string; clase: string | null }[]).find(
+      (x) => x.ausenciaId === r.data?.["ausenciaId"],
+    );
+    expect(g?.clase).toBe("Feriado legal");
+  });
 });
