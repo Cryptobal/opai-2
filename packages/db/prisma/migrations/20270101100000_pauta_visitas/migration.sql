@@ -43,6 +43,10 @@ ALTER TABLE "pauta"."visitas" ADD CONSTRAINT "visitas_instalacion_id_fkey"
 ALTER TABLE "pauta"."visitas" ADD CONSTRAINT "visitas_supervisor_id_fkey"
     FOREIGN KEY ("supervisor_id") REFERENCES "core"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- La instalación debe ser de la misma empresa (trigger del núcleo); core.users no tiene tenant_id (ADR-015).
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "pauta"."visitas"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('instalacion_id', 'core.instalaciones');
+
 ALTER TABLE "pauta"."visitas" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "pauta"."visitas" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "pauta"."visitas" AS PERMISSIVE FOR ALL TO opai_app
