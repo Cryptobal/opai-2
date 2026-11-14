@@ -35,6 +35,8 @@
 - Las capturas de `preview-e2e` mostraron que el buscador centrado con `position: absolute` tapaba «Editar» y «Fijar» en la ficha de persona a 1280 px, y las pestañas de la ruta y esos botones a 1024 px. Ahora queda al centro exacto solo en escritorio y cuando la barra no trae acciones; con acciones, o en iPad, vuelve al flujo (ruta, buscador, acciones, iconos), como antes de #727.
 - `cabecera-estable` (CAR-12, CA1) sigue exigiendo que la campana y el usuario no se muevan entre vistas; del buscador exige el mismo tamaño y la misma altura, pero no la misma x. Es la diferencia aceptada frente a CA1 para no tapar controles.
 
+- Segunda revisión de capturas (9bfcec34): en iPad el buscador aún tapaba la pestaña «Personas», y en escritorio, «Vencimientos». Ahora la ruta o las pestañas tienen su ancho natural, el buscador se centra en el espacio que queda y, en iPad con acciones de página, el buscador queda como ícono, sin texto. Así nada se monta sobre otra cosa.
+
 ## Presupuesto de JS (#727)
 
 - Tras traer `main` con #723, #725 y #726, `build · presupuesto de JS` marcó 25 rutas con 0,0 a 0,2 KB de más: el trozo común del shell creció con las novedades nuevas, no hay código nuevo en esas páginas. Se sube el tope de cada una al entero siguiente de su medida (ADR-037). Sigue pendiente para núcleo que las novedades no viajen en el trozo común.

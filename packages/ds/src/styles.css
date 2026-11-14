@@ -631,30 +631,41 @@
   background: var(--ds-accent);
   color: var(--ds-accent-fg);
 }
-/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): el buscador único va al centro, con la
-   ruta a la izquierda y las acciones, el tema, el agente y la campana a la derecha. */
+/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): la ruta o las pestañas a la izquierda con
+   su ancho natural, el buscador centrado en el espacio libre y, a la derecha, las acciones, el tema,
+   el agente y la campana. Nada se monta sobre otra cosa (CAR-335 D6c): en iPad, con acciones de
+   página (una ficha), el buscador queda como ícono para que las pestañas y los botones quepan. */
 @media (min-width: 64rem) {
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"],
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
-    flex: 1 1 0%;
-  }
-  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
-    justify-content: flex-end;
-    order: 4;
-  }
   [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
+    flex: 0 1 auto;
     order: 1;
   }
   [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="buscar"] {
     order: 2;
+    margin-inline: auto;
   }
   [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="acciones"] {
     order: 3;
   }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    flex: none;
+    justify-content: flex-end;
+    order: 4;
+    margin-left: auto;
+  }
+}
+@media (min-width: 64rem) and (max-width: 79.99rem) {
+  [data-marco="nuevo"] header[data-shell="barra"]:has(> [data-shell="acciones"]) > [data-shell="buscar"] > button {
+    width: 2.75rem;
+    justify-content: center;
+    padding-inline: 0;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"]:has(> [data-shell="acciones"]) > [data-shell="buscar"] > button > :not(svg) {
+    display: none;
+  }
 }
 /* En escritorio y sin acciones de página, el buscador queda al centro exacto de la barra; la ruta se
-   corta antes de llegar a él. Con acciones (una ficha) o en iPad vuelve al flujo, para que nunca tape
-   pestañas ni botones (CAR-335 D6c): en la vista previa de #727 tapaba «Editar» y «Fijar». */
+   corta antes de llegar a él. */
 @media (min-width: 80rem) {
   [data-marco="nuevo"] header[data-shell="barra"]:not(:has(> [data-shell="acciones"])) > [data-shell="buscar"] {
     position: absolute;
