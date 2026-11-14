@@ -2,9 +2,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { PARTES_FINANZAS } from "../cobros/catalogo-modulos";
+import { accesoDeRuta, type AccesoRuta } from "./acceso-ruta";
 import { NOVEDADES_MARKDOWN } from "./entradas/embed";
 import { parsearNovedadMarkdown, type EntradaNovedad } from "./parser";
 
+export { accesoDeRuta, type AccesoRuta } from "./acceso-ruta";
 export { parsearNovedadMarkdown, type EntradaNovedad, type FrontmatterNovedad } from "./parser";
 export {
   bloquesNovedad,
@@ -72,21 +74,29 @@ export function reiniciarCatalogoNovedades(): void {
 const activosFinanzas = (modulos: ReadonlySet<string>) =>
   modulos.has("finanzas") || PARTES_FINANZAS.some((p) => modulos.has(p));
 
-/** Filtra entradas visibles para el tenant y los permisos del actor. */
+const moduloActivo = (modulo: string, activos: ReadonlySet<string>) =>
+  modulo === "finanzas" ? activosFinanzas(activos) : activos.has(modulo);
+
+/**
+ * Filtra entradas visibles para el tenant y los permisos del actor. Con `tabla` (CAR-430), una
+ * novedad sin permiso propio se recorta además por la pantalla a la que lleva: si la persona no
+ * ve esa entrada del menú (módulo apagado o sin su permiso), tampoco ve la novedad.
+ */
 export function novedadesVisibles(
   entradas: readonly EntradaNovedad[],
   modulosActivos: readonly string[],
   puede: (permiso: string) => boolean,
   esPlataforma: boolean,
+  tabla: readonly AccesoRuta[] = [],
 ): EntradaNovedad[] {
   const activos = new Set(["core", ...modulosActivos]);
   return entradas.filter((e) => {
     if (e.modulo === "platform") return esPlataforma;
-    if (e.modulo === "core") return true;
-    if (e.modulo === "finanzas") {
-      if (!activosFinanzas(activos)) return false;
-    } else if (!activos.has(e.modulo)) return false;
-    if (e.permiso && !puede(e.permiso)) return false;
-    return true;
+    if (e.modulo !== "core" && !moduloActivo(e.modulo, activos)) return false;
+    if (e.permiso) return puede(e.permiso);
+    const acceso = e.ruta ? accesoDeRuta(e.ruta, tabla) : undefined;
+    if (!acceso) return true;
+    if (!moduloActivo(acceso.modulo, activos)) return false;
+    return !acceso.permiso || puede(acceso.permiso);
   });
 }
