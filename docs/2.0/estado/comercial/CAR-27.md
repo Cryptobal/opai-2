@@ -68,7 +68,6 @@ Brief `docs/2.0/briefs/BRIEF-CAR-27-fusionar.md`. Capacidad `core.cuentas.fusion
 - F3: fusión de contactos.
 
 ## PR fusionar contactos (F3) · rama `brief/car-27-fusionar-contactos`
-## PR fusionar cuentas (F2, pantalla) · rama `brief/car-27-fusionar-pantalla`
 
 - **Estado:** Abierto (F1 ya está en main)
 - **Migración:** No
@@ -83,6 +82,14 @@ Capacidad `core.contactos.fusionar` (`efecto: "irreversible"`, `dryRun`), con la
 - Se bloquea si el duplicado firmó un consentimiento de referencia comercial, porque ese registro es append-only.
 
 Una prueba compara el inventario de FK con la base. Falta la pantalla.
+
+## PR fusionar cuentas (F2, pantalla) · rama `brief/car-27-fusionar-pantalla`
+
+- **Estado:** Abierto (F1 ya está en main)
+- **Migración:** No
+
+### Qué entra
+
 Nueva acción **⋯ › Fusionar con…** en la ficha de la cuenta. Abre una hoja diferida (`?fusionar=1`) con el diseño CuentaV2 · fusionar y tres pasos:
 
 1. **Elegir:** combobox de búsqueda, con sugerencias por la primera palabra del nombre.
@@ -98,7 +105,7 @@ Cada paso usa la vista previa de `core.cuentas.fusionar`, así que los bloqueos 
 
 ## PR fusionar contactos (F4, pantalla) · rama `brief/car-27-fusionar-contactos-pantalla`
 
-- **Estado:** Abierto (apilado sobre F2 y F3)
+- **Estado:** Abierto (apilado sobre F2 #742 y F3 #744)
 - **Migración:** No
 
 ### Qué entra
