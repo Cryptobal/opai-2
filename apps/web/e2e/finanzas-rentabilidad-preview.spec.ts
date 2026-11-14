@@ -17,7 +17,7 @@ test.describe("@preview finanzas: rentabilidad por instalación", () => {
     await capturar(page, info, "finanzas-hoy-informes");
     await enlace.click();
     await expect(page).toHaveURL(/\/finanzas\/rentabilidad/, { timeout: 30_000 });
-    await expect(page.getByText("Costo estimado del personal")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("Costo estimado del personal", { exact: true })).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("No son liquidaciones", { exact: false })).toBeVisible();
     await capturar(page, info, "finanzas-rentabilidad");
     await page.getByRole("link", { name: "Mes anterior" }).click();
