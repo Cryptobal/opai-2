@@ -13,9 +13,7 @@ export {
   borrarUsuario,
   clienteAuth,
   clienteBloqueoLogin,
-  membresiaBloqueada,
   type ResultadoBorrado,
-  restablecerSegundoFactor,
   estadoSesionEnTransaccion,
   ultimosAccesos,
   usuarioEnOtrasEmpresas,
@@ -32,6 +30,7 @@ export {
   renombrarPasskey,
 } from "./identidad-metodos";
 export { type AppConectada, appsConectadas, desconectarApp } from "./identidad-oauth";
+export { membresiaBloqueada, restablecerSegundoFactor } from "./identidad-mfa";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
 export type {
   DatosCondicionCobro,
