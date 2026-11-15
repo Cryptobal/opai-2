@@ -12,7 +12,7 @@ DECLARE
   negocio uuid := '00000000-0000-7000-8000-000000544001'::uuid;
   cot uuid := '00000000-0000-7000-8000-000000544002'::uuid;
   ver uuid := '00000000-0000-7000-8000-000000544003'::uuid;
-  anio int := 2026;
+  anio_corr int := 2026;
 BEGIN
   IF t IS NULL THEN
     RAISE EXCEPTION 'No existe la empresa ficticia qa-e2e';
@@ -54,6 +54,6 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
 
   INSERT INTO cpq.correlativos (id, tenant_id, anio, ultimo, created_at, updated_at)
-  VALUES ('00000000-0000-7000-8000-000000544004'::uuid, t, anio, 901, now(), now())
+  VALUES ('00000000-0000-7000-8000-000000544004'::uuid, t, anio_corr, 901, now(), now())
   ON CONFLICT (tenant_id, anio) DO UPDATE SET ultimo = GREATEST(cpq.correlativos.ultimo, 901), updated_at = now();
 END $$;
