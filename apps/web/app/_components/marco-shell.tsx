@@ -127,24 +127,18 @@ export function MarcoShell({
       ? () => setInicio(true)
       : undefined,
   );
-  // CAR-316: la Bandeja suma las novedades sin leer y se resalta (también en la barra inferior).
-  const novedadesBandeja = enErp ? novedadesNoLeidas : 0;
   const bandejaContador = enErp ? (preferencias?.bandejaContador ?? 0) : 0;
   const navInferiorResuelto = useMemo(
     () =>
       navInferiorBase &&
-      conContadores(
-        navInferiorBase,
-        { bandejaContador, solicitudesNuevas: 0 },
-        novedadesBandeja,
-      ).map((n) =>
+      conContadores(navInferiorBase, { bandejaContador, solicitudesNuevas: 0 }).map((n) =>
         n.href === "/"
           ? { ...n, punto: true, alerta: bandejaPendiente }
           : n.href === "/cotizaciones"
             ? { ...n, corta: "Cotiz." }
             : n,
       ),
-    [navInferiorBase, bandejaPendiente, bandejaContador, novedadesBandeja],
+    [navInferiorBase, bandejaPendiente, bandejaContador],
   );
   const conPin = (accion: ReactNode) => (
     <>
@@ -161,7 +155,7 @@ export function MarcoShell({
         titulo={tituloEfectivo}
         busquedaCompacta={enConfiguracion}
         {...(padre ? { volver: padre, volverSoloTelefono: true } : {})}
-        nav={conContadores(nav, preferencias, novedadesBandeja)}
+        nav={conContadores(nav, preferencias)}
         {...(navInferiorResuelto ? { navInferior: navInferiorResuelto } : {})}
         portales={datos.portales}
         portalActual={datos.portal}
@@ -169,7 +163,7 @@ export function MarcoShell({
         {...(datos.tenant ? { tenant: datos.tenant } : {})}
         {...(empresas.length ? { empresas } : {})}
         // CAR-316 (Carlos, 11-nov): sin Bandeja, las novedades sin leer marcan el avatar.
-        usuario={{ ...datos.usuario, aviso: avisoNovedadesAvatar(datos.portal, novedadesNoLeidas) }}
+        usuario={{ ...datos.usuario, aviso: avisoNovedadesAvatar(novedadesNoLeidas) }}
         menuUsuario={menu}
         {...(agente.lanzador ? { agente: agente.lanzador } : {})}
         campana={
