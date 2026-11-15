@@ -1,4 +1,4 @@
-import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
+import { ajustesFinanzas, buscadoresFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
 
 import { capacidades as capacidadesFlujo } from "./capacidades";
 import { PERMISO_CONFIGURAR, PERMISO_GESTIONAR, PERMISO_VER } from "./capacidades/permisos";
@@ -157,4 +157,5 @@ export const manifest = defineModule({
     { id: "finanzas.folios.caf_reactivado", descripcion: "Se reactivó un rango de folios (CAF) pausado." },
   ],
   capacidades: [...capacidadesFinanzas, ...capacidadesFlujo],
+  buscadores: buscadoresFinanzas,
 });
