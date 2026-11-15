@@ -74,11 +74,11 @@ async function unTurnoModelo(
     cantidad: 1,
     modulo: "agente",
     capability: "agente.turno.preparar",
-    actorTipo: "agent",
-    actorId: ctx.actor.id,
-    viaUserId: ctx.actor.viaUserId,
-    apiKeyId: null,
-    portal: ctx.portal,
+      actorTipo: "agent",
+      actorId: ctx.actor.id ?? null,
+      viaUserId: ctx.actor.viaUserId ?? null,
+      apiKeyId: null,
+      portal: ctx.portal,
   });
   let r: RespuestaConversacion;
   try {
