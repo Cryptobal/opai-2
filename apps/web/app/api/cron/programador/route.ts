@@ -9,7 +9,7 @@ import {
   porTenant,
   tocaTrabajosDiarios,
 } from "@/lib/cron";
-import { contextoSistema } from "@/lib/medidor";
+import { contextoSistemaDelTenant } from "@/lib/medidor";
 import { purgarVentanas } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -25,15 +25,15 @@ export async function GET(req: Request): Promise<Response> {
   let resultados: Record<string, unknown> = {};
   let errorTenants = false;
   try {
-    resultados = await porTenant((t) => {
+    resultados = await porTenant(async (t) => {
       const hoy = hoyEn(t.timezone);
       const hora = horaEn(t.timezone);
-      return Promise.all([
-        tocaDiarios
-          ? programarPeriodicos(contextoSistema(t.id), hoy)
-          : Promise.resolve([] as string[]),
-        programarHorarios(contextoSistema(t.id), hora),
-      ]).then(([diarios, horarios]) => ({ diarios, horarios }));
+      const ctx = await contextoSistemaDelTenant(t.id);
+      const [diarios, horarios] = await Promise.all([
+        tocaDiarios ? programarPeriodicos(ctx, hoy) : Promise.resolve([] as string[]),
+        programarHorarios(ctx, hora),
+      ]);
+      return { diarios, horarios };
     });
   } catch {
     errorTenants = true;
@@ -67,7 +67,10 @@ export async function GET(req: Request): Promise<Response> {
   let capturaSiiEncolada: boolean | null = null;
   try {
     if (tocaDiarios)
-      capturaSiiEncolada = await encolarCapturaSiiDesdeCron(programarCapturaSii, contextoSistema);
+      capturaSiiEncolada = await encolarCapturaSiiDesdeCron(
+        programarCapturaSii,
+        contextoSistemaDelTenant,
+      );
   } catch {
     console.error("[cron programador] falló la programación de captura SII");
   }

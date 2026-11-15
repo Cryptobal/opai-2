@@ -61,13 +61,13 @@ export async function porTenant<T>(
 /** Encola la captura diaria UF/UTM del SII (una corrida global; ancla timezone en el primer tenant operable). */
 export async function encolarCapturaSiiDesdeCron(
   programarCapturaSii: (ctx: Contexto, hoy: string) => Promise<boolean>,
-  contextoSistema: (tenantId: string) => Contexto,
+  contextoSistema: (tenantId: string) => Contexto | Promise<Contexto>,
 ): Promise<boolean | null> {
   const operables = await tenantsOperables();
   const ancla = operables[0];
   if (!ancla) return null;
   const hoy = hoyEn(ancla.timezone);
-  return programarCapturaSii(contextoSistema(ancla.id), hoy);
+  return programarCapturaSii(await contextoSistema(ancla.id), hoy);
 }
 
 /**
