@@ -14,8 +14,7 @@ import {
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
 import { MarcoPortal } from "./marco-portal";
-import { BannerVerComo } from "./ver-como/banner-ver-como";
-import { SoloLecturaVerComo } from "./ver-como/solo-lectura";
+import { MarcoVerComo } from "./ver-como/marco-ver-como";
 
 /** Resuelve la identidad (lee cookies y sesión: dato dinámico) y monta el shell persistente. Vive
  *  dentro de un Suspense para que el acceso dinámico no bloquee el prerender del documento. */
@@ -30,10 +29,9 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   const vista = await verComoDe(identidad);
   if (vista?.portal === portal)
     return (
-      <>
-        <BannerVerComo portal={vista.portal} nombre={vista.nombre} />
-        <SoloLecturaVerComo>{children}</SoloLecturaVerComo>
-      </>
+      <MarcoVerComo vista={vista} portal={portal}>
+        {children}
+      </MarcoVerComo>
     );
   const datos = datosShell(identidad, portal);
   // Marco elegido por la persona (ADR-090): se lee de la cookie de este navegador, sin consultas, así
