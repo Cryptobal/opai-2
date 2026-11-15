@@ -86,7 +86,7 @@ Incluye 8 alias marcados `@deprecated` «conservados para pruebas» (`sii-valida
 |---|---|---|
 | `core/crm/contactos-cuentas.ts` ≈ `contactos-desvincular.ts` | 58 | Hecho en CAR-438 (#837): se borró la copia muerta |
 | Componentes de «generar documento» de Personas ≈ los genéricos de `_components/documentos/generar-entidad/` | 56 | Hecho (CAR-439): Personas usa los genéricos |
-| Tipos copiados entre `apps/web/lib` y módulos (`instrumentos-valores`, `aprobaciones-cpq`, `tipos-maestros`, pauta) | 79 | Importar el tipo desde su dueño |
+| Tipos copiados entre `apps/web/lib` y módulos (`instrumentos-valores`, `aprobaciones-cpq`, `tipos-maestros`, pauta) | 79 | Pauta hecho (CAR-439): importa de `@opai/domain`; quedan instrumentos/aprobaciones/maestros |
 | Rutas `api/terreno/*` y layouts de portales con el mismo encabezado | 66 | Un helper por familia |
 | `iconos.ts`: un bloque repetido dentro del mismo archivo | 30 | Borrar la copia |
 | Logo en PDF: `modules/cpq/persistencia/pdf/logo.ts` ≈ `capabilities/src/finanzas/ventas-pdf-logo.ts` | 28 | Hecho (CAR-439): CPQ reusa `logoDeMarca` |
