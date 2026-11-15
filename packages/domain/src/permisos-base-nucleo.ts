@@ -78,4 +78,5 @@ export const CLASES_NUCLEO: Readonly<Record<string, ClaseBase>> = {
   [P.correosSinAsignar]: "-",
   [P.indicadoresGestionRead]: "G",
   [P.importarManage]: "G",
+  [P.verComoIniciar]: "-",
 };

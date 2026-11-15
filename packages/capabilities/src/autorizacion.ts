@@ -53,6 +53,13 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
       `El módulo "${c.modulo}" está en solo lectura: puedes ver tus datos, pero no crear ni cambiar nada. Pide a OPAI activarlo.`,
     );
   }
+  // «Ver como» (CAR-528): solo lectura en el servidor, también lo entrante y lo irreversible.
+  if (ctx.verComo && c.efecto !== "lectura") {
+    return falla(
+      "FORBIDDEN",
+      "Estás viendo como otra persona: solo lectura. Sal de «ver como» para hacer cambios.",
+    );
+  }
   if (!enScope(ctx, c.modulo)) {
     return falla("FORBIDDEN", `La API key no tiene el scope "${c.modulo}".`);
   }

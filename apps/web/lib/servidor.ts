@@ -12,6 +12,8 @@ import { loginDe } from "./login-destino";
 import { COOKIE_TENANT } from "./tenant-actual";
 import { tieneAccesoAPortal } from "./acceso-portal";
 import { estadoMfaDe, verificarMfaDe } from "./mfa";
+import { contextoVerComo, verComoDe } from "./ver-como";
+import type { VerComo } from "./ver-como-token";
 
 export { tieneAccesoAPortal } from "./acceso-portal";
 
@@ -40,6 +42,25 @@ export function contextoServidor(identidad: Identidad, portal: string): Contexto
   return contextoDeIdentidad(identidad, portal);
 }
 
+/** Como la persona vista, en solo lectura; quien mira también debe tener su segundo factor al día. */
+async function ejecutarVerComo<T>(
+  identidad: Identidad,
+  verComo: VerComo,
+  id: string,
+  input: unknown,
+  dryRun: boolean,
+): Promise<Resultado<T>> {
+  if (await verificarMfaDe(identidad))
+    return { ok: false, error: { code: "FORBIDDEN", message: "Completa el segundo factor." } };
+  const vista = await contextoVerComo(verComo, verComo.portal);
+  if (!vista)
+    return {
+      ok: false,
+      error: { code: "FORBIDDEN", message: "La vista «ver como» ya no está disponible." },
+    };
+  return (await executeCapability(vista, id, input, { dryRun })) as Resultado<T>;
+}
+
 /** Ejecuta una capacidad como el usuario del request (Server Components y Server Actions). */
 export async function ejecutarComoUsuario<T = unknown>(
   portal: string,
@@ -51,6 +72,9 @@ export async function ejecutarComoUsuario<T = unknown>(
   const identidad = await identidadActual();
   if (!identidad)
     return { ok: false, error: { code: "UNAUTHENTICATED", message: "Inicia sesión." } };
+  // «Ver como» (CAR-528): solo en el portal de la vista; el ERP, `/api/v1` y el MCP siguen con la identidad propia.
+  const verComo = await verComoDe(identidad);
+  if (verComo?.portal === portal) return ejecutarVerComo<T>(identidad, verComo, id, input, dryRun);
   if (!tieneAccesoAPortal(identidad, portal))
     return { ok: false, error: { code: "FORBIDDEN", message: "No tienes acceso a este portal." } };
   if (await verificarMfaDe(identidad))
