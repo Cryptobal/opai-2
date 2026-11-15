@@ -779,9 +779,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
-| platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
-| platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
-| platform | `/platform/ajustes` | `platform.tenants.list` | `platform_tenants_list` | existe |
+| platform | `/platform/ajustes/credenciales` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
+| platform | `/platform/ajustes/modelos` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
+| platform | `/platform/ajustes/modelos` | `platform.precios.list` | `platform_precios_list` | existe |
+| platform | `/platform/ajustes/modelos` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/auditoria` | `platform.auditoria.list` | `platform_auditoria_list` | existe |
 | platform | `/platform/auditoria` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/catalogo` | `platform.catalogo.list` | `platform_catalogo_list` | existe |
@@ -799,7 +800,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.prueba_gratis_extender` | `platform_cobros_prueba_gratis_extender` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.pruebas_gratis_list` | `platform_cobros_pruebas_gratis_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
-| platform | `/platform/tenants/[id]/integraciones` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
 | platform | `/platform/tenants/[id]/usuarios` | `platform.tenants.miembros` | `platform_tenants_miembros` | existe |
 | platform | `/platform/tenants/[id]` | `platform.admins.invite` | `platform_admins_invite` | existe |
 | platform | `/platform/tenants/[id]` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
