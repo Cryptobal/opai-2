@@ -66,6 +66,8 @@ describe.skipIf(omitirSuiteDb())("core.buscar · facturas y documentos (CAR-526)
           cuentaId: cuentaB,
           tipoDte: 33,
           folio: 9001,
+          montoNeto: 1_000_000,
+          montoIva: 190_000,
           montoTotal: 1_190_000,
           estadoDte: "aceptado",
           fechaEmision: new Date("2026-11-01"),
