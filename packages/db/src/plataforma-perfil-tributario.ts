@@ -12,7 +12,7 @@ export type PerfilTributario = { rut: string | null; razonSocial: string | null 
 export type DatosTributarios = { rut: string; razonSocial: string };
 
 /** Nombre del índice único del RUT (migración 20261107130000_core_rut_empresa_unico). */
-export const INDICE_RUT_UNICO = "perfil_empresa_rut_unico";
+const INDICE_RUT_UNICO = "perfil_empresa_rut_unico";
 
 /** true solo si el error es la restricción única del RUT (no otra colisión única, como el slug). */
 export function esRutRepetido(e: unknown): boolean {

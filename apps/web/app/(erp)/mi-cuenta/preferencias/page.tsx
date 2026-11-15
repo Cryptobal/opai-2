@@ -40,7 +40,6 @@ export default function Preferencias() {
             <Cabecera
               titulo="Preferencias"
               tituloSiempre
-              tituloComoShell
               tituloDetalle
               subtitulo={`Solo para ti, ${nombre}`}
             />

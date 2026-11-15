@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./manifest.ts"
+    ".": "./manifest.ts",
+    "./trabajos": "./trabajos.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

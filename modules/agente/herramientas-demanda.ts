@@ -13,7 +13,7 @@ import { esquemasDelAgente, herramientasDelAgente } from "./herramientas";
  */
 export const CARGAR = "cargar-herramientas";
 export const USAR = "usar-herramienta";
-export const MAX_CARGA = 8;
+const MAX_CARGA = 8;
 const carga = z.object({ nombres: z.array(z.string().min(1).max(120)).min(1).max(MAX_CARGA) });
 const uso = z.object({
   nombre: z.string().min(1).max(120),

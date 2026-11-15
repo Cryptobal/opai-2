@@ -12,7 +12,7 @@ import { comunicableDe, plantillaVigente } from "../comunicaciones/resolver";
 import { variablesDe } from "../comunicaciones/variables";
 
 const LOTE = 500;
-export const EVENTO_TAREA_VENCIDA = "core.actividad.tarea_vencida";
+const EVENTO_TAREA_VENCIDA = "core.actividad.tarea_vencida";
 
 export const trabajoTareasVencidas = defineTrabajo({
   tipo: "core.actividades.tareas_vencidas",

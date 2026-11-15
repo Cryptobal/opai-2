@@ -15,10 +15,11 @@ import { exigirPrendasDelKit } from "./uniforme-prendas";
 export { capacidadesContratoPeriodos } from "./contrato-periodos";
 
 export const personasLaboralVer = defineCapability({
-  auditarLectura: (s) => [s.personaId],
+  // CAR-429: el id del documento OS-10 que respalda la ficha también queda como revelado.
+  auditarLectura: (s) => [s.personaId, ...(s.os10Respaldo ? [s.os10Respaldo.documentoId] : [])],
   id: "core.personas.laboral_ver",
   descripcion:
-    "Muestra uniforme, jornada DT, credencial OS-10 y contacto laboral de una persona. La lectura queda auditada.",
+    "Muestra uniforme, jornada DT, credencial OS-10 (con su documento vigente en Documentos, si existe) y contacto laboral de una persona. La lectura queda auditada.",
   permiso: PERMISOS_CORE.personasLaboralRead,
   input: z.object({ id: uuidSchema }),
   output: laboralSchema,
