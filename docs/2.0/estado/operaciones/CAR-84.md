@@ -3,7 +3,7 @@
 - **Sesión:** Sesión Operaciones
 - **PR:** #811 (avisos, integrado) · #821 instalación del ticket, rama `brief/car-84-ticket-instalacion`
 - **Estado:** #811 integrado; #821 en PR
-- **Migración:** #811 no; #821 sí: `20270119110000_tickets_instalacion` (renombrada desde 20270110110000 para quedar después de `20270116220000` de main; se integra después de `20270119100000_pauta_visitas`, #816)
+- **Migración:** #811 no; #821 sí: `20270122100000_tickets_instalacion` (20270119110000 quedaba antes de `20270121100000_core_campos_personalizados_fichas_tipos`, ya en main; se integra después de esa y de `20270119100000_pauta_visitas`, #816)
 - **Apilado sobre / espera:** #821 sobre `main` (espera #816 por el orden de migraciones)
 
 ## Qué entra (parte 1: avisos)
