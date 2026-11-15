@@ -2,41 +2,44 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { ControlCampo, type Entrada } from "./control-campo";
 import { entradaDe, type CampoFicha, type EntidadCampos, type ValorCampo } from "./tipos";
 
-const VACIO = "_vacio";
-type Borrador = Record<string, string>;
+type Borrador = Record<string, Entrada>;
 
-const aTexto = (v: ValorCampo): string =>
-  v === null ? "" : typeof v === "boolean" ? (v ? "si" : "no") : Array.isArray(v) ? v.join(",") : String(v);
+const aEntrada = (v: ValorCampo): Entrada => (typeof v === "number" ? String(v) : v);
+const igual = (a: Entrada | undefined, b: Entrada | undefined) =>
+  JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
-function aValor(c: CampoFicha, t: string): ValorCampo {
-  if (t === "" || t === VACIO) return null;
-  if (c.tipo === "si_no") return t === "si";
-  if (c.tipo === "numero") return Number(t.replace(",", "."));
-  return t;
-}
-
-/** Botón «Editar» y hoja con un control por campo; guarda solo lo que cambió. */
+/**
+ * Botón «Editar» y hoja con un control por campo; guarda solo lo que cambió. Un campo vacío con valor
+ * por defecto lo propone ya cargado (se guarda al confirmar).
+ */
 export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: CampoFicha[] }) {
-  const inicial = Object.fromEntries(p.campos.map((c) => [c.clave, aTexto(c.valor)]));
+  const guardado = Object.fromEntries(p.campos.map((c) => [c.clave, aEntrada(c.valor)]));
+  const propuesto = () =>
+    Object.fromEntries(p.campos.map((c) => [c.clave, aEntrada(c.valor ?? c.valorDefecto)]));
   const [abierto, setAbierto] = useState(false);
-  const [b, setB] = useState<Borrador>(inicial);
+  const [b, setB] = useState<Borrador>(propuesto);
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const cerrar = () => {
     setAbierto(false);
     limpiarError();
   };
+  const abrir = () => {
+    setB(propuesto());
+    setAbierto(true);
+  };
 
   async function guardar() {
     const valores = Object.fromEntries(
       p.campos
-        .filter((c) => (b[c.clave] ?? "") !== (inicial[c.clave] ?? ""))
-        .map((c) => [c.clave, aValor(c, b[c.clave] ?? "")]),
+        .filter((c) => !igual(b[c.clave], guardado[c.clave]))
+        .map((c) => [c.clave, b[c.clave] ?? null]),
     );
     if (Object.keys(valores).length === 0) return cerrar();
     const input = { ...entradaDe(p.tipo, p.id), valores };
@@ -50,42 +53,9 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
     }
   }
 
-  const control = (c: CampoFicha) => {
-    const id = `campo-${c.clave}`;
-    const valor = b[c.clave] ?? "";
-    const set = (v: string) => setB({ ...b, [c.clave]: v });
-    if (c.tipo === "fecha") return <InputFecha id={id} valor={valor} onCambiar={set} />;
-    if (c.tipo === "lista" || c.tipo === "si_no") {
-      const opciones =
-        c.tipo === "lista"
-          ? c.opciones
-          : [
-              { valor: "si", etiqueta: "Sí" },
-              { valor: "no", etiqueta: "No" },
-            ];
-      return (
-        <Select
-          id={id}
-          valor={valor || VACIO}
-          onCambiar={set}
-          opciones={[{ valor: VACIO, etiqueta: "Sin valor" }, ...opciones]}
-        />
-      );
-    }
-    return (
-      <Input
-        id={id}
-        value={valor}
-        maxLength={500}
-        {...(c.tipo === "numero" ? { inputMode: "decimal" as const } : {})}
-        onChange={(e) => set(e.target.value)}
-      />
-    );
-  };
-
   return (
     <>
-      <Button variant="ghost" onClick={() => setAbierto(true)}>
+      <Button variant="ghost" onClick={abrir}>
         Editar
       </Button>
       <Sheet
@@ -110,8 +80,14 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
               key={c.clave}
               etiqueta={c.obligatorio ? `${c.etiqueta} (obligatorio)` : c.etiqueta}
               htmlFor={`campo-${c.clave}`}
+              {...(c.descripcion ? { ayuda: c.descripcion } : {})}
             >
-              {control(c)}
+              <ControlCampo
+                c={c}
+                id={`campo-${c.clave}`}
+                valor={b[c.clave] ?? null}
+                onCambiar={(v) => setB({ ...b, [c.clave]: v })}
+              />
             </Campo>
           ))}
         </div>
