@@ -11,15 +11,22 @@ import { anotar } from "./anotar";
 import { aFechaDb, diaSchema, PERMISO_WRITE, puestoParaPauta } from "./comun";
 import { validarNoDoblar } from "./doblaje";
 import { cargarSeries } from "./cargar";
+import { insertarTurnoExtra } from "./turnos-extra-comun";
 
 const inputSchema = z.object({
   puestoId: uuidSchema,
   fecha: diaSchema,
   personaId: uuidSchema,
   motivo: z.string().trim().min(3).max(200),
+  tipoTrabajador: z.enum(["propio", "externo"]).default("propio"),
 });
 
-const salidaSchema = z.object({ puestoId: z.string(), fecha: z.string(), personaId: z.string() });
+const salidaSchema = z.object({
+  puestoId: z.string(),
+  fecha: z.string(),
+  personaId: z.string(),
+  turnoExtraId: z.string().nullable(),
+});
 
 /** Agrega un refuerzo en un día (incluso libre según la serie). */
 export const refuerzosAgregar = defineCapability({
@@ -58,10 +65,11 @@ export const refuerzosAgregar = defineCapability({
       horaInicio: puesto.horaInicio,
       horaFin: puesto.horaFin,
     });
-    if (dryRun) return { puestoId: puesto.id, fecha: input.fecha, personaId: input.personaId };
+    if (dryRun)
+      return { puestoId: puesto.id, fecha: input.fecha, personaId: input.personaId, turnoExtraId: null };
     return ctx.transaccion(async (tx) => {
       await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${input.puestoId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
-      await sinDuplicado(
+      const ex = await sinDuplicado(
         tx.excepcionPauta.create({
           data: {
             tenantId: ctx.tenantId,
@@ -75,13 +83,21 @@ export const refuerzosAgregar = defineCapability({
         }),
         "Ya hay una excepción activa ese día.",
       );
+      const extra = await insertarTurnoExtra(tx, ctx, {
+        puestoId: puesto.id,
+        instalacionId: puesto.instalacionId,
+        fecha: input.fecha,
+        personaId: input.personaId,
+        excepcionId: ex.id,
+        tipoTrabajador: input.tipoTrabajador,
+      });
       await anotar(tx, ctx, {
         instalacionId: puesto.instalacionId,
         puestoId: puesto.id,
         accion: "refuerzo_agregado",
         desde: input.fecha,
         hasta: input.fecha,
-        detalle: { personaId: input.personaId },
+        detalle: { personaId: input.personaId, turnoExtraId: extra.id },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "pauta.excepcion.creada",
@@ -89,7 +105,18 @@ export const refuerzosAgregar = defineCapability({
         entidadId: puesto.id,
         payload: { puestoId: puesto.id, tipo: "refuerzo", desde: input.fecha, hasta: input.fecha },
       });
-      return { puestoId: puesto.id, fecha: input.fecha, personaId: input.personaId };
+      await ctx.eventos.emitir(tx, {
+        tipo: "pauta.turno_extra.registrado",
+        entidadTipo: "turno_extra",
+        entidadId: extra.id,
+        payload: { puestoId: puesto.id, excepcionId: ex.id },
+      });
+      return {
+        puestoId: puesto.id,
+        fecha: input.fecha,
+        personaId: input.personaId,
+        turnoExtraId: extra.id,
+      };
     });
   },
 });

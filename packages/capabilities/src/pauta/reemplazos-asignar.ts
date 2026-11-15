@@ -11,14 +11,16 @@ import { anotar } from "./anotar";
 import { celdaDelDia, cargarSeries } from "./cargar";
 import { aFechaDb, diaSchema, PERMISO_WRITE, puestoParaPauta } from "./comun";
 import { validarNoDoblar } from "./doblaje";
+import { insertarTurnoExtra } from "./turnos-extra-comun";
 
 const inputSchema = z.object({
   puestoId: uuidSchema,
   fecha: diaSchema,
   personaId: uuidSchema,
   motivo: z.string().trim().min(3).max(200),
-  /** Reservado para turno extra por aprobar (CAR-96). */
+  /** @deprecated CAR-96: el reemplazo siempre deja turno extra por aprobar. */
   turnoExtraPendiente: z.boolean().optional(),
+  tipoTrabajador: z.enum(["propio", "externo"]).default("propio"),
 });
 
 const salidaSchema = z.object({
@@ -26,6 +28,7 @@ const salidaSchema = z.object({
   fecha: z.string(),
   personaId: z.string(),
   variante: z.enum(["reemplazo", "refuerzo_extra"]).nullable(),
+  turnoExtraId: z.string().nullable(),
 });
 
 /** Asigna un reemplazo: crea excepción «reemplazo» y valida que la persona no doble. */
@@ -69,12 +72,18 @@ export const reemplazosAsignar = defineCapability({
       horaInicio: puesto.horaInicio,
       horaFin: puesto.horaFin,
     });
-    const variante = input.turnoExtraPendiente ? ("refuerzo_extra" as const) : null;
+    const variante = "refuerzo_extra" as const;
     if (dryRun)
-      return { puestoId: puesto.id, fecha: input.fecha, personaId: input.personaId, variante };
+      return {
+        puestoId: puesto.id,
+        fecha: input.fecha,
+        personaId: input.personaId,
+        variante,
+        turnoExtraId: null,
+      };
     return ctx.transaccion(async (tx) => {
       await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${input.puestoId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
-      await sinDuplicado(
+      const ex = await sinDuplicado(
         tx.excepcionPauta.create({
           data: {
             tenantId: ctx.tenantId,
@@ -88,13 +97,21 @@ export const reemplazosAsignar = defineCapability({
         }),
         "Ya hay una excepción activa ese día.",
       );
+      const extra = await insertarTurnoExtra(tx, ctx, {
+        puestoId: puesto.id,
+        instalacionId: puesto.instalacionId,
+        fecha: input.fecha,
+        personaId: input.personaId,
+        excepcionId: ex.id,
+        tipoTrabajador: input.tipoTrabajador,
+      });
       await anotar(tx, ctx, {
         instalacionId: puesto.instalacionId,
         puestoId: puesto.id,
         accion: "reemplazo_asignado",
         desde: input.fecha,
         hasta: input.fecha,
-        detalle: { personaId: input.personaId, turnoExtraPendiente: input.turnoExtraPendiente ? 1 : 0 },
+        detalle: { personaId: input.personaId, turnoExtraId: extra.id },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "pauta.excepcion.creada",
@@ -102,7 +119,19 @@ export const reemplazosAsignar = defineCapability({
         entidadId: puesto.id,
         payload: { puestoId: puesto.id, tipo: "reemplazo", desde: input.fecha, hasta: input.fecha },
       });
-      return { puestoId: puesto.id, fecha: input.fecha, personaId: input.personaId, variante };
+      await ctx.eventos.emitir(tx, {
+        tipo: "pauta.turno_extra.registrado",
+        entidadTipo: "turno_extra",
+        entidadId: extra.id,
+        payload: { puestoId: puesto.id, excepcionId: ex.id },
+      });
+      return {
+        puestoId: puesto.id,
+        fecha: input.fecha,
+        personaId: input.personaId,
+        variante,
+        turnoExtraId: extra.id,
+      };
     });
   },
 });
