@@ -2,9 +2,8 @@ import { Badge, cn } from "@opai/ds";
 
 import { MODO_PUNTO, puntoConGps } from "./etiquetas";
 import { CeldaPuntoResaltable } from "./lista-puntos-resalte";
+import { formatoMetricaPunto } from "./lista-puntos-util";
 import type { Punto } from "./tipos";
-
-const m = (v: number | null, u: string) => (v != null ? `${v} ${u}` : "—");
 
 export function columnasPuntos(opts: {
   seleccionadoId?: string | null | undefined;
@@ -30,18 +29,18 @@ export function columnasPuntos(opts: {
       ),
     },
     { id: "modo", etiqueta: "Modo", render: (p: Punto) => MODO_PUNTO[p.modo] },
-    { id: "radio", etiqueta: "Radio", className: "t-numeric", render: (p: Punto) => m(p.radioM, "m") },
+    { id: "radio", etiqueta: "Radio", className: "t-numeric", render: (p: Punto) => formatoMetricaPunto(p.radioM, "m") },
     {
       id: "precision",
       etiqueta: "Precisión mín.",
       className: "hidden t-numeric lg:table-cell",
-      render: (p: Punto) => m(p.precisionMinM, "m"),
+      render: (p: Punto) => formatoMetricaPunto(p.precisionMinM, "m"),
     },
     {
       id: "permanencia",
       etiqueta: "Permanencia",
       className: "hidden t-numeric lg:table-cell",
-      render: (p: Punto) => m(p.permanenciaS, "s"),
+      render: (p: Punto) => formatoMetricaPunto(p.permanenciaS, "s"),
     },
     {
       id: "estado",
