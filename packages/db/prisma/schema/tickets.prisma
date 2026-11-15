@@ -51,6 +51,8 @@ model Ticket {
   estado         String    @default("abierto")
   solicitanteId  String    @map("solicitante_id") @db.Uuid
   responsableId  String    @map("responsable_id") @db.Uuid
+  /// Instalación a la que se refiere el ticket (CAR-84, PR 2 del Brief 13); opcional. FK y mismo tenant en el SQL.
+  instalacionId  String?   @map("instalacion_id") @db.Uuid
   motivoRechazo  String?   @map("motivo_rechazo")
   /// Datos propios de una solicitud con aprobación (fechas, tipo de permiso); texto plano, sin
   /// interpretarse como acción (regla del diseño: el texto externo nunca es botón ni enlace).
@@ -68,6 +70,7 @@ model Ticket {
   @@index([tenantId, responsableId])
   @@index([tenantId, solicitanteId])
   @@index([tenantId, tipoId])
+  @@index([tenantId, instalacionId])
   @@map("tickets")
   @@schema("tickets")
 }

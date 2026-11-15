@@ -18,8 +18,68 @@ type Props = {
   celdaEditable?: (filaId: string, columnaId: string) => boolean;
   onCelda?: (filaId: string, columnaId: string) => void;
   onAlternarFila?: (filaId: string) => void;
+  onAccionFila?: (filaId: string) => void;
   onSeleccion: (seleccion: SeleccionPlanilla) => void;
 };
+
+type CeldaFilaProps = {
+  fila: FilaPlanilla;
+  columna: ColumnaPlanilla;
+  valor: Celda | null;
+  editable: boolean;
+  onCelda?: (filaId: string, columnaId: string) => void;
+  onSeleccion: (seleccion: SeleccionPlanilla) => void;
+};
+
+function CeldaFila({ fila, columna, valor, editable, onCelda, onSeleccion }: CeldaFilaProps) {
+  const tono = valor?.tono ?? "neutro";
+  const texto = valor?.texto ?? "—";
+  if (!valor && !editable) {
+    return <td className="border-b border-border p-0.5" tabIndex={-1} />;
+  }
+  if (!editable) {
+    return (
+      <td className="border-b border-border p-0.5">
+        <span
+          tabIndex={-1}
+          className={cn(
+            "flex w-full items-center justify-center rounded-sm px-1",
+            claseCeldaNumero,
+            TONO[tono],
+          )}
+        >
+          {texto}
+        </span>
+      </td>
+    );
+  }
+  return (
+    <td className="border-b border-border p-0.5">
+      <button
+        type="button"
+        aria-label={`${fila.etiqueta}, ${columna.etiqueta}: ${texto}${valor?.detalle ? ` (${valor.detalle})` : ""}. Editar`}
+        title="Editar"
+        onClick={() => {
+          onCelda?.(fila.id, columna.id);
+          onSeleccion({
+            fila,
+            columna,
+            celda: valor ?? { texto, tono: "neutro", detalle: "Planificar" },
+          });
+        }}
+        className={cn(
+          "flex w-full cursor-pointer items-center justify-center rounded-sm px-1",
+          claseCeldaNumero,
+          TONO[tono],
+          "transition-shadow duration-150 hover:shadow-[inset_0_0_0_1px_var(--ds-accent)] motion-reduce:transition-none",
+          "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
+        )}
+      >
+        {texto}
+      </button>
+    </td>
+  );
+}
 
 export function PlanillaTabla({
   filas,
@@ -28,6 +88,7 @@ export function PlanillaTabla({
   celdaEditable,
   onCelda,
   onAlternarFila,
+  onAccionFila,
   onSeleccion,
 }: Props) {
   return (
@@ -53,60 +114,23 @@ export function PlanillaTabla({
         </thead>
         <tbody>
           {filas.map((f) => (
-            <tr key={f.id}>
-              <CabeceraFila fila={f} {...(onAlternarFila ? { onAlternar: onAlternarFila } : {})} />
-              {columnas.map((c) => {
-                const valor = celda(f.id, c.id);
-                const editable = Boolean(onCelda && celdaEditable?.(f.id, c.id));
-                const tono = valor?.tono ?? "neutro";
-                const texto = valor?.texto ?? "—";
-                if (!valor && !editable) {
-                  return <td key={c.id} className="border-b border-border p-0.5" tabIndex={-1} />;
-                }
-                if (!editable) {
-                  return (
-                    <td key={c.id} className="border-b border-border p-0.5">
-                      <span
-                        tabIndex={-1}
-                        className={cn(
-                          "flex w-full items-center justify-center rounded-sm px-1",
-                          claseCeldaNumero,
-                          TONO[tono],
-                        )}
-                      >
-                        {texto}
-                      </span>
-                    </td>
-                  );
-                }
-                return (
-                  <td key={c.id} className="border-b border-border p-0.5">
-                    <button
-                      type="button"
-                      aria-label={`${f.etiqueta}, ${c.etiqueta}: ${texto}${valor?.detalle ? ` (${valor.detalle})` : ""}. Editar`}
-                      title="Editar"
-                      onClick={() => {
-                        onCelda?.(f.id, c.id);
-                        onSeleccion({
-                          fila: f,
-                          columna: c,
-                          celda: valor ?? { texto, tono: "neutro", detalle: "Planificar" },
-                        });
-                      }}
-                      className={cn(
-                        "flex w-full cursor-pointer items-center justify-center rounded-sm px-1",
-                        claseCeldaNumero,
-                        TONO[tono],
-                        // Se nota qué celda se edita (CAR-456): borde al pasar el mouse y foco visible.
-                        "transition-shadow duration-150 hover:shadow-[inset_0_0_0_1px_var(--ds-accent)] motion-reduce:transition-none",
-                        "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
-                      )}
-                    >
-                      {texto}
-                    </button>
-                  </td>
-                );
-              })}
+            <tr key={f.id} className="group">
+              <CabeceraFila
+                fila={f}
+                {...(onAlternarFila ? { onAlternar: onAlternarFila } : {})}
+                {...(onAccionFila ? { onAccion: onAccionFila } : {})}
+              />
+              {columnas.map((c) => (
+                <CeldaFila
+                  key={c.id}
+                  fila={f}
+                  columna={c}
+                  valor={celda(f.id, c.id)}
+                  editable={Boolean(onCelda && celdaEditable?.(f.id, c.id))}
+                  {...(onCelda ? { onCelda } : {})}
+                  onSeleccion={onSeleccion}
+                />
+              ))}
             </tr>
           ))}
         </tbody>
