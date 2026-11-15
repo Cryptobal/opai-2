@@ -49,10 +49,9 @@ export const solicitudesListar = defineCapability({
     const filas = await ctx.db.solicitudArco.findMany({
       where,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     return { items: items.map(conSemaforo), siguiente };
   },
 });

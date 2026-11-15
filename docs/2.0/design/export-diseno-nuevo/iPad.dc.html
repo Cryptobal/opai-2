@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>OPAI · propuesta nueva · iPad</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+html,body{margin:0;height:100%}
+a{color:inherit}a:hover{opacity:.8}
+button{cursor:pointer}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.dato::placeholder{color:inherit;opacity:1}
+.dato:hover{filter:brightness(1.15)}
+@keyframes pulso{0%,100%{opacity:.45}50%{opacity:.9}}
+@media (prefers-reduced-motion: reduce){.esq{animation:none!important}}
+</style>
+</helmet>
+<div style="position: relative; font-family: Geist, Inter, sans-serif; color: {{c.fg}}; background: {{c.bg}}; min-height: 100vh; display: flex; font-size: 14px">
+
+  <sc-if value="{{hayPeek}}" hint-placeholder-val="{{ false }}"><div onClick="{{cerrarPeek}}" aria-hidden="true" style="position: absolute; inset: 0; z-index: 4"></div></sc-if>
+  <div onMouseLeave="{{salirMenu}}" style="flex: 0 0 {{anchoHueco}}; position: relative">
+  <aside onMouseEnter="{{entrarMenu}}" style="position: absolute; top: 0; bottom: 0; left: 0; width: {{anchoMenu}}; z-index: 5; box-shadow: {{sombraPeek}}; background: {{c.side}}; border-right: 1px solid {{c.line}}; display: flex; flex-direction: column; padding: 12px 8px; gap: 12px; box-sizing: border-box; overflow: hidden">
+    <button type="button" onClick="{{alternarMenu}}" aria-haspopup="menu" aria-label="Empresa, portales y tu cuenta" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px; border-radius: 8px; border: 0; background: {{menuBg}}; color: {{c.fg}}; text-align: left">
+      <span style="position: relative; width: 26px; height: 26px; border-radius: 6px; background: {{c.acento}}; color: {{c.acentoTexto}}; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex: none">G
+        <sc-if value="{{hayNovedades}}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; border-radius: 999px; background: {{c.fg}}; border: 2px solid {{c.side}}"></span></sc-if>
+      </span>
+      <sc-if value="{{menuAncho}}" hint-placeholder-val="{{ true }}"><span style="flex: 1; display: flex; flex-direction: column; white-space: nowrap"><span style="font-weight: 600">Gard Security</span><span style="font-size: 12px; color: {{c.muted}}">{{portalNombre}}</span></span></sc-if>
+    </button>
+
+    <nav aria-label="Principal" style="display: flex; flex-direction: column; gap: 2px; overflow-y: auto">
+      <sc-for list="{{nav}}" as="n" hint-placeholder-count="8">
+        <button type="button" onClick="{{n.ir}}" title="{{n.nombre}}" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: {{n.alto}}; padding: 0 8px 0 {{n.sangria}}; border-radius: 8px; border: 0; background: {{n.bg}}; color: {{n.color}}; font-size: {{n.tam}}; font-weight: {{n.peso}}; text-align: left; white-space: nowrap">
+          <sc-if value="{{n.esArea}}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex: none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{n.color}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{n.icono}}"></path></svg></span></sc-if>
+          <sc-if value="{{menuAncho}}" hint-placeholder-val="{{ true }}"><span style="flex: 1">{{n.nombre}}</span></sc-if>
+          <sc-if value="{{n.verCuenta}}" hint-placeholder-val="{{ false }}"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.muted}}">{{n.cuenta}}</span></sc-if>
+        </button>
+      </sc-for>
+    </nav>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid {{c.line}}; padding-top: 10px">
+      <button type="button" onClick="{{abrirConfig}}" title="Configuración" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 8px; border-radius: 8px; border: 0; background: {{configBg}}; color: {{configColor}}; font-size: 14px; text-align: left; white-space: nowrap">
+        <span aria-hidden="true" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex: none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{configColor}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg></span>
+        <sc-if value="{{menuAncho}}" hint-placeholder-val="{{ true }}"><span>Configuración</span></sc-if>
+      </button>
+      <button type="button" onClick="{{abrirNovedades}}" title="Novedades de OPAI" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 8px; border-radius: 8px; border: 0; background: transparent; color: {{c.muted}}; font-size: 14px; text-align: left; white-space: nowrap">
+        <span aria-hidden="true" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></span>
+        <sc-if value="{{menuAncho}}" hint-placeholder-val="{{ true }}"><span style="flex: 1">Novedades de OPAI</span></sc-if>
+        <sc-if value="{{verContadorNovedades}}" hint-placeholder-val="{{ true }}"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; padding: 1px 7px; border-radius: 999px; background: {{c.acentoBg}}; color: {{c.acento}}">3</span></sc-if>
+      </button>
+    </div>
+  </aside>
+  </div>
+
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; align-items: center; gap: 12px; padding: 8px 20px 8px 12px; border-bottom: 1px solid {{c.line}}">
+      <button type="button" onClick="{{plegarMenu}}" aria-label="{{etiquetaPlegar}}" title="{{etiquetaPlegar}}" style="width: 40px; height: 40px; border-radius: 8px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16"></path></svg></button>
+      <span style="font-size: 14px; color: {{c.muted}}">{{migaArea}} <span aria-hidden="true">/</span> <span style="color: {{c.fg}}; font-weight: 500">{{migaPagina}}</span></span>
+      <button type="button" onClick="{{abrirPaleta}}" style="font-family: inherit; margin-left: auto; flex: 0 1 400px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.muted}}; font-size: 14px; text-align: left">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <span style="flex: 1">Busca o pídele algo a OPAI</span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; padding: 1px 6px; border-radius: 5px; border: 1px solid {{c.line}}">⌘K</span>
+      </button>
+      <button type="button" onClick="{{cambiarTema}}" aria-label="{{etiquetaTema}}" title="{{etiquetaTema}}" style="width: 36px; height: 36px; border-radius: 8px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 4v16"></path><path d="M12 8h5M12 12h7M12 16h5"></path></svg></button>
+    </header>
+
+    <sc-if value="{{sinConexion}}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display: flex; align-items: center; gap: 10px; padding: 8px 20px; background: {{c.avisoBg}}; color: {{c.aviso}}; font-size: 13px; flex: none"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 999px; background: {{c.aviso}}; flex: none"></span><span style="flex: 1">Sin conexión. Ves lo guardado a las 18:02; lo que hagas se envía solo cuando vuelva la señal.</span><button type="button" onClick="{{salirEstado}}" style="font-family: inherit; min-height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid {{c.aviso}}; background: transparent; color: {{c.aviso}}; font-size: 13px; font-weight: 500; white-space: nowrap">Reintentar</button></div>
+    </sc-if>
+    <sc-if value="{{verEstado}}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 64px 24px; text-align: center">
+        <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 999px; background: {{c.fill}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{estadoIcono}}"></path></svg></span>
+        <span style="font-size: 18px; font-weight: 600; letter-spacing: -0.02em">{{estadoTitulo}}</span>
+        <span style="max-width: 420px; color: {{c.muted}}; line-height: 1.5">{{estadoTexto}}</span>
+        <div style="display: flex; gap: 8px; padding-top: 8px; flex-wrap: wrap; justify-content: center"><button type="button" onClick="{{salirEstado}}" style="font-family: inherit; min-height: 36px; padding: 0 14px; border-radius: 8px; border: 0; background: {{c.fg}}; color: {{c.bg}}; font-size: 13px; font-weight: 500; white-space: nowrap; min-height: 40px">{{estadoAccion}}</button><button type="button" onClick="{{salirEstado}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap; min-height: 40px">Volver</button></div>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.muted}}; padding-top: 6px">{{estadoPie}}</span>
+      </div>
+    </sc-if>
+    <div style="flex: {{cuerpoFlex}}; display: flex; min-height: 0">
+
+      <sc-if value="{{vistaLista}}" hint-placeholder-val="{{ false }}">
+        <section aria-label="{{pag.titulo}}" style="flex: 1; min-width: 0; display: {{listaDisplay}}; flex-direction: column">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 20px 24px 12px">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.03em">{{pag.titulo}}</h1>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: {{c.muted}}">{{pag.total}}</span>
+            <span style="position: relative">
+              <button type="button" onClick="{{alternarVistas}}" aria-haspopup="menu" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 6px"><span style="color: {{c.muted}}; font-weight: 400">Vista:</span>{{vistaNombre}}<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+              <sc-if value="{{vistasAbierto}}" hint-placeholder-val="{{ false }}">
+                <div role="menu" aria-label="Vistas guardadas" style="position: absolute; z-index: 6; top: 42px; left: 0; width: 260px; border-radius: 10px; background: {{c.surface}}; border: 1px solid {{c.line}}; box-shadow: {{c.sombraMenu}}; padding: 6px; display: flex; flex-direction: column">
+                  <sc-for list="{{vistas}}" as="v" hint-placeholder-count="3"><button type="button" role="menuitem" onClick="{{v.ir}}" style="font-family: inherit; display: flex; align-items: center; justify-content: space-between; min-height: 38px; padding: 0 10px; border-radius: 6px; border: 0; background: {{v.bg}}; color: {{c.fg}}; font-size: 14px; font-weight: {{v.peso}}; text-align: left">{{v.nombre}}</button></sc-for>
+                  <button type="button" role="menuitem" onClick="{{alternarVistas}}" style="font-family: inherit; min-height: 38px; padding: 0 10px; margin-top: 4px; border: 0; border-top: 1px solid {{c.line}}; background: transparent; color: {{c.muted}}; font-size: 13px; text-align: left">+ Guardar los filtros actuales como vista</button>
+                </div>
+              </sc-if>
+            </span>
+            <button type="button" style="font-family: inherit; margin-left: auto; min-height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid {{nuevoBorde}}; background: {{nuevoBg}}; color: {{nuevoColor}}; font-size: 14px; font-weight: 500; white-space: nowrap" onClick="{{crear}}">+ {{pag.nuevo}}</button>
+          </div>
+          <sc-if value="{{conSecciones}}" hint-placeholder-val="{{ false }}">
+            <div role="tablist" aria-label="Secciones" style="display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid {{c.line}}; overflow-x: auto">
+              <sc-for list="{{secciones}}" as="t" hint-placeholder-count="3">
+                <button type="button" role="tab" aria-selected="{{t.activa}}" onClick="{{t.ir}}" style="font-family: inherit; min-height: 40px; padding: 0 10px; border: 0; border-bottom: 2px solid {{t.borde}}; background: transparent; color: {{t.color}}; font-size: 14px; font-weight: {{t.peso}}; white-space: nowrap">{{t.nombre}}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; overflow-x: auto; flex: none">
+            <sc-if value="{{pag.conFecha}}" hint-placeholder-val="{{ false }}"><span style="display: flex; align-items: center; gap: 4px; padding-right: 8px"><button type="button" aria-label="Día anterior" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">‹</button><span style="padding: 0 8px; font-weight: 500">Hoy · jue 12 nov</span><button type="button" aria-label="Día siguiente" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">›</button></span></sc-if>
+            <label for="filtro" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filtrar</label>
+            <input id="filtro" type="search" placeholder="Filtrar…" style="font-family: inherit; flex: 0 0 200px; min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 14px">
+            <sc-for list="{{pag.filtros}}" as="f" hint-placeholder-count="3">
+              <button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{f.bg}}; color: {{f.color}}; font-size: 13px; white-space: nowrap; flex: none">{{f.nombre}}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{verEmbudo}}" hint-placeholder-val="{{ false }}">
+            <div style="flex: 1; display: grid; grid-template-columns: repeat(4, minmax(200px, 1fr)); gap: 12px; padding: 4px 24px 24px; overflow-x: auto; border-top: 1px solid {{c.line}}; padding-top: 16px">
+              <sc-for list="{{embudo}}" as="e" hint-placeholder-count="4">
+                <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 2px"><span style="font-weight: 500">{{e.nombre}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.muted}}">{{e.total}}</span></div>
+                  <sc-for list="{{e.tarjetas}}" as="k" hint-placeholder-count="2">
+                    <button type="button" onClick="{{k.abrir}}" style="font-family: inherit; display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 14px; text-align: left">
+                      <span style="font-weight: 500">{{k.a}}</span>
+                      <span style="font-size: 13px; color: {{c.muted}}">{{k.b}}</span>
+                      <span style="font-family: 'Geist Mono', monospace; font-size: 13px">{{k.c}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{verCarpetas}}" hint-placeholder-val="{{ false }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; padding: 16px 24px; border-top: 1px solid {{c.line}}">
+              <sc-for list="{{carpetas}}" as="k" hint-placeholder-count="5">
+                <button type="button" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border-radius: 10px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 14px; text-align: left">
+                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                  <span style="display: flex; flex-direction: column"><span style="font-weight: 500">{{k.nombre}}</span><span style="font-size: 12px; color: {{c.muted}}">{{k.total}}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{haySeleccion}}" hint-placeholder-val="{{ false }}">
+            <div role="toolbar" aria-label="Acciones sobre la selección" style="display: flex; align-items: center; gap: 8px; padding: 8px 24px; border-top: 1px solid {{c.line}}; background: {{c.fill}}; overflow-x: auto; flex: none">
+              <span style="font-weight: 500; padding-right: 8px; white-space: nowrap">{{textoSeleccion}}</span>
+              <button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap">Asignar responsable</button>
+              <button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap">Cambiar estado</button>
+              <button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap">Exportar</button>
+              <button type="button" onClick="{{quitarSeleccion}}" style="font-family: inherit; margin-left: auto; min-height: 36px; padding: 0 8px; border: 0; background: transparent; color: {{c.muted}}; font-size: 13px; white-space: nowrap">Quitar selección</button>
+            </div>
+          </sc-if>
+          <div style="border-top: 1px solid {{c.line}}; overflow-x: auto; display: {{tablaDisplay}}">
+            <div style="display: grid; grid-template-columns: {{rejilla}}; padding: 8px 24px 8px 60px; border-bottom: 1px solid {{c.line}}; font-size: 13px; color: {{c.muted}}">
+              <span>{{pag.col0}}</span><span>{{pag.col1}}</span>
+              <sc-if value="{{sinPanel}}" hint-placeholder-val="{{ true }}"><span>{{pag.col2}}</span></sc-if>
+              <span>Estado</span>
+            </div>
+            <sc-for list="{{pag.filas}}" as="q" hint-placeholder-count="5">
+              <div style="display: flex; align-items: stretch; border-bottom: 1px solid {{c.line}}; box-shadow: {{q.marca}}; background: {{q.bg}}">
+                <button type="button" role="checkbox" aria-checked="{{q.marcada}}" aria-label="Seleccionar fila" onClick="{{q.marcar}}" style="flex: 0 0 44px; margin-left: 12px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid {{q.cajaBorde}}; background: {{q.cajaBg}}; display: flex; align-items: center; justify-content: center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="{{q.cajaTic}}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span></button>
+                <button type="button" onClick="{{q.abrir}}" style="font-family: inherit; flex: 1; min-width: 0; display: grid; grid-template-columns: {{rejilla}}; align-items: center; min-height: 48px; padding: 0 24px 0 4px; border: 0; background: transparent; color: {{c.fg}}; font-size: 14px; text-align: left">
+                <span style="font-weight: 500">{{q.a}}</span>
+                <span style="color: {{c.muted}}">{{q.b}}</span>
+                <sc-if value="{{sinPanel}}" hint-placeholder-val="{{ true }}"><span style="font-family: 'Geist Mono', monospace; font-size: 13px">{{q.c}}</span></sc-if>
+                <span><span style="font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 999px; background: {{q.chipBg}}; color: {{q.chipFg}}">{{q.estado}}</span></span>
+              </button>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{cargando}}" hint-placeholder-val="{{ false }}">
+            <div aria-busy="true" aria-label="Cargando" style="border-top: 1px solid {{c.line}}">
+              <sc-for list="{{esqueleto}}" as="e" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr; gap: 16px; align-items: center; min-height: 48px; padding: 0 24px; border-bottom: 1px solid {{c.line}}">
+                  <span class="esq" style="height: 12px; width: {{e.a}}; border-radius: 6px; background: {{c.fill}}; animation: pulso 1.2s ease-in-out infinite"></span>
+                  <span class="esq" style="height: 12px; width: {{e.b}}; border-radius: 6px; background: {{c.fill}}; animation: pulso 1.2s ease-in-out infinite"></span>
+                  <span class="esq" style="height: 12px; width: 40%; border-radius: 6px; background: {{c.fill}}; animation: pulso 1.2s ease-in-out infinite"></span>
+                  <span class="esq" style="height: 18px; width: 64px; border-radius: 999px; background: {{c.fill}}; animation: pulso 1.2s ease-in-out infinite"></span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{vacio}}" hint-placeholder-val="{{ false }}">
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 64px 24px; border-top: 1px solid {{c.line}}; text-align: center">
+              <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid {{c.line}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-8h12l2 8v6H4zM4 13h5l1 2h4l1-2h5"></path></svg></span>
+              <span style="font-size: 16px; font-weight: 600">{{vacioTitulo}}</span>
+              <span style="color: {{c.muted}}; max-width: 360px">{{vacioTexto}}</span>
+              <button type="button" onClick="{{volverSeccion}}" style="margin-top: 6px; font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">Volver a {{primeraSeccion}}</button>
+            </div>
+          </sc-if>
+        </section>
+        <sc-if value="{{conPanel}}" hint-placeholder-val="{{ false }}">
+          <aside aria-label="Detalle" style="flex: {{panelFlex}}; min-width: 0; border-left: 1px solid {{c.line}}; background: {{c.side}}; display: flex; flex-direction: column">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 24px; border-bottom: 1px solid {{c.line}}; flex-wrap: wrap">
+              <h2 style="margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.02em">{{tituloFicha}}</h2>
+              <span style="font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 999px; background: {{sel.chipBg}}; color: {{sel.chipFg}}">{{sel.estado}}</span>
+              <button type="button" onClick="{{preguntar}}" style="margin-left: auto; display: flex; align-items: center; gap: 8px; font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 999px; background: {{c.acento}}"></span>Preguntar a OPAI</button>
+              <button type="button" style="font-family: inherit; min-height: 36px; padding: 0 14px; border-radius: 8px; border: 0; background: {{c.fg}}; color: {{c.bg}}; font-size: 13px; font-weight: 500">Guardar</button>
+              <button type="button" onClick="{{expandir}}" aria-label="{{etiquetaExpandir}}" title="{{etiquetaExpandir}}" style="width: 36px; height: 36px; border-radius: 8px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H4v5M15 20h5v-5M4 4l6 6M20 20l-6-6"></path></svg></button>
+              <button type="button" onClick="{{cerrarPanel}}" aria-label="Cerrar detalle" style="width: 36px; height: 36px; border-radius: 8px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+            </div>
+            <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 22px; overflow-y: auto">
+<sc-if value="{{fichaAgente}}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}">
+                  <span style="display: flex; align-items: center; gap: 8px; font-weight: 500"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 999px; background: {{c.acento}}"></span>OPAI sobre {{tituloFicha}}</span>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                    <sc-for list="{{faPreguntas}}" as="p" hint-placeholder-count="3"><button type="button" onClick="{{p.pedir}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{p.borde}}; background: transparent; color: {{c.fg}}; font-size: 13px">{{p.texto}}</button></sc-for>
+                  </div>
+                  <sc-if value="{{faCon}}" hint-placeholder-val="{{ false }}">
+                    <span style="color: {{c.sub}}; line-height: 1.5">{{faRespuesta}}</span>
+                    <sc-if value="{{faPend}}" hint-placeholder-val="{{ true }}">
+                      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 4px"><span style="flex: 1 1 200px; font-weight: 500">Propone: {{faPropuesta}}</span><button type="button" onClick="{{faAprobar}}" style="font-family: inherit; min-height: 36px; padding: 0 14px; border-radius: 8px; border: 0; background: {{c.fg}}; color: {{c.bg}}; font-size: 13px; font-weight: 500; white-space: nowrap">Aprobar</button><button type="button" onClick="{{faDescartar}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap">Descartar</button></div>
+                    </sc-if>
+                    <sc-if value="{{faOk}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: {{c.ok}}">Hecho. Quedó en la actividad de esta ficha.</span></sc-if>
+                  </sc-if>
+                </div>
+              </sc-if>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px">
+                <sc-for list="{{campos}}" as="k" hint-placeholder-count="4">
+                  <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: {{c.muted}}">{{k.nombre}}<input type="text" class="dato" placeholder="{{k.valor}}" style="font-family: inherit; min-height: 40px; padding: 0 10px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 14px"></label>
+                </sc-for>
+              </div>
+              <sc-if value="{{conLineas}}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <div style="display: flex; align-items: center; justify-content: space-between"><span style="font-weight: 500">Líneas</span><button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">+ Agregar línea</button></div>
+                  <div style="border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}; overflow-x: auto">
+                    <div style="display: grid; grid-template-columns: 3fr 1fr 1.4fr 1.4fr; min-width: 520px; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {{c.line}}; font-size: 13px; color: {{c.muted}}"><span>Descripción</span><span>Cantidad</span><span>Precio</span><span>Total</span></div>
+                    <sc-for list="{{lineas}}" as="l" hint-placeholder-count="3">
+                      <div style="display: grid; grid-template-columns: 3fr 1fr 1.4fr 1.4fr; min-width: 520px; gap: 8px; align-items: center; padding: 6px 12px; border-bottom: 1px solid {{c.line}}">
+                        <input type="text" class="dato" aria-label="Descripción" placeholder="{{l.d}}" style="font-family: inherit; min-height: 36px; padding: 0 8px; border-radius: 6px; border: 1px solid {{c.line}}; background: {{c.bg}}; color: {{c.fg}}; font-size: 14px; min-width: 0">
+                        <input type="text" class="dato" aria-label="Cantidad" placeholder="{{l.n}}" style="font-family: 'Geist Mono', monospace; min-height: 36px; padding: 0 8px; border-radius: 6px; border: 1px solid {{c.line}}; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; min-width: 0">
+                        <input type="text" aria-label="Precio" placeholder="[MONTO]" style="font-family: 'Geist Mono', monospace; min-height: 36px; padding: 0 8px; border-radius: 6px; border: 1px solid {{c.line}}; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; min-width: 0">
+                        <span style="font-family: 'Geist Mono', monospace; font-size: 13px">[MONTO]</span>
+                      </div>
+                    </sc-for>
+                    <div style="display: flex; justify-content: flex-end; gap: 24px; padding: 12px; font-weight: 600"><span>Total</span><span style="font-family: 'Geist Mono', monospace">[MONTO]</span></div>
+                  </div>
+                </div>
+              </sc-if>
+              <div style="display: flex; flex-direction: column">
+                <div style="display: flex; gap: 4px; border-bottom: 1px solid {{c.line}}">
+                  <span style="padding: 8px 10px; font-weight: 500; border-bottom: 2px solid {{c.fg}}">Actividad</span>
+                  <span style="padding: 8px 10px; color: {{c.muted}}">Documentos</span>
+                  <span style="padding: 8px 10px; color: {{c.muted}}">Notas</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid {{c.line}}"><span>[NOMBRE] actualizó los datos</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.muted}}">hace 2 d</span></div>
+                <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0"><span>Se creó el registro</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.muted}}">hace 30 d</span></div>
+              </div>
+            </div>
+          </aside>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{vistaMatriz}}" hint-placeholder-val="{{ false }}">
+        <section aria-label="{{mat.titulo}}" style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 20px 24px 12px">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.03em">{{mat.titulo}}</h1>
+            <button type="button" style="font-family: inherit; margin-left: auto; min-height: 40px; padding: 0 14px; border-radius: 8px; border: 0; background: {{c.fg}}; color: {{c.bg}}; font-size: 14px; font-weight: 500; white-space: nowrap">+ {{mat.nuevo}}</button>
+          </div>
+          <sc-if value="{{conSecciones}}" hint-placeholder-val="{{ false }}">
+            <div role="tablist" aria-label="Secciones" style="display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid {{c.line}}; overflow-x: auto">
+              <sc-for list="{{secciones}}" as="t" hint-placeholder-count="3">
+                <button type="button" role="tab" aria-selected="{{t.activa}}" onClick="{{t.ir}}" style="font-family: inherit; min-height: 40px; padding: 0 10px; border: 0; border-bottom: 2px solid {{t.borde}}; background: transparent; color: {{t.color}}; font-size: 14px; font-weight: {{t.peso}}; white-space: nowrap">{{t.nombre}}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 0 24px 12px; flex-wrap: wrap">
+            <button type="button" aria-label="Anterior" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">‹</button><span style="padding: 0 8px; font-weight: 500">{{mat.periodo}}</span><button type="button" aria-label="Siguiente" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">›</button>
+            <sc-for list="{{mat.selectores}}" as="f" hint-placeholder-count="2"><button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">{{f}} ▾</button></sc-for>
+            <span style="margin-left: auto; display: flex; gap: 12px; font-size: 13px; color: {{c.muted}}"><sc-for list="{{mat.leyenda}}" as="g" hint-placeholder-count="3"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: {{g.bg}}; border: 1px solid {{c.line}}"></span>{{g.nombre}}</span></sc-for></span>
+          </div>
+          <div style="border-top: 1px solid {{c.line}}; overflow-x: auto">
+            <div style="display: grid; grid-template-columns: {{mat.cols}}; min-width: {{mat.minimo}}; border-bottom: 1px solid {{c.line}}; font-size: 12px; color: {{c.muted}}">
+              <span style="padding: 8px 24px">{{mat.esquina}}</span>
+              <sc-for list="{{mat.cabeceras}}" as="h" hint-placeholder-count="7"><span style="padding: 8px 4px; text-align: {{mat.alinear}}; font-family: 'Geist Mono', monospace">{{h}}</span></sc-for>
+            </div>
+            <sc-for list="{{mat.filas}}" as="r" hint-placeholder-count="5">
+              <div style="display: grid; grid-template-columns: {{mat.cols}}; min-width: {{mat.minimo}}; align-items: stretch; border-bottom: 1px solid {{c.line}}; background: {{r.bg}}">
+                <span style="padding: 12px 24px; font-weight: {{r.peso}}; display: flex; flex-direction: column; gap: 2px"><span>{{r.nombre}}</span><span style="font-size: 12px; font-weight: 400; color: {{c.muted}}">{{r.sub}}</span></span>
+                <sc-for list="{{r.celdas}}" as="z" hint-placeholder-count="7">
+                  <button type="button" aria-label="{{z.t}}" style="font-family: 'Geist Mono', monospace; min-height: 44px; margin: 3px; border-radius: 6px; border: 0; background: {{z.bg}}; color: {{z.color}}; font-size: 12px; font-weight: {{r.peso}}; text-align: {{mat.alinear}}; padding: 0 6px">{{z.t}}</button>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{vistaSimple}}" hint-placeholder-val="{{ true }}">
+        <main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 24px; max-width: 1240px; box-sizing: border-box">
+
+          <sc-if value="{{vistaInicio}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 24px">
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.03em">Buenas tardes, Carlos</h1>
+                <span style="color: {{c.muted}}">Tienes 2 decisiones pendientes.</span>
+              </div>
+              <section aria-label="Indicadores de tu empresa" style="display: flex; flex-direction: column; gap: 10px">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+                  <span style="font-size: 13px; color: {{c.muted}}">Indicadores de tu empresa</span>
+                  <button type="button" onClick="{{alternarEdicion}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">{{etiquetaEdicion}}</button>
+                </div>
+                <sc-if value="{{editando}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px dashed {{c.line}}; border-radius: 10px">
+                    <span style="font-size: 13px; color: {{c.muted}}">Vienen del módulo Indicadores. Cada empresa elige cuáles se ven aquí; toca para agregar o quitar.</span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                      <sc-for list="{{disponibles}}" as="i" hint-placeholder-count="6">
+                        <button type="button" onClick="{{i.alternar}}" aria-pressed="{{i.activo}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{i.borde}}; background: {{i.bg}}; color: {{i.color}}; font-size: 13px">{{i.nombre}}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}; overflow: hidden">
+                  <sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+                    <div style="padding: 16px 18px; border-right: 1px solid {{c.line}}; border-bottom: 1px solid {{c.line}}; display: flex; flex-direction: column; gap: 6px">
+                      <span style="font-size: 13px; color: {{c.muted}}">{{k.etiqueta}}</span>
+                      <span style="font-size: 28px; font-weight: 600; letter-spacing: -0.03em">{{k.valor}}</span>
+                      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{k.color}}">{{k.delta}}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start">
+              <div style="grid-column: span 2; min-width: 0">
+              <section aria-label="Tu día" style="border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}; overflow: hidden">
+                <div style="display: flex; gap: 4px; padding: 6px 8px; border-bottom: 1px solid {{c.line}}">
+                  <sc-for list="{{pestanas}}" as="p" hint-placeholder-count="3">
+                    <button type="button" onClick="{{p.ir}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 6px; border: 0; background: {{p.bg}}; color: {{p.color}}; font-size: 14px; font-weight: {{p.peso}}">{{p.nombre}}</button>
+                  </sc-for>
+                </div>
+                <sc-for list="{{filas}}" as="f" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid {{c.line}}; flex-wrap: wrap">
+                    <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 999px; background: {{f.punto}}; flex: none"></span>
+                    <span style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                      <span style="font-weight: 500">{{f.titulo}}</span>
+                      <span style="font-size: 13px; color: {{c.muted}}">{{f.sub}}</span>
+                      <sc-if value="{{f.evidencia}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: {{c.muted}}">Por qué: {{f.evidencia}}</span></sc-if>
+                    </span>
+                    <span style="font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 999px; background: {{f.chipBg}}; color: {{f.chipFg}}">{{f.estado}}</span>
+                    <sc-if value="{{f.esProp}}" hint-placeholder-val="{{ false }}">
+                      <span style="display: flex; gap: 8px">
+                        <button type="button" onClick="{{f.aprobar}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 0; background: {{c.acento}}; color: {{c.acentoTexto}}; font-size: 13px; font-weight: 500">Aprobar</button>
+                        <button type="button" onClick="{{f.descartar}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">Descartar</button>
+                      </span>
+                    </sc-if>
+                    <sc-if value="{{f.accion}}" hint-placeholder-val="{{ true }}">
+                      <button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500">{{f.accion}}</button>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </section>
+              </div>
+              <aside aria-label="Próximos días" style="border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}; overflow: hidden">
+                <div style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 16px; border-bottom: 1px solid {{c.line}}"><span style="font-weight: 500">Próximos días</span><span style="font-size: 13px; color: {{c.muted}}">Agenda</span></div>
+                <sc-for list="{{proximos}}" as="x" hint-placeholder-count="4">
+                  <div style="display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid {{c.line}}">
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{x.color}}; flex: 0 0 52px; padding-top: 2px">{{x.cuando}}</span>
+                    <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 500">{{x.titulo}}</span><span style="font-size: 13px; color: {{c.muted}}">{{x.sub}}</span></span>
+                  </div>
+                </sc-for>
+              </aside>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{vistaMarcar}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; max-width: 420px; width: 100%; margin: 48px auto 0; text-align: center">
+              <span style="color: {{c.muted}}">[INSTALACIÓN A] · turno de día</span>
+              <span style="font-family: 'Geist Mono', monospace; font-size: 56px; font-weight: 500; letter-spacing: -0.03em">07:58</span>
+              <button type="button" onClick="{{marcar}}" style="font-family: inherit; width: 100%; min-height: 64px; border-radius: 12px; border: 0; background: {{c.acento}}; color: {{c.acentoTexto}}; font-size: 18px; font-weight: 600">{{textoMarcar}}</button>
+              <span style="font-size: 13px; color: {{c.muted}}">{{notaMarcar}}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{vistaConfig}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.03em">Configuración</h1>
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}">
+                <span style="display: flex; flex-direction: column; gap: 2px; flex: 1 1 220px"><span style="font-weight: 500">Color de tu empresa</span><span style="font-size: 13px; color: {{c.muted}}">Cada empresa elige el suyo; OPAI ajusta el tono para que se lea bien de día y de noche. Pruébalo: cambia en todo el prototipo.</span></span>
+                <sc-for list="{{acentos}}" as="a" hint-placeholder-count="3">
+                  <button type="button" onClick="{{a.poner}}" aria-pressed="{{a.activo}}" style="font-family: inherit; display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid {{a.borde}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 14px"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 999px; background: {{a.color}}"></span>{{a.nombre}}</button>
+                </sc-for>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}">
+                <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 10px; background: {{c.acento}}; color: {{c.acentoTexto}}; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 20px; flex: none">G</span>
+                <span style="display: flex; flex-direction: column; gap: 2px; flex: 1 1 220px"><span style="font-weight: 500">Logo de tu empresa</span><span style="font-size: 13px; color: {{c.muted}}">Se usa en el menú, los PDF, los correos y los portales. Si no subes uno, OPAI usa la inicial con tu color.</span></span>
+                <button type="button" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap; min-height: 40px">Subir logo</button>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border: 1px dashed {{c.line}}; border-radius: 10px">
+                <span style="display: flex; flex-direction: column; gap: 2px; flex: 1 1 220px"><span style="font-weight: 500">Solo en este prototipo: cómo se ve cuando algo falla</span><span style="font-size: 13px; color: {{c.muted}}">Las tres pantallas usan el mismo estilo en todos los módulos.</span></span>
+                <sc-for list="{{demoEstados}}" as="e" hint-placeholder-count="3"><button type="button" onClick="{{e.ir}}" style="font-family: inherit; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 13px; font-weight: 500; white-space: nowrap; min-height: 40px">{{e.nombre}}</button></sc-for>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px">
+                <sc-for list="{{grupos}}" as="g" hint-placeholder-count="6">
+                  <button type="button" onClick="{{g.ir}}" style="font-family: inherit; display: flex; flex-direction: column; gap: 4px; padding: 16px; min-height: 88px; border-radius: 10px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 14px; text-align: left">
+                    <span style="font-weight: 500">{{g.nombre}}</span><span style="font-size: 13px; color: {{c.muted}}">{{g.sub}}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{vistaNovedades}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.03em">Novedades de OPAI</h1>
+              <span style="color: {{c.muted}}">Lo que cambió en el sistema. No son las novedades de terreno: esas están en Operaciones.</span>
+              <div style="border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}; overflow: hidden">
+                <sc-for list="{{novedades}}" as="v" hint-placeholder-count="3">
+                  <div style="display: flex; gap: 16px; padding: 14px 16px; border-bottom: 1px solid {{c.line}}">
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.muted}}; flex: 0 0 56px; padding-top: 2px">{{v.fecha}}</span>
+                    <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 500">{{v.titulo}}</span><span style="font-size: 13px; color: {{c.muted}}">{{v.texto}}</span></span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{vistaAgente}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 20px; max-width: 720px; width: 100%; margin: 48px auto 0">
+              <sc-if value="{{sinPregunta}}" hint-placeholder-val="{{ true }}">
+                <h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.03em">¿Qué necesitas, Carlos?</h1>
+              </sc-if>
+              <sc-if value="{{conPregunta}}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="align-self: flex-end; max-width: 85%; padding: 10px 12px; border-radius: 10px; background: {{c.fill}}">{{pregunta}}</div>
+                  <span style="line-height: 1.5">{{respuesta}}</span>
+                  <div style="border: 1px solid {{c.line}}; border-radius: 10px; background: {{c.surface}}; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+                    <span style="font-size: 13px; color: {{c.muted}}">Propuesta · necesita tu aprobación</span>
+                    <span style="font-weight: 500">{{propuesta}}</span>
+                    <sc-if value="{{sinConfirmar}}" hint-placeholder-val="{{ true }}">
+                      <div style="display: flex; gap: 8px">
+                        <button type="button" onClick="{{confirmar}}" style="font-family: inherit; min-height: 40px; padding: 0 14px; border-radius: 8px; border: 0; background: {{c.acento}}; color: {{c.acentoTexto}}; font-size: 14px; font-weight: 500">Aprobar</button>
+                        <button type="button" onClick="{{reiniciar}}" style="font-family: inherit; min-height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid {{c.line}}; background: {{c.surface}}; color: {{c.fg}}; font-size: 14px; font-weight: 500">Descartar</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{confirmado}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 13px; color: {{c.ok}}">Aprobado. Quedó registrado en Actividad.</span>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-if>
+              <div style="border: 1px solid {{c.line}}; border-radius: 12px; background: {{c.surface}}; padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 8px">
+                <label for="pedir" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Pídele algo a OPAI</label>
+                <input id="pedir" type="text" placeholder="Pídele algo a OPAI…" style="font-family: inherit; min-height: 44px; border: 0; background: transparent; color: {{c.fg}}; font-size: 16px">
+                <div style="display: flex; justify-content: flex-end">
+                  <button type="button" aria-label="Enviar" style="width: 36px; height: 36px; border-radius: 999px; border: 0; background: {{c.acento}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.acentoTexto}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column">
+                <span style="font-size: 13px; color: {{c.muted}}; padding: 4px 4px 8px">Conversaciones recientes · tócalas para probar</span>
+                <sc-for list="{{sugerencias}}" as="g" hint-placeholder-count="3">
+                  <button type="button" onClick="{{g.pedir}}" style="font-family: inherit; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; padding: 0 4px; border: 0; border-bottom: 1px solid {{c.line}}; background: transparent; color: {{c.fg}}; font-size: 14px; text-align: left"><span>{{g.texto}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.muted}}">{{g.cuando}}</span></button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </main>
+      </sc-if>
+    </div>
+  </div>
+
+
+  <sc-if value="{{paleta}}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{cerrarPaleta}}" aria-hidden="true" style="position: absolute; inset: 0; z-index: 20; background: {{c.velo}}"></div>
+    <div role="dialog" aria-label="Buscar en OPAI" style="position: absolute; z-index: 21; top: 90px; left: 50%; transform: translateX(-50%); width: min(600px, calc(100% - 32px)); border-radius: 12px; background: {{c.surface}}; border: 1px solid {{c.line}}; box-shadow: {{c.sombraMenu}}; display: flex; flex-direction: column; overflow: hidden">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid {{c.line}}">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input type="search" aria-label="Buscar" placeholder="Busca una pantalla, un cliente, una persona… o pídele algo a OPAI" style="font-family: inherit; flex: 1; min-height: 52px; border: 0; outline: 0; background: transparent; color: {{c.fg}}; font-size: 15px">
+        <button type="button" onClick="{{cerrarPaleta}}" style="font-family: 'Geist Mono', monospace; font-size: 12px; padding: 2px 6px; border-radius: 5px; border: 1px solid {{c.line}}; background: transparent; color: {{c.muted}}">esc</button>
+      </div>
+      <div style="display: flex; flex-direction: column; padding: 8px; max-height: 440px; overflow-y: auto">
+        <span style="font-size: 12px; color: {{c.muted}}; padding: 6px 10px">Ir a</span>
+        <sc-for list="{{pIr}}" as="p" hint-placeholder-count="4"><button type="button" onClick="{{p.ir}}" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px; border-radius: 8px; border: 0; background: transparent; color: {{c.fg}}; font-size: 14px; text-align: left"><span style="flex: 1">{{p.nombre}}</span><span style="font-size: 12px; color: {{c.muted}}">{{p.nota}}</span></button></sc-for>
+        <span style="font-size: 12px; color: {{c.muted}}; padding: 10px 10px 6px">Registros</span>
+        <sc-for list="{{pReg}}" as="p" hint-placeholder-count="3"><button type="button" onClick="{{p.ir}}" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px; border-radius: 8px; border: 0; background: transparent; color: {{c.fg}}; font-size: 14px; text-align: left"><span style="flex: 1">{{p.nombre}}</span><span style="font-size: 12px; color: {{c.muted}}">{{p.nota}}</span></button></sc-for>
+        <span style="font-size: 12px; color: {{c.muted}}; padding: 10px 10px 6px; display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 999px; background: {{c.acento}}"></span>Pedirle a OPAI</span>
+        <sc-for list="{{pPedir}}" as="p" hint-placeholder-count="3"><button type="button" onClick="{{p.ir}}" style="font-family: inherit; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px; border-radius: 8px; border: 0; background: transparent; color: {{c.fg}}; font-size: 14px; text-align: left"><span style="flex: 1">{{p.nombre}}</span><span style="font-size: 12px; color: {{c.muted}}">{{p.nota}}</span></button></sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{menuAbierto}}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{cerrarMenu}}" aria-hidden="true" style="position: absolute; inset: 0"></div>
+    <div role="menu" aria-label="Empresa, portales y tu cuenta" style="position: absolute; top: 60px; left: 8px; width: 300px; border-radius: 10px; background: {{c.surface}}; border: 1px solid {{c.line}}; box-shadow: {{c.sombraMenu}}; padding: 6px; display: flex; flex-direction: column">
+      <span style="padding: 8px 10px 4px; font-size: 12px; color: {{c.muted}}">Portal</span>
+      <sc-for list="{{portales}}" as="p" hint-placeholder-count="6">
+        <a href="#" role="menuitem" onClick="{{p.ir}}" style="display: flex; align-items: center; justify-content: space-between; min-height: 40px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: {{c.fg}}; font-weight: {{p.peso}}">
+          <span>{{p.nombre}}</span>
+          <sc-if value="{{p.actual}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.fg}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+        </a>
+      </sc-for>
+      <div style="height: 1px; background: {{c.line}}; margin: 6px 0"></div>
+      <a href="#" role="menuitem" onClick="{{cerrarMenu}}" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: {{c.fg}}">Mi cuenta y preferencias</a>
+      <a href="#" role="menuitem" onClick="{{cerrarMenu}}" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: {{c.fg}}">Cambiar de empresa</a>
+      <a href="#" role="menuitem" onClick="{{cerrarMenu}}" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: {{c.muted}}">Cerrar sesión</a>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1024,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const tema = s.tema || 'noche';
+    const vista = s.vista || 'inicio';
+    const tab = s.tab || 'pend';
+    const telefono = false;
+    const estrecho = typeof window !== 'undefined' && window.innerWidth < 1100;
+    const fijo = telefono ? true : (s.plegado === undefined ? !estrecho : !s.plegado);
+    const ancho = fijo || !!s.peek;
+    const T = {
+      dia: { bg: '#ffffff', side: '#fafafa', surface: '#ffffff', fill: '#f2f2f2', line: '#eaeaea', fg: '#171717', muted: '#666666',
+        acento: '#0062d1', acentoTexto: '#ffffff', acentoBg: '#e9f2fd', alerta: '#c62828', alertaBg: '#fdecec', aviso: '#8a5300', avisoBg: '#fff5e0', ok: '#0e7a38', okBg: '#e8f6ec',
+        sombraMenu: '0 0 0 1px rgba(0,0,0,.04), 0 12px 32px rgba(0,0,0,.12)', velo: 'rgba(0,0,0,.25)' },
+      noche: { bg: '#000000', side: '#0a0a0a', surface: '#0a0a0a', fill: '#1f1f1f', line: '#262626', fg: '#ededed', muted: '#a1a1a1',
+        acento: '#52a8ff', acentoTexto: '#000000', acentoBg: '#0d2338', alerta: '#ff6b66', alertaBg: '#2a1212', aviso: '#f5b455', avisoBg: '#2a1f0a', ok: '#5fd38a', okBg: '#0f2617',
+        sombraMenu: '0 0 0 1px rgba(255,255,255,.04), 0 16px 40px rgba(0,0,0,.7)', velo: 'rgba(0,0,0,.6)' }
+    };
+    const c = T[tema];
+    const AC = {
+      azul: { nombre: 'Azul', dia: ['#0062d1', '#ffffff', '#e9f2fd'], noche: ['#52a8ff', '#000000', '#0d2338'] },
+      verde: { nombre: 'Verde', dia: ['#0b7a5c', '#ffffff', '#e6f4ef'], noche: ['#4fd6a8', '#000000', '#0c2a22'] },
+      indigo: { nombre: 'Índigo', dia: ['#4338ca', '#ffffff', '#ecebfb'], noche: ['#a5a0ff', '#000000', '#1c1a3d'] },
+      magenta: { nombre: 'Magenta', dia: ['#a3195b', '#ffffff', '#fbeaf2'], noche: ['#ff8fc0', '#000000', '#2e1220'] },
+      turquesa: { nombre: 'Turquesa', dia: ['#0a6c80', '#ffffff', '#e5f3f6'], noche: ['#5ccfe6', '#000000', '#0b2930'] },
+      grafito: { nombre: 'Grafito', dia: ['#3f3f46', '#ffffff', '#f0f0f1'], noche: ['#d4d4d8', '#000000', '#27272a'] }
+    };
+    const acento = AC[s.acento] ? s.acento : 'azul';
+    c.acento = AC[acento][tema][0]; c.acentoTexto = AC[acento][tema][1]; c.acentoBg = AC[acento][tema][2];
+    c.sub = tema === 'dia' ? '#4a4a4a' : '#c2c2c2';
+    const set = (o) => this.setState(Object.assign({}, s, o));
+    const navegar = (k) => { set({ vista: k, sel: undefined, sec: 0, exp: false, menu: false, carga: true, peek: false, paleta: false, marcas: undefined, vgAb: false, fichaAg: false, estado: s.estado === 'offline' ? 'offline' : undefined }); setTimeout(() => this.setState(Object.assign({}, this.state, { carga: false })), 550); };
+    const tono = { ok: [c.okBg, c.ok], aviso: [c.avisoBg, c.aviso], alerta: [c.alertaBg, c.alerta], neutro: [c.fill, c.muted], acento: [c.acentoBg, c.acento] };
+    const A = [['Activa', 'ok'], ['Por vencer', 'aviso'], ['Vencida', 'alerta'], ['Borrador', 'neutro']];
+    const M = '[MONTO]';
+    const DEF = {
+      bandeja: ['Gard Security', 'Bandeja', 'Nueva tarea', 'PENDIENTE', 'Pendiente', 'Origen', 'Desde', ['Aprobación', 'Aviso', 'Tarea'], ['hoy', 'hace 2 d'], [['Por aprobar', 'acento'], ['Por hacer', 'aviso'], ['Vencido', 'alerta']]],
+      solicitudes: ['Comercial', 'Solicitudes', 'Nueva solicitud', 'SOLICITUD', 'Solicitud', 'Origen', 'Recibida', ['Web', 'Correo', 'Teléfono'], ['hoy', 'hace 2 d'], [['Nueva', 'acento'], ['En revisión', 'aviso'], ['Descartada', 'neutro']]],
+      negocios: ['Comercial', 'Negocios', 'Nuevo negocio', 'NEGOCIO', 'Negocio', 'Cuenta', 'Monto', ['[CUENTA B]', '[CUENTA E]'], [M], [['Propuesta', 'acento'], ['Negociación', 'aviso'], ['Ganado', 'ok'], ['Perdido', 'neutro']]],
+      cotizaciones: ['Comercial', 'Cotizaciones', 'Nueva cotización', 'COTIZACIÓN', 'Cotización', 'Cuenta', 'Monto', ['[CUENTA B]', '[CUENTA E]'], [M], [['Enviada', 'acento'], ['Borrador', 'neutro'], ['Aceptada', 'ok'], ['Por vencer', 'aviso']]],
+      cuentas: ['Comercial', 'Cuentas', 'Nueva cuenta', 'CUENTA', 'Cuenta', 'Detalle', 'Puestos', ['3 instalaciones', 'Cotización enviada', '1 instalación', 'Factura vencida'], ['12', '—', '4', '6'], [['Activa', 'ok'], ['En negociación', 'aviso'], ['Activa', 'ok'], ['Con deuda', 'alerta']]],
+      contactos: ['Comercial', 'Contactos', 'Nuevo contacto', 'CONTACTO', 'Contacto', 'Cuenta', 'Cargo', ['[CUENTA A]', '[CUENTA B]'], ['Administración', 'Facturación', 'Gerencia'], [['Principal', 'acento'], ['Activo', 'ok']]],
+      licitaciones: ['Comercial', 'Licitaciones', 'Nueva licitación', 'LICITACIÓN', 'Licitación', 'Organismo', 'Cierre', ['[ORGANISMO A]', '[ORGANISMO B]'], ['[FECHA]'], [['En preparación', 'aviso'], ['Presentada', 'acento'], ['Adjudicada', 'ok']]],
+      pautad: ['Operaciones', 'Pauta diaria', 'Nuevo turno', 'PUESTO', 'Puesto', 'Persona', 'Entrada', ['[PERSONA A]', '[PERSONA B]', 'Sin asignar'], ['08:00', '20:00'], [['Presente', 'ok'], ['Atrasado', 'aviso'], ['Sin cubrir', 'alerta']]],
+      turnos: ['Operaciones', 'Turnos extra', 'Nuevo turno extra', 'TURNO', 'Turno extra', 'Persona', 'Monto', ['[PERSONA A]', '[PERSONA C]'], [M], [['Por aprobar', 'acento'], ['Aprobado', 'ok'], ['Pagado', 'neutro']]],
+      instalaciones: ['Operaciones', 'Instalaciones', 'Nueva instalación', 'INSTALACIÓN', 'Instalación', 'Cuenta', 'Puestos', ['[CUENTA A]', '[CUENTA C]'], ['4', '2', '6'], [['Activa', 'ok'], ['Sin cubrir', 'alerta'], ['Activa', 'ok']]],
+      rondas: ['Operaciones', 'Rondas', 'Nueva ronda', 'RONDA', 'Ronda', 'Instalación', 'Cumplimiento', ['[INSTALACIÓN A]', '[INSTALACIÓN B]'], ['[X]%'], [['Al día', 'ok'], ['Atrasada', 'aviso'], ['No hecha', 'alerta']]],
+      novedades: ['Operaciones', 'Novedades', 'Nueva novedad', 'NOVEDAD', 'Novedad', 'Instalación', 'Hora', ['[INSTALACIÓN A]', '[INSTALACIÓN B]'], ['03:10', '14:25'], [['Abierta', 'aviso'], ['Cerrada', 'neutro'], ['Grave', 'alerta']]],
+      tickets: ['Operaciones', 'Tickets', 'Nuevo ticket', 'TICKET', 'Ticket', 'Solicitante', 'Prioridad', ['[PERSONA A]', '[CONTACTO B]'], ['Alta', 'Media'], [['Abierto', 'acento'], ['En curso', 'aviso'], ['Resuelto', 'ok']]],
+      personas: ['Personas', 'Personas', 'Nueva persona', 'PERSONA', 'Persona', 'Cargo', 'Instalación', ['Guardia', 'Supervisor'], ['[INSTALACIÓN A]', '[INSTALACIÓN B]'], [['Activa', 'ok'], ['Documento por vencer', 'aviso'], ['Activa', 'ok'], ['Con licencia', 'neutro']]],
+      asistencia: ['Personas', 'Asistencia', 'Nueva marca manual', 'MARCA', 'Marca', 'Persona', 'Hora', ['[PERSONA A]', '[PERSONA B]'], ['07:58', '08:14', '—'], [['A la hora', 'ok'], ['Atraso', 'aviso'], ['Sin marca', 'alerta']]],
+      remuneraciones: ['Personas', 'Remuneraciones', 'Nuevo período', 'PERÍODO', 'Período', 'Personas', 'Total', ['[N] personas'], [M], [['En cálculo', 'aviso'], ['Cerrado', 'ok'], ['Pagado', 'neutro']]],
+      indicadores: ['Personas', 'Indicadores', 'Nuevo indicador', 'INDICADOR', 'Indicador', 'Área', 'Valor', ['Operaciones', 'Finanzas', 'Comercial'], ['[X]%', M], [['En meta', 'ok'], ['Bajo meta', 'aviso'], ['Crítico', 'alerta']]],
+      ventas: ['Finanzas', 'Ventas', 'Nueva factura', 'FACTURA', 'Factura', 'Cuenta', 'Monto', ['[CUENTA A]', '[CUENTA D]'], [M], [['Pagada', 'ok'], ['Vencida', 'alerta'], ['Emitida', 'acento'], ['Borrador', 'neutro']]],
+      compras: ['Finanzas', 'Compras', 'Nueva compra', 'COMPRA', 'Documento', 'Proveedor', 'Monto', ['[PROVEEDOR A]', '[PROVEEDOR B]'], [M], [['Por pagar', 'aviso'], ['Pagada', 'ok']]],
+      bancos: ['Finanzas', 'Bancos', 'Nuevo movimiento', 'MOVIMIENTO', 'Movimiento', 'Cuenta bancaria', 'Monto', ['[BANCO] ··[N]'], ['+' + M, '−' + M], [['Conciliado', 'ok'], ['Por conciliar', 'aviso'], ['Conciliado', 'ok'], ['Sin regla', 'neutro']]],
+      cobranza: ['Finanzas', 'Cobranza', 'Nueva gestión', 'GESTIÓN', 'Gestión', 'Cuenta', 'Vencida hace', ['[CUENTA D]', '[CUENTA F]'], ['3 d', '12 d', '31 d'], [['Por llamar', 'aviso'], ['Comprometida', 'acento'], ['Vencida', 'alerta']]],
+      rendiciones: ['Finanzas', 'Rendiciones', 'Nueva rendición', 'RENDICIÓN', 'Rendición', 'Persona', 'Monto', ['[PERSONA A]', '[PERSONA D]'], [M], [['Por aprobar', 'acento'], ['Aprobada', 'ok'], ['Rechazada', 'alerta']]],
+      contabilidad: ['Finanzas', 'Contabilidad', 'Nuevo asiento', 'ASIENTO', 'Asiento', 'Cuenta contable', 'Monto', ['[CUENTA CONTABLE A]', '[CUENTA CONTABLE B]'], [M], [['Contabilizado', 'ok'], ['Borrador', 'neutro']]],
+      explorador: ['Documentos', 'Explorador', 'Nuevo documento', 'DOCUMENTO', 'Documento', 'Vinculado a', 'Vence', ['[PERSONA A]', '[CUENTA A]', '[INSTALACIÓN B]'], ['[FECHA]', '—'], [['Vigente', 'ok'], ['Por vencer', 'aviso'], ['Vencido', 'alerta']]],
+      firmas: ['Documentos', 'Firmas', 'Nueva firma', 'FIRMA', 'Solicitud de firma', 'Firmante', 'Enviada', ['[PERSONA A]', '[CONTACTO B]'], ['hoy', 'hace 4 d'], [['Pendiente', 'aviso'], ['Firmado', 'ok'], ['Rechazado', 'alerta']]],
+      plantillas: ['Documentos', 'Plantillas', 'Nueva plantilla', 'PLANTILLA', 'Plantilla', 'Tipo', 'Usos', ['Contrato', 'Anexo', 'Carta'], ['[N]'], [['Publicada', 'ok'], ['Borrador', 'neutro']]],
+      usuarios: ['Configuración', 'Usuarios', 'Nuevo usuario', 'USUARIO', 'Usuario', 'Rol', 'Último acceso', ['Administrador', 'Supervisor'], ['hoy', 'hace 3 d'], [['Activo', 'ok'], ['Invitado', 'aviso']]],
+      cargos: ['Configuración', 'Cargos y sueldos', 'Nuevo cargo', 'CARGO', 'Cargo', 'Tipo', 'Personas', ['Operativo', 'Administrativo'], ['[N]'], [['Activo', 'ok']]],
+      integraciones: ['Configuración', 'Integraciones', 'Nueva integración', 'INTEGRACIÓN', 'Integración', 'Tipo', 'Uso', ['Correo', 'Banco', 'IA'], ['[N]'], [['Conectada', 'ok'], ['Sin configurar', 'neutro']]]
+    };
+    Object.assign(DEF, {
+      visitas: ['Supervisor', 'Visitas y rondas', 'Nueva visita', 'VISITA', 'Visita', 'Instalación', 'Hora', ['[INSTALACIÓN A]', '[INSTALACIÓN B]'], ['10:30', '15:00'], [['Pendiente', 'aviso'], ['Hecha', 'ok']]],
+      misdocs: ['Trabajador', 'Mis documentos', 'Subir documento', 'DOCUMENTO', 'Documento', 'Tipo', 'Fecha', ['Contrato', 'Liquidación', 'Comprobante'], ['[FECHA]'], [['Por firmar', 'aviso'], ['Firmado', 'ok']]],
+      missol: ['Trabajador', 'Solicitudes', 'Nueva solicitud', 'SOLICITUD', 'Solicitud', 'Tipo', 'Enviada', ['Permiso', 'Vacaciones', 'Anticipo'], ['hoy', 'hace 5 d'], [['En revisión', 'aviso'], ['Aprobada', 'ok'], ['Rechazada', 'alerta']]],
+      acceso: ['Terreno', 'Acceso', 'Nuevo ingreso', 'INGRESO', 'Ingreso', 'Tipo', 'Hora', ['Visita', 'Proveedor', 'Vehículo'], ['09:12', '11:40'], [['Dentro', 'acento'], ['Salió', 'neutro']]],
+      reportes: ['Cliente', 'Reportes', 'Nuevo reporte', 'REPORTE', 'Reporte', 'Tipo', 'Período', ['Asistencia', 'Rondas', 'Novedades'], ['Octubre', 'Semana 45'], [['Listo', 'ok'], ['Generando', 'aviso']]],
+      docscli: ['Cliente', 'Documentos y facturas', 'Nueva consulta', 'DOCUMENTO', 'Documento', 'Tipo', 'Monto', ['Factura', 'Contrato'], [M, '—'], [['Pagada', 'ok'], ['Por pagar', 'aviso'], ['Vigente', 'neutro']]],
+      empresas: ['Plataforma', 'Empresas', 'Nueva empresa', 'EMPRESA', 'Empresa', 'Plan', 'Usuarios', ['Completo', 'Básico'], ['[N]'], [['Activa', 'ok'], ['En prueba', 'aviso'], ['Suspendida', 'alerta']]],
+      trabajos: ['Plataforma', 'Trabajos', 'Nuevo trabajo', 'TRABAJO', 'Trabajo', 'Empresa', 'Duración', ['[EMPRESA A]', '[EMPRESA B]'], ['[N] s'], [['Hecho', 'ok'], ['En cola', 'neutro'], ['Falló', 'alerta']]],
+      consumos: ['Plataforma', 'Consumos', 'Nuevo ajuste', 'CONSUMO', 'Recurso', 'Empresa', 'Costo', ['[EMPRESA A]', '[EMPRESA B]'], [M], [['Normal', 'ok'], ['Sobre presupuesto', 'alerta']]],
+      precios: ['Plataforma', 'Precios', 'Nuevo precio', 'PRECIO', 'Módulo', 'Unidad', 'Valor', ['por usuario', 'por instalación'], [M], [['Vigente', 'ok'], ['Borrador', 'neutro']]]
+    });
+    const PORTALES = {
+      ERP: null,
+      Supervisor: [['inicio', 'Hoy'], ['instalaciones', 'Instalaciones a cargo'], ['visitas', 'Visitas y rondas'], ['novedades', 'Novedades'], ['tickets', 'Tickets']],
+      Trabajador: [['inicio', 'Inicio'], ['marcar', 'Marcar'], ['misdocs', 'Mis documentos'], ['missol', 'Solicitudes']],
+      Terreno: [['inicio', 'Inicio'], ['acceso', 'Acceso'], ['rondas', 'Rondas'], ['asistencia', 'Asistencia'], ['novedades', 'Novedades']],
+      Cliente: [['inicio', 'Resumen'], ['instalaciones', 'Instalaciones'], ['reportes', 'Reportes'], ['docscli', 'Documentos y facturas'], ['tickets', 'Solicitudes']],
+      Plataforma: [['empresas', 'Empresas'], ['trabajos', 'Trabajos'], ['consumos', 'Consumos'], ['precios', 'Precios'], ['usuarios', 'Ajustes']]
+    };
+    const portal = s.portal || 'ERP';
+    const SEC = {
+      negocios: ['Embudo', 'Lista'], explorador: ['Carpetas', 'Todos', 'Vencimientos', 'Papelera'], personas: ['Todas', 'Vencimientos', 'Postulantes', 'Desvinculadas'],
+      bancos: ['Movimientos', 'Cuentas', 'Reglas'], remuneraciones: ['Períodos', 'Novedades', 'Calendario'], asistencia: ['Hoy', 'Correcciones', 'Informe'],
+      cuentas: ['Todas', 'Con deuda', 'Archivadas'], cobranza: ['Por gestionar', 'Compromisos', 'Historial'], pautam: ['Planificación', 'Cobertura', 'Cambios'], flujo: ['Proyección', 'Real', 'Supuestos'],
+      ventas: ['Emitidas', 'Borradores', 'Recurrentes'], tickets: ['Abiertos', 'Míos', 'Cerrados']
+    };
+    const secs = SEC[vista] || [];
+    const sec = s.sec || 0;
+    const ORDEN = {
+      Comercial: ['solicitudes', 'negocios', 'cotizaciones', 'cuentas', 'contactos', 'licitaciones'],
+      Operaciones: ['pautam', 'pautad', 'turnos', 'instalaciones', 'rondas', 'novedades', 'tickets'],
+      Personas: ['personas', 'asistencia', 'remuneraciones', 'indicadores'],
+      Finanzas: ['ventas', 'compras', 'bancos', 'cobranza', 'flujo', 'rendiciones', 'contabilidad'],
+      Documentos: ['explorador', 'firmas', 'plantillas']
+    };
+    const celda = (t, k) => ({ t, bg: k === 'dia' ? c.fill : k === 'noche' ? c.acentoBg : k === 'falta' ? c.alertaBg : 'transparent', color: k === 'falta' ? c.alerta : k === 'noche' ? c.acento : k === 'libre' ? c.muted : c.fg });
+    const dias = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+    const patron = (off, hueco) => dias.map((n) => { const p = (n + off) % 6; if (n === hueco) return celda('!', 'falta'); return p < 2 ? celda('D', 'dia') : p < 4 ? celda('N', 'noche') : celda('·', 'libre'); });
+    const fila$ = (nombre, sub, fuerte, neg) => ({ nombre, sub, peso: fuerte ? 600 : 400, bg: fuerte ? c.side : 'transparent', celdas: [0, 1, 2, 3, 4, 5].map((i) => ({ t: neg === i ? '−' + M : M, bg: 'transparent', color: neg === i ? c.alerta : c.fg })) });
+    const MAT = {
+      pautam: { area: 'Operaciones', titulo: 'Pauta mensual', nuevo: 'Nuevo turno', periodo: 'Noviembre 2026', selectores: ['[INSTALACIÓN A]', 'Todos los puestos'], esquina: 'Puesto · persona', alinear: 'center',
+        cols: '220px repeat(14, minmax(36px, 1fr))', minimo: '820px', cabeceras: dias.map((n) => 'LMXJVSD'[(n + 6) % 7] + ' ' + n),
+        leyenda: [{ nombre: 'Día', bg: c.fill }, { nombre: 'Noche', bg: c.acentoBg }, { nombre: 'Sin cubrir', bg: c.alertaBg }],
+        filas: [['[PUESTO A]', '[PERSONA A]', 0, 0], ['[PUESTO A]', '[PERSONA B]', 3, 0], ['[PUESTO B]', '[PERSONA C]', 1, 9], ['[PUESTO B]', '[PERSONA D]', 4, 0], ['[PUESTO C]', 'Sin asignar', 2, 12]].map((r) => ({ nombre: r[0], sub: r[1], peso: 500, bg: 'transparent', celdas: patron(r[2], r[3]) })) },
+      flujo: { area: 'Finanzas', titulo: 'Flujo de caja', nuevo: 'Nuevo movimiento', periodo: 'Próximas 6 semanas', selectores: ['Semanal', 'Todas las cuentas'], esquina: 'Concepto', alinear: 'right',
+        cols: '240px repeat(6, minmax(110px, 1fr))', minimo: '920px', cabeceras: ['Sem 46', 'Sem 47', 'Sem 48', 'Sem 49', 'Sem 50', 'Sem 51'], leyenda: [{ nombre: 'Saldo negativo', bg: c.alertaBg }],
+        filas: [fila$('Saldo inicial', '', true), fila$('Cobranza esperada', 'Ingresos', false), fila$('Otros ingresos', 'Ingresos', false), fila$('Remuneraciones', 'Egresos', false), fila$('Proveedores', 'Egresos', false), fila$('Impuestos', 'Egresos', false), fila$('Saldo final', '', true, 3)] }
+    };
+    const TIT = (k) => DEF[k] ? DEF[k][1] : MAT[k].titulo;
+    const esMat = !!MAT[vista];
+    const mat = MAT[vista] || MAT.pautam;
+    const IND = [['cobertura', 'Cobertura de hoy', '[X]%', '▼ [N] sin cubrir', c.alerta], ['ventas', 'Ventas del mes', M, '▲ [X]% vs octubre', c.ok], ['cobrar', 'Por cobrar', M, '[N] vencidas', c.aviso], ['dotacion', 'Dotación', '[N]', 'sin cambios', c.muted], ['rotacion', 'Rotación', '[X]%', '▲ [X] pts', c.aviso], ['margen', 'Margen', '[X]%', '▲ [X] pts', c.ok], ['atrasos', 'Atrasos del mes', '[N]', '▼ [X]%', c.ok], ['caja', 'Caja disponible', M, 'alcanza [N] semanas', c.muted]];
+    const ind = s.ind || ['ventas', 'cobrar', 'cobertura', 'dotacion'];
+    const kpis = IND.filter((i) => ind.indexOf(i[0]) >= 0).map((i) => ({ etiqueta: i[1], valor: i[2], delta: i[3], color: i[4] }));
+    const disponibles = IND.map((i) => { const on = ind.indexOf(i[0]) >= 0; return { nombre: (on ? '✓ ' : '+ ') + i[1], activo: on ? 'true' : 'false', bg: on ? c.fill : 'transparent', color: on ? c.fg : c.muted, borde: c.line, alternar: () => set({ ind: on ? ind.filter((x) => x !== i[0]) : ind.concat([i[0]]) }) }; });
+    const esLista = !!DEF[vista];
+    const nuevo = s.sel === 'nuevo';
+    const d = DEF[vista] || DEF.cuentas;
+    const selI = esLista && !nuevo ? s.sel : undefined;
+    const filas = [0, 1, 2, 3, 4, 5].map((i) => {
+      const e = d[9][i % d[9].length];
+      return { a: '[' + d[3] + ' ' + 'ABCDEF'[i] + ']', b: d[7][i % d[7].length], c: d[8][i % d[8].length], estado: e[0], chipBg: tono[e[1]][0], chipFg: tono[e[1]][1],
+        abrir: () => set({ sel: i }), bg: selI === i ? c.fill : 'transparent', marca: selI === i ? 'inset 2px 0 0 ' + c.fg : 'none' };
+    });
+    const sel = selI === undefined ? filas[0] : filas[selI];
+    const abiertas = s.abiertas || { Comercial: true };
+    const areaActual = esLista ? d[0] : (esMat ? mat.area : '');
+    const ICONOS = {
+      inicio: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', bandeja: 'M4 13l2-8h12l2 8v6H4zM4 13h5l1 2h4l1-2h5',
+      agente: 'M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z',
+      Comercial: 'M3 8h18v12H3zM8 8V5h8v3M3 13h18', Operaciones: 'M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z',
+      Personas: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.2 2.2 3.5 5',
+      Finanzas: 'M3 6h18v13H3zM3 10h18M7 15h4', Documentos: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+      marcar: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2', otro: 'M5 5h14v14H5zM9 9h6M9 13h6'
+    };
+    const nav = [];
+    const item = (o) => { const hijo = o.esArea === false; nav.push(Object.assign({ alto: '40px', sangria: '6px', tam: '14px', esArea: true, verCuenta: false, sangriaTel: hijo ? '16px' : '0', tamTel: hijo ? '16px' : '13px', pesoTel: 400, colorTel: hijo ? c.fg : c.muted }, o)); };
+    const simple = (id, nombre, cuenta) => item({ tamTel: '16px', colorTel: c.fg, icono: ICONOS[id] || ICONOS.otro, nombre, letra: nombre[0], cuenta, verCuenta: ancho && !!cuenta, ir: () => set({ vista: id, sel: undefined, sec: 0, exp: false, menu: false, peek: false, estado: s.estado === 'offline' ? 'offline' : undefined }),
+      bg: vista === id ? c.fill : 'transparent', color: vista === id ? c.fg : c.muted, peso: vista === id ? 500 : 400 });
+    if (PORTALES[portal]) PORTALES[portal].forEach((p) => simple(p[0], p[1], ''));
+    if (!PORTALES[portal]) {
+    simple('inicio', 'Inicio', '');
+    simple('bandeja', 'Bandeja', '');
+    simple('agente', 'Agente', '');
+    Object.keys(ORDEN).forEach((area) => {
+      const hijos = ORDEN[area];
+      const abierta = telefono || !!abiertas[area];
+      const conArea = {}; conArea[area] = !abierta;
+      const soloAbrir = {}; soloAbrir[area] = true;
+      item({ nombre: area, icono: ICONOS[area], letra: area[0], cuenta: abierta ? '–' : '+', verCuenta: ancho,
+        ir: () => ancho ? set({ abiertas: conArea }) : set({ peek: true, abiertas: soloAbrir }),
+        bg: !ancho && areaActual === area ? c.fill : 'transparent', color: areaActual === area ? c.fg : c.muted, peso: areaActual === area ? 500 : 400 });
+      if (abierta && ancho) hijos.forEach((k) => item({ nombre: TIT(k), esArea: false, alto: '34px', sangria: '40px', tam: '13.5px',
+        ir: () => navegar(k), bg: vista === k ? c.fill : 'transparent', color: vista === k ? c.fg : c.sub, peso: vista === k ? 500 : 400 }));
+    });
+    }
+    const pestanas = [['pend', 'Necesita tu atención'], ['act', 'Actividad'], ['age', 'Agenda']].map(([id, nombre]) => ({
+      nombre, ir: () => set({ tab: id }), bg: tab === id ? c.fill : 'transparent', color: tab === id ? c.fg : c.muted, peso: tab === id ? 500 : 400 }));
+    const filasPor = {
+      pend: [
+        { punto: c.aviso, titulo: '1 invitación sin aceptar', sub: 'Usuarios · la primera vence en 3 días', estado: 'Por vencer', chipBg: c.avisoBg, chipFg: c.aviso, accion: 'Reenviar' },
+        { punto: c.acento, titulo: '1 solicitud nueva', sub: 'Comercial · procésala, derívala o descártala', estado: 'Nueva', chipBg: c.acentoBg, chipFg: c.acento, accion: 'Revisar' },
+        { punto: c.alerta, titulo: 'Factura sin pagar', sub: 'Finanzas · [CUENTA D] · venció hace 3 días', estado: 'Vencida', chipBg: c.alertaBg, chipFg: c.alerta, accion: 'Ver' }
+      ],
+      act: [
+        { punto: c.muted, titulo: 'Se emitió una factura', sub: 'Finanzas · [CUENTA A] · hace 10 min', estado: 'Hecho', chipBg: c.fill, chipFg: c.muted, accion: '' },
+        { punto: c.muted, titulo: 'Se creó un puesto', sub: 'Operaciones · [INSTALACIÓN A] · hace 1 h', estado: 'Hecho', chipBg: c.fill, chipFg: c.muted, accion: '' },
+        { punto: c.acento, titulo: 'OPAI preparó 2 correos de cobranza', sub: 'Aprobado por ti · hace 2 h', estado: 'OPAI', chipBg: c.acentoBg, chipFg: c.acento, accion: '' }
+      ],
+      age: [
+        { punto: c.alerta, titulo: 'Curso OS-10 vencido', sub: 'Personas · [PERSONA B]', estado: 'Vencido', chipBg: c.alertaBg, chipFg: c.alerta, accion: 'Ver ficha' },
+        { punto: c.muted, titulo: 'Llamar a [CONTACTO A]', sub: 'Tarea · hoy', estado: 'Hoy', chipBg: c.fill, chipFg: c.muted, accion: '' },
+        { punto: c.aviso, titulo: 'Contrato por renovar', sub: 'Documentos · vence en 12 días', estado: 'Por vencer', chipBg: c.avisoBg, chipFg: c.aviso, accion: '' }
+      ]
+    };
+    const prop = s.prop || 'pendiente';
+    if (prop !== 'descartada') filasPor.pend.unshift(prop === 'aprobada'
+      ? { punto: c.ok, titulo: '[PERSONA C] asignado al turno de 20:00', sub: 'Operaciones · [INSTALACIÓN B] · lo hizo OPAI con tu aprobación', estado: 'Aprobado', chipBg: c.okBg, chipFg: c.ok, accion: '' }
+      : { punto: c.acento, titulo: 'OPAI propone asignar a [PERSONA C] al turno de 20:00', sub: 'Operaciones · [INSTALACIÓN B] · puesto sin cubrir', evidencia: 'está disponible hoy, tiene su curso al día y vive a [N] km', estado: 'Propuesta', chipBg: c.acentoBg, chipFg: c.acento, accion: '', esProp: true, aprobar: () => set({ prop: 'aprobada' }), descartar: () => set({ prop: 'descartada' }) });
+    const guiones = [
+      { texto: '¿Qué facturas están vencidas?', respuesta: 'Hay [N] facturas vencidas por [MONTO]. La más antigua es de [CUENTA D].', propuesta: 'Preparar [N] correos de cobranza para que los revises' },
+      { texto: 'Cubre el turno de noche de hoy', respuesta: 'Hay 1 puesto sin cubrir en [INSTALACIÓN B]. [PERSONA C] está disponible y tiene su curso al día.', propuesta: 'Asignar a [PERSONA C] al turno de 20:00' },
+      { texto: 'Llévame a las cotizaciones abiertas', respuesta: 'Tienes [N] cotizaciones abiertas. Te las dejo filtradas.', propuesta: 'Abrir Comercial › Cotizaciones con el filtro «Abiertas»' }
+    ];
+    const g = s.libre ? { texto: s.libre, respuesta: 'Esto es lo que sé de ' + s.libreDe + ': su estado, sus últimos cambios y lo que tiene pendiente. [RESUMEN]', propuesta: 'Crear una tarea de seguimiento para ' + s.libreDe }
+      : (s.guion === undefined ? null : guiones[s.guion]);
+    const titulos = { inicio: 'Inicio', agente: 'Agente', novedades: 'Novedades de OPAI', marcar: 'Marcar', config: 'Configuración' };
+    const vistos = [];
+    const filtros = ['Todos'].concat(d[9].map((e) => e[0]).filter((x) => { if (vistos.indexOf(x) >= 0) return false; vistos.push(x); return true; }))
+      .map((nombre, i) => ({ nombre, bg: i === 0 ? c.fill : 'transparent', color: i === 0 ? c.fg : c.muted }));
+    const hayFicha = selI !== undefined || (esLista && nuevo);
+    const raizTel = ['inicio', 'agente', 'yo'].indexOf(vista) >= 0 ? vista : 'buscar';
+    const ICO = { inicio: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', agente: 'M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z', buscar: 'M4 6h16M4 12h16M4 18h16', yo: 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21c1.5-4 4.5-6 8-6s6.5 2 8 6' };
+    const est = s.estado; const bloque = est === 'permiso' || est === 'error';
+    const marcas = s.marcas || {};
+    const nMarcas = Object.keys(marcas).filter((k) => marcas[k]).length;
+    filas.forEach((f, i) => { const m = !!marcas[i]; f.marcada = m ? 'true' : 'false'; f.cajaBg = m ? c.fg : 'transparent'; f.cajaBorde = m ? c.fg : c.muted; f.cajaTic = m ? c.bg : 'transparent';
+      f.marcar = () => { const n = Object.assign({}, marcas); n[i] = !m; set({ marcas: n }); }; if (m && selI !== i) f.bg = c.fill; });
+    const VG = ['Todas', 'Mis abiertas', 'Por vencer esta semana'];
+    const vg = s.vg || 0;
+    const FQ = [['Resúmeme esto', 'Esto es lo que sé de ' + sel.a + ': su estado, sus últimos cambios y lo que tiene pendiente. [RESUMEN]', 'Crear una tarea de seguimiento'], ['¿Qué está pendiente?', 'Hay [N] cosas pendientes en ' + sel.a + '. La más urgente vence en 3 días.', 'Avisarle al responsable'], ['Prepara el siguiente paso', 'El siguiente paso es enviarlo a revisión. Te dejo el borrador listo.', 'Enviar a revisión']];
+    const fq = s.fq === undefined ? null : FQ[s.fq];
+    const EST = { permiso: ['M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z', 'No tienes permiso para ver esto', 'Tu rol no incluye esta sección. Si la necesitas, pídesela a quien administra OPAI en tu empresa.', 'Pedir acceso', 'Se le avisa al administrador con tu nombre y la sección'],
+      error: ['M12 8v5M12 16.5v.5M10.3 4.3L2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z', 'Algo falló al cargar', 'No es culpa tuya y no se perdió nada. Prueba otra vez; si sigue, avísanos con el código de abajo.', 'Reintentar', 'Código: [CÓDIGO]'] };
+    const eDef = EST[est] || EST.error;
+    const tel = {
+      titulo: hayFicha ? (nuevo ? d[2] : sel.a) : esLista ? d[1] : esMat ? mat.titulo : ({ inicio: 'Buenas tardes, Carlos', agente: 'Agente', buscar: 'Menú', yo: 'Tu cuenta', novedades: 'Novedades de OPAI', marcar: 'Marcar', config: 'Configuración' })[vista] || 'Inicio',
+      conVolver: raizTel === 'buscar' && vista !== 'buscar',
+      volver: () => hayFicha ? set({ sel: undefined, exp: false }) : set({ vista: 'buscar', sel: undefined, sec: 0 }),
+      verLista: esLista && !hayFicha, verFicha: esLista && hayFicha, verNuevo: (esLista && !hayFicha) || esMat,
+      vistaBuscar: vista === 'buscar', vistaYo: vista === 'yo',
+      verCarga: esLista && !hayFicha && !!s.carga, verVacio: esLista && !hayFicha && !s.carga && secs.length > 1 && sec === secs.length - 1,
+      tabs: [['inicio', 'Inicio'], ['agente', 'Agente'], ['buscar', 'Menú'], ['yo', 'Yo']].map(([id, nombre]) => ({ nombre, icono: ICO[id], ir: () => set({ vista: id, sel: undefined, sec: 0, menu: false }), color: raizTel === id ? c.fg : c.muted, peso: raizTel === id ? 600 : 400, punto: id === 'yo' && !s.leidas })),
+      opciones: [
+        { nombre: 'Novedades de OPAI', nota: s.leidas ? '' : '3 nuevas', color: c.fg, ir: () => set({ vista: 'novedades', leidas: true }) },
+        { nombre: 'Configuración', nota: '', color: c.fg, ir: () => set({ vista: 'config' }) },
+        { nombre: 'Mi cuenta y preferencias', nota: '', color: c.fg, ir: () => {} },
+        { nombre: 'Cambiar de empresa', nota: '', color: c.fg, ir: () => {} },
+        { nombre: 'Cerrar sesión', nota: '', color: c.muted, ir: () => {} }
+      ]
+    };
+    const R = {
+      c, tel,
+      cuerpoFlex: bloque ? '0 0 0px' : '1', verEstado: bloque, sinConexion: est === 'offline', salirEstado: () => set({ estado: undefined }),
+      estadoIcono: eDef[0], estadoTitulo: eDef[1], estadoTexto: eDef[2], estadoAccion: eDef[3], estadoPie: eDef[4],
+      demoEstados: [['permiso', 'Sin permiso'], ['error', 'Error'], ['offline', 'Sin conexión']].map((e) => ({ nombre: e[1], ir: () => set({ estado: e[0] }) })),
+      haySeleccion: esLista && nMarcas > 0, textoSeleccion: nMarcas + (nMarcas === 1 ? ' fila seleccionada' : ' filas seleccionadas'), quitarSeleccion: () => set({ marcas: undefined }),
+      vistaNombre: VG[vg], vistasAbierto: !!s.vgAb, alternarVistas: () => set({ vgAb: !s.vgAb }),
+      vistas: VG.map((nombre, i) => ({ nombre, ir: () => set({ vg: i, vgAb: false }), bg: i === vg ? c.fill : 'transparent', peso: i === vg ? 500 : 400 })),
+      fichaAgente: !!s.fichaAg && hayFicha && !nuevo,
+      faPreguntas: FQ.map((q, i) => ({ texto: q[0], borde: s.fq === i ? c.fg : c.line, pedir: () => set({ fq: i, fqOk: false }) })),
+      faCon: !!fq, faRespuesta: fq ? fq[1] : '', faPropuesta: fq ? fq[2] : '', faPend: !!fq && !s.fqOk, faOk: !!fq && !!s.fqOk,
+      faAprobar: () => set({ fqOk: true }), faDescartar: () => set({ fq: undefined, fqOk: false }),
+      paleta: !!s.paleta, abrirPaleta: () => set({ paleta: true, menu: false }), cerrarPaleta: () => set({ paleta: false }),
+      pIr: [['cotizaciones', 'Cotizaciones', 'Comercial'], ['pautad', 'Pauta diaria', 'Operaciones'], ['personas', 'Personas', 'Personas'], ['flujo', 'Flujo de caja', 'Finanzas'], ['explorador', 'Explorador', 'Documentos']].map((p) => ({ nombre: p[1], nota: p[2], ir: () => navegar(p[0]) })),
+      pReg: [['cuentas', 0, '[CUENTA A]', 'Cuenta'], ['personas', 1, '[PERSONA B]', 'Persona'], ['cotizaciones', 2, '[COTIZACIÓN C]', 'Cotización']].map((p) => ({ nombre: p[2], nota: p[3], ir: () => set({ vista: p[0], sel: p[1], sec: 0, exp: false, paleta: false, estado: undefined }) })),
+      pPedir: guiones.map((x, i) => ({ nombre: x.texto, nota: 'OPAI', ir: () => set({ vista: 'agente', guion: i, libre: undefined, ok: false, paleta: false, sel: undefined }) })),
+      anchoMenu: ancho ? '240px' : '52px', menuAncho: ancho,
+      plegarMenu: () => set({ plegado: fijo, peek: false, menu: false }), etiquetaPlegar: fijo ? 'Ocultar el menú' : 'Dejar el menú fijo',
+      anchoHueco: fijo ? '240px' : '52px', hayPeek: !fijo && !!s.peek, sombraPeek: !fijo && s.peek ? c.sombraMenu : 'none',
+      entrarMenu: () => { if (!fijo && !s.peek) set({ peek: true }); }, salirMenu: () => { if (s.peek) set({ peek: false }); }, cerrarPeek: () => set({ peek: false }),
+      etiquetaTema: tema === 'dia' ? 'Tema oscuro' : 'Tema claro',
+      cambiarTema: () => set({ tema: tema === 'dia' ? 'noche' : 'dia' }),
+      hayNovedades: !s.leidas, verContadorNovedades: !s.leidas && ancho,
+      migaArea: portal !== 'ERP' ? 'Portal ' + portal : (esLista ? d[0] : (esMat ? mat.area : 'Gard Security')), migaPagina: esLista ? d[1] : (esMat ? mat.titulo : (titulos[vista] || 'Inicio')),
+      vistaLista: esLista && !bloque, vistaMatriz: esMat && !bloque, mat, vistaSimple: !esLista && !esMat && !bloque,
+      vistaInicio: vista === 'inicio', vistaNovedades: vista === 'novedades', vistaAgente: vista === 'agente',
+      vistaConfig: vista === 'config', abrirConfig: () => set({ vista: 'config', sel: undefined, sec: 0, exp: false, menu: false, peek: false, estado: undefined }),
+      configBg: vista === 'config' || areaActual === 'Configuración' ? c.fill : 'transparent', configColor: vista === 'config' || areaActual === 'Configuración' ? c.fg : c.muted,
+      grupos: [['Empresa', 'Datos legales, marca y sucursales', ''], ['Usuarios y permisos', 'Quién entra y qué puede hacer', 'usuarios'], ['Cargos y sueldos', 'Catálogo de cargos y estructuras', 'cargos'], ['Integraciones', 'Correo, bancos, IA y facturación', 'integraciones'], ['Módulos', 'Qué tiene contratado la empresa', ''], ['Indicadores de Inicio', 'Cuáles ve cada rol al entrar', '']].map((g) => ({ nombre: g[0], sub: g[1], ir: () => { if (g[2]) set({ vista: g[2], sel: undefined, sec: 0, exp: false }); } })),
+      vistaMarcar: vista === 'marcar', marcar: () => set({ marcado: !s.marcado }), textoMarcar: s.marcado ? 'Marcar salida' : 'Marcar entrada', notaMarcar: s.marcado ? 'Entrada registrada a las 07:58. La hora la pone el servidor.' : 'Aún no marcas hoy.',
+      conSecciones: secs.length > 0,
+      secciones: secs.map((nombre, i) => ({ nombre, activa: i === sec ? 'true' : 'false', ir: () => set({ sec: i, sel: undefined, exp: false }), borde: i === sec ? c.fg : 'transparent', color: i === sec ? c.fg : c.muted, peso: i === sec ? 500 : 400 })),
+      verEmbudo: vista === 'negocios' && sec === 0 && !s.carga, verCarpetas: vista === 'explorador' && sec === 0 && !s.carga,
+      cargando: esLista && !!s.carga, vacio: esLista && !s.carga && secs.length > 1 && sec === secs.length - 1,
+      tablaDisplay: (vista === 'negocios' && sec === 0) || s.carga || (secs.length > 1 && sec === secs.length - 1) ? 'none' : 'block',
+      esqueleto: ['62%', '48%', '70%', '55%', '66%', '44%'].map((a, i) => ({ a, b: ['50%', '64%', '42%', '58%', '46%', '60%'][i] })),
+      vacioTitulo: 'No hay nada en «' + (secs[sec] || '') + '»', vacioTexto: 'Cuando haya ' + d[1].toLowerCase() + ' en esta sección, aparecerán aquí.',
+      volverSeccion: () => set({ sec: 0 }), primeraSeccion: secs[0] || '',
+      nuevoBg: hayFicha ? 'transparent' : c.fg, nuevoColor: hayFicha ? c.fg : c.bg, nuevoBorde: hayFicha ? c.line : c.fg,
+      proximos: [['Hoy', 'Llamar a [CONTACTO A]', 'Tarea tuya', c.fg], ['Mañana', 'Vence curso OS-10', 'Personas · [PERSONA B]', c.aviso], ['Lun 16', 'Cierre de remuneraciones', 'Personas · período de noviembre', c.muted], ['Mar 24', 'Contrato por renovar', 'Documentos · [CUENTA A]', c.muted]].map((x) => ({ cuando: x[0], titulo: x[1], sub: x[2], color: x[3] })),
+      acentos: Object.keys(AC).map((k) => ({ nombre: AC[k].nombre, color: AC[k][tema][0], activo: k === acento ? 'true' : 'false', borde: k === acento ? c.fg : c.line, poner: () => set({ acento: k }) })),
+      embudo: ['Propuesta', 'Negociación', 'Ganado', 'Perdido'].map((nombre) => { const t = filas.filter((f) => f.estado === nombre); return { nombre, total: t.length + ' · ' + M, tarjetas: t.map((f) => ({ a: f.a, b: f.b, c: f.c, abrir: f.abrir })) }; }),
+      carpetas: [['Personas', '[N] documentos'], ['Cuentas', '[N] documentos'], ['Instalaciones', '[N] documentos'], ['Empresa', '[N] documentos'], ['Plantillas', '[N] plantillas'], ['Sin clasificar', '[N] documentos']].map((k) => ({ nombre: k[0], total: k[1] })),
+      crear: () => set({ sel: 'nuevo' }), tituloFicha: nuevo ? d[2] : sel.a,
+      abrirNovedades: () => set({ vista: 'novedades', leidas: true, menu: false, sel: undefined }),
+      nav, pestanas, filas: filasPor[tab],
+      pag: { conFecha: vista === 'pautad', titulo: d[1], nuevo: d[2], col0: d[4], col1: d[5], col2: d[6], total: '[N]', filas, filtros },
+      conPanel: selI !== undefined || (esLista && nuevo), sinPanel: selI === undefined && !nuevo,
+      rejilla: selI === undefined && !nuevo ? '2fr 1.5fr 1fr 1fr' : '1.4fr 1fr 1fr',
+      sel, cerrarPanel: () => set({ sel: undefined, exp: false }),
+      listaDisplay: (selI !== undefined || nuevo) && (s.exp || estrecho) ? 'none' : 'flex',
+      panelFlex: s.exp || estrecho ? '1 1 auto' : '0 0 58%',
+      expandir: () => set({ exp: !s.exp }), etiquetaExpandir: s.exp ? 'Volver a ver la lista' : 'Ver a pantalla completa',
+      conLineas: ['cotizaciones', 'ventas', 'compras'].indexOf(vista) >= 0,
+      lineas: [{ d: 'Guardia 4x4 día', n: '2' }, { d: 'Guardia 4x4 noche', n: '2' }, { d: 'Supervisión', n: '1' }],
+      campos: [{ nombre: d[4], valor: nuevo ? '' : sel.a }, { nombre: d[5], valor: nuevo ? '' : sel.b }, { nombre: d[6], valor: nuevo ? '' : sel.c }, { nombre: 'Responsable', valor: nuevo ? '' : '[NOMBRE]' }],
+      preguntar: () => set({ fichaAg: !s.fichaAg, fq: undefined, fqOk: false }),
+      menuAbierto: !!s.menu, menuBg: s.menu ? c.fill : 'transparent',
+      alternarMenu: () => set({ menu: !s.menu }), cerrarMenu: () => set({ menu: false }),
+      portales: Object.keys(PORTALES).map((nombre) => ({ nombre, actual: nombre === portal, peso: nombre === portal ? 500 : 400, ir: () => set({ portal: nombre, vista: PORTALES[nombre] ? PORTALES[nombre][0][0] : 'inicio', sel: undefined, sec: 0, exp: false, menu: false }) })),
+      portalNombre: portal,
+      abrirAgente: () => set({ vista: 'agente', menu: false, sel: undefined }),
+      sugerencias: guiones.map((x, i) => ({ texto: x.texto, cuando: ['hoy', '3 d', '15 d'][i], pedir: () => set({ guion: i, libre: undefined, ok: false }) })),
+      sinPregunta: !g, conPregunta: !!g,
+      pregunta: g ? g.texto : '', respuesta: g ? g.respuesta : '', propuesta: g ? g.propuesta : '',
+      sinConfirmar: !!g && !s.ok, confirmado: !!g && !!s.ok,
+      confirmar: () => set({ ok: true }), reiniciar: () => set({ guion: undefined, libre: undefined, ok: false }),
+      kpis, disponibles, editando: !!s.edit, alternarEdicion: () => set({ edit: !s.edit }), etiquetaEdicion: s.edit ? 'Listo' : 'Personalizar',
+      novedades: [
+        { fecha: '12 nov', titulo: 'Actividad y Agenda', texto: 'Ves los cambios de tu equipo y lo que vence en los próximos 14 días.' },
+        { fecha: '11 nov', titulo: 'Entrar a OPAI desde Claude', texto: 'Conecta tu cuenta y usa OPAI dentro de Claude.' },
+        { fecha: '10 nov', titulo: 'Cartolas de Santander', texto: 'Ya puedes subir la cartola de Office Banking en Bancos.' }
+      ]
+    };
+    if (bloque) { ['vistaInicio', 'vistaNovedades', 'vistaAgente', 'vistaConfig', 'vistaMarcar'].forEach((k) => { R[k] = false; }); ['verLista', 'verFicha', 'verNuevo', 'vistaBuscar', 'vistaYo', 'verCarga', 'verVacio'].forEach((k) => { R.tel[k] = false; }); }
+    return R;
+  }
+}
+</script>
+</body>
+</html>

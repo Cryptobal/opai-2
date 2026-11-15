@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Sheet, Textarea } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Input, InputFecha, Sheet, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -62,7 +62,7 @@ export function BotonesPaso({ paso }: { paso: PasoSeguimiento }) {
         <div className="flex flex-col gap-4">
           {error ? <Alerta tono="danger" titulo={error} /> : null}
           <Campo etiqueta="Nueva fecha" htmlFor={`seg-fecha-${paso.id}`}>
-            <Input id={`seg-fecha-${paso.id}`} type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            <InputFecha id={`seg-fecha-${paso.id}`} valor={fecha} onCambiar={setFecha} />
           </Campo>
         </div>
       </Sheet>

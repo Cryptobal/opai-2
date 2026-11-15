@@ -14,7 +14,7 @@ export type DefinicionTrabajo<P> = {
 };
 
 /** Lo más que puede durar un trabajo: la función de Vercel dura 60 s y el runner reclama durante 45 s. */
-export const TIEMPO_MAXIMO_TRABAJO_MS = 40_000;
+const TIEMPO_MAXIMO_TRABAJO_MS = 40_000;
 
 /** Trabajo registrado: el payload se valida con su esquema antes de ejecutar. */
 export type Trabajo = {

@@ -85,3 +85,11 @@ export function planificarMovimientosApi(
     return { indice: m.indice, estado: "nuevo", claveDedupe: claveDedupeConOrdinal(base, ordinal), sospechoso };
   });
 }
+
+/**
+ * Un movimiento no puede tener fecha futura (CAR-341): si el banco en línea informa un día posterior a hoy
+ * (fecha contable del día hábil siguiente), se guarda con la fecha de hoy en la zona de la empresa.
+ */
+export function acotarFechaAHoy(fecha: string, hoy: string): string {
+  return fecha > hoy ? hoy : fecha;
+}

@@ -38,6 +38,8 @@ export function Credenciales({ items, conNombre }: { items: Integracion[]; conNo
                         proveedor: i.proveedor,
                         nombre: s.nombre,
                         valor,
+                        // Con una credencial guardada, CampoSecreto solo deja guardar tras pulsar «Reemplazar».
+                        reemplazar: Boolean(s.mascara),
                       });
                       if (r) avisar.exito("Credencial guardada cifrada");
                       else avisar.error("No se pudo guardar la credencial");

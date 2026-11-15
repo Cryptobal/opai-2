@@ -8,6 +8,10 @@ import { defineConfig } from "@playwright/test";
 const envRaiz = new URL("../../.env.local", import.meta.url);
 if (existsSync(envRaiz)) process.loadEnvFile(envRaiz);
 
+const BASE = process.env["BASE_URL"] ?? "http://localhost:3000";
+
+// Desde CAR-335 D6c todas las pruebas corren con el diseño nuevo, el único del ERP. Las que prueban
+// otro marco ponen su propia cookie (`addCookies`).
 // Evidencia visual a 375 y 1024 (y revisión a 1280). No es regresión visual todavía.
 export default defineConfig({
   testDir: "./e2e",
@@ -22,7 +26,7 @@ export default defineConfig({
   // `next dev` compila cada ruta en su primera visita y en el runner eso pasa de los 5 s por defecto.
   expect: { timeout: 15_000 },
   use: {
-    baseURL: process.env["BASE_URL"] ?? "http://localhost:3000",
+    baseURL: BASE,
     // La traza se escribe sin parar en `test-results`, dentro del árbol que vigila `next dev`: cada escritura
     // lo hace recompilar y recargar páginas aún sin hidratar (bucle en `/login`). Se activa solo a pedido.
     trace: process.env["E2E_TRACE"] ? "retain-on-failure" : "off",

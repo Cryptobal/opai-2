@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { etiquetaCapacidad } from "@/app/(erp)/configuracion/auditoria/_componentes/capacidad";
 import { haceCuanto } from "@/lib/fechas";
 
 import type { Trabajo } from "../tenants/[id]/tipos";
@@ -30,15 +31,27 @@ function EstadoTrabajo({ t }: { t: Trabajo }) {
   return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
 }
 
-type Props = { state: EstadoPantalla; items: Trabajo[]; filtros?: ReactNode; conEmpresa?: boolean };
+type Props = {
+  state: EstadoPantalla;
+  items: Trabajo[];
+  filtros?: ReactNode;
+  conEmpresa?: boolean;
+  titulo?: string;
+};
 
 /** Trabajos (51): tipo, empresa, estado e intentos, última actividad; la fila abre el detalle. */
-export function ListaTrabajos({ state, items, filtros, conEmpresa = true }: Props) {
+export function ListaTrabajos({
+  state,
+  items,
+  filtros,
+  conEmpresa = true,
+  titulo = "Trabajos",
+}: Props) {
   return (
     <>
       <ListScreen<Trabajo>
         state={state}
-        titulo="Trabajos"
+        titulo={titulo}
         soloTelefono
         {...(filtros ? { filtros } : {})}
         items={items}
@@ -51,7 +64,7 @@ export function ListaTrabajos({ state, items, filtros, conEmpresa = true }: Prop
         tarjeta={(t) => (
           <>
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="t-mono truncate text-base text-fg">{t.tipo}</span>
+              <span className="truncate text-base text-fg">{etiquetaCapacidad(t.tipo)}</span>
               <span className="t-caption truncate">
                 {conEmpresa ? `${t.slug} · ` : ""}
                 {t.actualizadoEn ? haceCuanto(t.actualizadoEn) : "—"}
@@ -61,7 +74,7 @@ export function ListaTrabajos({ state, items, filtros, conEmpresa = true }: Prop
           </>
         )}
         columnas={[
-          { id: "tipo", etiqueta: "Trabajo", className: "t-mono", render: (t) => t.tipo },
+          { id: "tipo", etiqueta: "Trabajo", render: (t) => etiquetaCapacidad(t.tipo) },
           ...(conEmpresa
             ? [
                 {

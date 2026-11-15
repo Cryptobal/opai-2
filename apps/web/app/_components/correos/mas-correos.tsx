@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { CorreoItem } from "./correo-item";
 import { type CorreoVista, type PaginaCorreos, sePuedeAsociar } from "./tipos";

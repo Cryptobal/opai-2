@@ -3,7 +3,7 @@
 import { Plus, Trash2 } from "lucide-react";
 
 import { REFERENCIAS_SII } from "@opai/domain";
-import { Button, Campo, Card, Input, Select } from "@opai/ds";
+import { Button, Campo, Card, Input, InputFecha, Select } from "@opai/ds";
 
 import { REF_VACIA, type RefForm } from "./emitir-util";
 
@@ -51,12 +51,11 @@ export function EmitirReferencias({ refs, setRefs, bloqueado, mensaje }: Props) 
             />
           </Campo>
           <Campo etiqueta="Fecha del documento" htmlFor={`ref-fecha-${i}`}>
-            <Input
+            <InputFecha
               id={`ref-fecha-${i}`}
-              type="date"
               disabled={bloqueado}
-              value={r.fecha}
-              onChange={(e) => cambiar(i, { fecha: e.target.value })}
+              valor={r.fecha}
+              onCambiar={(v) => cambiar(i, { fecha: v })}
             />
           </Campo>
           <Button

@@ -22,3 +22,12 @@ export const restantesAlQuitar = (m: Metodos) =>
 
 export const AVISO_SOLO_PASSWORD =
   "Si alguien obtiene tu contraseña podrá entrar a tu cuenta y ver los datos de tu empresa. Te recomendamos mantener al menos una passkey o la app autenticadora.";
+
+/** Salida de `core.apps_conectadas.list` (CAR-247), con fechas ya formateadas en el servidor. */
+export type AppConectadaVista = {
+  clientId: string;
+  nombre: string | null;
+  puedeEscribir: boolean;
+  conectadaEnTexto: string;
+  ultimoUsoTexto: string | null;
+};

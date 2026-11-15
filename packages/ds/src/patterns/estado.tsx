@@ -24,6 +24,19 @@ type Props = {
 /** Resuelve los cuatro estados estándar; en `ready` renderiza el contenido. */
 export function Estado({ state, variante, textos, children }: Props) {
   if (state === "loading") return <Loading variante={variante} />;
+  const aviso = avisoDe(state, textos);
+  if (!aviso) return <>{children}</>;
+  // En una lista las filas van de borde a borde; el aviso no: lleva margen (CAR-340).
+  return variante === "lista" ? (
+    <div data-estado-lista="" className="p-4">
+      {aviso}
+    </div>
+  ) : (
+    aviso
+  );
+}
+
+function avisoDe(state: EstadoPantalla, textos: Props["textos"]) {
   if (state === "forbidden") return <Forbidden />;
   if (state === "error") {
     const e = textos?.error;
@@ -55,7 +68,7 @@ export function Estado({ state, variante, textos, children }: Props) {
       />
     );
   }
-  return <>{children}</>;
+  return null;
 }
 
 export type CabeceraProps = {
@@ -69,8 +82,6 @@ export type CabeceraProps = {
   accionesSiempre?: boolean;
   /** Mostrar el título también en md+ (pantallas sin barra superior propia, como paneles de detalle). */
   tituloSiempre?: boolean;
-  /** Con `tituloSiempre`, el título es el mismo del shell: el marco Hilo ya lo muestra en el lienzo. */
-  tituloComoShell?: boolean;
   /** Título de detalle (22/28) en vez del de página (28/34). */
   tituloDetalle?: boolean;
   /** Toda la cabecera solo en teléfono (el subtítulo también es solo de teléfono). */
@@ -85,14 +96,15 @@ export type CabeceraProps = {
  */
 export function Cabecera(props: CabeceraProps) {
   const { titulo, subtitulo, sobre, acciones, tituloSiempre, tituloDetalle } = props;
-  const ocultarEnHilo = !tituloSiempre || props.tituloComoShell;
   const accionesVisibles = tituloSiempre || props.accionesSiempre;
   const apilada = props.accionesDebajoEnTelefono;
   return (
     <div
       className={cn(
         "mb-4 flex gap-x-3 gap-y-2",
-        apilada ? "flex-col md:flex-row md:items-start md:justify-between" : "flex-wrap items-start justify-between",
+        apilada
+          ? "flex-col md:flex-row md:items-start md:justify-between"
+          : "flex-wrap items-start justify-between",
         props.soloTelefono && "md:hidden",
       )}
     >
@@ -105,7 +117,6 @@ export function Cabecera(props: CabeceraProps) {
             tituloDetalle ? "t-heading" : "t-title",
             "text-fg",
             !tituloSiempre && "md:hidden",
-            ocultarEnHilo && "marco-hilo:hidden",
           )}
         >
           {titulo}

@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { Campo, Combobox } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 export type NegocioOpcion = { valor: string; etiqueta: string };
 

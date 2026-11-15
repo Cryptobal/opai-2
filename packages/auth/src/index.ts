@@ -17,6 +17,7 @@ export { LOGIN_RETENCION_DIAS, purgarIntentosLogin } from "./bloqueo-login";
 export {
   confirmarSegundoFactor,
   iniciarSegundoFactor,
+  regenerarCodigosRespaldo,
   verificarCodigoRespaldo,
   verificarSegundoFactor,
 } from "./mfa";
@@ -28,6 +29,13 @@ export {
   VIGENCIA_ENLACE_SEGUNDOS,
   VIGENCIA_RECUPERACION_SEGUNDOS,
 } from "./opciones";
+export {
+  cabeceraDesafioMcp,
+  emisorOAuth,
+  metadatosRecursoMcp,
+  urlMetadatosRecurso,
+} from "./oauth-metadatos";
+export { metadatosServidorOAuth } from "./oauth-metadatos-servidor";
 export {
   entrarConPasskey,
   guardarPasskey,
@@ -45,3 +53,14 @@ export { entrarConPin, type ResultadoPin } from "./pin";
 export { correoDeRecuperacion } from "./recuperacion";
 export { getSession, requireSession, sesionDeRequest, sesionVigente, type Sesion } from "./session";
 export { crearUsuarioConPassword } from "./usuarios";
+export {
+  consentirOAuth,
+  consultaOAuthValida,
+  datosConsentimientoOAuth,
+  type DatosConsentimiento,
+  elegirEmpresaOAuth,
+  type PasoOAuth,
+  urlReanudarOAuth,
+} from "./oauth-flujo";
+export { type TokenOAuth, tokenOAuthVigente } from "./oauth-token";
+export { purgarOAuth } from "./oauth-purga";

@@ -125,7 +125,7 @@
 <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
 <div style="height:300px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="clock" title="Aún no hay marcas" description="Cambia el período." hint-size="100%,300px"></x-import></div>
 <div style="height:300px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar" description="Revisa tu conexión." on-retry="{{ noop }}" hint-size="100%,300px"></x-import></div>
-<div style="height:300px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Sin acceso" description="Pídele acceso a Carlos Irigoyen." action-label="Pedir acceso" hint-size="100%,300px"></x-import></div>
+<div style="height:300px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Sin acceso" description="Pídele acceso a Andrea Fuentes." action-label="Pedir acceso" hint-size="100%,300px"></x-import></div>
 </div>
 </section>
 <span class="t-caption">También se usan: AppShell, Page, PageHeader, Sheet (lateral 420 desde iPad, inferior en teléfono) y Wordmark. Se ven en contexto en cada pantalla.</span>
@@ -154,7 +154,7 @@ class Component extends DCLogic {
       ],
       tRows: [{ id: 1, f: "01-10-2026", e: "07:58", s: "J.O." }, { id: 2, f: "04-10-2026", e: "08:05", s: "J.O.", b: true }],
       rcBadge: { tone: "warning", label: "Pendiente" },
-      hist: [{ who: "Carlos Irigoyen", initials: "CI", action: "corrigió la entrada", changes: [{ field: "Hora", from: "08:14", to: "07:58" }], when: "14-10-2026 10:22" }],
+      hist: [{ who: "Andrea Fuentes", initials: "CI", action: "corrigió la entrada", changes: [{ field: "Hora", from: "08:14", to: "07:58" }], when: "14-10-2026 10:22" }],
       kv: [{ label: "Fecha y hora (servidor)", value: "14-10-2026 07:58:12", numeric: true }, { label: "RUT empleador", value: "76.543.210-K", mono: true }],
       tabItems: [{ id: "pen", label: "Pendientes", count: 2 }, { id: "obj", label: "Objetadas" }, { id: "ace", label: "Aceptadas" }, { id: "x", label: "Bloqueada", disabled: true }],
     };

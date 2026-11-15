@@ -54,7 +54,8 @@ export const instalacionesList = defineCapability({
         alcance: instalacionesEnAlcance(ctx),
       }),
     );
-    const p = pagina(filas, input.limite);
+    // El keyset de `listarInstalaciones` ya excluye la fila del cursor.
+    const p = pagina(filas, input.limite, input.cursor);
     return {
       items: p.items.map((i) => ({
         ...vistaInstalacion(i, i.cuentaNombre),

@@ -25,6 +25,7 @@ export const HojaLaboral = hojaDiferida(
     "editar-os10",
     "editar-contacto-laboral",
     "cambiar-pago",
+    "agregar-cuenta",
   ],
   () => import("./hoja-laboral").then((m) => m.HojaLaboral),
 );

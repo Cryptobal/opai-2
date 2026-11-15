@@ -9,6 +9,7 @@ import { identidadActual, contextoServidor } from "@/lib/servidor";
 import { HojaEditarVinculo, HojaVinculo } from "../../_componentes/diferidas";
 import { HistorialVinculos, VinculoVigente } from "../../_componentes/laboral";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
+import { SeccionProcesos } from "../../_componentes/seccion-procesos";
 import { SeccionesLaboral } from "../../_componentes/secciones-laboral";
 
 export const metadata = { title: "Laboral" };
@@ -98,11 +99,14 @@ export default function Laboral(props: {
                   </SeccionTarjeta>
                 ) : null}
               </div>
-              <HistorialVinculos
-                vinculos={panel.vinculos}
-                cargos={cargos}
-                cargosRetirados={panel.cargosRetirados}
-              />
+              <div className="flex flex-col gap-4">
+                <SeccionProcesos personaId={p.id} />
+                <HistorialVinculos
+                  vinculos={panel.vinculos}
+                  cargos={cargos}
+                  cargosRetirados={panel.cargosRetirados}
+                />
+              </div>
             </div>
             <SeccionesLaboral personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
             {gestionar && actual ? (

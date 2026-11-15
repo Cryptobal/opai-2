@@ -12,6 +12,14 @@ export const cuentaSchema = z.object({
   /** Última entrega del banco en línea (Web4Leads) y saldo que informó; null si nunca sincronizó. */
   ultimaSyncEn: z.string().nullable(),
   saldoBanco: z.number().int().nullable(),
+  /** Saldo de hoy: el último saldo conocido llevado con los movimientos posteriores (CAR-341). */
+  saldoHoy: z.number().int().nullable().optional(),
+  /** Fecha del saldo conocido desde el que se lleva `saldoHoy`. */
+  saldoDesde: z.string().nullable().optional(),
+  /** Origen del saldo conocido: banco en línea, último movimiento con saldo o cierre de cartola (CAR-341). */
+  saldoFuente: z.enum(["banco", "movimiento", "cartola"]).nullable().optional(),
+  /** Movimientos posteriores al saldo conocido sumados para llegar a hoy. */
+  saldoMovimientosDespues: z.number().int().nullable().optional(),
 });
 
 export const movimientoSchema = z.object({
@@ -23,6 +31,10 @@ export const movimientoSchema = z.object({
   referencia: z.string().nullable(),
   estado: z.enum(["pendiente", "sugerido", "conciliado", "por_autorizar", "ignorado"]),
   origen: z.string(),
+  /** Dónde quedó conciliado (fila del flujo, «Facturas» o «Compras»); null si no está conciliado (CAR-328). */
+  clasificacion: z.string().nullable().optional(),
+  /** Nombre de la regla que lo concilió sola; null si lo hizo una persona. */
+  regla: z.string().nullable().optional(),
 });
 
 export const filaPreviewSchema = z.object({
@@ -37,3 +49,12 @@ export const filaPreviewSchema = z.object({
 export function montoDe(v: bigint | number): number {
   return aNumeroSeguro(v);
 }
+
+/** Saldo inicial + detalle = saldo final de una cartola (CAR-341). */
+export const cuadraturaSchema = z.object({
+  saldoInicial: z.number().int(),
+  saldoFinal: z.number().int(),
+  sumaDetalle: z.number().int(),
+  diferencia: z.number().int(),
+  cuadra: z.boolean(),
+});

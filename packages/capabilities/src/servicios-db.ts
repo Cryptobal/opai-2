@@ -4,6 +4,7 @@ import {
   registrarConsumoSesion,
   agregarABitacora,
   consumirPresupuesto,
+  esAgenteSinKey,
   enTransaccion,
   forTenant,
   preciosHasta,
@@ -44,15 +45,24 @@ export function auditoriaEnDb(tenantId: string): Auditoria {
   };
 }
 
-/** Precios vigentes (micro-USD por unidad) con caché de 10 minutos por proceso. */
+/**
+ * Precios vigentes (micro-USD por unidad) con caché corta por proceso. Al fijar un precio se invalida
+ * en el proceso que lo fijó (CAR-323); los demás procesos lo toman en a lo más un minuto.
+ */
 let precios: { hasta: number; mapa: Map<string, number> } | null = null;
+const VIGENCIA_CACHE_PRECIOS_MS = 60_000;
+
+/** Olvida la caché de precios: el próximo consumo lee la lista vigente. */
+export function invalidarCachePrecios(): void {
+  precios = null;
+}
 
 async function precioDe(recurso: string): Promise<number> {
   if (!precios || precios.hasta < Date.now()) {
     const filas = (await preciosHasta(new Date())).reverse();
     // Ordenado por vigencia: el último de cada recurso es el vigente.
     precios = {
-      hasta: Date.now() + 600_000,
+      hasta: Date.now() + VIGENCIA_CACHE_PRECIOS_MS,
       mapa: new Map(filas.map((f) => [f.recurso, f.costoUnitarioMicro])),
     };
   }
@@ -65,8 +75,8 @@ async function registrarConsumo({ sinCosto, yaIncurrido, ...c }: ConsumoNuevo) {
     return registrarConsumoSesion(c, sinCosto);
   const unitario = sinCosto ? 0 : await precioDe(c.recurso);
   const costoTotal = unitario * c.cantidad;
-  const interno =
-    c.actorTipo === "agent" && !c.apiKeyId && c.actorId?.startsWith("agente-interno:");
+  // Agente interno y apps OAuth comparten el presupuesto del agente de la empresa (ADR-098).
+  const interno = c.actorTipo === "agent" && !c.apiKeyId && esAgenteSinKey(c.actorId);
   return enTransaccion(c.tenantId, async (tx) => {
     if (
       (c.apiKeyId || interno) &&

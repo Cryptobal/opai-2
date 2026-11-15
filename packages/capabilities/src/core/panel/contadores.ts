@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { contarPorAprobar } from "../por-aprobar";
 import { defineCapability } from "../../define";
 import { dondeCuenta, dondeInstalacion, dondePersona } from "../maestros/alcance";
-import { SIN_PLATAFORMA } from "../../agentes/plataforma";
 
 const n = z.number().nullable();
 
@@ -66,26 +66,8 @@ export const resumenContadores = defineCapability({
         si("personas", PERMISOS_CORE.personasRead, () =>
           ctx.db.persona.count({ where: { archivadaEn: null, AND: [dondePersona(ctx)] } }),
         ),
-        si("aprobacionesPendientes", null, async () => {
-          const puedeAgente = ctx.autorizar(PERMISOS_CORE.aprobacionesManage);
-          const puedeMargen = ctx.autorizar("cpq:aprobar");
-          const puedeEnvio = ctx.autorizar("cpq:envios.aprobar");
-          if (!puedeAgente && !puedeMargen && !puedeEnvio) return null;
-          const [agente, margen, envio] = await Promise.all([
-            puedeAgente
-              ? ctx.db.aprobacion.count({
-                  where: { estado: "pendiente", venceEn: { gt: new Date() }, ...SIN_PLATAFORMA },
-                })
-              : Promise.resolve(0),
-            puedeMargen
-              ? ctx.db.cpqAprobacion.count({ where: { estado: "pendiente" } })
-              : Promise.resolve(0),
-            puedeEnvio
-              ? ctx.db.cpqPropuestaEnvio.count({ where: { estado: "pendiente_aprobacion" } })
-              : Promise.resolve(0),
-          ]);
-          return agente + margen + envio;
-        }),
+        // CAR-253: la misma cuenta que «Por aprobar» (núcleo + lo que aporta cada módulo).
+        si("aprobacionesPendientes", null, () => contarPorAprobar(ctx)),
         usuario
           ? si("notificacionesNoLeidas", null, () =>
               ctx.db.notificacion.count({ where: { usuarioId: usuario, leidaEn: null } }),

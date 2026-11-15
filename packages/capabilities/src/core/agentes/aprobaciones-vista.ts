@@ -58,7 +58,9 @@ export async function vistaAprobaciones(
     apiKeyId: a.apiKeyId,
     agente: a.agenteInternoId
       ? "Agente interno"
-      : (nombre.get(a.apiKeyId ?? "") ?? "Key eliminada"),
+      : a.apiKeyId === null && a.reglaId
+        ? (via.get(a.viaUserId) ?? "Una persona") // CAR-252: la pidió una persona por una regla
+        : (nombre.get(a.apiKeyId ?? "") ?? "Key eliminada"),
     via: via.get(a.viaUserId) ?? null,
     riesgo:
       obtenerCapacidad(a.capability)?.efecto === "irreversible"

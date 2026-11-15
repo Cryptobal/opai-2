@@ -1,42 +1,32 @@
 /**
- * Marco de la aplicación (ADR-090, CAR-278): el clásico (menú lateral) o el Hilo. Sigue el mecanismo
- * del tema: la elección se guarda como preferencia de la persona (`core.preferencias_marco`) y rige
- * en cada navegador por una cookie, que es lo único que el servidor lee para pintar el marco elegido
- * desde el primer byte, sin consultas ni parpadeo. Mientras conviven los dos marcos no se sincroniza
- * entre dispositivos: se puede probar el Hilo en el computador y seguir con el clásico en el teléfono.
- * No es un permiso: quien cambie la cookie a mano solo cambia su propio marco.
+ * Marco de la aplicación (ADR-109): el diseño nuevo es el único con empresa. Sin acceso a una
+ * empresa (p. ej. Plataforma o «Sin permisos») queda el marco base clásico, que muestra ese aviso.
+ * La preferencia y la cookie de marco ya no se leen ni se escriben (CAR-424).
  */
-export type Marco = "clasico" | "hilo";
+export type Marco = "clasico" | "nuevo";
 
-export const COOKIE_MARCO = "opai_marco";
-
-export function marcoDeCookie(valor: string | undefined): Marco {
-  return valor === "hilo" ? "hilo" : "clasico";
-}
-
-/** En esta etapa (H1) el Hilo existe solo en el ERP y con acceso a la empresa actual. */
-export function portalAdmiteHilo(portal: string, acceso: boolean): boolean {
-  return portal === "erp" && acceso;
+/**
+ * Marco que se monta para un portal y un acceso. Una sola regla para el layout y para las páginas
+ * que cambian con el marco (Inicio): nunca deciden por separado.
+ */
+export function marcoResuelto(_portal: string, acceso: boolean): Marco {
+  // CAR-335 D6e: todo portal con empresa usa el diseño nuevo. Sin acceso queda el marco base.
+  return acceso ? "nuevo" : "clasico";
 }
 
 /**
- * Marco que se monta para un portal, un acceso y el valor de la cookie. Una sola regla para el layout
- * y para las páginas que cambian con el marco (Inicio, Preferencias): nunca deciden por separado.
+ * Menú lateral plegado del diseño nuevo (ADR-109, CAR-335 D2b): se recuerda en una cookie de este
+ * navegador que el servidor lee para pintar el menú plegado desde el primer byte.
  */
-export function marcoResuelto(portal: string, acceso: boolean, cookie: string | undefined): Marco {
-  return portalAdmiteHilo(portal, acceso) ? marcoDeCookie(cookie) : "clasico";
+export const COOKIE_MENU = "opai_menu";
+
+export function menuPlegadoDeCookie(valor: string | undefined): boolean {
+  return valor === "plegado";
 }
 
-/** Texto para `document.cookie`: un año para Hilo; el clásico es la ausencia de la cookie. */
-export function cookieMarco(marco: Marco): string {
+/** Texto para `document.cookie`: plegado dura un año; abierto (lo normal) es la ausencia. */
+export function cookieMenu(plegado: boolean): string {
   const seguro =
     typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
-  return `${COOKIE_MARCO}=${marco === "hilo" ? "hilo" : ""}; Path=/; Max-Age=${marco === "hilo" ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
-}
-
-/** Planillas: pantallas que necesitan todo el ancho, donde el hilo va plegado en el riel. */
-const ANCHAS = ["/pauta", "/asistencia", "/finanzas/flujo"] as const;
-
-export function rutaAncha(ruta: string): boolean {
-  return ANCHAS.some((base) => ruta === base || ruta.startsWith(`${base}/`));
+  return `${COOKIE_MENU}=${plegado ? "plegado" : ""}; Path=/; Max-Age=${plegado ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
 }

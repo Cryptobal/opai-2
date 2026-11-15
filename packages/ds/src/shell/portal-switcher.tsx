@@ -49,6 +49,7 @@ export function PortalSwitcher(props: Props) {
   const { portales, portalActual, tenant, variante = "compacto", extra = [] } = props;
   const actual = portales.find((p) => p.id === portalActual) ?? portales[0];
   const nombre = tenant?.nombre ?? "OPAI";
+  const logo = tenant?.logo;
   const items: ItemMenu[] = [
     ...portales.map((p, i) => ({
       id: `p-${p.id}`,
@@ -63,10 +64,10 @@ export function PortalSwitcher(props: Props) {
   const conMenu = items.length > 1;
   const visual =
     variante === "monograma" ? (
-      <Monograma nombre={nombre} className="size-6" />
+      <Monograma nombre={nombre} logo={logo} className="size-6" />
     ) : variante === "riel" ? (
       <>
-        <Monograma nombre={nombre} />
+        <Monograma nombre={nombre} logo={logo} />
         <span className="flex max-w-full items-center gap-0.5 text-[11px] leading-[14px] font-semibold text-fg">
           <span className="truncate">{actual?.corta ?? actual?.etiqueta}</span>
           {conMenu ? <ChevronsUpDown className="size-3 flex-none" aria-hidden /> : null}
@@ -74,7 +75,7 @@ export function PortalSwitcher(props: Props) {
       </>
     ) : variante === "tarjeta" ? (
       <span className="flex w-full min-w-0 items-center gap-2.5 text-left">
-        <Monograma nombre={nombre} />
+        <Monograma nombre={nombre} logo={logo} />
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="t-label-sm truncate text-fg">{actual?.etiqueta}</span>
           <span className="t-caption truncate text-[11px] leading-[14px]">{nombre}</span>
@@ -85,7 +86,7 @@ export function PortalSwitcher(props: Props) {
       </span>
     ) : (
       <span className="flex min-w-0 items-center gap-2">
-        <Monograma nombre={nombre} />
+        <Monograma nombre={nombre} logo={logo} />
         <span className="truncate text-[15px] leading-5 font-semibold text-fg">{nombre}</span>
         {conMenu ? <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden /> : null}
       </span>

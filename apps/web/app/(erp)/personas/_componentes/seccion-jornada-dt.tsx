@@ -1,11 +1,11 @@
 import { PERMISOS_CORE } from "@opai/domain";
-import { Alerta, Badge, ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { Badge, ParesGrid, SeccionTarjeta } from "@opai/ds";
 
+import { BloqueContratoPeriodos } from "./bloque-contrato-periodos";
 import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { conDatos, SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
-import { estadoVencimiento } from "./estado-ficha";
 import { laboralDe } from "./lecturas-ficha";
-import { fecha, hoyIso } from "@/lib/fechas";
+import { fecha } from "@/lib/fechas";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { identidadActual } from "@/lib/servidor";
 
@@ -20,15 +20,7 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
   if (!r.ok) return <SeccionError titulo={TITULO} que="la jornada DT" />;
   const j = r.data.jornadaDt;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
-  const vacia = !conDatos(
-    j?.resolucion,
-    j?.horasSemanales,
-    j?.distribucion,
-    j?.terminoPlazoFijo,
-    j?.articulo22,
-  );
-  // CAR-124 (export «Secciones» › Jornada DT): aviso cuando el plazo fijo vence pronto o ya venció.
-  const plazo = estadoVencimiento(hoyIso(), j?.terminoPlazoFijo);
+  const vacia = !conDatos(j?.resolucion, j?.horasSemanales, j?.distribucion, j?.articulo22);
   return (
     <SeccionTarjeta
       titulo={TITULO}
@@ -46,18 +38,6 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
       {vacia ? (
         <VacioSeccion texto="Sin jornada registrada." accion={puede ? "Agregar" : null} />
       ) : null}
-      {plazo && plazo.tono !== "success" && j?.terminoPlazoFijo ? (
-        <div className="mb-3">
-          <Alerta
-            tono={plazo.tono === "danger" ? "danger" : "warning"}
-            titulo={`Plazo fijo: ${plazo.etiqueta.toLowerCase()}`}
-          >
-            Término el {fecha(j.terminoPlazoFijo)}
-            {j.plazoFijoPeriodo ? `, período ${j.plazoFijoPeriodo} de 3` : ""}. Decide si se
-            renueva, pasa a indefinido o termina.
-          </Alerta>
-        </div>
-      ) : null}
       <ParesGrid
         items={[
           {
@@ -72,16 +52,12 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
           },
           { etiqueta: "Resolución", valor: j?.resolucion },
           {
-            etiqueta: "Vigente desde",
-            valor: j?.resolucionVigenteDesde ? fecha(j.resolucionVigenteDesde) : null,
-          },
-          {
-            etiqueta: "Plazo fijo (período)",
-            valor: j?.plazoFijoPeriodo ? `${j.plazoFijoPeriodo} de 3` : null,
-          },
-          {
-            etiqueta: "Término plazo fijo",
-            valor: j?.terminoPlazoFijo ? fecha(j.terminoPlazoFijo) : null,
+            etiqueta: "Vigente",
+            valor: j?.resolucionVigenteDesde
+              ? `desde ${fecha(j.resolucionVigenteDesde)}${j.resolucionVigenteHasta ? ` hasta ${fecha(j.resolucionVigenteHasta)}` : ""}`
+              : j?.resolucionVigenteHasta
+                ? `hasta ${fecha(j.resolucionVigenteHasta)}`
+                : null,
           },
           {
             etiqueta: "Aviso de término",
@@ -89,6 +65,7 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
           },
         ]}
       />
+      <BloqueContratoPeriodos personaId={personaId} contrato={r.data.contrato} puede={puede} />
       {puede ? (
         <HojaEditarSeccion
           seccion="jornada-dt"
@@ -96,11 +73,10 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
           inicial={{
             resolucion: j?.resolucion,
             resolucionVigenteDesde: j?.resolucionVigenteDesde,
+            resolucionVigenteHasta: j?.resolucionVigenteHasta,
             horasSemanales: j?.horasSemanales,
             distribucion: j?.distribucion,
             articulo22: j?.articulo22 ? "si" : "no",
-            plazoFijoPeriodo: j?.plazoFijoPeriodo?.toString(),
-            terminoPlazoFijo: j?.terminoPlazoFijo,
             avisoTerminoDias: j?.avisoTerminoDias?.toString(),
           }}
         />

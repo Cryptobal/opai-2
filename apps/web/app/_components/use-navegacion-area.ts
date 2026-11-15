@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { AreaNav } from "@opai/domain";
 import { avisar } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 export type Fijado = {
   tipo: "entrada" | "ficha";

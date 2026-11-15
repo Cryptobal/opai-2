@@ -40,7 +40,7 @@ export function FormularioLogin({ destino, google, inicial, cargando: forzado, e
   return (
     <AuthCard
       titulo="Inicia sesión"
-      subtitulo="ERP, Plataforma y Supervisor"
+      subtitulo="ERP, Plataforma, Supervisor y Cliente"
       pie={<PiePortales />}
       Link={LinkNext}
     >

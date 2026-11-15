@@ -40,6 +40,8 @@ export type AppShellProps = ComunesBarra & {
   onAreaAbierta?: (area: string) => void;
   children: ReactNode;
   className?: string;
+  /** Diseño nuevo (ADR-109): botones del menú plegable; los pone `ShellNuevo` (`@opai/ds/shell-nuevo`). */
+  botonesMenu?: { sidebar?: ReactNode; riel?: ReactNode };
 };
 
 /**
@@ -49,7 +51,7 @@ export type AppShellProps = ComunesBarra & {
  */
 export function AppShell(props: AppShellProps) {
   const { titulo, nav, rutaActual, acciones, insignia, children, className, Link } = props;
-  const { accionesTelefono, onNavegar, completo, navInferior, ...barra } = props;
+  const { accionesTelefono, onNavegar, completo, navInferior, botonesMenu, ...barra } = props;
   return (
     <div className="flex min-h-dvh bg-bg text-fg">
       <Rail
@@ -65,6 +67,7 @@ export function AppShell(props: AppShellProps) {
         {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
         {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
         {...(onNavegar ? { onNavegar } : {})}
+        boton={botonesMenu?.riel}
       />
       <Sidebar
         items={nav}
@@ -82,6 +85,7 @@ export function AppShell(props: AppShellProps) {
         {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
         {...(props.areaAbierta !== undefined ? { areaAbierta: props.areaAbierta } : {})}
         {...(props.onAreaAbierta ? { onAreaAbierta: props.onAreaAbierta } : {})}
+        boton={botonesMenu?.sidebar}
         Link={Link}
       />
       <div className="flex min-w-0 flex-1 flex-col">

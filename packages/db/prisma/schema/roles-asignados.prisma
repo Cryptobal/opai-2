@@ -1,0 +1,45 @@
+// Varios roles por miembro y roles asignados a grupos (CAR-359, referente GitHub: roles que se suman
+// y roles a equipos). El rol base (`Membership.rol`) y el rol personalizado principal (`roleId`)
+// siguen igual; estas tablas SUMAN roles personalizados del tenant. Denegar (excepción) sigue
+// ganando. Con tenant_id y RLS `tenant_isolation`; FK compuestas: rol, miembro y grupo son de la
+// MISMA empresa aunque alguien salte la capacidad.
+
+/// Rol personalizado adicional de un miembro. Se suma al rol principal; quitarlo borra la fila (queda
+/// en `core.audit_events`). Si la membresía o el rol desaparecen, la fila se va con ellos.
+model RolMiembro {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  roleId    String   @map("role_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  membership Membership @relation(fields: [tenantId, userId], references: [tenantId, userId], onDelete: Cascade)
+  rol        Rol        @relation(fields: [tenantId, roleId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, roleId])
+  @@index([tenantId, roleId])
+  @@map("roles_miembro")
+  @@schema("core")
+}
+
+/// Rol personalizado asignado a un grupo: lo heredan sus miembros mientras pertenezcan al grupo y el
+/// grupo no esté archivado.
+model RolGrupo {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  grupoId   String   @map("grupo_id") @db.Uuid
+  roleId    String   @map("role_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id])
+  grupo  GrupoUsuarios @relation(fields: [tenantId, grupoId], references: [tenantId, id], onDelete: Cascade)
+  rol    Rol           @relation(fields: [tenantId, roleId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, grupoId, roleId])
+  @@index([tenantId, roleId])
+  @@map("roles_grupo")
+  @@schema("core")
+}

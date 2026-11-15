@@ -5,7 +5,7 @@ import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { conBusqueda, type Parametros, type SearchParams } from "@/lib/parametros";
+import { conFiltros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
 import { cargarCuenta, cargarCuentas, filtrosDe } from "./datos";
@@ -41,7 +41,7 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
           </EnlaceBoton>
         )
       }
-      opciones={(d) => ({ volver: { href: conBusqueda("/cuentas", d.p.q), etiqueta: "Cuentas" } })}
+      opciones={(d) => ({ volver: { href: conFiltros("/cuentas", d.p), etiqueta: "Cuentas" } })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
         // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
@@ -61,7 +61,7 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
                 state={lista.state}
                 items={lista.items}
                 seleccionada={id}
-                q={p.q}
+                filtros={p}
                 etiquetas={lista.etiquetas}
               />
             }

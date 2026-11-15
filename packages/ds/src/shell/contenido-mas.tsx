@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 
 import { Cerrar } from "../components/dialog-partes";
 import { HojaMovil } from "../components/hoja-movil";
+import { useHojaSobreBarra } from "../components/hoja-sobre-barra";
 import { TEXTO_BUSQUEDA } from "../components/hoja-busqueda";
 import { InputBusqueda } from "../components/input-busqueda";
 import type { ItemMenu } from "../components/menu";
@@ -43,7 +44,11 @@ type Props = {
  */
 export function ContenidoMas(p: Props) {
   const { abierto, onCerrar, rutaActual, epoca, busqueda } = p;
-  const { sueltas, areas, pie } = useMemo(() => estructuraMas(p.items, rutaActual), [p.items, rutaActual]);
+  const sobreBarra = useHojaSobreBarra();
+  const { sueltas, areas, pie } = useMemo(
+    () => estructuraMas(p.items, rutaActual),
+    [p.items, rutaActual],
+  );
   const e = useEstadoMas(abierto, areas, epoca, Boolean(busqueda));
   const ultimos = useRef<readonly ItemFijado[]>([]);
   // Se relee al abrir; al cerrar se conserva la última lectura para que la fila no se vacíe mientras la hoja sale.
@@ -100,7 +105,8 @@ export function ContenidoMas(p: Props) {
           >
             Cancelar
           </button>
-        ) : (
+        ) : // Sobre la barra del teléfono no hay «X»: se sale tocando otra pestaña (CAR-416).
+        sobreBarra ? null : (
           <Cerrar />
         )}
       </div>

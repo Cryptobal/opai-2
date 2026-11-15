@@ -1,43 +1,8 @@
 import { listarCapacidades, obtenerCapacidad } from "../../registry";
+import { SUSTANTIVO } from "./actividad-sustantivos";
+import { MODULO, VERBO } from "./actividad-verbos";
 
 // Frases de la actividad de una ficha a partir de la auditoría (capacidad + input saneado).
-
-const SUSTANTIVO: Record<string, string> = {
-  cuentas: "la cuenta",
-  contactos: "el contacto",
-  instalaciones: "la instalación",
-  puestos: "el puesto",
-  personas: "la ficha de",
-  vinculos: "el vínculo laboral",
-  cargos: "el cargo",
-  estructuras: "una estructura de sueldo",
-  documentos: "el documento",
-  negocios: "el negocio",
-  tenants: "la empresa",
-  agentes: "el agente",
-  config: "la configuración",
-};
-
-const VERBO: Record<string, string> = {
-  create: "creó",
-  update: "actualizó",
-  delete: "eliminó",
-  mover: "movió",
-  set_modules: "cambió los módulos activos",
-  archive: "archivó",
-  set_estado: "cambió el estado de",
-  set_activo: "cambió la vigencia de",
-  set_representantes: "actualizó los representantes de",
-  bloquear: "bloqueó",
-  desbloquear: "desbloqueó",
-  terminar: "terminó",
-  anular: "anuló",
-  confirmar_subida: "subió",
-  iniciar_subida: "empezó a subir",
-  vincular: "vinculó",
-  desvincular: "desvinculó",
-  vincular_usuario: "vinculó un usuario a",
-};
 
 const ETIQUETA: Record<string, string> = {
   nombre: "Nombre",
@@ -69,28 +34,43 @@ type Input = Record<string, unknown>;
 function objeto(input: Input): string | null {
   const t = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
   const persona = [t(input.nombres), t(input.apellidos)].filter(Boolean).join(" ");
-  return t(input.nombre) ?? (persona || null) ?? t(input.titulo) ?? null;
+  return (
+    t(input.nombre) ??
+    (persona || null) ??
+    t(input.titulo) ??
+    t(input.empresa) ??
+    t(input.email) ??
+    null
+  );
 }
 
-/** "creó la cuenta Logística Andina", "cambió el estado de la cuenta a Cliente activo". */
+/**
+ * "creó la cuenta Logística Andina", "cambió el estado de la cuenta a Cliente activo". Sin verbo
+ * conocido nombra la ficha («modificó la cotización»); sin ficha conocida, el módulo («aprobó un
+ * registro de Finanzas»). Un id histórico o nuevo jamás se presenta como texto al usuario (CAR-339).
+ */
 export function frase(capability: string, input: Input): string {
   const partes = capability.split(".");
   const verbo = partes.at(-1) ?? "";
   const entidad = partes.at(-2) ?? "";
   if (capability === "platform.modules.set" || verbo === "set_modules")
     return "cambió los módulos activos";
+  if (obtenerCapacidad(capability)?.efecto === "lectura") return "consultó información";
   const v = VERBO[verbo];
   const s = SUSTANTIVO[entidad];
-  // El registro no tiene una etiqueta breve en pasado; solo descripciones de herramienta.
-  // Un id histórico o un verbo nuevo jamás se presenta como texto al usuario.
-  if (!v || !s) {
-    return obtenerCapacidad(capability)?.efecto === "lectura"
-      ? "consultó información"
-      : "realizó un cambio";
-  }
+  const modulo = partes.length > 2 ? MODULO[partes[0] ?? ""] : undefined;
   const o = objeto(input);
-  return `${v} ${s}${o ? ` ${o}` : ""}`;
+  if (verbo === "invite") return `invitó a ${o ?? "un usuario"}`;
+  // «la ficha de» necesita a quién: sin nombre, «la ficha de una persona».
+  const sujeto = s && (o ? `${s} ${o}` : s.endsWith(" de") ? `${s} una persona` : s);
+  if (v && sujeto) return contraer(`${v} ${sujeto}`);
+  if (sujeto) return contraer(`modificó ${sujeto}`);
+  if (v && modulo) return `${v} un registro de ${modulo}`;
+  return modulo ? `realizó un cambio en ${modulo}` : "realizó un cambio";
 }
+
+/** «de el» → «del», «a el» → «al» («cambió el estado del ticket»). */
+const contraer = (t: string) => t.replace(/\bde el\b/g, "del").replace(/\ba el\b/g, "al");
 
 /** Campos cambiados (sin ids ni claves técnicas), hasta 4. */
 export function cambios(input: Input): { campo: string; valor: string }[] {

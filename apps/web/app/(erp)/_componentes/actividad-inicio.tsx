@@ -5,6 +5,7 @@ import { Avatar, SeccionTarjeta, Segmentado } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { fecha, haceCuanto, hora, hoyIso } from "@/lib/fechas";
+import { rutaDeEntidad } from "@/lib/ruta-entidad";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Actividad } from "@/lib/tipos-maestros";
 
@@ -47,32 +48,41 @@ export async function ActividadInicio({ actor }: { actor: string | undefined }) 
         <p className="text-base text-fg-muted">Sin actividad todavía.</p>
       ) : (
         <FilasPlegables visibles={3}>
-          {r.data.items.map((i) => (
-            <li
-              key={i.id}
-              className="flex gap-3 border-b border-border py-3 first:pt-0 last:border-b-0"
-            >
-              {i.actor.agente ? (
-                <span
-                  aria-label="Agente"
-                  className="flex size-8 flex-none items-center justify-center rounded-md bg-accent-muted text-accent"
-                >
-                  <Bot className="size-4" />
+          {r.data.items
+            .map((fila) => ({ ...fila, href: rutaDeEntidad(fila.entidad) }))
+            .map((i) => (
+              <li
+                key={i.id}
+                className="flex gap-3 border-b border-border py-3 first:pt-0 last:border-b-0"
+              >
+                {i.actor.agente ? (
+                  <span
+                    aria-label="Agente"
+                    className="flex size-8 flex-none items-center justify-center rounded-md bg-accent-muted text-accent"
+                  >
+                    <Bot className="size-4" />
+                  </span>
+                ) : (
+                  <Avatar nombre={i.actor.nombre} />
+                )}
+                <span className="flex min-w-0 flex-col">
+                  <span className="text-base text-fg">
+                    <strong className="font-semibold">{i.actor.nombre}</strong>{" "}
+                    {i.href ? (
+                      <LinkNext href={i.href} className="hover:underline">
+                        {i.accion}
+                      </LinkNext>
+                    ) : (
+                      i.accion
+                    )}
+                  </span>
+                  <span className="t-caption">
+                    {i.actor.agente ? `Agente${i.via ? ` vía ${i.via}` : ""} · ` : ""}
+                    {cuando(i.cuando)}
+                  </span>
                 </span>
-              ) : (
-                <Avatar nombre={i.actor.nombre} />
-              )}
-              <span className="flex min-w-0 flex-col">
-                <span className="text-base text-fg">
-                  <strong className="font-semibold">{i.actor.nombre}</strong> {i.accion}
-                </span>
-                <span className="t-caption">
-                  {i.actor.agente ? `Agente${i.via ? ` vía ${i.via}` : ""} · ` : ""}
-                  {cuando(i.cuando)}
-                </span>
-              </span>
-            </li>
-          ))}
+              </li>
+            ))}
         </FilasPlegables>
       )}
       <EnlaceBoton href="/configuracion/auditoria" variante="ghost" className="mt-2 -ml-3">

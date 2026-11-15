@@ -121,6 +121,10 @@ describe("Personas ficha PR 2 (capacidades)", () => {
 
     const directo = await mod.executeCapability(supCtx, "core.personas.prevision_ver", input);
     expect(directo).toMatchObject({ ok: true, data: { planIsapre: "••••" } });
+    // CAR-276: APV, cargas, % adicional y discapacidad también van ocultos al supervisor.
+    expect(directo).toMatchObject({
+      data: { sensiblesOcultos: true, tipoPension: null, cargasSimples: null, apvMonto: null, discapacidadInvalidez: null },
+    });
     expect(JSON.stringify(directo)).not.toContain(planClaro);
 
     const http = await manejarCapacidadHttp(

@@ -3,12 +3,13 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
+import { Alerta, Badge, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
 import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
 import { celdaEditable, type Planilla } from "./datos";
 import type { ArmadoPlanilla } from "./datos";
+import { hojaEspecial, type HojaEspecial } from "./cobros-celda";
 
 const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
 const HojaImportar = dynamic(() => import("./hoja-importar").then((m) => ({ default: m.HojaImportar })));
@@ -24,6 +25,8 @@ type Props = {
   textosError: Record<string, unknown> | undefined;
   seleccion: { filaId: string; semana: string } | null;
   onSeleccion: (s: { filaId: string; semana: string } | null) => void;
+  /** Abre la hoja de «Cobros esperados» (CAR-396) o del IVA (CAR-397) de la semana. */
+  onHoja: (h: HojaEspecial) => void;
   importAbierta: boolean;
   onImportAbiertaChange: (v: boolean) => void;
 };
@@ -38,6 +41,7 @@ export function PlanillaFlujoEscritorio({
   textosError,
   seleccion,
   onSeleccion,
+  onHoja,
   importAbierta,
   onImportAbiertaChange,
 }: Props) {
@@ -77,17 +81,28 @@ export function PlanillaFlujoEscritorio({
           ? {
               onCelda: (filaId: string, semana: string) => {
                 if (celdaEditable(p, filaId, semana)) onSeleccion({ filaId, semana });
+                else {
+                  const h = hojaEspecial(p, filaId, semana);
+                  if (h) onHoja(h);
+                }
               },
             }
           : {})}
       />
       {gestiona ? (
-        <p className="text-sm text-fg-muted">
-          Toca una celda planificada para editarla. Las semanas pasadas muestran lo real según cartola.{" "}
-          <Link href="/configuracion/modulo/finanzas?seccion=flujo-caja" className="text-accent underline">
-            Filas y ajustes
-          </Link>
-        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-fg-muted">
+          <span className="flex flex-wrap items-center gap-2" aria-label="Qué significa cada color">
+            <Badge tono="success">Real del banco</Badge>
+            <Badge tono="info">Comprometido</Badge>
+            <Badge tono="neutro">Planificado</Badge>
+          </span>
+          <span>
+            Toca una celda planificada para editarla; las semanas pasadas muestran lo real de la cartola.{" "}
+            <Link href="/configuracion/modulo/finanzas?seccion=flujo-caja" className="text-accent underline">
+              Filas y ajustes
+            </Link>
+          </span>
+        </div>
       ) : null}
       {gestiona ? (
         <>

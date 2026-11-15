@@ -2,7 +2,7 @@
 // un reloj inyectado, así se prueban con reloj simulado; los crons solo encolan (ADR-029).
 
 export const MINUTOS_ALERTA_INICIO_DEFECTO = 30;
-export const DIAS_AVISO_COMPENSABLES = 30;
+const DIAS_AVISO_COMPENSABLES = 30;
 
 const MIN = 60_000;
 

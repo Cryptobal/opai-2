@@ -17,10 +17,16 @@ export type Acceso = {
   permisosRol?: readonly string[] | null;
   /** Excepciones por usuario sobre el rol. */
   excepciones?: readonly Excepcion[] | null;
+  /**
+   * Permisos de los roles adicionales del miembro y de los roles de sus grupos (CAR-359): se SUMAN
+   * al rol principal. Nunca quitan; una excepción que deniega sigue ganando sobre ellos.
+   */
+  permisosAdicionales?: readonly string[] | null;
 };
 
-/** Si el rol (base o personalizado), sin excepciones, concede el permiso. */
+/** Si el rol (base o personalizado) o algún rol adicional, sin excepciones, concede el permiso. */
 function rolConcede(acceso: Acceso, permiso: string): boolean {
+  if ((acceso.permisosAdicionales ?? []).some((p) => coincide(p, permiso))) return true;
   if (acceso.rol !== null) return tienePermiso(acceso.rol, permiso);
   return (acceso.permisosRol ?? []).some((p) => coincide(p, permiso));
 }

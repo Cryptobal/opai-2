@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { useBusquedaDiferida } from "./use-busqueda";
 import type { Guardado, Resumen } from "./tipos-historial";
@@ -73,6 +73,7 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
           id: nuevoId(),
           rol: m.rol === "usuario" ? ("yo" as const) : ("agente" as const),
           texto: m.texto,
+          ...(m.referencias?.length ? { referencias: m.referencias } : {}),
         }));
         return { hilo, meta: { titulo, archivada } };
       } catch {

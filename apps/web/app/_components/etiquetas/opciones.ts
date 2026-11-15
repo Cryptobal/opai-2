@@ -12,8 +12,8 @@ export type OpcionEtiqueta = { valor: string; etiqueta: string };
  * Sin permiso de leer etiquetas devuelve vacío y el filtro no aparece. Una lectura por request.
  */
 export const cargarOpcionesEtiqueta = cache(async (): Promise<OpcionEtiqueta[]> => {
-  const r = await ejecutarComoUsuario<EtiquetaFila[]>("erp", "core.etiquetas.list", {});
-  return r.ok ? r.data.map((e) => ({ valor: e.id, etiqueta: e.nombre })) : [];
+  const r = await ejecutarComoUsuario<{ items: EtiquetaFila[] }>("erp", "core.etiquetas.list", {});
+  return r.ok ? r.data.items.map((e) => ({ valor: e.id, etiqueta: e.nombre })) : [];
 });
 
 /** Parámetro de la capacidad a partir de `?etiqueta=` (solo si es un id válido). */

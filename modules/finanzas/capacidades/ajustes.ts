@@ -5,12 +5,12 @@ import { defineCapability } from "@opai/capabilities";
 import { sincronizarAvisosEnTx } from "./aviso";
 import { ajustesSchema } from "./esquemas";
 import { PERMISO_CONFIGURAR, PERMISO_VER } from "./permisos";
-import { aFecha, ajustesDe } from "./util";
+import { ajustesDe } from "./util";
 
 export const ajustesObtener = defineCapability({
   id: "finanzas.ajustes.obtener",
   descripcion:
-    "Entrega los ajustes del flujo de caja: saldo inicial, umbral de saldo bajo (único), calendario de pagos y aviso de saldo.",
+    "Entrega los ajustes del flujo de caja: umbral de saldo bajo (único), calendario de pagos y aviso de saldo.",
   permiso: PERMISO_VER,
   input: z.object({}),
   output: ajustesSchema,
@@ -22,7 +22,7 @@ export const ajustesObtener = defineCapability({
 export const ajustesActualizar = defineCapability({
   id: "finanzas.ajustes.actualizar",
   descripcion:
-    "Fija saldo inicial, umbral de saldo bajo (único), calendario de pagos y aviso del flujo de caja; la planilla recalcula con ellos.",
+    "Fija el umbral de saldo bajo (único), el calendario de pagos y el aviso del flujo de caja; la planilla recalcula con ellos.",
   permiso: PERMISO_CONFIGURAR,
   input: ajustesSchema.partial(),
   output: ajustesSchema,
@@ -34,9 +34,7 @@ export const ajustesActualizar = defineCapability({
     if (dryRun) return nuevo;
     await ctx.transaccion(async (tx) => {
       const data = {
-        saldoInicial: BigInt(nuevo.saldoInicial),
         umbral: BigInt(nuevo.umbral),
-        desde: aFecha(nuevo.desde),
         horizonteSemanas: nuevo.horizonteSemanas,
         calendarioPagos: nuevo.calendarioPagos,
         avisoActivo: nuevo.avisoActivo,

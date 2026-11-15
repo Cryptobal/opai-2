@@ -88,5 +88,17 @@ describe.skipIf(omitirSuiteDb())("Finanzas · sesión de Octava (db)", () => {
     });
     expect(JSON.stringify(r)).toContain('"ok":true');
     expect(await almacenSesionOctava(ctx(), integ!.id).leerToken()).toBeNull();
+
+    // CAR-195: reemplazar exige confirmarlo; la vista previa avisa; la auditoría nunca guarda el valor.
+    const entrada = { proveedor: "dte_cesion", nombre: "clave", valor: "clave-nueva-456" };
+    const previa = await mod.executeCapability(cu, "core.integraciones.set_secreto", entrada, { dryRun: true });
+    expect(JSON.stringify(previa)).toContain('"reemplaza":true');
+    const sinConfirmar = await mod.executeCapability(cu, "core.integraciones.set_secreto", entrada);
+    expect(JSON.stringify(sinConfirmar)).toContain('"ok":false');
+    const confirmado = await mod.executeCapability(cu, "core.integraciones.set_secreto", { ...entrada, reemplazar: true });
+    expect(JSON.stringify(confirmado)).toContain('"ok":true');
+    const audit = await e.admin.auditEvent.findMany({ where: { tenantId: { in: [tenant, otro] } } });
+    expect(audit.some((a) => a.capability === "core.integraciones.set_secreto")).toBe(true);
+    for (const v of ["otra-clave-123", "clave-nueva-456"]) expect(JSON.stringify(audit)).not.toContain(v);
   });
 });

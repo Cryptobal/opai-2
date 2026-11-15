@@ -34,7 +34,12 @@ export function ApiKeySimpleApi({ proveedor, apiKey }: { proveedor: string; apiK
           error={fallo ? (error ?? "No se pudo guardar la credencial.") : null}
           onGuardar={async (valor) => {
             setFallo(false);
-            const r = await ejecutar("core.integraciones.set_secreto", { proveedor, nombre: "api_key", valor });
+            const r = await ejecutar("core.integraciones.set_secreto", {
+              proveedor,
+              nombre: "api_key",
+              valor,
+              reemplazar: Boolean(apiKey.mascara),
+            });
             if (!r) {
               setFallo(true);
               return false;

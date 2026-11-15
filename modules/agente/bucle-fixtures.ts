@@ -7,6 +7,7 @@ import {
 import { contextoDePrueba } from "@opai/capabilities/testing";
 import type { LlamadaHerramienta, RespuestaConversacion } from "@opai/integrations";
 import { z } from "zod";
+import { USAR } from "./herramientas-demanda";
 
 export function entornoBucle(efecto: "lectura" | "escritura" | "irreversible") {
   let escrituras = 0;
@@ -46,4 +47,9 @@ export function respuesta(llamadas: readonly LlamadaHerramienta[] = []): Respues
   };
 }
 
-export const llamada = { id: "llamada-1", nombre: "core_prueba_accion", argumentos: {} };
+/** El modelo ejecuta por la herramienta genérica (CAR-333), nunca por el nombre real. */
+export const llamada = {
+  id: "llamada-1",
+  nombre: USAR,
+  argumentos: { nombre: "core_prueba_accion", argumentos: {} },
+};

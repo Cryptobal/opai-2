@@ -1,0 +1,65 @@
+// Eventos salientes por empresa (CAR-352, Estándares N-1). Referente: Stripe (destinos de eventos).
+// Una empresa suscribe una dirección https a los eventos del catálogo que elija; cada envío va firmado
+// con el secreto del destino y queda en el registro de entregas. Con tenant_id y RLS `tenant_isolation`.
+
+/// Destino de eventos de una empresa. El secreto de firma se guarda cifrado con la DEK del tenant
+/// (envelope, ADR-027): se muestra una sola vez al crearlo o rotarlo y nunca sale por API ni MCP.
+model WebhookDestino {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  url           String
+  descripcion   String?
+  /// Ids del catálogo de eventos (`core.cuenta.creada`…). Vacío no se admite: se elige al menos uno.
+  eventos       String[]
+  activo        Boolean   @default(true)
+  secretoCifrado Bytes    @map("secreto_cifrado")
+  secretoIv     Bytes     @map("secreto_iv")
+  secretoTag    Bytes     @map("secreto_tag")
+  /// Últimos caracteres del secreto, para reconocerlo sin revelarlo.
+  secretoSufijo String    @map("secreto_sufijo")
+  secretoRotadoEn DateTime @default(now()) @map("secreto_rotado_en") @db.Timestamptz(6)
+  creadoPor     String?   @map("creado_por") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id])
+  entregas WebhookEntrega[]
+
+  /// Destino de la FK compuesta de las entregas: entrega y destino son de la misma empresa.
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@map("webhook_destinos")
+  @@schema("core")
+}
+
+/// Un evento por enviar (o enviado) a un destino. Se reintenta con espera creciente hasta el tope;
+/// guarda el estado, los intentos y el código de la última respuesta, nunca su cuerpo.
+model WebhookEntrega {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  destinoId       String    @map("destino_id") @db.Uuid
+  eventoId        String    @map("evento_id") @db.Uuid
+  tipo            String
+  /// "pendiente" | "ok" | "error"
+  estado          String    @default("pendiente")
+  intentos        Int       @default(0)
+  proximoIntentoEn DateTime @default(now()) @map("proximo_intento_en") @db.Timestamptz(6)
+  ultimoCodigo    Int?      @map("ultimo_codigo")
+  ultimoError     String?   @map("ultimo_error")
+  duracionMs      Int?      @map("duracion_ms")
+  entregadaEn     DateTime? @map("entregada_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id])
+  destino WebhookDestino @relation(fields: [tenantId, destinoId], references: [tenantId, id], onDelete: Cascade)
+  evento  Evento         @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, destinoId, eventoId])
+  /// Cola: lo pendiente que ya toca enviar.
+  @@index([tenantId, estado, proximoIntentoEn])
+  @@index([tenantId, destinoId, createdAt])
+  @@index([eventoId])
+  @@map("webhook_entregas")
+  @@schema("core")
+}

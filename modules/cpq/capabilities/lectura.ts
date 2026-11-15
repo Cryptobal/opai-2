@@ -60,12 +60,13 @@ export const cotizacionesList = defineCapability({
     // Archivar (CPQ v4) es de la cotización: por defecto fuera de la lista; «Archivadas» muestra solo ellas.
     if (input.soloArchivadas) filtro["archivadaEn"] = { not: null };
     else if (!input.incluirArchivadas) filtro["archivadaEn"] = null;
-    const filas = await ctx.db.cpqCotizacion.findMany({
+    // Sin `skip: 1` (CAR-400): la fila del cursor viene si aún cumple el filtro y se descarta abajo.
+    const crudas = await ctx.db.cpqCotizacion.findMany({
       where: filtro,
       orderBy: [{ id: "desc" }],
-      take: input.limite + 1,
-      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+      ...(input.cursor ? { cursor: { id: input.cursor }, take: input.limite + 2 } : { take: input.limite + 1 }),
     });
+    const filas = input.cursor && crudas[0]?.id === input.cursor ? crudas.slice(1) : crudas;
     const items = filas.slice(0, input.limite);
     const versiones = await ctx.db.cpqVersion.findMany({
       where: { cotizacionId: { in: items.map((c) => c.id) } },

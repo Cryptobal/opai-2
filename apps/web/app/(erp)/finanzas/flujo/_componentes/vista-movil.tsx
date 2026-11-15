@@ -4,6 +4,10 @@ import { Button } from "@opai/ds";
 
 import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
 import { clp, type Planilla } from "./datos";
+import { hojaEspecial } from "./cobros-celda";
+
+const editable = (filaId: string, capa: string | undefined, pasada: boolean) =>
+  !esFilaVirtual(filaId) && (!capa || capa === "plan") && !pasada;
 
 export function VistaMovilFlujo({
   planilla,
@@ -19,7 +23,7 @@ export function VistaMovilFlujo({
       <div className="rounded-lg border border-border bg-surface p-4">
         <p className="text-sm text-fg-muted">Saldo de hoy</p>
         <p className="text-2xl font-semibold text-fg">
-          {clp(planilla.semanas[0]?.saldoFinal ?? planilla.ajustes.saldoInicial)}
+          {clp(planilla.semanas[0]?.saldoFinal ?? 0)}
         </p>
       </div>
       {planilla.semanas.map((s) => (
@@ -37,7 +41,7 @@ export function VistaMovilFlujo({
               return (
                 <li key={f.id} className="flex justify-between gap-2 border-b border-border py-1 last:border-0">
                   <span>{f.etiqueta}</span>
-                  {gestiona && !esFilaVirtual(f.id) && (!c || c.capa === "plan") && !s.pasada ? (
+                  {gestiona && (editable(f.id, c?.capa, s.pasada) || hojaEspecial(planilla, f.id, s.semana)) ? (
                     <Button variant="ghost" onClick={() => onCelda(f.id, s.semana)}>
                       {monto}
                     </Button>

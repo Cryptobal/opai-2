@@ -4,7 +4,8 @@ import { Badge, Switch } from "@opai/ds";
 
 import { valoresIniciales } from "@/lib/instrumentos-valores";
 
-import { DefectoCtx, ValoresFinanciero, ValoresGarantia, ValoresRc, RestablecerInstrumentos } from "./margen-valores";
+import { DefectoCtx } from "./margen-marca";
+import { ValoresFinanciero, ValoresGarantia, ValoresRc, RestablecerInstrumentos } from "./margen-valores";
 import { type EstadoMargen, type ParametrosVersion, pctTexto } from "./margen-form";
 
 /** Instrumentos financieros de la versión: un interruptor por instrumento con su tasa vigente (CPQ v4). */

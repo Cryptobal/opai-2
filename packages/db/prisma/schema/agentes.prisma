@@ -149,6 +149,9 @@ model Aprobacion {
   input          Json
   idempotencyKey String?   @map("idempotency_key")
   resumen        String
+  /// Regla de aprobación de la empresa que la pidió (CAR-252). null: la pidió la autonomía del agente.
+  /// FK compuesta (tenant_id, regla_id) solo en SQL, como el grupo de la regla.
+  reglaId        String?   @map("regla_id") @db.Uuid
   /// "pendiente" | "aprobada" | "rechazada" | "vencida"
   estado         String    @default("pendiente")
   venceEn        DateTime  @map("vence_en") @db.Timestamptz(6)
@@ -162,6 +165,7 @@ model Aprobacion {
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, estado, createdAt])
+  @@index([tenantId, reglaId])
   @@map("aprobaciones")
   @@schema("core")
 }

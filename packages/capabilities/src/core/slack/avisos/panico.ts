@@ -68,7 +68,7 @@ export async function directos(ctx: Contexto, a: AvisoPanico, slackIds: string[]
 }
 
 /** Mensaje directo a los supervisores a cargo de la instalación del pánico. */
-export async function mensajesDirectosPanico(ctx: Contexto, a: AvisoPanico): Promise<number> {
+async function mensajesDirectosPanico(ctx: Contexto, a: AvisoPanico): Promise<number> {
   if (!a.instalacionId) return 0;
   const aCargo = await ctx.db.supervisorInstalacion.findMany({
     where: { instalacionId: a.instalacionId },

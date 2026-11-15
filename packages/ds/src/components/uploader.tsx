@@ -89,8 +89,8 @@ export function Uploader(props: Props) {
     <div className="flex flex-col gap-3">
       <input
         ref={input}
-        id={id}
-        type="file"
+        id={id} type="file"
+        aria-label={etiquetaBoton ?? "Agregar archivo"} // el label de arrastre se oculta en el teléfono
         className="sr-only"
         {...(accept ? { accept } : {})}
         multiple={multiple}

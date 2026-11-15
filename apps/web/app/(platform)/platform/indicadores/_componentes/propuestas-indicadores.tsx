@@ -1,25 +1,47 @@
 "use client";
 
-import { Alerta, avisar, Badge, Button, Empty, SeccionTarjeta } from "@opai/ds";
+import { Alerta, avisar, Badge, Button, Empty, SeccionTarjeta, Table, Td, Tr } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fechaHora } from "@/lib/formato";
 
-import { type DatosIndicadores, MOTIVO_FALLA, NOMBRE_INDICADOR, type Propuesta, textoValor } from "./tipos";
+import {
+  type DatosIndicadores,
+  filasValor,
+  MOTIVO_FALLA,
+  NOMBRE_INDICADOR,
+  type Propuesta,
+} from "./tipos";
 
 function Valor({ titulo, valor }: { titulo: string; valor: unknown }) {
   return (
     <div className="min-w-0 flex-1">
       <p className="t-caption mb-1">{titulo}</p>
-      <pre className="t-caption max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-surface-2 p-2 text-fg">
-        {textoValor(valor)}
-      </pre>
+      {/* Tabla, no JSON crudo (hoja de Plataforma §2.10). */}
+      <div className="max-h-48 overflow-auto rounded-md border border-border">
+        <Table>
+          <tbody>
+            {filasValor(valor).map(([k, v]) => (
+              <Tr key={k}>
+                <Td className="t-caption">{k}</Td>
+                <Td className="t-numeric text-right">{v}</Td>
+              </Tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
     </div>
   );
 }
 
-function TarjetaPropuesta({ p, disabled, onResolver }: {
-  p: Propuesta; disabled: boolean; onResolver: (p: Propuesta, aprobar: boolean) => void;
+function TarjetaPropuesta({
+  p,
+  disabled,
+  onResolver,
+}: {
+  p: Propuesta;
+  disabled: boolean;
+  onResolver: (p: Propuesta, aprobar: boolean) => void;
 }) {
   return (
     <SeccionTarjeta
@@ -31,8 +53,12 @@ function TarjetaPropuesta({ p, disabled, onResolver }: {
         <Valor titulo="Propuesto" valor={p.valorPropuesto} />
       </div>
       <div className="mt-3 flex flex-wrap justify-end gap-2">
-        <Button variant="secondary" disabled={disabled} onClick={() => onResolver(p, false)}>Rechazar</Button>
-        <Button disabled={disabled} onClick={() => onResolver(p, true)}>Aprobar para todas las empresas</Button>
+        <Button variant="secondary" disabled={disabled} onClick={() => onResolver(p, false)}>
+          Rechazar
+        </Button>
+        <Button disabled={disabled} onClick={() => onResolver(p, true)}>
+          Aprobar para todas las empresas
+        </Button>
       </div>
     </SeccionTarjeta>
   );
@@ -65,13 +91,19 @@ export function PropuestasIndicadores({ datos }: { datos: DatosIndicadores }) {
         />
       ) : (
         datos.propuestas.map((p) => (
-          <TarjetaPropuesta key={p.id} p={p} disabled={pendiente} onResolver={(x, a) => void resolver(x, a)} />
+          <TarjetaPropuesta
+            key={p.id}
+            p={p}
+            disabled={pendiente}
+            onResolver={(x, a) => void resolver(x, a)}
+          />
         ))
       )}
       <div className="flex flex-wrap gap-2">
         {datos.capturas.map((c) => (
           <Badge key={c.clave} tono={c.alerta ? "warning" : "success"}>
-            {NOMBRE_INDICADOR[c.clave] ?? c.clave}: {c.resultado === "propuesto" ? "con cambio" : c.alerta ? "con aviso" : "al día"}
+            {NOMBRE_INDICADOR[c.clave] ?? c.clave}:{" "}
+            {c.resultado === "propuesto" ? "con cambio" : c.alerta ? "con aviso" : "al día"}
           </Badge>
         ))}
       </div>

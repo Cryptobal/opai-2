@@ -4,6 +4,7 @@ import { defineModule } from "@opai/capabilities";
 import { buscadoresCpq } from "./buscador";
 import { capacidades } from "./capabilities";
 import { ajustesCpq } from "./persistencia/supuestos";
+import { fuentesAprobacionCpq } from "./fuente-aprobaciones";
 
 /**
  * Manifest del módulo CPQ (CAR-119, Brief 10 · PR 10.1, ADR-003/ADR-042). Datos y capacidades base de
@@ -66,4 +67,5 @@ export const manifest = defineModule({
   ],
   capacidades,
   buscadores: buscadoresCpq,
+  aprobaciones: fuentesAprobacionCpq,
 });

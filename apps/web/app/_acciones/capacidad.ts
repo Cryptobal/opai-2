@@ -22,6 +22,9 @@ import { destinoDeInicio } from "@/lib/portal-inicio";
  */
 export type Revalidacion = "layout" | "ninguna";
 
+/** El resultado de la capacidad y, si fue una escritura real, la marca para que el navegador avise. */
+export type ResultadoAccion = Resultado & { escritura?: true };
+
 /**
  * Acción de servidor genérica: la UI invoca capacidades con las mismas reglas que /api/v1
  * (sesión, tenant, módulo, permiso, auditoría y telemetría). Las internas no pasan por aquí.
@@ -36,7 +39,7 @@ export async function ejecutarCapacidad(
   dryRun = false,
   revalidar: Revalidacion = "layout",
   idempotencyKey?: string,
-): Promise<Resultado> {
+): Promise<ResultadoAccion> {
   let r: Resultado;
   let escritura: boolean;
   try {
@@ -70,7 +73,7 @@ export async function ejecutarCapacidad(
       });
     }
   }
-  return r;
+  return escritura && r.ok && !dryRun ? { ...r, escritura: true } : r;
 }
 
 async function ejecutar(

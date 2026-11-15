@@ -1,15 +1,22 @@
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
-import { Table, Td, Th, Tr } from "../components/table";
 import { type LinkComponent, LinkPorDefecto } from "../shell/types";
 import { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./estado";
+import { TablaLista } from "./list-screen-tabla";
 
 export type Columna<T> = {
   id: string;
   etiqueta: string;
   render: (item: T) => ReactNode;
   className?: string;
+};
+
+/** Piezas de la selección: casilla de la cabecera, casilla por fila y envoltura con estado y barra. */
+export type SeleccionTabla<T> = {
+  cabecera: ReactNode;
+  celda: (item: T) => ReactNode;
+  envolver: (tabla: ReactNode, visibles: string[]) => ReactNode;
 };
 
 export type ListScreenProps<T> = {
@@ -45,6 +52,13 @@ export type ListScreenProps<T> = {
    */
   acciones?: (item: T) => ReactNode;
   textos?: TextosEstado;
+  /**
+   * Selección de varias filas (diseño nuevo, CAR-335 D4a), desde md. Se arma con
+   * `seleccionDeLista` de `@opai/ds/seleccion`, que trae las casillas y la barra en su propio trozo
+   * de JS: las listas que no la usan no las descargan (ADR-037). Trae funciones: se arma en el mismo
+   * componente de servidor que pinta `ListScreen`, nunca se pasa a un componente de cliente.
+   */
+  seleccion?: SeleccionTabla<T>;
 };
 
 /** Lista: cabecera con acción principal, búsqueda, chips de filtro, filas en base y tabla en md+. */
@@ -108,54 +122,16 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
             </li>
           ))}
         </ul>
-        <div className="hidden md:block">
-          <Table>
-            <thead>
-              <tr>
-                {columnas.map((c) => (
-                  <Th key={c.id} className={c.className}>
-                    {c.etiqueta}
-                  </Th>
-                ))}
-                {acciones ? (
-                  <Th className="w-px">
-                    <span className="sr-only">Acciones</span>
-                  </Th>
-                ) : null}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <Tr
-                  key={clave(item)}
-                  onClick={onSeleccionar ? () => onSeleccionar(item) : undefined}
-                  className={cn((onSeleccionar || href) && "cursor-pointer", href && "relative")}
-                >
-                  {columnas.map((c, i) => (
-                    <Td key={c.id} className={c.className}>
-                      {href && i === 0 ? (
-                        // Enlace "estirado": toda la fila navega y el nombre accesible es la primera celda.
-                        // Con acciones, el ::after no se come el clic: el menú y el nombre sí lo reciben.
-                        <Link
-                          href={href(item)}
-                          className={cn(
-                            "after:absolute after:inset-0",
-                            acciones && "after:pointer-events-none",
-                          )}
-                        >
-                          {c.render(item)}
-                        </Link>
-                      ) : (
-                        c.render(item)
-                      )}
-                    </Td>
-                  ))}
-                  {acciones ? <Td className="relative z-10 text-right">{acciones(item)}</Td> : null}
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+        <TablaLista
+          items={items}
+          clave={clave}
+          columnas={columnas}
+          Link={Link}
+          {...(href ? { href } : {})}
+          {...(onSeleccionar ? { onSeleccionar } : {})}
+          {...(acciones ? { acciones } : {})}
+          {...(props.seleccion ? { seleccion: props.seleccion } : {})}
+        />
         {paginacion ? (
           <div className="mt-3 flex items-center justify-between text-base text-fg-muted">
             {paginacion}

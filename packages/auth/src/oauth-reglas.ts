@@ -1,0 +1,92 @@
+import { createHash } from "node:crypto";
+
+import { mfaEsObligatoria, pendienteMfa } from "@opai/domain";
+
+// Reglas puras del OAuth del MCP (CAR-247, ADR-098), sin base ni Better Auth, para poder probarlas.
+
+/** Alcances que una app puede pedir. Nunca `platform`: Plataforma solo con API key explícita. */
+export const ALCANCES_OAUTH = ["mcp:leer", "mcp:escribir", "offline_access"] as const;
+
+/** Vida de los tokens: acceso 1 hora; refresh 30 días, con rotación. */
+export const VIDA_ACCESO_SEGUNDOS = 60 * 60;
+export const VIDA_REFRESH_SEGUNDOS = 30 * 24 * 60 * 60;
+
+export type MembresiaOAuth = {
+  tenantId: string;
+  rol: string;
+  estado: string;
+  tenantEstado: string;
+};
+
+const usables = (m: readonly MembresiaOAuth[]) =>
+  m.filter((x) => x.estado === "activa" && x.tenantEstado !== "suspendido");
+
+/**
+ * Con más de una empresa usable, la persona elige con cuál conectar la app; la elección vale solo si
+ * es una de sus membresías activas en una empresa no suspendida.
+ */
+export function necesitaElegirEmpresa(
+  membresias: readonly MembresiaOAuth[],
+  elegida: string | null | undefined,
+): boolean {
+  const u = usables(membresias);
+  if (u.length <= 1) return false;
+  return !u.some((m) => m.tenantId === elegida);
+}
+
+/**
+ * Empresa a la que queda atado el consentimiento y sus tokens (`reference_id`). Falla si no hay una
+ * empresa usable o si la elegida no es de la persona: nunca se emite un token sin empresa válida.
+ */
+export function empresaDelConsentimiento(
+  membresias: readonly MembresiaOAuth[],
+  elegida: string | null | undefined,
+): string {
+  const u = usables(membresias);
+  // Una elección que no es usable nunca se reemplaza en silencio por otra empresa.
+  const m = elegida ? u.find((x) => x.tenantId === elegida) : u.length === 1 ? u[0] : undefined;
+  if (!m) throw new Error("Empresa no válida para autorizar la app.");
+  return m.tenantId;
+}
+
+/** Hash con el que el proveedor guarda los tokens (`storeTokens: "hashed"`): SHA-256, base64url. */
+export const hashTokenOAuth = (token: string): string =>
+  createHash("sha256").update(token).digest("base64url");
+
+export type EstadoTokenOAuth = "vigente" | "vencido" | "revocado";
+
+export function estadoTokenOAuth(
+  t: { expiresAt: Date; revoked: Date | null; clienteActivo: boolean },
+  ahora: Date,
+): EstadoTokenOAuth {
+  if (t.revoked || !t.clienteActivo) return "revocado";
+  return t.expiresAt.getTime() > ahora.getTime() ? "vigente" : "vencido";
+}
+
+/** Parámetros que agrega el proveedor al firmar la consulta (firma, vencimiento, sesión). */
+const PARAMETROS_FIRMA = ["sig", "exp", "ba_iat", "ba_pl", "ba_param"];
+
+/** La petición original de la app, sin firma: con ella se reanuda `/oauth2/authorize` tras entrar. */
+export function consultaParaAutorizar(consultaFirmada: string): string {
+  const p = new URLSearchParams(consultaFirmada);
+  for (const k of PARAMETROS_FIRMA) p.delete(k);
+  return p.toString();
+}
+
+/**
+ * Conectar una app exige lo mismo que entrar a un portal (NÚCLEO-F, ajustado por CAR-286): con
+ * segundo factor activo, que la sesión lo haya verificado; y una cuenta de plataforma debe tenerlo.
+ */
+export function faltaSegundoFactor(s: {
+  activo: boolean;
+  verificado: boolean;
+  platformRole: unknown;
+}): boolean {
+  return (
+    pendienteMfa({
+      activa: s.activo,
+      verificada: s.verificado,
+      obligatoria: mfaEsObligatoria(s.platformRole),
+    }) !== null
+  );
+}

@@ -1,18 +1,11 @@
 import { z } from "zod";
 
-import {
-  CATALOGO_INTEGRACIONES,
-  credencialDePlataforma,
-  enmascarar,
-  motivoSecretoInvalido,
-  sufijoParaGuardar,
-} from "@opai/integrations";
+import { CATALOGO_INTEGRACIONES, credencialDePlataforma } from "@opai/integrations";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { definicionVisible, integracionesVisibles } from "../integraciones/resolver";
-import { guardarSecreto } from "../integraciones/secretos";
 import { integracionSchema, vistaIntegracion } from "./integraciones-vista";
 
 export const integracionesList = defineCapability({
@@ -103,51 +96,4 @@ export const integracionesConfigurar = defineCapability({
   },
 });
 
-export const integracionesSetSecreto = defineCapability({
-  id: "core.integraciones.set_secreto",
-  // Credenciales y keys las gestionan personas: un agente no se crea keys ni cambia secretos.
-  soloPersonas: true,
-  descripcion:
-    "Guarda una credencial propia de la empresa para una integración (cifrada; se muestra una sola vez enmascarada). La auditoría nunca guarda el valor.",
-  permiso: PERMISOS_CORE.integracionesManage,
-  sensibles: ["valor"],
-  input: z.object({
-    proveedor: z.string(),
-    nombre: z.string(),
-    valor: z.string().trim().min(8).max(4000),
-  }),
-  output: z.object({ proveedor: z.string(), nombre: z.string(), mascara: z.string() }),
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    const def = await definicionVisible(ctx, input.proveedor);
-    if (!def?.disponible) throw noEncontrado(`La integración "${input.proveedor}"`);
-    if (!def.secretos.some((s) => s.nombre === input.nombre)) {
-      throw reglaDeNegocio(`${def.nombre} no usa el secreto "${input.nombre}".`);
-    }
-    // Formas que el proveedor rechaza (key de SimpleAPI sin guiones, CAR-240): no se guardan, también en vista previa.
-    const motivo = motivoSecretoInvalido(def.id, input.nombre, input.valor);
-    if (motivo) throw reglaDeNegocio(motivo);
-    const mascara = enmascarar(sufijoParaGuardar(input.nombre, input.valor));
-    if (dryRun) return { proveedor: def.id, nombre: input.nombre, mascara };
-    const fila = await ctx.db.integracion.upsert({
-      where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: def.id } },
-      create: {
-        tenantId: ctx.tenantId,
-        proveedor: def.id,
-        modalidad: "propia",
-        estado: "configurada",
-      },
-      // Guardar un secreto propio pasa la integración a modalidad propia (si no, no se usaría).
-      update: { modalidad: "propia", estado: "configurada", ultimoError: null },
-    });
-    await guardarSecreto(ctx, fila.id, input.nombre, input.valor);
-    // Con otras credenciales de Octava, el token guardado ya no vale: se descarta para revalidar.
-    if (def.id === "dte_cesion") {
-      await ctx.db.secreto.deleteMany({
-        where: { tenantId: ctx.tenantId, integracionId: fila.id, nombre: "token_sesion" },
-      });
-    }
-    return { proveedor: def.id, nombre: input.nombre, mascara };
-  },
-});
+export { integracionesSetSecreto } from "./integraciones-secreto";

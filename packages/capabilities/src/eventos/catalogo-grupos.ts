@@ -9,6 +9,12 @@ export const EVENTOS_GRUPOS: readonly EventoDeDominio[] = [
   { id: "core.grupo.miembro_quitado", descripcion: "Se quitó a un usuario de un grupo." },
 ];
 
+/** Reglas de aprobación por empresa (CAR-252, ADR-107). Payload vacío; la entidad es la regla. */
+export const EVENTOS_REGLAS_APROBACION: readonly EventoDeDominio[] = [
+  { id: "core.regla_aprobacion.guardada", descripcion: "Se creó o cambió una regla de aprobación de la empresa." },
+  { id: "core.regla_aprobacion.desactivada", descripcion: "Se desactivó una regla de aprobación de la empresa." },
+];
+
 /** Membresías (CAR-292): alguien entró a la empresa. Lo escucha Slack F2 para buscarlo. Payload: usuarioId. */
 export const EVENTOS_MEMBRESIA: readonly EventoDeDominio[] = [
   {

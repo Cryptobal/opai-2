@@ -8,6 +8,48 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "central.alertas.hacerse_cargo": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo:
+      "«Me hago cargo» de una alerta de la central: llega con la ficha de la alerta (pantallas de la Central). Mientras tanto la cadena sigue escalando sola.",
+  },
+  "core.roles.adicional_asignar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Sumar un rol a un usuario: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.roles.adicional_quitar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Quitar un rol adicional a un usuario: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.grupos.rol_asignar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Dar un rol a un grupo: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.grupos.rol_quitar": {
+    encargo: "CAR-359",
+    desde: "2026-11-14",
+    motivo:
+      "Quitar un rol a un grupo: Llega con la parte 3 de CAR-359 (ficha del usuario y del grupo). Mientras no haya pantalla nadie asigna roles adicionales, así que el acceso sigue como antes.",
+  },
+  "core.aprobaciones.reglas_guardar": {
+    encargo: "CAR-252",
+    desde: "2026-11-12",
+    motivo:
+      "Crear o cambiar reglas de aprobación: la pantalla Configuración › Aprobaciones › Reglas espera su diseño en Claude Design (decisión de Carlos del 12-nov). Sin reglas, todo sigue como antes.",
+  },
+  "core.aprobaciones.reglas_desactivar": {
+    encargo: "CAR-252",
+    desde: "2026-11-12",
+    motivo:
+      "Desactivar una regla de aprobación: llega con la misma pantalla de reglas (diseño pendiente). Mientras no haya pantalla nadie crea reglas, así que no hay nada que desactivar.",
+  },
   "core.cuentas_referencias.otorgar": {
     encargo: "CAR-138",
     desde: "2026-11-10",
@@ -17,7 +59,8 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
   "finanzas.apertura.importar": {
     encargo: "CAR-168",
     desde: "2026-11-04",
-    motivo: "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
+    motivo:
+      "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
   },
   "finanzas.apertura.revertir": {
     encargo: "CAR-168",
@@ -41,12 +84,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-10-29",
     motivo:
       "Revocar la firma automática del representante (R16): su pantalla de configuración va en el PR 2 de firma; aquí entra la capacidad de gobernanza.",
-  },
-  "core.users.restablecer_mfa": {
-    encargo: "CAR-54",
-    desde: "2026-10-29",
-    motivo:
-      "Restablecer el MFA de un usuario desde su ficha (owner): las pantallas de MFA no tienen diseño aprobado en Claude Design (export-acceso/README.md).",
   },
   "platform.usuarios.restablecer_mfa": {
     encargo: "CAR-54",

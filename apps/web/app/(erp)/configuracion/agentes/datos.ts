@@ -16,6 +16,7 @@ export type ApiKey = {
   scopeAmplio: boolean;
   responsable: { nombre: string; email: string };
   ultimoUsoEn: string | null;
+  expiraEn: string | null;
   revocadaEn: string | null;
   presupuestoMensualUsd: number | null;
   valida: boolean;
@@ -35,14 +36,17 @@ export async function gastoDelMes() {
 }
 
 /** Permisos efectivos del usuario que crea la key: el subconjunto que puede delegar (t457u). */
-export async function misPermisos() {
+async function misPermisos() {
   const r = await ejecutarComoUsuario<{ permisos: string[] }>("erp", "core.me");
   return r.ok ? r.data.permisos.filter((p) => !p.startsWith("platform:")) : [];
 }
 
 export async function cargarKeys() {
   const [r, gasto, permisos, identidad] = await Promise.all([
-    ejecutarComoUsuario<ApiKey[]>("erp", "core.apikeys.list"),
+    // CAR-353: primera página (hasta 100 keys, de la más nueva a la más antigua).
+    ejecutarComoUsuario<{ items: ApiKey[]; siguiente: string | null }>("erp", "core.apikeys.list", {
+      limite: 100,
+    }),
     gastoDelMes(),
     misPermisos(),
     identidadActual(),
@@ -50,7 +54,7 @@ export async function cargarKeys() {
   const ctx = identidad ? contextoServidor(identidad, "erp") : null;
   return {
     state: estadoPantalla(r),
-    keys: r.ok ? r.data : [],
+    keys: r.ok ? r.data.items : [],
     gasto,
     // El scope "platform" solo se ofrece a un usuario de plataforma (ADR-055).
     scopes: [

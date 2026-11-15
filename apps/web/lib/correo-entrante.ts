@@ -65,17 +65,48 @@ export function destinoDe(ev: Pick<EventoEntrante, "para" | "copia" | "copiaOcul
 }
 
 /** Destinatarios visibles para el historial: para y copia, sin las direcciones de OPAI. */
-export const destinatariosVisibles = (ev: Pick<EventoEntrante, "para" | "copia">): string[] =>
-  [...ev.para, ...ev.copia].filter((d) => !esDireccionOpai(d)).map((d) => d.slice(0, 320)).slice(0, 50);
+export const destinatariosVisibles = (ev: Pick<EventoEntrante, "para" | "copia">): string[] => {
+  const vistos = new Set<string>();
+  return [...ev.para, ...ev.copia]
+    .filter((d) => !esDireccionOpai(d))
+    .map((d) => d.slice(0, 320))
+    .filter((d) => {
+      const clave = d.toLowerCase();
+      return vistos.has(clave) ? false : (vistos.add(clave), true);
+    })
+    .slice(0, 50);
+};
 
-/** Texto del correo recibido (`GET /emails/receiving/{id}`), recortado. Null si Resend no lo entrega. */
-export async function leerTextoCorreo(emailId: string, apiKey: string): Promise<string | null> {
+/** Direcciones de un campo del correo recibido: arreglo de la API o cabecera «Ana <a@b.cl>, c@d.cl». */
+const direccionesDe = (v: unknown): string[] => {
+  const textos = Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : typeof v === "string" ? [v] : [];
+  return textos.flatMap((t) => t.match(/[^\s<>,;"']+@[^\s<>,;"']+/g) ?? []).slice(0, 50);
+};
+
+export type CorreoRecibido = { texto: string | null; para: string[]; copia: string[] };
+
+/**
+ * Correo recibido (`GET /emails/receiving/{id}`): texto recortado y los destinatarios del mensaje. En un
+ * CCO, el `to` del webhook trae solo la dirección de OPAI (la del sobre); los destinatarios reales del
+ * vendedor están en el correo mismo (campos `to`/`cc` o sus cabeceras). Si Resend falla, todo queda vacío.
+ */
+export async function leerCorreoRecibido(emailId: string, apiKey: string): Promise<CorreoRecibido> {
   const r = await fetch(`https://api.resend.com/emails/receiving/${encodeURIComponent(emailId)}`, {
     headers: { Authorization: `Bearer ${apiKey}` },
     signal: AbortSignal.timeout(8000),
   }).catch(() => null);
-  if (!r?.ok) return null;
-  const j = (await r.json().catch(() => null)) as { text?: unknown; html?: unknown } | null;
+  if (!r?.ok) return { texto: null, para: [], copia: [] };
+  const j = (await r.json().catch(() => null)) as { text?: unknown; html?: unknown; to?: unknown; cc?: unknown; headers?: Record<string, unknown> } | null;
   const texto = typeof j?.text === "string" ? j.text : typeof j?.html === "string" ? j.html.replace(/<[^>]+>/g, " ") : "";
-  return texto.replace(/\s+\n/g, "\n").trim().slice(0, 20000);
+  const h = j?.headers ?? {};
+  return {
+    texto: texto.replace(/\s+\n/g, "\n").trim().slice(0, 20000),
+    para: [...direccionesDe(j?.to), ...direccionesDe(h["to"] ?? h["To"])],
+    copia: [...direccionesDe(j?.cc), ...direccionesDe(h["cc"] ?? h["Cc"])],
+  };
+}
+
+/** Texto del correo recibido, recortado. Null si Resend no lo entrega. */
+export async function leerTextoCorreo(emailId: string, apiKey: string): Promise<string | null> {
+  return (await leerCorreoRecibido(emailId, apiKey)).texto;
 }

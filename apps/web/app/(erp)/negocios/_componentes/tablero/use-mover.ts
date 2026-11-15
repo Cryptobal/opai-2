@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { avisar } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { useParametros } from "@/app/_components/maestros/use-url";
 
 export type EtapaTablero = { id: string; nombre: string; tipo: string };

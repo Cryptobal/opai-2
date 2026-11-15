@@ -61,10 +61,31 @@ async function programacionPostImport(tx: TenantTx, programacionId: string, term
   return corridasNuevas + conDocumento > 0;
 }
 
+/** Cotizaciones del negocio que no vienen de la importación (las importadas se borran antes que él). */
+async function cotizacionesPropias(tx: TenantTx, negocioId: string): Promise<number> {
+  const todas = await tx.cpqCotizacion.findMany({ where: { negocioId }, select: { id: true } });
+  if (todas.length === 0) return 0;
+  const importadas = await tx.idExterno.count({
+    where: { sistema: "opai1", entidadTipo: "cotizacion", entidadId: { in: todas.map((c) => c.id) } },
+  });
+  return todas.length - importadas;
+}
+
+/** Una cotización importada con versiones, propuestas o enlaces hechos en 2.0 tras la corrida no se borra. */
+async function cotizacionPostImport(tx: TenantTx, cotizacionId: string, terminadaEn: Date): Promise<boolean> {
+  const c = despuesDe(terminadaEn);
+  const [versiones, propuestas, enlaces] = await Promise.all([
+    tx.cpqVersion.count({ where: { cotizacionId, OR: [{ numero: { gt: 1 } }, { createdAt: c }] } }),
+    tx.cpqPropuestaTecnica.count({ where: { cotizacionId } }),
+    tx.cpqEnlaceCompartido.count({ where: { cotizacionId } }),
+  ]);
+  return versiones + propuestas + enlaces > 0;
+}
+
 /** Un negocio con cotizaciones, contactos, actividad o cambios de etapa hechos en 2.0 no se borra. */
 async function negocioConUso(tx: TenantTx, negocioId: string): Promise<boolean> {
   const [cotizaciones, n] = await Promise.all([
-    tx.cpqCotizacion.count({ where: { negocioId } }),
+    cotizacionesPropias(tx, negocioId),
     tx.negocio.findFirst({
       where: { id: negocioId },
       select: { _count: { select: { instalaciones: true, contactos: true, solicitudes: true, actividadVinculos: true, historial: true, contexto: true } } },
@@ -91,6 +112,7 @@ export async function dependientesPostImport(
   if (f.entidad === "contacto") return contactoPostImport(tx, f.id20, terminadaEn);
   if (f.entidad === "instalacion") return instalacionPostImport(tx, f.id20, terminadaEn);
   if (f.entidad === "programacion_recurrente") return programacionPostImport(tx, f.id20, terminadaEn);
+  if (f.entidad === "cotizacion") return cotizacionPostImport(tx, f.id20, terminadaEn);
   if (f.entidad === "negocio") return negocioConUso(tx, f.id20);
   return false;
 }

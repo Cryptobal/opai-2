@@ -3,6 +3,7 @@
 import type { Identidad } from "../types";
 import type { Fila } from "./db-memoria-util";
 import { metodosEnMemoria } from "./identidad-metodos-memoria";
+import { appsOAuthEnMemoria } from "./identidad-oauth-memoria";
 
 export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
   const quitar = (n: string, userId: string) => {
@@ -26,7 +27,18 @@ export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
     async enOtrasEmpresas(userId, tenantId) {
       return tabla("membership").some((m) => m["userId"] === userId && m["tenantId"] !== tenantId);
     },
-    async restablecerSegundoFactor(_tx, userId) {
+    async membresiaBloqueada(_tx, membershipId) {
+      const m = tabla("membership").find((f) => f["id"] === membershipId);
+      if (!m) return null;
+      return { tenantId: String(m["tenantId"]), userId: String(m["userId"]) };
+    },
+    async restablecerSegundoFactor(_tx, userId, reverificar) {
+      const u = tabla("user").find((f) => f["id"] === userId);
+      reverificar?.({
+        platformRole: (u?.["platformRole"] as string | null) ?? null,
+        twoFactorEnabled: Boolean(u?.["twoFactorEnabled"]),
+        passkeyEnabled: Boolean(u?.["passkeyEnabled"]),
+      });
       const enrolamientos = quitar("twoFactor", userId);
       const passkeys = quitar("passkey", userId);
       for (const u of tabla("user"))
@@ -35,6 +47,7 @@ export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
       return { enrolamientos, passkeys, sesiones: quitar("session", userId) };
     },
     ...metodosEnMemoria(tabla),
+    ...appsOAuthEnMemoria(tabla),
     async borrarUsuario(_tx, userId) {
       const usuarios = tabla("user");
       const u = usuarios.find((f) => f["id"] === userId);

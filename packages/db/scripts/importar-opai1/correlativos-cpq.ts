@@ -24,7 +24,7 @@ export function numeroCorrelativoCpq(code: string): { anio: number; numero: numb
 }
 
 export function planCorrelativosCpq(
-  cotizaciones: readonly CotizacionOpai1[],
+  cotizaciones: readonly Pick<CotizacionOpai1, "id" | "code" | "createdAt">[],
   ultimoActualPorAnio: ReadonlyMap<number, number>,
   cpqActivo: boolean,
 ): CorrelativoCpqPropuesto[] {

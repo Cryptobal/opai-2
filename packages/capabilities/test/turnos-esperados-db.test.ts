@@ -28,10 +28,20 @@ describe.skipIf(!urlPropietario)("Turnos esperados · núcleo (Postgres real)", 
     });
   const ejecutar = (c: ReturnType<typeof ctx>, id: string, input: unknown, o = {}) =>
     mod.executeCapability(c, id, input, o);
+  type Turno = { personaId: string; fecha: string; inicio: string; fin: string; vigente: boolean; origen: string; version: number; feriado: boolean };
+  // CAR-353: la lista pagina por cursor; la prueba recorre todas las páginas.
   const listar = async (tenantId: string, instalacionId: string, extra = {}) => {
-    const r = await ejecutar(ctx(tenantId, []), "core.turnos_esperados.listar", { instalacionId, ...RANGO, ...extra });
-    expect(r.ok, JSON.stringify(r)).toBe(true);
-    return r.ok ? (r.data as { items: { personaId: string; fecha: string; inicio: string; fin: string; vigente: boolean; origen: string; version: number; feriado: boolean }[] }).items : [];
+    const todos: Turno[] = [];
+    let cursor: string | undefined;
+    do {
+      const r = await ejecutar(ctx(tenantId, []), "core.turnos_esperados.listar", { instalacionId, ...RANGO, ...extra, cursor });
+      expect(r.ok, JSON.stringify(r)).toBe(true);
+      if (!r.ok) return todos;
+      const pag = r.data as { items: Turno[]; siguiente: string | null };
+      todos.push(...pag.items);
+      cursor = pag.siguiente ?? undefined;
+    } while (cursor);
+    return todos;
   };
 
   beforeAll(async () => {

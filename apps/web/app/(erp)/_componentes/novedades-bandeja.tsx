@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Button, Enlace } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 /**
  * Novedades del producto sin leer dentro de la Bandeja (CAR-316): avisa cuántas hay, lleva a

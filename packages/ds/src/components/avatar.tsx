@@ -36,13 +36,31 @@ export function Avatar({ nombre, size, className }: AvatarProps) {
   );
 }
 
-/** Monograma del tenant: cuadrado 24px, fondo inverso. */
-export function Monograma({ nombre, className }: { nombre: string; className?: string }) {
+/**
+ * Monograma del tenant: cuadrado 24px. Con `logo` (CAR-335 D6b) muestra la imagen de la marca; sin
+ * logo, las iniciales con fondo inverso, que la piel nueva pinta con el color de la empresa.
+ */
+export function Monograma({
+  nombre,
+  logo,
+  className,
+}: {
+  nombre: string;
+  logo?: string | undefined;
+  className?: string;
+}) {
+  const base = "inline-flex size-6 flex-none items-center justify-center rounded-sm";
+  if (logo)
+    return (
+      <img src={logo} alt="" aria-hidden className={cn(base, "bg-bg object-contain", className)} />
+    );
   return (
     <span
       aria-hidden
+      data-monograma
       className={cn(
-        "inline-flex size-6 flex-none items-center justify-center rounded-sm bg-inverse-bg text-[10px] leading-none font-bold tracking-wide text-inverse-fg",
+        base,
+        "bg-inverse-bg text-[10px] leading-none font-bold tracking-wide text-inverse-fg",
         className,
       )}
     >

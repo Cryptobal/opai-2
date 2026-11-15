@@ -4,8 +4,12 @@ export function textoError(code: string, message: string, trasConfirmar = false)
   if (code === "BUDGET_EXCEEDED")
     return "Se agotó el presupuesto del agente de tu empresa. Avísale a un administrador.";
   if (trasConfirmar) return `${message} Revisa el estado de los cambios antes de reintentar.`;
+  // El motivo del servidor ya está en lenguaje de usuario (p. ej. «Tu acceso cambió durante la
+  // solicitud…»): se muestra para que la persona sepa qué hacer; sin motivo, el texto genérico.
   if (code === "FORBIDDEN")
-    return "No tienes acceso para hacer eso con el agente. No se hizo ningún cambio.";
+    return message && message !== "Sin permiso para esta capacidad."
+      ? `${message} No se hizo ningún cambio.`
+      : "No tienes acceso para hacer eso con el agente. No se hizo ningún cambio.";
   return `${message} No se hizo ningún cambio.`;
 }
 

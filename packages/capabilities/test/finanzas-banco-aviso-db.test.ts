@@ -3,7 +3,6 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { sincronizarAvisoSaldoBajo } from "../../../modules/finanzas/capacidades/bancos/aviso-banco";
-import { lunesDe } from "../../../modules/finanzas/domain";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -45,7 +44,6 @@ describe.skipIf(!urlPropietario)("aviso de saldo bajo del banco · suma de cuent
     await e.admin.flujoAjustes.create({
       data: {
         tenantId,
-        desde: new Date(`${lunesDe(new Date().toISOString().slice(0, 10))}T00:00:00Z`),
         umbral: 15_000_000n,
         avisoActivo: true,
       },

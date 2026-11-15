@@ -23,8 +23,9 @@ async function main() {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(255001)`;
     await tx.cuenta.upsert({
       where: { id: CUENTA },
-      create: { id: CUENTA, tenantId: tenant.id, nombre: "Cliente ficticio Ventas E2E" },
-      update: {},
+      // RUT ficticio y cliente activo: si no, el cliente no aparece para facturar (e2e de destinatarios, CAR-320).
+      create: { id: CUENTA, tenantId: tenant.id, nombre: "Cliente ficticio Ventas E2E", rut: "76999001-1", estado: "cliente_activo" },
+      update: { rut: "76999001-1", estado: "cliente_activo" },
     });
     const base = { tenantId: tenant.id, cuentaId: CUENTA, tipoDte: 33, montoNeto: 10000, montoIva: 1900, montoTotal: 11900 };
     const docs = [

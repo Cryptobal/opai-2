@@ -24,6 +24,8 @@ export type NavItem = {
   soloAmplio?: boolean;
   /** Fuera de la barra inferior del teléfono: va a "Más" (sigue en el riel y en la barra lateral). */
   fueraInferior?: boolean;
+  /** Entrada «Más» propia del portal: la barra inferior no agrega la del marco (CAR-494). */
+  mas?: boolean;
   /** El contador es una alerta (globo rojo también en el riel y la barra inferior). */
   alerta?: boolean;
   /** Punto de no leído sin número, en vez del contador numérico (D5: Inicio en la barra inferior). */
@@ -60,7 +62,11 @@ export type Portal = {
   corta?: string;
 };
 
-export type Tenant = { nombre: string };
+export type Tenant = {
+  nombre: string;
+  /** Logo de la marca (isotipo o logo principal) para el selector de empresa (CAR-335 D6b). */
+  logo?: string | undefined;
+};
 
 export type Usuario = {
   nombre: string;

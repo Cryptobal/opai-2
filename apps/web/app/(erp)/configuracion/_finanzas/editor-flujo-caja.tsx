@@ -100,28 +100,16 @@ export function EditorFlujoCaja({
         </div>
       </section>
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium text-fg">Saldo inicial y aviso</h2>
-        <Campo etiqueta="Saldo inicial (CLP)" htmlFor="aj-si">
-          <Input
-            id="aj-si"
-            value={String(aj.saldoInicial)}
-            onChange={(e) => setAj({ ...aj, saldoInicial: Number(e.target.value) || 0 })}
-            inputMode="numeric"
-          />
-        </Campo>
+        <h2 className="text-lg font-medium text-fg">Aviso de saldo bajo</h2>
+        <p className="t-caption text-fg-muted">
+          El saldo del flujo es el que hay hoy en el banco (Web4Leads o las cartolas cargadas); no se ingresa a mano.
+        </p>
         <Campo etiqueta="Umbral de saldo bajo (CLP)" htmlFor="aj-um">
           <Input
             id="aj-um"
             value={String(aj.umbral)}
             onChange={(e) => setAj({ ...aj, umbral: Number(e.target.value) || 0 })}
             inputMode="numeric"
-          />
-        </Campo>
-        <Campo etiqueta="Semana desde (lunes ISO)" htmlFor="aj-des">
-          <Input
-            id="aj-des"
-            value={aj.desde}
-            onChange={(e) => setAj({ ...aj, desde: e.target.value })}
           />
         </Campo>
         <Checkbox

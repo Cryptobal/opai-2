@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 /**
  * Solicitudes nuevas por revisar (CAR-211), para el número de «Solicitudes» en el menú. Un solo

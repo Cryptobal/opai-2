@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { cn } from "../cn";
 import { Menu as IconoMenu } from "lucide-react";
 import type { ItemMenu } from "../components/menu";
@@ -62,6 +64,8 @@ export type RailProps = NavProps & {
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
   onNavegar?: (href: string) => void;
+  /** Diseño nuevo (ADR-109): «Dejar el menú fijo» arriba del riel con el menú plegado. */
+  boton?: ReactNode;
 };
 
 /**
@@ -77,13 +81,15 @@ export function Rail({
   portalActual,
   tenant,
   empresas,
-  fijados, errorFijados, reintentarFijados, onDesfijar, onNavegar,
+  fijados, errorFijados, reintentarFijados, onDesfijar, onNavegar, boton,
 }: RailProps) {
   return (
     <nav
       aria-label="Principal"
+      data-shell="riel"
       className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex lg:hidden"
     >
+      {boton ? <span className="mb-2">{boton}</span> : null}
       <PortalSwitcher
         portales={portales}
         portalActual={portalActual}

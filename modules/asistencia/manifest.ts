@@ -1,6 +1,6 @@
 import { defineModule } from "@opai/capabilities";
 
-import { ajustesAsistencia, capacidades } from "./capabilities";
+import { ajustesAsistencia, capacidades, indicadoresAsistencia } from "./capabilities";
 
 /**
  * Manifest del módulo Asistencia (ADR-003, ADR-048): vendible por separado, depende solo del núcleo.
@@ -37,4 +37,6 @@ export const manifest = defineModule({
     { id: "asistencia.alerta.sin_correo_personal", descripcion: "Un trabajador marcó y no tiene correo personal para recibir el comprobante." },
   ],
   capacidades,
+  // Indicadores de gestión para el catálogo del núcleo (ADR-094, CAR-311).
+  indicadores: indicadoresAsistencia,
 });

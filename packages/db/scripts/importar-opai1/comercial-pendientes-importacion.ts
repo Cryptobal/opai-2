@@ -1,7 +1,6 @@
 import {
   COMERCIAL_EN_MAIN,
   FINANZAS_PROGRAMACION_EN_MAIN,
-  MOTIVO_EXPORT_CPQ_INCOMPLETO,
   MOTIVO_MODULO_COMERCIAL_INACTIVO,
   MOTIVO_MODULO_CPQ_INACTIVO,
   MOTIVO_MODULO_FINANZAS_INACTIVO,
@@ -37,12 +36,6 @@ export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan)
         entidad: "cotizacion",
         filas: cotizaciones,
         motivo: MOTIVO_MODULO_CPQ_INACTIVO,
-      });
-    else
-      salida.push({
-        entidad: "cotizacion",
-        filas: cotizaciones,
-        motivo: MOTIVO_EXPORT_CPQ_INCOMPLETO,
       });
   }
 

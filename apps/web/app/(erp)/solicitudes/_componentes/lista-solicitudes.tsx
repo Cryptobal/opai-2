@@ -64,7 +64,7 @@ export function ListaSolicitudes(p: {
         descripcion: "Las solicitudes que lleguen o registres aparecerán aquí.",
         ...(p.registrar ? { accion: p.registrar } : {}),
       }}
-      {...(p.registrar ? { accion: <span className="md:hidden">{p.registrar}</span> } : {})}
+      {...(p.registrar ? { accion: p.registrar } : {})}
       filas={p.items.map((s) => {
         const Icono = CANAL[s.canal].icono;
         return {

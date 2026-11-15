@@ -1,0 +1,28 @@
+/// Permiso, licencia, vacaciones o ausencia de una persona (CAR-393, Estándares H-4). Es el dato; la pauta lo lee y
+/// marca los turnos afectados (`pauta.excepciones.ausencia_id`). Se anula, nunca se borra.
+model Ausencia {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  personaId     String    @map("persona_id") @db.Uuid
+  /// "ausencia" | "licencia" | "vacaciones" | "permiso" (CHECK en la migración).
+  tipo          String
+  desde         DateTime  @db.Date
+  hasta         DateTime  @db.Date
+  /// Texto libre, sin diagnósticos; en una licencia se lee con auditoría.
+  motivo        String
+  /// Clase del catálogo de la empresa o de su vertical (CAR-393 parte 3); null en registros previos.
+  clase         String?
+  /// "solicitada" | "aprobada" | "rechazada" | "anulada". Desde la ficha nace aprobada.
+  estado        String    @default("aprobada")
+  registradaPor String?   @map("registrada_por") @db.Uuid
+  aprobadaPor   String?   @map("aprobada_por") @db.Uuid
+  aprobadaEn    DateTime? @map("aprobada_en") @db.Timestamptz(6)
+  anuladaPor    String?   @map("anulada_por") @db.Uuid
+  anuladaEn     DateTime? @map("anulada_en") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, personaId, desde(sort: Desc)])
+  @@map("ausencias")
+  @@schema("core")
+}

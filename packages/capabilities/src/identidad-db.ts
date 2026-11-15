@@ -1,9 +1,12 @@
 // Implementación real de `ctx.identidad` (CAR-43): operaciones con nombre de @opai/db, con el rol
 // `opai_auth` para las tablas de credenciales.
 import {
+  appsConectadas,
   borrarUsuario,
   consumirReautenticacion,
   desactivarTotp,
+  desconectarApp,
+  membresiaBloqueada,
   metodosDeUsuario,
   quitarPasskey,
   renombrarPasskey,
@@ -17,6 +20,7 @@ import type { Identidad } from "./types";
 export const identidadEnDb: Identidad = {
   ultimosAccesos,
   enOtrasEmpresas: usuarioEnOtrasEmpresas,
+  membresiaBloqueada,
   restablecerSegundoFactor,
   borrarUsuario,
   metodosDe: metodosDeUsuario,
@@ -24,4 +28,6 @@ export const identidadEnDb: Identidad = {
   quitarPasskey,
   desactivarTotp,
   consumirReautenticacion,
+  appsConectadas,
+  desconectarApp,
 };

@@ -11,7 +11,7 @@ export function mailerResend(apiKey: string, remitente: string): Mailer {
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           from: remitente,
-          to: [correo.para],
+          to: [correo.para, ...(correo.paraAdicionales ?? [])],
           subject: correo.asunto,
           text: correo.texto,
           ...(correo.html ? { html: correo.html } : {}),

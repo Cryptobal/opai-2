@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { avisar, Menu } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { useCapacidad } from "../use-capacidad";
 import { DialogoConfirmar } from "../maestros/dialogo-confirmar";

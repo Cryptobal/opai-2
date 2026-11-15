@@ -22,14 +22,15 @@ const nuevo = (extra: Record<string, unknown[]> = {}, permisos?: string[]) =>
   });
 
 describe("finanzas.planilla.obtener", () => {
-  it("acumula el saldo desde los ajustes y marca la semana bajo el umbral", async () => {
+  it("sin saldo del banco parte en $0 (no hay saldo de partida, CAR-391) y acumula la proyección", async () => {
     const { ctx } = nuevo();
-    const r = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 3 });
+    const r = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 3, desde: S0 });
     if (!r.ok) throw new Error(JSON.stringify(r));
     const sem = (
       r.data as { semanas: { semana: string; saldoFinal: number; tono: string | null; pasada: boolean }[] }
     ).semanas;
-    expect(sem.map((s) => s.saldoFinal)).toEqual([800, 1300, 1100]);
+    expect(sem.map((s) => s.saldoFinal)).toEqual([700, 1200, 1000]);
+    expect((r.data as { saldoBanco: { fuente: string } }).saldoBanco.fuente).toBe("sin_banco");
     expect(sem.map((s) => s.tono)).toEqual([null, null, null]);
     expect(sem[0]?.pasada).toBe(false);
   });
@@ -278,10 +279,10 @@ describe("finanzas.ajustes.actualizar · actualización parcial", () => {
     const { ctx } = nuevo({
       flujoAjustes: [{ ...semilla().flujoAjustes[0]!, umbral: 2_000_000, avisoActivo: false }],
     });
-    const r = await executeCapability(ctx, "finanzas.ajustes.actualizar", { saldoInicial: 777 });
-    expect(r).toMatchObject({ ok: true, data: { saldoInicial: 777, umbral: 2_000_000, avisoActivo: false } });
+    const r = await executeCapability(ctx, "finanzas.ajustes.actualizar", { horizonteSemanas: 8 });
+    expect(r).toMatchObject({ ok: true, data: { horizonteSemanas: 8, umbral: 2_000_000, avisoActivo: false } });
     const guardado = await executeCapability(ctx, "finanzas.ajustes.obtener", {});
-    expect(guardado).toMatchObject({ ok: true, data: { umbral: 2_000_000, avisoActivo: false, horizonteSemanas: 12 } });
+    expect(guardado).toMatchObject({ ok: true, data: { umbral: 2_000_000, avisoActivo: false, horizonteSemanas: 8 } });
   });
 
   it("sin ajustes guardados parte del umbral único de 10 millones y el aviso activo", async () => {

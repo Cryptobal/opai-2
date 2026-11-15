@@ -5,12 +5,8 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import { entidadEnAlcance } from "../maestros/alcance";
-import { nombres } from "./actividad-actores";
-import { visibleSinAnexos } from "./actividad-anexos";
-import { visibleSinNoRecontratar } from "./actividad-no-recontratar";
-import { ocultarPreferenciaNav } from "./actividad-preferencias-nav";
-import { auditarHistorialSensible, redactarSensibles } from "./actividad-sensible";
-import { capacidadesDeCambios, cambios, frase } from "./actividad-texto";
+import { presentarActividad, itemActividadSchema } from "./actividad-presentar";
+import { capacidadesDeCambios } from "./actividad-texto";
 import { auditoriaSelect } from "./auditoria-select";
 import { sinPlataformaAjena } from "../../agentes/plataforma";
 
@@ -22,19 +18,6 @@ const PERMISO_LECTURA: Record<(typeof TIPOS)[number], string> = {
   cargo: PERMISOS_CORE.estructurasRead,
   documento: PERMISOS_CORE.documentosRead,
 };
-
-const itemSchema = z.object({
-  id: z.string(),
-  cuando: z.string(),
-  capability: z.string(),
-  actor: z.object({ tipo: z.string(), nombre: z.string(), agente: z.boolean() }),
-  via: z.string().nullable().describe("Usuario responsable cuando actuó un agente."),
-  accion: z.string().describe('Frase legible: "creó el contacto Paula Riquelme".'),
-  cambios: z.array(z.object({ campo: z.string(), valor: z.string() })),
-  detalle: z.unknown().describe("Input auditado (sin datos sensibles)."),
-  entidad: z.object({ tipo: z.string(), id: z.string() }).nullable(),
-  extra: z.unknown().describe("Resto del registro: clave de idempotencia, resultado de intentos…"),
-});
 
 const dia = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato aaaa-mm-dd.");
 
@@ -56,7 +39,7 @@ export const actividadList = defineCapability({
     limite: z.number().int().min(1).max(100).default(30),
     cursor: z.uuid().optional(),
   }),
-  output: z.object({ items: z.array(itemSchema), siguiente: z.string().nullable() }),
+  output: z.object({ items: z.array(itemActividadSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -101,47 +84,6 @@ export const actividadList = defineCapability({
       take: input.limite + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     });
-    const leidas = filas.slice(0, input.limite);
-    const visibleAnexos = await visibleSinAnexos(ctx, leidas);
-    const visibleMarca = visibleSinNoRecontratar(ctx);
-    const pagina = leidas.filter(
-      (f) => visibleAnexos(f) && visibleMarca(f) && !ocultarPreferenciaNav(f),
-    );
-    await auditarHistorialSensible(ctx, pagina, "core.actividad.list");
-    const quien = await nombres(
-      ctx,
-      pagina
-        .flatMap((f) => [f.actorType === "user" ? f.actorId : null, f.viaUserId])
-        .filter((x): x is string => !!x),
-      pagina.filter((f) => f.actorType === "agent" && f.actorId).map((f) => f.actorId as string),
-    );
-    return {
-      items: pagina.map((f) => {
-        const { input: entradaAuditada, ...extra } = (f.payload ?? {}) as {
-          input?: Record<string, unknown>;
-        };
-        const entrada = redactarSensibles(ctx, f.capability, entradaAuditada ?? {});
-        const agente = f.actorType === "agent";
-        return {
-          id: f.id,
-          cuando: f.createdAt.toISOString(),
-          capability: f.capability,
-          actor: {
-            tipo: f.actorType,
-            nombre:
-              quien.get(f.actorId ?? "") ??
-              (agente ? "Agente" : f.actorType === "system" ? "OPAI" : "Usuario"),
-            agente,
-          },
-          via: f.viaUserId ? (quien.get(f.viaUserId) ?? null) : null,
-          accion: frase(f.capability, entrada),
-          cambios: cambios(entrada),
-          detalle: entrada,
-          entidad: f.entityType && f.entityId ? { tipo: f.entityType, id: f.entityId } : null,
-          extra,
-        };
-      }),
-      siguiente: filas.length > input.limite ? (leidas.at(-1)?.id ?? null) : null,
-    };
+    return presentarActividad(ctx, filas, input.limite, "core.actividad.list");
   },
 });

@@ -41,7 +41,8 @@ export function CrearApiKey({
     const r = await ejecutar<{ secreto: string }>("core.apikeys.create", {
       nombre,
       tipo: servicio ? "servicio" : "usuario",
-      ...(servicio || !hereda ? { permisos } : {}),
+      // CAR-351: heredar todos los permisos del responsable se pide explícitamente.
+      ...(servicio || !hereda ? { permisos } : { heredarPermisos: true }),
       scopes: todos ? ["*", ...modulos.filter((m) => m === "platform")] : modulos,
       ...(tope !== null ? { presupuestoMensualUsd: tope } : {}),
     });

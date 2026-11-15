@@ -1,3 +1,4 @@
+import { limpiarFuentesAprobaciones } from "./core/aprobaciones-fuentes";
 import { limpiarBuscadores } from "./core/maestros/buscadores";
 import type { Capacidad } from "./types";
 
@@ -25,4 +26,5 @@ export function listarCapacidades(): readonly Capacidad[] {
 export function limpiarRegistro(): void {
   registro.clear();
   limpiarBuscadores();
+  limpiarFuentesAprobaciones();
 }

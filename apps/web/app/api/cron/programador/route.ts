@@ -1,11 +1,27 @@
-import { purgarIntentosLogin, purgarVerificacionesVencidas } from "@opai/auth";
+import { purgarIntentosLogin, purgarOAuth, purgarVerificacionesVencidas } from "@opai/auth";
 import { programarCapturaSii, programarHorarios, programarPeriodicos } from "@opai/capabilities";
 
-import { autorizarCron, encolarCapturaSiiDesdeCron, horaEn, hoyEn, porTenant, tocaTrabajosDiarios } from "@/lib/cron";
-import { contextoSistema } from "@/lib/medidor";
+import {
+  autorizarCron,
+  encolarCapturaSiiDesdeCron,
+  horaEn,
+  hoyEn,
+  porTenant,
+  tocaTrabajosDiarios,
+} from "@/lib/cron";
+import { contextoSistemaDelTenant } from "@/lib/medidor";
 import { purgarVentanas } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
+
+async function programarTenant(t: { id: string; timezone: string }, tocaDiarios: boolean) {
+  const ctx = await contextoSistemaDelTenant(t.id);
+  const [diarios, horarios] = await Promise.all([
+    tocaDiarios ? programarPeriodicos(ctx, hoyEn(t.timezone)) : Promise.resolve([] as string[]),
+    programarHorarios(ctx, horaEn(t.timezone)),
+  ]);
+  return { diarios, horarios };
+}
 
 /**
  * Cron de cada hora: encola los trabajos horarios de cada tenant y, desde las 09:00 UTC, los diarios. No hace el
@@ -18,14 +34,7 @@ export async function GET(req: Request): Promise<Response> {
   let resultados: Record<string, unknown> = {};
   let errorTenants = false;
   try {
-    resultados = await porTenant((t) => {
-      const hoy = hoyEn(t.timezone);
-      const hora = horaEn(t.timezone);
-      return Promise.all([
-        tocaDiarios ? programarPeriodicos(contextoSistema(t.id), hoy) : Promise.resolve([] as string[]),
-        programarHorarios(contextoSistema(t.id), hora),
-      ]).then(([diarios, horarios]) => ({ diarios, horarios }));
-    });
+    resultados = await porTenant((t) => programarTenant(t, tocaDiarios));
   } catch {
     errorTenants = true;
     console.error("[cron programador] falló la programación por tenant");
@@ -44,6 +53,10 @@ export async function GET(req: Request): Promise<Response> {
   await purgarVerificacionesVencidas().catch(() =>
     console.error("[cron programador] falló la purga de verificaciones vencidas"),
   );
+  // Accesos OAuth vencidos o revocados y apps registradas sin uso (CAR-247): best-effort.
+  await purgarOAuth().catch(() =>
+    console.error("[cron programador] falló la purga del OAuth del MCP"),
+  );
   // Purga de las ventanas de rate limit vencidas (NÚCLEO-B). Global y aislada, como la de login.
   let ventanasRatePurgadas: number | null = null;
   try {
@@ -53,7 +66,11 @@ export async function GET(req: Request): Promise<Response> {
   }
   let capturaSiiEncolada: boolean | null = null;
   try {
-    if (tocaDiarios) capturaSiiEncolada = await encolarCapturaSiiDesdeCron(programarCapturaSii, contextoSistema);
+    if (tocaDiarios)
+      capturaSiiEncolada = await encolarCapturaSiiDesdeCron(
+        programarCapturaSii,
+        contextoSistemaDelTenant,
+      );
   } catch {
     console.error("[cron programador] falló la programación de captura SII");
   }

@@ -46,6 +46,7 @@ export function ListaCargos({
     <ListaMaestro
       state={state}
       titulo="Cargos"
+      vistas={{ lista: "cargos", ruta: "/cargos" }}
       accion={nuevo}
       accionFlotante={Boolean(nuevo)}
       buscar="Buscar cargo"

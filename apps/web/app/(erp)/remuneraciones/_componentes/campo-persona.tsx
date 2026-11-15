@@ -2,7 +2,7 @@
 
 import { Combobox } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 type Persona = { id: string; nombres: string; apellidos: string };
 

@@ -15,9 +15,6 @@
   }
 }
 
-/* Dentro del marco «Hilo» (ADR-090): variante para lo poco que un patrón cambia según el marco. */
-@custom-variant marco-hilo (&:where([data-marco="hilo"] *));
-
 @layer base {
   html {
     font-family: var(--font-sans);
@@ -126,46 +123,6 @@
   font-size: 13px;
   line-height: 20px;
   font-variant-numeric: tabular-nums;
-}
-
-/* Marco «Hilo» (ADR-090, CAR-278): tamaños del diseño aprobado que no están en la escala base
-   (docs/2.0/design/export-base-hilo/). Solo los usa el marco; las pantallas siguen con la escala. */
-@utility t-hilo-saludo {
-  font-size: 26px;
-  line-height: 32px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-@utility t-hilo-lead {
-  font-size: 15px;
-  line-height: 22px;
-  font-weight: 400;
-}
-@utility t-hilo-titulo {
-  font-size: 17px;
-  line-height: 24px;
-  font-weight: 600;
-}
-@utility t-hilo-item {
-  font-size: 16px;
-  line-height: 22px;
-  font-weight: 600;
-}
-@utility t-hilo-mini {
-  font-size: 11px;
-  line-height: 14px;
-}
-/* Cabecera del hilo (CAR-317): nombre de la empresa y monograma. */
-@utility t-hilo-sujeto {
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-@utility t-hilo-monograma {
-  font-size: 13px;
-  line-height: 16px;
-  font-weight: 700;
 }
 
 /* Skeleton con brillo (modo claro y oscuro) */
@@ -363,4 +320,271 @@
     black calc(100% - var(--fd)),
     transparent
   );
+}
+
+@utility ds-estado {
+  @apply flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center;
+}
+@utility ds-estado-icono {
+  @apply flex size-12 items-center justify-center rounded-full bg-bg text-fg-muted;
+  /* `:where` deja el tamaño en 24 px sin ganarle al que pase una pantalla en su ícono. */
+  & :where(svg) {
+    @apply size-6;
+  }
+}
+@utility ds-estado-accion {
+  @apply mt-1;
+}
+@utility ds-estado-titulo {
+  @apply text-md font-medium text-fg;
+}
+@utility ds-estado-texto {
+  @apply max-w-sm text-base text-fg-muted;
+}
+
+/* Menú plegable del diseño nuevo (ADR-109, CAR-335 D2): `ShellNuevo` pone `data-menu` y estas reglas
+   deciden qué se ve, sin JS en el shell compartido (ADR-037). Plegado: en escritorio queda el riel de
+   íconos. Asomado: el menú completo flota sobre la página, en iPad y en escritorio. */
+@media (min-width: 64rem) {
+  [data-menu="plegado"] nav[data-shell="riel"],
+  [data-menu="asomado"] nav[data-shell="riel"] {
+    display: flex;
+  }
+  [data-menu="plegado"] nav[data-shell="sidebar"] {
+    display: none;
+  }
+}
+[data-menu="asomado"] nav[data-shell="sidebar"] {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  box-shadow: var(--ds-shadow-overlay);
+}
+/* Ancho y movimiento del menú del diseño nuevo (CAR-442, referente Linear): `ShellNuevo` fija
+   `--ancho-menu` (200 a 360 px; se cambia arrastrando el borde, `AsaMenu`). El menú entra
+   deslizándose al fijarlo (no al cargar la página) o al asomarse, sin animación si el sistema pide menos movimiento. */
+[data-marco="nuevo"] nav[data-shell="sidebar"] {
+  width: var(--ancho-menu, 248px);
+}
+[data-marco="nuevo"] [data-shell="asa-menu"] {
+  left: var(--ancho-menu, 248px);
+}
+[data-menu="plegado"] [data-shell="asa-menu"],
+[data-menu="asomado"] [data-shell="asa-menu"] {
+  display: none;
+}
+/* Plegado como en Linear (CAR-442), con mouse o trackpad: sin riel de íconos; queda el botón
+   «Mostrar el menú» arriba a la izquierda y una franja de 8 px en el borde que asoman el menú; ya
+   asomado, el menú trae «Dejar el menú fijo» y la página se oscurece un poco. En pantallas táctiles
+   sigue el riel. */
+[data-shell="mostrar-menu"],
+[data-shell="borde-asomar"],
+[data-shell="velo-menu"] {
+  display: none;
+}
+@media (min-width: 64rem) and (pointer: fine) {
+  [data-menu="plegado"] nav[data-shell="riel"],
+  [data-menu="asomado"] nav[data-shell="riel"] {
+    display: none;
+  }
+  [data-menu="plegado"] [data-shell="mostrar-menu"] {
+    display: flex;
+  }
+  [data-menu="plegado"] header[data-shell="barra"],
+  [data-menu="asomado"] header[data-shell="barra"] {
+    padding-left: 3.5rem;
+  }
+  [data-menu="plegado"] [data-shell="borde-asomar"] {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 30;
+    display: block;
+    width: 8px;
+  }
+  [data-menu="asomado"] [data-shell="velo-menu"] {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: block;
+    pointer-events: none;
+  }
+}
+@media (min-width: 64rem) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-menu="asomado"] [data-shell="velo-menu"] {
+    animation: ds-aparecer 180ms ease-out;
+  }
+}
+/* En pantallas táctiles (iPad horizontal) no hay borde de 8 px que tomar: el menú se pliega con su botón. */
+@media (pointer: coarse) {
+  [data-marco="nuevo"] [data-shell="asa-menu"] {
+    display: none;
+  }
+}
+[data-arrastre] {
+  cursor: col-resize;
+  user-select: none;
+}
+@keyframes menu-entra {
+  from {
+    opacity: 0.6;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+  [data-menu="fijo"][data-animar] nav[data-shell="sidebar"],
+  [data-menu="asomado"] nav[data-shell="sidebar"] {
+    animation: menu-entra 180ms ease-out;
+  }
+}
+/* Sin logo, la inicial de la empresa va con su color (ADR-109, CAR-335 D6b). */
+[data-marco="nuevo"] [data-monograma] {
+  background: var(--ds-accent);
+  color: var(--ds-accent-fg);
+}
+/* Barra superior del diseño nuevo (ADR-109, CAR-335 D2b): la ruta o las pestañas a la izquierda con
+   su ancho natural, el buscador centrado en el espacio libre y, a la derecha, las acciones, el tema,
+   el agente y la campana. Nada se monta sobre otra cosa (CAR-335 D6c): en iPad, con acciones de
+   página (una ficha), el buscador queda como ícono para que las pestañas y los botones quepan. */
+@media (min-width: 64rem) {
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="titulo"] {
+    flex: 0 1 auto;
+    order: 1;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="buscar"] {
+    order: 2;
+    margin-inline: auto;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="acciones"] {
+    order: 3;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"] > [data-shell="grupo"] {
+    flex: none;
+    justify-content: flex-end;
+    order: 4;
+    margin-left: auto;
+  }
+}
+@media (min-width: 64rem) and (max-width: 79.99rem) {
+  [data-marco="nuevo"] header[data-shell="barra"]:has(> [data-shell="acciones"]) > [data-shell="buscar"] > button {
+    width: 2.75rem;
+    justify-content: center;
+    padding-inline: 0;
+  }
+  [data-marco="nuevo"] header[data-shell="barra"]:has(> [data-shell="acciones"]) > [data-shell="buscar"] > button > :not(svg) {
+    display: none;
+  }
+}
+/* En escritorio y sin acciones de página, el buscador queda al centro exacto de la barra; la ruta se
+   corta antes de llegar a él. */
+@media (min-width: 80rem) {
+  [data-marco="nuevo"] header[data-shell="barra"]:not(:has(> [data-shell="acciones"])) > [data-shell="buscar"] {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  [data-marco="nuevo"] header[data-shell="barra"]:not(:has(> [data-shell="acciones"])) > [data-shell="titulo"] {
+    max-width: calc(50% - 160px - 6rem);
+  }
+}
+/* Teléfono del diseño nuevo (CAR-335 D2c): la barra inferior es Inicio, Agente, Menú y Yo
+   (`BarraInferiorNueva`); la clásica y el avatar de arriba se esconden, porque la cuenta vive en «Yo».
+   Se eligen por su rol y su nombre accesible, sin marcas nuevas en el shell compartido (ADR-037).
+   Los portales de terreno (`data-pestanas="portal"`, CAR-335 D6e) conservan su barra de pestañas. */
+[data-marco="nuevo"][data-menu]:not([data-pestanas])
+  nav[aria-label="Principal"].fixed:not([data-shell="inferior-nuevo"]),
+[data-marco="nuevo"][data-menu]:not([data-pestanas])
+  header.md\:hidden
+  div:has(> button[aria-label^="Menú de usuario"]) {
+  display: none;
+}
+/* Teléfono del diseño nuevo (CAR-416, `export-diseno-nuevo/Telefono`): la barra inferior se ve siempre.
+   Agente, Menú y Yo son pestañas: el panel del agente y la hoja «Menú» van de arriba hasta la barra,
+   sin «X» (se sale tocando otra pestaña), y el agente no se repite en la barra superior. */
+:root {
+  --ds-alto-barra-inferior: calc(3.5rem + 1px + env(safe-area-inset-bottom));
+}
+@media (max-width: 47.999rem) {
+  [data-marco="nuevo"] aside[data-panel-lateral] {
+    bottom: var(--ds-alto-barra-inferior);
+    z-index: 30;
+  }
+  /* La barra ya cubre la zona segura de abajo: sin un segundo margen sobre ella. */
+  [data-marco="nuevo"] aside[data-panel-lateral] > div:last-child {
+    padding-bottom: 0;
+  }
+  /* Pestaña activa: con la hoja «Menú» o el panel del agente abiertos se marca esa pestaña. */
+  :root:has([data-sobre-barra], aside[data-panel-lateral])
+    [data-shell="inferior-nuevo"]
+    [data-tab] {
+    color: var(--color-fg-muted);
+    font-weight: 500;
+  }
+  :root:has([data-sobre-barra], aside[data-panel-lateral])
+    [data-shell="inferior-nuevo"]
+    [data-tab]
+    > svg {
+    color: inherit;
+  }
+  :root:has([data-sobre-barra]) [data-shell="inferior-nuevo"] [data-tab="menu"],
+  :root:has(aside[data-panel-lateral]) [data-shell="inferior-nuevo"] [data-tab="agente"] {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+  :root:has([data-sobre-barra]) [data-shell="inferior-nuevo"] [data-tab="menu"] > svg,
+  :root:has(aside[data-panel-lateral]) [data-shell="inferior-nuevo"] [data-tab="agente"] > svg {
+    color: var(--color-accent);
+  }
+  [data-marco="nuevo"] aside[data-panel-lateral] [data-panel-cerrar],
+  [data-marco="nuevo"] [data-agente-telefono] {
+    display: none;
+  }
+}
+/* Fondo propio del menú lateral y del riel en el diseño nuevo (`--ds-side`, D2c). */
+[data-marco="nuevo"] nav[data-shell="sidebar"],
+[data-marco="nuevo"] nav[data-shell="riel"] {
+  background-color: var(--ds-side);
+}
+/* Riel del diseño nuevo (CAR-377): `ShellNuevo` pone `RielNuevo` (primer nivel y un ícono por
+   módulo) a la izquierda del shell; el riel clásico, que lista cada submódulo, no se muestra. */
+[data-marco="nuevo"][data-menu] > div {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+[data-marco="nuevo"] nav[data-shell="riel"]:not([data-riel-nuevo]) {
+  display: none !important;
+}
+/* Listas con ficha a la derecha en el diseño nuevo (ADR-109, CAR-336): desde 1024 px, sin ficha la
+   lista usa todo el ancho (sin un panel casi vacío al lado) y, con ficha, la ficha toma el 58 %. No
+   aplica a Configuración (`data-contenido`), que tiene su propio menú a la izquierda. */
+@media (min-width: 64rem) {
+  [data-marco="nuevo"] [data-split]:not([data-contenido]) > [data-columna="lista"] {
+    width: 42%;
+  }
+  [data-marco="nuevo"]
+    [data-split][data-sin-detalle]:not([data-contenido])
+    > [data-columna="lista"] {
+    width: 100%;
+    flex: 1 1 auto;
+    border-right-width: 0;
+  }
+  [data-marco="nuevo"]
+    [data-split][data-sin-detalle]:not([data-contenido])
+    > [data-columna="detalle"] {
+    display: none;
+  }
+  /* «Ver a pantalla completa» (CAR-335 D4b): sin JS; la casilla de la ficha esconde la lista. */
+  [data-marco="nuevo"] [data-split] [data-expandir-ficha] {
+    display: flex;
+    margin: -0.5rem -0.75rem 0 0;
+  }
+  [data-marco="nuevo"] [data-split]:has([data-expandir]:checked) > [data-columna="lista"] {
+    display: none;
+  }
 }

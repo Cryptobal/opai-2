@@ -41,7 +41,7 @@ describe.skipIf(!urlPropietario)("lecturas durante expansión de auditoría", ()
         });
       for (const [capacidad, campo] of [
         ["core.actividad.list", "items"],
-        ["core.audit.list", "eventos"],
+        ["core.audit.list", "items"],
       ]) {
         // La fila histórica representa una escritura registrada. Filtrarla separa el evento
         // nullable de los eventos que agregan las propias lecturas auditadas.

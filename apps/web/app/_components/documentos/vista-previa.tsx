@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { Button, Cerrar, Dialog, Skeleton, TipoArchivo, Vigencia } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { fecha } from "@/lib/fechas";
 
 import { useHojaUrl } from "../maestros/use-url";

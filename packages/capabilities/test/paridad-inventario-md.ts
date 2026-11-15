@@ -13,7 +13,6 @@ const celda = (t: string) => t.replace(/\|/g, "\\|");
  */
 export function inventarioMarkdown(): string {
   const filas = inventario();
-  const cuenta = (e: FilaInventario["estado"]) => filas.filter((f) => f.estado === e).length;
   const tabla = filas.map(
     (f) =>
       `| ${f.portal} | \`${celda(f.ruta)}\` | \`${f.capacidad}\` | ${f.herramienta === "—" ? "—" : `\`${f.herramienta}\``} | ${f.estado} |`,
@@ -36,8 +35,8 @@ export function inventarioMarkdown(): string {
     "La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de",
     "plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.",
     "",
-    `**Resumen:** ${filas.length} pares pantalla→capacidad · ${cuenta("existe")} con herramienta · ${cuenta("excepción")} excepciones justificadas · ${cuenta("falta")} faltantes.`,
-    "",
+    // Sin línea de totales (Carlos, 14-nov-2026): cambiaba con cada capacidad nueva y hacía chocar a casi
+    // todos los PR abiertos con main. Los totales se cuentan en la tabla.
     "## Pantalla → herramienta MCP",
     "",
     "| Portal | Ruta o componente | Capacidad | Herramienta MCP | Estado |",

@@ -46,6 +46,7 @@ import {
   personasVincularUsuario,
 } from "./personas-estado";
 import { trabajoPersonasNoRecontratarVencer } from "./personas-no-recontratar-limpieza";
+import { trabajoCortarAccesosProgramado } from "./vinculos-corte-programado";
 import {
   personasMarcarNoRecontratar,
   personasNoRecontratarVer,
@@ -60,7 +61,7 @@ import {
   personasPagoAprobarCambio,
   personasPagoRechazarCambio,
 } from "./personas-pago-aprobacion";
-import { personasLaboralActualizar, personasLaboralVer } from "./personas-laboral";
+import { capacidadesContratoPeriodos, personasLaboralActualizar, personasLaboralVer } from "./personas-laboral";
 import { cargosMontosPorInstalacion } from "./cargos-montos-instalacion";
 import { puestosCreate, puestosUpdate } from "./puestos-escritura";
 import { puestosSetEstado } from "./puestos-estado";
@@ -128,6 +129,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasPagoRechazarCambio,
   personasLaboralVer,
   personasLaboralActualizar,
+  ...capacidadesContratoPeriodos,
   vinculosPrevisualizar,
   vinculosList,
   vinculosCreate,
@@ -149,4 +151,5 @@ export const capacidadesMaestros: readonly Capacidad[] = [
 ];
 
 /** Trabajos diarios de los maestros, registrados por el borde (`apps/web/lib/registro.ts`). */
-export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer, trabajoConsultarContribuyenteSii, trabajoPurgarCacheSii];
+// prettier-ignore
+export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer, trabajoConsultarContribuyenteSii, trabajoPurgarCacheSii, trabajoCortarAccesosProgramado];

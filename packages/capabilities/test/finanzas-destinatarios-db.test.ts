@@ -48,12 +48,12 @@ describe.skipIf(!urlPropietario)("Finanzas · destinatarios del documento (db)",
     await s?.e.cerrar();
   });
 
-  it("sugiere la casilla DTE como PARA y los contactos activos de facturación en copia", async () => {
+  it("sugiere los contactos activos de facturación como PARA y la casilla DTE en copia (ADR-103)", async () => {
     await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { emailDte: "DTE@Cliente.cl" } });
     const r = await s.dato<Sugerencia>("finanzas.ventas.destinatarios_sugeridos", { cuentaId: s.cuentaId });
     expect(r.sugeridos).toEqual([
-      { tipo: "PARA", email: "dte@cliente.cl", origen: "casilla_dte" },
-      { tipo: "CC", email: "pagos@cliente.cl", origen: "contacto_facturacion" },
+      { tipo: "PARA", email: "pagos@cliente.cl", origen: "contacto_facturacion" },
+      { tipo: "CC", email: "dte@cliente.cl", origen: "casilla_dte" },
     ]);
     expect(r.guardados).toEqual([]);
   });
@@ -78,12 +78,13 @@ describe.skipIf(!urlPropietario)("Finanzas · destinatarios del documento (db)",
     expect(r.guardados).toEqual([{ tipo: "PARA", email: "otro@cliente.cl", origen: "manual" }]);
   });
 
-  it("rechaza listas sin PARA, con dos PARA, con repetidos, con correos rotos o de más", async () => {
+  it("rechaza listas sin PARA, con más de 10 PARA, con repetidos, con correos rotos o de más", async () => {
     const intenta = (destinatarios: unknown[]) =>
       s.mod.executeCapability(s.ctx(), "finanzas.ventas.guardar_destinatarios", { documentoId: borradorId, destinatarios });
     const mensaje = (r: Awaited<ReturnType<typeof intenta>>) => (r.ok ? "" : r.error.message);
     expect(mensaje(await intenta([{ tipo: "CC", email: "a@x.cl" }]))).toMatch(/destinatario principal/);
-    expect(mensaje(await intenta([{ tipo: "PARA", email: "a@x.cl" }, { tipo: "PARA", email: "b@x.cl" }]))).toMatch(/Solo puede haber un destinatario PARA/);
+    const once = Array.from({ length: 11 }, (_, i) => ({ tipo: "PARA", email: `p${i}@x.cl` }));
+    expect(mensaje(await intenta(once))).toMatch(/Máximo 10 destinatarios principales/);
     expect(mensaje(await intenta([{ tipo: "PARA", email: "a@x.cl" }, { tipo: "BCC", email: "A@x.cl" }]))).toMatch(/repetido/);
     expect(mensaje(await intenta([{ tipo: "PARA", email: "no-es-correo" }]))).toMatch(/no es válido/);
     const veintiuno = Array.from({ length: 21 }, (_, i) => ({ tipo: i === 0 ? "PARA" : "CC", email: `u${i}@x.cl` }));
@@ -92,10 +93,10 @@ describe.skipIf(!urlPropietario)("Finanzas · destinatarios del documento (db)",
     expect(await s.e.admin.documentoEmitidoDestinatario.count({ where: { documentoId: borradorId } })).toBe(1);
   });
 
-  it("el envío usa la lista guardada: PARA, CC y BCC; sin lista cae en los contactos de facturación", async () => {
+  it("el envío usa la lista guardada: PARA, CC y BCC; sin lista cae en los contactos de facturación y la casilla DTE va en copia", async () => {
     const sin = await s.dato<Envio>("finanzas.ventas.enviar_cliente", { documentoId: emitidoId });
-    expect(sin).toMatchObject({ estado: "enviado", para: "pagos@cliente.cl", cc: [], bcc: [] });
-    expect(enviados[0]).toMatchObject({ para: "pagos@cliente.cl" });
+    expect(sin).toMatchObject({ estado: "enviado", para: "pagos@cliente.cl", cc: ["dte@cliente.cl"], bcc: [] });
+    expect(enviados[0]).toMatchObject({ para: "pagos@cliente.cl", cc: ["dte@cliente.cl"] });
     expect("bcc" in (enviados[0] ?? {})).toBe(false);
 
     await s.dato("finanzas.ventas.guardar_destinatarios", {
@@ -113,6 +114,19 @@ describe.skipIf(!urlPropietario)("Finanzas · destinatarios del documento (db)",
     expect(enviados[1]).toMatchObject({ para: "dte@cliente.cl", cc: ["pagos@cliente.cl"], bcc: ["respaldo@gard.test"] });
     const envio = await s.e.admin.documentoEmitidoEnvio.findFirstOrThrow({ where: { documentoId: emitidoId }, orderBy: { createdAt: "desc" } });
     expect(envio.destinatarios).toEqual(["dte@cliente.cl", "pagos@cliente.cl", "respaldo@gard.test"]);
+  });
+
+  it("varios PARA reciben por igual y la casilla DTE se agrega en copia aunque no esté guardada (ADR-103)", async () => {
+    await s.dato("finanzas.ventas.guardar_destinatarios", {
+      documentoId: emitidoId,
+      destinatarios: [
+        { tipo: "PARA", email: "pagos@cliente.cl" },
+        { tipo: "PARA", email: "gerencia@cliente.cl" },
+      ],
+    });
+    const r = await s.dato<Envio>("finanzas.ventas.enviar_cliente", { documentoId: emitidoId, reenviar: true });
+    expect(r).toMatchObject({ estado: "enviado", para: "pagos@cliente.cl", paraAdicionales: ["gerencia@cliente.cl"], cc: ["dte@cliente.cl"] });
+    expect(enviados.at(-1)).toMatchObject({ para: "pagos@cliente.cl", paraAdicionales: ["gerencia@cliente.cl"], cc: ["dte@cliente.cl"] });
   });
 
   it("otra empresa no ve, sugiere ni guarda destinatarios de este documento", async () => {

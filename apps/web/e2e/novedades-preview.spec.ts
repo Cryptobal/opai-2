@@ -38,6 +38,21 @@ test.describe("@preview novedades y bandeja", () => {
     expect(await page.locator("main").first().innerText()).not.toContain("**");
     await capturar(page, info, "novedades-lista");
 
+    // CAR-245: filtro «Todas / No leídas». En «No leídas» no queda ninguna tarjeta leída; sin
+    // pendientes, aparece el vacío con «Ver todas», que vuelve a la lista completa.
+    const filtro = page.getByRole("group", { name: "Filtrar novedades" });
+    await filtro.getByRole("button", { name: /^No leídas/ }).click();
+    if ((await pendientes(page)) === 0) {
+      await expect(page.getByText("No tienes novedades sin leer")).toBeVisible();
+      await capturar(page, info, "novedades-filtro-no-leidas");
+      await page.getByRole("button", { name: "Ver todas" }).click();
+    } else {
+      await expect(page.getByRole("button", { name: "Marcar como leída" }).first()).toBeVisible();
+      await capturar(page, info, "novedades-filtro-no-leidas");
+      await filtro.getByRole("button", { name: "Todas" }).click();
+    }
+    await expect(page.getByText(RESUMEN).first()).toBeVisible();
+
     await page.goto("/bandeja");
     // La Bandeja ya cargó cuando su título trae el número («Bandeja · N»).
     await expect(page.getByRole("heading", { name: /^Bandeja · \d+$/ })).toBeVisible({ timeout: 30_000 });
@@ -55,7 +70,7 @@ test.describe("@preview novedades y bandeja", () => {
     await page.goto("/supervisor/novedades");
     const lista = page.getByText(RESUMEN).first();
     if (await lista.waitFor({ timeout: 20_000 }).then(() => true, () => false)) {
-      const avatar = page.getByRole("button", { name: /^Menú de usuario/ }).filter({ visible: true }).first();
+      const avatar = page.getByRole("button", { name: /^(Menú de usuario|Yo)/ }).filter({ visible: true }).first();
       if ((await page.getByText(RESUMEN).count()) > 0 && (await pendientes(page)) > 0)
         await expect(avatar).toHaveAccessibleName(/hay novedades sin leer/, { timeout: 15_000 });
       await capturar(page, info, "novedades-avatar-sin-bandeja");

@@ -1,11 +1,11 @@
 "use client";
 
-import { Building2, FileText, Handshake, Inbox, MapPin, Settings, Sparkles } from "lucide-react";
+import { Building2, FileText, FolderOpen, Handshake, Inbox, MapPin, Receipt, Settings, Sparkles } from "lucide-react";
 import { useCallback, useMemo } from "react";
 
 import type { GrupoPaleta, ItemPaleta } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { destinoAjuste } from "@/lib/ajuste-destino";
 import type { AccionCmdK } from "@/lib/navegacion-entradas";
 import type { ItemNav } from "@/lib/navegacion";
@@ -20,7 +20,7 @@ const grupoAgente = (hay: boolean, q: string): GrupoPaleta[] =>
   hay
     ? [{ titulo: "Agente", items: [{ id: ASK + q, etiqueta: q ? `Preguntar a OPAI: «${q}»` : "Preguntar a OPAI", icono: Sparkles, href: "#" }] }]
     : [];
-const iconoGrupo = (g: string) => (g === "negocios" ? Handshake : g === "cotizaciones" ? FileText : Inbox);
+const iconoGrupo = (g: string) => (g === "negocios" ? Handshake : g === "cotizaciones" ? FileText : g === "facturas" ? Receipt : g === "documentos" ? FolderOpen : Inbox);
 type Resultado = { id: string; titulo: string; detalle: string | null; href: string };
 type Busqueda = Record<"cuentas" | "instalaciones" | "personas" | "contactos", Resultado[]> & {
   otros?: { grupo: string; titulo: string; items: Resultado[] }[];

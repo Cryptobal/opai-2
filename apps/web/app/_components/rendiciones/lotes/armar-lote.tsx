@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { avisar, Badge, Button, Checkbox, Table, Td, Th, Tr } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { pesos } from "../formato";
 import { type Candidata, RUTA_LOTES } from "./tipos";

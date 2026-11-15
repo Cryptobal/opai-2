@@ -9,8 +9,11 @@ import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 import { armarPlanilla, celdaEditable, clp, type Planilla } from "./datos";
 import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
 import { PlanillaFlujoEscritorio } from "./planilla-flujo-escritorio";
+import { cobrosDeSemana, FILA_COBROS_ESPERADOS, FILA_IVA, hojaEspecial, type HojaEspecial, ivaDeSemana } from "./cobros-celda";
 
 const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
+const HojaCobros = dynamic(() => import("./hoja-cobros").then((m) => ({ default: m.HojaCobros })));
+const HojaIva = dynamic(() => import("./hoja-iva").then((m) => ({ default: m.HojaIva })));
 const VistaMovilFlujo = dynamic(() =>
   import("./vista-movil").then((m) => ({ default: m.VistaMovilFlujo })),
 );
@@ -27,6 +30,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
   const router = useRouter();
   const [seleccion, setSeleccion] = useState<{ filaId: string; semana: string } | null>(null);
   const [importAbierta, setImportAbierta] = useState(false);
+  const [hoja, setHoja] = useState<HojaEspecial | null>(null);
   const p = planilla;
   const armado = useMemo(() => (p ? armarPlanilla(p, { gestiona }) : null), [p, gestiona]);
 
@@ -34,6 +38,22 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
     p && p.aviso.semanas.length
       ? `Semana ${p.aviso.semanas[0]?.semana.slice(8, 10)}-${p.aviso.semanas[0]?.semana.slice(5, 7)} con saldo ${clp(p.aviso.semanas[0]?.saldoFinal ?? 0)}`
       : null;
+
+  const hojaCobros =
+    gestiona && p && hoja?.tipo === "cobros" ? (
+      <HojaCobros
+        semana={hoja.semana}
+        cobros={cobrosDeSemana(p, FILA_COBROS_ESPERADOS, hoja.semana)}
+        onCerrar={() => setHoja(null)}
+      />
+    ) : gestiona && p && hoja?.tipo === "iva" ? (
+      <HojaIva semana={hoja.semana} ivas={ivaDeSemana(p, FILA_IVA, hoja.semana)} onCerrar={() => setHoja(null)} />
+    ) : null;
+  const abrirCelda = (filaId: string, semana: string) => {
+    const h = p ? hojaEspecial(p, filaId, semana) : null;
+    if (h) setHoja(h);
+    else setSeleccion({ filaId, semana });
+  };
 
   const textosError =
     state === "error"
@@ -56,7 +76,8 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
         ) : null}
         <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
         <AvisosProyeccion avisos={p.avisos} />
-        <VistaMovilFlujo planilla={p} gestiona={gestiona} onCelda={(filaId, semana) => setSeleccion({ filaId, semana })} />
+        <VistaMovilFlujo planilla={p} gestiona={gestiona} onCelda={abrirCelda} />
+        {hojaCobros}
         {gestiona ? (
           <HojaCelda
             abierta={!!seleccion}
@@ -91,18 +112,22 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
   }
 
   return (
-    <PlanillaFlujoEscritorio
-      state={state}
-      planilla={p}
-      armado={armado}
-      gestiona={gestiona}
-      configura={configura}
-      avisoTitulo={avisoTitulo}
-      textosError={textosError}
-      seleccion={seleccion}
-      onSeleccion={setSeleccion}
-      importAbierta={importAbierta}
-      onImportAbiertaChange={setImportAbierta}
-    />
+    <>
+      <PlanillaFlujoEscritorio
+        state={state}
+        planilla={p}
+        armado={armado}
+        gestiona={gestiona}
+        configura={configura}
+        avisoTitulo={avisoTitulo}
+        textosError={textosError}
+        seleccion={seleccion}
+        onSeleccion={setSeleccion}
+        importAbierta={importAbierta}
+        onImportAbiertaChange={setImportAbierta}
+        onHoja={setHoja}
+      />
+      {hojaCobros}
+    </>
   );
 }

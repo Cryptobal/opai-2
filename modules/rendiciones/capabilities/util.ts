@@ -1,5 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
 import { ajuste, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { INCLUIR_ACCESO } from "@opai/domain";
 
 import { claveDuplicado, codigoVisible, esFechaFutura, itemsSinRespaldo } from "../domain";
 import { puedeAprobarMembresia } from "./aprobadores";
@@ -55,7 +56,7 @@ export async function validarAprobador(
   if (aprobadorId === solicitanteId) throw reglaDeNegocio("Nadie aprueba su propia rendición.");
   const m = await ctx.db.membership.findFirst({
     where: { tenantId: ctx.tenantId, userId: aprobadorId, estado: "activa" },
-    include: { rolTenant: true, excepciones: true },
+    include: INCLUIR_ACCESO,
   });
   if (!m || !puedeAprobarMembresia(m))
     throw reglaDeNegocio("El aprobador elegido no puede aprobar rendiciones en esta empresa.");
@@ -143,7 +144,7 @@ export async function duplicadosDe(
 }
 
 /** Si el actor puede ver la rendición: es el solicitante, el aprobador asignado o ve todas (ADR-022). */
-export function puedeVer(ctx: Contexto, r: { solicitanteId: string; aprobadorId: string | null }): boolean {
+function puedeVer(ctx: Contexto, r: { solicitanteId: string; aprobadorId: string | null }): boolean {
   const yo = ctx.usuario?.id;
   return (
     !!yo && (r.solicitanteId === yo || r.aprobadorId === yo || ctx.autorizar(PERMISO_VER_TODAS))

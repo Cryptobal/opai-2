@@ -95,6 +95,7 @@ export function contextoDeIdentidad(
     rol: actual && esRol(actual.rol) ? actual.rol : null,
     permisosRol: acceso.permisosRol,
     excepciones: acceso.excepciones,
+    permisosAdicionales: acceso.permisosAdicionales ?? null,
     alcance: alcanceDe(acceso.instalaciones),
     portal,
     portalesMembresia: actual?.portales ?? [],

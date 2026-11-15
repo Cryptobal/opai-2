@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cn } from "../cn";
 import { Button } from "../components/button";
 import type { ItemMenu } from "../components/menu";
-import { AtajoBusqueda } from "../components/atajo-busqueda";
+import { CajaBusqueda } from "./caja-busqueda";
 import { PortalSwitcher } from "./portal-switcher";
 import { AtrasBarra, MigasBarra } from "./volver-barra";
 import {
@@ -35,6 +35,10 @@ export type ComunesBarra = {
   agente?: ReactNode;
   /** Abre la búsqueda global (⌘K). Sin ella, no hay búsqueda. */
   onBuscar?: () => void;
+  /** Texto de la caja de búsqueda en desktop (el diseño nuevo, ADR-109, la abre también al agente). */
+  textoBusqueda?: string;
+  /** Botón de tema en la barra de iPad y desktop (diseño nuevo); en teléfono el tema vive en «Yo». */
+  tema?: ReactNode;
   busquedaCompacta?: boolean;
   volver?: Volver;
   /** El "Atrás" solo en teléfono (detalle dentro de una vista dividida en md+). */
@@ -83,7 +87,11 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
               <Search className="size-5" />
             </Button>
           ) : null}
-          {props.agente}
+          {props.agente ? (
+            <span data-agente-telefono="" className="contents">
+              {props.agente}
+            </span>
+          ) : null}
           {campana}
           <MenuUsuarioBarra {...props} lado="abajo-derecha" />
         </div>
@@ -112,9 +120,12 @@ export function AppBar(props: AppBarProps) {
   const volver = props.volverSoloTelefono && !bajoLg ? undefined : props.volver;
   const Link = props.Link ?? LinkPorDefecto;
   return (
-    <header className="sticky top-0 z-20 hidden h-[60px] flex-none items-center gap-3 border-b border-border bg-bg/95 px-6 backdrop-blur md:flex xl:px-8">
+    <header
+      data-shell="barra"
+      className="sticky top-0 z-20 hidden h-[60px] flex-none items-center gap-3 border-b border-border bg-bg/95 px-6 backdrop-blur md:flex xl:px-8"
+    >
       {volver ? <AtrasBarra volver={volver} bajoLg={bajoLg} Link={Link} /> : null}
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+      <div data-shell="titulo" className="flex min-w-0 flex-1 items-center gap-3">
         {volver ? (
           <MigasBarra volver={volver} titulo={titulo} bajoLg={bajoLg} />
         ) : (
@@ -124,39 +135,20 @@ export function AppBar(props: AppBarProps) {
         )}
         {insignia}
       </div>
-      {acciones ? <div className="flex flex-none items-center gap-2">{acciones}</div> : null}
-      <div className="flex flex-none items-center gap-3">
-        {onBuscar ? (
-          <button
-            type="button"
-            onClick={onBuscar}
-            aria-label="Buscar o ir a"
-            className={cn(
-              "flex h-11 min-w-0 items-center gap-2 rounded-md border border-border bg-surface px-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9",
-              // En iPad (768–1023 px) la caja más angosta deja sitio al título aun con el botón del agente a la vista.
-              props.busquedaCompacta ? "w-auto" : "w-[200px] lg:w-[280px] xl:w-80",
-            )}
-          >
-            <Search className="size-4 flex-none" aria-hidden />
-            <span
-              className={cn(
-                "flex-1 truncate text-left xl:hidden",
-                props.busquedaCompacta && "hidden",
-              )}
-            >
-              Buscar personas, clientes, folios
-            </span>
-            <span
-              className={cn(
-                "hidden flex-1 text-left xl:inline",
-                props.busquedaCompacta && "xl:hidden",
-              )}
-            >
-              Buscar
-            </span>
-            <AtajoBusqueda className="hidden xl:inline-flex" />
-          </button>
-        ) : null}
+      {acciones ? (
+        <div data-shell="acciones" className="flex flex-none items-center gap-2">
+          {acciones}
+        </div>
+      ) : null}
+      {onBuscar ? (
+        <CajaBusqueda
+          onBuscar={onBuscar}
+          compacta={props.busquedaCompacta}
+          texto={props.textoBusqueda}
+        />
+      ) : null}
+      <div data-shell="grupo" className="flex flex-none items-center gap-3">
+        {props.tema}
         {props.agente}
         {campana}
         {usuario ? (

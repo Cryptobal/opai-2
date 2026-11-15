@@ -9,7 +9,12 @@ afterEach(() => vi.unstubAllGlobals());
 it("transporta el handle hasta Anthropic sin incluir pensamiento o firma en Plan ni auditoría", async () => {
   const raw = [
     { type: "thinking", thinking: "PENSAMIENTO_PRIVADO", signature: "FIRMA_PRIVADA" },
-    { type: "tool_use", id: "t1", name: "core_prueba_accion", input: {} },
+    {
+      type: "tool_use",
+      id: "t1",
+      name: "usar-herramienta",
+      input: { nombre: "core_prueba_accion", argumentos: {} },
+    },
   ];
   const cuerpos: string[] = [];
   vi.stubGlobal(

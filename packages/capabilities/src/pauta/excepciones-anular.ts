@@ -4,6 +4,7 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import { anotar } from "./anotar";
+import { anularRegistrosSinTurnos } from "./ausencias-registro";
 import { aFechaDb, diasDelRango, PERMISO_WRITE, puestoParaPauta, rangoSchema } from "./comun";
 
 const anularInput = z.object({ puestoId: uuidSchema }).and(rangoSchema);
@@ -31,11 +32,35 @@ export const excepcionesAnular = defineCapability({
     return ctx.transaccion(async (tx) => {
       await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${input.puestoId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       const puestoActual = await puestoParaPauta({ ...ctx, db: tx }, input.puestoId);
+      const registros = await tx.excepcionPauta.findMany({
+        where: donde,
+        select: { id: true, ausenciaId: true },
+      });
       const resultado = await tx.excepcionPauta.updateMany({
         where: donde,
         data: { estado: "anulada", anuladaEn: new Date(), anuladaPor: ctx.usuario?.id ?? null },
       });
       if (resultado.count === 0) throw reglaDeNegocio("No hay excepciones activas en esas fechas.");
+      // CAR-96: el turno extra de un reemplazo/refuerzo anulado pasa a rechazado.
+      await tx.turnoExtra.updateMany({
+        where: {
+          excepcionId: { in: registros.map((a) => a.id) },
+          estado: "por_aprobar",
+        },
+        data: {
+          estado: "rechazado",
+          resueltoEn: new Date(),
+          resueltoPor: ctx.usuario?.id ?? null,
+          motivoResolucion: "Excepción anulada",
+        },
+      });
+      // El registro de ausencia que se quedó sin turnos activos también se anula (CAR-393).
+      await anularRegistrosSinTurnos(
+        tx,
+        ctx.tenantId,
+        registros.map((r) => r.ausenciaId),
+        ctx.usuario?.id ?? null,
+      );
       await anotar(tx, ctx, {
         instalacionId: puestoActual.instalacionId,
         puestoId: puesto.id,

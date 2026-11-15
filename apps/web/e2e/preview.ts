@@ -6,6 +6,8 @@ import { type Page, type TestInfo } from "@playwright/test";
 
 /** Hay una vista previa remota como destino (no `next dev` local). */
 export const EN_PREVIEW = /^https:\/\//.test(process.env["BASE_URL"] ?? "");
+const CARPETA_CAPTURAS =
+  EN_PREVIEW || process.env["CI"] ? "test-results/capturas" : "e2e/__screenshots__";
 
 /**
  * La vista previa está detrás de la protección de Vercel: se agrega la cabecera de automatización solo a
@@ -18,15 +20,47 @@ export async function pasarProteccionDeVercel(page: Page): Promise<void> {
   if (!secreto || !base || !EN_PREVIEW) return;
   const origen = new URL(base).origin;
   await page.route(`${origen}/**`, (ruta) =>
-    ruta.continue({ headers: { ...ruta.request().headers(), "x-vercel-protection-bypass": secreto } }),
+    ruta.continue({
+      headers: { ...ruta.request().headers(), "x-vercel-protection-bypass": secreto },
+    }),
   );
 }
 
 /**
- * Captura de pantalla completa con el tamaño en el nombre. En `preview-e2e` va a `test-results/capturas/`
- * (el artefacto del run); en local, a `e2e/__screenshots__/` como el resto de los e2e.
+ * Captura de pantalla completa con el tamaño en el nombre. En `preview-e2e` y en el job e2e de CI (Postgres
+ * efímero) va a `test-results/capturas/`, que sube el artefacto del run; en local, a `e2e/__screenshots__/`.
+ * En CI es donde quedan las capturas de Plataforma: la vista previa copia la base con Gard y la cuenta de QA
+ * no tiene rol de plataforma (CAR-323, decisión de Carlos del 14-nov).
  */
 export async function capturar(page: Page, info: TestInfo, nombre: string): Promise<void> {
-  const carpeta = EN_PREVIEW ? "test-results/capturas" : "e2e/__screenshots__";
+  const carpeta = CARPETA_CAPTURAS;
   await page.screenshot({ path: `${carpeta}/${nombre}-${info.project.name}.png`, fullPage: true });
+}
+
+/**
+ * Captura una hoja o diálogo recién abierto después de que termine su animación de entrada, para que no
+ * quede semitransparente sobre la pantalla (CAR-417). Ignora animaciones infinitas (indicadores de carga)
+ * y captura solo la ventana visible.
+ */
+export async function capturarHoja(page: Page, info: TestInfo, nombre: string): Promise<void> {
+  // Las transiciones CSS recién arrancan en el cuadro siguiente: se espera un par de cuadros y se repite
+  // hasta que no quede ninguna animación finita corriendo (con tope, para no colgar la prueba).
+  await page.evaluate(async () => {
+    const cuadro = () => new Promise((r) => requestAnimationFrame(() => r(undefined)));
+    for (let i = 0; i < 10; i++) {
+      await cuadro();
+      await cuadro();
+      const vivas = document
+        .getAnimations()
+        .filter(
+          (a) => a.playState === "running" && a.effect?.getComputedTiming().iterations !== Infinity,
+        );
+      if (vivas.length === 0) return;
+      await Promise.all(vivas.map((a) => a.finished.catch(() => undefined)));
+    }
+  });
+  // Sin `fullPage`: alargar la ventana para la captura completa cambia el diseño en iPad (borde táctil de
+  // 1024 px) y la hoja vuelve a animar su entrada. La hoja ocupa la ventana, así que basta lo visible.
+  const carpeta = CARPETA_CAPTURAS;
+  await page.screenshot({ path: `${carpeta}/${nombre}-${info.project.name}.png` });
 }

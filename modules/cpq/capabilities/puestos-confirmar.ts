@@ -10,7 +10,7 @@ import { PERMISO_PUESTOS_CONFIRMAR } from "./permisos";
 
 const hora = z.string().refine(horaValida, 'Hora "HH:mm" de 00:00 a 23:59.');
 
-export const puestoConfirmadoSchema = z.object({
+const puestoConfirmadoSchema = z.object({
   puestoId: uuidSchema.nullable(),
   nombre: z.string(),
   lineaId: uuidSchema,

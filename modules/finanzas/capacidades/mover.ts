@@ -44,7 +44,8 @@ export const celdasMover = defineCapability({
     const ajustes = await ajustesDe(ctx);
     const todas = [...input.semanas].sort();
     const hasta = sumarSemanas(todas.at(-1) as string, Math.max(input.por, 0) + 52);
-    const base = ajustes.desde < (todas[0] as string) ? ajustes.desde : (todas[0] as string);
+    // Desde la primera semana movida (o su destino, si se adelanta): carga también las celdas de destino.
+    const base = sumarSemanas(todas[0] as string, Math.min(input.por, 0));
     const { celdasDom } = await cargarFlujo(ctx, base, hasta);
     const hoy = lunesHoy();
     const plan = planificarMovimiento({
@@ -74,7 +75,7 @@ export const celdasMover = defineCapability({
       return tras;
     };
     // Mismos saldos que la planilla: cartola en lo pasado y plan en lo futuro (hallazgo 10).
-    const desdeSerie = desdeVentana(ajustes, todas[0]);
+    const desdeSerie = desdeVentana(todas[0]);
     const cantidad = Math.max(
       26,
       Math.round((Date.parse(hasta) - Date.parse(desdeSerie)) / (7 * 86_400_000)) + 1,

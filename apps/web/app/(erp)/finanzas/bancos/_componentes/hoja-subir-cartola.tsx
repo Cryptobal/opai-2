@@ -27,8 +27,10 @@ export function HojaSubirCartola({
   const [formato, setFormato] = useState<"santander" | "generico">("santander");
   const [archivo, setArchivo] = useState<File | null>(null);
   const [vista, setVista] = useState<VistaCartolaPreview | null>(null);
+  // Una clave nueva por cada archivo elegido: evita el doble clic, pero permite volver a importar el mismo archivo
+  // después de deshacer su importación (CAR-341); con la clave anterior se devolvía el resultado ya guardado.
   const idempotencyKey = useMemo(
-    () => (archivo ? `${archivo.name}-${archivo.lastModified}-${archivo.size}` : ""),
+    () => (archivo ? `${archivo.size}-${archivo.lastModified}-${crypto.randomUUID()}` : ""),
     [archivo],
   );
 
@@ -77,7 +79,7 @@ export function HojaSubirCartola({
             Cancelar
           </Button>
           {vista ? (
-            <Button disabled={pendiente || vista.aplicados === 0} onClick={() => void confirmar()}>
+            <Button disabled={pendiente || vista.aplicados === 0 || vista.cuadratura?.cuadra === false} onClick={() => void confirmar()}>
               Importar
             </Button>
           ) : (
@@ -140,6 +142,8 @@ export function HojaSubirCartola({
             duplicados={vista.duplicados}
             rechazados={vista.rechazados}
             filas={vista.filas}
+            cuadratura={vista.cuadratura}
+            yaImportada={vista.yaImportada ?? null}
           />
         ) : null}
       </div>

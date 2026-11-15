@@ -40,10 +40,13 @@ export async function cargarCargo(id: string) {
     }),
   ]);
   requerirEncontrado(c);
+  // CAR-365: si fallan solo las estructuras antiguas, el cargo se muestra igual y esa tarjeta
+  // avisa por su cuenta (antes la ficha completa quedaba en «No pudimos cargar esta información»).
   return {
-    state: estadoPantalla(v.ok ? c : v),
+    state: estadoPantalla(c),
     cargo: c.ok ? c.data : null,
     versiones: v.ok ? v.data : [],
+    versionesConError: !v.ok,
   };
 }
 

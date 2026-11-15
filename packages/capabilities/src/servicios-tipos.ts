@@ -2,6 +2,7 @@
 // implementa el borde (base real) o `@opai/capabilities/testing` (memoria).
 import type {
   HechoBitacora,
+  AppConectada,
   MetodosUsuario,
   OrigenCambio,
   ResultadoBorrado,
@@ -105,10 +106,27 @@ export type Identidad = {
   ultimosAccesos(userIds: readonly string[]): Promise<Map<string, Date>>;
   /** Si el usuario es miembro de alguna empresa distinta de `tenantId`. */
   enOtrasEmpresas(userId: string, tenantId: string): Promise<boolean>;
-  /** Borra su enrolamiento de MFA y cierra todas sus sesiones, en la transacción del llamador. */
+  /**
+   * Bloquea la fila de membresía (`FOR UPDATE`) en la transacción del llamador y devuelve a qué
+   * tenant y usuario sigue perteneciendo; `null` si ya no existe (CAR-54, carrera §I-15).
+   */
+  membresiaBloqueada(
+    tx: TenantTx,
+    membershipId: string,
+  ): Promise<{ tenantId: string; userId: string } | null>;
+  /**
+   * Borra su enrolamiento de MFA y cierra todas sus sesiones, en la transacción del llamador.
+   * Bloquea antes la fila de `core.users` y, con `reverificar`, le entrega su estado recién leído
+   * para repetir ahí las condiciones de autorización (CAR-54, carrera §I-15).
+   */
   restablecerSegundoFactor(
     tx: TenantTx,
     userId: string,
+    reverificar?: (u: {
+      platformRole: string | null;
+      twoFactorEnabled: boolean;
+      passkeyEnabled: boolean;
+    }) => void,
   ): Promise<{ enrolamientos: number; passkeys?: number; sesiones: number }>;
   /** Métodos de autenticación propios (CAR-286): solo metadatos, nunca claves ni secretos. */
   metodosDe(userId: string): Promise<MetodosUsuario>;
@@ -121,6 +139,16 @@ export type Identidad = {
   ): Promise<boolean>;
   quitarPasskey(tx: TenantTx, userId: string, id: string, o: OrigenCambio): Promise<boolean>;
   desactivarTotp(tx: TenantTx, userId: string, o: OrigenCambio): Promise<boolean>;
+  /** Apps conectadas por OAuth de la persona en una empresa (CAR-247): sin tokens. */
+  appsConectadas(userId: string, tenantId: string): Promise<AppConectada[]>;
+  /** Revoca los accesos de una app y borra su consentimiento, solo en esa empresa. */
+  desconectarApp(
+    tx: TenantTx,
+    userId: string,
+    tenantId: string,
+    clientId: string,
+    o: OrigenCambio,
+  ): Promise<boolean>;
   /** Consume la confirmación de identidad reciente (≤ 5 min) que dejó la pantalla. */
   consumirReautenticacion(tx: TenantTx, userId: string): Promise<boolean>;
   /** Borra un usuario sin rol de plataforma ni referencias, en la transacción del llamador. */

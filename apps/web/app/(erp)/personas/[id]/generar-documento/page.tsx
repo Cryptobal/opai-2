@@ -2,14 +2,13 @@ import { notFound } from "next/navigation";
 
 import { Empty, ErrorState, Forbidden } from "@opai/ds";
 
+import { SelectorPlantilla } from "@/app/_components/documentos/generar-entidad/selector-plantilla-entidad";
+import type { PlantillaOpcion, VistaRellenoPersona } from "@/app/_components/documentos/generar-entidad/tipos";
+import { VistaGenerar } from "@/app/_components/documentos/generar-entidad/vista-generar";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
-
-import { SelectorPlantilla } from "./_componentes/selector-plantilla";
-import type { PlantillaOpcion, VistaRelleno } from "./_componentes/tipos";
-import { VistaDocumento } from "./_componentes/vista-documento";
 
 export const metadata = { title: "Generar documento" };
 type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
@@ -18,7 +17,8 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
  * 07 · Generar documento (CAR-127, PR 4a): elige una plantilla laboral y ve el documento con los datos de
  * la persona, con lo que falta señalado. Genera el PDF (PR 4b); la firma llega después. Solo owner
  * y admin (`documentos.plantillas.manage`); el permiso, el alcance y la lectura sensible del sueldo los
- * verifica la capacidad `core.documento_plantillas.rellenar`.
+ * verifica la capacidad `core.documento_plantillas.rellenar`. La UI compartida es la de generar-entidad
+ * (CAR-439).
  */
 export default function GenerarDocumentoPagina({ params, searchParams }: Props) {
   return (
@@ -34,7 +34,10 @@ export default function GenerarDocumentoPagina({ params, searchParams }: Props) 
         const lista = await ejecutarComoUsuario<PlantillaOpcion[]>("erp", "core.documento_plantillas.list", {});
         const vista =
           lista.ok && plantilla
-            ? await ejecutarComoUsuario<VistaRelleno>("erp", "core.documento_plantillas.rellenar", { plantillaId: plantilla, personaId: id })
+            ? await ejecutarComoUsuario<VistaRellenoPersona>("erp", "core.documento_plantillas.rellenar", {
+                plantillaId: plantilla,
+                personaId: id,
+              })
             : null;
         return { id, plantilla, lista, vista };
       }}
@@ -52,7 +55,12 @@ export default function GenerarDocumentoPagina({ params, searchParams }: Props) 
                 descripcion="Solo owner y admin generan documentos. Pídele acceso a un administrador."
               />
             );
-          return <ErrorState titulo="No pudimos preparar el documento" descripcion="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código DOC-GEN-500." />;
+          return (
+            <ErrorState
+              titulo="No pudimos preparar el documento"
+              descripcion="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código DOC-GEN-500."
+            />
+          );
         }
         if (lista.data.length === 0)
           return <Empty titulo="Aún no hay plantillas laborales" descripcion="Crea una en Documentos → Plantillas y vuelve aquí." />;
@@ -67,11 +75,18 @@ export default function GenerarDocumentoPagina({ params, searchParams }: Props) 
               />
             </div>
             {vista?.ok ? (
-              <VistaDocumento vista={vista.data} fichaHref={`/personas/${id}`} documentosHref={`/personas/${id}/documentos`} />
+              <VistaGenerar
+                vista={vista.data}
+                fichaHref={`/personas/${id}`}
+                documentosHref={`/personas/${id}/documentos`}
+              />
             ) : vista ? (
               <ErrorState titulo="No pudimos preparar el documento" descripcion={vista.error.message} />
             ) : (
-              <Empty titulo="Elige una plantilla" descripcion="Verás el documento con los datos de la persona antes de generarlo." />
+              <Empty
+                titulo="Elige una plantilla"
+                descripcion="Verás el documento con los datos de la persona antes de generarlo."
+              />
             )}
           </div>
         );
