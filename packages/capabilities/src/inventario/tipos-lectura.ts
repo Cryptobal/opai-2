@@ -1,10 +1,39 @@
-import { CATEGORIAS_TIPO } from "@opai/domain";
+import type { TenantDb } from "@opai/db";
+import { type CategoriaTipo, CATEGORIAS_TIPO } from "@opai/domain";
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
-import { PERMISOS_INVENTARIO, tipoSchema, vistaTipo } from "./comun";
+import { paginaInput, PERMISOS_INVENTARIO, tipoSchema, vistaTipo } from "./comun";
+
+type FiltroTipos = {
+  categoria?: CategoriaTipo | undefined;
+  incluirInactivos: boolean;
+  cursor?: string | undefined;
+  limite: number;
+};
+
+/** Una página de tipos ordenados por nombre; `siguiente` es el cursor de la próxima o null. */
+export async function paginaTipos(
+  db: TenantDb,
+  { categoria, incluirInactivos, cursor, limite }: FiltroTipos,
+) {
+  const filas = await db.inventarioTipo.findMany({
+    where: {
+      ...(categoria ? { categoria } : {}),
+      ...(incluirInactivos ? {} : { activo: true }),
+      ...(cursor ? { nombreNormalizado: { gt: cursor } } : {}),
+    },
+    orderBy: { nombreNormalizado: "asc" },
+    take: limite + 1,
+  });
+  const pagina = filas.slice(0, limite);
+  return {
+    pagina,
+    siguiente: filas.length > limite ? (pagina.at(-1)?.nombreNormalizado ?? null) : null,
+  };
+}
 
 export const tiposList = defineCapability({
   id: "inventario.tipos.list",
@@ -14,27 +43,14 @@ export const tiposList = defineCapability({
   input: z.object({
     categoria: z.enum(CATEGORIAS_TIPO).optional(),
     incluirInactivos: z.boolean().default(false),
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(100),
+    ...paginaInput(100),
   }),
   output: z.object({ items: z.array(tipoSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { categoria, incluirInactivos, cursor, limite }) {
-    const filas = await ctx.db.inventarioTipo.findMany({
-      where: {
-        ...(categoria ? { categoria } : {}),
-        ...(incluirInactivos ? {} : { activo: true }),
-        ...(cursor ? { nombreNormalizado: { gt: cursor } } : {}),
-      },
-      orderBy: { nombreNormalizado: "asc" },
-      take: limite + 1,
-    });
-    const pagina = filas.slice(0, limite);
-    return {
-      items: pagina.map(vistaTipo),
-      siguiente: filas.length > limite ? (pagina.at(-1)?.nombreNormalizado ?? null) : null,
-    };
+  async handler(ctx, filtro) {
+    const { pagina, siguiente } = await paginaTipos(ctx.db, filtro);
+    return { items: pagina.map(vistaTipo), siguiente };
   },
 });
 

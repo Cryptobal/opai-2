@@ -78,6 +78,11 @@ export function vistaTipo(f: FilaTipo): VistaTipo {
 export const nombreSchema = z.string().trim().min(LIMITES_TIPO.nombreMin).max(LIMITES_TIPO.nombreMax);
 export const descripcionSchema = z.string().trim().max(LIMITES_TIPO.descripcionMax);
 export const prendaSchema = z.string().trim().regex(/^[a-z][a-z0-9_]{0,39}$/);
+/** Cursor y tamaño de página de las listas de Inventario. */
+export const paginaInput = (porDefecto: number) => ({
+  cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
+  limite: z.number().int().min(1).max(200).default(porDefecto),
+});
 export const duplicado = (nombre: string) => `Ya existe un tipo llamado «${nombre}».`;
 
 export const ID_VISTA_PREVIA = "00000000-0000-7000-8000-000000000000";

@@ -5,7 +5,7 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
 import { activoSchema, fichaActivoSchema, vistaActivo } from "./activos-comun";
-import { camposGuardados, PERMISOS_INVENTARIO } from "./comun";
+import { camposGuardados, paginaInput, PERMISOS_INVENTARIO } from "./comun";
 
 export const activosList = defineCapability({
   id: "inventario.activos.list",
@@ -17,8 +17,7 @@ export const activosList = defineCapability({
     estado: z.enum(ESTADOS_ACTIVO).optional(),
     q: z.string().trim().max(60).optional().describe("Texto en el código o el número de serie."),
     incluirBaja: z.boolean().default(false),
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(100),
+    ...paginaInput(100),
   }),
   output: z.object({ items: z.array(activoSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",

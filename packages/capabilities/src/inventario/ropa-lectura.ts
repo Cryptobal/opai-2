@@ -4,7 +4,8 @@ import { z } from "zod";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
-import { PERMISOS_INVENTARIO } from "./comun";
+import { paginaInput, PERMISOS_INVENTARIO } from "./comun";
+import { paginaTipos } from "./tipos-lectura";
 
 const prendaSchema = z.object({
   tipoId: z.string(),
@@ -21,23 +22,18 @@ export const ropaList = defineCapability({
   permiso: PERMISOS_INVENTARIO.read,
   input: z.object({
     incluirInactivos: z.boolean().default(false),
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(100),
+    ...paginaInput(100),
   }),
   output: z.object({ items: z.array(prendaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { incluirInactivos, cursor, limite }) {
-    const tipos = await ctx.db.inventarioTipo.findMany({
-      where: {
-        categoria: "ropa",
-        ...(incluirInactivos ? {} : { activo: true }),
-        ...(cursor ? { nombreNormalizado: { gt: cursor } } : {}),
-      },
-      orderBy: { nombreNormalizado: "asc" },
-      take: limite + 1,
+    const { pagina, siguiente } = await paginaTipos(ctx.db, {
+      categoria: "ropa",
+      incluirInactivos,
+      cursor,
+      limite,
     });
-    const pagina = tipos.slice(0, limite);
     const filas = await ctx.db.inventarioExistencia.findMany({
       where: { tipoId: { in: pagina.map((t) => t.id) } },
       select: { tipoId: true, talla: true, cantidad: true },
@@ -45,8 +41,13 @@ export const ropaList = defineCapability({
     return {
       items: pagina.map((t) => {
         // Una talla sin movimientos aparece con 0; una talla que el tipo ya no ofrece, si tiene unidades.
-        const hay = new Map(filas.filter((f) => f.tipoId === t.id).map((f) => [f.talla, f.cantidad]));
-        const tallas = [...t.tallas, ...[...hay.keys()].filter((k) => !t.tallas.includes(k) && (hay.get(k) ?? 0) > 0)];
+        const hay = new Map(
+          filas.filter((f) => f.tipoId === t.id).map((f) => [f.talla, f.cantidad]),
+        );
+        const tallas = [
+          ...t.tallas,
+          ...[...hay.keys()].filter((k) => !t.tallas.includes(k) && (hay.get(k) ?? 0) > 0),
+        ];
         const existencias = tallas.map((talla) => ({ talla, cantidad: hay.get(talla) ?? 0 }));
         return {
           tipoId: t.id,
@@ -56,7 +57,7 @@ export const ropaList = defineCapability({
           total: existencias.reduce((s, e) => s + e.cantidad, 0),
         };
       }),
-      siguiente: tipos.length > limite ? (pagina.at(-1)?.nombreNormalizado ?? null) : null,
+      siguiente,
     };
   },
 });
@@ -68,8 +69,7 @@ export const ropaMovimientos = defineCapability({
   permiso: PERMISOS_INVENTARIO.read,
   input: z.object({
     tipoId: uuidSchema,
-    cursor: z.string().optional().describe("El `siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(50),
+    ...paginaInput(50),
   }),
   output: z.object({
     items: z.array(
@@ -88,7 +88,9 @@ export const ropaMovimientos = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { tipoId, cursor, limite }) {
-    const tipo = await ctx.db.inventarioTipo.findFirst({ where: { id: tipoId, categoria: "ropa" } });
+    const tipo = await ctx.db.inventarioTipo.findFirst({
+      where: { id: tipoId, categoria: "ropa" },
+    });
     if (!tipo) throw noEncontrado("El tipo de ropa");
     const filas = await ctx.db.inventarioMovimiento.findMany({
       where: { tipoId, ...(cursor ? { id: { lt: cursor } } : {}) },
