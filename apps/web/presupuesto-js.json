@@ -64,6 +64,8 @@
     "/ds": 235,
     "/(supervisor)/supervisor/personas/[id]": 168,
     "/(trabajador)/trabajador/mis-datos": 169,
+    "/(trabajador)/trabajador/mi-pauta": 166,
+    "/(trabajador)/trabajador/mis-documentos": 167,
     "/(trabajador)/trabajador/privacidad": 166,
     "/(trabajador)/trabajador/cambiar-pin": 170,
     "/(trabajador)/trabajador/notificaciones": 171,
