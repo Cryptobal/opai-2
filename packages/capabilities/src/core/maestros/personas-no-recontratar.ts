@@ -8,8 +8,6 @@ import { diaSchema, hoy } from "./comun";
 import { cambiar, marcaNoRecontratarSchema, personaParaMarca, vista } from "./personas-no-recontratar-core";
 import { exigirNoRecontratarHabilitada } from "./personas-no-recontratar-vigencia";
 
-export { marcaNoRecontratarSchema };
-
 const motivo = z
   .string()
   .trim()
