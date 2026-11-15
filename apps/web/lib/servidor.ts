@@ -12,8 +12,7 @@ import { loginDe } from "./login-destino";
 import { COOKIE_TENANT } from "./tenant-actual";
 import { tieneAccesoAPortal } from "./acceso-portal";
 import { estadoMfaDe, verificarMfaDe } from "./mfa";
-import { contextoVerComo, verComoDe } from "./ver-como";
-import type { VerComo } from "./ver-como-token";
+import { contextoVerComo, verComoDe, type VistaVigente } from "./ver-como";
 
 export { tieneAccesoAPortal } from "./acceso-portal";
 
@@ -45,7 +44,7 @@ export function contextoServidor(identidad: Identidad, portal: string): Contexto
 /** Como la persona vista, en solo lectura; quien mira también debe tener su segundo factor al día. */
 async function ejecutarVerComo<T>(
   identidad: Identidad,
-  verComo: VerComo,
+  verComo: VistaVigente,
   id: string,
   input: unknown,
   dryRun: boolean,
