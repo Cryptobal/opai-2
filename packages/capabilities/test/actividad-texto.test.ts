@@ -17,6 +17,9 @@ it("traduce acciones de personas y agentes con el mismo diccionario", () => {
   expect(frase("core.instalaciones.create", {})).toBe("creó la instalación");
   expect(frase("comercial.negocios.update", {})).toBe("actualizó el negocio");
   expect(frase("platform.modules.set", {})).toBe("cambió los módulos activos");
+  expect(frase("platform.tenants.set_modulos_nuevos", { activo: true })).toBe(
+    "activó los módulos nuevos automáticos",
+  );
 });
 
 it("usa un respaldo español sin revelar fragmentos de ids desconocidos", () => {
