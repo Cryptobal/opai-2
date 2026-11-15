@@ -19,6 +19,7 @@ import {
   Briefcase,
   Building2,
   Clock,
+  DoorOpen,
   Ellipsis,
   FileText,
   Gauge,
@@ -46,6 +47,7 @@ import {
 
 /** Iconos nombrados en manifests y navegación. Un nombre desconocido usa LayoutGrid. */
 const ICONOS: Record<string, LucideIcon> = {
+  DoorOpen,
   Banknote,
   CalendarDays,
   FolderOpen,
