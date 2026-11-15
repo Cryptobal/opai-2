@@ -2,11 +2,16 @@ import { formatearClp, formatearFecha } from "@opai/domain";
 import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
 import { type CobroApi, hojaEspecial, type IvaApi } from "./cobros-celda";
-import { celdaGrupoCobro, conGruposCobro, esGrupoCobro, filaBase } from "./grupos-cobro";
+import { celdaSaldo } from "./celda-saldo";
+import { abiertaPorDefecto, celdaEncabezado, esEncabezado, filasEstructura } from "./estructura";
+import { celdaGrupoCobro, esGrupoCobro, filaBase } from "./grupos-cobro";
+import type { GrupoEgreso } from "./grupos-egreso";
 
 export type FilaFlujo = {
   id: string;
   seccion: "ingreso" | "egreso";
+  /** Grupo de egreso; null en los ingresos. */
+  grupo: GrupoEgreso | null;
   etiqueta: string;
   vinculo: string | null;
   arrastre: boolean;
@@ -24,7 +29,7 @@ export type CeldaFlujo = {
   iva?: IvaApi;
   cliente?: { cuentaId: string; cuenta: string; instalacionId: string | null; instalacion: string | null };
 };
-type SemanaFlujo = {
+export type SemanaFlujo = {
   semana: string;
   ingresos: number;
   egresos: number;
@@ -79,14 +84,14 @@ export const fechaDdMmAaaa = (iso: string) => formatearFecha(iso);
 const corta = (iso: string) => fechaDdMmAaaa(iso).slice(0, 5);
 
 /** Columnas, filas y celdas para `PlanillaScreen`: filas del flujo, totales y saldo con su tono. */
-export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abiertas?: ReadonlySet<string> }) {
+export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abierta?: (filaId: string) => boolean }) {
   const columnas: ColumnaPlanilla[] = p.semanas.map((s) => ({
     id: s.semana,
     etiqueta: s.pasada ? `${corta(s.semana)} · real` : corta(s.semana),
     destacada: s.semana === p.columnaHoy,
   }));
   const filas: FilaPlanilla[] = [
-    ...p.filas.flatMap((f) => conGruposCobro(p, { id: f.id, etiqueta: f.etiqueta, ...(f.vinculo ? { sub: f.vinculo } : {}) }, opts?.abiertas)),
+    ...filasEstructura(p, opts?.abierta ?? abiertaPorDefecto),
     { id: TOTALES.ingresos, etiqueta: "Total ingresos" },
     { id: TOTALES.egresos, etiqueta: "Total egresos" },
     { id: TOTALES.saldo, etiqueta: "Saldo final" },
@@ -98,18 +103,8 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abiertas
     if (!s) return null;
     if (filaId === TOTALES.ingresos) return { texto: clp(s.ingresos) };
     if (filaId === TOTALES.egresos) return { texto: clp(s.egresos) };
-    if (filaId === TOTALES.saldo)
-      return {
-        texto: clp(s.saldoFinal),
-        tono: s.tono === "peligro" ? "danger" : s.tono === "alerta" ? "warning" : "neutro",
-        detalle: s.pasada
-          ? "Según cartola"
-          : s.tono === "peligro"
-            ? "Saldo negativo proyectado"
-            : s.tono === "alerta"
-              ? "Bajo el umbral"
-              : "Proyectado",
-      };
+    if (filaId === TOTALES.saldo) return celdaSaldo(s);
+    if (esEncabezado(filaId)) return celdaEncabezado(p, filaId, semana);
     if (esGrupoCobro(filaId)) return celdaGrupoCobro(p, filaId, semana);
     const c = celdaAgregada(p.celdas, filaId, semana, s.pasada);
     if (!c) {
