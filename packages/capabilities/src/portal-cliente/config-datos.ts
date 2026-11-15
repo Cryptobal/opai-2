@@ -20,7 +20,7 @@ type Fila = {
 
 const esSeccion = (s: string): s is SeccionPortal => (SECCIONES_PORTAL as readonly string[]).includes(s);
 
-export function configDeFila(f: Fila): ConfigPortal {
+function configDeFila(f: Fila): ConfigPortal {
   return {
     tiposDocumentoVisibles: f.tiposDocumentoVisibles,
     seccionesVisibles: f.seccionesVisibles.filter(esSeccion),
