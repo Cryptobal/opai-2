@@ -1,8 +1,10 @@
 import { Empty, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 import { puedeConfigurarRondas } from "@/lib/pestanas-modulos";
 
+import { centroMapaInstalacion } from "./datos-instalacion";
 import { PanelPlantillas } from "./panel-plantillas";
 import { PanelProgramaciones } from "./panel-programaciones";
 import { PanelPuntos } from "./panel-puntos";
@@ -20,16 +22,15 @@ function subDe(v: string | undefined): SubRondas {
  * alcance se aplica en la consulta (ADR-022). El Historial queda como contenedor vacío hasta el PR 3.
  */
 export async function PestanaRondas({
-  instalacionId,
-  instalacionNombre,
+  instalacion,
   sub,
 }: {
-  instalacionId: string;
-  instalacionNombre: string;
+  instalacion: InstalacionDetalle;
   sub: string | undefined;
 }) {
   const activa = subDe(sub);
   const puede = await puedeConfigurarRondas();
+  const centroInstalacion = await centroMapaInstalacion(instalacion);
   return (
     <div className="flex flex-col gap-4">
       <Segmentado
@@ -46,14 +47,15 @@ export async function PestanaRondas({
       />
       {activa === "puntos" ? (
         <PanelPuntos
-          instalacionId={instalacionId}
-          instalacionNombre={instalacionNombre}
+          instalacionId={instalacion.id}
+          instalacionNombre={instalacion.nombre}
+          centroInstalacion={centroInstalacion}
           puede={puede}
         />
       ) : activa === "plantillas" ? (
-        <PanelPlantillas instalacionId={instalacionId} puede={puede} />
+        <PanelPlantillas instalacionId={instalacion.id} puede={puede} />
       ) : activa === "programacion" ? (
-        <PanelProgramaciones instalacionId={instalacionId} puede={puede} />
+        <PanelProgramaciones instalacionId={instalacion.id} puede={puede} />
       ) : (
         <Empty
           titulo="Aún no hay historial de rondas"

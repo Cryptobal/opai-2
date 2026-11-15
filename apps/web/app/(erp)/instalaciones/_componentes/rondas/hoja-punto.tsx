@@ -8,6 +8,8 @@ import { DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import type { CentroMapa } from "@/lib/mapa-osm/coords";
+
 import { CamposPunto } from "./campos-punto";
 import { type DatosPunto, inicialPunto, puntoAInput } from "./hoja-punto-datos";
 import type { DefectosRondas, Punto } from "./tipos";
@@ -17,10 +19,12 @@ export function HojaPunto({
   instalacionId,
   puntos,
   defectos,
+  centroInstalacion,
 }: {
   instalacionId: string;
   puntos: readonly Punto[];
   defectos: DefectosRondas;
+  centroInstalacion: CentroMapa;
 }) {
   const hoja = useHojaUrl("punto");
   if (!hoja.abierta) return null;
@@ -31,6 +35,7 @@ export function HojaPunto({
       instalacionId={instalacionId}
       actual={actual}
       defectos={defectos}
+      centroInstalacion={centroInstalacion}
       onCerrar={hoja.cerrar}
     />
   );
@@ -40,11 +45,13 @@ function Formulario({
   instalacionId,
   actual,
   defectos,
+  centroInstalacion,
   onCerrar,
 }: {
   instalacionId: string;
   actual: Punto | null;
   defectos: DefectosRondas;
+  centroInstalacion: CentroMapa;
   onCerrar: () => void;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -95,7 +102,7 @@ function Formulario({
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <CamposPunto d={d} setD={setD} defectos={defectos} />
+        <CamposPunto d={d} setD={setD} defectos={defectos} centroInstalacion={centroInstalacion} />
       </div>
       {confirmar ? (
         <DialogoConfirmar
