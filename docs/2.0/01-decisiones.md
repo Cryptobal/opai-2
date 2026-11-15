@@ -1651,6 +1651,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
   - sin pagos reales;
   - el código de CAR-96 espera el diseño aprobado **y** esa revisión.
 
+**Adenda (14-nov-2026) · CAR-458: construir registro y aprobación ya.** Decisión de Carlos (opción A): se construye el registro y la aprobación de turnos extra (quién hizo el turno, propio o externo, monto sugerido, aprobado o rechazado) **sin mover plata ni informar a Nómina**. El pago por lote (CAR-101) sigue esperando la revisión legal y contable escrita. Las pantallas usan el diseño nuevo (ADR-109) sin esperar Claude Design. Desbloquea CAR-96 y CAR-100.
+
 **Adenda (9-nov-2026) · Cobro al cliente del turno extra.** Decisión cerrada de Carlos, textual:
 
 > El turno extra no se cobra, salvo un turno de refuerzo ingresado desde la pauta diaria cuando un guardia no va. El puesto temporal es ese mismo refuerzo. No es un puesto de un día ni un objeto nuevo.

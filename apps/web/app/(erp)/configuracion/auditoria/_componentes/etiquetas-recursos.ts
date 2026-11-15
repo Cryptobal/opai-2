@@ -20,7 +20,7 @@ export const RECURSOS: Record<string, string> = {
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
   conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", mes: "Mes", ppc: "Puestos por cubrir",
-  series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos",
+  series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos", turnos_extra: "Turnos extra",
   alertas: "Alertas", estado: "Estado de la central", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
