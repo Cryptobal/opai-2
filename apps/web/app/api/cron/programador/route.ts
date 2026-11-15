@@ -10,6 +10,7 @@ import {
   tocaTrabajosDiarios,
 } from "@/lib/cron";
 import { contextoSistemaDelTenant } from "@/lib/medidor";
+import { activarModulosNuevosDelCron } from "@/lib/modulos-nuevos-cron";
 import { purgarVentanas } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -74,6 +75,9 @@ export async function GET(req: Request): Promise<Response> {
   } catch {
     console.error("[cron programador] falló la programación de captura SII");
   }
+  await activarModulosNuevosDelCron().catch(() =>
+    console.error("[cron programador] falló la activación de módulos nuevos"),
+  );
   const ok = !errorTenants && intentosLoginPurgados !== null && ventanasRatePurgadas !== null;
   return Response.json(
     { ok, resultados, capturaSiiEncolada, intentosLoginPurgados, ventanasRatePurgadas },
