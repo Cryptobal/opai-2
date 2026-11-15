@@ -83,9 +83,3 @@ export function enlazarTitulos(texto: string, refs: readonly Referencia[]): stri
   }
   return out;
 }
-
-/** Hasta 4 tarjetas; si hay más, solo fichas de un segmento (`/cuentas/<id>`). */
-export function referenciasParaTarjetas(refs: readonly Referencia[]): Referencia[] {
-  if (refs.length <= 4) return [...refs];
-  return refs.filter((r) => /^\/[a-z0-9-]+\/[^/]+$/i.test(r.href)).slice(0, 4);
-}

@@ -1,16 +1,16 @@
 import { comoAgenteInterno, prohibido, type Contexto } from "@opai/capabilities";
-import { z } from "zod";
 
 import type { Plan } from "./plan";
 import { validarContextoAlGuardar } from "./conversaciones-contexto-guardado";
-import { contextoSchema, guardarTurno } from "./conversaciones-guardado";
+import { guardarTurno } from "./conversaciones-guardado";
 import { firmarPlan } from "./planes";
+import type { Referencia } from "./referencias";
 
 type Entrada = {
   mensaje: string;
   nivel: "aprobar_todo" | "paso_a_paso";
   conversacionId?: string | undefined;
-  contexto?: z.infer<typeof contextoSchema> | undefined;
+  contexto?: { tipo: "cuenta" | "instalacion" | "negocio" | "persona"; id: string } | undefined;
   turnoId?: string | undefined;
 };
 
@@ -21,7 +21,7 @@ const vacio = {
   pasos: [],
   tokens: 0,
   accesoSolicitud: null,
-  referencias: [],
+  referencias: [] as Referencia[],
 };
 
 /** Persiste el turno preparado y firma el plan; dryRun no toca base ni firma. */

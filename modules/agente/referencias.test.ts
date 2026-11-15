@@ -5,7 +5,6 @@ import {
   extraerReferencias,
   filtrarEnlaces,
   hrefOpai,
-  referenciasParaTarjetas,
 } from "./referencias";
 
 const cuenta = {
@@ -46,14 +45,7 @@ describe("referencias del agente (CAR-446)", () => {
     expect(out).toContain("malo");
   });
 
-  it("con muchas refs solo tarjeta fichas de un segmento", () => {
-    const muchas = [cuenta, cotiz, ...Array.from({ length: 4 }, (_, i) => ({
-      id: `id-${i}`,
-      titulo: `T${i}`,
-      detalle: null,
-      href: `/cotizaciones/id-${i}/lineas`,
-    }))];
-    expect(referenciasParaTarjetas(muchas)).toEqual([cuenta, cotiz]);
+  it("conserva enlaces permitidos al filtrar", () => {
     expect(filtrarEnlaces(`[x](${cuenta.href})`, new Set([cuenta.href]))).toContain(cuenta.href);
   });
 });
