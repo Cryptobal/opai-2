@@ -53,6 +53,8 @@ model RegistroAcceso {
   entradaListaId String?  @map("entrada_lista_id") @db.Uuid
   /// Campos personalizados del formulario (CAR-479): `[{ etiqueta, valor }]` tal como los pidió la portería.
   camposExtra    Json     @default("[]") @map("campos_extra")
+  /// Punto de acceso por el que entró (CAR-479 parte 2); nulo si la instalación no tiene puntos o es anterior.
+  puntoId        String?  @map("punto_id") @db.Uuid
   /// "en_linea" | "diferido".
   origen         String   @default("en_linea")
   horaCorregida  DateTime @map("hora_corregida") @db.Timestamptz(6)
@@ -60,6 +62,7 @@ model RegistroAcceso {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   entradaLista EntradaLista?    @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
+  punto        PuntoAcceso?     @relation(fields: [puntoId], references: [id], onDelete: Restrict, map: "registros_acceso_punto_fkey")
   salida       SalidaAcceso?
   anulacion    AnulacionAcceso?
   prerregistro PrerregistroUso?
@@ -213,5 +216,26 @@ model ConfigAcceso {
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("configuraciones")
+  @@schema("acceso")
+}
+
+/// Punto de acceso de una instalación (CAR-479 parte 2): portería principal, acceso vehicular, etc. No se borra:
+/// se desactiva, porque los registros lo referencian.
+model PuntoAcceso {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  nombre        String
+  /// "peatonal" | "vehicular" | "mixto".
+  tipo          String   @default("peatonal")
+  activo        Boolean  @default(true)
+  orden         Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  registros RegistroAcceso[]
+
+  @@index([tenantId, instalacionId, orden], map: "puntos_instalacion_idx")
+  @@map("puntos")
   @@schema("acceso")
 }
