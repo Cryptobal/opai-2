@@ -9,7 +9,7 @@ import { consumidorSenales } from "./senales";
 import { registrarHecho } from "./util";
 
 /** Al abrirse una alerta se contacta el paso 1 de su cadena (R7). Idempotente: solo si sigue nueva. */
-export const consumidorAlertaAbierta = defineConsumidor({
+const consumidorAlertaAbierta = defineConsumidor({
   id: "central.alerta.iniciar_cadena",
   descripcion: "Inicia la cadena de escalamiento de una alerta recién abierta en la central.",
   eventos: ["central.alerta.abierta"],
@@ -49,7 +49,7 @@ async function revisar(ctx: Contexto, alertaId: string) {
   });
 }
 
-export const trabajoRevisarAlerta = defineTrabajo({
+const trabajoRevisarAlerta = defineTrabajo({
   tipo: TRABAJO_REVISAR,
   descripcion: "Revisa una alerta de la central cuando vence su espera, su plazo de atención o su pospuesta.",
   payload: z.object({ alertaId: z.uuid() }),

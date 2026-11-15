@@ -38,4 +38,14 @@ describe("rentabilidad por instalación (CAR-174)", () => {
     const conOcultos = totalesRentabilidad(rentabilidadPorInstalacion([{ instalacionId: "a", tipoDte: 33, montoNeto: 400, montoExento: 0 }], [{ instalacionId: "a", estado: "oculto" }]));
     expect(conOcultos).toMatchObject({ ventasNetasClp: 400, margenClp: null, margenPct: null, puestosOcultos: 1 });
   });
+
+  it("sin valores legales el margen es null aunque el costo salga en cero", () => {
+    const ventas = [{ instalacionId: "a", tipoDte: 33, montoNeto: 1_600_000, montoExento: 0 }];
+    const costos = [{ instalacionId: "a", estado: "sin_costo" as const }];
+    const filas = rentabilidadPorInstalacion(ventas, costos, true);
+    expect(filas[0]).toMatchObject({ ventasNetasClp: 1_600_000, costoEstimadoClp: 0, margenClp: null, margenPct: null });
+    expect(totalesRentabilidad(filas, true)).toMatchObject({ ventasNetasClp: 1_600_000, margenClp: null, margenPct: null });
+    // Sin la bandera, el margen engañoso sería ventas − 0.
+    expect(totalesRentabilidad(rentabilidadPorInstalacion(ventas, costos)).margenClp).toBe(1_600_000);
+  });
 });

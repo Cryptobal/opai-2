@@ -6,7 +6,7 @@ import { CADENA_POR_DEFECTO, PLAZO_ATENCION_POR_DEFECTO_MIN } from "../domain/ca
 import { cursorDe, listaSchema, pagina, severidadSchema, uuidSchema } from "./esquemas";
 import { pasoSchema } from "./motor";
 
-export const PERMISO_CONFIG = "central:config.manage";
+const PERMISO_CONFIG = "central:config.manage";
 
 const cadenaSchema = z.object({
   id: uuidSchema.nullable().describe("null = la plantilla por defecto de la vertical."),
