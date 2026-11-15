@@ -245,6 +245,6 @@ describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-
     expect((await recibir("A", [salida(dentro.clave)])) as Res[]).toHaveLength(1);
     expect((await leer("A")).items.map((x) => x.clave)).not.toContain(dentro.clave);
     expect(JSON.stringify(await leer("B"))).not.toContain(dentro.clave);
-    expect(await leer("A", [])).toEqual({ activo: false, config: null, items: [] });
+    expect(await leer("A", [])).toEqual({ activo: false, config: null, puntos: [], items: [] });
   });
 });

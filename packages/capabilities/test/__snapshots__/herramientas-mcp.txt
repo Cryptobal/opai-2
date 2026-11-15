@@ -9,6 +9,8 @@ acceso_prerregistros_crear
 acceso_prerregistros_get
 acceso_prerregistros_invitacion
 acceso_prerregistros_listar
+acceso_puntos_list
+acceso_puntos_set
 acceso_registros_anular
 acceso_registros_cerrar_bloque
 acceso_registros_get
@@ -645,6 +647,7 @@ preview_acceso_listas_agregar
 preview_acceso_listas_quitar
 preview_acceso_prerregistros_cancelar
 preview_acceso_prerregistros_crear
+preview_acceso_puntos_set
 preview_acceso_registros_anular
 preview_acceso_registros_cerrar_bloque
 preview_acceso_registros_salida

@@ -26,6 +26,9 @@ test.describe("@preview acceso: configuración de formulario y reglas", () => {
     await expect(
       page.getByText("Usa la configuración de la empresa").filter({ visible: true }).first(),
     ).toBeVisible({ timeout: 60_000 });
+    await expect(
+      page.getByRole("button", { name: "Guardar puntos" }).filter({ visible: true }).first(),
+    ).toBeVisible();
     await capturar(page, info, "accesos-config-instalacion");
   });
 });
