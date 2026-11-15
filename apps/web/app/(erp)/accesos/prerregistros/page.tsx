@@ -34,10 +34,12 @@ export default function Prerregistros({ searchParams }: { searchParams: SearchPa
             <ListaPrerregistros
               state={estadoPantalla(d.r)}
               items={d.r.ok ? d.r.data.items : []}
+              href={(p) => `/accesos/prerregistros/${p.id}`}
               {...(d.crea && d.instalaciones.length > 0
                 ? {
                     accion: (
                       <Prerregistrar
+                        portal="erp"
                         instalaciones={d.instalaciones}
                         hoy={diaEnZona(new Date())}
                         {...(inst ? { instalacionId: inst } : {})}

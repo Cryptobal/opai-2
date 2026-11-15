@@ -35,12 +35,15 @@ export function ListaPrerregistros({
   accion,
   filtros,
   paginacion,
+  href,
 }: {
   state: EstadoPantalla;
   items: Prerregistro[];
   accion?: ReactNode;
   filtros?: ReactNode;
   paginacion?: ReactNode;
+  /** Ficha de cada prerregistro; sin ella (Portal Cliente) las filas no se abren. */
+  href?: (p: Prerregistro) => string;
 }) {
   return (
     <ListScreen<Prerregistro>
@@ -56,8 +59,7 @@ export function ListaPrerregistros({
           fin={estadoPrerregistro(p).etiqueta}
         />
       )}
-      href={(p) => `/accesos/prerregistros/${p.id}`}
-      Link={LinkNext}
+      {...(href ? { href, Link: LinkNext } : {})}
       columnas={COLUMNAS}
       textos={{
         vacio: {

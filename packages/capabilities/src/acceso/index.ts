@@ -12,6 +12,12 @@ import { listasListar, listasQuitar } from "./listas";
 import { listasAgregar } from "./listas-agregar";
 import { portalRegistrosListar } from "./portal-cliente";
 import { portalListasAgregar, portalListasListar, portalListasQuitar } from "./portal-listas";
+import {
+  portalPrerregistrosCancelar,
+  portalPrerregistrosCrear,
+  portalPrerregistrosInvitacion,
+  portalPrerregistrosListar,
+} from "./portal-prerregistros";
 import { registrosObtener } from "./registro-get";
 import { registrosListar } from "./registros";
 
@@ -34,4 +40,8 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   portalListasListar,
   portalListasAgregar,
   portalListasQuitar,
+  portalPrerregistrosListar,
+  portalPrerregistrosCrear,
+  portalPrerregistrosCancelar,
+  portalPrerregistrosInvitacion,
 ];

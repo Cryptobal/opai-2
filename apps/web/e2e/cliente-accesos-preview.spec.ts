@@ -28,6 +28,10 @@ test.describe("@preview acceso: Accesos en el Portal Cliente", () => {
     await page.getByRole("link", { name: "Registros", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Registros" }).first()).toBeVisible({ timeout: 30_000 });
     await capturar(page, info, "cliente-accesos-registros");
+    // CAR-539: visitas prerregistradas y la hoja «Prerregistrar».
+    await page.getByRole("link", { name: "Visitas", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Prerregistros" }).first()).toBeVisible({ timeout: 30_000 });
+    await capturar(page, info, "cliente-accesos-visitas");
     // CAR-538: la pestaña Listas muestra las listas o explica que la empresa no la habilitó.
     await page.getByRole("link", { name: "Listas", exact: true }).click();
     await expect(

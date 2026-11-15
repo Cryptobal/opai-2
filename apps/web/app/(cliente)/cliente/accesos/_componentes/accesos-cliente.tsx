@@ -9,6 +9,7 @@ import { Tarjeta } from "@/app/(erp)/accesos/_componentes/tablas-instalacion";
 
 import { type Listas, ListasCliente } from "./listas-cliente";
 import { ruta, type Vista } from "./ruta";
+import { type Visitas, VisitasCliente } from "./visitas-cliente";
 
 export type Instalacion = { id: string; nombre: string };
 
@@ -19,6 +20,7 @@ type Props = {
   instalacion: string | undefined;
   vista: Vista;
   listas: Listas | null;
+  visitas: Visitas | null;
 };
 
 const COLUMNAS_CLIENTE: Columna<Registro>[] = [
@@ -87,10 +89,11 @@ function Registros({ items, siguiente, instalacion, vista }: Props) {
 
 /**
  * En sitio y registros de las instalaciones del cliente (CAR-481), de solo lectura y con el documento
- * enmascarado, y sus listas autorizada y bloqueada si su empresa de seguridad se lo habilitó (CAR-538).
+ * enmascarado, sus visitas prerregistradas (CAR-539) y sus listas autorizada y bloqueada si su empresa de
+ * seguridad se lo habilitó (CAR-538).
  */
 export function AccesosCliente(props: Props) {
-  const { instalacion, vista, listas } = props;
+  const { instalaciones, instalacion, vista, listas, visitas } = props;
   return (
     <div className="flex flex-col gap-3">
       <Segmentado
@@ -101,11 +104,14 @@ export function AccesosCliente(props: Props) {
         opciones={[
           { id: "en_sitio", etiqueta: "En sitio", href: ruta({ instalacion }) },
           { id: "registros", etiqueta: "Registros", href: ruta({ instalacion, vista: "registros" }) },
+          { id: "visitas", etiqueta: "Visitas", href: ruta({ instalacion, vista: "visitas" }) },
           { id: "listas", etiqueta: "Listas", href: ruta({ instalacion, vista: "listas" }) },
         ]}
       />
       <SegmentoInstalacion {...props} />
-      {vista === "listas" && listas && instalacion ? (
+      {vista === "visitas" && visitas ? (
+        <VisitasCliente instalaciones={instalaciones} instalacion={instalacion} visitas={visitas} />
+      ) : vista === "listas" && listas && instalacion ? (
         <ListasCliente instalacion={instalacion} listas={listas} />
       ) : vista === "listas" ? (
         <p className="t-body text-fg-muted">Tu cuenta aún no tiene instalaciones.</p>
