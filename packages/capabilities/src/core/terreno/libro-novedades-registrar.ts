@@ -3,12 +3,16 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
-import type { Contexto } from "../../types";
+import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { dondeInstalacion } from "../maestros/alcance";
 import { quien } from "./comun";
-import { gravedadNovedadSchema, novedadSchema, vistaNovedad } from "./libro-novedades-comun";
+import {
+  gravedadDeRondas,
+  gravedadNovedadSchema,
+  novedadSchema,
+  vistaNovedad,
+} from "./libro-novedades-comun";
 
 const input = z.object({
   instalacionId: uuidSchema,
@@ -22,32 +26,6 @@ const input = z.object({
     .optional()
     .describe("Punto de control de la instalación (si Rondas está activo)."),
 });
-
-/** Punto y tipo de Rondas: solo con el módulo activo, el punto de la misma instalación y el tipo activo. */
-async function gravedadDeRondas(
-  ctx: Contexto,
-  e: z.infer<typeof input>,
-): Promise<string | undefined> {
-  if (!e.puntoId && !e.tipoIncidenteId) return undefined;
-  if (!ctx.modulosActivos.includes("rondas"))
-    throw reglaDeNegocio(
-      "Para enlazar un punto o un tipo de incidente, el módulo Rondas debe estar activo.",
-    );
-  if (e.puntoId) {
-    const p = await ctx.db.puntoControl.findFirst({
-      where: { id: e.puntoId, instalacionId: e.instalacionId, estado: "activo" },
-      select: { id: true },
-    });
-    if (!p) throw noEncontrado("El punto de control");
-  }
-  if (!e.tipoIncidenteId) return undefined;
-  const t = await ctx.db.tipoIncidente.findFirst({
-    where: { id: e.tipoIncidenteId, activo: true },
-    select: { gravedadDefecto: true },
-  });
-  if (!t) throw noEncontrado("El tipo de incidente");
-  return t.gravedadDefecto;
-}
 
 /** Registrar una novedad en línea (ERP, portal o agente) en el libro de una instalación (CAR-77 parte 2). */
 export const libroNovedadesRegistrar = defineCapability({
