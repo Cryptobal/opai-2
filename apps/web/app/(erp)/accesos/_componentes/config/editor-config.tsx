@@ -8,7 +8,7 @@ import type { ConfigAcceso } from "@opai/domain/acceso-config";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { CamposConfig } from "./campos-config";
-import { ReglasConfig } from "./reglas-config";
+import { ReglasConfig, TiposConfig } from "./reglas-config";
 
 type Props = {
   /** Sin instalación, edita la de la empresa. */
@@ -46,19 +46,15 @@ export function EditorConfig({ instalacionId, efectiva, personalizada }: Props) 
   return (
     <div className="flex flex-col gap-4">
       {instalacionId && !propia ? (
-        <Alerta
-          tono="info"
-          titulo="Usa la configuración de la empresa"
-          accion={
-            <Button variant="secondary" onClick={() => setPropia(true)}>
-              Personalizar para esta instalación
-            </Button>
-          }
-        >
-          Lo que cambies en Configuración › Módulos › Control de acceso rige también aquí.
+        <Alerta tono="info" titulo="Usa la configuración de la empresa">
+          <p>Lo que cambies en Configuración › Módulos › Control de acceso rige también aquí.</p>
+          <Button variant="secondary" className="mt-2" onClick={() => setPropia(true)}>
+            Personalizar para esta instalación
+          </Button>
         </Alerta>
       ) : null}
       {error ? <Alerta tono="danger" titulo={error} /> : null}
+      <TiposConfig config={c} onCambiar={cambiar} disabled={pendiente || !propia} />
       <ReglasConfig config={c} onCambiar={cambiar} disabled={pendiente || !propia} />
       <CamposConfig
         campos={c.campos}

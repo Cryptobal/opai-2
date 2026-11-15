@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { Button, Checkbox, Input, SeccionTarjeta, Switch } from "@opai/ds";
-import { type CampoAcceso, esCampoPersonalizado, MAX_CAMPOS } from "@opai/domain/acceso-config";
+import { Button, Input, SeccionTarjeta } from "@opai/ds";
+import { type CampoAcceso, MAX_CAMPOS } from "@opai/domain/acceso-config";
+
+import { FilaCampo } from "./fila-campo";
 
 type Props = {
   campos: CampoAcceso[];
@@ -40,55 +41,16 @@ export function CamposConfig({ campos, onCambiar, disabled }: Props) {
       </p>
       <ul className="flex flex-col">
         {campos.map((f, i) => (
-          <li
+          <FilaCampo
             key={f.id}
-            className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2"
-          >
-            <span className={`min-w-0 flex-1 truncate ${f.activo ? "" : "text-fg-subtle"}`}>
-              {f.etiqueta}
-            </span>
-            <Checkbox
-              etiqueta="Obligatorio"
-              marcado={f.obligatorio}
-              disabled={disabled || !f.activo}
-              onCambiar={(obligatorio) => cambiar(i, { obligatorio })}
-            />
-            <Switch
-              soloControl
-              etiqueta={`Pedir ${f.etiqueta}`}
-              activo={f.activo}
-              disabled={disabled}
-              onCambiar={(activo) =>
-                cambiar(i, { activo, ...(activo ? {} : { obligatorio: false }) })
-              }
-            />
-            <Button
-              variant="ghost"
-              aria-label={`Subir ${f.etiqueta}`}
-              disabled={disabled || i === 0}
-              onClick={() => onCambiar(mover(campos, i, -1))}
-            >
-              <ArrowUp aria-hidden className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              aria-label={`Bajar ${f.etiqueta}`}
-              disabled={disabled || i === campos.length - 1}
-              onClick={() => onCambiar(mover(campos, i, 1))}
-            >
-              <ArrowDown aria-hidden className="size-4" />
-            </Button>
-            {esCampoPersonalizado(f.id) ? (
-              <Button
-                variant="ghost"
-                aria-label={`Quitar ${f.etiqueta}`}
-                disabled={disabled}
-                onClick={() => onCambiar(campos.filter((_, j) => j !== i))}
-              >
-                <Trash2 aria-hidden className="size-4" />
-              </Button>
-            ) : null}
-          </li>
+            campo={f}
+            disabled={disabled}
+            primero={i === 0}
+            ultimo={i === campos.length - 1}
+            onCambiar={(c) => cambiar(i, c)}
+            onMover={(d) => onCambiar(mover(campos, i, d))}
+            onQuitar={() => onCambiar(campos.filter((_, j) => j !== i))}
+          />
         ))}
       </ul>
       <div className="flex flex-wrap gap-2 p-4">
