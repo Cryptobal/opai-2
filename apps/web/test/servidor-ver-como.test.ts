@@ -121,6 +121,13 @@ describe("ejecutarComoUsuario con «ver como»", () => {
     expect(estado.ejecutar).not.toHaveBeenCalled();
   });
 
+  it("si la persona vista sube a owner, un admin deja de ver como ella", async () => {
+    const vista = identidad("u-persona", ["trabajador"]);
+    estado.vista = { ...vista, actual: { ...vista.actual!, rol: "owner" } };
+    expect(await leerPortal()).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(estado.ejecutar).not.toHaveBeenCalled();
+  });
+
   it("el ERP sigue con la identidad propia aunque haya una vista abierta", async () => {
     await ejecutarComoUsuario("erp", "core.me");
     const [ctx] = estado.ejecutar.mock.calls[0] ?? [];

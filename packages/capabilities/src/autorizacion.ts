@@ -54,7 +54,8 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
     );
   }
   // «Ver como» (CAR-528): solo lectura en el servidor, también lo entrante y lo irreversible.
-  if (ctx.verComo && c.efecto !== "lectura") {
+  // Exportar no es mirar: una portabilidad ARCO quedaría atribuida a la persona vista.
+  if (ctx.verComo && (c.efecto !== "lectura" || c.id.endsWith(".exportar"))) {
     return falla(
       "FORBIDDEN",
       "Estás viendo como otra persona: solo lectura. Sal de «ver como» para hacer cambios.",
