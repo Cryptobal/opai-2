@@ -25,7 +25,9 @@ BEGIN
     probabilidad = e_act.probabilidad,
     updated_at = NOW()
   FROM comercial.etapas e_act
-  JOIN primera p ON p.tenant_id = n.tenant_id AND p.embudo_id = n.embudo_id
+  INNER JOIN primera p
+    ON p.tenant_id = e_act.tenant_id
+    AND p.embudo_id = e_act.embudo_id
   WHERE n.etapa_id = e_act.id
     AND n.tenant_id = e_act.tenant_id
     AND n.estado = 'abierto'
