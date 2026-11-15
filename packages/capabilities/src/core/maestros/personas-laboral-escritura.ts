@@ -21,19 +21,46 @@ function patchDe<T extends object>(
   return patch;
 }
 
-const UNIFORME = [
-  "tallaCamisa", "tallaPantalon", "tallaChaqueta", "tallaZapato",
-  "tallaPolera", "tallaGeologo", "tallaPolar", "estaturaCm", "pesoKg", "notas",
-] as const;
+const UNIFORME = ["estaturaCm", "pesoKg", "notas"] as const;
 const JORNADA = [
-  "resolucion", "resolucionVigenteDesde", "resolucionVigenteHasta", "horasSemanales",
-  "distribucion", "articulo22", "plazoFijoPeriodo", "terminoPlazoFijo", "avisoTerminoDias",
+  "resolucion",
+  "resolucionVigenteDesde",
+  "resolucionVigenteHasta",
+  "horasSemanales",
+  "distribucion",
+  "articulo22",
+  "avisoTerminoDias",
 ] as const;
-const JORNADA_FECHAS = ["resolucionVigenteDesde", "resolucionVigenteHasta", "terminoPlazoFijo"] as const;
+const JORNADA_FECHAS = ["resolucionVigenteDesde", "resolucionVigenteHasta"] as const;
 const CONTACTO = [
-  "estadoCivil", "telefonoSecundario", "emergenciaNombre", "emergenciaRelacion",
-  "emergenciaTelefono", "codigoInterno", "movilizacion",
+  "estadoCivil",
+  "telefonoSecundario",
+  "emergenciaNombre",
+  "emergenciaRelacion",
+  "emergenciaTelefono",
+  "codigoInterno",
+  "movilizacion",
 ] as const;
+
+/** Talla por prenda (CAR-408): vacía o null borra la fila; si no, la crea o la cambia. */
+async function guardarTallas(
+  tx: TenantTx,
+  base: { tenantId: string; personaId: string },
+  tallas: Record<string, string | null>,
+) {
+  for (const [prenda, valor] of Object.entries(tallas)) {
+    const talla = valor?.trim() ?? "";
+    if (!talla) {
+      await tx.personaTalla.deleteMany({ where: { personaId: base.personaId, prenda } });
+      continue;
+    }
+    await tx.personaTalla.upsert({
+      where: { personaId_prenda: { personaId: base.personaId, prenda } },
+      create: { ...base, prenda, talla },
+      update: { talla },
+    });
+  }
+}
 
 /** Aplica solo los campos enviados (actualización parcial por sección). */
 export async function aplicarLaboralParcial(
@@ -43,7 +70,8 @@ export async function aplicarLaboralParcial(
 ): Promise<void> {
   const base = { tenantId: p.tenantId, personaId: p.id };
   if (input.uniforme) {
-    const { entrega, ...datos } = input.uniforme;
+    const { entrega, tallas, ...datos } = input.uniforme;
+    if (tallas) await guardarTallas(tx, base, tallas);
     const patch = patchDe(datos, UNIFORME);
     let u = await tx.personaUniforme.findUnique({ where: { personaId: p.id } });
     if (Object.keys(patch).length || (entrega && !u)) {
@@ -68,20 +96,8 @@ export async function aplicarLaboralParcial(
     }
   }
   if (input.jornadaDt) {
-    const j = input.jornadaDt;
-    const patch = patchDe(j, JORNADA, JORNADA_FECHAS);
-    if (j.terminosPlazoFijo !== undefined) {
-      const terminos = [...j.terminosPlazoFijo].sort();
-      patch["terminosPlazoFijo"] = terminos.map(aFecha);
-      // El término vigente es el del último período registrado (compatibilidad con los avisos).
-      const ultimo = terminos.at(-1);
-      if (j.terminoPlazoFijo === undefined) patch["terminoPlazoFijo"] = ultimo ? aFecha(ultimo) : null;
-      if (j.plazoFijoPeriodo === undefined) patch["plazoFijoPeriodo"] = terminos.length || null;
-    } else if (j.terminoPlazoFijo !== undefined || j.plazoFijoPeriodo !== undefined) {
-      // Llegaron solo los campos antiguos (API o MCP): la lista ya no los representa y se vacía,
-      // para que la ficha muestre los campos antiguos y un guardado posterior no la reescriba.
-      patch["terminosPlazoFijo"] = [];
-    }
+    // Los períodos del contrato se registran aparte, como historia (CAR-409).
+    const patch = patchDe(input.jornadaDt, JORNADA, JORNADA_FECHAS);
     if (Object.keys(patch).length) {
       await tx.personaJornadaDt.upsert({
         where: { personaId: p.id },

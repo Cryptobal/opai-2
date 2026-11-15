@@ -36,12 +36,9 @@ test("Trabajador vuelve al ERP con título y Supervisor activa solo Instalacione
   await page.waitForURL((u) => u.pathname === "/");
   await expect(page.locator("header h1")).toHaveText("Inicio");
   await page.goto("/supervisor/instalaciones");
-  await expect(page.getByRole("link", { name: "Hoy", exact: true }).first()).not.toHaveAttribute(
-    "aria-current",
-    "page",
-  );
-  await expect(page.getByRole("link", { name: /Instalac/ }).first()).toHaveAttribute(
-    "aria-current",
-    "page",
-  );
+  // Diseño nuevo (CAR-335 D6d): en el teléfono la barra de abajo es Inicio/Agente/Menú/Yo; la entrada
+  // activa se lee en el menú lateral, que está en el documento en todos los anchos.
+  const activa = page.locator('nav[data-shell="sidebar"] a[aria-current="page"]');
+  await expect(activa).toHaveCount(1);
+  await expect(activa).toHaveText(/Instalac/);
 });

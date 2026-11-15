@@ -1,5 +1,7 @@
 import { cache } from "react";
 
+import type { TallaPrenda } from "./estado-ficha";
+
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 /**
@@ -7,13 +9,6 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
  * por capacidad, en vez de una por tarjeta (consultas por navegación, ADR-045). Mismo permiso y auditoría.
  */
 export type Uniforme = {
-  tallaCamisa: string | null;
-  tallaPantalon: string | null;
-  tallaChaqueta: string | null;
-  tallaZapato: string | null;
-  tallaPolera: string | null;
-  tallaGeologo: string | null;
-  tallaPolar: string | null;
   estaturaCm: number | null;
   pesoKg: number | null;
   notas: string | null;
@@ -32,14 +27,31 @@ export type JornadaDt = {
   horasSemanales: string | null;
   distribucion: string | null;
   articulo22: boolean;
-  plazoFijoPeriodo: number | null;
-  terminoPlazoFijo: string | null;
-  terminosPlazoFijo: string[];
   avisoTerminoDias: number | null;
+};
+/** Período del contrato (CAR-409): renovación de plazo fijo o paso a indefinido. */
+export type PeriodoContrato = {
+  id: string;
+  tipo: "plazo_fijo" | "indefinido";
+  numero: number | null;
+  inicio: string;
+  termino: string | null;
+};
+export type ContratoPeriodos = {
+  vinculoId: string;
+  inicioContrato: string;
+  tipoContrato: string;
+  periodos: PeriodoContrato[];
+  periodoVigente: number | null;
+  terminoVigente: string | null;
+  indefinidoDesde: string | null;
 };
 export type Laboral = {
   uniforme: Uniforme | null;
+  /** Talla por prenda del uniforme de la empresa (CAR-408). */
+  tallas: TallaPrenda[];
   jornadaDt: JornadaDt | null;
+  contrato: ContratoPeriodos | null;
   os10: { credencial: string | null; venceEn: string | null } | null;
   contacto: {
     estadoCivil: string | null;

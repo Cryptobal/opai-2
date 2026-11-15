@@ -44,17 +44,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Desactivar una regla de aprobación: llega con la misma pantalla de reglas (diseño pendiente). Mientras no haya pantalla nadie crea reglas, así que no hay nada que desactivar.",
   },
-  "core.push.suscribir": {
-    encargo: "CAR-356",
-    desde: "2026-11-13",
-    motivo:
-      "Activar los avisos al celular: el interruptor del portal del trabajador llega en el PR 4b con el service worker. Sin suscripciones, el aviso sigue solo en la campana.",
-  },
-  "core.push.quitar": {
-    encargo: "CAR-356",
-    desde: "2026-11-13",
-    motivo: "Apagar los avisos al celular: llega con el mismo interruptor del PR 4b. Sin pantalla nadie se suscribe, así que no hay nada que quitar.",
-  },
   "core.cuentas_referencias.otorgar": {
     encargo: "CAR-138",
     desde: "2026-11-10",
@@ -137,29 +126,5 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-11-10",
     motivo:
       "La verificación con prueba de vida se invoca desde la marcación de Asistencia (frente «Face ID»), que aporta la cámara; B4 deja el adaptador y la capacidad.",
-  },
-  "core.webhooks.destino_crear": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
-  },
-  "core.webhooks.destino_actualizar": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
-  },
-  "core.webhooks.destino_rotar_secreto": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
-  },
-  "core.webhooks.destino_eliminar": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
   },
 };

@@ -31,8 +31,13 @@ test.describe("@preview configuración: importar personas", () => {
     await entrar(page);
     await page.goto("/configuracion/importar");
     await expect(page.getByRole("heading", { name: "Importar datos", exact: true }).first()).toBeVisible();
-    await page.getByLabel("Qué quieres importar").click();
-    await page.getByRole("option", { name: "Personas", exact: true }).click();
+    // Hasta que la página hidrata, el clic solo enfoca el selector: se repite hasta que aparece la lista (CAR-431).
+    const personas = page.getByRole("option", { name: "Personas", exact: true });
+    await expect(async () => {
+      await page.getByLabel("Qué quieres importar").click();
+      await expect(personas).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    await personas.click();
     await capturar(page, info, "importar-personas-inicio");
 
     await page.locator('input[type="file"]').setInputFiles({ name: "personas.csv", mimeType: "text/csv", buffer: Buffer.from(csv, "utf8") });

@@ -18,11 +18,6 @@ export function marcoDeCookie(valor: string | undefined): Marco {
   return valor === "hilo" || valor === "clasico" ? valor : "nuevo";
 }
 
-/** En esta etapa (H1) el Hilo existe solo en el ERP y con acceso a la empresa actual. */
-export function portalAdmiteHilo(portal: string, acceso: boolean): boolean {
-  return portal === "erp" && acceso;
-}
-
 /**
  * Marco que se monta para un portal, un acceso y el valor de la cookie. Una sola regla para el layout
  * y para las páginas que cambian con el marco (Inicio, Preferencias): nunca deciden por separado.
