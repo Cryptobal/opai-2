@@ -58,7 +58,7 @@ Dentro de la app, el ingreso vuelve a mostrar «Continuar con Google» y ahora a
 - Rate limit cerrado en el canje. La respuesta de error es la misma para un código inexistente, vencido o con un verificador malo.
 - `mfa_verified` no se hereda. La empresa sale de la membresía, como en cualquier sesión, y nunca del enlace.
 - La emisión pide un POST desde la página de confirmación, con la sesión del navegador y la cookie del reto.
-- El rastro de seguridad registra «ingreso por la app con Google» sin datos personales (solo el id del usuario, como el resto).
+- El rastro de seguridad registra el ingreso con Google en el callback del navegador (`seguridad.login`, método `social`). El canje en la app todavía no deja un evento propio: queda pendiente (ver `estado/apps/CAR-516.md`).
 
 ## 10. Casos límite
 
