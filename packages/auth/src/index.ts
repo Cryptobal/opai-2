@@ -17,6 +17,7 @@ export { LOGIN_RETENCION_DIAS, purgarIntentosLogin } from "./bloqueo-login";
 export {
   confirmarSegundoFactor,
   iniciarSegundoFactor,
+  regenerarCodigosRespaldo,
   verificarCodigoRespaldo,
   verificarSegundoFactor,
 } from "./mfa";

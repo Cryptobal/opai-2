@@ -19,7 +19,6 @@ export const SIN_BUSCADOR: Readonly<Record<string, string>> = {
   finanzas: "CAR-402: facturas, notas y documentos de compra.",
   portal_cliente: "Portal del cliente: no agrega entidades al ERP.",
   portal_trabajador: "Portal del trabajador: no agrega entidades al ERP.",
-  rondas: "CAR-405: rondas y puntos de control.",
 };
 
 asegurarRegistro();

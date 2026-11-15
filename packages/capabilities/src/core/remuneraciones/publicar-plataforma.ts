@@ -6,7 +6,7 @@ import type { Contexto } from "../../types";
 import { fuenteEsSii, valorEnRango, variacionPermitidaAcumulada, diasEntreCivil } from "./sii-validacion";
 import type { ClaveSiiPublicable } from "./sii-validacion";
 
-export type PublicarInput = {
+type PublicarInput = {
   clave: ClaveSiiPublicable;
   valorJson: number;
   vigenteDesde: string;

@@ -1,6 +1,8 @@
+acceso_intentos_listar
 acceso_listas_agregar
 acceso_listas_listar
 acceso_listas_quitar
+acceso_registros_get
 acceso_registros_listar
 agente_conversaciones_archivar
 agente_conversaciones_borrar

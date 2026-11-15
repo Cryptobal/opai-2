@@ -14,7 +14,7 @@ const GRAVEDADES = ["baja", "media", "alta"] as const;
 const ESTADOS = ["abierta", "en_atencion", "resuelta", "cerrada", "derivada"] as const;
 
 /** Número visible de una novedad (NOV-0042), correlativo por empresa. */
-export const codigoNovedad = (numero: number) => `NOV-${String(numero).padStart(4, "0")}`;
+const codigoNovedad = (numero: number) => `NOV-${String(numero).padStart(4, "0")}`;
 
 const novedadSchema = z.object({
   id: z.string(),
