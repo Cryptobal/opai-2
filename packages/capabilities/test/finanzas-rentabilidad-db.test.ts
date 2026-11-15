@@ -1,5 +1,5 @@
 // CAR-174: rentabilidad por instalación con costo laboral estimado. Solo datos ficticios (empresas qa-rent*).
-// Los valores legales se inyectan (juego de referencia del dominio) para no sembrar publicaciones globales.
+// Los valores legales se inyectan en costosDePuestos; en get se dejan UF/UTM con consultada_el para juegoDeValores.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -8,12 +8,20 @@ import { costoEmpleadorPorPersona, juegoDeValores } from "@opai/domain";
 import { manifest } from "../../../modules/finanzas/manifest";
 import { publicacionesReferencia } from "../../domain/src/remuneraciones/referencia.fixture";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
-import { rentabilidadPorInstalacion, totalesRentabilidad } from "../src/finanzas/rentabilidad-calculo";
 import { costosDePuestos } from "../src/finanzas/rentabilidad-costos";
 
 import type * as Mod from "../src";
 
-type Fila = { instalacionId: string | null; nombre: string; ventasNetasClp: number; costoEstimadoClp: number; puestos: number; puestosSinCosto: number; puestosOcultos: number };
+type Fila = {
+  instalacionId: string | null;
+  nombre: string;
+  ventasNetasClp: number;
+  costoEstimadoClp: number;
+  puestos: number;
+  puestosSinCosto: number;
+  puestosOcultos: number;
+  margenClp: number | null;
+};
 
 describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   let e: Entorno, mod: typeof Mod;
@@ -34,6 +42,11 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo]);
     mod.registrarModulos([manifest]);
+    // Otras suites a veces dejan UF/UTM vigentes sin consultada_el; juegoDeValores falla («Falta fecha de consulta»).
+    await e.admin.valorPublicado.updateMany({
+      where: { consultadaEl: null, verificacion: "verificado" },
+      data: { consultadaEl: new Date("2026-11-01") },
+    });
     const mk = (s: string) => e.admin.tenant.create({ data: { slug: `${s}-${randomUUID().slice(0, 8)}`, nombre: s, vertical: "seguridad" } });
     t.a = (await mk("qa-renta")).id;
     t.b = (await mk("qa-rentb")).id;
@@ -58,6 +71,8 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
     await doc(t.a, cuenta.id, i.norte, 33, 9_000_000, "2026-10-15", "borrador");
     await doc(t.a, cuenta.id, i.norte, 33, 6_000_000, "2026-10-16", "rechazado");
     await doc(t.a, cuenta.id, i.norte, 33, 7_000_000, "2026-11-01");
+    // Mes sin publicaciones legales: ventas reales para demostrar que el margen no es ventas − 0.
+    await doc(t.a, cuenta.id, i.norte, 33, 1_600_000, "2025-01-15");
     const cuentaB = await e.admin.cuenta.create({ data: { tenantId: t.b, nombre: "Otra" } });
     await doc(t.b, cuentaB.id, null, 33, 8_000_000, "2026-10-10");
   });
@@ -96,19 +111,29 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   });
 
   it("sin permiso de sueldos no muestra margen (sería engañoso)", async () => {
-    // Mismo juego inyectado que el caso de costos: la base compartida de test:db a veces deja
-    // UF/UTM sin consultada_el y juegoDeValores falla («Falta fecha de consulta»).
-    const juego = await juegoDeValores("2026-10-31", publicacionesReferencia());
-    const { costos } = await costosDePuestos(ctx(t.a, ["finanzas:read", "core:estructuras.read"]), "2026-10-01", "2026-11-01", "2026-10-31", juego);
-    const filas = rentabilidadPorInstalacion(
-      [
-        { instalacionId: i.norte, tipoDte: 33, montoNeto: 1_500_000, montoExento: 0 },
-        { instalacionId: null, tipoDte: 33, montoNeto: 100_000, montoExento: 0 },
-      ],
-      costos,
+    const r = await mod.executeCapability(
+      ctx(t.a, ["finanzas:read", "core:estructuras.read"]),
+      "finanzas.rentabilidad.get",
+      { mes: "2026-10" },
+      {},
     );
-    expect(totalesRentabilidad(filas).margenClp).toBeNull();
-    expect(filas.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0 });
+    if (!r.ok) throw new Error(JSON.stringify(r.error));
+    const d = r.data as { sinValoresLegales: boolean; totales: { margenClp: number | null; puestosOcultos: number }; instalaciones: Fila[] };
+    expect(d.sinValoresLegales).toBe(false);
+    expect(d.totales.margenClp).toBeNull();
+    expect(d.totales.puestosOcultos).toBeGreaterThan(0);
+    expect(d.instalaciones.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0, puestosOcultos: 2 });
+  });
+
+  it("sin valores legales el margen es null (no ventas menos cero)", async () => {
+    const r = await mod.executeCapability(ctx(t.a), "finanzas.rentabilidad.get", { mes: "2025-01" }, {});
+    if (!r.ok) throw new Error(JSON.stringify(r.error));
+    const d = r.data as { sinValoresLegales: boolean; totales: { ventasNetasClp: number; margenClp: number | null; costoEstimadoClp: number }; instalaciones: Fila[] };
+    expect(d.sinValoresLegales).toBe(true);
+    expect(d.totales.ventasNetasClp).toBe(1_600_000);
+    expect(d.totales.costoEstimadoClp).toBe(0);
+    expect(d.totales.margenClp).toBeNull();
+    expect(d.instalaciones.find((f) => f.instalacionId === i.norte)).toMatchObject({ ventasNetasClp: 1_600_000, margenClp: null });
   });
 
   it("exige permiso de Finanzas y no acepta meses futuros", async () => {

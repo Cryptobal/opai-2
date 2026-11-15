@@ -4,26 +4,17 @@ import { executeCapability, prohibido, type Contexto, type Resultado } from "@op
 import type { Mensaje, RespuestaConversacion, SolicitudConversacion } from "@opai/integrations";
 
 import { herramientasDelAgente } from "./herramientas";
-import {
-  CARGAR,
-  GUIA,
-  esquemasADemanda,
-  indiceDelAgente,
-  resolverLlamada,
-} from "./herramientas-demanda";
+import { GUIA, esquemasADemanda, indiceDelAgente } from "./herramientas-demanda";
 import { type Paso, type Plan } from "./plan";
-import {
-  enlazarTitulos,
-  extraerReferencias,
-  type Referencia,
-} from "./referencias";
-import { compactarDatoAgente } from "./compactar-dato";
+import { enlazarTitulos, type Referencia } from "./referencias";
 import { sistema } from "./sistema";
+import { aplicarLlamadas } from "./turno-herramientas";
 
 export type { Paso, Plan } from "./plan";
 export type Conversador = { conversar(s: SolicitudConversacion): Promise<RespuestaConversacion> };
 const MAX_PASOS = 12;
 const MAX_TOKENS = 128_000;
+
 /** El borde comprueba sesión y acceso actuales; un contexto antiguo no acredita vigencia. */
 export async function revalidarAccesoDelTurno(ctx: Contexto): Promise<string> {
   if (!ctx.revalidarAccesoSolicitud)
@@ -31,8 +22,7 @@ export async function revalidarAccesoDelTurno(ctx: Contexto): Promise<string> {
   return ctx.revalidarAccesoSolicitud();
 }
 
-/** El modelo nunca recibe una función que escriba: aquí solo se ejecutan lecturas y dryRun. */
-export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversador): Promise<Plan> {
+function exigirAgente(ctx: Contexto) {
   if (
     ctx.actor.tipo !== "agent" ||
     !ctx.actor.interno ||
@@ -41,6 +31,11 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
   ) {
     throw prohibido("Sin acceso al agente interno.");
   }
+}
+
+/** El modelo nunca recibe una función que escriba: aquí solo se ejecutan lecturas y dryRun. */
+export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversador): Promise<Plan> {
+  exigirAgente(ctx);
   const mensajes: Mensaje[] = [
     { rol: "sistema", texto: `${sistema()}\n\n${GUIA}\n\n${indiceDelAgente(ctx)}` },
     { rol: "usuario", texto },
@@ -48,7 +43,7 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
   const plan: Plan = { id: randomUUID(), pasos: [], texto: "", tokens: 0, referencias: [] };
   const refs = new Map<string, Referencia>();
   const cargadas = new Set<string>();
-  let llamadas = 0;
+  const llamadas = { n: 0 };
   const cerrar = (): Plan => {
     const lista = [...refs.values()];
     plan.referencias = lista;
@@ -57,81 +52,57 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
   };
   for (let turno = 0; turno < MAX_PASOS; turno++) {
     if (plan.tokens >= MAX_TOKENS) break;
-    await revalidarAccesoDelTurno(ctx);
-    const inicio = Date.now();
-    // También el primer turno, sin herramientas, debe cortar al agotar el presupuesto.
-    const finalizar = await ctx.medidor.preparar?.({
-      tenantId: ctx.tenantId,
-      recurso: "capacidad.ejecucion",
-      unidad: "llamada",
-      cantidad: 1,
-      modulo: "agente",
-      capability: "agente.turno.preparar",
-      actorTipo: "agent",
-      actorId: ctx.actor.id,
-      viaUserId: ctx.actor.viaUserId,
-      apiKeyId: null,
-      portal: ctx.portal,
-    });
-    let r: RespuestaConversacion;
-    try {
-      r = await ia.conversar({
-        mensajes,
-        herramientas: esquemasADemanda(),
-        maxTokens: Math.min(2_000, MAX_TOKENS - plan.tokens),
-      });
-      await finalizar?.({ ok: true, duracionMs: Date.now() - inicio });
-    } catch (error) {
-      await finalizar?.({ ok: false, duracionMs: Date.now() - inicio });
-      throw error;
-    }
-    // El consumo ya ocurrió: se conserva aunque el acceso haya cambiado durante la llamada.
-    await revalidarAccesoDelTurno(ctx);
-    plan.tokens += r.uso.tokensEntrada + r.uso.tokensSalida;
-    plan.texto = r.texto;
-    if (plan.tokens > MAX_TOKENS) throw prohibido("Se alcanzó el límite de tokens del turno.");
-    mensajes.push({
-      rol: "asistente",
-      texto: r.texto,
-      llamadas: r.llamadas,
-      ...(r.continuidad ? { continuidad: r.continuidad } : {}),
-    });
+    const r = await unTurnoModelo(ctx, mensajes, plan, ia);
     if (!r.llamadas.length) return cerrar();
-    for (const llamada of r.llamadas) {
-      await revalidarAccesoDelTurno(ctx);
-      // Cargar esquemas no ejecuta nada: no gasta el límite de pasos del turno.
-      if (llamada.nombre !== CARGAR && ++llamadas > MAX_PASOS)
-        throw prohibido("Se alcanzó el límite de pasos del turno.");
-      const paso = resolverLlamada(ctx, cargadas, llamada.nombre, llamada.argumentos);
-      let resultado: Resultado;
-      if ("h" in paso) {
-        const escritura = paso.h.capacidad.efecto !== "lectura";
-        resultado = await executeCapability(ctx, paso.h.capacidad.id, paso.argumentos, {
-          dryRun: escritura,
-        });
-        if (escritura && resultado.ok) {
-          plan.pasos.push({
-            capacidad: paso.h.capacidad.id,
-            argumentos: paso.argumentos,
-            clave: randomUUID(),
-            vistaPrevia: resultado,
-          });
-        }
-      } else resultado = paso;
-      if (resultado.ok) extraerReferencias(resultado.data, refs);
-      const dato =
-        resultado.ok
-          ? { ...resultado, data: compactarDatoAgente(resultado.data) }
-          : resultado;
-      mensajes.push({
-        rol: "herramienta",
-        id: llamada.id,
-        nombre: llamada.nombre,
-        resultado: JSON.stringify({ externo: true, dato }).slice(0, 24_000),
-      });
-    }
+    await aplicarLlamadas(ctx, r, mensajes, plan, refs, cargadas, llamadas, revalidarAccesoDelTurno);
   }
   throw prohibido("Se alcanzó el límite del turno; acota la solicitud.");
+}
+
+async function unTurnoModelo(
+  ctx: Contexto,
+  mensajes: Mensaje[],
+  plan: Plan,
+  ia: Conversador,
+): Promise<RespuestaConversacion> {
+  await revalidarAccesoDelTurno(ctx);
+  const inicio = Date.now();
+  const finalizar = await ctx.medidor.preparar?.({
+    tenantId: ctx.tenantId,
+    recurso: "capacidad.ejecucion",
+    unidad: "llamada",
+    cantidad: 1,
+    modulo: "agente",
+    capability: "agente.turno.preparar",
+    actorTipo: "agent",
+    actorId: ctx.actor.id,
+    viaUserId: ctx.actor.viaUserId,
+    apiKeyId: null,
+    portal: ctx.portal,
+  });
+  let r: RespuestaConversacion;
+  try {
+    r = await ia.conversar({
+      mensajes,
+      herramientas: esquemasADemanda(),
+      maxTokens: Math.min(2_000, MAX_TOKENS - plan.tokens),
+    });
+    await finalizar?.({ ok: true, duracionMs: Date.now() - inicio });
+  } catch (error) {
+    await finalizar?.({ ok: false, duracionMs: Date.now() - inicio });
+    throw error;
+  }
+  await revalidarAccesoDelTurno(ctx);
+  plan.tokens += r.uso.tokensEntrada + r.uso.tokensSalida;
+  plan.texto = r.texto;
+  if (plan.tokens > MAX_TOKENS) throw prohibido("Se alcanzó el límite de tokens del turno.");
+  mensajes.push({
+    rol: "asistente",
+    texto: r.texto,
+    llamadas: r.llamadas,
+    ...(r.continuidad ? { continuidad: r.continuidad } : {}),
+  });
+  return r;
 }
 
 /** Solo la capacidad humana de confirmación llama esto con un paso guardado por el servidor. */
@@ -144,8 +115,5 @@ export async function ejecutarPaso(ctx: Contexto, paso: Paso): Promise<Resultado
   }
   const previo = await executeCapability(ctx, paso.capacidad, paso.argumentos, { dryRun: true });
   if (!previo.ok) return previo;
-  // Se aprueba la intención (capacidad + argumentos firmados), no valores calculados
-  // del dryRun como fechas o URLs efímeras. La capacidad revalida sus reglas al escribir;
-  // esta vista previa NO es un control de concurrencia ni una transacción con la escritura.
   return executeCapability(ctx, paso.capacidad, paso.argumentos, { idempotencyKey: paso.clave });
 }

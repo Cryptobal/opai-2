@@ -19,6 +19,7 @@ export const CLASES_NUCLEO: Readonly<Record<string, ClaseBase>> = {
   [P.cuentasReferenciasAutorizar]: "-",
   [P.instalacionesRead]: "GLS",
   [P.instalacionesManage]: "G",
+  [P.novedadesManage]: "GS",
   [P.patronesRead]: "GLS",
   [P.patronesManage]: "G",
   [P.patronesDesactivar]: "G",
