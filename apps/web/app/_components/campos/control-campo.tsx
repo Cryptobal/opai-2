@@ -15,10 +15,16 @@ type Props = {
 
 const VACIO = "_vacio";
 const SI_NO = [
-  { valor: VACIO, etiqueta: "Sin valor" },
   { valor: "si", etiqueta: "Sí" },
   { valor: "no", etiqueta: "No" },
 ];
+const ENTRADA = {
+  texto: {},
+  rut: {},
+  email: { type: "email", inputMode: "email" },
+  telefono: { type: "tel", inputMode: "tel" },
+  url: { type: "url", inputMode: "url" },
+};
 const texto = (v: Entrada) => (typeof v === "string" ? v : "");
 const dos = (n: number) => String(n).padStart(2, "0");
 
@@ -60,69 +66,59 @@ function Casillas({ c, id, valor, onCambiar }: Props) {
   );
 }
 
+/** Desplegable con «Sin valor» primero, que se entrega como `null`. */
+function Desplegable(p: {
+  id: string;
+  valor: string;
+  opciones: readonly { valor: string; etiqueta: string }[];
+  onCambiar: (v: string | null) => void;
+}) {
+  return (
+    <Select
+      id={p.id}
+      valor={p.valor || VACIO}
+      onCambiar={(x) => p.onCambiar(x === VACIO ? null : x)}
+      opciones={[{ valor: VACIO, etiqueta: "Sin valor" }, ...p.opciones]}
+    />
+  );
+}
+
 /** Control de un campo personalizado según su tipo. */
 export function ControlCampo({ c, id, valor, onCambiar }: Props) {
   const v = texto(valor);
+  const alCambiar = (e: { target: { value: string } }) => onCambiar(e.target.value);
   const input = (extra: Record<string, string>) => (
-    <Input
-      id={id}
-      value={v}
-      maxLength={500}
-      onChange={(e) => onCambiar(e.target.value)}
-      {...extra}
-    />
+    <Input id={id} value={v} maxLength={500} onChange={alCambiar} {...extra} />
   );
   switch (c.tipo) {
     case "texto":
     case "rut":
-      return input({});
+    case "email":
+    case "telefono":
+    case "url":
+      return input(ENTRADA[c.tipo]);
     case "numero":
       return input({
         inputMode: c.formato === "entero" || c.formato === "moneda_clp" ? "numeric" : "decimal",
       });
-    case "email":
-      return input({ type: "email", inputMode: "email" });
-    case "telefono":
-      return input({ type: "tel", inputMode: "tel" });
-    case "url":
-      return input({ type: "url", inputMode: "url" });
     case "texto_largo":
-      return (
-        <Textarea
-          id={id}
-          rows={4}
-          maxLength={5000}
-          value={v}
-          onChange={(e) => onCambiar(e.target.value)}
-        />
-      );
+      return <Textarea id={id} rows={4} maxLength={5000} value={v} onChange={alCambiar} />;
     case "fecha":
       return <InputFecha id={id} valor={v} onCambiar={onCambiar} />;
     case "fecha_hora":
       return <FechaHora id={id} valor={valor} onCambiar={onCambiar} />;
-    case "si_no": {
-      const actual = typeof valor === "boolean" ? (valor ? "si" : "no") : VACIO;
+    case "si_no":
       return (
-        <Select
+        <Desplegable
           id={id}
-          valor={actual}
-          onCambiar={(x) => onCambiar(x === VACIO ? null : x === "si")}
+          valor={typeof valor === "boolean" ? (valor ? "si" : "no") : ""}
           opciones={SI_NO}
+          onCambiar={(x) => onCambiar(x === null ? null : x === "si")}
         />
       );
-    }
     case "lista":
-    case "usuario": {
-      const opciones = [{ valor: VACIO, etiqueta: "Sin valor" }, ...c.opciones];
-      return (
-        <Select
-          id={id}
-          valor={v || VACIO}
-          onCambiar={(x) => onCambiar(x === VACIO ? null : x)}
-          opciones={opciones}
-        />
-      );
-    }
+    case "usuario":
+      return <Desplegable id={id} valor={v} opciones={c.opciones} onCambiar={onCambiar} />;
     case "radio":
       return (
         <RadioGroup
