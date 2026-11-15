@@ -108,10 +108,10 @@ function tabsTenant(base: string, detalle: DetalleTenant | null, panel: PanelTen
       contador: detalle?.administradores.length ?? 0,
       href: `${base}/usuarios`,
     },
-    { id: "consumos", etiqueta: "Consumos", href: `${base}/consumos` },
+    { id: "consumos", etiqueta: "Consumo de esta empresa", href: `${base}/consumos` },
     {
       id: "trabajos",
-      etiqueta: "Trabajos",
+      etiqueta: "Trabajos de esta empresa",
       ...(problemas ? { contador: problemas } : {}),
       href: `${base}/trabajos`,
     },

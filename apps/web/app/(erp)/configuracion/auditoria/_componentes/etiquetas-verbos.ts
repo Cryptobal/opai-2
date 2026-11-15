@@ -1,7 +1,7 @@
 /** Verbo (resto del código de la capacidad) → acción en español. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const VERBOS: Record<string, string> = {
   portal_inicio: "Portal de inicio", get: "Ver", excel: "Exportar a Excel", update: "Editar", list: "Listar", invite: "Invitar",
-  remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
+  salida: "Registrar salida", cerrar_bloque: "Cerrar en bloque", remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
   clases: "Ver clases", accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
   summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen", instalaciones: "Por instalación",
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado", iniciar_vida: "Iniciar prueba de vida", consentir: "Dar consentimiento", habilitar: "Habilitar", textos: "Textos vigentes",
@@ -45,7 +45,7 @@ export const VERBOS: Record<string, string> = {
   descartar_destacada: "Descartar destacada",
   set_autonomia: "Definir autonomía", set_role: "Cambiar rol", borrar: "Borrar", preparar: "Preparar",
   embudo: "Embudo", mover: "Mover", ganar: "Marcar como ganado", perder: "Marcar como perdido",
-  reabrir: "Reabrir", falsa_alarma: "Cerrar como falsa alarma", posponer: "Posponer", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
+  reabrir: "Reabrir", falsa_alarma: "Cerrar como falsa alarma", posponer: "Posponer", hacerse_cargo: "Hacerse cargo", contactar: "Registrar contacto", escalar: "Escalar", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
   set_contactos: "Definir contactos", actualizar_etapa: "Actualizar etapa", guardar_catalogo: "Guardar catálogo", guardar_lote: "Guardar en lote",
   reglas_list: "Ver reglas de aprobación", reglas_guardar: "Guardar regla de aprobación", reglas_desactivar: "Desactivar regla de aprobación",
   crear_etapa: "Crear etapa", reordenar_etapas: "Reordenar etapas", enriquecer: "Enriquecer",
@@ -53,7 +53,7 @@ export const VERBOS: Record<string, string> = {
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
   pasar_a_cotizacion: "Pasar a cotización", rotar_token_formulario: "Renovar clave del formulario",
   recibir_formulario_web: "Recibir formulario web", crear: "Crear", reemplazar_etiqueta: "Reemplazar etiqueta",
-  fijar: "Fijar", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
+  fijar: "Fijar", monto_fijar: "Fijar monto", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
   cambiar_estado: "Cambiar estado", marcar_pagado: "Marcar como pagado", cargar: "Cargar",
   aplicar_cuotas: "Aplicar cuotas", reglas_listar: "Listar reglas", fijar_regla: "Fijar regla",
   generar_calendario: "Generar calendario", leer: "Leer", deshacer: "Deshacer", registrar: "Registrar",
@@ -96,8 +96,8 @@ export const VERBOS: Record<string, string> = {
   // Slack (CAR-291, ADR-093).
   canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
   usuarios: "Ver personas en Slack", vincular_usuarios: "Vincular personas con Slack",
-  // Plataforma (CAR-323).
-  miembros: "Ver miembros", reenviar: "Reenviar",
+  // Plataforma (CAR-323, CAR-529).
+  miembros: "Ver miembros", reenviar: "Reenviar", set_modulos_nuevos: "Activar módulos nuevos",
   // Indicadores de gestión (CAR-305).
   medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",

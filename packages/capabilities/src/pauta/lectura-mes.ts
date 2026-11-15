@@ -24,7 +24,7 @@ const puestoMesSchema = z.object({
   resumen: resumenSchema,
 });
 
-export const mesSalidaSchema = z.object({
+const mesSalidaSchema = z.object({
   instalacionId: z.string(),
   instalacion: z.string(),
   anio: z.number().int(),

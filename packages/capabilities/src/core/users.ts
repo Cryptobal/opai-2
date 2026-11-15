@@ -11,7 +11,6 @@ import { exigeAsignarRol, exigeGestionDeRoles } from "./permisos/comun";
 import { limpiarPortalObsoleto } from "./users-portal";
 import { buscar, type Miembro, miembroSchema, quedanOtrosOwners } from "./users-miembro";
 
-export { miembroSchema } from "./users-miembro";
 export { usersList } from "./users-consulta";
 
 /** Quien no es owner no puede tocar owners ni asignar un rol con permisos que él no tenga de hecho. */
