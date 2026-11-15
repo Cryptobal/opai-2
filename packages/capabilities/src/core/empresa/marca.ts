@@ -24,7 +24,7 @@ const marcaSchema = z.object({
   urls: z.record(z.string(), z.string()).describe("URL pública estable de cada logo cargado."),
 });
 
-const vista = async (ctx: Contexto, p: Partial<Record<string, unknown>> | null) => {
+export const vistaMarca = async (ctx: Contexto, p: Partial<Record<string, unknown>> | null) => {
   const tenant = await ctx.db.tenant.findUnique({
     where: { id: ctx.tenantId },
     select: { slug: true },
@@ -75,7 +75,7 @@ export const marcaGet = defineCapability({
   output: marcaSchema,
   efecto: "lectura",
   dryRun: false,
-  handler: async (ctx) => vista(ctx, await perfilDe(ctx)),
+  handler: async (ctx) => vistaMarca(ctx, await perfilDe(ctx)),
 });
 
 export const marcaUpdate = defineCapability({
@@ -100,7 +100,7 @@ export const marcaUpdate = defineCapability({
     }
     const data = definidos(input as Record<string, string | null | undefined>);
     const actual = await perfilDe(ctx);
-    if (dryRun) return vista(ctx, { ...actual, ...data });
+    if (dryRun) return vistaMarca(ctx, { ...actual, ...data });
     const r = await escribirConEvento(
       ctx,
       {
@@ -115,6 +115,6 @@ export const marcaUpdate = defineCapability({
           update: data,
         }),
     );
-    return vista(ctx, r);
+    return vistaMarca(ctx, r);
   },
 });
