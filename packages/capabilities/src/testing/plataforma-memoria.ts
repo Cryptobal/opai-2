@@ -4,6 +4,7 @@
 import type { Globales, HechoPlataforma } from "@opai/db";
 
 import type { Fila } from "./db-memoria-util";
+import { modulosNuevosEnMemoria } from "./plataforma-memoria-modulos";
 
 type Delegado = {
   create(a: { data: Fila }): Promise<Fila>;
@@ -22,8 +23,7 @@ export function globalesEnMemoria(delegado: (m: string) => Delegado): Globales {
     ...plataformaEnMemoria(delegado),
     tenantPorId: (id: string) => delegado("tenant").findUnique({ where: { id } }),
     tenantPorSlug: (slug: string) => delegado("tenant").findUnique({ where: { slug } }),
-    listarTenants: (id?: string) =>
-      delegado("tenant").findMany({ where: id ? { id } : {}, orderBy: { nombre: "asc" } }),
+    listarTenants: (id?: string) => delegado("tenant").findMany({ where: id ? { id } : {}, orderBy: { nombre: "asc" } }),
     crearTenant: (data: Fila) => delegado("tenant").create({ data }),
     // Empresa + perfil tributario; el RUT repetido falla como la restricción única real (P2002).
     crearTenantConPerfil: async (data: Fila, datos: Fila) => {
@@ -36,16 +36,15 @@ export function globalesEnMemoria(delegado: (m: string) => Delegado): Globales {
       await delegado("perfilEmpresa").create({ data: { tenantId: tenant["id"], ...datos } });
       return tenant;
     },
-    actualizarTenant: (id: string, data: Fila) =>
-      delegado("tenant").update({ where: { id }, data }),
+    actualizarTenant: (id: string, data: Fila) => delegado("tenant").update({ where: { id }, data }),
+    ...modulosNuevosEnMemoria(delegado),
     usuariosDePlataforma: async () =>
       (await delegado("user").findMany({ orderBy: { email: "asc" } })).filter(
         (u) => u["platformRole"],
       ),
     listarAjustes: () => delegado("ajustePlataforma").findMany({}),
     ajustePorClave: (where: Fila) => delegado("ajustePlataforma").findUnique({ where }),
-    guardarAjuste: (args: Upsert, _tx?: unknown) =>
-      delegado("ajustePlataforma").upsert({ ...args, create: { version: 1, ...args.create } }),
+    guardarAjuste: (args: Upsert, _tx?: unknown) => delegado("ajustePlataforma").upsert({ ...args, create: { version: 1, ...args.create } }),
     listarPrecios: (hasta: Date) =>
       delegado("precioRecurso").findMany({
         where: { vigenteDesde: { lte: hasta } },
