@@ -44,7 +44,7 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
     >
       {(d) => (
         <>
-          {GRUPO_CARGOS ? <EncabezadoGrupo grupo={GRUPO_CARGOS} entrada /> : null}
+          {GRUPO_CARGOS ? <EncabezadoGrupo grupo={GRUPO_CARGOS} entrada titulo="Cargos" /> : null}
           <SplitScreen
             telefono="lista"
             unPanelHastaLg

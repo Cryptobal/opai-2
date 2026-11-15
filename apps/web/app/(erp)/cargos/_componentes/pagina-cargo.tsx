@@ -58,7 +58,7 @@ export function PaginaCargo({ params, searchParams }: Props) {
     >
       {({ id, p, datos, lista, puedeGestionar, puedeVerSensible }) => (
         <>
-          {GRUPO_CARGOS ? <EncabezadoGrupo grupo={GRUPO_CARGOS} entrada /> : null}
+          {GRUPO_CARGOS ? <EncabezadoGrupo grupo={GRUPO_CARGOS} entrada titulo="Cargos" /> : null}
           <SplitScreen
             telefono="detalle"
             unPanelHastaLg
