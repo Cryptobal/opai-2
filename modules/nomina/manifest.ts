@@ -1,4 +1,4 @@
-import { ajustesNomina, capacidadesNomina, defineModule } from "@opai/capabilities";
+import { ajustesNomina, buscadoresNomina, capacidadesNomina, defineModule } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Nómina (ADR-003, Brief 25). El núcleo deriva navegación, permisos,
@@ -51,4 +51,5 @@ export const manifest = defineModule({
     { id: "nomina.prestamo.cancelado", descripcion: "Se canceló un préstamo; sus cuotas pendientes se condonaron." },
   ],
   capacidades: capacidadesNomina,
+  buscadores: buscadoresNomina,
 });
