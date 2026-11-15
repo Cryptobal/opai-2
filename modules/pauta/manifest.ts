@@ -17,6 +17,10 @@ export const manifest = defineModule({
       id: "pauta:write",
       descripcion: "Fijar series de los puestos y registrar o anular excepciones de la pauta",
     },
+    {
+      id: "pauta:aprobar_extra",
+      descripcion: "Aprobar o rechazar turnos extra (owner, admin, gerente u Operaciones; no el supervisor)",
+    },
   ],
   navegacion: [{
       portal: "erp",
@@ -39,6 +43,18 @@ export const manifest = defineModule({
     {
       id: "pauta.publicada",
       descripcion: "Se publicó la pauta de una instalación para un mes: se avisa a cada titular sus turnos (CAR-356).",
+    },
+    {
+      id: "pauta.turno_extra.registrado",
+      descripcion: "Se registró un turno extra por aprobar sobre un reemplazo o refuerzo (CAR-96).",
+    },
+    {
+      id: "pauta.turno_extra.aprobado",
+      descripcion: "Se aprobó un turno extra. No implica pago (CAR-101).",
+    },
+    {
+      id: "pauta.turno_extra.rechazado",
+      descripcion: "Se rechazó un turno extra o quedó rechazado al anular su excepción.",
     },
   ],
   capacidades: capacidadesPauta,
