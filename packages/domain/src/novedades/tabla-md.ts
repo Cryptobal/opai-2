@@ -6,18 +6,18 @@
 const FILA = /^\|(.*)\|$/;
 const SEP_CELDA = /^\s*:?-{3,}:?\s*$/;
 
-export function esFilaTablaMd(linea: string): boolean {
+function esFilaTablaMd(linea: string): boolean {
   return FILA.test(linea.trim());
 }
 
-export function esSeparadorTablaMd(linea: string): boolean {
+function esSeparadorTablaMd(linea: string): boolean {
   const m = FILA.exec(linea.trim());
   if (!m) return false;
   const celdas = (m[1] ?? "").split("|");
   return celdas.length > 0 && celdas.every((c) => SEP_CELDA.test(c));
 }
 
-export function celdasTablaMd(linea: string): string[] {
+function celdasTablaMd(linea: string): string[] {
   const m = FILA.exec(linea.trim());
   if (!m) return [];
   return (m[1] ?? "").split("|").map((c) => c.trim());
