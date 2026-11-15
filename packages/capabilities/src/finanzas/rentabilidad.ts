@@ -14,8 +14,8 @@ const mesSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Mes aaaa-mm.");
 const montos = {
   ventasNetasClp: z.number().int(),
   costoEstimadoClp: z.number().int(),
-  margenClp: z.number().int().nullable().describe("Nulo si hay puestos ocultos por permiso de sueldos."),
-  margenPct: z.number().int().nullable().describe("Margen sobre ventas en millonésimas (1.000.000 = 100 %); nulo sin ventas."),
+  margenClp: z.number().int().nullable().describe("Nulo si hay puestos ocultos por permiso de sueldos o faltan valores legales."),
+  margenPct: z.number().int().nullable().describe("Margen sobre ventas en millonésimas (1.000.000 = 100 %); nulo sin ventas, con puestos ocultos o sin valores legales."),
 };
 
 /** Día anterior a una fecha aaaa-mm-dd. */
@@ -24,7 +24,7 @@ const diaAntes = (d: string) => new Date(Date.parse(`${d}T00:00:00Z`) - 86_400_0
 export const rentabilidadInstalaciones = defineCapability({
   id: "finanzas.rentabilidad.get",
   descripcion:
-    "Rentabilidad del mes por instalación: ventas netas sin IVA de facturas y notas enviadas al SII (las notas de crédito restan) contra el costo laboral ESTIMADO de sus puestos activos, calculado con la capa de sueldo vigente y supuestos fijos (no son liquidaciones). Devuelve margen en pesos y en porcentaje (nulo si hay puestos ocultos por permiso de sueldos) y cuántos puestos quedaron sin costo u ocultos.",
+    "Rentabilidad del mes por instalación: ventas netas sin IVA de facturas y notas enviadas al SII (las notas de crédito restan) contra el costo laboral ESTIMADO de sus puestos activos, calculado con la capa de sueldo vigente y supuestos fijos (no son liquidaciones). Devuelve margen en pesos y en porcentaje (nulo si hay puestos ocultos por permiso de sueldos o faltan valores legales) y cuántos puestos quedaron sin costo u ocultos.",
   permiso: PERMISO_READ,
   input: z.object({ mes: mesSchema.optional().describe("Mes aaaa-mm; por defecto, el actual. No se aceptan meses futuros.") }),
   output: z.object({
@@ -63,7 +63,7 @@ export const rentabilidadInstalaciones = defineCapability({
       }),
       costosDePuestos(ctx, inicio, fin, corte),
     ]);
-    const filas = rentabilidadPorInstalacion(ventas, costos);
+    const filas = rentabilidadPorInstalacion(ventas, costos, sinValoresLegales);
     const ids = filas.flatMap((f) => (f.instalacionId ? [f.instalacionId] : []));
     const inst = ids.length
       ? await ctx.db.instalacion.findMany({ where: { id: { in: ids }, AND: [dondeInstalacion(ctx)] }, select: { id: true, nombre: true } })
@@ -74,7 +74,7 @@ export const rentabilidadInstalaciones = defineCapability({
       corte,
       origenCosto: "estimado" as const,
       sinValoresLegales,
-      totales: totalesRentabilidad(filas),
+      totales: totalesRentabilidad(filas, sinValoresLegales),
       instalaciones: filas.map((f) => ({
         instalacionId: f.instalacionId,
         nombre: f.instalacionId ? (nombres.get(f.instalacionId) ?? "Instalación sin acceso") : "Sin instalación",

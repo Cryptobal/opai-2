@@ -18,7 +18,7 @@ export function fijarFuenteContribuyente(f: ConsultaContribuyente | null) {
 }
 
 /** Proveedor efectivo: la key propia del tenant (`sii_contribuyente`) o «no configurado». */
-export async function fuenteContribuyente(ctx: Contexto): Promise<ConsultaContribuyente> {
+async function fuenteContribuyente(ctx: Contexto): Promise<ConsultaContribuyente> {
   if (fuenteFija) return fuenteFija;
   const cred = await credencialDe(ctx, "sii_contribuyente");
   return cred ? contribuyenteSimpleApi(cred.valor) : contribuyenteNoConfigurado();
