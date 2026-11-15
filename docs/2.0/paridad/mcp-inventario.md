@@ -118,7 +118,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
-| compartido | `app/_components` | `core.novedades.descartar_destacada` | `core_novedades_descartar_destacada` | existe |
 | compartido | `app/_components` | `core.novedades.list` | `core_novedades_list` | existe |
 | compartido | `app/_components` | `core.novedades.marcar_leidas` | `core_novedades_marcar_leidas` | existe |
 | compartido | `app/_components` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
@@ -160,12 +159,17 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.inicio.pendientes` | `core_inicio_pendientes` | existe |
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
-| compartido | `app/(erp)/_componentes` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.quitar` | `acceso_listas_quitar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.anular` | `acceso_registros_anular` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.cerrar_bloque` | `acceso_registros_cerrar_bloque` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.get` | `acceso_registros_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.salida` | `acceso_registros_salida` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
@@ -409,6 +413,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.postergar_iva` | `finanzas_flujo_postergar_iva` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.crear` | `finanzas_filas_crear` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.actualizar` | `finanzas_recurrentes_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.cambiar_desde` | `finanzas_recurrentes_cambiar_desde` | existe |
@@ -622,6 +627,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
+| compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
@@ -807,6 +813,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_get` | `platform_tenants_perfil_get` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_set` | `platform_tenants_perfil_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.set_estado` | `platform_tenants_set_estado` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.set_modulos_nuevos` | `platform_tenants_set_modulos_nuevos` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.update` | `platform_tenants_update` | existe |
 | platform | `/platform/tenants/[id]` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform/tenants/nuevo` | `platform.tenants.create` | `platform_tenants_create` | existe |
@@ -826,11 +833,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
+| trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
 | trabajador | `/trabajador/notificaciones` | `portal_trabajador.preferencias_notificacion.obtener` | `portal_trabajador_preferencias_notificacion_obtener` | existe |
 | trabajador | `/trabajador/privacidad` | `portal_trabajador.privacidad.obtener` | `portal_trabajador_privacidad_obtener` | existe |
 | trabajador | `/trabajador` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
+| trabajador | `/trabajador` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 
 ## Entradas de servidor sin id literal (acciones y rutas)
 
@@ -1115,9 +1125,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
-- `acceso.listas.agregar`
-- `acceso.listas.listar`
-- `acceso.listas.quitar`
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
 - `asistencia.correcciones.listar`
@@ -1187,6 +1194,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.libro_novedades.listar`
 - `core.libro_novedades.obtener`
 - `core.libro_novedades.registrar`
+- `core.novedades.descartar_destacada`
 - `core.patrones.get`
 - `core.personas.asignar_jefe`
 - `core.personas.list_a_cargo`
@@ -1240,6 +1248,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.turnos_extra.monto_fijar`
 - `pauta.turnos_extra.rechazar`
 - `pauta.turnos_extra.registrar`
+- `pauta.visitas.cerrar`
+- `pauta.visitas.iniciar`
+- `pauta.visitas.listar`
+- `pauta.visitas.obtener`
 - `platform.ajustes.set`
 - `platform.eventos.list`
 - `platform.precios.set`
