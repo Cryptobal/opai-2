@@ -100,7 +100,7 @@ Regla de Carlos del 14-nov-2026 (ADR-115). Los cinco principios están en `AGENT
 - Pulido obligatorio en toda pantalla: foco visible, skeleton con la forma del contenido, estado vacío con acción, transiciones de 150–200 ms con `prefers-reduced-motion`, contraste AA. Todo componente nuevo aparece en `/ds` con sus estados.
 - Patrones de pantalla: `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, siempre con `state` y los estados loading, vacío, error y sin permisos. Tipografía solo con los estilos `t-*` o la escala del DS; nunca tamaños arbitrarios.
 - En iPad y desktop el título de la página va en el `AppShell` (`titulo`); el patrón recibe el mismo título y lo muestra solo en teléfono. La acción principal va en el patrón.
-- Fichas maestras: usar `AccionesFicha` en la cabecera (`Editar` · `Fijar` · `⋯`); no duplicar `Editar` en el menú. «Nueva»/«Nuevo» en listas siempre `variante` primario (CAR-546).
+- **Lista + ficha (sin excepción, CAR-545 / Carlos 15-nov):** toda sección con lista y ficha usa `AccionesFicha` (`Editar` · `Fijar` · `⋯`), sin `Editar` en ⋯, y «Nueva»/«Nuevo» siempre primario en la lista (CAR-546; ver `DISENO.md` §3).
 - Mobile e iPad first: diseñar y verificar a 375px y 1024px antes que desktop. Touch targets ≥44px. Safe-area iOS. Los nombres de carpeta con `_` no son rutas en App Router.
 - Las pantallas nuevas pasan por Claude Design (Design Prompt → diseño aprobado → brief) antes de implementarse.
 - Navegación: respetar `docs/2.0/NAVEGACION.md` (áreas, menú vs. pestañas, barra inferior, nombres); los módulos declaran su entrada con `area` en el manifest desde el Brief 05 (ADR-046).
