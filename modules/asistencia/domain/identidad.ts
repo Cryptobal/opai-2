@@ -4,7 +4,7 @@
 
 import type { Metodo } from "./tipos";
 
-export type SolicitudIdentidad = {
+type SolicitudIdentidad = {
   personaId: string;
   metodo: Metodo;
   /** PIN o secreto del método; nunca se guarda ni se registra. */

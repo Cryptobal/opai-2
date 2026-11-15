@@ -11,7 +11,7 @@ const CAMPOS = [
   ["noCerrarDesdeEtapa", "La etapa «no cerrar desde»"],
 ] as const;
 
-export type CampoEtapaPlan = (typeof CAMPOS)[number][0];
+type CampoEtapaPlan = (typeof CAMPOS)[number][0];
 export type EtapaInvalida = { campo: CampoEtapaPlan; mensaje: string };
 
 /**
