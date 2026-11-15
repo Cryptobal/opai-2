@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox, Input, InputFecha, InputHora, RadioGroup, Select, Textarea } from "@opai/ds";
+import { Checkbox, Input, InputFecha, RadioGroup, SelectorHora, Select, Textarea } from "@opai/ds";
 
 import type { CampoMostrable } from "@opai/domain";
 
@@ -38,7 +38,7 @@ function FechaHora({ id, valor, onCambiar }: Omit<Props, "c">) {
   return (
     <div className="grid grid-cols-2 gap-2">
       <InputFecha id={id} valor={fecha} onCambiar={(f) => armar(f, hora)} />
-      <InputHora
+      <SelectorHora
         aria-label="Hora"
         valor={hora}
         onCambiar={(h) => armar(fecha, h)}
