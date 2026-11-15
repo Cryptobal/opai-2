@@ -90,7 +90,7 @@ Incluye 8 alias marcados `@deprecated` «conservados para pruebas» (`sii-valida
 | Rutas `api/terreno/*` y layouts de portales con el mismo encabezado | 66 | Un helper por familia |
 | `iconos.ts`: un bloque repetido dentro del mismo archivo | 30 | Borrar la copia |
 | Logo en PDF: `modules/cpq/persistencia/pdf/logo.ts` ≈ `capabilities/src/finanzas/ventas-pdf-logo.ts` | 28 | Hecho (CAR-439): CPQ reusa `logoDeMarca` |
-| `lista-maestro.tsx` ≈ `lista-maestro-split.tsx` | 26 | Extraer lo común |
+| `lista-maestro.tsx` ≈ `lista-maestro-split.tsx` | 26 | Hecho (CAR-439): cuerpo compartido en `cuerpo-lista-maestro` |
 | Esquemas Zod repetidos entre Tickets, Finanzas y `core/maestros/comun.ts` | 34 | Reusar los de `comun.ts` |
 | `ventas-cesion-ceder.ts` ≈ `ventas-cesion-simular.ts` | 16 | Simular reutiliza la preparación de ceder |
 | Semillas de e2e (`packages/auth/scripts`, `packages/db/scripts`) | ~300 | Un helper de preparación |
