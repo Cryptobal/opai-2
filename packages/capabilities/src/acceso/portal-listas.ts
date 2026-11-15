@@ -14,8 +14,8 @@ import { agregarEntrada, inputAgregarEntrada } from "./listas-agregar";
 import { inputPaginaAcceso } from "./pagina-alcance";
 import { contextoCliente } from "./portal-cliente";
 
-/** Ajuste de empresa que declara CAR-479 en el manifest de `acceso` («el cliente gestiona la lista de sus instalaciones»). */
-const AJUSTE_EMPRESA = "clienteGestionaListas";
+/** Ajuste de empresa que declara CAR-479 (#917) en el manifest de `acceso`: «el cliente gestiona la lista de sus instalaciones». */
+const AJUSTE_EMPRESA = "cliente_gestiona_listas";
 
 /**
  * Si el contacto puede gestionar las listas de sus instalaciones (R12). Único punto de decisión: el interruptor de
