@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { sumarHorasHabiles } from "./horario-habil";
 
-export const PLAZOS_PRIMERA_RESPUESTA = [
+const PLAZOS_PRIMERA_RESPUESTA = [
   "sin_plazo",
   "dentro",
   "fuera",
@@ -11,7 +11,6 @@ export const PLAZOS_PRIMERA_RESPUESTA = [
   "tarde",
   "sin_dato",
 ] as const;
-export type PlazoPrimeraRespuesta = (typeof PLAZOS_PRIMERA_RESPUESTA)[number];
 
 export const plazoSchema = z.object({
   estado: z.enum(PLAZOS_PRIMERA_RESPUESTA),

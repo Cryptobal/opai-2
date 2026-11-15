@@ -1,6 +1,20 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
+import type { Contexto } from "../types";
+
+/** Nombres de las instalaciones de una página (una sola consulta; la RLS acota a la empresa). */
+export async function nombresInstalacion(
+  ctx: Contexto,
+  ids: readonly string[],
+): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const filas = await ctx.db.instalacion.findMany({
+    where: { id: { in: [...new Set(ids)] } },
+    select: { id: true, nombre: true },
+  });
+  return new Map(filas.map((i) => [i.id, i.nombre]));
+}
 
 export const PERMISO_READ = "acceso:read";
 export const PERMISO_LISTAS = "acceso:listas.manage";

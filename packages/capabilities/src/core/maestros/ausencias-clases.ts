@@ -15,7 +15,7 @@ import type { Contexto } from "../../types";
 import { ajuste } from "../config";
 
 /** Catálogo efectivo de la empresa: el suyo si lo definió y es válido; si no, el de su vertical. */
-export async function clasesDeLaEmpresa(ctx: Contexto) {
+async function clasesDeLaEmpresa(ctx: Contexto) {
   const [tenant, propio] = await Promise.all([
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { vertical: true } }),
     ajuste<unknown>(ctx, "core", "personas_clases_ausencia"),
