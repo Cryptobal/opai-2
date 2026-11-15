@@ -4,13 +4,13 @@ import { capturar, pasarProteccionDeVercel } from "./preview";
 
 // CAR-481: Accesos en el Portal Cliente (en sitio y registros, solo lectura). Corre en `preview-e2e` con un
 // contacto de cliente con acceso completo de la empresa ficticia `qa-e2e` (nunca Gard ni datos reales); sus
-// credenciales llegan como secretos (E2E_CLIENTE_EMAIL / E2E_CLIENTE_PASSWORD) y no se imprimen. Sin ellas
-// la prueba se omite y no bloquea.
+// credenciales llegan como secretos (E2E_CLIENTE_EMAIL con la contraseña de e2e, CAR-500) y no se imprimen.
+// Sin ellas la prueba se omite y no bloquea.
 const email = process.env["E2E_CLIENTE_EMAIL"];
-const password = process.env["E2E_CLIENTE_PASSWORD"];
+const password = process.env["E2E_PASSWORD"];
 
 test.describe("@preview acceso: Accesos en el Portal Cliente", () => {
-  test.skip(!email || !password, "Falta el contacto cliente de qa-e2e (E2E_CLIENTE_*)");
+  test.skip(!email || !password, "Falta el contacto cliente de qa-e2e (E2E_CLIENTE_EMAIL, CAR-500)");
 
   test("en sitio y registros de sus instalaciones", async ({ page }, info) => {
     const errores: string[] = [];
