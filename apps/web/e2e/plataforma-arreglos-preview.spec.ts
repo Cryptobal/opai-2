@@ -24,9 +24,15 @@ test.describe("@preview plataforma: arreglos del diagnóstico", () => {
   }, info) => {
     await entrar(page);
     await page.goto("/platform/ajustes");
+    await page.waitForURL(/\/platform\/ajustes\/credenciales$/, { timeout: 30_000 });
     const titulo = page.getByRole("heading", { name: "Ajustes de plataforma" }).first();
     const visible = await titulo.isVisible({ timeout: 30_000 }).catch(() => false);
     test.skip(!visible, "La cuenta de prueba no tiene rol de plataforma");
+    await expect(page.getByText("Google Maps").first()).toBeVisible();
+    await expect(page.getByText("Anthropic").first()).toBeVisible();
+    await capturar(page, info, "plataforma-ajustes-credenciales");
+    await page.getByRole("link", { name: "Modelos y precios" }).click();
+    await page.waitForURL(/\/platform\/ajustes\/modelos$/);
     await expect(page.getByLabel("Ingreso mínimo mensual (CLP)")).toHaveCount(0);
     await capturar(page, info, "plataforma-ajustes");
     await page.goto("/platform/indicadores");

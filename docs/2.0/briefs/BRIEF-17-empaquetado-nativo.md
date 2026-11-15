@@ -2,6 +2,8 @@
 
 **Ticket:** CAR-90 (proyecto Linear «18 · Apps») · **Sesión:** Sesión Apps · **Fecha:** 14-nov-2026 · **Base:** ADR-044 (puntos 1 y 8, decisiones 12 y 13 de Carlos) y su adenda de CAR-90.
 
+> **Actualización (14-nov-2026, CAR-495):** Carlos decidió publicar solo «OPAI». La variante «OPAI Terreno» se quitó en la parte 2a (PR #823): queda un solo contenedor, `apps/movil/src/configuracion.ts`, con su proyecto en `apps/movil/nativo/{android,ios}`. Donde este brief habla de dos variantes, vale una sola app. Fichas de tiendas: `docs/2.0/apps/fichas-tiendas.md`.
+
 ## 1. Objetivo
 
 Empaquetar OPAI como app nativa para Android e iOS con Capacitor, sin copiar el código web al teléfono, y asegurar que al abrir la app cada perfil (guardia, cliente, supervisor, administrativo y equipo de terreno emparejado) llegue a su portal.
