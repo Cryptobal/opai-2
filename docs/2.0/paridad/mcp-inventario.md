@@ -166,6 +166,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.get` | `acceso_registros_get` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -731,6 +735,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.invite` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios` | `core.users.remove` | `core_users_remove` | existe |
+| erp | `/configuracion/usuarios` | `core.users.restablecer_mfa` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
@@ -853,6 +858,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/metodos-acceso.ts#accionRenombrarPasskey` | Invoca core.metodos_acceso.renombrar_passkey (herramienta MCP existente). |
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
 | `app/_acciones/mfa.ts#accionIniciarMfa` | Identidad: enrola el segundo factor propio. |
+| `app/_acciones/mfa.ts#accionRegenerarCodigos` | Identidad: regenera los códigos de respaldo de la propia cuenta con contraseña. |
 | `app/_acciones/mfa.ts#accionVerificar` | Identidad: segundo factor de la sesión humana. |
 | `app/_acciones/oauth.ts#accionAutorizarOAuth` | Identidad: la persona autoriza a una app a entrar por OAuth con su cuenta (CAR-247). |
 | `app/_acciones/oauth.ts#accionElegirEmpresaOAuth` | Identidad: la persona elige la empresa con la que entra la app por OAuth (CAR-247). |
@@ -1092,7 +1098,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.desconectar` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
-| `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
+| `core.users.restablecer_mfa` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.webhooks.destino_actualizar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
 | `core.webhooks.destino_crear` | `/configuracion/agentes/eventos` | no | reservada a personas |
 | `core.webhooks.destino_eliminar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
@@ -1114,7 +1120,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `acceso.listas.agregar`
 - `acceso.listas.listar`
 - `acceso.listas.quitar`
-- `acceso.registros.listar`
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
 - `asistencia.correcciones.listar`
