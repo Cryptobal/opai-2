@@ -22,6 +22,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre.",
   "app/api/geo/mapa/route.ts":
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
+  "app/api/geo/buscar/route.ts":
+    "Proxy Nominatim (OpenStreetMap) para ubicar puntos de ronda en el mapa interactivo; sin datos de negocio ni escrituras.",
   "app/api/pauta/export/route.ts":
     "Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar.",
   "app/api/negocios/export/route.ts":
