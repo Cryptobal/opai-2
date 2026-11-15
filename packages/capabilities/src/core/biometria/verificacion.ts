@@ -23,7 +23,7 @@ import {
 const PUNTAJE_MINIMO = 90;
 
 /** Umbral de la plataforma; un valor ausente o fuera de rango cae al defecto en vez de abrir o cerrar todo. */
-export async function umbralDePlataforma(ctx: Contexto): Promise<number> {
+async function umbralDePlataforma(ctx: Contexto): Promise<number> {
   const v = await ajuste<number>(ctx, "core", "biometria_umbral_similitud").catch(() => PUNTAJE_MINIMO);
   return typeof v === "number" && v >= 70 && v <= 99.9 ? v : PUNTAJE_MINIMO;
 }
