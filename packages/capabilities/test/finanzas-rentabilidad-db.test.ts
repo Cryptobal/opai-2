@@ -8,6 +8,7 @@ import { costoEmpleadorPorPersona, juegoDeValores } from "@opai/domain";
 import { manifest } from "../../../modules/finanzas/manifest";
 import { publicacionesReferencia } from "../../domain/src/remuneraciones/referencia.fixture";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
+import { rentabilidadPorInstalacion, totalesRentabilidad } from "../src/finanzas/rentabilidad-calculo";
 import { costosDePuestos } from "../src/finanzas/rentabilidad-costos";
 
 import type * as Mod from "../src";
@@ -95,11 +96,19 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   });
 
   it("sin permiso de sueldos no muestra margen (sería engañoso)", async () => {
-    const r = await mod.executeCapability(ctx(t.a, ["finanzas:read", "core:estructuras.read"]), "finanzas.rentabilidad.get", { mes: "2026-10" }, {});
-    if (!r.ok) throw new Error(JSON.stringify(r.error));
-    const d = r.data as { totales: { margenClp: number | null; puestosOcultos: number }; instalaciones: (Fila & { margenClp: number | null })[] };
-    expect(d.totales.margenClp).toBeNull();
-    expect(d.instalaciones.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0 });
+    // Mismo juego inyectado que el caso de costos: la base compartida de test:db a veces deja
+    // UF/UTM sin consultada_el y juegoDeValores falla («Falta fecha de consulta»).
+    const juego = await juegoDeValores("2026-10-31", publicacionesReferencia());
+    const { costos } = await costosDePuestos(ctx(t.a, ["finanzas:read", "core:estructuras.read"]), "2026-10-01", "2026-11-01", "2026-10-31", juego);
+    const filas = rentabilidadPorInstalacion(
+      [
+        { instalacionId: i.norte, tipoDte: 33, montoNeto: 1_500_000, montoExento: 0 },
+        { instalacionId: null, tipoDte: 33, montoNeto: 100_000, montoExento: 0 },
+      ],
+      costos,
+    );
+    expect(totalesRentabilidad(filas).margenClp).toBeNull();
+    expect(filas.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0 });
   });
 
   it("exige permiso de Finanzas y no acepta meses futuros", async () => {
