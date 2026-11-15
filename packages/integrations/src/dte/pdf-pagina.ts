@@ -24,7 +24,7 @@ const textoReferencia = (d: PdfDteInput, ref: PdfReferencia) => {
 };
 
 /** Alto del recuadro de referencias: crece con la cantidad (hasta 6; el resto se resume). */
-export const altoReferencias = (d: PdfDteInput) =>
+const altoReferencias = (d: PdfDteInput) =>
   d.referencias?.length ? 18 + Math.min(d.referencias.length, MAX_REFERENCIAS + 1) * 11 : 0;
 
 function referencias(p: PDFPage, d: PdfDteInput, r: Recursos, arriba: number) {
