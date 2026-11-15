@@ -1,31 +1,41 @@
-// Leer y guardar los valores de los campos personalizados de una ficha (CAR-27, PR 2).
+// Leer y guardar los valores de los campos personalizados de una ficha (CAR-27, CAR-536).
 // Quien llama ya verificó permiso y alcance de la ficha; aquí solo se valida contra el catálogo.
 import { z } from "zod";
 
 import {
-  type ENTIDADES_CAMPO_PERSONALIZADO,
+  FORMATOS_NUMERO_CAMPO,
   TIPOS_CAMPO_PERSONALIZADO,
-  validarValorCampo,
+  type EntidadCampoPersonalizado,
+  type FormatoNumeroCampo,
   type TipoCampoPersonalizado,
 } from "@opai/domain";
 
-import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { sinDuplicado } from "../maestros/comun";
+import { opcionSchema, opcionesDe, valorSchema } from "./campos-definicion";
+import { validarEntrada, type CampoActivo } from "./campos-valores-validar";
+import { usuariosErp } from "./usuarios-erp";
 
-type EntidadCampo = (typeof ENTIDADES_CAMPO_PERSONALIZADO)[number];
-export type FichaCampos = { entidad: EntidadCampo; id: string };
+export type FichaCampos = { entidad: EntidadCampoPersonalizado; id: string };
 
-const COLUMNA = { cuenta: "cuentaId", contacto: "contactoId", negocio: "negocioId" } as const;
+const COLUMNA = {
+  cuenta: "cuentaId",
+  contacto: "contactoId",
+  negocio: "negocioId",
+  instalacion: "instalacionId",
+  persona: "personaId",
+} as const satisfies Record<EntidadCampoPersonalizado, string>;
 
-const valorSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 const valorCampoSchema = z.object({
   campoId: z.string(),
   clave: z.string(),
   etiqueta: z.string(),
+  descripcion: z.string().nullable(),
   tipo: z.enum(TIPOS_CAMPO_PERSONALIZADO),
-  opciones: z.array(z.string()),
+  formato: z.enum(FORMATOS_NUMERO_CAMPO).nullable(),
+  opciones: z.array(opcionSchema).describe("En campos de usuario: los usuarios del ERP (valor = id)."),
   obligatorio: z.boolean(),
+  valorDefecto: valorSchema,
   valor: valorSchema,
 });
 export const valoresSalida = z.object({ campos: z.array(valorCampoSchema) });
@@ -37,7 +47,7 @@ export const valoresEntrada = z
 type Valor = z.infer<typeof valorSchema>;
 type Salida = z.infer<typeof valoresSalida>;
 
-async function camposActivos(ctx: Contexto, entidad: EntidadCampo) {
+async function camposActivos(ctx: Contexto, entidad: EntidadCampoPersonalizado) {
   return ctx.db.campoPersonalizado.findMany({
     where: { entidad, activo: true },
     orderBy: [{ orden: "asc" }, { id: "asc" }],
@@ -45,29 +55,36 @@ async function camposActivos(ctx: Contexto, entidad: EntidadCampo) {
   });
 }
 
-function armar(
-  campos: Awaited<ReturnType<typeof camposActivos>>,
-  valores: ReadonlyMap<string, Valor>,
-): Salida {
+async function armar(ctx: Contexto, campos: CampoActivo[], valores: ReadonlyMap<string, Valor>): Promise<Salida> {
+  const usuarios = campos.some((c) => c.tipo === "usuario")
+    ? (await usuariosErp(ctx)).map((u) => ({ valor: u.id, etiqueta: u.nombre }))
+    : [];
   return {
     campos: campos.map((c) => ({
       campoId: c.id,
       clave: c.clave,
       etiqueta: c.etiqueta,
+      descripcion: c.descripcion,
       tipo: c.tipo as TipoCampoPersonalizado,
-      opciones: c.opciones,
+      formato: c.formato as FormatoNumeroCampo | null,
+      opciones: c.tipo === "usuario" ? usuarios : opcionesDe(c),
       obligatorio: c.obligatorio,
+      valorDefecto: (c.valorDefecto ?? null) as Valor,
       valor: valores.get(c.id) ?? null,
     })),
   };
 }
 
-export async function leerValores(ctx: Contexto, ficha: FichaCampos): Promise<Salida> {
-  const campos = await camposActivos(ctx, ficha.entidad);
+async function valoresGuardados(ctx: Contexto, ficha: FichaCampos, campos: CampoActivo[]) {
   const filas = await ctx.db.campoValor.findMany({
     where: { [COLUMNA[ficha.entidad]]: ficha.id, campoId: { in: campos.map((c) => c.id) } },
   });
-  return armar(campos, new Map(filas.map((f) => [f.campoId, f.valor as Valor])));
+  return new Map(filas.map((f) => [f.campoId, f.valor as Valor]));
+}
+
+export async function leerValores(ctx: Contexto, ficha: FichaCampos): Promise<Salida> {
+  const campos = await camposActivos(ctx, ficha.entidad);
+  return armar(ctx, campos, await valoresGuardados(ctx, ficha, campos));
 }
 
 export async function guardarValores(
@@ -77,31 +94,10 @@ export async function guardarValores(
   dryRun: boolean,
 ): Promise<Salida> {
   const campos = await camposActivos(ctx, ficha.entidad);
-  const porClave = new Map(campos.map((c) => [c.clave, c]));
-  const errores: Record<string, string> = {};
-  const cambios: { campoId: string; valor: Valor }[] = [];
-  for (const [clave, bruto] of Object.entries(entrada)) {
-    const campo = porClave.get(clave);
-    if (!campo) {
-      errores[clave] = "No existe un campo activo con esa clave.";
-      continue;
-    }
-    const r = validarValorCampo(campo.tipo as TipoCampoPersonalizado, campo.opciones, bruto);
-    if (!r.ok) errores[clave] = r.error;
-    else if (r.valor === null && campo.obligatorio) errores[clave] = "Es obligatorio.";
-    else cambios.push({ campoId: campo.id, valor: r.valor });
-  }
-  if (Object.keys(errores).length > 0) {
-    const detalle = Object.entries(errores)
-      .map(([clave, e]) => `${porClave.get(clave)?.etiqueta ?? clave}: ${e}`)
-      .join(" ");
-    throw reglaDeNegocio(`Revisa los campos. ${detalle}`, { errores });
-  }
-
-  const actual = await leerValores(ctx, ficha);
-  const mapa = new Map<string, Valor>(actual.campos.map((c) => [c.campoId, c.valor]));
+  const cambios = await validarEntrada(ctx, campos, entrada);
+  const mapa = await valoresGuardados(ctx, ficha, campos);
   for (const c of cambios) mapa.set(c.campoId, c.valor);
-  if (dryRun || cambios.length === 0) return armar(campos, mapa);
+  if (dryRun || cambios.length === 0) return armar(ctx, campos, mapa);
 
   const col = COLUMNA[ficha.entidad];
   await ctx.transaccion(async (tx) => {
@@ -126,5 +122,5 @@ export async function guardarValores(
       payload: { claves: Object.keys(entrada) },
     });
   });
-  return armar(campos, mapa);
+  return armar(ctx, campos, mapa);
 }
