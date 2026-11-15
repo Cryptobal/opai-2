@@ -51,6 +51,8 @@ model RegistroAcceso {
   motivoVisita   String?  @map("motivo_visita")
   patente        String?
   entradaListaId String?  @map("entrada_lista_id") @db.Uuid
+  /// Campos personalizados del formulario (CAR-479): `[{ etiqueta, valor }]` tal como los pidió la portería.
+  camposExtra    Json     @default("[]") @map("campos_extra")
   /// "en_linea" | "diferido".
   origen         String   @default("en_linea")
   horaCorregida  DateTime @map("hora_corregida") @db.Timestamptz(6)
@@ -196,5 +198,20 @@ model PrerregistroUso {
 
   @@unique([visitanteId, dia], map: "prerregistro_usos_dia_key")
   @@map("prerregistro_usos")
+  @@schema("acceso")
+}
+
+/// Configuración de acceso (CAR-479, R1): la de la empresa (`instalacion_id` nulo) y, si se personaliza, la de una
+/// instalación, que la reemplaza entera. Una por ámbito: índices únicos parciales en el SQL de la migración.
+model ConfigAcceso {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  instalacionId  String?  @map("instalacion_id") @db.Uuid
+  valor          Json
+  actualizadoPor String?  @map("actualizado_por") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("configuraciones")
   @@schema("acceso")
 }
