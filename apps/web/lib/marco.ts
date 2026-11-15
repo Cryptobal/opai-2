@@ -18,19 +18,16 @@ export function marcoDeCookie(valor: string | undefined): Marco {
   return valor === "hilo" || valor === "clasico" ? valor : "nuevo";
 }
 
-/** En esta etapa (H1) el Hilo existe solo en el ERP y con acceso a la empresa actual. */
-export function portalAdmiteHilo(portal: string, acceso: boolean): boolean {
-  return portal === "erp" && acceso;
-}
-
 /**
  * Marco que se monta para un portal, un acceso y el valor de la cookie. Una sola regla para el layout
  * y para las páginas que cambian con el marco (Inicio, Preferencias): nunca deciden por separado.
  */
-export function marcoResuelto(portal: string, acceso: boolean): Marco {
-  // CAR-335 D6c: en el ERP el diseño nuevo es el único; el clásico y el Hilo se retiraron. Los demás
-  // portales siguen con el clásico hasta su propio bloque.
-  return portalAdmiteHilo(portal, acceso) ? "nuevo" : "clasico";
+export function marcoResuelto(_portal: string, acceso: boolean): Marco {
+  // CAR-335 D6: el diseño nuevo es el único en todos los portales con empresa (decisión de Carlos del
+  // 13-nov-2026: «Sí. Todo»). Trabajador y terreno lo usan con sus propias pestañas en el teléfono.
+  // Sin acceso a una empresa (p. ej. Plataforma o «Sin permisos») queda el marco base, que es el que
+  // muestra ese aviso.
+  return acceso ? "nuevo" : "clasico";
 }
 
 /** Texto para `document.cookie`: un año para el clásico y el Hilo; el nuevo es la ausencia de la cookie. */

@@ -2,7 +2,7 @@
 export const RECURSOS: Record<string, string> = {
   ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", bandeja: "Bandeja del aprobador", lotes: "Lotes de pago", nomina: "Nómina de pago", reporte: "Reporte de rendiciones", rentabilidad: "Rentabilidad por instalación", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", metodos_acceso: "Métodos de acceso", apps_conectadas: "Apps conectadas", invitations: "Invitaciones",
   modules: "Módulos", apikeys: "API keys", audit: "Auditoría", usage: "Uso", tenants: "Empresas",
-  admins: "Administradores", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
+  admins: "Administradores", invitaciones: "Invitaciones", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",
   cuentas: "Cuentas", cuentas_referencias: "Referencias de clientes", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
   patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos", procesos_persona: "Ingreso y salida",
@@ -19,7 +19,7 @@ export const RECURSOS: Record<string, string> = {
   programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos",
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
-  conceptos: "Conceptos", obligaciones: "Obligaciones", mes: "Mes", ppc: "Puestos por cubrir",
+  conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", mes: "Mes", ppc: "Puestos por cubrir",
   series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos",
   alertas: "Alertas", estado: "Estado de la central", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
@@ -34,7 +34,7 @@ export const RECURSOS: Record<string, string> = {
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
   propuestas_tecnica: "Propuestas técnicas", propuestas_html: "Plantillas HTML de propuesta", envios_propuesta: "Envíos de propuesta",
   cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0", impuestos: "Impuestos",
-  informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
+  intentos: "Intentos de acceso denegados", informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
   // Grupos o equipos de usuarios (CAR-251).
   grupos: "Grupos",
   webhooks: "Eventos salientes",
