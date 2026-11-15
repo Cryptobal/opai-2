@@ -76,8 +76,12 @@ test.describe("desempeño: scorecard y jefatura de un cargo", () => {
       () => false,
     );
     test.skip(!hay, "La empresa no tiene Desempeño activo o quien entra no lo administra");
-    await nuevo.click();
     const hoja = page.getByRole("dialog");
+    // La hoja se descarga al abrirla; si el clic llega antes de hidratar, se reintenta.
+    await expect(async () => {
+      await nuevo.click();
+      await expect(hoja.getByLabel("Nombre")).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 45_000 });
     const nombre = `Negocios ganados ${Date.now()}`;
     await hoja.getByLabel("Nombre").fill(nombre);
     await hoja.getByLabel("Qué se cuenta").click();
