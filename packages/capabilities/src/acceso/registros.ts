@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
-import { cursorDe, pagina } from "../core/maestros/comun";
 import { defineCapability } from "../define";
-import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
-import { nombresInstalacion, PERMISO_PATENTE, PERMISO_READ, TIPOS_REGISTRO } from "./comun";
+import { dondeInstalacionId } from "../rondas/comun";
+import { PERMISO_PATENTE, PERMISO_READ, TIPOS_REGISTRO } from "./comun";
+import { inputPaginaAcceso, paginaAlcance, reciente } from "./pagina-alcance";
 
 const item = z.object({
   id: uuidSchema,
@@ -34,52 +34,46 @@ export const registrosListar = defineCapability({
     soloEnSitio: z.boolean().default(false),
     tipoRegistro: z.enum(TIPOS_REGISTRO).optional(),
     q: z.string().trim().max(80).optional(),
-    cursor: z.uuid().optional().describe("Id del último registro de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(50),
+    ...inputPaginaAcceso,
   }),
   output: z.object({ items: z.array(item), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (salida) => salida.items.map((r) => r.id),
   async handler(ctx, input) {
-    if (input.instalacionId) await instalacionEnAlcance(ctx, input.instalacionId);
     const verPatente = ctx.autorizar(PERMISO_PATENTE);
     const q = input.q ? { contains: input.q, mode: "insensitive" as const } : null;
     // La patente se guarda normalizada («AB-CD 12» → «ABCD12»): se busca igual de normalizada.
     const qPatente = input.q?.replace(/[\s.-]/g, "").toUpperCase();
-    const filas = await ctx.db.registroAcceso.findMany({
-      where: {
-        AND: [
-          dondeInstalacionId(ctx),
-          input.instalacionId ? { instalacionId: input.instalacionId } : {},
-          input.soloEnSitio ? { salida: null } : {},
-          input.tipoRegistro ? { tipoRegistro: input.tipoRegistro } : {},
-          q
-            ? {
-                OR: [
-                  { nombre: q },
-                  { empresa: q },
-                  ...(verPatente && qPatente ? [{ patente: { contains: qPatente } }] : []),
-                ],
-              }
-            : {},
-        ],
-      },
-      orderBy: [{ horaCorregida: "desc" }, { id: "desc" }],
-      include: { salida: { select: { horaCorregida: true } } },
-      ...cursorDe(input.cursor, input.limite),
-    });
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
-    const nombres = await nombresInstalacion(
+    return paginaAlcance(
       ctx,
-      items.map((r) => r.instalacionId),
-    );
-    return {
-      siguiente,
-      items: items.map((r) => ({
+      input,
+      () =>
+        ctx.db.registroAcceso.findMany({
+          where: {
+            AND: [
+              dondeInstalacionId(ctx),
+              input.instalacionId ? { instalacionId: input.instalacionId } : {},
+              input.soloEnSitio ? { salida: null } : {},
+              input.tipoRegistro ? { tipoRegistro: input.tipoRegistro } : {},
+              q
+                ? {
+                    OR: [
+                      { nombre: q },
+                      { empresa: q },
+                      ...(verPatente && qPatente ? [{ patente: { contains: qPatente } }] : []),
+                    ],
+                  }
+                : {},
+            ],
+          },
+          include: { salida: { select: { horaCorregida: true } } },
+          ...reciente(input.cursor, input.limite),
+        }),
+      (r, instalacion) => ({
         id: r.id,
         instalacionId: r.instalacionId,
-        instalacion: nombres.get(r.instalacionId) ?? "",
+        instalacion,
         entradaEn: r.horaCorregida.toISOString(),
         salidaEn: r.salida?.horaCorregida.toISOString() ?? null,
         tipoRegistro: r.tipoRegistro,
@@ -88,7 +82,7 @@ export const registrosListar = defineCapability({
         documento: r.mascara,
         patente: verPatente ? r.patente : null,
         origen: r.origen,
-      })),
-    };
+      }),
+    );
   },
 });

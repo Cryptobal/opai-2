@@ -69,11 +69,23 @@ describe("seguimiento del shell", () => {
     for (const r of ["/platform/trabajos", "/platform/consumos", "/platform/ajustes"])
       expect(activa(r)).toBe(false);
     const trabajos = NAV_PLATAFORMA.find((i) => i.href === "/platform/trabajos");
-    if (!trabajos) throw new Error("Falta Trabajos");
+    if (!trabajos) throw new Error("Falta Trabajos totales");
+    expect(trabajos.etiqueta).toBe("Trabajos totales");
     expect(esActivo("/platform/trabajos", trabajos.href, trabajos.exacta, trabajos.activoEn)).toBe(
       true,
     );
     expect(esActivo("/platform", trabajos.href, trabajos.exacta, trabajos.activoEn)).toBe(false);
+    const consumos = NAV_PLATAFORMA.find((i) => i.href === "/platform/consumos");
+    if (!consumos) throw new Error("Falta Consumos totales");
+    expect(consumos.etiqueta).toBe("Consumos totales");
+    const ajustes = NAV_PLATAFORMA.find((i) => i.href === "/platform/ajustes");
+    if (!ajustes) throw new Error("Falta Ajustes");
+    expect(esActivo("/platform/ajustes/credenciales", ajustes.href, ajustes.exacta, ajustes.activoEn)).toBe(
+      true,
+    );
+    expect(esActivo("/platform/ajustes/modelos", ajustes.href, ajustes.exacta, ajustes.activoEn)).toBe(
+      true,
+    );
   });
 
   it("Supervisor: la ficha de persona mantiene «Hoy» activa, no «Instalaciones» (H6)", () => {

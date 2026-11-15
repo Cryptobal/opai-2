@@ -5,7 +5,7 @@ import { type CSSProperties, useEffect, useState } from "react";
 import { Button, Campo, Input } from "@opai/ds";
 import { acentoDeMarca, type Modo } from "@opai/domain/marca-acento";
 
-import { PiezasHilo } from "../hilo/piezas";
+import { PiezasShowcase } from "./piezas";
 
 // Colores de ejemplo de empresas ficticias (datos, no estilos): los mismos seis del prototipo.
 const EJEMPLOS = [
@@ -113,7 +113,7 @@ export function MuestraNuevo() {
           <p className="t-numeric font-mono">$ 31.750.000 · 76.543.210-K · F-000123</p>
         </section>
 
-        <PiezasHilo />
+        <PiezasShowcase />
       </div>
     </div>
   );

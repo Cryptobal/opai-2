@@ -3,7 +3,7 @@ import {
   ETIQUETA_MODULO_NOVEDAD,
   novedadesVisibles,
   type EntradaNovedad,
-} from "@opai/domain";
+} from "@opai/domain/novedades";
 
 import { forTenantUsuario, validarTenantId } from "@opai/db";
 
