@@ -21,8 +21,8 @@ export async function entornoPortalAccesos() {
   mod.limpiarRegistro();
   mod.registrarCapacidades(mod.capacidadesDelNucleo);
   // El ajuste de empresa que declara CAR-479, para probar el interruptor de listas del cliente (R12).
-  const clienteGestionaListas = z.boolean().default(false).meta({ etiqueta: "El cliente gestiona sus listas", ambito: "tenant" });
-  mod.registrarModulos([{ ...manifest, configuracion: z.object({ clienteGestionaListas }) }]);
+  const cliente_gestiona_listas = z.boolean().default(false).meta({ etiqueta: "El cliente gestiona sus listas", ambito: "tenant" });
+  mod.registrarModulos([{ ...manifest, configuracion: z.object({ cliente_gestiona_listas }) }]);
   const s = randomUUID().slice(0, 8);
   const medidor = { registrar: async () => undefined };
   const tenant = async (k: string) =>

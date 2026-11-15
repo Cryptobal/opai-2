@@ -17,8 +17,8 @@ describe.skipIf(!urlPropietario)("Listas del cliente en el Portal Cliente, base 
   const code = (r: { ok: boolean; error?: { code: string } }) => (r.ok ? "ok" : r.error?.code);
   const interruptor = (tenantId: string, valor: boolean) =>
     x.e.admin.ajuste.upsert({
-      where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "acceso", clave: "clienteGestionaListas" } },
-      create: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "acceso", clave: "clienteGestionaListas", valor },
+      where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "acceso", clave: "cliente_gestiona_listas" } },
+      create: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "acceso", clave: "cliente_gestiona_listas", valor },
       update: { valor },
     });
 
