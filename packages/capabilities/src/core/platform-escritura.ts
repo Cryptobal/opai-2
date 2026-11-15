@@ -31,7 +31,7 @@ export async function invitarAdministrador(
     .invitar(tenant, { email, rol, portales: ["erp"], invitadoPor }, ctx.servicios, dryRun);
 }
 
-export const platformTenantsCreate = defineCapability({
+const platformTenantsCreate = defineCapability({
   id: "platform.tenants.create",
   descripcion:
     "Plataforma: crea una empresa (trial, con el núcleo activo) con su razón social y RUT tributario, e invita a su primer owner. Si el slug existe, error salvo `adoptarExistente`. El RUT se valida y no puede repetirse en otra empresa (la vista previa no detecta repetidos).",

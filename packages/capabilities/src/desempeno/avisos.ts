@@ -14,7 +14,7 @@ import { PERMISOS_DESEMPENO } from "./comun";
 
 import { EVENTO_EQUIPO_BAJO_META, EVENTO_PERSONA_BAJO_META } from "./avisos-emitir";
 
-export { EVENTO_EQUIPO_BAJO_META, EVENTO_PERSONA_BAJO_META, emitirBajoMeta } from "./avisos-emitir";
+export { emitirBajoMeta } from "./avisos-emitir";
 
 const MESES = [
   "enero",
@@ -32,7 +32,7 @@ const MESES = [
 ];
 
 /** "2026-10" → "octubre de 2026". */
-export const nombreDelMes = (p: string) =>
+const nombreDelMes = (p: string) =>
   `${MESES[Number(p.slice(5, 7)) - 1] ?? p} de ${p.slice(0, 4)}`;
 
 /** ¿La empresa activó el aviso? Sin el ajuste declarado (registro sin el módulo), apagado. */

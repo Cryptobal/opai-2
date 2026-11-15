@@ -54,7 +54,7 @@ export function opcionesPara(tipo: string, opciones: readonly string[] | undefin
   return limpias;
 }
 
-export const DUPLICADO = "Ya existe un campo con ese nombre para esa entidad.";
+const DUPLICADO = "Ya existe un campo con ese nombre para esa entidad.";
 
 export const camposPersonalizadosList = defineCapability({
   auditarLectura: (s) => s.items.map((c) => c.id),

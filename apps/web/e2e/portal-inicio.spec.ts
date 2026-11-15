@@ -25,7 +25,11 @@ async function entrar(page: Page, ruta = "/login") {
 }
 
 async function abrirMenu(page: Page) {
-  const boton = page.getByRole("button", { name: "Menú de usuario" }).filter({ visible: true });
+  // Diseño nuevo (CAR-335): en el teléfono el menú de la cuenta es la pestaña «Yo» de la barra inferior.
+  const boton = page
+    .getByRole("button", { name: /^(Menú de usuario|Yo)(,|$)/ })
+    .filter({ visible: true })
+    .first();
   await expect(async () => {
     if ((await boton.getAttribute("aria-expanded")) !== "true") await boton.click();
     await expect(boton).toHaveAttribute("aria-expanded", "true", { timeout: 1000 });

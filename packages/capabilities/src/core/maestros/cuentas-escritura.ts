@@ -13,7 +13,7 @@ import { camposCuenta, cuentaSchema, vistaCuenta } from "./cuentas-vista";
 
 const DUPLICADO = "Ya existe una cuenta con ese RUT.";
 
-export async function rutLibre(ctx: Contexto, rut: string | null | undefined, excepto?: string) {
+async function rutLibre(ctx: Contexto, rut: string | null | undefined, excepto?: string) {
   if (!rut) return;
   const otra = await ctx.db.cuenta.findFirst({ where: { rut, ...otroQue(excepto) } });
   if (otra) throw conflicto(`${DUPLICADO} (${otra.nombre}).`);
