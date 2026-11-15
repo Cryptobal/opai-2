@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 /** Largo máximo del texto de búsqueda y mínimo cuando no está vacío (CAR-120). */
-export const BUSQUEDA_MAX = 120;
-export const BUSQUEDA_MIN = 2;
+const BUSQUEDA_MAX = 120;
+const BUSQUEDA_MIN = 2;
 
 /**
  * Texto de búsqueda por título: se recorta, admite hasta 120 caracteres y, si no está vacío, pide

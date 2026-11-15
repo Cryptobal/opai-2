@@ -9,7 +9,7 @@ import { PERMISO_BIBLIOTECA, PERMISO_READ } from "./permisos";
 const problemaSchema = z.object({ codigo: z.string(), mensaje: z.string(), detalle: z.string().optional() });
 const tokensSchema = z.object({ usados: z.array(z.string()), colecciones: z.array(z.string()) });
 
-export const propuestaHtmlImportar = defineCapability({
+const propuestaHtmlImportar = defineCapability({
   id: "cpq.propuestas_html.importar",
   descripcion:
     "Importa un HTML como plantilla de propuesta de la empresa: lo sanea (sin scripts, sin red ni recursos remotos), valida que sus marcadores {{…}} sean del catálogo de campos y lo guarda como versión nueva. Lo rechazado no se guarda. No genera PDF: el PDF actual no usa esta plantilla.",
@@ -36,7 +36,7 @@ export const propuestaHtmlImportar = defineCapability({
   handler: (ctx, input, { dryRun }) => importarHtml(ctx, { nombre: input.nombre, html: input.html, escribir: !dryRun }),
 });
 
-export const propuestaHtmlList = defineCapability({
+const propuestaHtmlList = defineCapability({
   auditarLectura: (s) => s.plantillas.map((p) => p.id),
   id: "cpq.propuestas_html.list",
   descripcion:
@@ -56,7 +56,7 @@ export const propuestaHtmlList = defineCapability({
   handler: async (ctx, input) => ({ plantillas: await listarHtml(ctx, input.nombre) }),
 });
 
-export const propuestaHtmlGet = defineCapability({
+const propuestaHtmlGet = defineCapability({
   auditarLectura: (s) => [s.id],
   id: "cpq.propuestas_html.get",
   descripcion:

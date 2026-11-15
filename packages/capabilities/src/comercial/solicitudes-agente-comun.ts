@@ -2,7 +2,7 @@ import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
 /** Tope diario de escrituras de agente por solicitud (crear + enriquecer) por API key. */
-export const TOPE_ESCRITURAS_AGENTE_DIA = 500;
+const TOPE_ESCRITURAS_AGENTE_DIA = 500;
 
 const CAPS_CONTEO = ["comercial.solicitudes.create", "comercial.solicitudes.enriquecer"] as const;
 

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ESTADOS_CUOTA, ESTADOS_PRESTAMO, saldoPrestamo } from "@opai/domain";
 
-export const cuotaSchema = z.object({
+const cuotaSchema = z.object({
   id: z.string(),
   numero: z.number().int(),
   anio: z.number().int(),

@@ -6,7 +6,7 @@ import { etiquetasDeFilas } from "../core/crm/etiquetas-filas";
 import { defineCapability } from "../define";
 import { dondeNegocios, enriquecer, filtros } from "./negocios-lectura";
 
-export const PERMISO_EXPORTAR = "comercial:negocios.exportar";
+const PERMISO_EXPORTAR = "comercial:negocios.exportar";
 const MIME_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const LIMITE_MAXIMO = 5000;
 
