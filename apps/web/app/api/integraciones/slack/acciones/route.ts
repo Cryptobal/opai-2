@@ -1,18 +1,13 @@
 import { crearContexto, executeCapability } from "@opai/capabilities";
 import { resolverInstalacionSlack } from "@opai/db";
-import { appSlackDelEntorno, verificarFirmaSlack } from "@opai/integrations";
 
 import { medidorDiferido } from "@/lib/medidor";
-import { ipDe, permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
-import { MAX_CUERPO_SLACK } from "@/lib/slack-eventos";
 import { contextoDeVinculado } from "@/lib/slack-acciones";
 import { ACCIONES_SLACK, leerClicSlack } from "@/lib/slack-clic";
+import { cuerpoFirmadoSlack, listo } from "@/lib/slack-firma";
 
 asegurarRegistro();
-
-const listo = () => new Response(null, { status: 200 });
-const demasiadas = () => new Response(null, { status: 429, headers: { "Retry-After": "60" } });
 
 const SIN_VINCULO =
   "Tu usuario de Slack no está vinculado a OPAI, así que no se hizo nada. Pide a un administrador que revise Configuración › Integraciones › Slack.";
@@ -27,18 +22,8 @@ const RESPONDER =
  * no tiene permiso le llega un aviso efímero y no se ejecuta nada.
  */
 export async function POST(req: Request): Promise<Response> {
-  if (!(await permitir(`slack-acciones-ip:${ipDe(req)}`, 300, 60_000))) return demasiadas();
-  const app = appSlackDelEntorno();
-  if (!app) return new Response(null, { status: 401 });
-  if (Number(req.headers.get("content-length") ?? 0) > MAX_CUERPO_SLACK)
-    return new Response(null, { status: 413 });
-  const cuerpo = await req.text();
-  if (cuerpo.length > MAX_CUERPO_SLACK) return new Response(null, { status: 413 });
-  const firmada = verificarFirmaSlack(app.signingSecret, cuerpo, {
-    timestamp: req.headers.get("x-slack-request-timestamp"),
-    firma: req.headers.get("x-slack-signature"),
-  });
-  if (!firmada) return new Response(null, { status: 401 });
+  const cuerpo = await cuerpoFirmadoSlack(req, "slack-acciones-ip");
+  if (cuerpo instanceof Response) return cuerpo;
 
   const clic = leerClicSlack(cuerpo);
   if (!clic) return listo();

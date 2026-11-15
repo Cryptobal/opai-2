@@ -4,11 +4,11 @@ import { type BloqueSlack, escaparSlack } from "@opai/integrations";
 
 import type { TipoAviso } from "./registrar";
 
-export const ACCION_TOMAR = "opai.aviso.tomar";
-export const ACCION_CERRAR = "opai.aviso.cerrar";
-export const ACCION_REFUERZO = "opai.aviso.refuerzo";
-export const ACCION_RESPONDER = "opai.aviso.responder";
-export const ACCION_VER = "opai.aviso.ver";
+const ACCION_TOMAR = "opai.aviso.tomar";
+const ACCION_CERRAR = "opai.aviso.cerrar";
+const ACCION_REFUERZO = "opai.aviso.refuerzo";
+const ACCION_RESPONDER = "opai.aviso.responder";
+const ACCION_VER = "opai.aviso.ver";
 
 const ICONO: Record<TipoAviso, string> = {
   atraso: ":hourglass_flowing_sand:",

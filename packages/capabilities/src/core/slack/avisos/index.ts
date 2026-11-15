@@ -26,11 +26,3 @@ export const consumidoresAvisosSlack = [
   consumidorSlackIncidentes,
   consumidorSlackPanico,
 ];
-export { registrarAvisoSlack, TIPOS_AVISO, type TipoAviso } from "./registrar";
-export {
-  ACCION_CERRAR,
-  ACCION_REFUERZO,
-  ACCION_RESPONDER,
-  ACCION_TOMAR,
-  bloquesAviso,
-} from "./bloques";

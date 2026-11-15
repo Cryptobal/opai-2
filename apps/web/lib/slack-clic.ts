@@ -7,7 +7,7 @@ export const ACCIONES_SLACK = {
   "opai.aviso.refuerzo": "core.avisos_terreno.pedir_refuerzo",
   "opai.aviso.responder": null,
 } as const;
-export type AccionSlack = keyof typeof ACCIONES_SLACK;
+type AccionSlack = keyof typeof ACCIONES_SLACK;
 
 const payloadSchema = z.object({
   type: z.literal("block_actions"),
