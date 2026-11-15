@@ -1,4 +1,5 @@
-import { type AccesoRuta, PERMISOS_CORE } from "@opai/domain";
+import { type AccesoRuta } from "@opai/domain/novedades";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import { listarModulos } from "../../module";
 
