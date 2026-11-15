@@ -35,10 +35,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
-| cliente | `/cliente/accesos/invitacion` | `acceso.portal_prerregistros.invitacion` | `acceso_portal_prerregistros_invitacion` | existe |
 | cliente | `/cliente/accesos` | `acceso.portal_listas.listar` | `acceso_portal_listas_listar` | existe |
-| cliente | `/cliente/accesos` | `acceso.portal_prerregistros.listar` | `acceso_portal_prerregistros_listar` | existe |
 | cliente | `/cliente/accesos` | `acceso.portal_registros.listar` | `acceso_portal_registros_listar` | existe |
+| cliente | `/cliente/accesos` | `acceso.portal_visitas.listar` | `acceso_portal_visitas_listar` | existe |
 | cliente | `/cliente/accesos` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
 | cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
@@ -180,7 +179,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.salida` | `acceso_registros_salida` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
-| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.portal_prerregistros.crear` | `acceso_portal_prerregistros_crear` | existe |
+| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.portal_visitas.crear` | `acceso_portal_visitas_crear` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.cancelar` | `acceso_prerregistros_cancelar` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.crear` | `acceso_prerregistros_crear` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.get` | `acceso_prerregistros_get` | existe |
@@ -1141,7 +1140,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
-- `acceso.portal_prerregistros.cancelar`
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
 - `asistencia.correcciones.listar`

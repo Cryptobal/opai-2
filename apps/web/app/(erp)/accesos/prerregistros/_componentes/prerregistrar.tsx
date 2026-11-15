@@ -15,19 +15,14 @@ import { rango } from "./etiquetas";
 type Portal = "erp" | "cliente";
 
 type Props = {
-  /** El Portal Cliente prerregistra con sus capacidades (CAR-539) y abre la invitación en su propia ruta. */
+  /** El Portal Cliente prerregistra con sus capacidades (CAR-539); ahí el guardia reconoce al visitante por su documento. */
   portal: Portal;
   instalaciones: { id: string; nombre: string }[];
   instalacionId?: string;
   hoy: string;
 };
 
-/** Éxito: un enlace a la invitación de cada visitante (primer día) y «Prerregistrar otra». */
-const invitacion = (portal: Portal, p: Prerregistro, visitante: string) =>
-  portal === "cliente"
-    ? `/cliente/accesos/invitacion?visitante=${visitante}&dia=${p.desde}`
-    : `/accesos/prerregistros/${p.id}/invitacion?visitante=${visitante}&dia=${p.desde}`;
-
+/** Éxito: en el ERP, un enlace a la invitación de cada visitante (primer día); y «Prerregistrar otra». */
 function Listo({ p, otra, portal }: { p: Prerregistro; otra: () => void; portal: Portal }) {
   return (
     <div className="flex flex-col gap-4">
@@ -40,9 +35,14 @@ function Listo({ p, otra, portal }: { p: Prerregistro; otra: () => void; portal:
         {p.visitantes.map((v) => (
           <li key={v.id} className="flex items-center justify-between gap-3">
             <span className="t-body truncate">{v.nombre}</span>
-            <EnlaceBoton variante="secondary" href={invitacion(portal, p, v.id)}>
-              Ver invitación
-            </EnlaceBoton>
+            {portal === "erp" ? (
+              <EnlaceBoton
+                variante="secondary"
+                href={`/accesos/prerregistros/${p.id}/invitacion?visitante=${v.id}&dia=${p.desde}`}
+              >
+                Ver invitación
+              </EnlaceBoton>
+            ) : null}
           </li>
         ))}
       </ul>
@@ -76,7 +76,7 @@ export function Prerregistrar({ portal, instalaciones, instalacionId, hoy }: Pro
 
   async function guardar() {
     const r = await (portal === "cliente"
-      ? ejecutar<Prerregistro>("acceso.portal_prerregistros.crear", entradaPrerregistro(b))
+      ? ejecutar<Prerregistro>("acceso.portal_visitas.crear", entradaPrerregistro(b))
       : ejecutar<Prerregistro>("acceso.prerregistros.crear", entradaPrerregistro(b)));
     if (!r) return;
     avisar.exito("Visita prerregistrada");

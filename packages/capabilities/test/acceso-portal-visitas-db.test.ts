@@ -35,7 +35,7 @@ describe.skipIf(!urlPropietario)(
       x = await entornoPortalAccesos();
       propio = await x.ok<Prerregistro>(
         x.contacto("X"),
-        "acceso.portal_prerregistros.crear",
+        "acceso.portal_visitas.crear",
         visita(x.inst.X1),
       );
       deEmpresa = await x.ok<Prerregistro>(
@@ -54,7 +54,7 @@ describe.skipIf(!urlPropietario)(
       const fila = await x.e.admin.prerregistro.findUniqueOrThrow({ where: { id: propio.id } });
       expect(fila.creadoPor).toBe(x.usuarios.X);
       const a = await x.e.admin.auditEvent.findMany({
-        where: { capability: "acceso.portal_prerregistros.crear", actorId: x.usuarios.X },
+        where: { capability: "acceso.portal_visitas.crear", actorId: x.usuarios.X },
       });
       expect(a.length).toBe(1);
       expect(JSON.stringify(a)).not.toContain("11.111.111");
@@ -63,59 +63,40 @@ describe.skipIf(!urlPropietario)(
     it("otra instalación de su cuenta, de otra cuenta o de otra empresa: NOT_FOUND sin escribir", async () => {
       const antes = await x.e.admin.prerregistro.count();
       for (const i of [x.inst.X2, x.inst.Y, x.inst.B]) {
-        expect(
-          code(await x.run(x.contacto("X"), "acceso.portal_prerregistros.crear", visita(i))),
-        ).toBe("NOT_FOUND");
+        expect(code(await x.run(x.contacto("X"), "acceso.portal_visitas.crear", visita(i)))).toBe(
+          "NOT_FOUND",
+        );
       }
       expect(await x.e.admin.prerregistro.count()).toBe(antes);
     });
 
     it("lista solo las visitas de sus instalaciones; otra cuenta y otra empresa no las ven", async () => {
-      const l = await x.ok<Pagina>(x.contacto("X"), "acceso.portal_prerregistros.listar", {});
+      const l = await x.ok<Pagina>(x.contacto("X"), "acceso.portal_visitas.listar", {});
       expect(l.items.map((p) => p.id).sort()).toEqual([propio.id, deEmpresa.id].sort());
       expect(
-        (await x.ok<Pagina>(x.contacto("Y"), "acceso.portal_prerregistros.listar", {})).items,
+        (await x.ok<Pagina>(x.contacto("Y"), "acceso.portal_visitas.listar", {})).items,
       ).toEqual([]);
       expect(
-        (await x.ok<Pagina>(x.contacto("B"), "acceso.portal_prerregistros.listar", {})).items,
+        (await x.ok<Pagina>(x.contacto("B"), "acceso.portal_visitas.listar", {})).items,
       ).toEqual([]);
     });
 
-    it("la invitación y la cancelación son solo de lo que creó él", async () => {
-      const dia = hoy;
-      const inv = { visitanteId: propio.visitantes[0]?.id ?? "", dia };
-      expect(
-        code(await x.run(x.contacto("X"), "acceso.portal_prerregistros.invitacion", inv)),
-      ).toBe("ok");
-      const ajena = { visitanteId: deEmpresa.visitantes[0]?.id ?? "", dia };
-      expect(
-        code(await x.run(x.contacto("X"), "acceso.portal_prerregistros.invitacion", ajena)),
-      ).toBe("NOT_FOUND");
-      expect(
-        code(await x.run(x.contacto("Y"), "acceso.portal_prerregistros.invitacion", inv)),
-      ).toBe("NOT_FOUND");
-      expect(
-        code(
-          await x.run(x.contacto("X"), "acceso.portal_prerregistros.cancelar", {
-            id: deEmpresa.id,
-          }),
-        ),
-      ).toBe("FORBIDDEN");
-      expect(
-        code(
-          await x.run(x.contacto("B"), "acceso.portal_prerregistros.cancelar", { id: propio.id }),
-        ),
-      ).toBe("NOT_FOUND");
-      await x.ok(x.contacto("X"), "acceso.portal_prerregistros.cancelar", { id: propio.id });
-      const fila = await x.e.admin.prerregistro.findUniqueOrThrow({ where: { id: propio.id } });
-      expect(fila.canceladoEn).not.toBeNull();
+    it("el contacto no usa las capacidades del ERP: invitación y cancelación FORBIDDEN", async () => {
+      const inv = { visitanteId: propio.visitantes[0]?.id ?? "", dia: hoy };
+      expect(code(await x.run(x.contacto("X"), "acceso.prerregistros.invitacion", inv))).toBe(
+        "FORBIDDEN",
+      );
+      const cancelar = await x.run(x.contacto("X"), "acceso.prerregistros.cancelar", {
+        id: propio.id,
+      });
+      expect(code(cancelar)).toBe("FORBIDDEN");
     });
 
     it("sin la sección Accesos en su portal, FORBIDDEN", async () => {
       await x.e.admin.configPortalCuenta.create({
         data: { tenantId: x.t.A, cuentaId: x.cuentas.Y, seccionesVisibles: ["cobertura"] },
       });
-      const r = await x.run(x.contacto("Y"), "acceso.portal_prerregistros.crear", visita(x.inst.Y));
+      const r = await x.run(x.contacto("Y"), "acceso.portal_visitas.crear", visita(x.inst.Y));
       expect(code(r)).toBe("FORBIDDEN");
     });
   },

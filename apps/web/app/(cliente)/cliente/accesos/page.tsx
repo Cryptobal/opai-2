@@ -54,7 +54,7 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
         }
         const filtro = { ...(elegida ? { instalacionId: elegida } : {}), ...(cursor ? { cursor } : {}) };
         if (vista === "visitas") {
-          const v = await ejecutarComoUsuario<Visitas>("cliente", "acceso.portal_prerregistros.listar", filtro);
+          const v = await ejecutarComoUsuario<Visitas>("cliente", "acceso.portal_visitas.listar", filtro);
           const visitas = exigirDatos(v);
           return { items: [], siguiente: null, instalaciones, instalacion: elegida, vista, listas: null, visitas };
         }

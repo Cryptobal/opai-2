@@ -11,4 +11,4 @@ ruta: /cliente/accesos
 
 En **Accesos** del Portal Cliente aparece la pestaña **Visitas**. Ahí ves las visitas esperadas en tus instalaciones y, con **Prerregistrar**, avisas quién viene, qué días y a qué hora.
 
-Cada visitante recibe una **invitación con código QR** por día, que puedes abrir, imprimir o enviar. El guardia lo verá como autorizado cuando llegue.
+El guardia verá a cada visitante como autorizado cuando llegue y lo reconocerá por su RUT o documento.
