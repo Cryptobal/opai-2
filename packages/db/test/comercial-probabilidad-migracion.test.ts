@@ -80,7 +80,7 @@ describe.skipIf(!urlPropietario)("migración probabilidad negocios (CAR-559)", (
             )
           ).rows.map((r) => [r.id, r.probabilidad]),
         );
-      let probs = await lee();
+      const probs = await lee();
       expect(probs).toEqual({
         [stale]: 50,
         [manual]: 15,
