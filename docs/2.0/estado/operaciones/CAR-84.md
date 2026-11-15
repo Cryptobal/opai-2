@@ -18,7 +18,7 @@
 - `tickets.tickets.crear` acepta `instalacionId` (de esta empresa, no archivada y dentro del alcance de quien crea; si no, NOT_FOUND); `listar` filtra por instalación; la ficha y la bandeja devuelven `instalacionId`.
 - Prueba `tickets-instalacion-db.test.ts`: filtro, otra empresa, alcance del supervisor y trigger de la base.
 
-## Qué entra (parte 3: instalación en pantalla, apilado sobre el PR de la parte 2)
+## Qué entra (parte 3: instalación en pantalla, #868 apilado sobre #821)
 
 - «Nuevo ticket» trae el campo opcional «Instalación» (buscador con las instalaciones activas del alcance de quien crea, vía `core.instalaciones.list`); si no ve ninguna, el campo no aparece.
 - La ficha muestra la instalación, leída con `core.instalaciones.get`: si quien mira no la tiene en su alcance, no se muestra el nombre.
