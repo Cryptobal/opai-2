@@ -28,7 +28,7 @@ nombre y cantidad). Para usar una: 1) pide los nombres con ${LISTAR} (hasta ${MA
 esquema es fácil equivocar los argumentos.`;
 
 /** Índice corto por módulo; los nombres de herramientas se piden con ${LISTAR}. */
-export function textoIndiceModulos(porModulo: Map<string, number>): string {
+function textoIndiceModulos(porModulo: Map<string, number>): string {
   return [...porModulo.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([modulo, n]) => `${modulo} (${n})`)
