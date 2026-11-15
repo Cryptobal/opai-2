@@ -18,6 +18,8 @@ export async function nombresInstalacion(
 
 export const PERMISO_READ = "acceso:read";
 export const PERMISO_LISTAS = "acceso:listas.manage";
+/** Registrar salidas desde el ERP, anular registros y cerrar en bloque (CAR-477). */
+export const PERMISO_REGISTROS = "acceso:registros.manage";
 /** Ver la patente completa de un registro (decisión de Carlos, 7-nov-2026): acceso restringido. */
 export const PERMISO_PATENTE = "acceso:datos.ver_patente";
 
