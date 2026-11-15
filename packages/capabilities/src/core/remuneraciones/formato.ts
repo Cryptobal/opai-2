@@ -25,6 +25,23 @@ export function ufEscaladaDisplay(escalada: number): string {
   return `${uf.toFixed(2).replace(".", ",")} UF`;
 }
 
+/** Cantidad en UF_ESCALA (UF o UTM) con coma decimal y sin ceros sobrantes: 1_352_000 → «135,2». */
+export function escaladaDisplay(escalada: number): string {
+  return (escalada / UF_ESCALA).toLocaleString("es-CL", { maximumFractionDigits: 3 });
+}
+
+type Tramo = { hastaUtm: number | null; tasa: number; rebajaUtm: number };
+
+function resumenImpuesto(tramos: Tramo[]): string {
+  const exento = tramos.find((t) => t.tasa === 0 && t.hastaUtm != null);
+  const max = Math.max(...tramos.map((t) => t.tasa));
+  return [
+    `${tramos.length} tramos`,
+    ...(exento?.hastaUtm != null ? [`exento hasta ${escaladaDisplay(exento.hastaUtm)} UTM`] : []),
+    `máx. ${pctDisplay(max)}`,
+  ].join(" · ");
+}
+
 export function ufCentavosDisplay(centavos: number): string {
   const pesos = centavos / 100;
   return `$ ${pesos.toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -59,10 +76,13 @@ export function resumenIndicador(clave: string, valor: unknown): string {
       const a = valor as { obligatoria: number; salud: number };
       return `Obligatoria ${pctDisplay(a.obligatoria)} · Salud ${pctDisplay(a.salud)}`;
     }
-    case "topes":
+    case "topes": {
+      const t = valor as { pensionSaludUf: number; cesantiaUf: number };
+      return `Pensión y salud ${escaladaDisplay(t.pensionSaludUf)} UF · Cesantía ${escaladaDisplay(t.cesantiaUf)} UF`;
+    }
     case "impuesto":
-      return "Ver detalle";
+      return Array.isArray(valor) && valor.length ? resumenImpuesto(valor as Tramo[]) : "Sin tramos";
     default:
-      return typeof valor === "number" ? String(valor) : "Ver detalle";
+      return typeof valor === "number" ? String(valor) : "—";
   }
 }

@@ -83,6 +83,8 @@ export function PlanillaTabla({
                   <td key={c.id} className="border-b border-border p-0.5">
                     <button
                       type="button"
+                      aria-label={`${f.etiqueta}, ${c.etiqueta}: ${texto}${valor?.detalle ? ` (${valor.detalle})` : ""}. Editar`}
+                      title="Editar"
                       onClick={() => {
                         onCelda?.(f.id, c.id);
                         onSeleccion({
@@ -92,9 +94,12 @@ export function PlanillaTabla({
                         });
                       }}
                       className={cn(
-                        "flex w-full items-center justify-center rounded-sm px-1",
+                        "flex w-full cursor-pointer items-center justify-center rounded-sm px-1",
                         claseCeldaNumero,
                         TONO[tono],
+                        // Se nota qué celda se edita (CAR-456): borde al pasar el mouse y foco visible.
+                        "transition-shadow duration-150 hover:shadow-[inset_0_0_0_1px_var(--ds-accent)] motion-reduce:transition-none",
+                        "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
                       )}
                     >
                       {texto}

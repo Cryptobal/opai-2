@@ -33,7 +33,7 @@ export const vistaEtapa = (e: FilaEtapa): z.input<typeof etapaSchema> => ({
 /** Máximo de etapas de un embudo (el orden se valida entre 0 y 99). */
 export const MAX_ETAPAS = 30;
 /** Desplazamiento de la primera fase: deja libres los órdenes finales sin chocar con el único. */
-export const TEMPORAL = 1000;
+const TEMPORAL = 1000;
 
 /**
  * Renumera las etapas del embudo en dos fases dentro de la transacción: el índice único

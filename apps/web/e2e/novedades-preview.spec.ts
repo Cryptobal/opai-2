@@ -70,7 +70,7 @@ test.describe("@preview novedades y bandeja", () => {
     await page.goto("/supervisor/novedades");
     const lista = page.getByText(RESUMEN).first();
     if (await lista.waitFor({ timeout: 20_000 }).then(() => true, () => false)) {
-      const avatar = page.getByRole("button", { name: /^Menú de usuario/ }).filter({ visible: true }).first();
+      const avatar = page.getByRole("button", { name: /^(Menú de usuario|Yo)/ }).filter({ visible: true }).first();
       if ((await page.getByText(RESUMEN).count()) > 0 && (await pendientes(page)) > 0)
         await expect(avatar).toHaveAccessibleName(/hay novedades sin leer/, { timeout: 15_000 });
       await capturar(page, info, "novedades-avatar-sin-bandeja");

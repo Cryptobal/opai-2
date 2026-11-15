@@ -34,7 +34,7 @@ export type DatosEmpresa = {
   timezone: string;
 };
 
-export const CLAVES_TEXTO: (keyof Textos)[] = [
+const CLAVES_TEXTO: (keyof Textos)[] = [
   "razonSocial",
   "rut",
   "giro",
