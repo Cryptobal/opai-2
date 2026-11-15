@@ -58,7 +58,7 @@ export default function IndicadoresPropios() {
           state={estadoPantalla(r)}
           titulo="Desempeño"
           filtros={<PestanasDesempeno activa="indicadores" />}
-          accionPrincipal={edita ? <EditarPropio propio={null} hechos={hechos} /> : undefined}
+          accionPrincipal={edita && r.ok ? <EditarPropio propio={null} hechos={hechos} /> : undefined}
           items={r.ok ? r.data : []}
           clave={(p) => p.id}
           {...(edita

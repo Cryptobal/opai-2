@@ -62,7 +62,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `agente.historial.list` | `agente_historial_list` | existe |
 | compartido | `app/_components` | `agente.modelos.list` | `agente_modelos_list` | existe |
 | compartido | `app/_components` | `agente.plan.confirmar` | — | excepción |
-| compartido | `app/_components` | `agente.turno.preparar` | — | excepción |
 | compartido | `app/_components` | `asistencia.marcas.registrar` | — | excepción |
 | compartido | `app/_components` | `asistencia.rostro.consentir` | — | excepción |
 | compartido | `app/_components` | `asistencia.rostro.enrolar` | — | excepción |
@@ -430,6 +429,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.postergar_iva` | `finanzas_flujo_postergar_iva` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.crear` | `finanzas_filas_crear` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.actualizar` | `finanzas_recurrentes_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.cambiar_desde` | `finanzas_recurrentes_cambiar_desde` | existe |
@@ -828,6 +828,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_get` | `platform_tenants_perfil_get` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_set` | `platform_tenants_perfil_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.set_estado` | `platform_tenants_set_estado` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.set_modulos_nuevos` | `platform_tenants_set_modulos_nuevos` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.update` | `platform_tenants_update` | existe |
 | platform | `/platform/tenants/[id]` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform/tenants/nuevo` | `platform.tenants.create` | `platform_tenants_create` | existe |
@@ -847,11 +848,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/notificaciones` | `portal_trabajador.preferencias_notificacion.obtener` | `portal_trabajador_preferencias_notificacion_obtener` | existe |
 | trabajador | `/trabajador/privacidad` | `portal_trabajador.privacidad.obtener` | `portal_trabajador_privacidad_obtener` | existe |
 | trabajador | `/trabajador` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
+| trabajador | `/trabajador` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 
 ## Entradas de servidor sin id literal (acciones y rutas)
 
@@ -1049,7 +1052,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | Capacidad | Camino humano | API v1 con sesión | MCP |
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
-| `agente.turno.preparar` | `/api/agente`, `app/_components` | no | reservada a personas |
+| `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
 | `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
@@ -1256,6 +1259,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
 - `pauta.publicaciones.listar`
+- `pauta.turnos_extra.aprobar`
+- `pauta.turnos_extra.listar`
+- `pauta.turnos_extra.monto_fijar`
+- `pauta.turnos_extra.rechazar`
+- `pauta.turnos_extra.registrar`
 - `platform.ajustes.set`
 - `platform.eventos.list`
 - `platform.precios.set`
