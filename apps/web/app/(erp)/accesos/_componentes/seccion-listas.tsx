@@ -31,6 +31,7 @@ export async function SeccionListas({
         tipo={tipo}
         entradas={r.ok ? r.data : []}
         href={(t) => `${base}?sub=listas&lista=${t}`}
+        portal="erp"
       />
     </div>
   );

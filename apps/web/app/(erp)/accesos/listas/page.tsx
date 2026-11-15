@@ -48,6 +48,7 @@ export default function ListasAcceso({ searchParams }: { searchParams: SearchPar
                 tipo={d.tipo}
                 entradas={d.r.ok ? d.r.data : []}
                 href={href}
+                portal="erp"
               />
             ) : (
               <Empty

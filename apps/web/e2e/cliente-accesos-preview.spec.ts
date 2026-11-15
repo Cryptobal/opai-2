@@ -28,6 +28,12 @@ test.describe("@preview acceso: Accesos en el Portal Cliente", () => {
     await page.getByRole("link", { name: "Registros", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Registros" }).first()).toBeVisible({ timeout: 30_000 });
     await capturar(page, info, "cliente-accesos-registros");
+    // CAR-538: la pestaña Listas muestra las listas o explica que la empresa no la habilitó.
+    await page.getByRole("link", { name: "Listas", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: /^(Autorizadas|Listas no habilitadas)$/ }).first(),
+    ).toBeVisible({ timeout: 30_000 });
+    await capturar(page, info, "cliente-accesos-listas");
     expect(errores).toEqual([]);
   });
 });
