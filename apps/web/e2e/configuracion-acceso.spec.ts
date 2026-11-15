@@ -20,7 +20,8 @@ test.describe("configuración · acceso", () => {
     await page.goto("/configuracion/api-keys");
     // La redirección llega tras el streaming de una ruta que compila en frío.
     await expect(page).toHaveURL(/\/configuracion\/agentes$/, { timeout: 45_000 });
-    await expect(page.getByRole("link", { name: "Conectar tu IA", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Conectar tu IA/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Eventos salientes/ }).first()).toBeVisible();
     await captura(page, "config-agentes", p);
     await page.goto("/configuracion/agentes/conectar");
     await expect(page.getByText(/\/api\/mcp/).first()).toBeVisible();
@@ -53,6 +54,7 @@ test.describe("configuración · acceso", () => {
     await page.getByRole("button", { name: "Revocar key" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Revocar" }).click();
     await page.waitForURL(/\/configuracion\/agentes$/, { timeout: 60_000 });
+    await page.goto("/configuracion/agentes?estado=revocadas");
     await expect(page.getByText("Revocada").first()).toBeVisible();
   });
 
