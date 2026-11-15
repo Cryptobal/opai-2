@@ -6,6 +6,7 @@ titulo: Grupos o equipos de trabajo
 car: CAR-251
 permiso: core:users.read
 ruta: /configuracion/usuarios/grupos
+portales: erp
 ---
 En **Configuración › Usuarios y permisos** hay una pestaña nueva, **Grupos**, para reunir a las personas de tu empresa que trabajan juntas, por ejemplo quienes revisan cotizaciones o quienes autorizan facturas.
 

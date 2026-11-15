@@ -6,6 +6,7 @@ titulo: Entra con Face ID o huella, y el segundo factor pasa a ser opcional
 destacada: true
 car: CAR-286
 ruta: /mi-cuenta
+portales: erp
 ---
 
 Ahora puedes **entrar con una passkey**: Face ID, huella o una llave de seguridad, sin escribir la contraseña ni códigos.

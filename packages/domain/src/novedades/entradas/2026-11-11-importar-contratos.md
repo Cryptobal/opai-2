@@ -6,6 +6,7 @@ titulo: Importar los contratos vigentes de tu gente
 car: CAR-282
 permiso: core:vinculos.manage
 ruta: /configuracion/importar
+portales: erp
 ---
 En **Configuración › Importar datos**, la lista «Qué importar» ahora incluye **Contratos vigentes**. Subes una planilla con una fila por contrato (RUT, cargo, instalación, tipo, fechas, horas y distribución de la jornada) y OPAI lo deja cargado en la ficha de cada persona.
 

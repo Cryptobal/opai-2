@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Resumen del flujo de caja por mes y escenario de cobros atrasados
 car: CAR-378
 ruta: /finanzas/flujo/resumen
+portales: erp
 ---
 En **Finanzas › Flujo de caja** hay un botón nuevo, **Resumen por mes**. Abre una vista que parte del saldo del banco de hoy y muestra:
 

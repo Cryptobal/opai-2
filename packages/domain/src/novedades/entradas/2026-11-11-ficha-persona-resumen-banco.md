@@ -7,6 +7,12 @@ destacada: false
 car: CAR-124
 permiso: core:personas.read
 ruta: /personas
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 **Qué verás distinto en pantalla:**
 

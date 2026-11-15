@@ -6,6 +6,7 @@ titulo: Compras se sincroniza con el SII y la cesión muestra el factor
 car: CAR-273
 permiso: finanzas:compras.manage
 ruta: /finanzas/compras
+portales: erp
 ---
 En **Finanzas › Compras** hay un botón nuevo, **Sincronizar con el SII**. Trae las facturas y notas que el SII registra como recibidas en el mes y agrega al libro las que falten. Repetirlo no duplica nada.
 

@@ -5,6 +5,7 @@ modulo: core
 titulo: Diseño Hilo: un solo botón principal y avisos sin azul
 car: CAR-360
 ruta: /mi-cuenta/preferencias
+portales: erp
 ---
 Si usas el diseño **Hilo**:
 

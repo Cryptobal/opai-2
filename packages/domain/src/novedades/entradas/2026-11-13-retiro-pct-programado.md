@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Los retiros en % de ventas se estiman con lo que ya está programado
 car: CAR-374
 ruta: /finanzas/flujo
+portales: erp
 ---
 En el **flujo de caja**, los gastos fijos que son un porcentaje de las ventas (por ejemplo, el retiro de un socio) ahora se calculan mejor en los meses que todavía no cierran:
 

@@ -6,6 +6,7 @@ titulo: Nota de débito con cargo sobre una factura
 car: CAR-234
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas/nuevo
+portales: erp
 ---
 En **Finanzas › Emitir DTE**, la **nota de débito (56)** ahora puede **agregar un cargo a una factura ya emitida**, por ejemplo intereses o una diferencia de precio. Eliges la factura, escribes el motivo, el detalle y el monto, y la revisas antes de guardarla como borrador.
 

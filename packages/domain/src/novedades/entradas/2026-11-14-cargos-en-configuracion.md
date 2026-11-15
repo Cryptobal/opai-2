@@ -5,5 +5,11 @@ modulo: core
 titulo: Cargos y sueldos se queda dentro de Configuración
 car: CAR-319
 ruta: /cargos
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Al abrir **Cargos y sueldos** desde **Configuración › Operación**, la pantalla muestra arriba el camino **Configuración › Operación**, igual que las demás entradas de Configuración. En el teléfono, el botón para volver te lleva de nuevo a **Operación**.

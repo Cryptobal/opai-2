@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: En el flujo de caja se nota qué celda se puede editar
 car: CAR-456
 ruta: /finanzas/flujo
+portales: erp
 ---
 En el **Flujo de caja**, las celdas que puedes editar se marcan con un borde al pasar el mouse, y el lector de pantalla las anuncia como «Editar».
 

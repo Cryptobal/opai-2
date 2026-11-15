@@ -5,6 +5,7 @@ modulo: core
 titulo: Prueba el diseño nuevo de OPAI
 car: CAR-335
 ruta: /mi-cuenta/preferencias
+portales: erp
 ---
 En **Preferencias › Diseño** hay una opción nueva, **Nuevo (vista previa)**, y en el menú de tu usuario el atajo cambió a **Probar el diseño nuevo**.
 

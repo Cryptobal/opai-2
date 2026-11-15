@@ -6,6 +6,7 @@ titulo: Los anexos de contrato se aprueban con tu texto legal
 car: CAR-58
 permiso: core:anexos.manage
 ruta: /documentos/plantillas
+portales: erp
 ---
 Cuando publicas una plantilla de tipo **Anexo** en Documentos → Plantillas, los anexos de contrato ya se pueden aprobar: el documento final sale como **PDF** con tu texto, los datos de la persona y la marca de tu empresa, y queda guardado en sus Documentos.
 

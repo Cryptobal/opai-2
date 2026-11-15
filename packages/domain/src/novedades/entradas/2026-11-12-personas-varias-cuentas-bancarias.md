@@ -6,6 +6,7 @@ titulo: Una persona puede tener varias cuentas bancarias
 car: CAR-275
 permiso: personas:pago.manage
 ruta: /personas
+portales: erp
 ---
 En la ficha de una persona, en **Laboral › Pago y bancos**, ahora puedes registrar más de una cuenta bancaria. La lista muestra todas las cuentas y marca con **Por defecto** la que usa la nómina de pago.
 

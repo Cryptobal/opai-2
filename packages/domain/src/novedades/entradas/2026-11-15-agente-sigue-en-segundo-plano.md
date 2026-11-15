@@ -6,6 +6,7 @@ titulo: El agente sigue respondiendo si sales del chat
 car: CAR-524
 permiso: agente:usar
 ruta: /
+portales: erp
 ---
 Si en el celular sales a otra pestaña o app mientras el **agente** está respondiendo, la respuesta **ya no se corta**. Al volver al chat, OPAI retoma la conversación y muestra la respuesta completa.
 

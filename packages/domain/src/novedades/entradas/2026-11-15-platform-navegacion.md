@@ -5,6 +5,12 @@ modulo: core
 titulo: Menú de Plataforma más claro
 car: CAR-125
 ruta: /platform/ajustes/credenciales
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En la consola de **Plataforma** el menú ya no repite etiquetas ambiguas:
 

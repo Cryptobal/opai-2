@@ -5,6 +5,12 @@ modulo: finanzas
 titulo: Compras abre cada documento al lado de la lista
 car: CAR-256
 ruta: /finanzas/compras
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En **Compras › Libro de compras**, al tocar un documento su detalle se abre a la derecha (proveedor, montos, fechas, plazo para aceptar o reclamar y centro de costo) sin salir de la lista, igual que en Ventas. Los filtros se mantienen al volver.
 

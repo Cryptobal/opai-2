@@ -5,6 +5,7 @@ modulo: core
 titulo: Las listas de los ajustes se pueden ver y editar
 car: CAR-267
 ruta: /configuracion
+portales: erp
 ---
 En **Configuración › Módulos**, los ajustes que guardan una lista (por ejemplo **Factores para ceder facturas** o las **plantillas de glosa** de Finanzas) aparecían como un campo vacío y no se podían guardar desde ahí.
 

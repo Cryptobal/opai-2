@@ -6,6 +6,7 @@ titulo: Más datos en la ficha de la persona
 car: CAR-277
 permiso: core:personas.laboral.read
 ruta: /personas
+portales: erp
 ---
 En la ficha de una persona, en **Laboral**, ahora puedes registrar:
 

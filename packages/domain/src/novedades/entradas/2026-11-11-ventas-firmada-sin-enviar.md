@@ -6,6 +6,7 @@ titulo: Ventas distingue firmado de enviado al SII, filtra por tipo y no cobra l
 car: CAR-270
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas
+portales: erp
 ---
 En **Finanzas › Ventas**, un documento que ya tiene folio y firma pero todavía no se transmite al SII aparece como **«Firmada, sin enviar al SII»**. Antes decía «Enviada al SII» aunque el SII aún no lo había recibido.
 

@@ -6,5 +6,11 @@ titulo: Botones de Compras visibles en el teléfono
 car: CAR-273
 permiso: finanzas:compras.manage
 ruta: /finanzas/compras
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En **Finanzas › Compras**, los tres botones de arriba («Sincronizar con el SII», «Importar RCV» y «Registrar documento») ya no se salen de la pantalla del teléfono: si no caben en una línea, pasan a una segunda.

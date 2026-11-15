@@ -7,6 +7,12 @@ destacada: true
 car: CAR-255
 permiso: finanzas:read
 ruta: /finanzas/ventas
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En **Ventas (DTE)** ya no sales de la lista para ver una factura. El Libro de ventas queda a la izquierda y, al tocar un documento, su detalle se abre a la derecha: datos, líneas, envíos al cliente y las acciones (emitir, **Editar**, **Descartar**, enviar, nota de crédito, cobro).
 

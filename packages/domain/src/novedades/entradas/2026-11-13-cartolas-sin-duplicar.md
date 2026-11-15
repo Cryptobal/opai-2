@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Las cartolas ya no duplican lo que entró por la sincronización
 car: CAR-341
 ruta: /finanzas/bancos/importaciones
+portales: erp
 ---
 Al subir una cartola en **Bancos › Movimientos**, OPAI reconoce los movimientos que ya tenías, aunque hayan entrado por la sincronización con el banco o con otra fecha. En la vista previa salen como duplicados, con el motivo, y no se cargan dos veces. Si la cartola trae otra fecha, queda la fecha de la cartola.
 

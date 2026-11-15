@@ -7,6 +7,7 @@ destacada: true
 car: CAR-279
 permiso: comercial:config.manage
 ruta: /configuracion/integraciones
+portales: erp
 ---
 Ya no hace falta copiar y pegar un archivo para traer los datos de OPAI 1.
 

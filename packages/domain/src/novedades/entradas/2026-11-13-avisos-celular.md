@@ -5,6 +5,12 @@ modulo: portal_trabajador
 titulo: Los avisos de la pauta pueden llegar al celular
 car: CAR-356
 ruta: /trabajador/notificaciones
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En el portal del trabajador, en **Más › Notificaciones**, quien enciende **Aviso en el celular** y guarda recibe los avisos también en el teléfono:
 

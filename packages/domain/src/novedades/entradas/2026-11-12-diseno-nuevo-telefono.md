@@ -5,6 +5,12 @@ modulo: core
 titulo: Diseño nuevo en el teléfono: Inicio, Agente, Menú y Yo
 car: CAR-335
 ruta: /
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Si estás probando el **diseño nuevo** en el teléfono, la barra de abajo cambia a cuatro botones:
 

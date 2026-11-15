@@ -6,6 +6,7 @@ titulo: Antes de emitir, OPAI revisa que el archivo CAF esté sano
 car: CAR-240
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas
+portales: erp
 ---
 Al revisar una emisión, OPAI ahora comprueba que el **CAF** del folio esté íntegro y que corresponda al RUT de tu empresa. Si no, te dice que vuelvas a cargar el archivo CAF en **Finanzas › Folios**, y el documento queda sin emitir y sin usar folio.
 

@@ -6,6 +6,7 @@ titulo: Diseño «Hilo»: Actividad y Agenda con lo que te corresponde
 destacada: false
 car: CAR-331
 ruta: /
+portales: erp
 ---
 
 Si usas el diseño **Hilo**, la columna de la izquierda ahora muestra:

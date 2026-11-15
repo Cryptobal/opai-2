@@ -7,6 +7,7 @@ destacada: true
 car: CAR-279
 permiso: core:tenant.manage
 ruta: /configuracion/importar
+portales: erp
 ---
 En **Configuración › Importar datos** puedes cargar **cuentas, contactos, instalaciones y negocios** desde una planilla, sin escribirlos uno por uno.
 

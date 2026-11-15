@@ -6,6 +6,7 @@ titulo: Ve y desconecta tus apps conectadas
 destacada: false
 car: CAR-247
 ruta: /mi-cuenta
+portales: erp
 ---
 
 En **Mi cuenta**, debajo de la app autenticadora, aparece una sección nueva: **Apps conectadas**. Muestra las apps que entran a esta empresa con tu cuenta, por ejemplo **Claude**, con:

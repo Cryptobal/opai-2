@@ -6,6 +6,7 @@ titulo: Conecta Claude a OPAI con tu propia cuenta
 destacada: false
 car: CAR-247
 ruta: /autorizar
+portales: erp
 ---
 
 Ahora puedes conectar una app de inteligencia artificial, como **Claude**, a OPAI **con tu propia cuenta**, sin pedir una clave de API.

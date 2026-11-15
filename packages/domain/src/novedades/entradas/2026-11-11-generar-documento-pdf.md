@@ -6,6 +6,7 @@ titulo: Genera el PDF de un documento laboral desde la ficha
 car: CAR-127
 permiso: core:documentos.plantillas.manage
 ruta: /personas
+portales: erp
 ---
 En **Generar documento**, cuando la vista previa no tiene datos faltantes, aparece el botón **Generar PDF**. OPAI arma el documento con el nombre y los datos legales de tu empresa, lo guarda en los **Documentos** de la persona y te avisa con un enlace para abrirlo.
 

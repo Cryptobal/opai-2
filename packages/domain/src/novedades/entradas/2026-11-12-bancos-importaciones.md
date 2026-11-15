@@ -6,6 +6,7 @@ titulo: Bancos muestra el saldo de la cuenta y el historial de cartolas, con «D
 car: CAR-341
 permiso: finanzas:bancos.ver
 ruta: /finanzas/bancos/importaciones
+portales: erp
 ---
 En **Finanzas › Bancos** ahora ves el **saldo de hoy** de la cuenta: el último saldo conocido (de la cartola o del banco en línea) más los movimientos posteriores.
 

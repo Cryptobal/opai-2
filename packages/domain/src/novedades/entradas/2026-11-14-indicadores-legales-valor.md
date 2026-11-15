@@ -5,6 +5,7 @@ modulo: nomina
 titulo: Los indicadores legales muestran su valor en la tabla
 car: CAR-318
 ruta: /configuracion/remuneraciones
+portales: erp
 ---
 En **Configuración › Remuneraciones**, la columna **Valor** ahora muestra el valor vigente de todos los indicadores. Los **topes imponibles** se ven en UF (pensión y salud, cesantía) y el **impuesto único** muestra sus tramos, hasta cuánto es exento y la tasa máxima. **Ver detalle** sigue abriendo el desglose completo.
 

@@ -5,6 +5,9 @@ modulo: rondas
 titulo: Cerrar una ronda incompleta ahora pide confirmación
 car: CAR-381
 ruta: /terreno
+portales:
+  - terreno
+  - erp
 ---
 En la app de terreno, si tocas **Cerrar ronda** cuando faltan puntos obligatorios por marcar, la app pregunta antes:
 

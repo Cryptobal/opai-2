@@ -6,6 +6,7 @@ titulo: Rentabilidad por instalación
 car: CAR-174
 permiso: finanzas:read
 ruta: /finanzas/rentabilidad
+portales: erp
 ---
 En **Hoy en Finanzas** hay un informe nuevo: **Rentabilidad por instalación**. Para cada instalación muestra lo que se vendió en el mes (sin IVA, con las notas de crédito restando), el **costo estimado** del personal de sus puestos y el margen que queda, en pesos y en porcentaje. Las que pierden plata aparecen primero.
 

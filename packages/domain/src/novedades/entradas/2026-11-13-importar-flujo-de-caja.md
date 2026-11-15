@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Importa las categorías y los gastos fijos del flujo de caja
 car: CAR-349
 ruta: /configuracion/importar
+portales: erp
 ---
 En **Configuración › Importar datos** hay dos opciones nuevas:
 

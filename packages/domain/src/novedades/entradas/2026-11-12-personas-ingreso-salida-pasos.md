@@ -6,6 +6,7 @@ titulo: Listas de pasos al ingresar y al salir una persona
 car: CAR-355
 permiso: core:vinculos.read
 ruta: /personas
+portales: erp
 ---
 Al crear el contrato de una persona se abre sola su **lista de ingreso** (firmar contrato, afiliaciones, uniforme, PIN de terreno…). Al terminar su último contrato se abre la **lista de salida** (devolución de uniforme, carta de aviso, finiquito…).
 

@@ -5,6 +5,7 @@ modulo: core
 titulo: Filtrar las novedades que no has leído
 car: CAR-245
 ruta: /novedades
+portales: erp
 ---
 En **Novedades** hay un filtro nuevo arriba de la lista: **«Todas»** o **«No leídas»**. La opción «No leídas» muestra cuántas te quedan y deja ver solo esas.
 

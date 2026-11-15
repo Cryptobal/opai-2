@@ -5,6 +5,7 @@ modulo: comercial
 titulo: Fusiona cuentas duplicadas sin perder nada
 car: CAR-27
 ruta: /cuentas
+portales: erp
 ---
 Si un mismo cliente quedó registrado dos veces, abre la cuenta que quieres conservar y elige **⋯ › Fusionar con…**:
 

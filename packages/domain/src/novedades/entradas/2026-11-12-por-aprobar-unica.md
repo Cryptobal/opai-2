@@ -5,6 +5,7 @@ modulo: core
 titulo: Todo lo que tienes que aprobar, en un solo lugar
 car: CAR-253
 ruta: /bandeja
+portales: erp
 ---
 En la **Bandeja**, la sección **Aprobaciones pendientes** ahora junta todo lo que espera tu decisión, venga de donde venga:
 

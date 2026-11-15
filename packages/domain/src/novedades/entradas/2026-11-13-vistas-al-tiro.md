@@ -5,6 +5,12 @@ modulo: core
 titulo: Los avisos y pendientes se actualizan apenas haces algo
 car: CAR-338
 ruta: /
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Cuando reenvías una invitación, apruebas algo, tomas una solicitud o creas un registro:
 

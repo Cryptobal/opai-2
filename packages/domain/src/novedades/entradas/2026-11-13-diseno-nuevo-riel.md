@@ -5,6 +5,12 @@ modulo: core
 titulo: Diseño nuevo: el menú cerrado muestra solo los módulos
 car: CAR-377
 ruta: /
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Si estás probando el **diseño nuevo** y cierras el menú lateral:
 

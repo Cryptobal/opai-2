@@ -5,6 +5,9 @@ modulo: core
 titulo: Una empresa puede recibir los módulos nuevos ya activos
 car: CAR-529
 ruta: /platform
+portales:
+  - platform
+  - erp
 ---
 
 En **Plataforma**, en la pestaña **Módulos** de una empresa, hay un interruptor **Activar módulos nuevos automáticamente**. Si está encendido, cada módulo que se agregue al catálogo queda activo en esa empresa. Los módulos que ya existían no cambian. Por defecto está apagado.

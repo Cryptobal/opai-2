@@ -6,6 +6,7 @@ titulo: Registrar salidas, anular registros y cerrar en bloque en Accesos
 car: CAR-477
 permiso: acceso:registros.manage
 ruta: /accesos?estado=en_sitio
+portales: erp
 ---
 En la ficha de un registro de **Accesos** hay dos botones nuevos para quienes corrigen la portería:
 

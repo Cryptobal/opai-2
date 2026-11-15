@@ -6,6 +6,7 @@ titulo: Listas de acceso y pestaña Accesos en cada instalación
 car: CAR-475
 permiso: acceso:listas.manage
 ruta: /accesos/listas
+portales: erp
 ---
 En **Operaciones › Accesos** hay una sección nueva, **Listas**, para decidir quién puede entrar a cada instalación:
 

@@ -7,6 +7,7 @@ destacada: false
 car: CAR-311
 permiso: asistencia:configurar
 ruta: /configuracion/modulo/asistencia
+portales: erp
 ---
 En **Configuración › Asistencia** hay un ajuste nuevo: **Tolerancia de atraso para Desempeño**, en minutos (por defecto 15).
 

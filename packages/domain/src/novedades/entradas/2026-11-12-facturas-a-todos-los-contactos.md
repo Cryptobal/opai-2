@@ -6,6 +6,7 @@ titulo: Las facturas llegan a todos los contactos de facturación
 car: CAR-320
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas
+portales: erp
 ---
 La factura, la proforma, el estado de pago y el recordatorio de cobro ahora llegan **a todos los contactos de facturación** del cliente como destinatarios principales, hasta 10. Antes solo el primero era destinatario principal y el resto iba en copia.
 

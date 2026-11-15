@@ -6,6 +6,7 @@ titulo: Nuevo diseño «Hilo» para probar
 destacada: false
 car: CAR-278
 ruta: /mi-cuenta/preferencias
+portales: erp
 ---
 
 En **Preferencias** aparece una opción nueva, **Diseño**, con dos valores: **Clásico** (el de siempre) e **Hilo**. También hay un atajo en el menú de tu usuario: **Probar el diseño Hilo**.

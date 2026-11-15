@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Gastos recurrentes del flujo de caja en pantalla
 car: CAR-382
 ruta: /finanzas/flujo/recurrentes
+portales: erp
 ---
 En **Finanzas › Flujo de caja** hay un botón nuevo, **Gastos recurrentes**. Ahí ves todos los gastos fijos que el flujo proyecta solo, como el arriendo, los honorarios o el retiro de cada socio, con su monto, cuándo se pagan y si están activos.
 

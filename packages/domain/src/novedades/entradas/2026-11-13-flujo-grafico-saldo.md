@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Gráfico del saldo en el resumen del flujo de caja
 car: CAR-398
 ruta: /finanzas/flujo/resumen
+portales: erp
 ---
 El **Resumen del flujo** muestra ahora una línea con el saldo al cierre de cada mes o de cada semana, encima de la tabla.
 

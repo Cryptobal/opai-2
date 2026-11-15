@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Bancos — «Reconocer» más ordenado y fácil de cerrar
 car: CAR-443
 ruta: /finanzas/bancos
+portales: erp
 ---
 
 En **Finanzas › Bancos**, el panel para reconocer un movimiento ahora tiene una **X** arriba a la derecha para cerrarlo y volver a la lista, en el computador y en el celular. El botón de abajo dice **Cancelar**.

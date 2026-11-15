@@ -15,8 +15,10 @@ export function useConteoNovedades(
     if (!activo) return;
     let vivo = true;
     const cargar = () =>
-      void ejecutarCapacidad(portal, "core.novedades.list", {}).then((r) => {
-        if (vivo && r.ok) setNoLeidas((r.data as { noLeidas: number }).noLeidas);
+      void ejecutarCapacidad(portal, "core.novedades.list", { portal }).then((r) => {
+        if (!vivo) return;
+        if (r.ok) setNoLeidas((r.data as { noLeidas: number }).noLeidas);
+        else setNoLeidas(0);
       });
     cargar();
     window.addEventListener("opai-novedades", cargar);

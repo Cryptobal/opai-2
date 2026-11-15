@@ -5,6 +5,12 @@ modulo: core
 titulo: Diseño nuevo: Inicio como cola de trabajo
 car: CAR-335
 ruta: /
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Si estás probando el **diseño nuevo**, Inicio cambia:
 

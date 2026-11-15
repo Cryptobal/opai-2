@@ -6,6 +6,7 @@ titulo: Genera contratos de servicio y actas desde Documentos
 car: CAR-315
 permiso: core:documentos.plantillas.manage
 ruta: /documentos/plantillas
+portales: erp
 ---
 En **Documentos → Plantillas** ahora puedes crear plantillas de **contrato de servicio** (para una cuenta) y de **acta** (para una instalación). Cada tipo solo muestra las variables que le sirven: el contrato de servicio usa los datos de la cuenta y el acta, los de la instalación y su cuenta.
 

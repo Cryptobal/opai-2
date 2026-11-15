@@ -5,6 +5,7 @@ modulo: nomina
 titulo: Día de pago de sueldos en Remuneraciones
 car: CAR-344
 ruta: /configuracion/modulo/nomina?seccion=ajustes
+portales: erp
 ---
 En **Configuración › Módulos › Remuneraciones › Ajustes**, grupo **Pago**, hay dos ajustes nuevos: **Día de pago de sueldos** y **Los sueldos se pagan el mes siguiente**.
 

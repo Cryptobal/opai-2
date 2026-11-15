@@ -6,6 +6,7 @@ titulo: Seguimiento de cotizaciones más claro, en el tablero y en la Bandeja
 car: CAR-160
 permiso: comercial:negocios.read
 ruta: /negocios
+portales: erp
 ---
 **Qué verás distinto en pantalla:**
 

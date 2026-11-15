@@ -1,7 +1,10 @@
+import { PORTALES_NOVEDAD } from "@opai/domain/novedades/portales";
 import { z } from "zod";
 
 import { defineCapability } from "../../define";
 import { dbLecturaNovedades, entradasPara, etiquetaModulo, usuarioDe } from "./comun";
+
+const portalSchema = z.enum(PORTALES_NOVEDAD);
 
 const itemSchema = z.object({
   id: z.string(),
@@ -25,7 +28,9 @@ export const novedadesList = defineCapability({
     "Lista cronológica de novedades de producto visibles para el tenant, el rol y los módulos activos.",
   permiso: null,
   portales: ["erp", "supervisor", "trabajador", "terreno", "cliente", "platform"],
-  input: z.object({}),
+  input: z.object({
+    portal: portalSchema.optional(),
+  }),
   output: z.object({
     items: z.array(itemSchema),
     noLeidas: z.number().int(),
@@ -33,9 +38,10 @@ export const novedadesList = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx) {
+  async handler(ctx, input) {
+    const portal = input.portal ?? ctx.portal ?? "erp";
     const usuarioId = usuarioDe(ctx);
-    const visibles = entradasPara(ctx);
+    const visibles = entradasPara(ctx, portal);
     const ids = visibles.map((v) => v.id);
     const db = await dbLecturaNovedades(ctx);
     const lecturas = ids.length

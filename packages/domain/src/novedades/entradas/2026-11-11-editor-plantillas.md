@@ -7,6 +7,12 @@ car: CAR-127
 permiso: core:documentos.plantillas.manage
 ruta: /documentos/plantillas
 destacada: true
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 **Qué verás distinto en pantalla:**
 

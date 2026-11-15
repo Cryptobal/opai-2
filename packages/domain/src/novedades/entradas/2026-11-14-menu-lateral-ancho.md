@@ -5,6 +5,7 @@ modulo: core
 titulo: El menú lateral funciona como en Linear
 car: CAR-442
 ruta: /
+portales: erp
 ---
 En el computador, el menú lateral ahora se maneja como en Linear:
 

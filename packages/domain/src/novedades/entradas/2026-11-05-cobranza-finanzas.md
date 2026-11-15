@@ -6,6 +6,7 @@ titulo: Cobranza con recordatorios
 car: CAR-166
 permiso: finanzas:cobranza.read
 ruta: /finanzas/cobranza
+portales: erp
 ---
 **Finanzas › Cobranza** agrupa lo que tus clientes deben por facturas vencidas, con tramos de días y un historial de gestiones.
 

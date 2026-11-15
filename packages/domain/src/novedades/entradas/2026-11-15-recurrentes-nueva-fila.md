@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Crear una fila del flujo al cargar un gasto recurrente
 car: CAR-535
 ruta: /finanzas/flujo/recurrentes
+portales: erp
 ---
 En **Finanzas › Flujo de caja › Gastos recurrentes**, al crear un gasto ya no hace falta salir a Configuración si la fila aún no existe.
 

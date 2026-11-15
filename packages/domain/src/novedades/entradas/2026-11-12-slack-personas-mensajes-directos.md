@@ -6,6 +6,7 @@ titulo: Slack reconoce a tu equipo y le manda sus avisos por mensaje directo
 car: CAR-292
 permiso: core:integraciones.manage
 ruta: /configuracion/integraciones/slack
+portales: erp
 ---
 
 Con Slack conectado, OPAI busca a cada persona de tu equipo en Slack por su correo y la deja ligada sola, sin que tengas que configurar nada.

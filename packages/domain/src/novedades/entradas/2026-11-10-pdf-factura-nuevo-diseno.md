@@ -6,6 +6,12 @@ titulo: El PDF de la factura tiene el diseño de siempre
 car: CAR-259
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas?estado=borrador
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 El PDF del **borrador** y de la **factura emitida** ahora se ve como el de OPAI 1: lleva el **logo** y los datos de tu empresa (razón social, giro, dirección y teléfono), el recuadro rojo del SII, el cliente ordenado en dos columnas y cada línea con su descripción.
 

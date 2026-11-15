@@ -7,6 +7,7 @@ destacada: false
 car: CAR-330
 permiso: pauta:read
 ruta: /pauta/instalaciones
+portales: erp
 ---
 En **Pauta** hay una pestaña nueva, **Por instalación**, junto a Mensual y Diaria. Muestra cada instalación con la **cobertura del mes** junto a los turnos por cubrir, los refuerzos, el ausentismo y los atrasos. El color marca si va bien, en aviso o en alerta.
 

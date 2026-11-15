@@ -6,6 +6,7 @@ titulo: Diseño «Hilo»: indicadores y avisos de pantalla más limpios
 destacada: false
 car: CAR-324
 ruta: /mi-cuenta/preferencias
+portales: erp
 ---
 
 Si usas el diseño **Hilo**:

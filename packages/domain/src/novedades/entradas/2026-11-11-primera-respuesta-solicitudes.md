@@ -6,6 +6,7 @@ titulo: Mide qué tan rápido respondes a tus solicitudes
 car: CAR-299
 permiso: comercial:solicitudes.read
 ruta: /solicitudes
+portales: erp
 ---
 Ahora cada empresa puede fijar en cuántas **horas hábiles** (lunes a viernes, de 8:00 a 18:00) quiere dar la primera respuesta a una solicitud nueva. Viene **apagado**: no cambia nada hasta que lo actives.
 

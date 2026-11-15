@@ -5,6 +5,7 @@ modulo: rondas
 titulo: El buscador general encuentra las rondas
 car: CAR-405
 ruta: /instalaciones
+portales: erp
 ---
 En el **buscador general** (⌘K) aparece el grupo **Rondas**. Escribe el nombre de una ronda o el de su instalación, por ejemplo «nocturna» o «Bodega Norte», y abre la pestaña **Rondas** de esa instalación. Cada resultado muestra la instalación a la que pertenece.
 

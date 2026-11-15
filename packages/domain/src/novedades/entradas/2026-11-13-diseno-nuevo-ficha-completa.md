@@ -5,6 +5,12 @@ modulo: core
 titulo: Diseño nuevo: ver una ficha a pantalla completa
 car: CAR-335
 ruta: /cuentas
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Si estás probando el **diseño nuevo** en el computador, cuando abres un registro (una cuenta, un contacto, una persona…) arriba a la derecha de su ficha hay un botón nuevo:
 

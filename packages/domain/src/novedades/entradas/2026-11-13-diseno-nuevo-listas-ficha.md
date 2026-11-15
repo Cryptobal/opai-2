@@ -5,6 +5,12 @@ modulo: core
 titulo: Diseño nuevo: listas más anchas y ficha a la derecha
 car: CAR-336
 ruta: /cuentas
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Si estás probando el **diseño nuevo**, en listas como Cuentas, Contactos, Negocios o Personas (computador):
 

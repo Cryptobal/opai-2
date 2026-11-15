@@ -6,6 +6,7 @@ titulo: Ve cómo quedaría un documento laboral antes de generarlo
 car: CAR-127
 permiso: core:documentos.plantillas.manage
 ruta: /personas
+portales: erp
 ---
 En la pestaña **Documentos** de cada persona hay un botón nuevo, **Generar documento**. Eliges una plantilla (contrato, anexo, carta…) y OPAI muestra el documento con los datos de esa persona: nombre, RUT, dirección, cargo, jornada, instalación y, si tienes permiso de lectura sensible, el sueldo.
 

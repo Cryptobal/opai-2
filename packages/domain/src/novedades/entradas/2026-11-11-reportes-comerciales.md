@@ -7,6 +7,7 @@ destacada: true
 car: CAR-27
 permiso: comercial:negocios.read
 ruta: /negocios/reportes
+portales: erp
 ---
 En **Negocios** hay un botón nuevo, **Reportes**, que abre un tablero con el estado de las ventas.
 

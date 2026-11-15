@@ -5,6 +5,7 @@ modulo: comercial
 titulo: Agrega tus propios campos a cuentas, contactos y negocios
 car: CAR-27
 ruta: /configuracion/campos-personalizados
+portales: erp
 ---
 En **Configuración › Operación › Campos personalizados** puedes crear campos propios de tu empresa para las fichas de **cuentas, contactos y negocios**, por ejemplo «Rubro», «Dotación» o «Fecha de renovación».
 

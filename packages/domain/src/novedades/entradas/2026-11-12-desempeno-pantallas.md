@@ -7,6 +7,7 @@ destacada: true
 car: CAR-307
 permiso: desempeno:scorecards.read
 ruta: /desempeno
+portales: erp
 ---
 En el menú **Personas** aparece **Desempeño**. Ahí ves cada cargo de la empresa y si ya tiene definido cómo se mide su gestión.
 

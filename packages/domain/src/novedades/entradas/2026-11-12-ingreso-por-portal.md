@@ -5,6 +5,7 @@ modulo: core
 titulo: Cada portal abre su propio ingreso
 car: CAR-347
 ruta: /login
+portales: erp
 ---
 Si un **guardia** abre un enlace de su portal (por ejemplo «Marcar asistencia») sin haber entrado, ahora llega directo a **Ingresa con tu RUT** (RUT y PIN), y no al ingreso con correo del equipo.
 

@@ -6,6 +6,7 @@ titulo: Los gerentes también pueden importar datos
 car: CAR-279
 permiso: core:importar.manage
 ruta: /configuracion/importar
+portales: erp
 ---
 **Configuración › Importar datos** ahora aparece también para quienes tienen el rol **Gerente**, no solo para dueños y administradores.
 

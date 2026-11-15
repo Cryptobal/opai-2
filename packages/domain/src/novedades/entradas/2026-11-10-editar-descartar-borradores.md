@@ -7,6 +7,7 @@ destacada: true
 car: CAR-248
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas?estado=borrador
+portales: erp
 ---
 Los **borradores** de factura y de nota de débito ahora se pueden **editar** y **descartar** antes de emitirlos.
 

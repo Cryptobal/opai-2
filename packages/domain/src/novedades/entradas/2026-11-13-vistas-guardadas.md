@@ -5,6 +5,7 @@ modulo: comercial
 titulo: Guarda tus filtros como vistas en las listas
 car: CAR-335
 ruta: /cuentas
+portales: erp
 ---
 En **Cuentas, Personas, Instalaciones, Cargos y Ventas** hay un botón nuevo, **Vistas**:
 

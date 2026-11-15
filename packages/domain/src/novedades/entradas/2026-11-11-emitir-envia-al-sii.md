@@ -6,6 +6,7 @@ titulo: Emitir envía el documento al SII de inmediato
 car: CAR-270
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas
+portales: erp
 ---
 Al **emitir** una factura, una nota de crédito o una nota de débito, el documento ahora se envía al SII en el mismo paso. Antes quedaba firmado y había que apretar «Enviar al SII» aparte. La emisión en lote del cierre mensual hace lo mismo con cada documento.
 

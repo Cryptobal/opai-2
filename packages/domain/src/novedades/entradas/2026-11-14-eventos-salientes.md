@@ -6,6 +6,7 @@ titulo: Eventos salientes: OPAI avisa a tu sistema cuando algo pasa
 car: CAR-352
 permiso: core:apikeys.manage
 ruta: /configuracion/agentes/eventos
+portales: erp
 ---
 En **Configuración › Agentes y API keys** hay un enlace nuevo, **Eventos salientes**. Ahí registras la dirección de un sistema tuyo (por ejemplo, tu ERP o una automatización) y eliges qué eventos quieres recibir, como «se creó una cuenta» o «se archivó un documento».
 

@@ -7,6 +7,12 @@ destacada: false
 car: CAR-261
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Rediseñamos **Ventas** para el teléfono. En la lista, el nombre del cliente ya no se corta y «Borrador» aparece una sola vez. Cada borrador tiene un menú «⋮» con **Editar** y **Descartar**, en lugar de dos botones por fila.
 

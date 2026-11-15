@@ -5,6 +5,7 @@ modulo: comercial
 titulo: Los correos con cada cliente quedan en su ficha
 car: CAR-233
 permiso: core:actividades.read
+portales: erp
 ---
 En la pestaña **Actividad** de cada cuenta y negocio, y en la ficha de cada contacto, aparece una nueva sección **Correos**. Muestra, del más reciente al más antiguo, las cotizaciones, facturas y seguimientos que salen de OPAI y las respuestas del cliente, con la fecha, quién lo envió, a quién, el asunto y el texto. Es solo para leer: desde OPAI no se escriben ni se responden correos.
 

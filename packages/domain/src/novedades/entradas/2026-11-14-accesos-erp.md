@@ -6,6 +6,7 @@ titulo: Accesos de la portería en el ERP
 car: CAR-474
 permiso: acceso:read
 ruta: /accesos
+portales: erp
 ---
 En **Operaciones** hay una entrada nueva, **Accesos**, para quienes tienen el módulo Control de acceso. Muestra quién entró por la portería de tus instalaciones, con tres secciones:
 

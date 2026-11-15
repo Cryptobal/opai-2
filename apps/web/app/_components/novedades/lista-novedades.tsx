@@ -28,7 +28,7 @@ export function ListaNovedades({ portal }: { portal: string }) {
 
   const cargar = useCallback(() => {
     setError(false);
-    return ejecutarCapacidad(portal, "core.novedades.list", {}).then((r) => {
+    return ejecutarCapacidad(portal, "core.novedades.list", { portal }).then((r) => {
       if (!r.ok) {
         setError(true);
         return;
@@ -39,7 +39,7 @@ export function ListaNovedades({ portal }: { portal: string }) {
 
   useEffect(() => {
     let activo = true;
-    void ejecutarCapacidad(portal, "core.novedades.list", {}).then((r) => {
+    void ejecutarCapacidad(portal, "core.novedades.list", { portal }).then((r) => {
       if (!activo) return;
       if (!r.ok) {
         setError(true);
@@ -102,7 +102,7 @@ export function ListaNovedades({ portal }: { portal: string }) {
               }
             />
           ) : null}
-          <GruposNovedades items={visibles} onMarcar={marcarUna} />
+          {visibles.length > 0 ? <GruposNovedades items={visibles} onMarcar={marcarUna} /> : null}
         </>
       )}
     </div>

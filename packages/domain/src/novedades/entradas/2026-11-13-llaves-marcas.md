@@ -5,6 +5,7 @@ modulo: core
 titulo: La lista de API keys marca las que conviene renovar
 car: CAR-351
 ruta: /configuracion/agentes
+portales: erp
 ---
 En **Configuración › Agentes**, cada API key muestra dos avisos nuevos cuando corresponde:
 

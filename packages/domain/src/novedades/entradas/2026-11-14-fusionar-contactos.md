@@ -5,6 +5,12 @@ modulo: comercial
 titulo: Fusiona contactos duplicados
 car: CAR-27
 ruta: /contactos
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Si una misma persona quedó registrada dos veces, abre el contacto que quieres conservar y toca **Fusionar con…**:
 

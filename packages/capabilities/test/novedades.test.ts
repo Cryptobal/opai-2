@@ -28,10 +28,26 @@ describe("core.novedades", () => {
     expect(data.noLeidas).toBe(data.items.length);
   });
 
+  it("el contador y la lista coinciden (CAR-542)", async () => {
+    const { ctx } = contextoDePrueba({ modulosActivos: ["core", "finanzas", "comercial", "cpq"] });
+    const data = ok<{ items: { leida: boolean }[]; noLeidas: number }>(
+      await executeCapability(ctx, "core.novedades.list", { portal: "erp" }),
+    );
+    expect(data.noLeidas).toBe(data.items.filter((i) => !i.leida).length);
+    expect(data.items.length).toBeGreaterThanOrEqual(5);
+  });
+
   it("recorta las novedades por las pantallas que la persona ve (CAR-430)", async () => {
     const lista = async (permisosRol: readonly string[]) => {
-      const { ctx } = contextoDePrueba({ modulosActivos: ["core", "comercial"], permisosRol });
-      const r = ok<{ items: { id: string }[] }>(await executeCapability(ctx, "core.novedades.list", {}));
+      const { ctx } = contextoDePrueba({
+        modulosActivos: ["core", "comercial"],
+        permisosRol,
+        portal: "supervisor",
+        portalesMembresia: ["supervisor"],
+      });
+      const r = ok<{ items: { id: string }[] }>(
+        await executeCapability(ctx, "core.novedades.list", { portal: "supervisor" }),
+      );
       return r.items.map((i) => i.id);
     };
     expect(await lista(["core:cuentas.read"])).toContain("diseno-nuevo-ficha-completa");

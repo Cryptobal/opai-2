@@ -6,6 +6,7 @@ titulo: Importa tus facturas y notas ya emitidas
 car: CAR-283
 permiso: finanzas:ventas.manage
 ruta: /configuracion/importar
+portales: erp
 ---
 En **Configuración › Uso y registros › Importar datos** ahora puedes elegir **Facturas y notas emitidas** y cargar desde Excel o CSV tu historial de facturas, notas de crédito y notas de débito. Reconoce las columnas del Registro de Ventas del SII.
 

@@ -6,6 +6,7 @@ titulo: Importar personas con su previsión y su cuenta bancaria
 car: CAR-282
 permiso: core:personas.manage
 ruta: /configuracion/importar
+portales: erp
 ---
 En **Configuración › Importar datos**, la lista «Qué importar» ahora incluye **Personas**. Subes una planilla (Excel o CSV) con una fila por trabajador y OPAI carga su ficha, su previsión (AFP, salud, isapre) y su cuenta bancaria.
 

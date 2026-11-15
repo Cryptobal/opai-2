@@ -6,6 +6,7 @@ titulo: La cartola Santander se importa solo si cuadra
 car: CAR-341
 permiso: finanzas:bancos.gestionar
 ruta: /finanzas/bancos
+portales: erp
 ---
 Al **subir una cartola Santander** en **Finanzas › Bancos**, la vista previa ahora te dice si **cuadra**: saldo inicial más los movimientos debe dar el saldo final de la cartola. Si no cuadra, te muestra la diferencia y el botón **Importar** queda bloqueado.
 

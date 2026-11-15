@@ -6,6 +6,7 @@ titulo: La nota de crédito que corrige texto ya no pide monto
 car: CAR-270
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas
+portales: erp
 ---
 Al emitir una nota de crédito y elegir **Corrige texto**, el campo de monto desaparece y un aviso explica que la nota solo corrige el texto del documento y no cambia lo que el cliente debe.
 

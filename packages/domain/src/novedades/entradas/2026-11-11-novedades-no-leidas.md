@@ -5,6 +5,12 @@ modulo: core
 titulo: Novedades más fáciles de ver, leer y marcar como leídas
 car: CAR-316
 ruta: /novedades
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 **Qué verás distinto en pantalla:**
 

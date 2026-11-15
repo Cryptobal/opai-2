@@ -6,6 +6,7 @@ titulo: Factores guardados al ceder una factura
 car: CAR-267
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas
+portales: erp
 ---
 Al **ceder una factura** ya no hay que escribir los datos del factoring cada vez. Arriba del formulario hay una lista, **Elegir un factor guardado**, que llena el RUT, el nombre, el correo y la dirección.
 

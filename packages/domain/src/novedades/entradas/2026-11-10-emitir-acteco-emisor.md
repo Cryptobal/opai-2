@@ -6,6 +6,7 @@ titulo: Emitir al SII pide el ACTECO y los datos de tu empresa
 car: CAR-240
 permiso: finanzas:ventas.configure
 ruta: /finanzas/configuracion-dte
+portales: erp
 ---
 En **Finanzas › Configuración DTE** hay un campo nuevo, **ACTECO (actividad económica)**: es el código del SII que va en cada factura. Sin él, el SII rechaza el documento.
 

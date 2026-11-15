@@ -6,6 +6,7 @@ titulo: Las aprobaciones pendientes se leen en lenguaje claro
 car: CAR-250
 permiso: core:aprobaciones.manage
 ruta: /configuracion/aprobaciones
+portales: erp
 ---
 En la **campana** y en **Configuración › Aprobaciones**, cada solicitud de un agente ahora dice qué pide, por ejemplo «Grok pide emitir la factura 33, $ 11.900», en vez de un código con datos técnicos.
 

@@ -7,6 +7,7 @@ destacada: false
 car: CAR-322
 permiso: desempeno:scorecards.read
 ruta: /desempeno/cierres
+portales: erp
 ---
 En **Desempeño** hay una pestaña nueva: **Meses cerrados**. Muestra cada mes cerrado, cuándo se cerró, si fue a mano o automático y cuántas personas quedaron con resultado.
 

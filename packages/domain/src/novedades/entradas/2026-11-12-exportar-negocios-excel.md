@@ -7,6 +7,7 @@ destacada: false
 car: CAR-27
 permiso: comercial:negocios.exportar
 ruta: /negocios
+portales: erp
 ---
 En **Negocios**, tanto en el **tablero** como en la **lista**, hay un botón nuevo: **Exportar a Excel**.
 

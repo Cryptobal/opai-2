@@ -6,6 +6,7 @@ titulo: «Probar conexión» de Emisión DTE ahora comprueba la API key en Simpl
 car: CAR-263
 permiso: core:integraciones.manage
 ruta: /configuracion/integraciones
+portales: erp
 ---
 En **Configuración › Integraciones › Emisión DTE**, el botón **Probar conexión** revisa que el certificado digital abra con su clave y muestra, a modo informativo, lo que respondió SimpleAPI sobre la API key guardada (código de respuesta de cada forma de autenticación y número de suscripciones). No emite documentos ni usa folios.
 

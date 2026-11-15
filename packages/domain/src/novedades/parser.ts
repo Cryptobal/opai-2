@@ -1,3 +1,5 @@
+import { PORTALES_NOVEDAD, portalesDeEntrada } from "./portales";
+
 /** Entrada de changelog publicada en el repositorio (global; el estado de lectura es por usuario). */
 export type EntradaNovedad = {
   id: string;
@@ -10,6 +12,7 @@ export type EntradaNovedad = {
   car: string | null;
   permiso: string | null;
   imagen: string | null;
+  portales: readonly string[];
 };
 
 export type FrontmatterNovedad = {
@@ -34,7 +37,10 @@ const CLAVES = new Set([
   "permiso",
   "ruta",
   "imagen",
+  "portales",
 ]);
+
+const PORTALES_VALIDOS = new Set<string>(PORTALES_NOVEDAD);
 
 /** Interpreta un valor YAML simple (booleano, texto o fecha). */
 function valorDe(raw: string): string | boolean {
@@ -57,11 +63,31 @@ export function parsearNovedadMarkdown(texto: string): EntradaNovedad {
   const bloque = m?.[1];
   if (!bloque || cuerpo === undefined) throw new Error("Falta frontmatter delimitado por ---");
   const fm: Record<string, string | boolean> = {};
+  const portales: string[] = [];
+  let enListaPortales = false;
   for (const linea of bloque.split("\n")) {
+    const lista = linea.match(/^\s*-\s+(.+)$/);
+    if (enListaPortales && lista) {
+      const p = String(valorDe(lista[1] ?? "")).trim();
+      if (PORTALES_VALIDOS.has(p)) portales.push(p);
+      continue;
+    }
+    enListaPortales = false;
     const sep = linea.indexOf(":");
     if (sep < 0) continue;
     const clave = linea.slice(0, sep).trim();
+    if (clave === "portales" && !linea.slice(sep + 1).trim()) {
+      enListaPortales = true;
+      continue;
+    }
     if (!CLAVES.has(clave)) continue;
+    if (clave === "portales") {
+      const raw = String(valorDe(linea.slice(sep + 1))).trim();
+      for (const p of raw.split(/[, ]+/).filter(Boolean)) {
+        if (PORTALES_VALIDOS.has(p)) portales.push(p);
+      }
+      continue;
+    }
     fm[clave] = valorDe(linea.slice(sep + 1));
   }
   const id = String(fm.id ?? "").trim();
@@ -84,5 +110,6 @@ export function parsearNovedadMarkdown(texto: string): EntradaNovedad {
     car: fm.car ? String(fm.car) : null,
     permiso: fm.permiso ? String(fm.permiso) : null,
     imagen: fm.imagen ? String(fm.imagen) : null,
+    portales: portalesDeEntrada(portales),
   };
 }

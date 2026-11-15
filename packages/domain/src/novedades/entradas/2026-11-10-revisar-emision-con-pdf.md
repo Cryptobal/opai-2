@@ -6,6 +6,7 @@ titulo: «Revisar emisión» muestra el PDF del borrador
 car: CAR-249
 permiso: finanzas:ventas.manage
 ruta: /finanzas/ventas?estado=borrador
+portales: erp
 ---
 Al **revisar la emisión** de una factura o nota de débito, la vista previa ahora muestra también **cómo quedará el documento en PDF**, con la marca «BORRADOR», antes de que confirmes. Así ves las líneas, los montos y los datos del cliente tal como saldrán.
 

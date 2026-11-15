@@ -5,6 +5,7 @@ modulo: core
 titulo: Las API keys nuevas nacen con lo mínimo
 car: CAR-351
 ruta: /configuracion/agentes
+portales: erp
 ---
 Al crear una **API key** en **Configuración › Agentes**:
 

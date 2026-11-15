@@ -6,6 +6,9 @@ titulo: Plataforma suma Usuarios, Auditoría y Editar empresa
 car: CAR-323
 permiso: platform:tenants.read
 ruta: /platform/usuarios
+portales:
+  - platform
+  - erp
 ---
 En el portal **Plataforma** (equipo OPAI) aparecen pantallas para lo que antes solo se podía hacer por el agente:
 

@@ -6,5 +6,6 @@ titulo: Los reportes comerciales avisan si llegaron a su tope de datos
 car: CAR-27
 permiso: comercial:negocios.read
 ruta: /negocios/reportes
+portales: erp
 ---
 Si una empresa tiene tantos negocios o solicitudes que el reporte no alcanza a sumarlos todos, **Reportes comerciales** ahora lo dice con un aviso arriba del tablero, para que no tomes cifras incompletas como definitivas. Puedes elegir un período más corto o un responsable.

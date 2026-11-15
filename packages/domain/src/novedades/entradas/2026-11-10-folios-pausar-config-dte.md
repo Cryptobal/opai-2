@@ -6,6 +6,7 @@ titulo: Pausar un CAF y configuración DTE que sí se guarda
 car: CAR-240
 permiso: finanzas:ventas.configure
 ruta: /finanzas/folios
+portales: erp
 ---
 En **Finanzas › Folios** cada CAF muestra si es de **certificación** o de **producción**, y ahora se puede **pausar** o **reactivar**. Un CAF pausado no se usa para emitir; reactivarlo lo deja tal como estaba.
 

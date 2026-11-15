@@ -6,6 +6,7 @@ titulo: Conecta Slack para recibir las anomalías de terreno
 car: CAR-291
 permiso: core:integraciones.manage
 ruta: /configuracion/integraciones/slack
+portales: erp
 ---
 En **Configuración › Integraciones** la tarjeta **Slack** ya no dice «Próximamente»: abre una pantalla nueva para conectar el espacio de Slack de tu empresa y decidir qué se avisa.
 

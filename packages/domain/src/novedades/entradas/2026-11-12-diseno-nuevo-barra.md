@@ -5,6 +5,12 @@ modulo: core
 titulo: Diseño nuevo: buscador al centro y tema a un clic
 car: CAR-335
 ruta: /
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 Si estás probando el **diseño nuevo** (Preferencias › Diseño):
 

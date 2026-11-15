@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Posterga el pago del IVA desde el flujo de caja
 car: CAR-397
 ruta: /finanzas/flujo
+portales: erp
 ---
 En el **Flujo de caja**, al tocar la celda **IVA a pagar** ves de qué mes es ese IVA, cuánto es y qué día se paga.
 

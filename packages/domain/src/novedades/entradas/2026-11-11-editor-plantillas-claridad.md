@@ -6,6 +6,7 @@ titulo: Editor de plantillas más claro: variables y niveles de firma
 car: CAR-315
 permiso: core:documentos.plantillas.manage
 ruta: /documentos/plantillas
+portales: erp
 ---
 En **Documentos › Plantillas**, al abrir una plantilla:
 

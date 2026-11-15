@@ -6,6 +6,7 @@ titulo: Explorador de documentos
 car: CAR-182
 permiso: core:documentos.read
 ruta: /documentos
+portales: erp
 ---
 En **Documentos › Explorador** puedes buscar archivos de toda la empresa, filtrar por estado y tipo, y ver de un vistazo el propietario y si falta una firma.
 

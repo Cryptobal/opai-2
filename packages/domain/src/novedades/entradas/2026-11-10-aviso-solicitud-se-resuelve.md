@@ -6,6 +6,7 @@ titulo: El aviso de una solicitud se marca como leído al atenderla
 car: CAR-254
 permiso: comercial:solicitudes.read
 ruta: /comercial/solicitudes
+portales: erp
 ---
 Cuando **descartas, conviertes, derivas a revisión o marcas como duplicada** una solicitud, su aviso «Nueva solicitud» se marca solo como leído, para todas las personas que lo recibieron.
 

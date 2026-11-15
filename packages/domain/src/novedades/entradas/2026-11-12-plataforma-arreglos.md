@@ -5,6 +5,7 @@ modulo: core
 titulo: Módulos sin versión técnica y Plataforma más clara
 car: CAR-323
 ruta: /configuracion/modulos
+portales: erp
 ---
 En **Configuración › Módulos**, cada tarjeta ya no muestra la versión técnica («Versión 0.1.0»). Solo dice de qué otros módulos depende.
 

@@ -5,5 +5,11 @@ modulo: core
 titulo: El logo de tu empresa en el menú
 car: CAR-335
 ruta: /configuracion/marca
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En el **diseño nuevo**, el menú muestra el logo de tu empresa arriba a la izquierda. Si todavía no subes uno, aparece la inicial con el color de tu empresa. El logo y el color se cambian en **Configuración → Marca**.

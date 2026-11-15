@@ -5,6 +5,7 @@ modulo: core
 titulo: Un solo aviso por tema, novedades que se marcan al abrirlas y panel que se cierra
 car: CAR-262
 ruta: /novedades
+portales: erp
 ---
 Ordenamos los avisos de la parte superior para que no se repitan. Las **novedades del producto** ahora se indican solo en el menú de tu cuenta, en la fila **Novedades**, con su contador («N sin leer»). Quitamos el punto rojo que aparecía además sobre tu avatar. La **campana** queda solo para tus notificaciones y aprobaciones pendientes.
 

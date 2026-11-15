@@ -6,6 +6,7 @@ titulo: Al terminar el último contrato, la persona pierde el acceso
 car: CAR-355
 permiso: core:vinculos.manage
 ruta: /personas
+portales: erp
 ---
 Cuando terminas el **último contrato vigente** de una persona (ficha › menú ⋯ › **Terminar vínculo**), en el mismo acto ocurre lo siguiente:
 

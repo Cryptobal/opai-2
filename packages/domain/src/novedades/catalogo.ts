@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { PARTES_FINANZAS } from "../cobros/catalogo-modulos";
 import { accesoDeRuta, type AccesoRuta } from "./acceso-ruta";
+import { visibleEnPortal } from "./portales";
 import { NOVEDADES_MARKDOWN } from "./entradas/embed";
 import { parsearNovedadMarkdown, type EntradaNovedad } from "./parser";
 
@@ -88,13 +89,17 @@ export function novedadesVisibles(
   puede: (permiso: string) => boolean,
   esPlataforma: boolean,
   tabla: readonly AccesoRuta[] = [],
+  portalConsulta = "erp",
 ): EntradaNovedad[] {
   // «personas» es parte del núcleo, no un módulo vendible: sus entradas se ven con el núcleo.
   const activos = new Set(["core", "personas", ...modulosActivos]);
+  const recortePantalla = portalConsulta !== "erp";
   return entradas.filter((e) => {
+    if (!visibleEnPortal(e.portales, portalConsulta)) return false;
     if (e.modulo === "platform") return esPlataforma;
     if (e.modulo !== "core" && !moduloActivo(e.modulo, activos)) return false;
     if (e.permiso) return puede(e.permiso);
+    if (!recortePantalla) return true;
     const acceso = e.ruta ? accesoDeRuta(e.ruta, tabla) : undefined;
     if (!acceso) return true;
     if (!moduloActivo(acceso.modulo, activos)) return false;

@@ -5,6 +5,12 @@ modulo: finanzas
 titulo: Bancos abre cada movimiento al lado de la lista
 car: CAR-257
 ruta: /finanzas/bancos
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En **Bancos › Movimientos**, al tocar «Reconocer» o «Ver» el movimiento se abre a la derecha, con las sugerencias para conciliarlo, sin tapar la lista. El movimiento abierto queda marcado en la lista y los filtros (estado, ingresos o egresos) se mantienen.
 

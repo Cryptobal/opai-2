@@ -5,6 +5,7 @@ modulo: core
 titulo: Indicadores en el Inicio
 car: CAR-182
 ruta: /
+portales: erp
 ---
 El **Inicio** ahora puede mostrar hasta cuatro tarjetas con números del día: cobertura de la pauta, negocios abiertos, facturación del mes y tickets tuyos.
 

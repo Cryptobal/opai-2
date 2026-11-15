@@ -37,7 +37,8 @@ export function usuarioDe(ctx: Contexto): string {
   return ctx.actor.id;
 }
 
-export function entradasPara(ctx: Contexto): EntradaNovedad[] {
+export function entradasPara(ctx: Contexto, portalConsulta?: string): EntradaNovedad[] {
+  const portal = portalConsulta ?? ctx.portal ?? "erp";
   const esPlataforma = enScope(ctx, "platform") && Boolean(ctx.usuario?.platformRole);
   return novedadesVisibles(
     catalogoNovedades(),
@@ -45,6 +46,7 @@ export function entradasPara(ctx: Contexto): EntradaNovedad[] {
     (p) => ctx.autorizar(p),
     esPlataforma,
     accesosPorRuta(),
+    portal,
   );
 }
 

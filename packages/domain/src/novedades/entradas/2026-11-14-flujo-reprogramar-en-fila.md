@@ -5,6 +5,12 @@ modulo: finanzas
 titulo: «Reprogramar» ahora está en cada fila del flujo
 car: CAR-456
 ruta: /finanzas/flujo
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 En el **Flujo de caja**, el botón **Reprogramar** ya no está suelto bajo la planilla: aparece en la misma fila que quieres mover al pasar el mouse (en tablet y teléfono se ve siempre).
 

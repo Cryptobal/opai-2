@@ -6,6 +6,7 @@ titulo: La API key de SimpleAPI se guarda con guiones
 car: CAR-240
 permiso: core:integraciones.manage
 ruta: /configuracion/integraciones/dte_emision
+portales: erp
 ---
 En **Configuración › Integraciones › Emisión DTE**, bajo el campo **API key SimpleAPI**, ahora se indica el formato esperado: cinco grupos de cuatro caracteres separados por guiones (XXXX-XXXX-XXXX-XXXX-XXXX), tal como la muestra el panel de SimpleAPI.
 

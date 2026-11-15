@@ -6,6 +6,7 @@ titulo: Previsión completa en la ficha de la persona
 car: CAR-276
 permiso: core:personas.prevision.read
 ruta: /personas
+portales: erp
 ---
 En la ficha de una persona, en **Laboral**, la tarjeta **Previsión** ahora se ordena en cuatro grupos y trae más datos:
 

@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Los cobros esperados del flujo se abren por cliente e instalación
 car: CAR-456
 ruta: /finanzas/flujo
+portales: erp
 ---
 En el **Flujo de caja**, la fila **Cobros esperados** tiene una flecha a la izquierda. Al tocarla se abre una fila por cliente, con lo que se espera cobrarle cada semana; el cliente que más aporta va primero.
 

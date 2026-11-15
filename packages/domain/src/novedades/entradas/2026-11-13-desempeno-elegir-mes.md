@@ -7,6 +7,7 @@ destacada: false
 car: CAR-380
 permiso: desempeno:scorecards.read
 ruta: /desempeno/cierres
+portales: erp
 ---
 En el **scorecard de un cargo** y en el **resultado de una persona** puedes moverte de mes con **‹ ›** para ver cómo le fue a tu equipo en meses anteriores.
 

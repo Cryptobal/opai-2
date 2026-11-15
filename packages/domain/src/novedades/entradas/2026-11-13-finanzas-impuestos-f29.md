@@ -6,6 +6,7 @@ titulo: Borrador del F29 en Finanzas › Compras › IVA y F29
 car: CAR-173
 permiso: finanzas:read
 ruta: /finanzas/compras/impuestos
+portales: erp
 ---
 
 En **Finanzas › Compras › IVA y F29** ves el borrador del F29 del mes: **IVA a pagar**, **PPM**, el total y el día de pago, junto con el IVA débito de tus ventas y el IVA crédito de tus compras.

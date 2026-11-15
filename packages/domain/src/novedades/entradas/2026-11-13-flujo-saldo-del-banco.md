@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: El flujo de caja parte del saldo real del banco
 car: CAR-391
 ruta: /finanzas/flujo
+portales: erp
 ---
 El **flujo de caja** ahora parte siempre de lo que hay hoy en tus bancos (la suma de tus cuentas activas, según la conexión con el banco o las cartolas que cargues).
 

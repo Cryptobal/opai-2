@@ -6,6 +6,7 @@ titulo: Nueva sección Novedades
 destacada: true
 car: Núcleo
 ruta: /novedades
+portales: erp
 ---
 En el menú de tu cuenta verás **Novedades**: un registro de lo que cambia en OPAI 2.0, redactado para personas de negocio, no para desarrolladores.
 

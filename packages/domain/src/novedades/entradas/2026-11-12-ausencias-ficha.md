@@ -7,6 +7,7 @@ destacada: true
 car: CAR-373
 permiso: pauta:read
 ruta: /personas
+portales: erp
 ---
 La ficha de cada persona tiene una pestaña nueva, **Ausencias**. Con **Registrar permiso o licencia** eliges el tipo (licencia médica, permiso, vacaciones o ausencia), las fechas y el motivo. Antes de guardar, OPAI te muestra qué turnos de la pauta quedan por cubrir y en qué instalaciones.
 

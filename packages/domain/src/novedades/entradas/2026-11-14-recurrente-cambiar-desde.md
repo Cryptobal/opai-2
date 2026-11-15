@@ -5,6 +5,7 @@ modulo: finanzas
 titulo: Cambia la frecuencia o la fila de un gasto recurrente desde una fecha
 car: CAR-413
 ruta: /finanzas/flujo/recurrentes
+portales: erp
 ---
 En **Gastos recurrentes**, al editar un gasto aparece **Cambiar desde una fecha**. Ahí eliges desde qué día rige el cambio y la nueva fila del flujo, la frecuencia o el día de pago.
 

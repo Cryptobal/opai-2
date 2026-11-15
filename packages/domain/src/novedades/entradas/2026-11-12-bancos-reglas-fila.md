@@ -6,6 +6,7 @@ titulo: Bancos filtra ingresos y egresos, y los gastos se concilian contra el fl
 car: CAR-328
 permiso: finanzas:bancos.ver
 ruta: /finanzas/bancos
+portales: erp
 ---
 En **Finanzas › Bancos** ahora puedes ver solo los **ingresos** o solo los **egresos** del banco.
 

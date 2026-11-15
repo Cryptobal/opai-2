@@ -6,6 +6,12 @@ titulo: Diseño «Hilo»: cabecera más limpia
 destacada: false
 car: CAR-317
 ruta: /mi-cuenta/preferencias
+portales:
+  - erp
+  - terreno
+  - supervisor
+  - cliente
+  - trabajador
 ---
 
 En el diseño **Hilo**, la parte de arriba del hilo es más simple:

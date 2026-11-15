@@ -6,6 +6,7 @@ titulo: Cuentas listas para facturar y datos del SII al crearlas
 car: CAR-156
 permiso: core:cuentas.read
 ruta: /cuentas
+portales: erp
 ---
 La **lista de Cuentas** ahora muestra en cada fila si la cuenta está **«Lista para facturar»** o cuántos datos le faltan (por ejemplo, giro o dirección tributaria). Pasa el cursor sobre el aviso para ver cuáles.
 

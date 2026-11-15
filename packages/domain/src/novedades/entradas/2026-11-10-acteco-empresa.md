@@ -6,6 +6,7 @@ titulo: Actividad económica (ACTECO) en los datos de la empresa
 car: CAR-243
 permiso: core:tenant.manage
 ruta: /configuracion/empresa
+portales: erp
 ---
 En **Configuración › Datos de la empresa** hay una sección nueva, **Actividad económica (SII)**. Ahí eliges los códigos ACTECO de tu empresa desde el catálogo oficial del SII, buscando por código o por palabras como «seguridad privada». Si un código no aparece, puedes escribirlo a mano.
 
