@@ -29,6 +29,11 @@ test.describe("@preview flujo de caja: ingresos por cliente", () => {
     const egresos = page.getByRole("button", { name: "Ocultar detalle de Egresos" });
     await expect(ingresos.or(page.getByRole("button", { name: "Ver detalle de Ingresos" })).first()).toBeVisible();
     await expect(egresos.or(page.getByRole("button", { name: "Ver detalle de Egresos" })).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /detalle de (Remuneraciones|Gastos|Impuestos|Financiamiento)/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Gastos recurrentes" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Filas y ajustes" })).toBeVisible();
+    await expect(page.getByText("Toca una celda planificada")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Reprogramar…" })).toHaveCount(0);
     await capturar(page, info, "flujo-secciones-abiertas");
     await egresos.first().click();
     await expect(page.getByRole("button", { name: "Ver detalle de Egresos" }).first()).toHaveAttribute("aria-expanded", "false");

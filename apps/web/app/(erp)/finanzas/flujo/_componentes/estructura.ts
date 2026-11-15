@@ -24,12 +24,7 @@ export const esEncabezado = (filaId: string) => filaId === SEC_INGRESOS || filaI
 export const abiertaPorDefecto = (filaId: string) => !filaId.startsWith("cobro-");
 
 const grupoDe = (f: FilaFlujo) => f.grupo ?? GRUPO_POR_DEFECTO;
-const hoja = (f: FilaFlujo, nivel: 1 | 2): FilaPlanilla => ({
-  id: f.id,
-  etiqueta: f.etiqueta,
-  nivel,
-  ...(f.vinculo ? { sub: f.vinculo } : {}),
-});
+const hoja = (f: FilaFlujo, nivel: 1 | 2): FilaPlanilla => ({ id: f.id, etiqueta: f.etiqueta, nivel });
 
 function filasIngreso(p: Planilla, abierta: (id: string) => boolean): FilaPlanilla[] {
   return p.filas

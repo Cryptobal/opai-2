@@ -6,8 +6,10 @@ import { useMemo, useState } from "react";
 
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
+import { AccesoRecurrentes } from "./acciones-flujo-toolbar";
 import { armarPlanilla, celdaEditable, clp, type Planilla } from "./datos";
-import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
+import { AvisoSaldoBanco } from "./aviso-saldo-banco";
+import { AvisosProyeccion } from "./avisos-proyeccion";
 import { filaBase } from "./grupos-cobro";
 import { PlanillaFlujoEscritorio } from "./planilla-flujo-escritorio";
 import { useFilasAbiertas } from "./use-filas-abiertas";
@@ -79,9 +81,10 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil, epo
             El aviso se muestra solo dentro de OPAI y no envía correos.
           </Alerta>
         ) : null}
+        <AccesoRecurrentes gestiona={gestiona} />
         <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
-        <AvisosProyeccion avisos={p.avisos} />
-        <VistaMovilFlujo planilla={p} armado={armado} onCelda={abrirCelda} onAlternar={alternar} />
+        <AvisosProyeccion avisos={p.avisos} epoca={epoca} />
+        <VistaMovilFlujo planilla={p} armado={armado} gestiona={gestiona} onCelda={abrirCelda} onAlternar={alternar} />
         {hojaCobros}
         {gestiona ? (
           <HojaCelda
@@ -101,7 +104,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil, epo
         titulo="Flujo de caja"
         subtitulo="Próximas 12 semanas · montos en CLP"
         accionesSiempre
-        cabeceraSoloTelefono
+        acciones={<AccesoRecurrentes gestiona={gestiona} />}
         textos={{
           ...(textosError ?? {}),
           vacio: {
@@ -132,6 +135,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil, epo
         onImportAbiertaChange={setImportAbierta}
         onHoja={setHoja}
         onAlternarFila={alternar}
+        epoca={epoca}
       />
       {hojaCobros}
     </>

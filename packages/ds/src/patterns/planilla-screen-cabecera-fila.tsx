@@ -3,7 +3,7 @@
 import { ChevronRight } from "lucide-react";
 
 import { cn } from "../cn";
-import type { FilaPlanilla } from "./planilla-screen-types";
+import { claseFondoFila, type FilaPlanilla } from "./planilla-screen-types";
 
 const SANGRIA = { 0: "pl-3", 1: "pl-8", 2: "pl-13" } as const;
 
@@ -21,14 +21,17 @@ export function CabeceraFila({
   onAccion?: ((filaId: string) => void) | undefined;
 }) {
   const nivel = fila.nivel ?? 0;
-  const hija = nivel > 0;
   const plegable = fila.plegable && onAlternar ? fila.plegable : null;
+  const encabezado = nivel === 0 || Boolean(plegable) || Boolean(fila.total);
   return (
     <th
       className={cn(
-        "sticky left-0 z-10 max-w-72 border-r border-b border-border bg-surface py-1.5 pr-3 text-left",
+        "sticky left-0 z-10 max-w-72 border-r border-b border-border py-1.5 pr-3 text-left",
+        claseFondoFila(fila),
         SANGRIA[nivel],
-        hija ? "text-sm font-normal text-fg-muted" : "text-base font-medium text-fg",
+        fila.total && "border-t",
+        encabezado ? "text-base font-medium text-fg" : "text-sm font-normal text-fg-muted",
+        fila.total && "font-semibold",
       )}
     >
       <div className="flex min-w-0 items-center gap-1">

@@ -4,6 +4,7 @@ import { cn } from "../cn";
 import { CabeceraFila } from "./planilla-screen-cabecera-fila";
 import {
   claseCeldaNumero,
+  claseFondoFila,
   TONO,
   type Celda,
   type ColumnaPlanilla,
@@ -34,12 +35,13 @@ type CeldaFilaProps = {
 function CeldaFila({ fila, columna, valor, editable, onCelda, onSeleccion }: CeldaFilaProps) {
   const tono = valor?.tono ?? "neutro";
   const texto = valor?.texto ?? "—";
+  const caja = cn("border-b border-border p-0.5", claseFondoFila(fila), fila.total && "border-t");
   if (!valor && !editable) {
-    return <td className="border-b border-border p-0.5" tabIndex={-1} />;
+    return <td className={caja} tabIndex={-1} />;
   }
   if (!editable) {
     return (
-      <td className="border-b border-border p-0.5">
+      <td className={caja}>
         <span
           tabIndex={-1}
           className={cn(
@@ -54,7 +56,7 @@ function CeldaFila({ fila, columna, valor, editable, onCelda, onSeleccion }: Cel
     );
   }
   return (
-    <td className="border-b border-border p-0.5">
+    <td className={caja}>
       <button
         type="button"
         aria-label={`${fila.etiqueta}, ${columna.etiqueta}: ${texto}${valor?.detalle ? ` (${valor.detalle})` : ""}. Editar`}
