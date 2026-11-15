@@ -45,8 +45,8 @@ const identidadVista = cache(
 );
 
 /** Identidad de la persona vista (Trabajador y Cliente), o null; para montar su shell. */
-export const identidadDeLaVista = (v: VerComo): Promise<Identidad | null> =>
-  v.userId ? identidadVista(v.userId, v.tenantId) : Promise.resolve(null);
+export const identidadDeLaVista = (v: VistaVigente): Promise<Identidad | null> =>
+  v.userId ? identidadVista(v.userId, v.tenantId, v.rolQuienMira) : Promise.resolve(null);
 
 /**
  * Contexto de la persona vista en ese portal, marcado `verComo`: `restriccion` rechaza toda escritura

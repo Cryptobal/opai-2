@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 
 import { marcoDeLaPeticion } from "@/lib/marco-servidor";
-import { identidadDeLaVista } from "@/lib/ver-como";
-import type { VerComo } from "@/lib/ver-como-token";
+import { identidadDeLaVista, type VistaVigente } from "@/lib/ver-como";
 
 import { CargaPortal } from "../carga-portal";
 import { datosShell } from "../datos-shell";
@@ -20,7 +19,7 @@ export async function MarcoVerComo({
   portal,
   children,
 }: {
-  vista: VerComo;
+  vista: VistaVigente;
   portal: string;
   children: ReactNode;
 }) {
