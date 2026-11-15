@@ -61,6 +61,8 @@ export const entradaListaSchema = z.object({
   desdeMin: z.number().int().nullable(),
   hastaMin: z.number().int().nullable(),
   usoUnico: z.boolean(),
+  /** La agregó un contacto del cliente desde su portal (R12). */
+  deCliente: z.boolean(),
 });
 export type EntradaListaVista = z.infer<typeof entradaListaSchema>;
 
@@ -79,6 +81,7 @@ type Fila = {
   desdeMin: number | null;
   hastaMin: number | null;
   usoUnico: boolean;
+  cuentaId: string | null;
 };
 
 export function vistaEntrada(f: Fila): EntradaListaVista {
@@ -97,5 +100,6 @@ export function vistaEntrada(f: Fila): EntradaListaVista {
     desdeMin: f.desdeMin,
     hastaMin: f.hastaMin,
     usoUnico: f.usoUnico,
+    deCliente: f.cuentaId !== null,
   };
 }

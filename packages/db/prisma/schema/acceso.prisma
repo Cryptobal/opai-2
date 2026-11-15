@@ -23,6 +23,8 @@ model EntradaLista {
   desdeMin      Int?      @map("desde_min")
   hastaMin      Int?      @map("hasta_min")
   usoUnico      Boolean   @default(false) @map("uso_unico")
+  /// Cuenta cuyo contacto la agregó desde el Portal Cliente (R12); null = la agregó la empresa.
+  cuentaId      String?   @map("cuenta_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 

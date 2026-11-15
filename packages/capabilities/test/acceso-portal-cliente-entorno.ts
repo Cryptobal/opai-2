@@ -2,6 +2,9 @@
 // con su contacto. El contacto de X solo ve su primera instalación; los de Y y B ven todas las de su cuenta.
 import { randomUUID } from "node:crypto";
 import { vi } from "vitest";
+import { z } from "zod";
+
+import { manifest } from "../../../modules/acceso/manifest";
 
 import { type Entorno, prepararEntorno } from "../../db/test/entorno";
 
@@ -17,7 +20,9 @@ export async function entornoPortalAccesos() {
   const mod: typeof ModuloCapacidades = await import("../src");
   mod.limpiarRegistro();
   mod.registrarCapacidades(mod.capacidadesDelNucleo);
-  mod.registrarCapacidades(mod.capacidadesAcceso);
+  // El ajuste de empresa que declara CAR-479, para probar el interruptor de listas del cliente (R12).
+  const clienteGestionaListas = z.boolean().default(false).meta({ etiqueta: "El cliente gestiona sus listas", ambito: "tenant" });
+  mod.registrarModulos([{ ...manifest, configuracion: z.object({ clienteGestionaListas }) }]);
   const s = randomUUID().slice(0, 8);
   const medidor = { registrar: async () => undefined };
   const tenant = async (k: string) =>

@@ -35,6 +35,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/accesos` | `acceso.portal_listas.listar` | `acceso_portal_listas_listar` | existe |
 | cliente | `/cliente/accesos` | `acceso.portal_registros.listar` | `acceso_portal_registros_listar` | existe |
 | cliente | `/cliente/accesos` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
@@ -170,6 +171,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.quitar` | `acceso_listas_quitar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.portal_listas.agregar` | `acceso_portal_listas_agregar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.portal_listas.quitar` | `acceso_portal_listas_quitar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.anular` | `acceso_registros_anular` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.cerrar_bloque` | `acceso_registros_cerrar_bloque` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.get` | `acceso_registros_get` | existe |
