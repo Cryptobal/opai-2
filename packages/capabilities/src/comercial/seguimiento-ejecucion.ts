@@ -52,7 +52,7 @@ export async function enviarCorreoSeguimiento(ctx: Contexto, s: Seg, asunto: str
  * cumple los requisitos de entrada de esa etapa. Devuelve `"movido"`, `"sin_cambio"` o, si la etapa del
  * plan se borró o se desactivó después de guardarlo, `"etapa_invalida"` (el trabajo sigue; se avisa).
  */
-export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: string, etapaId: string | undefined): Promise<"movido" | "sin_cambio" | "etapa_invalida"> {
+async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: string, etapaId: string | undefined): Promise<"movido" | "sin_cambio" | "etapa_invalida"> {
   const r = await avanzarAEtapa(ctx, tx, negocioId, etapaId, "El cliente respondió");
   return r === "requisitos" ? "sin_cambio" : r;
 }

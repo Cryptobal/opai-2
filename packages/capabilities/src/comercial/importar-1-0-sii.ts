@@ -14,7 +14,7 @@ import { encolarConsultaSii, siiDisponible } from "../core/maestros/cuentas-sii-
 import type { Contexto } from "../types";
 
 /** Tope de consultas que encola una corrida (el resto queda para «Consultar SII» en cada ficha). */
-export const MAX_ENCOLAR_SII = 500;
+const MAX_ENCOLAR_SII = 500;
 const APLICA = new Set(["crear", "actualizar", "sin_cambios"]);
 
 export const resumenSiiSchema = z.object({

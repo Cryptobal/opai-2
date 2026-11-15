@@ -13,7 +13,7 @@ export const CUENTA_SE_ACTIVA = ["prospecto", "cliente_inactivo"] as const;
 /** Estados de instalación que se activan al ganar (R18). */
 export const INSTALACION_SE_ACTIVA = ["prospecto", "inactiva"] as const;
 /** Versiones abiertas de CPQ (R40): las que se rechazan si no son la aceptada (R45). */
-export const VERSION_ABIERTA = ["borrador", "en_aprobacion", "lista", "enviada"] as const;
+const VERSION_ABIERTA = ["borrador", "en_aprobacion", "lista", "enviada"] as const;
 
 export const efectosGanarSchema = z.object({
   cuenta: z
