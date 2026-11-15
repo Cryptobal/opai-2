@@ -4,16 +4,16 @@ import { validarMontoAlAprobar } from "@opai/domain";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { conflicto, prohibido, reglaDeNegocio } from "../errores";
-import { anotar } from "./anotar";
-import { fechaIso } from "./comun";
+import { reglaDeNegocio } from "../errores";
 import {
   PERMISO_APROBAR_EXTRA,
-  quienResuelveExtra,
-  turnoExtraPorAprobar,
   turnoExtraSchema,
   vistaTurnoExtra,
 } from "./turnos-extra-comun";
+import {
+  aplicarResolucionTurnoExtra,
+  turnoPendienteParaResolver,
+} from "./turnos-extra-resolver-comun";
 
 /** Aprueba un turno extra (CAR-96). Irreversible para agentes; nadie aprueba lo propio. */
 export const turnosExtraAprobar = defineCapability({
@@ -30,10 +30,7 @@ export const turnosExtraAprobar = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const actorId = quienResuelveExtra(ctx);
-    const { t, instalacionId } = await turnoExtraPorAprobar(ctx, input.id);
-    if (t.estado !== "por_aprobar") throw conflicto("El turno extra ya no está por aprobar.");
-    if (t.registradoPor === actorId) throw prohibido("No puedes aprobar un turno extra que tú registraste.");
+    const { actorId, t, instalacionId } = await turnoPendienteParaResolver(ctx, input.id, "aprobar");
     const monto = validarMontoAlAprobar({
       montoActual: t.montoClp,
       montoNuevo: input.montoClp,
@@ -54,35 +51,23 @@ export const turnosExtraAprobar = defineCapability({
         }),
       };
     }
-    const fila = await ctx.transaccion(async (tx) => {
-      const data = {
-        estado: "aprobado",
-        resueltoPor: actorId,
-        resueltoEn: new Date(),
-        montoClp: monto.montoClp,
-        ...(monto.montoMotivo ? { montoMotivo: monto.montoMotivo, montoOrigen: "manual" as const } : {}),
-      };
-      const r = await tx.turnoExtra.updateMany({
-        where: { id: t.id, estado: "por_aprobar", OR: [{ registradoPor: null }, { registradoPor: { not: actorId } }] },
-        data,
-      });
-      if (r.count !== 1) throw conflicto("El turno extra ya no está por aprobar o no puedes resolverlo.");
-      await anotar(tx, ctx, {
+    const fila = await ctx.transaccion(async (tx) =>
+      aplicarResolucionTurnoExtra(tx, ctx, {
+        t,
+        actorId,
         instalacionId,
-        puestoId: t.puestoId,
+        data: {
+          estado: "aprobado",
+          resueltoPor: actorId,
+          resueltoEn: new Date(),
+          montoClp: monto.montoClp,
+          ...(monto.montoMotivo ? { montoMotivo: monto.montoMotivo, montoOrigen: "manual" } : {}),
+        },
         accion: "turno_extra_aprobado",
-        desde: fechaIso(t.fecha),
-        hasta: fechaIso(t.fecha),
+        evento: "pauta.turno_extra.aprobado",
         detalle: { turnoExtraId: t.id, montoClp: monto.montoClp },
-      });
-      await ctx.eventos.emitir(tx, {
-        tipo: "pauta.turno_extra.aprobado",
-        entidadTipo: "turno_extra",
-        entidadId: t.id,
-        payload: { puestoId: t.puestoId },
-      });
-      return tx.turnoExtra.findUniqueOrThrow({ where: { id: t.id } });
-    });
+      }),
+    );
     return { turno: vistaTurnoExtra(fila) };
   },
 });

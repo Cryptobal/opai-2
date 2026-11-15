@@ -25,7 +25,7 @@ export type Anotacion = {
 };
 
 /** Quién actúa, para el historial: el usuario, o el responsable de la key si es un agente. */
-export function actorDeHistorial(ctx: Contexto): { tipo: string; id: string | null } {
+function actorDeHistorial(ctx: Contexto): { tipo: string; id: string | null } {
   const a = ctx.actor;
   return { tipo: a.tipo, id: a.tipo === "agent" ? a.viaUserId : (a.id ?? null) };
 }

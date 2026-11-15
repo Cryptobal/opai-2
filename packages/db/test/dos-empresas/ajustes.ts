@@ -154,6 +154,27 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Publicación de la pauta (CAR-356): CHECK del mes aaaa-mm.
   "pauta.publicaciones": { fijas: ["mes"], valores: () => ({ mes: "2026-12" }) },
+  // Turnos extra (CAR-96): CHECK de tipo, origen, estado y monto ≥ 0.
+  "pauta.turnos_extra": {
+    dependencias: ["pauta.excepciones", "core.puestos", "core.personas"],
+    valores: (ctx) => ({
+      excepcion_id: id(ctx, "pauta.excepciones"),
+      puesto_id: id(ctx, "core.puestos"),
+      persona_id: id(ctx, "core.personas"),
+      tipo_trabajador: "propio",
+      monto_clp: 0,
+      monto_origen: "sin_tarifa",
+      estado: "por_aprobar",
+    }),
+  },
+  "pauta.tarifas_turno_extra": {
+    dependencias: ["core.instalaciones"],
+    valores: (ctx) => ({
+      sujeto_tipo: "instalacion",
+      sujeto_id: id(ctx, "core.instalaciones"),
+      monto_clp: 35_000,
+    }),
+  },
   // Períodos del contrato (CAR-409): CHECK de tipo, término según el tipo y anulación con motivo.
   "core.contrato_periodos": {
     valores: () => ({

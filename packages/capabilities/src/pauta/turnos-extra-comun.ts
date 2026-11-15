@@ -1,9 +1,8 @@
 import { z } from "zod";
 
-import { resolverMontoSugerido } from "@opai/domain";
 import type { TenantTx } from "@opai/db";
+import { resolverMontoSugerido } from "@opai/domain";
 
-import { uuidSchema } from "../core/esquemas";
 import { dondePuesto } from "../core/maestros/alcance";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
@@ -54,7 +53,7 @@ export function vistaTurnoExtra(f: {
 }
 
 /** Tarifas del puesto y de su instalación para sugerir el monto. */
-export async function tarifasDe(ctx: Contexto, puestoId: string, instalacionId: string) {
+async function tarifasDe(ctx: Contexto, puestoId: string, instalacionId: string) {
   const filas = await ctx.db.tarifaTurnoExtra.findMany({
     where: {
       OR: [
@@ -86,8 +85,6 @@ export async function excepcionParaExtra(ctx: Contexto, excepcionId: string) {
   if (!puesto) throw noEncontrado("La excepción");
   return { ...ex, personaId: ex.personaId, instalacionId: puesto.instalacionId };
 }
-
-export const idExtraSchema = z.object({ id: uuidSchema });
 
 export function quienResuelveExtra(ctx: Contexto): string {
   const id = ctx.usuario?.id;
