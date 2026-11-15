@@ -14,16 +14,40 @@ async function marcoNuevo(page: Page) {
     .addCookies([{ name: "opai_marco", value: "nuevo", url: new URL(page.url()).origin }]);
 }
 
-async function abrirPrimeraCuenta(page: Page) {
+async function abrirPrimeraCuenta(page: Page): Promise<string> {
   await page.goto("/cuentas");
   const lista = page.getByRole("region", { name: "Lista de cuentas" });
   await hidratado(lista);
   const primera = lista.locator('a[href^="/cuentas/"]:not([href$="/nueva"]):visible').first();
   await expect(primera).toBeVisible();
-  const nombre = (await primera.textContent())?.trim() ?? "";
   await primera.click();
   await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}/);
-  return nombre;
+  const titulo = await page
+    .locator("[data-detalle]")
+    .getByRole("heading", { level: 1 })
+    .first()
+    .innerText();
+  return titulo.trim();
+}
+
+async function abrirAgenteDesdeBarra(page: Page) {
+  const superior = page.locator('button[title*="Ctrl+J"], button[title*="⌘J"]');
+  if (await superior.isVisible().catch(() => false)) {
+    await superior.click();
+    return;
+  }
+  const barra = page.getByRole("navigation", { name: "Principal" }).filter({ visible: true });
+  const pestaña = barra.getByRole("button", { name: /Agente/ });
+  await expect(pestaña).toBeVisible();
+  await pestaña.click();
+}
+
+async function cerrarPanel(page: Page, panel: ReturnType<Page["locator"]>) {
+  await page.keyboard.press("Escape");
+  if (await panel.isVisible().catch(() => false)) {
+    await page.keyboard.press("Escape");
+  }
+  await expect(panel).toBeHidden({ timeout: 15_000 });
 }
 
 test.describe("@preview agente: panel único con contexto de ficha (CAR-547)", () => {
@@ -36,28 +60,36 @@ test.describe("@preview agente: panel único con contexto de ficha (CAR-547)", (
     const preguntarFicha = page.locator("[data-detalle]").getByRole("button", {
       name: "Preguntar a OPAI",
     });
-    const agenteBarra = page.locator('button[title*="Ctrl+J"], button[title*="⌘J"]');
-    test.skip((await agenteBarra.count()) === 0, "la empresa no tiene agente interno");
+    const hayBarra =
+      (await page
+        .locator('button[title*="Ctrl+J"], button[title*="⌘J"]')
+        .count()) > 0 ||
+      (await page
+        .getByRole("navigation", { name: "Principal" })
+        .getByRole("button", { name: /Agente/ })
+        .count()) > 0;
+    test.skip(!hayBarra, "la empresa no tiene agente interno");
 
     await expect(page.getByTestId("agente-en-ficha")).toHaveCount(0);
+    await expect(preguntarFicha).toBeVisible();
 
     await preguntarFicha.click();
     const panel = page.locator("aside[data-panel-lateral]");
     await expect(panel).toBeVisible();
     const chip = panel.getByTestId("agente-contexto-ficha");
-    await expect(chip).toContainText(nombre || "Sobre");
-    await page.keyboard.press("Escape");
-    await expect(panel).toBeHidden();
+    await expect(chip).toContainText("Sobre");
+    await expect(chip).toContainText(nombre);
+    await cerrarPanel(page, panel);
 
-    await agenteBarra.click();
+    await abrirAgenteDesdeBarra(page);
     await expect(panel).toBeVisible();
     await expect(chip).toBeVisible();
     await page.waitForTimeout(300);
     await capturar(page, info, "agente-ficha-contexto");
 
-    await page.keyboard.press("Escape");
+    await cerrarPanel(page, panel);
     await page.goto("/cuentas");
-    await agenteBarra.click();
+    await abrirAgenteDesdeBarra(page);
     await expect(panel).toBeVisible();
     await expect(panel.getByTestId("agente-contexto-ficha")).toHaveCount(0);
     await capturar(page, info, "agente-lista-sin-contexto");
