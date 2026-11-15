@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar } from "./preview";
+import { capturar, pasarProteccionDeVercel } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-456: «Cobros esperados» se abre en una fila por cliente y cada cliente en sus instalaciones.
@@ -10,6 +10,7 @@ test.setTimeout(120_000);
 
 test.describe("@preview flujo de caja: ingresos por cliente", () => {
   test("filas plegables en el sistema de diseño", async ({ page }, info) => {
+    await pasarProteccionDeVercel(page);
     await page.goto("/ds");
     const cliente = page.getByRole("button", { name: "Ver detalle de Cementera Andina" });
     await cliente.scrollIntoViewIfNeeded();

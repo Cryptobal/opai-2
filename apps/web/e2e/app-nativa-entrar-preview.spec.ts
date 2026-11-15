@@ -18,7 +18,11 @@ test.describe("@preview app nativa: /entrar lleva a cada perfil a su portal", ()
     test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
     await entrar(page);
     await page.goto("/entrar");
-    await page.waitForLoadState("domcontentloaded");
+    try {
+      await page.waitForURL((u) => u.pathname !== "/entrar", { timeout: 15_000 });
+    } catch {
+      // Sigue en el selector de portal.
+    }
     const ruta = new URL(page.url()).pathname;
     if (ruta === "/entrar") {
       await expect(page.getByRole("heading", { name: "Entrar a OPAI" })).toBeVisible();
