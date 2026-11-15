@@ -18,8 +18,8 @@ export async function gravedadDeRondas(
   ctx: Contexto,
   e: {
     instalacionId: string;
-    puntoId?: string;
-    tipoIncidenteId?: string;
+    puntoId?: string | undefined;
+    tipoIncidenteId?: string | undefined;
   },
 ): Promise<string | undefined> {
   if (!e.puntoId && !e.tipoIncidenteId) return undefined;
