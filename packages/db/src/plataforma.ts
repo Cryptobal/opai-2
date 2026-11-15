@@ -23,7 +23,7 @@ const precio = {
   vigenteDesde: true,
 } as const;
 
-export function listarTenants(id?: string) {
+function listarTenants(id?: string) {
   return clienteApp().tenant.findMany({
     where: id ? { id } : {},
     orderBy: { nombre: "asc" },
