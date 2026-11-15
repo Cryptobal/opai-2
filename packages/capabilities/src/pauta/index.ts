@@ -25,6 +25,11 @@ import { seriesFijar } from "./series";
 import { titularAsignar } from "./titular-asignar";
 import { titularesListar } from "./titulares-listar";
 import { titularTrasladar } from "./titular-trasladar";
+import { turnosExtraAprobar } from "./turnos-extra-aprobar";
+import { turnosExtraListar } from "./turnos-extra-listar";
+import { turnosExtraMontoFijar } from "./turnos-extra-monto";
+import { turnosExtraRechazar } from "./turnos-extra-rechazar";
+import { turnosExtraRegistrar } from "./turnos-extra-registrar";
 
 export { ajustesPauta } from "./ajustes";
 export { buscadoresPauta } from "./buscadores";
@@ -53,6 +58,11 @@ export const capacidadesPauta: readonly Capacidad[] = [
   reemplazosSugerir,
   reemplazosAsignar,
   refuerzosAgregar,
+  turnosExtraRegistrar,
+  turnosExtraListar,
+  turnosExtraAprobar,
+  turnosExtraRechazar,
+  turnosExtraMontoFijar,
   alertasListar,
   exportarPauta,
   publicacionesPublicar,

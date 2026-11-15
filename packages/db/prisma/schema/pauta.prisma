@@ -106,6 +106,53 @@ model RegistroOperativoPauta {
   @@schema("pauta")
 }
 
+/// Turno extra por aprobar (CAR-96): referencia a la excepción de reemplazo o refuerzo; suma tipo,
+/// monto sugerido y estado. Aprobado o rechazado no cambia la cobertura. Sin estado de pago (CAR-101).
+model TurnoExtra {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  puestoId         String    @map("puesto_id") @db.Uuid
+  fecha            DateTime  @db.Date
+  personaId        String    @map("persona_id") @db.Uuid
+  excepcionId      String    @map("excepcion_id") @db.Uuid
+  /// "propio" | "externo".
+  tipoTrabajador   String    @map("tipo_trabajador")
+  montoClp         Int       @map("monto_clp")
+  montoMotivo      String?   @map("monto_motivo")
+  /// "puesto" | "instalacion" | "manual" | "sin_tarifa".
+  montoOrigen      String    @map("monto_origen")
+  /// "por_aprobar" | "aprobado" | "rechazado".
+  estado           String    @default("por_aprobar")
+  registradoPor    String?   @map("registrado_por") @db.Uuid
+  resueltoPor      String?   @map("resuelto_por") @db.Uuid
+  resueltoEn       DateTime? @map("resuelto_en") @db.Timestamptz(6)
+  motivoResolucion String?   @map("motivo_resolucion")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([excepcionId])
+  @@index([tenantId, estado, fecha])
+  @@index([tenantId, puestoId, fecha])
+  @@map("turnos_extra")
+  @@schema("pauta")
+}
+
+/// Tarifa sugerida de turno extra (CAR-96): por instalación o por puesto (la del puesto gana).
+model TarifaTurnoExtra {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  /// "instalacion" | "puesto".
+  sujetoTipo String   @map("sujeto_tipo")
+  sujetoId   String   @map("sujeto_id") @db.Uuid
+  montoClp   Int      @map("monto_clp")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, sujetoTipo, sujetoId])
+  @@map("tarifas_turno_extra")
+  @@schema("pauta")
+}
+
 /// Publicación de la pauta de una instalación en un mes (CAR-356): quién y cuándo la publicó y a cuántas
 /// personas se avisó. Republicar actualiza la misma fila. La pauta rige igual sin publicar.
 model PublicacionPauta {
