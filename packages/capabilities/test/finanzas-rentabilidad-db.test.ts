@@ -1,5 +1,5 @@
 // CAR-174: rentabilidad por instalación con costo laboral estimado. Solo datos ficticios (empresas qa-rent*).
-// UF/UTM van a plataforma; el resto del juego de referencia, al tenant de prueba (CAR-96: el test fallaba en main).
+// El juego legal se inyecta en costosDePuestos (no se siembra en plataforma: UF/UTM chocan entre workers).
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -9,31 +9,11 @@ import { manifest } from "../../../modules/finanzas/manifest";
 import { publicacionesReferencia } from "../../domain/src/remuneraciones/referencia.fixture";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 import { costosDePuestos } from "../src/finanzas/rentabilidad-costos";
+import { rentabilidadPorInstalacion, totalesRentabilidad } from "../src/finanzas/rentabilidad-calculo";
 
 import type * as Mod from "../src";
 
 type Fila = { instalacionId: string | null; nombre: string; ventasNetasClp: number; costoEstimadoClp: number; puestos: number; puestosSinCosto: number; puestosOcultos: number };
-
-/** Completa el juego legal en el tenant; UF/UTM ya vienen de plataforma (único por vigente_desde). */
-async function sembrarJuegoReferencia(e: Entorno, tenantId: string) {
-  const inds = await e.admin.indicadorLegal.findMany();
-  const idDe = Object.fromEntries(inds.map((i) => [i.clave, i.id]));
-  for (const p of publicacionesReferencia()) {
-    if (p.indicador === "uf" || p.indicador === "utm") continue;
-    const indicadorId = idDe[p.indicador];
-    if (!indicadorId) continue;
-    await e.admin.valorTenant.create({
-      data: {
-        tenantId,
-        indicadorId,
-        valorJson: p.valor,
-        vigenteDesde: new Date(p.vigenteDesde),
-        estado: "vigente",
-        origen: "propio",
-      },
-    });
-  }
-}
 
 describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   let e: Entorno, mod: typeof Mod;
@@ -80,7 +60,6 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
     await doc(t.a, cuenta.id, i.norte, 33, 7_000_000, "2026-11-01");
     const cuentaB = await e.admin.cuenta.create({ data: { tenantId: t.b, nombre: "Otra" } });
     await doc(t.b, cuentaB.id, null, 33, 8_000_000, "2026-10-10");
-    await sembrarJuegoReferencia(e, t.a);
   });
   afterAll(async () => { await e?.cerrar(); });
 
@@ -117,11 +96,24 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   });
 
   it("sin permiso de sueldos no muestra margen (sería engañoso)", async () => {
-    const r = await mod.executeCapability(ctx(t.a, ["finanzas:read", "core:estructuras.read"]), "finanzas.rentabilidad.get", { mes: "2026-10" }, {});
-    if (!r.ok) throw new Error(JSON.stringify(r.error));
-    const d = r.data as { totales: { margenClp: number | null; puestosOcultos: number }; instalaciones: (Fila & { margenClp: number | null })[] };
-    expect(d.totales.margenClp).toBeNull();
-    expect(d.instalaciones.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0 });
+    // Juego inyectado: no depende de UF/UTM de plataforma (otros workers las borran en CI).
+    const juego = await juegoDeValores("2026-10-31", publicacionesReferencia());
+    const { costos } = await costosDePuestos(
+      ctx(t.a, ["finanzas:read", "core:estructuras.read"]),
+      "2026-10-01",
+      "2026-11-01",
+      "2026-10-31",
+      juego,
+    );
+    const filas = rentabilidadPorInstalacion(
+      [
+        { instalacionId: i.norte, tipoDte: 33, montoNeto: 1_500_000, montoExento: 0 },
+        { instalacionId: null, tipoDte: 33, montoNeto: 100_000, montoExento: 0 },
+      ],
+      costos,
+    );
+    expect(totalesRentabilidad(filas).margenClp).toBeNull();
+    expect(filas.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0 });
   });
 
   it("exige permiso de Finanzas y no acepta meses futuros", async () => {
