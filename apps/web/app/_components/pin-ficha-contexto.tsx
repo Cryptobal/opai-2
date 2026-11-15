@@ -28,6 +28,13 @@ export function useBajoLg(): boolean {
  * «Fijar» de la ficha abierta: botón de la cabecera desde 1024 px (oculto debajo) y la misma acción
  * para el menú ⋯ de la ficha. `null` si la ruta no es una ficha o el usuario no puede fijar.
  */
+/** Botón Fijar/Desfijar en la cabecera de una ficha (≥1024 px). */
+export function BotonFijarEnCabecera(p: { fijado: boolean; onFijar: () => void }) {
+  return (
+    <BotonFijar variante="ficha" fijado={p.fijado} onFijar={p.onFijar} className="max-lg:hidden" />
+  );
+}
+
 export function pinDeFicha(
   activo: boolean,
   fijado: boolean | undefined,
@@ -37,12 +44,7 @@ export function pinDeFicha(
   if (!activo || !onFijar) return { boton: null, menu: null };
   const alFijar = () => void onFijar();
   const boton = botonEnShell ? (
-    <BotonFijar
-      variante="ficha"
-      fijado={fijado ?? false}
-      onFijar={alFijar}
-      className="max-lg:hidden"
-    />
+    <BotonFijarEnCabecera fijado={fijado ?? false} onFijar={alFijar} />
   ) : null;
   return { boton, menu: { fijado: fijado ?? false, onFijar: alFijar } };
 }

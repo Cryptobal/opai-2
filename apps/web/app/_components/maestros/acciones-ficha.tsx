@@ -2,12 +2,10 @@
 
 import { Pencil } from "lucide-react";
 
-import { PinDiferido as BotonFijar } from "@opai/ds";
-
 import type { Contexto } from "../agente/tipos";
-import { useBajoLg, usePinFicha } from "../pin-ficha-contexto";
+import { BotonFijarEnCabecera, useBajoLg, usePinFicha } from "../pin-ficha-contexto";
 import { type AccionEntidad, AccionesEntidad } from "./acciones-entidad";
-import { accionesSinEditar } from "./acciones-ficha-helpers";
+import { accionesSinEditar } from "./ficha-ruta";
 import { EnlaceBotonHoja } from "./enlace-boton-hoja";
 
 /** Cabecera estándar de ficha: [Editar] [Fijar] [⋯] (CAR-546). */
@@ -38,7 +36,7 @@ export function AccionesFicha({
         </EnlaceBotonHoja>
       ) : null}
       {pin && !bajoLg ? (
-        <BotonFijar variante="ficha" fijado={pin.fijado} onFijar={pin.onFijar} />
+        <BotonFijarEnCabecera fijado={pin.fijado} onFijar={pin.onFijar} />
       ) : null}
       <AccionesEntidad etiqueta={etiqueta} acciones={secundarias} {...(agente ? { agente } : {})} />
     </div>

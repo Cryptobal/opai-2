@@ -1,7 +1,6 @@
 import { expect, it } from "vitest";
 
-import { accionesSinEditar } from "@/app/_components/maestros/acciones-ficha-helpers";
-import { fichaAccionesEnCabecera, raizDeFicha } from "@/app/_components/maestros/ficha-ruta";
+import { accionesSinEditar, fichaAccionesEnCabecera, raizDeFicha } from "@/app/_components/maestros/ficha-ruta";
 
 it("normaliza la raíz de ficha con pestaña", () => {
   const id = "00000000-0000-4000-8000-000000000099";
