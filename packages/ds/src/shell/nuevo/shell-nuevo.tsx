@@ -23,21 +23,21 @@ export type ShellNuevoProps = AppShellProps & {
   onTema?: () => void;
   /** Pestaña «Agente» de la barra inferior del teléfono; sin agente no aparece. */
   onAgente?: () => void;
+  /** Trabajador y terreno: el teléfono conserva las pestañas del portal (CAR-335 D6e). */
+  pestanasDelPortal?: boolean;
 };
 
 /**
- * Shell del diseño nuevo (ADR-109, CAR-335 D2; diseño en docs/2.0/design/export-diseno-nuevo/): el
- * mismo shell que el clásico, con la piel `data-marco="nuevo"` y el menú lateral plegable. Plegado, se
- * ve el riel de íconos; al pasar el mouse se asoma el menú completo sobre la página y se vuelve a
- * esconder al alejarse o al elegir. La app recuerda si queda plegado y lo pasa al cargar, sin parpadeo. La visibilidad
- * va por `data-menu` y reglas de `styles.css`, y el componente se importa aparte
- * (`@opai/ds/shell-nuevo`): el shell clásico no carga nada de esto (ADR-037).
+ * Shell del diseño nuevo (ADR-109, CAR-335 D2; docs/2.0/design/export-diseno-nuevo/): el shell clásico
+ * con la piel `data-marco="nuevo"` y el menú lateral plegable (riel; al pasar el mouse se asoma el menú
+ * completo). Se importa aparte (`@opai/ds/shell-nuevo`): el shell clásico no carga nada de esto (ADR-037).
  */
 export function ShellNuevo({
   plegadoInicial,
   onPlegado,
   onTema,
   onAgente,
+  pestanasDelPortal = false,
   ...props
 }: ShellNuevoProps) {
   const [plegado, setPlegado] = useState(plegadoInicial ?? false);
@@ -50,8 +50,7 @@ export function ShellNuevo({
       if (raiz.dataset["marco"] === "nuevo") delete raiz.dataset["marco"];
     };
   }, []);
-  // Al elegir una pantalla del menú asomado, se esconde.
-  useEffect(() => setAsomado(false), [props.rutaActual]);
+  useEffect(() => setAsomado(false), [props.rutaActual]); // al elegir una pantalla, se esconde
   // Asomado: el riel queda tapado (fuera del árbol de accesibilidad, para no repetir «Principal») y
   // el menú se esconde cuando el mouse se aleja, también si apareció bajo el mouse sin que se moviera.
   useEffect(() => {
@@ -114,6 +113,7 @@ export function ShellNuevo({
     <div
       data-marco="nuevo"
       data-menu={asomado ? "asomado" : plegado ? "plegado" : "fijo"}
+      {...(pestanasDelPortal ? { "data-pestanas": "portal" } : {})}
       onPointerOver={asomar}
       className="flex"
     >
@@ -143,7 +143,7 @@ export function ShellNuevo({
           riel: plegado ? fijar : undefined,
         }}
       />
-      <BarraInferiorNueva {...props} onAgente={onAgente} onTema={onTema} />
+      {!pestanasDelPortal && <BarraInferiorNueva {...props} onAgente={onAgente} onTema={onTema} />}
       <BandaConexion />
     </div>
   );
