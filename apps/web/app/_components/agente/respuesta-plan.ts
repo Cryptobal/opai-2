@@ -53,6 +53,7 @@ export function aplicarTurno(m: Mensaje, t: Turno, nivel: Nivel): Mensaje {
     ...m,
     texto: t.texto,
     ...(plan ? { plan } : {}),
+    ...(t.referencias?.length ? { referencias: t.referencias } : {}),
     ...(t.conversacionId ? {} : { aviso: AVISO_SIN_HISTORIAL }),
   };
 }
