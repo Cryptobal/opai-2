@@ -39,9 +39,11 @@ const leer = defineCapability({
   handler: async () => ({ id: P_BETO }),
 });
 
+const exportar = defineCapability({ ...leer, id: "core.prueba_ver_como.exportar" });
+
 beforeEach(() => {
   limpiarRegistro();
-  registrarCapacidades([...capacidadesDelNucleo, escribir, leer]);
+  registrarCapacidades([...capacidadesDelNucleo, escribir, leer, exportar]);
 });
 
 function semilla() {
@@ -143,6 +145,15 @@ describe("contexto en «ver como»", () => {
       const r = await executeCapability(ctx, "core.prueba_ver_como.escribir", {}, { dryRun });
       expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     }
+  });
+
+  it("exportar tampoco: una portabilidad quedaría a nombre de la persona vista", async () => {
+    const { ctx } = ctxDe({ usuario: BETO, rol: "admin" });
+    ctx.verComo = { porUserId: ANA };
+    expect(await executeCapability(ctx, "core.prueba_ver_como.exportar", {})).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
   });
 
   it("las lecturas siguen y la auditoría registra a quien mira", async () => {
