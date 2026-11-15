@@ -14,6 +14,15 @@ import { purgarVentanas } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
+async function programarTenant(t: { id: string; timezone: string }, tocaDiarios: boolean) {
+  const ctx = await contextoSistemaDelTenant(t.id);
+  const [diarios, horarios] = await Promise.all([
+    tocaDiarios ? programarPeriodicos(ctx, hoyEn(t.timezone)) : Promise.resolve([] as string[]),
+    programarHorarios(ctx, horaEn(t.timezone)),
+  ]);
+  return { diarios, horarios };
+}
+
 /**
  * Cron de cada hora: encola los trabajos horarios de cada tenant y, desde las 09:00 UTC, los diarios. No hace el
  * trabajo (ADR-029). Antes corría una vez al día, así que los trabajos «horarios» también corrían una sola vez.
@@ -25,16 +34,7 @@ export async function GET(req: Request): Promise<Response> {
   let resultados: Record<string, unknown> = {};
   let errorTenants = false;
   try {
-    resultados = await porTenant(async (t) => {
-      const hoy = hoyEn(t.timezone);
-      const hora = horaEn(t.timezone);
-      const ctx = await contextoSistemaDelTenant(t.id);
-      const [diarios, horarios] = await Promise.all([
-        tocaDiarios ? programarPeriodicos(ctx, hoy) : Promise.resolve([] as string[]),
-        programarHorarios(ctx, hora),
-      ]);
-      return { diarios, horarios };
-    });
+    resultados = await porTenant((t) => programarTenant(t, tocaDiarios));
   } catch {
     errorTenants = true;
     console.error("[cron programador] falló la programación por tenant");

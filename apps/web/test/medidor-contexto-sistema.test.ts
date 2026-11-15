@@ -13,11 +13,13 @@ const crearContexto = vi.fn((p: { tenantId: string; modulosActivos: readonly str
   modulosActivos: [...p.modulosActivos],
   actor: { tipo: "system" as const },
 }));
-const despacharPendientes = vi.fn(async () => ({ publicados: 0, errores: 0 }));
+const despacharPendientes = vi.fn(
+  async (_ctx: { modulosActivos: string[] }) => ({ publicados: 0, errores: 0 }),
+);
 
 vi.mock("@opai/capabilities", () => ({
   crearContexto: (p: unknown) => crearContexto(p as never),
-  despacharPendientes: (...a: unknown[]) => despacharPendientes(...(a as [never])),
+  despacharPendientes: (ctx: { modulosActivos: string[] }) => despacharPendientes(ctx),
   medidorEnDb: { preparar: vi.fn(), registrar: vi.fn() },
 }));
 
@@ -46,7 +48,7 @@ describe("contextoSistemaDelTenant (CAR-441)", () => {
 
     await vi.waitFor(() => expect(despacharPendientes).toHaveBeenCalled());
     expect(modulosActivos).toHaveBeenCalledWith("tenant-qa");
-    const ctx = despacharPendientes.mock.calls[0]![0] as { modulosActivos: string[] };
+    const ctx = despacharPendientes.mock.calls[0]![0];
     expect(ctx.modulosActivos).toEqual(["portal_cliente", "comercial"]);
   });
 });
