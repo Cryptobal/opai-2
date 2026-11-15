@@ -11,8 +11,8 @@ import type { Equipo, FilaIntento, FilaRegistro, FilaUso, Tiempo } from "./acces
 /** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
 const DIFERIDO_MS = 120_000;
 type Lista = { e: Entrada; d: Doc; pre?: VisitanteDia | undefined };
-/** Zona de la empresa y si la instalación permite ingresos fuera de lista (R2, CAR-479). */
-type Reglas = { zona: string; fueraDeLista: boolean };
+/** Zona de la empresa, si la instalación permite ingresos fuera de lista (R2) y sus puntos activos (CAR-479). */
+type Reglas = { zona: string; fueraDeLista: boolean; puntos: ReadonlySet<string> };
 
 /** Entradas de lista de la instalación que coinciden con alguna huella del lote, y si hay lista autorizada. */
 async function listasDe(ctx: Contexto, instalacionId: string, huellas: string[]) {
@@ -72,6 +72,7 @@ function filaRegistro(
   id: string,
   entradaListaId: string | null,
   t: Tiempo,
+  puntos: ReadonlySet<string>,
 ): FilaRegistro {
   return {
     ...comun,
@@ -82,6 +83,7 @@ function filaRegistro(
     patente: (x.e.p.patente ? normalizarPatente(x.e.p.patente) : null) ?? x.pre?.patente ?? null,
     entradaListaId,
     camposExtra: x.e.p.campos ?? [],
+    puntoId: x.e.p.puntoId && puntos.has(x.e.p.puntoId) ? x.e.p.puntoId : null,
     origen:
       t.recibidoEn.getTime() - new Date(x.e.h.horaHecho).getTime() > DIFERIDO_MS
         ? "diferido"
@@ -129,7 +131,7 @@ export async function escribirFilas(
       continue;
     }
     const id = randomUUID();
-    registros.push(filaRegistro(x, comun, id, entradaListaId, t));
+    registros.push(filaRegistro(x, comun, id, entradaListaId, t, reglas.puntos));
     if (x.pre)
       usos.push({
         tenantId: ctx.tenantId,

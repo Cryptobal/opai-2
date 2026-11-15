@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { configDeInstalacion, configSchema } from "../../acceso/config-comun";
+import { puntosDe } from "../../acceso/puntos-comun";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { dispositivoActivo, iso } from "./hechos-comun";
@@ -21,6 +22,8 @@ export const accesoEnSitioTerreno = defineCapability({
     activo: z.boolean(),
     /** Configuración que rige en la instalación (CAR-479): tipos, formulario y permanencia máxima. */
     config: configSchema.nullable(),
+    /** Puntos de acceso activos de la instalación (CAR-479 parte 2): la portería elige uno si hay más de uno. */
+    puntos: z.array(z.object({ id: uuidSchema, nombre: z.string() })),
     items: z.array(
       z.object({
         id: uuidSchema,
@@ -38,11 +41,13 @@ export const accesoEnSitioTerreno = defineCapability({
   auditarLectura: (salida) => salida.items.map((r) => r.id),
   async handler(ctx, { dispositivoId }) {
     const disp = await dispositivoActivo(ctx, dispositivoId);
-    if (!ctx.modulosActivos.includes("acceso")) return { activo: false, config: null, items: [] };
+    if (!ctx.modulosActivos.includes("acceso"))
+      return { activo: false, config: null, puntos: [], items: [] };
     // Solo el día corriente y los que siguen dentro: la portería no necesita el historial.
     const desde = new Date(Date.now() - 36 * 3_600_000);
-    const [config, filas] = await Promise.all([
+    const [config, puntos, filas] = await Promise.all([
       configDeInstalacion(ctx, disp.instalacionId),
+      puntosDe(ctx, disp.instalacionId),
       ctx.db.registroAcceso.findMany({
         where: {
           instalacionId: disp.instalacionId,
@@ -66,6 +71,7 @@ export const accesoEnSitioTerreno = defineCapability({
     return {
       activo: true,
       config,
+      puntos: puntos.filter((p) => p.activo).map((p) => ({ id: p.id, nombre: p.nombre })),
       items: filas.map((r) => ({
         id: r.id,
         clave: r.clave,

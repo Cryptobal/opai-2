@@ -63,6 +63,8 @@ export const TIPOS_HECHO_TERRENO = {
       documento: documentoSchema.optional(),
       /** Código del QR de invitación de un prerregistro (CAR-478): reemplaza al documento, que ya está registrado. */
       invitacion: z.string().min(1).max(120).optional(),
+      /** Punto de acceso elegido en la portería (CAR-479 parte 2); uno que no sea activo de la instalación se ignora. */
+      puntoId: z.string().uuid().optional(),
       nombre: z.string().trim().min(2).max(120),
       empresa: z.string().trim().min(1).max(120).optional(),
       motivo: z.string().trim().min(1).max(200).optional(),
