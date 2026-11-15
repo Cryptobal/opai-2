@@ -25,6 +25,7 @@ function paresDe(r: RegistroFicha): Par[] {
   return [
     { etiqueta: DOC_TIPO[r.docTipo] ?? "Documento", valor: r.documento, numerico: true },
     { etiqueta: "Instalación", valor: r.instalacion },
+    ...(r.punto ? [{ etiqueta: "Punto de acceso", valor: r.punto }] : []),
     ...(r.patente ? [{ etiqueta: "Patente", valor: r.patente, numerico: true }] : []),
     { etiqueta: "Entrada", valor: formatearFechaHora(r.entradaEn) },
     ...(r.salidaEn ? [{ etiqueta: "Salida", valor: formatearFechaHora(r.salidaEn) }] : []),

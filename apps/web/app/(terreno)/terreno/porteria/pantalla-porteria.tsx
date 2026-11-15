@@ -11,6 +11,7 @@ import { usePersonaElegida } from "@/lib/terreno/persona";
 import type { ConfigAcceso } from "@opai/domain/acceso-config";
 
 import type { EnSitio } from "./lista-en-sitio";
+import { type PuntoPorteria, SelectorPunto, usePunto } from "./punto-porteria";
 
 // El formulario y la lista se cargan aparte para no pesar en el JS inicial de la ruta (presupuesto de JS, ADR-037).
 const FormularioEntrada = dynamic(
@@ -22,7 +23,12 @@ const ListaEnSitio = dynamic(() => import("./lista-en-sitio").then((m) => m.List
   ssr: false,
 });
 
-type Sitio = { activo: boolean; config: ConfigAcceso | null; items: EnSitio[] };
+type Sitio = {
+  activo: boolean;
+  config: ConfigAcceso | null;
+  puntos: PuntoPorteria[];
+  items: EnSitio[];
+};
 
 /**
  * Portería del equipo de terreno (CAR-78 · E4d): registrar entrada y salida. Lo que se registra queda primero en el
@@ -34,6 +40,7 @@ export function PantallaPorteria() {
   const [falla, setFalla] = useState(false);
   const [version, setVersion] = useState(0);
   const recargar = useCallback(() => setVersion((v) => v + 1), []);
+  const punto = usePunto(sitio?.puntos ?? []);
 
   useEffect(() => {
     let vivo = true;
@@ -76,6 +83,7 @@ export function PantallaPorteria() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-6 pt-safe pb-safe">
       <h1 className="t-title text-fg">Portería</h1>
+      <SelectorPunto puntos={sitio?.puntos ?? []} id={punto.id} onElegir={punto.elegir} />
       {!sitio && !falla ? <Loading variante="lista" /> : null}
       {sitio && !sitio.activo ? (
         <Empty
@@ -100,8 +108,12 @@ export function PantallaPorteria() {
       ) : null}
       {!sitio || sitio.activo ? (
         <>
-          <Esperados personaId={persona.id} alRegistrar={recargar} />
-          <FormularioEntrada personaId={persona.id} config={sitio?.config ?? null} />
+          <Esperados personaId={persona.id} puntoId={punto.id} alRegistrar={recargar} />
+          <FormularioEntrada
+            personaId={persona.id}
+            config={sitio?.config ?? null}
+            puntoId={punto.id}
+          />
           {sitio ? (
             <ListaEnSitio
               items={sitio.items}

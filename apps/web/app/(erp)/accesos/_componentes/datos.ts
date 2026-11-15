@@ -27,6 +27,7 @@ export type RegistroFicha = Registro & {
   docTipo: string;
   lista: "autorizada" | "bloqueada" | null;
   dispositivo: string | null;
+  punto: string | null;
   salidaOrigen: string | null;
   anulacion: { en: string; motivo: string } | null;
 };

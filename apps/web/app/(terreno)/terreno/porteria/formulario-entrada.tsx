@@ -25,9 +25,11 @@ import { DOCUMENTOS, TIPOS } from "./opciones";
 export function FormularioEntrada({
   personaId,
   config,
+  puntoId,
 }: {
   personaId: string;
   config: ConfigAcceso | null;
+  puntoId: string | null;
 }) {
   const c = config ?? CONFIG_ACCESO_DEFECTO;
   const [tipo, setTipo] = useState<string>(c.tipos[0] ?? "visita");
@@ -47,7 +49,8 @@ export function FormularioEntrada({
     setError(null);
     setEstado("guardando");
     try {
-      await encolarHecho({ tipo: "acceso.entrada", payload: r.payload, personaId });
+      const payload = { ...r.payload, ...(puntoId ? { puntoId } : {}) };
+      await encolarHecho({ tipo: "acceso.entrada", payload, personaId });
       setNumero("");
       setNombre("");
       setValores({});
