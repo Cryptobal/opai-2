@@ -114,6 +114,7 @@ model CentralIntento {
   @@schema("central")
 }
 
+
 /// Regla de vigilancia de la empresa (R1–R6): si una señal abre alertas y con qué severidad. Sin fila,
 /// rige el catálogo por defecto (`modules/central/domain/senales.ts`), activo solo dentro de la cola.
 model CentralRegla {

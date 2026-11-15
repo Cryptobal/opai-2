@@ -85,12 +85,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Revocar la firma automática del representante (R16): su pantalla de configuración va en el PR 2 de firma; aquí entra la capacidad de gobernanza.",
   },
-  "core.users.restablecer_mfa": {
-    encargo: "CAR-54",
-    desde: "2026-10-29",
-    motivo:
-      "Restablecer el MFA de un usuario desde su ficha (owner): las pantallas de MFA no tienen diseño aprobado en Claude Design (export-acceso/README.md).",
-  },
   "platform.usuarios.restablecer_mfa": {
     encargo: "CAR-54",
     desde: "2026-10-29",
@@ -132,29 +126,5 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-11-10",
     motivo:
       "La verificación con prueba de vida se invoca desde la marcación de Asistencia (frente «Face ID»), que aporta la cámara; B4 deja el adaptador y la capacidad.",
-  },
-  "core.webhooks.destino_crear": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
-  },
-  "core.webhooks.destino_actualizar": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
-  },
-  "core.webhooks.destino_rotar_secreto": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
-  },
-  "core.webhooks.destino_eliminar": {
-    encargo: "CAR-352",
-    desde: "2026-11-14",
-    motivo:
-      "La pantalla de destinos de eventos (Configuración › Agentes y API keys) entra con su diseño aprobado; esta parte deja la base, la firma y las capacidades por /api/v1.",
   },
 };

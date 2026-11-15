@@ -10,7 +10,4 @@ export function armarIndice(items: readonly ItemIndice[]): EntradaIndice[] {
     ...(it.subtitulos ?? []).map((t, k) => ({ numero: `${i + 1}.${k + 1}`, titulo: t, nivel: 2 as const })),
   ]);
 }
-
-/** Número del bloque `i` (base 0) y del capítulo `k` (base 0) con la misma regla del índice. */
-export const numeroBloque = (i: number) => String(i + 1);
 export const numeroCapitulo = (i: number, k: number) => `${i + 1}.${k + 1}`;

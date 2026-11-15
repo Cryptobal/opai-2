@@ -16,7 +16,7 @@ export type AlExistir = (typeof AL_EXISTIR)[number];
 export type Escalar = string | number | boolean | Date | null;
 export type Datos = Record<string, Escalar | readonly string[]>;
 
-export type AccionPlan = "crear" | "actualizar" | "sin_cambio" | "error";
+type AccionPlan = "crear" | "actualizar" | "sin_cambio" | "error";
 
 /** Lo que el importador decide para una fila válida de la planilla. */
 export type FilaPlan<D extends Datos> = {
@@ -35,7 +35,7 @@ export type FilaPlan<D extends Datos> = {
   idExterno?: string | null;
 };
 
-export type OpcionesPlan = { alExistir: AlExistir; sistema: string };
+type OpcionesPlan = { alExistir: AlExistir; sistema: string };
 
 export type Importador<D extends Datos = Datos> = {
   def: DefinicionImportador;

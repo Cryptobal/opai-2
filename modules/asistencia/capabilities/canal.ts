@@ -8,7 +8,7 @@ import { type Canal, PROPOSITO_TELEFONO, type ResultadoIdentidad } from "../doma
  * Canal por el que se marca (D-01): el kiosco de la instalación es el principal; el teléfono personal solo
  * si la empresa lo permite, la instalación lo incluye, RR. HH. habilitó a la persona y esta aceptó (T-04).
  */
-export async function exigirCanal(ctx: Contexto, instalacionId: string, personaId: string, canal: Canal | undefined): Promise<void> {
+async function exigirCanal(ctx: Contexto, instalacionId: string, personaId: string, canal: Canal | undefined): Promise<void> {
   const mapa = await ajuste<Record<string, Canal[]>>(ctx, "asistencia", "canales_por_instalacion");
   const permitidos = mapa[instalacionId] ?? ["kiosco"];
   if ((canal ?? "kiosco") === "kiosco") {
@@ -32,7 +32,7 @@ export async function exigirCanal(ctx: Contexto, instalacionId: string, personaI
  * El equipo del kiosco: sin sesión actúa como sistema y SU dispositivo es la credencial, así que debe venir, estar
  * activo y ser de la instalación donde se marca. Si viene en una sesión de usuario también se valida (no basta declararlo).
  */
-export async function exigirEquipo(ctx: Contexto, dispositivoId: string | undefined, instalacionId: string): Promise<void> {
+async function exigirEquipo(ctx: Contexto, dispositivoId: string | undefined, instalacionId: string): Promise<void> {
   if (!dispositivoId) {
     if (ctx.actor.tipo === "system") throw prohibido("Falta el equipo emparejado de la instalación.");
     return;
