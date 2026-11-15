@@ -23,7 +23,7 @@ import {
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
-import { consumidoresAsistencia, consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente, trabajosAsistencia, trabajosCpq } from "@opai/modules";
+import { consumidoresAsistencia, consumidorCpqBandeja, consumidorCpqEnlace, consumidorTicketsAvisos, modulos, trabajosAgente, trabajosAsistencia, trabajosCpq } from "@opai/modules";
 
 let hecho = false;
 
@@ -60,6 +60,7 @@ export function asegurarRegistro(): void {
     consumidorPautaPublicada,
     consumidorCpqBandeja,
     consumidorCpqEnlace,
+    consumidorTicketsAvisos,
     consumidorSeguimientoCierre,
     consumidorAvisoPrueba,
     consumidorAvisoPruebaEmpresa,
