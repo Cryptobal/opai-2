@@ -332,10 +332,6 @@
     @apply size-6;
   }
 }
-@utility ds-estado-icono-danger {
-}
-@utility ds-estado-icono-warning {
-}
 @utility ds-estado-accion {
   @apply mt-1;
 }
@@ -344,24 +340,6 @@
 }
 @utility ds-estado-texto {
   @apply max-w-sm text-base text-fg-muted;
-}
-@utility ds-esq {
-}
-@utility ds-esq-fila {
-}
-@utility ds-esq-mono {
-}
-@utility ds-esq-kpi {
-}
-@utility ds-kpi {
-}
-@utility ds-kpi-etiqueta {
-}
-@utility ds-kpi-valor {
-}
-@utility ds-kpi-nota {
-}
-@utility ds-grilla-kpi {
 }
 
 /* Menú plegable del diseño nuevo (ADR-109, CAR-335 D2): `ShellNuevo` pone `data-menu` y estas reglas
