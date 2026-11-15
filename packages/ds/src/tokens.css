@@ -262,6 +262,11 @@
   --ds-danger: #c62828;
   --ds-danger-fg: #c62828;
   --ds-danger-muted: #fdecec;
+  /* Sin azul de «info» (ADR-109): el único color libre es el acento de la empresa y el resto solo
+     marca estados (bien, aviso, alerta). Lo informativo va en neutro, como en el prototipo. */
+  --ds-info: var(--ds-fg-muted);
+  --ds-info-fg: var(--ds-fg);
+  --ds-info-muted: var(--ds-fill);
   --ds-destructive-bg: #c62828;
   --ds-destructive-fg: #ffffff;
   --ds-shimmer: rgba(255, 255, 255, 0.55);
@@ -306,6 +311,9 @@
     --ds-danger: #ff6b66;
     --ds-danger-fg: #ff6b66;
     --ds-danger-muted: #2a1212;
+    --ds-info: var(--ds-fg-muted);
+    --ds-info-fg: var(--ds-fg);
+    --ds-info-muted: var(--ds-fill);
     --ds-destructive-bg: #ff6b66;
     --ds-destructive-fg: #000000;
     --ds-shimmer: rgba(255, 255, 255, 0.05);
@@ -343,6 +351,9 @@
   --ds-danger: #ff6b66;
   --ds-danger-fg: #ff6b66;
   --ds-danger-muted: #2a1212;
+  --ds-info: var(--ds-fg-muted);
+  --ds-info-fg: var(--ds-fg);
+  --ds-info-muted: var(--ds-fill);
   --ds-destructive-bg: #ff6b66;
   --ds-destructive-fg: #000000;
   --ds-shimmer: rgba(255, 255, 255, 0.05);

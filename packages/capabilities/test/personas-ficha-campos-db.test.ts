@@ -42,7 +42,7 @@ describe.skipIf(omitirSuiteDb())("Personas · campos de la ficha CAR-277 (db)", 
   it("guarda tallas, medidas, código interno y movilización", async () => {
     const r = await ejecutar("core.personas.laboral_actualizar", {
       id: personaId,
-      uniforme: { tallaPolera: "M", tallaGeologo: "L", tallaPolar: "XL", estaturaCm: 172, pesoKg: 80 },
+      uniforme: { tallas: { polera: "M", geologo: "L", polar: "XL" }, estaturaCm: 172, pesoKg: 80 },
       jornadaDt: { resolucionVigenteHasta: "2027-06-30" },
       contacto: { codigoInterno: "G-0042", movilizacion: "Bus de acercamiento" },
     });
@@ -50,7 +50,11 @@ describe.skipIf(omitirSuiteDb())("Personas · campos de la ficha CAR-277 (db)", 
     const v = await ejecutar("core.personas.laboral_ver", { id: personaId });
     expect(v.ok, JSON.stringify(v)).toBe(true);
     expect(v.data).toMatchObject({
-      uniforme: { tallaPolera: "M", tallaGeologo: "L", tallaPolar: "XL", estaturaCm: 172, pesoKg: 80 },
+      uniforme: { estaturaCm: 172, pesoKg: 80 },
+      tallas: expect.arrayContaining([
+        expect.objectContaining({ prenda: "polera", talla: "M" }),
+        expect.objectContaining({ prenda: "polar", talla: "XL" }),
+      ]),
       jornadaDt: { resolucionVigenteHasta: "2027-06-30" },
       contacto: { codigoInterno: "G-0042", movilizacion: "Bus de acercamiento" },
     });
