@@ -144,7 +144,7 @@ export async function duplicadosDe(
 }
 
 /** Si el actor puede ver la rendición: es el solicitante, el aprobador asignado o ve todas (ADR-022). */
-export function puedeVer(ctx: Contexto, r: { solicitanteId: string; aprobadorId: string | null }): boolean {
+function puedeVer(ctx: Contexto, r: { solicitanteId: string; aprobadorId: string | null }): boolean {
   const yo = ctx.usuario?.id;
   return (
     !!yo && (r.solicitanteId === yo || r.aprobadorId === yo || ctx.autorizar(PERMISO_VER_TODAS))

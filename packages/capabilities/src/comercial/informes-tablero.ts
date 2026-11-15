@@ -11,7 +11,7 @@ import { resumenPrimeraRespuesta } from "./solicitudes-plazo";
 import { CANALES_SOLICITUD } from "./solicitudes-dominio";
 
 const dia = (d: Date) => d.toISOString().slice(0, 10);
-export const TOPE_INFORME = 20_000;
+const TOPE_INFORME = 20_000;
 const TOPE = TOPE_INFORME;
 
 /** Alguna fuente llegó al tope: el reporte suma solo esas filas y debe avisarlo. */

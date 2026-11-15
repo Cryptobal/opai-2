@@ -33,11 +33,13 @@ export function useMenuShell(
       datos.acceso && datos.tenant
         ? { href: rutaNovedades(datos.portal), noLeidas: novedadesNoLeidas }
         : undefined,
+      enErp && datos.nav.some((item) => item.href === "/configuracion"),
     );
     return { menuUsuario, novedadesNoLeidas };
   }, [
     datos.acceso,
     datos.iconos,
+    datos.nav,
     datos.portal,
     datos.tenant,
     enErp,

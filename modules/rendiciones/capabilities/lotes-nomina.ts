@@ -18,7 +18,7 @@ export async function exigirFormatoConfirmado(ctx: Contexto): Promise<void> {
 }
 
 /** Cuenta de origen: una cuenta activa de Bancos de la empresa (elegida en la configuración), nunca texto libre. */
-export async function cuentaOrigenDe(ctx: Contexto): Promise<string> {
+async function cuentaOrigenDe(ctx: Contexto): Promise<string> {
   const id = await ajuste<string>(ctx, "rendiciones", "nomina_cuenta_origen_id");
   if (!id) return "";
   const c = await ctx.db.cuentaBancaria.findFirst({ where: { id, activa: true }, select: { numeroVisible: true } });

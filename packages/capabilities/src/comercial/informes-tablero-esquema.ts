@@ -16,7 +16,7 @@ const cierre = z.object({
   cicloPromedioDias: z.number().int().nullable().describe("Días de creación a ganado; null sin ganados."),
 });
 
-export const PERIODOS = ["mes", "trimestre", "anio"] as const;
+const PERIODOS = ["mes", "trimestre", "anio"] as const;
 
 export const entradaTablero = z.object({
   periodo: z.enum(PERIODOS).default("mes").describe("Mes, trimestre o año calendario en curso."),
