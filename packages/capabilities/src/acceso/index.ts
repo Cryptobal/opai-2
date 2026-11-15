@@ -1,5 +1,6 @@
 // Capacidades de Control de acceso (CAR-78 · E4, CAR-474, CAR-478). Se exponen igual en UI, API /api/v1 y MCP (ADR-004, ADR-055).
 import type { Capacidad } from "../types";
+import { configCambiar, configObtener } from "./config";
 import { registrosAnular, registrosCerrarBloque, registrosSalida } from "./correcciones";
 import { intentosListar } from "./intentos";
 import { prerregistrosCancelar, prerregistrosCrear } from "./prerregistros";
@@ -27,4 +28,8 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   prerregistrosCrear,
   prerregistrosCancelar,
   prerregistrosInvitacion,
+  configObtener,
+  configCambiar,
 ];
+
+export { trabajoCierreAutomatico } from "./cierre";

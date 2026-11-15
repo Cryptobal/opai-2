@@ -1,3 +1,5 @@
+acceso_config_get
+acceso_config_set
 acceso_intentos_listar
 acceso_listas_agregar
 acceso_listas_listar
@@ -638,6 +640,7 @@ portal_trabajador_mis_datos_obtener
 portal_trabajador_preferencias_notificacion_actualizar
 portal_trabajador_preferencias_notificacion_obtener
 portal_trabajador_privacidad_obtener
+preview_acceso_config_set
 preview_acceso_listas_agregar
 preview_acceso_listas_quitar
 preview_acceso_prerregistros_cancelar
