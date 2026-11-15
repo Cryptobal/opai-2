@@ -8,8 +8,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { FormMarcaDocumentoDiferido } from "./form-marca-documento-diferido";
 import { FormPlantillaDocumentoDiferido } from "./form-plantilla-documento-diferido";
 import { FormPlantillaPropuestaDiferido } from "./form-plantilla-propuesta-diferido";
-import { type PlantillaHtmlFila, ListaPlantillasHtml } from "./lista-plantillas-html";
-import { SubirPlantillaHtml } from "./subir-plantilla-html";
+import { SeccionPlantillasHtml } from "./seccion-plantillas-html";
 
 async function cargarMarca() {
   const r = await ejecutarComoUsuario<{
@@ -48,19 +47,13 @@ async function cargarPrompt() {
   return r.ok ? r.data.texto : null;
 }
 
-async function cargarHtml() {
-  const r = await ejecutarComoUsuario<{ plantillas: PlantillaHtmlFila[] }>("erp", "cpq.propuestas_html.list", {});
-  return r.ok ? r.data.plantillas : null;
-}
-
 /** Marca documental CPQ y plantilla de cotización (CAR-135 addendum). Logos/colores en /configuracion/marca. */
 export async function SeccionMarcaPlantillasCpq() {
-  const [marca, plantilla, plantillaPropuesta, prompt, html] = await Promise.all([
+  const [marca, plantilla, plantillaPropuesta, prompt] = await Promise.all([
     cargarMarca(),
     cargarPlantilla(),
     cargarPlantillaPropuesta(),
     cargarPrompt(),
-    cargarHtml(),
   ]);
   const state = marca && plantilla && plantillaPropuesta ? ("ready" as const) : ("error" as const);
   return (
@@ -106,17 +99,7 @@ export async function SeccionMarcaPlantillasCpq() {
               <BotonCopiar texto={prompt} etiqueta="Copiar prompt" />
             </div>
           ) : null}
-          {html ? (
-            <div className="space-y-3 border-t border-border pt-6">
-              <p className="t-label">Plantillas HTML de la propuesta</p>
-              <p className="t-caption text-fg-muted">
-                Sube el HTML, revisa los errores y la vista previa, y elige cuál usar. Se quita todo lo que pueda ejecutar
-                código o llamar a internet.
-              </p>
-              <SubirPlantillaHtml />
-              <ListaPlantillasHtml plantillas={html} />
-            </div>
-          ) : null}
+          <SeccionPlantillasHtml />
         </div>
       ) : null}
     </Estado>
