@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 
 import { bloquesNovedad, trozosNovedad, type TrozoNovedad } from "@opai/domain";
-import { Enlace } from "@opai/ds";
+import { Enlace, Table, Td, Th, Tr } from "@opai/ds";
 
 type PropsTrozos = {
   trozos: readonly TrozoNovedad[];
@@ -73,6 +73,31 @@ export function TextoNovedad({
             <p key={i}>
               <Trozos trozos={b.trozos} enlaceOk={enlaceOk} />
             </p>
+          );
+        if (b.tipo === "tabla")
+          return (
+            <Table key={i} etiqueta="Tabla">
+              <thead>
+                <Tr>
+                  {b.encabezados.map((c, j) => (
+                    <Th key={j}>
+                      <Trozos trozos={c} enlaceOk={enlaceOk} />
+                    </Th>
+                  ))}
+                </Tr>
+              </thead>
+              <tbody>
+                {b.filas.map((fila, r) => (
+                  <Tr key={r}>
+                    {fila.map((c, j) => (
+                      <Td key={j}>
+                        <Trozos trozos={c} enlaceOk={enlaceOk} />
+                      </Td>
+                    ))}
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
           );
         const Lista = b.ordenada ? "ol" : "ul";
         return (
