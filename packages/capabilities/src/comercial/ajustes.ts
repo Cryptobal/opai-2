@@ -8,7 +8,7 @@ export const ajustesComercial = z.object({
   ganar_exige_cotizacion: z.boolean().default(false).meta({
     etiqueta: "Ganar exige cotización enviada",
     ayuda:
-      "Apagado hasta que exista CPQ: se puede ganar sin cotización (decisión de Carlos, 26-oct-2026).",
+      "Apagado por defecto. Encendido, no se puede marcar un negocio como ganado sin una cotización enviada al cliente.",
     grupo: "Negocios",
     ambito: "tenant",
     permiso: "comercial:config.manage",
@@ -34,7 +34,7 @@ export const ajustesComercial = z.object({
   solicitudes_acuse_recibo: z.boolean().default(false).meta({
     etiqueta: "Enviar acuse de recibo al recibir una solicitud",
     ayuda:
-      "Apagado por defecto (decisión de Carlos, 25-oct-2026). El correo sale por Comunicaciones; en el PR 1 aún no hay canal de entrada que lo dispare.",
+      "Apagado por defecto. Encendido, al recibir una solicitud OPAI envía un correo de acuse al solicitante por Comunicaciones.",
     grupo: "Leads",
     ambito: "tenant",
     permiso: "comercial:canales.manage",
@@ -43,7 +43,7 @@ export const ajustesComercial = z.object({
   solicitudes_primera_respuesta_horas: z.number().int().min(0).max(720).default(0).meta({
     etiqueta: "Tiempo objetivo de primera respuesta (horas hábiles)",
     ayuda:
-      "Apagado con 0 (decisión de Carlos, 11-nov-2026). Se cuenta en horas hábiles: lunes a viernes, de 8:00 a 18:00. Con un valor, la bandeja de Solicitudes marca cuáles están dentro o fuera del plazo y el tablero de reportes mide cuántas se atendieron a tiempo.",
+      "0 lo desactiva. Con un valor, se cuenta en horas hábiles (lunes a viernes, de 8:00 a 18:00): la bandeja de Solicitudes marca cuáles están dentro o fuera del plazo y los reportes miden cuántas se atendieron a tiempo.",
     grupo: "Leads",
     ambito: "tenant",
     permiso: "comercial:config.manage",

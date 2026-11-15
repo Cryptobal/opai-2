@@ -82,7 +82,8 @@ export const ajustesRendiciones = z.object({
   }),
   nomina_formato_confirmado: z.boolean().default(false).meta({
     etiqueta: "Activar la nómina Santander (solo empresa de pruebas)",
-    ayuda: "El formato Santander está confirmado (Carlos, 6-nov-2026), pero R3 está autorizado solo en la empresa de pruebas: se enciende únicamente allí. Apagado = no se genera ni se descarga la nómina.",
+    ayuda:
+      "Solo para empresas de prueba. Encendido permite generar y descargar la nómina en formato Santander; apagado bloquea la generación y la descarga.",
     grupo: "Pagos",
     ambito: "tenant",
     permiso: PERMISO_CONFIG,

@@ -1,12 +1,17 @@
 import { Badge, ListScreen } from "@opai/ds";
 
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
-import { NuevoTicket } from "./_componentes/nuevo-ticket";
+import {
+  CONFIG_TIPOS_TICKET,
+  MOTIVO_SIN_TIPOS_TICKET,
+  NuevoTicket,
+} from "./_componentes/nuevo-ticket";
 import {
   cargarTickets,
   cargarTipos,
@@ -43,6 +48,7 @@ export default function Tickets({ searchParams }: Props) {
     >
       {({ r, tipos }) => {
         const items = r.ok ? r.data.items : [];
+        const sinTipos = tipos.length === 0;
         return (
           <ListScreen<Ticket>
             state={estadoPantalla(r)}
@@ -93,8 +99,15 @@ export default function Tickets({ searchParams }: Props) {
             ]}
             textos={{
               vacio: {
-                titulo: "Sin tickets",
-                descripcion: "Los tickets nuevos del tipo que crees aparecerán aquí.",
+                titulo: sinTipos ? "Aún no puedes crear tickets" : "Sin tickets",
+                descripcion: sinTipos
+                  ? MOTIVO_SIN_TIPOS_TICKET
+                  : "Los tickets nuevos del tipo que crees aparecerán aquí.",
+                accion: sinTipos ? (
+                  <EnlaceBoton href={CONFIG_TIPOS_TICKET} variante="secondary">
+                    Configurar tipos de ticket
+                  </EnlaceBoton>
+                ) : undefined,
               },
             }}
           />

@@ -92,7 +92,7 @@ export const AJUSTES_PERSONAS = defineAjustes(
       .meta({
         etiqueta: 'Plazo máximo de vigencia de la marca "No recontratar" (días)',
         ayuda:
-          "TODO(decisión Carlos): sin plazo máximo definido. Con 0 no hay tope; la fecha de vencimiento la fija quien marca, por persona.",
+          "Con 0 no hay tope: la fecha de vencimiento la fija quien marca la persona, caso por caso. Si pones días, ninguna marca puede vigente más allá de ese plazo.",
         grupo: "Personas",
         ambito: "tenant",
         permiso: PERMISOS_CORE.personasNoRecontratarManage,

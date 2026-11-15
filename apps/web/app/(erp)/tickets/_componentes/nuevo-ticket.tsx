@@ -3,11 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
+import { avisar, Button, Campo, Input, Select, Sheet, Textarea, Tooltip } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { TipoTicket } from "./datos";
+
+export const CONFIG_TIPOS_TICKET = "/configuracion/modulo/tickets?seccion=tipos";
+
+export const MOTIVO_SIN_TIPOS_TICKET =
+  "Para crear un ticket hace falta un tipo disponible para tu rol. Quien administra Tickets puede crearlo en Configuración › Módulos › Tickets › Tipos.";
 
 // Solo el tipo viene de datos.ts: sus valores arrastran código de servidor al navegador.
 const PRIORIDADES = [
@@ -32,6 +37,7 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
   const [prioridad, setPrioridad] = useState("p3");
   const tipo = tipos.find((t) => t.id === tipoId);
   const valido = tipoId !== "" && titulo.trim().length >= 3 && descripcion.trim().length >= 3;
+  const sinTipos = tipos.length === 0;
 
   const cerrar = () => {
     limpiarError();
@@ -53,11 +59,21 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
     router.push(`/tickets/${r.id}`);
   }
 
+  const boton = (
+    <Button onClick={() => setAbierto(true)} disabled={sinTipos}>
+      Nuevo ticket
+    </Button>
+  );
+
   return (
     <>
-      <Button onClick={() => setAbierto(true)} disabled={tipos.length === 0}>
-        Nuevo ticket
-      </Button>
+      {sinTipos ? (
+        <Tooltip texto={MOTIVO_SIN_TIPOS_TICKET}>
+          <span className="inline-flex">{boton}</span>
+        </Tooltip>
+      ) : (
+        boton
+      )}
       <Sheet
         abierto={abierto}
         onCerrar={cerrar}
