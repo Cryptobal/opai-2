@@ -38,14 +38,14 @@ export const camposPersonalizadosList = defineCapability({
   portales: ["erp"],
   input: z.object({
     entidad: entidadSchema.optional(),
-    incluirArchivados: z.boolean().default(false),
     cursor: uuidSchema.optional(),
     limite: z.number().int().min(1).max(200).default(200),
+    incluirArchivados: z.boolean().default(false),
   }),
   output: z.object({
+    entidades: z.array(z.object({ valor: entidadSchema, nombre: z.string() })),
     items: z.array(campoPersonalizadoSchema),
     siguiente: z.string().nullable(),
-    entidades: z.array(z.object({ valor: entidadSchema, nombre: z.string() })),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -59,7 +59,10 @@ export const camposPersonalizadosList = defineCapability({
       orderBy: [{ entidad: "asc" }, { orden: "asc" }, { id: "asc" }],
       ...cursorDe(input.cursor, input.limite),
     });
-    const entidades = activas.map((e) => ({ valor: e, nombre: FICHAS_CAMPO_PERSONALIZADO[e].nombre }));
+    const entidades = activas.map((e) => ({
+      valor: e,
+      nombre: FICHAS_CAMPO_PERSONALIZADO[e].nombre,
+    }));
     return { ...pagina(filas.map(vistaCampo), input.limite, input.cursor), entidades };
   },
 });
@@ -84,12 +87,26 @@ export const camposPersonalizadosCreate = defineCapability({
     const columnas = columnasDefinicion(tipo, def);
     const orden = await siguienteOrden(ctx, entidad);
     const clave = claveCampoPersonalizado(etiqueta);
-    const datos = { entidad, etiqueta, tipo, descripcion: descripcion || null, obligatorio, clave, orden, activo: true, ...columnas };
+    const datos = {
+      entidad,
+      etiqueta,
+      tipo,
+      descripcion: descripcion || null,
+      obligatorio,
+      clave,
+      orden,
+      activo: true,
+      ...columnas,
+    };
     if (dryRun) return vistaCampo({ id: "", ...datos });
     const c = await ctx.transaccion(async (tx) => {
       const nuevo = await sinDuplicado(
         tx.campoPersonalizado.create({
-          data: { tenantId: ctx.tenantId, ...datos, valorDefecto: datos.valorDefecto ?? Prisma.DbNull },
+          data: {
+            tenantId: ctx.tenantId,
+            ...datos,
+            valorDefecto: datos.valorDefecto ?? Prisma.DbNull,
+          },
         }),
         DUPLICADO_CAMPO,
       );
