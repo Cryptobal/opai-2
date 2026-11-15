@@ -17,7 +17,8 @@ import {
   extraerReferencias,
   type Referencia,
 } from "./referencias";
-import { SISTEMA } from "./sistema";
+import { compactarDatoAgente } from "./compactar-dato";
+import { sistema } from "./sistema";
 
 export type { Paso, Plan } from "./plan";
 export type Conversador = { conversar(s: SolicitudConversacion): Promise<RespuestaConversacion> };
@@ -41,7 +42,7 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     throw prohibido("Sin acceso al agente interno.");
   }
   const mensajes: Mensaje[] = [
-    { rol: "sistema", texto: `${SISTEMA}\n\n${GUIA}\n\n${indiceDelAgente(ctx)}` },
+    { rol: "sistema", texto: `${sistema()}\n\n${GUIA}\n\n${indiceDelAgente(ctx)}` },
     { rol: "usuario", texto },
   ];
   const plan: Plan = { id: randomUUID(), pasos: [], texto: "", tokens: 0, referencias: [] };
@@ -118,11 +119,15 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
         }
       } else resultado = paso;
       if (resultado.ok) extraerReferencias(resultado.data, refs);
+      const dato =
+        resultado.ok
+          ? { ...resultado, data: compactarDatoAgente(resultado.data) }
+          : resultado;
       mensajes.push({
         rol: "herramienta",
         id: llamada.id,
         nombre: llamada.nombre,
-        resultado: JSON.stringify({ externo: true, dato: resultado }).slice(0, 24_000),
+        resultado: JSON.stringify({ externo: true, dato }).slice(0, 24_000),
       });
     }
   }
