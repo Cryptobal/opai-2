@@ -15,6 +15,19 @@ const aEntrada = (v: ValorCampo): Entrada => (typeof v === "number" ? String(v) 
 const igual = (a: Entrada | undefined, b: Entrada | undefined) =>
   JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
+function CampoEditable(p: { c: CampoFicha; valor: Entrada; onCambiar: (v: Entrada) => void }) {
+  const { c } = p;
+  return (
+    <Campo
+      etiqueta={c.obligatorio ? `${c.etiqueta} (obligatorio)` : c.etiqueta}
+      htmlFor={`campo-${c.clave}`}
+      {...(c.descripcion ? { ayuda: c.descripcion } : {})}
+    >
+      <ControlCampo c={c} id={`campo-${c.clave}`} valor={p.valor} onCambiar={p.onCambiar} />
+    </Campo>
+  );
+}
+
 /**
  * Botón «Editar» y hoja con un control por campo; guarda solo lo que cambió. Un campo vacío con valor
  * por defecto lo propone ya cargado (se guarda al confirmar).
@@ -76,19 +89,12 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
         <div className="flex flex-col gap-4">
           {error ? <Alerta tono="danger" titulo={error} /> : null}
           {p.campos.map((c) => (
-            <Campo
+            <CampoEditable
               key={c.clave}
-              etiqueta={c.obligatorio ? `${c.etiqueta} (obligatorio)` : c.etiqueta}
-              htmlFor={`campo-${c.clave}`}
-              {...(c.descripcion ? { ayuda: c.descripcion } : {})}
-            >
-              <ControlCampo
-                c={c}
-                id={`campo-${c.clave}`}
-                valor={b[c.clave] ?? null}
-                onCambiar={(v) => setB({ ...b, [c.clave]: v })}
-              />
-            </Campo>
+              c={c}
+              valor={b[c.clave] ?? null}
+              onCambiar={(v) => setB({ ...b, [c.clave]: v })}
+            />
           ))}
         </div>
       </Sheet>

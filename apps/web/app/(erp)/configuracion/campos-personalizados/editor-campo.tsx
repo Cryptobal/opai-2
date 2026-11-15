@@ -3,12 +3,13 @@
 import { useState } from "react";
 
 import type { EntidadCampoPersonalizado, TipoCampoPersonalizado } from "@opai/domain";
-import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Switch } from "@opai/ds";
+import { avisar, Button, Sheet, Switch } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { DatosCampo } from "./datos-campo";
 import { DefinicionCampo, definicionInicial, entradaDefinicion } from "./definicion-campo";
-import { TIPOS, type CampoConfig } from "./tipos-campo";
+import type { CampoConfig } from "./tipos-campo";
 
 type Props = (
   { campo: CampoConfig } | { entidad: EntidadCampoPersonalizado; nombreFicha: string }
@@ -71,43 +72,19 @@ export function EditorCampo(p: Props) {
       }
     >
       <div className="flex flex-col gap-4">
-        {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <Campo etiqueta="Nombre" htmlFor="campo-etiqueta">
-          <Input
-            id="campo-etiqueta"
-            maxLength={60}
-            value={etiqueta}
-            onChange={(e) => setEtiqueta(e.target.value)}
-          />
-        </Campo>
-        <Campo
-          etiqueta="Tipo"
-          htmlFor="campo-tipo"
-          {...(campo ? { ayuda: "El tipo no se cambia después de crear el campo." } : {})}
-        >
-          <Select
-            id="campo-tipo"
-            valor={tipo}
-            onCambiar={(v) => {
-              setTipo(v as TipoCampoPersonalizado);
-              setDef({ ...def, defecto: null });
-            }}
-            opciones={TIPOS}
-            disabled={Boolean(campo)}
-          />
-        </Campo>
-        <Campo
-          etiqueta="Ayuda"
-          htmlFor="campo-ayuda"
-          ayuda="Texto corto que se muestra bajo el campo en la ficha."
-        >
-          <Input
-            id="campo-ayuda"
-            maxLength={300}
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-          />
-        </Campo>
+        <DatosCampo
+          error={error}
+          etiqueta={etiqueta}
+          onEtiqueta={setEtiqueta}
+          tipo={tipo}
+          onTipo={(t) => {
+            setTipo(t);
+            setDef({ ...def, defecto: null });
+          }}
+          creado={Boolean(campo)}
+          descripcion={descripcion}
+          onDescripcion={setDescripcion}
+        />
         <DefinicionCampo tipo={tipo} d={def} onCambiar={setDef} />
         <Switch
           activo={obligatorio}
