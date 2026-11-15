@@ -10,11 +10,31 @@ import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
 import { cargarLogoMarca } from "./pdf/logo";
 import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
 import { renderPdfPropuestaTecnica } from "./pdf-propuesta-tecnica";
-import { marcaDocumentoEnVersion, vistaMarcaDocumento } from "./marca-documento";
+import { marcaDocumentoEnVersion, type MarcaDocumentoVista, vistaMarcaDocumento } from "./marca-documento";
 import { vistaPlantillaPropuesta } from "./plantilla-propuesta";
 import type { ServicioDesdeCotizacion } from "../domain/documento/propuesta-tecnica";
 import { capitulosDeEnvio } from "./propuesta-capitulos";
+import { htmlConValores, plantillaHtmlDeEnvio } from "./propuesta-html-uso";
+import { renderPdfPropuestaHtml } from "./pdf-propuesta-html";
 import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
+
+/** PDF con la versión de la plantilla HTML congelada en el envío y los valores del contrato de campos. */
+async function pdfHtmlDeEnvio(
+  ctx: Contexto,
+  snapshot: SnapshotEnvioPropuesta,
+  ref: { id: string; hash: string },
+  d: { cotizacionId: string; codigo: string; marca: MarcaDocumentoVista },
+) {
+  const entrada = await entradaPdfDesdeCotizacion(ctx, d.cotizacionId, { enviada: true });
+  return renderPdfPropuestaHtml({
+    codigo: d.codigo,
+    fecha: entrada?.calculo.fecha ?? "",
+    borrador: false,
+    marca: d.marca,
+    logo: await cargarLogoMarca(ctx),
+    html: htmlConValores(await plantillaHtmlDeEnvio(ctx, ref), snapshot.camposContrato?.valores),
+  });
+}
 
 export async function pdfPropuestaDesdeSnapshot(
   ctx: Contexto,
@@ -31,6 +51,7 @@ export async function pdfPropuestaDesdeSnapshot(
   const marca =
     (await marcaDocumentoEnVersion(ctx, snapshot.marcaDocumentoVersion)) ??
     (await vistaMarcaDocumento(ctx));
+  if (snapshot.plantillaHtml) return pdfHtmlDeEnvio(ctx, snapshot, snapshot.plantillaHtml, { ...input, marca });
   const rowPl = await ctx.db.cpqPlantillaDocumento.findFirst({
     where: { id: snapshot.plantillaDocumentoId, tenantId: ctx.tenantId },
   });

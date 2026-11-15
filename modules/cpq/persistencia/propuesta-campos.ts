@@ -11,6 +11,13 @@ import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
 /** Faltante del render cuando el texto repite `referencias` y no hay ninguna autorizada (CAR-138 PR 7). */
 const SIN_REFERENCIAS = "colecciones.referencias";
 
+/** Cuenta del negocio de la cotización, de donde salen los campos del cliente. */
+export async function cuentaDeCotizacion(ctx: Contexto, cotizacionId: string): Promise<string | null> {
+  const cot = await ctx.db.cpqCotizacion.findFirst({ where: { id: cotizacionId }, select: { negocioId: true } });
+  const neg = cot ? await ctx.db.negocio.findFirst({ where: { id: cot.negocioId }, select: { cuentaId: true } }) : null;
+  return neg?.cuentaId ?? null;
+}
+
 /**
  * Valida los tokens de la propuesta contra el catálogo único (finalidad «propuesta»), resuelve sus
  * valores con el contexto autorizado del actor y devuelve el contrato a congelar. Sin tokens no hace
@@ -23,12 +30,14 @@ export async function contratoCamposPropuesta(
     propuestaBloquesJson: string;
     bloquesBiblioteca: Readonly<Record<string, number>>;
     destinatarios: readonly DestinatarioEnvio[];
+    /** HTML de la plantilla de la empresa en uso: sus campos se congelan igual que los del texto. */
+    plantillaHtml?: string;
   },
 ): Promise<ContratoCamposEnvio | undefined> {
-  const textos = textosConTokens(
-    input.propuestaBloquesJson,
-    await textosBiblioteca(ctx, input.propuestaBloquesJson, input.bloquesBiblioteca),
-  );
+  const textos = [
+    ...textosConTokens(input.propuestaBloquesJson, await textosBiblioteca(ctx, input.propuestaBloquesJson, input.bloquesBiblioteca)),
+    ...(input.plantillaHtml ? [input.plantillaHtml] : []),
+  ];
   const v = validarTextosPropuesta(textos);
   if (v.problemas.length > 0) {
     const detalle = v.problemas
@@ -39,14 +48,8 @@ export async function contratoCamposPropuesta(
   }
   if (v.usados.length === 0 && v.colecciones.length === 0) return undefined;
 
-  const cot = await ctx.db.cpqCotizacion.findFirst({
-    where: { id: input.cotizacionId },
-    select: { negocioId: true },
-  });
-  const neg = cot
-    ? await ctx.db.negocio.findFirst({ where: { id: cot.negocioId }, select: { cuentaId: true } })
-    : null;
-  if (!neg?.cuentaId) {
+  const cuentaId = await cuentaDeCotizacion(ctx, input.cotizacionId);
+  if (!cuentaId) {
     throw reglaDeNegocio(
       "La propuesta usa campos del cliente, pero el negocio no tiene cuenta asociada.",
     );
@@ -54,7 +57,7 @@ export async function contratoCamposPropuesta(
   const contactoId = input.destinatarios.find((d) => d.contactoId)?.contactoId;
   const r = await resolverCamposDocumento(ctx, {
     finalidad: "propuesta",
-    cuentaId: neg.cuentaId,
+    cuentaId,
     contactoId,
     // Solo se consultan (y se auditan) las referencias si el texto las repite.
     referencias: v.colecciones.includes("referencias"),

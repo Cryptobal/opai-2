@@ -115,7 +115,7 @@ export const propuestaTecnicaSyncServicio = defineCapability({
 export const propuestaTecnicaPreviewPdf = defineCapability({
   auditarLectura: (_s, input) => [input.id, input.cotizacionId],
   id: "cpq.propuestas_tecnica.preview_pdf",
-  descripcion: "Genera PDF de propuesta técnica (marca de agua BORRADOR si no está enviada).",
+  descripcion: "Genera PDF de propuesta técnica (marca de agua BORRADOR si no está enviada). Si la empresa tiene una plantilla HTML en uso, sale de ella con los datos de la cotización; si no, del formato por bloques.",
   permiso: PERMISO_READ,
   input: z.object({ id: uuidSchema, cotizacionId: uuidSchema }),
   output: z.object({ pdfBase64: z.string(), bytes: z.number().int(), borrador: z.boolean() }),

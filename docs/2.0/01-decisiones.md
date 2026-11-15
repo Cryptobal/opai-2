@@ -2276,3 +2276,20 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 **Decisiones de la sesión (reversibles) y por qué.** Herramientas: `knip` (sin uso) y `jscpd` (duplicados), las de uso más extendido para TypeScript en monorepos; las funciones largas se cuentan con el analizador de TypeScript que el repo ya tiene, sin dependencia nueva. El tope de función es 60 líneas, medido y no error de lint, para no bloquear lo ya escrito. El check corre en el flujo rápido de cada PR y no pasa a obligatorio del ruleset: ese cambio es de Carlos (issue «Decide Carlos»).
 
 **Consecuencias.** Un PR que agrega duplicación, un archivo o función largos o algo sin uso falla `simplicidad` hasta que lo corrija o lo justifique. Las instrucciones del proyecto en claude.ai todavía piden «Decisión tuya»; cambiarlas es de Carlos (issue «Decide Carlos»). Mientras tanto manda el repositorio.
+
+## ADR-117 · La propuesta técnica sale de la plantilla HTML en uso de la empresa (CAR-533, 15-nov-2026)
+
+**Fecha:** 15-nov-2026 · **Estado:** vigente · **Decide:** la sesión (decisión técnica reversible, ADR-114) · **Registra:** «Sesión Cursor». **Extiende** ADR-085/086 (importador y saneador de HTML).
+
+**Contexto.** La empresa ya puede importar, revisar y activar una plantilla HTML de propuesta (CAR-532), pero el PDF seguía usando el formato por bloques. Hacía falta que la vista previa y el PDF usaran esa plantilla sin abrir una vía para ejecutar código ni llamar a internet, y que lo enviado no cambiara si después se edita la plantilla.
+
+**Decisión.**
+
+1. **Una plantilla en uso por empresa**, la fila de `cpq_propuesta_html` con `estado = 'activa'`. Si no hay ninguna, la propuesta usa el formato actual por bloques, sin cambios.
+2. **Render sin navegador ni red.** Los campos `{{…}}` se reemplazan con `renderizarPlantillaCampos`, que escapa cada valor. Después el resultado se sanea otra vez con `sanearHtml`. El PDF se dibuja con pdf-lib a partir de bloques simples (títulos, párrafos, viñetas, tablas y reglas) que salen de recorrer el HTML con parse5. El CSS se ignora, salvo el `color` hexadecimal de títulos y párrafos. Tipografía, membrete, logo y pie son los de la marca documental.
+3. **Vista previa:** los valores salen del contexto autorizado de quien mira (`resolverCamposDocumento`). Lo que falta queda vacío.
+4. **Envío:** el snapshot del envío guarda `plantillaHtml: { id, version, hash }`. Los campos del HTML entran al mismo contrato de campos que los textos (`contratoCamposPropuesta`): se exigen completos y se congelan sus valores. Al generar el PDF del envío se carga esa versión por `id` y se comprueba la huella. Las filas son inmutables por trigger. Una versión nueva o un cambio de plantilla en uso no altera lo enviado.
+
+**Alternativas descartadas.** (a) Un navegador sin cabeza (Chromium/Playwright) para convertir el HTML a PDF: pesa cientos de MB en la función, suma tiempo de arranque y es una superficie de red y de ejecución que el saneador ya evita. (b) Una columna nueva en `cpq_propuesta_envio` para la plantilla: el snapshot JSON ya guarda lo congelado del envío (marca, plantilla y bloques), así que no hizo falta migración.
+
+**Consecuencias.** El PDF con plantilla HTML respeta la estructura y el texto del HTML, no su diseño CSS completo. Si se pide más fidelidad visual, el paso siguiente es ampliar los bloques (por ejemplo, fondos de celda), no cambiar de motor. La vista previa HTML de la pantalla de importación (iframe aislado) muestra el diseño completo.

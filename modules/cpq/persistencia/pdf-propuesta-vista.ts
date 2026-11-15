@@ -6,11 +6,16 @@ import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
 import type { MarcaDocumentoVista } from "./marca-documento";
 import { cargarLogoMarca } from "./pdf/logo";
 import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
+import { renderPdfPropuestaHtml } from "./pdf-propuesta-html";
 import { renderPdfPropuestaTecnica } from "./pdf-propuesta-tecnica";
 import type { PlantillaPropuestaVista } from "./plantilla-propuesta";
+import { htmlConValores, plantillaHtmlEnUso, valoresVistaHtml } from "./propuesta-html-uso";
 import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
 
-/** Vista previa (o borrador) del PDF de la propuesta técnica con los datos vigentes de la cotización. */
+/**
+ * Vista previa (o borrador) del PDF de la propuesta técnica con los datos vigentes de la cotización. Si la empresa
+ * tiene una plantilla HTML en uso, el PDF sale de ella; si no, del formato actual por bloques.
+ */
 export async function pdfPropuestaVista(
   ctx: Contexto,
   d: {
@@ -27,6 +32,18 @@ export async function pdfPropuestaVista(
     capitulos?: readonly CapituloVista[];
   },
 ): Promise<Uint8Array> {
+  const html = await plantillaHtmlEnUso(ctx);
+  if (html) {
+    const valores = await valoresVistaHtml(ctx, d.cotizacionId, html.htmlSaneado);
+    return renderPdfPropuestaHtml({
+      codigo: d.codigo,
+      fecha: d.fecha,
+      borrador: d.borrador,
+      marca: d.marca,
+      logo: await cargarLogoMarca(ctx),
+      html: htmlConValores(html.htmlSaneado, valores),
+    });
+  }
   const entrada = await entradaPdfDesdeCotizacion(ctx, d.cotizacionId);
   return renderPdfPropuestaTecnica({
     codigo: d.codigo,

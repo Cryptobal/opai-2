@@ -67,6 +67,8 @@ export type SnapshotEnvioPropuesta = {
   propuestaBloquesJson: string;
   destinatarios: DestinatarioEnvio[];
   camposContrato?: ContratoCamposEnvio;
+  /** Versión de la plantilla HTML de la empresa congelada al enviar (CAR-533); ausente si no había una en uso. */
+  plantillaHtml?: { id: string; version: number; hash: string };
 };
 
 export const PLANTILLA_PROPUESTA_DEFECTO: BloquePlantillaPropuesta[] = [
