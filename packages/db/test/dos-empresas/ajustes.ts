@@ -199,6 +199,29 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Publicación de la pauta (CAR-356): CHECK del mes aaaa-mm.
   "pauta.publicaciones": { fijas: ["mes"], valores: () => ({ mes: "2026-12" }) },
+  // Turnos extra (CAR-96): CHECK de tipo, origen, estado y monto ≥ 0.
+  "pauta.turnos_extra": {
+    dependencias: ["pauta.excepciones", "core.puestos", "core.personas"],
+    valores: (ctx) => ({
+      excepcion_id: id(ctx, "pauta.excepciones"),
+      puesto_id: id(ctx, "core.puestos"),
+      persona_id: id(ctx, "core.personas"),
+      tipo_trabajador: "propio",
+      monto_clp: 0,
+      monto_origen: "sin_tarifa",
+      estado: "por_aprobar",
+    }),
+  },
+  "pauta.tarifas_turno_extra": {
+    dependencias: ["core.instalaciones"],
+    // sujeto_tipo entra al único (tenant, tipo, id): sin fijas, copia lo regenera y rompe el CHECK.
+    fijas: ["sujeto_tipo"],
+    valores: (ctx) => ({
+      sujeto_tipo: "instalacion",
+      sujeto_id: id(ctx, "core.instalaciones"),
+      monto_clp: 35_000,
+    }),
+  },
   // Períodos del contrato (CAR-409): CHECK de tipo, término según el tipo y anulación con motivo.
   "core.contrato_periodos": {
     valores: () => ({
@@ -635,6 +658,14 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.slack_instalaciones": {
     fijas: ["team_id"],
     valores: (ctx) => ({ team_id: `T${ctx.tenant.replace(/-/g, "").toUpperCase()}` }),
+  },
+  // Slack F3 (CAR-293): ts con formato de Slack y tipo/envío/gestión dentro de su lista (CHECK).
+  "core.slack_hilos": {
+    dependencias: ["core.instalaciones"],
+    valores: (ctx) => ({ instalacion_id: id(ctx, "core.instalaciones"), ts: "1700000000.000100" }),
+  },
+  "core.slack_avisos": {
+    valores: () => ({ tipo: "atraso", envio: "pendiente", gestion: "abierto", instalacion_id: null, persona_id: null }),
   },
   // Slack F2 (CAR-292): (tenant_id, user_id) → memberships; «vinculado» exige un id de Slack (CHECK).
   "core.slack_usuarios": {
