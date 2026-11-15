@@ -169,6 +169,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   "pauta.tarifas_turno_extra": {
     dependencias: ["core.instalaciones"],
+    // sujeto_tipo entra al único (tenant, tipo, id): sin fijas, copia lo regenera y rompe el CHECK.
+    fijas: ["sujeto_tipo"],
     valores: (ctx) => ({
       sujeto_tipo: "instalacion",
       sujeto_id: id(ctx, "core.instalaciones"),
