@@ -6,16 +6,16 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { cantidad, Superadmin, usd } from "../_componentes/formato";
 
-export const metadata = { title: "Consumos" };
+export const metadata = { title: "Consumos totales" };
 
 type Fila = { tenantId: string; nombre: string; costoUsd: number; ejecuciones: number };
 
-/** Plataforma → Consumos: costo y ejecuciones de cada empresa en los últimos 30 días. */
+/** Plataforma → Consumos totales: costo y ejecuciones de cada empresa en los últimos 30 días. */
 export default function Consumos() {
   return (
     <PaginaPortal
       portal="platform"
-      titulo="Consumos"
+      titulo="Consumos totales"
       ruta="/platform/consumos"
       opciones={() => ({ insignia: <Superadmin /> })}
       cargar={async () => {
@@ -30,7 +30,7 @@ export default function Consumos() {
     >
       {({ state, filas }) => (
         <div className="flex flex-col gap-3">
-          <h2 className="t-title text-fg md:hidden">Consumos</h2>
+          <h2 className="t-title text-fg md:hidden">Consumos totales</h2>
           <p className="t-caption">Últimos 30 días, con los precios vigentes de Ajustes.</p>
           {/* Si la carga falla se dice, nunca «Sin empresas» (hoja §2.6). */}
           {state === "forbidden" ? (

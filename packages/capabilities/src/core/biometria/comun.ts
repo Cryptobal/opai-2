@@ -20,8 +20,8 @@ export const PROPOSITO_BIOMETRIA = "biometria_asistencia";
 /** Lo emite la anonimización de una persona que tiene su rostro enrolado (retención o pedido del titular). */
 export const EVENTO_ANONIMIZACION = "core.biometria.anonimizacion_pendiente";
 
-export const TABLA = "enrolamientos_biometricos";
-export const CAMPO = "referencia_cifrada";
+const TABLA = "enrolamientos_biometricos";
+const CAMPO = "referencia_cifrada";
 
 /** Muestra de rostro capturada por la cámara. Se envía al proveedor y se descarta: nunca se guarda. */
 export const muestraSchema = z

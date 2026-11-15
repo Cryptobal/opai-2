@@ -67,25 +67,24 @@ test.describe("@preview diseño nuevo con sesión", () => {
         const ocultar = page.getByRole("button", { name: "Ocultar el menú" });
         await hidratado(ocultar);
         await ocultar.click();
-        const fijar = page.getByRole("button", { name: "Dejar el menú fijo" });
-        await expect(fijar).toBeVisible();
+        // Plegado como en Linear (CAR-442): sin riel de íconos, solo el botón «Mostrar el menú».
+        const mostrar = page.getByRole("button", { name: "Mostrar el menú" });
+        await expect(mostrar).toBeVisible();
+        await expect(page.locator("nav[data-riel-nuevo]")).toBeHidden();
+        await page.mouse.move(ancho(page) - 10, 400);
         await captura(page, "nuevo-menu-oculto", info);
-        // Plegado (CAR-377): el riel muestra las áreas, no cada submódulo.
-        const riel = page.locator("nav[data-riel-nuevo]");
-        await expect(riel.getByRole("button", { name: "Comercial" })).toBeVisible();
-        await expect(riel.getByRole("link", { name: "Negocios" })).toHaveCount(0);
         // Al recargar, el servidor ya manda el menú plegado: sin parpadeo del menú abierto (D2b).
         const recarga = await page.goto("/");
         expect(await recarga?.text()).toContain('data-menu="plegado"');
-        await hidratado(fijar);
-        // Al pasar el mouse por el riel, el menú completo se asoma sobre la página.
-        await fijar.hover();
+        await hidratado(mostrar);
+        // Al pasar el mouse por el botón, el menú completo se asoma sobre la página.
+        await mostrar.hover();
         await expect(page.getByText("OPAI", { exact: true })).toBeVisible();
         await captura(page, "nuevo-menu-asomado", info);
         await page.mouse.move(ancho(page) - 10, 400);
         await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
-        // Con el mouse sobre el riel se asoma el menú y su botón lo deja fijo.
-        await fijar.hover();
+        // El borde izquierdo de la ventana también lo asoma, y el menú asomado trae su botón para fijarlo.
+        await page.mouse.move(2, 400);
         await page.getByRole("button", { name: "Dejar el menú fijo" }).click();
         await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
       }

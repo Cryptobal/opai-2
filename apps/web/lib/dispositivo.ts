@@ -3,8 +3,9 @@ import { cache } from "react";
 
 import { dispositivoPorToken, type DispositivoReconocido } from "@opai/db";
 
-/** Cookie con el token del dispositivo emparejado (HttpOnly; el token solo existe en el equipo y como HMAC en la base). */
-export const COOKIE_DISPOSITIVO = "opai_dispositivo";
+import { COOKIE_DISPOSITIVO } from "./cookie-dispositivo";
+
+export { COOKIE_DISPOSITIVO };
 
 /**
  * Dispositivo de esta petición, o null si el equipo no está emparejado. Devuelve también el revocado
