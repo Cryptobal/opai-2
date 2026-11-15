@@ -14,35 +14,24 @@ import type * as Mod from "../src";
 
 type Fila = { instalacionId: string | null; nombre: string; ventasNetasClp: number; costoEstimadoClp: number; puestos: number; puestosSinCosto: number; puestosOcultos: number };
 
+/** Completa el juego legal en el tenant; UF/UTM ya vienen de plataforma (único por vigente_desde). */
 async function sembrarJuegoReferencia(e: Entorno, tenantId: string) {
   const inds = await e.admin.indicadorLegal.findMany();
   const idDe = Object.fromEntries(inds.map((i) => [i.clave, i.id]));
   for (const p of publicacionesReferencia()) {
+    if (p.indicador === "uf" || p.indicador === "utm") continue;
     const indicadorId = idDe[p.indicador];
     if (!indicadorId) continue;
-    if (p.indicador === "uf" || p.indicador === "utm") {
-      await e.admin.valorPublicado.create({
-        data: {
-          indicadorId,
-          valorJson: p.valor,
-          vigenteDesde: new Date(p.vigenteDesde),
-          estado: "vigente",
-          fuente: p.fuente,
-          verificacion: "verificado",
-        },
-      });
-    } else {
-      await e.admin.valorTenant.create({
-        data: {
-          tenantId,
-          indicadorId,
-          valorJson: p.valor,
-          vigenteDesde: new Date(p.vigenteDesde),
-          estado: "vigente",
-          origen: "propio",
-        },
-      });
-    }
+    await e.admin.valorTenant.create({
+      data: {
+        tenantId,
+        indicadorId,
+        valorJson: p.valor,
+        vigenteDesde: new Date(p.vigenteDesde),
+        estado: "vigente",
+        origen: "propio",
+      },
+    });
   }
 }
 
