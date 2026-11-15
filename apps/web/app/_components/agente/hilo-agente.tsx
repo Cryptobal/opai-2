@@ -3,15 +3,18 @@
 import { Banda } from "@opai/ds";
 import { Loader2 } from "lucide-react";
 
+import { debeDibujarFichas, fichasVisibles, textoRespaldoFichas } from "./fichas";
 import { TarjetaEntidad } from "./tarjeta-entidad";
 import { TarjetaPlan } from "./tarjeta-plan";
 import { TextoRespuesta } from "./texto-respuesta";
-import type { Mensaje, ReferenciaEntidad } from "./tipos";
+import type { Mensaje } from "./tipos";
 
-/** Hasta 4 tarjetas; si hay más, solo fichas de un segmento (`/cuentas/<id>`). */
-function tarjetasDe(refs: readonly ReferenciaEntidad[]): ReferenciaEntidad[] {
-  if (refs.length <= 4) return [...refs];
-  return refs.filter((r) => /^\/[a-z0-9-]+\/[^/]+$/i.test(r.href)).slice(0, 4);
+/** Pedido del turno: el mensaje «yo» inmediatamente anterior. */
+function pedidoDe(mensajes: Mensaje[], indice: number): string {
+  for (let i = indice - 1; i >= 0; i--) {
+    if (mensajes[i]?.rol === "yo") return mensajes[i]!.texto;
+  }
+  return "";
 }
 
 /** Burbujas del hilo: la persona a la derecha; el agente, con su plan y sus errores, a todo el ancho. */
@@ -24,9 +27,14 @@ export function HiloAgente({
 }) {
   return (
     <>
-      {mensajes.map((m) => {
+      {mensajes.map((m, i) => {
         const refs = m.referencias ?? [];
-        const cards = m.rol === "agente" ? tarjetasDe(refs) : [];
+        const pedido = pedidoDe(mensajes, i);
+        const modoFicha = m.rol === "agente" && debeDibujarFichas(pedido, refs);
+        const cards = m.rol === "agente" ? fichasVisibles(pedido, refs) : [];
+        const texto =
+          m.rol === "agente" && modoFicha ? textoRespaldoFichas(m.texto, cards) : m.texto;
+        const preparando = m.rol === "agente" && m.texto === "" && !m.error;
         return (
           <div key={m.id} className={m.rol === "yo" ? "flex justify-end" : "flex justify-start"}>
             <div
@@ -36,17 +44,28 @@ export function HiloAgente({
                   : "w-full rounded-lg bg-surface px-3 py-2"
               }
             >
-              {m.rol === "agente" && m.texto === "" && !m.error ? (
+              {preparando ? (
                 <p className="t-caption flex items-center gap-2" role="status">
                   <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />
                   Preparando…
                 </p>
-              ) : m.rol === "agente" ? (
-                <TextoRespuesta texto={m.texto} referencias={refs} />
-              ) : (
+              ) : null}
+              {m.rol === "agente" && !preparando && modoFicha && cards.length ? (
+                <div className="flex flex-col gap-2">
+                  {cards.map((r) => (
+                    <TarjetaEntidad key={`${r.href}:${r.id}`} entidad={r} />
+                  ))}
+                </div>
+              ) : null}
+              {m.rol === "agente" && !preparando && texto ? (
+                <div className={modoFicha && cards.length ? "mt-2" : undefined}>
+                  <TextoRespuesta texto={texto} referencias={refs} />
+                </div>
+              ) : null}
+              {m.rol === "yo" ? (
                 <p className="text-md break-words whitespace-pre-wrap text-fg">{m.texto}</p>
-              )}
-              {cards.length ? (
+              ) : null}
+              {m.rol === "agente" && !preparando && !modoFicha && cards.length ? (
                 <div className="mt-2 flex flex-col gap-2">
                   {cards.map((r) => (
                     <TarjetaEntidad key={`${r.href}:${r.id}`} entidad={r} />

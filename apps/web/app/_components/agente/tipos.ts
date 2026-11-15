@@ -13,11 +13,13 @@ export type PasoPlan = {
   clave: string;
   vistaPrevia: { data: unknown };
 };
-/** Entidad con href interno salido de una capacidad (CAR-446). */
+/** Entidad con href interno salido de una capacidad (CAR-446; campos CAR-523). */
 export type ReferenciaEntidad = {
   id: string;
   titulo: string;
   detalle: string | null;
+  estado?: string | null;
+  campos?: string[];
   href: string;
 };
 
