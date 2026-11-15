@@ -1,7 +1,4 @@
 import { Plus } from "lucide-react";
-import { Suspense } from "react";
-
-import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -10,6 +7,7 @@ import { conBusqueda, type SearchParams } from "@/lib/parametros";
 import { cargarFichaTipo } from "../../_componentes/datos";
 import { DetalleTipo } from "../../_componentes/detalle-tipo";
 import { HojaTipo } from "../../_componentes/diferidas";
+import { FichaDividida } from "../../_componentes/ficha-dividida";
 import { ListaTipos } from "../../_componentes/lista-tipos";
 
 export const metadata = { title: "Tipo de inventario" };
@@ -33,30 +31,25 @@ export default function TipoDetalle({ params, searchParams }: Props) {
         </EnlaceBoton>
       }
       cargar={() => cargarFichaTipo(params, searchParams)}
-      opciones={(d) => ({ volver: { href: conBusqueda("/inventario/tipos", d.p.q), etiqueta: "Tipos" } })}
+      opciones={(d) => ({
+        volver: { href: conBusqueda("/inventario/tipos", d.p.q), etiqueta: "Tipos" },
+      })}
     >
       {({ id, p, datos, lista, puedeGestionar }) => (
         <>
-          <SplitScreen
-            telefono="detalle"
-            unPanelHastaLg
+          <FichaDividida
             etiquetaLista="Lista de tipos"
             lista={
               <ListaTipos
-                state={lista.state}
-                items={lista.items}
-                total={lista.total}
-                seleccionada={id}
+                {...lista}
                 {...(p.q ? { q: p.q } : {})}
+                seleccionada={id}
                 puedeGestionar={puedeGestionar}
               />
             }
-            detalle={
-              <Suspense fallback={<Loading variante="detalle" />}>
-                <DetalleTipo datos={datos} puedeGestionar={puedeGestionar} />
-              </Suspense>
-            }
-          />
+          >
+            <DetalleTipo datos={datos} puedeGestionar={puedeGestionar} />
+          </FichaDividida>
           {puedeGestionar ? <HojaTipo /> : null}
         </>
       )}

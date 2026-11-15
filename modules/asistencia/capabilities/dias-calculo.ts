@@ -18,7 +18,7 @@ export type DiaCalculado = DiaConsolidado & {
 };
 
 /** Límites UTC del día calendario de la empresa: [00:00, 00:00 del siguiente). */
-export function limitesDelDia(fecha: string, zona: string): { desde: Date; hasta: Date } {
+function limitesDelDia(fecha: string, zona: string): { desde: Date; hasta: Date } {
   const siguiente = new Date(Date.parse(`${fecha}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
   return { desde: new Date(instanteEnZona(fecha, "00:00", zona)), hasta: new Date(instanteEnZona(siguiente, "00:00", zona)) };
 }

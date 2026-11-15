@@ -11,14 +11,13 @@ export function Table({
   etiqueta?: string;
 }) {
   return (
-    // Marco Hilo (ADR-090): sin tarjeta; las filas se separan con una línea sobre el fondo del lienzo.
     // La zona desplazable se alcanza con el teclado aunque la tabla no tenga enlaces (WCAG 2.1.1,
     // axe `scrollable-region-focusable`; CAR-364).
     <div
       role="region"
       aria-label={etiqueta}
       tabIndex={0}
-      className="w-full overflow-x-auto rounded-lg border border-border bg-surface outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus marco-hilo:rounded-none marco-hilo:border-0 marco-hilo:bg-transparent"
+      className="w-full overflow-x-auto rounded-lg border border-border bg-surface outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
     >
       <table
         className={cn("w-full border-separate border-spacing-0 text-base", className)}
@@ -34,7 +33,6 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
       scope="col"
       className={cn(
         "sticky top-0 border-b border-border bg-surface px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-fg-subtle",
-        "marco-hilo:bg-(--fondo) marco-hilo:font-semibold marco-hilo:tracking-[0.06em] marco-hilo:text-fg-muted marco-hilo:uppercase",
         className,
       )}
       {...props}

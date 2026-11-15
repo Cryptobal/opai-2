@@ -8,6 +8,12 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "central.alertas.hacerse_cargo": {
+    encargo: "CAR-472",
+    desde: "2026-11-14",
+    motivo:
+      "«Me hago cargo» de una alerta de la central: llega con la ficha de la alerta (pantallas de la Central). Mientras tanto la cadena sigue escalando sola.",
+  },
   "core.roles.adicional_asignar": {
     encargo: "CAR-359",
     desde: "2026-11-14",
@@ -78,12 +84,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-10-29",
     motivo:
       "Revocar la firma automática del representante (R16): su pantalla de configuración va en el PR 2 de firma; aquí entra la capacidad de gobernanza.",
-  },
-  "core.users.restablecer_mfa": {
-    encargo: "CAR-54",
-    desde: "2026-10-29",
-    motivo:
-      "Restablecer el MFA de un usuario desde su ficha (owner): las pantallas de MFA no tienen diseño aprobado en Claude Design (export-acceso/README.md).",
   },
   "platform.usuarios.restablecer_mfa": {
     encargo: "CAR-54",

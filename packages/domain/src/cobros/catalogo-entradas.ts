@@ -1,10 +1,6 @@
 /** Entradas del catálogo comercial (CAR-204): una por cobrable. Ver `catalogo-modulos.ts`. */
-import {
-  type EntradaCatalogo,
-  esIncluidoEnBase,
-  MODULO_FINANZAS,
-  type ParteFinanzas,
-} from "./catalogo-modulos";
+import { ENTRADAS_FINANZAS } from "./catalogo-finanzas";
+import { type EntradaCatalogo, esIncluidoEnBase } from "./catalogo-modulos";
 import { PLAN_BASE, type FormaCobro, type UnidadCobro } from "./catalogo";
 
 const modulo = (
@@ -22,22 +18,6 @@ const modulo = (
   formaSugerida: esIncluidoEnBase(id) ? null : forma,
   unidadSugerida: esIncluidoEnBase(id) ? null : unidad,
   dependencias: [],
-});
-
-const parte = (
-  id: ParteFinanzas,
-  nombre: string,
-  incluye: string,
-  dependencias: readonly (readonly string[])[] = [],
-): EntradaCatalogo => ({
-  id,
-  nombre,
-  incluye,
-  grupo: "parte_finanzas",
-  incluidoEnBase: false,
-  formaSugerida: "fijo",
-  unidadSugerida: null,
-  dependencias,
 });
 
 export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
@@ -125,6 +105,7 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "usuario_licencia",
   ),
   modulo("cpq", "CPQ", "Cotizaciones y propuestas.", "por_unidad", "usuario_licencia"),
+  modulo("inventario", "Inventario", "Activos, ropa y entregas con devolución.", "fijo", null),
   modulo(
     "desempeno",
     "Desempeño",
@@ -132,23 +113,5 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "por_unidad",
     "usuario_licencia",
   ),
-  {
-    id: MODULO_FINANZAS,
-    nombre: "Finanzas",
-    incluye: "Las siete partes juntas, a un precio mensual fijo.",
-    grupo: "finanzas",
-    incluidoEnBase: false,
-    formaSugerida: "fijo",
-    unidadSugerida: null,
-    dependencias: [],
-  },
-  parte("finanzas.bancos", "Bancos", "Cuentas, cartolas y conciliación."),
-  parte("finanzas.flujo", "Flujo de caja", "Planilla semanal y proyección.", [["finanzas.bancos"]]),
-  parte("finanzas.ventas", "Ventas y facturación", "Facturas, notas y clientes."),
-  parte("finanzas.cobranza", "Cobranza", "Seguimiento de cobros.", [["finanzas.ventas"]]),
-  parte("finanzas.factoring", "Factoring", "Cesión de facturas.", [["finanzas.ventas"]]),
-  parte("finanzas.compras", "Compras", "Facturas recibidas y proveedores."),
-  parte("finanzas.contabilidad", "Contabilidad e informes", "Balance, resultados e informes.", [
-    ["finanzas.ventas", "finanzas.compras"],
-  ]),
+  ...ENTRADAS_FINANZAS,
 ];
