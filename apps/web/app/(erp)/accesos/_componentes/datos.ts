@@ -17,6 +17,7 @@ export type Registro = {
   documento: string;
   patente: string | null;
   origen: string;
+  anulado: boolean;
 };
 
 export type RegistroFicha = Registro & {
@@ -25,6 +26,8 @@ export type RegistroFicha = Registro & {
   docTipo: string;
   lista: "autorizada" | "bloqueada" | null;
   dispositivo: string | null;
+  salidaOrigen: string | null;
+  anulacion: { en: string; motivo: string } | null;
 };
 
 export type Intento = {

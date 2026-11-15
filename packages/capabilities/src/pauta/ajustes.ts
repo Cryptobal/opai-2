@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { DESCANSO_MINIMO_HORAS_DEFECTO, LIMITE_MENSUAL_HORAS_DEFECTO } from "@opai/domain";
+import { DESCANSO_MINIMO_HORAS_DEFECTO, LIMITE_MENSUAL_HORAS_DEFECTO, listaVisita, MAX_ITEMS_VISITA, MAX_TEXTO_ITEM_VISITA } from "@opai/domain";
 
 import { valoresEfectivos, type CampoAjuste } from "../core/config";
 import { campoAjuste } from "../core/config/catalogo";
@@ -28,7 +28,23 @@ export const ajustesPauta = z.object({
     permiso: PERMISO,
     control: "numero",
   }),
+  visita_lista: z.array(z.string().trim().min(1).max(MAX_TEXTO_ITEM_VISITA)).max(MAX_ITEMS_VISITA).default([]).meta({
+    etiqueta: "Lista de revisión de las visitas",
+    ayuda: "Lo que el supervisor revisa en cada visita a una instalación. Vacía, se usa una lista genérica (CAR-83).",
+    grupo: "Visitas de supervisión",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "json",
+  }),
 });
+
+/** Lista de revisión de las visitas de la empresa (CAR-83, R4); sin el módulo registrado, la genérica. */
+export async function listaVisitaDe(ctx: Contexto): Promise<string[]> {
+  const campo = campoAjuste("pauta", "visita_lista");
+  if (!campo) return listaVisita(null);
+  const v = await valoresEfectivos(ctx, [campo]);
+  return listaVisita(v.get("pauta.visita_lista")?.valor as string[] | undefined);
+}
 
 /**
  * Tope mensual y descanso mínimo vigentes de la empresa. Si el módulo aún no está registrado (un
