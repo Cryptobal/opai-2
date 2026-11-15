@@ -1,12 +1,10 @@
-import { Estado } from "@opai/ds";
-
-import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { estadoTrabajador, SIN_FICHA } from "../_componentes/estado";
+import { estadoTrabajador } from "../_componentes/estado";
+import { EstadoLista } from "../_componentes/estado-lista";
 import { ListaTurnos } from "./_componentes/lista-turnos";
 import { fechaValida, type MisTurnos } from "./_componentes/semanas";
 
@@ -26,18 +24,20 @@ export default function Pagina({ searchParams }: { searchParams: SearchParams })
       cargando="lista"
       cargar={async () => {
         const { desde } = await leerParametros(searchParams);
-        const r = await ejecutarComoUsuario<MisTurnos>("trabajador", "portal_trabajador.mis_turnos.listar", {
-          dias: 28,
-          limite: 200,
-          ...(fechaValida(desde) ? { desde } : {}),
-        });
+        const r = await ejecutarComoUsuario<MisTurnos>(
+          "trabajador",
+          "portal_trabajador.mis_turnos.listar",
+          {
+            dias: 28,
+            limite: 200,
+            ...(fechaValida(desde) ? { desde } : {}),
+          },
+        );
         return { state: estadoTrabajador(r), datos: r.ok ? r.data : null };
       }}
     >
       {({ state, datos }) => (
-        <Estado state={state} variante="lista" textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}>
-          {datos ? <ListaTurnos r={datos} /> : null}
-        </Estado>
+        <EstadoLista state={state}>{datos ? <ListaTurnos r={datos} /> : null}</EstadoLista>
       )}
     </PaginaPortal>
   );
