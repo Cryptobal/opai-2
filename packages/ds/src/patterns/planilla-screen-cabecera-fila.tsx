@@ -11,7 +11,15 @@ const SANGRIA = { 0: "pl-3", 1: "pl-8", 2: "pl-13" } as const;
  * Cabecera fija de una fila de la planilla. Las filas `plegable` traen un botón para abrir su detalle
  * (por ejemplo, los ingresos por cliente y sus instalaciones); las hijas van con sangría y texto secundario.
  */
-export function CabeceraFila({ fila, onAlternar }: { fila: FilaPlanilla; onAlternar?: (filaId: string) => void }) {
+export function CabeceraFila({
+  fila,
+  onAlternar,
+  onAccion,
+}: {
+  fila: FilaPlanilla;
+  onAlternar?: ((filaId: string) => void) | undefined;
+  onAccion?: ((filaId: string) => void) | undefined;
+}) {
   const nivel = fila.nivel ?? 0;
   const hija = nivel > 0;
   const plegable = fila.plegable && onAlternar ? fila.plegable : null;
@@ -42,10 +50,21 @@ export function CabeceraFila({ fila, onAlternar }: { fila: FilaPlanilla; onAlter
             />
           </button>
         ) : null}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="truncate">{fila.etiqueta}</div>
           {fila.sub ? <div className="truncate text-xs font-normal text-fg-muted">{fila.sub}</div> : null}
         </div>
+        {fila.accion && onAccion ? (
+          <button
+            type="button"
+            aria-label={`${fila.accion} ${fila.etiqueta}`}
+            onClick={() => onAccion(fila.id)}
+            // La acción vive en su fila (CAR-456): aparece al pasar el mouse o con foco; en pantallas táctiles, siempre.
+            className="-my-2 flex min-h-11 shrink-0 cursor-pointer items-center rounded-sm px-2 text-xs font-medium text-accent opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-fill focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-focus motion-reduce:transition-none [@media(hover:none)]:opacity-100"
+          >
+            {fila.accion}
+          </button>
+        ) : null}
       </div>
     </th>
   );

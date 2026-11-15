@@ -12,26 +12,16 @@ describe("números del menú (CAR-211)", () => {
     expect(r[2]).toEqual({ href: "/negocios" });
   });
   it("sin solicitudes nuevas (o sin módulo, permiso o preferencias) no se muestra número", () => {
-    expect(conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 })[1]).toEqual({ href: "/solicitudes" });
+    expect(conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 })[1]).toEqual({
+      href: "/solicitudes",
+    });
     expect(conContadores(nav, undefined)[1]).toEqual({ href: "/solicitudes" });
   });
 });
 
-describe("Bandeja resaltada con novedades sin leer (CAR-316)", () => {
-  it("suma las novedades sin leer al número de la Bandeja y la resalta", () => {
-    const r = conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 }, 3);
-    expect(r[0]).toEqual({ href: "/bandeja", contador: 5, alerta: true, resaltado: true });
-  });
-  it("solo con novedades pendientes (sin avisos) la Bandeja también se resalta", () => {
-    expect(conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 0 }, 1)[0]).toMatchObject({
-      contador: 1,
-      alerta: true,
-      resaltado: true,
-    });
-    expect(conContadores(nav, undefined, 4)[0]).toMatchObject({ contador: 4, resaltado: true });
-  });
+describe("Bandeja resaltada con pendientes (CAR-316, CAR-430)", () => {
   it("con solo avisos o aprobaciones también se resalta (decisión de Carlos, 11-nov)", () => {
-    expect(conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 }, 0)[0]).toEqual({
+    expect(conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 })[0]).toEqual({
       href: "/bandeja",
       contador: 2,
       alerta: true,
@@ -39,20 +29,18 @@ describe("Bandeja resaltada con novedades sin leer (CAR-316)", () => {
     });
   });
   it("sin nada pendiente vuelve al número discreto en 0, sin globo rojo", () => {
-    expect(conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 0 }, 0)[0]).toEqual({
+    expect(conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 0 })[0]).toEqual({
       href: "/bandeja",
       contador: 0,
     });
   });
 });
 
-describe("punto rojo del avatar en portales sin Bandeja (CAR-316)", () => {
-  it("aparece con novedades sin leer en supervisor, trabajador, terreno, cliente y plataforma", () => {
-    for (const portal of ["supervisor", "trabajador", "terreno", "cliente", "platform"])
-      expect(avisoNovedadesAvatar(portal, 2), portal).toBe(true);
+describe("punto rojo del avatar y del botón «Yo» (CAR-430)", () => {
+  it("aparece con novedades sin leer en todos los portales, también en el ERP", () => {
+    expect(avisoNovedadesAvatar(2)).toBe(true);
   });
-  it("no aparece en el ERP (ahí está la Bandeja) ni sin novedades pendientes", () => {
-    expect(avisoNovedadesAvatar("erp", 5)).toBe(false);
-    expect(avisoNovedadesAvatar("supervisor", 0)).toBe(false);
+  it("no aparece sin novedades pendientes", () => {
+    expect(avisoNovedadesAvatar(0)).toBe(false);
   });
 });

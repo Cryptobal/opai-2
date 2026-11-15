@@ -45,6 +45,10 @@ export const manifest = defineModule({
       descripcion: "Se publicó la pauta de una instalación para un mes: se avisa a cada titular sus turnos (CAR-356).",
     },
     {
+      id: "pauta.visita.cerrada",
+      descripcion: "Un supervisor cerró una visita a una instalación con su lista de revisión (CAR-83).",
+    },
+    {
       id: "pauta.turno_extra.registrado",
       descripcion: "Se registró un turno extra por aprobar sobre un reemplazo o refuerzo (CAR-96).",
     },
