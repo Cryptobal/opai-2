@@ -1,45 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { COOKIE_MARCO, cookieMarco, marcoDeCookie, rutaAncha } from "@/lib/marco";
-
 // El menú importa la acción de salir (servidor); aquí solo se arma la lista.
 vi.mock("@/app/_acciones/auth", () => ({ accionSalir: () => undefined }));
 
-describe("elección del marco (ADR-090)", () => {
-  it("sin cookie o con un valor desconocido queda el diseño nuevo (ADR-109, D6)", () => {
-    expect(marcoDeCookie(undefined)).toBe("nuevo");
-    expect(marcoDeCookie("")).toBe("nuevo");
-    expect(marcoDeCookie("HILO")).toBe("nuevo");
-    expect(marcoDeCookie("hilo")).toBe("hilo");
-    expect(marcoDeCookie("clasico")).toBe("clasico");
-    expect(marcoDeCookie("nuevo")).toBe("nuevo");
-  });
-
-  it("el clásico elegido se recuerda un año; el nuevo es la ausencia de la cookie", () => {
-    expect(cookieMarco("clasico")).toContain(`${COOKIE_MARCO}=clasico`);
-    expect(cookieMarco("clasico")).toContain("Max-Age=31536000");
-    expect(cookieMarco("nuevo")).toContain("Max-Age=0");
-  });
-
-  it("la cookie dura un año, vale en todo el sitio y no viaja a otros sitios", () => {
-    const c = cookieMarco("hilo");
-    expect(c).toContain(`${COOKIE_MARCO}=hilo`);
-    expect(c).toContain("Path=/");
-    expect(c).toContain("Max-Age=31536000");
-    expect(c).toContain("SameSite=Lax");
-  });
-
-  it("las planillas pliegan el hilo; sus fichas y las demás pantallas no", () => {
-    expect(rutaAncha("/pauta")).toBe(true);
-    expect(rutaAncha("/finanzas/flujo")).toBe(true);
-    expect(rutaAncha("/asistencia/2026-11")).toBe(true);
-    expect(rutaAncha("/pautas")).toBe(false);
-    expect(rutaAncha("/cuentas")).toBe(false);
-    expect(rutaAncha("/")).toBe(false);
-  });
-});
-
-describe("tema del marco Hilo", () => {
+describe("tema de la barra", () => {
   it("el botón de tema pasa al contrario de lo que se ve, también si sigue al sistema", async () => {
     const { temaContrario } = await import("@/lib/tema");
     expect(temaContrario("dark", false)).toBe("claro");
@@ -59,14 +23,14 @@ describe("menú de usuario sin atajo de diseño (CAR-335 D6c)", () => {
 });
 
 describe("marco que se monta: una sola regla para el layout y las páginas", () => {
-  it("con acceso, el ERP y los portales de oficina usan el diseño nuevo; terreno sigue (CAR-335 D6)", async () => {
+  it("con acceso, todos los portales con empresa usan el diseño nuevo (CAR-335 D6e)", async () => {
     const { marcoResuelto } = await import("@/lib/marco");
     expect(marcoResuelto("erp", true)).toBe("nuevo");
     expect(marcoResuelto("erp", false)).toBe("clasico");
     expect(marcoResuelto("supervisor", true)).toBe("nuevo");
     expect(marcoResuelto("cliente", true)).toBe("nuevo");
-    expect(marcoResuelto("terreno", true)).toBe("clasico");
-    expect(marcoResuelto("trabajador", true)).toBe("clasico");
+    expect(marcoResuelto("terreno", true)).toBe("nuevo");
+    expect(marcoResuelto("trabajador", true)).toBe("nuevo");
     expect(marcoResuelto("platform", false)).toBe("clasico");
   });
 });

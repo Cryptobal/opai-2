@@ -1,5 +1,5 @@
 // CAR-174: rentabilidad por instalación con costo laboral estimado. Solo datos ficticios (empresas qa-rent*).
-// El juego legal se inyecta en costosDePuestos (no se siembra en plataforma: UF/UTM chocan entre workers).
+// Los valores legales se inyectan (juego de referencia del dominio) para no sembrar publicaciones globales.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -8,8 +8,8 @@ import { costoEmpleadorPorPersona, juegoDeValores } from "@opai/domain";
 import { manifest } from "../../../modules/finanzas/manifest";
 import { publicacionesReferencia } from "../../domain/src/remuneraciones/referencia.fixture";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
-import { costosDePuestos } from "../src/finanzas/rentabilidad-costos";
 import { rentabilidadPorInstalacion, totalesRentabilidad } from "../src/finanzas/rentabilidad-calculo";
+import { costosDePuestos } from "../src/finanzas/rentabilidad-costos";
 
 import type * as Mod from "../src";
 
@@ -96,15 +96,10 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   });
 
   it("sin permiso de sueldos no muestra margen (sería engañoso)", async () => {
-    // Juego inyectado: no depende de UF/UTM de plataforma (otros workers las borran en CI).
+    // Mismo juego inyectado que el caso de costos: la base compartida de test:db a veces deja
+    // UF/UTM sin consultada_el y juegoDeValores falla («Falta fecha de consulta»).
     const juego = await juegoDeValores("2026-10-31", publicacionesReferencia());
-    const { costos } = await costosDePuestos(
-      ctx(t.a, ["finanzas:read", "core:estructuras.read"]),
-      "2026-10-01",
-      "2026-11-01",
-      "2026-10-31",
-      juego,
-    );
+    const { costos } = await costosDePuestos(ctx(t.a, ["finanzas:read", "core:estructuras.read"]), "2026-10-01", "2026-11-01", "2026-10-31", juego);
     const filas = rentabilidadPorInstalacion(
       [
         { instalacionId: i.norte, tipoDte: 33, montoNeto: 1_500_000, montoExento: 0 },

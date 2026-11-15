@@ -9,7 +9,7 @@ export const RETENCION_DIAS = 90;
 /** Piso y techo de la retención: los mismos del ajuste del manifest, para que rijan donde se lee. */
 export const RETENCION_MIN = 7;
 export const RETENCION_MAX = 365;
-export const MAX_MENSAJES = 200;
+const MAX_MENSAJES = 200;
 /** Intentos de guardar sobre la versión vigente cuando otra pestaña escribió primero. */
 const INTENTOS = 4;
 
@@ -29,7 +29,7 @@ export const mensajeSchema = z.object({
   /** Turno que originó el mensaje: un reintento con el mismo id no se vuelve a guardar. */
   turno: z.string().uuid().optional(),
 });
-export type Mensaje = z.infer<typeof mensajeSchema>;
+type Mensaje = z.infer<typeof mensajeSchema>;
 
 const TOPE_TEXTO = 8_000;
 const recortar = (t: string) => (t.length > TOPE_TEXTO ? `${t.slice(0, TOPE_TEXTO)}…` : t);

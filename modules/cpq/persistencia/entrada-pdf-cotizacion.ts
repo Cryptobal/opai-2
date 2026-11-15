@@ -7,7 +7,7 @@ import { type EntradaPdfCotizacion, type LineaPdfCotizacion } from "./documento-
 import { cargarFilasVersion } from "./recalcular";
 import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
 
-export { entradaPdfConBorradorMarca, entradaPdfMuestra } from "./entrada-pdf-muestra";
+export { entradaPdfMuestra } from "./entrada-pdf-muestra";
 
 export async function entradaPdfDesdeCotizacion(
   ctx: Contexto,
@@ -119,7 +119,7 @@ export async function entradaPdfDesdeCotizacion(
 }
 
 /** Venta por línea (reparto por costo) cuya suma es exactamente la venta mensual: el resto va a la línea mayor. */
-export function mapVentaLineas(r: ResultadoCalculo, idsDb: string[]): Map<string, number> {
+function mapVentaLineas(r: ResultadoCalculo, idsDb: string[]): Map<string, number> {
   const m = new Map<string, number>();
   const totalCosto = r.lineas.reduce((s, l) => s + l.costoMensual, 0);
   if (r.ventaMensual != null && totalCosto > 0) {

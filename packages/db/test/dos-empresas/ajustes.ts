@@ -23,7 +23,19 @@ const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? nul
 export const AJUSTES: Record<string, Ajuste> = {
   // Central (CAR-461): CHECK de severidad, estado y coherencia de la pospuesta; actor del hecho.
   "central.alertas": {
-    valores: () => ({ severidad: "alta", estado: "nueva", estado_previo: null, pospuesta_hasta: null }),
+    valores: () => ({ severidad: "alta", estado: "nueva", estado_previo: null, pospuesta_hasta: null, paso_actual: 0, cadena_id: null }),
+  },
+  "central.cadenas": {
+    valores: () => ({
+      instalacion_id: null,
+      severidad: null,
+      plazo_atencion_min: 30,
+      pasos: JSON.stringify([{ destinatario: { tipo: "guardia" }, canales: ["campana"], esperaMin: 3, exigeConfirmacion: false }]),
+    }),
+  },
+  "central.intentos": {
+    dependencias: ["central.alertas"],
+    valores: (ctx) => ({ paso: 1, canal: "campana", resultado: "avisado", alerta_id: id(ctx, "central.alertas") }),
   },
   "central.alerta_eventos": {
     dependencias: ["central.alertas"],

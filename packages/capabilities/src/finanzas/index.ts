@@ -135,3 +135,5 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   dteConfigObtener,
   dteConfigActualizar,
 ];
+
+export { logoDeMarca } from "./ventas-pdf-logo";
