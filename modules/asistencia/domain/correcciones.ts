@@ -27,7 +27,7 @@ export function estadoCorreccion(
   return ahora.getTime() >= venceEn(c.selloServidor, c.plazoHoras).getTime() ? "vencida" : "pendiente";
 }
 
-export type Senal = "pendiente" | "corregida" | "objetada" | "vencida_aceptada";
+type Senal = "pendiente" | "corregida" | "objetada" | "vencida_aceptada";
 
 export type ValorEfectivo = {
   /** El valor que usan los reportes y los días. */

@@ -9,7 +9,6 @@ import type { Contexto } from "../types";
 
 export const PERMISO_READ = "rondas:read";
 export const PERMISO_CONFIG = "rondas:configurar";
-export const PERMISO_CONFIANZA = "rondas:confianza.manage";
 
 export const modoSchema = z.enum(MODOS_PUNTO);
 export const ordenSchema = z.enum(ORDENES_PLANTILLA);

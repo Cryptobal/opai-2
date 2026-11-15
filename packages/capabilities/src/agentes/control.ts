@@ -6,7 +6,7 @@ import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "../types
 import { aprobacionDePlataforma } from "./control-plataforma";
 
 /** Una aprobación pendiente vence a las 72 horas (ADR-032). */
-export const VIGENCIA_APROBACION_MS = 72 * 3_600_000;
+const VIGENCIA_APROBACION_MS = 72 * 3_600_000;
 
 /** Texto humano de la solicitud (CAR-250): «Grok pide emitir la factura 33, $ 11.900». Nunca falla. */
 async function resumir(

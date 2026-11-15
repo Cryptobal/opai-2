@@ -4,11 +4,11 @@ import { CODIGOS_BANCO, PERMISOS_CORE, VALORES_TIPO_CUENTA_BANCARIA } from "@opa
 
 import { cifrarCampoEnTransaccion } from "../cumplimiento/cifrado-campos";
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
+import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento, rutSchema, sinDuplicado } from "./comun";
 import { personaFicha } from "./personas-ficha-comun";
-import { pagoVerSchema, solicitudPendiente, vistaPago } from "./personas-pago-vista";
+import { pagoVerSchema, vistaPago } from "./personas-pago-vista";
 
 export const personasPagoVer = defineCapability({
   auditarLectura: (s) => [s.personaId],
@@ -110,14 +110,3 @@ export const personasPagoSolicitarCambio = defineCapability({
     return vistaPago(ctx, p.id);
   },
 });
-
-export async function solicitudPendienteDe(
-  ctx: Parameters<typeof personaFicha>[0],
-  personaId: string,
-) {
-  try {
-    return await solicitudPendiente(ctx, personaId);
-  } catch {
-    throw noEncontrado("La solicitud pendiente");
-  }
-}

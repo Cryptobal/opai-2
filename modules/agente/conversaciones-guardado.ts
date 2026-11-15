@@ -3,12 +3,13 @@ import type { Contexto } from "@opai/capabilities";
 import { z } from "zod";
 
 import { auditarPurga } from "./conversaciones-auditoria";
+import { referenciaSchema, type Referencia } from "./referencias";
 
 export const RETENCION_DIAS = 90;
 /** Piso y techo de la retención: los mismos del ajuste del manifest, para que rijan donde se lee. */
 export const RETENCION_MIN = 7;
 export const RETENCION_MAX = 365;
-export const MAX_MENSAJES = 200;
+const MAX_MENSAJES = 200;
 /** Intentos de guardar sobre la versión vigente cuando otra pestaña escribió primero. */
 const INTENTOS = 4;
 
@@ -22,11 +23,13 @@ export const mensajeSchema = z.object({
   texto: z.string(),
   /** Capacidades que propuso el plan; sin vistas previas ni el token firmado. */
   pasos: z.array(z.string()).optional(),
+  /** Entidades con href interno del turno (CAR-446); opcional en mensajes viejos. */
+  referencias: z.array(referenciaSchema).optional(),
   fecha: z.string(),
   /** Turno que originó el mensaje: un reintento con el mismo id no se vuelve a guardar. */
   turno: z.string().uuid().optional(),
 });
-export type Mensaje = z.infer<typeof mensajeSchema>;
+type Mensaje = z.infer<typeof mensajeSchema>;
 
 const TOPE_TEXTO = 8_000;
 const recortar = (t: string) => (t.length > TOPE_TEXTO ? `${t.slice(0, TOPE_TEXTO)}…` : t);
@@ -53,6 +56,7 @@ type Turno = {
   mensaje: string;
   texto: string;
   pasos: string[];
+  referencias?: Referencia[] | undefined;
 };
 
 /**
@@ -81,6 +85,7 @@ async function escribirTurno(ctx: Contexto, t: Turno): Promise<string | null> {
       rol: "agente",
       texto: recortar(t.texto),
       ...(t.pasos.length ? { pasos: t.pasos } : {}),
+      ...(t.referencias?.length ? { referencias: t.referencias } : {}),
       ...base,
     },
   ];
