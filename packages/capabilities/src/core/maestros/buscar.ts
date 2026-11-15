@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { enScope } from "../../autorizacion";
 import { defineCapability } from "../../define";
 import { externo } from "../../externo";
+import { buscarDocumentosGlobal } from "../documentos/buscar-global";
 import { listarBuscadores, resultadoBusquedaSchema } from "./buscadores";
 import { dondeContacto, dondeCuenta, dondeInstalacion, dondePersona } from "./alcance";
 
@@ -19,7 +20,7 @@ export const buscar = defineCapability({
   auditarLectura: (s) => [...s.cuentas, ...s.personas, ...s.contactos, ...s.otros.flatMap((g) => g.items)].map((r) => r.id),
   id: "core.buscar",
   descripcion:
-    "Búsqueda global (paleta ⌘K y agentes): cuentas, instalaciones, personas y contactos, más lo que aportan los módulos activos (negocios, cotizaciones y solicitudes de Comercial), hasta 5 de cada uno y solo de lo que el actor puede ver.",
+    "Búsqueda global (paleta ⌘K y agentes): cuentas, instalaciones, personas, contactos y documentos, más lo que aportan los módulos activos (negocios, cotizaciones, facturas DTE), hasta 5 de cada uno y solo de lo que el actor puede ver.",
   permiso: null,
   input: z.object({ q: z.string().trim().min(2).max(120) }),
   output: z.object({
@@ -27,7 +28,7 @@ export const buscar = defineCapability({
     instalaciones: z.array(resultado),
     personas: z.array(resultado),
     contactos: z.array(resultado),
-    /** Aportes de los módulos (CAR-301): un grupo por buscador, solo los que el actor puede ver. */
+    /** Aportes de los módulos (CAR-301) y documentos del núcleo (CAR-526): un grupo por buscador. */
     otros: z.array(z.object({ grupo: z.string(), titulo: z.string(), items: z.array(resultadoExterno) })),
   }),
   efecto: "lectura",
@@ -37,17 +38,13 @@ export const buscar = defineCapability({
     const rut = q.replace(/[.\s]/g, "").toUpperCase();
     const vacio = Promise.resolve([]);
     const aportes = listarBuscadores().filter((b) => ctx.modulosActivos.includes(b.modulo) && enScope(ctx, b.modulo) && puede(b.permiso));
-    const [cuentas, instalaciones, personas, contactos, otros] = await Promise.all([
+    const [cuentas, instalaciones, personas, contactos, docs, aportesRes] = await Promise.all([
       puede(PERMISOS_CORE.cuentasRead)
         ? ctx.db.cuenta.findMany({
             where: {
               AND: [dondeCuenta(ctx)],
               archivadaEn: null,
-              OR: [
-                { nombre: contiene(q) },
-                { razonSocial: contiene(q) },
-                { rut: { startsWith: rut } },
-              ],
+              OR: [{ nombre: contiene(q) }, { razonSocial: contiene(q) }, { rut: { startsWith: rut } }],
             },
             orderBy: { nombre: "asc" },
             take: MAX,
@@ -69,11 +66,7 @@ export const buscar = defineCapability({
             where: {
               AND: [dondePersona(ctx)],
               archivadaEn: null,
-              OR: [
-                { nombres: contiene(q) },
-                { apellidos: contiene(q) },
-                { rut: { startsWith: rut } },
-              ],
+              OR: [{ nombres: contiene(q) }, { apellidos: contiene(q) }, { rut: { startsWith: rut } }],
             },
             orderBy: { apellidos: "asc" },
             take: MAX,
@@ -90,28 +83,15 @@ export const buscar = defineCapability({
             take: MAX,
           })
         : vacio,
+      puede(PERMISOS_CORE.documentosRead) ? buscarDocumentosGlobal(ctx, q) : vacio,
       Promise.all(aportes.map(async (b) => ({ grupo: b.grupo, titulo: b.titulo, items: await b.buscar(ctx, q) }))),
     ]);
+    const docsGrupo = docs.length ? [{ grupo: "documentos", titulo: "Documentos", items: docs }] : [];
     return {
-      otros: otros.filter((g) => g.items.length > 0),
-      cuentas: cuentas.map((c) => ({
-        id: c.id,
-        titulo: c.nombre,
-        detalle: c.rut ?? null,
-        href: `/cuentas/${c.id}`,
-      })),
-      instalaciones: instalaciones.map((i) => ({
-        id: i.id,
-        titulo: i.nombre,
-        detalle: i.comuna ?? null,
-        href: `/instalaciones/${i.id}`,
-      })),
-      personas: personas.map((p) => ({
-        id: p.id,
-        titulo: `${p.nombres} ${p.apellidos}`,
-        detalle: p.rut,
-        href: `/personas/${p.id}`,
-      })),
+      otros: [...docsGrupo, ...aportesRes.filter((g) => g.items.length > 0)],
+      cuentas: cuentas.map((c) => ({ id: c.id, titulo: c.nombre, detalle: c.rut ?? null, href: `/cuentas/${c.id}` })),
+      instalaciones: instalaciones.map((i) => ({ id: i.id, titulo: i.nombre, detalle: i.comuna ?? null, href: `/instalaciones/${i.id}` })),
+      personas: personas.map((p) => ({ id: p.id, titulo: `${p.nombres} ${p.apellidos}`, detalle: p.rut, href: `/personas/${p.id}` })),
       contactos: contactos.map((k) => ({
         id: k.id,
         titulo: `${k.nombres} ${k.apellidos}`,
