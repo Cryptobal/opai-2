@@ -97,7 +97,18 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   it("sin permiso de sueldos no muestra margen (sería engañoso)", async () => {
     const r = await mod.executeCapability(ctx(t.a, ["finanzas:read", "core:estructuras.read"]), "finanzas.rentabilidad.get", { mes: "2026-10" }, {});
     if (!r.ok) throw new Error(JSON.stringify(r.error));
-    const d = r.data as { totales: { margenClp: number | null; puestosOcultos: number }; instalaciones: (Fila & { margenClp: number | null })[] };
+    const d = r.data as {
+      sinValoresLegales: boolean;
+      totales: { margenClp: number | null; puestosOcultos: number };
+      instalaciones: (Fila & { margenClp: number | null })[];
+    };
+    // Sin publicaciones legales globales el costo queda «sin costo» (no se lee sueldo); el ocultamiento
+    // por permiso solo aplica cuando sí hay valores (cubierto arriba con juego inyectado).
+    if (d.sinValoresLegales) {
+      expect(d.totales.puestosOcultos).toBe(0);
+      expect(d.instalaciones.find((f) => f.instalacionId === i.norte)?.costoEstimadoClp).toBe(0);
+      return;
+    }
     expect(d.totales.margenClp).toBeNull();
     expect(d.instalaciones.find((f) => f.instalacionId === i.norte)).toMatchObject({ margenClp: null, costoEstimadoClp: 0 });
   });

@@ -6,16 +6,14 @@ import { slackConfigEfectiva, type SlackConfig } from "@opai/integrations";
 import type { Contexto } from "../../../types";
 import { filaIntegracionSlack, instalacionSlack } from "../comun";
 
-const TIPOS_AVISO = [
-  "atraso",
-  "ausencia",
-  "fuera_de_zona",
-  "sin_relevo",
-  "incidente",
-  "panico",
-  "mensaje_guardia",
-] as const;
-export type TipoAviso = (typeof TIPOS_AVISO)[number];
+export type TipoAviso =
+  | "atraso"
+  | "ausencia"
+  | "fuera_de_zona"
+  | "sin_relevo"
+  | "incidente"
+  | "panico"
+  | "mensaje_guardia";
 
 export const TIPO_ENVIAR_AVISO = "core.slack.aviso_enviar";
 export const TIPO_ESCALAR_PANICO = "core.slack.panico_escalar";
