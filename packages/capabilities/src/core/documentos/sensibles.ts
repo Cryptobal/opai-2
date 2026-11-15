@@ -6,7 +6,7 @@ import type { Contexto } from "../../types";
 const TIPOS_CUMPLIMIENTO = [...ENTIDADES_DOC_CUMPLIMIENTO];
 
 /** Si el actor puede ver documentos de cumplimiento (Ley 21.719). Supervisor y viewer no. */
-export const puedeVerCumplimiento = (ctx: Contexto): boolean =>
+const puedeVerCumplimiento = (ctx: Contexto): boolean =>
   ctx.autorizar(PERMISOS_CORE.cumplimientoRead);
 
 /**
