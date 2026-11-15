@@ -34,6 +34,8 @@ export type ItemNav = {
   alerta?: boolean;
   /** Fuera de la barra inferior del teléfono: va a «Más» (sigue en el riel y la barra lateral). */
   fueraInferior?: boolean;
+  /** Entrada «Más» propia del portal: el teléfono no suma el «Más» del marco (CAR-494). */
+  mas?: boolean;
 };
 
 /** Conteos de `core.resumen.contadores` (null sin permiso). Los usan Inicio y las listas, no la barra lateral. */
@@ -149,6 +151,7 @@ export function navegacionPortal(
       href: `${href}/mas`,
       etiqueta: "Más",
       icono: "Ellipsis",
+      mas: true,
       activoEn: `${href}/privacidad`,
     };
     if (!modulosActivos.includes("portal_trabajador")) {

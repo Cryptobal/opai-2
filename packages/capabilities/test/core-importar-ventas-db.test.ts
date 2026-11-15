@@ -10,13 +10,13 @@ import { entornoImportar, type Salida } from "./importar-entorno";
 const CUENTAS = "nombre,rut\nDelta,77.777.777-7\n";
 // Encabezados del detalle del Registro de Ventas del SII, más las columnas propias de cobro.
 const VENTAS = [
-  "Tipo Doc,Folio,Rut cliente,Fecha Docto,Monto Exento,Monto Neto,Monto IVA,Monto total,Monto ya cobrado,Folio referencia,Tipo referencia,Codigo referencia",
-  "33,9001,77.777.777-7,01-10-2026,0,100000,19000,119000,119000,,,",
-  "33,9002,77.777.777-7,05-10-2026,0,200000,38000,238000,38000,,,",
-  "61,9101,77.777.777-7,06-10-2026,0,10000,1900,11900,,9002,33,corrige montos",
-  "33,9003,11.111.111-1,07-10-2026,0,1000,190,1190,,,,",
-  "33,9002,77.777.777-7,05-10-2026,0,200000,38000,238000,,,,",
-  "33,9004,77.777.777-7,08-10-2026,0,50000,9500,59500,,,,",
+  "Tipo Doc,Folio,Rut cliente,Fecha Docto,Monto Exento,Monto Neto,Monto IVA,Monto total,Monto ya cobrado,Folio referencia,Tipo referencia,Codigo referencia,Fecha vencimiento",
+  "33,9001,77.777.777-7,01-10-2026,0,100000,19000,119000,119000,,,,",
+  "33,9002,77.777.777-7,05-10-2026,0,200000,38000,238000,38000,,,,",
+  "61,9101,77.777.777-7,06-10-2026,0,10000,1900,11900,,9002,33,corrige montos,",
+  "33,9003,11.111.111-1,07-10-2026,0,1000,190,1190,,,,,",
+  "33,9002,77.777.777-7,05-10-2026,0,200000,38000,238000,,,,,",
+  "33,9004,77.777.777-7,08-10-2026,0,50000,9500,59500,,,,,30-12-2026",
 ].join("\n");
 
 describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR-283)", () => {
@@ -44,6 +44,7 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     const sim = await ventas(true);
     expect(sim.conteos).toMatchObject({ crear: 4, error: 2 });
     expect(sim.filas.find((f) => f.fila === 7)?.mensajes.join(" ")).toMatch(/se asume cobrada/);
+    expect(sim.filas.find((f) => f.fila === 3)?.mensajes.join(" ")).toMatch(/a 30 días de la emisión/);
     expect(sim.filas.find((f) => f.fila === 5)?.mensajes.join(" ")).toMatch(/cuenta|RUT/i);
     expect(sim.filas.find((f) => f.fila === 6)?.mensajes.join(" ")).toMatch(/fila 3/);
 
@@ -57,6 +58,9 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
       [61, 9101, "aceptado", "pendiente"],
     ]);
     expect(docs.every((d) => d.trackIdSii === null && d.xmlStorageKey === null)).toBe(true);
+    // CAR-342: sin vencimiento, la factura vence al plazo de cobro de la empresa (30 días por defecto); la nota no y
+    // el vencimiento que trae la planilla se respeta.
+    expect(docs.map((d) => d.fechaVencimiento?.toISOString().slice(0, 10) ?? null)).toEqual(["2026-10-31", "2026-11-04", "2026-12-30", null]);
     const nc = docs.find((d) => d.folio === 9101);
     expect(nc?.documentoReferenciaId).toBe(docs.find((d) => d.folio === 9002)?.id);
     expect(nc?.codigoReferencia).toBe(3);

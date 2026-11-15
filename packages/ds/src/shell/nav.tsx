@@ -60,11 +60,14 @@ export function BottomNav({
   // "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del riel ni de la barra lateral.
   const principales = elegidas ?? items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
   const cupoNav = 4;
+  // Un portal con su propia entrada «Más» (trabajador) no lleva la del marco: la cuenta sigue en el
+  // menú de usuario de la barra superior (CAR-494).
   const conMas =
-    Boolean(elegidas) ||
-    principales.length > 5 ||
-    extras.length > 0 ||
-    items.some((i) => i.soloAmplio || i.fueraInferior);
+    !items.some((i) => i.mas) &&
+    (Boolean(elegidas) ||
+      principales.length > 5 ||
+      extras.length > 0 ||
+      items.some((i) => i.soloAmplio || i.fueraInferior));
   const visibles = conMas ? principales.slice(0, cupoNav) : principales;
   const resto = elegidas
     ? items.filter((i) => !visibles.some((v) => v.href === i.href))
