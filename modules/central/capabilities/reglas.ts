@@ -3,8 +3,9 @@ import { z } from "zod";
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { aplicarRegla, SENALES, senalDe } from "../domain/senales";
-import { PERMISO_CONFIG } from "./cadenas";
 import { severidadSchema } from "./esquemas";
+
+const PERMISO_CONFIG = "central:config.manage";
 
 const reglaSchema = z.object({
   evento: z.string().describe("Señal que publica un módulo, p. ej. rondas.emergencia."),

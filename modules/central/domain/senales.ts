@@ -36,7 +36,7 @@ export function aplicarRegla(
 }
 
 /** Ventana en que señales de la misma instalación y persona se juntan en una alerta (R4). */
-export const VENTANA_AGRUPACION_MIN = 10;
+const VENTANA_AGRUPACION_MIN = 10;
 
 type Abierta = { id: string; instalacionId: string; personaId: string | null; origen: string; estado: string; createdAt: Date };
 
