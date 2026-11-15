@@ -11,7 +11,7 @@ function errores(code: string, archivo = "apps/web/lib/ejemplo.js") {
   return new Linter().verify(
     code,
     {
-      files: ["**/*.js"],
+      files: ["**/*.{js,ts}"],
       plugins: { opai: { rules: { frontera: accesoDb } } },
       rules: { "opai/frontera": "error" },
     },
@@ -49,5 +49,11 @@ describe("frontera global de base de datos", () => {
     expect(errores('import { dbAdmin } from "@opai/db";', "packages/auth/scripts/seed.js")).toEqual(
       [],
     );
+    expect(
+      errores(
+        'import { accesoPlataforma } from "@opai/db";',
+        "packages/capabilities/src/core/modulos-nuevos-aplicar.ts",
+      ),
+    ).toEqual([]);
   });
 });
