@@ -10,7 +10,7 @@ import { cookieAnchoMenu } from "@/lib/menu-ancho";
 
 import { useAcentoEmpresa } from "./acento-empresa";
 import { abrirAgente } from "./agente/abrir-agente";
-import { alternarTema } from "./hilo/marco-cliente";
+import { alternarTema } from "./alternar-tema";
 import { MarcoShell } from "./marco-shell";
 import type { DatosShell } from "./tipos-shell";
 

@@ -112,9 +112,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.firmas.enviar` | `core_firmas_enviar` | existe |
 | compartido | `app/_components` | `core.geo.autocompletar` | `core_geo_autocompletar` | existe |
 | compartido | `app/_components` | `core.geo.detalle` | `core_geo_detalle` | existe |
-| compartido | `app/_components` | `core.hilo.actividad` | `core_hilo_actividad` | existe |
-| compartido | `app/_components` | `core.hilo.agenda` | `core_hilo_agenda` | existe |
-| compartido | `app/_components` | `core.inicio.pendientes` | `core_inicio_pendientes` | existe |
 | compartido | `app/_components` | `core.marca.get` | `core_marca_get` | existe |
 | compartido | `app/_components` | `core.me` | `core_me` | existe |
 | compartido | `app/_components` | `core.me.portal_inicio` | `core_me_portal_inicio` | existe |
@@ -1175,6 +1172,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.geo.geocodificar`
 - `core.grupos.roles_list`
 - `core.hechos_terreno.listar`
+- `core.hilo.actividad`
+- `core.hilo.agenda`
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.indicadores_gestion.medir`

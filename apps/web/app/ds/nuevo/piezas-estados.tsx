@@ -9,12 +9,8 @@ const KPIS = [
   { etiqueta: "Asistencia", valor: "98,6 %", variacion: { texto: "+0,4 vs. octubre", tono: "success" as const } },
 ];
 
-/**
- * Indicadores y estados de una pantalla con la piel del marco Hilo (H2, CAR-324). Datos ficticios; se
- * compara con «Piezas y estados del diseño» (Estados) y con el «Pulso» de Inicio en
- * docs/2.0/design/export-base-hilo/.
- */
-export function EstadosHilo() {
+/** Indicadores y estados de pantalla para la muestra del diseño nuevo. Datos ficticios. */
+export function EstadosShowcase() {
   return (
     <div className="flex max-w-[900px] flex-col gap-8" data-testid="piezas-estados">
       <section className="flex flex-col gap-3">

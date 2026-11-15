@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Badge, Button, Campo, Card, CardContent, Input, Select, Table, Tabs, Td, Th, Tr } from "@opai/ds";
 
-import { EstadosHilo } from "./piezas-estados";
+import { EstadosShowcase } from "./piezas-estados";
 
 const FILAS = [
   ["Servicios Andes SpA", "Cliente", "success", "UF 380"],
@@ -15,11 +15,10 @@ const FILAS = [
 const Titulo = ({ children }: { children: string }) => <h2 className="t-overline text-fg-muted">{children}</h2>;
 
 /**
- * Las piezas de una pantalla por dentro, con la piel del marco Hilo (ADR-090): botones, campos,
- * etiquetas de estado, pestañas y tabla. Datos ficticios; se compara con «Piezas y estados del
- * diseño» de docs/2.0/design/export-base-hilo/.
+ * Piezas de una pantalla por dentro (botones, campos, etiquetas, pestañas y tabla) para la muestra
+ * del diseño nuevo. Datos ficticios.
  */
-export function PiezasHilo() {
+export function PiezasShowcase() {
   const [giro, setGiro] = useState<string | undefined>("seguridad");
   return (
     <div className="flex max-w-[900px] flex-col gap-8">
@@ -107,7 +106,7 @@ export function PiezasHilo() {
           ]}
         />
       </section>
-      <EstadosHilo />
+      <EstadosShowcase />
       <Card>
         <CardContent className="flex flex-col gap-1 p-4">
           <span className="t-label text-fg">Tarjeta</span>

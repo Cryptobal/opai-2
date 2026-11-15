@@ -6,7 +6,7 @@ import { ocultarIndicadorDev } from "./indicador-dev";
 import { capturar, EN_PREVIEW } from "./preview";
 
 // Sistema de diseño nuevo (ADR-109, CAR-335 D1): la muestra `/ds/nuevo` con la piel `data-marco="nuevo"`,
-// las fuentes Geist y el color de la empresa ajustado de día y de noche. Como `/ds/hilo`, no existe en
+// las fuentes Geist y el color de la empresa ajustado de día y de noche. Como `/ds`, no existe en
 // la vista previa (compilación de producción): corre en el job e2e de CI y en local.
 test.beforeEach(async ({ page }) => ocultarIndicadorDev(page));
 
