@@ -8,6 +8,7 @@ import type { EstadoPantalla } from "@opai/ds";
 import type { CentroMapa } from "@/lib/mapa-osm/coords";
 
 import { ListaPuntos } from "../lista-puntos";
+import { puntoConGps } from "../etiquetas";
 import type { DefectosRondas, Punto } from "../tipos";
 
 const MapaPanelPuntos = dynamic(
@@ -37,7 +38,7 @@ export function VistaPuntos({ state, puntos, centro, defectos, accionVacio, cabe
     const nodo = listaRef.current?.querySelector(`[data-punto-id="${seleccionadoId}"]`);
     nodo?.scrollIntoView({ block: "nearest" });
   }, [seleccionadoId]);
-  const vacioGps = !puntos.some((p) => (p.modo === "gps" || p.modo === "qr_gps") && p.latitud != null);
+  const vacioGps = !puntos.some((p) => puntoConGps(p.modo) && p.latitud != null);
   return (
     <div className="flex flex-col gap-4">
       {cabecera}

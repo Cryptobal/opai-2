@@ -1,5 +1,4 @@
-/** Centro por defecto (Plaza de Armas, Santiago) si la instalación no tiene ubicación. */
-export const SANTIAGO = { lat: -33.4489, lng: -70.6693 } as const;
+const SANTIAGO = { lat: -33.4489, lng: -70.6693 } as const;
 
 export function redondearCoord(n: number): number {
   return Math.round(n * 1e5) / 1e5;

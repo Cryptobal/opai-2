@@ -1,6 +1,6 @@
 import L from "leaflet";
 
-export function iconoDiv(html: string, clase = ""): L.DivIcon {
+function iconoDiv(html: string, clase = ""): L.DivIcon {
   return L.divIcon({
     className: clase,
     html,

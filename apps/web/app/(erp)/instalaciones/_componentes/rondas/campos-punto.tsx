@@ -1,26 +1,16 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import type { Dispatch, SetStateAction } from "react";
 
 import { Campo, Input, RadioGroup, Switch, Textarea } from "@opai/ds";
-import { type ModoPunto, MODOS_PUNTO, RADIO_GEOCERCA_M } from "@opai/domain";
+import { type ModoPunto, MODOS_PUNTO } from "@opai/domain";
 
 import type { CentroMapa } from "@/lib/mapa-osm/coords";
 
-import { MODO_PUNTO } from "./etiquetas";
+import { CamposPuntoGps } from "./campos-punto-gps";
+import { MODO_PUNTO, puntoConGps } from "./etiquetas";
 import type { DatosPunto } from "./hoja-punto-datos";
 import type { DefectosRondas } from "./tipos";
-
-const MapaEdicionPunto = dynamic(
-  () => import("./mapa/mapa-edicion-punto").then((m) => m.MapaEdicionPunto),
-  {
-    ssr: false,
-    loading: () => <div className="aspect-video animate-pulse rounded-md border border-border bg-fill" />,
-  },
-);
-
-const conGps = (m: string) => m === "gps" || m === "qr_gps";
 
 /** Campos del punto (c13pd) con la herencia del tenant visible: lo que se hereda se dice en la ayuda. */
 export function CamposPunto({
@@ -35,9 +25,7 @@ export function CamposPunto({
   centroInstalacion: CentroMapa;
 }) {
   const set = <K extends keyof DatosPunto>(k: K, v: DatosPunto[K]) => setD((x) => ({ ...x, [k]: v }));
-  const gps = conGps(d.modo);
-  const radio = Number.parseInt(d.radioM, 10);
-  const radioM = Number.isFinite(radio) && radio > 0 ? radio : defectos.radioM;
+  const gps = puntoConGps(d.modo);
   return (
     <div className="flex flex-col gap-4">
       <Campo etiqueta="Nombre del punto" htmlFor="pt-nombre">
@@ -64,67 +52,9 @@ export function CamposPunto({
         onCambiar={(v) => set("modo", v as ModoPunto)}
         opciones={MODOS_PUNTO.map((m) => ({ valor: m, etiqueta: MODO_PUNTO[m] }))}
       />
-      <p className="t-caption -mt-2">Valor por defecto de la empresa: {MODO_PUNTO[defectos.modo]}.</p>
+      <p className="t-caption -mt-2">Por defecto en la empresa: {MODO_PUNTO[defectos.modo]}.</p>
       {gps ? (
-        <>
-          <MapaEdicionPunto
-            centro={centroInstalacion}
-            latitud={d.latitud}
-            longitud={d.longitud}
-            radioM={radioM}
-            onCoords={(lat, lng) => setD((x) => ({ ...x, latitud: lat, longitud: lng }))}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Campo etiqueta="Latitud" htmlFor="pt-lat">
-              <Input
-                id="pt-lat"
-                value={d.latitud}
-                inputMode="decimal"
-                placeholder="-33.45"
-                onChange={(e) => set("latitud", e.target.value)}
-              />
-            </Campo>
-            <Campo etiqueta="Longitud" htmlFor="pt-lng">
-              <Input
-                id="pt-lng"
-                value={d.longitud}
-                inputMode="decimal"
-                placeholder="-70.66"
-                onChange={(e) => set("longitud", e.target.value)}
-              />
-            </Campo>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Campo
-              etiqueta="Radio (m)"
-              htmlFor="pt-radio"
-              ayuda={`Hereda ${defectos.radioM} m si lo dejas en blanco · máx. ${RADIO_GEOCERCA_M.max} m`}
-            >
-              <Input
-                id="pt-radio"
-                value={d.radioM}
-                inputMode="numeric"
-                placeholder={String(defectos.radioM)}
-                onChange={(e) => set("radioM", e.target.value)}
-              />
-            </Campo>
-            <Campo etiqueta="Precisión mín. (m)" htmlFor="pt-prec" ayuda={`Hereda ${defectos.precisionMinM} m`}>
-              <Input
-                id="pt-prec"
-                value={d.precisionMinM}
-                inputMode="numeric"
-                placeholder={String(defectos.precisionMinM)}
-                onChange={(e) => set("precisionMinM", e.target.value)}
-              />
-            </Campo>
-          </div>
-          <Switch
-            activo={d.estricto}
-            onCambiar={(v) => set("estricto", v)}
-            etiqueta="Geocerca estricta"
-            descripcion="Una marca QR fuera del radio se trata como anomalía."
-          />
-        </>
+        <CamposPuntoGps d={d} set={set} defectos={defectos} centroInstalacion={centroInstalacion} />
       ) : null}
       <Campo etiqueta="Permanencia (s)" htmlFor="pt-perm" ayuda={`Hereda ${defectos.permanenciaGpsS} s`}>
         <Input

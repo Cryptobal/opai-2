@@ -891,6 +891,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/cron/trabajos/route.ts` | Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029). |
 | `app/api/csp-report/route.ts` | Reportes CSP del navegador; solo logs categóricos. |
 | `app/api/existe/route.ts` | Infraestructura del proxy (404 real con Cache Components) usando las mismas capacidades .get que la página. |
+| `app/api/geo/buscar/route.ts` | Proxy Nominatim (OpenStreetMap) para ubicar puntos de ronda en el mapa interactivo; sin datos de negocio ni escrituras. |
 | `app/api/geo/mapa/route.ts` | Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente. |
 | `app/api/health/route.ts` | Salud del despliegue, sin datos. |
 | `app/api/integraciones/slack/eventos/route.ts` | Events API de Slack (CAR-291, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.slack.desinstalada (interna). Sin datos de negocio por ahora (las respuestas en hilos llegan en F5a). |

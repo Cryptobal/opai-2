@@ -2,15 +2,17 @@
 
 import "./estilos-leaflet.css";
 
-import { useCallback, useEffect, useState } from "react";
-import { Circle, MapContainer, Marker, useMap, useMapEvents } from "react-leaflet";
+import { useCallback, useState } from "react";
+import { MapContainer, Marker } from "react-leaflet";
 
 import { cn } from "@opai/ds";
 
 import { coordsDeTexto, redondearCoord, type CentroMapa } from "@/lib/mapa-osm/coords";
+import { ClicMapa, VistaMapaPunto } from "@/lib/mapa-osm/marcadores-leaflet";
 
 import { BuscarUbicacion } from "./buscar-ubicacion";
-import { iconoInstalacion, iconoPuntoEditable } from "./iconos";
+import { MarcadoresEdicionPunto } from "./mapa-edicion-marcadores";
+import { iconoInstalacion } from "./iconos";
 import { MapaCapaBase } from "./mapa-capa";
 
 type Props = {
@@ -20,23 +22,6 @@ type Props = {
   radioM: number;
   onCoords: (lat: string, lng: string) => void;
 };
-
-function SincronizarVista({ centro, punto }: { centro: CentroMapa; punto: { lat: number; lng: number } | null }) {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(punto ? [punto.lat, punto.lng] : [centro.lat, centro.lng], punto ? 17 : 15);
-  }, [centro.lat, centro.lng, map, punto]);
-  return null;
-}
-
-function EventosMapa({ onClick }: { onClick: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    click(e) {
-      onClick(redondearCoord(e.latlng.lat), redondearCoord(e.latlng.lng));
-    },
-  });
-  return null;
-}
 
 /** Mapa interactivo del punto GPS: clic, arrastre, geocerca y búsqueda. */
 export function MapaEdicionPunto({ centro, latitud, longitud, radioM, onCoords }: Props) {
@@ -72,33 +57,10 @@ export function MapaEdicionPunto({ centro, latitud, longitud, radioM, onCoords }
       >
         <MapContainer center={[centro.lat, centro.lng]} zoom={15} className="size-full" scrollWheelZoom>
           <MapaCapaBase />
-          <SincronizarVista centro={centro} punto={punto} />
-          <EventosMapa onClick={fijar} />
+          <VistaMapaPunto centro={centro} punto={punto} />
+          <ClicMapa onClick={fijar} />
           <Marker position={[centro.lat, centro.lng]} icon={iconoInstalacion()} />
-          {punto ? (
-            <>
-              <Marker
-                position={[punto.lat, punto.lng]}
-                icon={iconoPuntoEditable()}
-                draggable
-                eventHandlers={{
-                  dragend: (e) => {
-                    const { lat, lng } = e.target.getLatLng();
-                    fijar(lat, lng);
-                  },
-                }}
-              />
-              <Circle
-                center={[punto.lat, punto.lng]}
-                radius={radioM}
-                pathOptions={{
-                  color: "var(--color-accent)",
-                  fillColor: "var(--color-accent)",
-                  fillOpacity: 0.12,
-                }}
-              />
-            </>
-          ) : null}
+          {punto ? <MarcadoresEdicionPunto punto={punto} radioM={radioM} fijar={fijar} /> : null}
         </MapContainer>
         {!punto ? (
           <p className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-xs text-fg-muted">
