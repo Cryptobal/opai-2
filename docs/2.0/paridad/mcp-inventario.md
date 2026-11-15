@@ -810,6 +810,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_get` | `platform_tenants_perfil_get` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_set` | `platform_tenants_perfil_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.set_estado` | `platform_tenants_set_estado` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.set_modulos_nuevos` | `platform_tenants_set_modulos_nuevos` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.update` | `platform_tenants_update` | existe |
 | platform | `/platform/tenants/[id]` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform/tenants/nuevo` | `platform.tenants.create` | `platform_tenants_create` | existe |
@@ -829,11 +830,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/notificaciones` | `portal_trabajador.preferencias_notificacion.obtener` | `portal_trabajador_preferencias_notificacion_obtener` | existe |
 | trabajador | `/trabajador/privacidad` | `portal_trabajador.privacidad.obtener` | `portal_trabajador_privacidad_obtener` | existe |
 | trabajador | `/trabajador` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
+| trabajador | `/trabajador` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 
 ## Entradas de servidor sin id literal (acciones y rutas)
 
