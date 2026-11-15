@@ -45,7 +45,9 @@ export async function emparejarCartola(ctx: Contexto, cuentaId: string, filas: F
   const existentes = guardados.map((g) => ({ id: g.id, fecha: aIso(g.fecha), monto: Number(g.monto), glosa: g.glosa, referencia: g.referencia }));
   const porId = new Map(guardados.map((g) => [g.id, g]));
   const ocupadas = new Set(guardados.map((g) => g.claveDedupe));
-  const pares = emparejarMovimientos(filas, existentes, { toleranciaDias: TOLERANCIA_DIAS });
+  // CAR-450: con el banco en línea basta el monto y la fecha cercana si no hay ambigüedad (rotula distinto).
+  const porMontoSi = (e: { id: string }) => porId.get(e.id)?.origen === "web4leads";
+  const pares = emparejarMovimientos(filas, existentes, { toleranciaDias: TOLERANCIA_DIAS, porMontoSi });
   let duplicados = 0;
 
   filas.forEach((f, i) => {
@@ -59,6 +61,7 @@ export async function emparejarCartola(ctx: Contexto, cuentaId: string, filas: F
     duplicados += 1;
     const g = porId.get(par.existenteId)!;
     const deDonde = ORIGEN[g.origen] ?? "otra carga";
+    const porMonto = par.por === "monto" ? " Se reconoció por monto y fecha: el banco lo rotula distinto." : "";
     if (par.fechaExistente !== f.fecha) {
       ajustes.push({
         existenteId: g.id,
@@ -67,11 +70,11 @@ export async function emparejarCartola(ctx: Contexto, cuentaId: string, filas: F
         saldoDespues: g.saldoDespues == null ? f.saldoDespues : null,
         referencia: g.referencia == null ? f.referencia : null,
       });
-      const motivo = `Ya entró por ${deDonde} con fecha ${formatearFecha(par.fechaExistente)}; queda con la fecha de la cartola.`;
+      const motivo = `Ya entró por ${deDonde} con fecha ${formatearFecha(par.fechaExistente)}; queda con la fecha de la cartola.${porMonto}`;
       previews.push({ ...base, estado: "duplicada", motivo });
       return;
     }
-    const motivo = par.por === "exacta" ? "Ya existe con la misma huella." : `Ya entró por ${deDonde}.`;
+    const motivo = par.por === "exacta" ? "Ya existe con la misma huella." : `Ya entró por ${deDonde}.${porMonto}`;
     previews.push({ ...base, estado: "duplicada", motivo });
   });
   return { previews, nuevos, ajustes, duplicados };
