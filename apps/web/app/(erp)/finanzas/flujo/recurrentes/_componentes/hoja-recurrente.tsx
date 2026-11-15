@@ -12,6 +12,7 @@ import { hoyIso } from "@/lib/fechas";
 import { GRUPO_POR_DEFECTO, type GrupoEgreso } from "../../_componentes/grupos-egreso";
 import { SelectorGrupoEgreso } from "../../_componentes/selector-grupo-egreso";
 import { CamposUf } from "./campos-uf";
+import { SelectorFilaEgreso } from "./selector-fila-egreso";
 import { type FilaEgreso, FRECUENCIAS, montoEditable, montoEscrito, type PoliticaUf, type Recurrente, type Unidad } from "./tipos";
 
 const UNIDADES = [
@@ -96,9 +97,7 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
             <Button variant="secondary" onClick={() => url.fijar({ editar: null, cambiar: r.id })}>Cambiar desde una fecha</Button>
           </div>
         ) : null}
-        <Campo etiqueta="Fila del flujo" htmlFor="rc-fila">
-          <Select id="rc-fila" valor={fila} onCambiar={setFila} disabled={!!r} opciones={p.filas.map((f) => ({ valor: f.id, etiqueta: f.etiqueta }))} />
-        </Campo>
+        <SelectorFilaEgreso valor={fila} onCambiar={setFila} filas={p.filas} disabled={!!r} />
         <SelectorGrupoEgreso id="rc-grupo" valor={grupo} onCambiar={(g) => setCambioGrupo({ filaId: fila, grupo: g })} ayuda="Dónde se agrupa esta fila en el flujo de caja; cambia para toda la fila." />
         <Campo etiqueta="Concepto" htmlFor="rc-concepto">
           <Input id="rc-concepto" value={concepto} onChange={(e) => setConcepto(e.target.value)} autoFocus={!r} />
