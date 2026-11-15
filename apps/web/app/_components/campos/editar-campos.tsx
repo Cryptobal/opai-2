@@ -12,7 +12,7 @@ const VACIO = "_vacio";
 type Borrador = Record<string, string>;
 
 const aTexto = (v: ValorCampo): string =>
-  v === null ? "" : typeof v === "boolean" ? (v ? "si" : "no") : String(v);
+  v === null ? "" : typeof v === "boolean" ? (v ? "si" : "no") : Array.isArray(v) ? v.join(",") : String(v);
 
 function aValor(c: CampoFicha, t: string): ValorCampo {
   if (t === "" || t === VACIO) return null;
@@ -58,7 +58,7 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
     if (c.tipo === "lista" || c.tipo === "si_no") {
       const opciones =
         c.tipo === "lista"
-          ? c.opciones.map((o) => ({ valor: o, etiqueta: o }))
+          ? c.opciones
           : [
               { valor: "si", etiqueta: "Sí" },
               { valor: "no", etiqueta: "No" },
