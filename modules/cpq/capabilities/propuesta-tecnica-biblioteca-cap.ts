@@ -3,9 +3,12 @@ import { z } from "zod";
 import { defineCapability } from "@opai/capabilities";
 
 import { BASES_PLANTILLA } from "../domain/documento/bloques";
-import { TIPOS_BLOQUE_PROPUESTA, type BloquePlantillaPropuesta } from "../domain/documento/propuesta-tecnica";
+import {
+  PLANTILLA_PROPUESTA_DEFECTO,
+  TIPOS_BLOQUE_PROPUESTA,
+  type BloquePlantillaPropuesta,
+} from "../domain/documento/propuesta-tecnica";
 import { publicarBloqueBiblioteca } from "../persistencia/biblioteca-bloques";
-import { reglaDeNegocio } from "@opai/capabilities";
 import {
   actualizarPlantillaPropuesta,
   plantillaActivaPropuesta,
@@ -90,11 +93,18 @@ export const plantillasPropuestaGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
-    const row = await plantillaActivaPropuestaLectura(ctx);
-    if (!row) {
-      throw reglaDeNegocio("No hay plantilla activa de propuesta técnica; créala en Configuración CPQ.");
-    }
-    const v = vistaPlantillaPropuesta(row);
+    // Sin plantilla guardada se muestra la de defecto (versión 0); la primera edición la crea.
+    const v = vistaPlantillaPropuesta(
+      (await plantillaActivaPropuestaLectura(ctx)) ?? {
+        id: "00000000-0000-0000-0000-000000000000",
+        base: "clasica",
+        version: 0,
+        activa: true,
+        bloquesJson: JSON.stringify(PLANTILLA_PROPUESTA_DEFECTO),
+        nombreVisible: null,
+        aperturaMaxima: null,
+      },
+    );
     return { ...v, basesDisponibles: [...BASES_PLANTILLA] };
   },
 });
@@ -107,7 +117,10 @@ export const plantillasPropuestaUpdate = defineCapability({
     base: z.enum(BASES_PLANTILLA).optional(),
     nombreVisible: z.string().trim().max(120).optional(),
     aperturaMaxima: z.enum(["por_instalacion", "por_categoria", "por_item"]).optional(),
-    bloques: z.array(bloquePlantillaSchema).optional(),
+    bloques: z
+      .array(bloquePlantillaSchema)
+      .refine((l) => new Set(l.map((b) => b.tipo)).size === l.length, "Un bloque no puede repetirse.")
+      .optional(),
   }),
   output: plantillasPropuestaGet.output,
   efecto: "escritura",
