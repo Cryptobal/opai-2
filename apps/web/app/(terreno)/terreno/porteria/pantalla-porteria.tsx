@@ -10,6 +10,7 @@ import { usePersonaElegida } from "@/lib/terreno/persona";
 
 import type { ConfigAcceso } from "@opai/domain/acceso-config";
 
+import { type Bienvenida, BienvenidaPorteria } from "./bienvenida-porteria";
 import type { EnSitio } from "./lista-en-sitio";
 import { type PuntoPorteria, SelectorPunto, usePunto } from "./punto-porteria";
 
@@ -27,6 +28,7 @@ type Sitio = {
   activo: boolean;
   config: ConfigAcceso | null;
   puntos: PuntoPorteria[];
+  bienvenida: Bienvenida | null;
   items: EnSitio[];
 };
 
@@ -83,6 +85,7 @@ export function PantallaPorteria() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-6 pt-safe pb-safe">
       <h1 className="t-title text-fg">Portería</h1>
+      <BienvenidaPorteria b={sitio?.bienvenida ?? null} />
       <SelectorPunto puntos={sitio?.puntos ?? []} id={punto.id} onElegir={punto.elegir} />
       {!sitio && !falla ? <Loading variante="lista" /> : null}
       {sitio && !sitio.activo ? (
