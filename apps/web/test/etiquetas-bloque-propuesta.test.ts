@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { TIPOS_BLOQUE_PROPUESTA } from "../../../modules/cpq/domain/documento/propuesta-tecnica";
 import {
   TIPOS_BLOQUE_ETIQUETADOS,
+  conTextoAceptado,
+  esSeccionDeTexto,
   etiquetaBloquePropuesta,
   fijarBloque,
   moverBloque,
@@ -37,5 +39,21 @@ describe("gestor de bloques de la propuesta (CAR-530)", () => {
   it("prefiere el título propio y cae al tipo desconocido", () => {
     expect(etiquetaBloquePropuesta("texto_libre", " Alcance ")).toBe("Alcance");
     expect(etiquetaBloquePropuesta("nuevo")).toBe("nuevo");
+  });
+});
+
+describe("IA por sección (CAR-534)", () => {
+  const bloques = [
+    { id: "a", tipo: "texto_libre", activo: true, contenidoOverride: "manual" },
+    { id: "b", tipo: "metodologia", activo: true },
+  ];
+  it("aceptar un borrador cambia solo la sección elegida", () => {
+    const r = conTextoAceptado(bloques, "b", "borrador");
+    expect(r[1]?.contenidoOverride).toBe("borrador");
+    expect(r[0]).toBe(bloques[0]);
+  });
+  it("las secciones sin texto propio no ofrecen IA", () => {
+    expect(esSeccionDeTexto("portada")).toBe(false);
+    expect(esSeccionDeTexto("metodologia")).toBe(true);
   });
 });

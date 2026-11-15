@@ -6,9 +6,10 @@ import { Alerta, Badge, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { VisorPdf } from "@/app/_components/visor-pdf";
-import { etiquetaBloquePropuesta } from "@/lib/cpq-bloques-propuesta";
+import { type BloqueArmador, etiquetaBloquePropuesta } from "@/lib/cpq-bloques-propuesta";
 import { etiquetaBasePlantillaCpq } from "@/lib/cpq-plantilla-presentacion";
 
+import { SeccionesPropuestaIa } from "./secciones-propuesta-ia";
 import { urlDePdf } from "./use-vista-previa-pdf";
 
 export type PropuestaInline = {
@@ -16,21 +17,16 @@ export type PropuestaInline = {
   base: string;
   estado: string;
   servicioDesactualizado: boolean;
-  bloques: { id: string; tipo: string; titulo?: string; activo: boolean }[];
+  bloques: BloqueArmador[];
 };
 
 /**
  * Propuesta técnica completa en la misma pantalla de la cotización (CAR-229): los bloques que la
  * componen y su PDF, a todo el ancho, sin salir a otra página.
  */
-export function PropuestaTecnicaInline({
-  cotizacionId,
-  codigo,
-  propuesta,
-  gestionar,
-  onCambio,
-}: {
+export function PropuestaTecnicaInline({ cotizacionId, negocioId, codigo, propuesta, gestionar, onCambio }: {
   cotizacionId: string;
+  negocioId: string;
   codigo: string;
   propuesta: PropuestaInline;
   gestionar: boolean;
@@ -112,6 +108,9 @@ export function PropuestaTecnicaInline({
           </li>
         ))}
       </ol>
+      {gestionar && propuesta.estado !== "congelada" ? (
+        <SeccionesPropuestaIa negocioId={negocioId} propuestaId={propuesta.id} bloques={propuesta.bloques} onGuardado={onCambio} />
+      ) : null}
       {fallo && error ? (
         <Alerta
           tono="danger"

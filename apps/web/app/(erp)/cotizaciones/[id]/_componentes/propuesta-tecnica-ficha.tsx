@@ -12,10 +12,12 @@ import { urlDePdf } from "./use-vista-previa-pdf";
 
 export function PropuestaTecnicaFicha({
   cotizacionId,
+  negocioId,
   codigo,
   gestionar,
 }: {
   cotizacionId: string;
+  negocioId: string;
   codigo: string;
   gestionar: boolean;
 }) {
@@ -74,6 +76,7 @@ export function PropuestaTecnicaFicha({
         <PropuestaTecnicaInline
           key={version}
           cotizacionId={cotizacionId}
+          negocioId={negocioId}
           codigo={codigo}
           propuesta={propuesta}
           gestionar={gestionar}

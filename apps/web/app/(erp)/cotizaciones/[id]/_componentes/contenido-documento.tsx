@@ -58,6 +58,7 @@ export function ContenidoDocumento(p: {
       <PropuestaTecnicaFicha
         codigo={d.cotizacion.codigo}
         cotizacionId={d.cotizacion.id}
+        negocioId={d.cotizacion.negocioId}
         gestionar={datos.gestionar}
       />
       <AccionesComerciales
