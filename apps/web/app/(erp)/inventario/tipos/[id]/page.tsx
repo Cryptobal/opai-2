@@ -33,7 +33,9 @@ export default function TipoDetalle({ params, searchParams }: Props) {
         </EnlaceBoton>
       }
       cargar={() => cargarFichaTipo(params, searchParams)}
-      opciones={(d) => ({ volver: { href: conBusqueda("/inventario", d.p.q), etiqueta: "Inventario" } })}
+      opciones={(d) => ({
+        volver: { href: conBusqueda("/inventario", d.p.q), etiqueta: "Inventario" },
+      })}
     >
       {({ id, p, datos, lista, puedeGestionar }) => (
         <>
@@ -43,11 +45,9 @@ export default function TipoDetalle({ params, searchParams }: Props) {
             etiquetaLista="Lista de tipos"
             lista={
               <ListaTipos
-                state={lista.state}
-                items={lista.items}
-                total={lista.total}
-                seleccionada={id}
+                {...lista}
                 {...(p.q ? { q: p.q } : {})}
+                seleccionada={id}
                 puedeGestionar={puedeGestionar}
               />
             }
