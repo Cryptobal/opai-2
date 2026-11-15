@@ -43,6 +43,10 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Identidad: login con contraseña (Better Auth), solo personas.",
   "app/_acciones/auth.ts#accionGoogle": "Identidad: login con Google, solo personas.",
   "app/_acciones/auth.ts#accionSalir": "Identidad: cierra la sesión del navegador.",
+  "app/_acciones/ver-como.ts#accionIniciarVerComo":
+    "Invoca core.ver_como.iniciar (solo personas, CAR-528) y guarda la vista en una cookie firmada de esa sesión.",
+  "app/_acciones/ver-como.ts#accionSalirVerComo":
+    "Invoca core.ver_como.terminar (solo personas, CAR-528) y borra la cookie de la vista.",
   "app/_acciones/auth.ts#accionCambiarPassword":
     "Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032).",
   "app/_acciones/auth.ts#accionPedirRecuperacion":

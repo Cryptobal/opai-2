@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Alerta, Button, Card, CardContent } from "@opai/ds";
 
+import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
+
 import { CapturaRostro } from "./captura-rostro";
 import { EnrolarRostro } from "./enrolar-rostro";
 import { motivoDeFallo, ubicacion } from "./etiquetas";
@@ -33,7 +35,9 @@ export function Marcar({
   estadoInicial?: EstadoAsistencia | null | undefined;
 }) {
   const ejecutor = useEjecutorAsistencia(modo);
-  const { ejecutar, pendiente, error, limpiarError } = ejecutor;
+  const { ejecutar, error, limpiarError } = ejecutor;
+  const soloLectura = useSoloLectura();
+  const pendiente = ejecutor.pendiente || soloLectura;
   const [estado, setEstado] = useState<EstadoAsistencia | null>(estadoInicial ?? null);
   const [paso, setPaso] = useState<Paso>("inicio");
   const [pin, setPin] = useState("");
@@ -97,7 +101,7 @@ export function Marcar({
             </Alerta>
           )}
           <Button variant="secondary" size="lg" block onClick={() => { if (intentoRostro && error) setMotivo(motivoDeFallo(error)); limpiarError(); setPaso("pin"); }}>Usar PIN</Button>
-          {!rostroUsable ? <Button variant="ghost" block onClick={() => { limpiarError(); setPaso("enrolar"); }}>Enrolar mi rostro</Button> : null}
+          {!rostroUsable ? <Button variant="ghost" block disabled={soloLectura} onClick={() => { limpiarError(); setPaso("enrolar"); }}>Enrolar mi rostro</Button> : null}
         </CardContent></Card>
       ) : null}
       {paso === "pin" ? (

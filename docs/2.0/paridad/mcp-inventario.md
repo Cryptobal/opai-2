@@ -49,6 +49,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_acciones` | `core.metodos_acceso.renombrar_passkey` | `core_metodos_acceso_renombrar_passkey` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
 | compartido | `app/_acciones` | `core.personas.list` | `core_personas_list` | existe |
+| compartido | `app/_acciones` | `core.ver_como.iniciar` | — | excepción |
+| compartido | `app/_acciones` | `core.ver_como.terminar` | — | excepción |
 | compartido | `app/_components` | `agente.conversaciones.archivar` | `agente_conversaciones_archivar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.borrar` | `agente_conversaciones_borrar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.get` | `agente_conversaciones_get` | existe |
@@ -776,6 +778,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
+| erp | `/ver-como` | `core.ver_como.list` | — | excepción |
 | platform | `/platform/ajustes/credenciales` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
 | platform | `/platform/ajustes/modelos` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes/modelos` | `platform.precios.list` | `platform_precios_list` | existe |
@@ -866,6 +869,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
+| `app/_acciones/ver-como.ts#accionIniciarVerComo` | Invoca core.ver_como.iniciar (solo personas, CAR-528) y guarda la vista en una cookie firmada de esa sesión. |
+| `app/_acciones/ver-como.ts#accionSalirVerComo` | Invoca core.ver_como.terminar (solo personas, CAR-528) y borra la cookie de la vista. |
 | `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
@@ -1000,6 +1005,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
 | `core.ver_como.iniciar` | Solo personas: «ver como» es una vista de pantalla de quien tiene la sesión (CAR-528); un agente ya lee esos datos con sus propias capacidades. |
+| `core.ver_como.list` | Solo personas: buscador de la pantalla «Ver como…» (CAR-528); sin iniciar una vista no le sirve a un agente. |
 | `core.ver_como.terminar` | Solo personas: cierra la vista «ver como» de quien tiene la sesión (CAR-528). |
 | `core.webhooks.destino_actualizar` | Solo personas: cambiar la dirección de un destino redirige los eventos de la empresa (ADR-032). |
 | `core.webhooks.destino_crear` | Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032). |
@@ -1100,8 +1106,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | `/configuracion/usuarios` | no | reservada a personas |
-| `core.ver_como.iniciar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
-| `core.ver_como.terminar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
+| `core.ver_como.iniciar` | `app/_acciones` | no | reservada a personas |
+| `core.ver_como.list` | `/ver-como` | no | reservada a personas |
+| `core.ver_como.terminar` | `app/_acciones` | no | reservada a personas |
 | `core.webhooks.destino_actualizar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
 | `core.webhooks.destino_crear` | `/configuracion/agentes/eventos` | no | reservada a personas |
 | `core.webhooks.destino_eliminar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |

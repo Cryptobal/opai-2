@@ -13,11 +13,12 @@ import { PantallaEquipo } from "./_componentes/pantalla-equipo";
 
 export const metadata = { title: "Terreno" };
 
-/** Con sesión, el portal de siempre; sin sesión pero con un equipo emparejado (B2), Terreno del equipo (B3). */
+/** Con sesión, el portal de siempre; sin sesión pero con un equipo emparejado (B2), Terreno del equipo
+ * (B3). En «ver como» (CAR-528), el Terreno del equipo elegido, en solo lectura. */
 async function Contenido() {
-  if (await identidadActual())
-    return <PortalPlaceholder portal="terreno" titulo="Terreno" ruta="/terreno" />;
   const equipo = await dispositivoActual();
+  if (!equipo?.verComo && (await identidadActual()))
+    return <PortalPlaceholder portal="terreno" titulo="Terreno" ruta="/terreno" />;
   if (!equipo) redirect(loginDe("/terreno"));
   if (equipo.estado !== "activo") redirect("/terreno/emparejar");
   const { instalacion, personas } = await personasDelEquipo(equipo);

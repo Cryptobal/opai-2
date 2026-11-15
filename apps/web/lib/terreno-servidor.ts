@@ -25,6 +25,7 @@ export async function ejecutarComoEquipo(
 ): Promise<Resultado> {
   // Los módulos activos de la empresa: sin ellos, una capacidad de Rondas, Acceso o Asistencia se rechazaría.
   const ctx = contextoSistema(equipo.tenantId, await fuentesReales.modulosActivos(equipo.tenantId));
+  if (equipo.verComo) ctx.verComo = equipo.verComo;
   return executeCapability(
     ctx,
     capacidad,

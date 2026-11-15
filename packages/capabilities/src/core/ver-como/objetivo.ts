@@ -10,6 +10,11 @@ export type ObjetivoVerComo = {
   dispositivoId: string | null;
 };
 
+/** Quien mira no ve como alguien de rol superior al suyo (un admin no ve como el owner). */
+export function rolVisible(ctx: Contexto, rol: string): boolean {
+  return ctx.rol !== null && esRol(rol) && puedeAsignarRol(ctx.rol, rol);
+}
+
 /**
  * Membresía activa en esta empresa con el portal, y de rol no superior al de quien mira (un admin no
  * ve como el owner). La consulta va por `ctx.db`: otra empresa responde como inexistente.
@@ -25,7 +30,7 @@ async function miembroVisible(
   });
   if (!m || !m.portales.includes(portal))
     throw reglaDeNegocio("Esa persona no tiene acceso activo a ese portal.");
-  if (!ctx.rol || !esRol(m.rol) || !puedeAsignarRol(ctx.rol, m.rol))
+  if (!rolVisible(ctx, m.rol))
     throw prohibido("No puedes ver como alguien de un rol superior al tuyo.");
   return m.userId;
 }

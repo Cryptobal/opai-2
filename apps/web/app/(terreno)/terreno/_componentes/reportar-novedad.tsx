@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Alerta, Button, Campo, Input } from "@opai/ds";
 
 import { encolarHecho } from "@/lib/terreno/cola";
+import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
 
 type Gravedad = "baja" | "media" | "alta";
 const GRAVEDADES: readonly { v: Gravedad; t: string }[] = [
@@ -27,6 +28,7 @@ export function ReportarNovedad({
   const [resumen, setResumen] = useState("");
   const [gravedad, setGravedad] = useState<Gravedad>("media");
   const [estado, setEstado] = useState<"libre" | "guardando" | "guardada" | "error">("libre");
+  const soloLectura = useSoloLectura();
   const enviar = async () => {
     const r = resumen.trim();
     if (r.length < 3) return;
@@ -72,7 +74,7 @@ export function ReportarNovedad({
       </div>
       <Button
         onClick={() => void enviar()}
-        disabled={resumen.trim().length < 3 || estado === "guardando"}
+        disabled={soloLectura || resumen.trim().length < 3 || estado === "guardando"}
       >
         {estado === "guardando" ? "Guardando…" : "Enviar novedad"}
       </Button>
