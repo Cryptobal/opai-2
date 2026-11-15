@@ -545,6 +545,87 @@
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
 }
+/* Ancho y movimiento del menú del diseño nuevo (CAR-442, referente Linear): `ShellNuevo` fija
+   `--ancho-menu` (200 a 360 px; se cambia arrastrando el borde, `AsaMenu`). El menú entra
+   deslizándose al fijarlo (no al cargar la página) o al asomarse, sin animación si el sistema pide menos movimiento. */
+[data-marco="nuevo"] nav[data-shell="sidebar"] {
+  width: var(--ancho-menu, 248px);
+}
+[data-marco="nuevo"] [data-shell="asa-menu"] {
+  left: var(--ancho-menu, 248px);
+}
+[data-menu="plegado"] [data-shell="asa-menu"],
+[data-menu="asomado"] [data-shell="asa-menu"] {
+  display: none;
+}
+/* Plegado como en Linear (CAR-442), con mouse o trackpad: sin riel de íconos; queda el botón
+   «Mostrar el menú» arriba a la izquierda y una franja de 8 px en el borde que asoman el menú; ya
+   asomado, el menú trae «Dejar el menú fijo» y la página se oscurece un poco. En pantallas táctiles
+   sigue el riel. */
+[data-shell="mostrar-menu"],
+[data-shell="borde-asomar"],
+[data-shell="velo-menu"] {
+  display: none;
+}
+@media (min-width: 64rem) and (pointer: fine) {
+  [data-menu="plegado"] nav[data-shell="riel"],
+  [data-menu="asomado"] nav[data-shell="riel"] {
+    display: none;
+  }
+  [data-menu="plegado"] [data-shell="mostrar-menu"] {
+    display: flex;
+  }
+  [data-menu="plegado"] header[data-shell="barra"],
+  [data-menu="asomado"] header[data-shell="barra"] {
+    padding-left: 3.5rem;
+  }
+  [data-menu="plegado"] [data-shell="borde-asomar"] {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 30;
+    display: block;
+    width: 8px;
+  }
+  [data-menu="asomado"] [data-shell="velo-menu"] {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: block;
+    pointer-events: none;
+  }
+}
+@media (min-width: 64rem) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-menu="asomado"] [data-shell="velo-menu"] {
+    animation: ds-aparecer 180ms ease-out;
+  }
+}
+/* En pantallas táctiles (iPad horizontal) no hay borde de 8 px que tomar: el menú se pliega con su botón. */
+@media (pointer: coarse) {
+  [data-marco="nuevo"] [data-shell="asa-menu"] {
+    display: none;
+  }
+}
+[data-arrastre] {
+  cursor: col-resize;
+  user-select: none;
+}
+@keyframes menu-entra {
+  from {
+    opacity: 0.6;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+  [data-menu="fijo"][data-animar] nav[data-shell="sidebar"],
+  [data-menu="asomado"] nav[data-shell="sidebar"] {
+    animation: menu-entra 180ms ease-out;
+  }
+}
 /* Sin logo, la inicial de la empresa va con su color (ADR-109, CAR-335 D6b). */
 [data-marco="nuevo"] [data-monograma] {
   background: var(--ds-accent);

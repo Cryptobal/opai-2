@@ -1,24 +1,25 @@
 "use client";
 
-import { type PointerEvent, useEffect, useState } from "react";
+import { type CSSProperties, type PointerEvent, useCallback, useEffect, useState } from "react";
 
 import { AppShell, type AppShellProps } from "../app-shell";
 import { LinkPorDefecto } from "../types";
+import { ANCHO_BASE, AsaMenu, anchoValido } from "./asa-menu";
+import { PlegadoLinear, useAtajoMenu } from "./plegado-linear";
+import { useCierreAsomado } from "./use-cierre-asomado";
 import { BandaConexion } from "./banda-conexion";
 import { BarraInferiorNueva } from "./barra-inferior";
 import { RielNuevo } from "./riel-nuevo";
 import { BotonFijarMenu, BotonPlegarMenu, BotonTema } from "./botones-menu";
-
-/** Ancho del menú lateral completo (`Sidebar`, 248 px) más un margen para no cerrarlo en el borde. */
-const ANCHO_MENU = 264;
-const DENTRO_DEL_MENU =
-  'nav[data-shell="sidebar"], [data-radix-popper-content-wrapper], [role="menu"], [role="dialog"], [role="listbox"]';
 
 export type ShellNuevoProps = AppShellProps & {
   /** Menú plegado al cargar: lo lee el servidor (cookie) para pintarlo así desde el primer byte. */
   plegadoInicial?: boolean;
   /** La app recuerda la elección (cookie de este navegador). */
   onPlegado?: (plegado: boolean) => void;
+  /** Ancho del menú fijo al cargar (cookie) y aviso al cambiarlo arrastrando su borde (CAR-442). */
+  anchoInicial?: number;
+  onAncho?: (ancho: number) => void;
   /** Botón de tema de la barra superior (iPad y escritorio) y en «Yo» del teléfono. */
   onTema?: () => void;
   /** Pestaña «Agente» de la barra inferior del teléfono; sin agente no aparece. */
@@ -35,6 +36,8 @@ export type ShellNuevoProps = AppShellProps & {
 export function ShellNuevo({
   plegadoInicial,
   onPlegado,
+  anchoInicial,
+  onAncho,
   onTema,
   onAgente,
   pestanasDelPortal = false,
@@ -42,6 +45,7 @@ export function ShellNuevo({
 }: ShellNuevoProps) {
   const [plegado, setPlegado] = useState(plegadoInicial ?? false);
   const [asomado, setAsomado] = useState(false);
+  const [ancho, setAncho] = useState(anchoValido(anchoInicial ?? ANCHO_BASE));
   // Los menús y diálogos se pintan en <body>: el atributo en <html> les da la misma piel.
   useEffect(() => {
     const raiz = document.documentElement;
@@ -51,39 +55,27 @@ export function ShellNuevo({
     };
   }, []);
   useEffect(() => setAsomado(false), [props.rutaActual]); // al elegir una pantalla, se esconde
-  // Asomado: el riel queda tapado (fuera del árbol de accesibilidad, para no repetir «Principal») y
-  // el menú se esconde cuando el mouse se aleja, también si apareció bajo el mouse sin que se moviera.
-  useEffect(() => {
-    const riel = document.querySelector<HTMLElement>('[data-marco="nuevo"] nav[data-shell="riel"]');
-    riel?.toggleAttribute("inert", asomado);
-    if (asomado) riel?.setAttribute("aria-hidden", "true");
-    else riel?.removeAttribute("aria-hidden");
-    if (!asomado) return;
-    const mover = (e: globalThis.PointerEvent) => {
-      if (e.pointerType === "mouse" && e.clientX > ANCHO_MENU) setAsomado(false);
-    };
-    // En pantalla táctil (iPad) no hay mouse que se aleje: tocar fuera del menú lo cierra. Los menús
-    // que abre el propio menú (empresa, usuario) se pintan en <body> y no cuentan como «fuera».
-    const tocar = (e: globalThis.PointerEvent) => {
-      if (e.pointerType === "mouse" || !(e.target instanceof Element)) return;
-      if (!e.target.closest(DENTRO_DEL_MENU)) setAsomado(false);
-    };
-    const tecla = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !document.querySelector('[role="menu"]')) setAsomado(false);
-    };
-    window.addEventListener("pointermove", mover);
-    window.addEventListener("pointerdown", tocar);
-    window.addEventListener("keydown", tecla);
-    return () => {
-      window.removeEventListener("pointermove", mover);
-      window.removeEventListener("pointerdown", tocar);
-      window.removeEventListener("keydown", tecla);
-    };
-  }, [asomado]);
+  const cerrarAsomado = useCallback(() => setAsomado(false), []);
+  useCierreAsomado(asomado, ancho, cerrarAsomado);
+  const [animar, setAnimar] = useState(false); // el menú entra deslizándose solo tras un cambio
   const cambiar = (valor: boolean) => {
+    setAnimar(true);
     setPlegado(valor);
     setAsomado(false);
     onPlegado?.(valor);
+  };
+  const alternar = useCallback(() => {
+    setAnimar(true);
+    setAsomado(false);
+    setPlegado((antes) => {
+      onPlegado?.(!antes);
+      return !antes;
+    });
+  }, [onPlegado]);
+  useAtajoMenu(alternar);
+  const cambiarAncho = (valor: number) => {
+    setAncho(valor);
+    onAncho?.(valor);
   };
   const asomar = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "mouse" || asomado) return;
@@ -115,8 +107,16 @@ export function ShellNuevo({
       data-menu={asomado ? "asomado" : plegado ? "plegado" : "fijo"}
       {...(pestanasDelPortal ? { "data-pestanas": "portal" } : {})}
       onPointerOver={asomar}
+      {...(animar ? { "data-animar": "" } : {})}
+      style={{ "--ancho-menu": `${ancho}px` } as CSSProperties}
       className="flex"
     >
+      {plegado ? (
+        <PlegadoLinear onAsomar={() => setAsomado(true)} onFijar={() => cambiar(false)} />
+      ) : (
+        <AsaMenu ancho={ancho} onAncho={cambiarAncho} onPlegar={() => cambiar(true)} />
+      )}
+      {asomado ? <div data-shell="velo-menu" aria-hidden className="bg-scrim" /> : null}
       <RielNuevo
         items={props.nav}
         rutaActual={props.rutaActual}
