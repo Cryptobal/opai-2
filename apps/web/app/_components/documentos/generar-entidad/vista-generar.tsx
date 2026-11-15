@@ -2,14 +2,39 @@ import Link from "next/link";
 
 import { Alerta, cn } from "@opai/ds";
 
-import { BotonGenerar } from "./boton-generar";
-import type { VistaRelleno } from "./tipos";
+import { BotonGenerarDocumento } from "./boton-generar-documento";
+import type { VistaRellenoEntidad, VistaRellenoPersona } from "./tipos";
+
+const ETIQUETA = { cuenta: "Cuenta", instalacion: "Instalación" } as const;
+
+type Props = {
+  vista: VistaRellenoPersona | VistaRellenoEntidad;
+  fichaHref: string;
+  documentosHref: string;
+};
+
+function esPersona(v: Props["vista"]): v is VistaRellenoPersona {
+  return "persona" in v;
+}
 
 /**
- * Vista previa del documento con los datos de la persona (diseño 07). Lo que falta se muestra como
- * variable en ámbar dentro del texto y, aparte, con su motivo; mientras falte algo no se puede generar.
+ * Vista previa al generar un documento (persona, cuenta o instalación). Lo que falta se señala en
+ * ámbar; mientras falte algo no se puede generar. Una sola copia para Personas y entidad (CAR-439).
  */
-export function VistaDocumento({ vista, fichaHref, documentosHref }: { vista: VistaRelleno; fichaHref: string; documentosHref: string }) {
+export function VistaGenerar({ vista, fichaHref, documentosHref }: Props) {
+  const persona = esPersona(vista);
+  const sujeto = persona
+    ? { etiqueta: "Persona", nombre: vista.persona.nombre, id: vista.persona.id }
+    : { etiqueta: ETIQUETA[vista.entidad.tipo], nombre: vista.entidad.nombre, id: vista.entidad.id };
+  const fichaLink = persona ? "Abrir la ficha de la persona" : "Abrir la ficha";
+  const textoCompleto = persona
+    ? "Todos los datos están en la ficha. Puedes generar el PDF; el envío a firma llega en el siguiente paso."
+    : "Todos los datos están en la ficha. Puedes generar el PDF.";
+  const mensajeExito = persona
+    ? "El PDF quedó en los documentos de la persona."
+    : "El PDF quedó en los documentos.";
+  const input = persona ? { personaId: sujeto.id } : { entidadId: sujeto.id };
+  const firma = persona ? vista.firma : null;
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex min-w-0 flex-col gap-4">
@@ -30,19 +55,25 @@ export function VistaDocumento({ vista, fichaHref, documentosHref }: { vista: Vi
               ))}
             </ul>
             <Link href={fichaHref} className="mt-2 inline-block underline">
-              Abrir la ficha de la persona
+              {fichaLink}
             </Link>
           </Alerta>
         ) : (
           <Alerta tono="success" titulo="Documento completo">
-            Todos los datos están en la ficha. Puedes generar el PDF; el envío a firma llega en el siguiente paso.
+            {textoCompleto}
           </Alerta>
         )}
-        <BotonGenerar plantillaId={vista.plantilla.id} personaId={vista.persona.id} documentosHref={documentosHref} puedeGenerar={vista.puedeGenerar} />
+        <BotonGenerarDocumento
+          plantillaId={vista.plantilla.id}
+          documentosHref={documentosHref}
+          puedeGenerar={vista.puedeGenerar}
+          mensajeExito={mensajeExito}
+          input={input}
+        />
         <dl className="t-body-sm flex flex-col gap-1 rounded-lg border border-border bg-surface p-4">
           <div className="flex justify-between gap-3">
-            <dt className="text-fg-muted">Persona</dt>
-            <dd>{vista.persona.nombre}</dd>
+            <dt className="text-fg-muted">{sujeto.etiqueta}</dt>
+            <dd>{sujeto.nombre}</dd>
           </div>
           <div className="flex justify-between gap-3">
             <dt className="text-fg-muted">Plantilla</dt>
@@ -50,12 +81,14 @@ export function VistaDocumento({ vista, fichaHref, documentosHref }: { vista: Vi
               {vista.plantilla.nombre} · versión {vista.plantilla.version}
             </dd>
           </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-fg-muted">Firma</dt>
-            <dd>
-              {vista.firma.nivel} · {vista.firma.firmantes === "ambos" ? "trabajador y empleador" : vista.firma.firmantes}
-            </dd>
-          </div>
+          {firma ? (
+            <div className="flex justify-between gap-3">
+              <dt className="text-fg-muted">Firma</dt>
+              <dd>
+                {firma.nivel} · {firma.firmantes === "ambos" ? "trabajador y empleador" : firma.firmantes}
+              </dd>
+            </div>
+          ) : null}
         </dl>
       </div>
       <article className="flex min-w-0 flex-col gap-3 rounded-sm border border-paper-rule bg-paper px-4 py-4 text-paper-fg md:px-9 md:py-8">
