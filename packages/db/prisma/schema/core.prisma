@@ -26,6 +26,8 @@ model Tenant {
   timezone  String   @default("America/Santiago")
   /// "trial" | "activo" | "suspendido". Suspendido bloquea el ingreso de sus miembros.
   estado    String   @default("trial")
+  /// Desde cuándo un módulo nuevo del catálogo queda activo. Null: apagado (el defecto).
+  activarModulosNuevosDesde DateTime? @map("activar_modulos_nuevos_desde") @db.Timestamptz(6)
   /// Corte de la importación desde 1.0: con valor, `aplicar` se rechaza salvo reimportación del operador.
   importacionCerradaEn DateTime? @map("importacion_cerrada_en") @db.Timestamptz(6)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)

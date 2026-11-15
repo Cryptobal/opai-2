@@ -21,15 +21,21 @@ export function ListaRecurrentes(p: { state: EstadoPantalla; items: Recurrente[]
     <ListScreen<Recurrente>
       state={p.state}
       titulo="Gastos recurrentes"
-      {...(p.configura && p.filas.length ? { accionPrincipal: <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>Nuevo gasto recurrente</EnlaceBotonHoja> } : {})}
+      {...(p.configura ? { accionPrincipal: <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>Nuevo gasto recurrente</EnlaceBotonHoja> } : {})}
       items={p.items}
       clave={(x) => x.id}
       {...(p.configura ? { href: (x: Recurrente) => `?editar=${x.id}` } : {})}
       Link={LinkNext}
       textos={{
-        vacio: p.filas.length
-          ? { titulo: "Aún no hay gastos recurrentes", descripcion: "Agrega el arriendo, los honorarios o el retiro de cada socio: el flujo los proyecta solos y los da por pagados cuando llega el cargo del banco." }
-          : { titulo: "Primero crea una fila de egresos", descripcion: "Cada gasto recurrente va a una fila del flujo de caja.", accion: <EnlaceBoton href="/finanzas/flujo" variante="secondary">Ir al flujo</EnlaceBoton> },
+        vacio: {
+          titulo: "Aún no hay gastos recurrentes",
+          descripcion: p.filas.length
+            ? "Agrega el arriendo, los honorarios o el retiro de cada socio: el flujo los proyecta solos y los da por pagados cuando llega el cargo del banco."
+            : "Crea el gasto y, si hace falta, una fila nueva desde la misma hoja. También puedes administrarlas en Configuración › Finanzas › Flujo de caja.",
+          ...(p.configura
+            ? {}
+            : { accion: <EnlaceBoton href="/configuracion/modulo/finanzas?seccion=flujo-caja" variante="secondary">Administrar filas</EnlaceBoton> }),
+        },
       }}
       tarjeta={(x) => (
         <>
