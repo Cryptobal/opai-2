@@ -1,4 +1,5 @@
 import { executeCapability } from "@opai/capabilities";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { resolverActor } from "@/lib/actor";
@@ -18,7 +19,9 @@ const solicitud = z.discriminatedUnion("accion", [
   }),
 ]);
 
-/** Sesión y portal ERP fijado en servidor. SSE de eventos, sin una pantalla de chat nueva. */
+export const maxDuration = 300;
+
+/** Sesión y portal ERP fijado en servidor. SSE de eventos; la corrida sigue si el cliente se corta. */
 export async function POST(req: Request) {
   if (req.headers.has("authorization") || req.headers.get("origin") !== new URL(req.url).origin) {
     return Response.json({ error: "Prohibido." }, { status: 403 });
@@ -55,26 +58,40 @@ export async function POST(req: Request) {
   if (!datos.success) return Response.json({ error: "Solicitud inválida." }, { status: 400 });
   asegurarRegistro();
   const { accion, entrada, idempotencyKey } = datos.data;
+  const corrida =
+    accion === "preparar"
+      ? executeCapability({ ...ctx, portal: "erp" }, "agente.turno.preparar", entrada, {
+          idempotencyKey,
+        })
+      : executeCapability({ ...ctx, portal: "erp" }, "agente.plan.confirmar", entrada, {
+          idempotencyKey,
+        });
+  // Si el cliente se desconecta a mitad del SSE, la corrida igual termina (idempotencia + historial).
+  after(() => corrida.then(() => undefined).catch(() => undefined));
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controlador) {
-      const enviar = (evento: string, dato: unknown) =>
-        controlador.enqueue(encoder.encode(`event: ${evento}\ndata: ${JSON.stringify(dato)}\n\n`));
+      const enviar = (evento: string, dato: unknown) => {
+        try {
+          controlador.enqueue(encoder.encode(`event: ${evento}\ndata: ${JSON.stringify(dato)}\n\n`));
+        } catch {
+          /* cliente ya no lee el stream */
+        }
+      };
       enviar("iniciado", {});
       try {
-        const r =
-          accion === "preparar"
-            ? await executeCapability({ ...ctx, portal: "erp" }, "agente.turno.preparar", entrada, {
-                idempotencyKey,
-              })
-            : await executeCapability({ ...ctx, portal: "erp" }, "agente.plan.confirmar", entrada, {
-                idempotencyKey,
-              });
-        enviar("resultado", r);
+        enviar("resultado", await corrida);
       } catch {
         enviar("error", { mensaje: "No se pudo completar la solicitud." });
       }
-      controlador.close();
+      try {
+        controlador.close();
+      } catch {
+        /* ya cerrado */
+      }
+    },
+    cancel() {
+      /* no cancela la corrida: after() y la promesa compartida la mantienen */
     },
   });
   return new Response(stream, {
