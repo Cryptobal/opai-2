@@ -63,6 +63,7 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "nomina:prestamos.manage": "-",
   "nomina:prestamos.read": "-",
   "nomina:read": "-",
+  "pauta:aprobar_extra": "G",
   "pauta:read": "GLS",
   "pauta:write": "GS",
   "portal_cliente:accesos.manage": "G",

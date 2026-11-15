@@ -57,7 +57,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `agente.historial.list` | `agente_historial_list` | existe |
 | compartido | `app/_components` | `agente.modelos.list` | `agente_modelos_list` | existe |
 | compartido | `app/_components` | `agente.plan.confirmar` | — | excepción |
-| compartido | `app/_components` | `agente.turno.preparar` | — | excepción |
 | compartido | `app/_components` | `asistencia.marcas.registrar` | — | excepción |
 | compartido | `app/_components` | `asistencia.rostro.consentir` | — | excepción |
 | compartido | `app/_components` | `asistencia.rostro.enrolar` | — | excepción |
@@ -1046,7 +1045,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | Capacidad | Camino humano | API v1 con sesión | MCP |
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
-| `agente.turno.preparar` | `/api/agente`, `app/_components` | no | reservada a personas |
+| `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
 | `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
@@ -1256,6 +1255,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
 - `pauta.publicaciones.listar`
+- `pauta.turnos_extra.aprobar`
+- `pauta.turnos_extra.listar`
+- `pauta.turnos_extra.monto_fijar`
+- `pauta.turnos_extra.rechazar`
+- `pauta.turnos_extra.registrar`
 - `platform.ajustes.set`
 - `platform.eventos.list`
 - `platform.precios.set`
