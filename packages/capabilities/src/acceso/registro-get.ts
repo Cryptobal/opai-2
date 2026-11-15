@@ -23,6 +23,9 @@ const salida = z.object({
   origen: z.string(),
   lista: z.enum(["autorizada", "bloqueada"]).nullable(),
   dispositivo: z.string().nullable(),
+  /** Quién o qué registró la salida: el equipo, el ERP o el cierre en bloque. */
+  salidaOrigen: z.string().nullable(),
+  anulacion: z.object({ en: z.string(), motivo: z.string() }).nullable(),
 });
 
 /** Ficha de un registro de acceso (CAR-474, diseño `AccesoDetalle`): solo dentro del alcance del actor. */
@@ -40,7 +43,8 @@ export const registrosObtener = defineCapability({
     const r = await ctx.db.registroAcceso.findFirst({
       where: { AND: [{ id }, dondeInstalacionId(ctx)] },
       include: {
-        salida: { select: { horaCorregida: true } },
+        salida: { select: { horaCorregida: true, origen: true } },
+        anulacion: { select: { createdAt: true, motivo: true } },
         entradaLista: { select: { tipo: true } },
       },
     });
@@ -72,6 +76,10 @@ export const registrosObtener = defineCapability({
       origen: r.origen,
       lista: tipoLista,
       dispositivo: disp ? (disp.nombre ?? disp.identificador) : null,
+      salidaOrigen: r.salida?.origen ?? null,
+      anulacion: r.anulacion
+        ? { en: r.anulacion.createdAt.toISOString(), motivo: r.anulacion.motivo }
+        : null,
     };
   },
 });
