@@ -27,7 +27,7 @@ export function mesAnterior(periodo: string): string {
 }
 
 /** Cierra `periodo`: guarda el resultado de cada persona y deja el mes fijo. Un mes cerrado no se reabre. */
-export async function cerrarPeriodo(
+async function cerrarPeriodo(
   ctx: Contexto,
   periodo: string,
   origen: "manual" | "automatico",

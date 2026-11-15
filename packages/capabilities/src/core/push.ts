@@ -25,7 +25,7 @@ function usuarioDe(ctx: Contexto): string {
  * navegador del propio usuario después de dar permiso; un agente no tiene dispositivo (solo personas).
  * Idempotente por endpoint: volver a suscribir actualiza el dueño y el nombre del dispositivo.
  */
-export const pushSuscribir = defineCapability({
+const pushSuscribir = defineCapability({
   id: "core.push.suscribir",
   // Solo personas: la suscripción es del navegador de quien tiene la sesión; un agente no tiene celular.
   soloPersonas: true,
@@ -58,7 +58,7 @@ export const pushSuscribir = defineCapability({
 });
 
 /** Quita la suscripción de este dispositivo (solo si es del propio usuario). */
-export const pushQuitar = defineCapability({
+const pushQuitar = defineCapability({
   id: "core.push.quitar",
   // Solo personas, como suscribir: el dispositivo es de quien tiene la sesión.
   soloPersonas: true,

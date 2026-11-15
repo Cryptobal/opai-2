@@ -22,7 +22,7 @@ export type RegistroCorreccion = {
   evidenciaDocumentoId?: string;
 };
 
-export const canonDeCorreccion = (r: RegistroCorreccion): string => jsonCanonico({ v: 1, ...r });
+const canonDeCorreccion = (r: RegistroCorreccion): string => jsonCanonico({ v: 1, ...r });
 
 export const hashDeCorreccion = (hashAnterior: string, r: RegistroCorreccion): Promise<string> =>
   hashEncadenado(hashAnterior, canonDeCorreccion(r));

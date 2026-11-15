@@ -4,7 +4,11 @@ import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
 import { epocaDe } from "@/lib/epoca-sesion";
-import { marcoDeLaPeticion, menuPlegadoDeLaPeticion } from "@/lib/marco-servidor";
+import {
+  anchoMenuDeLaPeticion,
+  marcoDeLaPeticion,
+  menuPlegadoDeLaPeticion,
+} from "@/lib/marco-servidor";
 
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
@@ -26,11 +30,13 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   const conEmpresa = datos.acceso && datos.tenant !== null;
   const marco = await marcoDeLaPeticion(portal, conEmpresa);
   const menuPlegado = await menuPlegadoDeLaPeticion(marco);
+  const menuAncho = await anchoMenuDeLaPeticion(marco);
   return (
     <MarcoPortal
       key={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}
       marco={marco}
       menuPlegado={menuPlegado}
+      {...(menuAncho ? { menuAncho } : {})}
       datos={datos}
     >
       <CargaPortal>{children}</CargaPortal>

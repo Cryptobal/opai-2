@@ -1,11 +1,9 @@
-import { Estado } from "@opai/ds";
-
-import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { estadoTrabajador, SIN_FICHA } from "../_componentes/estado";
+import { estadoTrabajador } from "../_componentes/estado";
+import { EstadoLista } from "../_componentes/estado-lista";
 import { ListaDocumentos, type MiDocumento } from "./_componentes/lista-documentos";
 
 export const metadata = { title: tituloPagina("trabajador", "Mis documentos") };
@@ -24,18 +22,24 @@ export default function Pagina() {
       volverSoloTelefono
       cargando="lista"
       cargar={async () => {
-        const r = await ejecutarComoUsuario<{ hoy: string; items: MiDocumento[]; siguiente: string | null }>(
-          "trabajador",
-          "portal_trabajador.mis_documentos.listar",
-          { limite: 100 },
-        );
+        const r = await ejecutarComoUsuario<{
+          hoy: string;
+          items: MiDocumento[];
+          siguiente: string | null;
+        }>("trabajador", "portal_trabajador.mis_documentos.listar", { limite: 100 });
         return { state: estadoTrabajador(r), datos: r.ok ? r.data : null };
       }}
     >
       {({ state, datos }) => (
-        <Estado state={state} variante="lista" textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}>
-          {datos ? <ListaDocumentos items={datos.items} hoy={datos.hoy} hayMas={datos.siguiente !== null} /> : null}
-        </Estado>
+        <EstadoLista state={state}>
+          {datos ? (
+            <ListaDocumentos
+              items={datos.items}
+              hoy={datos.hoy}
+              hayMas={datos.siguiente !== null}
+            />
+          ) : null}
+        </EstadoLista>
       )}
     </PaginaPortal>
   );

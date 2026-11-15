@@ -128,27 +128,6 @@ export async function ultimosAccesos(userIds: readonly string[]): Promise<Map<st
   return ultimo;
 }
 
-/**
- * Restablece el segundo factor de un usuario (CAR-54): borra su enrolamiento y cierra todas sus
- * sesiones, para que vuelva a entrar con contraseña y enrolarse de nuevo. Corre en la transacción
- * de la capacidad que lo autorizó, junto con su auditoría.
- */
-export async function restablecerSegundoFactor(tx: TenantTx, userId: string) {
-  return conRolAuth(tx, async () => {
-    const enrolamientos = await tx.$executeRaw`
-      DELETE FROM core.two_factor WHERE user_id = ${userId}::uuid`;
-    // Las passkeys pueden vivir en el teléfono perdido (CAR-286): también se borran; el trigger
-    // de core.passkeys deja `passkey_enabled` en false.
-    const passkeys =
-      await tx.$executeRaw`DELETE FROM core.passkeys WHERE user_id = ${userId}::uuid`;
-    await tx.$executeRaw`
-      UPDATE core.users SET two_factor_enabled = false, updated_at = now() WHERE id = ${userId}::uuid`;
-    const sesiones =
-      await tx.$executeRaw`DELETE FROM core.sessions WHERE user_id = ${userId}::uuid`;
-    return { enrolamientos, passkeys, sesiones };
-  });
-}
-
 /** Estado mínimo de una sesión ya autenticada, en la conexión del caller; nunca entrega tokens. */
 export async function estadoSesionEnTransaccion(tx: TenantTx, sesionId: string, userId: string) {
   return conRolAuth(tx, async () => {
