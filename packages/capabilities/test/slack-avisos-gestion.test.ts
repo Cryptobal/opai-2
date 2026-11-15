@@ -93,7 +93,7 @@ describe("Slack F4: gestión de avisos en OPAI", () => {
       error: { code: "NOT_FOUND" },
     });
     const lista = await executeCapability(ctx, "core.avisos_terreno.list", {});
-    expect(lista).toMatchObject({ ok: true, data: [] });
+    expect(lista).toMatchObject({ ok: true, data: { items: [], siguiente: null } });
     const propio = contextoDePrueba({
       rol: "supervisor",
       alcance: { instalaciones: [INST] },

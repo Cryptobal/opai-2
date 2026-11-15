@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../../define";
 import { iso } from "../../comun";
+import { cursorDe, pagina } from "../../maestros/comun";
 
 /** Avisos de terreno de las últimas 48 horas (CAR-294), para ver qué falta tomar o cerrar. */
 export const avisosTerrenoList = defineCapability({
@@ -13,19 +14,27 @@ export const avisosTerrenoList = defineCapability({
   permiso: PERMISOS_CORE.avisosTerrenoGestionar,
   portales: ["erp", "supervisor"], // El supervisor es el destinatario principal de los avisos (F4).
   // Lectura de avisos que nombran a personas (NÚCLEO-H): se auditan los ids revelados.
-  auditarLectura: (s) => s.map((a) => a.id),
-  input: z.object({ gestion: z.enum(["abierto", "tomado", "cerrado"]).optional() }),
-  output: z.array(
-    z.object({
-      id: z.string(),
-      tipo: z.string(),
-      titulo: z.string(),
-      gestion: z.string(),
-      instalacionId: z.string().nullable(),
-      creadoEn: z.string(),
-      tomadoEn: z.string().nullable(),
-    }),
-  ),
+  auditarLectura: (s) => s.items.map((a) => a.id),
+  input: z.object({
+    gestion: z.enum(["abierto", "tomado", "cerrado"]).optional(),
+    // CAR-353: contrato único de listas (cursor + limite; items + siguiente).
+    cursor: z.uuid().optional().describe("Id del último aviso de la página anterior."),
+    limite: z.number().int().min(1).max(200).default(200),
+  }),
+  output: z.object({
+    items: z.array(
+      z.object({
+        id: z.string(),
+        tipo: z.string(),
+        titulo: z.string(),
+        gestion: z.string(),
+        instalacionId: z.string().nullable(),
+        creadoEn: z.string(),
+        tomadoEn: z.string().nullable(),
+      }),
+    ),
+    siguiente: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -36,17 +45,21 @@ export const avisosTerrenoList = defineCapability({
         // Alcance por filas en la consulta (ADR-022).
         ...(ctx.alcance ? { instalacionId: { in: [...ctx.alcance.instalaciones] } } : {}),
       },
-      orderBy: { createdAt: "desc" },
-      take: 200,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
-    return filas.map((a) => ({
-      id: a.id,
-      tipo: a.tipo,
-      titulo: a.titulo,
-      gestion: a.gestion,
-      instalacionId: a.instalacionId,
-      creadoEn: iso(a.createdAt) ?? "",
-      tomadoEn: iso(a.tomadoEn),
-    }));
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    return {
+      items: items.map((a) => ({
+        id: a.id,
+        tipo: a.tipo,
+        titulo: a.titulo,
+        gestion: a.gestion,
+        instalacionId: a.instalacionId,
+        creadoEn: iso(a.createdAt) ?? "",
+        tomadoEn: iso(a.tomadoEn),
+      })),
+      siguiente,
+    };
   },
 });
