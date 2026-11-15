@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
-import { personaPropia, usuarioDe } from "./persona-propia";
+import { cortarPagina, inputPaginaPropia, personaPropia, tramoPagina, usuarioDe } from "./persona-propia";
 import { hoyDeLaEmpresa, solicitudSchema, vistaSolicitud } from "./solicitudes-comun";
 
 /**
@@ -17,10 +17,7 @@ export const solicitudesListar = defineCapability({
   portales: ["trabajador"],
   // El motivo puede ser sensible (licencias): la lectura queda auditada con los registros revelados.
   auditarLectura: (s) => [s.personaId, ...s.items.map((a) => a.id)],
-  input: z.object({
-    cursor: z.uuid().optional().describe("Id del último registro de la página anterior."),
-    limite: z.number().int().min(1).max(100).default(50),
-  }),
+  input: z.object(inputPaginaPropia("Id del último registro de la página anterior.")),
   output: z.object({
     personaId: z.string(),
     hoy: z.string().describe("Hoy (aaaa-mm-dd) en la zona de la empresa: lo primero que se puede pedir."),
@@ -37,14 +34,13 @@ export const solicitudesListar = defineCapability({
     const filas = await ctx.db.ausencia.findMany({
       where: { personaId: persona.id },
       orderBy: [{ desde: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+      ...tramoPagina(input),
     });
-    const pagina = filas.slice(0, input.limite);
+    const { pagina, siguiente } = cortarPagina(filas, input.limite);
     return {
       personaId: persona.id,
       hoy: await hoyDeLaEmpresa(ctx),
-      siguiente: filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null,
+      siguiente,
       items: pagina.map((a) => vistaSolicitud(a, usuarioId)),
     };
   },
