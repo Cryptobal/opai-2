@@ -8,7 +8,7 @@ import { parseFragment, type DefaultTreeAdapterMap } from "parse5";
 type Nodo = DefaultTreeAdapterMap["childNode"];
 type Elemento = DefaultTreeAdapterMap["element"];
 
-export type FilaHtmlPdf = { celdas: string[]; encabezado: boolean };
+type FilaHtmlPdf = { celdas: string[]; encabezado: boolean };
 export type BloqueHtmlPdf =
   | { t: "titulo"; nivel: number; texto: string; color: string | null }
   | { t: "parrafo"; texto: string; color: string | null }

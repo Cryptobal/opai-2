@@ -9,7 +9,7 @@ import { tabla } from "./pdf/hoja-tabla";
 import type { LogoPdf } from "./pdf/logo";
 import { membrete } from "./pdf/membrete";
 
-export type EntradaPdfPropuestaHtml = {
+type EntradaPdfPropuestaHtml = {
   codigo: string;
   fecha: string;
   borrador: boolean;
