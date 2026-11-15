@@ -239,3 +239,20 @@ model PuntoAcceso {
   @@map("puntos")
   @@schema("acceso")
 }
+
+/// Fondo y mensaje de bienvenida de la portería de una instalación (CAR-553). Sin fila, la portería usa la marca
+/// de la empresa. El fondo es un documento de imagen de la instalación (FK en el SQL).
+model AparienciaAcceso {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  instalacionId    String   @map("instalacion_id") @db.Uuid
+  mensaje          String?
+  fondoDocumentoId String?  @map("fondo_documento_id") @db.Uuid
+  actualizadoPor   String?  @map("actualizado_por") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, instalacionId], map: "apariencias_instalacion_key")
+  @@map("apariencias")
+  @@schema("acceso")
+}
