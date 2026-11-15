@@ -4,11 +4,11 @@ import { COOKIE_MENU, type Marco, marcoResuelto, menuPlegadoDeCookie } from "./m
 import { anchoMenuDeCookie, COOKIE_ANCHO_MENU } from "./menu-ancho";
 
 /**
- * Marco de esta petición (ADR-090): lo usan el layout del portal y las páginas que cambian con el
- * marco, para que nunca discrepen. Fuera del ERP o sin acceso la cookie ni se lee.
+ * Marco de esta petición (ADR-109): lo usan el layout del portal y las páginas que cambian con el
+ * marco, para que nunca discrepen.
  */
 export async function marcoDeLaPeticion(portal: string, acceso: boolean): Promise<Marco> {
-  // Sigue siendo asíncrona: quienes la llaman no cambian cuando el marco dependía de la cookie.
+  // Sigue siendo asíncrona: quienes la llaman no cambian al dejar de leer la cookie de marco.
   return Promise.resolve(marcoResuelto(portal, acceso));
 }
 
