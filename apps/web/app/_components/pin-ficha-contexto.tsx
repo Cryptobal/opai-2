@@ -32,16 +32,17 @@ export function pinDeFicha(
   activo: boolean,
   fijado: boolean | undefined,
   onFijar: (() => Promise<void>) | undefined,
+  botonEnShell = true,
 ): { boton: ReactNode; menu: PinFicha | null } {
   if (!activo || !onFijar) return { boton: null, menu: null };
   const alFijar = () => void onFijar();
-  const boton = (
+  const boton = botonEnShell ? (
     <BotonFijar
       variante="ficha"
       fijado={fijado ?? false}
       onFijar={alFijar}
       className="max-lg:hidden"
     />
-  );
+  ) : null;
   return { boton, menu: { fijado: fijado ?? false, onFijar: alFijar } };
 }

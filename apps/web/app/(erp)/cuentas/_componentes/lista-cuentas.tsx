@@ -43,7 +43,7 @@ export function ListaCuentas(p: {
 }) {
   const activas = p.items.filter((c) => c.estado === "cliente_activo").length;
   const nueva = (
-    <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus} variante={p.seleccionada ? "secondary" : "primary"}>
+    <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus}>
       Nueva
     </EnlaceBotonHoja>
   );

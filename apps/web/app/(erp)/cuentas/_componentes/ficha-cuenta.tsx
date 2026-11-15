@@ -4,7 +4,8 @@ import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
 import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
-import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
+import { AccionesFicha } from "@/app/_components/maestros/acciones-ficha";
+import type { AccionEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_CUENTA, estadoDe } from "@/app/_components/maestros/estados";
 import { fecha, rut } from "@/lib/fechas";
 import { conFiltros, type Parametros } from "@/lib/parametros";
@@ -18,7 +19,6 @@ const SIGUIENTES: Record<string, string[]> = {
 
 export function accionesCuenta(c: CuentaDetalle): AccionEntidad[] {
   return [
-    { id: "editar", etiqueta: "Editar", parametro: { clave: "editar", valor: "1" } },
     ...(SIGUIENTES[c.estado] ?? []).map((estado, i) => ({
       id: `estado-${estado}`,
       ...(i === 0 ? { grupo: "Cambiar estado" } : {}),
@@ -93,8 +93,9 @@ export function FichaCuenta(p: {
                 </>
               ),
               acciones: (
-                <AccionesEntidad
+                <AccionesFicha
                   etiqueta="Acciones de la cuenta"
+                  editar={{ href: "?editar=1" }}
                   acciones={accionesCuenta(c)}
                   agente={{
                     contexto: { tipo: "cuenta", id: c.id },

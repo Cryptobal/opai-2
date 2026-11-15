@@ -27,7 +27,6 @@ export function ListaContactos(p: {
     <EnlaceBotonHoja
       href={`/contactos?${p.q ? `q=${encodeURIComponent(p.q)}&` : ""}contacto=nuevo`}
       icono={Plus}
-      variante={p.seleccionado ? "secondary" : "primary"}
     >
       Nuevo
     </EnlaceBotonHoja>

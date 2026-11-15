@@ -46,7 +46,7 @@ const estadoVisible = (x: PersonaFila) =>
  */
 export function ListaPersonas(x: Props) {
   const nueva = (
-    <EnlaceBotonHoja href="?nueva=1" icono={Plus} variante={x.seleccionada ? "secondary" : "primary"}>
+    <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
       Nueva
     </EnlaceBotonHoja>
   );

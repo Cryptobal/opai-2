@@ -18,6 +18,7 @@ import { usePendiente } from "./navegacion-pendiente";
 import { AgenteDisponible } from "./agente/agente-disponible";
 import { useAgenteShell } from "./agente/use-agente-shell";
 import { AccesosProveedor, useBusquedaShell } from "./busqueda-mas-shell";
+import { fichaAccionesEnCabecera } from "./maestros/ficha-ruta";
 import { PinFichaContexto, pinDeFicha } from "./pin-ficha-contexto";
 import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
@@ -111,6 +112,7 @@ export function MarcoShell({
     enErp && Boolean(esFicha),
     fichaFijada,
     onFijarFicha,
+    !fichaAccionesEnCabecera(rutaEfectiva),
   );
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.

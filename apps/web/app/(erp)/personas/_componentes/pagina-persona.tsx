@@ -1,11 +1,9 @@
 import type { PanelSueldo } from "@opai/capabilities";
 import { cargarPanelSueldo } from "@/lib/panel-sueldo";
-import { Pencil } from "lucide-react";
 import { type ReactNode, Suspense } from "react";
 
 import { Loading, SplitScreen } from "@opai/ds";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
@@ -15,14 +13,14 @@ import { cargarPersona, cargarPersonas } from "./datos";
 import { DetallePersona } from "./detalle-persona";
 import { HojaPersona } from "./diferidas";
 import type { TabPersona } from "./ficha-persona";
-import { conHoja, conParametros, ListaPersonas } from "./lista-personas";
+import { conParametros, ListaPersonas } from "./lista-personas";
 import { SegmentoPersonas } from "./segmento";
 
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
   tab: TabPersona;
-  /** Acción principal de la pestaña; por defecto, "Editar". Puede depender de los parámetros de la lista. */
+  /** Acciones extra en la cabecera del shell (CAR-546: «Editar» va en la ficha). */
   acciones?: ReactNode | ((p: Parametros) => ReactNode);
   children: (
     persona: PersonaDetalle,
@@ -51,11 +49,9 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
             <SegmentoPersonas activa="personas" plural="Personas" />
           </div>
         ),
-        acciones: (typeof acciones === "function" ? acciones(d.p) : acciones) ?? (
-          <EnlaceBotonHoja href={conHoja("editar=1", d.p)} icono={Pencil}>
-            Editar
-          </EnlaceBotonHoja>
-        ),
+        ...(typeof acciones === "function" || acciones
+          ? { acciones: typeof acciones === "function" ? acciones(d.p) : acciones }
+          : {}),
       })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
