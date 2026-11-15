@@ -6,7 +6,7 @@ const RESUMEN = /^(\d+) novedad(?:es)? sin leer$|^Estás al día/;
 const VACIO = "No hay novedades para mostrar";
 
 /** CAR-542: el ERP lista lo que cuenta el menú; Terreno no repite todo el catálogo del ERP. */
-test.describe("novedades por portal", () => {
+test.describe("@preview novedades por portal (CAR-542)", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
   test("en el ERP la lista coincide con el contador del menú", async ({ page }) => {
