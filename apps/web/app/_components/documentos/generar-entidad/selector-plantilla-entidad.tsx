@@ -25,3 +25,6 @@ export function SelectorPlantillaEntidad({
     </Campo>
   );
 }
+
+/** Alias para Personas: mismo selector (CAR-439). */
+export const SelectorPlantilla = SelectorPlantillaEntidad;

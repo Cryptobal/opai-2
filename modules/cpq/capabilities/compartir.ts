@@ -11,7 +11,7 @@ import { cotizacionDe } from "./util";
 
 const DIA_MS = 86_400_000;
 
-export const enlaceSchema = z.object({
+const enlaceSchema = z.object({
   id: uuidSchema,
   /** Solo al crear: el token no se guarda en claro y no se puede volver a leer. */
   url: z.string(),
@@ -21,7 +21,7 @@ export const enlaceSchema = z.object({
 });
 
 /** URL pública `/p/<slug>/<token>`: el tenant sale del slug (como la firma por enlace). */
-export async function urlDeEnlace(ctx: Contexto, token: string) {
+async function urlDeEnlace(ctx: Contexto, token: string) {
   const t = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { slug: true } });
   return `${ctx.servicios.urlBase}/p/${t?.slug ?? ""}/${token}`;
 }

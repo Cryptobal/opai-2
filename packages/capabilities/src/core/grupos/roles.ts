@@ -15,7 +15,7 @@ import { rolConcedible } from "../permisos/roles-adicionales";
 import { exigeSinAlcance, grupoDe, grupoVigente } from "./comun";
 
 /** Permisos que un grupo concede a quien entra en él (roles vigentes). */
-export async function permisosDeGrupo(ctx: Contexto, grupoId: string): Promise<string[]> {
+async function permisosDeGrupo(ctx: Contexto, grupoId: string): Promise<string[]> {
   const filas = await ctx.db.rolGrupo.findMany({
     where: { grupoId, rol: { archivadoEn: null } },
     select: { rol: { select: { permisos: true } } },

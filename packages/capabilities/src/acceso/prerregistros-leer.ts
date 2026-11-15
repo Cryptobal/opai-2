@@ -5,9 +5,10 @@ import { tenantActual } from "../core/comun";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
-import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
-import { nombresInstalacion, paginaConInstalacion, PERMISO_PATENTE, PERMISO_READ } from "./comun";
+import { dondeInstalacionId } from "../rondas/comun";
+import { nombresInstalacion, PERMISO_PATENTE, PERMISO_READ } from "./comun";
 import { codigoInvitacion } from "./huella";
+import { paginaAlcance } from "./pagina-alcance";
 import {
   diaSchema,
   fechaDia,
@@ -35,29 +36,29 @@ export const prerregistrosListar = defineCapability({
   dryRun: false,
   auditarLectura: (salida) => salida.items.map((p) => p.id),
   async handler(ctx, input) {
-    if (input.instalacionId) await instalacionEnAlcance(ctx, input.instalacionId);
     const hoy = await hoyEmpresa(ctx);
     const dia = input.dia ? fechaDia(input.dia) : null;
-    const filas = await ctx.db.prerregistro.findMany({
-      where: {
-        AND: [
-          dondeInstalacionId(ctx),
-          input.instalacionId ? { instalacionId: input.instalacionId } : {},
-          dia ? { desde: { lte: dia }, hasta: { gte: dia } } : { hasta: { gte: fechaDia(hoy) } },
-        ],
-      },
-      orderBy: [{ desde: "asc" }, { id: "asc" }],
-      include: { visitantes: { orderBy: { createdAt: "asc" } } },
-      ...cursorDe(input.cursor, input.limite),
-    });
-    const { items, siguiente, instalacion } = await paginaConInstalacion(ctx, filas, input);
     const verPatente = ctx.autorizar(PERMISO_PATENTE);
-    return {
-      siguiente,
-      items: items.map((p) =>
-        vistaPrerregistro(p, { instalacion: instalacion(p.instalacionId), hoy, verPatente }),
-      ),
-    };
+    return paginaAlcance(
+      ctx,
+      input,
+      () =>
+        ctx.db.prerregistro.findMany({
+          where: {
+            AND: [
+              dondeInstalacionId(ctx),
+              input.instalacionId ? { instalacionId: input.instalacionId } : {},
+              dia
+                ? { desde: { lte: dia }, hasta: { gte: dia } }
+                : { hasta: { gte: fechaDia(hoy) } },
+            ],
+          },
+          orderBy: [{ desde: "asc" }, { id: "asc" }],
+          include: { visitantes: { orderBy: { createdAt: "asc" } } },
+          ...cursorDe(input.cursor, input.limite),
+        }),
+      (p, instalacion) => vistaPrerregistro(p, { instalacion, hoy, verPatente }),
+    );
   },
 });
 

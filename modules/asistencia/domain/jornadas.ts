@@ -36,7 +36,7 @@ export const esTipoJornada = (v: unknown): v is TipoJornada =>
   typeof v === "string" && (TIPOS_JORNADA as readonly string[]).includes(v);
 
 /** Horas entre la salida anterior y la entrada; nulo si no hay salida previa. */
-export function horasDeDescanso(salidaPrevia: Date | null, entrada: Date): number | null {
+function horasDeDescanso(salidaPrevia: Date | null, entrada: Date): number | null {
   if (!salidaPrevia) return null;
   return Math.max(0, (entrada.getTime() - salidaPrevia.getTime()) / 3_600_000);
 }

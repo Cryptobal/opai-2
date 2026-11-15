@@ -10,7 +10,7 @@ import {
 import { noEncontrado } from "../errores";
 import type { Contexto } from "../types";
 
-export const pasoPlanSchema = z.object({
+const pasoPlanSchema = z.object({
   dias: z.number().int().min(0).max(365),
   hora: z.string().optional(),
   canal: z.enum(CANALES_PASO),
@@ -31,7 +31,7 @@ export const configPlanSchema = z.object({
   pasos: z.array(pasoPlanSchema).max(MAX_PASOS),
 });
 
-export const pasoVistaSchema = z.object({
+const pasoVistaSchema = z.object({
   id: z.string(), orden: z.number(), titulo: z.string(), canal: z.enum(CANALES_PASO),
   ejecutor: z.enum(EJECUTORES_PASO), estado: z.string(), programadoEn: z.string(),
   asignadoId: z.string().nullable(), asunto: z.string().nullable(), cuerpo: z.string().nullable(),
@@ -45,7 +45,7 @@ export const seguimientoVistaSchema = z.object({
 });
 export type SeguimientoVista = z.infer<typeof seguimientoVistaSchema>;
 
-export const ZONA_POR_DEFECTO = "America/Santiago";
+const ZONA_POR_DEFECTO = "America/Santiago";
 export async function zonaDe(ctx: Contexto): Promise<string> {
   const t = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { timezone: true } });
   return t?.timezone ?? ZONA_POR_DEFECTO;
