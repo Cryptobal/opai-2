@@ -46,3 +46,55 @@ model SlackUsuario {
   @@map("slack_usuarios")
   @@schema("core")
 }
+
+/// Mensaje padre de una instalación por canal y día (CAR-293): los avisos del día van en su hilo.
+/// Nunca se crea un canal por instalación (ADR-093 §4).
+model SlackHilo {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  canalId       String   @map("canal_id")
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  fecha         DateTime @db.Date
+  ts            String
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, canalId, instalacionId, fecha])
+  @@map("slack_hilos")
+  @@schema("core")
+}
+
+/// Aviso de terreno a Slack (CAR-293): solo anomalías que la empresa activó. `clave` lo hace idempotente
+/// (un aviso por hecho de origen). `gestion` es la verdad en OPAI de quién lo tomó o cerró (F4).
+model SlackAviso {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  /// "atraso" | "ausencia" | "fuera_de_zona" | "sin_relevo" | "incidente" | "panico" | "mensaje_guardia"
+  tipo          String
+  clave         String
+  instalacionId String?   @map("instalacion_id") @db.Uuid
+  personaId     String?   @map("persona_id") @db.Uuid
+  titulo        String
+  detalle       String?
+  enlace        String?
+  canalId       String?   @map("canal_id")
+  hiloTs        String?   @map("hilo_ts")
+  ts            String?
+  /// "pendiente" | "enviado" | "fallido"
+  envio         String    @default("pendiente")
+  error         String?
+  /// "abierto" | "tomado" | "cerrado"
+  gestion       String    @default("abierto")
+  tomadoPor     String?   @map("tomado_por") @db.Uuid
+  tomadoEn      DateTime? @map("tomado_en") @db.Timestamptz(6)
+  cerradoPor    String?   @map("cerrado_por") @db.Uuid
+  cerradoEn     DateTime? @map("cerrado_en") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, clave])
+  @@index([tenantId, gestion, createdAt])
+  @@index([tenantId, canalId, ts])
+  @@map("slack_avisos")
+  @@schema("core")
+}

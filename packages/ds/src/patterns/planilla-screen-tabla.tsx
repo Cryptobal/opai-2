@@ -56,7 +56,11 @@ export function PlanillaTabla({
         <tbody>
           {filas.map((f) => (
             <tr key={f.id} className="group">
-              <CabeceraFila fila={f} onAlternar={onAlternarFila} onAccion={onAccionFila} />
+              <CabeceraFila
+                fila={f}
+                {...(onAlternarFila ? { onAlternar: onAlternarFila } : {})}
+                {...(onAccionFila ? { onAccion: onAccionFila } : {})}
+              />
               {columnas.map((c) => {
                 const valor = celda(f.id, c.id);
                 const editable = Boolean(onCelda && celdaEditable?.(f.id, c.id));
