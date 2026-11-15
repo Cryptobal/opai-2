@@ -8,11 +8,11 @@ import { alcanceMarcas } from "./lecturas";
 
 export const fecha = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD.");
 export const PORTALES = ["erp", "supervisor"] as const;
-export const dia = (f: string) => new Date(`${f}T00:00:00Z`);
+const dia = (f: string) => new Date(`${f}T00:00:00Z`);
 const MAX_DIAS = 93;
 const MAX_FILAS = 20_000;
 
-export const diaSchema = z.object({
+const diaSchema = z.object({
   personaId: z.string(), fecha: z.string(), instalacionId: z.string().nullable(), tipoJornada: z.enum(TIPOS_JORNADA),
   estado: z.enum(["presente", "sin_marca", "ausente", "sin_turno", "incompleto"]), sigla: z.string().nullable(),
   minutosTrabajados: z.number().int(), segundosAtraso: z.number().int(), segundosExtra: z.number().int(),
@@ -24,7 +24,7 @@ type DiaFila = {
   minutosTrabajados: number; segundosAtraso: number; segundosExtra: number; segundosSalidaAnticipada: number;
   descansoInsuficiente: boolean; correccionPendiente: boolean; entrada: Date | null; salida: Date | null;
 };
-export const vista = (d: DiaFila) => ({
+const vista = (d: DiaFila) => ({
   personaId: d.personaId, fecha: d.fecha.toISOString().slice(0, 10), instalacionId: d.instalacionId, tipoJornada: (esTipoJornada(d.tipoJornada) ? d.tipoJornada : "ordinaria") as (typeof TIPOS_JORNADA)[number],
   estado: d.estado as never, sigla: d.sigla, minutosTrabajados: d.minutosTrabajados, segundosAtraso: d.segundosAtraso,
   segundosExtra: d.segundosExtra, segundosSalidaAnticipada: d.segundosSalidaAnticipada, descansoInsuficiente: d.descansoInsuficiente,

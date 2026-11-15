@@ -15,7 +15,7 @@ export const hechoEntrada = z.object({
 });
 export type HechoEntrada = z.infer<typeof hechoEntrada>;
 
-export const MOTIVOS_RECHAZO = [
+const MOTIVOS_RECHAZO = [
   "tipo_no_permitido",
   "payload_invalido",
   "posterior_al_envio",

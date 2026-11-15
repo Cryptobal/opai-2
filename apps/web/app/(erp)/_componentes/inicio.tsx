@@ -16,30 +16,23 @@ type Props = {
   nombre: string;
   empresa: string;
   actor: string | undefined;
-  hilo?: boolean;
-  /** Diseño nuevo (ADR-109, CAR-335 D3): cola de trabajo en pestañas e indicadores elegidos. */
+  /** Diseño nuevo (ADR-109): cola de trabajo en pestañas e indicadores elegidos. */
   nuevo?: boolean;
 };
 
 /**
- * Inicio del ERP (CAR-182, láminas 01 a 07): saludo con «Crear», lo que requiere decisión, tus tareas,
- * indicadores que llevan a su lista, seguimientos, tus accesos y actividad. Cada bloque carga por
- * separado (Suspense con su esqueleto) y un bloque sin permiso o sin datos no aparece (`empty:hidden`).
- * Teléfono: una columna en ese orden. 1024: decisión y tareas a la izquierda; accesos y seguimientos a la
- * derecha; actividad al final. 1280: columna lateral de 380 px con accesos y actividad. La Bandeja no
- * se repite aquí: vive en `/bandeja`. En el marco Hilo (ADR-090) el saludo y lo que requiere decisión
- * ya están en el hilo, así que no se repiten.
+ * Inicio del ERP (CAR-182): con empresa es el diseño nuevo; sin empresa, el marco base. Cada bloque
+ * carga por separado (Suspense con su esqueleto) y un bloque sin permiso o sin datos no aparece.
  */
-export function InicioErp({ nombre, empresa, actor, hilo = false, nuevo = false }: Props) {
+export function InicioErp({ nombre, empresa, actor, nuevo = false }: Props) {
   if (nuevo) return <InicioNuevo nombre={nombre} empresa={empresa} actor={actor} />;
-  const r = rejillaInicio(hilo);
+  const r = rejillaInicio;
   return (
     <div className="flex flex-col gap-4">
       <EncabezadoInicio
         nombre={nombre}
         empresa={empresa}
         ahora={new Date()}
-        hilo={hilo}
         crear={<CrearInicio />}
       />
       <div className={r.rejilla}>
@@ -49,7 +42,6 @@ export function InicioErp({ nombre, empresa, actor, hilo = false, nuevo = false 
           </Suspense>
         </div>
         <div className={r.decision}>
-          {/* En el marco Hilo los pendientes están en el hilo: el bloque se oculta con CSS (ver rejilla). */}
           <Suspense fallback={<EsqueletoTarjeta />}>
             <DecisionInicio />
           </Suspense>
