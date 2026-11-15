@@ -1,9 +1,7 @@
-import { Plus } from "lucide-react";
 import { type ReactNode, Suspense } from "react";
 
 import { Loading, SplitScreen } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { conBusqueda, leerParametros, type SearchParams } from "@/lib/parametros";
 
@@ -28,11 +26,6 @@ export function PaginaCotizacion({ params, searchParams, children }: Props) {
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      acciones={
-        <EnlaceBoton href="/cotizaciones/nueva" icono={Plus} className="max-lg:hidden">
-          Nueva cotización
-        </EnlaceBoton>
-      }
       opciones={(d) => ({ volver: { href: conBusqueda("/cotizaciones", d.p.q), etiqueta: "Cotizaciones" } })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
