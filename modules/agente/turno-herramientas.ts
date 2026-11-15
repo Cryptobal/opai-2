@@ -4,7 +4,7 @@ import { executeCapability, prohibido, type Contexto, type Resultado } from "@op
 import type { Mensaje, RespuestaConversacion } from "@opai/integrations";
 
 import { compactarDatoAgente } from "./compactar-dato";
-import { CARGAR, resolverLlamada } from "./herramientas-demanda";
+import { CARGAR, LISTAR, resolverLlamada } from "./herramientas-demanda";
 import { type Plan } from "./plan";
 import { extraerReferencias, type Referencia } from "./referencias";
 
@@ -23,7 +23,8 @@ export async function aplicarLlamadas(
 ): Promise<void> {
   for (const llamada of r.llamadas) {
     await revalidar(ctx);
-    if (llamada.nombre !== CARGAR && ++llamadas.n > MAX_PASOS)
+    // Cargar o listar esquemas no ejecuta nada: no gasta el límite de pasos del turno.
+    if (llamada.nombre !== CARGAR && llamada.nombre !== LISTAR && ++llamadas.n > MAX_PASOS)
       throw prohibido("Se alcanzó el límite de pasos del turno.");
     const paso = resolverLlamada(ctx, cargadas, llamada.nombre, llamada.argumentos);
     let resultado: Resultado;
