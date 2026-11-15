@@ -92,7 +92,7 @@ Incluye 8 alias marcados `@deprecated` «conservados para pruebas» (`sii-valida
 | Logo en PDF: `modules/cpq/persistencia/pdf/logo.ts` ≈ `capabilities/src/finanzas/ventas-pdf-logo.ts` | 28 | Hecho (CAR-439): CPQ reusa `logoDeMarca` |
 | `lista-maestro.tsx` ≈ `lista-maestro-split.tsx` | 26 | Hecho (CAR-439): cuerpo compartido en `cuerpo-lista-maestro` |
 | Esquemas Zod repetidos entre Tickets, Finanzas y `core/maestros/comun.ts` | 34 | Reusar los de `comun.ts` |
-| `ventas-cesion-ceder.ts` ≈ `ventas-cesion-simular.ts` | 16 | Simular reutiliza la preparación de ceder |
+| `ventas-cesion-ceder.ts` ≈ `ventas-cesion-simular.ts` | 16 | Hecho (CAR-439): ambos usan `prepararCesion` |
 | Semillas de e2e (`packages/auth/scripts`, `packages/db/scripts`) | ~300 | Un helper de preparación |
 
 El resto son bloques de 6 a 14 líneas, la mayoría formularios de Configuración con la misma estructura; se revisan en la pasada semanal, sin forzar abstracciones (regla 3: nada «por si acaso»).
