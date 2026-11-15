@@ -7,7 +7,7 @@
     "/(erp)/tareas": 175,
     "/(erp)/agente/historial": 178,
     "/(erp)/finanzas/ventas/programacion/*": 175,
-    "/(erp)/finanzas/flujo": 173,
+    "/(erp)/finanzas/flujo": 176,
     "/(erp)/finanzas/folios": 172,
     "/(erp)/finanzas/bancos": 174,
     "/(erp)/finanzas/bancos/reglas": 171,
