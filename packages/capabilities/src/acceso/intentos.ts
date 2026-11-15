@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
-import { cursorDe, pagina } from "../core/maestros/comun";
 import { defineCapability } from "../define";
-import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
-import { nombresInstalacion, PERMISO_READ } from "./comun";
+import { dondeInstalacionId } from "../rondas/comun";
+import { PERMISO_READ } from "./comun";
+import { inputPaginaAcceso, paginaAlcance, reciente } from "./pagina-alcance";
 
 const MOTIVOS_INTENTO = [
   "bloqueado",
@@ -35,42 +35,36 @@ export const intentosListar = defineCapability({
   input: z.object({
     instalacionId: uuidSchema.optional(),
     motivo: z.enum(MOTIVOS_INTENTO).optional(),
-    cursor: z.uuid().optional().describe("Id del último intento de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(50),
+    ...inputPaginaAcceso,
   }),
   output: z.object({ items: z.array(item), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (salida) => salida.items.map((r) => r.id),
+  auditarLectura: (s) => s.items.map((r) => r.id),
   async handler(ctx, input) {
-    if (input.instalacionId) await instalacionEnAlcance(ctx, input.instalacionId);
-    const filas = await ctx.db.intentoDenegado.findMany({
-      where: {
-        AND: [
-          dondeInstalacionId(ctx),
-          input.instalacionId ? { instalacionId: input.instalacionId } : {},
-          input.motivo ? { motivo: input.motivo } : {},
-        ],
-      },
-      orderBy: [{ horaCorregida: "desc" }, { id: "desc" }],
-      ...cursorDe(input.cursor, input.limite),
-    });
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
-    const nombres = await nombresInstalacion(
+    return paginaAlcance(
       ctx,
-      items.map((r) => r.instalacionId),
-    );
-    return {
-      siguiente,
-      items: items.map((r) => ({
+      input,
+      () =>
+        ctx.db.intentoDenegado.findMany({
+          where: {
+            AND: [
+              dondeInstalacionId(ctx),
+              input.instalacionId ? { instalacionId: input.instalacionId } : {},
+              input.motivo ? { motivo: input.motivo } : {},
+            ],
+          },
+          ...reciente(input.cursor, input.limite),
+        }),
+      (r, instalacion) => ({
         id: r.id,
         instalacionId: r.instalacionId,
-        instalacion: nombres.get(r.instalacionId) ?? "",
+        instalacion,
         ocurrioEn: r.horaCorregida.toISOString(),
         tipoRegistro: r.tipoRegistro,
         documento: r.mascara,
         motivo: r.motivo,
-      })),
-    };
+      }),
+    );
   },
 });
