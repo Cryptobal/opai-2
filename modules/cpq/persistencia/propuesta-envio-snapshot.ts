@@ -20,11 +20,7 @@ export async function construirSnapshotEnvioPropuesta(
 ): Promise<SnapshotEnvioPropuesta> {
   const marcaRow = await asegurarMarcaDocumento(ctx);
   const plantillaRow = await plantillaActivaPropuestaLectura(ctx);
-  if (!plantillaRow) {
-    throw reglaDeNegocio(
-      "Falta la plantilla activa de propuesta técnica; configúrala antes de enviar.",
-    );
-  }
+  if (!plantillaRow) throw reglaDeNegocio("Falta la plantilla activa de propuesta técnica; configúrala antes de enviar.");
   const plantilla = vistaPlantillaPropuesta(plantillaRow);
   let propuestaBloquesJson = "[]";
   const bloquesBiblioteca: Record<string, number> = {};
