@@ -18,5 +18,15 @@
     "packages/ds": { "ignoreDependencies": ["tailwindcss"] },
     "modules/*": {},
     "apps/web": { "entry": ["e2e/**/*.ts", "scripts/*.ts"] },
+    // Capacitor: los proyectos nativos (Gradle y Swift Package Manager, en nativo/) usan estos paquetes
+    // desde node_modules; ningún archivo TypeScript los importa.
+    "apps/movil": {
+      "ignoreDependencies": [
+        "@capacitor/android",
+        "@capacitor/app",
+        "@capacitor/core",
+        "@capacitor/ios",
+      ],
+    },
   },
 }

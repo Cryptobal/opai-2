@@ -95,7 +95,7 @@ async function leer(ctx: Contexto, desde: string, hasta: string) {
   return { series, vinculos };
 }
 
-export const indicadorDiasCubrirVacante = defineIndicador({
+const indicadorDiasCubrirVacante = defineIndicador({
   id: "pauta.dias_cubrir_vacante",
   nombre: "Días para cubrir una vacante",
   descripcion:
