@@ -23,6 +23,24 @@ const PORTALES: { id: PortalVerComo; etiqueta: string; vacio: string }[] = [
   { id: "cliente", etiqueta: "Cliente", vacio: "No hay contactos con acceso al Portal Cliente." },
 ];
 
+function Buscador({ portal, q }: { portal: PortalVerComo; q: string }) {
+  return (
+    <form method="get" action="/ver-como" role="search" className="flex gap-2">
+      <Input type="hidden" name="portal" value={portal} />
+      <Input
+        name="q"
+        defaultValue={q}
+        placeholder="Buscar por nombre"
+        aria-label="Buscar por nombre"
+      />
+      <Button type="submit" variant="secondary">
+        <Search aria-hidden className="size-4" />
+        Buscar
+      </Button>
+    </form>
+  );
+}
+
 type Props = { portal: PortalVerComo; q: string; items: Objetivo[]; siguiente: string | null };
 
 /** Portal → instalación, persona o cliente → «Ver». La búsqueda es un GET: sin JS hasta el botón. */
@@ -43,19 +61,7 @@ export function SelectorVerComo({ portal, q, items, siguiente }: Props) {
           href: `/ver-como?portal=${p.id}`,
         }))}
       />
-      <form method="get" action="/ver-como" role="search" className="flex gap-2">
-        <Input type="hidden" name="portal" value={portal} />
-        <Input
-          name="q"
-          defaultValue={q}
-          placeholder="Buscar por nombre"
-          aria-label="Buscar por nombre"
-        />
-        <Button type="submit" variant="secondary">
-          <Search aria-hidden className="size-4" />
-          Buscar
-        </Button>
-      </form>
+      <Buscador portal={portal} q={q} />
       {items.length === 0 ? (
         <Empty
           titulo={q ? "Sin resultados" : "Nada que ver todavía"}
