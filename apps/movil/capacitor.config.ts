@@ -1,6 +1,4 @@
-import { configuracion, elegir } from "./src/variantes";
+import { configuracion, elegirEntorno } from "./src/configuracion";
 
-// `OPAI_APP=terreno pnpm sincronizar` prepara OPAI Terreno; sin variables, OPAI contra test.opai.cl.
-const { variante, entorno } = elegir(process.env);
-
-export default configuracion(variante, entorno);
+// `pnpm sincronizar` prepara OPAI contra test.opai.cl; `OPAI_APP_ENTORNO=produccion` solo para tiendas.
+export default configuracion(elegirEntorno(process.env));
