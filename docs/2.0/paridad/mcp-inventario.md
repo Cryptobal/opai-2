@@ -91,6 +91,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_revocar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimientos_listar` | `core_cumplimiento_consentimientos_listar` | existe |
 | compartido | `app/_components` | `core.cumplimiento.solicitud_crear` | — | excepción |
+| compartido | `app/_components` | `core.documento_plantillas.generar` | `core_documento_plantillas_generar` | existe |
 | compartido | `app/_components` | `core.documento_plantillas.generar_entidad` | `core_documento_plantillas_generar_entidad` | existe |
 | compartido | `app/_components` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | compartido | `app/_components` | `core.documento_plantillas.rellenar_entidad` | `core_documento_plantillas_rellenar_entidad` | existe |
@@ -570,7 +571,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
-| compartido | `app/(erp)/personas/[id]/generar-documento/_componentes` | `core.documento_plantillas.generar` | `core_documento_plantillas_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |

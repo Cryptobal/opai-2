@@ -20,7 +20,7 @@ import { confirmarPlan } from "./planes";
 import { referenciaSchema } from "./referencias";
 import { salidaTurnoPreparar } from "./turno-salida";
 
-export const modeloSchema = z.object({
+const modeloSchema = z.object({
   proveedor: z.enum(["ia_anthropic", "ia_openai", "ia_google", "ia_compatible", "ia_xai"]),
   modelo: z.string().min(1).max(200),
   clase: z.enum(["economica", "estandar", "potente"]),
@@ -31,7 +31,7 @@ const secreto = () => {
   return valor;
 };
 
-export const modelosList = defineCapability({
+const modelosList = defineCapability({
   id: "agente.modelos.list",
   permiso: "agente:usar",
   descripcion:
@@ -84,7 +84,7 @@ export const turnoPreparar = defineCapability({
   },
 });
 
-export const planConfirmar = defineCapability({
+const planConfirmar = defineCapability({
   id: "agente.plan.confirmar",
   permiso: "agente:usar",
   // Una decisión humana no puede llegar por MCP ni por un resultado de herramienta.
