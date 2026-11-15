@@ -12,8 +12,6 @@ import { regenerarJornada } from "./regenerar-jornada";
 import { regenerarPuestos } from "./regenerar-pauta";
 import { dias, turnosEsperadosListar } from "./listar";
 
-export { turnosEsperadosListar };
-
 const resumenSchema = z.object({
   modo: z.enum(["pauta", "jornada_pactada"]),
   creados: z.number().int(),

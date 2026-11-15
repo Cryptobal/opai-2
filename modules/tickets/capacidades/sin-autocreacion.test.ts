@@ -19,6 +19,8 @@ const OMITIR = new Set(["node_modules", ".next", ".turbo", "generated", "dist", 
 const ESCRIBE_TICKET = /\bticket\.(create|createMany|upsert)\s*\(/;
 const INVOCA_CREAR = /["'`]tickets\.tickets\.crear["'`]/;
 const AUTORIZADOS = new Set(["modules/tickets/capacidades/escritura.ts"]);
+// Consumidores de Tickets que solo avisan en la campana (CAR-84): leen el ticket y crean notificaciones, nunca tickets.
+const SOLO_AVISAN = new Set(["modules/tickets/consumidor-avisos.ts"]);
 
 function fuentes(dir: string): string[] {
   return readdirSync(dir).flatMap((nombre) => {
@@ -51,7 +53,9 @@ describe("ningún ticket se crea solo", () => {
     const consumidoresTickets = codigo.filter(
       (f) => f.ruta.startsWith("modules/tickets/") && /defineConsumidor|defineTrabajo/.test(f.texto),
     );
-    expect(consumidoresTickets.map((f) => f.ruta)).toEqual([]);
+    expect(consumidoresTickets.map((f) => f.ruta)).toEqual([...SOLO_AVISAN]);
+    // Y esos consumidores no escriben ni piden crear tickets.
+    expect(consumidoresTickets.filter((f) => ESCRIBE_TICKET.test(f.texto) || INVOCA_CREAR.test(f.texto))).toEqual([]);
   });
 
   it("sin sesión de persona (sistema, evento o trabajo) la capacidad no crea nada", async () => {

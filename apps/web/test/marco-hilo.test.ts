@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { COOKIE_MARCO, cookieMarco, marcoDeCookie, portalAdmiteHilo, rutaAncha } from "@/lib/marco";
+import { COOKIE_MARCO, cookieMarco, marcoDeCookie, rutaAncha } from "@/lib/marco";
 
 // El menú importa la acción de salir (servidor); aquí solo se arma la lista.
 vi.mock("@/app/_acciones/auth", () => ({ accionSalir: () => undefined }));
@@ -19,13 +19,6 @@ describe("elección del marco (ADR-090)", () => {
     expect(cookieMarco("clasico")).toContain(`${COOKIE_MARCO}=clasico`);
     expect(cookieMarco("clasico")).toContain("Max-Age=31536000");
     expect(cookieMarco("nuevo")).toContain("Max-Age=0");
-  });
-
-  it("en esta etapa el Hilo solo existe en el ERP y con acceso a la empresa", () => {
-    expect(portalAdmiteHilo("erp", true)).toBe(true);
-    expect(portalAdmiteHilo("erp", false)).toBe(false);
-    expect(portalAdmiteHilo("supervisor", true)).toBe(false);
-    expect(portalAdmiteHilo("platform", true)).toBe(false);
   });
 
   it("la cookie dura un año, vale en todo el sitio y no viaja a otros sitios", () => {
@@ -56,45 +49,24 @@ describe("tema del marco Hilo", () => {
   });
 });
 
-describe("atajo de diseño en el menú de usuario", () => {
-  it("ofrece pasar al otro diseño, justo después de Preferencias, solo en el ERP", async () => {
+describe("menú de usuario sin atajo de diseño (CAR-335 D6c)", () => {
+  it("el diseño nuevo es el único: el menú ya no ofrece cambiar de diseño", async () => {
     const { menuCuentaShell } = await import("@/app/_components/menu-cuenta-shell");
     const nada = () => undefined;
-    const cambiar = vi.fn();
-    const clasico = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
-      actual: "clasico",
-      onCambiar: cambiar,
-    });
-    const ids = clasico.map((i) => i.id);
-    expect(ids.indexOf("diseno")).toBe(ids.indexOf("pref") + 1);
-    const item = clasico.find((i) => i.id === "diseno");
-    // Desde el 12-nov (ADR-109) el atajo lleva al diseño nuevo; Hilo se sigue eligiendo en Preferencias.
-    expect(item?.etiqueta).toBe("Probar el diseño nuevo");
-    item?.onSelect();
-    expect(cambiar).toHaveBeenCalledWith("nuevo");
-    const hilo = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
-      actual: "hilo",
-      onCambiar: cambiar,
-    });
-    expect(hilo.find((i) => i.id === "diseno")?.etiqueta).toBe("Volver al diseño clásico");
-    const nuevo = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
-      actual: "nuevo",
-      onCambiar: cambiar,
-    });
-    expect(nuevo.find((i) => i.id === "diseno")?.etiqueta).toBe("Volver al diseño clásico");
-    expect(menuCuentaShell(false, nada, nada, false).some((i) => i.id === "diseno")).toBe(false);
     expect(menuCuentaShell(true, nada, nada, true).some((i) => i.id === "diseno")).toBe(false);
+    expect(menuCuentaShell(true, nada, nada, true).some((i) => i.id === "pref")).toBe(true);
   });
 });
 
 describe("marco que se monta: una sola regla para el layout y las páginas", () => {
-  it("fuera del ERP o sin acceso es el clásico aunque la cookie diga hilo", async () => {
+  it("con acceso, el ERP y los portales de oficina usan el diseño nuevo; terreno sigue (CAR-335 D6)", async () => {
     const { marcoResuelto } = await import("@/lib/marco");
-    expect(marcoResuelto("erp", true, "hilo")).toBe("hilo");
-    expect(marcoResuelto("erp", false, "hilo")).toBe("clasico");
-    expect(marcoResuelto("supervisor", true, "hilo")).toBe("clasico");
-    expect(marcoResuelto("erp", true, undefined)).toBe("nuevo");
-    expect(marcoResuelto("erp", true, "nuevo")).toBe("nuevo");
-    expect(marcoResuelto("supervisor", true, "nuevo")).toBe("clasico");
+    expect(marcoResuelto("erp", true)).toBe("nuevo");
+    expect(marcoResuelto("erp", false)).toBe("clasico");
+    expect(marcoResuelto("supervisor", true)).toBe("nuevo");
+    expect(marcoResuelto("cliente", true)).toBe("nuevo");
+    expect(marcoResuelto("terreno", true)).toBe("clasico");
+    expect(marcoResuelto("trabajador", true)).toBe("clasico");
+    expect(marcoResuelto("platform", false)).toBe("clasico");
   });
 });
