@@ -7,9 +7,7 @@ import {
 } from "@opai/capabilities";
 import { z } from "zod";
 
-import type { Plan } from "./bucle";
-import { validarContextoAlGuardar } from "./conversaciones-contexto-guardado";
-import { contextoSchema, guardarTurno } from "./conversaciones-guardado";
+import { contextoSchema } from "./conversaciones-guardado";
 import {
   conversacionesArchivar,
   conversacionesBorrar,
@@ -18,9 +16,11 @@ import {
 import { conversacionesGet, conversacionesList } from "./conversaciones";
 import { historialList } from "./historial";
 import { autorizarRepeticionTurno, prepararSolicitud } from "./turno-preparacion";
-import { confirmarPlan, firmarPlan } from "./planes";
+import { confirmarPlan } from "./planes";
+import { referenciaSchema } from "./referencias";
+import { salidaTurnoPreparar } from "./turno-salida";
 
-export const modeloSchema = z.object({
+const modeloSchema = z.object({
   proveedor: z.enum(["ia_anthropic", "ia_openai", "ia_google", "ia_compatible", "ia_xai"]),
   modelo: z.string().min(1).max(200),
   clase: z.enum(["economica", "estandar", "potente"]),
@@ -31,7 +31,7 @@ const secreto = () => {
   return valor;
 };
 
-export const modelosList = defineCapability({
+const modelosList = defineCapability({
   id: "agente.modelos.list",
   permiso: "agente:usar",
   descripcion:
@@ -69,6 +69,8 @@ export const turnoPreparar = defineCapability({
     tokens: z.number(),
     /** Huella opaca del acceso que produjo la salida; protege su repetición idempotente. */
     accesoSolicitud: z.string().nullable(),
+    /** Fichas con href interno salidas de las capacidades (CAR-446); el cliente pinta enlaces y tarjetas. */
+    referencias: z.array(referenciaSchema),
   }),
   efecto: "escritura",
   dryRun: true,
@@ -78,47 +80,11 @@ export const turnoPreparar = defineCapability({
     return prepararSolicitud(ctx, input);
   },
   async handler(ctx, input, modo) {
-    const delegado = comoAgenteInterno(ctx);
-    if (modo.dryRun)
-      return {
-        conversacionId: null,
-        token: null,
-        texto: "Solicitará un plan sin ejecutar escrituras.",
-        pasos: [],
-        tokens: 0,
-        accesoSolicitud: null,
-      };
-    const firma = secreto();
-    if (!ctx.revalidarAccesoEnTransaccion)
-      throw prohibido("No se puede revalidar el acceso al guardar el turno.");
-    const accesoSolicitud = await ctx.revalidarAccesoEnTransaccion(ctx.db);
-    // El contexto lo manda el navegador: se revalida con el alcance de la persona antes de usarlo.
-    if (input.contexto) await validarContextoAlGuardar(delegado, input.contexto);
-    // Solo el hook de servidor produce este valor; no se recibe del usuario ni del modelo.
-    const plan = modo.preparado as Plan | undefined;
-    if (!plan) throw prohibido("No se preparó el turno.");
-    // Guardar corre en la misma transacción que la auditoría (ADR-052): si falla, el turno falla cerrado.
-    const conversacionId = await guardarTurno(ctx, {
-      conversacionId: input.conversacionId,
-      turnoId: input.turnoId,
-      contexto: input.contexto,
-      mensaje: input.mensaje,
-      texto: plan.texto,
-      pasos: plan.pasos.map((p) => p.capacidad),
-    });
-    await ctx.revalidarAccesoEnTransaccion(ctx.db);
-    return {
-      conversacionId,
-      token: plan.pasos.length ? firmarPlan(delegado, plan, input.nivel, firma) : null,
-      texto: plan.texto,
-      pasos: plan.pasos,
-      tokens: plan.tokens,
-      accesoSolicitud,
-    };
+    return salidaTurnoPreparar(ctx, input, modo, secreto());
   },
 });
 
-export const planConfirmar = defineCapability({
+const planConfirmar = defineCapability({
   id: "agente.plan.confirmar",
   permiso: "agente:usar",
   // Una decisión humana no puede llegar por MCP ni por un resultado de herramienta.

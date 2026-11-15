@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { dondeMisDocumentos, medirDescarga, PORTAL } from "./mis-documentos-comun";
-import { personaPropia } from "./persona-propia";
+import { cortarPagina, inputPaginaPropia, personaPropia, tramoPagina } from "./persona-propia";
 
 const fecha = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
 
@@ -29,10 +29,7 @@ export const misDocumentosListar = defineCapability({
   permiso: null,
   portales: [PORTAL],
   auditarLectura: (s) => [s.personaId, ...s.items.map((d) => d.id)],
-  input: z.object({
-    cursor: z.uuid().optional().describe("Id del último documento de la página anterior."),
-    limite: z.number().int().min(1).max(100).default(50),
-  }),
+  input: z.object(inputPaginaPropia("Id del último documento de la página anterior.")),
   output: z.object({
     personaId: z.string(),
     hoy: z.string().describe("Hoy (aaaa-mm-dd) en la zona de la empresa, para leer los vencimientos."),
@@ -50,19 +47,18 @@ export const misDocumentosListar = defineCapability({
     const filas = await ctx.db.documento.findMany({
       where: donde,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+      ...tramoPagina(input),
       select: {
         id: true, nombre: true, titulo: true, mime: true, tamano: true, emitidoEn: true, venceEn: true, createdAt: true,
         tipo: { select: { nombre: true } },
       },
     });
-    const pagina = filas.slice(0, input.limite);
+    const { pagina, siguiente } = cortarPagina(filas, input.limite);
     const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { timezone: true } });
     return {
       personaId: persona.id,
       hoy: new Intl.DateTimeFormat("en-CA", { timeZone: tenant?.timezone ?? "America/Santiago" }).format(new Date()),
-      siguiente: filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null,
+      siguiente,
       items: pagina.map((d) => ({
         id: d.id,
         titulo: d.titulo ?? d.nombre,

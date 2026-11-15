@@ -8,7 +8,7 @@ import { Superadmin } from "../_componentes/formato";
 import { ListaTrabajos } from "../_componentes/lista-trabajos";
 import type { Trabajo } from "../tenants/[id]/tipos";
 
-export const metadata = { title: "Trabajos" };
+export const metadata = { title: "Trabajos totales" };
 
 const ESTADOS = [
   { valor: "problemas", etiqueta: "Con problemas" },
@@ -19,12 +19,12 @@ const ESTADOS = [
   { valor: "cancelado", etiqueta: "Cancelados" },
 ];
 
-/** Plataforma → Trabajos (51): la cola de todas las empresas; la fila abre el detalle con reintento. */
+/** Plataforma → Trabajos totales (51): la cola de todas las empresas; la fila abre el detalle con reintento. */
 export default function Trabajos({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal
       portal="platform"
-      titulo="Trabajos"
+      titulo="Trabajos totales"
       ruta="/platform/trabajos"
       opciones={() => ({ insignia: <Superadmin /> })}
       cargar={async () => {
@@ -54,6 +54,7 @@ export default function Trabajos({ searchParams }: { searchParams: SearchParams 
         <ListaTrabajos
           state={d.state}
           items={d.items}
+          titulo="Trabajos totales"
           filtros={
             <ChipsFiltro
               filtros={[
