@@ -17,7 +17,7 @@ const ORDEN_IA: readonly ProveedorIaId[] = [
 type ConfigIa = { modelos?: Partial<Record<ClaseTarea, string>>; baseUrl?: string };
 
 /** Proveedor propio configurado por el tenant que no se puede usar, con el motivo (para avisar). */
-export type PropiaInutil = { id: ProveedorIaId; razon: string };
+type PropiaInutil = { id: ProveedorIaId; razon: string };
 
 export type Candidatos = {
   cands: Candidato[];

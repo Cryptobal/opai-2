@@ -31,20 +31,24 @@ test.describe("plataforma con sesión", () => {
       page.getByText("Llamadas API y MCP").filter({ visible: true }).first(),
     ).toBeVisible();
     await captura(page, "plataforma-empresa", p);
-    for (const tab of ["Módulos", "Usuarios", "Consumos", "Trabajos", "Agentes", "Integraciones"]) {
+    const pestanas: { nombre: string; ruta: RegExp }[] = [
+      { nombre: "Módulos", ruta: /\/modulos$/ },
+      { nombre: "Usuarios", ruta: /\/usuarios$/ },
+      { nombre: "Consumo de esta empresa", ruta: /\/consumos$/ },
+      { nombre: "Trabajos de esta empresa", ruta: /\/trabajos$/ },
+      { nombre: "Agentes", ruta: /\/agentes$/ },
+      { nombre: "Integraciones", ruta: /\/integraciones$/ },
+    ];
+    for (const tab of pestanas) {
       await page
         .getByRole("navigation", { name: "Secciones" })
-        .getByRole("link", { name: new RegExp(`^${tab}`) })
+        .getByRole("link", { name: new RegExp(`^${tab.nombre}`) })
         .first()
         .click();
-      const ruta = tab
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/\p{Diacritic}/gu, "");
-      await page.waitForURL(new RegExp(`/${ruta}$`), { timeout: 60_000 });
+      await page.waitForURL(tab.ruta, { timeout: 60_000 });
     }
 
-    await page.goto("/platform/ajustes");
+    await page.goto("/platform/ajustes/modelos");
     await esperar(page.getByRole("button", { name: "Guardar" })).toBeVisible();
     await captura(page, "plataforma-ajustes", p);
 

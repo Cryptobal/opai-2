@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 
-import { Alerta, Button, Card, Table, Td, Th, Tr } from "@opai/ds";
-
-import { fecha } from "@/lib/fechas";
+import { Button, Table, Td, Th, Tr } from "@opai/ds";
 
 import { DialogoMutual } from "./dialogo-mutual";
 import { PanelDetalleIndicador } from "./panel-detalle-indicador";
+import { AvisoCapturaSii, TarjetaMutual } from "./tarjetas-remuneraciones";
 
 type Props = {
   data: DatosRemuneraciones;
@@ -52,41 +51,8 @@ export function TablaRemuneraciones({ data, puede, abrirMutual = false, onActual
 
   return (
     <div className="flex flex-col gap-4">
-      {data.capturaSii.ufDesactualizada ? (
-        <Alerta tono="warning" titulo="UF desactualizada">
-          {data.capturaSii.ufVigenteDesde
-            ? `La UF vigente es del ${data.capturaSii.ufVigenteDesde}; hoy es ${fecha(data.fecha)}.`
-            : "No hay UF publicada para la fecha de hoy."}
-          {data.capturaSii.ultimaCaptura
-            ? ` Última captura SII: ${data.capturaSii.ultimaCaptura}.`
-            : " Aún no hay capturas automáticas registradas."}
-        </Alerta>
-      ) : data.capturaSii.ultimaCaptura ? (
-        <p className="t-caption text-fg-muted">
-          Última captura SII (UF): {data.capturaSii.ultimaCaptura}
-          {data.capturaSii.ufVigenteDesde ? ` · UF vigente desde ${data.capturaSii.ufVigenteDesde}` : null}
-        </p>
-      ) : null}
-
-      <Card className="flex flex-col gap-3 p-4">
-        <div className="flex flex-col gap-1">
-          <p className="t-label-sm text-fg-muted">Cotización adicional de la mutual</p>
-          <p className="t-body">
-            {mutual.estado === "vigente" ? mutual.resumen : "Pendiente de confirmar."}
-          </p>
-          {mutual.estado === "vigente" && mutual.confirmadoPor ? (
-            <p className="t-caption text-fg-muted">
-              Confirmada por {mutual.confirmadoPor}
-              {mutual.confirmadoEn ? ` el ${mutual.confirmadoEn}` : null}
-            </p>
-          ) : null}
-        </div>
-        {puede ? (
-          <Button className="self-start" onClick={() => setMutualAbierto(true)}>
-            {mutual.estado === "vigente" ? "Editar tasa" : "Confirmar tasa"}
-          </Button>
-        ) : null}
-      </Card>
+      <AvisoCapturaSii fecha={data.fecha} captura={data.capturaSii} />
+      <TarjetaMutual mutual={mutual} puede={puede} onEditar={() => setMutualAbierto(true)} />
 
       <Table>
         <thead>
@@ -119,9 +85,9 @@ export function TablaRemuneraciones({ data, puede, abrirMutual = false, onActual
         </tbody>
       </Table>
       <p className="t-caption text-fg-muted">
-        Se actualizan solos: UF y UTM cada día desde el SII; ingreso mínimo, topes, AFP, SIS y cesantía cada mes
-        desde Previred. El impuesto único, la reforma, la mutual básica y la jornada cambian por ley y los publica
-        OPAI.
+        Se actualizan solos: UF y UTM cada día desde el SII; ingreso mínimo, topes, AFP, SIS y
+        cesantía cada mes desde Previred. El impuesto único, la reforma, la mutual básica y la
+        jornada cambian por ley y los publica OPAI.
       </p>
 
       <DialogoMutual

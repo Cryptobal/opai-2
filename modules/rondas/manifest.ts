@@ -1,4 +1,11 @@
-import { ajustesRondas, capacidadesRondas, defineModule, indicadoresRondas } from "@opai/capabilities";
+import {
+  ajustesRondas,
+  capacidadesRondas,
+  defineModule,
+  indicadoresRondas,
+} from "@opai/capabilities";
+
+import { buscadoresRondas } from "./buscador";
 
 /**
  * Manifest del módulo Rondas (ADR-003, Brief 14). El núcleo deriva navegación, permisos,
@@ -32,23 +39,40 @@ export const manifest = defineModule({
   configuracion: ajustesRondas,
   eventos: [
     { id: "rondas.ejecucion.iniciada", descripcion: "Comenzó una ronda." },
-    { id: "rondas.ejecucion.completada", descripcion: "Se cerró una ronda con sus puntos marcados." },
+    {
+      id: "rondas.ejecucion.completada",
+      descripcion: "Se cerró una ronda con sus puntos marcados.",
+    },
     { id: "rondas.ejecucion.atrasada", descripcion: "Una ronda en curso superó su tiempo máximo." },
     { id: "rondas.ejecucion.no_realizada", descripcion: "Venció la ventana sin iniciar la ronda." },
     { id: "rondas.ejecucion.incompleta", descripcion: "Una ronda se cerró con puntos sin marcar." },
     { id: "rondas.punto.omitido", descripcion: "Venció el tramo de un punto obligatorio." },
-    { id: "rondas.anomalia.detectada", descripcion: "Se detectó una anomalía en una marca o ronda." },
+    {
+      id: "rondas.anomalia.detectada",
+      descripcion: "Se detectó una anomalía en una marca o ronda.",
+    },
     {
       id: "rondas.ronda.sin_movimiento",
       descripcion: "Una ronda en curso no registró desplazamiento por el umbral configurado.",
     },
     { id: "rondas.ronda.sin_rastro", descripcion: "Un tramo de la ronda quedó sin rastro GPS." },
-    { id: "rondas.marca.sincronizada_tarde", descripcion: "Llegó una marca sin conexión tras el cierre." },
+    {
+      id: "rondas.marca.sincronizada_tarde",
+      descripcion: "Llegó una marca sin conexión tras el cierre.",
+    },
     { id: "rondas.emergencia", descripcion: "El guardia activó el botón de emergencia." },
-    { id: "rondas.novedad.grave", descripcion: "Se registró una novedad de gravedad alta (incidente)." },
-    { id: "rondas.informe.cliente", descripcion: "Se generó el informe de rondas programado para el cliente." },
+    {
+      id: "rondas.novedad.grave",
+      descripcion: "Se registró una novedad de gravedad alta (incidente).",
+    },
+    {
+      id: "rondas.informe.cliente",
+      descripcion: "Se generó el informe de rondas programado para el cliente.",
+    },
   ],
   capacidades: capacidadesRondas,
   // Indicador de gestión para el catálogo del núcleo (ADR-094, CAR-310).
   indicadores: indicadoresRondas,
+  // Aporte a la búsqueda global (CAR-405, parte 2 de CAR-301).
+  buscadores: buscadoresRondas,
 });

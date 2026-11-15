@@ -23,8 +23,8 @@ test.describe("@preview buscador general", () => {
     await campo.fill("co", { timeout: 10_000 });
     const paleta = page.getByRole("dialog");
     // Espera a que termine de buscar: aparece algún grupo.
-    await expect(paleta.getByText(/^(Acciones|Ir a|Cuentas|Instalaciones|Personas|Contactos|Negocios|Cotizaciones|Solicitudes|Documentos|Plantillas de documento|Ajustes)$/).first()).toBeVisible({ timeout: 20_000 });
-    for (const grupo of ["Negocios", "Cotizaciones", "Solicitudes", "Documentos", "Plantillas de documento"]) {
+    await expect(paleta.getByText(/^(Acciones|Ir a|Cuentas|Instalaciones|Personas|Contactos|Negocios|Cotizaciones|Solicitudes|Facturas|Documentos|Plantillas de documento|Ajustes)$/).first()).toBeVisible({ timeout: 20_000 });
+    for (const grupo of ["Negocios", "Cotizaciones", "Solicitudes", "Facturas", "Documentos", "Plantillas de documento"]) {
       // El grupo se reconoce por su título: «Cotizaciones» también es un atajo de «Ir a» en la misma paleta (CAR-449).
       const titulo = paleta.getByRole("heading", { name: grupo, exact: true });
       if (await titulo.count()) await expect(titulo).toBeVisible();
