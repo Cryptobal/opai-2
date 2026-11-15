@@ -1,17 +1,9 @@
 import { cn, estilosBoton } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import type { Parametros } from "@/lib/parametros";
+import { conCambios as con, type Parametros } from "@/lib/parametros";
 
 import { anteriores, POR_PAGINA } from "./datos";
-
-/** Query string con cambios (null borra la clave). */
-function con(p: Parametros, cambios: Record<string, string | null>) {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries({ ...p, ...cambios })) if (v) q.set(k, v);
-  const s = q.toString();
-  return s ? `?${s}` : "?";
-}
 
 type Props = { p: Parametros; mostrados: number; siguiente: string | null; total: number | null };
 

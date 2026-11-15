@@ -3,11 +3,11 @@ import { Badge, ListScreen } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { cuandoCompleto } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
-import type { Parametros } from "@/lib/parametros";
+import { conCambios, type Parametros } from "@/lib/parametros";
 
 import { cargarVisitas } from "./datos";
 import { HojaVisita } from "./diferidas";
-import { conVisitas, PaginasVisitas } from "./paginas-visitas";
+import { PaginasVisitas } from "./paginas-visitas";
 import { LLEGADA, resumenRevision, textoLlegada, type Visita } from "./tipos";
 
 /** Pestaña «Visitas» de la instalación (CAR-83): historial de visitas de supervisión y su detalle. */
@@ -28,7 +28,7 @@ export async function PestanaVisitas({
         sinCabecera
         items={items}
         clave={(v) => v.id}
-        href={(v) => conVisitas(p, { visita: v.id })}
+        href={(v) => conCambios(p, { visita: v.id })}
         Link={LinkNext}
         paginacion={<PaginasVisitas p={p} siguiente={r.ok ? r.data.siguiente : null} />}
         tarjeta={(v) => (

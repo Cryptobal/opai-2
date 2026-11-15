@@ -7,6 +7,14 @@ export async function leerParametros(sp: SearchParams): Promise<Parametros> {
   return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
 }
 
+/** Query string con los parámetros vigentes y los cambios aplicados (null borra la clave). */
+export function conCambios(p: Parametros, cambios: Record<string, string | null>): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries({ ...p, ...cambios })) if (v) q.set(k, v);
+  const s = q.toString();
+  return s ? `?${s}` : "?";
+}
+
 /** Ruta con la búsqueda de la lista (`?q=`): abrir una ficha y volver no la pierde. */
 export const conBusqueda = (ruta: string, q?: string) =>
   q ? `${ruta}?q=${encodeURIComponent(q)}` : ruta;
