@@ -6,6 +6,7 @@ import { Alerta, avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { AlertaErrorAccion } from "./alerta-error-accion";
 import { CamposMover } from "./campos-mover";
 
 export function HojaMover({
@@ -102,15 +103,11 @@ export function HojaMover({
         }
       >
         <div className="flex flex-col gap-4">
-          {error ? (
-            <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
-              {errorServidor ? (
-                <Button variant="secondary" className="mt-2" onClick={() => void previsualizar()}>
-                  Reintentar
-                </Button>
-              ) : null}
-            </Alerta>
-          ) : null}
+          <AlertaErrorAccion
+            error={error}
+            errorServidor={errorServidor}
+            onReintentar={() => void previsualizar()}
+          />
           {avisoPasada}
           <CamposMover
             filas={filas}
