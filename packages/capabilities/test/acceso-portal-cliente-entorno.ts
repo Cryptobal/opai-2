@@ -8,7 +8,7 @@ import { type Entorno, prepararEntorno } from "../../db/test/entorno";
 import type * as ModuloCapacidades from "../src";
 
 const CLAVE_PRUEBA = "clave-solo-para-pruebas-no-es-un-secreto-real-0123456789";
-export type Res<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
+type Res<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
 type Contacto = "X" | "Y" | "B";
 
 export async function entornoPortalAccesos() {
