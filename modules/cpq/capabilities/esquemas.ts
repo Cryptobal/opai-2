@@ -38,7 +38,7 @@ export const cotizacionSchema = z.object({
   createdAt: z.date(),
 });
 
-export const lineaSchema = z.object({
+const lineaSchema = z.object({
   id: uuidSchema,
   tipo: z.enum(["puesto", "item", "adicional"]),
   grupo: z.string().nullable(),

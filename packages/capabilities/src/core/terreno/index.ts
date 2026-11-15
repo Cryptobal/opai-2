@@ -7,6 +7,9 @@ import { accesoEnSitioTerreno } from "./acceso-sitio";
 import { terrenoContexto } from "./contexto";
 import { rondasEstadoTerreno } from "./rondas-estado";
 import { hechosListar, personasListarTerreno } from "./hechos-lectura";
+import { libroNovedadesListar } from "./libro-novedades";
+import { libroNovedadesCambiarEstado, libroNovedadesObtener } from "./libro-novedades-estado";
+import { libroNovedadesRegistrar } from "./libro-novedades-registrar";
 
 export const capacidadesTerreno = [
   ...capacidadesCredencialesTerreno,
@@ -19,4 +22,8 @@ export const capacidadesTerreno = [
   accesoEnSitioTerreno,
   accesoEsperadosTerreno,
   rondasEstadoTerreno,
+  libroNovedadesListar,
+  libroNovedadesObtener,
+  libroNovedadesRegistrar,
+  libroNovedadesCambiarEstado,
 ];

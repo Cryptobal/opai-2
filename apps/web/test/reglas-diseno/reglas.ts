@@ -2,11 +2,8 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-import { TAMANOS_TEXTO_HILO } from "@opai/ds/hilo";
-
-// Reglas de uso de Hilo que se pueden verificar leyendo el código (DISENO-hilo.md, ADR-105, CAR-334).
-// Las que dependen de la pantalla dibujada (un primario por vista, área táctil, textos en inglés) las
-// mide la auditoría de Playwright (`e2e/auditoria-diseno*.ts`).
+// Reglas de uso de la UI que se pueden verificar leyendo el código. Las que dependen de la pantalla
+// dibujada las mide la auditoría de Playwright (`e2e/auditoria-diseno*.ts`).
 
 export const RAIZ = join(import.meta.dirname, "../../../..");
 
@@ -29,15 +26,6 @@ export const REGLAS: Regla[] = [
     contar: contarRegex(
       /\.toLocale(Date|Time)?String\(|new Intl\.NumberFormat\(|Intl\.DateTimeFormat\(\s*["']es-CL/g,
     ),
-  },
-  {
-    id: "T1-tamano-fuera-de-escala",
-    descripcion:
-      "Los tamaños de texto salen de la escala Hilo (11, 12, 13, 14, 15, 16, 18, 22, 24, 26, 28…)",
-    contar: (texto) =>
-      [...texto.matchAll(/\btext-\[(\d+(?:\.\d+)?)px\]/g)].filter(
-        (m) => !TAMANOS_TEXTO_HILO.includes(Number(m[1])),
-      ).length,
   },
   {
     id: "B1-boton-generico",

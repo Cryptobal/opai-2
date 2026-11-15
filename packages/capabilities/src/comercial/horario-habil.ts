@@ -1,8 +1,8 @@
 // Horario hábil para el plazo de primera respuesta (CAR-299, decisión de Carlos del 11-nov-2026):
 // lunes a viernes, de 8:00 a 18:00 en la zona de la empresa. Lógica pura.
-export const INICIO_HABIL_MIN = 8 * 60;
-export const FIN_HABIL_MIN = 18 * 60;
-export const ZONA_POR_DEFECTO = "America/Santiago";
+const INICIO_HABIL_MIN = 8 * 60;
+const FIN_HABIL_MIN = 18 * 60;
+const ZONA_POR_DEFECTO = "America/Santiago";
 
 const DIAS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 

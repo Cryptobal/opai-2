@@ -27,7 +27,7 @@ export function etiquetaOrigen(d: Pick<DiaVista, "fuente" | "automatico">): stri
 
 /** Años que ofrece el filtro rápido; cualquier año válido también vale por `?anio=`. */
 export const ANIOS = [2026, 2027, 2028] as const;
-export const ANIO_DEFECTO = 2026;
+const ANIO_DEFECTO = 2026;
 /** Rango que acepta la capacidad `core.calendario.listar` (input `anio`). */
 export const ANIO_MIN = 2000;
 export const ANIO_MAX = 2100;
