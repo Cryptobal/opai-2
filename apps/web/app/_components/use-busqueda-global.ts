@@ -20,12 +20,26 @@ const grupoAgente = (hay: boolean, q: string): GrupoPaleta[] =>
   hay
     ? [{ titulo: "Agente", items: [{ id: ASK + q, etiqueta: q ? `Preguntar a OPAI: «${q}»` : "Preguntar a OPAI", icono: Sparkles, href: "#" }] }]
     : [];
-const iconoGrupo = (g: string) => (g === "negocios" ? Handshake : g === "cotizaciones" ? FileText : g === "facturas" ? Receipt : g === "documentos" ? FolderOpen : Inbox);
+const ICONOS: Record<string, typeof Handshake> = {
+  negocios: Handshake,
+  cotizaciones: FileText,
+  facturas: Receipt,
+  documentos: FolderOpen,
+  plantillas_documento: FolderOpen,
+};
+const iconoGrupo = (g: string) => ICONOS[g] ?? Inbox;
 type Resultado = { id: string; titulo: string; detalle: string | null; href: string };
 type Busqueda = Record<"cuentas" | "instalaciones" | "personas" | "contactos", Resultado[]> & {
   otros?: { grupo: string; titulo: string; items: Resultado[] }[];
 };
 type Ajuste = { modulo: string; clave: string; etiqueta: string; grupo: string | null };
+const item = (x: Resultado, extra: Partial<ItemPaleta> = {}) => ({
+  id: x.id,
+  etiqueta: x.titulo,
+  ...(x.detalle ? { detalle: x.detalle } : {}),
+  href: x.href,
+  ...extra,
+});
 
 type Opciones = {
   abierto: boolean;
@@ -37,23 +51,13 @@ type Opciones = {
   router: { push: (href: string) => void };
 };
 
-/**
- * Fuente única de la búsqueda global (`core.buscar` y `core.config.buscar`) para la paleta ⌘K y el
- * menú «Más» del teléfono: mismos grupos iniciales, mismos resultados, misma acción al elegir.
- */
+/** Fuente única de ⌘K / «Más»: mismos grupos, resultados y acción al elegir. */
 export function useBusquedaGlobal({ abierto, epoca, acciones, nav, agente, router }: Opciones) {
   const { recientes, limpiarRecientes } = useRecientesPaleta(abierto, epoca, nav);
   const iniciales = useMemo(() => {
     const visibles = recientes.flatMap((r) => {
       const entrada = nav.find((n) => n.href === r.href);
-      return [
-        {
-          id: r.href,
-          etiqueta: entrada?.etiqueta ?? r.etiqueta,
-          href: r.href,
-          icono: icono(entrada?.icono ?? "Pin"),
-        },
-      ];
+      return [{ id: r.href, etiqueta: entrada?.etiqueta ?? r.etiqueta, href: r.href, icono: icono(entrada?.icono ?? "Pin") }];
     });
     return [
       ...grupoAgente(agente, ""),
@@ -74,57 +78,19 @@ export function useBusquedaGlobal({ abierto, epoca, acciones, nav, agente, route
         ...grupoAgente(agente, q),
         {
           titulo: "Acciones",
-          items: acciones
-            .filter((a) => a.etiqueta.toLowerCase().includes(t))
-            .map((a) => ({ ...a, icono: icono(a.icono) })),
+          items: acciones.filter((a) => a.etiqueta.toLowerCase().includes(t)).map((a) => ({ ...a, icono: icono(a.icono) })),
         },
         {
           titulo: "Ir a",
           items: nav.filter((i) => i.etiqueta.toLowerCase().includes(t)).map((i) => ({ id: i.href, href: i.href, etiqueta: i.etiqueta, icono: icono(i.icono) })),
         },
-        {
-          titulo: "Cuentas",
-          items: (d?.cuentas ?? []).map((x) => ({
-            id: x.id,
-            etiqueta: x.titulo,
-            ...(x.detalle ? { detalle: x.detalle } : {}),
-            icono: Building2,
-            href: x.href,
-          })),
-        },
-        {
-          titulo: "Instalaciones",
-          items: (d?.instalaciones ?? []).map((x) => ({
-            id: x.id,
-            etiqueta: x.titulo,
-            ...(x.detalle ? { detalle: x.detalle } : {}),
-            icono: MapPin,
-            href: x.href,
-          })),
-        },
-        {
-          titulo: "Personas",
-          items: (d?.personas ?? []).map((x) => ({
-            id: x.id,
-            etiqueta: x.titulo,
-            ...(x.detalle ? { detalle: x.detalle } : {}),
-            persona: true,
-            href: x.href,
-          })),
-        },
-        {
-          titulo: "Contactos",
-          items: (d?.contactos ?? []).map((x) => ({
-            id: x.id,
-            etiqueta: x.titulo,
-            ...(x.detalle ? { detalle: x.detalle } : {}),
-            persona: true,
-            href: x.href,
-          })),
-        },
+        { titulo: "Cuentas", items: (d?.cuentas ?? []).map((x) => item(x, { icono: Building2 })) },
+        { titulo: "Instalaciones", items: (d?.instalaciones ?? []).map((x) => item(x, { icono: MapPin })) },
+        { titulo: "Personas", items: (d?.personas ?? []).map((x) => item(x, { persona: true })) },
+        { titulo: "Contactos", items: (d?.contactos ?? []).map((x) => item(x, { persona: true })) },
         ...(d?.otros ?? []).map((g) => ({
           titulo: g.titulo,
-          items: g.items.map((x) => ({ id: x.id, etiqueta: x.titulo, ...(x.detalle ? { detalle: x.detalle } : {}), icono: iconoGrupo(g.grupo), href: x.href })),
+          items: g.items.map((x) => item(x, { icono: iconoGrupo(g.grupo) })),
         })),
         {
           titulo: "Ajustes",
