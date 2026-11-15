@@ -3,6 +3,11 @@ import type { EventoDeDominio } from "../module";
 /** Eventos de Terreno que emite el núcleo (CAR-78). */
 export const EVENTOS_TERRENO: readonly EventoDeDominio[] = [
   {
+    id: "core.terreno.panico",
+    descripcion:
+      "Un guardia apretó el botón de pánico en la app de terreno; trae la instalación, la persona y el id del pánico (CAR-293/296).",
+  },
+  {
     id: "core.terreno.hechos_recibidos",
     descripcion:
       "Un equipo de terreno envió un lote de hechos; trae la instalación y la cuenta por tipo.",
