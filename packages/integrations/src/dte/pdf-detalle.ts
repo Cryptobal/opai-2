@@ -14,7 +14,7 @@ const INTERLINEA_SUB = 9;
 const MAX_NOMBRE = 3;
 const MAX_SUB = 4;
 /** Espacio bajo la tabla de la proforma para la glosa del documento (hasta 5 renglones). */
-export const RESERVA_GLOSA = 56;
+const RESERVA_GLOSA = 56;
 
 /** «15,5» % para 1550 centésimas; «10» para 1000. */
 const descuentoTexto = (c: number) => (c % 100 === 0 ? String(c / 100) : (c / 100).toFixed(2).replace(".", ","));

@@ -18,7 +18,7 @@ export type PedidoPuesto = {
   horaFinNoche?: string | undefined;
 };
 
-export type PlanPuesto = {
+type PlanPuesto = {
   lineaId: string;
   posicion: number;
   nombre: string;

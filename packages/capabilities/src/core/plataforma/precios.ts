@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-import { PERMISOS_PLATAFORMA } from "@opai/domain";
+import { PERMISOS_PLATAFORMA, PRECIOS_RECURSOS_BASE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { conflicto, reglaDeNegocio } from "../../errores";
 import { aFecha, dia, hoy } from "../maestros/comun";
+import { invalidarCachePrecios } from "../../servicios-db";
 import { requierePlataforma } from "../comun";
 
 const precioSchema = z.object({
@@ -60,6 +61,17 @@ export const platformPreciosSet = defineCapability({
     // Versiona sin reescribir historia: nunca hacia atrás, y la versión de hoy no se corrige
     // (los consumos de hoy ya la usan); una versión futura sí puede ajustarse.
     if (desde < hoy()) throw reglaDeNegocio("La fecha de vigencia no puede ser pasada.");
+    // Solo recursos que el medidor conoce (CAR-323): un recurso inventado se valoraría en 0.
+    const conocidos = new Set([
+      ...PRECIOS_RECURSOS_BASE.map((r) => r.recurso),
+      ...(await requierePlataforma(ctx).globales.listarPrecios(aFecha(desde))).map(
+        (f) => f.recurso,
+      ),
+    ]);
+    if (!conocidos.has(input.recurso))
+      throw reglaDeNegocio(
+        `«${input.recurso}» no es un recurso medido de OPAI. Elige uno de la lista de precios.`,
+      );
     const existente = await requierePlataforma(ctx).globales.precioPorVigencia({
       recurso_vigenteDesde: { recurso: input.recurso, vigenteDesde: aFecha(desde) },
     });
@@ -83,6 +95,7 @@ export const platformPreciosSet = defineCapability({
         },
         ctx.db,
       ); // En la transacción de su auditoría global: falla cerrado (CAR-41).
+    if (!dryRun) invalidarCachePrecios();
     return { ...fila, vigenteDesde: desde, anterior };
   },
 });

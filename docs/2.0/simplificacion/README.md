@@ -84,8 +84,8 @@ Incluye 8 alias marcados `@deprecated` «conservados para pruebas» (`sii-valida
 
 | Caso | Líneas | Qué hacer |
 |---|---|---|
-| `core/crm/contactos-cuentas.ts` ≈ `contactos-desvincular.ts` | 58 | Una función compartida en el mismo módulo |
-| Componentes de «generar documento» de Personas ≈ los genéricos de `_components/documentos/generar-entidad/` | 56 | Personas usa los genéricos |
+| `core/crm/contactos-cuentas.ts` ≈ `contactos-desvincular.ts` | 58 | Hecho en CAR-438 (#837): se borró la copia muerta |
+| Componentes de «generar documento» de Personas ≈ los genéricos de `_components/documentos/generar-entidad/` | 56 | Hecho (CAR-439): Personas usa los genéricos |
 | Tipos copiados entre `apps/web/lib` y módulos (`instrumentos-valores`, `aprobaciones-cpq`, `tipos-maestros`, pauta) | 79 | Importar el tipo desde su dueño |
 | Rutas `api/terreno/*` y layouts de portales con el mismo encabezado | 66 | Un helper por familia |
 | `iconos.ts`: un bloque repetido dentro del mismo archivo | 30 | Borrar la copia |

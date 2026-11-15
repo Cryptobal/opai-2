@@ -4,11 +4,10 @@ import type { Contexto } from "../types";
 import { consumoBase } from "./consumo-base";
 import { credencialDe, integracionDe } from "./resolver";
 
-export { biometriaDe, type BiometriaDeEmpresa } from "./biometria";
+export { biometriaDe } from "./biometria";
 export { consumoBase } from "./consumo-base";
 export { distanciaDe, geoDe } from "./geo";
 export { iaDe } from "./ia";
-export { selloDe } from "./sello";
 
 /** Correo del tenant: Resend propio o de plataforma; en desarrollo, consola. Mide cada envío. */
 export async function correoDe(

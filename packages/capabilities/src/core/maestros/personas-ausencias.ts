@@ -20,7 +20,7 @@ import { uuidSchema } from "../esquemas";
 import { dondePuesto } from "./alcance";
 import { ausenciasClases } from "./ausencias-clases";
 
-export const personasAusenciasRegistrar = defineCapability({
+const personasAusenciasRegistrar = defineCapability({
   id: "core.ausencias.registrar",
   descripcion:
     "Registra un permiso, licencia, vacaciones o ausencia de una persona para un día o un rango, aunque no tenga turnos o la empresa no use la pauta. Si la empresa usa la pauta, en el mismo acto marca los turnos que la persona tiene como titular en esas fechas.",
@@ -40,7 +40,7 @@ export const personasAusenciasRegistrar = defineCapability({
     }),
 });
 
-export const personasAusenciasListar = defineCapability({
+const personasAusenciasListar = defineCapability({
   id: "core.ausencias.listar",
   descripcion:
     "Lista los permisos, licencias, vacaciones y ausencias registrados de una persona, con sus fechas, si siguen vigentes o se anularon y, si la empresa usa la pauta, los turnos e instalaciones que marcan. Pagina con cursor.",
@@ -61,7 +61,7 @@ export const personasAusenciasListar = defineCapability({
   },
 });
 
-export const personasAusenciasAnular = defineCapability({
+const personasAusenciasAnular = defineCapability({
   id: "core.ausencias.anular",
   descripcion:
     "Anula un registro de ausencia de una persona (permiso, licencia, vacaciones o ausencia): queda en el historial como anulado y, si marcaba turnos en la pauta, esos turnos vuelven a cubrirse según su serie.",

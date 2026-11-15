@@ -14,7 +14,7 @@ const vistaSchema = z.object({
   query: z.string().max(400, "Los filtros son demasiado largos para guardarlos")
     .regex(/^(\?[A-Za-z0-9%&=_.~+-]*)?$/, "Usa solo filtros de la URL"),
 });
-export const MAXIMO_VISTAS = 10;
+const MAXIMO_VISTAS = 10;
 const vistasSchema = z
   .record(z.string().regex(/^[a-z][a-z0-9_-]{0,39}$/), z.array(vistaSchema).max(MAXIMO_VISTAS))
   .refine((r) => Object.keys(r).length <= 20, "Demasiadas listas")
