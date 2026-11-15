@@ -1,5 +1,5 @@
 // CAR-174: rentabilidad por instalación con costo laboral estimado. Solo datos ficticios (empresas qa-rent*).
-// Los valores legales se inyectan (juego de referencia del dominio) para no sembrar publicaciones globales.
+// UF/UTM van a plataforma; el resto del juego de referencia, al tenant de prueba (CAR-96: el test fallaba en main).
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -13,6 +13,38 @@ import { costosDePuestos } from "../src/finanzas/rentabilidad-costos";
 import type * as Mod from "../src";
 
 type Fila = { instalacionId: string | null; nombre: string; ventasNetasClp: number; costoEstimadoClp: number; puestos: number; puestosSinCosto: number; puestosOcultos: number };
+
+async function sembrarJuegoReferencia(e: Entorno, tenantId: string) {
+  const inds = await e.admin.indicadorLegal.findMany();
+  const idDe = Object.fromEntries(inds.map((i) => [i.clave, i.id]));
+  for (const p of publicacionesReferencia()) {
+    const indicadorId = idDe[p.indicador];
+    if (!indicadorId) continue;
+    if (p.indicador === "uf" || p.indicador === "utm") {
+      await e.admin.valorPublicado.create({
+        data: {
+          indicadorId,
+          valorJson: p.valor,
+          vigenteDesde: new Date(p.vigenteDesde),
+          estado: "vigente",
+          fuente: p.fuente,
+          verificacion: "verificado",
+        },
+      });
+    } else {
+      await e.admin.valorTenant.create({
+        data: {
+          tenantId,
+          indicadorId,
+          valorJson: p.valor,
+          vigenteDesde: new Date(p.vigenteDesde),
+          estado: "vigente",
+          origen: "propio",
+        },
+      });
+    }
+  }
+}
 
 describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
   let e: Entorno, mod: typeof Mod;
@@ -59,6 +91,7 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
     await doc(t.a, cuenta.id, i.norte, 33, 7_000_000, "2026-11-01");
     const cuentaB = await e.admin.cuenta.create({ data: { tenantId: t.b, nombre: "Otra" } });
     await doc(t.b, cuentaB.id, null, 33, 8_000_000, "2026-10-10");
+    await sembrarJuegoReferencia(e, t.a);
   });
   afterAll(async () => { await e?.cerrar(); });
 
