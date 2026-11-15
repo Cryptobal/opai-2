@@ -64,13 +64,4 @@ async function publicarValorPlataformaEnTx(
   return id;
 }
 
-/** Publica UF/UTM del SII en plataforma vía función SECURITY DEFINER (una transacción). */
-export async function publicarValorPlataforma(
-  ctx: Contexto,
-  input: PublicarInput,
-): Promise<{ publicadoId: string; cambio: boolean }> {
-  const publicadoId = await ctx.transaccion((tx) => publicarValorPlataformaEnTx(ctx, tx, input));
-  return { publicadoId, cambio: true };
-}
-
 export { publicarValorPlataformaEnTx };
