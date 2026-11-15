@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
+import { Alerta, Badge, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
 import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
@@ -90,12 +90,19 @@ export function PlanillaFlujoEscritorio({
           : {})}
       />
       {gestiona ? (
-        <p className="text-sm text-fg-muted">
-          Toca una celda planificada para editarla. Las semanas pasadas muestran lo real según cartola.{" "}
-          <Link href="/configuracion/modulo/finanzas?seccion=flujo-caja" className="text-accent underline">
-            Filas y ajustes
-          </Link>
-        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-fg-muted">
+          <span className="flex flex-wrap items-center gap-2" aria-label="Qué significa cada color">
+            <Badge tono="success">Real del banco</Badge>
+            <Badge tono="info">Comprometido</Badge>
+            <Badge tono="neutro">Planificado</Badge>
+          </span>
+          <span>
+            Toca una celda planificada para editarla; las semanas pasadas muestran lo real de la cartola.{" "}
+            <Link href="/configuracion/modulo/finanzas?seccion=flujo-caja" className="text-accent underline">
+              Filas y ajustes
+            </Link>
+          </span>
+        </div>
       ) : null}
       {gestiona ? (
         <>

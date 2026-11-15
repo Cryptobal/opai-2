@@ -78,6 +78,7 @@ export function CampoSecreto({ id, guardado, onGuardar, placeholder, pendiente, 
           </button>
         </span>
         <Button
+          variant="secondary"
           className="h-11"
           disabled={!valor.trim() || pendiente}
           onClick={async () => {
