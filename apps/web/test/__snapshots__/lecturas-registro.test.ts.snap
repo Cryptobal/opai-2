@@ -2,6 +2,7 @@
 
 exports[`declaración de auditoría del registro completo > ninguna lectura nueva puede omitir auditarLectura sin revisar la lista cerrada 1`] = `
 [
+  "acceso.config.get",
   "agente.historial.list",
   "agente.modelos.list",
   "asistencia.correcciones.ver_enlace",

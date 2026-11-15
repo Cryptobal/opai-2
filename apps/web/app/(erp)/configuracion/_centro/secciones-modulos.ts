@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { SeccionConfigEmpresa } from "@/app/(erp)/accesos/_componentes/config/seccion-config";
 import { SeccionCatalogos } from "@/app/(erp)/negocios/_configuracion/seccion-catalogos";
 import { SeccionEmbudo } from "@/app/(erp)/negocios/_configuracion/seccion-embudo";
 import { SeccionTiposTicket } from "@/app/(erp)/configuracion/_tickets/seccion-tipos";
@@ -33,6 +34,14 @@ export type SeccionModulo = {
  * `lib/existencia-ruta.ts` para las fichas). El orden es el de las pestañas; «Ajustes» va al final.
  */
 export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
+  acceso: [
+    {
+      id: "formulario",
+      etiqueta: "Formulario y reglas",
+      permiso: "acceso:config.manage",
+      Contenido: SeccionConfigEmpresa,
+    },
+  ],
   comercial: [
     {
       id: "embudo",

@@ -55,6 +55,12 @@ export async function puedeGestionarRegistros(): Promise<boolean> {
   return identidad ? puedeDeIdentidad(identidad)("acceso:registros.manage") : false;
 }
 
+/** ¿Puede configurar el control de acceso (CAR-479)? Oculta «Configuración» de la pestaña a quien no. */
+export async function puedeConfigurarAcceso(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("acceso:config.manage") : false;
+}
+
 /** ¿Puede prerregistrar visitas (CAR-478)? Oculta «Prerregistrar» a quien solo lee. */
 export async function puedePrerregistrar(): Promise<boolean> {
   const identidad = await identidadActual();

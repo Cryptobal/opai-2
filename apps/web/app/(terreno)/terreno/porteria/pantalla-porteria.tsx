@@ -8,6 +8,8 @@ import { LinkNext } from "@/app/_components/link-next";
 
 import { usePersonaElegida } from "@/lib/terreno/persona";
 
+import type { ConfigAcceso } from "@opai/domain/acceso-config";
+
 import type { EnSitio } from "./lista-en-sitio";
 
 // El formulario y la lista se cargan aparte para no pesar en el JS inicial de la ruta (presupuesto de JS, ADR-037).
@@ -20,7 +22,7 @@ const ListaEnSitio = dynamic(() => import("./lista-en-sitio").then((m) => m.List
   ssr: false,
 });
 
-type Sitio = { activo: boolean; items: EnSitio[] };
+type Sitio = { activo: boolean; config: ConfigAcceso | null; items: EnSitio[] };
 
 /**
  * Portería del equipo de terreno (CAR-78 · E4d): registrar entrada y salida. Lo que se registra queda primero en el
@@ -99,8 +101,14 @@ export function PantallaPorteria() {
       {!sitio || sitio.activo ? (
         <>
           <Esperados personaId={persona.id} alRegistrar={recargar} />
-          <FormularioEntrada personaId={persona.id} />
-          {sitio ? <ListaEnSitio items={sitio.items} personaId={persona.id} /> : null}
+          <FormularioEntrada personaId={persona.id} config={sitio?.config ?? null} />
+          {sitio ? (
+            <ListaEnSitio
+              items={sitio.items}
+              personaId={persona.id}
+              permanenciaMaxMin={sitio.config?.permanenciaMaxMin ?? null}
+            />
+          ) : null}
         </>
       ) : null}
     </main>
