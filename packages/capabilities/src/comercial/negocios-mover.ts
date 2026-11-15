@@ -35,7 +35,13 @@ export const negociosMover = defineCapability({
     const actual = await etapaDe(ctx, negocio.etapaId);
     const avanza = destino.orden > actual.orden;
     if (avanza) await validarEntrada(ctx, negocio, destino);
-    if (dryRun) return vistaNegocio({ ...negocio, etapaId: destino.id, estado: "abierto" });
+    if (dryRun)
+      return vistaNegocio({
+        ...negocio,
+        etapaId: destino.id,
+        estado: "abierto",
+        probabilidad: destino.probabilidad,
+      });
     const r = await ctx.transaccion((tx) =>
       aplicarEtapa(ctx, tx, negocio, destino, { evento: "comercial.negocio.etapa_cambiada" }),
     );
@@ -80,7 +86,12 @@ export const negociosGanar = defineCapability({
     const { efectos } = await planGanar(ctx.db, negocio);
     if (dryRun)
       return {
-        ...vistaNegocio({ ...negocio, etapaId: ganada.id, estado: "ganado" }),
+        ...vistaNegocio({
+          ...negocio,
+          etapaId: ganada.id,
+          estado: "ganado",
+          probabilidad: ganada.probabilidad,
+        }),
         aviso,
         efectos,
       };
