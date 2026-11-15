@@ -36,7 +36,7 @@ export async function gastoDelMes() {
 }
 
 /** Permisos efectivos del usuario que crea la key: el subconjunto que puede delegar (t457u). */
-export async function misPermisos() {
+async function misPermisos() {
   const r = await ejecutarComoUsuario<{ permisos: string[] }>("erp", "core.me");
   return r.ok ? r.data.permisos.filter((p) => !p.startsWith("platform:")) : [];
 }
