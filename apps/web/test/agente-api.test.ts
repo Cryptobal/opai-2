@@ -2,7 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { contextoDePrueba } from "@opai/capabilities/testing";
 import type * as Capacidades from "@opai/capabilities";
 
-const dobles = vi.hoisted(() => ({ actor: vi.fn(), ejecutar: vi.fn(), permitir: vi.fn() }));
+const dobles = vi.hoisted(() => ({
+  actor: vi.fn(),
+  ejecutar: vi.fn(),
+  permitir: vi.fn(),
+  after: vi.fn((fn: () => unknown) => fn()),
+}));
+vi.mock("next/server", () => ({ after: dobles.after }));
 vi.mock("../lib/actor", () => ({ resolverActor: dobles.actor }));
 vi.mock("../lib/rate-limit", () => ({ permitir: dobles.permitir }));
 vi.mock("../lib/registro", () => ({ asegurarRegistro: vi.fn() }));
@@ -58,5 +64,12 @@ describe("POST /api/agente", () => {
     dobles.actor.mockResolvedValue(contextoDePrueba({ modulosActivos: ["agente"] }).ctx);
     dobles.permitir.mockResolvedValue(false);
     expect((await POST(solicitud())).status).toBe(429);
+  });
+  it("arma after() para que la corrida siga si el cliente cancela el SSE (CAR-524)", async () => {
+    dobles.after.mockClear();
+    const r = await POST(solicitud());
+    expect(dobles.after).toHaveBeenCalledOnce();
+    await r.text();
+    expect(dobles.ejecutar).toHaveBeenCalled();
   });
 });

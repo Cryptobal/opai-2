@@ -12,6 +12,7 @@ import {
   PlanillaScreen,
 } from "@opai/ds";
 
+import { PlanillaPlegableMuestra } from "./componentes-nuevos/planilla-plegable-muestra";
 import { SelectMuestra } from "./componentes-nuevos/select-muestra";
 import { celdaPauta, COLUMNAS_PAUTA, FILAS_PAUTA, KPIS } from "./datos";
 
@@ -101,6 +102,9 @@ export function BloquePlanillaYDashboard({ state }: { state: EstadoPantalla }) {
           columnas={COLUMNAS_PAUTA}
           celda={celdaPauta}
         />
+      </Bloque>
+      <Bloque titulo="PlanillaScreen · Filas plegables">
+        <PlanillaPlegableMuestra state={state} />
       </Bloque>
       <Bloque titulo="DashboardScreen · Finanzas">
         <DashboardScreen state={state} titulo="Finanzas" subtitulo="Octubre 2026" kpis={KPIS}>

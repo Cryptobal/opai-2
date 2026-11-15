@@ -28,6 +28,20 @@ function cobroEditable(i: IngresoEsperado): i is IngresoEsperado & { documentoEm
   return !!i.documentoEmitidoId && (i.origenFecha === "manual" || i.origenFecha === "promedio" || i.origenFecha === "vencimiento" || i.origenFecha === "emision");
 }
 
+/** Nombres de clientes e instalaciones de los cobros, en dos lecturas (sin N+1). */
+async function nombresDeClientes(ctx: Contexto, items: readonly IngresoEsperado[]) {
+  const cuentaIds = [...new Set(items.map((i) => i.cuentaId))];
+  const instIds = [...new Set(items.flatMap((i) => (i.instalacionId ? [i.instalacionId] : [])))];
+  const [cuentas, insts] = await Promise.all([
+    cuentaIds.length ? ctx.db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } }) : [],
+    instIds.length ? ctx.db.instalacion.findMany({ where: { id: { in: instIds } }, select: { id: true, nombre: true } }) : [],
+  ]);
+  return {
+    cuentas: new Map(cuentas.map((c) => [c.id, c.nombre])),
+    instalaciones: new Map(insts.map((x) => [x.id, x.nombre])),
+  };
+}
+
 /**
  * Cobros esperados de las facturas por cobrar (ADR-073): un solo criterio de semana, la fecha esperada de cobro.
  * Solo semanas desde la actual dentro de `semanas`; el pasado lo cuenta la cartola. Solo lectura.
@@ -39,6 +53,7 @@ export async function celdasCobrosEsperados(
   const enRango = new Set(semanas);
   const proy = await proyeccionDeIngresos(ctx, hoyChile(), semanas.at(-1));
   const items = proy.items.filter((i) => enRango.has(i.semanaCobro));
+  const nombres = await nombresDeClientes(ctx, items);
   const dominio: CeldaFlujo[] = [];
   const vista: z.infer<typeof celdaSchema>[] = [];
   for (const i of items) {
@@ -53,6 +68,16 @@ export async function celdasCobrosEsperados(
       monto: i.monto,
       nota: `${i.etiqueta}${cuando}`,
       ...(cobroEditable(i) ? { cobro: { documentoId: i.documentoEmitidoId, fechaEsperada: i.fechaEsperada, origen: i.origenFecha } } : {}),
+      ...(nombres.cuentas.has(i.cuentaId)
+        ? {
+            cliente: {
+              cuentaId: i.cuentaId,
+              cuenta: nombres.cuentas.get(i.cuentaId)!,
+              instalacionId: i.instalacionId,
+              instalacion: i.instalacionId ? (nombres.instalaciones.get(i.instalacionId) ?? null) : null,
+            },
+          }
+        : {}),
     });
   }
   return { dominio, vista, avisos: proy.avisos, diferencias: proy.diferenciasFactoring.filter((d) => enRango.has(d.semana)) };

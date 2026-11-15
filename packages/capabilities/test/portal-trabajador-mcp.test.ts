@@ -31,6 +31,7 @@ describe("tools/list · portal_trabajador", () => {
       "portal_trabajador_arco_solicitar",
       "preview_portal_trabajador_arco_solicitar",
       "portal_trabajador_mis_datos_exportar",
+      "portal_trabajador_mis_turnos_listar",
     ];
     const nombres = herramientasMcp(contextoOwnerAgente()).map((h) => h.nombre);
     expect(nombres).toEqual(expect.arrayContaining(esperadas));
