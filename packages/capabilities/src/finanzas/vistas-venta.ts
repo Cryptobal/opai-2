@@ -51,6 +51,11 @@ export const ventaSchema = z.object({
   trackIdSii: z.string().nullable(),
   documentoReferenciaId: z.string().nullable(),
   lineas: z.array(lineaSchema),
+  titulo: z
+    .string()
+    .optional()
+    .describe("Etiqueta corta para el agente (enlace); p. ej. «Factura electrónica 123»."),
+  href: z.string().optional().describe("Ruta interna de la ficha (`/finanzas/ventas/…`)."),
   emisionPrevista: z
     .object({ proveedor: z.enum(["simulado", "simpleapi"]), ambiente: z.enum(["certificacion", "produccion"]) })
     .optional()
@@ -128,6 +133,8 @@ export function vistaVenta(
     trackIdSii: d.trackIdSii,
     documentoReferenciaId: d.documentoReferenciaId,
     lineas,
+    titulo: `${NOMBRE_TIPO_DTE_VENTA[tipo] ?? `DTE ${d.tipoDte}`} ${d.folio ?? "borrador"}`,
+    href: `/finanzas/ventas/${d.id}`,
   };
 }
 
