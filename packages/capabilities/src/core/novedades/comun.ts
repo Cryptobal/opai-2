@@ -10,6 +10,7 @@ import { forTenantUsuario, validarTenantId } from "@opai/db";
 import { enScope } from "../../autorizacion";
 import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
+import { accesosPorRuta } from "./acceso-rutas";
 
 /**
  * `permiso: null` en las cuatro capacidades (igual que `core.notificaciones.list`): bandeja propia
@@ -43,6 +44,7 @@ export function entradasPara(ctx: Contexto): EntradaNovedad[] {
     ctx.modulosActivos,
     (p) => ctx.autorizar(p),
     esPlataforma,
+    accesosPorRuta(),
   );
 }
 
