@@ -14,7 +14,10 @@ export type Anotacion = {
     | "cobertura_deshacer"
     | "marca_registrada"
     | "reemplazo_asignado"
-    | "refuerzo_agregado";
+    | "refuerzo_agregado"
+    | "turno_extra_registrado"
+    | "turno_extra_aprobado"
+    | "turno_extra_rechazado";
   desde: string;
   hasta: string;
   /** Datos estructurados del cambio (tipo, patrón, ids). Sin RUT ni sueldos. */
