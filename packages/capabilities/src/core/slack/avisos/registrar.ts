@@ -6,7 +6,7 @@ import { slackConfigEfectiva, type SlackConfig } from "@opai/integrations";
 import type { Contexto } from "../../../types";
 import { filaIntegracionSlack, instalacionSlack } from "../comun";
 
-export const TIPOS_AVISO = [
+const TIPOS_AVISO = [
   "atraso",
   "ausencia",
   "fuera_de_zona",
@@ -34,7 +34,7 @@ export type AvisoNuevo = {
 };
 
 /** ¿La empresa activó este tipo de aviso? (decisiones 2 a 4 de Carlos, 11-nov-2026). */
-export function avisoActivo(c: SlackConfig, tipo: TipoAviso): boolean {
+function avisoActivo(c: SlackConfig, tipo: TipoAviso): boolean {
   switch (tipo) {
     case "atraso":
       return c.avisos.atraso;
@@ -58,7 +58,7 @@ export function avisoActivo(c: SlackConfig, tipo: TipoAviso): boolean {
 }
 
 /** Canal del aviso: el pánico y su canal propio (o el general); lo demás, el general. */
-export function canalDeAviso(c: SlackConfig, tipo: TipoAviso): string | null {
+function canalDeAviso(c: SlackConfig, tipo: TipoAviso): string | null {
   if (tipo === "panico")
     return c.panico.alCanal ? ((c.canales.panico ?? c.canales.general)?.id ?? null) : null;
   return c.canales.general?.id ?? null;
