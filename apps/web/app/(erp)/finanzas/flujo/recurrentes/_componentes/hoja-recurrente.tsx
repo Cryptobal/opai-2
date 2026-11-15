@@ -9,6 +9,8 @@ import { useHojaUrl, useParametros } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { hoyIso } from "@/lib/fechas";
 
+import { GRUPO_POR_DEFECTO, type GrupoEgreso } from "../../_componentes/grupos-egreso";
+import { SelectorGrupoEgreso } from "../../_componentes/selector-grupo-egreso";
 import { CamposUf } from "./campos-uf";
 import { type FilaEgreso, FRECUENCIAS, montoEditable, montoEscrito, type PoliticaUf, type Recurrente, type Unidad } from "./tipos";
 
@@ -39,6 +41,10 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
   const [ufDia, setUfDia] = useState(r?.ufDiaFijo != null ? String(r.ufDiaFijo) : "1");
   const [nota, setNota] = useState(r?.nota ?? "");
   const [activa, setActiva] = useState(r?.activa ?? true);
+  // El grupo es de la fila del flujo, no del gasto: se cambia al guardar y vale para toda la fila.
+  const [cambioGrupo, setCambioGrupo] = useState<{ filaId: string; grupo: GrupoEgreso } | null>(null);
+  const grupoActual = p.filas.find((f) => f.id === fila)?.grupo ?? GRUPO_POR_DEFECTO;
+  const grupo = cambioGrupo?.filaId === fila ? cambioGrupo.grupo : grupoActual;
   if (id && !r) return null;
 
   const montoN = montoEscrito(unidad, monto);
@@ -59,6 +65,7 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
       fin: fin || null,
       nota: nota.trim() || null,
     };
+    if (grupo !== grupoActual && !(await ejecutar("finanzas.filas.actualizar", { id: fila, grupo }))) return;
     const res = await ejecutar<Recurrente>(
       r ? "finanzas.recurrentes.actualizar" : "finanzas.recurrentes.crear",
       r ? { id: r.id, ...comunes, activa } : { filaId: fila, frecuencia, inicio, ...comunes },
@@ -92,6 +99,7 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
         <Campo etiqueta="Fila del flujo" htmlFor="rc-fila">
           <Select id="rc-fila" valor={fila} onCambiar={setFila} disabled={!!r} opciones={p.filas.map((f) => ({ valor: f.id, etiqueta: f.etiqueta }))} />
         </Campo>
+        <SelectorGrupoEgreso id="rc-grupo" valor={grupo} onCambiar={(g) => setCambioGrupo({ filaId: fila, grupo: g })} ayuda="Dónde se agrupa esta fila en el flujo de caja; cambia para toda la fila." />
         <Campo etiqueta="Concepto" htmlFor="rc-concepto">
           <Input id="rc-concepto" value={concepto} onChange={(e) => setConcepto(e.target.value)} autoFocus={!r} />
         </Campo>
