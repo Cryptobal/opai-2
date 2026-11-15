@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  debeDibujarFichas,
   enlazarTitulos,
   extraerReferencias,
   filtrarEnlaces,
   hrefOpai,
+  textoRespaldoFichas,
 } from "./referencias";
 
 const cuenta = {
@@ -33,7 +35,10 @@ describe("referencias del agente (CAR-446)", () => {
       cuentas: [cuenta],
       otros: [{ grupo: "cotizaciones", items: [cotiz] }],
     });
-    expect([...mapa.values()]).toEqual([cuenta, cotiz]);
+    expect([...mapa.values()]).toEqual([
+      { ...cuenta, campos: ["76.123.456-7"] },
+      { ...cotiz, campos: ["Enviada"] },
+    ]);
   });
 
   it("filtra enlaces inventados y enlaza títulos con href de capacidades", () => {
@@ -47,5 +52,35 @@ describe("referencias del agente (CAR-446)", () => {
 
   it("conserva enlaces permitidos al filtrar", () => {
     expect(filtrarEnlaces(`[x](${cuenta.href})`, new Set([cuenta.href]))).toContain(cuenta.href);
+  });
+});
+
+describe("fichas del agente (CAR-523)", () => {
+  it("extrae estado y campos clave del dato estructurado", () => {
+    const mapa = extraerReferencias({
+      id: "33333333-3333-3333-3333-333333333333",
+      titulo: "Negocio Norte",
+      estado: "negociacion",
+      campos: ["Cliente Acme", "$12.000.000"],
+      href: "/negocios/33333333-3333-3333-3333-333333333333",
+      detalle: null,
+    });
+    expect([...mapa.values()][0]).toEqual({
+      id: "33333333-3333-3333-3333-333333333333",
+      titulo: "Negocio Norte",
+      detalle: null,
+      estado: "negociacion",
+      campos: ["Cliente Acme", "$12.000.000"],
+      href: "/negocios/33333333-3333-3333-3333-333333333333",
+    });
+  });
+
+  it("dibuja fichas con pedido de tarjetas o lista corta; quita viñetas de respaldo", () => {
+    const refs = [cuenta, cotiz];
+    expect(debeDibujarFichas("Dame 2 cuentas en tarjetas", [cuenta])).toBe(true);
+    expect(debeDibujarFichas("muéstrame cuentas", refs)).toBe(true);
+    expect(debeDibujarFichas("hola", [])).toBe(false);
+    const texto = `Aquí van dos cuentas:\n\n- [Acme SpA](${cuenta.href})\n- Otra cosa\n`;
+    expect(textoRespaldoFichas(texto, [cuenta])).toBe("Aquí van dos cuentas:\n\n- Otra cosa");
   });
 });

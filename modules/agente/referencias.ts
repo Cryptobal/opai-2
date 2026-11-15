@@ -5,9 +5,19 @@ export const referenciaSchema = z.object({
   id: z.string().min(1).max(120),
   titulo: z.string().min(1).max(200),
   detalle: z.string().max(200).nullable(),
+  estado: z.string().max(80).nullable().optional(),
+  campos: z.array(z.string().min(1).max(120)).max(3).optional(),
   href: z.string().min(1).max(300),
 });
 export type Referencia = z.infer<typeof referenciaSchema>;
+
+export {
+  debeDibujarFichas,
+  esHrefFicha,
+  listaCortaDeEntidades,
+  pideFichas,
+  textoRespaldoFichas,
+} from "./fichas";
 
 /** Solo rutas internas de OPAI (`/cuentas/…`); nada de `//`, `javascript:` ni hosts. */
 export function hrefOpai(href: string): string | null {
@@ -27,11 +37,33 @@ function tituloDe(o: Record<string, unknown>): string | null {
 }
 
 function detalleDe(o: Record<string, unknown>): string | null {
-  for (const k of ["detalle", "estado", "subtitulo"] as const) {
+  for (const k of ["detalle", "subtitulo"] as const) {
     const v = o[k];
     if (typeof v === "string" && v.trim()) return v.trim().slice(0, 200);
   }
   return null;
+}
+
+function estadoDe(o: Record<string, unknown>, detalle: string | null): string | null {
+  const v = o["estado"];
+  if (typeof v === "string" && v.trim()) return v.trim().slice(0, 80);
+  if (!detalle) return null;
+  const partes = detalle.split(/\s*·\s*/).map((p) => p.trim()).filter(Boolean);
+  return partes.length >= 2 ? partes[partes.length - 1]!.slice(0, 80) : null;
+}
+
+function camposDe(o: Record<string, unknown>, detalle: string | null, estado: string | null): string[] {
+  const raw = o["campos"];
+  if (Array.isArray(raw)) {
+    return raw
+      .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+      .map((x) => x.trim().slice(0, 120))
+      .slice(0, 3);
+  }
+  if (!detalle) return [];
+  const partes = detalle.split(/\s*·\s*/).map((p) => p.trim()).filter(Boolean);
+  if (estado && partes.length >= 2) return partes.slice(0, -1).slice(0, 3);
+  return [detalle.slice(0, 120)];
 }
 
 /** Recorre el dato de una capacidad y junta ítems con `id` + `href` interno (+ título si hay). */
@@ -47,9 +79,19 @@ export function extraerReferencias(dato: unknown, salida: Map<string, Referencia
   const id = typeof o["id"] === "string" ? o["id"].trim() : "";
   const titulo = tituloDe(o);
   if (href && id && titulo) {
+    const detalle = detalleDe(o);
+    const estado = estadoDe(o, detalle);
+    const campos = camposDe(o, detalle, estado);
     const clave = `${href}|${id}`;
     if (!salida.has(clave))
-      salida.set(clave, { id, titulo, detalle: detalleDe(o), href });
+      salida.set(clave, {
+        id,
+        titulo,
+        detalle,
+        ...(estado ? { estado } : {}),
+        ...(campos.length ? { campos } : {}),
+        href,
+      });
   }
   for (const v of Object.values(o)) extraerReferencias(v, salida);
   return salida;
