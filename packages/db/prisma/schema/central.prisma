@@ -1,0 +1,64 @@
+// Módulo Central de monitoreo (CAR-461, Brief 15b · PR 1, spec docs/2.0/modulos/central.md).
+// Schema propio `central`. Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7) y columnas
+// snake_case por @map. Las FK a core.tenants, core.instalaciones, core.personas y core.users van en
+// el SQL de la migración, sin relación Prisma cruzada (no se toca core.prisma).
+
+/// Alerta (spec §2): el caso que la central atiende, de una instalación. Estados de §6. En el PR 1
+/// solo nacen a mano (`origen = "manual"`); las reglas y señales llegan en el PR 3 (CAR-469).
+model CentralAlerta {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  instalacionId  String    @map("instalacion_id") @db.Uuid
+  /// Persona involucrada (guardia del turno), si la hay.
+  personaId      String?   @map("persona_id") @db.Uuid
+  titulo         String
+  descripcion    String    @default("")
+  /// "critica" | "alta" | "media" | "baja".
+  severidad      String
+  /// "manual" (PR 1); las reglas de vigilancia agregan los suyos (PR 3).
+  origen         String    @default("manual")
+  /// "nueva" | "en_contacto" | "escalada" | "en_atencion" | "resuelta" | "falsa_alarma" | "pospuesta".
+  estado         String    @default("nueva")
+  /// Estado al que vuelve una alerta pospuesta (R4a).
+  estadoPrevio   String?   @map("estado_previo")
+  pospuestaHasta DateTime? @map("pospuesta_hasta") @db.Timestamptz(6)
+  /// Nota de resolución o motivo de falsa alarma.
+  notaCierre     String?   @map("nota_cierre")
+  abiertaPorId   String?   @map("abierta_por_id") @db.Uuid
+  cerradaEn      DateTime? @map("cerrada_en") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  eventos CentralAlertaEvento[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, estado])
+  @@index([tenantId, instalacionId])
+  @@map("alertas")
+  @@schema("central")
+}
+
+/// Línea de tiempo de la alerta (R18), append-only: un trigger impide UPDATE y DELETE. Cada hecho
+/// además queda encadenado en `core.bitacora` en la misma transacción.
+model CentralAlertaEvento {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  alertaId  String   @map("alerta_id") @db.Uuid
+  /// "abierta" | "resuelta" | "falsa_alarma" | "reabierta" | "pospuesta" | "reactivada".
+  tipo      String
+  /// "persona" | "agente" | "sistema".
+  actorTipo String   @map("actor_tipo")
+  /// Usuario humano (o responsable de la key del agente).
+  actorId   String?  @map("actor_id") @db.Uuid
+  nota      String?
+  estadoDesde String? @map("estado_desde")
+  estadoHacia String  @map("estado_hacia")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  alerta CentralAlerta @relation(fields: [tenantId, alertaId], references: [tenantId, id], onDelete: Restrict)
+
+  @@index([tenantId, alertaId])
+  @@map("alerta_eventos")
+  @@schema("central")
+}

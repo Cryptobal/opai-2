@@ -47,6 +47,8 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   talla_polera: "talla de polera",
   talla_geologo: "talla de geólogo",
   talla_polar: "talla de polar",
+  prenda: "prenda del uniforme",
+  talla: "talla",
   estatura_cm: "estatura",
   peso_kg: "peso",
   notas: "notas de uniforme",

@@ -12,16 +12,13 @@ export const SIN_BUSCADOR: Readonly<Record<string, string>> = {
   agente: "No tiene entidades propias que buscar: sus conversaciones tienen su propio historial.",
   acceso:
     "Control de acceso de visitas: pendiente de definir qué se busca (visitas, credenciales).",
+  central: "CAR-472: las alertas se buscan cuando entren las pantallas de la central.",
   asistencia:
     "Marcas y turnos se ven por persona e instalación, que ya se buscan; pendiente su buscador.",
   desempeno: "Indicadores y scorecards: pendiente su buscador (cargos y personas ya se buscan).",
   finanzas: "CAR-402: facturas, notas y documentos de compra.",
-  nomina: "CAR-406: procesos de remuneraciones.",
-  pauta: "La pauta se abre por instalación, que ya se busca; pendiente su buscador.",
   portal_cliente: "Portal del cliente: no agrega entidades al ERP.",
   portal_trabajador: "Portal del trabajador: no agrega entidades al ERP.",
-  rondas: "CAR-405: rondas y puntos de control.",
-  tickets: "CAR-404: tickets y puestos.",
 };
 
 asegurarRegistro();
