@@ -3,7 +3,7 @@ import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros, SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { leerEntrada, todasLasPaginas } from "./paginas";
+import { leerEntrada, type Pagina, todasLasPaginas } from "./paginas";
 import type { Activo, FichaActivo, TipoInventario } from "./tipos";
 
 /** Activos filtrados en el servidor (tipo, estado y texto), página a página: la lista nunca se corta. */
@@ -14,7 +14,9 @@ export async function cargarActivos(p: Parametros) {
     ...(p["q"] ? { q: p["q"] } : {}),
     incluirBaja: p["estado"] === "de_baja",
   };
-  const { r, items } = await todasLasPaginas<Activo>("inventario.activos.list", filtros);
+  const { r, items } = await todasLasPaginas((desde) =>
+    ejecutarComoUsuario<Pagina<Activo>>("erp", "inventario.activos.list", { ...filtros, ...desde }),
+  );
   const tipos = await ejecutarComoUsuario<{ items: TipoInventario[] }>("erp", "inventario.tipos.list", {
     categoria: "activo",
     limite: 200,

@@ -3,14 +3,14 @@ import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros, SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { leerEntrada, todasLasPaginas } from "./paginas";
+import { leerEntrada, type Pagina, todasLasPaginas } from "./paginas";
 import type { MovimientoRopa, Prenda, TipoInventario } from "./tipos";
 
 const sinTildes = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
 /** Tipos de ropa con sus existencias, página a página (la lista nunca se corta). */
 export async function cargarRopa(p: Parametros) {
-  const { r, items } = await todasLasPaginas<Prenda>("inventario.ropa.list");
+  const { r, items } = await todasLasPaginas((desde) => ejecutarComoUsuario<Pagina<Prenda>>("erp", "inventario.ropa.list", desde));
   const q = sinTildes(p["q"] ?? "");
   return { state: estadoPantalla(r), items: items.filter((x) => !q || sinTildes(x.nombre).includes(q)) };
 }

@@ -3,7 +3,7 @@ import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros, SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { leerEntrada, todasLasPaginas } from "./paginas";
+import { leerEntrada, type Pagina, todasLasPaginas } from "./paginas";
 import type { TipoInventario } from "./tipos";
 
 const sinTildes = (t: string) =>
@@ -14,7 +14,9 @@ const sinTildes = (t: string) =>
 
 /** Catálogo de tipos: búsqueda, categoría y estado se filtran aquí. */
 export async function cargarTipos(p: Parametros) {
-  const { r, items: todos } = await todasLasPaginas<TipoInventario>("inventario.tipos.list", { incluirInactivos: true });
+  const { r, items: todos } = await todasLasPaginas((desde) =>
+    ejecutarComoUsuario<Pagina<TipoInventario>>("erp", "inventario.tipos.list", { incluirInactivos: true, ...desde }),
+  );
   const q = sinTildes(p["q"] ?? "");
   const items = todos.filter(
     (t) =>

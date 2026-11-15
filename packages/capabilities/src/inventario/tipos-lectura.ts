@@ -1,4 +1,4 @@
-import type { TenantDb } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 import { type CategoriaTipo, CATEGORIAS_TIPO } from "@opai/domain";
 import { z } from "zod";
 
@@ -16,7 +16,7 @@ type FiltroTipos = {
 
 /** Una página de tipos ordenados por nombre; `siguiente` es el cursor de la próxima o null. */
 export async function paginaTipos(
-  db: TenantDb,
+  db: TenantTx,
   { categoria, incluirInactivos, cursor, limite }: FiltroTipos,
 ) {
   const filas = await db.inventarioTipo.findMany({
