@@ -1250,6 +1250,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.turnos_extra.monto_fijar`
 - `pauta.turnos_extra.rechazar`
 - `pauta.turnos_extra.registrar`
+- `pauta.visitas.cerrar`
+- `pauta.visitas.iniciar`
+- `pauta.visitas.listar`
+- `pauta.visitas.obtener`
 - `platform.ajustes.set`
 - `platform.eventos.list`
 - `platform.precios.set`
