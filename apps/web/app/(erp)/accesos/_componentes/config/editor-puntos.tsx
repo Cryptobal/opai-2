@@ -48,32 +48,7 @@ export function EditorPuntos({
       {error ? <Alerta tono="danger" titulo={error} className="mx-4 mt-3" /> : null}
       <ul className="flex flex-col">
         {ps.map((p, i) => (
-          <li
-            key={p.id ?? `n${i}`}
-            className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2"
-          >
-            <Input
-              aria-label={`Nombre del punto ${i + 1}`}
-              className="min-w-0 flex-1 basis-full sm:basis-0"
-              maxLength={60}
-              value={p.nombre}
-              onChange={(e) => cambiar(i, { nombre: e.target.value })}
-            />
-            <div className="w-48">
-              <Select
-                aria-label={`Tipo de ${p.nombre}`}
-                valor={p.tipo}
-                opciones={TIPOS}
-                onCambiar={(tipo) => cambiar(i, { tipo })}
-              />
-            </div>
-            <Switch
-              soloControl
-              etiqueta={`${p.nombre} activo`}
-              activo={p.activo}
-              onCambiar={(activo) => cambiar(i, { activo })}
-            />
-          </li>
+          <FilaPunto key={p.id ?? `n${i}`} n={i + 1} p={p} cambiar={(x) => cambiar(i, x)} />
         ))}
       </ul>
       <div className="flex flex-wrap gap-2 p-4">
@@ -100,5 +75,41 @@ export function EditorPuntos({
         </Button>
       </div>
     </SeccionTarjeta>
+  );
+}
+
+function FilaPunto({
+  n,
+  p,
+  cambiar,
+}: {
+  n: number;
+  p: Punto;
+  cambiar: (x: Partial<Punto>) => void;
+}) {
+  return (
+    <li className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2">
+      <Input
+        aria-label={`Nombre del punto ${n}`}
+        className="min-w-0 flex-1 basis-full sm:basis-0"
+        maxLength={60}
+        value={p.nombre}
+        onChange={(e) => cambiar({ nombre: e.target.value })}
+      />
+      <div className="w-48">
+        <Select
+          aria-label={`Tipo de ${p.nombre}`}
+          valor={p.tipo}
+          opciones={TIPOS}
+          onCambiar={(tipo) => cambiar({ tipo })}
+        />
+      </div>
+      <Switch
+        soloControl
+        etiqueta={`${p.nombre} activo`}
+        activo={p.activo}
+        onCambiar={(activo) => cambiar({ activo })}
+      />
+    </li>
   );
 }
