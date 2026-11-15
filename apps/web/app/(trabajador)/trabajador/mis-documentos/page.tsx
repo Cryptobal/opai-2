@@ -22,23 +22,17 @@ export default function Pagina() {
       volverSoloTelefono
       cargando="lista"
       cargar={async () => {
-        const r = await ejecutarComoUsuario<{
-          hoy: string;
-          items: MiDocumento[];
-          siguiente: string | null;
-        }>("trabajador", "portal_trabajador.mis_documentos.listar", { limite: 100 });
+        const r = await ejecutarComoUsuario<{ hoy: string; items: MiDocumento[]; siguiente: string | null }>(
+          "trabajador",
+          "portal_trabajador.mis_documentos.listar",
+          { limite: 100 },
+        );
         return { state: estadoTrabajador(r), datos: r.ok ? r.data : null };
       }}
     >
       {({ state, datos }) => (
         <EstadoLista state={state}>
-          {datos ? (
-            <ListaDocumentos
-              items={datos.items}
-              hoy={datos.hoy}
-              hayMas={datos.siguiente !== null}
-            />
-          ) : null}
+          {datos ? <ListaDocumentos items={datos.items} hoy={datos.hoy} hayMas={datos.siguiente !== null} /> : null}
         </EstadoLista>
       )}
     </PaginaPortal>

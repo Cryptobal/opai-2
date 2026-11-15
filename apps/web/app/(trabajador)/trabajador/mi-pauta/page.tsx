@@ -24,15 +24,11 @@ export default function Pagina({ searchParams }: { searchParams: SearchParams })
       cargando="lista"
       cargar={async () => {
         const { desde } = await leerParametros(searchParams);
-        const r = await ejecutarComoUsuario<MisTurnos>(
-          "trabajador",
-          "portal_trabajador.mis_turnos.listar",
-          {
-            dias: 28,
-            limite: 200,
-            ...(fechaValida(desde) ? { desde } : {}),
-          },
-        );
+        const r = await ejecutarComoUsuario<MisTurnos>("trabajador", "portal_trabajador.mis_turnos.listar", {
+          dias: 28,
+          limite: 200,
+          ...(fechaValida(desde) ? { desde } : {}),
+        });
         return { state: estadoTrabajador(r), datos: r.ok ? r.data : null };
       }}
     >
