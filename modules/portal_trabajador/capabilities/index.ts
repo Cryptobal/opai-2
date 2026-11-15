@@ -6,8 +6,6 @@ import { misDatosActualizar, misDatosObtener } from "./mis-datos";
 import { misDatosExportar } from "./mis-datos-exportar";
 import { misDocumentosDescargar, misDocumentosListar } from "./mis-documentos";
 import { misTurnosListar } from "./mis-turnos";
-import { solicitudesCancelar, solicitudesCrear } from "./solicitudes";
-import { solicitudesListar } from "./solicitudes-listar";
 import { privacidadObtener } from "./privacidad";
 import { preferenciasActualizar, preferenciasObtener } from "./preferencias";
 
@@ -19,9 +17,6 @@ export const capacidades: readonly Capacidad[] = [
   misTurnosListar,
   misDocumentosListar,
   misDocumentosDescargar,
-  solicitudesListar,
-  solicitudesCrear,
-  solicitudesCancelar,
   preferenciasObtener,
   preferenciasActualizar,
   privacidadObtener,
