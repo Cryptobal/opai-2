@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { esTipoSoloEnLinea } from "@opai/domain";
+import { esTipoSoloEnLinea, TIPOS_REGISTRO } from "@opai/domain";
+
+import { documentoSchema } from "../../acceso/comun";
 
 /**
  * Lista blanca de hechos que un equipo de terreno puede encolar sin conexión (CAR-78 · B3). Un tipo que no
@@ -57,15 +59,8 @@ export const TIPOS_HECHO_TERRENO = {
    */
   "acceso.entrada": z
     .object({
-      tipoRegistro: z.enum(["visita", "contratista", "proveedor", "vehiculo", "despacho"]),
-      documento: z
-        .object({
-          tipo: z.enum(["run", "pasaporte", "otro"]),
-          numero: z.string().min(1).max(40),
-          pais: z.string().min(2).max(3).optional(),
-        })
-        .strict()
-        .optional(),
+      tipoRegistro: z.enum(TIPOS_REGISTRO),
+      documento: documentoSchema.optional(),
       /** Código del QR de invitación de un prerregistro (CAR-478): reemplaza al documento, que ya está registrado. */
       invitacion: z.string().min(1).max(120).optional(),
       nombre: z.string().trim().min(2).max(120),
