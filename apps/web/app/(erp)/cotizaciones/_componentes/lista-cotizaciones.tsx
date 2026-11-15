@@ -4,24 +4,26 @@ import { Badge } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
-import { conBusqueda } from "@/lib/parametros";
+import { fecha } from "@/lib/fechas";
 import { semaforoEtiqueta } from "@/lib/cpq-presentacion";
 
 import type { DatosCotizaciones } from "./datos";
+import { conFiltrosCotizaciones } from "./filtros-cotizaciones";
+import { FiltrosFechaEnvio } from "./filtros-fecha-envio";
 import { estadoLista, margenLista, pideRecalcular, ventaLista } from "./lista-cotizaciones-helpers";
+import { opcionesEstadoCpq } from "./opciones-filtro-cpq";
 
 /** Columna izquierda del patrón lista y ficha (CAR-141). */
 export function ListaCotizaciones({
   datos: d,
   seleccionada,
-  q,
   base = "/cotizaciones",
 }: {
   datos: DatosCotizaciones;
   seleccionada?: string;
-  q?: string;
   base?: string;
 }) {
+  const p = d.parametros;
   const nueva = d.crear ? (
     <EnlaceBotonHoja
       href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`}
@@ -36,14 +38,23 @@ export function ListaCotizaciones({
       state={d.state}
       titulo="Cotizaciones"
       accion={nueva}
+      vistas={{ lista: "cotizaciones", ruta: base }}
       buscar="Buscar cotización"
-      filtros={[
-        {
-          param: "ver",
-          etiqueta: "Mostrar",
-          opciones: [{ valor: "archivadas", etiqueta: "Archivadas" }],
-        },
-      ]}
+      filtros={
+        d.archivadas
+          ? []
+          : [
+              { param: "estado", etiqueta: "Estado", opciones: opcionesEstadoCpq },
+              { param: "cuenta", etiqueta: "Cuenta", opciones: d.cuentas },
+              { param: "responsable", etiqueta: "Responsable", opciones: d.responsables },
+              {
+                param: "ver",
+                etiqueta: "Mostrar",
+                opciones: [{ valor: "archivadas", etiqueta: "Archivadas" }],
+              },
+            ]
+      }
+      debajoFiltros={d.archivadas ? undefined : <FiltrosFechaEnvio />}
       meta={{
         izquierda: `${d.items.length} ${d.archivadas ? "archivadas" : "cotizaciones"}`,
         derecha: "Más recientes",
@@ -64,10 +75,7 @@ export function ListaCotizaciones({
       pie={
         d.siguiente ? (
           <LinkNext
-            href={conBusqueda(
-              `${base}?cursor=${d.siguiente}${d.archivadas ? "&ver=archivadas" : ""}`,
-              q,
-            )}
+            href={conFiltrosCotizaciones(`${base}`, { ...p, cursor: d.siguiente ?? undefined })}
             className="t-label text-accent"
           >
             Siguiente página
@@ -79,7 +87,7 @@ export function ListaCotizaciones({
         const margen = margenLista(c, d.costos);
         return {
           id: c.id,
-          href: d.archivadas ? `${base}/${c.id}?ver=archivadas` : conBusqueda(`${base}/${c.id}`, q),
+          href: conFiltrosCotizaciones(`${base}/${c.id}`, p),
           titulo: (
             <>
               <span className="t-mono text-[13px]">{c.codigo}</span>
@@ -96,6 +104,7 @@ export function ListaCotizaciones({
             <span className="t-caption">
               v{c.version?.numero ?? "—"} · {ventaLista(c)}
               {margen ? ` · Margen ${margen}` : null}
+              {c.version?.enviadaEn ? ` · Enviada ${fecha(c.version.enviadaEn)}` : null}
               {pideRecalcular(c, d.costos) ? " · Recalcular" : null}
             </span>
           ),

@@ -26,6 +26,17 @@ async function conDosCotizaciones(permisos?: readonly string[]) {
 }
 
 describe("cpq.cotizaciones.list / get", () => {
+  it("filtra por cuenta del negocio", async () => {
+    const { h, a } = await conDosCotizaciones();
+    const neg = await h.ctx.db.negocio.findFirst({ where: { id: NEGOCIO_1 }, select: { cuentaId: true } });
+    if (!neg?.cuentaId) throw new Error("fixture sin cuenta");
+    const lista = await executeCapability(h.ctx, "cpq.cotizaciones.list", { cuentaId: neg.cuentaId });
+    expect(lista).toMatchObject({
+      ok: true,
+      data: { items: expect.arrayContaining([expect.objectContaining({ id: a })]) },
+    });
+  });
+
   it("lista con la última versión y filtra por negocio y por estado", async () => {
     const { h, a } = await conDosCotizaciones();
     const todas = await executeCapability(h.ctx, "cpq.cotizaciones.list", {});

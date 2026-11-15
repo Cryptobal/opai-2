@@ -2,14 +2,9 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
-import {
-  cotizacionSchema,
-  estadoSchema,
-  listaSchema,
-  seccionSchema,
-  uuidSchema,
-  versionSchema,
-} from "./esquemas";
+import { cotizacionSchema, seccionSchema, uuidSchema, versionSchema } from "./esquemas";
+import { acotarNegocioLista } from "./lista-filtro-negocio";
+import { inputListaCotizacionesSchema, whereListaCotizaciones } from "./lista-filtros";
 import { PERMISO_COSTOS, PERMISO_READ } from "./permisos";
 import { estadosDeLista } from "../persistencia/lista-estado";
 import { margenesConfigurados } from "../persistencia/supuestos";
@@ -39,27 +34,16 @@ export const cotizacionesList = defineCapability({
   auditarLectura: (s) => s.items.flatMap((c) => [c.id, c.negocioId]),
   id: "cpq.cotizaciones.list",
   descripcion:
-    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio y por estado; las archivadas quedan fuera salvo que se pidan (todas o solo ellas).",
+    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio, cuenta, responsable del negocio, estado, rango de envío y texto; las archivadas quedan fuera salvo que se pidan (todas o solo ellas).",
   permiso: PERMISO_READ,
-  input: listaSchema.extend({
-    negocioId: uuidSchema.optional(),
-    estado: estadoSchema.optional(),
-    incluirArchivadas: z.boolean().default(false),
-    soloArchivadas: z.boolean().default(false).describe("Solo las archivadas (filtro «Archivadas»)."),
-  }),
+  input: inputListaCotizacionesSchema,
   output: z.object({ items: z.array(itemSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const filtro: Record<string, unknown> = {};
-    if (input.negocioId) filtro["negocioId"] = input.negocioId;
-    // Filtro relacional: no carga todas las versiones del tenant solo para filtrar la página.
-    if (input.estado) filtro["versiones"] = { some: { estado: input.estado } };
-    else if (!input.incluirArchivadas && !input.soloArchivadas)
-      filtro["versiones"] = { none: { estado: "archivada" } };
-    // Archivar (CPQ v4) es de la cotización: por defecto fuera de la lista; «Archivadas» muestra solo ellas.
-    if (input.soloArchivadas) filtro["archivadaEn"] = { not: null };
-    else if (!input.incluirArchivadas) filtro["archivadaEn"] = null;
+    const filtro = whereListaCotizaciones(input);
+    const vacio = await acotarNegocioLista(ctx, input, filtro);
+    if (vacio) return vacio;
     // Sin `skip: 1` (CAR-400): la fila del cursor viene si aún cumple el filtro y se descarta abajo.
     const crudas = await ctx.db.cpqCotizacion.findMany({
       where: filtro,

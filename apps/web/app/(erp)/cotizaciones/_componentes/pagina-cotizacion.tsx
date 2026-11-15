@@ -3,9 +3,10 @@ import { type ReactNode, Suspense } from "react";
 import { Loading, SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { conBusqueda, leerParametros, type SearchParams } from "@/lib/parametros";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 
 import { cargarCotizaciones, cargarFichaCotizacion } from "./datos";
+import { conFiltrosCotizaciones } from "./filtros-cotizaciones";
 import { DetalleCotizacion } from "./detalle-cotizacion";
 import { ListaCotizaciones } from "./lista-cotizaciones";
 
@@ -26,26 +27,22 @@ export function PaginaCotizacion({ params, searchParams, children }: Props) {
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      opciones={(d) => ({ volver: { href: conBusqueda("/cotizaciones", d.p.q), etiqueta: "Cotizaciones" } })}
+      opciones={(d) => ({ volver: { href: conFiltrosCotizaciones("/cotizaciones", d.p), etiqueta: "Cotizaciones" } })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
         const datos = cargarFichaCotizacion(id);
         datos.catch(() => undefined);
-        const lista = await cargarCotizaciones(p["cursor"], undefined, p["ver"] === "archivadas");
+        const lista = await cargarCotizaciones(p);
         return { id, p, datos, lista };
       }}
     >
-      {({ id, p, datos, lista }) => (
+      {({ id, datos, lista }) => (
         <SplitScreen
           telefono="detalle"
           unPanelHastaLg
           etiquetaLista="Lista de cotizaciones"
           lista={
-            <ListaCotizaciones
-              datos={lista}
-              seleccionada={id}
-              {...(p.q !== undefined && p.q !== "" ? { q: p.q } : {})}
-            />
+            <ListaCotizaciones datos={lista} seleccionada={id} />
           }
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>

@@ -32,7 +32,12 @@ const fila = {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.identidad.mockResolvedValue(identidadCpq());
-  mocks.ejecutar.mockResolvedValue({ ok: true, data: { items: [fila], siguiente: cursor } });
+  mocks.ejecutar.mockImplementation(async (_p: string, cap: string) => {
+    if (cap === "cpq.cotizaciones.list") return { ok: true, data: { items: [fila], siguiente: cursor } };
+    if (cap === "core.cuentas.list") return { ok: true, data: { items: [] } };
+    if (cap === "comercial.negocios.responsables") return { ok: true, data: [] };
+    return { ok: false, error: { code: "INTERNAL" } };
+  });
 });
 
 describe("CPQ: datos de pantalla autorizados en servidor", () => {
@@ -50,18 +55,18 @@ describe("CPQ: datos de pantalla autorizados en servidor", () => {
   });
   it("viewer lee sin creación y sin serializar margen ni datos que la lista no usa", async () => {
     mocks.identidad.mockResolvedValue(identidadCpq("viewer"));
-    const r = await cargarCotizaciones(cursor, negocioId);
+    const r = await cargarCotizaciones({ cursor }, negocioId);
     expect(r).toMatchObject({
       state: "ready",
       crear: false,
       siguiente: cursor,
       items: [{ negocioTitulo: fila.negocioTitulo }],
     });
-    expect(mocks.ejecutar).toHaveBeenCalledWith("erp", "cpq.cotizaciones.list", {
-      limite: 20,
-      cursor,
-      negocioId,
-    });
+    expect(mocks.ejecutar).toHaveBeenCalledWith(
+      "erp",
+      "cpq.cotizaciones.list",
+      expect.objectContaining({ limite: 20, cursor, negocioId }),
+    );
     expect(JSON.stringify(r)).not.toMatch(/margen|objetivoPct|creadoPorId/);
   });
   it("rechazo y fallo se muestran como tales, nunca como vacío listo", async () => {

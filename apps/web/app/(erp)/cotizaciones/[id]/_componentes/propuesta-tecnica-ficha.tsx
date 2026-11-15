@@ -1,6 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+
+import { ScrollText } from "lucide-react";
 
 import { Alerta, Button } from "@opai/ds";
 
@@ -8,16 +11,20 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { DialogoPdfPropuesta } from "../propuesta-tecnica/_componentes/dialogo-pdf-propuesta";
 import { PropuestaTecnicaInline, type PropuestaInline } from "./propuesta-tecnica-inline";
+import { TarjetaAccionDocumento } from "./tarjeta-accion-documento";
 import { urlDePdf } from "./use-vista-previa-pdf";
 
 export function PropuestaTecnicaFicha({
   cotizacionId,
   codigo,
   gestionar,
+  accionCotizacion,
 }: {
   cotizacionId: string;
   codigo: string;
   gestionar: boolean;
+  /** Tarjeta de la cotización (PDF) en el mismo renglón (CAR-544). */
+  accionCotizacion?: ReactNode;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [propuesta, setPropuesta] = useState<PropuestaInline | null>(null);
@@ -27,7 +34,6 @@ export function PropuestaTecnicaFicha({
   const [pdf, setPdf] = useState<{ url: string; borrador: boolean } | null>(null);
   const [fallo, setFallo] = useState(false);
 
-  /** Vista previa en un panel sobre la misma cotización: sin salir de la pantalla (CAR-215). */
   async function vistaPrevia() {
     if (!propuestaId) return;
     setFallo(false);
@@ -45,7 +51,6 @@ export function PropuestaTecnicaFicha({
     });
   }, [cotizacionId, ejecutar, version]);
 
-  /** «Armar propuesta técnica»: crea el armador si falta y lo muestra aquí mismo, sin salir (CAR-229). */
   async function armar() {
     if (abierta) return setAbierta(false);
     if (!propuesta) {
@@ -56,20 +61,35 @@ export function PropuestaTecnicaFicha({
     setAbierta(true);
   }
 
+  const tituloTarjeta = abierta
+    ? "Ocultar propuesta técnica"
+    : gestionar
+      ? "Armar propuesta técnica"
+      : "Ver propuesta técnica";
+  const tarjetaPropuesta =
+    gestionar || propuesta ? (
+      <TarjetaAccionDocumento
+        icono={ScrollText}
+        titulo={tituloTarjeta}
+        descripcion={
+          propuesta
+            ? "Edita la memoria del servicio y genera su PDF para adjuntar al envío."
+            : "Crea la memoria descriptiva del servicio para el cliente."
+        }
+        onClick={() => void armar()}
+        cargando={pendiente && !propuesta}
+        activa={abierta}
+      />
+    ) : null;
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {gestionar || propuesta ? (
-          <Button type="button" variant="secondary" cargando={pendiente && !propuesta} onClick={() => void armar()}>
-            {abierta ? "Ocultar propuesta técnica" : gestionar ? "Armar propuesta técnica" : "Ver propuesta técnica"}
-          </Button>
-        ) : null}
-        {propuestaId ? (
-          <Button type="button" variant="secondary" cargando={pendiente} onClick={() => void vistaPrevia()}>
-            Vista previa de la propuesta
-          </Button>
-        ) : null}
-      </div>
+      {accionCotizacion || tarjetaPropuesta ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {accionCotizacion}
+          {tarjetaPropuesta}
+        </div>
+      ) : null}
       {abierta && propuesta ? (
         <PropuestaTecnicaInline
           key={version}
@@ -80,18 +100,18 @@ export function PropuestaTecnicaFicha({
           onCambio={() => setVersion((n) => n + 1)}
         />
       ) : null}
+      {propuestaId ? (
+        <Button type="button" variant="secondary" cargando={pendiente} onClick={() => void vistaPrevia()}>
+          Vista previa del PDF de la propuesta
+        </Button>
+      ) : null}
       {fallo && error ? (
         <Alerta tono="danger" titulo="No se pudo generar la vista previa">
           {error}
         </Alerta>
       ) : null}
       {pdf ? (
-        <DialogoPdfPropuesta
-          codigo={codigo}
-          pdfUrl={pdf.url}
-          borrador={pdf.borrador}
-          onCerrar={() => setPdf(null)}
-        />
+        <DialogoPdfPropuesta codigo={codigo} pdfUrl={pdf.url} borrador={pdf.borrador} onCerrar={() => setPdf(null)} />
       ) : null}
     </div>
   );
