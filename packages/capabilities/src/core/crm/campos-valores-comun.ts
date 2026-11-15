@@ -3,8 +3,6 @@
 import { z } from "zod";
 
 import {
-  FORMATOS_NUMERO_CAMPO,
-  TIPOS_CAMPO_PERSONALIZADO,
   type EntidadCampoPersonalizado,
   type FormatoNumeroCampo,
   type TipoCampoPersonalizado,
@@ -12,7 +10,12 @@ import {
 
 import type { Contexto } from "../../types";
 import { sinDuplicado } from "../maestros/comun";
-import { opcionSchema, opcionesDe, valorSchema } from "./campos-definicion";
+import {
+  campoPersonalizadoSchema,
+  opcionSchema,
+  opcionesDe,
+  valorSchema,
+} from "./campos-definicion";
 import { validarEntrada, type CampoActivo } from "./campos-valores-validar";
 import { usuariosErp } from "./usuarios-erp";
 
@@ -26,18 +29,23 @@ const COLUMNA = {
   persona: "personaId",
 } as const satisfies Record<EntidadCampoPersonalizado, string>;
 
-const valorCampoSchema = z.object({
-  campoId: z.string(),
-  clave: z.string(),
-  etiqueta: z.string(),
-  descripcion: z.string().nullable(),
-  tipo: z.enum(TIPOS_CAMPO_PERSONALIZADO),
-  formato: z.enum(FORMATOS_NUMERO_CAMPO).nullable(),
-  opciones: z.array(opcionSchema).describe("En campos de usuario: los usuarios del ERP (valor = id)."),
-  obligatorio: z.boolean(),
-  valorDefecto: valorSchema,
-  valor: valorSchema,
-});
+const valorCampoSchema = campoPersonalizadoSchema
+  .pick({
+    clave: true,
+    etiqueta: true,
+    descripcion: true,
+    tipo: true,
+    formato: true,
+    obligatorio: true,
+    valorDefecto: true,
+  })
+  .extend({
+    campoId: z.string(),
+    opciones: z
+      .array(opcionSchema)
+      .describe("En campos de usuario: los usuarios del ERP (valor = id)."),
+    valor: valorSchema,
+  });
 export const valoresSalida = z.object({ campos: z.array(valorCampoSchema) });
 export const valoresEntrada = z
   .record(z.string().max(40), valorSchema)
@@ -55,7 +63,11 @@ async function camposActivos(ctx: Contexto, entidad: EntidadCampoPersonalizado) 
   });
 }
 
-async function armar(ctx: Contexto, campos: CampoActivo[], valores: ReadonlyMap<string, Valor>): Promise<Salida> {
+async function armar(
+  ctx: Contexto,
+  campos: CampoActivo[],
+  valores: ReadonlyMap<string, Valor>,
+): Promise<Salida> {
   const usuarios = campos.some((c) => c.tipo === "usuario")
     ? (await usuariosErp(ctx)).map((u) => ({ valor: u.id, etiqueta: u.nombre }))
     : [];
