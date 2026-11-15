@@ -3,9 +3,9 @@ import { Empty, Table, Td, Th, Tr } from "@opai/ds";
 import { cantidad, nombreRecurso, usd } from "../../../_componentes/formato";
 import { PaginaTenant } from "../pagina-tenant";
 
-export const metadata = { title: "Consumos de la empresa" };
+export const metadata = { title: "Consumo de esta empresa" };
 
-/** Plataforma → empresa · Consumos del mes por recurso, con su costo. */
+/** Plataforma → empresa · Consumo de esta empresa: del mes por recurso, con su costo. */
 export default function Pagina({ params }: { params: Promise<{ id: string }> }) {
   return (
     <PaginaTenant params={params} tab="consumos">

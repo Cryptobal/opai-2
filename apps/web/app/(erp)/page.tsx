@@ -29,7 +29,6 @@ export default function Inicio({ searchParams }: { searchParams: SearchParams })
           nombre={d.nombre}
           empresa={d.empresa}
           actor={d.actor}
-          hilo={d.marco === "hilo"}
           nuevo={d.marco === "nuevo"}
         />
       )}

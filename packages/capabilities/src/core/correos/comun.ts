@@ -14,9 +14,9 @@ export const PERMISO_HISTORIAL = PERMISOS_CORE.actividadesRead;
 /** Ver la bandeja «sin asignar» y asociar a mano (por defecto owner y admin; DECISIÓN CARLOS). */
 export const PERMISO_SIN_ASIGNAR = PERMISOS_CORE.correosSinAsignar;
 
-export const SENTIDOS = ["enviado", "recibido"] as const;
-export const ORIGENES = ["cotizacion", "factura", "seguimiento", "buzon"] as const;
-export const ASOCIACIONES = ["origen", "contacto", "dominio", "manual"] as const;
+const SENTIDOS = ["enviado", "recibido"] as const;
+const ORIGENES = ["cotizacion", "factura", "seguimiento", "buzon"] as const;
+const ASOCIACIONES = ["origen", "contacto", "dominio", "manual"] as const;
 export const LARGO_TEXTO = 20000;
 
 export type OrigenCorreo = (typeof ORIGENES)[number];
@@ -77,7 +77,7 @@ export const vistaCorreo = (f: Fila): CorreoClienteVista => ({
 export const AMBITO_FINANZAS = "finanzas";
 
 /** ¿Puede ver documentos de Finanzas (folio, monto, vencimiento)? Como en la ficha de Finanzas. */
-export const veFinanzas = (ctx: Contexto) =>
+const veFinanzas = (ctx: Contexto) =>
   enScope(ctx, "finanzas") &&
   ctx.modulosActivos.includes("finanzas") &&
   ctx.autorizar("finanzas:read");

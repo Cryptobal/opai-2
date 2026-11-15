@@ -10,7 +10,7 @@ import { crearTarea, tituloTarea } from "./comun";
 const dia = (d: Date) => d.toISOString().slice(0, 10);
 
 /** ¿Hay que abrir la lista? Ingreso: vínculo vigente y sin continuidad. Salida: sin vínculos vigentes. */
-export async function debeAbrir(ctx: Contexto, vinculoId: string, tipo: TipoProcesoPersona) {
+async function debeAbrir(ctx: Contexto, vinculoId: string, tipo: TipoProcesoPersona) {
   const v = await ctx.db.vinculoLaboral.findUnique({ where: { id: vinculoId } });
   if (!v) return null;
   if (tipo === "salida") {

@@ -31,15 +31,27 @@ function EstadoTrabajo({ t }: { t: Trabajo }) {
   return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
 }
 
-type Props = { state: EstadoPantalla; items: Trabajo[]; filtros?: ReactNode; conEmpresa?: boolean };
+type Props = {
+  state: EstadoPantalla;
+  items: Trabajo[];
+  filtros?: ReactNode;
+  conEmpresa?: boolean;
+  titulo?: string;
+};
 
 /** Trabajos (51): tipo, empresa, estado e intentos, última actividad; la fila abre el detalle. */
-export function ListaTrabajos({ state, items, filtros, conEmpresa = true }: Props) {
+export function ListaTrabajos({
+  state,
+  items,
+  filtros,
+  conEmpresa = true,
+  titulo = "Trabajos",
+}: Props) {
   return (
     <>
       <ListScreen<Trabajo>
         state={state}
-        titulo="Trabajos"
+        titulo={titulo}
         soloTelefono
         {...(filtros ? { filtros } : {})}
         items={items}

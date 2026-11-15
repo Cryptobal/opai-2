@@ -8,7 +8,7 @@ export const BLOQUES_COTIZACION = [
   "pie",
 ] as const;
 
-export type BloqueCotizacion = (typeof BLOQUES_COTIZACION)[number];
+type BloqueCotizacion = (typeof BLOQUES_COTIZACION)[number];
 
 export type BloqueConfig = { id: BloqueCotizacion; activo: boolean };
 
@@ -28,7 +28,7 @@ export const BLOQUES_POR_BASE: Record<BasePlantilla, BloqueConfig[]> = {
   compacta: def(["encabezado", "resumen_comercial", "detalle_secciones", "pie"], ["datos_empresa", "condiciones"]),
 };
 
-export function normalizarBloques(base: BasePlantilla, entrada?: BloqueConfig[]): BloqueConfig[] {
+function normalizarBloques(base: BasePlantilla, entrada?: BloqueConfig[]): BloqueConfig[] {
   const plantilla = BLOQUES_POR_BASE[base];
   if (!entrada?.length) return plantilla;
   const map = new Map(entrada.map((b) => [b.id, b.activo]));

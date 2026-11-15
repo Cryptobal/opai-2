@@ -84,15 +84,15 @@ Incluye 8 alias marcados `@deprecated` «conservados para pruebas» (`sii-valida
 
 | Caso | Líneas | Qué hacer |
 |---|---|---|
-| `core/crm/contactos-cuentas.ts` ≈ `contactos-desvincular.ts` | 58 | Una función compartida en el mismo módulo |
-| Componentes de «generar documento» de Personas ≈ los genéricos de `_components/documentos/generar-entidad/` | 56 | Personas usa los genéricos |
-| Tipos copiados entre `apps/web/lib` y módulos (`instrumentos-valores`, `aprobaciones-cpq`, `tipos-maestros`, pauta) | 79 | Importar el tipo desde su dueño |
+| `core/crm/contactos-cuentas.ts` ≈ `contactos-desvincular.ts` | 58 | Hecho en CAR-438 (#837): se borró la copia muerta |
+| Componentes de «generar documento» de Personas ≈ los genéricos de `_components/documentos/generar-entidad/` | 56 | Hecho (CAR-439): Personas usa los genéricos |
+| Tipos copiados entre `apps/web/lib` y módulos (`instrumentos-valores`, `aprobaciones-cpq`, `tipos-maestros`, pauta) | 79 | Pauta hecho (CAR-439): importa de `@opai/domain`; quedan instrumentos/aprobaciones/maestros |
 | Rutas `api/terreno/*` y layouts de portales con el mismo encabezado | 66 | Un helper por familia |
 | `iconos.ts`: un bloque repetido dentro del mismo archivo | 30 | Borrar la copia |
-| Logo en PDF: `modules/cpq/persistencia/pdf/logo.ts` ≈ `capabilities/src/finanzas/ventas-pdf-logo.ts` | 28 | Una sola en el paquete compartido |
-| `lista-maestro.tsx` ≈ `lista-maestro-split.tsx` | 26 | Extraer lo común |
+| Logo en PDF: `modules/cpq/persistencia/pdf/logo.ts` ≈ `capabilities/src/finanzas/ventas-pdf-logo.ts` | 28 | Hecho (CAR-439): CPQ reusa `logoDeMarca` |
+| `lista-maestro.tsx` ≈ `lista-maestro-split.tsx` | 26 | Hecho (CAR-439): cuerpo compartido en `cuerpo-lista-maestro` |
 | Esquemas Zod repetidos entre Tickets, Finanzas y `core/maestros/comun.ts` | 34 | Reusar los de `comun.ts` |
-| `ventas-cesion-ceder.ts` ≈ `ventas-cesion-simular.ts` | 16 | Simular reutiliza la preparación de ceder |
+| `ventas-cesion-ceder.ts` ≈ `ventas-cesion-simular.ts` | 16 | Hecho (CAR-439): ambos usan `prepararCesion` |
 | Semillas de e2e (`packages/auth/scripts`, `packages/db/scripts`) | ~300 | Un helper de preparación |
 
 El resto son bloques de 6 a 14 líneas, la mayoría formularios de Configuración con la misma estructura; se revisan en la pasada semanal, sin forzar abstracciones (regla 3: nada «por si acaso»).
