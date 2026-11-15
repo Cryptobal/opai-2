@@ -38,6 +38,22 @@ const APROBACION_A = "0192f3a0-0000-7000-8000-0000000000f3";
 const APROBACION_R = "0192f3a0-0000-7000-8000-0000000000f4";
 const PROPUESTA = "0192f3a0-0000-7000-8000-0000000000f5";
 const CARGO = "0192f3a0-0000-7000-8000-0000000000f6";
+const INV_REVOCAR = "0192f3a0-0000-7000-8000-0000000000f7";
+const INV_REENVIAR = "0192f3a0-0000-7000-8000-0000000000f8";
+const invitacion = (id: string, email: string) => ({
+  id,
+  tenantId: TENANT_DE_PRUEBA,
+  email,
+  rol: "admin",
+  portales: ["erp"],
+  portalInicio: null,
+  tokenHash: id,
+  invitedByUserId: USUARIO_DE_PRUEBA.id,
+  acceptedAt: null,
+  revocadaEn: null,
+  expiresAt: new Date(Date.now() + 86_400_000),
+  createdAt: new Date(),
+});
 const manana = () => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
 
 function semilla() {
@@ -68,6 +84,10 @@ function semilla() {
   });
   return {
     ...s,
+    invitation: [
+      invitacion(INV_REVOCAR, "revocar@gard.cl"),
+      invitacion(INV_REENVIAR, "reenviar@gard.cl"),
+    ],
     user: [
       ...s.user.map((u) =>
         u.id === owner.id
@@ -137,7 +157,7 @@ const CASOS: Record<string, Record<string, unknown>> = {
     precio: { moneda: "UF", forma: "fijo", precio: "3" },
   },
   "platform.precios.set": {
-    recurso: "ia.economica",
+    recurso: "ia.economica.entrada",
     unidad: "token",
     costoUnitarioMicro: 3,
     vigenteDesde: manana(),
@@ -152,9 +172,15 @@ const CASOS: Record<string, Record<string, unknown>> = {
     rut: "76.123.456-0",
     adminEmail: "owner@nueva.cl",
   },
-  "platform.tenants.perfil_set": { tenantId: t, razonSocial: "Gard Security SpA", rut: "76.555.444-6" },
+  "platform.tenants.perfil_set": {
+    tenantId: t,
+    razonSocial: "Gard Security SpA",
+    rut: "76.555.444-6",
+  },
   "platform.modules.set": { tenantId: t, moduloId: "crm", estado: "trial" },
   "platform.admins.invite": { tenantId: t, email: "admin@gard.cl", rol: "admin" },
+  "platform.invitaciones.revocar": { tenantId: t, invitacionId: INV_REVOCAR },
+  "platform.invitaciones.reenviar": { tenantId: t, invitacionId: INV_REENVIAR },
   "platform.trabajos.reintentar": { tenantId: t, trabajoId: TRABAJO_FALLIDO },
   "platform.trabajos.cancelar": { tenantId: t, trabajoId: TRABAJO_PENDIENTE },
   "platform.users.set_role": { email: "beto@prueba.cl", platformRole: "support" },
@@ -198,6 +224,42 @@ describe("auditoría global de las escrituras de plataforma (CAR-41)", () => {
         });
       }
     });
+
+  it("tenants.get deja la empresa objetivo en su auditoría de lectura (CAR-323)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ usuario: owner, semilla: semilla() });
+    expect(await executeCapability(ctx, "platform.tenants.get", { tenantId: t })).toMatchObject({
+      ok: true,
+    });
+    expect(tabla("auditoriaGlobal").at(-1)).toMatchObject({
+      capability: "platform.tenants.get",
+      tenantObjetivoId: t,
+    });
+  });
+
+  it("reenviar una invitación revoca la anterior y crea otra con el mismo rol y portales (CAR-323)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ usuario: owner, semilla: semilla() });
+    const r = await executeCapability(ctx, "platform.invitaciones.reenviar", {
+      tenantId: t,
+      invitacionId: INV_REENVIAR,
+    });
+    expect(r).toMatchObject({ ok: true, data: { email: "reenviar@gard.cl", rol: "admin" } });
+    const filas = tabla("invitation").filter((i) => i["email"] === "reenviar@gard.cl");
+    expect(filas.find((i) => i["id"] === INV_REENVIAR)?.["revocadaEn"]).toBeInstanceOf(Date);
+    const nueva = filas.find((i) => i["id"] !== INV_REENVIAR);
+    expect(nueva).toMatchObject({ rol: "admin", portales: ["erp"] });
+    expect(nueva?.["revocadaEn"] ?? null).toBeNull();
+    expect(nueva?.["tokenHash"]).not.toBe(INV_REENVIAR);
+  });
+
+  it("precios.set rechaza un recurso que el medidor no conoce (CAR-323)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ usuario: owner, semilla: semilla() });
+    const r = await executeCapability(ctx, "platform.precios.set", {
+      ...CASOS["platform.precios.set"],
+      recurso: "ia.inventado",
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(tabla("precioRecurso")).toEqual([]);
+  });
 
   it("ajustes y precios guardan antes y después; precios.set es irreversible", async () => {
     const { ctx, tabla } = contextoDePrueba({ usuario: owner, semilla: semilla() });

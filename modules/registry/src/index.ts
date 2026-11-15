@@ -1,5 +1,7 @@
 import type { ModuleManifest } from "@opai/capabilities";
 
+import { manifest as Central } from "@opai/mod-central";
+
 import { manifest as Desempeno } from "@opai/mod-desempeno";
 
 import { manifest as Acceso } from "@opai/mod-acceso";
@@ -27,6 +29,7 @@ export { consumidoresAsistencia, trabajosAsistencia } from "@opai/mod-asistencia
 export { consumidorCpqBandeja } from "@opai/mod-cpq/consumidor-bandeja";
 export { consumidorCpqEnlace } from "@opai/mod-cpq/consumidor-enlace";
 export { trabajosCpq } from "@opai/mod-cpq/trabajos";
+export { consumidorTicketsAvisos } from "@opai/mod-tickets/consumidor-avisos";
 
 /**
  * Registro de módulos vendibles (ADR-003). `pnpm scaffold:module <id>` agrega el import y la entrada.
@@ -48,5 +51,6 @@ export const modulos: readonly ModuleManifest[] = [
   Asistencia,
   Acceso,
   Desempeno,
+  Central,
   // scaffold:module — las entradas se agregan sobre esta línea
 ];
