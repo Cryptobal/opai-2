@@ -6,8 +6,7 @@ import { fecha } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { AnularAusencia } from "./anular-ausencia";
-import { ResponderSolicitud } from "./responder-solicitud";
+import { AnularAusencia, ResponderSolicitud } from "./acciones-ausencia";
 import { etiquetaTipo, type GrupoAusencia } from "./tipos";
 
 const TONO = {
