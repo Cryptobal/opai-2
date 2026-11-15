@@ -23,7 +23,21 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: registrar el consentimiento de un cliente para ser referencia es un acto de una persona; ninguna key lo hace, ni con autonomía «directo» (CAR-138 PR 7, ADR-087).",
   "core.metodos_acceso.quitar":
     "Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP.",
+  "core.apps_conectadas.desconectar":
+    "Solo personas: desconectar una app conectada por OAuth gobierna agentes; se hace en Mi cuenta (CAR-247). Listar sí va por MCP.",
+  "core.push.suscribir":
+    "Solo personas: la suscripción de Web Push es del navegador de quien tiene la sesión; un agente no tiene celular (CAR-356 PR 4a).",
+  "core.push.quitar":
+    "Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a).",
   "core.apikeys.create": "Solo personas: una key no se crea keys ni ve secretos (ADR-032).",
+  // CAR-352: un destino saca eventos de la empresa hacia afuera y lleva un secreto de firma.
+  "core.webhooks.destino_crear":
+    "Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032).",
+  "core.webhooks.destino_actualizar":
+    "Solo personas: cambiar la dirección de un destino redirige los eventos de la empresa (ADR-032).",
+  "core.webhooks.destino_rotar_secreto": "Solo personas: entrega un secreto de firma (ADR-032).",
+  "core.webhooks.destino_eliminar":
+    "Solo personas: gobierna una integración de la empresa (ADR-032).",
   "core.apikeys.revoke": "Solo personas: gobierno de keys y credenciales (ADR-032).",
   "core.apikeys.update":
     "Solo personas: cambiar alcances de una key es gobernar agentes (ADR-032).",
@@ -51,6 +65,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.personas.pago_rechazar_cambio":
     "Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
+  "core.aprobaciones.reglas_guardar":
+    "Solo personas: decide quién aprueba lo irreversible; un agente no puede cambiar la regla que lo frena (ADR-032, CAR-252).",
+  "core.aprobaciones.reglas_desactivar":
+    "Solo personas: desactivar una regla quita una aprobación de lo irreversible; lo decide un humano (ADR-032, CAR-252).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
   "platform.aprobaciones.aprobar":
@@ -96,6 +114,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.roles.archive":
     "Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034).",
   "core.roles.assign": "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
+  "core.roles.adicional_asignar":
+    "Solo personas: sumar un rol a un usuario gobierna su acceso (ADR-034, CAR-359).",
+  "core.roles.adicional_quitar":
+    "Solo personas: quitar un rol a un usuario gobierna su acceso (ADR-034, CAR-359).",
+  "core.grupos.rol_asignar":
+    "Solo personas: dar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359).",
+  "core.grupos.rol_quitar":
+    "Solo personas: quitar un rol a un grupo gobierna el acceso de sus miembros (ADR-034, CAR-359).",
   "core.excepciones.set":
     "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
   "core.firmas.firmante_empresa_set":

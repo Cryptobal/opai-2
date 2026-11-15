@@ -63,8 +63,7 @@ export const comprasListar = defineCapability({
         where,
         include: { proveedor: true },
         orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
-        take: input.limite + 1,
-        ...cursorDe(input.cursor),
+        ...cursorDe(input.cursor, input.limite),
       }),
       ctx.db.documentoRecibido.groupBy({
         by: ["tipoDte"],
@@ -74,7 +73,7 @@ export const comprasListar = defineCapability({
       }),
       ctx.db.documentoRecibido.count({ where: { ...where, centroCostoId: null } }),
     ]);
-    const { items, siguiente } = pagina(filas, input.limite);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     const firmado = (pick: (g: (typeof porTipo)[number]) => number | null) =>
       porTipo.reduce((a, g) => a + signoDte(g.tipoDte as TipoDteCompra) * (pick(g) ?? 0), 0);
     return {

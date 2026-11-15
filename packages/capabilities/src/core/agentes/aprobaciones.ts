@@ -1,10 +1,9 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
-
 import { defineCapability } from "../../define";
 import { noEncontrado, prohibido } from "../../errores";
 import { uuidSchema } from "../esquemas";
+import { filtroAprobacionesVisibles, puedeResolverSolicitud } from "../aprobaciones-reglas/comun";
 import { aprobacionSchema, vistaAprobaciones } from "./aprobaciones-vista";
 import {
   aprobacionPlataformaVisible,
@@ -19,8 +18,9 @@ export const aprobacionesList = defineCapability({
   auditarLectura: (s) => s.filter((a) => a.ambito === "empresa").map((a) => a.id),
   id: "core.aprobaciones.list",
   descripcion:
-    "Cola de aprobaciones de acciones irreversibles pedidas por agentes: pendientes primero, con resumen, agente y vencimiento; también el historial.",
-  permiso: PERMISOS_CORE.aprobacionesManage,
+    "Cola de aprobaciones de acciones irreversibles pedidas por agentes o por las reglas de la empresa: pendientes primero, con resumen, quién la pidió y vencimiento; también el historial.",
+  // CAR-252: dueños y administradores ven todas; los aprobadores de una regla, solo las de sus reglas.
+  permiso: null,
   input: z.object({
     estado: z.enum(["pendiente", "aprobada", "rechazada", "vencida"]).optional(),
     limite: z.number().int().min(1).max(100).default(50),
@@ -35,8 +35,10 @@ export const aprobacionesList = defineCapability({
   async handler(ctx, input) {
     if (ctx.alcance) throw prohibido("No tienes acceso a estas aprobaciones.");
     const plataforma = veAprobacionesPlataforma(ctx);
+    const visibles = await filtroAprobacionesVisibles(ctx);
     const filas = await ctx.db.aprobacion.findMany({
       where: {
+        ...(visibles ?? {}),
         ...(input.estado ? { estado: input.estado } : {}),
         // Inmediato (CAR-36): las `platform.*` que quedaron en la empresa solo con platformRole.
         ...(plataforma ? {} : { NOT: { capability: { startsWith: "platform." } } }),
@@ -94,12 +96,14 @@ export const aprobacionesGet = defineCapability({
       return vista as z.input<typeof aprobacionSchema>;
     }
     const propia =
+      (ctx.actor.tipo === "user" && a.reglaId !== null && a.viaUserId === ctx.actor.id) ||
       (ctx.agente && a.apiKeyId === ctx.agente.apiKeyId) ||
       (ctx.actor.tipo === "agent" &&
         ctx.actor.interno &&
         a.agenteInternoId === ctx.actor.id &&
         a.viaUserId === ctx.actor.viaUserId);
-    if (!propia && !ctx.autorizar(PERMISOS_CORE.aprobacionesManage))
+    // CAR-252: también la ve quien pidió la acción y los aprobadores de su regla.
+    if (!propia && !(await puedeResolverSolicitud(ctx, { ...a, viaUserId: "" })))
       throw noEncontrado("La aprobación");
     if (!propia) exigirVisiblePlataforma(ctx, a.capability);
     return (await vistaAprobaciones(ctx, [a]))[0] as z.input<typeof aprobacionSchema>;

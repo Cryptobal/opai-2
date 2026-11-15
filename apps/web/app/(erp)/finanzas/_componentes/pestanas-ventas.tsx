@@ -1,15 +1,19 @@
-import { Tabs } from "@opai/ds";
+import { Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
-/** Secciones de Ventas como rutas reales (server-first, ADR-037), igual que Compras: libro, programación y tablero del mes. */
+/**
+ * Vistas de Ventas como botones juntos (CAR-258, opción A aprobada por Carlos el 14-nov-2026): Libro, Programación y
+ * Tablero del mes, cada una con su ruta (server-first, ADR-037). La acción de crear va aparte, arriba a la derecha.
+ */
 export function PestanasVentas({ activa }: { activa: "libro" | "plantillas" | "tablero" }) {
   return (
-    <Tabs
+    <Segmentado
       Link={LinkNext}
+      etiqueta="Vista de Ventas"
       activa={activa}
-      tabs={[
-        { id: "libro", etiqueta: "Libro de ventas", href: "/finanzas/ventas" },
+      opciones={[
+        { id: "libro", etiqueta: "Libro", href: "/finanzas/ventas" },
         { id: "plantillas", etiqueta: "Programación", href: "/finanzas/ventas/programacion" },
         { id: "tablero", etiqueta: "Tablero del mes", href: "/finanzas/ventas/programacion/cierre" },
       ]}

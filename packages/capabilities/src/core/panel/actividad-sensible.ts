@@ -30,7 +30,7 @@ export function redactarSensibles(
 export async function auditarHistorialSensible(
   ctx: Contexto,
   filas: readonly { id: string; capability: string; entityId: string | null }[],
-  origen: "core.actividad.list" | "core.audit.list",
+  origen: "core.actividad.list" | "core.audit.list" | "core.hilo.actividad",
 ): Promise<void> {
   if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return;
   for (const f of filas.filter(

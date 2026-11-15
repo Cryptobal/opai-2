@@ -1,6 +1,7 @@
 import {
   capacidadesDelNucleo,
   consumidorAvisoPrueba,
+  consumidorAvisoPruebaEmpresa,
   consumidorSeguimientoCierre,
   consumidoresDelNucleo,
   limpiarConsumidores,
@@ -15,10 +16,14 @@ import {
   trabajoCobrosPruebas,
   trabajoPruebasGratis,
   trabajosComercial,
+  trabajosDesempeno,
+  consumidoresDesempeno,
+  consumidorPautaCambio,
+  consumidorPautaPublicada,
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
-import { consumidoresAsistencia, consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente, trabajosAsistencia, trabajosCpq } from "@opai/modules";
+import { consumidoresAsistencia, consumidorCpqBandeja, consumidorCpqEnlace, consumidorTicketsAvisos, modulos, trabajosAgente, trabajosAsistencia, trabajosCpq } from "@opai/modules";
 
 let hecho = false;
 
@@ -39,6 +44,7 @@ export function asegurarRegistro(): void {
     ...trabajosDelNucleo,
     ...trabajosFinanzas,
     ...trabajosComercial,
+    ...trabajosDesempeno,
     ...trabajosAgente,
     ...trabajosAsistencia,
     ...trabajosCpq,
@@ -49,10 +55,15 @@ export function asegurarRegistro(): void {
   registrarConsumidores([
     ...consumidoresDelNucleo,
     ...consumidoresAsistencia,
+    ...consumidoresDesempeno,
+    consumidorPautaCambio,
+    consumidorPautaPublicada,
     consumidorCpqBandeja,
     consumidorCpqEnlace,
+    consumidorTicketsAvisos,
     consumidorSeguimientoCierre,
     consumidorAvisoPrueba,
+    consumidorAvisoPruebaEmpresa,
   ]);
   hecho = true;
 }

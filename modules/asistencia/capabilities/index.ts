@@ -22,6 +22,7 @@ import { marcasRegistrar } from "./registrar";
 import { marcasVerificar } from "./verificar";
 
 export { ajustesAsistencia } from "./ajustes";
+export { indicadoresAsistencia } from "./indicadores";
 export { fijarVerificadorIdentidad, PIN_SIMULADO } from "./identidad-registro";
 export const trabajosAsistencia = [trabajoVerificarCadenaMarcas, trabajoVencerCorrecciones, trabajoAlertasArt45, trabajoAvisoCompensables, trabajoRecalcularDias, trabajoSuprimirBiometria];
 export const consumidoresAsistencia = [consumidorComprobante, consumidorAvisoCorreccion, consumidorAvisoContingencia, consumidorDias, consumidorAlertas];

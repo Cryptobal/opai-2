@@ -61,7 +61,6 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
     mod.registrarCapacidades(capacidades);
     tenantId = (await e.admin.tenant.create({ data: { slug: `saldo-${randomUUID().slice(0, 8)}`, nombre: "S", vertical: "seguridad" } })).id;
     await e.admin.user.create({ data: { id: usuario, email: `u-${randomUUID().slice(0, 8)}@saldo.test`, name: "u" } });
-    await ok("finanzas.ajustes.actualizar", { saldoInicial: 999, desde: mas(lunes, -56) });
     // Los ingresos no se crean por la capacidad (solo egresos planificados): la fila se siembra directo.
     filaCliente = (await e.admin.flujoFila.create({ data: { tenantId, seccion: "ingreso", etiqueta: "Cliente QA", arrastre: false, orden: 0, activa: true } })).id;
     const conSaldo = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco con saldo", numeroVisible: "0001", activa: true, saldoBanco: 10_000_000n } });
@@ -100,8 +99,6 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
     expect(porSemana.get(semAnt2)).toMatchObject({ ingresos: 0, egresos: 500_000, saldoFinal: 12_300_000, saldoInicial: 12_800_000 });
     expect(p.saldoBanco).toMatchObject({ fuente: "banco", saldo: 14_000_000 });
     expect(p.saldoBanco.cuentasSinSaldo.map((c) => c.banco)).toEqual(["Banco sin saldo"]);
-    // El saldo inicial manual de los ajustes (999) ya no manda.
-    expect(p.semanas.every((s) => s.saldoInicial !== 999)).toBe(true);
   });
 
   it("lo no conciliado de una semana pasada va a «Sin conciliar», con el total de la cartola", async () => {

@@ -2,7 +2,7 @@
 
 import { avisar } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { cookieMarco, type Marco } from "@/lib/marco";
 import { aplicarTema, temaContrario } from "@/lib/tema";
 

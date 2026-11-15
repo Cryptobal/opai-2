@@ -81,6 +81,9 @@ export function EntradaArea({ item, rutaActual, Link, onFijar, fijado }: ItemPro
         )}
       >
         <span className="truncate">{item.etiqueta}</span>
+        {item.alerta && item.contador ? (
+          <span className={cn(PILDORA_ROJA, "ml-auto px-1.5 text-xs")}>{item.contador}</span>
+        ) : null}
       </Link>
       {item.fijable && onFijar ? (
         <BotonFijar fijado={Boolean(fijado)} onFijar={onFijar} className="absolute right-1" />

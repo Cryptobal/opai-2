@@ -9,6 +9,7 @@ import {
 import type { Excepcion } from "@opai/domain";
 
 import { instalacionesDeContactoCliente } from "./fuentes-cliente";
+import { INCLUIR_ROLES_ADICIONALES, permisosAdicionalesDe } from "./fuentes-roles";
 
 /** Membresía con su tenant, tal como se lista para elegir empresa. */
 export type MembresiaConTenant = {
@@ -50,6 +51,8 @@ export type AccesoFila = {
   permisosRol: string[] | null;
   excepciones: Excepcion[];
   instalaciones: string[] | null;
+  /** Permisos de los roles adicionales y de los roles de sus grupos (CAR-359). Se suman. */
+  permisosAdicionales?: string[];
 };
 
 /** Lecturas que necesita el borde para resolver al actor. Inyectables en tests. */
@@ -126,6 +129,7 @@ export async function accesoConModulos(
     include: {
       rolTenant: true,
       excepciones: true,
+      ...INCLUIR_ROLES_ADICIONALES,
       tenant: {
         select: {
           modules: { where: { estado: { in: ACTIVOS } }, select: { moduloId: true, estado: true } },
@@ -157,6 +161,7 @@ export async function accesoConModulos(
       conceder: e.conceder,
     })),
     instalaciones,
+    permisosAdicionales: m ? permisosAdicionalesDe(m) : [],
   };
   const modulos = m?.tenant.modules ?? [];
   return {

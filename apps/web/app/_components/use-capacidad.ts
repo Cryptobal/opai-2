@@ -4,7 +4,8 @@ import { useCallback, useState } from "react";
 
 import type { Resultado } from "@opai/capabilities";
 
-import { ejecutarCapacidad, type Revalidacion } from "@/app/_acciones/capacidad";
+import type { Revalidacion } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { mensajeDeError } from "@/lib/mensajes-error";
 
 /**

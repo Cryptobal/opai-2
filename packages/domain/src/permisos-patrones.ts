@@ -1,15 +1,8 @@
 import { PERMISOS_CORE } from "./permisos-catalogo";
-import {
-  DENEGAR_GERENTE_PERSONAS_PR2,
-  DENEGAR_VIEWER_PERSONAS_PR2,
-  PERMITIR_SUPERVISOR_PERSONAS_PR2,
-} from "./permisos-personas-pr2";
+import { PERMISOS_GERENTE, PERMISOS_LECTOR, PERMISOS_SUPERVISOR } from "./permisos-base";
 import type { Rol } from "./permisos-roles";
 
 type Patrones = { permitir: readonly string[]; denegar: readonly string[] };
-
-/** Bloqueo financiero heredado de 1.0 (`applyFinancialRoleLock`): solo owner y admin. */
-const FINANCIERO = ["finanzas:*", "nomina:*"] as const;
 
 export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
   owner: { permitir: ["*"], denegar: [] },
@@ -21,98 +14,10 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.cumplimientoDpaAceptar,
     ],
   },
-  gerente: {
-    permitir: ["*"],
-    denegar: [
-      ...FINANCIERO,
-      PERMISOS_CORE.tenantManage,
-      PERMISOS_CORE.tenantDelete,
-      PERMISOS_CORE.usersManage,
-      PERMISOS_CORE.ownersManage,
-      PERMISOS_CORE.apikeysManage,
-      PERMISOS_CORE.vinculosManage,
-      PERMISOS_CORE.estructurasManage,
-      PERMISOS_CORE.estructurasReadSensible,
-      PERMISOS_CORE.personasNoRecontratarManage,
-      PERMISOS_CORE.cuentasReferenciasAutorizar,
-      PERMISOS_CORE.correosSinAsignar,
-      ...DENEGAR_GERENTE_PERSONAS_PR2,
-      PERMISOS_CORE.anexosRead,
-      PERMISOS_CORE.anexosManage,
-      PERMISOS_CORE.documentosPlantillasManage,
-      PERMISOS_CORE.configManage,
-      PERMISOS_CORE.firmasConfig,
-      PERMISOS_CORE.finiquitosManage,
-      "comercial:config.manage",
-      "comercial:canales.manage",
-      PERMISOS_CORE.etiquetasConfig,
-      PERMISOS_CORE.actividadesAdmin,
-      PERMISOS_CORE.marcaManage,
-      PERMISOS_CORE.integracionesManage,
-      PERMISOS_CORE.comunicacionesManage,
-      PERMISOS_CORE.aprobacionesManage,
-      PERMISOS_CORE.agentesManage,
-      "agente:configurar",
-      PERMISOS_CORE.cumplimientoManage,
-      PERMISOS_CORE.cumplimientoDpaAceptar,
-      PERMISOS_CORE.calendarioManage,
-      PERMISOS_CORE.remuneracionesManage,
-      PERMISOS_CORE.remuneracionesAprobar,
-      PERMISOS_CORE.remuneracionesRetroactivo,
-      "tickets:tipos.manage",
-      "cpq:aprobar",
-      "cpq:modelo.manage",
-      "cpq:biblioteca.manage",
-      "cpq:envios.aprobar",
-      "cpq:puestos.confirmar",
-    ],
-  },
-  supervisor: {
-    permitir: [
-      "ops:*",
-      "rondas:*",
-      "acceso:read",
-      "pauta:*",
-      "asistencia:ver",
-      "asistencia:corregir",
-      "tickets:*",
-      "rendiciones:rendir",
-      "personas:read",
-      "personas:*.read",
-      PERMISOS_CORE.tenantRead,
-      PERMISOS_CORE.cuentasRead,
-      PERMISOS_CORE.instalacionesRead,
-      PERMISOS_CORE.patronesRead,
-      PERMISOS_CORE.funcionesRead,
-      PERMISOS_CORE.vinculosRead,
-      PERMISOS_CORE.personasRead,
-      ...PERMITIR_SUPERVISOR_PERSONAS_PR2,
-      PERMISOS_CORE.documentosRead,
-      PERMISOS_CORE.documentosSubirAlcance,
-      PERMISOS_CORE.firmasEnviar,
-      PERMISOS_CORE.firmasRead,
-      PERMISOS_CORE.configRead,
-      PERMISOS_CORE.calendarioRead,
-    ],
-    denegar: [...FINANCIERO, "comercial:*", "cpq:*", "tickets:tipos.manage"],
-  },
-  viewer: {
-    permitir: [
-      "*:read",
-      "*:*.read",
-      "tickets:tickets.ver",
-      "tickets:tickets.gestionar",
-    ],
-    denegar: [
-      ...FINANCIERO,
-      PERMISOS_CORE.consumosRead,
-      PERMISOS_CORE.auditRead,
-      PERMISOS_CORE.cumplimientoRead,
-      PERMISOS_CORE.anexosRead,
-      ...DENEGAR_VIEWER_PERSONAS_PR2,
-      "comercial:solicitudes.read",
-      // ADR-094: el comodín `*:*.read` no alcanza a los resultados de gestión de otras personas.
-      PERMISOS_CORE.indicadoresGestionRead,
-    ],
-  },
+  // CAR-350: lista explícita (permisos-base*.ts); lo no clasificado no se concede.
+  gerente: { permitir: PERMISOS_GERENTE, denegar: [] },
+  // CAR-387: también por lista explícita; un permiso nuevo de Operaciones, Rondas, Pauta o Tickets
+  // no se le concede hasta que alguien lo clasifica.
+  supervisor: { permitir: PERMISOS_SUPERVISOR, denegar: [] },
+  viewer: { permitir: PERMISOS_LECTOR, denegar: [] },
 };

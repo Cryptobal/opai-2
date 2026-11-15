@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { useId } from "react";
 
 import { cn } from "../cn";
+import { PILDORA_ROJA } from "./contador";
 
 type Props = {
   etiqueta: string;
@@ -13,6 +14,8 @@ type Props = {
   /** El área contiene la página activa (así, plegada, su icono lleva el acento, D1). */
   activa: boolean;
   onAlternar: () => void;
+  /** Suma de las alertas de sus entradas: se ve en el encabezado mientras el área está plegada. */
+  contador?: number | undefined;
   children: React.ReactNode;
 };
 
@@ -26,6 +29,7 @@ export function AreaGrupo({
   abierto,
   activa,
   onAlternar,
+  contador,
   children,
 }: Props) {
   const id = useId();
@@ -44,6 +48,9 @@ export function AreaGrupo({
       >
         <Icono className={cn("size-4 flex-none", activa && "text-accent")} aria-hidden />
         <span className="min-w-0 flex-1 truncate text-left">{etiqueta}</span>
+        {!abierto && contador ? (
+          <span className={cn(PILDORA_ROJA, "px-1.5 text-xs")}>{contador}</span>
+        ) : null}
         {abierto ? (
           <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden />
         ) : (
@@ -59,7 +66,10 @@ export function AreaGrupo({
           abierto ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
       >
-        <div className="flex min-h-0 flex-col gap-0.5 overflow-hidden pt-0.5 pb-1.5">{children}</div>
+        {/* La fila plegada mide 0: el relleno va en un hijo, así se anima junto con el alto y no asoma nada. */}
+        <div className="min-h-0 overflow-hidden">
+          <div className="flex flex-col gap-0.5 pt-0.5 pb-1.5">{children}</div>
+        </div>
       </div>
     </div>
   );

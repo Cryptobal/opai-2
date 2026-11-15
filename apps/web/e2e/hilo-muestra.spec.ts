@@ -84,6 +84,25 @@ test.describe("piel Hilo de las pantallas por dentro", () => {
     expect(await estilo("pieza-etiqueta", "display", "::before")).toBe("none");
     const marcoTabla = page.getByTestId("pieza-tabla").locator("xpath=..");
     expect(await marcoTabla.evaluate((n) => getComputedStyle(n).borderTopWidth)).toBe("0px");
+    // H2 (CAR-324): estados a la izquierda y sin borde; indicador sin tarjeta; esqueleto en filas.
+    const piezas = page.getByTestId("piezas-estados");
+    const css = (sel: string, props: string[]) =>
+      piezas
+        .locator(sel)
+        .first()
+        .evaluate((n, ps) => ps.map((x) => getComputedStyle(n).getPropertyValue(x)), props);
+    expect(await css(".ds-estado", ["text-align", "border-top-width", "align-items"])).toEqual([
+      "left",
+      "0px",
+      "flex-start",
+    ]);
+    expect(await css(".ds-estado-icono", ["width", "border-top-left-radius"])).toEqual(["44px", "14px"]);
+    expect(await css(".ds-kpi", ["border-top-left-radius", "border-top-width", "border-right-width"])).toEqual([
+      "0px",
+      "1px",
+      "0px",
+    ]);
+    expect(await css(".ds-esq-fila", ["height", "border-bottom-width"])).toEqual(["61px", "1px"]);
     await captura(page, "hilo-ds-piezas", info);
   });
 });

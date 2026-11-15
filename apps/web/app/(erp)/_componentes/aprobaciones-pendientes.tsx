@@ -7,7 +7,7 @@ import { Badge } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-type Decision = { id: string; resumen: string };
+import type { Decision } from "./use-bandeja";
 
 /** «Margen · CPQ-2026-002 · Cliente» → tipo, título y detalle; sin ese formato, todo va de título. */
 export function partesDeResumen(resumen: string) {
@@ -39,7 +39,7 @@ export function AprobacionesPendientes({ total, decisiones }: { total: number; d
           return (
             <li key={d.id}>
               <Link
-                href={`/configuracion/aprobaciones?ver=${encodeURIComponent(d.id)}`}
+                href={d.href}
                 className="group flex min-h-14 items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 outline-none transition-[border-color,box-shadow] duration-150 hover:border-fg-subtle focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)]"
               >
                 <span className="min-w-0 flex-1 space-y-1">

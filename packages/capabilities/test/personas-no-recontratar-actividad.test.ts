@@ -34,7 +34,10 @@ describe("Actividad y auditoría: la marca P1 es un dato reservado (art. 154 ter
       const r = await dato<{ items: Item[] }>(ctx, "core.actividad.list", {
         entidad: { tipo: "persona", id },
       });
-      expect(r.items.some((i) => i.capability === CAP_MARCAR), rol).toBe(false);
+      expect(
+        r.items.some((i) => i.capability === CAP_MARCAR),
+        rol,
+      ).toBe(false);
       expect(JSON.stringify(r)).not.toContain("Abandono de turno");
     }
   });
@@ -55,19 +58,19 @@ describe("Actividad y auditoría: la marca P1 es un dato reservado (art. 154 ter
   it("core.audit.list: gerente ve la auditoría global, pero no la fila de la marca", async () => {
     const { base } = await marcar();
     const gerente = comoRol(base, "gerente");
-    const r = await dato<{ eventos: { capability: string }[] }>(gerente, "core.audit.list", {});
-    expect(r.eventos.some((e) => e.capability === CAP_MARCAR)).toBe(false);
+    const r = await dato<{ items: { capability: string }[] }>(gerente, "core.audit.list", {});
+    expect(r.items.some((e) => e.capability === CAP_MARCAR)).toBe(false);
   });
 
   it("core.audit.list: admin ve la fila, con el motivo oculto", async () => {
     const { base } = await marcar();
     const admin = comoRol(base, "admin");
-    const r = await dato<{ eventos: { capability: string; payload: unknown }[] }>(
+    const r = await dato<{ items: { capability: string; payload: unknown }[] }>(
       admin,
       "core.audit.list",
       {},
     );
-    const fila = r.eventos.find((e) => e.capability === CAP_MARCAR);
+    const fila = r.items.find((e) => e.capability === CAP_MARCAR);
     expect(fila).toBeTruthy();
     const payload = fila?.payload as { input?: { motivo?: string } } | undefined;
     expect(payload?.input?.motivo).toBe("[oculto]");

@@ -7,7 +7,6 @@ import {
   COMERCIAL_EN_MAIN,
   instalacionesDeNegocio,
   mapearMotivoPerdida,
-  MOTIVO_EXPORT_CPQ_INCOMPLETO,
 } from "./comercial-pendiente";
 import { planEtapas } from "./comercial-plan-etapas";
 import { planContactosNegocio, planHistorial } from "./comercial-plan-historial";
@@ -17,13 +16,11 @@ import {
   etapaUtilizable,
   type PlanComercial,
   type ResolverId,
-  type DatosCotizacion,
 } from "./comercial-plan-tipos";
 export type * from "./comercial-plan-tipos";
 import type { EstadoDestino } from "./destino-tipos";
 import { modulosDelPlan, type OpcionesPlan } from "./opciones";
 import type {
-  CotizacionOpai1,
   DatosOpai1,
   NegocioOpai1,
 } from "./origen";
@@ -85,15 +82,6 @@ function planNegocios(
   return { decisiones, avisos, porIdOpai1 };
 }
 
-function planCotizaciones(filas: readonly CotizacionOpai1[]): Decision<DatosCotizacion>[] {
-  return ordenEstable(filas).map((q) =>
-    decision<DatosCotizacion>("cotizacion", q.id, "omitido", {
-      motivo: MOTIVO_EXPORT_CPQ_INCOMPLETO,
-      datos: { code: q.code, createdAt: q.createdAt },
-    }),
-  );
-}
-
 export function planComercial(
   origen: DatosOpai1,
   destino: EstadoDestino,
@@ -109,7 +97,7 @@ export function planComercial(
     cotizaciones: [],
     avisos: [],
   };
-  const { comercial, cpq } = modulosDelPlan(opciones);
+  const { comercial } = modulosDelPlan(opciones);
   if (!comercial || !COMERCIAL_EN_MAIN) return vacio;
 
   const et = planEtapas(origen.pipelineStages, destino);
@@ -127,14 +115,13 @@ export function planComercial(
     resolverContacto,
     destino,
   );
-  const cotizaciones = cpq ? planCotizaciones(origen.cpqQuotes) : [];
 
   return {
     etapas: et.decisiones,
     negocios: neg.decisiones,
     historial,
     contactosNegocio,
-    cotizaciones,
+    cotizaciones: [],
     avisos: [...et.avisos, ...neg.avisos],
   };
 }

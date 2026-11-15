@@ -37,11 +37,17 @@ const rango = z.object({ desde: fecha, hasta: fecha })
 export const diasListar = defineCapability({
   id: "asistencia.dias.listar",
   descripcion:
-    "Lista el día consolidado de asistencia (estado, sigla oficial, minutos trabajados, atraso y sobretiempo al segundo, descanso y corrección pendiente) de una persona o una instalación en un rango de fechas. El trabajador ve solo lo suyo y el supervisor lo de sus instalaciones.",
+    "Lista el día consolidado de asistencia (estado, sigla oficial, minutos trabajados, atraso y sobretiempo al segundo, descanso y corrección pendiente) de una persona o una instalación en un rango de fechas. El trabajador ve solo lo suyo y el supervisor lo de sus instalaciones. Paginada por cursor.",
   permiso: null,
   portales: [...PORTALES, "trabajador", "terreno"],
-  input: rango.and(z.object({ personaId: uuid.optional(), instalacionId: uuid.optional() })),
-  output: z.object({ items: z.array(diaSchema) }),
+  // CAR-353: contrato único de listas (cursor + limite; items + siguiente). Antes fallaba sobre 1000 días.
+  input: z.object({
+    desde: fecha, hasta: fecha, personaId: uuid.optional(), instalacionId: uuid.optional(),
+    cursor: z.uuid().optional().describe("Valor de «siguiente» de la página anterior."),
+    limite: z.number().int().min(1).max(200).default(200),
+  }).refine((i) => i.hasta >= i.desde, "«hasta» no puede ser anterior a «desde».")
+    .refine((i) => Date.parse(i.hasta) - Date.parse(i.desde) <= MAX_DIAS * 86_400_000, `Como máximo ${MAX_DIAS} días.`),
+  output: z.object({ items: z.array(diaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => [...new Set(s.items.map((d) => d.personaId))],
@@ -49,10 +55,11 @@ export const diasListar = defineCapability({
     const alcance = await alcanceMarcas(ctx);
     const filas = await ctx.db.dia.findMany({
       where: { fecha: { gte: dia(i.desde), lte: dia(i.hasta) }, AND: [alcance, i.personaId ? { personaId: i.personaId } : {}, i.instalacionId ? { instalacionId: i.instalacionId } : {}] },
-      orderBy: [{ fecha: "asc" }, { personaId: "asc" }], take: 1001,
+      orderBy: [{ fecha: "asc" }, { personaId: "asc" }, { id: "asc" }], take: i.limite + 1,
+      ...(i.cursor ? { cursor: { id: i.cursor }, skip: 1 } : {}),
     });
-    if (filas.length > 1000) throw reglaDeNegocio("Hay más de 1000 días: acota el rango o filtra por persona o instalación.");
-    return { items: filas.map(vista) };
+    const pagina = filas.slice(0, i.limite);
+    return { items: pagina.map(vista), siguiente: filas.length > i.limite ? (pagina.at(-1)?.id ?? null) : null };
   },
 });
 

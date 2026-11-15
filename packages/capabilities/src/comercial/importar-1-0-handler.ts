@@ -12,6 +12,7 @@ import {
   iniciarCorrida,
   leerEstadoDestinoPorTenantId,
   revertirCorrida,
+  soloCotizaciones,
   validarDatos,
   type DatosOpai1,
   type Plan,
@@ -69,6 +70,8 @@ export async function ejecutarImportar10(
     ...(tenant?.slug ? { tenantSlug: tenant.slug } : {}),
   });
 
+  if (input.soloCotizaciones) plan = soloCotizaciones(plan);
+
   if (input.accion === "conciliar") {
     return {
       dryRun: true,
@@ -115,7 +118,7 @@ export async function ejecutarImportar10(
     origen: "instantanea",
     lanzadaPorId: ctx.usuario?.id ?? null,
   });
-  const r = await aplicarPorLotes(ctx.tenantId, importacionId, plan);
+  const r = await aplicarPorLotes(ctx.tenantId, importacionId, plan, undefined, undefined, ctx.usuario?.id ?? null);
   await cerrarCorrida(ctx.tenantId, importacionId, "completada", {
     aplicadas: r.aplicadas,
     omitidas: r.omitidas,
@@ -135,6 +138,7 @@ export async function ejecutarImportar10(
       instalaciones: r.aplicadas.instalaciones,
       programaciones: r.aplicadas.programaciones,
       negocios: r.aplicadas.negocios,
+      cotizaciones: r.aplicadas.cotizaciones,
       omitidas: r.omitidas,
       importacionId,
     },

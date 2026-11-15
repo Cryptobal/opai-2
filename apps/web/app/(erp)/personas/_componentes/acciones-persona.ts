@@ -49,11 +49,11 @@ export function accionesPersona(p: PersonaDetalle): AccionEntidad[] {
             capacidad: {
               id: "core.vinculos.terminar",
               input: { id: v.id, termino: hoyIso() },
-              exito: "Vínculo terminado",
+              exito: "Vínculo terminado: se abrió su lista de salida",
             },
             confirmar: {
               titulo: `Terminar el vínculo de ${p.nombreCompleto}`,
-              descripcion: `${v.cargo}, desde ${fecha(v.inicio)}. Termina hoy y no se puede deshacer.`,
+              descripcion: `${v.cargo}, desde ${fecha(v.inicio)}. Termina hoy y no se puede deshacer. Si no le quedan otros vínculos, en el mismo acto pierde el acceso: su PIN de terreno deja de servir y su usuario queda suspendido.`,
               boton: "Terminar vínculo",
               peligro: true,
               motivo: true,

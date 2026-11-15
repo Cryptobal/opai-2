@@ -32,10 +32,12 @@ describe("tienePermisoEfectivo", () => {
   it("un rol personalizado archivado deniega por defecto; no vuelve al rol base", () => {
     // El borde (fuentes.ts) mapea un rol personalizado archivado a `permisosRol: []` (deny-by-default),
     // nunca a los permisos del rol base. Con el rol base (sin lista) el mismo permiso sí se concede.
-    expect(tienePermisoEfectivo({ rol: null, permisosRol: [] }, "core:instalaciones.read")).toBe(false);
-    expect(tienePermisoEfectivo({ rol: "viewer", permisosRol: null }, "core:instalaciones.read")).toBe(
-      true,
+    expect(tienePermisoEfectivo({ rol: null, permisosRol: [] }, "core:instalaciones.read")).toBe(
+      false,
     );
+    expect(
+      tienePermisoEfectivo({ rol: "viewer", permisosRol: null }, "core:instalaciones.read"),
+    ).toBe(true);
   });
 
   it("una excepción que concede gana sobre el rol; una que deniega gana sobre todo", () => {

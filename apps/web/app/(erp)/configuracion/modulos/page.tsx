@@ -72,7 +72,7 @@ export default function Modulos() {
                     nombre={m.nombre}
                     estado={m.estado}
                     funciones={(manifests.get(m.id)?.navegacion ?? []).map((n) => n.etiqueta)}
-                    pie={`Versión ${m.version} · depende de ${["Núcleo", ...m.dependencias.map(nombre)].join(", ")}`}
+                    pie={`Depende de ${["Núcleo", ...m.dependencias.map(nombre)].join(", ")}`}
                     {...(it ? { detalle: <PruebaInfo item={it} /> } : {})}
                     {...(puede && m.estado !== "activo"
                       ? {

@@ -10,7 +10,9 @@ import {
   documentoPlantillasPublicar,
 } from "./plantillas-editor";
 import { documentoPlantillasGenerar } from "./generar";
+import { documentoPlantillasGenerarEntidad } from "./generar-entidad";
 import { documentoPlantillasRellenar } from "./rellenar";
+import { documentoPlantillasRellenarEntidad } from "./rellenar-entidad";
 import { documentosPedirRenovacion } from "./renovacion";
 import { documentosArchive, documentosUpdate, documentosUrlDescarga } from "./gestion";
 import { documentosIniciarSubida } from "./subida";
@@ -46,4 +48,6 @@ export const capacidadesDocumentos: readonly Capacidad[] = [
   documentoPlantillasPublicar,
   documentoPlantillasRellenar,
   documentoPlantillasGenerar,
+  documentoPlantillasRellenarEntidad,
+  documentoPlantillasGenerarEntidad,
 ];

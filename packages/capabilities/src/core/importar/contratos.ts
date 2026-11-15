@@ -85,7 +85,7 @@ export const importadorContratos: Importador<DatosContrato> = {
     if (estado === "vigente") await tx.persona.updateMany({ where: { id: d.personaId, estado: { not: "activa" }, archivadaEn: null }, data: { estado: "activa" } });
     await ctx.eventos.emitir(tx, {
       tipo: "core.vinculo.creado", entidadTipo: "vinculo", entidadId: v.id,
-      payload: { personaId: d.personaId, cargoId: d.cargoId, tipo: d.tipo, inicio: dia(d.inicio) },
+      payload: { personaId: d.personaId, cargoId: d.cargoId, tipo: d.tipo, inicio: dia(d.inicio), origen: "importacion" },
     });
     return v.id;
   },

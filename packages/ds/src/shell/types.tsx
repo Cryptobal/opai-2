@@ -60,7 +60,11 @@ export type Portal = {
   corta?: string;
 };
 
-export type Tenant = { nombre: string };
+export type Tenant = {
+  nombre: string;
+  /** Logo de la marca (isotipo o logo principal) para el selector de empresa (CAR-335 D6b). */
+  logo?: string | undefined;
+};
 
 export type Usuario = {
   nombre: string;

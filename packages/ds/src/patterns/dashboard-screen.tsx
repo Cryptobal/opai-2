@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { KpiTile } from "../components/card";
+import { cn } from "../cn";
+import { GRILLA_KPI_HILO, KpiTile } from "../components/card";
 import { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./estado";
 
 export type Kpi = {
@@ -38,7 +39,7 @@ export function DashboardScreen({
         {...(acciones ? { acciones } : {})}
       />
       <Estado state={state} variante="dashboard" {...(textos ? { textos } : {})}>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className={cn("grid grid-cols-2 gap-3 lg:grid-cols-4", GRILLA_KPI_HILO)}>
           {kpis.map((k) => (
             <KpiTile
               key={k.etiqueta}
@@ -49,7 +50,9 @@ export function DashboardScreen({
           ))}
         </div>
         {children ? (
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">{children}</div>
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2 marco-hilo:mt-8 marco-hilo:gap-8">
+            {children}
+          </div>
         ) : null}
       </Estado>
     </section>

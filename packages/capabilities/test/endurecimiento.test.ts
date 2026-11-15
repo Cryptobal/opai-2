@@ -178,7 +178,7 @@ describe("idempotencia de escrituras", () => {
   it("la misma clave devuelve el resultado original sin repetir el efecto ni la auditoría", async () => {
     const { ctx, tabla, eventos } = contextoDePrueba({ semilla: semillaTenant() });
     const opciones = { idempotencyKey: "crear-key-1" };
-    const datos = { nombre: "Agente cobranza", scopes: ["*"] };
+    const datos = { nombre: "Agente cobranza", scopes: ["*"], heredarPermisos: true };
     const a = await executeCapability(ctx, "core.apikeys.create", datos, opciones);
     const b = await executeCapability(ctx, "core.apikeys.create", datos, opciones);
     expect(a.ok && b.ok).toBe(true);
@@ -217,7 +217,7 @@ describe("idempotencia de escrituras", () => {
       Object.keys((z.toJSONSchema(h.input, { io: "input" }) as { properties: object }).properties);
     expect(props(real)).toContain("idempotency_key");
     expect(props(previa)).not.toContain("idempotency_key");
-    const args = { nombre: "Agente MCP", scopes: ["*"], idempotency_key: "mcp-intento-001" };
+    const args = { nombre: "Agente MCP", scopes: ["*"], heredarPermisos: true, idempotency_key: "mcp-intento-001" };
     await ejecutarHerramienta(ctx, real, args);
     expect(await ejecutarHerramienta(ctx, real, args)).toMatchObject({ ok: true, repetida: true });
     expect(tabla("apiKey")).toHaveLength(1);

@@ -83,6 +83,7 @@ describe("paridad: la UI solo invoca capacidades existentes y públicas", () => 
     const conocidas = new Set([
       "app/_acciones/capacidad.ts",
       "app/_components/use-capacidad.ts",
+      "app/_components/ejecutar-capacidad.ts", // pasarela del navegador: avisa a lo cargado aparte tras escribir (CAR-338)
       "lib/servidor.ts",
       "app/(auth)/invitacion/[slug]/[token]/invitacion.tsx",
       "app/(platform)/platform/_componentes/hoja-trabajo.tsx",

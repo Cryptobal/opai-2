@@ -87,7 +87,7 @@ export function EditorPlantilla({ inicial }: { inicial: PlantillaEditor }) {
       </Alerta>
       <div className="grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_240px] xl:grid-cols-[200px_minmax(0,1fr)_240px]">
         <div className="hidden min-w-0 xl:flex">
-          <PanelVariables onInsertar={insertar} />
+          <PanelVariables clase={p.clase} onInsertar={insertar} />
         </div>
         <div className="flex min-w-0 flex-col gap-3">
           <BarraEditor
@@ -123,7 +123,7 @@ export function EditorPlantilla({ inicial }: { inicial: PlantillaEditor }) {
         titulo="Variables"
         descripcion="Toca una variable para insertarla donde está el cursor."
       >
-        <PanelVariables onInsertar={insertar} />
+        <PanelVariables clase={p.clase} onInsertar={insertar} />
       </Sheet>
     </DetailScreen>
   );

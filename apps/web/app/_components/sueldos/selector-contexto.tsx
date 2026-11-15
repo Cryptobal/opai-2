@@ -2,6 +2,7 @@
 
 import { lazy, Suspense, useState } from "react";
 import { Button, Loading } from "@opai/ds";
+import { formatearFecha } from "@opai/domain";
 
 const Campos = lazy(() =>
   import("./selector-contexto-campos").then((m) => ({ default: m.SelectorContexto })),
@@ -16,7 +17,7 @@ export function SelectorContexto(props: Props) {
   return (
     <div className="flex flex-col gap-3">
       <Button variant="secondary" aria-expanded={abierto} onClick={() => abrir(!abierto)}>
-        Resolver al {props.fecha} · cambiar contexto
+        Resolver al {formatearFecha(props.fecha)} · cambiar contexto
       </Button>
       {abierto ? (
         <Suspense fallback={<Loading variante="detalle" />}>

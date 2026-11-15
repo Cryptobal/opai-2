@@ -3,7 +3,7 @@
 import { Plus, X } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 
-import { Button, Campo, ChipToggle, InputFecha, InputHora, Input, Select } from "@opai/ds";
+import { Button, Campo, ChipToggle, InputFecha, SelectorHora, Input, Select } from "@opai/ds";
 
 import { DIAS } from "./dias";
 import type { DatosProgramacion } from "./hoja-programacion-datos";
@@ -42,7 +42,7 @@ export function CamposProgramacion({
         <div className="flex flex-col gap-2">
           {d.horarios.map((h, i) => (
             <div key={i} className="flex items-center gap-2">
-              <InputHora valor={h} onCambiar={(v) => setHora(i, v)} />
+              <SelectorHora aria-label={`Hora ${i + 1}`} valor={h} onCambiar={(v) => setHora(i, v)} />
               <Button
                 variant="ghost"
                 aria-label={`Quitar la hora ${h || i + 1}`}

@@ -5,7 +5,7 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { InputBusqueda } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { LinkIndice } from "@/app/_components/link-indice";
 import { destinoAjuste } from "@/lib/ajuste-destino";
 

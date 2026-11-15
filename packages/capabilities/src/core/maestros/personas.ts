@@ -73,8 +73,7 @@ export const personasList = defineCapability({
       ctx.db.persona.findMany({
         where,
         orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
-        take: input.limite + 1,
-        ...cursorDe(input.cursor),
+        ...cursorDe(input.cursor, input.limite),
         include: {
           vinculos: {
             where: { estado: "vigente" },
@@ -97,7 +96,7 @@ export const personasList = defineCapability({
       !input.cursor && filas.length <= input.limite
         ? filas.length
         : await ctx.db.persona.count({ where });
-    const p = pagina(filas, input.limite);
+    const p = pagina(filas, input.limite, input.cursor);
     const alertas = await alertasDocumentos(
       ctx,
       "persona",

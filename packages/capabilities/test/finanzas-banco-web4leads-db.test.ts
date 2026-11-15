@@ -3,6 +3,7 @@ import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { capacidades } from "../../../modules/finanzas/capacidades";
+import { aplicarSincronizacion } from "../../../modules/finanzas/capacidades/bancos/sincronizar-aplicar";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -117,6 +118,34 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     expect(await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaA } })).toBe(antes + 2);
   });
 
+  it("CAR-345: el saldo de la cuenta llega solo, sin movimientos, y solo uno más reciente reemplaza al vigente", async () => {
+    const t = (await e.admin.tenant.create({ data: { slug: `w4s-${randomUUID().slice(0, 8)}`, nombre: "W4L S", vertical: "seguridad" } })).id;
+    await run(t, "core.integraciones.configurar", { proveedor: "web4leads", modalidad: "propia" });
+    await run(t, "core.integraciones.set_secreto", { proveedor: "web4leads", nombre: "api_key", valor: SECRETO });
+    const id = (await cuenta(t, "94541158")).data.id;
+    const saldo = async () => e.admin.cuentaBancaria.findUniqueOrThrow({ where: { id } });
+    const soloSaldo = (current: number, asOf: string) => payload([], { accountBalance: { current, asOf } });
+
+    // Con movimientos y saldo: queda el saldo informado.
+    await recibir(t, payload([mov("s1", 10_000, 2_010_000)], { accountBalance: { current: 2_010_000, asOf: "2026-11-12T12:00:00-03:00" } }));
+    // Solo el saldo, más reciente, sin movimientos nuevos: reemplaza al vigente (antes se ignoraba).
+    const r = await recibir(t, soloSaldo(1_750_000, "2026-11-12T17:30:00-03:00"));
+    expect(r.ok && (r.data as { nuevos: number }).nuevos).toBe(0);
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    expect((await saldo()).saldoBancoEn?.toISOString()).toBe("2026-11-12T20:30:00.000Z");
+    // Un saldo más antiguo que llega tarde no pisa el vigente.
+    await recibir(t, soloSaldo(9_999_999, "2026-11-12T15:00:00-03:00"));
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    // Ni aunque traiga un movimiento nuevo: manda la fecha del saldo informado.
+    await recibir(t, payload([mov("s2", -5_000, null)], { accountBalance: { current: 8_888_888, asOf: "2026-11-12T16:00:00-03:00" } }));
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    // El mismo saldo con la misma hora (reenvío) se acepta sin cambios.
+    await recibir(t, soloSaldo(1_750_000, "2026-11-12T17:30:00-03:00"));
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    // La otra empresa con el mismo número de cuenta no se toca.
+    expect((await e.admin.cuentaBancaria.findUniqueOrThrow({ where: { id: cuentaB } })).saldoBanco).toBeNull();
+  });
+
   it("misma operación que ya vino por cartola (misma huella y saldo) se descarta", async () => {
     await e.admin.movimientoBancario.create({
       data: {
@@ -127,6 +156,34 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     const cuerpo = payload([{ externalId: "c1", transactionDate: "2026-11-03", description: "Compra  comercio", amount: -7_000, balance: 500_000 }]);
     const r = await recibir(tenantA, cuerpo);
     expect(r.ok && r.data).toMatchObject({ nuevos: 0, duplicados: 1 });
+  });
+
+  // Fechas pasadas: el receptor descarta las futuras.
+  it("CAR-450: lo que ya vino por cartola con otra glosa se reconoce por monto único; con dos iguales no adivina", async () => {
+    const cartola = (fecha: string, monto: bigint, glosa: string) =>
+      e.admin.movimientoBancario.create({
+        data: { tenantId: tenantA, cuentaId: cuentaA, fecha: new Date(`${fecha}T00:00:00Z`), monto, glosa, claveDedupe: `k-${randomUUID()}`, origen: "cartola" },
+      });
+    const unico = await cartola("2026-11-07", -43_210n, "PAGO PROVEEDORES 0099");
+    const r1 = await recibir(tenantA, payload([{ externalId: "m450", transactionDate: "2026-11-05", description: "TEF PROVEEDOR FICT", amount: -43_210 }]));
+    expect(r1.ok && r1.data).toMatchObject({ nuevos: 0, duplicados: 1 });
+    expect((await e.admin.movimientoBancario.findUniqueOrThrow({ where: { id: unico.id } })).idExterno).toBe("m450");
+
+    await cartola("2026-11-09", -12_340n, "CARGO A");
+    await cartola("2026-11-10", -12_340n, "CARGO B");
+    const r2 = await recibir(tenantA, payload([{ externalId: "m451", transactionDate: "2026-11-09", description: "TEF OTRA", amount: -12_340 }]));
+    expect(r2.ok && r2.data).toMatchObject({ nuevos: 1 });
+  });
+
+  it("CAR-488: si otra entrega ya vinculó el movimiento de cartola, el entrante se inserta en vez de perderse", async () => {
+    const tomado = await e.admin.movimientoBancario.create({
+      data: { tenantId: tenantA, cuentaId: cuentaA, fecha: new Date("2026-11-06T00:00:00Z"), monto: -65_432n, glosa: "Cargo", claveDedupe: `t-${randomUUID()}`, idExterno: "otra-entrega", origen: "cartola" },
+    });
+    const movimiento = { idExterno: "m488", fecha: "2026-11-06", monto: -65_432, glosa: "TEF X", referencia: null, saldoDespues: null, claveDedupe: `n-${randomUUID()}` };
+    const vinculos = [{ existenteId: tomado.id, idExterno: "m488", indice: 0, movimiento }];
+    const n = await aplicarSincronizacion(ctx(tenantA, true), { cuentaId: cuentaA, nuevos: [], vinculos, duplicados: 1, sospechosos: 0, saldoBanco: null, saldoBancoEn: null });
+    expect(n).toBe(1);
+    expect(await e.admin.movimientoBancario.count({ where: { tenantId: tenantA, idExterno: "m488" } })).toBe(1);
   });
 
   it("misma huella sin saldo se inserta y queda como sospechosa; cuenta desconocida se ignora", async () => {

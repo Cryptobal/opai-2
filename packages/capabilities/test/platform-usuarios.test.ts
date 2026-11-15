@@ -112,6 +112,7 @@ describe("core.apikeys.create con el scope platform (ADR-055)", () => {
     executeCapability(ctx, "core.apikeys.create", {
       nombre: "Plataforma",
       scopes: ["*", "platform"],
+      heredarPermisos: true,
       ...extra,
     });
 

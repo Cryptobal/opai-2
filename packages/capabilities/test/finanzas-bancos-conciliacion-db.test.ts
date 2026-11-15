@@ -344,6 +344,12 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     expect(sug56.sugerencias.some((s) => s.documentoId === doc56)).toBe(false);
 
     const docOk = await emitirFactura(77_000, "Factura P2 sugerir");
+    // Los movimientos de prueba son del 29-oct y sugerir mira ±15 días: la factura se emite hoy, así que se fecha
+    // junto al movimiento para que la prueba no dependa del día en que corre.
+    await e.admin.documentoEmitido.update({
+      where: { id: docOk.id },
+      data: { fechaEmision: new Date("2026-10-29") },
+    });
     const movOk = await movimiento(docOk.montoTotal, `p2-ok-${randomUUID()}`);
     const sugOk = await dato<{ sugerencias: { documentoId: string }[] }>("finanzas.conciliaciones.sugerir", {
       movimientoId: movOk.id,

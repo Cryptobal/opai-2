@@ -83,7 +83,7 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 
 **Objetivo:** las anomalías de terreno que la empresa activó llegan a su canal de Slack, en un hilo por instalación y día, con «Tomar» y «Ver en OPAI»; el pánico, además, por mensaje directo a los supervisores a cargo y con escalamiento.
 
-- **Tablas** (migración aditiva `20261206100000_core_slack_avisos`, RLS + FORCE, trigger `verificar_mismo_tenant`): `core.slack_avisos` (un aviso por hecho de origen, clave única; envío pendiente/enviado/fallido; gestión abierto/tomado/cerrado, que F4 usa como verdad en OPAI) y `core.slack_hilos` (mensaje padre por canal, instalación y día).
+- **Tablas** (migración aditiva `20270103100000_core_slack_avisos`, RLS + FORCE, trigger `verificar_mismo_tenant`): `core.slack_avisos` (un aviso por hecho de origen, clave única; envío pendiente/enviado/fallido; gestión abierto/tomado/cerrado, que F4 usa como verdad en OPAI) y `core.slack_hilos` (mensaje padre por canal, instalación y día).
 - **Qué se avisa y de dónde sale** (consumidores del núcleo, sin tocar la lógica de otros módulos):
   - Atraso sobre el margen y fuera de zona: `asistencia.marca.registrada`. **Punto de extensión:** el payload suma `turnoInicio`, `horaServidor` y `distanciaM` (aditivo).
   - Ausencia: `asistencia.alerta.sin_marca_inicio`. **Punto de extensión:** el payload suma la instalación (`refs`, aditivo).

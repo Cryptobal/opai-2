@@ -2,13 +2,14 @@
 
 import { type FormEvent, type ReactNode, lazy, Suspense, useState } from "react";
 
-import { avisar, Button, Campo, Input, Skeleton, type SwitchProps } from "@opai/ds";
+import { avisar, Button, Campo, SelectorHora, Skeleton, type SwitchProps } from "@opai/ds";
 import { CATEGORIAS_AVISO, type CategoriaAviso } from "@opai/domain";
 
 import { FormScreenListo } from "@opai/ds/form-screen-listo";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { activarPush, apagarPush, mensajePush, pedirPermiso } from "./suscripcion-push";
 import type { Preferencias } from "./tipos";
 
 // Aparte (React.lazy, ADR-037): el interruptor sobre Radix no pesa en el JS inicial de la ruta;
@@ -38,9 +39,12 @@ const CATEGORIA: Record<CategoriaAviso, { titulo: string; detalle: string }> = {
 export function FormularioAvisos({
   inicial,
   cabecera,
+  clavePush,
 }: {
   inicial: Preferencias;
   cabecera: ReactNode;
+  /** Clave pública VAPID; null = el aviso al celular está apagado en el servidor (CAR-356 PR 4b). */
+  clavePush: string | null;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("trabajador");
   const [prefs, setPrefs] = useState(inicial.preferencias);
@@ -54,6 +58,10 @@ export function FormularioAvisos({
 
   async function guardar(e: FormEvent) {
     e.preventDefault();
+    // El permiso del celular se pide aquí, al activar un aviso (ADR-044.4), y antes de esperar al servidor:
+    // Safari en iOS solo lo acepta dentro del gesto de guardar.
+    const algunPush = Object.values(prefs).some((p) => p.push);
+    const permiso = algunPush ? pedirPermiso(clavePush) : null;
     const r = await ejecutar<Preferencias>(
       "portal_trabajador.preferencias_notificacion.actualizar",
       {
@@ -61,8 +69,14 @@ export function FormularioAvisos({
         silencio: conSilencio ? { desde, hasta } : null,
       },
     );
-    if (r) avisar.exito("Tus avisos quedaron guardados");
-    else avisar.error("No se pudo guardar. Inténtalo de nuevo.");
+    if (!r) {
+      avisar.error("No se pudo guardar. Inténtalo de nuevo.");
+      return;
+    }
+    avisar.exito("Tus avisos quedaron guardados");
+    if (!algunPush) return void apagarPush(ejecutar);
+    const texto = mensajePush(await activarPush(clavePush, ejecutar, permiso));
+    if (texto) avisar.info(texto);
   }
 
   return (
@@ -103,20 +117,10 @@ export function FormularioAvisos({
               {conSilencio ? (
                 <div className="grid grid-cols-2 gap-3">
                   <Campo etiqueta="Desde" htmlFor="silencio-desde">
-                    <Input
-                      id="silencio-desde"
-                      type="time"
-                      value={desde}
-                      onChange={(e) => setDesde(e.target.value)}
-                    />
+                    <SelectorHora id="silencio-desde" valor={desde} onCambiar={setDesde} />
                   </Campo>
                   <Campo etiqueta="Hasta" htmlFor="silencio-hasta">
-                    <Input
-                      id="silencio-hasta"
-                      type="time"
-                      value={hasta}
-                      onChange={(e) => setHasta(e.target.value)}
-                    />
+                    <SelectorHora id="silencio-hasta" valor={hasta} onCambiar={setHasta} />
                   </Campo>
                 </div>
               ) : null}

@@ -127,7 +127,7 @@ describe.skipIf(!urlPropietario)("inventario NÚCLEO-H: accesos sensibles en Pos
 
   it("historial y auditoría registran solo los IDs de la página; sin duplicar read_sensible", async () => {
     for (const [id, campo] of [
-      ["core.audit.list", "eventos"],
+      ["core.audit.list", "items"],
       ["core.actividad.list", "items"],
     ] as const) {
       const r = await mod.executeCapability(contexto(), id, { limite: 2 });
@@ -162,12 +162,26 @@ describe.skipIf(!urlPropietario)("inventario NÚCLEO-H: accesos sensibles en Pos
 
   it("sin permiso no revela; sin alcance no revela titulares, incidentes ni documentos", async () => {
     for (const [id, input] of casosLecturas(a).filter(
-      ([id]) => !["core.buscar", "core.notificaciones.list", "core.inicio.pendientes"].includes(id),
+      ([id]) =>
+        ![
+          "core.buscar",
+          "core.notificaciones.list",
+          "core.inicio.pendientes",
+          "core.aprobaciones.list",
+        ].includes(id),
     )) {
       const ctx = contexto();
       ctx.autorizar = () => false;
       expect(await mod.executeCapability(ctx, id, input), id).toMatchObject({ ok: false });
     }
+    // CAR-252: la lista de aprobaciones filtra por quién puede aprobar; sin permiso ni regla a su
+    // nombre responde vacío en vez de FORBIDDEN, y no revela ninguna solicitud.
+    const sinPermiso = contexto();
+    sinPermiso.autorizar = () => false;
+    expect(await mod.executeCapability(sinPermiso, "core.aprobaciones.list", {})).toMatchObject({
+      ok: true,
+      data: [],
+    });
     const ctx = contexto();
     ctx.alcance = { instalaciones: [] };
     for (const id of [

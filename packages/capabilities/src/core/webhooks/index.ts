@@ -1,0 +1,19 @@
+import type { Capacidad } from "../../types";
+import { webhooksDestinoCreate, webhooksDestinosList, webhooksDestinoUpdate } from "./destinos";
+import { webhooksEventosList } from "./catalogo";
+import { webhooksEntregaReenviar, webhooksEntregasList } from "./entregas";
+import { webhooksDestinoDelete, webhooksDestinoGet, webhooksDestinoRotar } from "./secreto";
+export { consumidorWebhooks, trabajoEnviarWebhooks } from "./envio";
+
+/** Eventos salientes por empresa (CAR-352): UI, `/api/v1` y MCP (la gestión es solo de personas). */
+export const capacidadesWebhooks: readonly Capacidad[] = [
+  webhooksDestinosList,
+  webhooksDestinoGet,
+  webhooksDestinoCreate,
+  webhooksDestinoUpdate,
+  webhooksDestinoRotar,
+  webhooksDestinoDelete,
+  webhooksEntregasList,
+  webhooksEntregaReenviar,
+  webhooksEventosList,
+];

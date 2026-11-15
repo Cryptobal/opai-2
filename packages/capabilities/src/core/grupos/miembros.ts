@@ -15,6 +15,7 @@ import {
   vistaGrupo,
 } from "./comun";
 import { exigeElegibles, sinMiembroAjeno } from "./elegibles";
+import { exigeConcederRolesDeGrupo } from "./roles";
 
 const salidaMiembros = z.object({
   grupo: grupoSchema,
@@ -63,6 +64,8 @@ export const gruposMiembrosAdd = defineCapability({
     const grupo = await grupoVigente(ctx, input.grupoId);
     const pedidos = [...new Set(input.userIds)];
     await exigeElegibles(ctx, pedidos);
+    // CAR-359: un grupo con roles da permisos a quien entra; nadie lo hace si no podría darlos.
+    await exigeConcederRolesDeGrupo(ctx, grupo.id);
     const previo = await separar(ctx.db, grupo.id, pedidos);
     const antes = await contarMiembros(ctx, grupo.id);
     if (dryRun || previo.agregados.length === 0) {

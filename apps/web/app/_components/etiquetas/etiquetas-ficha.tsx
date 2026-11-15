@@ -19,7 +19,7 @@ export async function EtiquetasFicha(p: { tipo: EntidadEtiquetable; id: string }
       entidadId: p.id,
     }),
     gestiona
-      ? ejecutarComoUsuario<EtiquetaFila[]>("erp", "core.etiquetas.list", {})
+      ? ejecutarComoUsuario<{ items: EtiquetaFila[] }>("erp", "core.etiquetas.list", {})
       : Promise.resolve(null),
   ]);
   if (!asignadas.ok) return null;
@@ -28,7 +28,7 @@ export async function EtiquetasFicha(p: { tipo: EntidadEtiquetable; id: string }
       <EtiquetasEditables
         entidad={{ tipo: p.tipo, id: p.id }}
         asignadas={asignadas.data}
-        catalogo={catalogo?.ok ? catalogo.data : []}
+        catalogo={catalogo?.ok ? catalogo.data.items : []}
         gestiona={gestiona}
         crea={puede(PERMISOS_CORE.etiquetasConfig)}
       />

@@ -29,7 +29,7 @@ export function PaginaMisRendiciones({
       cargar={async () => {
         const i = portal === "erp" ? await identidadActual() : null;
         const puede = i ? puedeDeIdentidad(i) : () => false;
-        const accesos = { aprobar: puede("rendiciones:aprobar"), pagar: puede("rendiciones:pagar") };
+        const accesos = { aprobar: puede("rendiciones:aprobar"), pagar: puede("rendiciones:pagar"), reporte: puede("rendiciones:ver_todas") };
         try {
           return { todas: await cargarMias(portal), empresa: null, admin: null, accesos };
         } catch (e) {
@@ -60,6 +60,7 @@ export function PaginaMisRendiciones({
           <>
             {accesos.aprobar ? <EnlaceBoton href="/rendiciones/bandeja" variante="secondary">Bandeja del aprobador</EnlaceBoton> : null}
             {accesos.pagar ? <EnlaceBoton href="/rendiciones/lotes" variante="secondary">Lotes de pago</EnlaceBoton> : null}
+            {accesos.reporte ? <EnlaceBoton href="/rendiciones/reporte" variante="secondary">Reporte</EnlaceBoton> : null}
             <EnlaceBoton href={`${base}/nueva`} className="hidden md:inline-flex">
               Nueva rendición
             </EnlaceBoton>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 type Miembro = { userId: string; nombre: string; estado: string };
 

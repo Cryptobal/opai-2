@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Badge, Button, Campo, Card, CardContent, Input, Select, Table, Tabs, Td, Th, Tr } from "@opai/ds";
 
+import { EstadosHilo } from "./piezas-estados";
+
 const FILAS = [
   ["Servicios Andes SpA", "Cliente", "success", "UF 380"],
   ["Constructora Lira", "En revisión", "warning", "UF 145"],
@@ -105,6 +107,7 @@ export function PiezasHilo() {
           ]}
         />
       </section>
+      <EstadosHilo />
       <Card>
         <CardContent className="flex flex-col gap-1 p-4">
           <span className="t-label text-fg">Tarjeta</span>

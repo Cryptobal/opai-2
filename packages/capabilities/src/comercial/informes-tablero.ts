@@ -11,7 +11,12 @@ import { resumenPrimeraRespuesta } from "./solicitudes-plazo";
 import { CANALES_SOLICITUD } from "./solicitudes-dominio";
 
 const dia = (d: Date) => d.toISOString().slice(0, 10);
-const TOPE = 20_000;
+export const TOPE_INFORME = 20_000;
+const TOPE = TOPE_INFORME;
+
+/** Alguna fuente llegó al tope: el reporte suma solo esas filas y debe avisarlo. */
+export const informeParcial = (fuentes: readonly ({ length: number } | null)[], tope = TOPE_INFORME) =>
+  fuentes.some((f) => (f?.length ?? 0) >= tope);
 
 /**
  * Tablero de reportes comerciales (CAR-27, pantalla `/negocios/reportes`; incluye el embudo por canal
@@ -95,6 +100,7 @@ export const informesTablero = defineCapability({
       canales: solicitudes ? canalesDe(solicitudes, CANALES_SOLICITUD) : null,
       primeraRespuesta: solicitudes ? resumenPrimeraRespuesta(solicitudes, horasObjetivo, new Date()) : null,
       pronostico: pronosticoDe(vivos, mesesDesde(fecha, 4)),
+      parcial: informeParcial([abiertos, cerradosBase, pasos, solicitudes]),
       responsables: tabla.map((t) => ({ ...t, nombre: usuarios.find((u) => u.id === t.responsableId)?.name ?? "Sin responsable" })),
     };
   },

@@ -56,6 +56,7 @@ export function ListaPersonas(x: Props) {
     <ListaMaestro
       state={x.state}
       titulo={x.titulo}
+      vistas={{ lista: "personas", ruta: "/personas" }}
       accion={
         <>
           {nueva}

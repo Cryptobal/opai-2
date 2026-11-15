@@ -49,7 +49,7 @@ export function AccionesVenta({ venta, enviosPrevios, montoPendiente, abrirEdita
 
   async function alCliente(reenviar: boolean) {
     limpiarError();
-    const r = await ejecutar<{ estado: string; para: string }>(
+    const r = await ejecutar<{ estado: string; para: string; paraAdicionales?: string[] }>(
       "finanzas.ventas.enviar_cliente",
       { documentoId: venta.id, reenviar },
       false,
@@ -58,7 +58,7 @@ export function AccionesVenta({ venta, enviosPrevios, montoPendiente, abrirEdita
     );
     setHoja(null);
     intento.current = crypto.randomUUID();
-    if (r?.estado === "enviado") avisar.exito(`Enviado a ${r.para}`);
+    if (r?.estado === "enviado") avisar.exito(`Enviado a ${[r.para, ...(r.paraAdicionales ?? [])].join(", ")}`);
     else if (r) avisar.error("El correo no salió. Revisa el historial de envíos.");
   }
 

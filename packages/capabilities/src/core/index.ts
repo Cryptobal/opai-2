@@ -3,6 +3,9 @@ import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
+import { capacidadesPush } from "./push";
+export { avisarAlCelular } from "./push-avisar";
+import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
@@ -44,13 +47,19 @@ import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
 import { consumidorNegocioGanado } from "../comercial/consumidor-ganado";
 import { consumidorCpqGanado } from "../comercial/consumidor-ganado-cpq";
+import { consumidorPropuestaAlAceptar } from "../portal-cliente/propuesta-al-aceptar";
 import { capacidadesCorreos } from "./correos";
 import { capacidadesImportar } from "./importar";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
+import { capacidadesAusencias } from "./maestros/personas-ausencias";
 import { capacidadesPanel } from "./panel";
+import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";
+import { porAprobarList } from "./por-aprobar";
 import { capacidadesGrupos } from "./grupos";
+import { capacidadesWebhooks, consumidorWebhooks, trabajoEnviarWebhooks } from "./webhooks";
 import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
+import { capacidadesJefatura } from "./jefatura";
 import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
@@ -62,13 +71,19 @@ import { ping } from "./ping";
 import { capacidadesTenantsEscritura } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
 import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
-import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
+import { platformTenantsGet } from "./platform-tenants";
+import {
+  platformInvitacionesReenviar,
+  platformInvitacionesRevocar,
+  platformTenantsMiembros,
+} from "./plataforma/miembros";
 import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from "./plataforma";
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
 import { usersRestablecerMfa } from "./users-mfa";
 import { seguridadMetodos, seguridadPasskeysRenombrar } from "./seguridad/metodos";
 import { seguridadMetodosQuitar } from "./seguridad/quitar";
+import { appsConectadasDesconectar, appsConectadasList } from "./seguridad/apps";
 import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
@@ -87,11 +102,14 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   seguridadMetodos,
   seguridadPasskeysRenombrar,
   seguridadMetodosQuitar,
+  appsConectadasList,
+  appsConectadasDesconectar,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,
   invitationsAccept,
   invitationsRequestNew,
+  ...capacidadesPush,
   modulesList,
   ...capacidadesModulos,
   apikeysList,
@@ -101,12 +119,14 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usageSummary,
   platformTenantsList,
   platformTenantsGet,
+  platformTenantsMiembros,
+  platformInvitacionesRevocar,
+  platformInvitacionesReenviar,
   ...capacidadesTenantsEscritura,
   platformTenantsUpdate,
   platformTenantsSetEstado,
   platformModulesSet,
   platformAdminsInvite,
-  platformUsageSummary,
   // Brief 02 · servicios del núcleo
   consumosResumen,
   consumosPorAgente,
@@ -132,6 +152,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesAusencias,
   ...capacidadesCrm,
   ...capacidadesCorreos,
   ...capacidadesImportar,
@@ -142,8 +163,13 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesGrupos,
+  ...capacidadesWebhooks,
+  ...capacidadesReglasAprobacion,
+  porAprobarList,
   ...capacidadesSlack,
   ...capacidadesIndicadoresGestion,
+  ...capacidadesJefatura,
+  ...capacidadesProcesosPersona,
   ...capacidadesDocumentos,
   ...capacidadesFirmas,
   ...capacidadesConfig,
@@ -167,9 +193,12 @@ export const consumidoresDelNucleo = [
   ...consumidoresPausaSeguimiento,
   consumidorNegocioGanado,
   consumidorCpqGanado,
+  consumidorPropuestaAlAceptar,
   consumidorTurnosEsperados,
   consumidorRevocacionBiometria,
   ...consumidoresSlack,
+  consumidorProcesosPersona,
+  consumidorWebhooks,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
@@ -184,5 +213,6 @@ export const trabajosDelNucleo = [
   trabajoCapturaPrevisional,
   trabajoTareasVencidas,
   trabajoExtenderTurnos,
+  trabajoEnviarWebhooks,
   ...trabajosSlack,
 ];

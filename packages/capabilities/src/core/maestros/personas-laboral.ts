@@ -9,6 +9,10 @@ import { personaFicha } from "./personas-ficha-comun";
 import { aplicarLaboralParcial } from "./personas-laboral-escritura";
 import { actualizarLaboralInput } from "./personas-laboral-input";
 import { cargarLaboral, laboralSchema } from "./personas-laboral-vista";
+import { exigirPrendasDelKit } from "./uniforme-prendas";
+
+/** Períodos del contrato (CAR-409): se registran aparte de la ficha laboral, como historia. */
+export { capacidadesContratoPeriodos } from "./contrato-periodos";
 
 export const personasLaboralVer = defineCapability({
   auditarLectura: (s) => [s.personaId],
@@ -37,6 +41,7 @@ export const personasLaboralActualizar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const p = await personaFicha(ctx, input.id);
+    await exigirPrendasDelKit(ctx, input.uniforme?.tallas);
     if (dryRun) return cargarLaboral(ctx, p.id);
     await escribirConEvento(
       ctx,

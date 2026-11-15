@@ -1,7 +1,9 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { COOKIE_DISPOSITIVO } from "./lib/cookie-dispositivo";
 import { consultaDeRuta } from "./lib/existencia-ruta";
+import { loginDe } from "./lib/login-destino";
 import { destino404, esIdInvalido } from "./lib/rutas-invalidas";
 import { cabecerasConNonce } from "./lib/nonce";
 
@@ -104,7 +106,10 @@ export async function proxy(request: NextRequest) {
       "/terreno/cola",
       "/terreno/porteria",
       "/terreno/rondas",
-    ].includes(request.nextUrl.pathname);
+    ].includes(request.nextUrl.pathname) ||
+    // Un equipo de terreno emparejado no tiene sesión: `/entrar` lo lleva a Terreno (Brief 17). Con
+    // sesión también pasa por aquí; la página resuelve la sesión y `/entrar` no usa el chequeo de 404.
+    (request.nextUrl.pathname === "/entrar" && request.cookies.has(COOKIE_DISPOSITIVO));
   if (publica) return responder(NextResponse.next({ request: { headers } }));
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
     // La cabecera se fija en el servidor y sobrescribe cualquier `x-opai-t0` del cliente: en ninguna
@@ -114,14 +119,14 @@ export async function proxy(request: NextRequest) {
       return responder(await respuesta404(request, headers));
     return responder(NextResponse.next({ request: { headers } }));
   }
-  const login = new URL("/login", request.url);
+  // Cada portal a su ingreso (CAR-347): el trabajador entra con RUT y PIN, no con correo.
   const destino = request.nextUrl.pathname + request.nextUrl.search;
-  if (destino !== "/") login.searchParams.set("next", destino);
+  const login = new URL(loginDe(destino === "/" ? undefined : destino), request.url);
   return responder(NextResponse.redirect(login));
 }
 
 export const config = {
   matcher: [
-    "/((?!api|manifest.webmanifest|sw.js|sw-cola.js|sw-cola-bd.js|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
+    "/((?!api|\\.well-known|manifest.webmanifest|sw.js|sw-cola.js|sw-cola-bd.js|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };

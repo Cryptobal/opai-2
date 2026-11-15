@@ -110,10 +110,9 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
     supervisor: false,
     viewer: false,
   },
-  "ops:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
-  "rondas:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
-  "personas:read": { owner: true, admin: true, gerente: true, supervisor: true, viewer: true },
-  "personas:write": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
+  "rondas:configurar": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
+  // CAR-350: un permiso sin clasificar no lo reciben gerente ni lector (lista explícita).
+  "comercial:algo_nuevo.read": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   // Marca P1 "No recontratar" (Personas y Cargos PR 1): solo owner y admin por defecto.
   "core:personas.no_recontratar.manage": {
     owner: true,
@@ -248,17 +247,17 @@ describe("comodines", () => {
 });
 
 describe("permisosDe", () => {
-  const catalogo = ["core:tenant.read", "core:users.manage", "comercial:read", "finanzas:read"];
+  const catalogo = ["core:tenant.read", "core:users.manage", "comercial:negocios.read", "finanzas:read"];
 
   it("filtra por rol y por módulos activos (core siempre activo)", () => {
     expect(permisosDe("admin", catalogo, ["comercial"])).toEqual([
       "core:tenant.read",
       "core:users.manage",
-      "comercial:read",
+      "comercial:negocios.read",
     ]);
     expect(permisosDe("viewer", catalogo, ["comercial", "finanzas"])).toEqual([
       "core:tenant.read",
-      "comercial:read",
+      "comercial:negocios.read",
     ]);
   });
 });

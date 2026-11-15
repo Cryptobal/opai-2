@@ -16,8 +16,10 @@ const estilos = cva(
     variants: {
       variant: {
         // En el marco Hilo la acción de una persona va en tinta: el índigo queda para el agente.
+        // `ds-primario` no tiene estilos: marca la acción principal para la regla «un solo primario por
+        // vista» (DISENO-hilo.md R1), que la auditoría y las pruebas cuentan.
         primary:
-          "bg-accent text-accent-fg hover:brightness-95 active:brightness-90 marco-hilo:bg-fg marco-hilo:text-bg",
+          "ds-primario bg-accent text-accent-fg hover:brightness-95 active:brightness-90 marco-hilo:bg-fg marco-hilo:text-bg",
         secondary: "border-border-control bg-surface text-fg hover:bg-fill",
         ghost: "text-fg hover:bg-fill",
         destructive: "bg-destructive-bg text-destructive-fg hover:brightness-95",

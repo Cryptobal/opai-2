@@ -26,18 +26,23 @@ async function resumir(
   return resumenGenerico(agente, c.id, c.descripcion);
 }
 
-/** Lo irreversible sin autonomía "directo" no se ejecuta: queda en la cola de aprobaciones. */
-async function aprobacion(
+/**
+ * Lo irreversible sin autonomía "directo" no se ejecuta: queda en la cola de aprobaciones. Con una
+ * regla de la empresa (CAR-252, `reglaId`) queda siempre, también si la pide una persona.
+ */
+export async function aprobacion(
   ctx: Contexto,
   c: Capacidad,
   entrada: unknown,
   opciones: OpcionesEjecucion,
+  reglaId: string | null = null,
 ): Promise<Resultado | null> {
   const interno = ctx.actor.tipo === "agent" && ctx.actor.interno ? ctx.actor.id : null;
+  const persona = reglaId && ctx.actor.tipo === "user" ? ctx.actor.id : null;
   const a =
     ctx.agente ??
-    (interno
-      ? { apiKeyId: null, nombre: "Agente interno", autonomia: {} as Record<string, string> }
+    (interno || persona
+      ? { apiKeyId: null, nombre: interno ? "Agente interno" : (ctx.usuario?.nombre ?? "Una persona"), autonomia: {} as Record<string, string> }
       : null);
   const nivel = a?.autonomia[c.id];
   // `exigeAprobacion` (R19) condiciona la aprobación al input y reemplaza al efecto como disparador;
@@ -45,9 +50,10 @@ async function aprobacion(
   const porInput = c.exigeAprobacion
     ? c.exigeAprobacion(entrada)
     : c.efecto === "irreversible";
-  const exige = nivel === "aprobacion" || (porInput && nivel !== "directo");
+  const exige = !!reglaId || nivel === "aprobacion" || (porInput && nivel !== "directo");
   if (!a || !exige) return null;
-  if (ctx.actor.tipo !== "agent") return null;
+  if (ctx.actor.tipo !== "agent" && !persona) return null;
+  const viaUserId = persona ?? ctx.actor.viaUserId ?? "";
   const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
   const resumen = await resumir(ctx, c, entrada, a.nombre);
   // Lo `platform.*` va a la cola de plataforma, nunca a la de la empresa de la key (CAR-36).
@@ -57,7 +63,7 @@ async function aprobacion(
     ? await ctx.db.aprobacion.findFirst({
         where: {
           apiKeyId: a.apiKeyId,
-          ...(interno ? { agenteInternoId: interno, viaUserId: ctx.actor.viaUserId } : {}),
+          ...(interno || persona ? { agenteInternoId: interno, viaUserId } : {}),
           capability: c.id,
           idempotencyKey: opciones.idempotencyKey,
         },
@@ -78,7 +84,8 @@ async function aprobacion(
         tenantId: ctx.tenantId,
         apiKeyId: a.apiKeyId,
         agenteInternoId: interno,
-        viaUserId: ctx.actor.viaUserId ?? "",
+        viaUserId,
+        reglaId,
         capability: c.id,
         input: JSON.parse(JSON.stringify(entrada ?? {})),
         idempotencyKey: opciones.idempotencyKey ?? null,
@@ -91,7 +98,7 @@ async function aprobacion(
       tipo: "core.aprobacion.pendiente",
       entidadTipo: "aprobacion",
       entidadId: fila.id,
-      payload: { agente: a.nombre, capability: c.id, resumen, venceEn: venceEn.toISOString() },
+      payload: { agente: a.nombre, capability: c.id, resumen, venceEn: venceEn.toISOString(), reglaId },
     });
     await ctx.auditoria.registrar(tx, {
       tenantId: ctx.tenantId,
@@ -127,9 +134,10 @@ export async function controlAgente(
   c: Capacidad,
   entrada: unknown,
   opciones: OpcionesEjecucion,
+  reglaId: string | null = null,
 ) {
   if (ctx.actor.tipo !== "agent" || (!ctx.agente && !ctx.actor.interno) || opciones.dryRun)
     return null;
   // El presupuesto se consume atómicamente en el medidor ANTES del handler (execute.ts).
-  return aprobacion(ctx, c, entrada, opciones);
+  return aprobacion(ctx, c, entrada, opciones, reglaId);
 }

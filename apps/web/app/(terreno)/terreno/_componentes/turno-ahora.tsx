@@ -1,15 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { Alerta, Button, Loading } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-
-const MarcarPunto = dynamic(() => import("./marcar-punto").then((m) => m.MarcarPunto), {
-  ssr: false,
-});
 
 type Turno = {
   personaId: string;
@@ -33,7 +28,7 @@ const hora = (iso: string) =>
  * «Turno de ahora» (CAR-78 · E2): quién cubre la instalación del equipo según el turno esperado. Lee del
  * servidor; sin conexión no inventa nada: dice que no pudo actualizar y conserva lo último que leyó.
  */
-export function TurnoAhora({ personaId }: { personaId: string }) {
+export function TurnoAhora() {
   const [c, setC] = useState<Contexto | null>(null);
   const [falla, setFalla] = useState(false);
   const [version, setVersion] = useState(0);
@@ -106,7 +101,7 @@ export function TurnoAhora({ personaId }: { personaId: string }) {
           </ul>
         ) : null}
       </section>
-      {c?.modulos.rondas ? <MarcarPunto personaId={personaId} /> : null}
+      {/* CAR-395: «Marcar punto» vive solo dentro de la ronda en curso; desde aquí se va a «Mis rondas». */}
       {c?.modulos.rondas ? (
         <LinkNext href="/terreno/rondas" className="font-medium underline">
           Ir a Mis rondas

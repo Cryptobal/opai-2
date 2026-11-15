@@ -16,7 +16,7 @@ export const metadata = { title: "Slack" };
 async function cargar(searchParams: SearchParams) {
   const [estado, grupos, personas, p] = await Promise.all([
     ejecutarComoUsuario<EstadoSlack>("erp", "core.slack.estado", {}),
-    ejecutarComoUsuario<Grupo[]>("erp", "core.grupos.list", {}),
+    ejecutarComoUsuario<{ items: Grupo[] }>("erp", "core.grupos.list", { limite: 200 }),
     ejecutarComoUsuario<{ conectada: boolean; personas: PersonaSlack[] }>(
       "erp",
       "core.slack.usuarios",
@@ -27,7 +27,7 @@ async function cargar(searchParams: SearchParams) {
   return {
     estado: exigirDatos(estado),
     // Sin permiso para ver grupos, el escalamiento muestra la lista vacía; el resto sigue.
-    grupos: datosSiHayPermiso(grupos, [] as Grupo[]),
+    grupos: datosSiHayPermiso(grupos, { items: [] as Grupo[] }).items,
     // Vínculo de personas (CAR-292): solo con Slack conectado; un error no tumba la pantalla.
     personas: datosSiHayPermiso(personas, { conectada: false, personas: [] as PersonaSlack[] }),
     slack: typeof p["slack"] === "string" ? p["slack"] : undefined,

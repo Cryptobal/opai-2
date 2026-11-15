@@ -9,7 +9,7 @@ import {
   tienePermisoPlataforma,
 } from "@opai/domain";
 import { accesoPlataforma, forTenant } from "@opai/db";
-import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
+import { almacenamientoDelEntorno, emisorPushDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
 import { identidadEnDb } from "./identidad-db";
 import { idempotenciaSobre } from "./idempotencia";
@@ -59,6 +59,8 @@ export type ParametrosContexto = {
   permisosRol?: readonly string[] | null;
   /** Excepciones de permiso por usuario sobre el rol. ADR-022. */
   excepciones?: readonly Excepcion[] | null;
+  /** Permisos de los roles adicionales y de grupo que se suman al rol (CAR-359). */
+  permisosAdicionales?: readonly string[] | null;
   portal?: string | null;
   /** Solo servidor: membresía activa del usuario en este tenant; ausente = sin acceso. */
   portalesMembresia?: readonly string[];
@@ -189,6 +191,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     servicios: {
       correo: params.servicios?.correo ?? mailerDelEntorno(),
       almacenamiento: params.servicios?.almacenamiento ?? almacenamientoDelEntorno(),
+      push: params.servicios?.push === undefined ? emisorPushDelEntorno() : params.servicios.push,
       urlBase:
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },
@@ -208,6 +211,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
         rol: params.permisosRol != null ? null : rol,
         permisosRol: params.permisosRol ?? null,
         excepciones: params.excepciones ?? null,
+        permisosAdicionales: params.permisosAdicionales ?? null,
       },
       usuario,
       params.claveApi ?? null,

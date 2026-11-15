@@ -60,18 +60,16 @@ for (const rol of ["viewer", "supervisor", "owner"]) {
             aprobacionesPendientes: rol === "owner" ? 2 : null,
           },
         };
-      return { ok: true, data: [] };
+      return { ok: true, data: { total: 0, grupos: [] } };
     });
     renderToStaticMarkup(createElement(Bandeja));
     vi.stubGlobal("window", { addEventListener: vi.fn(), removeEventListener: vi.fn() });
     h.efectos[0]?.();
     await vi.waitFor(() =>
-      expect(h.ejecutar.mock.calls.length).toBe(rol === "owner" ? 4 : 2),
+      expect(h.ejecutar.mock.calls.length).toBe(rol === "owner" ? 3 : 2),
     );
-    expect(h.ejecutar.mock.calls.some((c) => c[1] === "core.aprobaciones.list")).toBe(
-      rol === "owner",
-    );
-    expect(h.ejecutar.mock.calls.some((c) => c[1] === "cpq.aprobaciones.list")).toBe(
+    // CAR-253: una sola consulta a la bandeja única «Por aprobar», que junta núcleo y módulos.
+    expect(h.ejecutar.mock.calls.some((c) => c[1] === "core.por_aprobar.list")).toBe(
       rol === "owner",
     );
   });

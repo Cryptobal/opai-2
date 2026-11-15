@@ -7,11 +7,19 @@ import { DecisionInicio } from "./decision-inicio";
 import { EncabezadoInicio } from "./encabezado-inicio";
 import { EsqueletoIndicadores, EsqueletoTarjeta } from "./esqueletos-inicio";
 import { IndicadoresInicio } from "./indicadores-inicio";
+import { InicioNuevo } from "./inicio-nuevo";
 import { rejillaInicio } from "./rejilla-inicio";
 import { SeguimientosInicio } from "./seguimientos-inicio";
 import { TareasInicio } from "./tareas-inicio";
 
-type Props = { nombre: string; empresa: string; actor: string | undefined; hilo?: boolean };
+type Props = {
+  nombre: string;
+  empresa: string;
+  actor: string | undefined;
+  hilo?: boolean;
+  /** Diseño nuevo (ADR-109, CAR-335 D3): cola de trabajo en pestañas e indicadores elegidos. */
+  nuevo?: boolean;
+};
 
 /**
  * Inicio del ERP (CAR-182, láminas 01 a 07): saludo con «Crear», lo que requiere decisión, tus tareas,
@@ -22,7 +30,8 @@ type Props = { nombre: string; empresa: string; actor: string | undefined; hilo?
  * se repite aquí: vive en `/bandeja`. En el marco Hilo (ADR-090) el saludo y lo que requiere decisión
  * ya están en el hilo, así que no se repiten.
  */
-export function InicioErp({ nombre, empresa, actor, hilo = false }: Props) {
+export function InicioErp({ nombre, empresa, actor, hilo = false, nuevo = false }: Props) {
+  if (nuevo) return <InicioNuevo nombre={nombre} empresa={empresa} actor={actor} />;
   const r = rejillaInicio(hilo);
   return (
     <div className="flex flex-col gap-4">

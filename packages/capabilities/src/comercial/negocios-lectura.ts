@@ -95,10 +95,9 @@ export const negociosList = defineCapability({
     const filas = await ctx.db.negocio.findMany({
       where,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
+      ...cursorDe(input.cursor, input.limite),
     });
-    const p = pagina(filas, input.limite);
+    const p = pagina(filas, input.limite, input.cursor);
     const [extra, etiquetas] = await Promise.all([
       enriquecer(ctx, p.items),
       etiquetasDeFilas(

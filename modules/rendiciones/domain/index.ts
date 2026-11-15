@@ -85,3 +85,4 @@ export function puedeDecidir(solicitanteId: string, actorId: string, aprobadorId
 export * from "./kilometraje";
 export * from "./lotes";
 export * from "./nomina";
+export * from "./reporte";

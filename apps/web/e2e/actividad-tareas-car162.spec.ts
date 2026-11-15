@@ -20,6 +20,8 @@ test.describe("Comercial · Actividad y tareas", () => {
       .getByRole("region", { name: "Lista de negocios" })
       .locator('a[href^="/negocios/"]')
       .first();
+    // La lista llega por streaming: contar de inmediato da 0 en un runner lento y la prueba se salta.
+    await primero.waitFor({ timeout: 60_000 }).catch(() => undefined);
     test.skip((await primero.count()) === 0, "Sin negocios en el entorno");
     await primero.click();
     await page.waitForURL(/\/negocios\/[0-9a-f-]{36}/);
@@ -37,6 +39,9 @@ test.describe("Comercial · Actividad y tareas", () => {
     await expect(tipoTarea).toHaveAttribute("aria-pressed", "true");
     await compositor.getByRole("textbox").first().fill(titulo);
     await compositor.getByRole("button", { name: "Crear tarea" }).click();
+    // La creación debe confirmarse: si la capacidad falla, el texto queda en el compositor y la
+    // tarea nunca llega a Mis tareas.
+    await expect(page.getByText("Tarea creada").first()).toBeVisible({ timeout: 60_000 });
     // La primera escritura de la capacidad compila su ruta en frío en el runner.
     await expect(page.getByText(titulo).first()).toBeVisible({ timeout: 60_000 });
 
@@ -45,15 +50,19 @@ test.describe("Comercial · Actividad y tareas", () => {
       await page.screenshot({ path: info.outputPath(`actividad-${ancho}.png`), fullPage: true });
     }
 
+    // Primero «Yo»: quien la crea queda como responsable si no elige a otro.
+    await page.goto("/tareas");
+    await expect(page.getByRole("heading", { name: /Mis tareas/ }).first()).toBeVisible();
+    await info.attach("mis-tareas-yo.txt", { body: await page.locator("main").innerText(), contentType: "text/plain" });
     await page.goto("/tareas?ver=equipo");
     await expect(page.getByRole("heading", { name: /Mis tareas/ }).first()).toBeVisible();
-    const fila = page.getByText(titulo).first();
+    const fila = page.getByText(titulo).filter({ visible: true }).first();
     await expect(fila).toBeVisible({ timeout: 45_000 });
     for (const ancho of ANCHOS) {
       await page.setViewportSize({ width: ancho, height: 900 });
       await page.screenshot({ path: info.outputPath(`mis-tareas-${ancho}.png`), fullPage: true });
     }
-    await page.getByRole("checkbox", { name: new RegExp(titulo) }).first().click();
+    await page.getByRole("checkbox", { name: new RegExp(titulo) }).filter({ visible: true }).first().click();
     await expect(page.getByText("Tarea hecha").first()).toBeVisible();
   });
 });

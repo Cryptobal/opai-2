@@ -1,6 +1,8 @@
 import type { Capacidad } from "../../types";
 import { actividadList } from "./actividad";
 import { resumenContadores } from "./contadores";
+import { hiloActividad } from "./hilo-actividad";
+import { hiloAgenda } from "./hilo-agenda";
 import { inicioIndicadores } from "./indicadores";
 import { inicioPendientes } from "./pendientes";
 
@@ -10,4 +12,6 @@ export const capacidadesPanel: readonly Capacidad[] = [
   resumenContadores,
   inicioPendientes,
   inicioIndicadores,
+  hiloActividad,
+  hiloAgenda,
 ];

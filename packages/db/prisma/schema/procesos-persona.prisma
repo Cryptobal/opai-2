@@ -1,0 +1,51 @@
+// Ingreso y salida de una persona como lista de pasos (CAR-355). Las FKs a `core.tenants`,
+// `core.personas`, `core.vinculos_laborales` y `core.actividades` viven en la migración (como en
+// `terreno.prisma`): no se tocan los modelos existentes para declarar la relación inversa.
+
+/// Lista de ingreso o de salida de un vínculo laboral. Una por vínculo y tipo (índice único).
+model ProcesoPersona {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  tenantId  String    @map("tenant_id") @db.Uuid
+  personaId String    @map("persona_id") @db.Uuid
+  vinculoId String    @map("vinculo_id") @db.Uuid
+  /// "ingreso" | "salida"
+  tipo      String
+  /// "abierto" | "cerrado" (se cierra cuando ningún paso queda por hacer)
+  estado    String    @default("abierto")
+  cerradoEn DateTime? @map("cerrado_en") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  pasos ProcesoPersonaPaso[]
+
+  @@unique([vinculoId, tipo])
+  @@index([tenantId, personaId])
+  @@map("procesos_persona")
+  @@schema("core")
+}
+
+/// Paso de una lista: responsable (usuario), plazo y la tarea del núcleo que lo muestra en su bandeja.
+model ProcesoPersonaPaso {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  procesoId     String    @map("proceso_id") @db.Uuid
+  orden         Int
+  titulo        String
+  responsableId String?   @map("responsable_id") @db.Uuid
+  vence         DateTime  @db.Date
+  /// "por_hacer" | "hecho" | "omitido"
+  estado        String    @default("por_hacer")
+  actividadId   String?   @map("actividad_id") @db.Uuid
+  hechoEn       DateTime? @map("hecho_en") @db.Timestamptz(6)
+  hechoPorId    String?   @map("hecho_por_id") @db.Uuid
+  nota          String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  proceso ProcesoPersona @relation(fields: [procesoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, procesoId])
+  @@index([actividadId])
+  @@map("procesos_persona_pasos")
+  @@schema("core")
+}

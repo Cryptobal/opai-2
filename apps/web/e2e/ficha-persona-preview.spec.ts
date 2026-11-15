@@ -55,4 +55,29 @@ test.describe("@preview ficha de persona", () => {
     }
     expect(errores).toEqual([]);
   });
+
+  test("Pago: agregar otra cuenta bancaria (CAR-275)", async ({ page }, info) => {
+    const errores: string[] = [];
+    page.on("pageerror", (e) => errores.push(e.name));
+    await entrar(page);
+    await abrirUnaPersona(page);
+    const ficha = new URL(page.url()).pathname.match(/^\/personas\/[0-9a-f-]{36}/)?.[0] ?? "";
+    await page.goto(`${ficha}/laboral`);
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    // La sección de pago carga aparte (Suspense): se espera su título antes de decidir si se omite.
+    await expect(page.getByText("Pago y bancos", { exact: true }).first()).toBeVisible();
+    const agregar = page.getByRole("link", { name: "Agregar cuenta" }).first();
+    // Con una solicitud ya pendiente el botón no se ofrece; la prueba no depende del orden de las otras.
+    test.skip(
+      (await agregar.count()) === 0,
+      "Hay una solicitud de pago pendiente en la persona de prueba",
+    );
+    await agregar.click();
+    // Con el diseño nuevo el menú del iPad también es un diálogo: se busca la hoja por su contenido.
+    const hoja = page.getByRole("dialog").filter({ hasText: "Dejarla como cuenta por defecto" });
+    await expect(hoja).toBeVisible();
+    await expect(hoja.getByRole("button", { name: "Solicitar cuenta" })).toBeDisabled();
+    await capturar(page, info, "ficha-persona-agregar-cuenta");
+    expect(errores).toEqual([]);
+  });
 });

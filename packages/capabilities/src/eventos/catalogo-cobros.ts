@@ -15,6 +15,11 @@ export const EVENTOS_COBROS: readonly EventoDeDominio[] = [
     descripcion: "Una empresa activó su prueba gratis de un módulo o de una parte de Finanzas.",
   },
   {
+    id: "core.prueba_gratis.por_vencer",
+    descripcion:
+      "La prueba gratis de una empresa vence en dos días: aviso por correo a la empresa.",
+  },
+  {
     id: "core.prueba_gratis.vencida",
     descripcion: "Terminó la prueba gratis de una empresa: el módulo quedó en solo lectura.",
   },

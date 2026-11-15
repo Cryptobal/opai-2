@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import { Badge, Button, Campo, Combobox, Input, SeccionTarjeta } from "@opai/ds";
 import { formatearActeco, leerActeco } from "@opai/domain";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import type { ActecoElegido, EstadoActecos } from "./use-actecos";
 

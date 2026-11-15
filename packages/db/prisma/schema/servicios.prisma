@@ -111,6 +111,7 @@ model Evento {
 
   tenant   Tenant          @relation(fields: [tenantId], references: [id])
   entregas EventoEntrega[]
+  webhookEntregas WebhookEntrega[]
 
   @@index([tenantId, estado, createdAt])
   @@index([tenantId, tipo, createdAt])
@@ -259,5 +260,25 @@ model Envio {
 
   @@index([tenantId, createdAt])
   @@map("envios")
+  @@schema("core")
+}
+
+/// Dispositivo suscrito a Web Push de un usuario en una empresa (CAR-356 PR 4a, ADR-044.4). El aviso va sin
+/// contenido: solo el endpoint del servicio de push del navegador.
+model SuscripcionPush {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  usuarioId     String    @map("usuario_id") @db.Uuid
+  endpoint      String
+  dispositivo   String?
+  ultimoAvisoEn DateTime? @map("ultimo_aviso_en") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, endpoint])
+  @@index([tenantId, usuarioId])
+  @@map("suscripciones_push")
   @@schema("core")
 }

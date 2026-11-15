@@ -8,6 +8,7 @@ import type { Contexto } from "../types";
 import { cuentaDe, rutEmisorDe } from "./ventas-comun";
 import { cantidadTexto, emisorDePerfil, receptorPdf } from "./ventas-pdf-doc";
 import { logoDeMarca } from "./ventas-pdf-logo";
+import { ufDelPrevio } from "./ventas-pdf-previo-uf";
 import type { TipoPrevio } from "./ventas-programacion-previos";
 
 const PREFIJO: Record<TipoPrevio, string> = { proforma: "PF", estado_pago: "EP" };
@@ -49,7 +50,7 @@ export async function pdfDePrevio(
   tipo: TipoPrevio,
   b: { documentoId: string; cuentaId: string; fechaFactura: string },
 ): Promise<{ numero: string; nombre: string; bytes: Uint8Array }> {
-  const [{ numero, periodo }, doc, cuenta, rutEmisor, tenant, perfil, lineas, referencias, logo] = await Promise.all([
+  const [{ numero, periodo }, doc, cuenta, rutEmisor, tenant, perfil, lineas, referencias, logo, uf] = await Promise.all([
     numeroInterno(ctx, tipo, b.documentoId),
     ctx.db.documentoEmitido.findFirst({
       where: { id: b.documentoId },
@@ -62,6 +63,7 @@ export async function pdfDePrevio(
     ctx.db.documentoEmitidoLinea.findMany({ where: { documentoId: b.documentoId }, orderBy: { orden: "asc" } }),
     ctx.db.documentoEmitidoReferencia.findMany({ where: { documentoId: b.documentoId }, orderBy: { id: "asc" } }),
     logoDeMarca(ctx),
+    ufDelPrevio(ctx, b.documentoId, b.fechaFactura),
   ]);
   if (!doc) throw new Error("BORRADOR_NO_ENCONTRADO");
   const vence = dia(doc.fechaVencimiento);
@@ -86,6 +88,7 @@ export async function pdfDePrevio(
     iva: doc.montoIva,
     total: doc.montoTotal,
     ...(logo ? { logo } : {}),
+    ...(uf ? { uf } : {}),
     referencias: referencias.map((r) => `${REF[r.tipoDteRef] ?? "Ref."} ${r.folioRef} (${r.tipoDteRef})`),
   });
   return { numero, nombre: `${NOMBRE_ARCHIVO[tipo]} ${numero}.pdf`, bytes };

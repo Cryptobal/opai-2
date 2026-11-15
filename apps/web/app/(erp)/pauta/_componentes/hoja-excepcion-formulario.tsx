@@ -12,6 +12,7 @@ import { CamposExcepcionDiaria, CamposExcepcionMensual } from "./campos-excepcio
 import { DialogosExcepcion } from "./dialogos-excepcion";
 import { diaSemana, fechaCl, personaEnTurno } from "./etiquetas";
 import type { CeldaDia, MesPauta } from "./tipos";
+import { useTipoYClase } from "./use-tipo-y-clase";
 
 export function HojaExcepcionFormulario({
   mes,
@@ -37,7 +38,6 @@ export function HojaExcepcionFormulario({
   onCerrar: () => void;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const [tipo, setTipo] = useState<string>("ausencia");
   const [hasta, setHasta] = useState(fecha);
   const [motivo, setMotivo] = useState("");
   const [confirmarAnulacion, setConfirmarAnulacion] = useState(false);
@@ -45,9 +45,10 @@ export function HojaExcepcionFormulario({
   const trabaja = celda.estado === "cubierto" || celda.estado === "ppc";
   const titular = personaEnTurno(mes, celda.titularId, celda.cubiertoPorId);
   const clave = `${puestoId}_${fecha}`;
+  const { tipo, clase, campos } = useTipoYClase(puedeEditar && !celda.excepcion && trabaja, diaria);
 
   async function registrar() {
-    const r = await ejecutar("pauta.excepciones.crear", { puestoId, tipo, motivo: motivo.trim(), desde: fecha, hasta });
+    const r = await ejecutar("pauta.excepciones.crear", { puestoId, tipo, ...(clase ? { clase } : {}), motivo: motivo.trim(), desde: fecha, hasta });
     if (r) {
       avisar.exito("Excepción registrada");
       onCerrar();
@@ -110,8 +111,7 @@ export function HojaExcepcionFormulario({
           ) : null}
           {puedeEditar && !celda.excepcion && trabaja && !diaria ? (
             <CamposExcepcionMensual
-              tipo={tipo}
-              setTipo={setTipo}
+              {...campos}
               hasta={hasta}
               setHasta={setHasta}
               motivo={motivo}
@@ -120,8 +120,7 @@ export function HojaExcepcionFormulario({
           ) : null}
           {diaria && puedeEditar && !celda.excepcion && trabaja && celda.estado === "ppc" ? (
             <CamposExcepcionDiaria
-              tipo={tipo}
-              setTipo={setTipo}
+              {...campos}
               hasta={hasta}
               setHasta={setHasta}
               motivo={motivo}

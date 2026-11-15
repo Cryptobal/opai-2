@@ -69,6 +69,7 @@ export default function Negocios({ searchParams }: Props) {
                   etiquetas={d.filas?.etiquetas ?? []}
                   {...(d.gestiona ? { nuevo: accionNuevo } : {})}
                   puedeExportar={d.exporta}
+                  puedeTransferir={d.gestiona}
                 />
               }
             />

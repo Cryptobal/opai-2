@@ -1,4 +1,4 @@
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 export type Opcion = { valor: string; etiqueta: string };
 type Contacto = { contactoId: string; nombres: string; apellidos: string; email: string | null };

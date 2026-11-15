@@ -2,6 +2,7 @@
 
 import { avisar } from "@opai/ds";
 
+import { avisarCambio } from "@/app/_components/ejecutar-capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { esAprobacionCpq } from "@/lib/aprobaciones-cpq";
 
@@ -40,7 +41,7 @@ export function useResolver(dePlataforma: ReadonlySet<string> = new Set()) {
     for (const id of ids) if (await aprobarUna(id)) ok++;
     if (ok) {
       avisar.exito(ok === 1 ? "Aprobada" : `${ok} aprobadas`);
-      window.dispatchEvent(new Event("opai-bandeja"));
+      avisarCambio();
     }
     return ok === ids.length;
   }
@@ -49,7 +50,7 @@ export function useResolver(dePlataforma: ReadonlySet<string> = new Set()) {
     for (const id of ids) if (await rechazarUna(id, motivo)) ok++;
     if (ok) {
       avisar.exito(ok === 1 ? "Rechazada" : `${ok} rechazadas`);
-      window.dispatchEvent(new Event("opai-bandeja"));
+      avisarCambio();
     }
     return ok === ids.length;
   }

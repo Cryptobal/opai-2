@@ -1,6 +1,6 @@
 import { Empty, Table, Td, Th, Tr } from "@opai/ds";
 
-import { cantidad, usd } from "../../../_componentes/formato";
+import { cantidad, nombreRecurso, usd } from "../../../_componentes/formato";
 import { PaginaTenant } from "../pagina-tenant";
 
 export const metadata = { title: "Consumos de la empresa" };
@@ -22,7 +22,7 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
             <tbody>
               {panel.porRecurso.map((r) => (
                 <Tr key={r.recurso}>
-                  <Td className="t-mono">{r.recurso}</Td>
+                  <Td>{nombreRecurso(r.recurso)}</Td>
                   <Td className="t-numeric text-right">{cantidad(r.cantidad)}</Td>
                   <Td className="t-numeric text-right">{usd(r.costoUsd)}</Td>
                 </Tr>

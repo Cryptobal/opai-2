@@ -2,15 +2,12 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
-import {
-  cifrarCampoEnTransaccion,
-  descifrarCampoEnTransaccion,
-} from "../cumplimiento/cifrado-campos";
 import { defineCapability } from "../../define";
 import { conflicto, prohibido, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaFicha } from "./personas-ficha-comun";
+import { aplicarSolicitudPago } from "./personas-pago-aplicar";
 import { exigirCatalogo, vistaPago } from "./personas-pago-vista";
 
 const motivoRechazo = z.string().trim().min(5).max(500);
@@ -39,7 +36,7 @@ export const personasPagoAprobarCambio = defineCapability({
     if (!ctx.usuario?.id) throw reglaDeNegocio("Se requiere un usuario autenticado.");
     if (s.solicitadoPorId === ctx.usuario.id)
       throw prohibido("No puedes aprobar una solicitud que tú mismo registraste.");
-    exigirCatalogo(s); // CAR-244: a la cuenta vigente solo entra un banco del catálogo SBIF.
+    if (s.tipo === "reemplazar" || s.tipo === "agregar") exigirCatalogo(s); // CAR-244: a la cuenta vigente solo entra un banco del catálogo SBIF.
     if (dryRun) return { personaId: p.id, solicitudId: s.id, estado: "aprobada" as const };
     await escribirConEvento(
       ctx,
@@ -60,38 +57,7 @@ export const personasPagoAprobarCambio = defineCapability({
         if (resuelta.count !== 1) {
           throw conflicto("La solicitud ya no está pendiente o no puedes resolverla.");
         }
-        const numeroVigente = s.numeroCuenta
-          ? await cifrarCampoEnTransaccion(
-              ctx,
-              tx,
-              "personas_pago",
-              "numero_cuenta",
-              await descifrarCampoEnTransaccion(
-                ctx,
-                tx,
-                "personas_pago_solicitudes",
-                "numero_cuenta",
-                s.numeroCuenta,
-              ),
-            )
-          : null;
-        await tx.personaPago.upsert({
-          where: { personaId: p.id },
-          create: {
-            tenantId: p.tenantId,
-            personaId: p.id,
-            bancoCodigo: s.bancoCodigo,
-            tipoCuenta: s.tipoCuenta,
-            numeroCuenta: numeroVigente,
-            rutTitular: s.rutTitular,
-          },
-          update: {
-            bancoCodigo: s.bancoCodigo,
-            tipoCuenta: s.tipoCuenta,
-            numeroCuenta: numeroVigente,
-            rutTitular: s.rutTitular,
-          },
-        });
+        await aplicarSolicitudPago(ctx, tx, p, s);
         return { id: p.id };
       },
     );

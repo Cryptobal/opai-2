@@ -6,6 +6,7 @@ import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { identidadActual } from "@/lib/servidor";
 
+import { CuentasPago, TEXTO_TIPO } from "./cuentas-pago";
 import { SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
 import { cuentaCorta } from "./estado-ficha";
 import { type CuentaPago, pagoDe } from "./lecturas-ficha";
@@ -32,6 +33,9 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
   const v = d.vigente;
   const sinCuenta = !v.bancoCodigo && !v.tipoCuenta && !v.numeroCuenta && !v.rutTitular;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPagoManage);
+  const bloqueoPendiente = d.solicitudPendiente
+    ? "Ya hay una solicitud de cambio pendiente de RRHH."
+    : null;
   const puedeAprobar = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPagoAprobar);
   const acciones: AccionEntidad[] =
     d.solicitudPendiente && puedeAprobar
@@ -69,18 +73,26 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
       {...(puede
         ? {
             accion: (
-              <BotonEditarSeccion
-                seccion="pago"
-                etiqueta={d.solicitudPendiente ? "Ver solicitud" : "Solicitar cambio"}
-              />
+              <div className="flex flex-wrap gap-2">
+                <BotonEditarSeccion
+                  seccion="pago"
+                  etiqueta={d.solicitudPendiente ? "Ver solicitud" : "Solicitar cambio"}
+                />
+                {d.solicitudPendiente ? null : (
+                  <BotonEditarSeccion seccion="pago-agregar" etiqueta="Agregar cuenta" />
+                )}
+              </div>
             ),
           }
         : {})}
     >
       {d.solicitudPendiente ? (
         <Alerta tono="warning" titulo="Cambio de cuenta pendiente de RRHH">
-          Nueva cuenta: {cuentaCorta(d.solicitudPendiente) ?? "sin datos"}. La aprueba o rechaza
-          alguien distinto de quien la registró.
+          {TEXTO_TIPO[d.solicitudPendiente.tipo]}
+          {d.solicitudPendiente.tipo === "reemplazar" || d.solicitudPendiente.tipo === "agregar"
+            ? `: ${cuentaCorta(d.solicitudPendiente) ?? "sin datos"}`
+            : ""}
+          . La aprueba o rechaza alguien distinto de quien la registró.
         </Alerta>
       ) : null}
       {sinCuenta && !d.solicitudPendiente ? (
@@ -100,20 +112,32 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
           { etiqueta: "RUT titular", valor: v.rutTitular, mono: true },
         ]}
       />
+      <CuentasPago
+        personaId={personaId}
+        cuentas={d.cuentas}
+        puede={puede}
+        bloqueado={Boolean(d.solicitudPendiente)}
+      />
       {acciones.length ? (
         <div className="mt-3">
           <AccionesEntidad etiqueta="Resolución RRHH" acciones={acciones} />
         </div>
       ) : null}
       {puede ? (
-        <HojaEditarSeccion
-          seccion="pago"
-          personaId={personaId}
-          inicial={{ bancoCodigo: "", tipoCuenta: "", numeroCuenta: "", rutTitular: "" }}
-          {...(d.solicitudPendiente
-            ? { bloqueo: "Ya hay una solicitud de cambio pendiente de RRHH." }
-            : {})}
-        />
+        <>
+          <HojaEditarSeccion
+            seccion="pago"
+            personaId={personaId}
+            inicial={{ bancoCodigo: "", tipoCuenta: "", numeroCuenta: "", rutTitular: "" }}
+            {...(bloqueoPendiente ? { bloqueo: bloqueoPendiente } : {})}
+          />
+          <HojaEditarSeccion
+            seccion="pago-agregar"
+            personaId={personaId}
+            inicial={{ bancoCodigo: "", tipoCuenta: "", numeroCuenta: "", porDefecto: "no" }}
+            {...(bloqueoPendiente ? { bloqueo: bloqueoPendiente } : {})}
+          />
+        </>
       ) : null}
     </SeccionTarjeta>
   );

@@ -32,8 +32,8 @@ describe("finanzas flujo · saldos acumulados grandes", () => {
       expect(f).toMatchObject({ ok: true });
     }
     // Ingreso planificado 1000 de la semilla; dos egresos al tope reemplazan o se suman.
-    const saldoEsperado = 100 + 1000 - MONTO_FLUJO_MAX - MONTO_FLUJO_MAX;
-    const planilla = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 1 });
+    const saldoEsperado = 1000 - MONTO_FLUJO_MAX - MONTO_FLUJO_MAX;
+    const planilla = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 1, desde: S0 });
     if (!planilla.ok) throw new Error(JSON.stringify(planilla));
     const sem = (planilla.data as { semanas: { saldoFinal: number }[] }).semanas;
     expect(sem[0]?.saldoFinal).toBe(saldoEsperado);

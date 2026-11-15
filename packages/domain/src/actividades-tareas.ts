@@ -50,11 +50,7 @@ export function instanteEnZona(dia: string, hora: string, zona = ZONA): string {
 }
 
 /** Grupo de Mis tareas: vencidas (antes de ahora), hoy, esta semana (hasta el domingo), más adelante. */
-export function grupoDeTarea(
-  vencimiento: string | null,
-  ahora: Date,
-  zona = ZONA,
-): GrupoTarea {
+export function grupoDeTarea(vencimiento: string | null, ahora: Date, zona = ZONA): GrupoTarea {
   if (!vencimiento) return "sin_fecha";
   const v = new Date(vencimiento);
   if (v.getTime() < ahora.getTime()) return "vencidas";
@@ -64,6 +60,15 @@ export function grupoDeTarea(
   // Lunes = 1 … domingo = 7: «esta semana» llega hasta el domingo.
   const diaSemana = new Date(`${hoy}T12:00:00Z`).getUTCDay() || 7;
   return dias <= 7 - diaSemana ? "semana" : "despues";
+}
+
+/** Agenda de Inicio (CAR-335 D3): vence después de hoy y a lo más `dias` días calendario más allá. */
+export function enAgenda(vencimiento: string | null, ahora: Date, dias = 14, zona = ZONA): boolean {
+  if (!vencimiento) return false;
+  const v = new Date(vencimiento);
+  if (v.getTime() < ahora.getTime()) return false;
+  const d = diasEntre(diaEnZona(ahora, zona), diaEnZona(v, zona));
+  return d >= 1 && d <= dias;
 }
 
 export type TonoVencimiento = "danger" | "warning" | "neutro";

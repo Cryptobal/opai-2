@@ -15,29 +15,39 @@ export type MovidoSemana = {
 };
 
 /**
- * Lo movido en la semana en curso que ya está en el saldo del banco: por cada cuenta que suma en él, los movimientos
- * desde el lunes hasta hoy y hasta la fecha de ESE saldo (lo posterior no está en él). La apertura de la semana los
- * resta (ADR-073); los abonos vuelven a la semana como celdas reales y los cargos los cubre la proyección.
+ * Lo movido en la semana en curso hasta hoy, en las cuentas que suman en el saldo del banco. La apertura de la semana
+ * es el saldo al cierre del domingo (`llevarSaldo`, CAR-343), así que nada de esto está en ella: los abonos vuelven a
+ * la semana como celdas reales y los cargos los cubre la proyección (ADR-073). Antes se cortaba en la fecha del saldo
+ * de cada cuenta y un abono posterior a un saldo antiguo se perdía.
  */
-export async function movidosDeLaSemana(db: TenantTx, banco: SaldoBanco, lunes: string): Promise<MovidoSemana[]> {
+export async function movidosDeLaSemana(
+  db: TenantTx,
+  banco: SaldoBanco,
+  lunes: string,
+): Promise<MovidoSemana[]> {
   const filas = await db.movimientoBancario.findMany({
     where: {
       estado: { not: "ignorado" },
       cuentaId: { in: banco.cuentasConSaldo.map((c) => c.cuentaId) },
       fecha: { gte: aFecha(lunes), lte: aFecha(hoyIso()) },
     },
-    select: { id: true, cuentaId: true, fecha: true, monto: true, estado: true, glosa: true, referencia: true },
+    select: {
+      id: true,
+      cuentaId: true,
+      fecha: true,
+      monto: true,
+      estado: true,
+      glosa: true,
+      referencia: true,
+    },
     orderBy: [{ fecha: "asc" }, { id: "asc" }],
   });
-  const corte = new Map(banco.cuentasConSaldo.map((c) => [c.cuentaId, c.fecha] as const));
-  return filas
-    .filter((m) => aIso(m.fecha) <= (corte.get(m.cuentaId) ?? ""))
-    .map((m) => ({
-      id: m.id,
-      cuentaId: m.cuentaId,
-      fecha: aIso(m.fecha),
-      monto: aNumeroSeguro(m.monto),
-      estado: m.estado,
-      texto: `${m.glosa} ${m.referencia ?? ""}`.trim(),
-    }));
+  return filas.map((m) => ({
+    id: m.id,
+    cuentaId: m.cuentaId,
+    fecha: aIso(m.fecha),
+    monto: aNumeroSeguro(m.monto),
+    estado: m.estado,
+    texto: `${m.glosa} ${m.referencia ?? ""}`.trim(),
+  }));
 }

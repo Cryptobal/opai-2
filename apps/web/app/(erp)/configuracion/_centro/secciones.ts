@@ -17,8 +17,10 @@ import {
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { type Seccion, seccion as s } from "./seccion-tipo";
+import { SECCIONES_CRM } from "./secciones-crm";
 import { SECCIONES_FINANZAS } from "./secciones-finanzas";
 import { SECCIONES_OPERACION } from "./secciones-operacion";
+import { SECCIONES_PERSONAS } from "./secciones-personas";
 
 export type { Seccion };
 
@@ -76,8 +78,10 @@ export const SECCIONES: readonly Seccion[] = [
     grupo: "empresa",
     permiso: PERMISOS_CORE.correosSinAsignar,
   }),
+  ...SECCIONES_CRM,
   ...SECCIONES_FINANZAS,
   ...SECCIONES_OPERACION,
+  ...SECCIONES_PERSONAS,
   s({
     id: "usuarios",
     titulo: "Usuarios y permisos",

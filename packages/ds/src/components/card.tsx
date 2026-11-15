@@ -26,6 +26,12 @@ export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivEleme
   return <div className={cn("p-4 pt-2", className)} {...props} />;
 }
 
+/**
+ * Grilla de indicadores en el marco Hilo (H2, CAR-324): sin espacio vertical entre filas, 24 px entre
+ * columnas y una línea al pie, como el «Pulso» del diseño. Se suma a la grilla de cada pantalla.
+ */
+export const GRILLA_KPI_HILO = "ds-grilla-kpi";
+
 type KpiProps = {
   etiqueta: string;
   valor: string;
@@ -45,14 +51,23 @@ const TONO_VARIACION = {
  * un monto de 9 dígitos cabe en la grilla de 2 columnas del celular a 375 px.
  */
 export function KpiTile({ etiqueta, valor, variacion }: KpiProps) {
+  // Marco Hilo (H2, CAR-324): sin tarjeta, una línea encima, como el «Pulso» del diseño; el valor
+  // llega a 26 px. El tablero quita el espacio vertical entre filas y cierra con la línea de abajo.
   return (
-    <Card className="@container flex min-w-0 flex-col gap-1.5 p-4">
-      <p className="t-label-sm text-fg-muted">{etiqueta}</p>
-      <p className="t-numeric text-[length:clamp(14px,11cqi,22px)] leading-7 font-semibold tracking-[-0.015em] whitespace-nowrap text-fg">
+    <Card className="ds-kpi @container flex min-w-0 flex-col gap-1.5 p-4">
+      <p className="ds-kpi-etiqueta t-label-sm text-fg-muted">{etiqueta}</p>
+      <p className="ds-kpi-valor t-numeric text-[length:clamp(14px,11cqi,22px)] leading-7 font-semibold tracking-[-0.015em] whitespace-nowrap text-fg">
         {valor}
       </p>
       {variacion ? (
-        <p className={cn("t-numeric text-xs", TONO_VARIACION[variacion.tono])}>{variacion.texto}</p>
+        <p
+          className={cn(
+            "ds-kpi-nota t-numeric text-xs",
+            TONO_VARIACION[variacion.tono],
+          )}
+        >
+          {variacion.texto}
+        </p>
       ) : null}
     </Card>
   );

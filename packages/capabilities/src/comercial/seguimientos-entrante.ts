@@ -19,6 +19,8 @@ export const seguimientosRecibirCorreo = defineCapability({
   interna: true,
   // El contenido del correo es de un tercero: no se copia a la auditoría (CAR-297).
   sensibles: ["remitente", "asunto", "texto"],
+  // Con Comercial en solo lectura la respuesta se guarda igual, sin crear tareas (ADR-071, adenda 7.5).
+  entrante: true,
   input: z.object({
     seguimientoId: z.uuid(),
     mensajeId: z.string().min(1).max(200),
@@ -38,7 +40,7 @@ export const seguimientosRecibirCorreo = defineCapability({
     if (dryRun) return { registrado: true };
     const config = await configDeVersion(ctx, s.planId, s.planVersion);
     await ctx.transaccion(async (tx) => {
-      const vivo = s.estado === "activo" || s.estado === "pausado";
+      const vivo = (s.estado === "activo" || s.estado === "pausado") && !ctx.modulosSoloLectura.includes("comercial");
       const actividadId = vivo
         ? await aplicarRespuesta(ctx, tx, s, config, { titulo: "El cliente respondió por correo", detalle: `De ${input.remitente}. Contenido externo en el seguimiento.` })
         : null;

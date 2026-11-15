@@ -59,8 +59,7 @@ export async function datosPanel(ctx: Contexto, input: EntradaPanel) {
     },
     personas: {
       where: personas,
-      take: input.tipo === "persona" ? 51 : 0,
-      ...cursorDe(f.cursor),
+      ...(input.tipo === "persona" ? cursorDe(f.cursor, 50) : { take: 0 }),
       orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
       include: { vinculos: { where: { estado: "vigente" }, take: 1, include: { cargo: true } } },
     },

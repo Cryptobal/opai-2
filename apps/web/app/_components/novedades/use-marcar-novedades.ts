@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { listaComoLeida } from "./aplicar-leida";
 import type { ItemNovedad } from "./tarjeta-novedad";

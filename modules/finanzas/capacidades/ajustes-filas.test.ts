@@ -12,9 +12,11 @@ const nuevo = () => contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIV
 describe("ajustes y filas", () => {
   it("actualiza el umbral y crea una fila con dry_run previo", async () => {
     const { ctx } = nuevo();
-    expect(
-      await executeCapability(ctx, "finanzas.ajustes.actualizar", { umbral: 2000 }),
-    ).toMatchObject({ ok: true, data: { umbral: 2000, saldoInicial: 100 } });
+    const aj = await executeCapability(ctx, "finanzas.ajustes.actualizar", { umbral: 2000 });
+    expect(aj).toMatchObject({ ok: true, data: { umbral: 2000 } });
+    // Sin saldo inicial ni semana de partida: el saldo parte del banco (ADR-073, CAR-394).
+    expect(aj.ok && aj.data).not.toHaveProperty("saldoInicial");
+    expect(aj.ok && aj.data).not.toHaveProperty("desde");
     const antes = (await ctx.db.flujoFila.findMany({})).length;
     await executeCapability(
       ctx,

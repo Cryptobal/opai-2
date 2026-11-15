@@ -24,9 +24,13 @@ export function AreaPrincipal({ grupos }: { grupos: GrupoArea[] }) {
       <p className="t-body-sm mb-3 text-fg-muted">
         Elige qué aparece en la barra inferior del teléfono.
       </p>
-      {prefs.errorCarga ? <Alerta tono="danger" titulo="No se pudieron cargar tus preferencias">
-        <Button variant="secondary" onClick={() => void prefs.reintentar()}>Reintentar</Button>
-      </Alerta> : null}
+      {prefs.errorCarga ? (
+        <Alerta tono="danger" titulo="No se pudieron cargar tus preferencias">
+          <Button variant="secondary" onClick={() => void prefs.reintentar()}>
+            Reintentar
+          </Button>
+        </Alerta>
+      ) : null}
       <RadioGroup
         etiqueta="Área principal"
         valor={prefs.areaPrincipal ?? "defecto"}

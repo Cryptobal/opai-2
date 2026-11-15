@@ -1,42 +1,25 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import { serieVigente, trabajaEn } from "@opai/domain";
 
-import { uuidSchema } from "../core/esquemas";
+import { claseValida } from "../core/maestros/ausencias-clases";
 import { sinDuplicado } from "../core/maestros/comun";
 import { defineCapability } from "../define";
 import { conflicto, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { anotar } from "./anotar";
+import { registrarDesdePauta } from "./ausencias-registro";
 import { cargarSeries } from "./cargar";
-import { aFechaDb, diasDelRango, fechaIso, PERMISO_WRITE, puestoParaPauta, rangoSchema } from "./comun";
+import { aFechaDb, diasDelRango, fechaIso, PERMISO_WRITE, puestoParaPauta } from "./comun";
 import { nombresDePersonas } from "./nombres";
-import { tipoExcepcionSchema } from "./vistas";
-
-const crearInput = z
-  .object({
-    puestoId: uuidSchema,
-    tipo: tipoExcepcionSchema,
-    motivo: z.string().trim().min(3, "Cuenta brevemente el motivo.").max(200),
-  })
-  .and(rangoSchema);
-
-const crearSalida = z.object({
-  puestoId: z.string(),
-  tipo: tipoExcepcionSchema,
-  desde: z.string(),
-  hasta: z.string(),
-  /** Días de turno registrados (los libres del rango se omiten). */
-  dias: z.number().int(),
-  /** Titulares a los que el sistema avisará (notificación, sin confirmar). */
-  avisarA: z.array(z.string()),
-});
+import { crearInput, crearSalida } from "./excepciones-crear-esquemas";
 
 type Entrada = z.output<typeof crearInput>;
 
 /** Valida el rango contra la serie vigente y arma lo que se registra; sirve a la vista previa y a la real. */
 async function planear(ctx: Contexto, i: Entrada) {
   const puesto = await puestoParaPauta(ctx, i.puestoId);
+  const clase = await claseValida(ctx, i.tipo, i.clase);
   const series = await cargarSeries(ctx, puesto.id);
   // Solo cuentan los días de turno según la serie vigente: un día libre no tiene qué quedar por cubrir.
   const dias = diasDelRango(i.desde, i.hasta).flatMap((f) => {
@@ -50,13 +33,22 @@ async function planear(ctx: Contexto, i: Entrada) {
         : "Ningún día de ese rango es de turno según la serie del puesto.",
     );
   const repetida = await ctx.db.excepcionPauta.findFirst({
-    where: { puestoId: puesto.id, estado: "activa", fecha: { in: dias.map((d) => aFechaDb(d.fecha)) } },
+    where: {
+      puestoId: puesto.id,
+      estado: "activa",
+      fecha: { in: dias.map((d) => aFechaDb(d.fecha)) },
+    },
     select: { fecha: true },
   });
   if (repetida)
-    throw conflicto(`Ya hay una excepción activa el ${fechaIso(repetida.fecha)}: anúlala antes de registrar otra.`);
-  const nombres = await nombresDePersonas(ctx, dias.map((d) => d.personaId));
-  return { puesto, dias, avisarA: [...nombres.values()] };
+    throw conflicto(
+      `Ya hay una excepción activa el ${fechaIso(repetida.fecha)}: anúlala antes de registrar otra.`,
+    );
+  const nombres = await nombresDePersonas(
+    ctx,
+    dias.map((d) => d.personaId),
+  );
+  return { puesto, dias, clase, avisarA: [...nombres.values()] };
 }
 
 /** Registra una ausencia, licencia, vacaciones o permiso: los turnos de esos días quedan PPC. */
@@ -68,6 +60,8 @@ export const excepcionesCrear = defineCapability({
   input: crearInput,
   output: crearSalida,
   efecto: "escritura",
+  // El motivo es texto libre y puede ser de salud: no llega en claro a la auditoría (CAR-393).
+  sensibles: ["motivo"],
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const hasta = input.hasta ?? input.desde;
@@ -84,6 +78,17 @@ export const excepcionesCrear = defineCapability({
       // Un puesto a la vez: bloquea la fila y revalida dentro (serie, días libres y repeticiones).
       await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${input.puestoId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       const plan = await planear({ ...ctx, db: tx }, input);
+      // Cada titular afectado queda con su registro de ausencia (CAR-393), en el mismo instante que sus turnos.
+      const ahora = new Date();
+      const registros = await registrarDesdePauta(tx, {
+        tenantId: ctx.tenantId,
+        tipo: input.tipo,
+        motivo: input.motivo,
+        clase: plan.clase,
+        usuarioId: ctx.usuario?.id ?? null,
+        ahora,
+        dias: plan.dias.map((d) => ({ fecha: aFechaDb(d.fecha), personaId: d.personaId })),
+      });
       await sinDuplicado(
         tx.excepcionPauta.createMany({
           data: plan.dias.map((d) => ({
@@ -92,8 +97,11 @@ export const excepcionesCrear = defineCapability({
             fecha: aFechaDb(d.fecha),
             tipo: input.tipo,
             motivo: input.motivo,
+            clase: plan.clase,
             personaId: d.personaId,
+            ausenciaId: d.personaId ? (registros.get(d.personaId) ?? null) : null,
             creadaPor: ctx.usuario?.id ?? null,
+            createdAt: ahora,
           })),
         }),
         "Ya hay una excepción activa en alguno de esos días: anúlala antes de registrar otra.",

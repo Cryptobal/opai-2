@@ -1,0 +1,89 @@
+import { expect, test } from "@playwright/test";
+
+import { capturar } from "./preview";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
+
+// Desempeño (CAR-307) en `preview-e2e`: la lista de cargos, el scorecard de un cargo con su editor y,
+// si el cargo tiene equipo visible, el resultado de una persona; a 375, 1024 y 1280 px. Entra con el
+// usuario de la empresa ficticia `qa-e2e` (necesita el módulo Desempeño activo y al menos un cargo).
+test.use({ actionTimeout: 30_000 });
+test.setTimeout(180_000);
+
+test.describe("@preview desempeño", () => {
+  test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
+
+  test("lista de cargos, scorecard con su editor y resultado de una persona", async ({
+    page,
+  }, info) => {
+    const errores: string[] = [];
+    page.on("pageerror", (e) => errores.push(e.name));
+    await entrar(page);
+
+    await page.goto("/desempeno");
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    const cargo = page.locator('a[href^="/desempeno/cargos/"]').filter({ visible: true }).first();
+    // Sin cargos (por ejemplo, la base efímera del job e2e) no hay ficha que recorrer: se captura la lista
+    // y se anota como omitido, igual que las demás pruebas @preview que dependen de datos de qa-e2e.
+    await capturar(page, info, "desempeno-lista");
+    if (!(await cargo.count())) {
+      info.annotations.push({ type: "omitido", description: "qa-e2e sin cargos en Desempeño" });
+      expect(errores).toEqual([]);
+      return;
+    }
+
+    await cargo.click();
+    await page.waitForURL(/\/desempeno\/cargos\/[0-9a-f-]{36}/);
+    await expect(page.getByText("Equipo", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "desempeno-cargo");
+
+    // Elegir otro mes (pendiente de CAR-307): el mes anterior por la URL, sin errores.
+    const anterior = page.getByRole("navigation", { name: "Mes" }).getByRole("link").first();
+    await expect(anterior, "el equipo trae el selector de mes").toBeVisible();
+    {
+      await anterior.click();
+      await page.waitForURL(/[?&]mes=\d{4}-\d{2}/);
+      await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+      await capturar(page, info, "desempeno-cargo-mes-anterior");
+      await page.goBack();
+      await page.waitForURL((u) => !u.search.includes("mes="));
+    }
+
+    const editar = page.getByRole("button", { name: /Editar scorecard|Definir scorecard/ }).first();
+    await editar.click();
+    await expect(page.getByText(/Los pesos suman/)).toBeVisible();
+    await capturar(page, info, "desempeno-editor");
+    await page.keyboard.press("Escape");
+
+    const persona = page
+      .locator('a[href^="/desempeno/personas/"]')
+      .filter({ visible: true })
+      .first();
+    if (await persona.count()) {
+      await persona.click();
+      await page.waitForURL(/\/desempeno\/personas\/[0-9a-f-]{36}/);
+      await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+      await capturar(page, info, "desempeno-persona");
+    }
+    await page.goto("/desempeno/indicadores");
+    await expect(page.getByRole("link", { name: "Indicadores propios" })).toBeVisible();
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "desempeno-indicadores");
+    // Meses cerrados: solo se mira (cerrar no se deshace); si está el botón, se abre y se cancela.
+    await page.goto("/desempeno/cierres");
+    await expect(page.getByRole("link", { name: "Meses cerrados" })).toBeVisible();
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "desempeno-cierres");
+    const cerrar = page.getByRole("button", { name: /^Cerrar / }).first();
+    if (await cerrar.count()) {
+      await cerrar.click();
+      await expect(
+        page.getByText(/Se guarda el resultado de \d|quedará cerrado vacío/),
+      ).toBeVisible();
+      await page.waitForTimeout(300);
+      await capturar(page, info, "desempeno-cierres-confirmar");
+      await page.getByRole("button", { name: "Cancelar" }).click();
+    }
+    expect(errores).toEqual([]);
+  });
+});

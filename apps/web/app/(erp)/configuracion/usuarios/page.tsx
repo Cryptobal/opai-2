@@ -22,13 +22,15 @@ export default function Usuarios() {
       seccion="usuarios"
       titulo="Usuarios y permisos"
       cargar={async () => {
-        const [usuarios, invitaciones, permisos] = await Promise.all([
+        const [usuarios, pagina, permisos] = await Promise.all([
           ejecutarComoUsuario<Miembro[]>("erp", "core.users.list"),
-          ejecutarComoUsuario<Invitacion[]>("erp", "core.invitations.list", {
+          ejecutarComoUsuario<{ items: Invitacion[] }>("erp", "core.invitations.list", {
             soloPendientes: true,
+            limite: 200,
           }),
           cargarPermisos(),
         ]);
+        const invitaciones = pagina.ok ? { ...pagina, data: pagina.data.items } : pagina;
         return { usuarios, invitaciones, ...permisos };
       }}
       cabecera={({ usuarios, invitaciones }) => {

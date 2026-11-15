@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Campo, Combobox } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { Compositor } from "./compositor";
 import type { FichaActividad } from "./tipos";

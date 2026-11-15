@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 
 import { Badge, ListScreen } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { etiquetaCapacidad } from "@/app/(erp)/configuracion/auditoria/_componentes/capacidad";
 
 type Entidad = { tipo: string; id: string; etiqueta: string | null };

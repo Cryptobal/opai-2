@@ -3,6 +3,7 @@ import {
   buscadoresComercial,
   capacidadesComercial,
   defineModule,
+  hechosComercial,
   indicadoresComercial,
 } from "@opai/capabilities";
 
@@ -134,6 +135,8 @@ export const manifest = defineModule({
     },
   ],
   capacidades: capacidadesComercial,
+  // Hechos que la empresa puede usar para armar indicadores propios (CAR-313, ADR-094 §8).
+  hechos: hechosComercial,
   buscadores: buscadoresComercial,
   // Indicadores de gestión para el catálogo del núcleo (CAR-308, ADR-094).
   indicadores: indicadoresComercial,

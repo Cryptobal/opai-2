@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { sinDesborde } from "./negocios-ayuda";
+import { accionNegocios, sinDesborde } from "./negocios-ayuda";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -12,7 +12,7 @@ test.describe("@preview comercial: reportes", () => {
   test("se llega desde Negocios, cambia de período y no se desborda", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/negocios");
-    await page.getByRole("link", { name: "Reportes", exact: true }).click();
+    await accionNegocios(page, info.project.name === "telefono", "Reportes");
     await page.waitForURL(/\/negocios\/reportes/);
     const periodo = page.getByRole("group", { name: "Período" });
     await expect(periodo.getByRole("link", { name: "Mes", exact: true })).toBeVisible();

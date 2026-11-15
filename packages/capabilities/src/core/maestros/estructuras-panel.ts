@@ -68,7 +68,7 @@ export const estructurasPanel = defineCapability({
     // Se auditan solo las versiones realmente devueltas (historial + capas efectivas).
     const reveladas = [...new Map([...versiones, ...vigentes].map((e) => [e.id, e])).values()];
     const ocultas = await ocultasDe(ctx, reveladas);
-    const personas = pagina(datos.personas, 50);
+    const personas = pagina(datos.personas, 50, input.filtros.cursor);
     const alertas = resumirAlertasDocumentos(datos.documentoVinculos);
     return {
       vinculos: persona?.vinculos.map(vistaVinculo) ?? [],

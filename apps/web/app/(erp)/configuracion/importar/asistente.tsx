@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { avisar, Button, Campo, Select, Uploader } from "@opai/ds";
 
+import { avisarCambio } from "@/app/_components/ejecutar-capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { MapeoColumnas } from "./mapeo-columnas";
@@ -69,6 +70,8 @@ export function AsistenteImportar({ catalogo }: { catalogo: Catalogo }) {
       desde = r.siguiente;
     }
     setHecho(total);
+    // Los lotes siguientes no invalidan nada: al terminar, un aviso pone al día contadores y hilo.
+    avisarCambio();
     if (desde === null) {
       avisar.exito(`Importación lista: ${total.crear} creados y ${total.actualizar} completados`);
       setArchivo(null);

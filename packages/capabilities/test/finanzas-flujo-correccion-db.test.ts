@@ -63,7 +63,6 @@ describe.skipIf(omitirSuiteDb())("Finanzas · corrección del flujo (db)", () =>
     await e.admin.user.create({
       data: { id: usuarioId, email: `u-${randomUUID().slice(0, 8)}@flujo.test`, name: "u" },
     });
-    await ok("finanzas.ajustes.actualizar", { saldoInicial: 0, desde: "2026-10-05" });
     cuentaId = (
       await ok<{ id: string }>("finanzas.bancos.guardar", { banco: "Banco QA", numeroVisible: "55001122" })
     ).id;
@@ -138,12 +137,10 @@ describe.skipIf(omitirSuiteDb())("Finanzas · corrección del flujo (db)", () =>
       "egreso,Nueva fila CSV,2026-12-07,1.000",
       "egreso,Otra,2026-02-30,500",
     ].join("\n");
-    const r = await ok<{ aplicadas: number; errores: number }>("finanzas.flujo.importar", { contenido: csv, saldoInicial: 777 });
+    const r = await ok<{ aplicadas: number; errores: number }>("finanzas.flujo.importar", { contenido: csv });
     expect(r.errores).toBe(1);
     expect(r.aplicadas).toBe(0);
     expect(await e.admin.flujoFila.count({ where: { tenantId } })).toBe(antes);
-    const ajustes = await ok<{ saldoInicial: number }>("finanzas.ajustes.obtener", {});
-    expect(ajustes.saldoInicial).toBe(0);
   });
 
   it("importar rechaza las filas de ingresos y no aplica nada (ADR-073)", async () => {
@@ -151,17 +148,16 @@ describe.skipIf(omitirSuiteDb())("Finanzas · corrección del flujo (db)", () =>
     const csv = ["seccion,etiqueta,semana,monto", "ingreso,Cliente CSV,2026-12-07,1.000"].join("\n");
     const r = await ok<{ aplicadas: number; errores: number; filas: { mensaje: string | null }[] }>(
       "finanzas.flujo.importar",
-      { contenido: csv, saldoInicial: 888 },
+      { contenido: csv },
     );
     expect(r.errores).toBe(1);
     expect(r.aplicadas).toBe(0);
     expect(r.filas[0]?.mensaje).toContain("Los ingresos no se ajustan a mano");
     expect(await e.admin.flujoFila.count({ where: { tenantId } })).toBe(antes);
-    expect((await ok<{ saldoInicial: number }>("finanzas.ajustes.obtener", {})).saldoInicial).toBe(0);
   });
 
-  it("bajar el saldo inicial con el aviso activo emite el aviso", async () => {
-    await ok("finanzas.ajustes.actualizar", { avisoActivo: true, umbral: 0, saldoInicial: -1_000_000_000 });
+  it("subir el umbral sobre el saldo con el aviso activo emite el aviso", async () => {
+    await ok("finanzas.ajustes.actualizar", { avisoActivo: true, umbral: 1_000_000_000_000 });
     expect(await e.admin.flujoAvisoEmitido.count({ where: { tenantId } })).toBeGreaterThan(0);
   });
 });

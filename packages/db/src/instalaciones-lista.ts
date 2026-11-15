@@ -39,7 +39,10 @@ export async function listarInstalaciones(tx: TenantTx, f: FiltroInstalaciones) 
         AND (${q}::text IS NULL OR nombre ILIKE ${q} OR comuna ILIKE ${q})
     ), pagina AS (
       SELECT * FROM filtradas WHERE (${f.cursor ?? null}::uuid IS NULL OR
-        (nombre, id) > (SELECT nombre, id FROM filtradas WHERE id = ${f.cursor ?? null}::uuid))
+        -- La referencia sale de la tabla y no de «filtradas»: si la fila del cursor dejó de calzar
+        -- (archivada, otro estado o fuera de alcance), la lista sigue en vez de cortarse (CAR-400).
+        (nombre, id) > (SELECT nombre, id FROM core.instalaciones
+          WHERE tenant_id = ${f.tenantId}::uuid AND id = ${f.cursor ?? null}::uuid))
       ORDER BY nombre, id LIMIT ${f.limite + 1}
     )
     SELECT i.id, i.tenant_id AS "tenantId", i.cuenta_id AS "cuentaId", i.nombre, i.estado,

@@ -59,7 +59,7 @@ async function guardadosDe(ctx: Parameters<typeof cuentaDe>[0], documentoId: str
 export const ventasDestinatariosSugeridos = defineCapability({
   id: "finanzas.ventas.destinatarios_sugeridos",
   descripcion:
-    "Propone los destinatarios del correo de un documento de venta a partir de la cuenta del cliente: la casilla DTE de la cuenta como destinatario principal y los contactos con rol facturación en copia. Si se indica el documento, devuelve además los destinatarios ya guardados en él.",
+    "Propone los destinatarios del correo de un documento de venta a partir de la cuenta del cliente: todos los contactos con rol facturación como destinatarios principales (hasta 10) y la casilla DTE de la cuenta, que recibe el XML, en copia. Si se indica el documento, devuelve además los destinatarios ya guardados en él.",
   permiso: PERMISO_VENTAS,
   input: z.object({
     cuentaId: uuidSchema,
@@ -99,7 +99,7 @@ export const ventasDestinatariosSugeridos = defineCapability({
 export const ventasGuardarDestinatarios = defineCapability({
   id: "finanzas.ventas.guardar_destinatarios",
   descripcion:
-    "Guarda los destinatarios del correo de un documento de venta: exactamente uno PARA y el resto en copia (CC) o copia oculta (BCC), hasta 20 en total, sin correos repetidos. Reemplaza la lista anterior del documento. El envío al cliente usa esta lista; si no hay ninguna, usa los contactos de facturación.",
+    "Guarda los destinatarios del correo de un documento de venta: de 1 a 10 principales (PARA), que reciben igual, y el resto en copia (CC) o copia oculta (BCC), hasta 20 en total, sin correos repetidos. Al enviar, la casilla DTE del cliente se agrega en copia si no está. Reemplaza la lista anterior del documento. El envío al cliente usa esta lista; si no hay ninguna, usa los contactos de facturación.",
   permiso: PERMISO_VENTAS,
   input: z.object({
     documentoId: documentoEmitidoIdSchema,
@@ -108,6 +108,7 @@ export const ventasGuardarDestinatarios = defineCapability({
   output: z.object({
     documentoId: z.string(),
     para: z.string(),
+    paraAdicionales: z.array(z.string()),
     cc: z.array(z.string()),
     bcc: z.array(z.string()),
     destinatarios: z.array(destinatarioSalidaSchema),

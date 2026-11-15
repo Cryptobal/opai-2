@@ -6,11 +6,19 @@ import { COOKIE_MARCO, cookieMarco, marcoDeCookie, portalAdmiteHilo, rutaAncha }
 vi.mock("@/app/_acciones/auth", () => ({ accionSalir: () => undefined }));
 
 describe("elección del marco (ADR-090)", () => {
-  it("sin cookie o con un valor desconocido queda el marco clásico", () => {
-    expect(marcoDeCookie(undefined)).toBe("clasico");
-    expect(marcoDeCookie("")).toBe("clasico");
-    expect(marcoDeCookie("HILO")).toBe("clasico");
+  it("sin cookie o con un valor desconocido queda el diseño nuevo (ADR-109, D6)", () => {
+    expect(marcoDeCookie(undefined)).toBe("nuevo");
+    expect(marcoDeCookie("")).toBe("nuevo");
+    expect(marcoDeCookie("HILO")).toBe("nuevo");
     expect(marcoDeCookie("hilo")).toBe("hilo");
+    expect(marcoDeCookie("clasico")).toBe("clasico");
+    expect(marcoDeCookie("nuevo")).toBe("nuevo");
+  });
+
+  it("el clásico elegido se recuerda un año; el nuevo es la ausencia de la cookie", () => {
+    expect(cookieMarco("clasico")).toContain(`${COOKIE_MARCO}=clasico`);
+    expect(cookieMarco("clasico")).toContain("Max-Age=31536000");
+    expect(cookieMarco("nuevo")).toContain("Max-Age=0");
   });
 
   it("en esta etapa el Hilo solo existe en el ERP y con acceso a la empresa", () => {
@@ -26,7 +34,6 @@ describe("elección del marco (ADR-090)", () => {
     expect(c).toContain("Path=/");
     expect(c).toContain("Max-Age=31536000");
     expect(c).toContain("SameSite=Lax");
-    expect(cookieMarco("clasico")).toContain("Max-Age=0");
   });
 
   it("las planillas pliegan el hilo; sus fichas y las demás pantallas no", () => {
@@ -49,37 +56,20 @@ describe("tema del marco Hilo", () => {
   });
 });
 
-describe("atajo de diseño en el menú de usuario", () => {
-  it("ofrece pasar al otro diseño, justo después de Preferencias, solo en el ERP", async () => {
+describe("menú de usuario sin atajo de diseño (CAR-335 D6c)", () => {
+  it("el diseño nuevo es el único: el menú ya no ofrece cambiar de diseño", async () => {
     const { menuCuentaShell } = await import("@/app/_components/menu-cuenta-shell");
     const nada = () => undefined;
-    const cambiar = vi.fn();
-    const clasico = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
-      actual: "clasico",
-      onCambiar: cambiar,
-    });
-    const ids = clasico.map((i) => i.id);
-    expect(ids.indexOf("diseno")).toBe(ids.indexOf("pref") + 1);
-    const item = clasico.find((i) => i.id === "diseno");
-    expect(item?.etiqueta).toBe("Probar el diseño Hilo");
-    item?.onSelect();
-    expect(cambiar).toHaveBeenCalledWith("hilo");
-    const hilo = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
-      actual: "hilo",
-      onCambiar: cambiar,
-    });
-    expect(hilo.find((i) => i.id === "diseno")?.etiqueta).toBe("Volver al diseño clásico");
-    expect(menuCuentaShell(false, nada, nada, false).some((i) => i.id === "diseno")).toBe(false);
     expect(menuCuentaShell(true, nada, nada, true).some((i) => i.id === "diseno")).toBe(false);
+    expect(menuCuentaShell(true, nada, nada, true).some((i) => i.id === "pref")).toBe(true);
   });
 });
 
 describe("marco que se monta: una sola regla para el layout y las páginas", () => {
-  it("fuera del ERP o sin acceso es el clásico aunque la cookie diga hilo", async () => {
+  it("en el ERP con acceso es siempre el nuevo (CAR-335 D6c); fuera del ERP, el clásico", async () => {
     const { marcoResuelto } = await import("@/lib/marco");
-    expect(marcoResuelto("erp", true, "hilo")).toBe("hilo");
-    expect(marcoResuelto("erp", false, "hilo")).toBe("clasico");
-    expect(marcoResuelto("supervisor", true, "hilo")).toBe("clasico");
-    expect(marcoResuelto("erp", true, undefined)).toBe("clasico");
+    expect(marcoResuelto("erp", true)).toBe("nuevo");
+    expect(marcoResuelto("erp", false)).toBe("clasico");
+    expect(marcoResuelto("supervisor", true)).toBe("clasico");
   });
 });

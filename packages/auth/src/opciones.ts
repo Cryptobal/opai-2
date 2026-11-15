@@ -33,6 +33,15 @@ export function reglasPassword(p: string) {
 
 export const passwordValida = (p: string): boolean => reglasPassword(p).every((r) => r.ok);
 
+/**
+ * Campos propios en `sessions`: `mfaVerified` lo fija solo el servidor tras el segundo factor;
+ * `oauthTenantId`, la empresa elegida para autorizar una app por OAuth (CAR-247).
+ */
+export const camposSesion = {
+  mfaVerified: { type: "boolean", defaultValue: false, input: false },
+  oauthTenantId: { type: "string", required: false, input: false },
+} as const;
+
 /** Campos propios en `users`. `platformRole` nunca se acepta desde el cliente. */
 export const camposUsuario = {
   platformRole: { type: "string", required: false, input: false },

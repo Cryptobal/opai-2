@@ -1,6 +1,7 @@
 // Destinatarios del correo de un DTE de venta (CAR-221 · A3b). Lógica pura.
-// Un documento tiene exactamente un destinatario PARA (el correo admite un solo destinatario principal)
-// y hasta 19 en copia (CC) o copia oculta (BCC).
+// Regla de Carlos (12-nov-2026, ADR-103): todos los contactos de facturación reciben el documento por igual
+// como destinatarios principales (hasta 10 PARA, como en OPAI 1) y la casilla DTE del cliente, que recibe el XML,
+// va siempre en copia. Hasta 20 correos en total.
 
 export const TIPOS_DESTINATARIO = ["PARA", "CC", "BCC"] as const;
 export type TipoDestinatario = (typeof TIPOS_DESTINATARIO)[number];
@@ -9,6 +10,7 @@ export const ORIGENES_DESTINATARIO = ["casilla_dte", "contacto_facturacion", "ma
 export type OrigenDestinatario = (typeof ORIGENES_DESTINATARIO)[number];
 
 export const MAX_DESTINATARIOS = 20;
+export const MAX_PARA = 10;
 
 export type DestinatarioDoc = { tipo: TipoDestinatario; email: string; origen: OrigenDestinatario };
 
@@ -34,17 +36,23 @@ export function validarDestinatarios(lista: readonly DestinatarioDoc[]): string 
   }
   const para = lista.filter((d) => d.tipo === "PARA").length;
   if (para === 0) return "Falta el destinatario principal (PARA).";
-  if (para > 1) return "Solo puede haber un destinatario PARA; el resto va en CC o BCC.";
+  if (para > MAX_PARA) return `Máximo ${MAX_PARA} destinatarios principales (PARA); el resto va en CC o BCC.`;
   return null;
 }
 
-/** Agrupa la lista (ya validada) como la usa el envío: un PARA, y las copias en el orden dado. */
-export function agruparDestinatarios(lista: readonly DestinatarioDoc[]): { para: string; cc: string[]; bcc: string[] } {
+/** Agrupa la lista (ya validada) como la usa el envío: el primer PARA, los demás PARA y las copias, en el orden dado. */
+export function agruparDestinatarios(lista: readonly DestinatarioDoc[]): {
+  para: string;
+  paraAdicionales: string[];
+  cc: string[];
+  bcc: string[];
+} {
   const correo = (d: DestinatarioDoc) => correoNormalizado(d.email);
-  const para = lista.find((d) => d.tipo === "PARA");
+  const [para, ...paraAdicionales] = lista.filter((d) => d.tipo === "PARA").map(correo);
   if (!para) throw new Error("Falta el destinatario PARA.");
   return {
-    para: correo(para),
+    para,
+    paraAdicionales,
     cc: lista.filter((d) => d.tipo === "CC").map(correo),
     bcc: lista.filter((d) => d.tipo === "BCC").map(correo),
   };
@@ -53,8 +61,8 @@ export function agruparDestinatarios(lista: readonly DestinatarioDoc[]): { para:
 export type ContactoFacturacion = { email: string | null; esPrincipal?: boolean };
 
 /**
- * Sugerencia al elegir un cliente: la casilla DTE de la cuenta va como PARA; los contactos con rol facturación,
- * en copia. Sin casilla DTE, el primer contacto de facturación pasa a PARA. Descarta vacíos, inválidos y repetidos.
+ * Sugerencia al elegir un cliente: los contactos con rol facturación van todos como PARA (hasta 10; el resto en copia)
+ * y la casilla DTE de la cuenta, en copia. Sin contactos, la casilla DTE pasa a PARA. Descarta vacíos, inválidos y repetidos.
  */
 export function destinatariosSugeridos(entrada: {
   emailDte: string | null;
@@ -62,14 +70,15 @@ export function destinatariosSugeridos(entrada: {
 }): DestinatarioDoc[] {
   const salida: DestinatarioDoc[] = [];
   const vistos = new Set<string>();
-  const agregar = (email: string | null, origen: OrigenDestinatario) => {
+  const agregar = (email: string | null, origen: OrigenDestinatario, tipo: TipoDestinatario) => {
     if (!email || !esCorreoValido(email)) return;
     const c = correoNormalizado(email);
     if (vistos.has(c)) return;
     vistos.add(c);
-    salida.push({ tipo: salida.length === 0 ? "PARA" : "CC", email: c, origen });
+    salida.push({ tipo, email: c, origen });
   };
-  agregar(entrada.emailDte, "casilla_dte");
-  for (const c of entrada.contactosFacturacion) agregar(c.email, "contacto_facturacion");
-  return salida;
+  const paras = () => salida.filter((d) => d.tipo === "PARA").length;
+  for (const c of entrada.contactosFacturacion) agregar(c.email, "contacto_facturacion", paras() < MAX_PARA ? "PARA" : "CC");
+  agregar(entrada.emailDte, "casilla_dte", paras() === 0 ? "PARA" : "CC");
+  return salida.slice(0, MAX_DESTINATARIOS);
 }

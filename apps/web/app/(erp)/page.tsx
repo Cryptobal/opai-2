@@ -20,11 +20,19 @@ export default function Inicio({ searchParams }: { searchParams: SearchParams })
           actor: p["actor"],
           nombre: id.usuario.nombre,
           empresa: id.actual?.tenant.nombre ?? "",
-          hilo: (await marcoDeLaPeticion("erp", conEmpresa)) === "hilo",
+          marco: await marcoDeLaPeticion("erp", conEmpresa),
         };
       }}
     >
-      {(d) => <InicioErp nombre={d.nombre} empresa={d.empresa} actor={d.actor} hilo={d.hilo} />}
+      {(d) => (
+        <InicioErp
+          nombre={d.nombre}
+          empresa={d.empresa}
+          actor={d.actor}
+          hilo={d.marco === "hilo"}
+          nuevo={d.marco === "nuevo"}
+        />
+      )}
     </PaginaPortal>
   );
 }

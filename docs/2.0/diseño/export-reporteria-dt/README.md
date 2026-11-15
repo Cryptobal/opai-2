@@ -39,6 +39,6 @@ Cada pantalla trae 375/1024/1280 px, claro/oscuro, los estados vacío, cargando,
 
 ## Pendientes menores
 
-- Quitar «Carlos Irigoyen» como actor de ejemplo (en `05 Contingencia e incidentes.dc.html` y `08 Accesos de mandante.dc.html`, entre otras pantallas), de los textos de estado «sin permiso» y del bundle `_ds/`.
+- Quitar «Andrea Fuentes» como actor de ejemplo (en `05 Contingencia e incidentes.dc.html` y `08 Accesos de mandante.dc.html`, entre otras pantallas), de los textos de estado «sin permiso» y del bundle `_ds/`.
 - El `Indice.dc.html` dice «Asistencia DT v1»; alinear el nombre con «Reportería DT».
 - Hex sueltos en los envoltorios de varias pantallas (`#d4d4d8`, `#18181b`, `#52525b`, `#3f3f46`), fuera de `_ds/tokens/`.

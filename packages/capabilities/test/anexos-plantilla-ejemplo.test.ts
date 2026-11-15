@@ -41,11 +41,13 @@ describe("core.anexos.aprobar con la plantilla de ejemplo", () => {
       expect(r.error.code).toBe("UNPROCESSABLE");
       expect(r.error.message).toBe(MENSAJE_PLANTILLA_EJEMPLO);
     }
-    const lista = await dato<{ id: string; estado: string; documentoId: string | null }[]>(
-      ctx,
-      "core.anexos.list",
-      { personaId: persona.id },
-    );
+    const lista = (
+      await dato<{ items: { id: string; estado: string; documentoId: string | null }[] }>(
+        ctx,
+        "core.anexos.list",
+        { personaId: persona.id },
+      )
+    ).items;
     expect(lista).toEqual([
       expect.objectContaining({ id: anexo.id, estado: "borrador", documentoId: null }),
     ]);

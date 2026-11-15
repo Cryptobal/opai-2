@@ -4,7 +4,7 @@ import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
 import { epocaDe } from "@/lib/epoca-sesion";
-import { marcoDeLaPeticion } from "@/lib/marco-servidor";
+import { marcoDeLaPeticion, menuPlegadoDeLaPeticion } from "@/lib/marco-servidor";
 
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
@@ -24,11 +24,13 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   // que el servidor ya pinta el marco correcto y no hay parpadeo. Sin acceso a la empresa o fuera del
   // ERP queda el clásico —donde vive el aviso «Sin permisos»— y la cookie ni se lee.
   const conEmpresa = datos.acceso && datos.tenant !== null;
-  const hilo = (await marcoDeLaPeticion(portal, conEmpresa)) === "hilo";
+  const marco = await marcoDeLaPeticion(portal, conEmpresa);
+  const menuPlegado = await menuPlegadoDeLaPeticion(marco);
   return (
     <MarcoPortal
       key={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}
-      hilo={hilo}
+      marco={marco}
+      menuPlegado={menuPlegado}
       datos={datos}
     >
       <CargaPortal>{children}</CargaPortal>

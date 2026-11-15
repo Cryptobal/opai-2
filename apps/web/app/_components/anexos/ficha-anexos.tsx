@@ -14,8 +14,11 @@ const TONO = { borrador: "warning", aprobado: "success", rechazado: "danger" } a
 /** Tab Anexos de la ficha de persona (26-30, D16): historial de anexos de contrato, con el pendiente
  * primero. El detalle (aprobar/rechazar) vive en su propia ruta `[anexoId]`. */
 export async function FichaAnexos({ personaId }: { personaId: string }) {
-  const r = await ejecutarComoUsuario<Anexo[]>("erp", "core.anexos.list", { personaId });
-  const items = r.ok ? r.data : [];
+  const r = await ejecutarComoUsuario<{ items: Anexo[] }>("erp", "core.anexos.list", {
+    personaId,
+    limite: 100,
+  });
+  const items = r.ok ? r.data.items : [];
   return (
     <Estado
       state={r.ok && items.length === 0 ? "empty" : estadoPantalla(r)}

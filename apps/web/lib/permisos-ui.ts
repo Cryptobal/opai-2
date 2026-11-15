@@ -19,6 +19,7 @@ export function construirPuede(
     rol: acceso.permisosRol != null ? null : rolBase,
     permisosRol: acceso.permisosRol,
     excepciones: acceso.excepciones,
+    permisosAdicionales: acceso.permisosAdicionales ?? null,
   };
   return (permiso) => tienePermisoEfectivo(efectivo, permiso);
 }

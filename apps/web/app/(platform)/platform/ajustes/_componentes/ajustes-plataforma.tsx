@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, SeccionTarjeta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { aLote, type Cambio, cambiosPendientes, FUERA_DE_LIMITES } from "./cambios";
 import { ModelosIaCard } from "./modelos-ia";
 import { TablaPrecios } from "./tabla-precios";
 import { type Ajuste, aMicro, aUsd, esModelosIa, type ModelosIa, type Precio } from "./tipos";
 
-type Props = { precios: Precio[]; ajustes: Ajuste[] };
+const ConfirmarAjustes = lazy(() => import("./confirmar-ajustes"));
 
-/** Ajustes de plataforma (50): precios, modelos de IA por clase y límites; un solo "Guardar". */
-export function AjustesPlataforma({ precios, ajustes }: Props) {
+type Props = { precios: Precio[]; ajustes: Ajuste[]; empresas: number | null };
+
+/**
+ * Ajustes de plataforma (50): precios, modelos de IA por clase y límites; un solo «Guardar». Todo o
+ * nada: la vista previa revisa todos los cambios y se confirma cuántas empresas afectan (CAR-323); al
+ * confirmar, `platform.ajustes.guardar_lote` los escribe en una sola transacción (CAR-329).
+ */
+export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("platform");
   const [txtPrecios, setTxtPrecios] = useState(() =>
     Object.fromEntries(precios.map((p) => [p.recurso, aUsd(p.costoUnitarioMicro)])),
@@ -22,7 +29,11 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
   const [modelos, setModelos] = useState<ModelosIa | null>(
     esModelosIa(modelosIni) ? modelosIni : null,
   );
-  const numericos = ajustes.filter((a) => typeof a.valor === "number");
+  const numericos = ajustes.filter(
+    (a) => typeof a.valor === "number" && !FUERA_DE_LIMITES.has(a.clave),
+  );
+  const [porConfirmar, setPorConfirmar] = useState<Cambio[] | null>(null);
+  const [revisando, setRevisando] = useState(false);
   const [nums, setNums] = useState(() =>
     Object.fromEntries(numericos.map((a) => [a.clave, String(a.valor)])),
   );
@@ -31,40 +42,23 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
   );
   const numMalo = numericos.some((a) => !Number.isInteger(Number(nums[a.clave])));
 
-  async function guardar() {
-    let cambios = 0;
-    for (const p of precios) {
-      const micro = aMicro(txtPrecios[p.recurso] ?? "");
-      if (micro === null || micro === p.costoUnitarioMicro) continue;
-      if (
-        !(await ejecutar("platform.precios.set", {
-          recurso: p.recurso,
-          unidad: p.unidad,
-          costoUnitarioMicro: micro,
-        }))
-      )
-        return;
-      cambios++;
+  const lote = (cambios: Cambio[], dryRun = false) =>
+    ejecutar("platform.ajustes.guardar_lote", aLote(cambios), dryRun);
+
+  async function revisar() {
+    const cambios = cambiosPendientes(precios, txtPrecios, modelos, modelosIni, numericos, nums);
+    if (!cambios.length) return avisar.exito("Sin cambios");
+    setRevisando(true);
+    try {
+      if ((await lote(cambios, true)) !== null) setPorConfirmar(cambios);
+    } finally {
+      setRevisando(false);
     }
-    if (modelos && JSON.stringify(modelos) !== JSON.stringify(modelosIni)) {
-      if (
-        !(await ejecutar("platform.ajustes.set", {
-          modulo: "core",
-          clave: "ia_modelos",
-          valor: modelos,
-        }))
-      )
-        return;
-      cambios++;
-    }
-    for (const a of numericos) {
-      const n = Number(nums[a.clave]);
-      if (n === a.valor) continue;
-      if (!(await ejecutar("platform.ajustes.set", { modulo: a.modulo, clave: a.clave, valor: n })))
-        return;
-      cambios++;
-    }
-    avisar.exito(cambios ? "Ajustes guardados" : "Sin cambios");
+  }
+
+  async function guardar(cambios: Cambio[]) {
+    setPorConfirmar(null);
+    if ((await lote(cambios)) !== null) avisar.exito("Ajustes guardados");
   }
 
   return (
@@ -73,9 +67,9 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
         <span className="t-caption">Afecta a todas las empresas</span>
         <Button
           disabled={pendiente || invalidos.size > 0 || numMalo}
-          onClick={() => void guardar()}
+          onClick={() => void revisar()}
         >
-          {pendiente ? "Guardando…" : "Guardar"}
+          {revisando ? "Revisando…" : pendiente ? "Guardando…" : "Guardar"}
         </Button>
       </div>
       {error ? <Alerta tono="danger" titulo={error} /> : null}
@@ -91,6 +85,7 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
         </div>
         <SeccionTarjeta titulo="Límites">
           <div className="flex flex-col gap-4">
+            <p className="t-caption">El ingreso mínimo se edita en Valores legales.</p>
             {numericos.map((a) => (
               <Campo
                 key={a.clave}
@@ -112,6 +107,17 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
           </div>
         </SeccionTarjeta>
       </div>
+      {porConfirmar ? (
+        <Suspense fallback={null}>
+          <ConfirmarAjustes
+            cambios={porConfirmar.length}
+            empresas={empresas}
+            pendiente={pendiente}
+            onCancelar={() => setPorConfirmar(null)}
+            onGuardar={() => void guardar(porConfirmar)}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

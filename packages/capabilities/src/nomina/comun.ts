@@ -16,7 +16,7 @@ import type { Contexto } from "../types";
 
 // Permisos del módulo Nómina (nomina.md §7). Las lecturas con datos de remuneraciones de una persona
 // (novedades, préstamos) son sensibles: se auditan por IDs revelados (NÚCLEO-H). El bloqueo
-// financiero de AGENTS/permisos.ts (`nomina:*`) ya deja fuera a gerente, supervisor y viewer.
+// financiero (`nomina:*` denegado al supervisor; gerente y lector no lo tienen en su lista) los deja fuera.
 export const PERMISO_READ = "nomina:read";
 export const PERMISO_PERIODOS = "nomina:periodos.manage";
 export const PERMISO_PAGAR = "nomina:periodos.pagar";

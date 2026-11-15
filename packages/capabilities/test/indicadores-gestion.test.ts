@@ -72,7 +72,13 @@ describe(CATALOGO, () => {
   it("lista los del núcleo y los de módulos activos, sin tocar el núcleo para sumar uno", async () => {
     const { ctx } = contextoDePrueba({ modulosActivos: ["pruebas"] });
     const lista = await dato<{ id: string; modulo: string; puedeMedir: boolean }[]>(ctx, CATALOGO, {});
-    expect(lista.map((i) => i.id)).toEqual(["core.tareas_a_tiempo", "pruebas.visitas_hechas"]);
+    expect(lista.map((i) => i.id)).toEqual([
+      "core.tareas_a_tiempo",
+      "core.personas_documentos_al_dia",
+      "core.personas_retencion_90",
+      "core.respuesta_escalados",
+      "pruebas.visitas_hechas",
+    ]);
     expect(lista.every((i) => i.puedeMedir)).toBe(true);
     const soloPruebas = await dato<{ id: string }[]>(ctx, CATALOGO, { modulo: "pruebas" });
     expect(soloPruebas.map((i) => i.id)).toEqual(["pruebas.visitas_hechas"]);
@@ -81,10 +87,16 @@ describe(CATALOGO, () => {
     const apagado = contextoDePrueba({ modulosActivos: [] }).ctx;
     expect((await dato<{ id: string }[]>(apagado, CATALOGO, {})).map((i) => i.id)).toEqual([
       "core.tareas_a_tiempo",
+      "core.personas_documentos_al_dia",
+      "core.personas_retencion_90",
+      "core.respuesta_escalados",
     ]);
     const sinScope = contextoDePrueba({ modulosActivos: ["pruebas"], scopes: ["core"] }).ctx;
     expect((await dato<{ id: string }[]>(sinScope, CATALOGO, {})).map((i) => i.id)).toEqual([
       "core.tareas_a_tiempo",
+      "core.personas_documentos_al_dia",
+      "core.personas_retencion_90",
+      "core.respuesta_escalados",
     ]);
   });
   it("marca lo que el actor no puede medir y niega el catálogo a viewer y supervisor", async () => {
