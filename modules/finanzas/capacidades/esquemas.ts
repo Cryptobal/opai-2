@@ -43,17 +43,32 @@ export function aNumeroSeguro(v: bigint | number): number {
 }
 
 export const seccionSchema = z.enum(["ingreso", "egreso"]);
+/** Grupos de egreso de la planilla; «gastos» es el valor por defecto de toda fila. */
+export const grupoEgresoSchema = z.enum(["remuneraciones", "gastos", "impuestos", "financiamiento"]);
+export type GrupoEgreso = z.infer<typeof grupoEgresoSchema>;
+
+const GRUPO_POR_VINCULO: Readonly<Record<string, GrupoEgreso>> = {
+  "nomina:costo_proyectado": "remuneraciones",
+  "finanzas:impuestos": "impuestos",
+  "finanzas:factoring": "financiamiento",
+};
+/** Grupo de una fila automática (sin columna propia): sale del origen de su cifra; el resto va en «Gastos». */
+export const grupoPorVinculo = (vinculo: string | null): GrupoEgreso => GRUPO_POR_VINCULO[vinculo ?? ""] ?? "gastos";
 export const capaSchema = z.enum(["plan", "comprometido", "real"]);
 
 export const filaSchema = z.object({
   id: uuidSchema,
   seccion: seccionSchema,
+  grupo: grupoEgresoSchema.nullable().describe("Grupo de egreso en la planilla; null en las filas de ingreso."),
   etiqueta: z.string(),
   vinculo: z.string().nullable(),
   arrastre: z.boolean(),
   orden: z.number().int(),
   activa: z.boolean(),
 });
+
+/** Fila automática de la planilla: el grupo se deduce de su vínculo (ver `conGrupo`). */
+export type FilaAutomatica = Omit<z.infer<typeof filaSchema>, "grupo">;
 
 export const celdaSchema = z.object({
   id: uuidSchema,
@@ -95,6 +110,7 @@ export const ajustesSchema = z.object({
 type FilaDb = {
   id: string;
   seccion: string;
+  grupo: string;
   etiqueta: string;
   vinculo: string | null;
   arrastre: boolean;
@@ -104,9 +120,15 @@ type FilaDb = {
 export const vistaFila = (f: FilaDb): z.infer<typeof filaSchema> => ({
   id: f.id,
   seccion: f.seccion as z.infer<typeof seccionSchema>,
+  grupo: f.seccion === "egreso" ? (f.grupo as GrupoEgreso) : null,
   etiqueta: f.etiqueta,
   vinculo: f.vinculo,
   arrastre: f.arrastre,
   orden: f.orden,
   activa: f.activa,
+});
+
+export const conGrupo = (f: FilaAutomatica): z.infer<typeof filaSchema> => ({
+  ...f,
+  grupo: f.seccion === "egreso" ? grupoPorVinculo(f.vinculo) : null,
 });
