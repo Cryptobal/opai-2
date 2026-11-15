@@ -3,11 +3,9 @@ import { Package } from "lucide-react";
 import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { requerirIdentidad } from "@/lib/servidor";
+import type { SearchParams } from "@/lib/parametros";
 
-import { cargarTipos } from "../_componentes/datos";
+import { cargarPaginaTipos } from "../_componentes/datos";
 import { HojaTipo } from "../_componentes/diferidas";
 import { ListaTipos } from "../_componentes/lista-tipos";
 
@@ -21,14 +19,7 @@ export default function TiposInventario({ searchParams }: { searchParams: Search
       titulo="Inventario"
       ruta="/inventario"
       completo
-      cargar={async () => {
-        const [p, identidad] = await Promise.all([leerParametros(searchParams), requerirIdentidad("/inventario/tipos")]);
-        return {
-          ...(await cargarTipos(p)),
-          q: p.q,
-          puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage"),
-        };
-      }}
+      cargar={() => cargarPaginaTipos(searchParams)}
     >
       {(d) => (
         <>

@@ -1,7 +1,4 @@
 import { Plus } from "lucide-react";
-import { Suspense } from "react";
-
-import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -10,6 +7,7 @@ import { conBusqueda, type SearchParams } from "@/lib/parametros";
 import { cargarFichaActivo } from "../../_componentes/datos-activos";
 import { DetalleActivo } from "../../_componentes/detalle-activo";
 import { HojaActivo } from "../../_componentes/diferidas";
+import { FichaDividida } from "../../_componentes/ficha-dividida";
 import { ListaActivos } from "../../_componentes/lista-activos";
 
 export const metadata = { title: "Activo" };
@@ -33,30 +31,25 @@ export default function ActivoDetalle({ params, searchParams }: Props) {
         </EnlaceBoton>
       }
       cargar={() => cargarFichaActivo(params, searchParams)}
-      opciones={(d) => ({ volver: { href: conBusqueda("/inventario", d.p.q), etiqueta: "Inventario" } })}
+      opciones={(d) => ({
+        volver: { href: conBusqueda("/inventario", d.p.q), etiqueta: "Inventario" },
+      })}
     >
       {({ id, p, datos, lista, puedeGestionar }) => (
         <>
-          <SplitScreen
-            telefono="detalle"
-            unPanelHastaLg
+          <FichaDividida
             etiquetaLista="Lista de activos"
             lista={
               <ListaActivos
-                state={lista.state}
-                items={lista.items}
-                tipos={lista.tipos}
-                seleccionada={id}
+                {...lista}
                 {...(p.q ? { q: p.q } : {})}
+                seleccionada={id}
                 puedeGestionar={puedeGestionar}
               />
             }
-            detalle={
-              <Suspense fallback={<Loading variante="detalle" />}>
-                <DetalleActivo datos={datos} puedeGestionar={puedeGestionar} />
-              </Suspense>
-            }
-          />
+          >
+            <DetalleActivo datos={datos} puedeGestionar={puedeGestionar} />
+          </FichaDividida>
           {puedeGestionar ? <HojaActivo tipos={lista.tipos} /> : null}
         </>
       )}

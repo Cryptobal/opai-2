@@ -52,6 +52,12 @@ export async function cargarTipo(id: string) {
   return { state: estadoPantalla(r), tipo: r.ok ? r.data : null };
 }
 
+/** Datos de la página de tipos: la lista filtrada, la búsqueda y el permiso. */
+export async function cargarPaginaTipos(searchParams: SearchParams) {
+  const [p, identidad] = await Promise.all([leerParametros(searchParams), requerirIdentidad("/inventario/tipos")]);
+  return { ...(await cargarTipos(p)), q: p.q, puedeGestionar: puedeDeIdentidad(identidad)("inventario:tipos.manage") };
+}
+
 /** Datos de la página de la ficha: la lista de la izquierda, la ficha (sin esperar) y el permiso. */
 export async function cargarFichaTipo(params: Promise<{ id: string }>, searchParams: SearchParams) {
   const [{ id }, p, identidad] = await Promise.all([params, leerParametros(searchParams), requerirIdentidad("/inventario/tipos")]);

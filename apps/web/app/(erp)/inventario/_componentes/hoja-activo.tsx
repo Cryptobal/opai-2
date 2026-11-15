@@ -3,16 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Alerta, avisar, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
+import { Alerta, avisar, Campo, Select, Sheet } from "@opai/ds";
 
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { AccionesHoja } from "./acciones-hoja";
-import { CamposActivo } from "./campos-activo";
+import { CamposBase, type Estado } from "./campos-activo";
 import type { CampoTipo, FichaActivo, TipoInventario } from "./tipos";
-
-type Estado = { tipoId: string; codigo: string; serie: string; notas: string; valores: Record<string, string> };
 
 const inicial = (a: FichaActivo | undefined, tipos: TipoInventario[]): Estado => ({
   tipoId: a?.tipoId ?? tipos[0]?.id ?? "",
@@ -85,26 +83,5 @@ export function HojaActivo({ activo, tipos = [] }: { activo?: FichaActivo; tipos
         <CamposBase e={e} fijar={fijar} campos={campos} />
       </div>
     </Sheet>
-  );
-}
-
-function CamposBase({ e, fijar, campos }: { e: Estado; fijar: (p: Partial<Estado>) => void; campos: CampoTipo[] }) {
-  return (
-    <>
-      <Campo etiqueta="Código" htmlFor="ia-codigo" ayuda="Único en la empresa, por ejemplo el de la etiqueta.">
-        <Input id="ia-codigo" value={e.codigo} onChange={(x) => fijar({ codigo: x.target.value })} autoFocus />
-      </Campo>
-      <Campo etiqueta="Número de serie" htmlFor="ia-serie">
-        <Input id="ia-serie" value={e.serie} onChange={(x) => fijar({ serie: x.target.value })} />
-      </Campo>
-      <CamposActivo
-        campos={campos}
-        valores={e.valores}
-        onCambiar={(k, v) => fijar({ valores: { ...e.valores, [k]: v } })}
-      />
-      <Campo etiqueta="Notas" htmlFor="ia-notas">
-        <Textarea id="ia-notas" rows={2} value={e.notas} onChange={(x) => fijar({ notas: x.target.value })} />
-      </Campo>
-    </>
   );
 }
