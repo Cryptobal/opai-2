@@ -1,5 +1,5 @@
-import { formatearClp, formatearFecha } from "@opai/domain";
 import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
+import { clp, fechaDdMmAaaa } from "./formato";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
 import { type CobroApi, hojaEspecial, type IvaApi } from "./cobros-celda";
 import { celdaSaldo } from "./celda-saldo";
@@ -76,10 +76,7 @@ const CAPA: Record<CeldaFlujo["capa"], { tono: NonNullable<Celda["tono"]>; detal
   real: { tono: "success", detalle: "Real" },
 };
 
-export const clp = (n: number) => formatearClp(n);
-
-/** ISO `aaaa-mm-dd` → `dd-mm-aaaa` para UI es-CL (el formato común de `@opai/domain`). */
-export const fechaDdMmAaaa = (iso: string) => formatearFecha(iso);
+export { clp, fechaDdMmAaaa };
 
 const corta = (iso: string) => fechaDdMmAaaa(iso).slice(0, 5);
 
