@@ -2,53 +2,69 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Switch, Textarea } from "@opai/ds";
+import type { EntidadCampoPersonalizado, TipoCampoPersonalizado } from "@opai/domain";
+import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Switch } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { ENTIDADES, TIPOS, type CampoConfig, type EntidadCampo, type TipoCampo } from "./lista-campos";
+import { DefinicionCampo, definicionInicial, entradaDefinicion } from "./definicion-campo";
+import { TIPOS, type CampoConfig } from "./tipos-campo";
 
-type Props = ({ campo: CampoConfig } | { entidad: EntidadCampo }) & { onCerrar: () => void };
+type Props = (
+  { campo: CampoConfig } | { entidad: EntidadCampoPersonalizado; nombreFicha: string }
+) & {
+  onCerrar: () => void;
+};
 
 /** Crea o edita un campo. El tipo se elige al crear; después no cambia (los valores dependen de él). */
 export function EditorCampo(p: Props) {
   const campo = "campo" in p ? p.campo : null;
-  const entidad = campo?.entidad ?? ("entidad" in p ? p.entidad : "cuenta");
   const [etiqueta, setEtiqueta] = useState(campo?.etiqueta ?? "");
-  const [tipo, setTipo] = useState<TipoCampo>(campo?.tipo ?? "texto");
-  const [opciones, setOpciones] = useState((campo?.opciones ?? []).map((o) => o.etiqueta).join("\n"));
+  const [tipo, setTipo] = useState<TipoCampoPersonalizado>(campo?.tipo ?? "texto");
+  const [descripcion, setDescripcion] = useState(campo?.descripcion ?? "");
+  const [def, setDef] = useState(() => definicionInicial(campo));
   const [obligatorio, setObligatorio] = useState(campo?.obligatorio ?? false);
   const [activo, setActivo] = useState(campo?.activo ?? true);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const lista = opciones
-    .split("\n")
-    .map((o) => o.trim())
-    .filter(Boolean);
-  const nombreEntidad = ENTIDADES.find((e) => e.valor === entidad)?.etiqueta.toLowerCase();
+  const definicion = entradaDefinicion(tipo, def);
 
   async function guardar() {
-    const comun = { etiqueta: etiqueta.trim(), obligatorio, ...(tipo === "lista" ? { opciones: lista } : {}) };
-    const r = campo
-      ? await ejecutar("core.campos_personalizados.update", { id: campo.id, ...comun, activo })
-      : await ejecutar("core.campos_personalizados.create", { entidad, tipo, ...comun });
+    const comun = {
+      etiqueta: etiqueta.trim(),
+      descripcion: descripcion.trim() || null,
+      obligatorio,
+      ...definicion,
+    };
+    const r =
+      "entidad" in p
+        ? await ejecutar("core.campos_personalizados.create", {
+            entidad: p.entidad,
+            tipo,
+            ...comun,
+          })
+        : await ejecutar("core.campos_personalizados.update", { id: p.campo.id, ...comun, activo });
     if (!r) return;
     avisar.exito(campo ? "Campo guardado" : "Campo creado");
     p.onCerrar();
   }
 
-  const invalido = !etiqueta.trim() || (tipo === "lista" && lista.length === 0);
   return (
     <Sheet
       abierto
       onCerrar={p.onCerrar}
       titulo={campo ? "Editar campo" : "Nuevo campo"}
-      descripcion={`Aparece en la ficha de ${nombreEntidad}.`}
+      {...("nombreFicha" in p
+        ? { descripcion: `Aparece en la ficha de ${p.nombreFicha.toLowerCase()}.` }
+        : {})}
       acciones={
         <>
           <Button variant="secondary" onClick={p.onCerrar}>
             Cancelar
           </Button>
-          <Button disabled={pendiente || invalido} onClick={() => void guardar()}>
+          <Button
+            disabled={pendiente || !etiqueta.trim() || !definicion}
+            onClick={() => void guardar()}
+          >
             Guardar
           </Button>
         </>
@@ -72,21 +88,27 @@ export function EditorCampo(p: Props) {
           <Select
             id="campo-tipo"
             valor={tipo}
-            onCambiar={(v) => setTipo(v as TipoCampo)}
+            onCambiar={(v) => {
+              setTipo(v as TipoCampoPersonalizado);
+              setDef({ ...def, defecto: null });
+            }}
             opciones={TIPOS}
             disabled={Boolean(campo)}
           />
         </Campo>
-        {tipo === "lista" ? (
-          <Campo etiqueta="Opciones" htmlFor="campo-opciones" ayuda="Una por línea, hasta 50.">
-            <Textarea
-              id="campo-opciones"
-              rows={5}
-              value={opciones}
-              onChange={(e) => setOpciones(e.target.value)}
-            />
-          </Campo>
-        ) : null}
+        <Campo
+          etiqueta="Ayuda"
+          htmlFor="campo-ayuda"
+          ayuda="Texto corto que se muestra bajo el campo en la ficha."
+        >
+          <Input
+            id="campo-ayuda"
+            maxLength={300}
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+          />
+        </Campo>
+        <DefinicionCampo tipo={tipo} d={def} onCambiar={setDef} />
         <Switch
           activo={obligatorio}
           onCambiar={setObligatorio}
