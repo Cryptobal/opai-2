@@ -7,7 +7,6 @@ export type Bienvenida = {
   fondoId: string | null;
   fondoUrl: string | null;
   logoUrl: string | null;
-  color: string | null;
 };
 
 /**
@@ -28,23 +27,19 @@ function useFondo(b: Bienvenida | null) {
 export function BienvenidaPorteria({ b }: { b: Bienvenida | null }) {
   const url = useFondo(b);
   if (!b || (!b.mensaje && !b.logoUrl && !url)) return null;
-  const oscuro = Boolean(url || b.color);
   return (
     <section
       aria-label="Bienvenida"
-      className={`relative flex min-h-32 flex-col justify-end gap-2 overflow-hidden rounded-xl bg-cover bg-center p-4 ${oscuro ? "" : "bg-accent-muted"}`}
-      style={{
-        ...(b.color ? { backgroundColor: b.color } : {}),
-        ...(url ? { backgroundImage: `url("${url}")` } : {}),
-      }}
+      className={`relative flex min-h-32 flex-col justify-end gap-2 overflow-hidden rounded-xl bg-cover bg-center p-4 ${url ? "" : "bg-accent-muted"}`}
+      style={url ? { backgroundImage: `url("${url}")` } : undefined}
     >
-      {oscuro ? <div aria-hidden className="absolute inset-0 bg-black/40" /> : null}
+      {url ? <div aria-hidden className="absolute inset-0 bg-black/40" /> : null}
       {b.logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- logo público de la marca, de tamaño fijo
         <img src={b.logoUrl} alt="" className="relative h-8 w-auto max-w-40 object-contain" />
       ) : null}
       {b.mensaje ? (
-        <p className={`t-heading relative ${oscuro ? "text-white" : "text-fg"}`}>{b.mensaje}</p>
+        <p className={`t-heading relative ${url ? "text-white" : "text-fg"}`}>{b.mensaje}</p>
       ) : null}
     </section>
   );

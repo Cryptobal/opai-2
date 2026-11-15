@@ -164,6 +164,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.apariencia.get` | `acceso_apariencia_get` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.apariencia.set` | `acceso_apariencia_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.config.get` | `acceso_config_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.config.set` | `acceso_config_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
@@ -1134,8 +1136,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
-- `acceso.apariencia.get`
-- `acceso.apariencia.set`
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
 - `asistencia.correcciones.listar`

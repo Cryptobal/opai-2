@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { urlPropietario } from "../../db/test/entorno";
 import { prepararAccesoAB } from "./acceso-entorno-a-b";
 
-type Bienvenida = { mensaje: string | null; fondoId: string | null; color: string | null };
+type Bienvenida = { mensaje: string | null; fondoId: string | null };
 
 describe.skipIf(!urlPropietario)("bienvenida de la portería en base real (CAR-553)", () => {
   let x: Awaited<ReturnType<typeof prepararAccesoAB>>;
@@ -44,7 +44,7 @@ describe.skipIf(!urlPropietario)("bienvenida de la portería en base real (CAR-5
   beforeAll(async () => {
     x = await prepararAccesoAB();
     await x.e.admin.perfilEmpresa.create({
-      data: { tenantId: x.t.A, nombreComercial: "Empresa Demo", colorPrimario: "#123456" },
+      data: { tenantId: x.t.A, nombreComercial: "Empresa Demo" },
     });
   }, 120_000);
   afterAll(async () => {
@@ -56,7 +56,6 @@ describe.skipIf(!urlPropietario)("bienvenida de la portería en base real (CAR-5
     expect(await sitio()).toMatchObject({
       mensaje: "Bienvenido a Empresa Demo",
       fondoId: null,
-      color: "#123456",
     });
   });
 

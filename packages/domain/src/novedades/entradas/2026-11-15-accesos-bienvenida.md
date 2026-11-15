@@ -8,4 +8,4 @@ permiso: acceso:config.manage
 ---
 En la ficha de una instalación, pestaña **Accesos › Configuración**, hay una tarjeta nueva, **Bienvenida de la portería**: escribe un mensaje de bienvenida y sube una imagen de fondo.
 
-La portería del teléfono los muestra arriba. Si la instalación no tiene mensaje ni fondo, se usan el logo, el color y el nombre de la empresa.
+La portería del teléfono los muestra arriba. Si la instalación no tiene mensaje ni fondo, se usan el logo y el nombre de la empresa.

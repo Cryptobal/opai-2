@@ -10,7 +10,7 @@ import { PERMISO_CONFIG } from "./config-comun";
 export const aparienciaGet = defineCapability({
   id: "acceso.apariencia.get",
   descripcion:
-    "Fondo y mensaje de bienvenida propios de la portería de una instalación. Lo que viene en null lo pone la marca de la empresa (color, logo y «Bienvenido a <nombre comercial>»).",
+    "Fondo y mensaje de bienvenida propios de la portería de una instalación. Lo que viene en null lo pone la marca de la empresa (su logo y «Bienvenido a <nombre comercial>»).",
   permiso: PERMISO_READ,
   input: z.object({ instalacionId: uuidSchema }),
   output: aparienciaSchema,

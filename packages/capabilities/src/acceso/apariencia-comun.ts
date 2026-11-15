@@ -12,7 +12,7 @@ export const aparienciaSchema = z.object({
   fondo: z
     .object({ id: z.string(), nombre: z.string() })
     .nullable()
-    .describe("Imagen de fondo propia; null usa el color de la marca."),
+    .describe("Imagen de fondo propia; null usa el acento de la marca."),
 });
 
 export async function aparienciaDe(ctx: Contexto, instalacionId: string) {
@@ -43,7 +43,7 @@ export async function validarFondo(ctx: Contexto, instalacionId: string, id: str
   return { id: d.id, nombre: d.nombre };
 }
 
-/** Lo que ve la portería: lo propio de la instalación o, si falta, la marca de la empresa (logo, color y nombre). */
+/** Lo que ve la portería: lo propio de la instalación o, si falta, la marca de la empresa (logo y nombre). */
 export async function bienvenidaPorteria(ctx: Contexto, instalacionId: string) {
   const [{ mensaje, doc }, marca] = await Promise.all([
     aparienciaDe(ctx, instalacionId),
@@ -59,7 +59,6 @@ export async function bienvenidaPorteria(ctx: Contexto, instalacionId: string) {
         ? await almacen.urlDescarga(doc.storageKey, doc.nombre, 3_600)
         : null,
     logoUrl: marca.urls["logoPrincipalId"] ?? null,
-    color: marca.colorPrimario,
   };
 }
 
@@ -68,5 +67,4 @@ export const bienvenidaSchema = z.object({
   fondoId: z.string().nullable(),
   fondoUrl: z.string().nullable(),
   logoUrl: z.string().nullable(),
-  color: z.string().nullable(),
 });

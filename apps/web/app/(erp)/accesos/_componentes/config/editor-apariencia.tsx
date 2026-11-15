@@ -38,7 +38,7 @@ export function EditorApariencia({
     <SeccionTarjeta titulo="Bienvenida de la portería">
       <div className="flex flex-col gap-4">
         <p className="t-caption">
-          Sin mensaje ni fondo, la portería muestra el logo, el color y el nombre de la empresa.
+          Sin mensaje ni fondo, la portería muestra el logo y el nombre de la empresa.
         </p>
         {error ? <Alerta tono="danger" titulo={error} /> : null}
         <Campo etiqueta="Mensaje de bienvenida" htmlFor="bienvenida-mensaje">
