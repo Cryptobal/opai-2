@@ -33,20 +33,19 @@ async function abrirPrimeraCuenta(page: Page): Promise<string> {
 }
 
 async function abrirAgenteDesdeBarra(page: Page) {
+  const cabecera = page.locator('header[data-shell="barra"]');
   const barraTelefono = page
     .getByRole("navigation", { name: "Principal" })
     .filter({ visible: true });
   const pestañaAgente = barraTelefono.getByRole("button", { name: /Agente/ });
-  if (await pestañaAgente.isVisible().catch(() => false)) {
-    await pestañaAgente.click();
+  if (await cabecera.isVisible().catch(() => false)) {
+    const lanzador = cabecera.getByRole("button", { name: "Preguntar a OPAI", exact: true });
+    await expect(lanzador).toBeVisible({ timeout: 15_000 });
+    await lanzador.click();
     return;
   }
-  // iPad/escritorio: botón del shell en la barra superior (no el de la ficha ni la barra inferior).
-  const lanzador = page
-    .locator('header[data-shell="barra"]')
-    .getByRole("button", { name: "Preguntar a OPAI", exact: true });
-  await expect(lanzador).toBeVisible({ timeout: 15_000 });
-  await lanzador.click();
+  await expect(pestañaAgente).toBeVisible({ timeout: 15_000 });
+  await pestañaAgente.click();
 }
 
 async function cerrarPanel(page: Page, panel: ReturnType<Page["locator"]>) {
@@ -96,6 +95,7 @@ test.describe("@preview agente: panel único con contexto de ficha (CAR-547)", (
 
     await cerrarPanel(page, panel);
     await page.goto("/cuentas");
+    await hidratado(page.getByRole("region", { name: "Lista de cuentas" }));
     await abrirAgenteDesdeBarra(page);
     await expect(panel).toBeVisible();
     await expect(panel.getByTestId("agente-contexto-ficha")).toHaveCount(0);
