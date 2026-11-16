@@ -53,7 +53,7 @@ export const VERBOS: Record<string, string> = {
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
   pasar_a_cotizacion: "Pasar a cotización", rotar_token_formulario: "Renovar clave del formulario",
   recibir_formulario_web: "Recibir formulario web", crear: "Crear", invitacion: "Ver invitación", esperados: "Ver esperados", reemplazar_etiqueta: "Reemplazar etiqueta",
-  fijar: "Fijar", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
+  fijar: "Fijar", monto_fijar: "Fijar monto", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
   cambiar_estado: "Cambiar estado", marcar_pagado: "Marcar como pagado", cargar: "Cargar",
   aplicar_cuotas: "Aplicar cuotas", reglas_listar: "Listar reglas", fijar_regla: "Fijar regla",
   generar_calendario: "Generar calendario", leer: "Leer", deshacer: "Deshacer", registrar: "Registrar",
@@ -96,8 +96,8 @@ export const VERBOS: Record<string, string> = {
   // Slack (CAR-291, ADR-093).
   canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
   usuarios: "Ver personas en Slack", vincular_usuarios: "Vincular personas con Slack",
-  // Plataforma (CAR-323).
-  miembros: "Ver miembros", reenviar: "Reenviar",
+  // Plataforma (CAR-323, CAR-529).
+  miembros: "Ver miembros", reenviar: "Reenviar", set_modulos_nuevos: "Activar módulos nuevos",
   // Indicadores de gestión (CAR-305).
   medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",

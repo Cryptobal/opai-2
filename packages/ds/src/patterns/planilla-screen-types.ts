@@ -4,7 +4,17 @@ import type { EstadoPantalla, TextosEstado } from "./estado";
 
 export type TonoCelda = "neutro" | "success" | "warning" | "danger" | "info" | "accent";
 export type Celda = { texto: string; tono?: TonoCelda; detalle?: string };
-export type FilaPlanilla = { id: string; etiqueta: string; sub?: string };
+export type FilaPlanilla = {
+  id: string;
+  etiqueta: string;
+  sub?: string;
+  /** Detalle dentro de otra fila: 1 = hija, 2 = nieta (sangría y texto secundario). */
+  nivel?: 1 | 2;
+  /** Fila que se abre para mostrar su detalle; `abierta` dice si ya se ve. */
+  plegable?: { abierta: boolean };
+  /** Acción propia de la fila (ej. «Reprogramar»): botón en la misma fila, visible al pasar el mouse o con foco. */
+  accion?: string;
+};
 export type ColumnaPlanilla = { id: string; etiqueta: string; destacada?: boolean };
 
 export type PlanillaScreenProps = {
@@ -24,6 +34,10 @@ export type PlanillaScreenProps = {
   textos?: TextosEstado;
   /** Si se define, se invoca al tocar una celda editable (además del zoom en móvil). */
   onCelda?: (filaId: string, columnaId: string) => void;
+  /** Se invoca al abrir o cerrar una fila `plegable`. */
+  onAlternarFila?: (filaId: string) => void;
+  /** Se invoca al tocar la `accion` de una fila. */
+  onAccionFila?: (filaId: string) => void;
 };
 
 /* Códigos de turno del diseño: D info, N acento, L libre (sin fondo), V success, X danger (sin cubrir). */
