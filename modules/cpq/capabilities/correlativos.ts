@@ -8,7 +8,7 @@ import { PERMISO_MODELO } from "./permisos";
 export const correlativosFijar = defineCapability({
   id: "cpq.correlativos.fijar",
   descripcion:
-    "Fija el último número correlativo CPQ de un año (import R54 desde 1.0); el siguiente create usará ultimo+1.",
+    "Fija el último número correlativo CPQ de un año (por ejemplo al migrar numeración heredada); el siguiente create usará ultimo+1.",
   permiso: PERMISO_MODELO,
   input: z.object({
     anio: z.number().int().min(2000).max(9999),
