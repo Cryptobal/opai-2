@@ -10,7 +10,7 @@ import { validarEntrada } from "./validaciones";
 export const negociosPerder = defineCapability({
   id: "comercial.negocios.perder",
   descripcion:
-    "Marca un negocio como perdido con un motivo del catálogo (detalle obligatorio en «otro»), moviéndolo a la etapa perdida del embudo (R19). Reversible reabriendo.",
+    "Marca un negocio como perdido con un motivo del catálogo (detalle obligatorio en «otro»), moviéndolo a la etapa perdida del embudo. Reversible reabriendo.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     id: uuidSchema,
@@ -57,7 +57,7 @@ export const negociosPerder = defineCapability({
 export const negociosReabrir = defineCapability({
   id: "comercial.negocios.reabrir",
   descripcion:
-    "Reabre un negocio perdido con un motivo, devolviéndolo a la etapa abierta que se elija (por defecto, la primera); queda en el historial (R20). Un negocio ganado no se reabre.",
+    "Reabre un negocio perdido con un motivo, devolviéndolo a la etapa abierta que se elija (por defecto, la primera); el cambio queda en el historial. Un negocio ganado no se reabre.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     id: uuidSchema,

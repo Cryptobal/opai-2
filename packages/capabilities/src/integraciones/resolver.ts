@@ -21,7 +21,7 @@ export async function integracionDe(ctx: Contexto, proveedor: string) {
 }
 
 /** Una integración restringida solo existe para las empresas que Plataforma habilitó (CAR-321). */
-export async function integracionHabilitada(ctx: Contexto, def: DefinicionIntegracion): Promise<boolean> {
+async function integracionHabilitada(ctx: Contexto, def: DefinicionIntegracion): Promise<boolean> {
   if (!def.soloHabilitadas) return true;
   const habilitadas = await ajuste<Record<string, string[]>>(ctx, "core", "integraciones_habilitadas");
   return (habilitadas[def.id] ?? []).includes(ctx.tenantId);

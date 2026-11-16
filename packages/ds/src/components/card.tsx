@@ -26,10 +26,7 @@ export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivEleme
   return <div className={cn("p-4 pt-2", className)} {...props} />;
 }
 
-/**
- * Grilla de indicadores en el marco Hilo (H2, CAR-324): sin espacio vertical entre filas, 24 px entre
- * columnas y una línea al pie, como el «Pulso» del diseño. Se suma a la grilla de cada pantalla.
- */
+/** Clase de la grilla de indicadores del DS (se suma a la grilla de cada pantalla). */
 export const GRILLA_KPI_HILO = "ds-grilla-kpi";
 
 type KpiProps = {
