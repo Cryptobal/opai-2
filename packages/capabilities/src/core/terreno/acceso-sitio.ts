@@ -39,7 +39,12 @@ export const accesoEnSitioTerreno = defineCapability({
     // Solo el día corriente y los que siguen dentro: la portería no necesita el historial.
     const desde = new Date(Date.now() - 36 * 3_600_000);
     const filas = await ctx.db.registroAcceso.findMany({
-      where: { instalacionId: disp.instalacionId, salida: null, horaCorregida: { gte: desde } },
+      where: {
+        instalacionId: disp.instalacionId,
+        salida: null,
+        anulacion: null,
+        horaCorregida: { gte: desde },
+      },
       orderBy: { horaCorregida: "desc" },
       take: 200,
       select: {

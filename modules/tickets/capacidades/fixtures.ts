@@ -65,6 +65,7 @@ export function ticketFila(overrides: Record<string, unknown>) {
     estado: "abierto",
     solicitanteId: OTRO_USUARIO,
     responsableId: OTRO_USUARIO,
+    instalacionId: null,
     motivoRechazo: null,
     slaVenceEn: null,
     resueltoEn: null,

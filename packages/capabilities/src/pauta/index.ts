@@ -10,6 +10,8 @@ import { coberturaDeshacer } from "./cobertura-deshacer";
 import { excepcionesAnular } from "./excepciones-anular";
 import { excepcionesCrear } from "./excepciones-crear";
 import { exportarPauta } from "./exportar";
+import { visitasCerrar, visitasIniciar } from "./visitas";
+import { visitasListar, visitasObtener } from "./visitas-lectura";
 import { historialListar } from "./historial";
 import { informeInstalaciones } from "./informe-instalaciones";
 import { mesLeer } from "./lectura-mes";
@@ -23,6 +25,11 @@ import { seriesFijar } from "./series";
 import { titularAsignar } from "./titular-asignar";
 import { titularesListar } from "./titulares-listar";
 import { titularTrasladar } from "./titular-trasladar";
+import { turnosExtraAprobar } from "./turnos-extra-aprobar";
+import { turnosExtraListar } from "./turnos-extra-listar";
+import { turnosExtraMontoFijar } from "./turnos-extra-monto";
+import { turnosExtraRechazar } from "./turnos-extra-rechazar";
+import { turnosExtraRegistrar } from "./turnos-extra-registrar";
 
 export { ajustesPauta } from "./ajustes";
 export { buscadoresPauta } from "./buscadores";
@@ -51,8 +58,17 @@ export const capacidadesPauta: readonly Capacidad[] = [
   reemplazosSugerir,
   reemplazosAsignar,
   refuerzosAgregar,
+  turnosExtraRegistrar,
+  turnosExtraListar,
+  turnosExtraAprobar,
+  turnosExtraRechazar,
+  turnosExtraMontoFijar,
   alertasListar,
   exportarPauta,
   publicacionesPublicar,
   publicacionesListar,
+  visitasIniciar,
+  visitasCerrar,
+  visitasListar,
+  visitasObtener,
 ];

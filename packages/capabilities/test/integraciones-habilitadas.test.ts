@@ -38,7 +38,7 @@ describe("integraciones restringidas (CAR-321)", () => {
       valor: "https://ejemplo.test/api/export/opai2/v1",
     });
     expect(set).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
-    await expect(leerExportDeOpai1(ctx, async () => ({}) as never)).rejects.toThrow(/no está habilitado/);
+    await expect(leerExportDeOpai1(ctx, async () => ({}) as never)).rejects.toThrow(/migración de datos no está habilitada/);
   });
 
   it("configurar y probar tampoco existen para una empresa no habilitada", async () => {

@@ -72,7 +72,7 @@ export function Resumen({
       ) : null}
       {item.ultimoPeriodo10 ? (
         <p className="text-sm text-fg-muted">
-          Último período facturado en OPAI 1.0: {item.ultimoPeriodo10}
+          Último período facturado antes de la migración: {item.ultimoPeriodo10}
         </p>
       ) : null}
       {acciones}

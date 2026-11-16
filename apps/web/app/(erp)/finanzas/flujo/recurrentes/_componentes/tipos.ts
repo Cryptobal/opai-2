@@ -1,6 +1,8 @@
 // Gasto recurrente tal como lo devuelve `finanzas.recurrentes.listar` (CAR-349) y su formato en pantalla.
 import { formatearClp, formatearNumero } from "@opai/domain";
 
+import type { GrupoEgreso } from "../../_componentes/grupos-egreso";
+
 export type Unidad = "clp" | "uf" | "pct_ventas";
 export type PoliticaUf = "dia_cuota" | "fin_de_mes" | "fin_mes_anterior" | "inicio_de_mes" | "dia_fijo";
 export type Recurrente = {
@@ -24,7 +26,7 @@ export type Recurrente = {
   /** Tramo anterior del mismo gasto cuando cambió desde una fecha (CAR-413). */
   anteriorId?: string | null;
 };
-export type FilaEgreso = { id: string; etiqueta: string; seccion: string; activa: boolean };
+export type FilaEgreso = { id: string; etiqueta: string; seccion: string; grupo: GrupoEgreso | null; activa: boolean };
 
 /** Hasta 4 decimales con coma; sin miles cuando el texto va a un campo editable (formateador único, R4). */
 const decimales = (n: number, agrupar = true) => (agrupar ? formatearNumero(n, 4) : formatearNumero(n, 4).replace(/\./g, ""));

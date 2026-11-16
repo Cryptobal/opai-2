@@ -10,6 +10,8 @@ test.describe("@preview agentes: marcas de keys con permisos amplios", () => {
   test("la lista de keys se ve y las marcas usan el texto acordado", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/agentes");
+    await expect(page.getByRole("group", { name: "Estado de las keys" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Conectar tu IA/ }).first()).toBeVisible();
     const permitido = await page
       .getByRole("heading", { name: /Agentes/ })
       .first()
