@@ -1,37 +1,24 @@
 // Tipos de lo que devuelven las capacidades de Pauta (las pantallas no importan los esquemas Zod).
-export type Motivo = "sin_titular" | "ausencia" | "licencia" | "vacaciones" | "permiso";
-export type EstadoCelda = "cubierto" | "libre" | "ppc" | "sin_serie";
-export type VarianteCelda = null | "reemplazo" | "refuerzo" | "refuerzo_extra";
+// Celda, motivo y presencia viven en @opai/domain; aquí solo la forma de las vistas de pantalla.
+import type {
+  CeldaPauta,
+  EstadoCelda,
+  EstadoPresencia,
+  MotivoPpc,
+  PresenciaCelda,
+  VarianteCelda,
+} from "@opai/domain";
 
-export type CeldaDia = {
-  fecha: string;
-  estado: EstadoCelda;
-  motivo: Motivo | null;
-  excepcion: boolean;
-  feriado: string | null;
-  titularId: string | null;
-  confirmado?: boolean;
-  marcaManual?: boolean;
-  cubiertoPorId?: string | null;
-  variante?: VarianteCelda;
-  /** Presencia real según las marcas de Asistencia (solo con el módulo activo y permiso `asistencia:ver`). */
-  presencia?: PresenciaCelda;
-};
-
-export type EstadoPresencia = "presente" | "sin_marca" | "ausente" | "incompleto" | "sin_turno";
-export type PresenciaCelda = {
-  personaId: string;
-  estado: EstadoPresencia;
-  entrada: string | null;
-  salida: string | null;
-  atrasoMin: number;
-};
+export type CeldaDia = CeldaPauta;
+export type Motivo = MotivoPpc;
+export type { EstadoCelda, EstadoPresencia, PresenciaCelda, VarianteCelda };
 
 export type ResumenCobertura = {
   programados: number;
   cubiertos: number;
   ppc: number;
   cobertura: number | null;
+  /** Claves libres: la capacidad entrega `Record<string, number>`. */
   ppcPorMotivo: Record<string, number>;
 };
 

@@ -4,6 +4,7 @@ import { defineCapability, prohibido, reglaDeNegocio } from "@opai/capabilities"
 
 import { type Accion, estadoEfectivo, POSPONER_MAX_MIN, transicion } from "../domain";
 import { PERMISO_ATENDER, uuidSchema } from "./esquemas";
+import { TRABAJO_REVISAR } from "./motor";
 import { alertaVisible, exigirPersona, registrarHecho } from "./util";
 
 const salida = z.object({ id: uuidSchema, estado: z.string() });
@@ -44,6 +45,8 @@ function cambiarEstado(accion: Accion, tipoHecho: string, evento: string, verbo:
         });
       await registrarHecho(ctx, tx, { alertaId: a.id, tipo: tipoHecho, estadoDesde: desde, estadoHacia: hacia, nota: i.nota ?? null });
       await ctx.eventos.emitir(tx, { tipo: evento, entidadTipo: "central.alerta", entidadId: a.id, payload: { desde, hacia } });
+      if (hacia === "pospuesta" && i.hasta)
+        await ctx.trabajos.encolar(tx, { tipo: TRABAJO_REVISAR, payload: { alertaId: a.id }, programadoPara: i.hasta, claveUnica: `${a.id}:${i.hasta.toISOString()}` });
     });
     return { id: a.id, estado: hacia };
   };

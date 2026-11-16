@@ -23,7 +23,7 @@ const precio = {
   vigenteDesde: true,
 } as const;
 
-export function listarTenants(id?: string) {
+function listarTenants(id?: string) {
   return clienteApp().tenant.findMany({
     where: id ? { id } : {},
     orderBy: { nombre: "asc" },
@@ -70,6 +70,24 @@ export function accesoPlataforma() {
         estado?: string;
       },
     ) => db.tenant.update({ where: { id }, data, select: perfil }),
+    /** Marca de «activar módulos nuevos». Null si la empresa no existe. */
+    tenantModulosNuevos: (id: string) =>
+      db.tenant.findUnique({
+        where: { id },
+        select: { id: true, activarModulosNuevosDesde: true },
+      }),
+    /** Empresas con la opción encendida. No incluye las apagadas (null). */
+    tenantsConModulosNuevos: () =>
+      db.tenant.findMany({
+        where: { activarModulosNuevosDesde: { not: null } },
+        select: { id: true, activarModulosNuevosDesde: true },
+      }),
+    fijarModulosNuevosDesde: (id: string, desde: Date | null) =>
+      db.tenant.update({
+        where: { id },
+        data: { activarModulosNuevosDesde: desde },
+        select: { id: true, activarModulosNuevosDesde: true },
+      }),
     /** Usuarios con rol de plataforma (ADR-055): solo identidad mínima y el rol. */
     usuariosDePlataforma: () =>
       db.user.findMany({

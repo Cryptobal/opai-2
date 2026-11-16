@@ -2,19 +2,20 @@
 
 import { useState } from "react";
 
+import type { EntidadCampoPersonalizado, OpcionCampo, TipoCampoPersonalizado } from "@opai/domain";
 import { Badge, Button, Empty, SeccionTarjeta } from "@opai/ds";
 
 import { EditorCampo } from "./editor-campo";
 
-export type EntidadCampo = "cuenta" | "contacto" | "negocio";
-export type TipoCampo = "texto" | "numero" | "fecha" | "lista" | "si_no";
+export type EntidadCampo = EntidadCampoPersonalizado;
+export type TipoCampo = TipoCampoPersonalizado;
 export type CampoConfig = {
   id: string;
   entidad: EntidadCampo;
   clave: string;
   etiqueta: string;
   tipo: TipoCampo;
-  opciones: string[];
+  opciones: OpcionCampo[];
   obligatorio: boolean;
   orden: number;
   activo: boolean;
@@ -74,7 +75,7 @@ export function ListaCampos({ campos }: { campos: CampoConfig[] }) {
                       </span>
                       <span className="t-caption">
                         {nombreTipo(c.tipo)}
-                        {c.tipo === "lista" ? ` · ${c.opciones.join(", ")}` : ""}
+                        {c.tipo === "lista" ? ` · ${c.opciones.map((o) => o.etiqueta).join(", ")}` : ""}
                       </span>
                     </div>
                     <Button variant="secondary" onClick={() => setEditando({ campo: c })}>

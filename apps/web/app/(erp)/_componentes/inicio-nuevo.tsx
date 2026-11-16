@@ -41,7 +41,6 @@ export function InicioNuevo({ nombre, empresa, actor }: Props) {
         nombre={nombre}
         empresa={empresa}
         ahora={new Date()}
-        hilo={false}
         crear={<CrearInicio />}
       />
       <Suspense fallback={<EsqueletoIndicadores />}>

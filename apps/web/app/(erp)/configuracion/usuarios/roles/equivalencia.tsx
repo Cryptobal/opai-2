@@ -19,12 +19,12 @@ const FILAS: readonly [string, string][] = [
 
 export function EquivalenciaRoles() {
   return (
-    <SeccionTarjeta titulo="Si vienes de OPAI 1.0" sinRelleno>
+    <SeccionTarjeta titulo="Si migras desde una instalación anterior" sinRelleno>
       <Table className="text-sm">
         <thead>
           <tr>
-            <Th>Rol en 1.0</Th>
-            <Th>Rol en 2.0</Th>
+            <Th>Rol en la instalación anterior</Th>
+            <Th>Rol en OPAI</Th>
           </tr>
         </thead>
         <tbody>

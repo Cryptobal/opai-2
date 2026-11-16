@@ -73,7 +73,7 @@ export async function guardarSecreto(
 }
 
 /** Guarda un secreto cifrado dentro de una transacción ya abierta (sin anidar otra). */
-export async function guardarSecretoConIdTx(
+async function guardarSecretoConIdTx(
   tx: TenantTx,
   ctx: Contexto,
   integracionId: string,
@@ -124,7 +124,7 @@ export async function insertarSecretoConIdTx(
 }
 
 /** Guarda un secreto cifrado y devuelve su id (p. ej. CAF en finanzas.dte_folios). */
-export async function guardarSecretoConId(
+async function guardarSecretoConId(
   ctx: Contexto,
   integracionId: string,
   nombre: string,

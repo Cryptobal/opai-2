@@ -31,7 +31,7 @@ export function nombreMes(mes: string): string {
 }
 
 /** «1, 2, 5 y 6» desde los días aaaa-mm-dd. */
-export function listaDias(dias: readonly string[]): string {
+function listaDias(dias: readonly string[]): string {
   const n = dias.map((d) => String(Number(d.slice(8))));
   return n.length <= 1 ? (n[0] ?? "") : `${n.slice(0, -1).join(", ")} y ${n.at(-1)}`;
 }
