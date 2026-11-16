@@ -25,7 +25,7 @@ const sobreSchema = z.object({
 });
 type Sobre = z.infer<typeof sobreSchema>;
 export type Nivel = Sobre["nivel"];
-export const VIGENCIA_PLAN_MS = 3_600_000;
+const VIGENCIA_PLAN_MS = 3_600_000;
 
 const acceso = (ctx: Contexto) =>
   createHash("sha256")

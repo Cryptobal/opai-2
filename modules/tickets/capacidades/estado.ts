@@ -14,7 +14,7 @@ function puedeGestionar(ctx: { usuario: { id: string } | null; autorizar(p: stri
 export const ticketsCambiarEstado = defineCapability({
   id: "tickets.tickets.cambiar_estado",
   descripcion:
-    "Cambia el estado de un ticket siguiendo las transiciones válidas (ADR-025); solo el responsable o quien ve todos los tickets. El rechazo usa su propia capacidad con motivo.",
+    "Cambia el estado de un ticket siguiendo las transiciones válidas del módulo; solo el responsable o quien ve todos los tickets. El rechazo usa su propia capacidad con motivo.",
   permiso: PERMISO_GESTIONAR,
   input: z.object({ id: uuidSchema, estado: z.enum(["en_curso", "resuelto", "cerrado"]) }),
   output: z.object({ id: uuidSchema, estado: z.string() }),

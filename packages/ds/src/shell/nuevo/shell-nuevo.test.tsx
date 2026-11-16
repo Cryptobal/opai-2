@@ -136,4 +136,12 @@ describe("riel del menú plegado (CAR-377)", () => {
     expect(riel).not.toContain("aria-haspopup");
     expect(riel.indexOf(">Configuración<")).toBeGreaterThan(riel.indexOf(">Comercial<"));
   });
+
+  it("los portales de terreno conservan sus pestañas en el teléfono (CAR-335 D6e)", () => {
+    const terreno = html({ pestanasDelPortal: true });
+    expect(terreno).toContain('data-pestanas="portal"');
+    expect(terreno).not.toContain('data-shell="inferior-nuevo"');
+    expect(html()).toContain('data-shell="inferior-nuevo"');
+    expect(html()).not.toContain("data-pestanas");
+  });
 });

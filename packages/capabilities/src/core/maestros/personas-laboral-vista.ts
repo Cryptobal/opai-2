@@ -2,19 +2,14 @@ import { z } from "zod";
 
 import { dia } from "./comun";
 import { cargarContrato, contratoSchema } from "./contrato-periodos-vista";
+import { respaldoOs10 } from "./os10-documento";
+import { prendasDeLaEmpresa } from "./uniforme-prendas";
 import type { Contexto } from "../../types";
 
 export const laboralSchema = z.object({
   personaId: z.string(),
   uniforme: z
     .object({
-      tallaCamisa: z.string().nullable(),
-      tallaPantalon: z.string().nullable(),
-      tallaChaqueta: z.string().nullable(),
-      tallaZapato: z.string().nullable(),
-      tallaPolera: z.string().nullable(),
-      tallaGeologo: z.string().nullable(),
-      tallaPolar: z.string().nullable(),
       estaturaCm: z.number().nullable(),
       pesoKg: z.number().nullable(),
       notas: z.string().nullable(),
@@ -47,6 +42,22 @@ export const laboralSchema = z.object({
       venceEn: z.string().nullable(),
     })
     .nullable(),
+  /** Documento OS-10 vigente en Documentos (CAR-429): fuente del vencimiento cuando existe. */
+  os10Respaldo: z
+    .object({
+      documentoId: z.string(),
+      venceEn: z.string().nullable(),
+    })
+    .nullable(),
+  /** Talla por prenda del uniforme de la empresa (CAR-408); `enKit: false` = prenda que la empresa ya no usa. */
+  tallas: z.array(
+    z.object({
+      prenda: z.string(),
+      nombre: z.string(),
+      talla: z.string().nullable(),
+      enKit: z.boolean(),
+    }),
+  ),
   /** Historia del contrato vigente (CAR-409): períodos de plazo fijo y paso a indefinido. */
   contrato: contratoSchema.nullable(),
   contacto: z
@@ -62,28 +73,55 @@ export const laboralSchema = z.object({
     .nullable(),
 });
 
+const CONTACTO = {
+  estadoCivil: true,
+  telefonoSecundario: true,
+  emergenciaNombre: true,
+  emergenciaRelacion: true,
+  emergenciaTelefono: true,
+  codigoInterno: true,
+  movilizacion: true,
+} as const;
+
+/** Una fila por prenda del kit, más las tallas guardadas de prendas que la empresa ya no usa (CAR-408). */
+function tallasDe(
+  kit: { clave: string; nombre: string }[],
+  guardadas: { prenda: string; talla: string }[],
+) {
+  const porPrenda = new Map(guardadas.map((t) => [t.prenda, t.talla]));
+  const claves = new Set(kit.map((p) => p.clave));
+  return [
+    ...kit.map((p) => ({
+      prenda: p.clave,
+      nombre: p.nombre,
+      talla: porPrenda.get(p.clave) ?? null,
+      enKit: true,
+    })),
+    ...guardadas
+      .filter((t) => !claves.has(t.prenda))
+      .map((t) => ({ prenda: t.prenda, nombre: t.prenda, talla: t.talla, enKit: false })),
+  ];
+}
+
 export async function cargarLaboral(ctx: Contexto, personaId: string) {
-  const [uniforme, jornada, os10, contacto, contrato] = await Promise.all([
-    ctx.db.personaUniforme.findUnique({
-      where: { personaId },
-      include: { entregas: { orderBy: { entregadaEn: "desc" }, take: 20 } },
-    }),
-    ctx.db.personaJornadaDt.findUnique({ where: { personaId } }),
-    ctx.db.personaOs10.findUnique({ where: { personaId } }),
-    ctx.db.personaContactoLaboral.findUnique({ where: { personaId } }),
-    cargarContrato(ctx.db, personaId),
-  ]);
+  const [uniforme, jornada, os10, contacto, contrato, kit, guardadas, os10Respaldo] =
+    await Promise.all([
+      ctx.db.personaUniforme.findUnique({
+        where: { personaId },
+        include: { entregas: { orderBy: { entregadaEn: "desc" }, take: 20 } },
+      }),
+      ctx.db.personaJornadaDt.findUnique({ where: { personaId } }),
+      ctx.db.personaOs10.findUnique({ where: { personaId } }),
+      ctx.db.personaContactoLaboral.findUnique({ where: { personaId }, select: CONTACTO }),
+      cargarContrato(ctx.db, personaId),
+      prendasDeLaEmpresa(ctx),
+      ctx.db.personaTalla.findMany({ where: { personaId }, select: { prenda: true, talla: true } }),
+      respaldoOs10(ctx, personaId),
+    ]);
   return {
     personaId,
     uniforme: uniforme
       ? {
-          tallaCamisa: uniforme.tallaCamisa,
-          tallaPantalon: uniforme.tallaPantalon,
-          tallaChaqueta: uniforme.tallaChaqueta,
-          tallaZapato: uniforme.tallaZapato,
-          tallaPolera: uniforme.tallaPolera ?? null,
-          tallaGeologo: uniforme.tallaGeologo ?? null,
-          tallaPolar: uniforme.tallaPolar ?? null,
           estaturaCm: uniforme.estaturaCm ?? null,
           pesoKg: uniforme.pesoKg ?? null,
           notas: uniforme.notas,
@@ -108,18 +146,14 @@ export async function cargarLaboral(ctx: Contexto, personaId: string) {
           avisoTerminoDias: jornada.avisoTerminoDias,
         }
       : null,
+    tallas: tallasDe(kit, guardadas),
     contrato,
     os10: os10 ? { credencial: os10.credencial, venceEn: dia(os10.venceEn) } : null,
-    contacto: contacto
-      ? {
-          estadoCivil: contacto.estadoCivil,
-          telefonoSecundario: contacto.telefonoSecundario,
-          emergenciaNombre: contacto.emergenciaNombre,
-          emergenciaRelacion: contacto.emergenciaRelacion,
-          emergenciaTelefono: contacto.emergenciaTelefono,
-          codigoInterno: contacto.codigoInterno ?? null,
-          movilizacion: contacto.movilizacion ?? null,
-        }
-      : null,
+    os10Respaldo,
+    contacto: contacto && {
+      ...contacto,
+      codigoInterno: contacto.codigoInterno ?? null,
+      movilizacion: contacto.movilizacion ?? null,
+    },
   };
 }

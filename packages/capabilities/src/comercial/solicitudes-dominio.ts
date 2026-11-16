@@ -11,7 +11,7 @@ export const ESTADOS_CANAL = ["sin_conectar", "conectado", "revocado"] as const;
 export type EstadoCanal = (typeof ESTADOS_CANAL)[number];
 
 /** Canales que se registran dentro de OPAI y nacen conectados; los otros necesitan infraestructura (PR 2). */
-export const CANALES_INTERNOS: readonly CanalSolicitud[] = ["agente", "manual"];
+const CANALES_INTERNOS: readonly CanalSolicitud[] = ["agente", "manual"];
 
 export const ESTADO_INICIAL_CANAL = (c: CanalSolicitud): EstadoCanal =>
   CANALES_INTERNOS.includes(c) ? "conectado" : "sin_conectar";

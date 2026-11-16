@@ -1,13 +1,11 @@
 import { z } from "zod";
 
-import { existeAnulacionCod1, puedeCederDocumento, simularCesion } from "@opai/domain";
-
 import { defineCapability } from "../define";
 import { escribirConEvento } from "../core/maestros/comun";
-import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
+import { conflicto, reglaDeNegocio } from "../errores";
 import { adaptadorCesionDe } from "./adaptador-cesion";
 import { correoDeudorCesion, exigirCorreoDeudor } from "./ventas-cesion-deudor";
-import { notasCreditoPreviasDe } from "./ventas-nc-comun";
+import { prepararCesion } from "./ventas-cesion-prep";
 import { PERMISO_VENTAS, documentoEmitidoIdSchema, rutEmisorDe } from "./ventas-comun";
 import { vistaDeDocumento } from "./ventas-consulta";
 import { xmlBase64ParaCesion } from "./ventas-xml";
@@ -43,21 +41,7 @@ export const ventasCesionCeder = defineCapability({
   dryRun: true,
   exigeAprobacion: () => true,
   async handler(ctx, input, { dryRun }) {
-    const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
-    if (!doc) throw noEncontrado("El documento");
-    const previas = await notasCreditoPreviasDe(ctx, doc.id);
-    const bloqueo = puedeCederDocumento({
-      tipoDte: doc.tipoDte,
-      estadoDte: doc.estadoDte,
-      cesionEstado: doc.cesionEstado,
-      xmlStorageKey: doc.xmlStorageKey,
-      estadoCobro: doc.estadoCobro,
-      montoTotal: doc.montoTotal,
-      montoCobrado: doc.montoCobrado,
-      anuladaPorNc: existeAnulacionCod1(previas),
-    });
-    if (bloqueo) throw reglaDeNegocio(bloqueo);
-    const calc = simularCesion(doc.montoTotal, input.tasaBps);
+    const { doc, calc } = await prepararCesion(ctx, input.documentoId, input.tasaBps);
     if (dryRun) return vistaDeDocumento(ctx, doc.id);
     const rutEmisor = await rutEmisorDe(ctx);
     const cuenta = await ctx.db.cuenta.findFirst({ where: { id: doc.cuentaId }, select: { rut: true, emailDte: true } });

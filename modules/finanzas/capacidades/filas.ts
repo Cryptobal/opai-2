@@ -3,11 +3,14 @@ import { z } from "zod";
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { sincronizarAvisosEnTx } from "./aviso";
-import { filaSchema, seccionSchema, sinDuplicado, uuidSchema, vistaFila } from "./esquemas";
+import { filaSchema, grupoEgresoSchema, seccionSchema, sinDuplicado, uuidSchema, vistaFila } from "./esquemas";
 import { PERMISO_CONFIGURAR } from "./permisos";
 import { filaDe, ID_VISTA_PREVIA } from "./util";
 
 const datosFila = {
+  grupo: grupoEgresoSchema
+    .default("gastos")
+    .describe("Grupo de egreso en la planilla: remuneraciones, gastos, impuestos o financiamiento (créditos, factoring)."),
   etiqueta: z.string().trim().min(2).max(120),
   vinculo: z
     .string()
@@ -24,7 +27,7 @@ const datosFila = {
 export const filasCrear = defineCapability({
   id: "finanzas.filas.crear",
   descripcion:
-    "Agrega una fila de egreso planificado a la planilla del flujo de caja, con el origen de su cifra y si arrastra las semanas siguientes al reprogramar. Los ingresos no se crean a mano: salen solos de lo facturado y cobrado.",
+    "Agrega una fila de egreso planificado a la planilla del flujo de caja, en un grupo de egreso (por defecto Gastos), con el origen de su cifra y si arrastra las semanas siguientes al reprogramar. Los ingresos no se crean a mano: salen solos de lo facturado y cobrado.",
   permiso: PERMISO_CONFIGURAR,
   input: z.object({
     seccion: seccionSchema,
@@ -42,6 +45,7 @@ export const filasCrear = defineCapability({
     }
     const data = {
       seccion: input.seccion,
+      grupo: input.grupo,
       etiqueta: input.etiqueta,
       vinculo: input.vinculo ?? null,
       arrastre: input.arrastre,
@@ -68,10 +72,11 @@ export const filasCrear = defineCapability({
 export const filasActualizar = defineCapability({
   id: "finanzas.filas.actualizar",
   descripcion:
-    "Cambia una fila de la planilla del flujo de caja: nombre, origen de la cifra, regla de arrastre, orden o si está activa. Las celdas ya cargadas se conservan.",
+    "Cambia una fila de la planilla del flujo de caja: nombre, grupo de egreso, origen de la cifra, regla de arrastre, orden o si está activa. Las celdas ya cargadas se conservan.",
   permiso: PERMISO_CONFIGURAR,
   input: z.object({
     id: uuidSchema,
+    grupo: grupoEgresoSchema.optional().describe("Cambia el grupo de egreso de la fila; solo aplica a filas de egreso."),
     etiqueta: datosFila.etiqueta.optional(),
     vinculo: datosFila.vinculo,
     arrastre: z.boolean().optional(),
@@ -83,6 +88,7 @@ export const filasActualizar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const actual = await filaDe(ctx, input.id);
+    if (input.grupo && actual.seccion !== "egreso") throw reglaDeNegocio("El grupo solo aplica a las filas de egreso.");
     const { id, ...cambios } = input;
     const data = Object.fromEntries(Object.entries(cambios).filter(([, v]) => v !== undefined));
     if (dryRun) return vistaFila({ ...actual, ...data });

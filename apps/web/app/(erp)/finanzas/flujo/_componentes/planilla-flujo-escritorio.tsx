@@ -1,13 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { useState } from "react";
 
-import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
+import { Alerta, Badge, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
-import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
-import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
+import { AccesoRecurrentes, AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
+import { AvisoSaldoBanco } from "./aviso-saldo-banco";
+import { AvisosProyeccion } from "./avisos-proyeccion";
+import { esFilaVirtual } from "./celda-agregada";
 import { celdaEditable, type Planilla } from "./datos";
+import { filaBase } from "./grupos-cobro";
 import type { ArmadoPlanilla } from "./datos";
 import { hojaEspecial, type HojaEspecial } from "./cobros-celda";
 
@@ -29,6 +32,10 @@ type Props = {
   onHoja: (h: HojaEspecial) => void;
   importAbierta: boolean;
   onImportAbiertaChange: (v: boolean) => void;
+  /** Abre o cierra el detalle por cliente e instalación de los cobros (CAR-456). */
+  onAlternarFila: (filaId: string) => void;
+  /** Quién y en qué empresa: para recordar qué avisos ya cerró. */
+  epoca: string;
 };
 
 export function PlanillaFlujoEscritorio({
@@ -44,24 +51,31 @@ export function PlanillaFlujoEscritorio({
   onHoja,
   importAbierta,
   onImportAbiertaChange,
+  onAlternarFila,
+  epoca,
 }: Props) {
+  // «Reprogramar» vive en cada fila con plan (CAR-456), no como botón suelto bajo la planilla.
+  const [mover, setMover] = useState<string | null>(null);
+  const filasPlan = p.filas.filter((f) => !esFilaVirtual(f.id));
+  const conAccion = (id: string) => gestiona && filasPlan.some((f) => f.id === id);
+  const filas = armado.filas.map((f) => (conAccion(f.id) ? { ...f, accion: "Reprogramar" } : f));
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div className="flex min-w-0 flex-col gap-4 pb-24 md:pb-0">
       {avisoTitulo ? (
         <Alerta tono="danger" titulo={avisoTitulo}>
           Revisa la semana en la planilla. El aviso se muestra solo dentro de OPAI, sin enviar correos.
         </Alerta>
       ) : null}
       <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
-      <AvisosProyeccion avisos={p.avisos} />
+      <AvisosProyeccion avisos={p.avisos} epoca={epoca} />
       <PlanillaScreen
         state={state}
         titulo="Flujo de caja"
         subtitulo={`Próximas ${p.semanas.length} semanas · montos en CLP`}
         accionesSiempre
-        cabeceraSoloTelefono
         acciones={
           <>
+            <AccesoRecurrentes gestiona={gestiona} />
             <AccionesFlujoEscritorio configura={configura} onImportar={() => onImportAbiertaChange(true)} />
             <AccionesFlujoMovil configura={configura} onImportar={() => onImportAbiertaChange(true)} />
           </>
@@ -73,16 +87,18 @@ export function PlanillaFlujoEscritorio({
             descripcion: "Agrega filas en Configuración › Módulos › Finanzas › Flujo de caja.",
           },
         }}
-        filas={armado.filas.length > 3 ? armado.filas : []}
+        filas={filas.length > 3 ? filas : []}
         columnas={armado.columnas}
         celda={armado.celda}
         celdaEditable={armado.celdaEditable}
+        onAlternarFila={onAlternarFila}
+        onAccionFila={setMover}
         {...(gestiona
           ? {
               onCelda: (filaId: string, semana: string) => {
                 if (celdaEditable(p, filaId, semana)) onSeleccion({ filaId, semana });
                 else {
-                  const h = hojaEspecial(p, filaId, semana);
+                  const h = hojaEspecial(p, filaBase(filaId), semana);
                   if (h) onHoja(h);
                 }
               },
@@ -90,12 +106,13 @@ export function PlanillaFlujoEscritorio({
           : {})}
       />
       {gestiona ? (
-        <p className="text-sm text-fg-muted">
-          Toca una celda planificada para editarla. Las semanas pasadas muestran lo real según cartola.{" "}
-          <Link href="/configuracion/modulo/finanzas?seccion=flujo-caja" className="text-accent underline">
-            Filas y ajustes
-          </Link>
-        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-fg-muted">
+          <span className="flex flex-wrap items-center gap-2" aria-label="Qué significa cada color">
+            <Badge tono="success">Real del banco</Badge>
+            <Badge tono="info">Comprometido</Badge>
+            <Badge tono="neutro">Planificado</Badge>
+          </span>
+        </div>
       ) : null}
       {gestiona ? (
         <>
@@ -104,12 +121,16 @@ export function PlanillaFlujoEscritorio({
             onCerrar={() => onSeleccion(null)}
             contexto={seleccion ? celdaEditable(p, seleccion.filaId, seleccion.semana) : null}
           />
-          <HojaMover
-            filas={p.filas}
-            semanas={p.semanas.map((s) => s.semana)}
-            semanasPasadas={p.semanas.filter((s) => s.pasada).map((s) => s.semana)}
-            horizonte={p.semanas.length}
-          />
+          {mover ? (
+            <HojaMover
+              filas={filasPlan}
+              semanas={p.semanas.map((s) => s.semana)}
+              semanasPasadas={p.semanas.filter((s) => s.pasada).map((s) => s.semana)}
+              horizonte={p.semanas.length}
+              filaInicial={mover}
+              onCerrar={() => setMover(null)}
+            />
+          ) : null}
         </>
       ) : null}
       {configura ? (

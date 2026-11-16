@@ -77,7 +77,7 @@ export const configCrearEtapa = defineCapability({
 export const configReordenarEtapas = defineCapability({
   id: "comercial.config.reordenar_etapas",
   descripcion:
-    "Reordena las etapas del embudo de ventas: recibe la lista completa de ids en el orden nuevo y la aplica de una vez. La ganada y la perdida no se mueven del final (R26).",
+    "Reordena las etapas del embudo de ventas: recibe la lista completa de ids en el orden nuevo y la aplica de una vez. La ganada y la perdida no se mueven del final.",
   permiso: PERMISO_CONFIG,
   input: z.object({
     ids: z

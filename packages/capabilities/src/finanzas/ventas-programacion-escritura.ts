@@ -106,7 +106,7 @@ export const ventasProgramacionActualizar = defineCapability({
 export const ventasProgramacionCambiarEstado = defineCapability({
   id: "finanzas.ventas_programacion.cambiar_estado",
   descripcion:
-    "Activa o pausa una programación recurrente. Al activarla calcula la próxima generación sin repetir períodos facturados en OPAI 1.0 (fecha de corte y último período importado).",
+    "Activa o pausa una programación recurrente. Al activarla calcula la próxima generación sin repetir períodos ya facturados en un sistema heredado (fecha de corte y último período importado).",
   permiso: PERMISO_VENTAS,
   input: z.object({ programacionId: uuidSchema, activa: z.boolean() }),
   output: resultadoSchema,
