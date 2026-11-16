@@ -1,10 +1,10 @@
 # CAR-84 · Tickets y solicitudes (PR 2 del Brief 13)
 
 - **Sesión:** Sesión Operaciones
-- **PR:** #811 · rama `brief/car-84-avisos-solicitante`
-- **Estado:** En PR
-- **Migración:** PR #811 no; PR «instalación del ticket» sí: `20270101110000_tickets_instalacion` (se integra después de `20270101100000_pauta_visitas`, #816)
-- **Apilado sobre / espera:** el PR «instalación del ticket» va apilado sobre #811
+- **PR:** #811 (avisos, integrado) · #821 instalación del ticket, rama `brief/car-84-ticket-instalacion`
+- **Estado:** #811 integrado; #821 integrado en main
+- **Migración:** #811 no; #821 sí: `20270122100000_tickets_instalacion` (ya en main)
+- **Apilado sobre / espera:** #821 sobre `main` (integrado)
 
 ## Qué entra (parte 1: avisos)
 
@@ -12,7 +12,7 @@
 - Prueba `tickets-avisos-db.test.ts` (5 casos, con dos empresas).
 - `docs/2.0/modulos/tickets.md` §8 al día. Novedad para usuarios.
 
-## Qué entra (parte 2: instalación del ticket, apilado sobre #811)
+## Qué entra (parte 2: instalación del ticket, #821)
 
 - Columna opcional `tickets.tickets.instalacion_id` con FK a `core.instalaciones` y el trigger de mismo tenant ampliado.
 - `tickets.tickets.crear` acepta `instalacionId` (de esta empresa, no archivada y dentro del alcance de quien crea; si no, NOT_FOUND); `listar` filtra por instalación; la ficha y la bandeja devuelven `instalacionId`.

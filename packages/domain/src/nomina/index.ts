@@ -3,3 +3,4 @@ export * from "./periodo";
 export * from "./prestamo";
 export * from "./anticipo";
 export * from "./obligaciones";
+export * from "./costo-proyectado";

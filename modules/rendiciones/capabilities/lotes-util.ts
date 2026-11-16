@@ -1,8 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
-import { cifradoDeCampos, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { cifradoDeCampos, reglaDeNegocio } from "@opai/capabilities";
 import { accesoDeMembresia, INCLUIR_ACCESO, tienePermisoEfectivo } from "@opai/domain";
-
-import { codigoLote, type EstadoLote } from "../domain";
 import { PERMISO_APROBAR_LOTE } from "./permisos";
 
 type Tx = Contexto["db"];
@@ -11,12 +9,6 @@ type Tx = Contexto["db"];
 export async function siguienteCodigoLote(tx: Tx, tenantId: string): Promise<number> {
   await tx.lotePagoContador.createMany({ data: [{ tenantId }], skipDuplicates: true });
   return (await tx.lotePagoContador.update({ where: { tenantId }, data: { ultimo: { increment: 1 } } })).ultimo;
-}
-
-export async function loteDe(ctx: Contexto, id: string) {
-  const l = await ctx.db.lotePago.findFirst({ where: { id }, include: { items: { where: {} } } });
-  if (!l) throw noEncontrado("El lote de pago");
-  return l;
 }
 
 /** Anota un paso en la línea de tiempo del lote y emite el evento, en la transacción de la escritura. */
@@ -74,6 +66,3 @@ export async function numeroDeCuenta(ctx: Contexto, personaId: string): Promise<
   if (!c?.numeroCuenta) throw reglaDeNegocio("Una persona del lote ya no tiene cuenta en su ficha.");
   return cifradoDeCampos(ctx).descifrar("personas_pago", "numero_cuenta", c.numeroCuenta);
 }
-
-export const ETIQUETA_LOTE: Record<EstadoLote, string> = { borrador: "Borrador", aprobado: "Aprobado", generado: "Generado", pagado: "Pagado", anulado: "Anulado" };
-export { codigoLote, prohibido };

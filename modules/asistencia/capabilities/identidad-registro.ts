@@ -4,13 +4,6 @@ import { verificadorPinSimulado, type VerificadorIdentidad } from "../domain";
 import { verificarRostro } from "./identidad-rostro";
 import { verificarPinDePersona } from "./identidad-pin";
 
-let real: VerificadorIdentidad | null = null;
-
-/** Sustituye el verificador (solo pruebas). Sin él se usa RUT + PIN de terreno y, si está habilitado, el rostro. */
-export function fijarVerificadorIdentidad(v: VerificadorIdentidad | null): void {
-  real = v;
-}
-
 export const PIN_SIMULADO = "123456";
 
 /**
@@ -19,7 +12,6 @@ export const PIN_SIMULADO = "123456";
  * marca con el PIN simulado, para no frenar las pruebas de la marca.
  */
 export async function verificadorDe(ctx: Contexto): Promise<VerificadorIdentidad> {
-  if (real) return real;
   const t = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { slug: true } });
   const esPrueba = !!t?.slug.startsWith("qa-");
   return {

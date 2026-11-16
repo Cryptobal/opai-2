@@ -6,7 +6,7 @@ import type { Contexto } from "../../types";
 import { dondeCuenta } from "./alcance";
 import { esVigente, hoyReferencias, ultimasReferencias } from "./referencias-vista";
 
-export const MAX_REFERENCIAS = 10;
+const MAX_REFERENCIAS = 10;
 
 export async function referenciasParaDocumento(
   ctx: Contexto,

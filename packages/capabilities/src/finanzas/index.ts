@@ -64,6 +64,7 @@ import { cierreActualizar } from "./cierre-actualizar";
 import { cierreEmitirLote } from "./cierre-emitir-lote";
 
 export { ajustesFinanzas } from "./ajustes";
+export { buscadoresFinanzas } from "./buscadores";
 export { ventasProgramadasPorPeriodo } from "./ventas-programacion-netas";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
@@ -135,3 +136,5 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   dteConfigObtener,
   dteConfigActualizar,
 ];
+
+export { logoDeMarca } from "./ventas-pdf-logo";
