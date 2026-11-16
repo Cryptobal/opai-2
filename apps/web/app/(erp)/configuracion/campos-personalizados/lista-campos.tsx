@@ -2,14 +2,25 @@
 
 import { useState } from "react";
 
-import type { EntidadCampoPersonalizado } from "@opai/domain";
+import type { EntidadCampoPersonalizado, OpcionCampo, TipoCampoPersonalizado } from "@opai/domain";
 import { Badge, Button, Empty, SeccionTarjeta } from "@opai/ds";
 
 import { EditorCampo } from "./editor-campo";
 import { resumenTipo, type CampoConfig, type FichaConfig } from "./tipos-campo";
 
-type Editando =
-  { campo: CampoConfig } | { nuevo: EntidadCampoPersonalizado; nombre: string } | null;
+export type EntidadCampo = EntidadCampoPersonalizado;
+export type TipoCampo = TipoCampoPersonalizado;
+export type CampoConfig = {
+  id: string;
+  entidad: EntidadCampo;
+  clave: string;
+  etiqueta: string;
+  tipo: TipoCampo;
+  opciones: OpcionCampo[];
+  obligatorio: boolean;
+  orden: number;
+  activo: boolean;
+};
 
 function FilaCampo({ c, onEditar }: { c: CampoConfig; onEditar: () => void }) {
   return (
@@ -58,7 +69,25 @@ export function ListaCampos({ campos, fichas }: { campos: CampoConfig[]; fichas:
             ) : (
               <ul className="divide-y divide-border">
                 {propios.map((c) => (
-                  <FilaCampo key={c.id} c={c} onEditar={() => setEditando({ campo: c })} />
+                  <li
+                    key={c.id}
+                    className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+                  >
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{c.etiqueta}</span>
+                        {c.obligatorio ? <Badge tono="accent">Obligatorio</Badge> : null}
+                        {!c.activo ? <Badge>Archivado</Badge> : null}
+                      </span>
+                      <span className="t-caption">
+                        {nombreTipo(c.tipo)}
+                        {c.tipo === "lista" ? ` · ${c.opciones.map((o) => o.etiqueta).join(", ")}` : ""}
+                      </span>
+                    </div>
+                    <Button variant="secondary" onClick={() => setEditando({ campo: c })}>
+                      Editar
+                    </Button>
+                  </li>
                 ))}
               </ul>
             )}

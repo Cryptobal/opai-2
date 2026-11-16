@@ -21,9 +21,8 @@ type Props = (
 export function EditorCampo(p: Props) {
   const campo = "campo" in p ? p.campo : null;
   const [etiqueta, setEtiqueta] = useState(campo?.etiqueta ?? "");
-  const [tipo, setTipo] = useState<TipoCampoPersonalizado>(campo?.tipo ?? "texto");
-  const [descripcion, setDescripcion] = useState(campo?.descripcion ?? "");
-  const [def, setDef] = useState(() => definicionInicial(campo));
+  const [tipo, setTipo] = useState<TipoCampo>(campo?.tipo ?? "texto");
+  const [opciones, setOpciones] = useState((campo?.opciones ?? []).map((o) => o.etiqueta).join("\n"));
   const [obligatorio, setObligatorio] = useState(campo?.obligatorio ?? false);
   const [activo, setActivo] = useState(campo?.activo ?? true);
   const { ejecutar, pendiente, error } = useCapacidad("erp");

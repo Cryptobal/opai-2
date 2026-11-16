@@ -47,7 +47,7 @@ export const firmasRechazar = defineCapability({
         where: { id: firmante.id, estado: "pendiente" },
         data: { estado: "rechazado", motivoRechazo: input.motivo },
       });
-      if (count !== 1) throw conflicto("Ya firmaste o rechazaste (R11).");
+      if (count !== 1) throw conflicto("Ya firmaste o rechazaste.");
       await tx.solicitudFirma.update({
         where: { id: s.id },
         data: { estado: "rechazada", motivo: input.motivo },
