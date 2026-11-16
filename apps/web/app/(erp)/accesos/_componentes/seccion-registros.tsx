@@ -8,9 +8,11 @@ import { estadoPantalla } from "@/lib/formato";
 import { puedeGestionarRegistros } from "@/lib/pestanas-modulos";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
+import { uuid } from "../prerregistros/_componentes/datos";
 import { CerrarEnBloque } from "./acciones-registro";
 import type { Pagina, Registro } from "./datos";
 import { estadoRegistro, tipoDe } from "./etiquetas";
+import { paginacion } from "./paginacion";
 import { Tarjeta } from "./tablas-instalacion";
 
 const COLUMNAS: Columna<Registro>[] = [
@@ -29,20 +31,32 @@ const COLUMNAS: Columna<Registro>[] = [
   },
 ];
 
-/** Registros o «en sitio» de la instalación, con enlace a la ficha en Accesos. */
+const textos = (enSitio: boolean) => ({
+  vacio: {
+    titulo: enSitio ? "Nadie en sitio" : "Aún no hay registros",
+    descripcion: "Las entradas que registre la portería de esta instalación aparecerán aquí.",
+  },
+});
+
+/** Registros o «en sitio» de la instalación, por páginas, con enlace a la ficha del registro. */
 export async function SeccionRegistros({
   instalacionId,
   enSitio,
+  base,
+  cursor,
   segmento,
 }: {
   instalacionId: string;
   enSitio: boolean;
+  base: string;
+  cursor: string | undefined;
   segmento: ReactNode;
 }) {
   const [r, gestiona] = await Promise.all([
     ejecutarComoUsuario<Pagina<Registro>>("erp", "acceso.registros.listar", {
       instalacionId,
       soloEnSitio: enSitio,
+      ...(uuid(cursor) ? { cursor } : {}),
     }),
     puedeGestionarRegistros(),
   ]);
@@ -68,16 +82,15 @@ export async function SeccionRegistros({
             fin={estadoRegistro(x).etiqueta}
           />
         )}
-        href={(x) => `/accesos/${x.id}?instalacion=${instalacionId}`}
+        href={(x) => `/accesos/${x.id}`}
         Link={LinkNext}
         columnas={COLUMNAS}
-        textos={{
-          vacio: {
-            titulo: enSitio ? "Nadie en sitio" : "Aún no hay registros",
-            descripcion:
-              "Las entradas que registre la portería de esta instalación aparecerán aquí.",
-          },
-        }}
+        textos={textos(enSitio)}
+        {...paginacion(
+          r.ok && r.data.siguiente
+            ? `${base}?sub=${enSitio ? "en_sitio" : "registros"}&cursor=${r.data.siguiente}`
+            : null,
+        )}
       />
     </div>
   );

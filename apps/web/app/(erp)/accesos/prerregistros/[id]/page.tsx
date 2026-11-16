@@ -15,9 +15,8 @@ export default function PrerregistroFicha({ params }: { params: Promise<{ id: st
     <PaginaPortal
       portal="erp"
       titulo="Accesos"
-      ruta="/accesos"
+      ruta="/instalaciones"
       cargando="detalle"
-      volver={{ href: "/accesos/prerregistros", etiqueta: "Prerregistros" }}
       cargar={async () => {
         const id = uuid((await params).id);
         if (!id) notFound();
@@ -25,6 +24,16 @@ export default function PrerregistroFicha({ params }: { params: Promise<{ id: st
         if (!r.ok && r.error.code === "NOT_FOUND") notFound();
         return { r, crea };
       }}
+      opciones={(d) =>
+        d.r.ok
+          ? {
+              volver: {
+                href: `/instalaciones/${d.r.data.instalacionId}/accesos?sub=prerregistros`,
+                etiqueta: "Prerregistros",
+              },
+            }
+          : {}
+      }
     >
       {(d) => (
         <DetallePrerregistro

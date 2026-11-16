@@ -4,8 +4,8 @@ import { capacidadesAcceso, defineModule } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Control de acceso (ADR-003, CAR-78 · E4, CAR-474). Las capacidades viven en
- * packages/capabilities/src/acceso. Pantallas: «Accesos» del ERP (área Operaciones, `/accesos`) y la portería
- * de Terreno (`/terreno/porteria`).
+ * packages/capabilities/src/acceso. Pantallas: la pestaña «Accesos» de cada instalación (sin entrada propia en el
+ * menú: `/accesos` redirige a Instalaciones) y la portería de Terreno (`/terreno/porteria`).
  */
 export const manifest = defineModule({
   id: "acceso",
@@ -41,17 +41,7 @@ export const manifest = defineModule({
       descripcion: "Ver la patente completa de los vehículos registrados (acceso restringido)",
     },
   ],
-  navegacion: [
-    {
-      portal: "erp",
-      area: "operaciones",
-      href: "/accesos",
-      etiqueta: "Accesos",
-      icono: "DoorOpen",
-      orden: 60,
-      permiso: "acceso:read",
-    },
-  ],
+  navegacion: [],
   configuracion: z.object({
     cliente_gestiona_listas: z.boolean().default(true).meta({
       etiqueta: "El cliente gestiona la lista de sus instalaciones",
