@@ -9,6 +9,7 @@ import { ajustesCentral } from "./capabilities/ajustes";
  * estados y bitácora. PR 2 (CAR-468): cadenas de escalamiento e intentos de contacto.
  * PR 3 (CAR-469): reglas de vigilancia y señales de Asistencia y Rondas.
  * PR 4 (CAR-470): humano a cargo (turno, responsable de respaldo, tomar y devolver, pausar al agente).
+ * PR 5 (CAR-471): mensajes a la central desde el portal del trabajador y avisos con acuse.
  * PR 6 (CAR-472): cola en vivo y ficha de la alerta en el ERP, con su entrada en Operaciones.
  */
 export const manifest = defineModule({
@@ -23,6 +24,7 @@ export const manifest = defineModule({
       descripcion: "Abrir, resolver, cerrar como falsa alarma, reabrir, posponer, contactar y escalar alertas",
     },
     { id: "central:agente.gobernar", descripcion: "Pausar al agente en toda la empresa, reanudarlo y devolver alertas tomadas por otros" },
+    { id: "central:avisos.enviar", descripcion: "Enviar avisos de la central (consignas, cambios de turno e instrucciones) con acuse" },
     { id: "central:config.manage", descripcion: "Configurar las reglas de vigilancia y las cadenas de escalamiento de la central" },
   ],
   navegacion: [
@@ -43,6 +45,9 @@ export const manifest = defineModule({
     { id: "central.alerta.reabierta", descripcion: "Se reabrió una alerta cerrada." },
     { id: "central.alerta.pospuesta", descripcion: "Se pospuso una alerta por un plazo." },
     { id: "central.alerta.escalada", descripcion: "Una alerta pasó al siguiente paso de su cadena." },
+    { id: "central.mensaje.recibido", descripcion: "Llegó un mensaje de terreno a la central." },
+    { id: "central.mensaje.respondido", descripcion: "La central respondió un mensaje de terreno." },
+    { id: "central.aviso.enviado", descripcion: "La central envió un aviso a guardias." },
   ],
   capacidades,
 });

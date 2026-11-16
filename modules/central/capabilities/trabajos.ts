@@ -5,6 +5,7 @@ import { defineConsumidor, defineTrabajo, type Contexto } from "@opai/capabiliti
 import type { EstadoAlerta, Severidad } from "../domain";
 import { siguientePaso } from "../domain/cadena";
 import { bloquearAlerta, cadenaDe, contactarPaso, TRABAJO_REVISAR } from "./motor";
+import { trabajoRevisarAcuse, trabajoRevisarConsulta } from "./mensajes-trabajos";
 import { consumidorSenales } from "./senales";
 import { registrarHecho } from "./util";
 
@@ -58,5 +59,5 @@ export const trabajoRevisarAlerta = defineTrabajo({
   handler: (ctx, p) => revisar(ctx, p.alertaId),
 });
 
-export const trabajosCentral = [trabajoRevisarAlerta];
+export const trabajosCentral = [trabajoRevisarAlerta, trabajoRevisarConsulta, trabajoRevisarAcuse];
 export const consumidoresCentral = [consumidorAlertaAbierta, consumidorSenales];
