@@ -12,7 +12,15 @@ export type FilaPlanilla = {
   nivel?: 1 | 2;
   /** Fila que se abre para mostrar su detalle; `abierta` dice si ya se ve. */
   plegable?: { abierta: boolean };
+  /** Acción propia de la fila (ej. «Reprogramar»): botón en la misma fila, visible al pasar el mouse o con foco. */
+  accion?: string;
+  /** Fila de cierre (totales): se separa y se lee más fuerte que el detalle. */
+  total?: boolean;
 };
+
+/** Fondo de la fila: las secciones y los totales se distinguen del detalle. */
+export const claseFondoFila = (fila: FilaPlanilla) =>
+  fila.total || (fila.nivel ?? 0) === 0 ? "bg-fill" : "bg-surface";
 export type ColumnaPlanilla = { id: string; etiqueta: string; destacada?: boolean };
 
 export type PlanillaScreenProps = {
@@ -34,6 +42,8 @@ export type PlanillaScreenProps = {
   onCelda?: (filaId: string, columnaId: string) => void;
   /** Se invoca al abrir o cerrar una fila `plegable`. */
   onAlternarFila?: (filaId: string) => void;
+  /** Se invoca al tocar la `accion` de una fila. */
+  onAccionFila?: (filaId: string) => void;
 };
 
 /* Códigos de turno del diseño: D info, N acento, L libre (sin fondo), V success, X danger (sin cubrir). */

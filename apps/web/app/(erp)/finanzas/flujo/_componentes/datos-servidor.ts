@@ -1,5 +1,6 @@
 import "server-only";
 
+import { epocaDeIdentidad } from "@/lib/epoca-sesion";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import { estadoPantalla } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -22,5 +23,6 @@ export async function cargarPlanilla(sp?: SearchParams) {
     gestiona: puede("finanzas:flujo.gestionar"),
     configura: puede("finanzas:flujo.configurar"),
     movil,
+    epoca: epocaDeIdentidad(identidad),
   };
 }

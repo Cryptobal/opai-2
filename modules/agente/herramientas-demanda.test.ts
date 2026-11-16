@@ -15,7 +15,7 @@ import type {
 import { z } from "zod";
 
 import { prepararTurno } from "./bucle";
-import { CARGAR, USAR, indiceDelAgente } from "./herramientas-demanda";
+import { CARGAR, LISTAR, USAR, indiceDelAgente, resolverLlamada } from "./herramientas-demanda";
 
 beforeEach(() => limpiarRegistro());
 afterEach(() => vi.unstubAllGlobals());
@@ -51,7 +51,7 @@ const respuesta = (texto: string, llamadas: LlamadaHerramienta[] = []) =>
     proveedor: "ia_anthropic",
   }) satisfies RespuestaConversacion;
 
-it("no envía los esquemas del registro: siempre las mismas dos herramientas", async () => {
+it("no envía los esquemas del registro: siempre las mismas tres herramientas meta", async () => {
   const ctx = contexto(40);
   const vistos: string[][] = [];
   const plan = await prepararTurno(ctx, "hola", {
@@ -62,15 +62,19 @@ it("no envía los esquemas del registro: siempre las mismas dos herramientas", a
     },
   });
   expect(plan.texto).toBe("listo");
-  expect(vistos).toEqual([[CARGAR, USAR]]);
+  expect(vistos).toEqual([[LISTAR, CARGAR, USAR]]);
 });
 
-it("el índice nombra todas las herramientas sin sus esquemas", () => {
+it("el índice solo lista módulos; los nombres se piden con listar-modulo", () => {
   const ctx = contexto(3);
   const indice = indiceDelAgente(ctx);
-  expect(indice).toContain("core_prueba_lee0");
-  expect(indice).toContain("core_prueba_lee2");
-  expect(indice).not.toContain("filtro");
+  expect(indice).toMatch(/core \(3\)/);
+  expect(indice).not.toContain("core_prueba_lee0");
+  const listado = resolverLlamada(ctx, new Set(), LISTAR, { modulos: ["core"] });
+  expect(listado).toMatchObject({
+    ok: true,
+    data: { modulos: { core: ["core_prueba_lee0", "core_prueba_lee1", "core_prueba_lee2"] } },
+  });
 });
 
 it("carga el esquema pedido y después ejecuta la herramienta real", async () => {
