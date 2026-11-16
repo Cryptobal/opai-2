@@ -1,11 +1,18 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+import { defineCapability, noEncontrado, reglaDeNegocio, type Contexto } from "@opai/capabilities";
 
 import { uuidSchema } from "./esquemas";
 import { PERMISO_CONFIGURAR, PERMISO_VER } from "./permisos";
 import { motivoInvalido, recurrenteDatos, recurrenteSchema, vistaRecurrente } from "./recurrentes-esquemas";
 import { aFecha, filaDe, ID_VISTA_PREVIA } from "./util";
+
+async function proveedorOpcional(ctx: Contexto, id: string | null | undefined) {
+  if (!id) return null;
+  const p = await ctx.db.proveedor.findFirst({ where: { id, activo: true }, select: { id: true } });
+  if (!p) throw noEncontrado("El proveedor");
+  return p.id;
+}
 
 export const recurrentesListar = defineCapability({
   id: "finanzas.recurrentes.listar",
@@ -50,6 +57,7 @@ export const recurrentesCrear = defineCapability({
     if (motivo) throw reglaDeNegocio(motivo);
     const fila = await filaDe(ctx, input.filaId);
     if (fila.seccion !== "egreso" || !fila.activa) throw reglaDeNegocio("Elige una fila de egresos activa.");
+    const proveedorId = await proveedorOpcional(ctx, input.proveedorId);
     const data = {
       filaId: fila.id,
       concepto: input.concepto,
@@ -65,6 +73,7 @@ export const recurrentesCrear = defineCapability({
       ventanaAntes: input.ventanaAntes,
       ventanaDespues: input.ventanaDespues,
       nota: input.nota,
+      proveedorId,
       activa: true,
       claveOrigen: null,
     };
@@ -89,6 +98,7 @@ const parcial = z.object({
   fin: recurrenteDatos.fin.unwrap().unwrap().nullable().optional(),
   repeticiones: recurrenteDatos.repeticiones.unwrap().unwrap().nullable().optional(),
   nota: recurrenteDatos.nota.unwrap().unwrap().nullable().optional(),
+  proveedorId: recurrenteDatos.proveedorId.unwrap().unwrap().nullable().optional(),
   activa: z.boolean().optional().describe("false deja de proyectarlo; las cuotas ya pagadas no cambian."),
 });
 
@@ -118,7 +128,9 @@ export const recurrentesActualizar = defineCapability({
     if (nuevo.politicaUf !== "dia_fijo" && input.ufDiaFijo === undefined) nuevo.ufDiaFijo = null;
     const motivo = motivoInvalido(nuevo);
     if (motivo) throw reglaDeNegocio(motivo);
-    if (dryRun) return nuevo;
+    const proveedorId =
+      input.proveedorId !== undefined ? await proveedorOpcional(ctx, input.proveedorId) : vista.proveedorId;
+    if (dryRun) return { ...nuevo, proveedorId };
     const r = await ctx.transaccion(async (tx) => {
       const u = await tx.flujoRecurrente.update({
         where: { id: actual.id },
@@ -132,6 +144,7 @@ export const recurrentesActualizar = defineCapability({
           fin: nuevo.fin ? aFecha(nuevo.fin) : null,
           repeticiones: nuevo.repeticiones,
           nota: nuevo.nota,
+          proveedorId,
           activa: nuevo.activa,
         },
       });

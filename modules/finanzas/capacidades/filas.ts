@@ -43,6 +43,10 @@ export const filasCrear = defineCapability({
     if (input.seccion === "ingreso") {
       throw reglaDeNegocio("Los ingresos no se crean a mano: salen de lo facturado y cobrado. Crea un egreso planificado.");
     }
+    const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { slug: true } });
+    if (tenant && !tenant.slug.startsWith("qa-") && /(^TEST QA|\(QA\))/i.test(input.etiqueta)) {
+      throw reglaDeNegocio("Ese nombre está reservado para datos de prueba en empresas ficticias (qa-*).");
+    }
     const data = {
       seccion: input.seccion,
       grupo: input.grupo,

@@ -34,6 +34,7 @@ export const recurrenteDatos = {
   ventanaAntes: z.number().int().min(0).max(31).default(5),
   ventanaDespues: z.number().int().min(0).max(31).default(10),
   nota: z.string().trim().max(500).nullable().default(null),
+  proveedorId: uuidSchema.nullable().default(null).describe("Proveedor del maestro de compras, si el pago es siempre al mismo."),
 };
 
 export const recurrenteSchema = z.object({
@@ -65,6 +66,7 @@ type FilaDb = {
   activa: boolean;
   nota: string | null;
   claveOrigen: string | null;
+  proveedorId: string | null;
   anteriorId?: string | null;
 };
 
@@ -87,6 +89,7 @@ export function vistaRecurrente(r: FilaDb): z.infer<typeof recurrenteSchema> {
     nota: r.nota,
     activa: r.activa,
     claveOrigen: r.claveOrigen,
+    proveedorId: r.proveedorId ?? null,
     anteriorId: r.anteriorId ?? null,
   };
 }
