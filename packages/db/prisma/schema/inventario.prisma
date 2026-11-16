@@ -19,6 +19,8 @@ model InventarioTipo {
   tallas            String[] @default([])
   /// Clave de la prenda del uniforme de Personas (CAR-408) a la que corresponde un tipo de ropa.
   prendaClave       String?  @map("prenda_clave")
+  /// Si el tipo se entrega a personas (CAR-487): cada entrega lleva persona e instalación de imputación.
+  entregaAPersona   Boolean  @default(false) @map("entrega_a_persona")
   activo            Boolean  @default(true)
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
