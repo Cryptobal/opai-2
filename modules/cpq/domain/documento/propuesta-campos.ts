@@ -82,6 +82,7 @@ export function contratoCamposDeEnvio(
         referencias: colecciones.includes("referencias")
           ? (valores.colecciones.referencias ?? []).map(solo)
           : [],
+        puestos: colecciones.includes("puestos") ? (valores.colecciones.puestos ?? []).map(solo) : [],
       },
     },
     faltantes: [...faltantes],

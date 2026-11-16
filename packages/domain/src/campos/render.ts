@@ -53,7 +53,8 @@ export function renderizarPlantillaCampos(
             });
             return "";
           }
-          return op.html ? escaparHtml(s) : s;
+          if (op.html && !campo.contenidoHtml) return escaparHtml(s);
+          return s;
         }
         if (n.t === "si") {
           const clave = campoPorClave(n.clave)?.clave ?? n.clave;

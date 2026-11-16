@@ -7,6 +7,7 @@ import {
 } from "../domain/documento/propuesta-tecnica";
 import { asegurarMarcaDocumento } from "./marca-documento";
 import { contratoCamposPropuesta } from "./propuesta-campos";
+import { plantillaHtmlEnUso } from "./propuesta-html-uso";
 import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "./plantilla-propuesta";
 
 export async function construirSnapshotEnvioPropuesta(
@@ -49,12 +50,14 @@ export async function construirSnapshotEnvioPropuesta(
       }
     }
   }
+  const html = input.propuestaTecnicaId ? await plantillaHtmlEnUso(ctx) : null;
   const camposContrato = input.propuestaTecnicaId
     ? await contratoCamposPropuesta(ctx, {
         cotizacionId: input.cotizacionId,
         propuestaBloquesJson,
         bloquesBiblioteca,
         destinatarios: input.destinatarios,
+        ...(html ? { plantillaHtml: html.htmlSaneado } : {}),
       })
     : undefined;
   return {
@@ -65,6 +68,7 @@ export async function construirSnapshotEnvioPropuesta(
     propuestaBloquesJson,
     destinatarios: input.destinatarios,
     ...(camposContrato ? { camposContrato } : {}),
+    ...(html ? { plantillaHtml: { id: html.id, version: html.version, hash: html.hashSha256 } } : {}),
   };
 }
 

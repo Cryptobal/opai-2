@@ -69,7 +69,7 @@ describe("saneador de HTML de propuesta", () => {
     const r = sanearHtml("<div>{{#cada referencias}}<p>{{referencia.cliente}} · {{referencia.comuna}}</p>{{/cada}}</div>");
     expect(r.ok).toBe(true);
     expect(r.tokens.colecciones).toEqual(["referencias"]);
-    expect(r.catalogoVersion).toBe(2);
+    expect(r.catalogoVersion).toBe(3);
     // Un campo de contrato (o personal sin finalidad «propuesta») no se cuela en una plantilla de propuesta.
     for (const t of ["{{cuenta.escritura_notaria}}", "{{contacto.email}}"]) expect(codigos(`<p>${t}</p>`)).toContain("token");
   });
