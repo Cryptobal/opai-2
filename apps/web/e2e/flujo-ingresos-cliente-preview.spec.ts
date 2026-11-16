@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar, pulsarEnPlanilla } from "./preview";
+import { capturar, plegarHasta } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-456 y CAR-537: la planilla se abre y se cierra, y se recuerda al recargar. No escribe en `qa-e2e`.
@@ -24,14 +24,12 @@ test.describe("@preview flujo de caja: ingresos por cliente", () => {
     await expect(page.getByText("Toca una celda planificada")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Reprogramar…" })).toHaveCount(0);
     await capturar(page, info, "flujo-secciones-abiertas");
-    if ((await egresos.first().getAttribute("aria-expanded")) !== "false") await pulsarEnPlanilla(egresos.first());
-    await expect(egresos.first()).toHaveAttribute("aria-expanded", "false");
+    await plegarHasta(egresos.first(), false);
     await capturar(page, info, "flujo-egresos-contraidos");
     await page.reload();
     await expect(egresos.first()).toBeVisible({ timeout: 60_000 });
     await expect(egresos.first()).toHaveAttribute("aria-expanded", "false");
-    await pulsarEnPlanilla(egresos.first());
-    await expect(egresos.first()).toHaveAttribute("aria-expanded", "true");
+    await plegarHasta(egresos.first(), true);
     await capturar(page, info, "flujo-secciones-recordadas");
   });
 });

@@ -1,4 +1,4 @@
-import { type Locator, type Page, type TestInfo } from "@playwright/test";
+import { expect, type Locator, type Page, type TestInfo } from "@playwright/test";
 
 // Apoyo de `preview-e2e` (CAR-285): los e2e marcados `@preview` corren contra la vista previa de Vercel
 // de cada PR, con el usuario de la empresa ficticia `qa-e2e`, a 375, 1024 y 1280 px. Sus capturas se
@@ -51,6 +51,18 @@ export async function pulsarEnPlanilla(control: Locator): Promise<void> {
     if (bajo > 0) window.scrollBy(0, bajo);
   });
   await control.click();
+}
+
+/**
+ * Deja un botón plegable en `abierto`. En el teléfono el HTML llega antes que la hidratación y un toque
+ * temprano se pierde, así que se repite hasta que el estado cambia; nunca pulsa si ya está como se pide.
+ */
+export async function plegarHasta(boton: Locator, abierto: boolean): Promise<void> {
+  const esperado = String(abierto);
+  await expect(async () => {
+    if ((await boton.getAttribute("aria-expanded")) !== esperado) await pulsarEnPlanilla(boton);
+    await expect(boton).toHaveAttribute("aria-expanded", esperado, { timeout: 2_000 });
+  }).toPass({ timeout: 60_000 });
 }
 
 export async function capturar(page: Page, info: TestInfo, nombre: string): Promise<void> {
