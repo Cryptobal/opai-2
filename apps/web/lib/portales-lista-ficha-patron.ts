@@ -59,7 +59,6 @@ export const PANTALLAS_PORTAL_PATRON: readonly PantallaPortalPatron[] = [
     tipo: "ficha",
     archivo: "apps/web/app/(cliente)/cliente/cotizaciones/_componentes/detalle-cotizacion.tsx",
     patron: "DetailScreen",
-    pendiente: true,
   },
   {
     portal: "supervisor",

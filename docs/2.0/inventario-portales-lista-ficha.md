@@ -21,7 +21,7 @@ Gate: `apps/web/test/portales-lista-ficha-patron.test.ts` (registro en `apps/web
 | Ruta | Tipo | Componente | Patrón | Estado |
 | --- | --- | --- | --- | --- |
 | `/cliente/cotizaciones` | Lista | `cotizaciones/_componentes/lista-cotizaciones.tsx` | `ListScreen` | Conforme |
-| `/cliente/cotizaciones/[id]` | Ficha | `detalle-cotizacion.tsx` | Custom (h2 + cards) | Pendiente |
+| `/cliente/cotizaciones/[id]` | Ficha | `detalle-cotizacion.tsx` | `DetailScreen` | Conforme (CAR-589) |
 | `/cliente` | Resumen | `page.tsx` | Dashboard | Exento |
 | `/cliente/novedades` | Lista | `novedades/page.tsx` | Feed | Exento |
 
@@ -48,6 +48,6 @@ Rendiciones comparten componentes con supervisor (`portal` en props). Misma exig
 | Portal | Rama | PR |
 | --- | --- | --- |
 | Supervisor | `brief/car-589-supervisor-lista-ficha` | (este PR) |
-| Cliente | `brief/car-589-cliente-lista-ficha` | Pendiente |
+| Cliente | `brief/car-589-cliente-lista-ficha` | En PR |
 | Trabajador | `brief/car-589-trabajador-lista-ficha` | Pendiente |
 | Terreno | `brief/car-589-terreno-lista-ficha` | Pendiente |
