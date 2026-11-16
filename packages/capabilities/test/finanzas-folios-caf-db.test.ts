@@ -232,6 +232,9 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
   });
 
   it("listar avisa folios que vencerán sin usar", async () => {
+    const manana = new Date();
+    manana.setUTCDate(manana.getUTCDate() + 1);
+    manana.setUTCHours(0, 0, 0, 0);
     await s.e.admin.dteFolio.updateMany({
       where: { tenantId: s.tenantId, activo: true },
       data: { activo: false },
@@ -243,7 +246,7 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
         folioDesde: 1,
         folioHasta: 10,
         folioActual: 8,
-        cafVenceEn: new Date("2026-11-15T00:00:00.000Z"),
+        cafVenceEn: manana,
         activo: true,
       },
     });
