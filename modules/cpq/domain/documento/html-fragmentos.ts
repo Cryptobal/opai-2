@@ -5,20 +5,29 @@ import { formatearPersonas, type CapituloVista } from "./capitulo-instalacion";
 import { proyectarResumenEconomico, type AperturaPropuesta, type ServicioDesdeCotizacion } from "./propuesta-tecnica";
 import { etiquetaIva, repartirSeccionesComunes } from "./totales";
 
-export const titulo = (nivel: number, texto: string) => `<h${nivel}>${escaparHtml(texto)}</h${nivel}>`;
-export const parrafo = (texto: string) => `<p>${escaparHtml(texto)}</p>`;
+/** Escapa un dato de la cotización o de la marca y separa las llaves dobles: un dato nunca se lee como marcador `{{…}}`. */
+export const escaparDato = (texto: string) => escaparHtml(texto).replace(/([{}])(?=[{}])/g, "$1 ");
 
-/** Un párrafo por línea. Los marcadores `{{…}}` del texto no se tocan: se resuelven después, con los datos reales. */
-export const parrafos = (texto: string) =>
+export const titulo = (nivel: number, texto: string) => `<h${nivel}>${escaparDato(texto)}</h${nivel}>`;
+export const parrafo = (texto: string) => `<p>${escaparDato(texto)}</p>`;
+
+const lineas = (texto: string) =>
   texto
     .split(/\n+/)
     .map((l) => l.trim())
-    .filter(Boolean)
-    .map(parrafo)
+    .filter(Boolean);
+
+/** Un párrafo por línea de un dato (texto literal). */
+export const parrafos = (texto: string) => lineas(texto).map(parrafo).join("");
+
+/** Un párrafo por línea del texto de una sección: sus marcadores `{{…}}` se resuelven después, con los datos reales. */
+export const parrafosConMarcadores = (texto: string) =>
+  lineas(texto)
+    .map((l) => `<p>${escaparHtml(l)}</p>`)
     .join("");
 
 function tabla(cabeza: readonly string[], filas: readonly (readonly string[])[]): string {
-  const celda = (tag: string) => (c: string) => `<${tag}>${escaparHtml(c)}</${tag}>`;
+  const celda = (tag: string) => (c: string) => `<${tag}>${escaparDato(c)}</${tag}>`;
   const cuerpo = filas.map((f) => `<tr>${f.map(celda("td")).join("")}</tr>`).join("");
   return `<table><thead><tr>${cabeza.map(celda("th")).join("")}</tr></thead><tbody>${cuerpo}</tbody></table>`;
 }

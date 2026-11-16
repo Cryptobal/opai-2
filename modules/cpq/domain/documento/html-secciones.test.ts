@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { validarPlantillaCampos } from "@opai/domain";
+
 import { sanearHtml } from "./sanear-html";
 import { htmlBasePropuesta } from "./html-base-propuesta";
 import { conSecciones, htmlSecciones, type DatosSecciones } from "./html-secciones";
@@ -108,5 +110,22 @@ describe("htmlBasePropuesta", () => {
     expect(html).toContain("Vigencia hasta el 30-12-2026");
     expect(html.endsWith("{{secciones}}")).toBe(true);
     expect(sanearHtml(html).ok).toBe(true);
+  });
+});
+
+describe("datos con llaves", () => {
+  it("un dato nunca se lee como marcador; el texto de una sección sí", () => {
+    const html = conSecciones(
+      htmlBasePropuesta({ titulo: "Propuesta", cliente: "Cliente {{cuenta.rut}}" }),
+      htmlSecciones(
+        datos(
+          [bloque("condiciones"), bloque("texto_libre", { contenidoOverride: "Para {{cuenta.nombre}}" })],
+          { condiciones: "Pago {{cotizacion.total}}" },
+        ),
+      ),
+    );
+    expect(validarPlantillaCampos(html, "propuesta").usados).toEqual(["cuenta.nombre"]);
+    expect(html).toContain("<p>Pago { {cotizacion.total} }</p>");
+    expect(sanearHtml(html.replace("{{cuenta.nombre}}", "Cliente")).ok).toBe(true);
   });
 });

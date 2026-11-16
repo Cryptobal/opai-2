@@ -1,4 +1,4 @@
-import { escaparHtml } from "@opai/domain";
+import { parrafo, titulo } from "./html-fragmentos";
 
 /** Marcador que inserta las secciones activas del armador (ver `html-secciones.ts`). */
 const MARCADOR_SECCIONES = "{{secciones}}";
@@ -13,12 +13,11 @@ export function htmlBasePropuesta(d: {
   cliente?: string | null;
   validaHasta?: string | null;
 }): string {
-  const p = (t: string) => `<p>${escaparHtml(t)}</p>`;
   return [
-    `<h1>${escaparHtml(d.titulo)}</h1>`,
-    d.negocio ? p(d.negocio) : "",
-    d.cliente ? p(`Preparada para ${d.cliente}`) : "",
-    d.validaHasta ? p(`Vigencia hasta el ${d.validaHasta}`) : "",
+    titulo(1, d.titulo),
+    d.negocio ? parrafo(d.negocio) : "",
+    d.cliente ? parrafo(`Preparada para ${d.cliente}`) : "",
+    d.validaHasta ? parrafo(`Vigencia hasta el ${d.validaHasta}`) : "",
     MARCADOR_SECCIONES,
   ].join("");
 }
