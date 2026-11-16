@@ -9,28 +9,28 @@ import { leerSecreto } from "../integraciones/secretos";
 import type { Contexto } from "../types";
 
 const FALTA =
-  "Falta conectar OPAI 1: en Configuración › Integraciones › OPAI 1 pega la dirección del exportador y la llave de solo lectura.";
+  "Falta conectar la migración: en Configuración › Integraciones › Migración (exportar datos) pega la dirección del exportador y la llave de solo lectura.";
 
 export async function leerExportDeOpai1(
   ctx: Contexto,
   leer: (url: string, key: string) => Promise<DatosOpai1> = (url, key) => lectorApiOpai1(url, { key }).leer(),
 ): Promise<DatosOpai1> {
-  if (!(await definicionVisible(ctx, "opai1"))) throw reglaDeNegocio("Traer datos desde OPAI 1 no está habilitado para esta empresa.");
+  if (!(await definicionVisible(ctx, "opai1"))) throw reglaDeNegocio("La migración de datos no está habilitada para esta empresa.");
   const fila = await integracionDe(ctx, "opai1");
   if (!fila) throw reglaDeNegocio(FALTA);
   const [url, key] = await Promise.all([leerSecreto(ctx, fila.id, "url"), leerSecreto(ctx, fila.id, "api_key")]);
   if (!url?.trim() || !key?.trim()) throw reglaDeNegocio(FALTA);
   try {
     // Solo https y destinos públicos: la dirección la escribe una persona y el servidor la visita.
-    await exigirDestinoPublico(url.trim(), "OPAI 1");
+    await exigirDestinoPublico(url.trim(), "exportador de migración");
   } catch {
-    throw reglaDeNegocio("La dirección del exportador de OPAI 1 no es válida: debe ser https y pública.");
+    throw reglaDeNegocio("La dirección del exportador no es válida: debe ser https y pública.");
   }
   try {
     return await leer(url.trim(), key.trim());
   } catch (error) {
     // Mensajes propios del lector (estado HTTP, cursor repetido, forma del JSON): sin llave ni filas.
     const detalle = error instanceof Error && /^(Exportador OPAI 1\.0|El exportador|La empresa de 1\.0)/.test(error.message) ? ` ${error.message}.` : "";
-    throw reglaDeNegocio(`No se pudo leer OPAI 1.${detalle} Revisa la dirección y la llave en Configuración › Integraciones.`);
+    throw reglaDeNegocio(`No se pudo leer el export de migración.${detalle} Revisa la dirección y la llave en Configuración › Integraciones.`);
   }
 }

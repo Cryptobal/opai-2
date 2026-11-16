@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { FILA_COBROS_ESPERADOS, hojaEspecial } from "@/app/(erp)/finanzas/flujo/_componentes/cobros-celda";
 import { armarPlanilla, type CeldaFlujo, type Planilla } from "@/app/(erp)/finanzas/flujo/_componentes/datos";
+import { abiertaPorDefecto } from "@/app/(erp)/finanzas/flujo/_componentes/estructura";
 import { filaBase } from "@/app/(erp)/finanzas/flujo/_componentes/grupos-cobro";
 
 const S = "2026-11-16";
@@ -31,7 +32,7 @@ const planilla = (celdas: CeldaFlujo[]): Planilla => ({
   saldoBanco: { fuente: "sin_banco", saldo: null, cuentasSinSaldo: [] },
   avisos: [],
   columnaHoy: S,
-  filas: [{ id: FILA_COBROS_ESPERADOS, etiqueta: "Cobros esperados", seccion: "ingreso", vinculo: null, arrastre: false, orden: 0, activa: true }],
+  filas: [{ id: FILA_COBROS_ESPERADOS, etiqueta: "Cobros esperados", seccion: "ingreso", grupo: null, vinculo: null, arrastre: false, orden: 0, activa: true }],
   semanas: [semana(S), semana(S2)],
   celdas,
 });
@@ -46,16 +47,17 @@ const p = planilla([
   cobro(4, S, 50_000, clienteB),
 ]);
 
+const abre = (...ids: string[]) => (id: string) => ids.includes(id) || abiertaPorDefecto(id);
+
 describe("ingresos agrupados por cliente (CAR-456)", () => {
-  it("«Cobros esperados» se puede abrir y empieza cerrada", () => {
+  it("los cobros se muestran por cliente dentro de Ingresos, con los clientes sumados al empezar", () => {
     const a = armarPlanilla(p, { gestiona: true });
-    const fila = a.filas.find((f) => f.id === FILA_COBROS_ESPERADOS);
-    expect(fila?.plegable).toEqual({ abierta: false });
-    expect(a.filas.some((f) => f.nivel)).toBe(false);
+    expect(a.filas.some((f) => f.id === FILA_COBROS_ESPERADOS)).toBe(false);
+    expect(a.filas.filter((f) => f.nivel === 2)).toEqual([]);
   });
 
-  it("abierta muestra un cliente por fila, el de más monto primero", () => {
-    const a = armarPlanilla(p, { gestiona: true, abiertas: new Set([FILA_COBROS_ESPERADOS]) });
+  it("muestra un cliente por fila, el de más monto primero", () => {
+    const a = armarPlanilla(p, { gestiona: true });
     const hijas = a.filas.filter((f) => f.nivel === 1);
     expect(hijas.map((f) => f.etiqueta)).toEqual(["Cementera Andina", "Bodegas del Sur"]);
     expect(hijas[0]).toMatchObject({ sub: "2 instalaciones", plegable: { abierta: false } });
@@ -67,7 +69,7 @@ describe("ingresos agrupados por cliente (CAR-456)", () => {
 
   it("un cliente abierto muestra sus instalaciones con su propia suma", () => {
     const cli = `cobro-cli:${CLI_A}`;
-    const a = armarPlanilla(p, { gestiona: true, abiertas: new Set([FILA_COBROS_ESPERADOS, cli]) });
+    const a = armarPlanilla(p, { gestiona: true, abierta: abre(cli) });
     const nietas = a.filas.filter((f) => f.nivel === 2);
     expect(nietas.map((f) => f.etiqueta)).toEqual(["Planta Norte", "Planta Sur"]);
     expect(a.celda(nietas[0]!.id, S2)?.texto).toContain("100.000");
@@ -75,7 +77,7 @@ describe("ingresos agrupados por cliente (CAR-456)", () => {
   });
 
   it("la celda de un grupo abre la hoja de cobros de su semana", () => {
-    const a = armarPlanilla(p, { gestiona: true, abiertas: new Set([FILA_COBROS_ESPERADOS]) });
+    const a = armarPlanilla(p, { gestiona: true });
     const cli = `cobro-cli:${CLI_A}`;
     expect(a.celdaEditable(cli, S)).toBe(true);
     expect(hojaEspecial(p, filaBase(cli), S)).toEqual({ tipo: "cobros", semana: S });
@@ -84,13 +86,15 @@ describe("ingresos agrupados por cliente (CAR-456)", () => {
 
   it("un cobro sin cliente resuelto va a «Sin cliente»: las hijas suman lo mismo que la fila", () => {
     const mixta = planilla([cobro(1, S, 300_000, clienteB), cobro(2, S, 20_000, undefined)]);
-    const a = armarPlanilla(mixta, { abiertas: new Set([FILA_COBROS_ESPERADOS]) });
+    const a = armarPlanilla(mixta);
     expect(a.filas.filter((f) => f.nivel === 1).map((f) => f.etiqueta)).toEqual(["Bodegas del Sur", "Sin cliente"]);
     expect(a.celda("cobro-cli:sin", S)?.texto).toContain("20.000");
   });
 
-  it("sin cobros con cliente la fila no se abre", () => {
+  it("sin cobros con cliente queda la fila «Cobros esperados» tal cual, dentro de Ingresos", () => {
     const sinCliente = planilla([cobro(9, S, 10_000, undefined)]);
-    expect(armarPlanilla(sinCliente).filas[0]?.plegable).toBeUndefined();
+    const fila = armarPlanilla(sinCliente).filas.find((f) => f.id === FILA_COBROS_ESPERADOS);
+    expect(fila).toMatchObject({ nivel: 1 });
+    expect(fila?.plegable).toBeUndefined();
   });
 });
