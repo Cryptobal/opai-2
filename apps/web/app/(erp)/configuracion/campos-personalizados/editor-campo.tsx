@@ -16,7 +16,7 @@ export function EditorCampo(p: Props) {
   const entidad = campo?.entidad ?? ("entidad" in p ? p.entidad : "cuenta");
   const [etiqueta, setEtiqueta] = useState(campo?.etiqueta ?? "");
   const [tipo, setTipo] = useState<TipoCampo>(campo?.tipo ?? "texto");
-  const [opciones, setOpciones] = useState((campo?.opciones ?? []).join("\n"));
+  const [opciones, setOpciones] = useState((campo?.opciones ?? []).map((o) => o.etiqueta).join("\n"));
   const [obligatorio, setObligatorio] = useState(campo?.obligatorio ?? false);
   const [activo, setActivo] = useState(campo?.activo ?? true);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
