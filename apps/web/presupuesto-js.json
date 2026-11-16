@@ -113,7 +113,7 @@
     "/(trabajador)/trabajador/novedades": 172,
     "/(cliente)/cliente/novedades": 172,
     "/(erp)/cotizaciones/[id]/propuesta-tecnica": 171,
-    "/(supervisor)/supervisor/rendiciones/[id]": 167,
+    "/(supervisor)/supervisor/rendiciones/[id]": 168,
     "/(erp)/bandeja": 171,
     "/(erp)/finanzas/cobranza/[cuentaId]": 171,
     "/(erp)/remuneraciones": 171,
