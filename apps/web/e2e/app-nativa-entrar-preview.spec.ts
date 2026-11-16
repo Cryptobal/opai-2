@@ -17,14 +17,29 @@ test.describe("@preview app nativa: /entrar lleva a cada perfil a su portal", ()
   }, info) => {
     test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
     await entrar(page);
-    await page.goto("/entrar");
-    await page.waitForLoadState("domcontentloaded");
+    const origen = new URL(page.url()).origin;
+    // Sin preferencia guardada: el servidor redirige al único portal o pinta el selector.
+    await page.context().clearCookies({ name: "opai_portal" });
+    await page.goto("/entrar", { waitUntil: "networkidle" });
+    await expect
+      .poll(
+        async () => {
+          const ruta = new URL(page.url()).pathname;
+          if (ruta !== "/entrar") return "redirect";
+          if (await page.getByRole("heading", { name: "Entrar a OPAI" }).isVisible()) return "selector";
+          if (await page.getByRole("button", { name: "ERP" }).isVisible()) return "selector";
+          return null;
+        },
+        { timeout: 60_000 },
+      )
+      .not.toBeNull();
     const ruta = new URL(page.url()).pathname;
     if (ruta === "/entrar") {
       await expect(page.getByRole("heading", { name: "Entrar a OPAI" })).toBeVisible();
     } else {
       expect(PORTALES).toContain(ruta);
     }
+    await page.context().addCookies([{ name: "opai_portal", value: "", url: origen }]);
     await capturar(page, info, "app-nativa-entrar");
   });
 

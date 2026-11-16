@@ -13,7 +13,7 @@ import { estructuraSchema, vistaEstructura } from "./estructuras-vista";
 export const estructurasAnular = defineCapability({
   id: "core.estructuras.anular",
   descripcion:
-    "IRREVERSIBLE: anula una versión de sueldo con motivo. No reabre versiones anteriores. Emite el cambio por outbox para el anexo del PR 4.",
+    "IRREVERSIBLE: anula una versión de sueldo con motivo. No reabre versiones anteriores. Emite el cambio para propagarlo a los anexos vinculados.",
   permiso: PERMISOS_CORE.estructurasManage,
   input: z.object({ id: uuidSchema, motivo: z.string().trim().min(5).max(500) }),
   output: estructuraSchema,

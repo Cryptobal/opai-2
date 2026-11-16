@@ -332,7 +332,6 @@ Con este acuerdo la especificación queda **aprobada** (antes estaba en borrador
 - Permiso nuevo **`acceso:prerregistros.create`** (gerente y supervisor de base, con alcance), como en §7.
 - **Entregas en dos partes:** la primera trae los datos, las capacidades y las pantallas del ERP (`Prerregistrar`, ficha e `InvitacionQR`); la segunda, el uso en la portería (esperados de hoy, QR que llega lleno, día «Ingresó»). El envío de la invitación por correo o WhatsApp llega con los eventos de Accesos (CAR-482).
 - Un prerregistro vigente autoriza ese día **como una entrada de lista sin horario** (R2): entra aunque la instalación esté en «solo autorizados», y el bloqueo igual gana (R7). Con la invitación, el guardia no necesita el documento: se registra con la huella y la máscara que ya están en el prerregistro.
-
 ## Historial
 
 | Fecha | Cambio | Aprobó |

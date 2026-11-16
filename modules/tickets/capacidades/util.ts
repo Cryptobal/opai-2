@@ -56,3 +56,15 @@ export async function vistaDeFila(
   if (!ctx.usuario) return false;
   return t.solicitanteId === ctx.usuario.id || t.responsableId === ctx.usuario.id;
 }
+
+/**
+ * La instalación existe en esta empresa, no está archivada y está en el alcance de quien crea (ADR-022): un supervisor
+ * solo refiere tickets a sus instalaciones. Devuelve su id o NOT_FOUND (no revela si existe fuera del alcance).
+ */
+export async function instalacionVisible(ctx: Contexto, id: string): Promise<string> {
+  const alcance = ctx.alcance?.instalaciones;
+  if (alcance && !alcance.includes(id)) throw noEncontrado("La instalación");
+  const i = await ctx.db.instalacion.findFirst({ where: { id, archivadaEn: null }, select: { id: true } });
+  if (!i) throw noEncontrado("La instalación");
+  return i.id;
+}

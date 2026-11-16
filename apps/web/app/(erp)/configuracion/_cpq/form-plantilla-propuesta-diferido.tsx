@@ -4,6 +4,8 @@ import { lazy, Suspense } from "react";
 
 import { Loading } from "@opai/ds";
 
+import type { BloquePlantilla } from "@/lib/cpq-bloques-propuesta";
+
 const FormPlantillaPropuesta = lazy(() =>
   import("./form-plantilla-propuesta").then((m) => ({ default: m.FormPlantillaPropuesta })),
 );
@@ -16,7 +18,7 @@ export function FormPlantillaPropuestaDiferido({
     base: string;
     nombreVisible: string;
     aperturaMaxima: string;
-    bloques: { id: string; activo: boolean; fijo: boolean; opcional: boolean }[];
+    bloques: BloquePlantilla[];
     basesDisponibles: string[];
   };
 }) {

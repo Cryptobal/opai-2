@@ -34,7 +34,7 @@ export function validarNivelEnvio(clase: ClaseFirma, nivel: NivelFirma, pol: Vis
   if (nivel === "N3") throw reglaDeNegocio("N3 (FEA) está apagada en esta versión (P2/P3).");
   if (!nivelValido(clase, nivel)) throw reglaDeNegocio(`El nivel ${nivel} no vale para esta clase.`);
   if (!nivelAlMenos(nivel, pol.nivelMinimo))
-    throw reglaDeNegocio(`No se puede bajar del mínimo ${pol.nivelMinimo} de la política (R3).`);
+    throw reglaDeNegocio(`No se puede bajar del mínimo ${pol.nivelMinimo} de la política.`);
   if (!pol.nivelesPermitidos.includes(nivel))
     throw reglaDeNegocio(`El nivel ${nivel} no está entre los permitidos por la política.`);
 }

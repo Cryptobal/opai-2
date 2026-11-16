@@ -27,7 +27,7 @@ export const anexosAprobar = defineCapability({
   // Solo personas: aprobar materializa un documento irreversible (ADR-032); un agente no lo aprueba.
   soloPersonas: true,
   descripcion:
-    "IRREVERSIBLE: aprueba el anexo de contrato en borrador, genera el documento final con la plantilla base y la marca del tenant y lo deja en Documentos con su huella SHA-256 (R15). Solo personas, nunca API keys.",
+    "IRREVERSIBLE: aprueba el anexo de contrato en borrador, genera el documento final con la plantilla base y la marca del tenant y lo deja en Documentos con su huella SHA-256. Solo personas, nunca API keys.",
   permiso: PERMISOS_CORE.anexosManage,
   input: z.object({ id: z.uuid() }),
   output: anexoSchema,
