@@ -13,9 +13,15 @@ import {
 /** Junta el texto visible de todos los bloques (lo que la persona lee en pantalla). */
 function visible(bloques: BloqueNovedad[]): string {
   return bloques
-    .map((b) =>
-      b.tipo === "lista" ? b.items.map((i) => textoPlanoNovedad(i)).join("\n") : textoPlanoNovedad(b.trozos),
-    )
+    .map((b) => {
+      if (b.tipo === "lista") return b.items.map((i) => textoPlanoNovedad(i)).join("\n");
+      if (b.tipo === "tabla") {
+        const head = b.encabezados.map(textoPlanoNovedad).join(" | ");
+        const rows = b.filas.map((f) => f.map(textoPlanoNovedad).join(" | "));
+        return [head, ...rows].join("\n");
+      }
+      return textoPlanoNovedad(b.trozos);
+    })
     .join("\n");
 }
 
@@ -102,5 +108,28 @@ describe("formato de novedades (CAR-316)", () => {
       const texto = visible(bloquesNovedad(e.descripcion));
       expect(texto, e.id).not.toMatch(/\*\*|(^|\n)\s*[-*] /);
     }
+  });
+
+  it("parsea tablas GFM con folio, fecha y cliente (CAR-525)", () => {
+    const md = [
+      "Emitidas la **semana pasada**:",
+      "",
+      "| Folio | Fecha | Cliente | Monto | Estado |",
+      "|-------|-------|---------|-------|--------|",
+      "| 100 | 2026-11-03 | Acme SpA | 1190000 | aceptado |",
+      "| 101 | 2026-11-05 | Beta Ltda | 500000 | pendiente |",
+      "",
+      "Total: **2**.",
+    ].join("\n");
+    const b = bloquesNovedad(md);
+    expect(b.map((x) => x.tipo)).toEqual(["parrafo", "tabla", "parrafo"]);
+    const t = b[1] as Extract<BloqueNovedad, { tipo: "tabla" }>;
+    expect(t.encabezados.map(textoPlanoNovedad)).toEqual(["Folio", "Fecha", "Cliente", "Monto", "Estado"]);
+    expect(t.filas.map((f) => f.map(textoPlanoNovedad))).toEqual([
+      ["100", "2026-11-03", "Acme SpA", "1190000", "aceptado"],
+      ["101", "2026-11-05", "Beta Ltda", "500000", "pendiente"],
+    ]);
+    expect(visible(b)).toContain("Acme SpA");
+    expect(visible(b)).not.toMatch(/\|-------/);
   });
 });
