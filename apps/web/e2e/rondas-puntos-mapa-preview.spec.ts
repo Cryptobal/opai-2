@@ -22,14 +22,16 @@ test.describe("@preview rondas: mapa de puntos en la instalación", () => {
 
   test("panel y hoja nuevo punto muestran el mapa interactivo", async ({ page }, info) => {
     await abrirPuntos(page);
-    await expect(page.getByRole("region", { name: "Mapa de puntos de la ronda" })).toBeVisible();
+    const panelMapa = page.getByRole("region", { name: "Mapa de puntos de la ronda" });
+    await expect(panelMapa).toBeVisible();
+    await expect(panelMapa.locator(".leaflet-container")).toBeVisible({ timeout: 30_000 });
     await capturar(page, info, "rondas-puntos-mapa-panel");
 
     await page.getByRole("link", { name: "Nuevo punto" }).first().click();
     const hoja = page.getByRole("dialog");
-    await expect(hoja.getByRole("region", { name: "Mapa para ubicar el punto" })).toBeVisible({
-      timeout: 30_000,
-    });
+    const mapaHoja = hoja.getByRole("region", { name: "Mapa para ubicar el punto" });
+    await expect(mapaHoja).toBeVisible({ timeout: 30_000 });
+    await expect(mapaHoja.locator(".leaflet-container")).toBeVisible({ timeout: 30_000 });
     await expect(hoja.getByLabel("Buscar dirección")).toBeVisible();
     await expect(hoja.getByRole("button", { name: "Usar mi ubicación" })).toBeVisible();
     await capturarHoja(page, info, "rondas-punto-mapa-hoja");
