@@ -1,6 +1,6 @@
 # Inventario — Hoja de alcance y especificación
 
-**Estado:** en revisión (decidida por la Sesión Inventario con autonomía, ADR-114; Carlos la revisa en el issue «Decide Carlos» CAR-487) · **Fase:** Versión 1.0 · **Insumos:** [`extraccion/inventario.md`](../extraccion/inventario.md), ADR-116 · **Autor:** Claude («Sesión Inventario») · **Linear:** 07 · Inventario (CAR-235 a CAR-238)
+**Estado:** alcance aprobado (CAR-487, opción 1, Carlos 16-nov-2026) · **Fase:** Versión 1.0 · **Insumos:** [`extraccion/inventario.md`](../extraccion/inventario.md), ADR-116 · **Autor:** Claude («Sesión Inventario») · **Linear:** 07 · Inventario (CAR-235 a CAR-238)
 
 ## 1. Objetivo
 
@@ -28,7 +28,7 @@ Se nota que funciona cuando: (1) cada guardia nuevo recibe su uniforme registrad
 - **Ropa ligada al uniforme de Personas** (CAR-237 con CAR-408): un tipo de ropa puede apuntar a una prenda del kit del uniforme; al entregar, se propone la talla de la ficha de la persona.
 - **Existencias por talla** de cada tipo de ropa (CAR-237).
 - **Entrega y devolución** a persona o instalación, con historial; la ropa entregada descuenta existencias (CAR-238).
-- **Módulo vendible**: la forma de cobro queda en espera de Carlos (CAR-487; propuesta: por instalación activa). Sin entrada en el catálogo de cobro hasta que decida.
+- **Módulo vendible**: activación por empresa; la forma de cobro (propuesta: por instalación activa) queda para un ticket hijo de CAR-487 (sin catálogo de cobro en v1 de esta pila).
 
 ## 3. Entidades y relaciones
 
@@ -59,6 +59,7 @@ Mismo diseño que el resto de OPAI (diseño nuevo, ADR-109). No hay diseño apro
 | Descripción | Texto | No | Hasta 300 |
 | Campos propios (activo) | Lista | No | Hasta 12; cada uno con etiqueta (2 a 40), tipo (texto, número, fecha) y obligatorio; etiquetas sin repetir |
 | Prenda del uniforme (ropa) | Clave de la prenda | No | Texto corto; la asignación propone la talla de la ficha |
+| Se entrega a una persona | Sí/no | Sí | En Configuración › Inventario › Tipos. Por defecto **sí** en ropa y **no** en activo (teléfonos y radios pueden marcarse). Los tipos marcados exigen persona + instalación de imputación en cada entrega (CAR-487). |
 | Tallas (ropa) | Lista | Sí en ropa | 1 a 20 tallas, sin repetir, hasta 10 caracteres cada una |
 | Activo | Sí/no | — | Un tipo inactivo no se ofrece para nuevos activos ni entregas |
 
@@ -106,3 +107,4 @@ No hay capa de inventario en [`REFERENTES-saas.md`](../REFERENTES-saas.md). Se s
 - 14-nov-2026: primera versión (Sesión Inventario).
 - 14-nov-2026: R10 a R14, activos (CAR-236); Activos pasa a ser la pestaña principal.
 - 14-nov-2026: R15 a R18, existencias de ropa (CAR-237).
+- 16-nov-2026: CAR-487 — flag «se entrega a una persona» en tipos (CAR-235).

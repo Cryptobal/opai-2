@@ -41,6 +41,7 @@ export const tipoSchema = z.object({
   campos: z.array(campoSchema),
   tallas: z.array(z.string()),
   prendaClave: z.string().nullable(),
+  entregaAPersona: z.boolean(),
   activo: z.boolean(),
 });
 export type VistaTipo = z.infer<typeof tipoSchema>;
@@ -53,6 +54,7 @@ type FilaTipo = {
   campos: unknown;
   tallas: string[];
   prendaClave: string | null;
+  entregaAPersona: boolean;
   activo: boolean;
 };
 
@@ -71,6 +73,7 @@ export function vistaTipo(f: FilaTipo): VistaTipo {
     campos: camposGuardados(f.campos),
     tallas: f.tallas,
     prendaClave: f.prendaClave,
+    entregaAPersona: f.entregaAPersona,
     activo: f.activo,
   };
 }
