@@ -17,11 +17,11 @@ on:
 permissions:
   contents: read
 
-# Un push nuevo al mismo PR cancela la corrida anterior. El e2e a pedido (etiqueta `e2e`) llega como
-# workflow_dispatch desde `e2e-a-pedido.yml`, en su propio grupo.
+# Un push nuevo al mismo PR cancela la corrida anterior. Un workflow_dispatch manual comparte el
+# grupo de su ref y también cancela corridas previas en curso (CAR-627).
 concurrency:
-  group: ci-${{ github.event_name == 'workflow_dispatch' && 'a-pedido-' || '' }}${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
   # ¿El PR toca la base (Prisma o migraciones)? Decide si corre test:db en el PR.
@@ -338,7 +338,7 @@ jobs:
 
   e2e:
     name: e2e · shard ${{ matrix.shard }}/10
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 50
     strategy:
@@ -456,7 +456,7 @@ jobs:
   e2e-informe:
     name: e2e · informe
     needs: e2e
-    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    if: always() && github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 10
     steps:
@@ -488,7 +488,7 @@ jobs:
   e2e-check:
     name: e2e (Playwright)
     needs: [e2e, e2e-informe]
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
@@ -500,7 +500,7 @@ jobs:
 
   rendimiento:
     name: rendimiento
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 25
     services:
