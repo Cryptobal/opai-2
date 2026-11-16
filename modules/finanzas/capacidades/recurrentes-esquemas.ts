@@ -95,7 +95,7 @@ export function vistaRecurrente(r: FilaDb): z.infer<typeof recurrenteSchema> {
 }
 
 /** Tope del porcentaje: 1.000.000 = 100 % de las ventas netas. */
-export const PCT_TOPE = 1_000_000;
+const PCT_TOPE = 1_000_000;
 
 /** Reglas que el modelo no puede expresar en tipos: día solo en mensual, fin posterior al inicio y % ≤ 100. */
 type Revisable = { frecuencia: string; diaDelMes: number | null; inicio: string; fin: string | null; unidad: string; monto: number; politicaUf: string; ufDiaFijo: number | null };

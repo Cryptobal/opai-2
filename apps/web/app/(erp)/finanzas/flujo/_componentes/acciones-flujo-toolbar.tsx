@@ -9,7 +9,7 @@ import { Button, type ItemMenu, Menu } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { HojaImportar } from "./hoja-importar";
 
-export const RUTA_AJUSTES = "/configuracion/modulo/finanzas?seccion=flujo-caja";
+const RUTA_AJUSTES = "/configuracion/modulo/finanzas?seccion=flujo-caja";
 
 type Props = {
   configura: boolean;
