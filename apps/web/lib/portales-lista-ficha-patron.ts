@@ -61,6 +61,13 @@ export const PANTALLAS_PORTAL_PATRON: readonly PantallaPortalPatron[] = [
     patron: "DetailScreen",
   },
   {
+    portal: "terreno",
+    ruta: "/terreno/rondas",
+    tipo: "lista",
+    archivo: "apps/web/app/(terreno)/terreno/rondas/lista-plantillas.tsx",
+    patron: "ListScreen",
+  },
+  {
     portal: "supervisor",
     ruta: "/supervisor/instalaciones",
     tipo: "lista",
@@ -75,6 +82,13 @@ export const PANTALLAS_PORTAL_PATRON: readonly PantallaPortalPatron[] = [
     archivo: "apps/web/app/(supervisor)/supervisor/instalaciones/[id]/page.tsx",
     patron: "DetailScreen",
     pendiente: true,
+  },
+  {
+    portal: "trabajador",
+    ruta: "/trabajador/mis-documentos",
+    tipo: "lista",
+    archivo: "apps/web/app/(trabajador)/trabajador/mis-documentos/_componentes/lista-documentos.tsx",
+    patron: "ListScreen",
   },
   {
     portal: "supervisor",
