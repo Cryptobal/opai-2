@@ -1,5 +1,6 @@
--- Renombra el ajuste desempeno.dia_cierre → desempeno.dia_cierre_mes (CAR-580).
--- Idempotente: no sobrescribe si el destino ya existe.
+-- Qué hace: copia valores guardados de desempeno.dia_cierre a desempeno.dia_cierre_mes sin sobrescribir destinos existentes (idempotente).
+BEGIN;
+SET LOCAL lock_timeout = '5s';
 
 INSERT INTO core.ajustes (
   id,
@@ -37,5 +38,6 @@ WHERE v.modulo = 'desempeno'
       AND n.clave = 'dia_cierre_mes'
   );
 
--- Respaldar reversión (no ejecutar automáticamente):
--- INSERT INTO core.ajustes (...) SELECT ... 'dia_cierre' ... FROM core.ajustes WHERE modulo = 'desempeno' AND clave = 'dia_cierre_mes' ...
+COMMIT;
+
+-- Reversión: eliminar filas desempeno.dia_cierre_mes que no tenían par dia_cierre (o restaurar desde rama Neon backup-car-580-pre-main / backup-car-580-pre-dev).
