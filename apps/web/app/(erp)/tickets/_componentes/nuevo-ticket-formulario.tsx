@@ -1,6 +1,7 @@
-import { Campo, Input, Select, Textarea } from "@opai/ds";
+import { Campo, Combobox, Input, Select, Textarea } from "@opai/ds";
 
-import type { TipoTicket } from "./datos";
+import type { InstalacionOpcion, TipoTicket } from "./datos";
+import { SIN_INSTALACION } from "./instalaciones-ticket";
 
 const PRIORIDADES = [
   { valor: "p1", etiqueta: "P1 · Urgente" },
@@ -20,6 +21,11 @@ export function NuevoTicketFormulario({
   onDescripcion,
   prioridad,
   onPrioridad,
+  instalaciones,
+  instalacionId,
+  onInstalacion,
+  instOpciones,
+  onBuscarInstalacion,
   error,
 }: {
   tipos: TipoTicket[];
@@ -32,6 +38,11 @@ export function NuevoTicketFormulario({
   onDescripcion: (v: string) => void;
   prioridad: string;
   onPrioridad: (v: string) => void;
+  instalaciones: InstalacionOpcion[];
+  instalacionId: string;
+  onInstalacion: (id: string) => void;
+  instOpciones: { valor: string; etiqueta: string }[];
+  onBuscarInstalacion: (q: string) => Promise<{ valor: string; etiqueta: string }[]>;
   error?: string | undefined;
 }) {
   return (
@@ -62,6 +73,18 @@ export function NuevoTicketFormulario({
           onChange={(e) => onDescripcion(e.target.value)}
         />
       </Campo>
+      {instalaciones.length > 0 ? (
+        <Campo etiqueta="Instalación (opcional)" htmlFor="nt-inst">
+          <Combobox
+            id="nt-inst"
+            valor={instalacionId}
+            onCambiar={([v]) => onInstalacion(v ?? SIN_INSTALACION)}
+            opciones={instOpciones}
+            onBuscar={onBuscarInstalacion}
+            placeholder="Sin instalación"
+          />
+        </Campo>
+      ) : null}
       <Campo etiqueta="Prioridad" htmlFor="nt-prio">
         <Select valor={prioridad} opciones={PRIORIDADES} onCambiar={onPrioridad} />
       </Campo>

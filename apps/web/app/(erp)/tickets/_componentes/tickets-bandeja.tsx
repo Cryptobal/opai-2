@@ -11,7 +11,7 @@ import {
   NuevoTicket,
 } from "./nuevo-ticket";
 import { ETIQUETA_ESTADO, ETIQUETA_PRIORIDAD, TONO_ESTADO, TONO_PRIORIDAD } from "./datos";
-import type { RespuestaTicketsLista, Ticket, TipoTicket } from "./datos";
+import type { InstalacionOpcion, RespuestaTicketsLista, Ticket, TipoTicket } from "./datos";
 import { COLUMNAS_TICKETS } from "./tickets-columnas";
 
 const OPCIONES_VISTA = [
@@ -20,14 +20,22 @@ const OPCIONES_VISTA = [
   { valor: "todos", etiqueta: "Todos" },
 ];
 
-export function TicketsBandeja({ r, tipos }: { r: RespuestaTicketsLista; tipos: TipoTicket[] }) {
+export function TicketsBandeja({
+  r,
+  tipos,
+  instalaciones,
+}: {
+  r: RespuestaTicketsLista;
+  tipos: TipoTicket[];
+  instalaciones: InstalacionOpcion[];
+}) {
   const items = r.ok ? r.data.items : [];
   const sinTipos = tipos.length === 0;
   return (
     <ListScreen<Ticket>
       state={estadoPantalla(r)}
       titulo="Tickets"
-      accionPrincipal={<NuevoTicket tipos={tipos} />}
+      accionPrincipal={<NuevoTicket tipos={tipos} instalaciones={instalaciones} />}
       filtros={<ChipsFiltro filtros={[{ param: "vista", etiqueta: "Vista", opciones: OPCIONES_VISTA }]} />}
       items={items}
       clave={(t) => t.id}

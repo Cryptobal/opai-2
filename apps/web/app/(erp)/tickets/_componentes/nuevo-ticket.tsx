@@ -7,7 +7,8 @@ import { avisar, Button, Sheet, Tooltip } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { TipoTicket } from "./datos";
+import type { InstalacionOpcion, TipoTicket } from "./datos";
+import { SIN_INSTALACION, useInstalacionesTicket } from "./instalaciones-ticket";
 import { NuevoTicketFormulario } from "./nuevo-ticket-formulario";
 
 export const CONFIG_TIPOS_TICKET = "/configuracion/modulo/tickets?seccion=tipos";
@@ -18,16 +19,20 @@ export const MOTIVO_SIN_TIPOS_TICKET =
 /**
  * Nuevo ticket (Sheet de la bandeja). Un ticket nace solo cuando una persona lo crea aquí o por
  * `tickets.tickets.crear`: ninguna regla ni integración lo crea (regla de Carlos, 30-oct-2026). El
- * responsable lo fija el tipo; quien no ve todos los tickets no lo elige.
+ * responsable lo fija el tipo; quien no ve todos los tickets no lo elige. La instalación es opcional y
+ * solo aparece si quien crea ve alguna (su alcance).
  */
-export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
+export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: InstalacionOpcion[] }) {
+  const { tipos, instalaciones } = p;
   const router = useRouter();
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const inst = useInstalacionesTicket(instalaciones);
   const [abierto, setAbierto] = useState(false);
   const [tipoId, setTipoId] = useState("");
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [prioridad, setPrioridad] = useState("p3");
+  const [instalacionId, setInstalacionId] = useState(SIN_INSTALACION);
   const tipo = tipos.find((t) => t.id === tipoId);
   const valido = tipoId !== "" && titulo.trim().length >= 3 && descripcion.trim().length >= 3;
   const sinTipos = tipos.length === 0;
@@ -43,11 +48,13 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
       titulo: titulo.trim(),
       descripcion: descripcion.trim(),
       prioridad,
+      ...(instalacionId !== SIN_INSTALACION ? { instalacionId } : {}),
     });
     if (!r) return;
     avisar.exito(tipo?.requiereAprobacion ? "Solicitud enviada" : "Ticket creado");
     setTitulo("");
     setDescripcion("");
+    setInstalacionId(SIN_INSTALACION);
     setAbierto(false);
     router.push(`/tickets/${r.id}`);
   }
@@ -73,7 +80,11 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
         titulo="Nuevo ticket"
         acciones={
           <Button block size="lg" disabled={pendiente || !valido} onClick={() => void crear()}>
-            {pendiente ? "Creando…" : tipo?.requiereAprobacion ? "Enviar solicitud" : "Crear ticket"}
+            {pendiente
+              ? "Creando…"
+              : tipo?.requiereAprobacion
+                ? "Enviar solicitud"
+                : "Crear ticket"}
           </Button>
         }
       >
@@ -88,6 +99,11 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
           onDescripcion={setDescripcion}
           prioridad={prioridad}
           onPrioridad={setPrioridad}
+          instalaciones={instalaciones}
+          instalacionId={instalacionId}
+          onInstalacion={setInstalacionId}
+          instOpciones={inst.opciones}
+          onBuscarInstalacion={inst.buscar}
           {...(error ? { error } : {})}
         />
       </Sheet>
