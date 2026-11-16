@@ -19,7 +19,7 @@ export const rutNormalizado = (rut: string) =>
 export const ventasBuscar = defineCapability({
   id: "finanzas.ventas.buscar",
   descripcion:
-    "Búsqueda avanzada en el libro de ventas para agentes: por RUT o cuenta del cliente, folio, tipo de documento, estado ante el SII, estado de cobro, estado de cesión, rango de fechas de emisión y rango de monto total. Devuelve los mismos documentos que el libro, paginados por cursor.",
+    "Búsqueda avanzada en el libro de ventas para agentes: por RUT o cuenta, folio, tipo, estados, rango de emisión (emitidaDesde/emitidaHasta; para «semana pasada» usa el lunes–domingo de esa semana) y monto. Cada ítem trae folio, fechaEmision, cuentaNombre, montoTotal, estadoDte, estadoCobro, titulo y href. Paginado por cursor (siguiente).",
   permiso: PERMISO_READ,
   input: z.object({
     rut: z
@@ -85,7 +85,7 @@ export const ventasBuscar = defineCapability({
         ...(Object.keys(emision).length ? { fechaEmision: emision } : {}),
         ...(Object.keys(monto).length ? { montoTotal: monto } : {}),
       },
-      include: { lineas: { orderBy: { orden: "asc" } } },
+      // Sin líneas: el listado debe caber en el turno del agente; el detalle va en ventas.obtener.
       orderBy: [{ fechaEmision: "desc" }, { id: "desc" }],
       ...cursorDe(input.cursor, input.limite),
     });
