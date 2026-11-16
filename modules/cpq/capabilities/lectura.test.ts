@@ -26,6 +26,23 @@ async function conDosCotizaciones(permisos?: readonly string[]) {
 }
 
 describe("cpq.cotizaciones.list / get", () => {
+  it("filtra por texto en cuenta, título o código", async () => {
+    const { h, a, b } = await conDosCotizaciones();
+    await h.ctx.db.cpqCotizacion.update({
+      where: { id: a },
+      data: { titulo: "Especial alfa único" },
+    });
+    const porTitulo = await executeCapability(h.ctx, "cpq.cotizaciones.list", { q: "alfa único" });
+    expect(porTitulo).toMatchObject({
+      ok: true,
+      data: { items: [expect.objectContaining({ id: a })] },
+    });
+    const porCuenta = await executeCapability(h.ctx, "cpq.cotizaciones.list", { q: "Cuenta CPQ" });
+    expect(porCuenta.ok && (porCuenta.data as { items: { id: string }[] }).items.map((x) => x.id).sort()).toEqual(
+      [a, b].sort(),
+    );
+  });
+
   it("filtra por cuenta del negocio", async () => {
     const { h, a } = await conDosCotizaciones();
     const neg = await h.ctx.db.negocio.findFirst({ where: { id: NEGOCIO_1 }, select: { cuentaId: true } });

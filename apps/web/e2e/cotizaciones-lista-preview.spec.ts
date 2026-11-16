@@ -1,6 +1,6 @@
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 
-import { abrirCotizacionQa } from "./cpq-seed-preview";
+import { abrirCotizacionQa, CODIGO_COTIZACION_QA } from "./cpq-seed-preview";
 import { capturar } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
@@ -44,5 +44,32 @@ test.describe("@preview CPQ: lista y documento", () => {
     await expect(page.getByRole("button", { name: "Ver cotización (PDF)" })).toBeVisible({ timeout: 60_000 });
     await expect(page.getByRole("button", { name: /propuesta técnica/i })).toBeVisible();
     await capturarCotizaciones(page, info, "cotizaciones-documento-tarjetas");
+  });
+
+  test("búsqueda, paginación y volver a la lista", async ({ page }) => {
+    test.setTimeout(120_000);
+    await entrar(page);
+    await page.goto("/cotizaciones?q=Cliente%20ficticio%20QA");
+    await expect(page.getByText(/\d+ resultados?/)).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('a[href^="/cotizaciones/"]').filter({ hasText: CODIGO_COTIZACION_QA })).toBeVisible({
+      timeout: 60_000,
+    });
+
+    await page.goto("/cotizaciones?limite=20");
+    const cargarMas = page.getByRole("link", { name: "Cargar más" });
+    const siguienteDesktop = page.getByRole("link", { name: "Siguiente" });
+    if (await cargarMas.isVisible({ timeout: 5_000 }).catch(() => false)) {
+      const href = await cargarMas.getAttribute("href");
+      expect(href).toContain("cursor=");
+      await cargarMas.click();
+      await expect(page.url()).toContain("cursor=");
+    } else if (await siguienteDesktop.isVisible({ timeout: 5_000 }).catch(() => false)) {
+      await siguienteDesktop.click();
+      await expect(page.url()).toContain("cursor=");
+    }
+
+    await abrirCotizacionQa(page);
+    await page.getByRole("link", { name: "Cotizaciones" }).click();
+    await expect(page).toHaveURL(/\/cotizaciones/);
   });
 });

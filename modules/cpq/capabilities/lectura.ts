@@ -4,6 +4,7 @@ import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { cotizacionSchema, seccionSchema, uuidSchema, versionSchema } from "./esquemas";
 import { acotarNegocioLista } from "./lista-filtro-negocio";
+import { ampliarBusquedaCotizaciones } from "./lista-busqueda";
 import { inputListaCotizacionesSchema, whereListaCotizaciones } from "./lista-filtros";
 import { PERMISO_COSTOS, PERMISO_READ } from "./permisos";
 import { estadosDeLista } from "../persistencia/lista-estado";
@@ -42,6 +43,7 @@ export const cotizacionesList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const filtro = whereListaCotizaciones(input);
+    if (input.q) await ampliarBusquedaCotizaciones(ctx, input.q.trim(), filtro);
     const vacio = await acotarNegocioLista(ctx, input, filtro);
     if (vacio) return vacio;
     // Sin `skip: 1` (CAR-400): la fila del cursor viene si aún cumple el filtro y se descarta abajo.

@@ -1,9 +1,10 @@
 import { Plus } from "lucide-react";
 
 import { Badge } from "@opai/ds";
-import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { fecha } from "@/lib/fechas";
 import { semaforoEtiqueta } from "@/lib/cpq-presentacion";
 
@@ -24,6 +25,13 @@ export function ListaCotizaciones({
   base?: string;
 }) {
   const p = d.parametros;
+  const porPagina = tamanoPagina(p);
+  const filtrando = Boolean(
+    p.q || p.estado || p.cuenta || p.responsable || p.desde || p.hasta || d.archivadas,
+  );
+  const metaConteo = filtrando
+    ? `${d.items.length}${d.siguiente ? "+" : ""} ${d.items.length === 1 ? "resultado" : "resultados"}`
+    : `${d.items.length}${d.siguiente ? "+" : ""} ${d.archivadas ? "archivadas" : "cotizaciones"}`;
   const nueva = d.crear ? (
     <EnlaceBotonHoja
       href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`}
@@ -55,31 +63,34 @@ export function ListaCotizaciones({
             ]
       }
       debajoFiltros={d.archivadas ? undefined : <FiltrosFechaEnvio />}
-      meta={{
-        izquierda: `${d.items.length} ${d.archivadas ? "archivadas" : "cotizaciones"}`,
-        derecha: "Más recientes",
-      }}
+      meta={{ izquierda: metaConteo, derecha: "Más recientes" }}
       seleccionada={seleccionada}
       vacio={
-        d.archivadas
+        filtrando
           ? {
-              titulo: "No hay cotizaciones archivadas",
-              descripcion: "Las que archives aparecen aquí y se pueden restaurar.",
+              titulo: "Sin resultados",
+              descripcion: "Prueba otro término: cuenta, título o número de cotización.",
             }
-          : {
-              titulo: "Aún no hay cotizaciones",
-              descripcion: "Crea una cotización ligada a un negocio abierto.",
-              accion: nueva,
-            }
+          : d.archivadas
+            ? {
+                titulo: "No hay cotizaciones archivadas",
+                descripcion: "Las que archives aparecen aquí y se pueden restaurar.",
+              }
+            : {
+                titulo: "Aún no hay cotizaciones",
+                descripcion: "Crea una cotización ligada a un negocio abierto.",
+                accion: nueva,
+              }
       }
       pie={
-        d.siguiente ? (
-          <LinkNext
-            href={conFiltrosCotizaciones(`${base}`, { ...p, cursor: d.siguiente ?? undefined })}
-            className="t-label text-accent"
-          >
-            Siguiente página
-          </LinkNext>
+        d.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={p}
+            rutaBase={base}
+            mostrados={d.items.length}
+            siguiente={d.siguiente}
+            porPagina={porPagina}
+          />
         ) : undefined
       }
       filas={d.items.map((c) => {

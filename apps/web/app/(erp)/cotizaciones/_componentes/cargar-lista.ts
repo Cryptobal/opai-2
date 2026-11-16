@@ -1,5 +1,6 @@
 import type { EstadoPantalla } from "@opai/ds";
 
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { accesoCpq } from "@/lib/cpq-ui";
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
@@ -49,9 +50,10 @@ export async function cargarListaCotizaciones(p: Parametros = {}, negocioId?: st
       ...vacio,
     };
   }
+  const limite = tamanoPagina(p);
   const [r, cuentas, responsables] = await Promise.all([
     ejecutarComoUsuario<ListaCotizaciones>("erp", "cpq.cotizaciones.list", {
-      limite: 20,
+      limite,
       ...(p.cursor && esUuid(p.cursor) ? { cursor: p.cursor } : {}),
       ...(negocioId ? { negocioId } : {}),
       ...(archivadas ? { soloArchivadas: true } : {}),
