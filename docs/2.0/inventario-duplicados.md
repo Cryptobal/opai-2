@@ -44,6 +44,8 @@ Aliases declarados (`apps/web/lib/rutas-alias-pantalla.ts`): API keys → Agente
 
 Paridad entre portales (misma UI ERP/supervisor): rendiciones; catch-alls `/:ruta...` por portal.
 
+**Listas y fichas en portales (CAR-589):** inventario vivo en [`inventario-portales-lista-ficha.md`](inventario-portales-lista-ficha.md); gate `portales-lista-ficha-patron.test.ts`.
+
 **Sin duplicado de componente pendiente** tras excluir aliases y paridad de portales (test en verde).
 
 ## 4. Acciones (capacidades)
