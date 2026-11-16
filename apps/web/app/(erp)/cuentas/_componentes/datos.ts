@@ -1,6 +1,5 @@
-import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
+import { entradaPaginaLista } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
-import { esUuid } from "@/lib/ids";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { cargarOpcionesEtiqueta, filtroEtiquetaDe } from "@/app/_components/etiquetas/opciones";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -11,11 +10,9 @@ export type Filtros = Parametros;
 
 /** Lista de cuentas filtrada (búsqueda y estado en la capacidad; "con instalaciones" aquí). */
 export async function cargarCuentas(f: Filtros) {
-  const limite = tamanoPagina(f);
   const [r, etiquetas] = await Promise.all([
     ejecutarComoUsuario<Pagina<CuentaFila>>("erp", "core.cuentas.list", {
-      limite,
-      ...(f.cursor && esUuid(f.cursor) ? { cursor: f.cursor } : {}),
+      ...entradaPaginaLista(f),
       ...filtroEtiquetaDe(f),
       ...(f["q"] ? { q: f["q"] } : {}),
       ...(f["estado"] ? { estado: f["estado"] } : {}),

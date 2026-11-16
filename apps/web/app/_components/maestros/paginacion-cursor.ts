@@ -1,9 +1,18 @@
+import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 
 export const TAMANOS_PAGINA = [20, 50, 100] as const;
 export type TamanoPagina = (typeof TAMANOS_PAGINA)[number];
 
 const DEFECTO: TamanoPagina = 20;
+
+/** `limite` y `cursor` de la URL para capacidades con paginación por cursor (CAR-585). */
+export function entradaPaginaLista(p: Parametros) {
+  return {
+    limite: tamanoPagina(p),
+    ...(p.cursor && esUuid(p.cursor) ? { cursor: p.cursor } : {}),
+  };
+}
 
 /** Tamaño de página desde `?limite=` (20, 50 o 100). */
 export function tamanoPagina(p: Parametros): TamanoPagina {
