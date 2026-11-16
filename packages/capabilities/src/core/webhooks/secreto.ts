@@ -59,3 +59,18 @@ export const webhooksDestinoDelete = defineCapability({
     return { id: actual.id, url: actual.url, eliminado: true };
   },
 });
+
+export const webhooksDestinoGet = defineCapability({
+  id: "core.webhooks.destino_get",
+  descripcion:
+    "Detalle de un destino de eventos salientes: dirección, eventos suscritos, si está activo y los últimos caracteres de su secreto de firma (el secreto nunca se muestra).",
+  permiso: PERMISOS_CORE.apikeysManage,
+  input: z.object({ id: uuidSchema.describe("Id del destino.") }),
+  output: destinoSchema,
+  efecto: "lectura",
+  dryRun: false,
+  async handler(ctx, input) {
+    exigeSinAlcance(ctx);
+    return vistaDestino(await destinoDe(ctx, input.id));
+  },
+});

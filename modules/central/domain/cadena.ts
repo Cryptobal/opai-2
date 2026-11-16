@@ -10,7 +10,7 @@ export type Canal = (typeof CANALES)[number];
  * instalación; «rol», todos los miembros activos con ese rol; «usuario», una persona puntual.
  * El operador de turno y el jefe de operaciones de respaldo llegan con el turno de central (CAR-470).
  */
-export type Destinatario =
+type Destinatario =
   | { tipo: "guardia" }
   | { tipo: "supervisores" }
   | { tipo: "rol"; rol: "owner" | "admin" | "gerente" | "supervisor" }

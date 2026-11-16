@@ -1,11 +1,17 @@
-import { formatearClp } from "@opai/domain";
 import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
+import { clp, fechaDdMmAaaa } from "./formato";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
 import { type CobroApi, hojaEspecial, type IvaApi } from "./cobros-celda";
+import { celdaSaldo } from "./celda-saldo";
+import { abiertaPorDefecto, celdaEncabezado, esEncabezado, filasEstructura } from "./estructura";
+import { celdaGrupoCobro, esGrupoCobro, filaBase } from "./grupos-cobro";
+import type { GrupoEgreso } from "./grupos-egreso";
 
 export type FilaFlujo = {
   id: string;
   seccion: "ingreso" | "egreso";
+  /** Grupo de egreso; null en los ingresos. */
+  grupo: GrupoEgreso | null;
   etiqueta: string;
   vinculo: string | null;
   arrastre: boolean;
@@ -21,6 +27,7 @@ export type CeldaFlujo = {
   nota: string | null;
   cobro?: CobroApi;
   iva?: IvaApi;
+  cliente?: { cuentaId: string; cuenta: string; instalacionId: string | null; instalacion: string | null };
 };
 export type SemanaFlujo = {
   semana: string;
@@ -69,32 +76,22 @@ const CAPA: Record<CeldaFlujo["capa"], { tono: NonNullable<Celda["tono"]>; detal
   real: { tono: "success", detalle: "Real" },
 };
 
-export const clp = (n: number) => formatearClp(n);
-
-/** ISO `aaaa-mm-dd` → `dd-mm-aaaa` para UI es-CL. */
-export function fechaDdMmAaaa(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
-}
+export { clp, fechaDdMmAaaa };
 
 const corta = (iso: string) => fechaDdMmAaaa(iso).slice(0, 5);
 
 /** Columnas, filas y celdas para `PlanillaScreen`: filas del flujo, totales y saldo con su tono. */
-export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
+export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abierta?: (filaId: string) => boolean }) {
   const columnas: ColumnaPlanilla[] = p.semanas.map((s) => ({
     id: s.semana,
     etiqueta: s.pasada ? `${corta(s.semana)} · real` : corta(s.semana),
     destacada: s.semana === p.columnaHoy,
   }));
   const filas: FilaPlanilla[] = [
-    ...p.filas.map((f) => ({
-      id: f.id,
-      etiqueta: f.etiqueta,
-      ...(f.vinculo ? { sub: f.vinculo } : {}),
-    })),
-    { id: TOTALES.ingresos, etiqueta: "Total ingresos" },
-    { id: TOTALES.egresos, etiqueta: "Total egresos" },
-    { id: TOTALES.saldo, etiqueta: "Saldo final" },
+    ...filasEstructura(p, opts?.abierta ?? abiertaPorDefecto),
+    { id: TOTALES.ingresos, etiqueta: "Total ingresos", total: true },
+    { id: TOTALES.egresos, etiqueta: "Total egresos", total: true },
+    { id: TOTALES.saldo, etiqueta: "Saldo final", total: true },
   ];
   const esFilaMonto = (filaId: string) =>
     filaId !== TOTALES.ingresos && filaId !== TOTALES.egresos && filaId !== TOTALES.saldo && !esFilaVirtual(filaId);
@@ -103,18 +100,9 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
     if (!s) return null;
     if (filaId === TOTALES.ingresos) return { texto: clp(s.ingresos) };
     if (filaId === TOTALES.egresos) return { texto: clp(s.egresos) };
-    if (filaId === TOTALES.saldo)
-      return {
-        texto: clp(s.saldoFinal),
-        tono: s.tono === "peligro" ? "danger" : s.tono === "alerta" ? "warning" : "neutro",
-        detalle: s.pasada
-          ? "Según cartola"
-          : s.tono === "peligro"
-            ? "Saldo negativo proyectado"
-            : s.tono === "alerta"
-              ? "Bajo el umbral"
-              : "Proyectado",
-      };
+    if (filaId === TOTALES.saldo) return celdaSaldo(s);
+    if (esEncabezado(filaId)) return celdaEncabezado(p, filaId, semana);
+    if (esGrupoCobro(filaId)) return celdaGrupoCobro(p, filaId, semana);
     const c = celdaAgregada(p.celdas, filaId, semana, s.pasada);
     if (!c) {
       if (opts?.gestiona && esFilaMonto(filaId) && !s.pasada) {
@@ -131,13 +119,13 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
     };
   };
   const celdaEditable = (filaId: string, semana: string) =>
-    Boolean(opts?.gestiona && (celdaEditablePlan(p, filaId, semana) || hojaEspecial(p, filaId, semana)));
+    Boolean(opts?.gestiona && (celdaEditablePlan(p, filaId, semana) || hojaEspecial(p, filaBase(filaId), semana)));
   return { columnas, filas, celda, celdaEditable, totales: TOTALES };
 }
 
 export type ArmadoPlanilla = ReturnType<typeof armarPlanilla>;
 
-export function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
+function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
   if (filaId.startsWith("total") || filaId === TOTALES.saldo || esFilaVirtual(filaId)) return false;
   const s = p.semanas.find((x) => x.semana === semana);
   if (!s || s.pasada) return false;

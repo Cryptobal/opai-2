@@ -1,7 +1,9 @@
 // Emparejar movimientos entrantes (cartola o banco en línea) con los ya guardados de la cuenta (CAR-341), como la
 // conciliación de Xero o QuickBooks: un mismo movimiento no se guarda dos veces aunque llegue por otra vía o con otra
-// fecha. Emparejamiento uno a uno, en tres pasadas: 1) mismo número de documento y monto; 2) misma huella exacta
-// (fecha, monto y glosa); 3) mismo monto, fecha a ±N días y glosa parecida, eligiendo primero la fecha más cercana.
+// fecha. Emparejamiento uno a uno, en cuatro pasadas: 1) mismo número de documento y monto; 2) misma huella exacta
+// (fecha, monto y glosa); 3) mismo monto, fecha a ±N días y glosa parecida, eligiendo primero la fecha más cercana;
+// 4) solo con el banco en línea (CAR-450): mismo monto y fecha a ±N días aunque la glosa no se parezca, si el par es
+// el único candidato en ambos sentidos.
 
 import { normalizarGlosa } from "./dedupe";
 
@@ -16,8 +18,8 @@ export type ExistenteEmparejable = MovimientoEmparejable & { id: string };
 
 export type Emparejado = {
   existenteId: string;
-  /** referencia | exacta | parecida */
-  por: "referencia" | "exacta" | "parecida";
+  /** referencia | exacta | parecida | monto (único candidato del banco en línea, CAR-450) */
+  por: "referencia" | "exacta" | "parecida" | "monto";
   /** Fecha guardada del existente (puede diferir de la entrante en la pasada 1 o 3). */
   fechaExistente: string;
 };
@@ -65,12 +67,15 @@ export function glosasParecidas(a: string, b: string): boolean {
 
 /**
  * Empareja cada entrante (por su índice en la lista) con a lo más un existente, y cada existente con a lo más un
- * entrante. Los que no emparejan son movimientos nuevos. `toleranciaDias` acota las pasadas 1 y 3.
+ * entrante. Los que no emparejan son movimientos nuevos. `toleranciaDias` acota las pasadas 1, 3 y 4. La pasada 4
+ * solo considera los pares que cumplen `porMontoSi` (sin él no corre): el banco en línea rotula distinto que la
+ * cartola, así que ahí basta el monto y la fecha cercana cuando no hay ambigüedad. La ambigüedad se mide solo entre
+ * pares elegibles: un registro de otro origen con el mismo monto no impide el par.
  */
 export function emparejarMovimientos<E extends MovimientoEmparejable>(
   entrantes: readonly E[],
   existentes: readonly ExistenteEmparejable[],
-  opciones: { toleranciaDias?: number } = {},
+  opciones: { toleranciaDias?: number; porMontoSi?: (e: ExistenteEmparejable, m: E) => boolean } = {},
 ): Map<number, Emparejado> {
   const tol = opciones.toleranciaDias ?? 3;
   const out = new Map<number, Emparejado>();
@@ -103,6 +108,19 @@ export function emparejarMovimientos<E extends MovimientoEmparejable>(
   });
   pasada("exacta", (m, e) => m.fecha === e.fecha && normalizarGlosa(m.glosa) === normalizarGlosa(e.glosa));
   pasada("parecida", (m, e) => diasEntre(m.fecha, e.fecha) <= tol && glosasParecidas(m.glosa, e.glosa));
+  if (opciones.porMontoSi) {
+    const elegible = opciones.porMontoSi;
+    const candidatos = new Map<number, ExistenteEmparejable[]>();
+    const vecesExistente = new Map<string, number>();
+    entrantes.forEach((m, i) => {
+      if (!libres(i)) return;
+      const c = (porMonto.get(m.monto) ?? []).filter((e) => !usados.has(e.id) && elegible(e, m) && diasEntre(m.fecha, e.fecha) <= tol);
+      candidatos.set(i, c);
+      for (const e of c) vecesExistente.set(e.id, (vecesExistente.get(e.id) ?? 0) + 1);
+    });
+    // Solo pares sin ambigüedad: un único existente para el entrante y un único entrante para ese existente.
+    for (const [i, c] of candidatos) if (c.length === 1 && vecesExistente.get(c[0]!.id) === 1) asignar(i, c[0]!, "monto");
+  }
   return out;
 }
 

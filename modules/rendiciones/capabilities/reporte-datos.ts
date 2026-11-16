@@ -7,7 +7,7 @@ import { nombresDe } from "./vista";
 
 const ZONA = "America/Santiago";
 /** Más filas que esto en un período no se suman en línea: se pide acortarlo (nunca se trunca en silencio). */
-export const MAX_FILAS_REPORTE = 20_000;
+const MAX_FILAS_REPORTE = 20_000;
 
 const fechaSchema = z
   .string()
@@ -42,7 +42,7 @@ export async function filasDelPeriodo(ctx: Contexto, desde: string, hasta: strin
 }
 
 const CATEGORIAS: Record<string, string> = { compra: "Compra", kilometraje: "Kilometraje" };
-export const ETIQUETA_ADMINISTRACION = "Administración / Oficina central";
+const ETIQUETA_ADMINISTRACION = "Administración / Oficina central";
 
 /** Nombres visibles de personas e instalaciones del mismo tenant; lo que ya no existe queda «Sin nombre». */
 export async function etiquetasDe(ctx: Contexto, personas: readonly string[], instalaciones: readonly string[]) {

@@ -1,6 +1,6 @@
 import { Badge, Button } from "@opai/ds";
 
-import { clp } from "../../flujo/_componentes/datos";
+import { clp } from "../../flujo/_componentes/formato";
 import { deSugerencia, type Elegida } from "./seleccion-conciliacion";
 
 export type SugerenciaReconocer = {
