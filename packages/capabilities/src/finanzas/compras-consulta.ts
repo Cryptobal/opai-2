@@ -55,7 +55,7 @@ export async function vistasDeCompras(ctx: Contexto, filas: readonly FilaConProv
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Lo pagado de cada compra: conciliaciones bancarias confirmadas y vigentes (una consulta por página). */
-async function pagadoPorCompra(ctx: Contexto, todos: string[]): Promise<Map<string, number>> {
+export async function pagadoPorCompra(ctx: Contexto, todos: string[]): Promise<Map<string, number>> {
   // La vista previa de un registro trae un id que aún no es uuid: no tiene pagos y no se consulta.
   const ids = todos.filter((id) => UUID.test(id));
   if (!ids.length) return new Map();

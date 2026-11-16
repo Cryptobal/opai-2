@@ -54,6 +54,7 @@ export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos:
         filtros={[
           { param: "periodo", etiqueta: "Período", opciones: periodosRecientes() },
           { param: "sin_centro", etiqueta: "Centro", opciones: [{ valor: "1", etiqueta: "Sin centro de costo" }] },
+          { param: "con_saldo", etiqueta: "Pago", opciones: [{ valor: "1", etiqueta: "Con saldo por pagar" }] },
         ]}
         meta={{ izquierda: r ? `${r.documentos} documentos · Total ${pesos(r.total)}` : `${items.length} documentos` }}
         seleccionada={seleccionada}

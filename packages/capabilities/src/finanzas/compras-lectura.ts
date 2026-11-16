@@ -6,7 +6,7 @@ import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { aFecha, cursorDe, pagina } from "../core/maestros/comun";
 import { PERMISO_READ } from "./comun";
-import { vistasDeCompras } from "./compras-consulta";
+import { pagadoPorCompra, vistasDeCompras } from "./compras-consulta";
 import { compraSchema } from "./vistas-compra";
 
 const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa-mm.");
@@ -22,6 +22,7 @@ export const comprasListar = defineCapability({
     sinCentroCosto: z.boolean().optional().describe("Solo los documentos sin centro de costo asignado."),
     estadoRecepcion: z.enum(ESTADOS_RECEPCION).optional(),
     q: z.string().trim().max(120).optional().describe("Folio o nombre del proveedor."),
+    conSaldo: z.boolean().optional().describe("Solo documentos con saldo por pagar (derivado de la conciliación)."),
     cursor: uuidSchema.optional(),
     limite: z.number().int().min(1).max(100).default(50),
   }),
@@ -58,13 +59,46 @@ export const comprasListar = defineCapability({
           }
         : {}),
     };
-    const [filas, porTipo, sinCentro] = await Promise.all([
-      ctx.db.documentoRecibido.findMany({
-        where,
-        include: { proveedor: true },
-        orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
-        ...cursorDe(input.cursor, input.limite),
-      }),
+    const armarPagina = async () => {
+      if (!input.conSaldo) {
+        const filas = await ctx.db.documentoRecibido.findMany({
+          where,
+          include: { proveedor: true },
+          orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
+          ...cursorDe(input.cursor, input.limite),
+        });
+        return pagina(filas, input.limite, input.cursor);
+      }
+      type FilaLibro = Awaited<
+        ReturnType<typeof ctx.db.documentoRecibido.findMany<{ include: { proveedor: true } }>>
+      >[number];
+      const salidas: FilaLibro[] = [];
+      let cur = input.cursor;
+      while (salidas.length <= input.limite) {
+        const lote = await ctx.db.documentoRecibido.findMany({
+          where,
+          include: { proveedor: true },
+          orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
+          ...cursorDe(cur, 50),
+        });
+        if (!lote.length) break;
+        const pagado = await pagadoPorCompra(
+          ctx,
+          lote.map((f) => f.id),
+        );
+        for (const f of lote) {
+          if (f.tipoDte === 61) continue;
+          const saldo = Math.max(f.montoTotal - (pagado.get(f.id) ?? 0), 0);
+          if (saldo > 0) salidas.push(f);
+          if (salidas.length > input.limite) break;
+        }
+        cur = lote[lote.length - 1]?.id;
+        if (lote.length < 50) break;
+      }
+      return pagina(salidas, input.limite, input.cursor);
+    };
+    const [{ items, siguiente }, porTipo, sinCentro] = await Promise.all([
+      armarPagina(),
       ctx.db.documentoRecibido.groupBy({
         by: ["tipoDte"],
         where,
@@ -73,7 +107,6 @@ export const comprasListar = defineCapability({
       }),
       ctx.db.documentoRecibido.count({ where: { ...where, centroCostoId: null } }),
     ]);
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     const firmado = (pick: (g: (typeof porTipo)[number]) => number | null) =>
       porTipo.reduce((a, g) => a + signoDte(g.tipoDte as TipoDteCompra) * (pick(g) ?? 0), 0);
     return {

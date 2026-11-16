@@ -201,12 +201,20 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     expect(await ver()).toMatchObject({ estadoPago: "por_pagar", montoPagado: 0, saldoPorPagar: 119_000 });
     await pagar(50_000);
     expect(await ver()).toMatchObject({ estadoPago: "parcial", montoPagado: 50_000, saldoPorPagar: 69_000 });
+    const conSaldo = await dato<{ items: { proveedorId: string; saldoPorPagar: number }[] }>("finanzas.compras.pagos_proveedores", {
+      limite: 20,
+    });
+    expect(conSaldo.items.some((i) => i.proveedorId === proveedorId && i.saldoPorPagar === 69_000)).toBe(true);
+    const filtro = await dato<{ items: Compra[] }>("finanzas.compras.listar", { conSaldo: true, limite: 20 });
+    expect(filtro.items.some((i) => i.id === c.id)).toBe(true);
     await pagar(69_000);
     expect(await ver()).toMatchObject({ estadoPago: "pagada", montoPagado: 119_000, saldoPorPagar: 0 });
     const enLibro = (await libro()).items.find((i) => i.id === c.id);
     expect(enLibro?.estadoPago).toBe("pagada");
     const ficha = await dato<{ compras: Compra[] }>("finanzas.proveedores.obtener", { id: proveedorId });
     expect(ficha.compras.find((i) => i.id === c.id)?.estadoPago).toBe("pagada");
+    const pagos = await dato<{ totalPorPagar: number }>("finanzas.compras.pagos_proveedores", { limite: 20 });
+    expect(pagos.totalPorPagar).toBe(0);
   });
 });
 

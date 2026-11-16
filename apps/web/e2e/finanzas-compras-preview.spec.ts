@@ -39,5 +39,13 @@ test.describe("@preview finanzas: compras maestro-detalle", () => {
     await expect(vencida.getByText("Pago vencido")).toBeVisible({ timeout: 60_000 });
     await capturar(page, info, "finanzas-compras-por-pagar");
   });
+
+  test("pagos a proveedores agrupa el saldo por proveedor (CAR-239)", async ({ page }, info) => {
+    await entrar(page);
+    await page.goto("/finanzas/compras/pagos");
+    await expect(page.getByRole("heading", { name: "Pagos a proveedores" })).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "finanzas-compras-pagos-proveedores");
+  });
 });
 
