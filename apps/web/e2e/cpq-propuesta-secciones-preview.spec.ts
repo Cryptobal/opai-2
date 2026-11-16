@@ -44,6 +44,8 @@ test.describe("@preview cpq: secciones de la propuesta en el PDF", () => {
       await expect(armar).toBeVisible({ timeout: 5_000 });
     }).toPass({ timeout: 60_000 });
     await armar.click();
+    const propuesta = page.getByRole("region", { name: "Propuesta técnica" });
+    await expect(propuesta.getByText(/Plantilla (base OPAI|HTML)/)).toBeVisible({ timeout: 60_000 });
     const lista = page.getByRole("list", { name: "Bloques de la propuesta" });
     await expect(lista).toBeVisible({ timeout: 60_000 });
     const activas = (await lista.getByRole("listitem").allTextContents()).map((t) => t.replace(/^\d+\.\s*/, "").trim());
