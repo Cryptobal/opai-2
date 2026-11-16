@@ -17,8 +17,8 @@ import { crearEtiquetaVigente } from "./etiqueta-escritura";
 import { puntoSchema, vistaPunto } from "./vistas";
 
 const camposPunto = {
-  modo: modoSchema.optional().describe("QR, GPS o QR + GPS; por defecto el del tenant (R1)."),
-  estricto: z.boolean().optional().describe("Modo estricto: QR fuera de la geocerca es anomalía (R2)."),
+  modo: modoSchema.optional().describe("QR, GPS o QR + GPS; por defecto el del tenant."),
+  estricto: z.boolean().optional().describe("Modo estricto: un QR fuera de la geocerca se registra como anomalía."),
   latitud: z.number().min(-90).max(90).nullable().optional(),
   longitud: z.number().min(-180).max(180).nullable().optional(),
   radioM: z
@@ -28,7 +28,7 @@ const camposPunto = {
     .max(RADIO_GEOCERCA_M.max)
     .nullable()
     .optional()
-    .describe("Radio de la geocerca (R3): entre 5 y 20 m, 15 m por defecto."),
+    .describe("Radio de la geocerca, en metros: entre 5 y 20; 15 m por defecto."),
   precisionMinM: z.number().int().min(5).max(100).nullable().optional(),
   permanenciaS: z.number().int().min(0).max(300).optional(),
   exigeFoto: z.boolean().optional(),

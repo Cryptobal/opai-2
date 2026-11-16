@@ -30,7 +30,8 @@ export const ajustesPauta = z.object({
   }),
   visita_lista: z.array(z.string().trim().min(1).max(MAX_TEXTO_ITEM_VISITA)).max(MAX_ITEMS_VISITA).default([]).meta({
     etiqueta: "Lista de revisión de las visitas",
-    ayuda: "Lo que el supervisor revisa en cada visita a una instalación. Vacía, se usa una lista genérica (CAR-83).",
+    ayuda:
+      "Lo que el supervisor revisa en cada visita a una instalación. Vacía, se usa una lista genérica predefinida.",
     grupo: "Visitas de supervisión",
     ambito: "tenant",
     permiso: PERMISO,

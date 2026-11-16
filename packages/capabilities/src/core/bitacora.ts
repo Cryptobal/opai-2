@@ -18,7 +18,7 @@ const verificacionSchema = z.object({
 export const bitacoraVerificar = defineCapability({
   id: "core.bitacora.verificar",
   descripcion:
-    "Verifica la integridad de la bitácora encadenada de la empresa (ADR-023): recorre los hechos y devuelve si la cadena está intacta o el primer eslabón roto.",
+    "Verifica la integridad de la bitácora encadenada de la empresa: recorre los hechos y devuelve si la cadena está intacta o el primer eslabón roto.",
   permiso: PERMISOS_CORE.auditRead,
   input: z.object({}),
   output: verificacionSchema,
