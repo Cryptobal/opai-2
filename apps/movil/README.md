@@ -21,6 +21,10 @@ El APK queda en `nativo/android/app/build/outputs/apk/debug/app-debug.apk`.
 
 `pnpm --filter @opai/movil sincronizar` y abrir `nativo/ios/App` en Xcode.
 
+## Ícono y pantalla de carga
+
+Fuentes en `assets/`: el logo actual de OPAI, el monograma de `scripts/generar-iconos-pwa.ts` (decisión de Carlos, 14-nov-2026). Los archivos de `nativo/android/app/src/main/res` y de `nativo/ios/App/App/Assets.xcassets` salen de esas fuentes. Si cambia el logo, se reemplazan las fuentes y se regeneran esos archivos.
+
 ## Reglas
 
 - Nada de secretos aquí: la firma para tiendas usa llaves que guarda Carlos fuera del repositorio.
