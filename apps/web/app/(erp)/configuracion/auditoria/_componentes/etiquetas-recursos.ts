@@ -19,19 +19,9 @@ export const RECURSOS: Record<string, string> = {
   programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos", mis_turnos: "Mis turnos", mis_documentos: "Mis documentos",
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
-<<<<<<< HEAD
-  conceptos: "Conceptos", obligaciones: "Obligaciones", mes: "Mes", ppc: "Puestos por cubrir",
-  series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos",
-<<<<<<< HEAD
-  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", agente: "Agente", propuestas: "Propuestas del agente", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
-=======
-  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", agente: "Agente", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
-=======
   conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", mes: "Mes", ppc: "Puestos por cubrir",
   series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos", turnos_extra: "Turnos extra",
-  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
->>>>>>> origin/brief/car-469-central-senales
->>>>>>> origin/brief/car-470-central-humano
+  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", agente: "Agente", propuestas: "Propuestas del agente", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
   planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura", recurrentes: "Gastos recurrentes",
