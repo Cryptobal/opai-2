@@ -19,6 +19,7 @@ import {
   Briefcase,
   Building2,
   Clock,
+  DoorOpen,
   Ellipsis,
   FileText,
   Gauge,
@@ -40,11 +41,13 @@ import {
   SlidersHorizontal,
   UserCheck,
   Users,
+  History,
   UserRound,
 } from "lucide-react";
 
 /** Iconos nombrados en manifests y navegación. Un nombre desconocido usa LayoutGrid. */
 const ICONOS: Record<string, LucideIcon> = {
+  DoorOpen,
   Banknote,
   CalendarDays,
   FolderOpen,
@@ -85,6 +88,7 @@ const ICONOS: Record<string, LucideIcon> = {
   SlidersHorizontal,
   UserCheck,
   Users,
+  History,
   UserRound,
 };
 

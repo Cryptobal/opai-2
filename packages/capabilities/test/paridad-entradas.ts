@@ -73,6 +73,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247).",
   "app/_acciones/metodos-acceso.ts#accionQuitarMetodo":
     "Confirma la identidad y luego invoca core.metodos_acceso.quitar (herramienta MCP existente).",
+  "app/_acciones/mfa.ts#accionRegenerarCodigos":
+    "Identidad: regenera los códigos de respaldo de la propia cuenta con contraseña.",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion":
     "Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial.",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion":
