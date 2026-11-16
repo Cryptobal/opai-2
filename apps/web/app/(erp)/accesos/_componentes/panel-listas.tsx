@@ -107,7 +107,17 @@ export function PanelListas({ state, instalacionId, tipo, entradas, href }: Prop
       <ListScreen<EntradaLista>
         state={state}
         titulo={bloq ? "Bloqueadas" : "Autorizadas"}
-        accionPrincipal={<AgregarEntrada instalacionId={instalacionId} tipo={tipo} />}
+        accionPrincipal={
+          <span className="flex flex-wrap items-center gap-3">
+            <LinkNext
+              href="/configuracion/importar?importador=acceso_listas"
+              className="t-body-sm font-medium underline"
+            >
+              Importar desde Excel
+            </LinkNext>
+            <AgregarEntrada instalacionId={instalacionId} tipo={tipo} />
+          </span>
+        }
         items={entradas}
         acciones={(e) => <QuitarEntrada id={e.id} nombre={e.nombre ?? e.mascara} />}
         clave={(e) => e.id}

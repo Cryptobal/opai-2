@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { avisar, Button, Campo, Select, Uploader } from "@opai/ds";
@@ -21,7 +22,9 @@ const AL_EXISTIR = [
 export function AsistenteImportar({ catalogo }: { catalogo: Catalogo }) {
   const disponibles = catalogo.importadores.filter((i) => i.disponible);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const [importador, setImportador] = useState(disponibles[0]?.id ?? "");
+  // `?importador=` llega desde otra pantalla (Listas de acceso) con el importador ya elegido.
+  const pedido = useSearchParams().get("importador");
+  const [importador, setImportador] = useState(disponibles.find((i) => i.id === pedido)?.id ?? disponibles[0]?.id ?? "");
   const [alExistir, setAlExistir] = useState<AlExistir>("completar");
   const [archivo, setArchivo] = useState<Archivo | null>(null);
   const [mapeo, setMapeo] = useState<Record<string, string | null>>({});

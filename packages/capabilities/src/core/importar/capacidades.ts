@@ -81,6 +81,8 @@ export const importarEjecutar = defineCapability({
   output: outputEjecutar,
   // El contenido de la planilla (datos de clientes y contactos) no va a la auditoría: queda el resumen.
   sensibles: ["archivo", "filas", "opai1"],
+  // Una lista de acceso puede bloquear personas: a un agente le pide aprobación humana, como acceso.listas.agregar.
+  exigeAprobacion: (i) => i.importador === "acceso_listas",
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
