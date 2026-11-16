@@ -12,7 +12,7 @@ export const VERBOS: Record<string, string> = {
   consultar_sii: "Consultar al SII", facturable: "Ver si está lista para facturar", aplicar_sii: "Aplicar datos del SII",
   set_representantes: "Definir representantes", set_activo: "Activar o desactivar", bloquear: "Bloquear",
   desbloquear: "Desbloquear", vincular_usuario: "Vincular usuario", no_recontratar_ver: "Ver no recontratar",
-  marcar_no_recontratar: "Marcar como no recontratar", quitar_no_recontratar: "Quitar no recontratar",
+  marcar_no_recontratar: "Marcar como no recontratar", marcar_revisadas: "Marcar como revisadas", quitar_no_recontratar: "Quitar no recontratar",
   prevision_ver: "Ver previsión", prevision_actualizar: "Actualizar previsión", pago_ver: "Ver datos de pago",
   pago_solicitar_cambio: "Pedir cambio de pago", pago_aprobar_cambio: "Aprobar cambio de pago",
   pago_rechazar_cambio: "Rechazar cambio de pago", laboral_ver: "Ver datos laborales",
