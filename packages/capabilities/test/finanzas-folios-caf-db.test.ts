@@ -236,6 +236,8 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
       where: { tenantId: s.tenantId, activo: true },
       data: { activo: false },
     });
+    const cafVenceEn = new Date();
+    cafVenceEn.setUTCDate(cafVenceEn.getUTCDate() + 7);
     await s.e.admin.dteFolio.create({
       data: {
         tenantId: s.tenantId,
@@ -243,7 +245,7 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
         folioDesde: 1,
         folioHasta: 10,
         folioActual: 8,
-        cafVenceEn: new Date("2026-11-15T00:00:00.000Z"),
+        cafVenceEn,
         activo: true,
       },
     });
