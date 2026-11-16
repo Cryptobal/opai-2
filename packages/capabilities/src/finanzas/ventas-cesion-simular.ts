@@ -4,7 +4,7 @@ import { defineCapability } from "../define";
 import { PERMISO_VENTAS, documentoEmitidoIdSchema } from "./ventas-comun";
 import { prepararCesion } from "./ventas-cesion-prep";
 
-export const simulacionCesionSchema = z.object({
+const simulacionCesionSchema = z.object({
   documentoId: z.string(),
   factorRut: z.string(),
   factorNombre: z.string().nullable(),

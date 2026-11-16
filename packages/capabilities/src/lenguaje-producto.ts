@@ -24,7 +24,3 @@ export function hallarLenguajeInterno(texto: string | undefined | null): string 
   }
   return null;
 }
-
-export function patronesLenguajeProducto(): readonly { id: string; re: RegExp }[] {
-  return PATRONES;
-}
