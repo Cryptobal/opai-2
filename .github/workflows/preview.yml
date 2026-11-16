@@ -25,6 +25,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: read # solo para saber si un PR huérfano ya está cerrado
+      # Borrar la rama Git al cerrar el PR (CAR-629).
+      contents: write
     env:
       RAMA: preview/pr-${{ github.event.pull_request.number }}
       RAMA_GIT: ${{ github.head_ref }}
@@ -99,12 +101,10 @@ jobs:
       - name: Crear o reutilizar la rama Neon
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         id: neon
-        uses: neondatabase/create-branch-action@v6
-        with:
-          project_id: ${{ secrets.NEON_PROJECT_ID }}
-          branch_name: ${{ env.RAMA }}
-          parent_branch: main
-          api_key: ${{ secrets.NEON_API_KEY }}
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: .github/scripts/neon-preview-branch.sh
       - name: Migrar la rama
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         env:
@@ -200,6 +200,14 @@ jobs:
             exit 1
           fi
           npx --yes "$VERCEL_CLI" redeploy "$URL" --target preview >/dev/null
+      - name: Suspender compute al terminar la preview
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          ep=$(npx --yes "$NEONCTL" postgres computes list --branch "$RAMA" --project-id "$NEON_PROJECT_ID" --output json | jq -r '.[0].id // empty')
+          [ -z "$ep" ] || npx --yes "$NEONCTL" postgres computes suspend "$ep" --project-id "$NEON_PROJECT_ID" || true
       - name: Borrar la rama Neon y la variable al cerrar
         if: steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
         env:
@@ -219,4 +227,18 @@ jobs:
             echo "$salida"
             echo "$salida" | grep -qiE 'not found|no existing' || exit 1
             echo "La variable DATABASE_URL de $RAMA_GIT ya no existe."
+          fi
+      - name: Borrar rama Git del PR
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.ref != 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref="${{ github.event.pull_request.head.ref }}"
+          if ! gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${ref}" 2>&1; then
+            echo "La rama Git $ref ya no existe o no se pudo borrar."
+          else
+            echo "Rama Git $ref borrada."
           fi
