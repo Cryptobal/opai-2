@@ -50,7 +50,7 @@ export function DashboardScreen({
           ))}
         </div>
         {children ? (
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2 marco-hilo:mt-8 marco-hilo:gap-8">
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {children}
           </div>
         ) : null}

@@ -84,7 +84,7 @@ export const AJUSTES_NUCLEO = defineAjustes(
     cumplimiento_dpa_texto: z.string().default("").meta({
       etiqueta: "Texto del DPA",
       ayuda:
-        "Texto del acuerdo de tratamiento de datos (DPA) de esa versión. La aceptación guarda su hash (SHA-256) como prueba de a qué texto aceptó el tenant. El texto legal lo fija Carlos.",
+        "Texto del acuerdo de tratamiento de datos (DPA) de esa versión. La aceptación guarda su hash (SHA-256) como prueba de a qué texto aceptó la empresa.",
       grupo: "Cumplimiento",
       ambito: "plataforma",
       control: "texto",
@@ -93,18 +93,6 @@ export const AJUSTES_NUCLEO = defineAjustes(
       .enum(["sistema", "claro", "oscuro"])
       .default("sistema")
       .meta({ etiqueta: "Tema", grupo: "Preferencias", ambito: "usuario", control: "seleccion" }),
-    // Marco de la aplicación (ADR-090, CAR-278): cada persona elige entre el clásico y el Hilo. Sin
-    // migración (ADR-038): va en `core.ajuste`, igual que el tema. El navegador lo recuerda en una
-    // cookie para que el servidor pinte el marco elegido sin parpadeo (`apps/web/lib/marco.ts`).
-    // «nuevo» (ADR-109): el diseño nuevo, predeterminado desde CAR-335 D6.
-    preferencias_marco: z.enum(["clasico", "hilo", "nuevo"]).default("nuevo").meta({
-      etiqueta: "Diseño",
-      ayuda:
-        "Nuevo: el diseño de OPAI. Clásico e Hilo: los diseños anteriores, disponibles por un tiempo.",
-      grupo: "Preferencias",
-      ambito: "usuario",
-      control: "seleccion",
-    }),
     preferencias_silencio: z.boolean().default(false).meta({
       etiqueta: "Silenciar avisos por correo",
       ayuda: "Los correos transaccionales (invitaciones, recuperación) llegan igual.",

@@ -13,7 +13,7 @@ import { vistaEtapa } from "./embudo-util";
 export const configActualizarEtapa = defineCapability({
   id: "comercial.config.actualizar_etapa",
   descripcion:
-    "Edita una etapa del embudo: nombre, probabilidad, tono, requisitos de entrada y si está activa. El tipo no cambia (R26); una etapa ganada o perdida no se desactiva. El orden se cambia con comercial.config.reordenar_etapas.",
+    "Edita una etapa del embudo: nombre, probabilidad, tono, requisitos de entrada y si está activa. El tipo (abierta, ganada o perdida) no cambia; una etapa ganada o perdida no se desactiva. El orden se cambia con comercial.config.reordenar_etapas.",
   permiso: PERMISO_CONFIG,
   input: z.object({
     id: uuidSchema,

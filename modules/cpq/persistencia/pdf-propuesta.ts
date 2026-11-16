@@ -58,6 +58,3 @@ export function buildPdfPropuesta(input: {
     plantilla,
   );
 }
-
-export { renderPdfCotizacion } from "./documento-pdf";
-export { pdfCotizacionConMarca } from "./pdf-cotizacion";
