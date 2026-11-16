@@ -12,6 +12,9 @@ model FlujoFila {
   tenantId  String   @map("tenant_id") @db.Uuid
   /// "ingreso" | "egreso".
   seccion   String
+  /// Grupo de egreso en la planilla: "remuneraciones" | "gastos" | "impuestos" | "financiamiento".
+  /// Solo se muestra en filas de egreso; las filas de ingreso lo guardan en "gastos" y no lo usan.
+  grupo     String   @default("gastos")
   etiqueta  String
   vinculo   String?
   arrastre  Boolean  @default(false)

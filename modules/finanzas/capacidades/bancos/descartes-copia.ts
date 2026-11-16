@@ -6,7 +6,7 @@ import type { TenantTx } from "@opai/db";
  * CAR-412: copia exacta de un movimiento bancario descartado, para restaurarlo igual. Montos como texto (BigInt no cabe
  * en JSON) y fechas ISO. Las propuestas de conciliación no se copian: se borran al descartar y se vuelven a sugerir.
  */
-export const copiaSchema = z.object({
+const copiaSchema = z.object({
   id: z.uuid(),
   cartolaId: z.uuid().nullable(),
   fecha: z.string(),

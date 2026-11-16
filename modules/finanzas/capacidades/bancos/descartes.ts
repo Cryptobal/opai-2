@@ -30,9 +30,9 @@ export const bancosDescartesListar = defineCapability({
     cursor: z.uuid().optional().describe("Id del último descarte de la página anterior."),
     limite: z.number().int().min(1).max(100).default(20),
   }),
-  output: z.object({ items: z.array(descarteSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
+  output: z.object({ items: z.array(descarteSchema), siguiente: z.string().nullable() }),
   auditarLectura: (s) => s.items.map((i) => i.id),
   async handler(ctx, input) {
     const cuenta = await cuentaDe(ctx, input.cuentaId);

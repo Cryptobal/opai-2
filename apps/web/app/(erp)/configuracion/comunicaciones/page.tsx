@@ -31,8 +31,8 @@ export default function Comunicaciones() {
         const grupos = [...new Set(eventos.map((x) => grupoDe(x.evento)))];
         return (
           <Estado state={estadoPantalla(e, r)} variante="lista">
-            <Table>
-              <thead>
+            <Table className="max-md:block" etiqueta="Avisos por evento">
+              <thead className="max-md:hidden">
                 <tr>
                   <Th>Evento</Th>
                   <Th>Canales</Th>
@@ -40,11 +40,14 @@ export default function Comunicaciones() {
                   <Th>Activo</Th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="max-md:block">
                 {grupos.map((g) => (
                   <Fragment key={g}>
-                    <Tr>
-                      <Td colSpan={4} className="h-9 bg-bg text-sm text-fg-muted">
+                    <Tr className="max-md:block">
+                      <Td
+                        colSpan={4}
+                        className="h-9 bg-bg text-sm text-fg-muted max-md:flex max-md:items-center"
+                      >
                         {g}
                       </Td>
                     </Tr>

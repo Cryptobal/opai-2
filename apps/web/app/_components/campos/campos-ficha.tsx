@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { FICHAS_CAMPO_PERSONALIZADO } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -11,12 +11,6 @@ import { entradaDe, mostrarValor, type CampoFicha, type EntidadCampos } from "./
 // El editor (hoja y controles) se carga aparte del primer JS de la ficha (ADR-037).
 const EditarCampos = dynamic(() => import("./editar-campos").then((m) => m.EditarCampos));
 
-const PERMISOS: Record<EntidadCampos, { ver: string; editar: string }> = {
-  cuenta: { ver: PERMISOS_CORE.cuentasRead, editar: PERMISOS_CORE.cuentasManage },
-  contacto: { ver: PERMISOS_CORE.cuentasRead, editar: PERMISOS_CORE.cuentasManage },
-  negocio: { ver: "comercial:negocios.read", editar: "comercial:negocios.manage" },
-};
-
 /**
  * Tarjeta «Campos de <empresa>» de una ficha (CAR-27, `DESIGN-PROMPT-crm-pr3.md` §3): los campos personalizados que definió la empresa en
  * Configuración. Si la empresa no definió ninguno para esta entidad, no se muestra.
@@ -24,7 +18,7 @@ const PERMISOS: Record<EntidadCampos, { ver: string; editar: string }> = {
 export async function CamposFicha(p: { tipo: EntidadCampos; id: string }) {
   const identidad = await identidadActual();
   const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
-  if (!puede(PERMISOS[p.tipo].ver)) return null;
+  if (!puede(FICHAS_CAMPO_PERSONALIZADO[p.tipo].ver)) return null;
   type R = { campos: CampoFicha[] };
   const entrada = entradaDe(p.tipo, p.id);
   const r =
@@ -37,7 +31,7 @@ export async function CamposFicha(p: { tipo: EntidadCampos; id: string }) {
     <SeccionTarjeta
       titulo={`Campos de ${identidad?.actual?.tenant.nombre ?? "la empresa"}`}
       accion={
-        puede(PERMISOS[p.tipo].editar) ? (
+        puede(FICHAS_CAMPO_PERSONALIZADO[p.tipo].editar) ? (
           <EditarCampos tipo={p.tipo} id={p.id} campos={campos} />
         ) : undefined
       }

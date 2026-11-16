@@ -62,30 +62,45 @@ export function ListaDescartes({ descartes, gestiona }: { descartes: DescarteMov
         ))}
       </ul>
       {vista ? (
-        <Dialog
-          abierto
+        <DialogoRestaurar
+          vista={vista}
+          error={error}
+          pendiente={pendiente}
           onCerrar={() => setVista(null)}
-          titulo="¿Restaurar estos movimientos?"
-          descripcion="Vuelven a la cuenta tal como estaban y se pueden conciliar de nuevo."
-          acciones={
-            <>
-              <Button variant="secondary" onClick={() => setVista(null)}>
-                Cancelar
-              </Button>
-              <Button disabled={pendiente || vista.restaurados === 0} onClick={() => void restaurar()}>
-                {`Restaurar ${movs(vista.restaurados)}`}
-              </Button>
-            </>
-          }
-        >
-          {error ? <Alerta tono="danger" titulo={error} /> : null}
-          {vista.yaPresentes ? (
-            <Alerta tono="info" titulo={vista.yaPresentes === 1 ? "1 ya está de vuelta" : `${vista.yaPresentes} ya están de vuelta`}>
-              Volvieron por una cartola o por la sincronización con el banco; no se duplican.
-            </Alerta>
-          ) : null}
-        </Dialog>
+          onRestaurar={() => void restaurar()}
+        />
       ) : null}
     </section>
+  );
+}
+
+type PropsDialogo = { vista: VistaRestaurar; error: string | null; pendiente: boolean; onCerrar: () => void; onRestaurar: () => void };
+
+/** Vista previa de la restauración: cuántos vuelven y cuántos ya estaban de vuelta. */
+function DialogoRestaurar({ vista, error, pendiente, onCerrar, onRestaurar }: PropsDialogo) {
+  return (
+    <Dialog
+      abierto
+      onCerrar={onCerrar}
+      titulo="¿Restaurar estos movimientos?"
+      descripcion="Vuelven a la cuenta tal como estaban y se pueden conciliar de nuevo."
+      acciones={
+        <>
+          <Button variant="secondary" onClick={onCerrar}>
+            Cancelar
+          </Button>
+          <Button disabled={pendiente || vista.restaurados === 0} onClick={onRestaurar}>
+            {`Restaurar ${movs(vista.restaurados)}`}
+          </Button>
+        </>
+      }
+    >
+      {error ? <Alerta tono="danger" titulo={error} /> : null}
+      {vista.yaPresentes ? (
+        <Alerta tono="info" titulo={vista.yaPresentes === 1 ? "1 ya está de vuelta" : `${vista.yaPresentes} ya están de vuelta`}>
+          Volvieron por una cartola o por la sincronización con el banco; no se duplican.
+        </Alerta>
+      ) : null}
+    </Dialog>
   );
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { desgloseIndicador } from "../src/core/remuneraciones/desglose";
 import {
   fechaDisplay,
   hoyCivil,
@@ -15,6 +16,26 @@ describe("formato remuneraciones", () => {
     expect(resumenIndicador("utm", 72_151)).toBe("$\u00a072.151");
     expect(resumenIndicador("sis", 17_800)).toBe("1,78 %");
     expect(resumenIndicador("jornada", 42)).toBe("42 h");
+  });
+
+  // CAR-318: la tabla muestra el valor vigente de todos los indicadores, nunca «Ver detalle».
+  it("resume topes e impuesto único con sus valores", () => {
+    const topes = { pensionSaludUf: 900_000, ipsUf: 600_000, cesantiaUf: 1_352_000, indemnizacionUf: 900_000 };
+    expect(resumenIndicador("topes", topes)).toBe("Pensión y salud 90 UF · Cesantía 135,2 UF");
+    const impuesto = [
+      { hastaUtm: 135_000, tasa: 0, rebajaUtm: 0 },
+      { hastaUtm: 300_000, tasa: 40_000, rebajaUtm: 5_400 },
+      { hastaUtm: null, tasa: 400_000, rebajaUtm: 388_200 },
+    ];
+    expect(resumenIndicador("impuesto", impuesto)).toBe("3 tramos · exento hasta 13,5 UTM · máx. 40,00 %");
+    for (const [clave, valor] of [["topes", topes], ["impuesto", impuesto], ["otro", { a: 1 }]] as const)
+      expect(resumenIndicador(clave, valor)).not.toBe("Ver detalle");
+  });
+
+  it("el detalle del impuesto muestra la rebaja en UTM, no escalada", () => {
+    expect(desgloseIndicador("impuesto", [{ hastaUtm: 300_000, tasa: 40_000, rebajaUtm: 5_400 }])).toEqual([
+      "Tramo 1 (hasta 30 UTM): 4,00 % · rebaja 0,54 UTM",
+    ]);
   });
 
   it("fechaDisplay invierte ISO civil", () => {

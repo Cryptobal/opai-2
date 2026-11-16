@@ -2,11 +2,15 @@ import "server-only";
 
 import { executeCapability, type Resultado } from "@opai/capabilities";
 
-import type { dispositivoActual } from "@/lib/dispositivo";
+import { dispositivoActual } from "@/lib/dispositivo";
 import { fuentesReales } from "@/lib/fuentes";
 import { contextoSistema } from "@/lib/medidor";
+import { permitir } from "@/lib/rate-limit";
 
 export type EquipoDeTerreno = NonNullable<Awaited<ReturnType<typeof dispositivoActual>>>;
+
+const json = (status: number, cuerpo: unknown, extra: Record<string, string> = {}) =>
+  Response.json(cuerpo, { status, headers: { "Cache-Control": "no-store", ...extra } });
 
 /**
  * Ejecuta una capacidad interna de Terreno con la empresa del equipo emparejado. El equipo no tiene sesión:
@@ -27,6 +31,23 @@ export async function ejecutarComoEquipo(
     { dispositivoId: equipo.dispositivoId, ...entrada },
     opciones,
   );
+}
+
+/**
+ * GET de solo lectura para el equipo de terreno emparejado (cookie del dispositivo = credencial).
+ * `cupo` distingue el rate limit entre rutas (`contexto`, `rondas`, `porteria`, …).
+ */
+export async function lecturaEquipoTerreno(cupo: string, capacidad: string): Promise<Response> {
+  const equipo = await dispositivoActual();
+  if (!equipo) return json(401, { error: "sin_dispositivo" });
+  if (equipo.estado !== "activo") return json(401, { error: "revocado", revocado: true });
+  if (!(await permitir(`${cupo}:${equipo.dispositivoId}`, 60, 60_000, { fallarCerrado: true }))) {
+    return json(429, { error: "demasiadas_consultas" }, { "Retry-After": "60" });
+  }
+  const r = await ejecutarComoEquipo(equipo, capacidad, {});
+  if (r.ok) return json(200, r.data);
+  if (r.error.code === "UNPROCESSABLE") return json(401, { error: "revocado", revocado: true });
+  return json(500, { error: "no_se_pudo_leer" });
 }
 
 export type PersonaDeLista = {

@@ -53,7 +53,7 @@ const rolesDe = (c: z.infer<typeof contacto>) =>
 /** Filas del export de OPAI 1 para un importador. Lanza `ErrorPlanilla` si el JSON no tiene la forma del export. */
 export function filasDeOpai1(importador: string, json: unknown): Fila[] {
   const r = exporte.safeParse(json);
-  if (!r.success) throw new ErrorPlanilla("El JSON no tiene la forma del export de OPAI 1 (accounts, contacts, installations, deals, personas).");
+  if (!r.success) throw new ErrorPlanilla("El JSON no tiene la forma del export de migración (accounts, contacts, installations, deals, personas).");
   const d = r.data;
   const etapas = new Map(d.pipelineStages.map((e) => [e.id, e.name]));
   const correos = new Map(d.users.map((u) => [u.id, u.email]));
@@ -91,6 +91,6 @@ export function filasDeOpai1(importador: string, json: unknown): Fila[] {
                   numero_cuenta: p.accountNumber ?? p.bankAccountNumber ?? null,
                 }))
               : [];
-  if (!filas.length) throw new ErrorPlanilla("El export de OPAI 1 no trae registros para este importador.");
+  if (!filas.length) throw new ErrorPlanilla("El export de migración no trae registros para este importador.");
   return filas;
 }

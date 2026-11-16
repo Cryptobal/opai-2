@@ -8,7 +8,7 @@ import { Alerta, avisar, Badge, Button, Campo, Empty, Estado, Select, type Estad
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { clp, fechaDdMmAaaa } from "../../../flujo/_componentes/datos";
+import { clp, fechaDdMmAaaa } from "../../../flujo/_componentes/formato";
 import type { CuentaBanco } from "../../_componentes/bancos-tipos";
 import { origenSaldo } from "../../_componentes/origen-saldo";
 import { BorrarSincronizacion } from "./borrar-sincronizacion";

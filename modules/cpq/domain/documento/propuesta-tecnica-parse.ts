@@ -5,8 +5,6 @@ import {
   type BloquePlantillaPropuesta,
 } from "./propuesta-tecnica-tipos";
 
-export { PLANTILLA_PROPUESTA_DEFECTO };
-
 export function parseBloquesPlantillaPropuesta(json: string): BloquePlantillaPropuesta[] {
   try {
     const raw = JSON.parse(json) as BloquePlantillaPropuesta[];

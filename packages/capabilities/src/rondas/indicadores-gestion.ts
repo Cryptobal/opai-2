@@ -5,7 +5,7 @@ import { porcentajeDe } from "@opai/domain";
 
 import { defineIndicador, type IndicadorGestion, type MedicionIndicador } from "../indicadores-gestion";
 
-export const indicadorRondasCompletas = defineIndicador({
+const indicadorRondasCompletas = defineIndicador({
   id: "rondas.rondas_completas",
   nombre: "Rondas completas",
   descripcion:

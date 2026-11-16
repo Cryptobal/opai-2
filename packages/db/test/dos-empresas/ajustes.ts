@@ -21,6 +21,26 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Central (CAR-461): CHECK de severidad, estado y coherencia de la pospuesta; actor del hecho.
+  "central.alertas": {
+    valores: () => ({ severidad: "alta", estado: "nueva", estado_previo: null, pospuesta_hasta: null, paso_actual: 0, cadena_id: null }),
+  },
+  "central.cadenas": {
+    valores: () => ({
+      instalacion_id: null,
+      severidad: null,
+      plazo_atencion_min: 30,
+      pasos: JSON.stringify([{ destinatario: { tipo: "guardia" }, canales: ["campana"], esperaMin: 3, exigeConfirmacion: false }]),
+    }),
+  },
+  "central.intentos": {
+    dependencias: ["central.alertas"],
+    valores: (ctx) => ({ paso: 1, canal: "campana", resultado: "avisado", alerta_id: id(ctx, "central.alertas") }),
+  },
+  "central.alerta_eventos": {
+    dependencias: ["central.alertas"],
+    valores: (ctx) => ({ actor_tipo: "persona", alerta_id: id(ctx, "central.alertas") }),
+  },
   // Reglas de aprobación (CAR-252): CHECK de un solo aprobador (rol o grupo) y monto no negativo.
   "core.reglas_aprobacion": {
     valores: () => ({
@@ -44,6 +64,10 @@ export const AJUSTES: Record<string, Ajuste> = {
       hasta: "2026-12-03",
       motivo: "Prueba",
     }),
+  },
+  // Libro de novedades (CAR-77): CHECK de la acción del historial de estados.
+  "core.libro_novedades_hechos": {
+    valores: () => ({ accion: "tomar", estado_anterior: "abierta", estado_nuevo: "en_atencion" }),
   },
   "core.procesos_persona_pasos": {
     valores: () => ({ estado: "por_hacer", titulo: "Firmar contrato", nota: null }),
@@ -146,6 +170,33 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Publicación de la pauta (CAR-356): CHECK del mes aaaa-mm.
   "pauta.publicaciones": { fijas: ["mes"], valores: () => ({ mes: "2026-12" }) },
+  // Visitas de supervisión (CAR-83): CHECK de estado, geocerca y cierre (cerrada ⇔ cerrada_en).
+  "pauta.visitas": {
+    valores: () => ({ estado: "cerrada", cerrada_en: "2026-12-01T12:00:00Z", geocerca: "sin_gps", precision_m: null, distancia_m: null }),
+  },
+  // Turnos extra (CAR-96): CHECK de tipo, origen, estado y monto ≥ 0.
+  "pauta.turnos_extra": {
+    dependencias: ["pauta.excepciones", "core.puestos", "core.personas"],
+    valores: (ctx) => ({
+      excepcion_id: id(ctx, "pauta.excepciones"),
+      puesto_id: id(ctx, "core.puestos"),
+      persona_id: id(ctx, "core.personas"),
+      tipo_trabajador: "propio",
+      monto_clp: 0,
+      monto_origen: "sin_tarifa",
+      estado: "por_aprobar",
+    }),
+  },
+  "pauta.tarifas_turno_extra": {
+    dependencias: ["core.instalaciones"],
+    // sujeto_tipo entra al único (tenant, tipo, id): sin fijas, copia lo regenera y rompe el CHECK.
+    fijas: ["sujeto_tipo"],
+    valores: (ctx) => ({
+      sujeto_tipo: "instalacion",
+      sujeto_id: id(ctx, "core.instalaciones"),
+      monto_clp: 35_000,
+    }),
+  },
   // Períodos del contrato (CAR-409): CHECK de tipo, término según el tipo y anulación con motivo.
   "core.contrato_periodos": {
     valores: () => ({
@@ -156,6 +207,8 @@ export const AJUSTES: Record<string, Ajuste> = {
       motivo_anulacion: null,
     }),
   },
+  // Tallas por prenda (CAR-408): CHECK del formato de la clave y del largo de la talla.
+  "core.personas_tallas": { fijas: ["prenda"], valores: () => ({ prenda: "camisa", talla: "M" }) },
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },
@@ -593,6 +646,14 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.slack_instalaciones": {
     fijas: ["team_id"],
     valores: (ctx) => ({ team_id: `T${ctx.tenant.replace(/-/g, "").toUpperCase()}` }),
+  },
+  // Slack F3 (CAR-293): ts con formato de Slack y tipo/envío/gestión dentro de su lista (CHECK).
+  "core.slack_hilos": {
+    dependencias: ["core.instalaciones"],
+    valores: (ctx) => ({ instalacion_id: id(ctx, "core.instalaciones"), ts: "1700000000.000100" }),
+  },
+  "core.slack_avisos": {
+    valores: () => ({ tipo: "atraso", envio: "pendiente", gestion: "abierto", instalacion_id: null, persona_id: null }),
   },
   // Slack F2 (CAR-292): (tenant_id, user_id) → memberships; «vinculado» exige un id de Slack (CHECK).
   "core.slack_usuarios": {
