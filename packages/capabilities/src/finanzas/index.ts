@@ -138,9 +138,3 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
 ];
 
 export { logoDeMarca } from "./ventas-pdf-logo";
-export {
-  actualizarMarcaDocumento,
-  marcaDocumentoDe,
-  marcaDocumentoEnVersion,
-  type TipografiaDocumento,
-} from "../core/empresa/marca-documento";

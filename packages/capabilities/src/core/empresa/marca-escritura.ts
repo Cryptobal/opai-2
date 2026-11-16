@@ -8,7 +8,7 @@ const DOC_CAMPOS = ["documentoTipografia", "documentoPiePagina", "documentoCondi
 
 type MarcaInput = Record<string, string | null | undefined>;
 
-export function partesMarcaInput(raw: MarcaInput) {
+function partesMarcaInput(raw: MarcaInput) {
   const docInput = Object.fromEntries(
     DOC_CAMPOS.filter((k) => raw[k] !== undefined).map((k) => [k, raw[k]]),
   );

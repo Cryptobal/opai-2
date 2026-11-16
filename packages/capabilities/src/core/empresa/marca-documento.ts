@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { Contexto } from "../../types";
 
-export const TIPOGRAFIAS_DOCUMENTO = ["inter", "helvetica", "times"] as const;
+const TIPOGRAFIAS_DOCUMENTO = ["inter", "helvetica", "times"] as const;
 export type TipografiaDocumento = (typeof TIPOGRAFIAS_DOCUMENTO)[number];
 
 export const tipografiaDocumento = z.enum(TIPOGRAFIAS_DOCUMENTO);
