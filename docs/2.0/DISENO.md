@@ -51,6 +51,12 @@ Nunca `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>` ni `<a>` crudo
 
 ## 3. Patrones de pantalla
 
+### Agente (CAR-547, reemplaza CAR-335 D5)
+
+- **Una sola superficie:** el panel lateral derecho (o pestaña Agente en el teléfono). No hay bloque de chat dentro de `DetailScreen`.
+- **Contexto de ficha:** la pantalla registra la ficha abierta; el botón IA de la barra (⌘J) y «Preguntar a OPAI» abren el panel con chip «Sobre: …» y preguntas sugeridas. El contexto es quitablé; el servidor revalida en cada turno.
+- **Listas sin ficha:** el panel abre sin contexto de entidad (solo la conversación general).
+
 Toda pantalla compone un patrón del DS. Los patrones reciben `state` y resuelven los estados estándar con `Estado`.
 
 | Patrón | Uso | Notas |

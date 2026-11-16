@@ -4,7 +4,7 @@ import { defineCapability } from "../define";
 import { PERMISO_VENTAS, documentoEmitidoIdSchema } from "./ventas-comun";
 import { prepararCesion } from "./ventas-cesion-prep";
 
-export const simulacionCesionSchema = z.object({
+const simulacionCesionSchema = z.object({
   documentoId: z.string(),
   factorRut: z.string(),
   factorNombre: z.string().nullable(),
@@ -18,7 +18,7 @@ export const simulacionCesionSchema = z.object({
 export const ventasCesionSimular = defineCapability({
   id: "finanzas.ventas.cesion_simular",
   descripcion:
-    "Simula una cesión (factoring): anticipo, merma y saldo del factor antes de enviar el AEC (paridad 1.0).",
+    "Simula una cesión (factoring): anticipo, merma y saldo del factor antes de enviar el AEC, con el mismo criterio que el sistema heredado de facturación.",
   permiso: PERMISO_VENTAS,
   input: z.object({
     documentoId: documentoEmitidoIdSchema,

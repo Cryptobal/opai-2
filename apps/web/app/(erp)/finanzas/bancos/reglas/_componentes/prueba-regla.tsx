@@ -1,6 +1,6 @@
 import { Button } from "@opai/ds";
 
-import { clp, fechaDdMmAaaa } from "../../../flujo/_componentes/datos";
+import { clp, fechaDdMmAaaa } from "../../../flujo/_componentes/formato";
 
 export type ResultadoPrueba = {
   total: number;

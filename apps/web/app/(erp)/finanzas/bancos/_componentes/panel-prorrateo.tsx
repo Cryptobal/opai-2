@@ -3,7 +3,7 @@
 import { diferenciaAsignada, prorratearAbono } from "@opai/domain";
 import { Alerta, Button, Input } from "@opai/ds";
 
-import { clp } from "../../flujo/_componentes/datos";
+import { clp } from "../../flujo/_componentes/formato";
 import type { Elegida } from "./seleccion-conciliacion";
 
 /** Montos asignados a cada documento elegido y lo que falta para cuadrar con el abono. */
