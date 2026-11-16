@@ -8,6 +8,7 @@ import { identidadActual } from "@/lib/servidor";
 import { AccionesTicket } from "./_componentes/acciones";
 import {
   cargarTicket,
+  nombreInstalacion,
   ETIQUETA_ESTADO,
   ETIQUETA_PRIORIDAD,
   type EventoTicket,
@@ -37,11 +38,12 @@ export default function TicketFicha({ params }: Props) {
       cargar={async () => {
         const [{ id }, identidad] = await Promise.all([params, identidadActual()]);
         const r = await cargarTicket(id);
-        return { id, r, usuarioId: identidad?.usuario.id ?? null };
+        const instalacion = await nombreInstalacion(r.ok ? r.data.ticket.instalacionId : null);
+        return { id, r, instalacion, usuarioId: identidad?.usuario.id ?? null };
       }}
       opciones={({ r }) => ({ titulo: r.ok ? r.data.ticket.titulo : "Ticket" })}
     >
-      {({ id, r, usuarioId }) => {
+      {({ id, r, instalacion, usuarioId }) => {
         const t = r.ok ? r.data.ticket : null;
         const eventos = r.ok ? r.data.eventos : [];
         return (
@@ -68,6 +70,7 @@ export default function TicketFicha({ params }: Props) {
                 <Pares
                   items={[
                     { etiqueta: "Descripción", valor: t.descripcion },
+                    ...(instalacion ? [{ etiqueta: "Instalación", valor: instalacion }] : []),
                     ...(t.motivoRechazo ? [{ etiqueta: "Motivo del rechazo", valor: t.motivoRechazo }] : []),
                     ...(t.resueltoEn ? [{ etiqueta: "Resuelto", valor: fecha(t.resueltoEn) }] : []),
                     ...(t.cerradoEn ? [{ etiqueta: "Cerrado", valor: fecha(t.cerradoEn) }] : []),
