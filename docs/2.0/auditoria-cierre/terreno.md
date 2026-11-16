@@ -2,9 +2,9 @@
 
 **Fecha:** 16-nov-2026 · **Sesión:** Auditoría de cierre (tanda 06, 07 y 08) · **Foto:** `main` en `5c0a5a8`.
 
-**Avance real: 69 %** (Linear: 3 de 7 en Done).
+**Avance real: 61 %** (Linear: 3 de 7 en Done). Corregido el 16-nov en la tanda 09-10-11: el modo supervisor no estaba, ver ítem 10.
 
-Método: el de [`asistencia.md`](asistencia.md#cómo-se-calculó-igual-en-los-tres-informes-de-esta-tanda). Terreno es el portal del equipo de la instalación: emparejar, identificarse, marcar, hacer rondas, portería y novedades. Alcance 8,5 / 12 = 71 %; estándares 5 / 6 = 83 %; pruebas 45 %. Total: **69 %**.
+Método: el de [`asistencia.md`](asistencia.md#cómo-se-calculó-igual-en-los-tres-informes-de-esta-tanda). Terreno es el portal del equipo de la instalación: emparejar, identificarse, marcar, hacer rondas, portería y novedades. Alcance 7,5 / 12 = 63 %; estándares 4 / 6 = 67 %; pruebas 45 %. Total: **61 %**.
 
 ## Lo más importante
 
@@ -40,7 +40,7 @@ Fuente 1.0: `portal/terreno` (tarjetas Marcación, Rondas, Acceso, Libro, Incide
 | 7 | Portería (acceso) | Está | Módulo 09 |
 | 8 | Pánico o emergencia | Falta | #883 abierto |
 | 9 | Cola sin conexión con pendientes visibles | Parcial | `/terreno/cola` existe; sin la marca de asistencia; e2e en rojo |
-| 10 | Modo supervisor | Está | e2e «terreno del supervisor» en verde |
+| 10 | Modo supervisor | Falta | Con sesión, `/terreno` muestra «Terreno: en construcción · Este portal se habilita en la fase de portales» (`PortalPlaceholder`). #907 (CAR-527) lo reemplaza. La e2e «terreno del supervisor» (`maestros.spec.ts`) en realidad prueba el portal Supervisor, no `/terreno` |
 | 11 | Foto como evidencia de la novedad | Falta | Etapa T2 de CAR-226 |
 | 12 | Señales a la Central | Parcial | #877 abierto |
 
@@ -53,7 +53,7 @@ Rediseñado sin portar: la ronda por enlace público `ronda/[code]` se reemplaza
 | Patrón de portal (CAR-589) | Parcial | En curso para todos los portales |
 | Paginación y búsqueda | Sí | Listas cortas por instalación |
 | Sin duplicados | Parcial | `rondas.novedades` convive con `core.libro_novedades` hasta la parte 5 de CAR-77 |
-| Sin textos internos | Sí | Sin hallazgos |
+| Sin textos internos | No | «en construcción · se habilita en la fase de portales» a la vista con sesión (comentado en CAR-527) |
 | Permisos por rol | Sí | |
 | MCP | Sí | `core.terreno.*` |
 
