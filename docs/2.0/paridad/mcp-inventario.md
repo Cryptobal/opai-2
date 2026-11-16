@@ -208,11 +208,17 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.update` | `cpq_plantillas_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_propuesta.get` | `cpq_plantillas_propuesta_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_propuesta.update` | `cpq_plantillas_propuesta_update` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.activar` | `cpq_propuestas_html_activar` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.get` | `cpq_propuestas_html_get` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.importar` | `cpq_propuestas_html_importar` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.list` | `cpq_propuestas_html_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_tecnica.prompt_exportable` | `cpq_propuestas_tecnica_prompt_exportable` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.sueldos_referencia.fijar` | `cpq_sueldos_referencia_fijar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.sueldos_referencia.list` | `cpq_sueldos_referencia_list` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.actualizar` | `finanzas_ajustes_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.obtener` | `finanzas_ajustes_obtener` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
+| compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.filas.actualizar` | `finanzas_filas_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.filas.archivar` | `finanzas_filas_archivar` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.filas.crear` | `finanzas_filas_crear` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
@@ -413,6 +419,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.postergar_iva` | `finanzas_flujo_postergar_iva` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
+| compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.actualizar` | `finanzas_filas_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.crear` | `finanzas_filas_crear` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/recurrentes/_componentes` | `finanzas.recurrentes.actualizar` | `finanzas_recurrentes_actualizar` | existe |
@@ -1220,12 +1227,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
-- `cpq.propuestas_html.get`
-- `cpq.propuestas_html.importar`
-- `cpq.propuestas_html.list`
 - `cpq.propuestas_tecnica.capitulo_guardar`
 - `cpq.propuestas_tecnica.capitulos_list`
-- `cpq.propuestas_tecnica.prompt_exportable`
 - `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
@@ -1236,7 +1239,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.cesiones.listar`
 - `finanzas.cuadratura.obtener`
 - `finanzas.derivadas.listar`
-- `finanzas.filas.actualizar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.costo_proyectado.listar`

@@ -5,7 +5,7 @@ import { FILA_COBROS_ESPERADOS } from "./cobros-celda";
 import type { CeldaFlujo, Planilla } from "./datos";
 
 /**
- * Ingresos agrupados por cliente (CAR-456): la fila «Cobros esperados» se abre en una fila por cliente
+ * Ingresos agrupados por cliente (CAR-456): los cobros esperados se muestran en una fila por cliente
  * y cada cliente en sus instalaciones. Las filas de grupo son de solo lectura y suman sus facturas.
  */
 const CLIENTE = "cobro-cli:";
@@ -40,15 +40,11 @@ export const esGrupoCobro = (filaId: string) => filaId.startsWith(CLIENTE) || fi
 /** Las filas de cliente o instalación abren la hoja de «Cobros esperados» de su semana. */
 export const filaBase = (filaId: string) => (esGrupoCobro(filaId) ? FILA_COBROS_ESPERADOS : filaId);
 
-/** La fila tal cual, o «Cobros esperados» plegable seguida de sus clientes abiertos (si hay cobros con cliente). */
-export function conGruposCobro(p: Planilla, fila: FilaPlanilla, abiertas: ReadonlySet<string> = new Set()): FilaPlanilla[] {
-  if (fila.id !== FILA_COBROS_ESPERADOS || !p.celdas.some((c) => c.filaId === FILA_COBROS_ESPERADOS && !!c.cliente)) return [fila];
-  return [{ ...fila, plegable: { abierta: abiertas.has(fila.id) } }, ...filasGrupoCobro(p, abiertas)];
-}
+/** ¿Hay cobros con cliente para abrir «Cobros esperados» en clientes e instalaciones? */
+export const hayCobrosConCliente = (p: Planilla) => p.celdas.some((c) => c.filaId === FILA_COBROS_ESPERADOS && !!c.cliente);
 
-/** Filas de cliente e instalación que van bajo «Cobros esperados», según qué filas están abiertas. */
-function filasGrupoCobro(p: Planilla, abiertas: ReadonlySet<string>): FilaPlanilla[] {
-  if (!abiertas.has(FILA_COBROS_ESPERADOS)) return [];
+/** Filas de cliente (nivel 1) e instalación (nivel 2) de los cobros, según qué filas están abiertas. */
+export function filasClientes(p: Planilla, abierta: (filaId: string) => boolean): FilaPlanilla[] {
   const out: FilaPlanilla[] = [];
   for (const g of agrupar(p)) {
     const idCli = `${CLIENTE}${g.id}`;
@@ -57,9 +53,9 @@ function filasGrupoCobro(p: Planilla, abiertas: ReadonlySet<string>): FilaPlanil
       id: idCli,
       etiqueta: g.etiqueta,
       nivel: 1,
-      ...(conDetalle ? { plegable: { abierta: abiertas.has(idCli) }, sub: `${g.instalaciones.size} instalaciones` } : {}),
+      ...(conDetalle ? { plegable: { abierta: abierta(idCli) }, sub: `${g.instalaciones.size} instalaciones` } : {}),
     });
-    if (!conDetalle || !abiertas.has(idCli)) continue;
+    if (!conDetalle || !abierta(idCli)) continue;
     const insts = [...g.instalaciones.entries()].sort(
       (a, b) => b[1].total - a[1].total || a[1].etiqueta.localeCompare(b[1].etiqueta, "es"),
     );

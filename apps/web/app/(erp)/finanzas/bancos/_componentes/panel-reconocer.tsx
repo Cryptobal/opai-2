@@ -8,7 +8,7 @@ import { avisar, Button, Card } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { clp } from "../../flujo/_componentes/datos";
+import { clp } from "../../flujo/_componentes/formato";
 import { DialogDeshacerBanco } from "./dialog-deshacer-banco";
 import type { MovimientoBanco } from "./bancos-tipos";
 import { confirmarContraFila } from "./confirmar-fila";
