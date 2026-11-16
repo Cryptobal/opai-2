@@ -6,7 +6,10 @@ import { Alerta, avisar, Button, Checkbox, Campo, Input } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import type { GrupoEgreso } from "@/app/(erp)/finanzas/flujo/_componentes/grupos-egreso";
+import { SelectorGrupoEgreso } from "@/app/(erp)/finanzas/flujo/_componentes/selector-grupo-egreso";
 import { CalendarioPagosEditor } from "./calendario-pagos";
+import { FilaEgresoEditor } from "./fila-egreso-editor";
 import type { FilaFlujo, AjustesFlujo } from "@/app/(erp)/finanzas/flujo/_componentes/datos";
 
 export function EditorFlujoCaja({
@@ -18,6 +21,7 @@ export function EditorFlujoCaja({
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [etiqueta, setEtiqueta] = useState("");
+  const [grupo, setGrupo] = useState<GrupoEgreso>("gastos");
   const [aj, setAj] = useState(ajustes);
   // La lista se actualiza al instante con lo que devuelve cada capacidad y se vuelve a alinear cuando el
   // servidor revalida la página (CAR-198/CAR-220).
@@ -34,11 +38,18 @@ export function EditorFlujoCaja({
     setLista((l) => (l.some((x) => x.id === f.id) ? l.map((x) => (x.id === f.id ? f : x)) : [...l, f]));
 
   async function crearFila() {
-    const r = await ejecutar<FilaFlujo>("finanzas.filas.crear", { seccion: "egreso", etiqueta, arrastre: false });
+    const r = await ejecutar<FilaFlujo>("finanzas.filas.crear", { seccion: "egreso", etiqueta, grupo, arrastre: false });
     if (!r) return;
     poner(r);
     avisar.exito("Egreso creado");
     setEtiqueta("");
+  }
+
+  async function cambiarGrupo(id: string, nuevo: GrupoEgreso) {
+    const r = await ejecutar<FilaFlujo>("finanzas.filas.actualizar", { id, grupo: nuevo });
+    if (!r) return;
+    poner(r);
+    avisar.exito("Grupo actualizado");
   }
 
   async function archivarFila(id: string, archivar: boolean) {
@@ -82,18 +93,20 @@ export function EditorFlujoCaja({
         </p>
         <ul className="text-sm text-fg-muted">
           {egresos.map((f) => (
-            <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-1">
-              <span>{f.etiqueta}{f.activa ? "" : " · archivada"}</span>
-              <Button variant="ghost" disabled={pendiente} onClick={() => void archivarFila(f.id, f.activa)}>
-                {f.activa ? "Archivar" : "Restaurar"}
-              </Button>
-            </li>
+            <FilaEgresoEditor
+              key={f.id}
+              fila={f}
+              pendiente={pendiente}
+              onGrupo={(g) => void cambiarGrupo(f.id, g)}
+              onArchivar={() => void archivarFila(f.id, f.activa)}
+            />
           ))}
         </ul>
         <div className="flex flex-col gap-2 md:flex-row md:items-end">
           <Campo etiqueta="Nuevo egreso (p. ej. Arriendo)" htmlFor="ff-etiq">
             <Input id="ff-etiq" value={etiqueta} onChange={(e) => setEtiqueta(e.target.value)} />
           </Campo>
+          <SelectorGrupoEgreso id="ff-grupo" valor={grupo} onCambiar={setGrupo} />
           <Button disabled={pendiente || etiqueta.trim().length < 2} onClick={() => void crearFila()}>
             Agregar egreso
           </Button>

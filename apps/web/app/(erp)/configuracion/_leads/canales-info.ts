@@ -19,7 +19,7 @@ export const INFO: Record<
   formulario_web: {
     nombre: "Formulario web",
     texto:
-      "Recibe consultas desde el sitio de la empresa (por ejemplo gard.cl). Genera una clave, configúrala en el sitio y envía al endpoint público de OPAI.",
+      "Recibe consultas desde el sitio de la empresa (por ejemplo ejemplo.cl). Genera una clave, configúrala en el sitio y envía al endpoint público de OPAI.",
     icono: Globe,
   },
   correo: {
