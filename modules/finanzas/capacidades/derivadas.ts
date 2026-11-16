@@ -53,7 +53,7 @@ export const flujoDerivadasListar = defineCapability({
           id: "banco",
           nombre: "Movimientos bancarios",
           disponible: banco.length > 0,
-          descripcion: "Capa real desde conciliación bancaria (CAR-97).",
+          descripcion: "Capa real desde conciliación bancaria.",
           celdas: banco,
         },
         {
