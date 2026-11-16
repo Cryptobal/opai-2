@@ -230,7 +230,8 @@ model Proveedor {
   cuentaGasto    CuentaContable?     @relation("CuentaGastoProveedor", fields: [cuentaGastoId], references: [id], onDelete: Restrict)
   cuentaPorPagar CuentaContable?     @relation("CuentaPagarProveedor", fields: [cuentaPorPagarId], references: [id], onDelete: Restrict)
   centroCosto    CentroCosto?        @relation(fields: [centroCostoId], references: [id], onDelete: Restrict)
-  documentos     DocumentoRecibido[]
+  documentos          DocumentoRecibido[]
+  gastosRecurrentes   FlujoRecurrente[]
 
   @@unique([tenantId, rut])
   @@index([tenantId, razonSocial])
@@ -915,6 +916,8 @@ model FlujoRecurrente {
   nota          String?
   /// Clave del origen al importar (p. ej. «opai1:<id>»): hace idempotente la importación.
   claveOrigen   String?   @map("clave_origen")
+  /// Proveedor al que se paga cada cuota (maestro de compras; CAR-582).
+  proveedorId   String?   @map("proveedor_id") @db.Uuid
   /// Tramo anterior del mismo gasto (CAR-413): un cambio de fila, frecuencia o día «rige desde» una fecha cierra
   /// el tramo anterior el día antes y crea este. Las cuotas del tramo anterior no cambian.
   anteriorId    String?   @unique @map("anterior_id") @db.Uuid
@@ -922,6 +925,7 @@ model FlujoRecurrente {
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   fila      FlujoFila        @relation(fields: [filaId], references: [id], onDelete: Restrict)
+  proveedor Proveedor?       @relation(fields: [proveedorId], references: [id], onDelete: SetNull)
   anterior  FlujoRecurrente? @relation("TramoRecurrente", fields: [anteriorId], references: [id], onDelete: SetNull)
   siguiente FlujoRecurrente? @relation("TramoRecurrente")
 
