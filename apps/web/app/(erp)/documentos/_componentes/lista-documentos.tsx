@@ -9,9 +9,9 @@ import { LinkNext } from "@/app/_components/link-next";
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Parametros } from "@/lib/parametros";
-
-import { Paginacion } from "../../personas/_componentes/paginacion";
 import type { FilaExplorador } from "./datos";
 import { etiquetasEntidad, OPCIONES_ESTADO, OPCIONES_ORDEN } from "./etiquetas";
 import { columnasDe, TarjetaDocumento } from "./filas";
@@ -27,7 +27,7 @@ type Props = {
   p: Parametros;
 };
 
-const FILTROS_URL = ["q", "estado", "tipo", "entidad", "orden", "cursor", "prev"];
+const FILTROS_URL = ["q", "estado", "tipo", "entidad", "orden", "cursor", "prev", "limite"];
 
 /** Enlace a una hoja (`?ver=<id>`, `?subir=1`) que conserva búsqueda, filtros y página de la lista. */
 function conHoja(p: Parametros, hoja: Record<string, string>) {
@@ -74,7 +74,15 @@ export function ListaDocumentos(x: Props) {
       href={(d) => conHoja(x.p, { ver: d.id })}
       Link={LinkNext}
       paginacion={
-        <Paginacion p={x.p} mostrados={x.items.length} siguiente={x.siguiente} total={x.total} />
+        x.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={x.p}
+            rutaBase="/documentos"
+            mostrados={x.items.length}
+            siguiente={x.siguiente}
+            porPagina={tamanoPagina(x.p)}
+          />
+        ) : undefined
       }
       tarjeta={(d) => <TarjetaDocumento d={d} etiquetas={etiquetas} />}
       columnas={columnasDe(etiquetas)}

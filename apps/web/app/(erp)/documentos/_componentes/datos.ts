@@ -1,3 +1,4 @@
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
@@ -7,8 +8,6 @@ import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { opcionesDeSubida } from "./subida-permisos";
-
-export const POR_PAGINA = 50;
 
 export type FilaExplorador = Documento & {
   entidad: { tipo: string; id: string; nombre: string | null } | null;
@@ -29,7 +28,7 @@ export function entradaDe(p: Parametros) {
   const entidadTipo = dentro(p["entidad"], ENTIDADES);
   const orden = dentro(p["orden"], ORDENES);
   return {
-    limite: POR_PAGINA,
+    limite: tamanoPagina(p),
     ...(p["q"] ? { q: p["q"] } : {}),
     ...(vigencia ? { vigencia } : {}),
     ...(entidadTipo ? { entidadTipo } : {}),

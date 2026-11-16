@@ -12,6 +12,7 @@ const LISTAS_PAGINACION = [
   "app/(erp)/finanzas/ventas/_componentes/lista-ventas-maestro.tsx",
   "app/(erp)/finanzas/compras/_componentes/lista-compras-maestro.tsx",
   "app/(erp)/personas/_componentes/lista-personas.tsx",
+  "app/(erp)/documentos/_componentes/lista-documentos.tsx",
 ] as const;
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
