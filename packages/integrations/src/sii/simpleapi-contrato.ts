@@ -19,7 +19,7 @@ export const SIMPLEAPI_RUTAS = {
 } as const;
 
 /** RUT del SII como receptor del sobre de envío (ejemplo de la documentación: `RutReceptor: "60803000-K"`). */
-export const RUT_SII = "60803000-K" as const;
+const RUT_SII = "60803000-K" as const;
 
 /**
  * Autenticación Basic con usuario «api» y la API key como contraseña: `Basic base64("api:" + key)` (CAR-240). Es lo que
@@ -52,7 +52,7 @@ export type CredencialesSimpleApiV1 = {
 const fechaSii = (iso: string) => iso.slice(0, 10);
 
 /** 0 = certificación, 1 = producción (documentación: «Ambiente: Certificación = 0, Producción = 1»). */
-export const codigoAmbiente = (a: AmbienteSii): 0 | 1 => (a === "produccion" ? 1 : 0);
+const codigoAmbiente = (a: AmbienteSii): 0 | 1 => (a === "produccion" ? 1 : 0);
 
 /** Forma de pago: la documentación pide informarla (1 contado, 2 crédito, 3 sin costo); sin dato rige crédito. */
 const FORMA_PAGO_CREDITO = 2;

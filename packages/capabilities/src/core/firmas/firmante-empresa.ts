@@ -32,7 +32,7 @@ export const firmasFirmanteEmpresaSet = defineCapability({
   // Solo personas: define quién firma por la empresa; gobierna la identidad de firma, no una key.
   soloPersonas: true,
   descripcion:
-    "Registra o actualiza un firmante de la empresa (representante legal u otro autorizado del tenant) con su RUN, cargo y nivel máximo, para firmar documentos o habilitar la firma automática (R16).",
+    "Registra o actualiza un firmante de la empresa (representante legal u otro autorizado del tenant) con su RUN, cargo y nivel máximo, para firmar documentos o habilitar la firma automática.",
   permiso: PERMISO_FIRMAS_CONFIG,
   input: z.object({
     usuarioId: uuidSchema,

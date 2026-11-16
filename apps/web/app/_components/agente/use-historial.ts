@@ -73,6 +73,7 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
           id: nuevoId(),
           rol: m.rol === "usuario" ? ("yo" as const) : ("agente" as const),
           texto: m.texto,
+          ...(m.referencias?.length ? { referencias: m.referencias } : {}),
         }));
         return { hilo, meta: { titulo, archivada } };
       } catch {

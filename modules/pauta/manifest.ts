@@ -1,4 +1,4 @@
-import { ajustesPauta, capacidadesPauta, defineModule, indicadoresPauta } from "@opai/capabilities";
+import { ajustesPauta, buscadoresPauta, capacidadesPauta, defineModule, indicadoresPauta } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Pauta (Operaciones, Brief 11b · PR 1). El núcleo deriva navegación, permisos,
@@ -16,6 +16,10 @@ export const manifest = defineModule({
     {
       id: "pauta:write",
       descripcion: "Fijar series de los puestos y registrar o anular excepciones de la pauta",
+    },
+    {
+      id: "pauta:aprobar_extra",
+      descripcion: "Aprobar o rechazar turnos extra (owner, admin, gerente u Operaciones; no el supervisor)",
     },
   ],
   navegacion: [{
@@ -38,10 +42,28 @@ export const manifest = defineModule({
     { id: "pauta.excepcion.anulada", descripcion: "Se anularon excepciones de la pauta de un puesto." },
     {
       id: "pauta.publicada",
-      descripcion: "Se publicó la pauta de una instalación para un mes: se avisa a cada titular sus turnos (CAR-356).",
+      descripcion: "Se publicó la pauta de una instalación para un mes: se avisa a cada titular sus turnos.",
+    },
+    {
+      id: "pauta.visita.cerrada",
+      descripcion: "Un supervisor cerró una visita a una instalación con su lista de revisión.",
+    },
+    {
+      id: "pauta.turno_extra.registrado",
+      descripcion: "Se registró un turno extra por aprobar sobre un reemplazo o refuerzo.",
+    },
+    {
+      id: "pauta.turno_extra.aprobado",
+      descripcion: "Se aprobó un turno extra. No implica pago.",
+    },
+    {
+      id: "pauta.turno_extra.rechazado",
+      descripcion: "Se rechazó un turno extra o quedó rechazado al anular su excepción.",
     },
   ],
   capacidades: capacidadesPauta,
   // Indicador de gestión para el catálogo del núcleo (ADR-094, adenda CAR-309).
   indicadores: indicadoresPauta,
+  // Aporte al buscador general (CAR-404): puestos por nombre o instalación.
+  buscadores: buscadoresPauta,
 });

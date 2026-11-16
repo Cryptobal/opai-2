@@ -10,8 +10,9 @@ const texto = (max: number) => z.string().trim().max(max).default("");
 
 export const ajustesNomina = z.object({
   dia_cierre: z.number().int().min(1).max(31).default(31).meta({
-    etiqueta: "Día de cierre del mes",
-    ayuda: "Día del mes en que se cierra el período de remuneraciones; si el mes es más corto, el último día.",
+    etiqueta: "Día de cierre del período de remuneraciones",
+    ayuda:
+      "Día del mes en que se cierra el período de remuneraciones; si el mes es más corto, el último día. Es distinto del cierre automático del mes en Desempeño.",
     grupo: "Período",
     ambito: "tenant",
     permiso: PERMISO_CONFIG,
@@ -32,6 +33,22 @@ export const ajustesNomina = z.object({
     ambito: "tenant",
     permiso: PERMISO_CONFIG,
     control: "numero",
+  }),
+  sueldo_dia_pago: z.number().int().min(1).max(31).default(31).meta({
+    etiqueta: "Día de pago de sueldos",
+    ayuda: "Día en que se pagan los sueldos del mes; si el mes es más corto, el último día. Lo usa el flujo de caja.",
+    grupo: "Pago",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "numero",
+  }),
+  sueldo_pago_mes_siguiente: z.boolean().default(false).meta({
+    etiqueta: "Los sueldos se pagan el mes siguiente",
+    ayuda: "Actívalo si los sueldos de un mes se pagan en el mes siguiente (por ejemplo, el día 5).",
+    grupo: "Pago",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "switch",
   }),
   banco_pago: texto(80).meta({
     etiqueta: "Banco del archivo de pago",

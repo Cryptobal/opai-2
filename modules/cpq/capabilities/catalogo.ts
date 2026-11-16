@@ -10,7 +10,7 @@ import { ID_VISTA_PREVIA } from "./util";
 
 export const catalogoCategoriasList = defineCapability({
   id: "cpq.catalogo_categorias.list",
-  descripcion: "Lista las categorías del catálogo CPQ del tenant (R55).",
+  descripcion: "Lista las categorías del catálogo CPQ del tenant.",
   permiso: PERMISO_READ,
   input: z.object({ incluirInactivas: z.boolean().default(false) }),
   output: z.object({ items: z.array(categoriaSchema) }),

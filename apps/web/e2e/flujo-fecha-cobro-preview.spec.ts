@@ -1,10 +1,11 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import { capturar, capturarHoja } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-396: tocar la celda «Cobros esperados» abre las facturas de la semana y deja cambiar la fecha de cobro con vista
 // previa. Solo revisa el cambio: no confirma, así no escribe nada en `qa-e2e` (la factura ficticia queda igual).
+// CAR-456: el chevron «Ver detalle» ya no abre la hoja; hay que tocar el monto (botón «Editar») de la semana.
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(120_000);
 
@@ -13,6 +14,25 @@ function fechaEscrita(dias: number): string {
   const d = new Date(Date.now() + dias * 86_400_000);
   const dos = (n: number) => String(n).padStart(2, "0");
   return `${dos(d.getUTCDate())}-${dos(d.getUTCMonth() + 1)}-${d.getUTCFullYear()}`;
+}
+
+async function abrirHojaCobros(page: Page) {
+  const hoja = page.getByRole("dialog");
+  const movil = (page.viewportSize()?.width ?? 0) < 1024;
+  if (movil) {
+    const fila = page.locator("li").filter({ hasText: "Cobros esperados" }).first();
+    const celda = fila.getByRole("button");
+    await celda.scrollIntoViewIfNeeded();
+    await celda.click();
+  } else {
+    const celda = page
+      .locator("tbody tr", { hasText: "Cobros esperados" })
+      .getByRole("button", { name: /Editar/ })
+      .first();
+    await celda.scrollIntoViewIfNeeded();
+    await celda.click();
+  }
+  await expect(hoja.getByText("Cobros esperados").first()).toBeVisible({ timeout: 15_000 });
 }
 
 test.describe("@preview flujo de caja: fecha de cobro desde la celda", () => {
@@ -26,25 +46,21 @@ test.describe("@preview flujo de caja: fecha de cobro desde la celda", () => {
     await expect(page.getByRole("heading", { name: "Flujo de caja" }).first()).toBeVisible({
       timeout: 60_000,
     });
-    // Solo la fila de la planilla: la novedad de este cambio también nombra «Cobros esperados» y, en el teléfono,
-    // su lista queda antes en la página.
-    const celda = page
+    const movil = (page.viewportSize()?.width ?? 0) < 1024;
+    const celdaEscritorio = page
       .locator("tbody tr", { hasText: "Cobros esperados" })
-      .getByRole("button")
+      .getByRole("button", { name: /Editar/ })
       .first();
-    test.skip(
-      (await celda.count()) === 0,
-      "La empresa de prueba no tiene facturas por cobrar en el horizonte",
-    );
+    const celdaMovil = page.locator("li").filter({ hasText: "Cobros esperados" }).first().getByRole("button");
+    const hayCelda = movil ? (await celdaMovil.count()) > 0 : (await celdaEscritorio.count()) > 0;
+    test.skip(!hayCelda, "La empresa de prueba no tiene facturas por cobrar en el horizonte");
 
-    // En el teléfono la página puede no estar hidratada al primer toque: se reintenta hasta que abra la hoja.
     const hoja = page.getByRole("dialog");
     await expect(async () => {
-      await celda.scrollIntoViewIfNeeded();
-      await celda.click();
+      await abrirHojaCobros(page);
       await expect(hoja.getByText("Cobros esperados").first()).toBeVisible({ timeout: 5_000 });
     })
-      .toPass({ timeout: 60_000 })
+      .toPass({ timeout: 30_000 })
       .catch(async (e: unknown) => {
         await capturar(page, info, "flujo-cobros-sin-hoja");
         throw e;

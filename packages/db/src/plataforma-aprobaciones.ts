@@ -85,6 +85,8 @@ export function operacionesAprobacionesPlataforma() {
       capability?: string;
       tenantObjetivoId?: string;
       antesDeSeq?: number;
+      desde?: Date;
+      hasta?: Date;
       limite: number;
     }) =>
       db().auditoriaGlobal.findMany({
@@ -93,6 +95,14 @@ export function operacionesAprobacionesPlataforma() {
           ...(filtro.capability ? { capability: { startsWith: filtro.capability } } : {}),
           ...(filtro.tenantObjetivoId ? { tenantObjetivoId: filtro.tenantObjetivoId } : {}),
           ...(filtro.antesDeSeq ? { seq: { lt: filtro.antesDeSeq } } : {}),
+          ...(filtro.desde || filtro.hasta
+            ? {
+                createdAt: {
+                  ...(filtro.desde ? { gte: filtro.desde } : {}),
+                  ...(filtro.hasta ? { lt: filtro.hasta } : {}),
+                },
+              }
+            : {}),
         },
         orderBy: { seq: "desc" },
         take: filtro.limite,

@@ -20,13 +20,19 @@ test.describe("@preview finanzas: gastos recurrentes", () => {
 
     const nuevo = page.getByRole("link", { name: "Nuevo gasto recurrente" });
     if ((await nuevo.count()) === 0) {
-      // Sin filas de egreso en la empresa de prueba: la captura muestra el estado vacío con su acción.
-      test.info().annotations.push({ type: "aviso", description: "qa-e2e sin filas de egreso: no se probó la hoja" });
-      await expect(page.getByText("Primero crea una fila de egresos")).toBeVisible();
+      // Sin permiso de configurar: solo se captura la lista.
+      test.info().annotations.push({ type: "aviso", description: "qa-e2e sin permiso para crear: no se probó la hoja" });
       return;
     }
     await nuevo.first().click();
-    await expect(page.getByRole("dialog").getByText("Nuevo gasto recurrente")).toBeVisible();
+    const hoja = page.getByRole("dialog").filter({ has: page.getByText("Nuevo gasto recurrente") });
+    await expect(hoja).toBeVisible();
+    await expect(hoja.getByRole("link", { name: "Administrar filas" })).toBeVisible();
+    await hoja.getByLabel("Fila del flujo").click();
+    await page.getByRole("option", { name: "+ Nueva fila…" }).click();
+    await expect(hoja.getByLabel("Nombre de la fila")).toBeVisible();
+    await hoja.getByRole("button", { name: "Crear fila" }).locator("xpath=..").getByRole("button", { name: "Cancelar" }).click();
+    await expect(hoja.getByLabel("Nombre de la fila")).toHaveCount(0);
     await page.getByLabel("Concepto").fill("Arriendo de prueba");
     await page.getByLabel("Monto por cuota ($)").fill("80.000");
     await capturarHoja(page, info, "flujo-recurrentes-nuevo");
