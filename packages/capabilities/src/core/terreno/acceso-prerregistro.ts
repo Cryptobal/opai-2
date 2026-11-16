@@ -1,3 +1,5 @@
+import type { EntradaLista } from "@opai/domain";
+
 import { verificarInvitacion } from "../../acceso/huella";
 import { fechaDia } from "../../acceso/prerregistro-comun";
 import type { Contexto } from "../../types";
@@ -105,3 +107,17 @@ export async function cruzarPrerregistros(
   }
   return salida;
 }
+
+/** Un prerregistro vigente autoriza ese día como una entrada de lista sin horario (R2); el bloqueo igual gana (R7). */
+export const autorizaPrerregistro = (clave: string): EntradaLista => ({
+  tipo: "autorizada",
+  clave,
+  tiposRegistro: [],
+  vigenteDesde: null,
+  vigenteHasta: null,
+  dias: [],
+  desdeMin: null,
+  hastaMin: null,
+  usoUnico: false,
+  consumida: false,
+});

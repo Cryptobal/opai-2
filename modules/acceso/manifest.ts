@@ -1,6 +1,4 @@
-import { z } from "zod";
-
-import { capacidadesAcceso, defineModule } from "@opai/capabilities";
+import { ajustesAcceso, capacidadesAcceso, defineModule } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Control de acceso (ADR-003, CAR-78 · E4, CAR-474). Las capacidades viven en
@@ -32,6 +30,11 @@ export const manifest = defineModule({
         "Prerregistrar visitas con invitación QR y cancelar los prerregistros propios (o todos, si también gestiona registros)",
     },
     {
+      id: "acceso:config.manage",
+      descripcion:
+        "Configurar Control de acceso: modo de lista y tipos de registro de la empresa (solo personas)",
+    },
+    {
       id: "acceso:datos.ver_patente",
       descripcion: "Ver la patente completa de los vehículos registrados (acceso restringido)",
     },
@@ -47,7 +50,7 @@ export const manifest = defineModule({
       permiso: "acceso:read",
     },
   ],
-  configuracion: z.object({}),
+  configuracion: ajustesAcceso,
   eventos: [],
   capacidades: capacidadesAcceso,
 });

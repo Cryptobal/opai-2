@@ -3,9 +3,10 @@ import { randomUUID } from "node:crypto";
 import { decidirAcceso, type EntradaLista, normalizarPatente } from "@opai/domain";
 
 import { fechaDia } from "../../acceso/prerregistro-comun";
+import { configAcceso } from "../../acceso/ajustes";
 import type { Contexto } from "../../types";
 import type { Doc, Entrada } from "./acceso-entradas";
-import type { VisitanteDia } from "./acceso-prerregistro";
+import { autorizaPrerregistro, type VisitanteDia } from "./acceso-prerregistro";
 import type { Equipo, FilaIntento, FilaRegistro, FilaUso, Tiempo } from "./acceso-tipos";
 
 /** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
@@ -14,30 +15,17 @@ type Lista = { e: Entrada; d: Doc; pre?: VisitanteDia | undefined };
 
 /** Entradas de lista de la instalación que coinciden con alguna huella del lote, y si hay lista autorizada. */
 async function listasDe(ctx: Contexto, instalacionId: string, huellas: string[]) {
-  const [lista, hayAutorizadas] = await Promise.all([
+  const [lista, hayAutorizadas, permitir] = await Promise.all([
     ctx.db.entradaLista.findMany({
       where: { instalacionId, huella: { in: huellas } },
       include: { registros: { select: { id: true }, take: 1 } },
     }),
     ctx.db.entradaLista.count({ where: { instalacionId, tipo: "autorizada" } }),
+    configAcceso(ctx),
   ]);
-  return { lista, hayAutorizadas: hayAutorizadas > 0 };
+  return { lista, hayAutorizadas: hayAutorizadas > 0, permitir: permitir.permitirFueraDeLista };
 }
 type Listas = Awaited<ReturnType<typeof listasDe>>;
-
-/** Un prerregistro vigente autoriza ese día como una entrada de lista sin horario (R2); el bloqueo igual gana (R7). */
-const autorizaPrerregistro = (clave: string): EntradaLista => ({
-  tipo: "autorizada",
-  clave,
-  tiposRegistro: [],
-  vigenteDesde: null,
-  vigenteHasta: null,
-  dias: [],
-  desdeMin: null,
-  hastaMin: null,
-  usoUnico: false,
-  consumida: false,
-});
 
 /** Decide una entrada con sus listas (y su prerregistro, si tiene); devuelve la decisión y la lista de uso único que consume. */
 function decidir(x: Lista, l: Listas, hora: Date, zona: string, consumidas: Set<string>) {
@@ -59,7 +47,10 @@ function decidir(x: Lista, l: Listas, hora: Date, zona: string, consumidas: Set<
   const decision = decidirAcceso({
     clave: x.d.clave,
     tipoRegistro: x.e.p.tipoRegistro,
-    modo: l.hayAutorizadas || x.pre ? "solo_autorizados" : "permitir_fuera_de_lista",
+    // R2: con lista de autorizados (o prerregistro) solo entran ellos, salvo que la empresa permita ingresos
+    // fuera de lista; el bloqueo se aplica en ambos modos (R7).
+    modo:
+      (l.hayAutorizadas || x.pre) && !l.permitir ? "solo_autorizados" : "permitir_fuera_de_lista",
     entradas: [...propias.map(dominio), ...(x.pre ? [autorizaPrerregistro(x.d.clave)] : [])],
     ahora: hora,
     zona,

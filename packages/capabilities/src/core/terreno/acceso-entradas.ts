@@ -1,5 +1,6 @@
 import { diaEnZona, normalizarDocumento, normalizarPatente } from "@opai/domain";
 
+import { configAcceso } from "../../acceso/ajustes";
 import { type HuellaVersionada, huellasCandidatas } from "../../acceso/huella";
 import type { Contexto } from "../../types";
 import { tenantActual } from "../comun";
@@ -62,7 +63,11 @@ export async function evaluarEntradas(
   const entradas = [...crudas]
     .sort((a, b) => a.h.horaHecho.localeCompare(b.h.horaHecho))
     .map((e) => ({ ...e, dia: diaEnZona(t.corregir(new Date(e.h.horaHecho)), zona) }));
+  const { tipos: activos } = await configAcceso(ctx);
+  for (const e of entradas)
+    if (!activos.has(e.p.tipoRegistro)) rechazos.set(e.h.clave, "tipo_registro_inactivo");
   const validas = entradas
+    .filter((e) => !rechazos.has(e.h.clave))
     .map((e) => ({ e, d: documentoDe(ctx, e, rechazos) }))
     .filter((x) => !rechazos.has(x.e.h.clave) && (x.d || x.e.p.invitacion));
   const pre = await cruzarPrerregistros(

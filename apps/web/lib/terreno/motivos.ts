@@ -32,6 +32,8 @@ export const MOTIVO_RECHAZO: Record<string, string> = {
   tipo_incidente_invalido: "El tipo de incidente ya no está disponible.",
   salida_repetida: "Esta entrada ya tenía su salida registrada.",
   entrada_anulada: "La entrada se anuló desde la oficina; su salida no se guarda.",
+  tipo_registro_inactivo:
+    "Tu empresa desactivó este tipo de registro. Registra la entrada con otro tipo.",
   invitacion_invalida:
     "La invitación no sirve: es de otro día, ya se usó, se canceló o no corresponde a esta instalación.",
   lote_invalido: "El envío no era válido y el servidor lo devolvió.",

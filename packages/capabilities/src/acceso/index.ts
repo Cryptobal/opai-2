@@ -28,3 +28,5 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   prerregistrosCancelar,
   prerregistrosInvitacion,
 ];
+
+export { ajustesAcceso } from "./ajustes";
