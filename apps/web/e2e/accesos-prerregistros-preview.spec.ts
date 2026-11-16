@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import { abrirAccesos } from "./accesos-instalacion";
 import { capturar, capturarHoja, EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// CAR-478: prerregistro de visitas (`/accesos/prerregistros`), su ficha y la invitación con QR.
+// CAR-478: prerregistro de visitas (segmento de la pestaña Accesos de la instalación), su ficha y la invitación.
 // En la vista previa solo se abre la hoja: prerregistrar exige ACCESO_HUELLA_SECRET (CAR-483), que allí no existe.
 test.describe("@preview acceso: prerregistro de visitas", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
@@ -13,7 +14,7 @@ test.describe("@preview acceso: prerregistro de visitas", () => {
     await page
       .context()
       .addCookies([{ name: "opai_marco", value: "nuevo", url: new URL(page.url()).origin }]);
-    await page.goto("/accesos/prerregistros");
+    await abrirAccesos(page, "prerregistros");
     const abrir = page
       .getByRole("button", { name: "Prerregistrar" })
       .filter({ visible: true })

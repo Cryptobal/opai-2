@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { abrirAccesos } from "./accesos-instalacion";
 import { hidratado } from "./hidratacion";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
@@ -14,11 +15,7 @@ test.describe("@preview acceso: importar listas desde Excel", () => {
 
   test("enlace desde Listas y simulación con errores por fila", async ({ page }, info) => {
     await entrar(page);
-    await page.goto("/instalaciones");
-    const fila = page.locator('a[href^="/instalaciones/0"]').filter({ visible: true }).first();
-    await expect(fila).toBeVisible({ timeout: 60_000 });
-    const href = await fila.getAttribute("href");
-    await page.goto(`${href}/accesos?sub=listas`);
+    await abrirAccesos(page, "listas");
     const enlace = page
       .getByRole("link", { name: "Importar desde Excel" })
       .filter({ visible: true })
