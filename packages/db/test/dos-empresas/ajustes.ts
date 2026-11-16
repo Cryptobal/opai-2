@@ -27,6 +27,29 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   "central.turnos": { valores: () => ({ estado: "abierto", entrega_a_id: null, cerrado_en: null }) },
   "central.pausas": { valores: () => ({ instalacion_id: null, reanudada_en: null, reanudada_por_id: null }) },
+  "central.hilos": {
+    fijas: ["tipo", "estado"],
+    valores: () => ({ tipo: "novedad", estado: "enviado", alerta_id: null, consulta_vence_en: null, cerrado_en: null, cerrado_por_id: null }),
+  },
+  "central.hilo_mensajes": {
+    dependencias: ["central.hilos"],
+    fijas: ["autor_tipo", "hilo_id"],
+    valores: (ctx) => ({ autor_tipo: "persona", autor_id: null, texto: "Prueba", hilo_id: id(ctx, "central.hilos") }),
+  },
+  "central.avisos": {
+    fijas: ["tipo", "acuse_obligatorio", "plazo_min"],
+    valores: () => ({ tipo: "consigna", texto: "Prueba", acuse_obligatorio: true, plazo_min: 15, vigente_desde: null, vigente_hasta: null, enviado_por_id: null }),
+  },
+  "central.aviso_destinatarios": {
+    dependencias: ["central.avisos"],
+    fijas: ["aviso_id"],
+    valores: (ctx) => ({ aviso_id: id(ctx, "central.avisos"), alerta_id: null }),
+  },
+  "central.acuses": {
+    dependencias: ["central.avisos"],
+    fijas: ["aviso_id"],
+    valores: (ctx) => ({ aviso_id: id(ctx, "central.avisos") }),
+  },
   "central.propuestas": {
     dependencias: ["central.alertas"],
     fijas: ["accion", "alerta_id"],
