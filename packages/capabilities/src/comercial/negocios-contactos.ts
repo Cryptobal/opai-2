@@ -21,7 +21,7 @@ async function visibles(ctx: Contexto, ids: string[]) {
 export const negociosSetContactos = defineCapability({
   id: "comercial.negocios.set_contactos",
   descripcion:
-    "Define los contactos del negocio con su rol (decisor, técnico, compras o usuario) y cuál es el principal; reemplaza el conjunto actual. Solo contactos de la cuenta del negocio (R16).",
+    "Define los contactos del negocio con su rol (decisor, técnico, compras o usuario) y cuál es el principal; reemplaza el conjunto actual. Solo contactos de la cuenta del negocio.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     negocioId: uuidSchema,
