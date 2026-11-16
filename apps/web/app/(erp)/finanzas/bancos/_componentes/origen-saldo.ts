@@ -1,4 +1,4 @@
-import { fechaDdMmAaaa } from "../../flujo/_componentes/datos";
+import { fechaDdMmAaaa } from "../../flujo/_componentes/formato";
 import type { CuentaBanco } from "./bancos-tipos";
 
 const FUENTE = { banco: "saldo informado por el banco", movimiento: "saldo del último movimiento", cartola: "cierre de la cartola" } as const;

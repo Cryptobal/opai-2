@@ -1,5 +1,5 @@
 const TEXTOS: Record<string, string> = {
-  sin_negocio: "la cotización no tiene negocio en OPAI 1",
+  sin_negocio: "la cotización no tiene negocio en el export de migración",
   negocio_no_importado: "su negocio todavía no está en OPAI 2",
   codigo_ya_existe: "ya existe una cotización con ese código",
   sin_responsable: "falta el usuario responsable",

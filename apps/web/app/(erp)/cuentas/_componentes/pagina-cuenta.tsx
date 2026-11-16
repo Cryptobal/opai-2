@@ -1,9 +1,7 @@
-import { Plus } from "lucide-react";
 import { type ReactNode, Suspense } from "react";
 
 import { Loading, SplitScreen } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { conFiltros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
@@ -18,7 +16,7 @@ type Props = {
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
   tab: TabCuenta;
-  /** Acción principal de la pestaña; por defecto, "Nueva cuenta". */
+  /** Acción principal de la pestaña; sin ella no hay botón arriba: «Nueva» está en la lista (CAR-360). */
   acciones?: ReactNode;
   children: (cuenta: CuentaDetalle, p: Parametros) => ReactNode;
 };
@@ -34,13 +32,7 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      acciones={
-        acciones ?? (
-          <EnlaceBoton href="/cuentas?nueva=1" icono={Plus} className="max-lg:hidden">
-            Nueva cuenta
-          </EnlaceBoton>
-        )
-      }
+      {...(acciones ? { acciones } : {})}
       opciones={(d) => ({ volver: { href: conFiltros("/cuentas", d.p), etiqueta: "Cuentas" } })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);

@@ -24,7 +24,7 @@ const lunesDe = (iso: string) => {
 type Planilla = {
   semanas: { semana: string; ingresos: number; egresos: number }[];
   celdas: { filaId: string; semana: string; monto: number; nota: string | null; iva?: { periodo: string; postergado: boolean } }[];
-  filas: { id: string; etiqueta: string }[];
+  filas: { id: string; etiqueta: string; grupo: string | null }[];
 };
 
 describe.skipIf(omitirSuiteDb())("flujo · IVA y PPM (db)", () => {
@@ -98,6 +98,18 @@ describe.skipIf(omitirSuiteDb())("flujo · IVA y PPM (db)", () => {
     const sem = p.semanas.find((s) => s.semana === lunesDe(pagoM1));
     expect(sem?.egresos).toBeGreaterThanOrEqual(144_000);
     expect(p.filas.map((f) => f.etiqueta)).toEqual(expect.arrayContaining(["IVA a pagar", "PPM"]));
+    // El IVA y el PPM llegan a la planilla ya en su grupo de egreso.
+    expect(p.filas.filter((f) => f.id === FILA_IVA || f.id === FILA_PPM).map((f) => f.grupo)).toEqual(["impuestos", "impuestos"]);
+  });
+
+  it("una fila guardada sin grupo queda en «Gastos» y se puede mover a otro grupo", async () => {
+    const creada = await ok<{ id: string; grupo: string }>(tenantA, "finanzas.filas.crear", { seccion: "egreso", etiqueta: "Arriendo" });
+    expect(creada.grupo).toBe("gastos");
+    const guardada = await e.admin.flujoFila.create({ data: { tenantId: tenantA, seccion: "egreso", etiqueta: "Fila sin grupo" } });
+    expect(guardada.grupo).toBe("gastos");
+    const cambiada = await ok<{ grupo: string }>(tenantA, "finanzas.filas.actualizar", { id: creada.id, grupo: "financiamiento" });
+    expect(cambiada.grupo).toBe("financiamiento");
+    await expect(e.admin.flujoFila.update({ where: { id: creada.id }, data: { grupo: "otro" } })).rejects.toThrow();
   });
 
   it("postergar el IVA lo lleva a M+2 y el PPM sigue en M+1; la vista previa no escribe; otra empresa no se ve afectada", async () => {

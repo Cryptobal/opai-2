@@ -317,6 +317,12 @@ Carlos decidió las 13 preguntas de §14 el **29-oct-2026 a las 15:17 CLT** (tod
 
 Con este acuerdo la especificación queda **aprobada** (antes estaba en borrador, ADR-047); el Design Prompt pasa a estar listo para copiar en Claude Design.
 
+## Adenda 14-nov-2026 (Sesión Acceso, CAR-477)
+
+- Registrar la salida desde el ERP, anular y cerrar en bloque usan el permiso **`acceso:registros.manage`** (en §7 y §9 decía `acceso:registros.create`): lo reciben de base gerente y supervisor (con alcance), además de owner y admin. Corregir registros es una tarea distinta de gestionar listas. Reversible: Carlos puede quitar el permiso a un rol en Configuración.
+- Anular también queda disponible para el gerente (en §6 decía supervisor y admin), para que alguien con oficina pueda corregir un error sin depender del supervisor de turno.
+- Un registro anulado no cuenta como «en sitio» y no admite salida, ni desde el ERP ni desde un equipo que sincroniza tarde (se rechaza con el motivo «entrada anulada»).
+
 ## Historial
 
 | Fecha | Cambio | Aprobó |
