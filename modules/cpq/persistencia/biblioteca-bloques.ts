@@ -39,11 +39,11 @@ export async function guardarTextoTipo(ctx: Contexto, tipo: string, texto: strin
   const previo = await ctx.db.cpqBibliotecaBloque.findFirst({ where: { clave: tipo } });
   if (!escribir) return { id: previo?.id ?? "00000000-0000-0000-0000-000000000000", versionPublicada: (previo?.versionPublicada ?? 0) + 1 };
   return ctx.transaccion(async (tx) => {
-    const row = previo
-      ? await tx.cpqBibliotecaBloque.update({ where: { id: previo.id }, data: { contenidoJson } })
-      : await tx.cpqBibliotecaBloque.create({
-          data: { id: uuid7(), tenantId: ctx.tenantId, clave: tipo, tipo, titulo: NOMBRES_BLOQUE_PROPUESTA[tipo] ?? tipo, contenidoJson, creadoPorId: actorId },
-        });
+    const row = await tx.cpqBibliotecaBloque.upsert({
+      where: { tenantId_clave: { tenantId: ctx.tenantId, clave: tipo } },
+      update: { contenidoJson },
+      create: { id: uuid7(), tenantId: ctx.tenantId, clave: tipo, tipo, titulo: NOMBRES_BLOQUE_PROPUESTA[tipo] ?? tipo, contenidoJson, creadoPorId: actorId },
+    });
     return publicarEn(tx, ctx, row, actorId);
   });
 }

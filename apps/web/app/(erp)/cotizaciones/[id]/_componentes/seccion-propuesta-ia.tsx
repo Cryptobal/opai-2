@@ -5,22 +5,16 @@ import { useState } from "react";
 import { avisar } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
-import {
-  type BloqueArmador,
-  cambiarBloque,
-  etiquetaBloquePropuesta,
-} from "@/lib/cpq-bloques-propuesta";
+import { type BloqueArmador, type cambiarBloque, etiquetaBloquePropuesta } from "@/lib/cpq-bloques-propuesta";
 
 import { AvisosIa, BorradorIa, CabeceraIa, type Sugerencia } from "./seccion-propuesta-ia-partes";
 import { TextoSeccionPropuesta } from "./texto-seccion-propuesta";
 
 type Props = {
   negocioId: string;
-  propuestaId: string;
-  bloques: BloqueArmador[];
   bloque: BloqueArmador;
   textoPorDefecto: string;
-  onGuardado: () => void;
+  onGuardar: (cambio: Parameters<typeof cambiarBloque>[2]) => Promise<boolean>;
 };
 
 const ACORTAR = "Acorta el texto actual a lo esencial, sin agregar datos nuevos.";
@@ -48,12 +42,9 @@ export function SeccionPropuestaIa(p: Props) {
     );
   }
   async function guardar(cambio: Parameters<typeof cambiarBloque>[2], aviso: string) {
-    const bloques = cambiarBloque(p.bloques, p.bloque.id, cambio);
-    const guardado = await ejecutar("cpq.propuestas_tecnica.update", { id: p.propuestaId, bloques }, false, "ninguna");
-    if (!guardado) return;
+    if (!(await p.onGuardar(cambio))) return;
     avisar.exito(aviso);
     setSugerencia(null);
-    p.onGuardado();
   }
   return (
     <div aria-label={nombre} role="group" className="space-y-2 rounded-md border border-border p-3">
