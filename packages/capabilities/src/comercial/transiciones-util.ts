@@ -8,6 +8,12 @@ import { idAutor } from "../autor";
 type NegocioFila = { id: string; etapaId: string; estado: string; createdAt: Date };
 type EtapaFila = { id: string; tipo: string; probabilidad?: number };
 
+async function probabilidadDeEtapa(tx: TenantTx, destino: EtapaFila) {
+  if (destino.probabilidad !== undefined) return destino.probabilidad;
+  return (await tx.etapa.findUnique({ where: { id: destino.id }, select: { probabilidad: true } }))
+    ?.probabilidad;
+}
+
 /**
  * Aplica un cambio de etapa dentro de una transacción: registra el historial con los segundos en la
  * etapa anterior (R11), deriva el estado del tipo de la etapa (R8) y emite el evento de dominio.
@@ -23,16 +29,7 @@ export async function aplicarEtapa(
   },
 ) {
   const ahora = new Date();
-  let probabilidad = destino.probabilidad;
-  if (probabilidad === undefined) {
-    probabilidad =
-      (
-        await tx.etapa.findUnique({
-          where: { id: destino.id },
-          select: { probabilidad: true },
-        })
-      )?.probabilidad ?? undefined;
-  }
+  const probabilidad = await probabilidadDeEtapa(tx, destino);
   const ultimo = await tx.historialEtapa.findFirst({
     where: { negocioId: negocio.id },
     orderBy: { cuando: "desc" },
