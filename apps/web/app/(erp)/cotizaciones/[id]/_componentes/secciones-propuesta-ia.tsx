@@ -1,11 +1,19 @@
 "use client";
 
-import { type BloqueArmador, esSeccionDeTexto } from "@/lib/cpq-bloques-propuesta";
+import { esSeccionDeTexto } from "@opai/domain";
+
+import { type BloqueArmador } from "@/lib/cpq-bloques-propuesta";
 
 import { SeccionPropuestaIa } from "./seccion-propuesta-ia";
 
-/** Secciones de texto activas de la propuesta, cada una con su ayuda de IA (CAR-534). */
-export function SeccionesPropuestaIa(p: { negocioId: string; propuestaId: string; bloques: BloqueArmador[]; onGuardado: () => void }) {
+/** Secciones de texto activas de la propuesta: el texto se edita en el mismo lugar, con su ayuda de IA. */
+export function SeccionesPropuestaIa(p: {
+  negocioId: string;
+  propuestaId: string;
+  bloques: BloqueArmador[];
+  textosPorDefecto: Record<string, string>;
+  onGuardado: () => void;
+}) {
   const secciones = p.bloques.filter((b) => b.activo && esSeccionDeTexto(b.tipo));
   if (secciones.length === 0) return null;
   return (
@@ -14,7 +22,15 @@ export function SeccionesPropuestaIa(p: { negocioId: string; propuestaId: string
         Textos de la propuesta
       </p>
       {secciones.map((b) => (
-        <SeccionPropuestaIa key={b.id} negocioId={p.negocioId} propuestaId={p.propuestaId} bloques={p.bloques} bloque={b} onGuardado={p.onGuardado} />
+        <SeccionPropuestaIa
+          key={b.id}
+          negocioId={p.negocioId}
+          propuestaId={p.propuestaId}
+          bloques={p.bloques}
+          bloque={b}
+          textoPorDefecto={p.textosPorDefecto[b.id] ?? ""}
+          onGuardado={p.onGuardado}
+        />
       ))}
     </div>
   );

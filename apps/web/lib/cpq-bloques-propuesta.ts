@@ -13,6 +13,7 @@ export type BloquePlantilla = {
   fijo: boolean;
   opcional: boolean;
   bibliotecaClave?: string | null;
+  titulo?: string;
 };
 
 /** Intercambia el bloque `i` con su vecino; fuera de rango deja la lista igual. */
@@ -31,22 +32,20 @@ export function fijarBloque(b: BloquePlantilla, fijo: boolean): BloquePlantilla 
   return { ...b, fijo, opcional: !fijo, activo: fijo ? true : b.activo };
 }
 
-/** Tipos del catálogo que todavía no están en la plantilla (para «Agregar bloque»). */
+/** Tipos para «Agregar bloque»: los que todavía no están y «Texto libre», que se puede repetir. */
 export const tiposDisponibles = (lista: readonly BloquePlantilla[]) =>
-  TIPOS_BLOQUE_ETIQUETADOS.filter((t) => !lista.some((b) => b.tipo === t));
+  TIPOS_BLOQUE_ETIQUETADOS.filter((t) => t === "texto_libre" || !lista.some((b) => b.tipo === t));
 
 /** Bloque del armador de una cotización, tal como lo devuelve `cpq.propuestas_tecnica.get`. */
 export type BloqueArmador = BloquePlantilla & {
   id: string;
-  titulo?: string;
   contenidoOverride?: string | null;
   editadoParaCliente?: boolean;
 };
 
-/** Bloques que salen del CPQ, la marca o la estructura: no llevan texto que la persona redacte. */
-const SIN_TEXTO = new Set(["portada", "indice", "detalle_servicio", "resumen_economico", "contacto_ejecutivo", "salto_pagina"]);
-export const esSeccionDeTexto = (tipo: string) => !SIN_TEXTO.has(tipo);
-
-/** Deja el borrador aceptado como texto de un bloque; los demás quedan iguales. */
-export const conTextoAceptado = (bloques: readonly BloqueArmador[], id: string, texto: string): BloqueArmador[] =>
-  bloques.map((b) => (b.id === id ? { ...b, contenidoOverride: texto } : b));
+/** Cambia un bloque del armador (texto, título); los demás quedan iguales. */
+export const cambiarBloque = (
+  bloques: readonly BloqueArmador[],
+  id: string,
+  cambio: Partial<Pick<BloqueArmador, "contenidoOverride" | "titulo">>,
+): BloqueArmador[] => bloques.map((b) => (b.id === id ? { ...b, ...cambio } : b));

@@ -9,6 +9,7 @@ import { FormMarcaDocumentoDiferido } from "./form-marca-documento-diferido";
 import { FormPlantillaDocumentoDiferido } from "./form-plantilla-documento-diferido";
 import { FormPlantillaPropuestaDiferido } from "./form-plantilla-propuesta-diferido";
 import { SeccionPlantillasHtml } from "./seccion-plantillas-html";
+import { SeccionTextosTipo } from "./seccion-textos-tipo";
 
 async function cargarMarca() {
   const r = await ejecutarComoUsuario<{
@@ -89,6 +90,7 @@ export async function SeccionMarcaPlantillasCpq() {
             <Badge tono="info">Versión plantilla v{plantillaPropuesta.version}</Badge>
           </div>
           <FormPlantillaPropuestaDiferido plantilla={plantillaPropuesta} />
+          <SeccionTextosTipo />
           {prompt ? (
             <div className="space-y-2 border-t border-border pt-6">
               <p className="t-label">Diseño de la propuesta con IA</p>
