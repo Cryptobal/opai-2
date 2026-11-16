@@ -13,7 +13,11 @@ export function EnlaceAltaLista({
   icono?: LucideIcon;
 }) {
   return (
-    <EnlaceBotonHoja href={href} icono={icono} variante="primary">
+    <EnlaceBotonHoja
+      href={href}
+      variante="primary"
+      {...(icono !== undefined ? { icono } : {})}
+    >
       {children}
     </EnlaceBotonHoja>
   );
