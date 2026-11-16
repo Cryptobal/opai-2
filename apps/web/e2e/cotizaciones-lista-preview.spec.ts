@@ -16,7 +16,12 @@ test.describe("@preview CPQ: lista y documento", () => {
     await expect(page.getByRole("button", { name: "Vistas guardadas" }).filter({ visible: true })).toBeVisible({
       timeout: 60_000,
     });
-    await expect(page.getByText("Filtrar por estado")).toBeVisible();
+    // Con `estado` en la URL el chip activo es «Estado: Enviada» (no el disparador «Filtrar por estado»).
+    await expect(page.getByRole("button", { name: "Quitar filtro Estado" })).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByLabel("Enviada desde")).toBeVisible();
+    await expect(page.getByLabel("Enviada hasta")).toBeVisible();
+    // Otros filtros sin valor siguen como menú punteado (misma fila en los 3 viewports).
+    await expect(page.getByRole("button", { name: "Filtrar por cuenta" })).toBeVisible();
     await capturar(page, info, "cotizaciones-lista-filtros");
 
     await page.goto("/cotizaciones");
