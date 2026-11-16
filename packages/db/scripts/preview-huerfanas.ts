@@ -19,6 +19,17 @@ import {
 
 const CARPETA = new URL("../prisma/migrations/", import.meta.url);
 
+async function marcarRevertidos(client: Client, ids: string[], motivo: string) {
+  for (const id of ids) {
+    await client.query(
+      `UPDATE public._prisma_migrations SET rolled_back_at = now()
+        WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
+      [id],
+    );
+    console.log(`Marcada como revertida (${motivo})`);
+  }
+}
+
 async function main(): Promise<void> {
   const rama = process.env["PREVIEW_RAMA"] ?? "";
   const url = process.env["DATABASE_URL_MIGRATE"];
@@ -61,24 +72,18 @@ async function main(): Promise<void> {
       console.log(`Renombrada (mismo checksum, ya aplicada): ${r.desde} → ${r.hacia}`);
     }
     const huerfanas = fallidasHuerfanas(rows, enRepo);
-    for (const r of huerfanas) {
-      await client.query(
-        `UPDATE public._prisma_migrations SET rolled_back_at = now()
-          WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
-        [r.id],
-      );
-      console.log(`Marcada como revertida (ya no existe en el repo): ${r.migration_name}`);
-    }
+    await marcarRevertidos(
+      client,
+      huerfanas.map((r) => r.id),
+      "ya no existe en el repo",
+    );
     if (!huerfanas.length) console.log("Sin migraciones fallidas huérfanas.");
     const sqlCorregido = fallidasConSqlCorregido(rows, checksums);
-    for (const r of sqlCorregido) {
-      await client.query(
-        `UPDATE public._prisma_migrations SET rolled_back_at = now()
-          WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
-        [r.id],
-      );
-      console.log(`Marcada como revertida (SQL corregido en el repo): ${r.migration_name}`);
-    }
+    await marcarRevertidos(
+      client,
+      sqlCorregido.map((r) => r.id),
+      "SQL corregido en el repo",
+    );
   } finally {
     await client.end();
   }
