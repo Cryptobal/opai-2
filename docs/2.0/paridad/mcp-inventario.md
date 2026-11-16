@@ -609,6 +609,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.reabrir` | `comercial_solicitudes_reabrir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/tareas/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
+| compartido | `app/(erp)/tickets/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
+| compartido | `app/(erp)/tickets/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.crear` | `tickets_tickets_crear` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.listar` | `tickets_tickets_listar` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.obtener` | `tickets_tickets_obtener` | existe |
