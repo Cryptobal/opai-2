@@ -13,6 +13,19 @@ type Respuesta = {
   destacadaPendiente: ItemNovedad | null;
 };
 
+async function persistirMarcadas(
+  portal: string,
+  ids: readonly string[] | undefined,
+  pendientes: readonly string[],
+) {
+  if (ids) {
+    return ejecutarCapacidad(portal, "core.novedades.marcar_leidas", {
+      ids: [...pendientes],
+    });
+  }
+  return ejecutarCapacidad(portal, "core.novedades.marcar_todas", {});
+}
+
 /** Marca al tiro en pantalla y persiste. Con `ids`, solo esas novedades (filtro activo). */
 export function useMarcarNovedades(
   portal: string,
@@ -30,16 +43,12 @@ export function useMarcarNovedades(
     marcando.current = true;
     const previo = datos;
     setErrorMarca(false);
-    setDatos(
-      ids ? listaMarcarIds(datos, ids) : listaComoLeida(datos),
-    );
+    setDatos(ids ? listaMarcarIds(datos, ids) : listaComoLeida(datos));
     const volver = () => {
       setDatos(previo);
       setErrorMarca(true);
     };
-    const capacidad = ids ? "core.novedades.marcar_leidas" : "core.novedades.marcar_todas";
-    const input = ids ? { ids: [...pendientes] } : {};
-    void ejecutarCapacidad(portal, capacidad, input)
+    void persistirMarcadas(portal, ids, pendientes)
       .then((r) => {
         if (!r.ok) {
           volver();
