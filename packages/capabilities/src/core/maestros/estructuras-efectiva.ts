@@ -24,7 +24,7 @@ export const estructurasEfectiva = defineCapability({
     fecha: diaSchema.optional().describe("Por defecto, hoy."),
     puestoId: uuidSchema
       .optional()
-      .describe("Puesto a considerar (sin asignaciones en este brief)."),
+      .describe("Puesto a considerar cuando aún no tiene asignaciones vigentes."),
     instalacionId: uuidSchema.optional(),
     imm: z.number().int().min(1).optional().describe("Ingreso mínimo mensual vigente, en CLP."),
   }),
