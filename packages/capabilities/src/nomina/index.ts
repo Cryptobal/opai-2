@@ -11,7 +11,9 @@ import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
 import { lreGenerar } from "./lre";
 import { previredGenerar } from "./previred";
 import { f301Generar } from "./f30-1";
+import { consumidorLiquidacionPublicada } from "./consumidor-liquidacion-publicada";
 import { libroRemuneracionesExcel, libroRemuneracionesPdf } from "./libro-remuneraciones";
+import { liquidacionesPublicar } from "./liquidaciones-publicar";
 import { conceptosActualizar, conceptosCrear, conceptosListar } from "./conceptos";
 import { novedadesAnular, novedadesCargar, novedadesCrear } from "./novedades-escritura";
 import { novedadesListar } from "./novedades-lectura";
@@ -56,4 +58,7 @@ export const capacidadesNomina: readonly Capacidad[] = [
   f301Generar,
   libroRemuneracionesExcel,
   libroRemuneracionesPdf,
+  liquidacionesPublicar,
 ];
+
+export const consumidoresNomina = [consumidorLiquidacionPublicada];

@@ -11,3 +11,4 @@ export * from "./previred";
 export * from "./f30-1";
 export * from "./libro-remuneraciones";
 export * from "./libro-remuneraciones-excel";
+export * from "./liquidacion-pdf";

@@ -29,11 +29,15 @@ const resumenSchema = z.object({
   descuentos: z.number().int().describe("Descuentos legales más anticipos, cuotas y otros descuentos."),
   liquido: z.number().int(),
   advertencias: z.array(z.string()),
+  publicadaEn: z.string().nullable(),
+  documentoId: z.string().nullable(),
+  correoPersonal: z.string().nullable().optional(),
 });
 
 type Fila = {
   id: string; personaId: string; estado: string; diasTrabajados: number; haberes: number;
   descuentosLegales: number; otrosDescuentos: number; liquido: number; advertencias: unknown;
+  publicadaEn: Date | null; documentoId: string | null;
 };
 const textos = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
 const resumen = (f: Fila, nombre: string): z.output<typeof resumenSchema> => ({
@@ -46,6 +50,8 @@ const resumen = (f: Fila, nombre: string): z.output<typeof resumenSchema> => ({
   descuentos: f.descuentosLegales + f.otrosDescuentos,
   liquido: f.liquido,
   advertencias: textos(f.advertencias),
+  publicadaEn: iso(f.publicadaEn),
+  documentoId: f.documentoId,
 });
 
 /** Liquidaciones de un período, con el total del período. */
@@ -116,7 +122,10 @@ export const liquidacionesObtener = defineCapability({
     exigirVistaCompleta(ctx);
     const f = await ctx.db.nominaLiquidacion.findUnique({ where: { id } });
     if (!f) throw noEncontrado("La liquidación");
-    const nombres = await nombresDe(ctx.db, [f.personaId]);
+    const [nombres, persona] = await Promise.all([
+      nombresDe(ctx.db, [f.personaId]),
+      ctx.db.persona.findFirst({ where: { id: f.personaId }, select: { emailPersonal: true } }),
+    ]);
     const d = (f.detalle ?? {}) as Record<string, unknown>;
     const lineas = (v: unknown) => z.array(lineaSchema).catch([]).parse(v);
     return {
@@ -126,6 +135,7 @@ export const liquidacionesObtener = defineCapability({
       costoEmpresa: f.costoEmpresa,
       detalle: { haberes: lineas(d.haberes), descuentosLegales: lineas(d.descuentosLegales), otrosDescuentos: lineas(d.otrosDescuentos) },
       calculadaEn: iso(f.calculadaEn),
+      correoPersonal: persona?.emailPersonal?.trim() || null,
     };
   },
 });

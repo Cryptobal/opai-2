@@ -794,6 +794,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.obtener` | `nomina_liquidaciones_obtener` | existe |
+| erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |

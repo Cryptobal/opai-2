@@ -22,6 +22,13 @@ test.describe("@preview nómina: liquidaciones", () => {
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await expect(page.getByText("Revisadas").first()).toBeVisible();
     await capturar(page, info, "nomina-liquidaciones");
+    const fila = page.locator('a[href*="/liquidaciones/"]').first();
+    if ((await fila.count()) > 0) {
+      await fila.click();
+      await expect(page.getByText("Líquido a pagar")).toBeVisible({ timeout: 30_000 });
+      const publicar = page.getByRole("button", { name: "Publicar al trabajador" });
+      if ((await publicar.count()) > 0) await capturar(page, info, "nomina-liquidacion-publicar");
+    }
     const calcular = page.getByRole("button", { name: "Calcular liquidaciones" });
     if ((await calcular.count()) > 0) {
       await calcular.click();

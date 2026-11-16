@@ -31,7 +31,9 @@ const semilla = (estado = "abierto") => {
       id: `v-${i}`, indicadorId: `i-${p.indicador}`, estado: "vigente", vigenteDesde: f(p.vigenteDesde), vigenteHasta: null,
       valorJson: p.valor, fuente: p.fuente, consultadaEl: f("2026-11-01"), verificacion: "verificado",
     })),
-    persona: [P1, P2].map((id, i) => ({ id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activa" })),
+    persona: [P1, P2].map((id, i) => ({
+      id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activa", emailPersonal: `n${i}@prueba.cl`,
+    })),
     vinculoLaboral: [P1, P2].map((personaId, i) => ({
       id: `0192f3a0-0000-7000-8000-00000000f41${i}`, tenantId: T, personaId, cargoId: "c", tipo: "indefinido",
       inicio: f("2025-01-01"), termino: null, estado: "vigente", puestoId: null, instalacionId: null, horasSemanales: 42,
@@ -99,6 +101,21 @@ describe("nomina.liquidaciones", () => {
     expect(una.detalle.otrosDescuentos).toEqual([{ concepto: "Anticipos", monto: 50_000 }]);
     const lecturas = (c.tabla("auditEvent") as { capability: string }[]).map((e) => e.capability);
     expect(lecturas).toEqual(expect.arrayContaining(["nomina.liquidaciones.listar", "nomina.liquidaciones.obtener"]));
+  });
+
+  it("publica una liquidación revisada y recalcular anula el vínculo al documento", async () => {
+    const c = como();
+    await run(c, "nomina.liquidaciones.calcular", { periodoId: PER });
+    await run(c, "nomina.liquidaciones.marcar_revisadas", { periodoId: PER });
+    const id = data<{ items: { id: string }[] }>(await run(c, "nomina.liquidaciones.listar", { periodoId: PER })).items[0]?.id ?? "";
+    expect(await run(c, "nomina.liquidaciones.publicar", { id }, { dryRun: true })).toMatchObject({ ok: true });
+    const pub = data<{ documentoId: string; yaPublicada: boolean }>(await run(c, "nomina.liquidaciones.publicar", { id }));
+    expect(pub.yaPublicada).toBe(false);
+    expect(pub.documentoId).toBeTruthy();
+    expect(c.tabla("documento")).toHaveLength(1);
+    expect(await run(c, "nomina.liquidaciones.publicar", { id })).toMatchObject({ ok: true, data: expect.objectContaining({ yaPublicada: true }) });
+    await run(c, "nomina.liquidaciones.calcular", { periodoId: PER });
+    expect((c.tabla("nominaLiquidacion") as { documentoId: string | null }[])[0]?.documentoId).toBeNull();
   });
 
   it("marca revisadas las calculadas, cuenta en el total y recalcular las vuelve a calculada", async () => {

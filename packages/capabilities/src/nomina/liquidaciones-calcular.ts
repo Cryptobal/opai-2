@@ -124,6 +124,7 @@ async function guardarLiquidaciones(tx: TenantTx, tenantId: string, periodoId: s
       estado: "calculada", diasTrabajados: l.diasTrabajados, haberes: l.totalHaberes, imponible: l.imponible,
       descuentosLegales: l.totalDescuentosLegales, otrosDescuentos: l.totalOtrosDescuentos, liquido: l.liquido,
       costoEmpresa: l.costoEmpresa, capaId: l.capaId, juegoHuella: l.huellaJuego, calculadaEn: new Date(),
+      documentoId: null, publicadaEn: null,
       detalle: { haberes: l.haberes, descuentosLegales: l.descuentosLegales, otrosDescuentos: l.otrosDescuentos,
         aportesEmpleador: l.aportesEmpleador, diasLicencia: l.diasLicencia, prevision: l.prevision },
       advertencias: l.advertencias,

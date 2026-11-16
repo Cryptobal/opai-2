@@ -225,6 +225,9 @@ model NominaLiquidacion {
   capaId            String   @map("capa_id") @db.Uuid
   juegoHuella       String   @map("juego_huella")
   calculadaEn       DateTime @default(now()) @map("calculada_en") @db.Timestamptz(6)
+  /// PDF en `core.documentos`, visible en el portal del trabajador (CAR-99).
+  documentoId       String?  @map("documento_id") @db.Uuid
+  publicadaEn       DateTime? @map("publicada_en") @db.Timestamptz(6)
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
