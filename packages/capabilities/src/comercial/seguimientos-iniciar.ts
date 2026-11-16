@@ -13,7 +13,7 @@ import { cancelarPasosPendientes } from "./seguimiento-tareas";
 import type { Contexto } from "../types";
 import { idAutor } from "../autor";
 
-export const inicioSchema = z.object({
+const inicioSchema = z.object({
   negocioId: uuidSchema,
   planId: uuidSchema.optional(),
   ancla: z.string().datetime().optional().describe("Instante desde el que se cuentan los plazos; por defecto, ahora."),

@@ -15,9 +15,9 @@ export type FilaRentabilidad = {
   puestos: number;
   puestosSinCosto: number;
   puestosOcultos: number;
-  /** Null si hay puestos ocultos: sin sus sueldos el margen sería engañoso. */
+  /** Null si hay puestos ocultos o faltan valores legales: sin el costo real el margen sería engañoso. */
   margenClp: number | null;
-  /** Margen sobre ventas en PCT_ESCALA (1.000.000 = 100 %); null sin ventas positivas o con puestos ocultos. */
+  /** Margen sobre ventas en PCT_ESCALA (1.000.000 = 100 %); null sin ventas positivas, con puestos ocultos o sin valores legales. */
   margenPct: number | null;
 };
 
@@ -26,7 +26,11 @@ const vacia = (instalacionId: string | null): FilaRentabilidad => ({
 });
 
 /** Junta ventas y costos por instalación y ordena por margen ascendente (las que pierden plata primero). */
-export function rentabilidadPorInstalacion(ventas: readonly VentaParaRentabilidad[], costos: readonly CostoPuesto[]): FilaRentabilidad[] {
+export function rentabilidadPorInstalacion(
+  ventas: readonly VentaParaRentabilidad[],
+  costos: readonly CostoPuesto[],
+  sinValoresLegales = false,
+): FilaRentabilidad[] {
   const filas = new Map<string | null, FilaRentabilidad>();
   const fila = (id: string | null) => {
     const f = filas.get(id) ?? vacia(id);
@@ -47,21 +51,22 @@ export function rentabilidadPorInstalacion(ventas: readonly VentaParaRentabilida
   }
   return [...filas.values()]
     .map((f) => {
-      if (f.puestosOcultos > 0) return { ...f, margenClp: null, margenPct: null };
+      // Sin valores legales los puestos salen «sin_costo» (costo 0); calcular margen sería ventas − 0.
+      if (sinValoresLegales || f.puestosOcultos > 0) return { ...f, margenClp: null, margenPct: null };
       const margenClp = f.ventasNetasClp - f.costoEstimadoClp;
       const margenPct = f.ventasNetasClp > 0 ? Math.round((margenClp * PCT_ESCALA) / f.ventasNetasClp) : null;
       return { ...f, margenClp, margenPct };
     })
-    // Las que pierden plata primero; las de margen desconocido (puestos ocultos) al final.
+    // Las que pierden plata primero; las de margen desconocido al final.
     .sort((a, b) => (a.margenClp ?? Infinity) - (b.margenClp ?? Infinity) || String(a.instalacionId).localeCompare(String(b.instalacionId)));
 }
 
 /** Totales de la empresa en el mes. */
-export function totalesRentabilidad(filas: readonly FilaRentabilidad[]) {
+export function totalesRentabilidad(filas: readonly FilaRentabilidad[], sinValoresLegales = false) {
   const s = (k: "ventasNetasClp" | "costoEstimadoClp" | "puestosSinCosto" | "puestosOcultos") => filas.reduce((t, f) => t + f[k], 0);
   const ventas = s("ventasNetasClp");
   const costo = s("costoEstimadoClp");
-  const completo = s("puestosOcultos") === 0;
+  const completo = !sinValoresLegales && s("puestosOcultos") === 0;
   return {
     ventasNetasClp: ventas,
     costoEstimadoClp: costo,

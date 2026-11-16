@@ -11,7 +11,7 @@ import { planGanar } from "./ganar-efectos";
  */
 export const consumidorCpqGanado = defineConsumidor({
   id: "cpq.ganar.aceptar",
-  descripcion: "Acepta la cotización vigente y rechaza las abiertas al ganar el negocio (R45).",
+  descripcion: "Acepta la cotización vigente y rechaza las abiertas al ganar el negocio.",
   eventos: ["comercial.negocio.ganado"],
   async handler(ctx, ev) {
     if (!ev.entidadId) return;

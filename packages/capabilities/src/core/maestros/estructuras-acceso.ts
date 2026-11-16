@@ -16,7 +16,7 @@ type RefEstructura = Pick<FilaEstructura, "cargoId" | "puestoId" | "personaId"> 
  * a la vista, pero toda lectura queda trazada. La vista previa de creación (sin fila persistida) no
  * se audita porque aún no hay nada leído.
  */
-export async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): Promise<void> {
+async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): Promise<void> {
   if (!e.id) return;
   const entityId = e.id;
   await ctx.transaccion((tx) =>
