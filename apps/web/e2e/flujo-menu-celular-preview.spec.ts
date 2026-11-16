@@ -17,8 +17,12 @@ test.describe("@preview flujo de caja en celular", () => {
     await expect(page.getByRole("heading", { name: "Flujo de caja" }).first()).toBeVisible({ timeout: 60_000 });
     const menu = page.getByRole("button", { name: "Acciones del flujo" });
     await expect(menu).toBeVisible();
-    await menu.click();
-    await expect(page.getByRole("menuitem", { name: "Resumen por mes" })).toBeVisible();
+    const resumen = page.getByRole("menuitem", { name: "Resumen por mes" });
+    // El primer toque solo carga el menú, y en el teléfono puede llegar antes de hidratar.
+    await expect(async () => {
+      if ((await resumen.count()) === 0) await menu.click();
+      await expect(resumen).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 60_000 });
     await expect(page.getByRole("menuitem", { name: "Vista de planilla" })).toBeVisible();
     await page.keyboard.press("Escape");
     await capturar(page, info, "flujo-menu-celular");
