@@ -13,11 +13,11 @@ test.describe("@preview comercial: traer desde OPAI 1 solo en empresas habilitad
     await entrar(page);
     await page.goto("/configuracion/integraciones");
     await expect(page.getByText("Banco (Web4Leads)").first()).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByText("OPAI 1 (traer datos)")).toHaveCount(0);
+    await expect(page.getByText("Migración (exportar datos)")).toHaveCount(0);
     await capturar(page, info, "opai1-integraciones-oculta");
 
     await page.goto("/configuracion/integraciones/opai1");
     await expect(page.getByText("No encontramos lo que buscas").first()).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByText("Llave de solo lectura de OPAI 1")).toHaveCount(0);
+    await expect(page.getByText("Llave de solo lectura del exportador")).toHaveCount(0);
   });
 });

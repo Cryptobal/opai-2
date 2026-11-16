@@ -83,7 +83,7 @@ export const ajustesRendiciones = z.object({
   nomina_formato_confirmado: z.boolean().default(false).meta({
     etiqueta: "Activar la nómina Santander (solo empresa de pruebas)",
     ayuda:
-      "Solo para empresas de prueba. Encendido permite generar y descargar la nómina en formato Santander; apagado bloquea la generación y la descarga.",
+      "Apagado por defecto. Si lo enciendes en una empresa de prueba, se puede generar y descargar la nómina en formato Santander.",
     grupo: "Pagos",
     ambito: "tenant",
     permiso: PERMISO_CONFIG,

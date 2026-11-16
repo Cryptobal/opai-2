@@ -61,7 +61,7 @@ describe.skipIf(!urlPropietario)("desempeño: día de cierre de la empresa (Post
   it("con el día de cierre en 10, el 5 no cierra y el 10 sí", async () => {
     await dato(ctx(["desempeno"]), "core.config.set", {
       modulo: "desempeno",
-      clave: "dia_cierre",
+      clave: "dia_cierre_mes",
       valor: 10,
     });
     vi.useFakeTimers({ toFake: ["Date"] });
