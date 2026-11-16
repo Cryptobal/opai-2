@@ -5,7 +5,7 @@ import type { cursorDe } from "../core/maestros/comun";
 import type { Contexto } from "../types";
 
 export const MAX_PUNTOS = 20;
-export const TIPOS_PUNTO = ["peatonal", "vehicular", "mixto"] as const;
+const TIPOS_PUNTO = ["peatonal", "vehicular", "mixto"] as const;
 
 export const puntoSchema = z.object({
   id: uuidSchema,

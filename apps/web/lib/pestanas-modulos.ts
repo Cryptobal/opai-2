@@ -66,7 +66,6 @@ export async function puedePrerregistrar(): Promise<boolean> {
   const identidad = await identidadActual();
   return identidad ? puedeDeIdentidad(identidad)("acceso:prerregistros.create") : false;
 }
-
 /** ¿Puede configurar puntos, plantillas y programación de rondas? Oculta acciones a quien solo lee. */
 export async function puedeConfigurarRondas(): Promise<boolean> {
   const identidad = await identidadActual();

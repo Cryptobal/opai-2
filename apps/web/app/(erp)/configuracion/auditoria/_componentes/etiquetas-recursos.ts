@@ -16,11 +16,11 @@ export const RECURSOS: Record<string, string> = {
   aprobaciones: "Aprobaciones", por_aprobar: "Por aprobar", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
   turno: "Turnos", plan: "Plan", historial: "Historial", negocios: "Negocios", solicitudes: "Solicitudes",
   seguimiento_planes: "Planes de seguimiento", seguimientos: "Seguimientos", canales: "Canales", importar_1_0: "Importación desde OPAI 1.0", puntos: "Puntos de ronda", apariencia: "Bienvenida de la portería",
-  programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos",
+  programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos", mis_turnos: "Mis turnos", mis_documentos: "Mis documentos",
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
   conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", mes: "Mes", ppc: "Puestos por cubrir",
-  series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos",
+  series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos", turnos_extra: "Turnos extra",
   alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
@@ -50,5 +50,5 @@ export const RECURSOS: Record<string, string> = {
   hilo: "Hilo",
   // Permisos y licencias de una persona en la pauta (CAR-373).
   ausencias: "Permisos y licencias",
-  publicaciones: "Publicaciones de la pauta",
+  publicaciones: "Publicaciones de la pauta", visitas: "Visitas de supervisión",
 };
