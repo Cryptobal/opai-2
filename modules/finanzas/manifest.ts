@@ -1,4 +1,4 @@
-import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
+import { ajustesFinanzas, buscadoresFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
 
 import { buscadoresFinanzas } from "./buscador";
 import { capacidades as capacidadesFlujo } from "./capacidades";

@@ -20,7 +20,7 @@ import {
 const iso = (d: Date | null) => (d ? d.toISOString() : null);
 
 /** PIN temporal al azar que cumple las mismas reglas que uno elegido a mano. */
-export function pinTemporal(rut: string): string {
+function pinTemporal(rut: string): string {
   for (let i = 0; i < 50; i++) {
     const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
     if (!problemaDePin(pin, rut)) return pin;
@@ -43,7 +43,7 @@ const estadoSchema = z.object({
   sinIngreso: motivoSinIngresoSchema.nullable(),
 });
 
-export const credencialesTerrenoEstado = defineCapability({
+const credencialesTerrenoEstado = defineCapability({
   id: "core.credenciales_terreno.estado",
   descripcion:
     "Muestra si una persona tiene PIN de terreno, si debe cambiarlo, si está bloqueada por intentos fallidos y si hay algo que le impide ingresar (sin usuario o con otros portales). Nunca muestra el PIN.",
@@ -103,7 +103,7 @@ async function fijar(ctx: Contexto, persona: { id: string; rut: string }, pin: s
   );
 }
 
-export const credencialesTerrenoAsignarPin = defineCapability({
+const credencialesTerrenoAsignarPin = defineCapability({
   id: "core.credenciales_terreno.asignar_pin",
   descripcion:
     "RR. HH. asigna el PIN de 6 dígitos con que una persona se identifica en terreno cuando no puede usar el rostro. Debe cambiarlo en su primer ingreso; el PIN nunca se guarda ni se muestra.",
@@ -124,7 +124,7 @@ export const credencialesTerrenoAsignarPin = defineCapability({
   },
 });
 
-export const credencialesTerrenoRestablecer = defineCapability({
+const credencialesTerrenoRestablecer = defineCapability({
   id: "core.credenciales_terreno.restablecer",
   descripcion:
     "RR. HH. restablece el PIN de terreno de una persona: genera uno temporal de 6 dígitos, desbloquea la credencial y se lo muestra una sola vez. La persona debe cambiarlo en su primer ingreso.",

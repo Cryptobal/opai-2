@@ -3,6 +3,7 @@ import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { capacidades } from "../../../modules/finanzas/capacidades";
+import { aplicarSincronizacion } from "../../../modules/finanzas/capacidades/bancos/sincronizar-aplicar";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -172,6 +173,17 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     await cartola("2026-11-10", -12_340n, "CARGO B");
     const r2 = await recibir(tenantA, payload([{ externalId: "m451", transactionDate: "2026-11-09", description: "TEF OTRA", amount: -12_340 }]));
     expect(r2.ok && r2.data).toMatchObject({ nuevos: 1 });
+  });
+
+  it("CAR-488: si otra entrega ya vinculó el movimiento de cartola, el entrante se inserta en vez de perderse", async () => {
+    const tomado = await e.admin.movimientoBancario.create({
+      data: { tenantId: tenantA, cuentaId: cuentaA, fecha: new Date("2026-11-06T00:00:00Z"), monto: -65_432n, glosa: "Cargo", claveDedupe: `t-${randomUUID()}`, idExterno: "otra-entrega", origen: "cartola" },
+    });
+    const movimiento = { idExterno: "m488", fecha: "2026-11-06", monto: -65_432, glosa: "TEF X", referencia: null, saldoDespues: null, claveDedupe: `n-${randomUUID()}` };
+    const vinculos = [{ existenteId: tomado.id, idExterno: "m488", indice: 0, movimiento }];
+    const n = await aplicarSincronizacion(ctx(tenantA, true), { cuentaId: cuentaA, nuevos: [], vinculos, duplicados: 1, sospechosos: 0, saldoBanco: null, saldoBancoEn: null });
+    expect(n).toBe(1);
+    expect(await e.admin.movimientoBancario.count({ where: { tenantId: tenantA, idExterno: "m488" } })).toBe(1);
   });
 
   it("misma huella sin saldo se inserta y queda como sospechosa; cuenta desconocida se ignora", async () => {

@@ -18,6 +18,7 @@ export const platformTenantsGet = defineCapability({
   input: z.object({ tenantId: uuidSchema }),
   output: z.object({
     tenant: tenantSchema,
+    activarModulosNuevos: z.boolean(),
     modulos: z.array(moduloEstadoSchema),
     administradores: z.array(
       z.object({
@@ -45,6 +46,8 @@ export const platformTenantsGet = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
+  // NÚCLEO-H / CAR-323: la lectura queda en la auditoría global con la empresa objetivo.
+  tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input) {
     const p = requierePlataforma(ctx);
     const tenant = await p.globales.tenantPorId(input.tenantId);
@@ -57,8 +60,10 @@ export const platformTenantsGet = defineCapability({
       e.apiKeys(),
       resumenUso(e, 30),
     ]);
+    const marca = await p.globales.tenantModulosNuevos(tenant.id);
     return {
       tenant,
+      activarModulosNuevos: marca?.activarModulosNuevosDesde != null,
       modulos,
       administradores: admins.map((m) => ({
         membershipId: m.id,
@@ -77,40 +82,5 @@ export const platformTenantsGet = defineCapability({
       })),
       uso,
     };
-  },
-});
-
-export const platformUsageSummary = defineCapability({
-  id: "platform.usage.summary",
-  descripcion: "Plataforma: ejecuciones por empresa en los últimos días.",
-  permiso: PERMISOS_PLATAFORMA.tenantsRead,
-  sinTenant: true,
-  input: z.object({ dias: z.number().int().min(1).max(365).default(30) }),
-  output: z.array(
-    z.object({
-      tenantId: z.string(),
-      slug: z.string(),
-      nombre: z.string(),
-      total: z.number(),
-      errores: z.number(),
-    }),
-  ),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx, input) {
-    const p = requierePlataforma(ctx);
-    const tenants = await p.globales.listarTenants();
-    return Promise.all(
-      tenants.map(async (t) => {
-        const uso = await resumenUso(p.empresa(t.id), input.dias);
-        return {
-          tenantId: t.id,
-          slug: t.slug,
-          nombre: t.nombre,
-          total: uso.total,
-          errores: uso.errores,
-        };
-      }),
-    );
   },
 });

@@ -28,6 +28,18 @@ describe("core.novedades", () => {
     expect(data.noLeidas).toBe(data.items.length);
   });
 
+  it("recorta las novedades por las pantallas que la persona ve (CAR-430)", async () => {
+    const lista = async (permisosRol: readonly string[]) => {
+      const { ctx } = contextoDePrueba({ modulosActivos: ["core", "comercial"], permisosRol });
+      const r = ok<{ items: { id: string }[] }>(await executeCapability(ctx, "core.novedades.list", {}));
+      return r.items.map((i) => i.id);
+    };
+    expect(await lista(["core:cuentas.read"])).toContain("diseno-nuevo-ficha-completa");
+    const sinCuentas = await lista(["core:personas.read"]);
+    expect(sinCuentas).not.toContain("diseno-nuevo-ficha-completa");
+    expect(sinCuentas).toContain("barra-inferior-telefono");
+  });
+
   it("marca como leídas y reduce el conteo", async () => {
     const { ctx } = contextoDePrueba({ modulosActivos: ["core", "finanzas", "comercial", "cpq"] });
     const antes = ok<{ items: { id: string }[] }>(

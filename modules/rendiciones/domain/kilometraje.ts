@@ -4,10 +4,9 @@
 import { clp, porcentajeCLP, redondearRazonCLP } from "@opai/domain";
 
 export const METODOS_KM = ["consumo", "tarifa_km", "tramo_fijo"] as const;
-export type MetodoKm = (typeof METODOS_KM)[number];
 
 /** Versión del esquema de la configuración que se guarda en la instantánea del viaje. */
-export const VERSION_CONFIG_KM = 1;
+const VERSION_CONFIG_KM = 1;
 export const MAX_MONTO_KM = 50_000_000;
 
 export type TramoFijo = { nombre: string; montoClp: number };
@@ -26,8 +25,8 @@ export type ConfigKilometraje = {
 };
 
 export type EntradaViaje = { km: number; idaYVuelta: boolean; peajeClp: number; tramo?: string | undefined };
-export type LineaKm = { concepto: string; montoClp: number; detalle: string };
-export type MotivoKm = "sin_configurar" | "metodo_desconocido" | "config_incompleta" | "km_invalido" | "peaje_invalido" | "tramo_invalido";
+type LineaKm = { concepto: string; montoClp: number; detalle: string };
+type MotivoKm = "sin_configurar" | "metodo_desconocido" | "config_incompleta" | "km_invalido" | "peaje_invalido" | "tramo_invalido";
 
 export type ResultadoKm =
   | { ok: true; kmEfectivos: number; montoClp: number; lineas: LineaKm[] }

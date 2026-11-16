@@ -47,7 +47,7 @@ export const porAprobarList = defineCapability({
   auditarLectura: (s) => s.grupos.flatMap((g) => g.items.map((i) => i.id)),
   id: "core.por_aprobar.list",
   descripcion:
-    "Bandeja única «Por aprobar»: todo lo que espera la decisión del actor, venga de donde venga (acciones de agentes o de las reglas de la empresa, margen y envíos de cotizaciones, rendiciones, tickets con aprobación), agrupado por origen y con el enlace a la pantalla donde se resuelve. Cada módulo aplica su propio criterio de quién aprueba.",
+    "Bandeja única «Por aprobar»: todo lo que espera tu aprobación, venga de donde venga (acciones de agentes o de las reglas de la empresa, margen y envíos de cotizaciones, rendiciones, tickets con aprobación), agrupado por origen y con el enlace a la pantalla donde se resuelve. Cada módulo aplica su propio criterio de quién aprueba.",
   permiso: null,
   input: z.object({
     limite: z.number().int().min(1).max(50).default(10).describe("Máximo por grupo."),
