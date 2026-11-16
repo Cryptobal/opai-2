@@ -11,13 +11,7 @@ export const referenciaSchema = z.object({
 });
 export type Referencia = z.infer<typeof referenciaSchema>;
 
-export {
-  debeDibujarFichas,
-  esHrefFicha,
-  listaCortaDeEntidades,
-  pideFichas,
-  textoRespaldoFichas,
-} from "./fichas";
+export { debeDibujarFichas, textoRespaldoFichas } from "@opai/domain/agente-fichas";
 
 /** Solo rutas internas de OPAI (`/cuentas/…`); nada de `//`, `javascript:` ni hosts. */
 export function hrefOpai(href: string): string | null {

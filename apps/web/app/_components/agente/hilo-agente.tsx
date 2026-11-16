@@ -35,6 +35,14 @@ export function HiloAgente({
         const texto =
           m.rol === "agente" && modoFicha ? textoRespaldoFichas(m.texto, cards) : m.texto;
         const preparando = m.rol === "agente" && m.texto === "" && !m.error;
+        const bloqueFichas =
+          m.rol === "agente" && !preparando && cards.length ? (
+            <div className={`flex flex-col gap-2${modoFicha ? "" : " mt-2"}`}>
+              {cards.map((r) => (
+                <TarjetaEntidad key={`${r.href}:${r.id}`} entidad={r} />
+              ))}
+            </div>
+          ) : null;
         return (
           <div key={m.id} className={m.rol === "yo" ? "flex justify-end" : "flex justify-start"}>
             <div
@@ -50,13 +58,7 @@ export function HiloAgente({
                   Preparando…
                 </p>
               ) : null}
-              {m.rol === "agente" && !preparando && modoFicha && cards.length ? (
-                <div className="flex flex-col gap-2">
-                  {cards.map((r) => (
-                    <TarjetaEntidad key={`${r.href}:${r.id}`} entidad={r} />
-                  ))}
-                </div>
-              ) : null}
+              {modoFicha ? bloqueFichas : null}
               {m.rol === "agente" && !preparando && texto ? (
                 <div className={modoFicha && cards.length ? "mt-2" : undefined}>
                   <TextoRespuesta texto={texto} referencias={refs} />
@@ -65,13 +67,7 @@ export function HiloAgente({
               {m.rol === "yo" ? (
                 <p className="text-md break-words whitespace-pre-wrap text-fg">{m.texto}</p>
               ) : null}
-              {m.rol === "agente" && !preparando && !modoFicha && cards.length ? (
-                <div className="mt-2 flex flex-col gap-2">
-                  {cards.map((r) => (
-                    <TarjetaEntidad key={`${r.href}:${r.id}`} entidad={r} />
-                  ))}
-                </div>
-              ) : null}
+              {!modoFicha ? bloqueFichas : null}
               {m.error ? (
                 <p role="alert" className="t-caption text-danger-fg">
                   {m.error}

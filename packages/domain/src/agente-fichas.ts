@@ -1,6 +1,5 @@
-import type { Referencia } from "./referencias";
+/** Reglas compartidas agente ↔ UI para fichas (CAR-523). */
 
-/** Ficha de entidad que el chat dibuja como tarjeta (CAR-523). */
 export function esHrefFicha(href: string): boolean {
   return /^\/(cuentas|personas|negocios|cotizaciones|finanzas\/ventas)\/[^/]+$/i.test(href);
 }
@@ -9,20 +8,21 @@ export function pideFichas(texto: string): boolean {
   return /\b(tarjeta|tarjetas|ficha|fichas)\b/i.test(texto);
 }
 
-/** Lista corta de cuentas, personas, negocios, cotizaciones o facturas. */
-export function listaCortaDeEntidades(refs: readonly Referencia[]): boolean {
+export function listaCortaDeEntidades(refs: readonly { href: string }[]): boolean {
   return refs.length >= 1 && refs.length <= 4 && refs.every((r) => esHrefFicha(r.href));
 }
 
-/** Cuándo el hilo dibuja fichas y deja el markdown solo como respaldo. */
-export function debeDibujarFichas(pedido: string, refs: readonly Referencia[]): boolean {
+export function debeDibujarFichas(pedido: string, refs: readonly { href: string }[]): boolean {
   if (!refs.length) return false;
   if (pideFichas(pedido)) return refs.some((r) => esHrefFicha(r.href));
   return listaCortaDeEntidades(refs);
 }
 
-/** Quita viñetas que solo repiten las fichas; deja prosa corta como respaldo (CAR-523). */
-export function textoRespaldoFichas(texto: string, refs: readonly Referencia[]): string {
+/** Quita viñetas que solo repiten las fichas; deja prosa corta como respaldo. */
+export function textoRespaldoFichas(
+  texto: string,
+  refs: readonly { titulo: string; href: string }[],
+): string {
   if (!refs.length) return texto;
   const titulos = new Set(refs.map((r) => r.titulo.toLowerCase()));
   const hrefs = new Set(refs.map((r) => r.href));
