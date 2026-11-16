@@ -36,9 +36,11 @@ export function rellenarPlantilla(texto: string, valores: ValoresPlantilla): Rel
   return { parrafos, faltantes: [...faltantes] };
 }
 
-/** Etiqueta legible de una variable (la del catálogo; la clave si no existe). */
-export const etiquetaDeVariable = (clave: string): string =>
-  VARIABLES_PLANTILLA.find((v) => v.clave === clave)?.etiqueta ?? clave;
+/** Etiqueta legible de una variable (catálogo fijo, campos de cuenta o la clave). */
+export const etiquetaDeVariable = (
+  clave: string,
+  camposCuenta?: ReadonlyMap<string, string>,
+): string => camposCuenta?.get(clave) ?? VARIABLES_PLANTILLA.find((v) => v.clave === clave)?.etiqueta ?? clave;
 
 /** Fecha de calendario «aaaa-mm-dd» → «dd-mm-aaaa» (formato de los documentos). */
 export const fechaDeDocumento = (dia: string): string => dia.split("-").reverse().join("-");

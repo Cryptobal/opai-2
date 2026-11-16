@@ -49,7 +49,7 @@ export async function pdfDeAnexo(
     "contrato.cambios": filas.map((f) => `${f.concepto}: ${f.antes} → ${f.despues}`).join("; ") || null,
   });
   if (relleno.faltantes.length)
-    throw reglaDeNegocio(`Faltan datos para generar el anexo: ${relleno.faltantes.map(etiquetaDeVariable).join(", ")}.`);
+    throw reglaDeNegocio(`Faltan datos para generar el anexo: ${relleno.faltantes.map((c) => etiquetaDeVariable(c)).join(", ")}.`);
   const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
   return (await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo: await logoDeMarca(ctx) })).bytes;
 }

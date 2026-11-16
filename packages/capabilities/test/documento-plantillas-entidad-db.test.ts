@@ -38,6 +38,26 @@ describe("plantillas de cuenta e instalación", () => {
     await f?.e.cerrar();
   });
 
+  it("rellena un campo personalizado de la cuenta en el contrato", async () => {
+    const campo = await executeCapability(ctx(f.tenantId), "core.campos_personalizados.create", {
+      entidad: "cuenta",
+      etiqueta: "Rubro doc",
+      tipo: "texto",
+    });
+    if (!campo.ok) throw new Error(JSON.stringify(campo));
+    const { clave } = campo.data as { clave: string };
+    await executeCapability(ctx(f.tenantId), "core.valores_personalizados.set", {
+      entidad: "cuenta",
+      id: cuentaId,
+      valores: { [clave]: "Seguridad" },
+    });
+    const plantilla = await crear("Con rubro", "contrato_servicio", `Rubro {cuenta.campo.${clave}}.`);
+    const r = await llamar("core.documento_plantillas.rellenar_entidad", { plantillaId: plantilla, entidadId: cuentaId });
+    expect(r.ok).toBe(true);
+    const d = r.ok ? (r.data as { relleno: { parrafos: { texto: string }[][] } }) : null;
+    expect(d?.relleno.parrafos.flat().some((s) => s.texto === "Seguridad")).toBe(true);
+  });
+
   it("el contrato de servicio dice qué falta de la cuenta", async () => {
     const r = await llamar("core.documento_plantillas.rellenar_entidad", { plantillaId: contratoId, entidadId: cuentaId });
     expect(r.ok).toBe(true);
