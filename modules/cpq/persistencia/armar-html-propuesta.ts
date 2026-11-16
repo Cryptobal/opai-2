@@ -2,7 +2,7 @@ import { noEncontrado, reglaDeNegocio, type Contexto } from "@opai/capabilities"
 import { renderizarPlantillaCampos } from "@opai/domain";
 
 import type { CapituloVista } from "../domain/documento/capitulo-instalacion";
-import { htmlBasePropuesta } from "../domain/documento/html-base-propuesta";
+import { htmlBasePropuesta, type MarcaBasePropuesta } from "../domain/documento/html-base-propuesta";
 import { conSecciones, htmlSecciones } from "../domain/documento/html-secciones";
 import { sanearHtml } from "../domain/documento/sanear-html";
 import {
@@ -12,7 +12,7 @@ import {
   type ServicioDesdeCotizacion,
 } from "../domain/documento/propuesta-tecnica";
 import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
-import type { MarcaDocumentoVista } from "./marca-documento";
+import { type MarcaDocumentoVista, vistaMarcaDocumento } from "./marca-documento";
 import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
 import { htmlConValores, plantillaHtmlEnUso, valoresVistaHtml } from "./propuesta-html-uso";
 import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
@@ -33,6 +33,13 @@ export type EntradaHtmlPropuesta = {
 };
 
 const CRUDOS = /\{\{[\s#/]?[^}]+\}\}/g;
+
+const marcaBase = (m: MarcaDocumentoVista): MarcaBasePropuesta => ({
+  colorPrimario: m.colorPrimario,
+  colorSecundario: m.colorSecundario,
+  nombre: m.nombreComercial ?? m.razonSocial ?? "Su empresa",
+  piePagina: m.piePagina,
+});
 
 async function plantillaConSecciones(ctx: Contexto, d: EntradaHtmlPropuesta): Promise<string> {
   const entrada = await entradaPdfDesdeCotizacion(ctx, d.cotizacionId, { enviada: !d.borrador });
@@ -64,6 +71,9 @@ async function plantillaConSecciones(ctx: Contexto, d: EntradaHtmlPropuesta): Pr
       negocio: entrada.negocio,
       cliente: entrada.cliente?.razonSocial ?? entrada.cliente?.nombre ?? null,
       validaHasta: entrada.validaHasta ?? null,
+      codigo: entrada.codigo,
+      fecha: entrada.calculo.fecha,
+      marca: marcaBase(d.marca),
     });
   return conSecciones(base, secciones);
 }
@@ -97,13 +107,19 @@ export async function armarHtmlPropuestaVista(
 export async function htmlPlantillaVigente(ctx: Contexto, tituloCotizacion: string, cotizacionId: string) {
   const enUso = await plantillaHtmlEnUso(ctx);
   if (enUso) return { html: enUso.htmlSaneado, origen: "empresa" as const, nombre: enUso.nombre, version: enUso.version };
-  const entrada = await entradaPdfDesdeCotizacion(ctx, cotizacionId, {});
+  const [entrada, marca] = await Promise.all([
+    entradaPdfDesdeCotizacion(ctx, cotizacionId, {}),
+    vistaMarcaDocumento(ctx),
+  ]);
   return {
     html: htmlBasePropuesta({
       titulo: tituloCotizacion,
       negocio: entrada?.negocio ?? null,
       cliente: entrada?.cliente?.razonSocial ?? entrada?.cliente?.nombre ?? null,
       validaHasta: entrada?.validaHasta ?? null,
+      codigo: entrada?.codigo ?? null,
+      fecha: entrada?.calculo.fecha ?? null,
+      marca: marcaBase(marca),
     }),
     origen: "opai" as const,
     nombre: null as string | null,

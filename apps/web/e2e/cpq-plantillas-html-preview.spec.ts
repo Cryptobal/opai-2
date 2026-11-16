@@ -13,6 +13,12 @@ const HTML = [
   "<p>{{cuenta.inventado}}</p><script>alert(1)</script></section>",
 ].join("");
 
+const HTML_STYLE = `<style>
+.portada{padding:24px;border:2px solid #0a3d62}
+h1{color:#0a3d62}
+</style>
+<section class="portada"><h1>{{cuenta.nombre}}</h1><p>{{cotizacion.codigo}}</p>{{secciones}}</section>`;
+
 test.describe("@preview cpq: plantillas HTML en Marca y plantillas", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
@@ -48,5 +54,21 @@ test.describe("@preview cpq: plantillas HTML en Marca y plantillas", () => {
     await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible({ timeout: 60_000 });
     await page.getByTitle("Vista previa del HTML subido").scrollIntoViewIfNeeded();
     await capturar(page, info, "cpq-plantillas-html-vista");
+  });
+
+  test("revisa HTML con bloque style sanitizado y marcador de secciones", async ({ page }, info) => {
+    await entrar(page);
+    await page.goto("/configuracion/modulo/cpq?seccion=marca-plantillas");
+    const archivo = page.getByLabel("Archivo HTML");
+    await archivo.scrollIntoViewIfNeeded();
+    const revisar = page.getByRole("button", { name: "Revisar HTML" });
+    await expect(async () => {
+      await archivo.setInputFiles({ name: "propuesta-style.html", mimeType: "text/html", buffer: Buffer.from(HTML_STYLE) });
+      await expect(revisar).toBeEnabled({ timeout: 2_000 });
+    }).toPass({ timeout: 60_000 });
+    await revisar.click();
+    await expect(page.getByRole("alert").filter({ hasText: "No se puede guardar" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Guardar plantilla HTML" })).toBeEnabled();
+    await capturar(page, info, "cpq-plantillas-html-style-portada");
   });
 });

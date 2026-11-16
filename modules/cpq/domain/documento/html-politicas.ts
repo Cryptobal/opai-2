@@ -10,7 +10,8 @@ export const ELEMENTOS_PERMITIDOS: ReadonlySet<string> = new Set([
   "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li", "dl", "dt", "dd",
   "table", "caption", "colgroup", "col", "thead", "tbody", "tfoot", "tr", "th", "td",
   "strong", "b", "em", "i", "u", "s", "small", "sub", "sup", "mark", "abbr", "code", "pre", "blockquote", "time",
-  "br", "hr", "a",
+  "br", "hr", "a", "style",
+  "svg", "g", "path", "circle", "rect", "line", "polyline", "polygon",
 ]);
 
 export const ELEMENTOS_VACIOS: ReadonlySet<string> = new Set(["br", "hr", "col"]);
@@ -18,12 +19,12 @@ export const ELEMENTOS_VACIOS: ReadonlySet<string> = new Set(["br", "hr", "col"]
 /** Elementos que ejecutan código o toman el control de la página. */
 export const ELEMENTOS_ACTIVOS: ReadonlySet<string> = new Set([
   "script", "noscript", "iframe", "frame", "frameset", "object", "embed", "applet", "form", "input", "button",
-  "select", "textarea", "option", "svg", "math", "template", "slot", "dialog",
+  "select", "textarea", "option", "math", "template", "slot", "dialog",
 ]);
 
-/** Elementos que cargan o declaran recursos de red (hojas de estilo, imágenes, medios, base, estilos con url). */
+/** Elementos que cargan o declaran recursos de red (hojas de estilo remotas, imágenes, medios, base). */
 export const ELEMENTOS_RECURSO: ReadonlySet<string> = new Set([
-  "link", "style", "base", "img", "picture", "source", "video", "audio", "track", "canvas", "image",
+  "link", "base", "img", "picture", "source", "video", "audio", "track", "canvas", "image",
 ]);
 
 /** Envoltorios del documento: se atraviesan sin emitirlos (`title` y `meta` sin `http-equiv` se descartan). */
@@ -40,6 +41,13 @@ const ATRIBUTOS_POR_ELEMENTO: Readonly<Record<string, readonly string[]>> = {
   li: ["value"],
   time: ["datetime"],
   abbr: [],
+  svg: ["viewBox", "width", "height", "xmlns"],
+  path: ["d"],
+  circle: ["cx", "cy", "r"],
+  rect: ["x", "y", "width", "height", "rx", "ry"],
+  line: ["x1", "y1", "x2", "y2"],
+  polyline: ["points"],
+  polygon: ["points"],
 };
 export const atributosPermitidos = (elemento: string): ReadonlySet<string> =>
   new Set([...GLOBALES, ...(ATRIBUTOS_POR_ELEMENTO[elemento] ?? [])]);

@@ -102,13 +102,27 @@ describe("conSecciones", () => {
   });
 });
 
+const MARCA_TEST = { colorPrimario: "#0a3d62", colorSecundario: "#f4f4f5", nombre: "Empresa QA", piePagina: "Atención al cliente" };
+
 describe("htmlBasePropuesta", () => {
-  it("lleva título, negocio, cliente, vigencia y el marcador de secciones, y pasa el saneado", () => {
-    const html = htmlBasePropuesta({ titulo: "Guardias <Planta>", negocio: "Negocio Ficticio", cliente: "Cliente Ficticio SpA", validaHasta: "30-12-2026" });
-    expect(html).toContain("<h1>Guardias &lt;Planta&gt;</h1>");
-    expect(html).toContain("Preparada para Cliente Ficticio SpA");
-    expect(html).toContain("Vigencia hasta el 30-12-2026");
-    expect(html.endsWith("{{secciones}}")).toBe(true);
+  it("lleva portada con marca, metadatos, estilos, ícono SVG y el marcador de secciones, y pasa el saneado", () => {
+    const html = htmlBasePropuesta({
+      titulo: "Guardias <Planta>",
+      negocio: "Negocio Ficticio",
+      cliente: "Cliente Ficticio SpA",
+      validaHasta: "30-12-2026",
+      codigo: "CPQ-1",
+      fecha: "16-11-2026",
+      marca: MARCA_TEST,
+    });
+    expect(html).toContain("titulo-portada");
+    expect(html).toContain("Guardias &lt;Planta&gt;");
+    expect(html).toContain("Cliente Ficticio SpA");
+    expect(html).toContain("CPQ-1");
+    expect(html).toContain("<style>");
+    expect(html).toContain("<svg");
+    expect(html).toContain("{{secciones}}");
+    expect(html).toContain("Atención al cliente");
     expect(sanearHtml(html).ok).toBe(true);
   });
 });
@@ -116,7 +130,7 @@ describe("htmlBasePropuesta", () => {
 describe("datos con llaves", () => {
   it("un dato nunca se lee como marcador; el texto de una sección sí", () => {
     const html = conSecciones(
-      htmlBasePropuesta({ titulo: "Propuesta", cliente: "Cliente {{cuenta.rut}}" }),
+      htmlBasePropuesta({ titulo: "Propuesta", cliente: "Cliente {{cuenta.rut}}", marca: MARCA_TEST }),
       htmlSecciones(
         datos(
           [bloque("condiciones"), bloque("texto_libre", { contenidoOverride: "Para {{cuenta.nombre}}" })],

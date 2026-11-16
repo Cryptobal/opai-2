@@ -14,6 +14,15 @@ const VALIDO = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>x</title
 const codigos = (h: string) => sanearHtml(h).problemas.map((p) => p.codigo);
 
 describe("saneador de HTML de propuesta", () => {
+  it("acepta SVG inline y un bloque style sanitizado", () => {
+    const html = '<style>.k{color:#111;padding:8px}</style><p class="k">hola</p><svg viewBox="0 0 4 4" width="4" height="4"><circle cx="2" cy="2" r="1" fill="currentColor"/></svg>';
+    const r = sanearHtml(html);
+    expect(r.ok).toBe(true);
+    expect(r.html).toContain("<style>");
+    expect(r.html).toContain("<svg");
+    expect(r.html).not.toContain("@import");
+  });
+
   it("acepta HTML con marcadores del catálogo y devuelve solo el cuerpo", () => {
     const r = sanearHtml(VALIDO);
     expect(r.ok).toBe(true);
@@ -30,9 +39,9 @@ describe("saneador de HTML de propuesta", () => {
     ["<p>hola</p><script>alert(1)</script>", "elemento_activo"],
     ["<p>hola</p><iframe src='https://x.cl'></iframe>", "elemento_activo"],
     ["<p>hola</p><form><input></form>", "elemento_activo"],
-    ["<svg><circle/></svg><p>hola</p>", "elemento_activo"],
+    ["<svg><foreignObject/></svg><p>hola</p>", "elemento_no_permitido"],
     ["<link rel='stylesheet' href='https://x.cl/a.css'><p>hola</p>", "recurso_externo"],
-    ["<style>@import url(https://x.cl/a.css)</style><p>hola</p>", "recurso_externo"],
+    ["<style>@import url(https://x.cl/a.css)</style><p>hola</p>", "estilo_no_permitido"],
     ["<img src='https://x.cl/a.png'><p>hola</p>", "recurso_externo"],
     ["<p onclick='x()'>hola</p>", "manejador_evento"],
     ["<p>hola</p><a href='javascript:alert(1)'>x</a>", "url_no_permitida"],

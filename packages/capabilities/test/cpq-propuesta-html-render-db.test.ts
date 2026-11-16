@@ -95,7 +95,7 @@ describe.skipIf(!urlPropietario)("cpq · la propuesta usa la plantilla HTML de l
   it("sin plantilla de la empresa sale la base de OPAI con las secciones activas, en orden y sin las vacías", async () => {
     const t = await vista(a);
     expect(t).toContain("Guardias");
-    expect(t).toContain("Preparada para");
+    expect(t).toMatch(/Cliente|Cotización/);
     expect(pos(t, "1. Comprensión del servicio")).toBeGreaterThan(0);
     expect(pos(t, "2. Metodología de trabajo")).toBeGreaterThan(pos(t, "1. Comprensión del servicio"));
     expect(pos(t, "3. Condiciones comerciales")).toBeGreaterThan(pos(t, "2. Metodología de trabajo"));
