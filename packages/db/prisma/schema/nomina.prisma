@@ -180,7 +180,7 @@ model NominaObligacion {
   id                     String    @id @default(uuid(7)) @db.Uuid
   tenantId               String    @map("tenant_id") @db.Uuid
   periodoId              String?   @map("periodo_id") @db.Uuid
-  /// "lre" | "previred" | "f29_retencion" | "dj_sueldos" | "certificado_sueldos".
+  /// "lre" | "previred" | "f30_1" | "f29_retencion" | "dj_sueldos" | "certificado_sueldos".
   tipo                   String
   anio                   Int
   mes                    Int?

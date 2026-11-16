@@ -34,13 +34,14 @@ export default function ArchivosPeriodo({ params }: Props) {
               El LRE lo sube en Mi DT el representante laboral electrónico con su ClaveÚnica. La declaración y el pago en Previred los hace la persona responsable. Los archivos salen de las liquidaciones calculadas del período.
             </Alerta>
             {d.obl && !d.obl.ok ? <Alerta tono="danger" titulo="No pudimos leer el calendario de obligaciones del mes." /> : null}
-            {d.obl?.ok && !d.obl.lre && !d.obl.previred ? (
+            {d.obl?.ok && !d.obl.lre && !d.obl.previred && !d.obl.f30_1 ? (
               <Alerta tono="warning" titulo="El calendario de obligaciones de este año no está generado">
                 Genéralo en Remuneraciones › Calendario para guardar aquí los comprobantes de carga y pago.
               </Alerta>
             ) : null}
             <TarjetaArchivoLegal periodoId={d.id} tipo="lre" obligacion={d.obl?.lre ?? null} tenantId={d.obl?.tenantId ?? ""} />
             <TarjetaArchivoLegal periodoId={d.id} tipo="previred" obligacion={d.obl?.previred ?? null} tenantId={d.obl?.tenantId ?? ""} />
+            <TarjetaArchivoLegal periodoId={d.id} tipo="f30_1" obligacion={d.obl?.f30_1 ?? null} tenantId={d.obl?.tenantId ?? ""} />
           </div>
         );
       }}

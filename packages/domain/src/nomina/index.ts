@@ -8,3 +8,4 @@ export * from "./costo-proyectado";
 export * from "./lre-columnas";
 export * from "./lre";
 export * from "./previred";
+export * from "./f30-1";

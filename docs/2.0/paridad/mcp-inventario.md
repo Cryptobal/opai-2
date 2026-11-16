@@ -587,7 +587,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
@@ -600,7 +599,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.aplicar_cuotas` | `nomina_prestamos_aplicar_cuotas` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.cancelar` | `nomina_prestamos_cancelar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.crear` | `nomina_prestamos_crear` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.previred.generar` | `nomina_previred_generar` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.acciones_agente` | `comercial_solicitudes_acciones_agente` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.convertir` | `comercial_solicitudes_convertir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.create` | `comercial_solicitudes_create` | existe |
@@ -1247,7 +1245,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.costo_proyectado.listar`
+- `nomina.f30_1.generar`
+- `nomina.lre.generar`
 - `nomina.novedades.cargar`
+- `nomina.previred.generar`
 - `pauta.ausencias.anular`
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`

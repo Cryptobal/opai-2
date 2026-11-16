@@ -16,6 +16,7 @@ type Archivo = ArchivoLegal;
 const TEXTOS = {
   lre: { titulo: "Libro de Remuneraciones Electrónico (LRE)", desc: "Carga mensual en Mi DT · separador «;» y encabezados del suplemento", tipo: "text/csv" },
   previred: { titulo: "Previred · cotizaciones", desc: "AFP, SIS, salud, seguro de cesantía y mutual por persona · 105 campos", tipo: "text/plain" },
+  f30_1: { titulo: "Certificado F30-1", desc: "Cumplimiento laboral y previsional del mes · texto por verificar", tipo: "text/plain" },
 } as const;
 
 function descargar(nombre: string, contenido: string, tipo: string) {
@@ -30,7 +31,7 @@ const CERRADA: Record<string, string> = { cargado: "Cargado con comprobante", pa
 /** Desde dónde el generador puede marcar el resultado de la validación (transiciones de `obligaciones.ts`). */
 const MARCABLE = new Set(["por_generar", "generado", "con_errores"]);
 
-type Props = { periodoId: string; tipo: "lre" | "previred"; obligacion: ObligacionArchivo | null; tenantId: string };
+type Props = { periodoId: string; tipo: "lre" | "previred" | "f30_1"; obligacion: ObligacionArchivo | null; tenantId: string };
 
 export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: Props) {
   const t = TEXTOS[tipo];
@@ -39,9 +40,8 @@ export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: P
   const [archivo, setArchivo] = useState<Archivo | null>(null);
   async function validar() {
     // Ids literales: el escáner de paridad verifica cada capacidad que llama la pantalla.
-    const r = tipo === "lre"
-      ? await ejecutar<Archivo>("nomina.lre.generar", { periodoId })
-      : await ejecutar<Archivo>("nomina.previred.generar", { periodoId });
+    const cap = tipo === "lre" ? "nomina.lre.generar" : tipo === "previred" ? "nomina.previred.generar" : "nomina.f30_1.generar";
+    const r = await ejecutar<Archivo>(cap, { periodoId });
     if (!r) return;
     setArchivo(r);
     // Deja el resultado en el calendario de obligaciones (generado o con errores), si el mes no está cerrado.

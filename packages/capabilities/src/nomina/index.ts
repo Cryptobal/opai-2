@@ -10,6 +10,7 @@ import { liquidacionesListar, liquidacionesObtener } from "./liquidaciones-lectu
 import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
 import { lreGenerar } from "./lre";
 import { previredGenerar } from "./previred";
+import { f301Generar } from "./f30-1";
 import { conceptosActualizar, conceptosCrear, conceptosListar } from "./conceptos";
 import { novedadesAnular, novedadesCargar, novedadesCrear } from "./novedades-escritura";
 import { novedadesListar } from "./novedades-lectura";
@@ -51,4 +52,5 @@ export const capacidadesNomina: readonly Capacidad[] = [
   liquidacionesObtener,
   lreGenerar,
   previredGenerar,
+  f301Generar,
 ];
