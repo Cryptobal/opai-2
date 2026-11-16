@@ -12,9 +12,11 @@ test.setTimeout(120_000);
 test.describe("@preview flujo de caja: ingresos por cliente", () => {
   test("filas plegables en el sistema de diseño", async ({ page }, info) => {
     await page.goto("/ds");
+    const bloque = page.getByRole("heading", { name: "PlanillaScreen · Filas plegables" });
+    await expect(bloque).toBeVisible({ timeout: 30_000 });
+    await bloque.scrollIntoViewIfNeeded();
     const cliente = page.getByRole("button", { name: "Ver detalle de Cementera Andina" });
-    await expect(cliente).toBeVisible({ timeout: 30_000 });
-    await cliente.scrollIntoViewIfNeeded();
+    await expect(cliente).toBeVisible();
     await expect(cliente).toHaveAttribute("aria-expanded", "false");
     await cliente.click();
     await expect(page.getByRole("button", { name: "Ocultar detalle de Cementera Andina" })).toHaveAttribute(
