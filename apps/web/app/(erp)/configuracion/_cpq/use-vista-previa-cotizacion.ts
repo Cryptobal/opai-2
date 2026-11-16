@@ -32,7 +32,7 @@ export function useVistaPreviaCotizacion(input: {
       false,
       "ninguna",
     ).then((r) => {
-      if (activo) setCache({ cotizacionId: input.cotizacionId!, vista: r });
+      if (activo && r) setCache({ cotizacionId: input.cotizacionId!, vista: r });
     });
     return () => {
       activo = false;

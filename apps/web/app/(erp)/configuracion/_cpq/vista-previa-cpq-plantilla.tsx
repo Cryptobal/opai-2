@@ -22,8 +22,8 @@ export function VistaPreviaCpqPlantilla({
   const [cotizacion, setCotizacion] = useState<{ id: string; etiqueta: string } | null>(null);
   const { vista, pendiente, error } = useVistaPreviaCotizacion({
     cotizacionId: cotizacion?.id ?? null,
-    plantillaId,
-    htmlBorrador,
+    ...(plantillaId !== undefined ? { plantillaId } : {}),
+    ...(htmlBorrador !== undefined ? { htmlBorrador } : {}),
   });
 
   return (
