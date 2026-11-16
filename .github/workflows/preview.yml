@@ -19,14 +19,12 @@ concurrency:
 jobs:
   rama-neon:
     # Sin rama Neon para PR en borrador; al cerrar siempre se limpia.
-    if: github.event.action == 'closed' || github.event.pull_request.draft != true
+    if: github.event.action == 'closed' || github.event.pull_request.draft == false
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 15
     permissions:
-      contents: read
-      pull-requests: read # solo para saber si un PR huérfano ya está cerrado
-      # Borrar la rama Git al cerrar el PR (CAR-629).
-      contents: write
+      contents: write # borrar la rama Git al cerrar el PR (CAR-629)
+      pull-requests: read # saber si un PR huérfano ya está cerrado
     env:
       RAMA: preview/pr-${{ github.event.pull_request.number }}
       RAMA_GIT: ${{ github.head_ref }}
