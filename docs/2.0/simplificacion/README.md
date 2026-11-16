@@ -182,3 +182,10 @@ No se tocan hasta que ese PR se integre:
 ## Pasada semanal
 
 Cada semana la Sesión Estándares corre `pnpm simplicidad --detalle`, compara con este informe, abre los PR chicos que correspondan y actualiza los tickets CAR-436 a CAR-440. Resultado esperado: las seis cifras de `simplicidad-base.json` solo bajan.
+
+## Pasadas semanales
+
+| Fecha | Duplicadas | Archivos largos | Funciones largas | Exportaciones sin uso | Archivos sin uso | Dependencias sin uso | PR |
+|---|---|---|---|---|---|---|---|
+| 14-nov-2026 (informe) | 3.620 | 38 | 681 | 567 | 6 | 35 | — |
+| 16-nov-2026 (medido en `main` `886e262`) | 3.223 | 36 | 670 | 265 | 0 | 0 | #967 (Finanzas, −29), #970 (componentes web, −19), #992 (núcleo, −18 y −13 líneas duplicadas). Al integrarse los tres: 3.210 duplicadas y 199 exportaciones sin uso. Se cerró #880 (lockfile), que ya no aportaba nada. |
