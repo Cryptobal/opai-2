@@ -6,7 +6,7 @@ import { cargarOferta } from "../persistencia/puestos-oferta";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_COSTOS, PERMISO_PUESTOS_CONFIRMAR } from "./permisos";
 
-export const lineaOfertaSchema = z.object({
+const lineaOfertaSchema = z.object({
   lineaId: uuidSchema,
   linea: z.string(),
   cargoId: uuidSchema.nullable(),

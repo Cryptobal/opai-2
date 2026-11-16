@@ -44,5 +44,5 @@ export const serieVistaSchema = z.object({
 });
 export type SerieVista = z.infer<typeof serieVistaSchema>;
 
-export const TIPOS_EXC = ["ausencia", "licencia", "vacaciones", "permiso"] as const;
+const TIPOS_EXC = ["ausencia", "licencia", "vacaciones", "permiso"] as const;
 export const tipoExcepcionSchema = z.enum(TIPOS_EXC);

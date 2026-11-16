@@ -31,7 +31,7 @@ export function ClaveFormularioCreada({
   -H 'Authorization: Bearer ${d.token}' \\
   -H 'Content-Type: application/json' \\
   -H 'Idempotency-Key: $(uuidgen)' \\
-  -d '{"mensaje":"Consulta desde gard.cl","nombre":"Ana Pérez","email":"ana@ejemplo.cl","website":""}'`
+  -d '{"mensaje":"Consulta desde ejemplo.cl","nombre":"Ana Pérez","email":"ana@ejemplo.cl","website":""}'`
     : "";
   return (
     <Dialog

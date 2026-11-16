@@ -1,6 +1,5 @@
 [
   "acceso.listas.listar",
-  "acceso.registros.listar",
   "agente.conversaciones.list",
   "agente.historial.list",
   "agente.modelos.list",
@@ -124,7 +123,6 @@
   "platform.precios.list",
   "platform.tenants.list",
   "platform.trabajos.list",
-  "platform.usage.summary",
   "platform.users.list",
   "portal_cliente.accesos.candidatos",
   "portal_cliente.accesos.listar",

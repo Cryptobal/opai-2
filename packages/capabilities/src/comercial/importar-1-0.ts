@@ -54,7 +54,7 @@ export const comercialImportar10 = defineCapability({
   id: "comercial.importar_1_0",
   soloPersonas: true,
   descripcion:
-    "Importa un export de OPAI 1.0 (simular, aplicar, conciliar o revertir). Idempotente por ids externos; solo owner o admin. Informa en `sii` cuántas cuentas el SII podría completar (simular lee la caché; aplicar encola las consultas) sin escribir datos del SII en las cuentas.",
+    "Importa un export del sistema comercial anterior (simular, aplicar, conciliar o revertir). Idempotente por ids externos; solo owner o admin. Informa en `sii` cuántas cuentas el SII podría completar (simular lee la caché; aplicar encola las consultas) sin escribir datos del SII en las cuentas.",
   permiso: "comercial:config.manage",
   // El export pegado trae datos personales (contactos, RUT): no se copia a la auditoría.
   sensibles: ["origen"],
