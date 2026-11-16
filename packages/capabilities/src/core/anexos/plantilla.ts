@@ -53,7 +53,7 @@ export function renderizarAnexoHtml(marca: MarcaCorreo, datos: DatosAnexoDoc): s
     <p style="margin:0 0 16px"><strong>Trabajador:</strong> ${escaparHtml(nombrePersona)} (RUT ${escaparHtml(datos.persona.rut)})</p>
     <p style="margin:0 0 8px">Por el presente anexo, las partes acuerdan modificar la ${escaparHtml(titulo)} del contrato de trabajo, a contar del ${escaparHtml(datos.fecha)}, en los términos que se indican a continuación.</p>
     ${tabla}
-    <p style="margin:16px 0 0;font-size:12px;opacity:.7">Texto de ejemplo (D15): el texto legal definitivo de la plantilla base lo fija Carlos; el editor por tenant llega con el Brief 09.</p>
+    <p style="margin:16px 0 0;font-size:12px;opacity:.7">Texto de ejemplo: la plantilla definitiva se publicará por empresa cuando esté lista; este documento no tiene validez laboral.</p>
   `;
   return layoutCorreo(marca, cuerpo);
 }

@@ -12,7 +12,7 @@ export const puestoSchema = z.object({
   funcion: z.string().nullable().describe("Nombre de la función operativa (guardia, supervisor…)."),
   patronId: z.string().nullable(),
   patron: z.string().nullable().describe('Nombre del patrón de turno (p. ej. "4×4").'),
-  patronResumen: z.string().nullable().describe("Resumen legible del patrón para la lista (CAR-8)."),
+  patronResumen: z.string().nullable().describe("Resumen legible del patrón para la lista."),
   nombre: z.string(),
   diasTrabajo: z.number(),
   diasDescanso: z.number(),

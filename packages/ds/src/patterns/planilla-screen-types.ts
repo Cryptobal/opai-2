@@ -14,7 +14,13 @@ export type FilaPlanilla = {
   plegable?: { abierta: boolean };
   /** Acción propia de la fila (ej. «Reprogramar»): botón en la misma fila, visible al pasar el mouse o con foco. */
   accion?: string;
+  /** Fila de cierre (totales): se separa y se lee más fuerte que el detalle. */
+  total?: boolean;
 };
+
+/** Fondo de la fila: las secciones y los totales se distinguen del detalle. */
+export const claseFondoFila = (fila: FilaPlanilla) =>
+  fila.total || (fila.nivel ?? 0) === 0 ? "bg-fill" : "bg-surface";
 export type ColumnaPlanilla = { id: string; etiqueta: string; destacada?: boolean };
 
 export type PlanillaScreenProps = {
