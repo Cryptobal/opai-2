@@ -1,26 +1,10 @@
-/** Nombre legible de cada bloque de la propuesta técnica (pantalla). */
-const ETIQUETAS: Record<string, string> = {
-  portada: "Portada",
-  indice: "Índice",
-  seccion_institucional: "Presentación institucional",
-  comprension_servicio: "Comprensión del servicio",
-  detalle_servicio: "Detalle del servicio",
-  resumen_economico: "Resumen económico",
-  condiciones: "Condiciones",
-  incluye_exclusiones: "Incluye y exclusiones",
-  metodologia: "Metodología",
-  contacto_ejecutivo: "Contacto ejecutivo",
-  certificaciones: "Certificaciones",
-  clientes_referencia: "Clientes de referencia",
-  texto_libre: "Texto libre",
-  salto_pagina: "Salto de página",
-};
+import { NOMBRES_BLOQUE_PROPUESTA } from "@opai/domain";
 
 /** Tipos de bloque que la pantalla sabe nombrar, en el orden del catálogo. */
-export const TIPOS_BLOQUE_ETIQUETADOS = Object.keys(ETIQUETAS);
+export const TIPOS_BLOQUE_ETIQUETADOS = Object.keys(NOMBRES_BLOQUE_PROPUESTA);
 
 export const etiquetaBloquePropuesta = (tipo: string, titulo?: string) =>
-  titulo?.trim() || ETIQUETAS[tipo] || tipo;
+  titulo?.trim() || NOMBRES_BLOQUE_PROPUESTA[tipo] || tipo;
 
 /** Bloque de la plantilla de propuesta del tenant tal como lo guarda `cpq.plantillas_propuesta.update`. */
 export type BloquePlantilla = {
