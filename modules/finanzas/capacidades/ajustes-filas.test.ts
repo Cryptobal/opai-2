@@ -43,3 +43,30 @@ describe("finanzas.filas.crear · solo egresos (CAR-198/CAR-220)", () => {
     }
   });
 });
+
+describe("finanzas.filas · grupo de egreso", () => {
+  it("crea en «Gastos» por defecto, acepta otro grupo y lo cambia después", async () => {
+    const { ctx } = nuevo();
+    const base = await executeCapability(ctx, "finanzas.filas.crear", { seccion: "egreso", etiqueta: "Arriendo" });
+    expect(base).toMatchObject({ ok: true, data: { grupo: "gastos" } });
+    const credito = await executeCapability(ctx, "finanzas.filas.crear", {
+      seccion: "egreso",
+      etiqueta: "Crédito banco",
+      grupo: "financiamiento",
+    });
+    expect(credito).toMatchObject({ ok: true, data: { grupo: "financiamiento" } });
+    const id = credito.ok ? (credito.data as { id: string }).id : "";
+    const cambio = await executeCapability(ctx, "finanzas.filas.actualizar", { id, grupo: "impuestos" });
+    expect(cambio).toMatchObject({ ok: true, data: { grupo: "impuestos" } });
+    expect(await executeCapability(ctx, "finanzas.filas.actualizar", { id, grupo: "otro" })).toMatchObject({ ok: false });
+  });
+
+  it("las filas de ingreso no tienen grupo y no admiten uno", async () => {
+    const { ctx } = nuevo();
+    const lista = await executeCapability(ctx, "finanzas.filas.listar", { incluirInactivas: true });
+    const ingreso = lista.ok ? (lista.data as { id: string; seccion: string; grupo: string | null }[]).find((f) => f.seccion === "ingreso") : undefined;
+    expect(ingreso?.grupo).toBeNull();
+    const r = await executeCapability(ctx, "finanzas.filas.actualizar", { id: ingreso?.id, grupo: "gastos" });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+});

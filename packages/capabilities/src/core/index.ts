@@ -5,6 +5,7 @@ import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
 import { capacidadesPush } from "./push";
 export { avisarAlCelular } from "./push-avisar";
+export { aplicarModulosNuevosRegistrados } from "./modulos-nuevos-aplicar";
 import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
@@ -71,6 +72,7 @@ import { ping } from "./ping";
 import { capacidadesTenantsEscritura } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
 import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
+import { platformTenantsSetModulosNuevos } from "./modulos-nuevos";
 import { platformTenantsGet } from "./platform-tenants";
 import {
   platformInvitacionesReenviar,
@@ -130,6 +132,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesTenantsEscritura,
   platformTenantsUpdate,
   platformTenantsSetEstado,
+  platformTenantsSetModulosNuevos,
   platformModulesSet,
   platformAdminsInvite,
   // Brief 02 · servicios del núcleo
