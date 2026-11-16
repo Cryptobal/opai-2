@@ -46,7 +46,7 @@ async function exigeAprobador(ctx: Contexto, rol: string | null, grupoId: string
   }
 }
 
-export const reglasAprobacionList = defineCapability({
+const reglasAprobacionList = defineCapability({
   // Lectura auditada (NÚCLEO-H): solo los ids de las reglas reveladas.
   auditarLectura: (s) => s.items.map((r) => r.id),
   id: "core.aprobaciones.reglas_list",
@@ -79,7 +79,7 @@ export const reglasAprobacionList = defineCapability({
   },
 });
 
-export const reglasAprobacionGuardar = defineCapability({
+const reglasAprobacionGuardar = defineCapability({
   id: "core.aprobaciones.reglas_guardar",
   descripcion:
     "Crea o cambia una regla de aprobación: la acción, el monto mínimo en pesos (opcional) y quién aprueba (un rol o un grupo). Dueños y administradores aprueban todo igual.",
@@ -130,7 +130,7 @@ export const reglasAprobacionGuardar = defineCapability({
   },
 });
 
-export const reglasAprobacionDesactivar = defineCapability({
+const reglasAprobacionDesactivar = defineCapability({
   id: "core.aprobaciones.reglas_desactivar",
   descripcion:
     "Desactiva una regla de aprobación: desde ahora esa acción ya no la pide. Las solicitudes pendientes que pidió siguen igual.",

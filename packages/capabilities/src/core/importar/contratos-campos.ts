@@ -15,7 +15,7 @@ export type DatosContrato = {
   distribucion: string;
 };
 
-export const TIPOS = {
+const TIPOS = {
   indefinido: ["indefinido", "indef", "permanente"],
   plazo_fijo: ["plazo fijo", "plazo_fijo", "fijo", "temporal"],
   por_obra: ["por obra", "obra", "faena", "por faena"],

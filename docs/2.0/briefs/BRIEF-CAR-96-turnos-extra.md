@@ -1,6 +1,6 @@
 # BRIEF — CAR-96 · Turnos extra: registro y aprobación (PR 1, mínimo)
 
-**Estado: brief aprobado por Carlos el 6-nov-2026; pasa a Claude Design antes de cualquier código (solo documentación).** Alcance elegido por Carlos el 6-nov-2026: «Registro + aprobación mínimos». No hay especificación ni diseño aprobados de turnos extra (`AGENTS.md`: especificación → diseño → código), y el PR 1 necesita una migración y un permiso nuevo; por eso este PR deja el brief para su OK y el código va en el PR siguiente. Decisiones de origen: A5–A10 y C13–C15 (29-oct-2026, Linear CAR-96). Depende de: Pauta diaria y reemplazos (CAR-86), titular y series (CAR-206 y CAR-207, ADR-081).
+**Estado: brief aprobado; código del PR 1 (servidor) en curso tras CAR-458 (14-nov-2026).** Alcance elegido por Carlos el 6-nov-2026: «Registro + aprobación mínimos». Decisión CAR-458: construir ya registro y aprobación sin plata ni Nómina; pantallas con diseño ADR-109 (sin esperar Claude Design). Decisiones de origen: A5–A10 y C13–C15 (29-oct-2026, Linear CAR-96). Depende de: Pauta diaria y reemplazos (CAR-86), titular y series (CAR-206 y CAR-207, ADR-081).
 
 ## 1. Objetivo
 Que todo reemplazo o refuerzo pagado sea un **turno extra** registrado por el supervisor y aprobado por owner, admin, gerente y el rol Operaciones (`pauta:aprobar_extra`), con su monto y su tipo de trabajador (propio o externo), sin tocar la nómina.

@@ -29,7 +29,7 @@ export const rangoSchema = z
   .refine((r) => !r.hasta || r.hasta >= r.desde, "«hasta» no puede ser anterior a «desde».");
 
 /** Máximo de días que una sola excepción puede cubrir (vacaciones largas caben). */
-export const MAX_DIAS_EXCEPCION = 62;
+const MAX_DIAS_EXCEPCION = 62;
 
 /** Días de un rango; el tope se valida antes de expandir para no generar millones de fechas. */
 export function diasDelRango(desde: string, hasta: string | undefined): string[] {

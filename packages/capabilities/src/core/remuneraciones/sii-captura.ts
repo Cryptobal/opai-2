@@ -14,7 +14,7 @@ function hoyCivilEn(zona: string, ahora = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: zona, dateStyle: "short" }).format(ahora);
 }
 
-export type ConsultaSii = (url: string, signal?: AbortSignal) => Promise<string>;
+type ConsultaSii = (url: string, signal?: AbortSignal) => Promise<string>;
 
 const TIMEOUT_MS = 15_000;
 
@@ -48,7 +48,7 @@ async function leerSii(url: string, signal?: AbortSignal): Promise<string> {
   return res.text();
 }
 
-export const consultaSiiPorDefecto: ConsultaSii = leerSii;
+const consultaSiiPorDefecto: ConsultaSii = leerSii;
 
 type OpcionesCaptura = {
   dia?: string;
