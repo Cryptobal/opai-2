@@ -29,7 +29,10 @@ test.describe("@preview cpq: bloques de la propuesta en Marca y plantillas", () 
     await capturar(page, info, "cpq-bloques-propuesta");
   });
 
-  test("«Copiar prompt» copia el prompt con el estilo de la empresa (CAR-531)", async ({ page, context }, info) => {
+  test("«Copiar prompt» copia el prompt con el estilo de la empresa (CAR-531)", async ({
+    page,
+    context,
+  }, info) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await entrar(page);
     await page.goto("/configuracion/modulo/cpq?seccion=marca-plantillas");

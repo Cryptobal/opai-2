@@ -12,6 +12,10 @@ test.describe("@preview flujo de caja: reprogramar desde la fila", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
   test("la acción está en la fila y abre la hoja con esa fila", async ({ page }, info) => {
+    test.skip(
+      (page.viewportSize()?.width ?? 0) < 1024,
+      "La acción Reprogramar en fila solo existe en la planilla de escritorio.",
+    );
     await entrar(page);
     await page.goto("/finanzas/flujo");
     await expect(page.getByRole("heading", { name: "Flujo de caja" }).first()).toBeVisible({ timeout: 60_000 });
@@ -20,8 +24,8 @@ test.describe("@preview flujo de caja: reprogramar desde la fila", () => {
 
     const nombre = (await accion.getAttribute("aria-label"))?.replace(/^Reprogramar /, "") ?? "";
     expect(nombre).not.toBe("");
-    const fila = page.locator("tbody tr").filter({ has: accion });
-    if (!info.project.name.includes("telefono")) await fila.hover();
+    await accion.scrollIntoViewIfNeeded();
+    await accion.focus();
     await expect(accion).toBeVisible();
     await capturar(page, info, "flujo-fila-reprogramar");
 
