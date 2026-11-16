@@ -7,12 +7,9 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 test.describe("@preview configuración: buscador compacto", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
-  test.beforeEach((_, testInfo) => {
-    test.skip(
-      testInfo.project.name === "telefono",
-      "La caja compacta va en la barra superior md+, no en teléfono",
-    );
-  });
+  test.beforeEach(({ viewport }) =>
+    test.skip((viewport?.width ?? 0) < 768, "La caja compacta va en la barra superior md+, no en teléfono"),
+  );
 
   test("la cabecera muestra Buscar… con atajo cuando la caja va compacta", async ({ page }, info) => {
     const errores: string[] = [];
