@@ -6,7 +6,7 @@ import { noEncontrado, prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import { dondeContacto, dondeCuenta, dondeInstalacion } from "../maestros/alcance";
 
-export const ROLES_CUENTA = [
+const ROLES_CUENTA = [
   "comercial",
   "operacional",
   "facturacion",

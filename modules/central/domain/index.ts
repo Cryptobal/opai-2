@@ -17,7 +17,7 @@ export type EstadoAlerta = (typeof ESTADOS)[number];
 /** Estados en la cola activa (la alerta pide atención). */
 export const ESTADOS_ACTIVOS: readonly EstadoAlerta[] = ["nueva", "en_contacto", "escalada", "en_atencion"];
 /** Estados cerrados. */
-export const ESTADOS_CERRADOS: readonly EstadoAlerta[] = ["resuelta", "falsa_alarma"];
+const ESTADOS_CERRADOS: readonly EstadoAlerta[] = ["resuelta", "falsa_alarma"];
 
 export type Accion = "resolver" | "falsa_alarma" | "reabrir" | "posponer" | "hacerse_cargo";
 

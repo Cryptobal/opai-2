@@ -21,15 +21,12 @@ export function puedeTransitarLote(desde: EstadoLote, hacia: EstadoLote): boolea
   return TRANSICIONES[desde].includes(hacia);
 }
 
-/** Estados en que el lote retiene sus rendiciones (no pueden entrar a otro lote). */
-export const esLoteActivo = (e: EstadoLote): boolean => e !== "anulado";
-
 export const codigoLote = (n: number): string => `LP-${n}`;
 
 /** Tope de rendiciones por lote (una nómina de transferencias razonable de revisar). */
-export const MAX_RENDICIONES_LOTE = 200;
+const MAX_RENDICIONES_LOTE = 200;
 /** Tope del total del lote: cabe en el entero de la base (CLP entero). */
-export const MAX_TOTAL_LOTE = 2_000_000_000;
+const MAX_TOTAL_LOTE = 2_000_000_000;
 
 export type RendicionParaLote = {
   id: string;

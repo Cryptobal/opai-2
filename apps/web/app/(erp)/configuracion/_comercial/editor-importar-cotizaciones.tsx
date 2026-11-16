@@ -62,14 +62,14 @@ export function EditorImportarCotizaciones({ conOpai1 }: { conOpai1: boolean }) 
   return (
     <Card className="flex flex-col gap-4 p-4">
       <div>
-        <h2 className="t-label text-fg">Importar cotizaciones desde OPAI 1</h2>
+        <h2 className="t-label text-fg">Importar cotizaciones de la migración</h2>
         <p className="mt-1 text-sm text-fg-muted">
-          Trae las cotizaciones de OPAI 1 y las cuelga de sus negocios. Primero simula y revisa el resumen: no
+          Trae las cotizaciones del export de migración y las cuelga de sus negocios. Primero simula y revisa el resumen: no
           modifica cuentas, contactos, instalaciones ni negocios, y repetir la carga no duplica.
         </p>
       </div>
       {!conOpai1 ? (
-        <Alerta tono="warning" titulo="Falta la integración «OPAI 1 (traer datos)» en Configuración › Integraciones." />
+        <Alerta tono="warning" titulo="Falta la integración «Migración (exportar datos)» en Configuración › Integraciones." />
       ) : null}
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       <div className="flex flex-wrap gap-2">

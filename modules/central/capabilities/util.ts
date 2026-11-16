@@ -47,7 +47,7 @@ export function vistaAlerta(a: FilaAlerta, ahora: Date): z.infer<typeof alertaSc
 export function exigirPersona(ctx: Contexto, accion: string) {
   if (ctx.principal?.tipo === "servicio" || ctx.agente)
     throw reglaDeNegocio(
-      `El agente de central no puede ${accion} por su cuenta: solo puede proponerlo al operador de turno (R10).`,
+      `El agente de central no puede ${accion} por su cuenta: solo puede proponerlo al operador de turno.`,
     );
 }
 
