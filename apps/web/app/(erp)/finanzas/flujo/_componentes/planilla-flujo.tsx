@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
-import { AccesoRecurrentes } from "./acciones-flujo-toolbar";
+import { AccesoRecurrentes, CabeceraVistaMovil } from "./acciones-flujo-toolbar";
 import { armarPlanilla, celdaEditable, clp, type Planilla } from "./datos";
 import { AvisoSaldoBanco } from "./aviso-saldo-banco";
 import { AvisosProyeccion } from "./avisos-proyeccion";
@@ -81,7 +81,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil, epo
             El aviso se muestra solo dentro de OPAI y no envía correos.
           </Alerta>
         ) : null}
-        <AccesoRecurrentes gestiona={gestiona} />
+        <CabeceraVistaMovil gestiona={gestiona} configura={configura} />
         <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
         <AvisosProyeccion avisos={p.avisos} epoca={epoca} />
         <VistaMovilFlujo planilla={p} armado={armado} gestiona={gestiona} onCelda={abrirCelda} onAlternar={alternar} />

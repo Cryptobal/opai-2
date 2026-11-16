@@ -20,7 +20,13 @@ export function AvisosProyeccion({ avisos, epoca }: { avisos: readonly Aviso[]; 
       tono="warning"
       titulo={titulo}
       accion={
-        <Button variant="ghost" size="icon" aria-label="Cerrar avisos" onClick={() => cerrarAvisos(epoca, visibles.map((a) => a.abonoId))}>
+        <Button
+          variant="secondary"
+          size="icon"
+          aria-label="Cerrar avisos"
+          className="shrink-0"
+          onClick={() => cerrarAvisos(epoca, visibles.map((a) => a.abonoId))}
+        >
           <X className="size-4" aria-hidden />
         </Button>
       }
