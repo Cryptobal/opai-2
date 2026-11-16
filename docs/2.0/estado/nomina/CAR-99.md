@@ -79,4 +79,8 @@
 - Capacidades MCP: `nomina.midt.listar`, `nomina.midt.exportar_pendientes`, `nomina.midt.datos` y `nomina.midt.registrar` (marca con comprobante; lecturas auditadas).
 - Pantalla `/remuneraciones/cumplimiento-dt/contratos` (diseño 07): segmento Por registrar / Registrados, descarga CSV, datos por fila y diálogo Marcar registrado. Navegación «Cumplimiento DT». Sin API Mi DT.
 
-- **Pendiente:** Finiquitos Mi DT (diseño 07 fin), F29, pago banco y entitlements del complemento.
+## F29 y pago bancario (PR apilado sobre #993, rama `cursor/f29-pago-banco-ab10`)
+
+- Capacidades `nomina.f29.generar` (Excel retención impuesto único) y `nomina.pago_banco.generar` (CSV transferencias; período cerrado o pagado; cuenta por defecto descifrada). Dominio `f29-retencion` y `pago-banco`. Tarjetas en Archivos y declaraciones. Sin migración.
+
+- **Pendiente:** Finiquitos Mi DT (diseño 07 fin) y entitlements del complemento.
