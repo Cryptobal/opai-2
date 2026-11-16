@@ -73,7 +73,7 @@ export function FirmarFlujo({ slug, token, datos }: { slug: string; token: strin
   return (
     <AuthCard
       titulo={`Firmar · ${ETIQUETA_CLASE[datos.clase] ?? datos.clase}`}
-      subtitulo={`Nivel ${datos.nivel} · huella del documento verificable al completarse (R6)`}
+      subtitulo={`Nivel ${datos.nivel} · huella del documento verificable al completarse`}
       acciones={
         rechazando ? undefined : (
           <>

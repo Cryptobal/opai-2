@@ -11,9 +11,8 @@ import { entradaDe, type CampoFicha, type EntidadCampos, type ValorCampo } from 
 
 type Borrador = Record<string, Entrada>;
 
-const aEntrada = (v: ValorCampo): Entrada => (typeof v === "number" ? String(v) : v);
-const igual = (a: Entrada | undefined, b: Entrada | undefined) =>
-  JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+const aTexto = (v: ValorCampo): string =>
+  v === null ? "" : typeof v === "boolean" ? (v ? "si" : "no") : Array.isArray(v) ? v.join(",") : String(v);
 
 function CampoEditable(p: { c: CampoFicha; valor: Entrada; onCambiar: (v: Entrada) => void }) {
   const { c } = p;
@@ -65,6 +64,39 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
       cerrar();
     }
   }
+
+  const control = (c: CampoFicha) => {
+    const id = `campo-${c.clave}`;
+    const valor = b[c.clave] ?? "";
+    const set = (v: string) => setB({ ...b, [c.clave]: v });
+    if (c.tipo === "fecha") return <InputFecha id={id} valor={valor} onCambiar={set} />;
+    if (c.tipo === "lista" || c.tipo === "si_no") {
+      const opciones =
+        c.tipo === "lista"
+          ? c.opciones
+          : [
+              { valor: "si", etiqueta: "Sí" },
+              { valor: "no", etiqueta: "No" },
+            ];
+      return (
+        <Select
+          id={id}
+          valor={valor || VACIO}
+          onCambiar={set}
+          opciones={[{ valor: VACIO, etiqueta: "Sin valor" }, ...opciones]}
+        />
+      );
+    }
+    return (
+      <Input
+        id={id}
+        value={valor}
+        maxLength={500}
+        {...(c.tipo === "numero" ? { inputMode: "decimal" as const } : {})}
+        onChange={(e) => set(e.target.value)}
+      />
+    );
+  };
 
   return (
     <>

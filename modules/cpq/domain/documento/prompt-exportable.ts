@@ -3,7 +3,8 @@
  * Claude Design u otra IA a partir del catálogo real de campos (`packages/domain/src/campos`). No hay lista
  * de campos escrita a mano: cada clave, alias, tipo, formato y ejemplo sale de `CampoDef`.
  *
- * Solo promete texto con marcadores. No promete archivos Figma, PPT ni PDF, ni importación de HTML.
+ * Pide un fragmento HTML con marcadores que el importador acepte (CAR-531), con el estilo guardado de la empresa.
+ * No promete archivos Figma, PPT ni PDF.
  */
 import {
   FORMATOS_POR_TIPO,
@@ -15,12 +16,15 @@ import {
   type ColeccionDef,
 } from "@opai/domain";
 
+import { seccionEntregaHtml, seccionEstilo, type EstiloEmpresa } from "./prompt-html-estilo";
+
 export type EntradaPrompt = {
   /** Campos que la propuesta puede resolver hoy para quien consulta. */
   disponibles: readonly CampoDef[];
   /** Campos de la finalidad sin valores todavía: se nombran para que la IA no los use. */
   sinValores?: readonly CampoDef[];
   colecciones: readonly ColeccionDef[];
+  estilo: EstiloEmpresa;
 };
 
 export type PromptExportable = {
@@ -97,6 +101,7 @@ export function generarPromptPropuesta(e: EntradaPrompt): PromptExportable {
     "- Todo bloque se cierra. Un marcador desconocido, mal cerrado o sin autorización invalida el texto completo.",
     "- Los alias de la tabla siguen funcionando, pero escribe siempre la clave principal.",
     "",
+    ...seccionEstilo(e.estilo),
     "## Marcadores disponibles",
     "",
     ...tablaCampos(disp),
@@ -110,10 +115,6 @@ export function generarPromptPropuesta(e: EntradaPrompt): PromptExportable {
       "",
     );
   }
-  lineas.push(
-    "## Entrega",
-    "",
-    "Devuelve el diseño de la propuesta con los marcadores literales en su lugar. Este prompt no genera por sí solo archivos de otro formato ni los importa en OPAI.",
-  );
+  lineas.push(...seccionEntregaHtml());
   return { version: VERSION_CATALOGO_CAMPOS, finalidad: "propuesta", texto: lineas.join("\n"), claves: disp.map((c) => c.clave) };
 }

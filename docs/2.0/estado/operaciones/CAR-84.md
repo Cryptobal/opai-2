@@ -1,10 +1,10 @@
 # CAR-84 · Tickets y solicitudes (PR 2 del Brief 13)
 
 - **Sesión:** Sesión Operaciones
-- **PR:** #811 · rama `brief/car-84-avisos-solicitante`
-- **Estado:** En PR
-- **Migración:** No
-- **Apilado sobre / espera:** ninguno
+- **PR:** #811 (avisos, integrado) · #821 instalación del ticket, rama `brief/car-84-ticket-instalacion`
+- **Estado:** #811 integrado; #821 en PR
+- **Migración:** #811 no; #821 sí: `20270122100000_tickets_instalacion` (20270119110000 quedaba antes de `20270121100000_core_campos_personalizados_fichas_tipos`, ya en main; se integra después de esa y de `20270119100000_pauta_visitas`, #816)
+- **Apilado sobre / espera:** #821 sobre `main` (espera #816 por el orden de migraciones)
 
 ## Qué entra (parte 1: avisos)
 
@@ -12,11 +12,20 @@
 - Prueba `tickets-avisos-db.test.ts` (5 casos, con dos empresas).
 - `docs/2.0/modulos/tickets.md` §8 al día. Novedad para usuarios.
 
+## Qué entra (parte 2: instalación del ticket, #821)
+
+- Columna opcional `tickets.tickets.instalacion_id` con FK a `core.instalaciones` y el trigger de mismo tenant ampliado.
+- `tickets.tickets.crear` acepta `instalacionId` (de esta empresa, no archivada y dentro del alcance de quien crea; si no, NOT_FOUND); `listar` filtra por instalación; la ficha y la bandeja devuelven `instalacionId`.
+- Prueba `tickets-instalacion-db.test.ts`: filtro, otra empresa, alcance del supervisor y trigger de la base.
+- Sin pantalla todavía: elegir la instalación en «Nuevo ticket» y verla en la ficha va con la lista del portal del supervisor.
+
 ## Qué queda pendiente (resto del PR 2 del Brief 13)
 
 - Correo al solicitante: declarar los comunicables de Tickets (ADR-020, silencio por defecto). Hoy el catálogo comunicable vive solo en el núcleo (`COMUNICABLES_NUCLEO`).
-- Vínculo polimórfico del ticket a otras entidades (negocio, instalación).
-- Adjuntos vía `core.documentos`.
+- Vínculo a un negocio (Comercial): Tickets no depende de Comercial; se decide cuando haya un caso real.
+- Elegir la instalación en «Nuevo ticket» y mostrarla en la ficha.
+- Decidir si la bandeja «Todos» de un supervisor con `tickets:tickets.ver_todos` se acota a sus instalaciones (hoy ve todos, como antes de este PR).
+- Adjuntos vía `core.documentos`: espera CAR-496 (Documentos acepta el tipo `ticket`).
 - Lista de tickets en el portal del supervisor.
 
 ## Qué se decidió
