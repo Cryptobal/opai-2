@@ -1,4 +1,4 @@
-import { type Page, type TestInfo } from "@playwright/test";
+import { type Locator, type Page, type TestInfo } from "@playwright/test";
 
 // Apoyo de `preview-e2e` (CAR-285): los e2e marcados `@preview` corren contra la vista previa de Vercel
 // de cada PR, con el usuario de la empresa ficticia `qa-e2e`, a 375, 1024 y 1280 px. Sus capturas se
@@ -32,6 +32,27 @@ export async function pasarProteccionDeVercel(page: Page): Promise<void> {
  * En CI es donde quedan las capturas de Plataforma: la vista previa copia la base con Gard y la cuenta de QA
  * no tiene rol de plataforma (CAR-323, decisión de Carlos del 14-nov).
  */
+/**
+ * Pulsa un control de la planilla dejándolo a la derecha de la columna fija y sobre la barra del teléfono.
+ * El toque de Playwright, si no, cae en esa columna o en la barra inferior.
+ */
+export async function pulsarEnPlanilla(control: Locator): Promise<void> {
+  await control.evaluate((el) => {
+    el.scrollIntoView({ block: "center", inline: "nearest" });
+    const th = el.closest("tr")?.querySelector("th");
+    const scroller = el.closest("table")?.parentElement;
+    if (th && scroller && !th.contains(el)) {
+      const tapa = th.getBoundingClientRect().right - el.getBoundingClientRect().left + 8;
+      if (tapa > 0) scroller.scrollLeft += tapa;
+    }
+    const nav = document.querySelector("[data-shell='inferior-nuevo']");
+    const limite = (nav?.getBoundingClientRect().top ?? window.innerHeight) - 8;
+    const bajo = el.getBoundingClientRect().bottom - limite;
+    if (bajo > 0) window.scrollBy(0, bajo);
+  });
+  await control.click();
+}
+
 export async function capturar(page: Page, info: TestInfo, nombre: string): Promise<void> {
   const carpeta = CARPETA_CAPTURAS;
   await page.screenshot({ path: `${carpeta}/${nombre}-${info.project.name}.png`, fullPage: true });
