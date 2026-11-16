@@ -3,10 +3,10 @@ import { z } from "zod";
 import { dondeCuenta, dondeContacto } from "../core/maestros/alcance";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
-import { partirNombre, tituloNegocio } from "./solicitudes-dominio";
+import { tituloNegocio } from "./solicitudes-dominio";
 import { cuentaValida } from "./validaciones";
 
-export const accionPlan = z.enum(["reutiliza", "crea", "sin_contacto"]);
+const accionPlan = z.enum(["reutiliza", "crea", "sin_contacto"]);
 
 export const planSchema = z.object({
   cuenta: z.object({ accion: accionPlan, id: z.string().nullable(), nombre: z.string() }),
@@ -100,5 +100,3 @@ export async function resolverPlan(
     cuentaNombreNueva: nombreCuenta ?? nombreCuentaFinal,
   };
 }
-
-export { partirNombre };

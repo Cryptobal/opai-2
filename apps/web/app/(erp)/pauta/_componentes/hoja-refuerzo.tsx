@@ -55,6 +55,7 @@ function Formulario({
   async function agregar() {
     if (await ejecutar("pauta.refuerzos.agregar", { puestoId, fecha, personaId, motivo: motivo.trim() })) {
       avisar.exito("Refuerzo agregado");
+      avisar.info("Quedó como turno extra por aprobar.");
       onCerrar();
     }
   }

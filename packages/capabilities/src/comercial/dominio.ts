@@ -2,7 +2,6 @@
 // etapa (R11) y requisitos de entrada por etapa (R9). Se prueba con Vitest.
 
 export const TIPOS_ETAPA = ["abierta", "ganada", "perdida"] as const;
-export type TipoEtapa = (typeof TIPOS_ETAPA)[number];
 
 export const ESTADOS_NEGOCIO = ["abierto", "ganado", "perdido"] as const;
 export type EstadoNegocio = (typeof ESTADOS_NEGOCIO)[number];

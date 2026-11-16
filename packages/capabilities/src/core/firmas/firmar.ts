@@ -21,7 +21,7 @@ export const firmasFirmar = defineCapability({
   interna: true,
   soloPersonas: true,
   descripcion:
-    "Firma un documento como firmante N1: revisa el documento, acepta expresamente (casilla con su texto) y firma con su trazo o nombre; al firmar el último se arma el PDF firmado (firma.md R5, R6, R12).",
+    "Firma un documento como firmante N1: revisa el documento, acepta expresamente (casilla con su texto) y firma con su trazo o nombre; al firmar el último se arma el PDF firmado.",
   permiso: null,
   portales: ["erp", "trabajador", "cliente", "supervisor", "terreno"],
   input: z
@@ -48,7 +48,7 @@ export const firmasFirmar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     if (!input.aceptaMedio)
-      throw reglaDeNegocio("Debes aceptar expresamente para firmar (R12).");
+      throw reglaDeNegocio("Debes aceptar expresamente para firmar.");
     const firmante = await resolverFirmante(ctx, input);
     const s = await ctx.db.solicitudFirma.findFirst({
       where: { tenantId: ctx.tenantId, id: firmante.solicitudId },
@@ -61,7 +61,7 @@ export const firmasFirmar = defineCapability({
     if (s.nivel !== "N1")
       throw reglaDeNegocio("La firma N2/N3 llega en una próxima entrega (prueba de vida).");
     if (firmante.rol !== "firma") throw reglaDeNegocio("Este firmante solo recibe copia.");
-    if (firmante.estado !== "pendiente") throw conflicto("Ya firmaste o rechazaste (R11).");
+    if (firmante.estado !== "pendiente") throw conflicto("Ya firmaste o rechazaste.");
     if (!esSuTurno(s.orden, s.firmantes, firmante))
       throw reglaDeNegocio("Aún no es tu turno de firmar (orden secuencial).");
     if (dryRun)
@@ -79,7 +79,7 @@ export const firmasFirmar = defineCapability({
         where: { id: firmante.id, estado: "pendiente" },
         data: { estado: "firmado", firmadoEn: new Date(), vistoEn: new Date() },
       });
-      if (count !== 1) throw conflicto("Ya firmaste o rechazaste (R11).");
+      if (count !== 1) throw conflicto("Ya firmaste o rechazaste.");
       // B2: fija la solicitud como viva DENTRO de esta transacción; si alguien la canceló o
       // rechazó mientras tanto (fuera de la foto leída arriba), esto revierte también la firma de
       // arriba, en vez de revivir una solicitud terminal.

@@ -6,9 +6,13 @@ import { useMemo, useState } from "react";
 
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
+import { AccesoRecurrentes, CabeceraVistaMovil } from "./acciones-flujo-toolbar";
 import { armarPlanilla, celdaEditable, clp, type Planilla } from "./datos";
-import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
+import { AvisoSaldoBanco } from "./aviso-saldo-banco";
+import { AvisosProyeccion } from "./avisos-proyeccion";
+import { filaBase } from "./grupos-cobro";
 import { PlanillaFlujoEscritorio } from "./planilla-flujo-escritorio";
+import { useFilasAbiertas } from "./use-filas-abiertas";
 import { cobrosDeSemana, FILA_COBROS_ESPERADOS, FILA_IVA, hojaEspecial, type HojaEspecial, ivaDeSemana } from "./cobros-celda";
 
 const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
@@ -24,15 +28,18 @@ type Props = {
   gestiona: boolean;
   configura: boolean;
   movil: boolean;
+  /** Quién y en qué empresa: la clave de lo que la persona dejó abierto o cerrado. */
+  epoca: string;
 };
 
-export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: Props) {
+export function PlanillaFlujo({ state, planilla, gestiona, configura, movil, epoca }: Props) {
   const router = useRouter();
   const [seleccion, setSeleccion] = useState<{ filaId: string; semana: string } | null>(null);
   const [importAbierta, setImportAbierta] = useState(false);
   const [hoja, setHoja] = useState<HojaEspecial | null>(null);
+  const { abierta, alternar } = useFilasAbiertas(epoca);
   const p = planilla;
-  const armado = useMemo(() => (p ? armarPlanilla(p, { gestiona }) : null), [p, gestiona]);
+  const armado = useMemo(() => (p ? armarPlanilla(p, { gestiona, abierta }) : null), [p, gestiona, abierta]);
 
   const avisoTitulo =
     p && p.aviso.semanas.length
@@ -50,7 +57,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
       <HojaIva semana={hoja.semana} ivas={ivaDeSemana(p, FILA_IVA, hoja.semana)} onCerrar={() => setHoja(null)} />
     ) : null;
   const abrirCelda = (filaId: string, semana: string) => {
-    const h = p ? hojaEspecial(p, filaId, semana) : null;
+    const h = p ? hojaEspecial(p, filaBase(filaId), semana) : null;
     if (h) setHoja(h);
     else setSeleccion({ filaId, semana });
   };
@@ -74,9 +81,10 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
             El aviso se muestra solo dentro de OPAI y no envía correos.
           </Alerta>
         ) : null}
+        <CabeceraVistaMovil gestiona={gestiona} configura={configura} />
         <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
-        <AvisosProyeccion avisos={p.avisos} />
-        <VistaMovilFlujo planilla={p} gestiona={gestiona} onCelda={abrirCelda} />
+        <AvisosProyeccion avisos={p.avisos} epoca={epoca} />
+        <VistaMovilFlujo planilla={p} armado={armado} gestiona={gestiona} onCelda={abrirCelda} onAlternar={alternar} />
         {hojaCobros}
         {gestiona ? (
           <HojaCelda
@@ -96,7 +104,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
         titulo="Flujo de caja"
         subtitulo="Próximas 12 semanas · montos en CLP"
         accionesSiempre
-        cabeceraSoloTelefono
+        acciones={<AccesoRecurrentes gestiona={gestiona} />}
         textos={{
           ...(textosError ?? {}),
           vacio: {
@@ -126,6 +134,8 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
         importAbierta={importAbierta}
         onImportAbiertaChange={setImportAbierta}
         onHoja={setHoja}
+        onAlternarFila={alternar}
+        epoca={epoca}
       />
       {hojaCobros}
     </>

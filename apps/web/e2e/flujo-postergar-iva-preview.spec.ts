@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { capturar, capturarHoja } from "./preview";
+import { capturar, capturarHoja, pulsarEnPlanilla } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-397: tocar la celda «IVA a pagar» abre la hoja para postergar el pago a M+2 (o volverlo a M+1) con vista previa.
@@ -29,8 +29,7 @@ test.describe("@preview flujo de caja: postergar el IVA", () => {
     // En el teléfono la página puede no estar hidratada al primer toque: se reintenta hasta que abra la hoja.
     const hoja = page.getByRole("dialog");
     await expect(async () => {
-      await celda.scrollIntoViewIfNeeded();
-      await celda.click();
+      await pulsarEnPlanilla(celda);
       await expect(hoja.getByText(/IVA de /).first()).toBeVisible({ timeout: 5_000 });
     })
       .toPass({ timeout: 60_000 })
