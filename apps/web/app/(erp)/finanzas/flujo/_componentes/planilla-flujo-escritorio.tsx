@@ -2,12 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import Link from "next/link";
 
 import { Alerta, Badge, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
-import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
-import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
+import { AccesoRecurrentes, AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
+import { AvisoSaldoBanco } from "./aviso-saldo-banco";
+import { AvisosProyeccion } from "./avisos-proyeccion";
 import { esFilaVirtual } from "./celda-agregada";
 import { celdaEditable, type Planilla } from "./datos";
 import { filaBase } from "./grupos-cobro";
@@ -34,6 +34,8 @@ type Props = {
   onImportAbiertaChange: (v: boolean) => void;
   /** Abre o cierra el detalle por cliente e instalación de los cobros (CAR-456). */
   onAlternarFila: (filaId: string) => void;
+  /** Quién y en qué empresa: para recordar qué avisos ya cerró. */
+  epoca: string;
 };
 
 export function PlanillaFlujoEscritorio({
@@ -50,6 +52,7 @@ export function PlanillaFlujoEscritorio({
   importAbierta,
   onImportAbiertaChange,
   onAlternarFila,
+  epoca,
 }: Props) {
   // «Reprogramar» vive en cada fila con plan (CAR-456), no como botón suelto bajo la planilla.
   const [mover, setMover] = useState<string | null>(null);
@@ -64,15 +67,15 @@ export function PlanillaFlujoEscritorio({
         </Alerta>
       ) : null}
       <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
-      <AvisosProyeccion avisos={p.avisos} />
+      <AvisosProyeccion avisos={p.avisos} epoca={epoca} />
       <PlanillaScreen
         state={state}
         titulo="Flujo de caja"
         subtitulo={`Próximas ${p.semanas.length} semanas · montos en CLP`}
         accionesSiempre
-        cabeceraSoloTelefono
         acciones={
           <>
+            <AccesoRecurrentes gestiona={gestiona} />
             <AccionesFlujoEscritorio configura={configura} onImportar={() => onImportAbiertaChange(true)} />
             <AccionesFlujoMovil configura={configura} onImportar={() => onImportAbiertaChange(true)} />
           </>
@@ -108,12 +111,6 @@ export function PlanillaFlujoEscritorio({
             <Badge tono="success">Real del banco</Badge>
             <Badge tono="info">Comprometido</Badge>
             <Badge tono="neutro">Planificado</Badge>
-          </span>
-          <span>
-            Toca una celda planificada para editarla; las semanas pasadas muestran lo real de la cartola.{" "}
-            <Link href="/configuracion/modulo/finanzas?seccion=flujo-caja" className="text-accent underline">
-              Filas y ajustes
-            </Link>
           </span>
         </div>
       ) : null}

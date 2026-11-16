@@ -66,6 +66,17 @@ describe("planilla por secciones contraíbles (CAR-537)", () => {
       "total-ing", "total-egr", "saldo",
     ]);
     expect(a.filas.filter((f) => f.nivel === 2).map((f) => f.etiqueta)).toEqual(["Arriendo", "IVA a pagar", "Crédito", "Diferencia del factoring"]);
+    expect(a.filas.find((f) => f.id === SEC_INGRESOS)?.plegable).toEqual({ abierta: true });
+    expect(a.filas.find((f) => f.id === "grp:gastos")?.plegable).toEqual({ abierta: true });
+    expect(a.filas.find((f) => f.id === "total-ing")?.total).toBe(true);
+  });
+
+  it("no muestra el vínculo técnico (finanzas:ventas) bajo la fila: el grupo ya dice dónde va", () => {
+    const conVinculo = {
+      ...p,
+      filas: p.filas.map((f) => (f.id === id(1) ? { ...f, vinculo: "finanzas:gastos" } : f)),
+    };
+    expect(armarPlanilla(conVinculo).filas.find((f) => f.id === id(1))?.sub).toBeUndefined();
   });
 
   it("un grupo sin filas no se muestra", () => {

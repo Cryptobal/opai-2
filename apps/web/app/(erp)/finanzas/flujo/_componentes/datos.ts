@@ -89,9 +89,9 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean; abierta?
   }));
   const filas: FilaPlanilla[] = [
     ...filasEstructura(p, opts?.abierta ?? abiertaPorDefecto),
-    { id: TOTALES.ingresos, etiqueta: "Total ingresos" },
-    { id: TOTALES.egresos, etiqueta: "Total egresos" },
-    { id: TOTALES.saldo, etiqueta: "Saldo final" },
+    { id: TOTALES.ingresos, etiqueta: "Total ingresos", total: true },
+    { id: TOTALES.egresos, etiqueta: "Total egresos", total: true },
+    { id: TOTALES.saldo, etiqueta: "Saldo final", total: true },
   ];
   const esFilaMonto = (filaId: string) =>
     filaId !== TOTALES.ingresos && filaId !== TOTALES.egresos && filaId !== TOTALES.saldo && !esFilaVirtual(filaId);

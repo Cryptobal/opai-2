@@ -27,7 +27,7 @@ function puedeResolver(ctx: { rol: string | null }, t: { tipo: { aprobadorRol: s
 export const ticketsAprobar = defineCapability({
   id: "tickets.tickets.aprobar",
   descripcion:
-    "Aprueba una solicitud con aprobación: la marca resuelta. Solo el rol aprobador del tipo (R-TCK-006); la UI pide confirmación antes de llamarla (decisión de Carlos).",
+    "Aprueba una solicitud con aprobación: la marca resuelta. Solo el rol aprobador configurado en el tipo de ticket; en pantalla se pide confirmación antes de ejecutarla.",
   permiso: PERMISO_GESTIONAR,
   input: z.object({ id: uuidSchema }),
   output: z.object({ id: uuidSchema }),
