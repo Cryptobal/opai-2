@@ -4,7 +4,7 @@ import { degrees, rgb, type PDFImage, type PDFPage, type PDFDocument } from "pdf
 import { LINEA, TENUE, TEXTO, type Rgb } from "./colores";
 import type { Fuentes } from "./fuentes";
 
-export const A4 = { ancho: 595.28, alto: 841.89 } as const;
+const A4 = { ancho: 595.28, alto: 841.89 } as const;
 export const MARGEN = { x: 56.7, arriba: 62, abajo: 68 } as const;
 export const ANCHO_UTIL = A4.ancho - 2 * MARGEN.x;
 

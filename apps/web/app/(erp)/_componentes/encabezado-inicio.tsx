@@ -14,20 +14,15 @@ function saludo(ahora: Date) {
   return h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
 }
 
-type Props = { nombre: string; empresa: string; ahora: Date; hilo: boolean; crear: ReactNode };
+type Props = { nombre: string; empresa: string; ahora: Date; crear: ReactNode };
 
-/**
- * Encabezado de Inicio: saludo, fecha y «Crear». En el marco Hilo (ADR-090) el saludo ya está en el
- * hilo, a la izquierda, así que aquí se ven solo la fecha y «Crear».
- */
-export function EncabezadoInicio({ nombre, empresa, ahora, hilo, crear }: Props) {
+/** Encabezado de Inicio: saludo, fecha y «Crear». */
+export function EncabezadoInicio({ nombre, empresa, ahora, crear }: Props) {
   const pila = nombreDePila(nombre);
   return (
     <div className="flex items-end justify-between gap-3">
       <div className="min-w-0">
-        {/* Dentro del marco Hilo el saludo ya está en el hilo: aquí se oculta con CSS, por el marco que
-            de verdad está montado, no por lo que el servidor supuso. */}
-        <h2 className={hilo ? "t-title text-fg marco-hilo:hidden" : "t-title text-fg"}>
+        <h2 className="t-title text-fg">
           <span className="md:hidden">Hola, {pila}</span>
           <span className="hidden md:inline">
             {saludo(ahora)}, {pila}

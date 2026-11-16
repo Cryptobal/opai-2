@@ -184,6 +184,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: el rostro es un dato biométrico sensible (Ley 21.719); un agente nunca enrola a un trabajador. Lo hace la propia persona con prueba de vida.",
   "asistencia.telefono.habilitar":
     "Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes.",
+  "central.alertas.hacerse_cargo":
+    "Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala.",
   "asistencia.marcas.verificar":
     "Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante.",
   "asistencia.correcciones.responder":

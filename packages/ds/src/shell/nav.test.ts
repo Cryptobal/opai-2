@@ -46,4 +46,17 @@ describe("shell del teléfono", () => {
     expect(activo?.[1]).toMatch(/class="[^"]*\btext-fg\b/);
     expect(activo?.[2]).toContain("text-accent");
   });
+
+  it("un portal con su propia entrada «Más» no lleva el «Más» del marco (CAR-494)", () => {
+    const portal: NavItem[] = [
+      { href: "/trabajador", etiqueta: "Inicio", icono: Home, exacta: true },
+      { href: "/trabajador/mas", etiqueta: "Más", icono: Users, mas: true },
+    ];
+    const extras = [{ id: "salir", etiqueta: "Cerrar sesión", onSelect: () => undefined }];
+    const html = renderToStaticMarkup(
+      createElement(BottomNav, { items: portal, rutaActual: "/trabajador", extras }),
+    );
+    expect(html.match(/>Más</g)?.length).toBe(1);
+    expect(html).toContain('href="/trabajador/mas"');
+  });
 });

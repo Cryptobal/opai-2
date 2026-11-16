@@ -7,7 +7,6 @@ import type { Contexto } from "../../types";
 
 export const PERMISO_FIRMAS_ENVIAR = PERMISOS_CORE.firmasEnviar;
 export const PERMISO_FIRMAS_READ = PERMISOS_CORE.firmasRead;
-export const PERMISO_FINIQUITOS = PERMISOS_CORE.finiquitosManage;
 
 /** Hash SHA-256 (hex) de un token de un solo destinatario: nunca se guarda el token en claro (R12). */
 export const hashToken = (token: string): string =>

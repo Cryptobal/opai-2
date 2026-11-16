@@ -1,16 +1,42 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { MoreHorizontal, Settings } from "lucide-react";
 
-import { Button, Menu } from "@opai/ds";
+import { Button, type ItemMenu, Menu } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { HojaImportar } from "./hoja-importar";
+
+const RUTA_AJUSTES = "/configuracion/modulo/finanzas?seccion=flujo-caja";
 
 type Props = {
   configura: boolean;
   onImportar: () => void;
 };
+
+/** Siempre visible: la pantalla de gastos recurrentes y el ajuste de filas. */
+export function AccesoRecurrentes({ gestiona }: { gestiona: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <EnlaceBoton href="/finanzas/flujo/recurrentes" variante="secondary">
+        Gastos recurrentes
+      </EnlaceBoton>
+      {gestiona ? (
+        <EnlaceBoton
+          href={RUTA_AJUSTES}
+          variante="secondary"
+          icono={Settings}
+          etiqueta="Filas y ajustes"
+          className="size-11 px-0"
+        >
+          {null}
+        </EnlaceBoton>
+      ) : null}
+    </div>
+  );
+}
 
 export function AccionesFlujoEscritorio({ configura, onImportar }: Props) {
   return (
@@ -18,17 +44,9 @@ export function AccionesFlujoEscritorio({ configura, onImportar }: Props) {
       <EnlaceBoton href="/finanzas/flujo/resumen" variante="secondary">
         Resumen por mes
       </EnlaceBoton>
-      <EnlaceBoton href="/finanzas/flujo/recurrentes" variante="secondary">
-        Gastos recurrentes
-      </EnlaceBoton>
       <EnlaceBoton href="/finanzas/flujo?vista=movil" variante="secondary">
         Vista celular
       </EnlaceBoton>
-      {configura ? (
-        <EnlaceBoton href="/configuracion/modulo/finanzas?seccion=flujo-caja" variante="secondary">
-          Configurar
-        </EnlaceBoton>
-      ) : null}
       {configura ? (
         <Button variant="secondary" onClick={onImportar}>
           Importar CSV…
@@ -38,44 +56,47 @@ export function AccionesFlujoEscritorio({ configura, onImportar }: Props) {
   );
 }
 
-export function AccionesFlujoMovil({ configura, onImportar }: Props) {
+/** ⋯ de la cabecera. En la planilla se esconde desde xl; en las tarjetas del teléfono va siempre. */
+export function AccionesFlujoMovil({ configura, onImportar, enMovil = false }: Props & { enMovil?: boolean }) {
   const router = useRouter();
-  if (!configura) return null;
+  const items: ItemMenu[] = [
+    { id: "resumen", etiqueta: "Resumen por mes", onSelect: () => router.push("/finanzas/flujo/resumen") },
+    enMovil
+      ? { id: "planilla", etiqueta: "Vista de planilla", onSelect: () => router.push("/finanzas/flujo") }
+      : { id: "movil", etiqueta: "Vista celular", onSelect: () => router.push("/finanzas/flujo?vista=movil") },
+  ];
+  if (configura) {
+    items.push(
+      { id: "config", etiqueta: "Filas y ajustes", onSelect: () => router.push(RUTA_AJUSTES) },
+      { id: "import", etiqueta: "Importar CSV…", onSelect: onImportar },
+    );
+  }
   return (
-    <div className="xl:hidden">
+    <div className={enMovil ? "shrink-0" : "shrink-0 xl:hidden"}>
       <Menu
         etiqueta="Acciones del flujo"
         lado="abajo-derecha"
-        className="relative inline-flex"
         disparador={<MoreHorizontal className="size-5" aria-hidden />}
-        items={[
-          {
-            id: "resumen",
-            etiqueta: "Resumen por mes",
-            onSelect: () => router.push("/finanzas/flujo/resumen"),
-          },
-          {
-            id: "recurrentes",
-            etiqueta: "Gastos recurrentes",
-            onSelect: () => router.push("/finanzas/flujo/recurrentes"),
-          },
-          {
-            id: "movil",
-            etiqueta: "Vista celular",
-            onSelect: () => router.push("/finanzas/flujo?vista=movil"),
-          },
-          {
-            id: "config",
-            etiqueta: "Configurar",
-            onSelect: () => router.push("/configuracion/modulo/finanzas?seccion=flujo-caja"),
-          },
-          {
-            id: "import",
-            etiqueta: "Importar CSV…",
-            onSelect: onImportar,
-          },
-        ]}
+        claseDisparador="border border-border-strong bg-surface"
+        items={items}
       />
     </div>
+  );
+}
+
+/** Cabecera de la vista de tarjetas: título, gastos recurrentes y el menú ⋯ (CAR-570). */
+export function CabeceraVistaMovil({ gestiona, configura }: { gestiona: boolean; configura: boolean }) {
+  const [importar, setImportar] = useState(false);
+  return (
+    <>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="t-title text-fg">Flujo de caja</h2>
+        <div className="flex items-center gap-2">
+          <AccesoRecurrentes gestiona={gestiona} />
+          <AccionesFlujoMovil configura={configura} enMovil onImportar={() => setImportar(true)} />
+        </div>
+      </div>
+      {configura ? <HojaImportar abierta={importar} onAbiertaChange={setImportar} ocultarDisparador /> : null}
+    </>
   );
 }

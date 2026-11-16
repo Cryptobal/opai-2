@@ -20,19 +20,19 @@ Columna «Pendientes»: conteo al 14-nov-2026, hora de Chile. Cuenta los tickets
 | 03 · Personas | Personas y Documentos | abierta | antes del 14-nov-2026 | 4 |
 | 04 · Asistencia | falta | sin sesión por ahora (sin pendientes) | — | 0 |
 | 05 · Instalación | falta | sin sesión por ahora (sin pendientes) | — | 0 |
-| 06 · Operaciones | Sesión 06 · Operaciones | a abrir | — | 5 |
-| 07 · Inventario | Sesión 07 · Inventario | a abrir | — | 4 |
-| 08 · Terreno | Sesión 08 · Terreno | a abrir | — | 3 |
-| 09 · Acceso | Sesión 09 · Acceso | a abrir | — | 1 |
+| 06 · Operaciones | Sesión Operaciones | abierta | 14-nov-2026 | 5 |
+| 07 · Inventario | Sesión Inventario | abierta | 14-nov-2026 | 4 |
+| 08 · Terreno | Sesión Terreno | abierta | 14-nov-2026 | 3 |
+| 09 · Acceso | Sesión Acceso | abierta | 14-nov-2026 | 1 |
 | 10 · Documentos | Personas y Documentos | abierta | antes del 14-nov-2026 | 3 |
-| 11 · Portales | Sesión 11 · Portales | a abrir | — | 4 |
+| 11 · Portales | Sesión Portales | abierta | 14-nov-2026 | 4 |
 | 12 · Payroll | Payroll | abierta | antes del 14-nov-2026 | 3 |
-| 13 · Cobrar | Sesión 13 · Cobrar | a abrir | — | 5 |
+| 13 · Cobrar | Sesión Cobrar | abierta | 14-nov-2026 | 5 |
 | 14 · Caja | Flujo de caja OPAI 2.0 | abierta | antes del 14-nov-2026 | 3 |
 | 15 · Informes | Indicadores | abierta | antes del 14-nov-2026 | 3 |
 | 16 · Rendiciones | Finanzas | cubierta (sin pendientes) | antes del 14-nov-2026 | 0 |
-| 17 · Central | Sesión 17 · Central | a abrir | — | 1 |
-| 18 · Apps | Sesión 18 · Apps | a abrir | — | 1 |
+| 17 · Central | Sesión Central | abierta | 14-nov-2026 | 1 |
+| 18 · Apps | Sesión Apps | abierta | 14-nov-2026 | 1 |
 | 19 · Agente IA | Hilo: auditoría y reglas de diseño | abierta | antes del 14-nov-2026 | 4 |
 | 20 · Núcleo | Núcleo | abierta | antes del 14-nov-2026 | 19 |
 | 21 · Diseño y experiencia | Rediseño de Opai 2.0 | abierta | antes del 14-nov-2026 | 7 |
@@ -46,5 +46,6 @@ Columna «Pendientes»: conteo al 14-nov-2026, hora de Chile. Cuenta los tickets
 - **15 Informes** queda en «Indicadores». A2.5.5 no le nombra dueña y esa es la sesión abierta más cercana.
 - **19 Agente IA** queda en «Hilo: auditoría y reglas de diseño», porque A2.5.5 asigna el agente interno a la Sesión Hilo.
 - **21 Diseño y experiencia** queda en «Rediseño de Opai 2.0». Hilo y Diseño comparten el marco y el Design System (A2.5.5), pero el proyecto tiene una sola dueña.
-- **04, 05, 06, 08 y 09** no tenían dueña con nombre fijo: A2.5.5 los agrupa en «la sesión que lleve Operaciones (hoy sin nombre fijo; por confirmar)». Tampoco son de la Sesión Desempeño, que solo lleva el módulo Desempeño; ese módulo no tiene proyecto en esta iniciativa. Se abren dueñas propias solo donde hay pendientes (06, 08 y 09). 04 y 05 quedan como «falta» hasta que tengan trabajo.
-- **11 Portales** ya no depende de «Sesión Proyecto», el nombre provisorio de A2.5.5, y pasa a tener sesión propia.
+- **04 y 05** siguen sin dueña («falta») hasta que tengan pendientes. A2.5.5 los agrupa con Operaciones; no son de la Sesión Desempeño (módulo Desempeño sin proyecto en esta iniciativa).
+- **06 Operaciones, 08 Terreno y 09 Acceso** abrieron dueña propia el 14-nov-2026 (CAR-457, CAR-459, CAR-486).
+- **07 Inventario, 11 Portales, 13 Cobrar, 17 Central y 18 Apps** también abrieron el 14-nov-2026 (CAR-467, CAR-465, CAR-460, CAR-484, CAR-476). 11 ya no depende del nombre provisorio «Sesión Proyecto» de A2.5.5.

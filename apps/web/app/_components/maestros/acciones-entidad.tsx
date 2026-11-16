@@ -82,7 +82,7 @@ export function AccionesEntidad({
     });
   }
   // Sin acciones (p. ej. un cargo de solo lectura) y sin «Fijar», no hay menú que mostrar.
-  // «Preguntar a OPAI» va a la vista, junto al menú (CAR-335 D5): responde dentro de la ficha.
+  // «Preguntar a OPAI» abre el panel lateral con el contexto de la ficha (CAR-547).
   const preguntar =
     agente && hayAgente ? (
       <BotonAgenteFicha contexto={agente.contexto} nombre={agente.nombre} />
