@@ -500,6 +500,7 @@ finanzas_compras_asignar_centro
 finanzas_compras_get
 finanzas_compras_importar
 finanzas_compras_listar
+finanzas_compras_pagos_proveedores
 finanzas_compras_registrar
 finanzas_compras_sincronizar_rcv
 finanzas_conciliaciones_confirmar
