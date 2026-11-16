@@ -1,6 +1,8 @@
 import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
+import type { EntradaLista } from "./panel-listas";
+
 export type Pagina<T> = { items: T[]; siguiente: string | null };
 
 export type Registro = {
@@ -15,6 +17,7 @@ export type Registro = {
   documento: string;
   patente: string | null;
   origen: string;
+  anulado: boolean;
 };
 
 export type RegistroFicha = Registro & {
@@ -23,6 +26,8 @@ export type RegistroFicha = Registro & {
   docTipo: string;
   lista: "autorizada" | "bloqueada" | null;
   dispositivo: string | null;
+  salidaOrigen: string | null;
+  anulacion: { en: string; motivo: string } | null;
 };
 
 export type Intento = {
@@ -76,6 +81,21 @@ export async function cargarIntentos(sp: SearchParams) {
     cargarInstalaciones(),
   ]);
   return { p, r, instalaciones: inst };
+}
+
+/** Listas de una instalación: la de la URL o, si no viene, la primera a cargo (la lista siempre es por instalación). */
+export async function cargarListas(sp: SearchParams) {
+  const p = await leerParametros(sp);
+  const instalaciones = await cargarInstalaciones();
+  const instalacionId = uuid(p["instalacion"]) ?? instalaciones[0]?.id;
+  const tipo: "autorizada" | "bloqueada" = p["lista"] === "bloqueada" ? "bloqueada" : "autorizada";
+  const r = instalacionId
+    ? await ejecutarComoUsuario<EntradaLista[]>("erp", "acceso.listas.listar", {
+        instalacionId,
+        tipo,
+      })
+    : null;
+  return { p, r, instalaciones, instalacionId, tipo };
 }
 
 export const cargarRegistro = (id: string) =>

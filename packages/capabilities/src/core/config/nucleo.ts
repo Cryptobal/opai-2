@@ -84,7 +84,7 @@ export const AJUSTES_NUCLEO = defineAjustes(
     cumplimiento_dpa_texto: z.string().default("").meta({
       etiqueta: "Texto del DPA",
       ayuda:
-        "Texto del acuerdo de tratamiento de datos (DPA) de esa versión. La aceptación guarda su hash (SHA-256) como prueba de a qué texto aceptó el tenant. El texto legal lo fija Carlos.",
+        "Texto del acuerdo de tratamiento de datos (DPA) de esa versión. La aceptación guarda su hash (SHA-256) como prueba de a qué texto aceptó la empresa.",
       grupo: "Cumplimiento",
       ambito: "plataforma",
       control: "texto",

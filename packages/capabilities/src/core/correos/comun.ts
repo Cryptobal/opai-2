@@ -27,7 +27,7 @@ export const correoClienteSchema = z.object({
   id: z.string(),
   fuente: z
     .enum(["historial", "seguimiento"])
-    .describe("«seguimiento»: respuesta guardada por un seguimiento (CAR-67)."),
+    .describe("«seguimiento»: respuesta guardada por un seguimiento."),
   sentido: z.enum(SENTIDOS),
   origen: z.enum([...ORIGENES, "respuesta_seguimiento"]),
   ocurridoEn: z.string(),

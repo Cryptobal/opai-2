@@ -13,7 +13,7 @@ export const DEF_FLUJO_FILAS: DefinicionImportador = {
     CAMPO_ID_EXTERNO,
     { clave: "etiqueta", etiqueta: "Nombre de la fila", tipo: "texto", requerido: true, sinonimos: ["name", "nombre", "fila", "categoria", "categoría"], ejemplo: "Arriendo oficina", largoMaximo: 120 },
     { clave: "seccion", etiqueta: "Sección", tipo: "opcion", sinonimos: ["section"], ejemplo: "egreso",
-      ayuda: "Las secciones de egreso de OPAI 1 (remuneraciones, impuestos, GAV, otros, financiamiento) entran como egreso.",
+      ayuda: "Las secciones de egreso del export de migración (remuneraciones, impuestos, GAV, otros, financiamiento) entran como egreso.",
       opciones: { egreso: ["egresos", "gasto", "gastos", "remuneraciones", "impuestos", "gav", "otros", "financiamiento"], ingreso: ["ingresos", "income"] } },
     { clave: "orden", etiqueta: "Orden", tipo: "entero", sinonimos: ["order", "position", "sortOrder"], ejemplo: "10" },
   ],

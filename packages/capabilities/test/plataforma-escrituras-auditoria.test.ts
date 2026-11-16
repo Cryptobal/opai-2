@@ -178,6 +178,7 @@ const CASOS: Record<string, Record<string, unknown>> = {
     rut: "76.555.444-6",
   },
   "platform.modules.set": { tenantId: t, moduloId: "crm", estado: "trial" },
+  "platform.tenants.set_modulos_nuevos": { tenantId: t, activo: true },
   "platform.admins.invite": { tenantId: t, email: "admin@gard.cl", rol: "admin" },
   "platform.invitaciones.revocar": { tenantId: t, invitacionId: INV_REVOCAR },
   "platform.invitaciones.reenviar": { tenantId: t, invitacionId: INV_REENVIAR },
