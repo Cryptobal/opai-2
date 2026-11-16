@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { hidratado } from "./hidratacion";
+import { contenidoHidratado, hidratado } from "./hidratacion";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -19,15 +19,17 @@ async function abrirPrimeraCuenta(page: Page): Promise<string> {
   const lista = page.getByRole("region", { name: "Lista de cuentas" });
   await hidratado(lista);
   const primera = lista.locator('a[href^="/cuentas/"]:not([href$="/nueva"]):visible').first();
-  await expect(primera).toBeVisible();
+  const hay = await primera.isVisible({ timeout: 30_000 }).catch(() => false);
+  if (!hay) throw new Error("qa-e2e sin cuentas en la lista");
   await primera.click();
-  await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}/);
-  const titulo = await page
-    .locator("[data-detalle]")
-    .getByRole("heading", { level: 1 })
-    .first()
-    .innerText();
-  return titulo.trim();
+  await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  await contenidoHidratado(page);
+  const detalle = page.locator("[data-detalle]");
+  await expect(detalle).toBeVisible({ timeout: 30_000 });
+  // Cabecera de ficha (`DetailScreen`): el título es `<h2>` con `tituloDetalle`, no h1.
+  const tituloEl = detalle.getByRole("heading", { level: 2 });
+  await expect(tituloEl).toBeVisible();
+  return (await tituloEl.innerText()).trim();
 }
 
 async function abrirAgenteDesdeBarra(page: Page) {
