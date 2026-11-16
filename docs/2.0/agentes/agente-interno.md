@@ -4,6 +4,10 @@ Cliente del registro común de capacidades, sin herramientas de negocio propias.
 Requiere módulo agente activo y permiso agente:usar. Configurarlo exige agente:configurar.
 La UI llegará en otro PR con export aprobado, siempre con el Design System de OPAI 2.0.
 
+## Interfaz (CAR-547)
+
+El chat vive solo en el panel lateral del shell. Las fichas registran su contexto; «Preguntar a OPAI» y el botón IA abren ese panel (no hay agente embebido en la ficha).
+
 ## Flujo
 
 1. agente.modelos.list devuelve proveedor, clase y modelo conectados, nunca credenciales.

@@ -10,7 +10,7 @@ Regla usada: primero lo que no depende de nadie y destraba a otros; las migracio
 |---|---|---|---|
 | 1 | #561 Desempeño: cierre de período | `20261203100000_desempeno_cierre_periodo` | Base de toda la cadena de Desempeño. |
 | 2 | #565 Slack F2 | `20261205100000_core_slack_usuarios` | Ya aplicada en `dev` y `main`. Tiene conflicto con `main` otra vez (archivos generados): traer `main` y regenerar. |
-| 3 | #569 Slack F3 | `20261206100000_core_slack_avisos` | Apilado sobre #565. Mismo `slack.prisma`: nunca antes que #565. Ya aplicada. |
+| 3 | #569 Slack F3 | `20270103100000_core_slack_avisos` | Apilado sobre #565. Mismo `slack.prisma`: nunca antes que #565. Ya aplicada. |
 | 4 | #568 Personas: indicadores y «Reclutado por» | `20261210100000_core_vinculo_reclutado_por` | Parte de la cadena de Desempeño (ver 2). |
 | 5 | #595 Reglas de aprobación | `20261212100000_core_reglas_aprobacion` | Sin choque de `.prisma` con otros. Debe renumerar su ADR (ver 4). |
 

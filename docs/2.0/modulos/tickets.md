@@ -70,9 +70,12 @@ Alcance de filas (ADR-022): la bandeja filtra por solicitante/responsable en la 
 
 | Evento | Cuándo | Quién se entera | Canal |
 |---|---|---|---|
-| `tickets.ticket.creado` | Al crear | — (silencio por defecto, ADR-020; Comunicaciones en PR 2) | — |
-| `tickets.ticket.estado_cambiado` | Cambio de estado | solicitante (PR 2) | correo + portal |
-| `tickets.ticket.aprobado` / `.rechazado` | Resolver una solicitud | solicitante (PR 2) | correo + portal |
+| `tickets.ticket.creado` | Al crear | responsable (si no es quien lo creó) | campana (CAR-84) |
+| `tickets.ticket.reasignado` | Cambio de responsable | nuevo responsable (si no es quien reasignó) | campana (CAR-84) |
+| `tickets.ticket.estado_cambiado` | Cambio de estado | solicitante (si no es quien lo cambió) | campana (CAR-84); correo pendiente |
+| `tickets.ticket.aprobado` / `.rechazado` | Resolver una solicitud | solicitante | campana (CAR-84); correo pendiente |
+
+Los avisos en la campana van directo a la persona (como Linear o Zendesk avisan al responsable y a quien pidió), no por reglas de Comunicaciones. El correo llegará cuando Tickets declare sus eventos comunicables (ADR-020) y queda en silencio por defecto.
 
 ## 9. Herramientas MCP
 

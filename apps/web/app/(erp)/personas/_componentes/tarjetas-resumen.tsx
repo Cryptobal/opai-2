@@ -10,6 +10,7 @@ import { identidadActual } from "@/lib/servidor";
 
 import * as E from "./estado-ficha";
 import { laboralDe, pagoDe, previsionDe } from "./lecturas-ficha";
+import { os10Efectivo } from "./os10-efectivo";
 
 type Tarjeta = {
   titulo: string;
@@ -95,23 +96,25 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
   }
   if (lab && !lab.ok) fallo("Laboral");
   else if (lab) {
-    const { uniforme: u, jornadaDt: j, os10: o, contrato } = lab.data;
+    const { uniforme: u, jornadaDt: j, contrato, tallas } = lab.data;
+    // CAR-429: vencimiento del documento vigente en Documentos; sin él, el dato manual.
+    const o = os10Efectivo(lab.data.os10, lab.data.os10Respaldo);
     const termino = contrato?.terminoVigente ?? null;
+    const kitTallas = tallas.filter((t) => t.enKit);
     const ultima = u?.entregas.at(0);
     agregar({
       titulo: "Uniforme",
-      estado: E.estadoUniforme(u),
+      estado: E.estadoUniforme(tallas),
       ancla: "uniforme",
       ir: "Ir a Uniforme y tallas",
       filas: [
-        {
-          etiqueta: "Calzado · Pantalón",
-          valor: `${u?.tallaZapato ?? "—"} · ${u?.tallaPantalon ?? "—"}`,
-        },
-        {
-          etiqueta: "Camisa · Chaqueta",
-          valor: `${u?.tallaCamisa ?? "—"} · ${u?.tallaChaqueta ?? "—"}`,
-        },
+        // Las primeras prendas del uniforme de la empresa, de a dos (CAR-408).
+        ...[kitTallas.slice(0, 2), kitTallas.slice(2, 4)]
+          .filter((par) => par.length)
+          .map((par) => ({
+            etiqueta: par.map((t) => t.nombre).join(" · "),
+            valor: par.map((t) => t.talla ?? "—").join(" · "),
+          })),
         {
           etiqueta: "Última entrega",
           valor: ultima ? `${fecha(ultima.entregadaEn)} · ${ultima.articulo}` : null,
@@ -141,14 +144,14 @@ export async function TarjetasResumen({ personaId, hoy }: { personaId: string; h
       estado: os10,
       ancla: "os10",
       ir:
-        os10.tono === "success"
+        os10.tono === "success" || o.fuente === "documento"
           ? "Ir a OS-10"
-          : o?.venceEn
+          : o.venceEn
             ? "Registrar renovación"
             : "Registrar OS-10",
       filas: [
-        { etiqueta: "Credencial", valor: o?.credencial, mono: true },
-        { etiqueta: "Vencimiento", valor: o?.venceEn ? fecha(o.venceEn) : null },
+        { etiqueta: "Credencial", valor: o.credencial, mono: true },
+        { etiqueta: "Vencimiento", valor: o.venceEn ? fecha(o.venceEn) : null },
       ],
     });
   }

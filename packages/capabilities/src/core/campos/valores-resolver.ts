@@ -18,9 +18,9 @@ import { cuentaDe } from "../maestros/cuentas-acceso";
 import { referenciasParaDocumento } from "../maestros/referencias-documento";
 
 export const MAX_INSTALACIONES = 50;
-export const valorSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+const valorSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 export const registroSchema = z.record(z.string(), valorSchema);
-export type RegistroCampos = z.infer<typeof registroSchema>;
+type RegistroCampos = z.infer<typeof registroSchema>;
 
 /** Fechas como `AAAA-MM-DD`; el formato de presentación lo aplica `renderizarPlantillaCampos`. */
 function serializable(v: Record<string, ValorCampo>): RegistroCampos {
