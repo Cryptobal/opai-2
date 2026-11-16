@@ -5,15 +5,10 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
-import { definidos, escribirConEvento, textoOpcional } from "../maestros/comun";
+import { textoOpcional } from "../maestros/comun";
 import { perfilDe } from "./empresa";
-import {
-  fusionarMarcaDocumento,
-  marcaDocumentoDe,
-  marcaDocumentoInputSchema,
-  persistirMarcaDocumento,
-  tipografiaDocumento,
-} from "./marca-documento";
+import { guardarMarca } from "./marca-escritura";
+import { marcaDocumentoDe, marcaDocumentoInputSchema, tipografiaDocumento } from "./marca-documento";
 
 const LOGOS = ["logoPrincipalId", "logoClaroId", "logoOscuroId", "isotipoId", "faviconId"] as const;
 const color = z
@@ -109,56 +104,12 @@ export const marcaUpdate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    for (const k of LOGOS) {
-      const id = (input as Record<string, string | null | undefined>)[k];
-      if (id) await validarLogo(ctx, id);
-    }
-    const raw = input as Record<string, string | null | undefined>;
-    const docCampos = ["documentoTipografia", "documentoPiePagina", "documentoCondicionesDefault"] as const;
-    const docInput = Object.fromEntries(
-      docCampos.filter((k) => raw[k] !== undefined).map((k) => [k, raw[k]]),
-    );
-    const data = definidos(
-      Object.fromEntries(
-        Object.entries(raw).filter(([k]) => !(docCampos as readonly string[]).includes(k)),
-      ),
-    );
-    const actual = await perfilDe(ctx);
-    if (dryRun) {
-      return vista(ctx, {
-        ...actual,
-        ...data,
-        ...fusionarMarcaDocumento(actual, docInput),
-      });
-    }
-    const r = await escribirConEvento(
+    return guardarMarca(
       ctx,
-      {
-        tipo: "core.marca.actualizada",
-        entidadTipo: "perfil_empresa",
-        payload: () => ({
-          campos: [...Object.keys(data), ...Object.keys(docInput)],
-        }),
-      },
-      async (tx) => {
-        const base =
-          Object.keys(data).length > 0
-            ? await tx.perfilEmpresa.upsert({
-                where: { tenantId: ctx.tenantId },
-                create: { ...data, tenantId: ctx.tenantId },
-                update: data,
-              })
-            : ((await tx.perfilEmpresa.findUnique({ where: { tenantId: ctx.tenantId } })) ??
-              (await tx.perfilEmpresa.create({ data: { tenantId: ctx.tenantId } })));
-        if (Object.keys(docInput).length) {
-          await persistirMarcaDocumento(
-            { ...ctx, db: tx },
-            fusionarMarcaDocumento(base, docInput),
-          );
-        }
-        return base;
-      },
+      input as Record<string, string | null | undefined>,
+      (p) => vista(ctx, p),
+      (id) => validarLogo(ctx, id),
+      dryRun,
     );
-    return vista(ctx, r);
   },
 });

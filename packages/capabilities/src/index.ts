@@ -39,12 +39,6 @@ export {
 } from "./core/cumplimiento/cifrado-campos";
 export { enviarCorreo, previsualizarCorreo } from "./core/comunicaciones";
 export {
-  actualizarMarcaDocumento,
-  marcaDocumentoDe,
-  marcaDocumentoEnVersion,
-  type TipografiaDocumento,
-} from "./core/empresa/marca-documento";
-export {
   borrarEnrolamiento,
   consentimientoBiometricoVigente,
   enrolarRostro,

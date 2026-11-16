@@ -4,22 +4,22 @@ import { AjustesConectados } from "../_centro/ajustes-conectados";
 import { cargarAjustes } from "../_centro/ajustes-datos";
 
 const CLAVES = new Set([
-  "comunicaciones_remitente",
   "notificaciones_correo_defecto",
   "notificaciones_correo_comercial",
   "notificaciones_correo_operaciones",
   "notificaciones_correo_finanzas",
 ]);
 
-/** Ajustes de remitente y copias ocultas en avisos (no afectan correos al cliente). */
-export async function TarjetaCopiasAvisos() {
-  const ajustes = await cargarAjustes("core", "Comunicaciones");
+/** Correos en copia oculta de los avisos por correo (no afectan correos al cliente). */
+export async function TarjetaCorreosNotificacion() {
+  const ajustes = await cargarAjustes("core", "Correos de notificación");
   const campos = ajustes.campos.filter((c) => CLAVES.has(c.clave));
+  if (!campos.length) return null;
   return (
-    <SeccionTarjeta titulo="Copias ocultas en avisos">
+    <SeccionTarjeta titulo="Correos de notificación">
       <p className="t-caption mb-3 text-fg-muted">
-        Solo en los avisos que configuras abajo. Los correos al cliente (propuestas, facturas) usan el
-        correo comercial en Datos de la empresa.
+        Copias ocultas en los avisos que configuras en Comunicaciones. El correo comercial del perfil
+        de la empresa sigue usándose en propuestas y documentos al cliente.
       </p>
       <AjustesConectados campos={campos} valores={ajustes.valores} />
     </SeccionTarjeta>

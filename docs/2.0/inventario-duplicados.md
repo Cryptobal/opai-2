@@ -57,7 +57,7 @@ Datos de configuración que **no** son ajustes del catálogo (tablas o capacidad
 | Tema | Dueño | Acción |
 | --- | --- | --- |
 | Correo comercial | `perfil_empresa.correo_comercial` (Datos de la empresa) | Se retiran los CCO comerciales del núcleo; migración SQL desde `core.ajustes`. Cotizaciones y CPQ ya leían el perfil. |
-| Copias ocultas en avisos | `core.notificaciones_correo_*` | Defecto más overrides por área (comercial, finanzas, operaciones). UI en Configuración › Comunicaciones; el consumidor añade BCC en avisos (no en transaccionales). |
+| Copias ocultas en avisos | `core.notificaciones_correo_*` | Defecto más overrides por área (comercial, finanzas, operaciones). UI en Configuración › Usuarios y permisos; el consumidor añade BCC en avisos (no en transaccionales). |
 | Marca documental (tipografía, pie, condiciones) | `perfil_empresa` + `core.marca.*` | Migra desde `cpq.marca_documento`; UI en Configuración › Marca. CPQ mantiene `cpq.marca_documento.*` como delegado MCP y versiones de PDF. |
 | Flujo de caja vs cobranza/facturación | Dos capas | `finanzas.flujo_ajustes` (planilla) vs ajustes manifest Finanzas (cobranza). Ayudas actualizadas en Configuración › Finanzas › Flujo de caja y en el módulo. |
 | Geocerca asistencia vs rondas | Dos módulos | Asistencia: defecto 100 m en marcas. Rondas: 15 m en puntos (`RADIO_GEOCERCA_M`). Etiquetas de ayuda distinguen ambos usos. |
