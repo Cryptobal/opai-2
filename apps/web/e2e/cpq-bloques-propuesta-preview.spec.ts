@@ -28,4 +28,23 @@ test.describe("@preview cpq: bloques de la propuesta en Marca y plantillas", () 
     await lista.scrollIntoViewIfNeeded();
     await capturar(page, info, "cpq-bloques-propuesta");
   });
+
+  test("«Copiar prompt» copia el prompt con el estilo de la empresa (CAR-531)", async ({
+    page,
+    context,
+  }, info) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await entrar(page);
+    await page.goto("/configuracion/modulo/cpq?seccion=marca-plantillas");
+    const boton = page.getByRole("button", { name: "Copiar prompt" });
+    await boton.scrollIntoViewIfNeeded();
+    await expect(async () => {
+      await boton.click();
+      await expect(page.getByRole("button", { name: "Copiado" })).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 60_000 });
+    const copiado = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copiado).toContain("## Estilo de la empresa");
+    expect(copiado).toContain("un único fragmento HTML");
+    await capturar(page, info, "cpq-copiar-prompt");
+  });
 });

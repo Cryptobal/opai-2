@@ -1,5 +1,6 @@
 import { Badge, Estado } from "@opai/ds";
 
+import { BotonCopiar } from "@/app/_components/boton-copiar";
 import { LinkNext } from "@/app/_components/link-next";
 import type { BloquePlantilla } from "@/lib/cpq-bloques-propuesta";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -40,12 +41,18 @@ async function cargarPlantillaPropuesta() {
   return r.ok ? r.data : null;
 }
 
+async function cargarPrompt() {
+  const r = await ejecutarComoUsuario<{ texto: string }>("erp", "cpq.propuestas_tecnica.prompt_exportable", {});
+  return r.ok ? r.data.texto : null;
+}
+
 /** Marca documental CPQ y plantilla de cotización (CAR-135 addendum). Logos/colores en /configuracion/marca. */
 export async function SeccionMarcaPlantillasCpq() {
-  const [marca, plantilla, plantillaPropuesta] = await Promise.all([
+  const [marca, plantilla, plantillaPropuesta, prompt] = await Promise.all([
     cargarMarca(),
     cargarPlantilla(),
     cargarPlantillaPropuesta(),
+    cargarPrompt(),
   ]);
   const state = marca && plantilla && plantillaPropuesta ? ("ready" as const) : ("error" as const);
   return (
@@ -81,6 +88,16 @@ export async function SeccionMarcaPlantillasCpq() {
             <Badge tono="info">Versión plantilla v{plantillaPropuesta.version}</Badge>
           </div>
           <FormPlantillaPropuestaDiferido plantilla={plantillaPropuesta} />
+          {prompt ? (
+            <div className="space-y-2 border-t border-border pt-6">
+              <p className="t-label">Diseño de la propuesta con IA</p>
+              <p className="t-caption text-fg-muted">
+                Copia el prompt y pégalo en Claude u otra IA. Lleva los colores, la tipografía y el logo de tu marca,
+                y los marcadores {"{{…}}"} del catálogo. La IA te devuelve un HTML para subir como plantilla.
+              </p>
+              <BotonCopiar texto={prompt} etiqueta="Copiar prompt" />
+            </div>
+          ) : null}
         </div>
       ) : null}
     </Estado>
