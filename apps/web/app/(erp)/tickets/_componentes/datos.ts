@@ -1,5 +1,7 @@
 import type { BadgeProps } from "@opai/ds";
 
+import { estadoPantalla } from "@/lib/formato";
+import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Parametros, SearchParams } from "@/lib/parametros";
 
@@ -84,7 +86,7 @@ export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
 }
 
 export async function cargarTickets(p: Parametros) {
-  return ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
+  const r = await ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
     "erp",
     "tickets.tickets.listar",
     {
@@ -92,14 +94,21 @@ export async function cargarTickets(p: Parametros) {
       ...(p["estado"] ? { estado: p["estado"] } : {}),
     },
   );
+  return { state: estadoPantalla(r), items: r.ok ? r.data.items : [], siguiente: r.ok ? r.data.siguiente : null };
 }
 
 export async function cargarTicket(id: string) {
-  return ejecutarComoUsuario<{ ticket: Ticket; eventos: EventoTicket[] }>(
+  const r = await ejecutarComoUsuario<{ ticket: Ticket; eventos: EventoTicket[] }>(
     "erp",
     "tickets.tickets.obtener",
-    { id },
+    { id: requerirUuid(id) },
   );
+  requerirEncontrado(r);
+  return {
+    state: estadoPantalla(r),
+    ticket: r.ok ? r.data.ticket : null,
+    eventos: r.ok ? r.data.eventos : [],
+  };
 }
 
 export async function cargarTipos() {

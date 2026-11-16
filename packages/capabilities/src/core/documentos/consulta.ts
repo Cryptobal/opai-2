@@ -8,7 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { entidadEnAlcance } from "../maestros/alcance";
 import { hoy } from "../maestros/comun";
-import { documentosEnAlcance, entidadesEnAlcance, vinculoEnAlcance } from "./alcance-doc";
+import { documentosEnAlcance, entidadesEnAlcance, vinculoVisible } from "./alcance-doc";
 import { CAPA_DE } from "./entidad";
 import { filtroDocumentoSensible } from "./sensibles";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
@@ -26,7 +26,7 @@ export const documentosList = defineCapability({
   auditarLectura: (s) => s.items.map((d) => d.id),
   id: "core.documentos.list",
   descripcion:
-    "Documentos vigentes (última versión) de una entidad —empresa, cuenta, instalación, persona o puesto— o de todo el tenant, con estado de vigencia; por entidad incluye los tipos obligatorios que faltan.",
+    "Documentos vigentes (última versión) de una entidad —empresa, cuenta, instalación, persona, puesto, ticket o visita de supervisión— o de todo el tenant, con estado de vigencia; por entidad incluye los tipos obligatorios que faltan.",
   permiso: PERMISOS_CORE.documentosRead,
   portales: ["erp", "supervisor"],
   input: z.object({
@@ -128,9 +128,10 @@ export const documentosGet = defineCapability({
     // Los vínculos que se devuelven se acotan al alcance: no se exponen ids de entidades ajenas
     // (una persona o una cuenta que el supervisor no tiene a cargo) aunque cuelguen del documento.
     const vinculosTodos = await ctx.db.documentoVinculo.findMany({ where: { documentoId: d.id } });
-    const vinculos = alc
-      ? vinculosTodos.filter((v) => vinculoEnAlcance(alc, v.entidadTipo, v.entidadId))
-      : vinculosTodos;
+    const vinculos = [];
+    for (const v of vinculosTodos) {
+      if (await vinculoVisible(ctx, alc, v.entidadTipo, v.entidadId)) vinculos.push(v);
+    }
     const versiones = [];
     for (let previo = d.reemplazaAId, n = 0; previo && n < 50; n++) {
       const v = await ctx.db.documento.findFirst({

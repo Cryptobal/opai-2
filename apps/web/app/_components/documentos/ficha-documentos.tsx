@@ -17,6 +17,8 @@ const CAPA = {
   instalacion: "instalacion",
   persona: "persona",
   puesto: "puesto",
+  ticket: "ticket",
+  visita: "visita",
 } as const;
 
 /** Tab Documentos de una ficha (16): resumen de vigencias, faltantes punteados y lista por tipo. */

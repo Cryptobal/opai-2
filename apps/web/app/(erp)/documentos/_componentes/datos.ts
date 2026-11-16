@@ -18,7 +18,7 @@ export type FilaExplorador = Documento & {
 type PaginaExplorador = { items: FilaExplorador[]; siguiente: string | null; total: number };
 
 const VIGENCIAS = ["vigente", "por_vencer", "vencido", "sin_fecha"];
-const ENTIDADES = ["tenant", "cuenta", "instalacion", "persona", "puesto"];
+const ENTIDADES = ["tenant", "cuenta", "instalacion", "persona", "puesto", "ticket", "visita"];
 const ORDENES = ["recientes", "nombre", "vence"];
 const dentro = (v: string | undefined, validos: string[]) =>
   v && validos.includes(v) ? v : undefined;

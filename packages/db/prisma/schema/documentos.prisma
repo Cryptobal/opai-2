@@ -7,7 +7,7 @@ model DocumentoTipo {
   codigo               String
   nombre               String
   descripcion          String?
-  /// "empresa" | "cuenta" | "instalacion" | "persona" | "puesto"
+  /// "empresa" | "cuenta" | "instalacion" | "persona" | "puesto" | "ticket" | "visita"
   capa                 String
   obligatorio          Boolean  @default(false)
   tieneVencimiento     Boolean  @default(false) @map("tiene_vencimiento")
@@ -84,7 +84,7 @@ model DocumentoVinculo {
   id          String   @id @default(uuid(7)) @db.Uuid
   tenantId    String   @map("tenant_id") @db.Uuid
   documentoId String   @map("documento_id") @db.Uuid
-  /// "tenant" | "cuenta" | "instalacion" | "persona" | "puesto" | entidades de módulos
+  /// "tenant" | "cuenta" | "instalacion" | "persona" | "puesto" | "ticket" | "visita" | …
   entidadTipo String   @map("entidad_tipo")
   entidadId   String   @map("entidad_id") @db.Uuid
   /// "propietario" | "referencia"

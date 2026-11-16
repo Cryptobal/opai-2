@@ -7,6 +7,8 @@ import type { Prisma } from "@opai/db";
 
 import type { Contexto } from "../../types";
 import { documentosEnAlcance } from "../documentos/alcance-doc";
+import { ticketVisible } from "../documentos/entidad-externa";
+import { dondeVisita } from "../../pauta/visitas-comun";
 
 /** Instalaciones a cargo del actor acotado, o null si ve todo el tenant. */
 export function instalacionesEnAlcance(ctx: Contexto): readonly string[] | null {
@@ -59,6 +61,9 @@ export async function entidadEnAlcance(ctx: Contexto, tipo: string, id: string):
   }
   // El catálogo de cargos es del tenant y no se acota por instalación.
   if (tipo === "cargo") return true;
+  if (tipo === "ticket") return (await ticketVisible(ctx, id)) !== null;
+  if (tipo === "visita")
+    return (await ctx.db.visitaSupervision.count({ where: { id, AND: [dondeVisita(ctx)] } })) > 0;
   // Empresa (tenant) y cualquier otro tipo: un actor acotado no lo ve (denegar por defecto, §16.4).
   return false;
 }
