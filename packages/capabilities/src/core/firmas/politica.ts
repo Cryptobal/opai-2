@@ -53,7 +53,7 @@ export const firmasPoliticaGet = defineCapability({
 export const firmasPoliticaSet = defineCapability({
   id: "core.firmas.politica_set",
   descripcion:
-    "Fija la política de firma de un tipo de documento sin bajar del mínimo legal de la plataforma (R2): nivel mínimo, niveles permitidos, orden, plazo en días y recordatorios. N3 está apagada (P2/P3).",
+    "Fija la política de firma de un tipo de documento sin bajar del mínimo legal de la plataforma: nivel mínimo, niveles permitidos, orden, plazo en días y recordatorios. El tercer nivel de firma no está disponible por ahora.",
   permiso: PERMISO_FIRMAS_CONFIG,
   input: z.object({
     clase: claseSchema,
