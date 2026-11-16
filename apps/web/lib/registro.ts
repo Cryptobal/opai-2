@@ -24,7 +24,7 @@ import {
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
-import { consumidoresAsistencia, consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente, trabajosAsistencia, trabajosCpq } from "@opai/modules";
+import { consumidoresAsistencia, consumidoresCentral, consumidorCpqBandeja, consumidorCpqEnlace, consumidorTicketsAvisos, modulos, trabajosAgente, trabajosAsistencia, trabajosCentral, trabajosCpq } from "@opai/modules";
 
 let hecho = false;
 
@@ -49,6 +49,7 @@ export function asegurarRegistro(): void {
     ...trabajosAgente,
     ...trabajosAsistencia,
     ...trabajosCpq,
+    ...trabajosCentral,
     trabajoCobrosMesAnterior,
     trabajoCobrosPruebas,
     trabajoVigilanciaRondas,
@@ -58,10 +59,12 @@ export function asegurarRegistro(): void {
     ...consumidoresDelNucleo,
     ...consumidoresAsistencia,
     ...consumidoresDesempeno,
+    ...consumidoresCentral,
     consumidorPautaCambio,
     consumidorPautaPublicada,
     consumidorCpqBandeja,
     consumidorCpqEnlace,
+    consumidorTicketsAvisos,
     consumidorSeguimientoCierre,
     consumidorAvisoPrueba,
     consumidorAvisoPruebaEmpresa,
