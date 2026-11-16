@@ -26,7 +26,7 @@ export function CabeceraFila({
   return (
     <th
       className={cn(
-        "sticky left-0 z-10 max-w-72 border-r border-b border-border py-1.5 pr-3 text-left",
+        "sticky left-0 z-10 w-36 min-w-36 max-w-36 overflow-hidden border-r border-b border-border py-1.5 pr-3 text-left md:w-auto md:min-w-40 md:max-w-72",
         claseFondoFila(fila),
         SANGRIA[nivel],
         fila.total && "border-t",
@@ -42,7 +42,7 @@ export function CabeceraFila({
             aria-label={`${plegable.abierta ? "Ocultar" : "Ver"} detalle de ${fila.etiqueta}`}
             onClick={() => onAlternar?.(fila.id)}
             // Área de toque de 44 px (iPad usa esta vista); el ícono sigue chico.
-            className="-my-2 -ml-2 flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm text-fg-subtle hover:bg-fill hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
+            className="-my-2 -ml-2 flex size-11 shrink-0 cursor-pointer scroll-mb-24 items-center justify-center rounded-sm text-fg-subtle hover:bg-fill hover:text-fg focus-visible:outline-2 focus-visible:outline-focus md:scroll-mb-0"
           >
             <ChevronRight
               aria-hidden

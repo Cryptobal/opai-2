@@ -60,7 +60,7 @@ export function PlanillaFlujoEscritorio({
   const conAccion = (id: string) => gestiona && filasPlan.some((f) => f.id === id);
   const filas = armado.filas.map((f) => (conAccion(f.id) ? { ...f, accion: "Reprogramar" } : f));
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div className="flex min-w-0 flex-col gap-4 pb-24 md:pb-0">
       {avisoTitulo ? (
         <Alerta tono="danger" titulo={avisoTitulo}>
           Revisa la semana en la planilla. El aviso se muestra solo dentro de OPAI, sin enviar correos.
