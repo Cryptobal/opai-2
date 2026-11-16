@@ -79,7 +79,7 @@ export const costoProyectadoListar = defineCapability({
     const meses = mesesQueCubren(desde, hasta);
     const [primero, ultimo] = [meses[0], meses[meses.length - 1]];
     const advertencias: string[] = [
-      "Turnos extra: aún no tienen monto en OPAI (CAR-96), por eso no se proyectan.",
+      "Turnos extra: aún no tienen monto asignado, por eso no se proyectan.",
       "Impuesto único: se descuenta del líquido y se paga con el F29; no está en estos totales.",
     ];
     const items: ItemCostoProyectado[] = [];

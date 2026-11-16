@@ -3,7 +3,7 @@ import type { Contexto } from "../types";
 
 export async function exigirOwnerAdmin(ctx: Contexto) {
   if (ctx.rol !== "owner" && ctx.rol !== "admin") {
-    throw prohibido("Solo owner o admin pueden importar datos desde OPAI 1.0.");
+    throw prohibido("Solo owner o admin pueden importar datos de migración.");
   }
 }
 

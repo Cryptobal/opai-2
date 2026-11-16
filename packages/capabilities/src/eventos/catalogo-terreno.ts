@@ -5,7 +5,7 @@ export const EVENTOS_TERRENO: readonly EventoDeDominio[] = [
   {
     id: "core.terreno.panico",
     descripcion:
-      "Un guardia apretó el botón de pánico en la app de terreno; trae la instalación, la persona y el id del pánico (CAR-293/296).",
+      "Un guardia apretó el botón de pánico en la app de terreno; trae la instalación, la persona y el id del pánico.",
   },
   {
     id: "core.terreno.hechos_recibidos",
