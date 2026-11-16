@@ -7,6 +7,7 @@ import { herramientasDelAgente } from "./herramientas";
 import {
   CARGAR,
   GUIA,
+  LISTAR,
   esquemasADemanda,
   indiceDelAgente,
   resolverLlamada,
@@ -99,7 +100,7 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     for (const llamada of r.llamadas) {
       await revalidarAccesoDelTurno(ctx);
       // Cargar esquemas no ejecuta nada: no gasta el límite de pasos del turno.
-      if (llamada.nombre !== CARGAR && ++llamadas > MAX_PASOS)
+      if (llamada.nombre !== CARGAR && llamada.nombre !== LISTAR && ++llamadas > MAX_PASOS)
         throw prohibido("Se alcanzó el límite de pasos del turno.");
       const paso = resolverLlamada(ctx, cargadas, llamada.nombre, llamada.argumentos);
       let resultado: Resultado;
