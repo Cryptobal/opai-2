@@ -8,45 +8,64 @@ import { avisar, Button, Sheet, Switch } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { DatosCampo } from "./datos-campo";
-import { DefinicionCampo, definicionInicial, entradaDefinicion } from "./definicion-campo";
+import { DefinicionCampo, definicionInicial, entradaDefinicion, type Definicion } from "./definicion-campo";
 import type { CampoConfig } from "./tipos-campo";
 
 type Props = (
-  { campo: CampoConfig } | { entidad: EntidadCampoPersonalizado; nombreFicha: string }
+  | { campo: CampoConfig }
+  | { entidad: EntidadCampoPersonalizado; nombreFicha: string }
 ) & {
   onCerrar: () => void;
 };
+
+async function guardarCampo(p: {
+  props: Props;
+  campo: CampoConfig | null;
+  etiqueta: string;
+  descripcion: string;
+  tipo: TipoCampoPersonalizado;
+  obligatorio: boolean;
+  activo: boolean;
+  definicion: Definicion;
+  ejecutar: ReturnType<typeof useCapacidad>["ejecutar"];
+}) {
+  const entrada = entradaDefinicion(p.tipo, p.definicion);
+  if (!entrada) return false;
+  const comun = {
+    etiqueta: p.etiqueta.trim(),
+    descripcion: p.descripcion.trim() || null,
+    obligatorio: p.obligatorio,
+    ...entrada,
+  };
+  const r =
+    "entidad" in p.props
+      ? await p.ejecutar("core.campos_personalizados.create", {
+          entidad: p.props.entidad,
+          tipo: p.tipo,
+          ...comun,
+        })
+      : await p.ejecutar("core.campos_personalizados.update", {
+          id: p.props.campo.id,
+          ...comun,
+          activo: p.activo,
+        });
+  if (!r) return false;
+  avisar.exito(p.campo ? "Campo guardado" : "Campo creado");
+  p.props.onCerrar();
+  return true;
+}
 
 /** Crea o edita un campo. El tipo se elige al crear; después no cambia (los valores dependen de él). */
 export function EditorCampo(p: Props) {
   const campo = "campo" in p ? p.campo : null;
   const [etiqueta, setEtiqueta] = useState(campo?.etiqueta ?? "");
-  const [tipo, setTipo] = useState<TipoCampo>(campo?.tipo ?? "texto");
-  const [opciones, setOpciones] = useState((campo?.opciones ?? []).map((o) => o.etiqueta).join("\n"));
+  const [tipo, setTipo] = useState<TipoCampoPersonalizado>(campo?.tipo ?? "texto");
+  const [descripcion, setDescripcion] = useState(campo?.descripcion ?? "");
+  const [def, setDef] = useState(() => definicionInicial(campo));
   const [obligatorio, setObligatorio] = useState(campo?.obligatorio ?? false);
   const [activo, setActivo] = useState(campo?.activo ?? true);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const definicion = entradaDefinicion(tipo, def);
-
-  async function guardar() {
-    const comun = {
-      etiqueta: etiqueta.trim(),
-      descripcion: descripcion.trim() || null,
-      obligatorio,
-      ...definicion,
-    };
-    const r =
-      "entidad" in p
-        ? await ejecutar("core.campos_personalizados.create", {
-            entidad: p.entidad,
-            tipo,
-            ...comun,
-          })
-        : await ejecutar("core.campos_personalizados.update", { id: p.campo.id, ...comun, activo });
-    if (!r) return;
-    avisar.exito(campo ? "Campo guardado" : "Campo creado");
-    p.onCerrar();
-  }
 
   return (
     <Sheet
@@ -63,7 +82,19 @@ export function EditorCampo(p: Props) {
           </Button>
           <Button
             disabled={pendiente || !etiqueta.trim() || !definicion}
-            onClick={() => void guardar()}
+            onClick={() =>
+              void guardarCampo({
+                props: p,
+                campo,
+                etiqueta,
+                descripcion,
+                tipo,
+                obligatorio,
+                activo,
+                definicion: def,
+                ejecutar,
+              })
+            }
           >
             Guardar
           </Button>
