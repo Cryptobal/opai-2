@@ -35,5 +35,5 @@ export {
 } from "./mapeo-referencias";
 export { valoresEmpresa, type FilaEmpresa } from "./mapeo-empresa";
 export { valoresNegocio, valoresCotizacion } from "./mapeo-negocio-cotizacion";
-export { valoresPuesto, textoTurnoPuesto, type FilaPuestoCotizacion } from "./mapeo-puesto";
+export { valoresPuesto, type FilaPuestoCotizacion } from "./mapeo-puesto";
 export { htmlTablaServicio, htmlResumenEconomico } from "./html-propuesta";

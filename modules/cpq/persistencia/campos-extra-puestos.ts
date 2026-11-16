@@ -11,10 +11,7 @@ import { IVA_PCT } from "@opai/domain/dinero";
 import { totalesDocumento } from "../domain/documento/totales";
 import type { EntradaPdfCotizacion } from "./documento-pdf-tipos";
 import { servicioDesdeFilas } from "./propuesta-tecnica";
-import type * as Recalc from "./recalcular";
-import { packServicioCotizacion } from "./recalcular";
-
-type PackFilasCotizacion = NonNullable<Awaited<ReturnType<typeof Recalc.cargarFilasVersion>>>;
+import { packServicioCotizacion, type PackFilasCotizacion } from "./recalcular";
 
 function ventaPorLinea(entrada: EntradaPdfCotizacion | null): Map<string, number | null> {
   const m = new Map<string, number | null>();

@@ -6,9 +6,7 @@ import {
 } from "@opai/domain";
 
 import type { EntradaPdfCotizacion } from "./documento-pdf-tipos";
-import type * as Recalc from "./recalcular";
-
-type PackFilasCotizacion = NonNullable<Awaited<ReturnType<typeof Recalc.cargarFilasVersion>>>;
+import type { PackFilasCotizacion } from "./recalcular";
 import { mesesContrato } from "./version";
 
 type Perfil = {
