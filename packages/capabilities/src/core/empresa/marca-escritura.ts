@@ -19,13 +19,13 @@ export function partesMarcaInput(raw: MarcaInput) {
 }
 
 /** Persiste marca visual y campos documentales en una sola transacción. */
-export async function guardarMarca(
+export async function guardarMarca<T>(
   ctx: Contexto,
   input: MarcaInput,
-  vista: (p: Partial<Record<string, unknown>> | null) => Promise<unknown>,
+  vista: (p: Partial<Record<string, unknown>> | null) => Promise<T>,
   validarLogo: (id: string) => Promise<void>,
   dryRun: boolean,
-) {
+): Promise<T> {
   for (const k of LOGOS) {
     const id = input[k];
     if (id) await validarLogo(id);

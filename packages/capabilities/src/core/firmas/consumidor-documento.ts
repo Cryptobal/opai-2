@@ -9,7 +9,7 @@ import { registrarEvidencia } from "./comun-flujo";
 export const consumidorFirmaDocumento = defineConsumidor({
   id: "core.firmas.documento",
   descripcion:
-    "Cancela las solicitudes de firma vivas de un documento cuando entra una versión nueva que lo reemplaza (firma.md R4, CA1).",
+    "Cancela las solicitudes de firma vivas de un documento cuando entra una versión nueva que lo reemplaza.",
   eventos: ["core.documento.registrado"],
   async handler(ctx, ev) {
     const p = ev.payload as { reemplazaAId?: string | null };
@@ -27,7 +27,7 @@ export const consumidorFirmaDocumento = defineConsumidor({
           where: { id: s.id, estado: s.estado },
           data: {
             estado: "cancelada",
-            motivo: "El documento cambió: se creó una versión nueva (R4).",
+            motivo: "El documento cambió: se creó una versión nueva.",
             canceladaEn: new Date(),
           },
         });

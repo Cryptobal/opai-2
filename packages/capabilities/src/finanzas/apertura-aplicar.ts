@@ -101,7 +101,7 @@ export async function aplicarApertura(
       const cuentaId = (bancoPor.get(`${s.banco}/${s.numeroVisible}`) as { id: string }).id;
       const m = await tx.movimientoBancario.create({
         data: {
-          tenantId: ctx.tenantId, cuentaId, fecha: aFecha(fechaCorte), monto: BigInt(s.saldo), glosa: "Saldo de apertura desde OPAI 1.0",
+          tenantId: ctx.tenantId, cuentaId, fecha: aFecha(fechaCorte), monto: BigInt(s.saldo), glosa: "Saldo de apertura (migración)",
           saldoDespues: BigInt(s.saldo), claveDedupe: "apertura:saldo", estado: "ignorado", origen: "manual",
         },
       });
@@ -113,7 +113,7 @@ export async function aplicarApertura(
           tenantId: ctx.tenantId, cuentaId, tipoDte: d.tipoDte, folio: d.folio, fechaEmision: aFecha(d.fechaEmision),
           fechaVencimiento: d.fechaVencimiento ? aFecha(d.fechaVencimiento) : null, montoNeto: d.montoNeto, montoExento: d.montoExento,
           montoIva: d.montoIva, montoTotal: d.montoTotal, estadoDte: "aceptado", estadoCobro: estadoCobro(d), montoCobrado: d.montoCobrado,
-          glosa: d.glosa ?? "Documento de apertura desde OPAI 1.0",
+          glosa: d.glosa ?? "Documento de apertura (migración)",
         },
       });
       await fila("documento_cobrar", `${d.tipoDte}-${d.folio}`, doc.id, { cobradoApertura: d.montoCobrado });
