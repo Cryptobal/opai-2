@@ -12,7 +12,7 @@ const ESTADOS = ["pendiente", "en_curso", "hecho", "fallido", "cancelado"] as co
 export const platformTrabajosList = defineCapability({
   id: "platform.trabajos.list",
   descripcion:
-    "Plataforma: cola de trabajos de una empresa o de todas (pendientes, en curso, fallidos), más reciente primero, con intentos y último error (sin el payload: CAR-40). 'conProblemas' deja los fallidos y los que están reintentando.",
+    "Plataforma: cola de trabajos de una empresa o de todas (pendientes, en curso, fallidos), más reciente primero, con intentos y último error (sin el detalle interno del trabajo). 'conProblemas' deja los fallidos y los que están reintentando.",
   permiso: PERMISOS_PLATAFORMA.tenantsRead,
   sinTenant: true,
   input: z.object({

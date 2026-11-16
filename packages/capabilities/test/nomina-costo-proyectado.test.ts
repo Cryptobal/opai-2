@@ -91,7 +91,7 @@ describe("nomina.costo_proyectado.listar", () => {
     expect(r.items.find((i) => i.fecha === "2026-12-13")?.concepto).toBe("previred");
     expect(JSON.stringify(r)).not.toMatch(new RegExp(`${P1}|${P2}|${P3}`));
     expect(r.advertencias.some((a) => a.startsWith("2026-11: 1 persona(s) sin estructura"))).toBe(true);
-    expect(r.advertencias.some((a) => a.includes("CAR-96"))).toBe(true);
+    expect(r.advertencias.some((a) => a.includes("Turnos extra"))).toBe(true);
   });
 
   it("leer sueldos queda en la auditoría sensible", async () => {

@@ -7,10 +7,10 @@ export const DIA_CIERRE_DEFECTO = 5;
 
 // Ajustes del módulo Desempeño (ADR-018): el manifiesto los declara y Configuración los edita.
 export const ajustesDesempeno = z.object({
-  dia_cierre: z.number().int().min(1).max(28).default(DIA_CIERRE_DEFECTO).meta({
-    etiqueta: "Día de cierre del mes",
+  dia_cierre_mes: z.number().int().min(1).max(28).default(DIA_CIERRE_DEFECTO).meta({
+    etiqueta: "Día de cierre automático del mes",
     ayuda:
-      "Ese día del mes OPAI cierra el mes anterior si nadie lo cerró antes: su resultado queda guardado y ya no cambia. Deja unos días para corregir hechos atrasados.",
+      "Ese día del mes OPAI cierra el mes anterior en Desempeño si nadie lo cerró antes: el resultado queda guardado y ya no cambia. Deja unos días para corregir hechos atrasados. No es el cierre del período de remuneraciones.",
     grupo: "Cierre de mes",
     ambito: "tenant",
     permiso: PERMISOS_DESEMPENO.scorecardsManage,
