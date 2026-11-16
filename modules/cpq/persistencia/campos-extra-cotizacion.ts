@@ -34,7 +34,7 @@ export async function extrasCamposCotizacion(
   const [tenant, perfil, entrada] = await Promise.all([
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
     ctx.db.perfilEmpresa.findUnique({ where: { tenantId: ctx.tenantId } }),
-    entradaPdfDesdeCotizacion(ctx, cotizacionId, { enviada }),
+    entradaPdfDesdeCotizacion(ctx, cotizacionId, enviada === undefined ? {} : { enviada }),
   ]);
 
   const { campos: escalares, venta, meses } = escalaresCamposCotizacion(

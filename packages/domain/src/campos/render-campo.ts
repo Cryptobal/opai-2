@@ -2,11 +2,12 @@ import { escaparHtml } from "../plantillas";
 import { campoPorClave } from "./catalogo";
 import { estaVacio, formatearValor } from "./formatos";
 import type { Nodo } from "./plantilla";
-import type { OpcionesRender, ProblemaCampo, ValorCampo } from "./tipos";
+import type { OpcionesRender } from "./render";
+import type { ProblemaCampo, ValorCampo } from "./tipos";
 
 type Ambito = Readonly<Record<string, ValorCampo>>;
 
-export function textoCampo(
+function textoCampo(
   n: Extract<Nodo, { t: "campo" }>,
   buscar: (clave: string, item?: Ambito) => ValorCampo,
   item: Ambito | undefined,

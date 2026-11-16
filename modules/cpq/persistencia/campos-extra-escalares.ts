@@ -6,10 +6,10 @@ import {
 } from "@opai/domain";
 
 import type { EntradaPdfCotizacion } from "./documento-pdf-tipos";
-import { cargarFilasVersion } from "./recalcular";
-import { mesesContrato } from "./version";
+import type * as Recalc from "./recalcular";
 
-type PackVersion = NonNullable<Awaited<ReturnType<typeof cargarFilasVersion>>>;
+type PackFilasCotizacion = NonNullable<Awaited<ReturnType<typeof Recalc.cargarFilasVersion>>>;
+import { mesesContrato } from "./version";
 
 type Perfil = {
   razonSocial: string | null;
@@ -37,7 +37,7 @@ export function escalaresCamposCotizacion(
   perfil: Perfil,
   neg: Negocio,
   cot: { codigo: string; titulo: string },
-  pack: PackVersion | null,
+  pack: PackFilasCotizacion | null,
   entrada: EntradaPdfCotizacion | null,
 ): EscalaresCpq {
   const version = pack?.version;

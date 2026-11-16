@@ -11,20 +11,21 @@ import { IVA_PCT } from "@opai/domain/dinero";
 import { totalesDocumento } from "../domain/documento/totales";
 import type { EntradaPdfCotizacion } from "./documento-pdf-tipos";
 import { servicioDesdeFilas } from "./propuesta-tecnica";
-import { cargarFilasVersion, packServicioCotizacion } from "./recalcular";
+import type * as Recalc from "./recalcular";
+import { packServicioCotizacion } from "./recalcular";
 
-type PackVersion = NonNullable<Awaited<ReturnType<typeof cargarFilasVersion>>>;
+type PackFilasCotizacion = NonNullable<Awaited<ReturnType<typeof Recalc.cargarFilasVersion>>>;
 
 function ventaPorLinea(entrada: EntradaPdfCotizacion | null): Map<string, number | null> {
   const m = new Map<string, number | null>();
   for (const s of entrada?.secciones ?? []) {
-    for (const l of s.lineas) m.set(`${s.nombre}\0${l.nombre}`, l.ventaMensualClp);
+    for (const l of s.lineas) m.set(`${s.nombre}\0${l.nombre}`, l.ventaMensualClp ?? null);
   }
   return m;
 }
 
 export function filasPuestosCotizacion(
-  pack: PackVersion | null,
+  pack: PackFilasCotizacion | null,
   entrada: EntradaPdfCotizacion | null,
 ): FilaPuestoCotizacion[] {
   const ventas = ventaPorLinea(entrada);
