@@ -19,7 +19,7 @@ const salida = z.object({
 export const configObtener = defineCapability({
   id: "acceso.config.get",
   descripcion:
-    "Lee la configuración de Control de acceso de la empresa o, con `instalacionId`, la que rige en esa instalación: tipos de ingreso habilitados, campos del formulario de la portería, validación del RUT, si se permiten ingresos fuera de lista, permanencia máxima y hora de cierre automático. Dice si la instalación la personalizó o hereda la de la empresa.",
+    "Lee la configuración de Control de acceso de la empresa o, con instalacionId, la que rige en esa instalación: tipos de ingreso habilitados, campos del formulario de la portería, validación del RUT, si se permiten ingresos fuera de lista, permanencia máxima y hora de cierre automático. Dice si la instalación la personalizó o hereda la de la empresa.",
   permiso: PERMISO_READ,
   input: z.object({ instalacionId: uuidSchema.optional() }),
   output: salida,
@@ -39,7 +39,7 @@ export const configObtener = defineCapability({
 export const configCambiar = defineCapability({
   id: "acceso.config.set",
   descripcion:
-    "Cambia la configuración de Control de acceso de la empresa o, con `instalacionId`, la de una instalación, que reemplaza entera a la de la empresa. Con `config: null` la instalación vuelve a heredar la de la empresa (y la empresa, a la de fábrica). Activar «permitir ingresos fuera de lista» queda auditado (R2). Un agente necesita aprobación humana.",
+    "Cambia la configuración de Control de acceso de la empresa o, con instalacionId, la de una instalación, que reemplaza entera a la de la empresa. Con config en null la instalación vuelve a heredar la de la empresa (y la empresa, a la de fábrica). Activar «permitir ingresos fuera de lista» queda en el registro de auditoría. Un agente necesita aprobación humana.",
   permiso: PERMISO_CONFIG,
   input: z.object({ instalacionId: uuidSchema.optional(), config: configSchema.nullable() }),
   output: salida,
