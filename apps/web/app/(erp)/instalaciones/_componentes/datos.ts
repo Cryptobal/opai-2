@@ -1,14 +1,17 @@
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
-import { requerirEncontrado, requerirUuid } from "@/lib/ids";
+import { esUuid, requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { CuentaFila, InstalacionDetalle, InstalacionFila, Pagina } from "@/lib/tipos-maestros";
 
 /** Instalaciones filtradas por texto, cuenta, estado y región, con las cuentas para el filtro. */
 export async function cargarInstalaciones(p: Parametros) {
+  const limite = tamanoPagina(p);
   const [r, cuentas] = await Promise.all([
     ejecutarComoUsuario<Pagina<InstalacionFila>>("erp", "core.instalaciones.list", {
-      limite: 100,
+      limite,
+      ...(p.cursor && esUuid(p.cursor) ? { cursor: p.cursor } : {}),
       ...(p["q"] ? { q: p["q"] } : {}),
       ...(p["cuenta"] ? { cuentaId: p["cuenta"] } : {}),
       ...(p["estado"] ? { estado: p["estado"] } : {}),
@@ -19,6 +22,7 @@ export async function cargarInstalaciones(p: Parametros) {
   return {
     state: estadoPantalla(r),
     items: r.ok ? r.data.items : [],
+    siguiente: r.ok ? r.data.siguiente : null,
     cuentas: cuentas.ok ? cuentas.data.items.map((c) => ({ valor: c.id, etiqueta: c.nombre })) : [],
   };
 }

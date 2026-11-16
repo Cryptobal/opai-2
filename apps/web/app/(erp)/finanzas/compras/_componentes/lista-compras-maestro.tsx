@@ -4,6 +4,8 @@ import { Alerta, Badge } from "@opai/ds";
 
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { pesos } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 
@@ -20,6 +22,8 @@ type Datos = Awaited<ReturnType<typeof cargarLibro>>;
 /** Columna izquierda del libro de compras (CAR-256): pestañas, aviso de centros, búsqueda, filtros y filas. */
 export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos: Datos; seleccionada?: string; params: Parametros }) {
   const items = d.libro?.items ?? [];
+  const siguiente = d.libro?.siguiente ?? null;
+  const porPagina = tamanoPagina(params);
   const r = d.libro?.resumen;
   const acciones = d.gestiona ? (
     // Tres acciones: en una columna angosta pasan a otra línea en vez de salirse.
@@ -81,7 +85,17 @@ export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos:
             </>
           ),
         }))}
-        {...(d.libro?.siguiente ? { pie: <p className="px-4 py-3 text-sm text-fg-muted">Se muestran los primeros 100 documentos: acota el período para ver el resto.</p> } : {})}
+        pie={
+          d.state === "ready" ? (
+            <PaginacionListaMaestro
+              p={params}
+              rutaBase="/finanzas/compras"
+              mostrados={items.length}
+              siguiente={siguiente}
+              porPagina={porPagina}
+            />
+          ) : undefined
+        }
       />
     </>
   );

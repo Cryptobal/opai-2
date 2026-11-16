@@ -5,6 +5,8 @@ import { Badge, cn, type EstadoPantalla } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionFila } from "@/lib/tipos-maestros";
 
@@ -14,6 +16,7 @@ import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 type Props = {
   state: EstadoPantalla;
   items: InstalacionFila[];
+  siguiente?: string | null;
   cuentas: { valor: string; etiqueta: string }[];
   titulo: string;
   singular: string;
@@ -27,6 +30,8 @@ const personas = (n: number) => `${n} ${n === 1 ? "persona" : "personas"}`;
 /** Columna de instalaciones (06): icono, nombre, "cuenta · comuna", estado y dotación. */
 export function ListaInstalaciones(p: Props) {
   const total = p.items.reduce((t, i) => t + i.dotacion, 0);
+  const porPagina = tamanoPagina(p.parametros);
+  const filtrando = Boolean(p.parametros.q || p.parametros.estado || p.parametros.cuenta || p.parametros.region);
   const nueva = (
     <EnlaceBoton href="/instalaciones/nueva" icono={Plus} variante={p.seleccionada ? "secondary" : "primary"}>
       Nueva
@@ -51,13 +56,33 @@ export function ListaInstalaciones(p: Props) {
         },
         { param: "region", etiqueta: "Región", opciones: REGIONES },
       ]}
-      meta={{ izquierda: `${p.items.length} ${p.titulo.toLowerCase()}`, derecha: personas(total) }}
-      seleccionada={p.seleccionada}
-      vacio={{
-        titulo: `Aún no hay ${p.titulo.toLowerCase()}`,
-        descripcion: "Crea la primera para definir sus puestos y documentos.",
-        accion: nueva,
+      meta={{
+        izquierda: filtrando
+          ? `${p.items.length}${p.siguiente ? "+" : ""} ${p.items.length === 1 ? "resultado" : "resultados"}`
+          : `${p.items.length}${p.siguiente ? "+" : ""} ${p.titulo.toLowerCase()}`,
+        derecha: personas(total),
       }}
+      seleccionada={p.seleccionada}
+      vacio={
+        filtrando
+          ? { titulo: "Sin resultados", descripcion: "Prueba otro término o quita un filtro." }
+          : {
+              titulo: `Aún no hay ${p.titulo.toLowerCase()}`,
+              descripcion: "Crea la primera para definir sus puestos y documentos.",
+              accion: nueva,
+            }
+      }
+      pie={
+        p.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={p.parametros}
+            rutaBase="/instalaciones"
+            mostrados={p.items.length}
+            siguiente={p.siguiente ?? null}
+            porPagina={porPagina}
+          />
+        ) : undefined
+      }
       filas={p.items.map((i) => {
         const e = estadoDe(ESTADO_INSTALACION, i.estado);
         const sel = p.seleccionada === i.id;

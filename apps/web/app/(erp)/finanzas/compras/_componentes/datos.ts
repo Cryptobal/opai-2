@@ -1,5 +1,7 @@
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { hoyIso } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
+import { esUuid } from "@/lib/ids";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
@@ -29,9 +31,11 @@ export async function cargarLibro(sp: SearchParams) {
   const puede = puedeDeIdentidad(identidad);
   const gestiona = puede("finanzas:compras.manage");
   const puedeCrearProveedores = puede("finanzas:proveedores.manage");
+  const limite = tamanoPagina(p);
   const [libro, centros, proveedores] = await Promise.all([
     ejecutarComoUsuario<Libro>("erp", "finanzas.compras.listar", {
-      limite: 100,
+      limite,
+      ...(p.cursor && esUuid(p.cursor) ? { cursor: p.cursor } : {}),
       ...(p["periodo"] ? { periodo: p["periodo"] } : {}),
       ...(p["q"] ? { q: p["q"] } : {}),
       ...(p["sin_centro"] === "1" ? { sinCentroCosto: true } : {}),

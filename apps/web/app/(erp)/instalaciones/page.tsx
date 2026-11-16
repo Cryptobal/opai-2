@@ -36,6 +36,7 @@ export default function Instalaciones({ searchParams }: { searchParams: SearchPa
             <ListaInstalaciones
               state={d.state}
               items={d.items}
+              siguiente={d.siguiente}
               cuentas={d.cuentas}
               titulo={d.voc.titulo("instalacion")}
               singular={d.voc.instalacion.singular}
