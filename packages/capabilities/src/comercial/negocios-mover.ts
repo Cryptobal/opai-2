@@ -52,7 +52,7 @@ export const negociosMover = defineCapability({
 export const negociosGanar = defineCapability({
   id: "comercial.negocios.ganar",
   descripcion:
-    "IRREVERSIBLE: marca un negocio como ganado (etapa ganada del embudo), validando los requisitos. Devuelve los efectos (R18): la cuenta pasa a cliente activo, se activan las instalaciones, la cotización vigente queda aceptada y cuántos puestos se ofrecerán; la vista previa los muestra sin aplicarlos. Un agente queda en la cola de aprobación humana (R20).",
+    "IRREVERSIBLE: marca un negocio como ganado (etapa ganada del embudo), validando los requisitos. Devuelve los efectos posteriores: la cuenta pasa a cliente activo, se activan las instalaciones, la cotización vigente queda aceptada y cuántos puestos se ofrecerán; la vista previa los muestra sin aplicarlos. Si un agente ejecuta la acción, puede quedar en la cola de aprobación humana.",
   permiso: PERMISO_MANAGE,
   input: z.object({ id: uuidSchema }),
   output: negocioSchema.extend({ aviso: z.string().nullable(), efectos: efectosGanarSchema }),
