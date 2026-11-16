@@ -9,7 +9,7 @@ import { accionesSinEditar } from "./ficha-ruta";
 import { EnlaceBotonHoja } from "./enlace-boton-hoja";
 
 /** Cabecera estándar de ficha: [Editar] [Fijar] [⋯] (CAR-546). */
-export function AccionesFicha({
+function AccionesFicha({
   acciones,
   etiqueta,
   editar,
