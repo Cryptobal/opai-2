@@ -5,7 +5,7 @@ import { defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai
 import { ESTADOS_VIVOS } from "../domain";
 import { prioridadSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR, PERMISO_VER_TODOS } from "./permisos";
-import { exigirMiembroActivo, ID_VISTA_PREVIA, responsablePorDefecto, ticketDe, vistaDeFila } from "./util";
+import { exigirMiembroActivo, ID_VISTA_PREVIA, instalacionVisible, responsablePorDefecto, ticketDe, vistaDeFila } from "./util";
 
 export const ticketsCrear = defineCapability({
   id: "tickets.tickets.crear",
@@ -18,6 +18,7 @@ export const ticketsCrear = defineCapability({
     descripcion: z.string().trim().min(3).max(4000),
     prioridad: prioridadSchema.default("p3"),
     responsableId: uuidSchema.optional().describe("Solo si quien crea puede ver todos los tickets."),
+    instalacionId: uuidSchema.optional().describe("Instalación a la que se refiere, dentro del alcance de quien crea."),
   }),
   output: z.object({ id: uuidSchema }),
   efecto: "escritura",
@@ -36,6 +37,7 @@ export const ticketsCrear = defineCapability({
     } else {
       responsableId = await responsablePorDefecto(ctx, tipo);
     }
+    const instalacionId = input.instalacionId ? await instalacionVisible(ctx, input.instalacionId) : null;
     if (dryRun) return { id: ID_VISTA_PREVIA };
     const creado = await ctx.transaccion(async (tx) => {
       const t = await tx.ticket.create({
@@ -48,6 +50,7 @@ export const ticketsCrear = defineCapability({
           estado: "abierto",
           solicitanteId: ctx.usuario!.id,
           responsableId,
+          instalacionId,
         },
       });
       await tx.ticketEvento.create({
@@ -57,7 +60,7 @@ export const ticketsCrear = defineCapability({
         tipo: "tickets.ticket.creado",
         entidadTipo: "ticket",
         entidadId: t.id,
-        payload: { tipoId: tipo.id, prioridad: t.prioridad, responsableId },
+        payload: { tipoId: tipo.id, prioridad: t.prioridad, responsableId, instalacionId },
       });
       return t;
     });

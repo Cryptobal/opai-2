@@ -61,6 +61,8 @@ export * from "./incidentes";
 export * from "./documento-subida";
 export * from "./firma";
 export * from "./campos-personalizados";
+export * from "./campos-personalizados-valor";
+export * from "./campos-personalizados-mostrar";
 export * from "./firma-flujo";
 export * from "./retencion";
 export * from "./etiquetas-datos-personales";
