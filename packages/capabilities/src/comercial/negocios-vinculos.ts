@@ -21,7 +21,7 @@ function visibles(ctx: Contexto, negocioId: string) {
 export const negociosVincularInstalacion = defineCapability({
   id: "comercial.negocios.vincular_instalacion",
   descripcion:
-    "Vincula una instalación de la cuenta del negocio con su tipo (nueva, ampliación, renovación o reemplazo). El negocio lee los datos de la instalación, no los copia (R7).",
+    "Vincula una instalación de la cuenta del negocio con su tipo (nueva, ampliación, renovación o reemplazo). El negocio referencia los datos de la instalación, no los copia.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     negocioId: uuidSchema,

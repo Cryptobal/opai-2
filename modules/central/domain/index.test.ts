@@ -29,6 +29,12 @@ describe("transicion", () => {
   });
 });
 
+it("hacerse cargo pasa a en atención desde nueva, en contacto o escalada", () => {
+  expect(transicion("escalada", "hacerse_cargo")).toBe("en_atencion");
+  expect(transicion("en_atencion", "hacerse_cargo")).toBeNull();
+  expect(transicion("resuelta", "hacerse_cargo")).toBeNull();
+});
+
 describe("estadoEfectivo", () => {
   const ahora = new Date("2026-11-14T12:00:00Z");
   it("una pospuesta vencida vuelve a su estado anterior", () => {
