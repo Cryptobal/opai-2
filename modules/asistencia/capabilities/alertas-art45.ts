@@ -27,7 +27,7 @@ export async function emitir(
       data: [{ tenantId: ctx.tenantId, tipo, clave, personaId, datos: datos as never, ...refs }], skipDuplicates: true,
     });
     if (r.count === 0) return false;
-    await ctx.eventos.emitir(tx, { tipo: EVENTO[tipo], entidadTipo: "persona", entidadId: personaId, payload: { personaId, tipo, clave, ...datos } });
+    await ctx.eventos.emitir(tx, { tipo: EVENTO[tipo], entidadTipo: "persona", entidadId: personaId, payload: { personaId, tipo, clave, ...refs, ...datos } }); // refs (aditivo, CAR-293): instalación del aviso a Slack
     return true;
   });
   if (!emitido) return false;

@@ -18,6 +18,7 @@ export default function FlujoDeCaja({ searchParams }: { searchParams: SearchPara
           gestiona={d.gestiona}
           configura={d.configura}
           movil={d.movil}
+          epoca={d.epoca}
         />
       )}
     </PaginaPortal>

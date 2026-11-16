@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
 
-import { ajustesSchema, aNumeroSeguro, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
+import { ajustesSchema, aNumeroSeguro, celdaSchema, conGrupo, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
 import type { capaSchema } from "./esquemas";
 import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
@@ -127,8 +127,8 @@ export const planillaObtener = defineCapability({
       ajustes,
       filas: [
         ...filas.map(vistaFila),
-        ...FILAS_VIRTUALES_VISTA.filter((f) => extraVista.some((c) => c.filaId === f.id)),
-        ...(extraVista.some((c) => c.filaId === FILA_DIFERENCIA_FACTORING) ? [filaDiferenciaFactoringVista(await cuentaDiferenciaFactoring(ctx))] : []),
+        ...FILAS_VIRTUALES_VISTA.filter((f) => extraVista.some((c) => c.filaId === f.id)).map(conGrupo),
+        ...(extraVista.some((c) => c.filaId === FILA_DIFERENCIA_FACTORING) ? [conGrupo(filaDiferenciaFactoringVista(await cuentaDiferenciaFactoring(ctx)))] : []),
       ],
       celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,

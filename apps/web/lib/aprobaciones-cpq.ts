@@ -1,26 +1,8 @@
 import type { Aprobacion } from "@/app/(erp)/configuracion/aprobaciones/tipos";
+import type { ItemBandejaCpq } from "../../../modules/cpq/persistencia/aprobaciones-bandeja-tipos";
 
-export type ItemBandejaCpqApi = {
-  id: string;
-  tipo: "margen" | "envio_propuesta";
-  estado: string;
-  resumen: string;
-  cotizacionId: string;
-  codigo: string;
-  titulo: string;
-  cuentaNombre: string;
-  ventaMensualClp: number | null;
-  margenEfectivoPct: number | null;
-  margenMinimoPct: number;
-  solicitanteId: string;
-  solicitanteNombre: string;
-  comentario: string | null;
-  creadaEn: string;
-  resueltaEn: string | null;
-  motivo: string | null;
-  enlaceCotizacion: string;
-  enlaceBandeja: string;
-};
+/** Forma de la API de bandeja CPQ: es el tipo del módulo (dueño). */
+export type ItemBandejaCpqApi = ItemBandejaCpq;
 
 export function esAprobacionCpq(id: string) {
   return id.startsWith("cpq-m/") || id.startsWith("cpq-e/");

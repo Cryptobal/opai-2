@@ -42,7 +42,7 @@ export function Historial({ item }: { item: DetalleProgramacion }) {
                     {c.periodo}
                   </LinkNext>
                 ) : (
-                  <span>{c.periodo} · importado de OPAI 1.0</span>
+                  <span>{c.periodo} · importado en la migración</span>
                 )}
                 <span className="t-numeric">{c.montoTotal !== null ? pesos(c.montoTotal) : "—"}</span>
               </span>

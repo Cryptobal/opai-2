@@ -15,9 +15,6 @@
   }
 }
 
-/* Dentro del marco «Hilo» (ADR-090): variante para lo poco que un patrón cambia según el marco. */
-@custom-variant marco-hilo (&:where([data-marco="hilo"] *));
-
 @layer base {
   html {
     font-family: var(--font-sans);
@@ -126,46 +123,6 @@
   font-size: 13px;
   line-height: 20px;
   font-variant-numeric: tabular-nums;
-}
-
-/* Marco «Hilo» (ADR-090, CAR-278): tamaños del diseño aprobado que no están en la escala base
-   (docs/2.0/design/export-base-hilo/). Solo los usa el marco; las pantallas siguen con la escala. */
-@utility t-hilo-saludo {
-  font-size: 26px;
-  line-height: 32px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-@utility t-hilo-lead {
-  font-size: 15px;
-  line-height: 22px;
-  font-weight: 400;
-}
-@utility t-hilo-titulo {
-  font-size: 17px;
-  line-height: 24px;
-  font-weight: 600;
-}
-@utility t-hilo-item {
-  font-size: 16px;
-  line-height: 22px;
-  font-weight: 600;
-}
-@utility t-hilo-mini {
-  font-size: 11px;
-  line-height: 14px;
-}
-/* Cabecera del hilo (CAR-317): nombre de la empresa y monograma. */
-@utility t-hilo-sujeto {
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-@utility t-hilo-monograma {
-  font-size: 13px;
-  line-height: 16px;
-  font-weight: 700;
 }
 
 /* Skeleton con brillo (modo claro y oscuro) */
@@ -365,15 +322,8 @@
   );
 }
 
-/* Piel Hilo de estados, esqueleto e indicadores (H2, CAR-324; diseño en
-   docs/2.0/design/export-base-hilo/). Vive en CSS y no en clases `marco-hilo:` para no pesar en el
-   JS compartido de todas las rutas (ADR-037). `:is()` da al marco Hilo más especificidad que las
-   utilidades del clásico. */
 @utility ds-estado {
   @apply flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center;
-  &:is([data-marco="hilo"] *) {
-    @apply max-w-[560px] items-start gap-2 rounded-none border-0 px-0 py-5 text-left;
-  }
 }
 @utility ds-estado-icono {
   @apply flex size-12 items-center justify-center rounded-full bg-bg text-fg-muted;
@@ -381,150 +331,17 @@
   & :where(svg) {
     @apply size-6;
   }
-  &:is([data-marco="hilo"] *) {
-    @apply size-11 rounded-[14px] bg-fill;
-  }
-  &:is([data-marco="hilo"] *) svg {
-    @apply size-[22px];
-  }
 }
-@utility ds-estado-icono-danger {
-  &:is([data-marco="hilo"] *):is([data-marco="hilo"] *) {
-    @apply bg-danger-muted text-danger-fg;
-  }
-}
-@utility ds-estado-icono-warning {
-  &:is([data-marco="hilo"] *):is([data-marco="hilo"] *) {
-    @apply bg-warning-muted text-warning-fg;
-  }
-}
-/* Acción de un estado: en el marco Hilo va como botón secundario, aunque la pantalla pase un botón
-   principal (DISENO.md §3b; CAR-360). Así la cabecera conserva el único primario de la vista (R1). */
 @utility ds-estado-accion {
   @apply mt-1;
-  &:is([data-marco="hilo"] *) :is(.bg-accent.bg-accent) {
-    @apply border-border-control bg-surface text-fg hover:bg-fill;
-  }
 }
 @utility ds-estado-titulo {
   @apply text-md font-medium text-fg;
-  &:is([data-marco="hilo"] *) {
-    @apply text-lg leading-[26px] font-semibold;
-  }
 }
 @utility ds-estado-texto {
   @apply max-w-sm text-base text-fg-muted;
-  &:is([data-marco="hilo"] *) {
-    @apply max-w-none;
-  }
-}
-/* Esqueleto: en el marco Hilo, los mismos bloques del clásico se pintan como filas sin tarjeta,
-   separadas por una línea, con monograma de 36 px (listas) y dos líneas de texto. Sin elementos
-   extra en el DOM. */
-@utility ds-esq {
-  &:is([data-marco="hilo"] *) {
-    @apply gap-0 border-t border-border;
-  }
-  /* El tablero ya trae la línea encima de cada indicador: sin la del contenedor no queda doble. */
-  &:is([data-marco="hilo"] *):has(> .ds-grilla-kpi) {
-    @apply border-t-0;
-  }
-}
-@utility ds-esq-fila {
-  &:is([data-marco="hilo"] *) {
-    @apply relative h-[61px] rounded-none border-b border-border bg-transparent;
-  }
-  /* El esqueleto del diseño es quieto: el `::after` deja el brillo de `ds-shimmer` y pinta la
-     segunda línea. */
-  &:is([data-marco="hilo"] *)::before,
-  &:is([data-marco="hilo"] *)::after {
-    @apply absolute inset-auto h-3 animate-none rounded-[6px] content-[''];
-    transform: none;
-    background: var(--ds-fill);
-  }
-  &:is([data-marco="hilo"] *)::before {
-    @apply top-[18px] left-0 w-[46%];
-  }
-  &:is([data-marco="hilo"] *)::after {
-    @apply top-[36px] left-0 h-2.5 w-[30%];
-  }
-  &:is([data-marco="hilo"] *):nth-child(3n + 2)::before {
-    @apply w-[38%];
-  }
-  &:is([data-marco="hilo"] *):nth-child(3n + 2)::after {
-    @apply w-[52%];
-  }
-}
-@utility ds-esq-mono {
-  &:is([data-marco="hilo"] *) {
-    @apply pl-12;
-    background: linear-gradient(var(--ds-fill), var(--ds-fill)) left 12px / 36px 36px no-repeat;
-  }
-  &:is([data-marco="hilo"] *)::before,
-  &:is([data-marco="hilo"] *)::after {
-    @apply left-12;
-  }
-}
-@utility ds-esq-kpi {
-  &:is([data-marco="hilo"] *) {
-    @apply relative h-[84px] rounded-none border-t border-border bg-transparent;
-  }
-  &:is([data-marco="hilo"] *)::before,
-  &:is([data-marco="hilo"] *)::after {
-    @apply absolute inset-auto left-0 animate-none rounded-[6px] content-[''];
-    transform: none;
-    background: var(--ds-fill);
-  }
-  &:is([data-marco="hilo"] *)::before {
-    @apply top-4 h-3 w-1/2;
-  }
-  &:is([data-marco="hilo"] *)::after {
-    @apply top-9 h-6 w-3/4;
-  }
-}
-/* Indicador sin tarjeta, con una línea encima, como el «Pulso» del diseño. */
-@utility ds-kpi {
-  &:is([data-marco="hilo"] *) {
-    @apply gap-1 rounded-none border-0 border-t bg-transparent px-0 py-3.5;
-  }
-}
-@utility ds-kpi-etiqueta {
-  &:is([data-marco="hilo"] *) {
-    @apply font-normal;
-  }
-}
-@utility ds-kpi-valor {
-  &:is([data-marco="hilo"] *) {
-    @apply text-[length:clamp(14px,13cqi,26px)] leading-[30px] tracking-[-0.02em];
-  }
-}
-@utility ds-kpi-nota {
-  &:is([data-marco="hilo"] *) {
-    @apply leading-4 font-medium;
-  }
-}
-/* Grilla de indicadores: sin espacio vertical entre filas, 24 px entre columnas y línea al pie. */
-@utility ds-grilla-kpi {
-  &:is([data-marco="hilo"] *) {
-    @apply gap-x-6 gap-y-0 border-b border-border;
-  }
 }
 
-/* Marco Hilo: la fila seleccionada (lista de una vista dividida, lista lateral de Configuración) no usa
-   el índigo, que es solo del agente (DISENO-hilo.md R3; CAR-369). Fondo `fill` y barra en tinta. Vive en
-   CSS sobre las clases que ya pone `claseFila`, para no sumar JS (ADR-037). */
-:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent {
-  background-color: var(--ds-fill);
-}
-:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent::before {
-  background-color: var(--ds-fg);
-}
-:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .text-accent {
-  color: var(--ds-fg);
-}
-:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .bg-surface.text-accent {
-  box-shadow: inset 0 0 0 1px var(--ds-fg);
-}
 /* Menú plegable del diseño nuevo (ADR-109, CAR-335 D2): `ShellNuevo` pone `data-menu` y estas reglas
    deciden qué se ve, sin JS en el shell compartido (ADR-037). Plegado: en escritorio queda el riel de
    íconos. Asomado: el menú completo flota sobre la página, en iPad y en escritorio. */
@@ -544,6 +361,87 @@
   z-index: 40;
   display: flex;
   box-shadow: var(--ds-shadow-overlay);
+}
+/* Ancho y movimiento del menú del diseño nuevo (CAR-442, referente Linear): `ShellNuevo` fija
+   `--ancho-menu` (200 a 360 px; se cambia arrastrando el borde, `AsaMenu`). El menú entra
+   deslizándose al fijarlo (no al cargar la página) o al asomarse, sin animación si el sistema pide menos movimiento. */
+[data-marco="nuevo"] nav[data-shell="sidebar"] {
+  width: var(--ancho-menu, 248px);
+}
+[data-marco="nuevo"] [data-shell="asa-menu"] {
+  left: var(--ancho-menu, 248px);
+}
+[data-menu="plegado"] [data-shell="asa-menu"],
+[data-menu="asomado"] [data-shell="asa-menu"] {
+  display: none;
+}
+/* Plegado como en Linear (CAR-442), con mouse o trackpad: sin riel de íconos; queda el botón
+   «Mostrar el menú» arriba a la izquierda y una franja de 8 px en el borde que asoman el menú; ya
+   asomado, el menú trae «Dejar el menú fijo» y la página se oscurece un poco. En pantallas táctiles
+   sigue el riel. */
+[data-shell="mostrar-menu"],
+[data-shell="borde-asomar"],
+[data-shell="velo-menu"] {
+  display: none;
+}
+@media (min-width: 64rem) and (pointer: fine) {
+  [data-menu="plegado"] nav[data-shell="riel"],
+  [data-menu="asomado"] nav[data-shell="riel"] {
+    display: none;
+  }
+  [data-menu="plegado"] [data-shell="mostrar-menu"] {
+    display: flex;
+  }
+  [data-menu="plegado"] header[data-shell="barra"],
+  [data-menu="asomado"] header[data-shell="barra"] {
+    padding-left: 3.5rem;
+  }
+  [data-menu="plegado"] [data-shell="borde-asomar"] {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 30;
+    display: block;
+    width: 8px;
+  }
+  [data-menu="asomado"] [data-shell="velo-menu"] {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: block;
+    pointer-events: none;
+  }
+}
+@media (min-width: 64rem) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-menu="asomado"] [data-shell="velo-menu"] {
+    animation: ds-aparecer 180ms ease-out;
+  }
+}
+/* En pantallas táctiles (iPad horizontal) no hay borde de 8 px que tomar: el menú se pliega con su botón. */
+@media (pointer: coarse) {
+  [data-marco="nuevo"] [data-shell="asa-menu"] {
+    display: none;
+  }
+}
+[data-arrastre] {
+  cursor: col-resize;
+  user-select: none;
+}
+@keyframes menu-entra {
+  from {
+    opacity: 0.6;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+  [data-menu="fijo"][data-animar] nav[data-shell="sidebar"],
+  [data-menu="asomado"] nav[data-shell="sidebar"] {
+    animation: menu-entra 180ms ease-out;
+  }
 }
 /* Sin logo, la inicial de la empresa va con su color (ADR-109, CAR-335 D6b). */
 [data-marco="nuevo"] [data-monograma] {
@@ -597,9 +495,13 @@
 }
 /* Teléfono del diseño nuevo (CAR-335 D2c): la barra inferior es Inicio, Agente, Menú y Yo
    (`BarraInferiorNueva`); la clásica y el avatar de arriba se esconden, porque la cuenta vive en «Yo».
-   Se eligen por su rol y su nombre accesible, sin marcas nuevas en el shell compartido (ADR-037). */
-[data-marco="nuevo"] nav[aria-label="Principal"].fixed:not([data-shell="inferior-nuevo"]),
-[data-marco="nuevo"] header.md\:hidden div:has(> button[aria-label^="Menú de usuario"]) {
+   Se eligen por su rol y su nombre accesible, sin marcas nuevas en el shell compartido (ADR-037).
+   Los portales de terreno (`data-pestanas="portal"`, CAR-335 D6e) conservan su barra de pestañas. */
+[data-marco="nuevo"][data-menu]:not([data-pestanas])
+  nav[aria-label="Principal"].fixed:not([data-shell="inferior-nuevo"]),
+[data-marco="nuevo"][data-menu]:not([data-pestanas])
+  header.md\:hidden
+  div:has(> button[aria-label^="Menú de usuario"]) {
   display: none;
 }
 /* Teléfono del diseño nuevo (CAR-416, `export-diseno-nuevo/Telefono`): la barra inferior se ve siempre.

@@ -5,9 +5,9 @@ import type { Contexto } from "../types";
 const TOPE_BYTES = 2 * 1024 * 1024;
 
 /**
- * Logo principal de Configuración › Marca del tenant (ADR-028) para el PDF del DTE (CAR-259). Solo PNG/JPG con tope de
- * tamaño y de tiempo; ante cualquier fallo devuelve `null` y el PDF sigue con la razón social en texto. Nunca hay un logo fijo.
- * (Misma lectura que `cargarLogoMarca` de CPQ: una capacidad no puede importar de un módulo.)
+ * Logo principal de Configuración › Marca del tenant (ADR-028) para PDF (DTE, documentos laborales, CPQ).
+ * Solo PNG/JPG con tope de tamaño y de tiempo; ante cualquier fallo devuelve `null` y el PDF sigue con la
+ * razón social en texto. Nunca hay un logo fijo. Una sola copia (CAR-439); CPQ la reexporta como `cargarLogoMarca`.
  */
 export async function logoDeMarca(ctx: Contexto): Promise<PdfLogo | null> {
   try {

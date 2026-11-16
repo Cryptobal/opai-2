@@ -30,7 +30,7 @@ const datosSchema = z.object({
   inicioActividades: z.string().nullable(),
 });
 
-export type OrigenSii = "cache" | "sii";
+type OrigenSii = "cache" | "sii";
 export type ConsultaSii = ResultadoContribuyente & {
   origen: OrigenSii | null;
   consultadoEn: Date | null;
