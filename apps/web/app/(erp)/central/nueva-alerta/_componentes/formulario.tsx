@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { avisar, Button, Campo, Input, Select, Textarea } from "@opai/ds";
+import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { SEVERIDADES, ETIQUETA_SEVERIDAD } from "../../_componentes/tipos-central";
+import { CamposNuevaAlerta } from "./campos-form";
 
 type Inst = { id: string; nombre: string };
 
@@ -18,7 +18,7 @@ export function FormularioNuevaAlerta() {
   const [instalacionId, setInstalacionId] = useState("");
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [severidad, setSeveridad] = useState<string>("media");
+  const [severidad, setSeveridad] = useState("media");
 
   useEffect(() => {
     void ejecutar<{ items: { id: string; nombre: string }[] }>("core.instalaciones.list", { limite: 100 }).then((r) => {
@@ -27,12 +27,7 @@ export function FormularioNuevaAlerta() {
   }, [ejecutar]);
 
   async function enviar() {
-    const r = await ejecutar<{ id: string }>("central.alertas.abrir", {
-      instalacionId,
-      titulo,
-      descripcion,
-      severidad,
-    });
+    const r = await ejecutar<{ id: string }>("central.alertas.abrir", { instalacionId, titulo, descripcion, severidad });
     if (!r) return;
     avisar.exito("Alerta abierta");
     router.push(`/central/alertas/${r.id}`);
@@ -46,26 +41,17 @@ export function FormularioNuevaAlerta() {
           {error}
         </p>
       ) : null}
-      <Campo etiqueta="Instalación">
-        <Select
-          valor={instalacionId}
-          onCambiar={(v) => setInstalacionId(v)}
-          opciones={[{ valor: "", etiqueta: "Elegir instalación" }, ...instalaciones.map((i) => ({ valor: i.id, etiqueta: i.nombre }))]}
-        />
-      </Campo>
-      <Campo etiqueta="Título">
-        <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
-      </Campo>
-      <Campo etiqueta="Descripción">
-        <Textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} />
-      </Campo>
-      <Campo etiqueta="Severidad">
-        <Select
-          valor={severidad}
-          onCambiar={setSeveridad}
-          opciones={SEVERIDADES.map((s) => ({ valor: s, etiqueta: ETIQUETA_SEVERIDAD[s] ?? s }))}
-        />
-      </Campo>
+      <CamposNuevaAlerta
+        instalaciones={instalaciones}
+        instalacionId={instalacionId}
+        titulo={titulo}
+        descripcion={descripcion}
+        severidad={severidad}
+        onInstalacion={setInstalacionId}
+        onTitulo={setTitulo}
+        onDescripcion={setDescripcion}
+        onSeveridad={setSeveridad}
+      />
       <Button variant="primary" disabled={pendiente || !instalacionId || titulo.trim().length < 3} onClick={() => void enviar()}>
         Abrir alerta
       </Button>

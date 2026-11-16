@@ -63,12 +63,3 @@ export function BitacoraAlerta({ eventos }: { eventos: EventoAlerta[] }) {
     </section>
   );
 }
-
-export function ContenidoFicha({ alerta, eventos }: { alerta: AlertaFicha; eventos: EventoAlerta[] }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <QuePasoAlerta alerta={alerta} />
-      <BitacoraAlerta eventos={eventos} />
-    </div>
-  );
-}
