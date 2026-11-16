@@ -2,7 +2,7 @@
  * Rutas que solo redirigen o repiten la misma pantalla de forma declarada (CAR-580).
  * Si dos rutas comparten componente y no están aquí ni en `PANTALLAS_PARIDAD_PORTAL`, el test falla.
  */
-export const RUTAS_ALIAS_PANTALLA: Readonly<Record<string, string>> = {
+const RUTAS_ALIAS_PANTALLA: Readonly<Record<string, string>> = {
   "/configuracion/api-keys": "/configuracion/agentes",
   "/configuracion/preferencias": "/mi-cuenta/preferencias",
   "/finanzas/plan-de-cuentas": "/configuracion/modulo/finanzas?seccion=plan-cuentas",
