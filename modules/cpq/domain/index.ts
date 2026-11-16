@@ -15,16 +15,8 @@ export const ESTADOS_COTIZACION = [
 ] as const;
 export type EstadoCotizacion = (typeof ESTADOS_COTIZACION)[number];
 
-/** «Abierta» = todavía puede cerrarse con el negocio (R40). */
-export const ESTADOS_ABIERTOS: readonly EstadoCotizacion[] = [
-  "borrador",
-  "en_aprobacion",
-  "lista",
-  "enviada",
-];
-
 /** La única versión editable de un código vive en uno de estos estados (índice parcial en el SQL). */
-export const ESTADOS_EDITABLES: readonly EstadoCotizacion[] = [
+const ESTADOS_EDITABLES: readonly EstadoCotizacion[] = [
   "borrador",
   "en_aprobacion",
   "lista",
@@ -71,7 +63,7 @@ export function anioEnZona(fecha: Date, zona = "America/Santiago"): number {
 }
 
 /** Validez por defecto de una cotización nueva, en días (cpq.md pregunta 10). */
-export const VALIDEZ_DIAS_DEFECTO = 30;
+const VALIDEZ_DIAS_DEFECTO = 30;
 
 /** Fecha `YYYY-MM-DD` de hoy (en la zona) más `dias`, para «válida hasta». */
 export function validaHastaPorDefecto(

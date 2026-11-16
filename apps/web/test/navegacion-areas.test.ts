@@ -175,7 +175,7 @@ describe("armarNavegacion", () => {
       icono: "Gauge",
       modulo: "core",
     }));
-    expect(() => armarNavegacion(ocho, { puede: todas, modulosActivos: [] })).toThrow(/D2/);
+    expect(() => armarNavegacion(ocho, { puede: todas, modulosActivos: [] })).toThrow(/máximo/);
   });
 
   it("siete entradas en un área no falla (D2: hoy Finanzas tiene justo siete)", () => {

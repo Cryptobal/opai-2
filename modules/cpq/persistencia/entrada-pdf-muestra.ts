@@ -38,16 +38,3 @@ const MUESTRA: EntradaPdfCotizacion = {
 export function entradaPdfMuestra(): EntradaPdfCotizacion {
   return structuredClone(MUESTRA);
 }
-
-export function entradaPdfConBorradorMarca(
-  base: EntradaPdfCotizacion,
-  marca: { condicionesDefault?: string | null },
-  plantilla?: { condiciones?: string | null },
-): EntradaPdfCotizacion {
-  const condiciones =
-    plantilla?.condiciones ?? marca.condicionesDefault ?? base.condiciones ?? null;
-  return {
-    ...base,
-    condiciones,
-  };
-}

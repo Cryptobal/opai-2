@@ -1,7 +1,7 @@
 import type { Contexto } from "../types";
 import { listarTrabajos, obtenerTrabajo } from "./registro";
 
-export type TrabajoReclamado = {
+type TrabajoReclamado = {
   id: string;
   tipo: string;
   payload: unknown;

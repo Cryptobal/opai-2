@@ -8,20 +8,24 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { CamposMover } from "./campos-mover";
 
+/** Hoja «Reprogramar» de una fila: se abre desde la acción de la propia fila en la planilla (CAR-456). */
 export function HojaMover({
   filas,
   semanas,
   semanasPasadas,
   horizonte,
+  filaInicial,
+  onCerrar,
 }: {
   filas: { id: string; etiqueta: string }[];
   semanas: string[];
   semanasPasadas: string[];
   horizonte: number;
+  filaInicial: string;
+  onCerrar: () => void;
 }) {
-  const [abierta, setAbierta] = useState(false);
   const { ejecutar, pendiente, error, codigo, limpiarError } = useCapacidad("erp");
-  const [filaId, setFilaId] = useState(filas[0]?.id ?? "");
+  const [filaId, setFilaId] = useState(filaInicial);
   const [semana, setSemana] = useState(semanas[0] ?? "");
   const [por, setPor] = useState("1");
   const [confirmarPasada, setConfirmarPasada] = useState(false);
@@ -29,13 +33,6 @@ export function HojaMover({
     null,
   );
   const pasadasSet = useMemo(() => new Set(semanasPasadas), [semanasPasadas]);
-
-  function abrir() {
-    setSemana(semanas[0] ?? "");
-    setVista(null);
-    setConfirmarPasada(false);
-    setAbierta(true);
-  }
 
   const entrada = () => ({
     filaId,
@@ -63,7 +60,7 @@ export function HojaMover({
     const r = await ejecutar("finanzas.celdas.mover", entrada());
     if (!r) return;
     avisar.exito("Celdas reprogramadas");
-    setAbierta(false);
+    onCerrar();
   }
 
   const errorServidor = codigo === "INTERNAL";
@@ -75,61 +72,56 @@ export function HojaMover({
     ) : null;
 
   return (
-    <>
-      <Button variant="secondary" onClick={abrir}>
-        Reprogramar…
-      </Button>
-      <Sheet
-        abierto={abierta}
-        onCerrar={() => setAbierta(false)}
-        titulo="Reprogramar"
-        descripcion={`Mueve la cifra planificada ± N semanas (horizonte ${horizonte} semanas).`}
-        acciones={
-          <>
-            <Button variant="secondary" onClick={() => setAbierta(false)}>
-              Cancelar
+    <Sheet
+      abierto
+      onCerrar={onCerrar}
+      titulo="Reprogramar"
+      descripcion={`Mueve la cifra planificada ± N semanas (horizonte ${horizonte} semanas).`}
+      acciones={
+        <>
+          <Button variant="secondary" onClick={onCerrar}>
+            Cancelar
+          </Button>
+          {vista ? (
+            <Button disabled={pendiente} onClick={() => void aplicar()}>
+              Aplicar
             </Button>
-            {vista ? (
-              <Button disabled={pendiente} onClick={() => void aplicar()}>
-                Aplicar
+          ) : (
+            <Button disabled={pendiente || !filaId || !semana} onClick={() => void previsualizar()}>
+              Ver vista previa
+            </Button>
+          )}
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {error ? (
+          <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
+            {errorServidor ? (
+              <Button variant="secondary" className="mt-2" onClick={() => void previsualizar()}>
+                Reintentar
               </Button>
-            ) : (
-              <Button disabled={pendiente || !filaId || !semana} onClick={() => void previsualizar()}>
-                Ver vista previa
-              </Button>
-            )}
-          </>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          {error ? (
-            <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
-              {errorServidor ? (
-                <Button variant="secondary" className="mt-2" onClick={() => void previsualizar()}>
-                  Reintentar
-                </Button>
-              ) : null}
-            </Alerta>
-          ) : null}
-          {avisoPasada}
-          <CamposMover
-            filas={filas}
-            semanas={semanas}
-            filaId={filaId}
-            semana={semana}
-            por={por}
-            vista={vista}
-            requierePasada={Boolean(vista && requiereConfirmacionPasada(vista.movimientos))}
-            confirmarPasada={confirmarPasada}
-            on={{
-              fila: (v) => { setFilaId(v); setVista(null); },
-              semana: (v) => { setSemana(v); setVista(null); setConfirmarPasada(false); },
-              por: (v) => { setPor(v); setVista(null); },
-              confirmar: setConfirmarPasada,
-            }}
-          />
-        </div>
-      </Sheet>
-    </>
+            ) : null}
+          </Alerta>
+        ) : null}
+        {avisoPasada}
+        <CamposMover
+          filas={filas}
+          semanas={semanas}
+          filaId={filaId}
+          semana={semana}
+          por={por}
+          vista={vista}
+          requierePasada={Boolean(vista && requiereConfirmacionPasada(vista.movimientos))}
+          confirmarPasada={confirmarPasada}
+          on={{
+            fila: (v) => { setFilaId(v); setVista(null); },
+            semana: (v) => { setSemana(v); setVista(null); setConfirmarPasada(false); },
+            por: (v) => { setPor(v); setVista(null); },
+            confirmar: setConfirmarPasada,
+          }}
+        />
+      </div>
+    </Sheet>
   );
 }

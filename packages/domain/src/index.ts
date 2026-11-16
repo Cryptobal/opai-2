@@ -1,4 +1,7 @@
-export * from "./novedades/catalogo";
+// Formato de novedades (sin el catálogo embebido): el catálogo vive en `@opai/domain/novedades`
+// para no meter el embed en el trozo común de JS del cliente (CAR-424).
+export * from "./novedades/formato";
+export * from "./libro-novedades";
 export * from "./inicio/indicadores";
 export * from "./bloqueo-login";
 export * from "./catalogos";
@@ -58,6 +61,8 @@ export * from "./incidentes";
 export * from "./documento-subida";
 export * from "./firma";
 export * from "./campos-personalizados";
+export * from "./campos-personalizados-valor";
+export * from "./campos-personalizados-mostrar";
 export * from "./firma-flujo";
 export * from "./retencion";
 export * from "./etiquetas-datos-personales";

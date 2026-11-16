@@ -13,7 +13,7 @@ import { registrarModuloComercial } from "./comercial-modulo";
 
 type Res<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
 type Imp = {
-  guardada: boolean; sinCambios: boolean; version: number | null; id: string | null; hash: string | null;
+  guardada: boolean; sinCambios: boolean; activa: boolean; html: string | null; version: number | null; id: string | null; hash: string | null;
   problemas: { codigo: string }[]; tokens: { usados: string[] };
 };
 type Fila = { id: string; version: number; estado: string };
@@ -120,5 +120,32 @@ describe.skipIf(!urlPropietario)("cpq · plantilla HTML de propuesta en base rea
     const r = await run<Imp>(t1, "cpq.propuestas_html.importar", { nombre: "X", html: HTML_A }, "supervisor");
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error.code).toBe("FORBIDDEN");
+  });
+
+  const activar = (t: string, id: string, activa: boolean, rol: "owner" | "supervisor" = "owner", dryRun = false) =>
+    run<{ estado: string }>(t, "cpq.propuestas_html.activar", { id, activa }, rol, dryRun);
+  const enUso = async (t: string) => (await lista(t)).filter((f) => f.estado === "activa").map((f) => f.id);
+
+  it("otra plantilla queda inactiva hasta activarla; activar cambia la que está en uso; desactivar deja ninguna", async () => {
+    const base = (await lista(t1)).find((f) => f.version === 2)?.id ?? "";
+    expect((await activar(t1, base, true)).ok).toBe(true);
+    const otra = await importar(t1, "Otra", HTML_A);
+    expect(otra.ok && otra.data).toMatchObject({ guardada: true, activa: false, html: HTML_A });
+    expect(await enUso(t1)).toEqual([base]);
+    const id = (otra.ok && otra.data.id) || "";
+    expect((await activar(t1, id, true, "owner", true)).ok).toBe(true);
+    expect(await enUso(t1)).toEqual([base]);
+    expect((await activar(t1, id, true)).ok).toBe(true);
+    expect(await enUso(t1)).toEqual([id]);
+    expect((await activar(t1, id, false)).ok).toBe(true);
+    expect(await enUso(t1)).toEqual([]);
+  });
+
+  it("activar es por empresa y pide permiso de biblioteca", async () => {
+    const id = (await lista(t1))[0]?.id ?? "";
+    expect((await activar(t2, id, true)).ok).toBe(false);
+    const r = await activar(t1, id, true, "supervisor");
+    expect(!r.ok && r.error.code).toBe("FORBIDDEN");
+    expect(await enUso(t1)).toEqual([]);
   });
 });
