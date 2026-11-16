@@ -1,42 +1,64 @@
 "use client";
 
-import { Button, Segmentado } from "@opai/ds";
+import { Button, Campo, Segmentado, Select } from "@opai/ds";
 
 export type FiltroNovedades = "todas" | "no_leidas";
 
 /**
- * Resumen, filtro «Todas / No leídas» y «Marcar todas como leídas» de la lista de Novedades (CAR-245).
- * El filtro es local: la lista ya trae todas las novedades del usuario, con su estado de lectura.
+ * Resumen, filtros «Todas / No leídas» y por módulo, y marcar leídas (CAR-245, CAR-569).
+ * Los filtros son locales sobre la lista del usuario.
  */
 export function EncabezadoNovedades({
   noLeidas,
   filtro,
   onFiltro,
-  onMarcarTodas,
+  modulo,
+  modulos,
+  onModulo,
+  onMarcarFiltradas,
+  textoMarcar,
 }: {
   noLeidas: number;
   filtro: FiltroNovedades;
   onFiltro: (f: FiltroNovedades) => void;
-  onMarcarTodas: () => void;
+  modulo: string;
+  modulos: readonly string[];
+  onModulo: (modulo: string) => void;
+  onMarcarFiltradas: () => void;
+  textoMarcar: string;
 }) {
+  const opcionesModulo = [
+    { valor: "todos", etiqueta: "Todos los módulos" },
+    ...modulos.map((m) => ({ valor: m, etiqueta: m })),
+  ];
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Segmentado
-          etiqueta="Filtrar novedades"
-          activa={filtro}
-          opciones={[
-            { id: "todas", etiqueta: "Todas", onClick: () => onFiltro("todas") },
-            {
-              id: "no_leidas",
-              etiqueta: noLeidas > 0 ? `No leídas (${noLeidas})` : "No leídas",
-              onClick: () => onFiltro("no_leidas"),
-            },
-          ]}
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <Segmentado
+            etiqueta="Filtrar novedades"
+            activa={filtro}
+            opciones={[
+              { id: "todas", etiqueta: "Todas", onClick: () => onFiltro("todas") },
+              {
+                id: "no_leidas",
+                etiqueta: noLeidas > 0 ? `No leídas (${noLeidas})` : "No leídas",
+                onClick: () => onFiltro("no_leidas"),
+              },
+            ]}
+          />
+          <Campo etiqueta="Módulo" htmlFor="filtro-modulo-novedades" className="w-full sm:w-52">
+            <Select
+              id="filtro-modulo-novedades"
+              valor={modulo}
+              onCambiar={onModulo}
+              opciones={opcionesModulo}
+            />
+          </Campo>
+        </div>
         {noLeidas > 0 ? (
-          <Button variant="secondary" onClick={onMarcarTodas}>
-            Marcar todas como leídas
+          <Button variant="secondary" onClick={onMarcarFiltradas}>
+            {textoMarcar}
           </Button>
         ) : null}
       </div>

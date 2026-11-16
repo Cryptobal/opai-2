@@ -43,6 +43,18 @@ test.describe("@preview novedades y bandeja", () => {
     }
     await capturar(page, info, "novedades-lista");
 
+    // CAR-569: filtro por módulo junto a Todas / No leídas.
+    const modulo = page.getByLabel("Módulo");
+    await expect(modulo).toBeVisible();
+    await modulo.click();
+    const opcionFinanzas = page.getByRole("option", { name: "Finanzas" });
+    if (await opcionFinanzas.count()) {
+      await opcionFinanzas.click();
+      await capturar(page, info, "novedades-filtro-modulo");
+      await modulo.click();
+      await page.getByRole("option", { name: "Todos los módulos" }).click();
+    }
+
     // CAR-245: filtro «Todas / No leídas». En «No leídas» no queda ninguna tarjeta leída; sin
     // pendientes, aparece el vacío con «Ver todas», que vuelve a la lista completa.
     const filtro = page.getByRole("group", { name: "Filtrar novedades" });
