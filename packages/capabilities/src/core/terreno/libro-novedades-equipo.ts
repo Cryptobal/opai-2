@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 import { defineCapability } from "../../define";
+import { cursorDe } from "../maestros/comun";
 import { uuidSchema } from "../esquemas";
 import { dispositivoActivo } from "./hechos-comun";
-import { novedadSchema, vistaNovedad } from "./libro-novedades-comun";
+import { paginaNovedadesLibro, salidaListaNovedadesSchema } from "./libro-novedades-comun";
 
 /**
  * El libro de novedades de la instalación del equipo de terreno emparejado (CAR-77 parte 3): las últimas
@@ -22,7 +23,7 @@ export const libroNovedadesEquipo = defineCapability({
     limite: z.number().int().min(1).max(50).default(30),
     cursor: z.uuid().optional().describe("Valor de «siguiente» de la página anterior."),
   }),
-  output: z.object({ items: z.array(novedadSchema), siguiente: z.string().nullable() }),
+  output: salidaListaNovedadesSchema,
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => s.items.map((n) => n.id),
@@ -31,13 +32,8 @@ export const libroNovedadesEquipo = defineCapability({
     const filas = await ctx.db.libroNovedad.findMany({
       where: { instalacionId: disp.instalacionId },
       orderBy: [{ horaHecho: "desc" }, { id: "desc" }],
-      take: limite + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      ...cursorDe(cursor, limite),
     });
-    const pagina = filas.slice(0, limite);
-    return {
-      items: pagina.map(vistaNovedad),
-      siguiente: filas.length > limite ? (pagina.at(-1)?.id ?? null) : null,
-    };
+    return paginaNovedadesLibro(filas, limite, cursor);
   },
 });

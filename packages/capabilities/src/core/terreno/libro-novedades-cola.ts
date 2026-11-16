@@ -1,5 +1,6 @@
 import type { Contexto } from "../../types";
 import type { Equipo, Hecho, Tiempo } from "./acceso-tipos";
+import { emitirLibroRegistrada, insertarLibroNovedades } from "./libro-novedades-comun";
 import { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
 
 /**
@@ -36,18 +37,7 @@ export function novedadesDelLibro(
         horaHecho: t.corregir(new Date(h.horaHecho)),
         idempotencyKey: h.clave,
       }));
-    if (data.length === 0) return;
-    const nuevas = await tx.libroNovedad.createManyAndReturn({
-      skipDuplicates: true,
-      data,
-      select: { id: true, numero: true, gravedad: true },
-    });
-    for (const n of nuevas)
-      await ctx.eventos.emitir(tx, {
-        tipo: "core.libro_novedades.registrada",
-        entidadTipo: "libro_novedad",
-        entidadId: n.id,
-        payload: { instalacionId: equipo.instalacionId, numero: n.numero, gravedad: n.gravedad },
-      });
+    const nuevas = await insertarLibroNovedades(tx, data);
+    await emitirLibroRegistrada(ctx, tx, equipo.instalacionId, nuevas);
   };
 }

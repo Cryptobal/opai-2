@@ -1,5 +1,6 @@
 import type { Contexto } from "../../types";
 import type { Equipo, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
+import { insertarLibroNovedades } from "./libro-novedades-comun";
 import { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
 
 export type NovedadesResueltas = {
@@ -103,12 +104,8 @@ export async function resolverNovedades(
         horaHecho: t.corregir(new Date(h.horaHecho)),
         idempotencyKey: h.clave,
       }));
-      if (data.length === 0) return;
-      const nuevas = await tx.libroNovedad.createManyAndReturn({
-        skipDuplicates: true,
-        data,
-        select: { id: true, numero: true, gravedad: true },
-      });
+      const nuevas = await insertarLibroNovedades(tx, data);
+      if (nuevas.length === 0) return;
       for (const n of nuevas.filter((x) => x.gravedad === "alta")) {
         await ctx.eventos.emitir(tx, {
           tipo: "rondas.novedad.grave",

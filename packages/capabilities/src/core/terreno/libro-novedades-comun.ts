@@ -6,6 +6,7 @@ import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { externo } from "../../externo";
 import type { Contexto } from "../../types";
 import { instalacionesEnAlcance } from "../maestros/alcance";
+import { cursorDe, pagina } from "../maestros/comun";
 import { iso } from "./hechos-comun";
 
 type LibroNovedad = Awaited<ReturnType<Contexto["db"]["libroNovedad"]["findFirstOrThrow"]>>;
@@ -86,6 +87,17 @@ export function vistaNovedad(n: LibroNovedad): z.infer<typeof novedadSchema> {
   };
 }
 
+export const salidaListaNovedadesSchema = z.object({
+  items: z.array(novedadSchema),
+  siguiente: z.string().nullable(),
+});
+
+/** Página de filas del libro ya mapeadas a la vista de lista (CAR-353). */
+export function paginaNovedadesLibro(filas: LibroNovedad[], limite: number, cursor?: string) {
+  const p = pagina(filas, limite, cursor);
+  return { items: p.items.map(vistaNovedad), siguiente: p.siguiente };
+}
+
 /** Una novedad de esta empresa dentro del alcance del actor (ADR-022), o NOT_FOUND sin revelar que existe. */
 export async function novedadEnAlcance(ctx: Contexto, id: string): Promise<LibroNovedad> {
   const alcance = instalacionesEnAlcance(ctx);
@@ -94,4 +106,38 @@ export async function novedadEnAlcance(ctx: Contexto, id: string): Promise<Libro
   });
   if (!n) throw noEncontrado("La novedad");
   return n;
+}
+
+export type LibroNovedadInsertada = { id: string; numero: number; gravedad: string };
+
+/** Inserta filas del libro con idempotencia por clave; devuelve solo las realmente creadas. */
+export async function insertarLibroNovedades(
+  tx: Contexto["db"],
+  data: NonNullable<
+    Parameters<Contexto["db"]["libroNovedad"]["createManyAndReturn"]>[0]["data"]
+  >,
+): Promise<LibroNovedadInsertada[]> {
+  const filas = Array.isArray(data) ? data : [data];
+  if (filas.length === 0) return [];
+  return tx.libroNovedad.createManyAndReturn({
+    skipDuplicates: true,
+    data: filas,
+    select: { id: true, numero: true, gravedad: true },
+  });
+}
+
+export async function emitirLibroRegistrada(
+  ctx: Contexto,
+  tx: Contexto["db"],
+  instalacionId: string,
+  nuevas: readonly LibroNovedadInsertada[],
+) {
+  for (const n of nuevas) {
+    await ctx.eventos.emitir(tx, {
+      tipo: "core.libro_novedades.registrada",
+      entidadTipo: "libro_novedad",
+      entidadId: n.id,
+      payload: { instalacionId, numero: n.numero, gravedad: n.gravedad },
+    });
+  }
 }
