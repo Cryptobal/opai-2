@@ -33,7 +33,7 @@ async function todosLosTipos() {
 }
 
 /** Catálogo de tipos: búsqueda, categoría y estado se filtran aquí. */
-export async function cargarTipos(p: Parametros) {
+async function cargarTipos(p: Parametros) {
   const { r, items: todos } = await todosLosTipos();
   const q = sinTildes(p["q"] ?? "");
   const items = todos.filter(
