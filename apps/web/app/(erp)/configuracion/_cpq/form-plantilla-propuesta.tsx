@@ -1,11 +1,14 @@
 "use client";
 
-import { Button, Campo, Input, Select } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Input, Select } from "@opai/ds";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import type { BloquePlantilla } from "@/lib/cpq-bloques-propuesta";
 import { etiquetaBasePlantillaCpq } from "@/lib/cpq-plantilla-presentacion";
+
+import { EditorBloquesPropuesta } from "./editor-bloques-propuesta";
 
 const APERTURAS = [
   { valor: "por_instalacion", etiqueta: "Por instalación" },
@@ -20,12 +23,12 @@ export function FormPlantillaPropuesta({
     base: string;
     nombreVisible: string;
     aperturaMaxima: string;
-    bloques: { id: string; activo: boolean; fijo: boolean; opcional: boolean }[];
+    bloques: BloquePlantilla[];
     basesDisponibles: string[];
   };
 }) {
   const router = useRouter();
-  const { ejecutar, pendiente } = useCapacidad("erp");
+  const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [base, setBase] = useState(plantilla.base);
   const [nombreVisible, setNombreVisible] = useState(plantilla.nombreVisible);
   const [aperturaMaxima, setAperturaMaxima] = useState(plantilla.aperturaMaxima);
@@ -36,14 +39,11 @@ export function FormPlantillaPropuesta({
       base,
       nombreVisible,
       aperturaMaxima,
-      bloques: bloques.map((b) => ({
-        id: b.id,
-        activo: b.activo,
-        fijo: b.fijo,
-        opcional: b.opcional,
-      })),
+      bloques,
     });
-    if (r != null) router.refresh();
+    if (r == null) return;
+    avisar.exito("Plantilla de propuesta guardada");
+    router.refresh();
   }
 
   return (
@@ -80,9 +80,11 @@ export function FormPlantillaPropuesta({
           opciones={APERTURAS.map((a) => ({ valor: a.valor, etiqueta: a.etiqueta }))}
         />
       </Campo>
+      <EditorBloquesPropuesta bloques={bloques} onCambiar={setBloques} />
       <p className="t-caption text-fg-muted">
-        El armador hereda la base de la cotización; aquí defines el orden por defecto y qué bloques son fijos u opcionales.
+        Cada cotización nueva hereda este orden; los cambios no alteran propuestas ya creadas.
       </p>
+      {error ? <Alerta tono="danger" titulo={error} /> : null}
       <Button type="submit" disabled={pendiente}>
         Guardar plantilla de propuesta
       </Button>
