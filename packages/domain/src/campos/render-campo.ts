@@ -7,7 +7,7 @@ import type { ProblemaCampo, ValorCampo } from "./tipos";
 
 type Ambito = Readonly<Record<string, ValorCampo>>;
 
-function textoCampo(
+export function textoCampo(
   n: Extract<Nodo, { t: "campo" }>,
   buscar: (clave: string, item?: Ambito) => ValorCampo,
   item: Ambito | undefined,
