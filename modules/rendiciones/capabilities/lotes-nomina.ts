@@ -13,7 +13,7 @@ type ItemLote = { personaId: string; cuentaVersion: Date; montoClp: number };
 export async function exigirFormatoConfirmado(ctx: Contexto): Promise<void> {
   if (!(await ajuste<boolean>(ctx, "rendiciones", "nomina_formato_confirmado")))
     throw reglaDeNegocio(
-      "La nómina Santander está activa solo en la empresa de pruebas (R3, decisión de Carlos del 6-nov-2026). El lote se puede aprobar y marcar como pagado sin archivo.",
+      "La nómina Santander en formato de archivo no está activa en esta empresa. El lote se puede aprobar y marcar como pagado sin archivo.",
     );
 }
 

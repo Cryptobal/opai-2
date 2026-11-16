@@ -14,6 +14,7 @@ export function semilla() {
     id,
     tenantId: TENANT_DE_PRUEBA,
     seccion,
+    grupo: "gastos",
     etiqueta,
     vinculo: null,
     arrastre,
