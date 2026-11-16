@@ -54,7 +54,7 @@ export const AJUSTES_TERRENO = defineAjustes(
     biometria_empresas_reales: z.boolean().default(false).meta({
       etiqueta: "Permitir Face ID en empresas reales",
       ayuda:
-        "Apagado: solo las empresas de prueba (slug «qa-…») usan un proveedor real de rostro. Se enciende solo cuando Carlos confirma la evaluación de impacto y el DPA (Ley 21.719, datos biométricos sensibles desde el 1-dic-2026).",
+        "Apagado por defecto: solo las empresas de prueba (slug «qa-…») usan un proveedor real de rostro. Enciéndelo en empresas reales cuando la evaluación de impacto y el DPA estén listos (Ley 21.719, datos biométricos sensibles desde el 1-dic-2026).",
       grupo: "Biometría",
       ambito: "plataforma",
       control: "switch",

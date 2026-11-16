@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { enScope } from "../../autorizacion";
 import { defineCapability } from "../../define";
 import { externo } from "../../externo";
+import { buscadoresDocumentos } from "../documentos/buscadores";
 import { buscarDocumentosGlobal } from "../documentos/buscar-global";
 import { listarBuscadores, resultadoBusquedaSchema } from "./buscadores";
 import { dondeContacto, dondeCuenta, dondeInstalacion, dondePersona } from "./alcance";
@@ -20,7 +21,7 @@ export const buscar = defineCapability({
   auditarLectura: (s) => [...s.cuentas, ...s.personas, ...s.contactos, ...s.otros.flatMap((g) => g.items)].map((r) => r.id),
   id: "core.buscar",
   descripcion:
-    "Búsqueda global (paleta ⌘K y agentes): cuentas, instalaciones, personas, contactos y documentos, más lo que aportan los módulos activos (negocios, cotizaciones, facturas DTE), hasta 5 de cada uno y solo de lo que el actor puede ver.",
+    "Búsqueda global (paleta ⌘K y agentes): cuentas, instalaciones, personas, contactos y documentos, plantillas de documento, más lo que aportan los módulos activos (negocios, cotizaciones, facturas DTE), hasta 5 de cada uno y solo de lo que el actor puede ver.",
   permiso: null,
   input: z.object({ q: z.string().trim().min(2).max(120) }),
   output: z.object({
@@ -28,7 +29,7 @@ export const buscar = defineCapability({
     instalaciones: z.array(resultado),
     personas: z.array(resultado),
     contactos: z.array(resultado),
-    /** Aportes de los módulos (CAR-301) y documentos del núcleo (CAR-526): un grupo por buscador. */
+    /** Aportes de los módulos (CAR-301), documentos (CAR-526) y plantillas del núcleo (CAR-407): un grupo por buscador. */
     otros: z.array(z.object({ grupo: z.string(), titulo: z.string(), items: z.array(resultadoExterno) })),
   }),
   efecto: "lectura",
@@ -37,7 +38,11 @@ export const buscar = defineCapability({
     const puede = (p: string) => ctx.autorizar(p);
     const rut = q.replace(/[.\s]/g, "").toUpperCase();
     const vacio = Promise.resolve([]);
-    const aportes = listarBuscadores().filter((b) => ctx.modulosActivos.includes(b.modulo) && enScope(ctx, b.modulo) && puede(b.permiso));
+    // El núcleo (plantillas, CAR-407) siempre está activo; los módulos, solo si la empresa los tiene.
+    const activo = (m: string) => m === "core" || ctx.modulosActivos.includes(m);
+    const aportes = [...buscadoresDocumentos, ...listarBuscadores()].filter(
+      (b) => activo(b.modulo) && enScope(ctx, b.modulo) && puede(b.permiso),
+    );
     const [cuentas, instalaciones, personas, contactos, docs, aportesRes] = await Promise.all([
       puede(PERMISOS_CORE.cuentasRead)
         ? ctx.db.cuenta.findMany({
