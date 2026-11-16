@@ -23,8 +23,20 @@ export const SENALES: readonly Senal[] = [
 
 export const senalDe = (evento: string) => SENALES.find((s) => s.evento === evento) ?? null;
 
+/** Severidad y activación efectivas: la fila de la empresa, o el catálogo; la fija no se apaga ni baja. */
+export function aplicarRegla(
+  senal: Senal,
+  propia?: { severidad: string; activa: boolean } | null,
+): { severidad: Severidad; activa: boolean } {
+  if (senal.fija) return { severidad: senal.severidad, activa: true };
+  return {
+    severidad: (propia?.severidad as Severidad | undefined) ?? senal.severidad,
+    activa: propia?.activa ?? true,
+  };
+}
+
 /** Ventana en que señales de la misma instalación y persona se juntan en una alerta (R4). */
-export const VENTANA_AGRUPACION_MIN = 10;
+const VENTANA_AGRUPACION_MIN = 10;
 
 type Abierta = { id: string; instalacionId: string; personaId: string | null; origen: string; estado: string; createdAt: Date };
 

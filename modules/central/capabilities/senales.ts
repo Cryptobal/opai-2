@@ -3,7 +3,7 @@ import { z } from "zod";
 import { type Contexto, defineConsumidor } from "@opai/capabilities";
 
 import { ESTADOS_ACTIVOS, type Severidad } from "../domain";
-import { alertaParaAgrupar, masGrave, SENALES, senalDe } from "../domain/senales";
+import { alertaParaAgrupar, aplicarRegla, masGrave, SENALES, senalDe } from "../domain/senales";
 import { bloquearAlerta, TRABAJO_REVISAR } from "./motor";
 import { registrarHecho } from "./util";
 
@@ -50,8 +50,9 @@ export const consumidorSenales = defineConsumidor({
     const p = payloadSchema.safeParse(ev.payload);
     if (!senal || !p.success || !(await centralActiva(ctx))) return;
     const regla = await ctx.db.centralRegla.findFirst({ where: { evento: senal.evento } });
-    if (regla && !regla.activa && !senal.fija) return;
-    const severidad = (senal.fija ? senal.severidad : (regla?.severidad ?? senal.severidad)) as Severidad;
+    const efectiva = aplicarRegla(senal, regla);
+    if (!efectiva.activa) return;
+    const severidad = efectiva.severidad;
     const persona = p.data.personaId
       ? await ctx.db.persona.findFirst({ where: { id: p.data.personaId }, select: { id: true } })
       : null;

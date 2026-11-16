@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { alertaParaAgrupar, masGrave, senalDe } from "./senales";
+import { alertaParaAgrupar, aplicarRegla, masGrave, senalDe } from "./senales";
 
 const ahora = new Date("2026-11-14T12:00:00Z");
 const hace = (min: number) => new Date(ahora.getTime() - min * 60_000);
@@ -33,4 +33,15 @@ it("la severidad solo sube y la emergencia es fija", () => {
   expect(masGrave("alta", "baja")).toBe("alta");
   expect(senalDe("rondas.emergencia")).toMatchObject({ severidad: "critica", fija: true });
   expect(senalDe("otro.evento")).toBeNull();
+  const emergencia = senalDe("rondas.emergencia")!;
+  expect(aplicarRegla(emergencia, { severidad: "baja", activa: false })).toEqual({
+    severidad: "critica",
+    activa: true,
+  });
+  const atrasada = senalDe("rondas.ejecucion.atrasada")!;
+  expect(aplicarRegla(atrasada, { severidad: "alta", activa: false })).toEqual({
+    severidad: "alta",
+    activa: false,
+  });
+  expect(aplicarRegla(atrasada, null)).toEqual({ severidad: "media", activa: true });
 });

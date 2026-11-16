@@ -121,7 +121,7 @@ export function SeccionesDte({ f, set, esOwner, pendiente, errores }: Props) {
               onChange={(e) => set("avisoCaf", e.target.value)}
             />
           </Campo>
-          <Campo etiqueta="Fecha de corte con OPAI 1.0" htmlFor="dte-corte">
+          <Campo etiqueta="Fecha de corte con la instalación anterior" htmlFor="dte-corte">
             <InputFecha
               id="dte-corte"
               valor={f.fechaCorte}

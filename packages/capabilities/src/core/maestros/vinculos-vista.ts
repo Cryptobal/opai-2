@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { dia, diaSchema } from "./comun";
 
-export const TIPOS_CONTRATO = ["indefinido", "plazo_fijo", "por_obra", "honorarios"] as const;
+const TIPOS_CONTRATO = ["indefinido", "plazo_fijo", "por_obra", "honorarios"] as const;
 
 export const vinculoSchema = z.object({
   id: z.string(),

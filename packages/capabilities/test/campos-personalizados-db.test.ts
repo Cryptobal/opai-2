@@ -6,7 +6,7 @@ import * as mod from "../src";
 import { capacidadesComercial } from "../src/comercial";
 import { codigo, dato } from "./maestros-ayuda";
 
-type Campo = { id: string; clave: string; orden: number; opciones: string[]; activo: boolean };
+type Campo = { id: string; clave: string; orden: number; opciones: { valor: string; etiqueta: string }[]; activo: boolean };
 type Lista = { items: Campo[]; siguiente: string | null };
 
 // Catálogo de campos personalizados (CAR-27, PR 1) contra Postgres real (RLS sin BYPASSRLS).
@@ -71,7 +71,10 @@ describe("core · campos personalizados contra Postgres real", () => {
     });
     expect([c1.orden, c2.orden]).toEqual([0, 1]);
     expect(c2.clave).toBe("tamano");
-    expect(c2.opciones).toEqual(["Grande", "Chica"]);
+    expect(c2.opciones).toEqual([
+      { valor: "Grande", etiqueta: "Grande" },
+      { valor: "Chica", etiqueta: "Chica" },
+    ]);
   });
 
   it("rechaza duplicados, listas sin opciones y roles sin permiso de configurar", async () => {

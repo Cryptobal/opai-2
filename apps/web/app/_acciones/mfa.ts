@@ -6,10 +6,14 @@ import {
   confirmarSegundoFactor,
   iniciarSegundoFactor,
   requireSession,
+  regenerarCodigosRespaldo,
   verificarCodigoRespaldo,
   verificarSegundoFactor,
 } from "@opai/auth";
 import { destinoSeguro } from "@/app/(auth)/destino";
+import { verificarMfaDe } from "@/lib/mfa";
+import { LIMITES, permitir } from "@/lib/rate-limit";
+import { identidadActual } from "@/lib/servidor";
 import { qrSvg } from "@/lib/qr";
 import { normalizarCodigoRespaldo } from "@/lib/codigo-mfa";
 
@@ -91,4 +95,26 @@ export async function accionConfirmarMfa(
   const codigo = String(form.get("codigo") ?? "").replace(/\D/g, "");
   const r = await confirmarSegundoFactor(codigo);
   return r.ok ? { ok: true } : { ok: false, error: r.mensaje };
+}
+
+export type EstadoCodigos = { ok: true; codigos: string[] } | { ok: false; error: string };
+
+/** Regenera los códigos de la cuenta con sesión y segundo factor verificado. */
+export async function accionRegenerarCodigos(
+  _previo: EstadoCodigos | null,
+  form: FormData,
+): Promise<EstadoCodigos> {
+  await requireSession();
+  const identidad = await identidadActual();
+  if (!identidad || !identidad.mfaActiva || (await verificarMfaDe(identidad)))
+    return { ok: false, error: "Falta verificar el segundo factor de la sesión." };
+  // Los códigos de respaldo son de la app autenticadora; una cuenta solo con passkey no los tiene.
+  if (identidad.totpActiva !== true)
+    return { ok: false, error: "Activa la app autenticadora para tener códigos de respaldo." };
+  // Mismo límite que confirmar la identidad en Métodos de acceso: frena adivinar la contraseña.
+  const { maximo, ventanaMs } = LIMITES.confirmarIdentidad;
+  if (!(await permitir(`confirmar-identidad:${identidad.usuario.id}`, maximo, ventanaMs)))
+    return { ok: false, error: "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos." };
+  const r = await regenerarCodigosRespaldo(String(form.get("password") ?? ""));
+  return r.ok ? r : { ok: false, error: r.mensaje };
 }

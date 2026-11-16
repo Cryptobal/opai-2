@@ -1,19 +1,14 @@
 import { cache } from "react";
 
+import type { TallaPrenda } from "./estado-ficha";
+
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 /**
  * Lecturas de la ficha por request (CAR-124): el Resumen y las secciones de Laboral comparten una sola llamada
  * por capacidad, en vez de una por tarjeta (consultas por navegación, ADR-045). Mismo permiso y auditoría.
  */
-export type Uniforme = {
-  tallaCamisa: string | null;
-  tallaPantalon: string | null;
-  tallaChaqueta: string | null;
-  tallaZapato: string | null;
-  tallaPolera: string | null;
-  tallaGeologo: string | null;
-  tallaPolar: string | null;
+type Uniforme = {
   estaturaCm: number | null;
   pesoKg: number | null;
   notas: string | null;
@@ -25,7 +20,7 @@ export type Uniforme = {
     cantidad: number;
   }[];
 };
-export type JornadaDt = {
+type JornadaDt = {
   resolucion: string | null;
   resolucionVigenteDesde: string | null;
   resolucionVigenteHasta: string | null;
@@ -53,9 +48,13 @@ export type ContratoPeriodos = {
 };
 export type Laboral = {
   uniforme: Uniforme | null;
+  /** Talla por prenda del uniforme de la empresa (CAR-408). */
+  tallas: TallaPrenda[];
   jornadaDt: JornadaDt | null;
   contrato: ContratoPeriodos | null;
   os10: { credencial: string | null; venceEn: string | null } | null;
+  /** Documento OS-10 vigente en Documentos (CAR-429). */
+  os10Respaldo: { documentoId: string; venceEn: string | null } | null;
   contacto: {
     estadoCivil: string | null;
     telefonoSecundario: string | null;

@@ -9,6 +9,8 @@ export type DetalleTenant = {
     timezone: string;
     estado: string;
   };
+  /** La empresa recibe activos los módulos que se agreguen al catálogo. */
+  activarModulosNuevos: boolean;
   modulos: {
     id: string;
     nombre: string;
