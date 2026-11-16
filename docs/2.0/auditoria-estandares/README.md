@@ -8,13 +8,13 @@ Un archivo por capa o módulo. En cada uno: qué hace hoy (con rutas de código)
 
 Primera actualización desde la auditoría inicial. Cada brecha se volvió a comprobar en el código de `main`; el detalle está en la sección «Estado al 16-nov-2026» de cada archivo.
 
-**De las 10 brechas altas quedan 3 abiertas, y las tres con avance.** Seis se cerraron en el producto, una se retiró por decisión de Carlos y sigue sin haber ninguna crítica.
+**De las 10 brechas altas quedan 4 abiertas, y las cuatro con avance.** Cinco se cerraron en el producto, una se retiró por decisión de Carlos y sigue sin haber ninguna crítica.
 
 | Capa o módulo | Altas al 12-nov | Altas abiertas hoy | Medias abiertas hoy | Cambio de la semana |
 |---|---|---|---|---|
-| Permisos y roles | 3 | 0 | 3 | P-1, P-2 y P-3 cerradas |
+| Permisos y roles | 3 | 1 (parcial) | 3 | P-1 y P-2 cerradas; P-3 casi: al editar una llave se le puede quitar el vencimiento (P-3b, [CAR-588](https://linear.app/carlos-irigoyen/issue/CAR-588)) |
 | Núcleo | 2 | 1 (parcial) | 4 | N-1 cerrada; N-2 con contrato y prueba, faltan 137 listas antiguas |
-| Comercial | 0 | 0 | 3 (una parcial) | C-3 cerrada; C-1 resuelta en el servidor |
+| Comercial | 0 | 0 | 3 (dos parciales) | C-3 cerrada; C-1 resuelta en el servidor; C-2 con vistas guardadas personales en cinco listas |
 | Finanzas | 1 | 0 | 3 (dos en PR) | F-1 retirada por decisión; F-4 y F-5 nuevas, F-5 cerrada |
 | Personas | 1 | 0 | 1 (parcial) | H-1 y H-2 cerradas; H-4, H-5 y H-6 nuevas y cerradas |
 | Operaciones | 1 | 0 | 1 | O-1 cerrada |
@@ -75,7 +75,7 @@ Un referente se cambia o se agrega con una adenda al ADR-106, no en un PR de mó
 |---|---|---|---|---|
 | P-1 | Permisos | Los roles gerente y lector se definen por «todo menos…»: un permiso nuevo queda concedido sin que nadie lo decida | [CAR-350](https://linear.app/carlos-irigoyen/issue/CAR-350) | Cerrada |
 | P-2 | Permisos | Un miembro tiene un solo rol y los grupos no reciben roles | [CAR-359](https://linear.app/carlos-irigoyen/issue/CAR-359) | Cerrada |
-| P-3 | Permisos | Llaves de agente con alcance `*` y herencia completa por defecto | [CAR-351](https://linear.app/carlos-irigoyen/issue/CAR-351) | Cerrada en el producto; falta revocar la llave `*` de Gard |
+| P-3 | Permisos | Llaves de agente con alcance `*` y herencia completa por defecto | [CAR-351](https://linear.app/carlos-irigoyen/issue/CAR-351) | Parcial: falta aplicar el vencimiento al editar (CAR-588) y revocar la llave `*` de Gard |
 | N-1 | Núcleo | No hay eventos salientes (webhooks) para la empresa | [CAR-352](https://linear.app/carlos-irigoyen/issue/CAR-352) | Cerrada |
 | N-2 | Núcleo | Las listas no comparten un contrato: unas paginan, otras devuelven todo o cortan | [CAR-353](https://linear.app/carlos-irigoyen/issue/CAR-353) | Parcial: 137 listas antiguas por migrar |
 | F-1 | Finanzas | No hay libro contable de partida doble ni candado de mes | [CAR-354](https://linear.app/carlos-irigoyen/issue/CAR-354) | Retirada: OPAI no lleva contabilidad (ADR-113, adenda del 14-nov) |

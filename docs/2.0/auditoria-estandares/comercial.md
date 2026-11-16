@@ -31,12 +31,12 @@ HubSpot y Salesforce: objetos asociados, embudos con reglas por etapa, propiedad
 
 ## Estado al 16-nov-2026
 
-Repaso semanal contra `main` en `886e262` (CAR-586). Se cerró una media y otra quedó resuelta en el servidor.
+Repaso semanal contra `main` en `886e262` (CAR-586). Se cerró una media y otras dos quedaron parciales.
 
 | # | Estado | Qué cambió y dónde se comprueba |
 |---|---|---|
 | C-1 | Parcial | CAR-536 (#923, integrado). La empresa define campos propios con tipos al estilo de HubSpot: `core.campos_personalizados.list`, `create` y `update` (`packages/capabilities/src/core/crm/`). El editor con todos los tipos y las tarjetas en las fichas de instalación y persona siguen en PR (#924 y #926) |
-| C-2 | Abierta | No hay un modelo de vista guardada en `main`. CAR-544 (#931, abierto) agrega vistas y filtros a Cotizaciones; al integrarse hay que comprobar si la vista se guarda y se comparte o si son vistas fijas |
+| C-2 | Parcial | Vistas guardadas personales en Cuentas, Personas, Instalaciones, Cargos y Ventas (CAR-335; ajuste por usuario `navegacion_vistas_guardadas` en `core/config/navegacion.ts`, `apps/web/app/_components/maestros/vistas-guardadas.tsx`). Falta compartirlas y activarlas en Negocios, Cotizaciones, Contactos y Solicitudes; CAR-544 (#931, abierto) las lleva a Cotizaciones |
 | C-3 | Cerrada | `core.cuentas.fusionar` y `core.contactos.fusionar` (`packages/capabilities/src/core/maestros/cuentas-fusion.ts`, `contactos-fusion.ts`), con eventos `core.cuenta.fusionada` y `core.contacto.fusionado` |
 | C-4 | Abierta | Sin cambios |
 
