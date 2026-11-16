@@ -200,6 +200,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.update` | `cpq_catalogo_items_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.guardar` | `cpq_costos_predefinidos_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.list` | `cpq_costos_predefinidos_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.guardar` | `cpq_esquemas_cobertura_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.list` | `cpq_esquemas_cobertura_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
@@ -209,9 +210,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_propuesta.get` | `cpq_plantillas_propuesta_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_propuesta.update` | `cpq_plantillas_propuesta_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.activar` | `cpq_propuestas_html_activar` | existe |
-| compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.get` | `cpq_propuestas_html_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.importar` | `cpq_propuestas_html_importar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.list` | `cpq_propuestas_html_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_html.vista_previa_cotizacion` | `cpq_propuestas_html_vista_previa_cotizacion` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.propuestas_tecnica.prompt_exportable` | `cpq_propuestas_tecnica_prompt_exportable` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.sueldos_referencia.fijar` | `cpq_sueldos_referencia_fijar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.sueldos_referencia.list` | `cpq_sueldos_referencia_list` | existe |
@@ -1225,6 +1226,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
+- `cpq.propuestas_html.get`
 - `cpq.propuestas_tecnica.capitulo_guardar`
 - `cpq.propuestas_tecnica.capitulos_list`
 - `cpq.propuestas_tecnica.update`

@@ -6,19 +6,17 @@ import { Alerta, avisar, Badge, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { VistaHtml } from "./revision-plantilla-html";
+import { VistaPreviaCpqPlantilla } from "./vista-previa-cpq-plantilla";
 
 export type PlantillaHtmlFila = { id: string; nombre: string; version: number; estado: string; tokensUsados: string[]; createdAt: string };
 
 /** Versiones importadas: una sola en uso por empresa; sin ninguna, la propuesta usa el formato actual. */
 export function ListaPlantillasHtml({ plantillas }: { plantillas: PlantillaHtmlFila[] }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const [vista, setVista] = useState<{ id: string; html: string } | null>(null);
+  const [vistaId, setVistaId] = useState<string | null>(null);
 
-  async function verPrevia(id: string) {
-    if (vista?.id === id) return setVista(null);
-    const r = await ejecutar<{ html: string }>("cpq.propuestas_html.get", { id }, false, "ninguna");
-    if (r) setVista({ id, html: r.html });
+  function verPrevia(id: string) {
+    setVistaId((actual) => (actual === id ? null : id));
   }
   async function activar(p: PlantillaHtmlFila, activa: boolean) {
     const r = await ejecutar("cpq.propuestas_html.activar", { id: p.id, activa }, false, "layout", `html-activar-${crypto.randomUUID()}`);
@@ -41,7 +39,7 @@ export function ListaPlantillasHtml({ plantillas }: { plantillas: PlantillaHtmlF
                 <Badge tono={enUso ? "success" : "neutro"}>{enUso ? "En uso" : "Inactiva"}</Badge>
                 <span className="t-caption text-fg-muted">{p.tokensUsados.length} marcadores</span>
                 <div className="ml-auto flex gap-2">
-                  <Button variant="ghost" onClick={() => verPrevia(p.id)} disabled={pendiente} aria-expanded={vista?.id === p.id}>
+                  <Button variant="ghost" onClick={() => verPrevia(p.id)} disabled={pendiente} aria-expanded={vistaId === p.id}>
                     Vista previa
                   </Button>
                   <Button variant="secondary" onClick={() => activar(p, !enUso)} disabled={pendiente}>
@@ -49,7 +47,9 @@ export function ListaPlantillasHtml({ plantillas }: { plantillas: PlantillaHtmlF
                   </Button>
                 </div>
               </div>
-              {vista?.id === p.id ? <VistaHtml html={vista.html} titulo={`Vista previa de ${etiqueta}`} /> : null}
+              {vistaId === p.id ? (
+                <VistaPreviaCpqPlantilla plantillaId={p.id} titulo={`Vista previa de ${etiqueta}`} />
+              ) : null}
             </li>
           );
         })}

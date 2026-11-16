@@ -40,6 +40,12 @@ test.describe("@preview cpq: plantillas HTML en Marca y plantillas", () => {
     await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible();
     await expect(page.getByRole("button", { name: "Guardar plantilla HTML" })).toBeEnabled();
     await expect(page.getByLabel("Marcadores reconocidos")).toContainText("{{cuenta.nombre}}");
+    const vistaCpq = page.getByLabel("Ver con la cotización");
+    await vistaCpq.scrollIntoViewIfNeeded();
+    await vistaCpq.getByRole("combobox").click();
+    await page.getByPlaceholder("Buscar por código, título o cuenta").fill("e2e");
+    await page.getByRole("option").first().click({ timeout: 30_000 });
+    await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible({ timeout: 60_000 });
     await page.getByTitle("Vista previa del HTML subido").scrollIntoViewIfNeeded();
     await capturar(page, info, "cpq-plantillas-html-vista");
   });

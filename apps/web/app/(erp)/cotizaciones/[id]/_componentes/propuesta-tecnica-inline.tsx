@@ -7,7 +7,6 @@ import { Alerta, Badge, Button } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { VisorPdf } from "@/app/_components/visor-pdf";
 import { etiquetaBloquePropuesta } from "@/lib/cpq-bloques-propuesta";
-import { etiquetaBasePlantillaCpq } from "@/lib/cpq-plantilla-presentacion";
 
 import { urlDePdf } from "./use-vista-previa-pdf";
 
@@ -17,6 +16,7 @@ export type PropuestaInline = {
   estado: string;
   servicioDesactualizado: boolean;
   bloques: { id: string; tipo: string; titulo?: string; activo: boolean }[];
+  documento?: { origen: "html_empresa" | "html_opai"; nombre: string | null; version: number | null };
 };
 
 /**
@@ -73,7 +73,11 @@ export function PropuestaTecnicaInline({
     <section aria-label="Propuesta técnica" className="min-w-0 max-w-full space-y-3 rounded-md border border-border p-3">
       <div className="flex flex-wrap items-center gap-2">
         <h4 className="t-label">Propuesta técnica · {codigo}</h4>
-        <Badge tono="info">Base {etiquetaBasePlantillaCpq(propuesta.base)}</Badge>
+        <Badge tono="info">
+          {propuesta.documento?.origen === "html_empresa"
+            ? `Plantilla HTML${propuesta.documento.nombre ? ` · ${propuesta.documento.nombre}` : ""}`
+            : "Plantilla base OPAI"}
+        </Badge>
         <Badge tono={propuesta.estado === "congelada" ? "success" : "neutro"}>
           {propuesta.estado === "congelada" ? "Congelada" : "Borrador"}
         </Badge>

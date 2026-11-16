@@ -1,23 +1,20 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { BASES_PLANTILLA } from "../domain/documento/bloques";
 import {
   parseBloquesArmadorPropuesta,
   type BloqueArmadorPropuesta,
 } from "../domain/documento/propuesta-tecnica";
-import { capitulosDePropuesta } from "../persistencia/propuesta-capitulos";
-import { vistaMarcaDocumento } from "../persistencia/marca-documento";
-import { pdfPropuestaVista } from "../persistencia/pdf-propuesta-vista";
-import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
+import { plantillaHtmlEnUso } from "../persistencia/propuesta-html-uso";
 import {
   actualizarPropuestaArmador,
   propuestaServicioDesactualizado,
   servicioDesdeFilas,
   sincronizarServicioDesdeCotizacion,
 } from "../persistencia/propuesta-tecnica";
-import { cargarFilasVersion, packServicioCotizacion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
+import { cargarFilasVersion, packServicioCotizacion } from "../persistencia/recalcular";
 import { PERMISO_MANAGE, PERMISO_READ } from "./permisos";
 import { bloqueArmadorSchema } from "./propuesta-tecnica-esquemas";
 import { uuidSchema } from "./esquemas";
@@ -41,6 +38,11 @@ export const propuestaTecnicaGet = defineCapability({
       editadoParaCliente: z.boolean(),
       codigo: z.string(),
       versionNumero: z.number().int(),
+      documento: z.object({
+        origen: z.enum(["html_empresa", "html_opai"]),
+        nombre: z.string().nullable(),
+        version: z.number().int().nullable(),
+      }),
     })
     .nullable(),
   efecto: "lectura",
@@ -52,6 +54,7 @@ export const propuestaTecnicaGet = defineCapability({
     const prop = await ctx.db.cpqPropuestaTecnica.findFirst({ where: { versionId: pack.version.id } });
     if (!prop) return null;
     const servicio = servicioDesdeFilas(packServicioCotizacion(c, pack));
+    const html = await plantillaHtmlEnUso(ctx);
     return {
       id: prop.id,
       cotizacionId: prop.cotizacionId,
@@ -63,6 +66,9 @@ export const propuestaTecnicaGet = defineCapability({
       editadoParaCliente: prop.editadoParaCliente,
       codigo: c.codigo,
       versionNumero: pack.version.numero,
+      documento: html
+        ? { origen: "html_empresa" as const, nombre: html.nombre, version: html.version }
+        : { origen: "html_opai" as const, nombre: null, version: null },
     };
   },
 });
@@ -109,47 +115,5 @@ export const propuestaTecnicaSyncServicio = defineCapability({
     if (!pack) throw noEncontrado("La versión");
     await sincronizarServicioDesdeCotizacion(ctx, input.id, servicioDesdeFilas(packServicioCotizacion(c, pack)), !dryRun);
     return { id: input.id, servicioDesactualizado: false as const };
-  },
-});
-
-export const propuestaTecnicaPreviewPdf = defineCapability({
-  auditarLectura: (_s, input) => [input.id, input.cotizacionId],
-  id: "cpq.propuestas_tecnica.preview_pdf",
-  descripcion: "Genera PDF de propuesta técnica (marca de agua BORRADOR si no está enviada). Sale de la plantilla HTML en uso de la empresa (o de la base de OPAI) con los datos de la cotización; `{{secciones}}` inserta las secciones activas del armador.",
-  permiso: PERMISO_READ,
-  input: z.object({ id: uuidSchema, cotizacionId: uuidSchema }),
-  output: z.object({ pdfBase64: z.string(), bytes: z.number().int(), borrador: z.boolean() }),
-  efecto: "lectura",
-  dryRun: true,
-  async handler(ctx, input) {
-    const c = await cotizacionDe(ctx, input.cotizacionId);
-    const prop = await ctx.db.cpqPropuestaTecnica.findFirst({ where: { id: input.id } });
-    if (!prop) throw noEncontrado("La propuesta técnica");
-    if (prop.cotizacionId !== input.cotizacionId) {
-      throw reglaDeNegocio("La propuesta técnica no pertenece a esta cotización.");
-    }
-    const pack = await cargarFilasVersion(ctx, input.cotizacionId, undefined, false);
-    if (!pack) throw noEncontrado("La versión");
-    const resultado = await recalcularVersion(ctx, input.cotizacionId, undefined, false);
-    if (!resultado) throw noEncontrado("La versión");
-    const calculo = proyectarCalculo(ctx, resultado);
-    const plantillaRow = await plantillaActivaPropuestaLectura(ctx);
-    if (!plantillaRow) throw reglaDeNegocio("No hay plantilla activa de propuesta técnica.");
-    const plantilla = vistaPlantillaPropuesta(plantillaRow);
-    const marca = await vistaMarcaDocumento(ctx);
-    const servicio = servicioDesdeFilas(packServicioCotizacion(c, pack));
-    const bytes = await pdfPropuestaVista(ctx, {
-      cotizacionId: input.cotizacionId,
-      codigo: c.codigo,
-      titulo: c.titulo,
-      borrador: prop.estado !== "congelada",
-      bloquesJson: prop.bloquesJson,
-      plantilla,
-      marca,
-      servicio,
-      netoTotalClp: calculo.ventaMensual ?? 0,
-      capitulos: await capitulosDePropuesta(ctx, prop),
-    });
-    return { pdfBase64: Buffer.from(bytes).toString("base64"), bytes: bytes.byteLength, borrador: prop.estado !== "congelada" };
   },
 });

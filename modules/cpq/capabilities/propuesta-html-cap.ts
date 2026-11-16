@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability, externo } from "@opai/capabilities";
 
 import { activarHtml, importarHtml, listarHtml, obtenerHtml } from "../persistencia/propuesta-html";
+import { vistaPreviaPropuestaHtml } from "../persistencia/vista-previa-propuesta-html";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_BIBLIOTECA, PERMISO_READ } from "./permisos";
 
@@ -89,5 +90,34 @@ const propuestaHtmlActivar = defineCapability({
   handler: (ctx, input, { dryRun }) => activarHtml(ctx, { id: input.id, activa: input.activa, escribir: !dryRun }),
 });
 
+const propuestaHtmlVistaCotizacion = defineCapability({
+  auditarLectura: (_s, input) => [input.cotizacionId, input.plantillaId].filter(Boolean) as string[],
+  id: "cpq.propuestas_html.vista_previa_cotizacion",
+  descripcion:
+    "Renderiza una plantilla HTML de propuesta con los datos reales de una cotización (armador y campos del catálogo), para vista previa en Configuración.",
+  permiso: PERMISO_READ,
+  input: z.object({
+    cotizacionId: uuidSchema,
+    plantillaId: uuidSchema.optional(),
+    html: z.string().max(400_000).optional(),
+  }),
+  sensibles: ["html"],
+  output: z.object({
+    html: externo(z.string()),
+    cotizacionCodigo: z.string(),
+    marcadoresVacios: z.array(z.string()),
+    marcadoresSinResolver: z.array(z.string()),
+  }),
+  efecto: "lectura",
+  dryRun: false,
+  handler: (ctx, input) => vistaPreviaPropuestaHtml(ctx, input),
+});
+
 /** Las capacidades de la plantilla HTML, para registrarlas juntas. */
-export const capacidadesPropuestaHtml = [propuestaHtmlImportar, propuestaHtmlList, propuestaHtmlGet, propuestaHtmlActivar];
+export const capacidadesPropuestaHtml = [
+  propuestaHtmlImportar,
+  propuestaHtmlList,
+  propuestaHtmlGet,
+  propuestaHtmlActivar,
+  propuestaHtmlVistaCotizacion,
+];

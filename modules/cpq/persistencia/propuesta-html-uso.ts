@@ -14,7 +14,7 @@ export function plantillaHtmlEnUso(ctx: Contexto) {
   return ctx.db.cpqPropuestaHtml.findFirst({
     where: { estado: "activa" },
     orderBy: { createdAt: "desc" },
-    select: { id: true, version: true, hashSha256: true, htmlSaneado: true },
+    select: { id: true, nombre: true, version: true, hashSha256: true, htmlSaneado: true },
   });
 }
 
