@@ -36,6 +36,20 @@ describe("texto de las novedades (CAR-316)", () => {
     expect(html).not.toContain("javascript:");
   });
 
+  it("dibuja tablas GFM con filas de datos (CAR-525)", () => {
+    const texto = [
+      "| Folio | Fecha | Cliente |",
+      "|-------|-------|---------|",
+      "| 100 | 2026-11-03 | Acme SpA |",
+    ].join("\n");
+    const html = renderToStaticMarkup(createElement(TextoNovedad, { texto }));
+    expect(html).toContain("<table");
+    expect(html).toContain("<th");
+    expect(html).toContain("Folio");
+    expect(html).toContain("Acme SpA");
+    expect(html).not.toContain("|-------");
+  });
+
   it("el aviso destacado muestra solo el primer párrafo con formato", () => {
     const html = renderToStaticMarkup(createElement(LineaNovedad, { texto: "Hola **tú**\nsigue.\n\nOtro" }));
     expect(html).toBe("Hola <strong class=\"font-semibold\">tú</strong> sigue.");
