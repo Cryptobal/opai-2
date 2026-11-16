@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ESTADOS_NOVEDAD_LIBRO, GRAVEDADES_NOVEDAD_LIBRO, codigoNovedad } from "@opai/domain";
 
-import { noEncontrado } from "../../errores";
+import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { externo } from "../../externo";
 import type { Contexto } from "../../types";
 import { instalacionesEnAlcance } from "../maestros/alcance";
@@ -12,6 +12,36 @@ type LibroNovedad = Awaited<ReturnType<Contexto["db"]["libroNovedad"]["findFirst
 
 export const gravedadNovedadSchema = z.enum(GRAVEDADES_NOVEDAD_LIBRO);
 export const estadoNovedadSchema = z.enum(ESTADOS_NOVEDAD_LIBRO);
+
+/** Punto y tipo de Rondas: solo con el módulo activo, el punto de la misma instalación y el tipo activo. */
+export async function gravedadDeRondas(
+  ctx: Contexto,
+  e: {
+    instalacionId: string;
+    puntoId?: string | undefined;
+    tipoIncidenteId?: string | undefined;
+  },
+): Promise<string | undefined> {
+  if (!e.puntoId && !e.tipoIncidenteId) return undefined;
+  if (!ctx.modulosActivos.includes("rondas"))
+    throw reglaDeNegocio(
+      "Para enlazar un punto o un tipo de incidente, el módulo Rondas debe estar activo.",
+    );
+  if (e.puntoId) {
+    const p = await ctx.db.puntoControl.findFirst({
+      where: { id: e.puntoId, instalacionId: e.instalacionId, estado: "activo" },
+      select: { id: true },
+    });
+    if (!p) throw noEncontrado("El punto de control");
+  }
+  if (!e.tipoIncidenteId) return undefined;
+  const t = await ctx.db.tipoIncidente.findFirst({
+    where: { id: e.tipoIncidenteId, activo: true },
+    select: { gravedadDefecto: true },
+  });
+  if (!t) throw noEncontrado("El tipo de incidente");
+  return t.gravedadDefecto;
+}
 
 export const novedadSchema = z.object({
   id: z.string(),

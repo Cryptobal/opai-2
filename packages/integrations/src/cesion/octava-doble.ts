@@ -3,7 +3,7 @@ import type { DepsAdaptadorOctava } from "./octava";
 import type { FetchOctava } from "./octava-http";
 import type { AlmacenSesionOctava, CedenteOctava } from "./octava-sesion";
 
-export type Llamada = { endpoint: string; cuerpo: Record<string, string> };
+type Llamada = { endpoint: string; cuerpo: Record<string, string> };
 
 export function fetchGrabado(respuestas: Record<string, unknown[]>) {
   const llamadas: Llamada[] = [];

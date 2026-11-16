@@ -9,7 +9,9 @@ export const accesoDb = {
     const archivo = context.filename.replaceAll("\\", "/");
     const db = archivo.includes("/packages/db/");
     const auth = archivo.includes("/packages/auth/");
-    const contexto = archivo.endsWith("/packages/capabilities/src/contexto.ts");
+    const contexto =
+      archivo.endsWith("/packages/capabilities/src/contexto.ts") ||
+      archivo.endsWith("/packages/capabilities/src/core/modulos-nuevos-aplicar.ts");
     // Operaciones de identidad (CAR-43, CAR-54, CAR-45): solo `ctx.identidad`, ya autorizado.
     const identidad = archivo.endsWith("/packages/capabilities/src/identidad-db.ts");
     const IDENTIDAD = [
