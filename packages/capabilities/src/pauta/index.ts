@@ -10,6 +10,10 @@ import { coberturaDeshacer } from "./cobertura-deshacer";
 import { excepcionesAnular } from "./excepciones-anular";
 import { excepcionesCrear } from "./excepciones-crear";
 import { exportarPauta } from "./exportar";
+import { montosTurnoExtraFijar, montosTurnoExtraListar } from "./montos-turno-extra";
+import { turnosExtraListar } from "./turnos-extra-listar";
+import { turnosExtraRegistrar } from "./turnos-extra-registrar";
+import { turnosExtraAprobar, turnosExtraRechazar } from "./turnos-extra-resolver";
 import { historialListar } from "./historial";
 import { informeInstalaciones } from "./informe-instalaciones";
 import { mesLeer } from "./lectura-mes";
@@ -55,4 +59,10 @@ export const capacidadesPauta: readonly Capacidad[] = [
   exportarPauta,
   publicacionesPublicar,
   publicacionesListar,
+  turnosExtraRegistrar,
+  turnosExtraAprobar,
+  turnosExtraRechazar,
+  turnosExtraListar,
+  montosTurnoExtraFijar,
+  montosTurnoExtraListar,
 ];

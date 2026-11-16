@@ -6,6 +6,7 @@ import { reglaDeNegocio } from "../errores";
 import { anotar } from "./anotar";
 import { anularRegistrosSinTurnos } from "./ausencias-registro";
 import { aFechaDb, diasDelRango, PERMISO_WRITE, puestoParaPauta, rangoSchema } from "./comun";
+import { rechazarTurnosDeExcepciones } from "./turnos-extra-anular";
 
 const anularInput = z.object({ puestoId: uuidSchema }).and(rangoSchema);
 
@@ -34,7 +35,7 @@ export const excepcionesAnular = defineCapability({
       const puestoActual = await puestoParaPauta({ ...ctx, db: tx }, input.puestoId);
       const registros = await tx.excepcionPauta.findMany({
         where: donde,
-        select: { ausenciaId: true },
+        select: { id: true, ausenciaId: true },
       });
       const resultado = await tx.excepcionPauta.updateMany({
         where: donde,
@@ -48,6 +49,8 @@ export const excepcionesAnular = defineCapability({
         registros.map((r) => r.ausenciaId),
         ctx.usuario?.id ?? null,
       );
+      // El turno extra de un reemplazo o refuerzo anulado ya no se paga (CAR-96).
+      await rechazarTurnosDeExcepciones(tx, registros.map((r) => r.id), ctx.usuario?.id ?? null);
       await anotar(tx, ctx, {
         instalacionId: puestoActual.instalacionId,
         puestoId: puesto.id,

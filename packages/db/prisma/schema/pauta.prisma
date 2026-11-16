@@ -125,3 +125,52 @@ model PublicacionPauta {
   @@map("publicaciones")
   @@schema("pauta")
 }
+
+/// Turno extra (CAR-96, ADR-083): un reemplazo o refuerzo pagado, registrado por el supervisor y aprobado por
+/// quien tiene `pauta:aprobar_extra` (nunca quien lo registró). No mueve plata ni se informa a Nómina: el pago
+/// por lote (CAR-101) espera la revisión legal y contable escrita (decisión de Carlos, CAR-458).
+model TurnoExtra {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  /// Reemplazo o refuerzo (excepción activa) que origina el turno; uno por excepción.
+  excepcionId      String    @unique @map("excepcion_id") @db.Uuid
+  instalacionId    String    @map("instalacion_id") @db.Uuid
+  puestoId         String    @map("puesto_id") @db.Uuid
+  personaId        String    @map("persona_id") @db.Uuid
+  fecha            DateTime  @db.Date
+  /// "propio" | "externo" (CHECK en la migración).
+  tipoTrabajador   String    @map("tipo_trabajador")
+  /// Monto que resultó de la instalación o del puesto al registrar; el supervisor no lo edita.
+  montoSugeridoClp Int       @map("monto_sugerido_clp")
+  /// Monto final: igual al sugerido salvo que quien aprueba lo cambie con motivo.
+  montoClp         Int       @map("monto_clp")
+  montoMotivo      String?   @map("monto_motivo")
+  /// "por_aprobar" | "aprobado" | "rechazado" (CHECK en la migración).
+  estado           String    @default("por_aprobar")
+  registradoPor    String    @map("registrado_por") @db.Uuid
+  resueltoPor      String?   @map("resuelto_por") @db.Uuid
+  resueltoEn       DateTime? @map("resuelto_en") @db.Timestamptz(6)
+  motivoResolucion String?   @map("motivo_resolucion")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, estado, fecha])
+  @@index([tenantId, instalacionId, fecha])
+  @@map("turnos_extra")
+  @@schema("pauta")
+}
+
+/// Monto fijo del turno extra por instalación, con excepción por puesto (A6). `puestoId` nulo = el de la
+/// instalación. Únicos parciales en la migración (uno por instalación y uno por puesto).
+model MontoTurnoExtra {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  puestoId      String?  @map("puesto_id") @db.Uuid
+  montoClp      Int      @map("monto_clp")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("montos_turno_extra")
+  @@schema("pauta")
+}

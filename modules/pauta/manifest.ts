@@ -17,6 +17,10 @@ export const manifest = defineModule({
       id: "pauta:write",
       descripcion: "Fijar series de los puestos y registrar o anular excepciones de la pauta",
     },
+    {
+      id: "pauta:aprobar_extra",
+      descripcion: "Aprobar o rechazar turnos extra y fijar sus montos por instalación o puesto (ADR-083)",
+    },
   ],
   navegacion: [{
       portal: "erp",
@@ -40,6 +44,9 @@ export const manifest = defineModule({
       id: "pauta.publicada",
       descripcion: "Se publicó la pauta de una instalación para un mes: se avisa a cada titular sus turnos (CAR-356).",
     },
+    { id: "pauta.turno_extra.registrado", descripcion: "Se registró un turno extra por aprobar (CAR-96)." },
+    { id: "pauta.turno_extra.aprobado", descripcion: "Se aprobó un turno extra, con su monto final (CAR-96)." },
+    { id: "pauta.turno_extra.rechazado", descripcion: "Se rechazó un turno extra con su motivo (CAR-96)." },
   ],
   capacidades: capacidadesPauta,
   // Indicador de gestión para el catálogo del núcleo (ADR-094, adenda CAR-309).

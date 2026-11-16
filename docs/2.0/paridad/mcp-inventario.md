@@ -1211,7 +1211,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.ausencias.anular`
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
+- `pauta.montos_turno_extra.fijar`
+- `pauta.montos_turno_extra.listar`
 - `pauta.publicaciones.listar`
+- `pauta.turnos_extra.aprobar`
+- `pauta.turnos_extra.listar`
+- `pauta.turnos_extra.rechazar`
+- `pauta.turnos_extra.registrar`
 - `platform.ajustes.set`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`

@@ -149,6 +149,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },
+  // Turnos extra (CAR-96): CHECK de tipo, montos iguales (sin motivo) y por aprobar sin resolución.
+  "pauta.turnos_extra": {
+    valores: () => ({ tipo_trabajador: "propio", estado: "por_aprobar", monto_sugerido_clp: 30000, monto_clp: 30000, monto_motivo: null, resuelto_en: null, resuelto_por: null }),
+  },
+  "pauta.montos_turno_extra": { valores: () => ({ monto_clp: 30000, puesto_id: null }) },
   "pauta.registros_operativos": {
     valores: () => ({ tipo: "cobertura_confirmada", estado: "activa", motivo: "" }),
   },
