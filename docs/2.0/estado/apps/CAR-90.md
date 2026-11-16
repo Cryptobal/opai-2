@@ -21,9 +21,14 @@
 - Fichas de Google Play y App Store en `docs/2.0/apps/fichas-tiendas.md`, sin publicar, con la lista de lo que falta para publicar.
 - La web reconoce la app por el user agent (`lib/app-nativa.ts`). En Notificaciones del Portal Trabajador, dentro de la app ya no pide «agregar OPAI a la pantalla de inicio» (en la app no existe ese paso): avisa que los verá en la campana hasta que llegue el push nativo.
 
+## Parte 2b (PR apilado sobre la parte 2a)
+
+- Ícono (Android normal, redondo y adaptable; iOS) y pantalla de carga con el logo actual de OPAI, por decisión de Carlos del 14-nov-2026. Las fuentes están en `apps/movil/assets/`. El APK compila.
+- Borrador de la política de privacidad en `docs/2.0/apps/borrador-politica-privacidad.md`, **por aprobar por Carlos y sin publicar**.
+
 ## Qué queda pendiente
 
-- **Parte 2:** íconos y pantalla de carga con la marca; push nativo (APNs/FCM) por el adaptador del núcleo; GPS en segundo plano para rondas; ingreso con Google por el navegador del sistema (Google lo bloquea en vistas web embebidas).
+- **Parte 2:** push nativo (FCM: Firebase lo gestiona el asistente de Carlos con el id `cl.opai.app`; APNs: espera el pago de Apple Developer) por el adaptador del núcleo; GPS en segundo plano para rondas; ingreso con Google por el navegador del sistema (Google lo bloquea en vistas web embebidas).
 - Compilar iOS en un Mac con Xcode.
 - Probar en un teléfono real que «Reintentar» de la página sin conexión vuelve a cargar (usa `history.back()`; si al arrancar sin red no hay historial, cambiar a recargar la entrada).
 - El e2e `@preview` acepta el portal del usuario `qa-e2e` o el selector; afirmar el portal exacto cuando haya usuarios de prueba por perfil.
