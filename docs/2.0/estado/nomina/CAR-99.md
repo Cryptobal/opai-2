@@ -47,7 +47,7 @@
 
 - `/remuneraciones/[id]/archivos`, enlazada desde el período («Archivos y declaraciones»): una tarjeta por archivo (LRE y Previred) con Validar, tabla de errores por persona y Descargar, que solo se habilita sin errores (como en el diseño aprobado). El botón que el PR del LRE había puesto en la página de liquidaciones sale de ahí.
 - Tope de JS propio de 174 KB para la ruta nueva, igual que liquidaciones.
-- Pendiente del diseño 06: libro de remuneraciones en PDF y Excel, F29 y archivo de pago del banco.
+- Libro de remuneraciones en PDF y Excel (PR apilado sobre cierre-revisadas, rama `cursor/libro-remuneraciones-ab10`): capacidades `nomina.libro_remuneraciones.pdf` y `.excel`, tarjeta en Archivos. Pendiente diseño 06: F29 y archivo de pago del banco.
 
 ### Comprobantes y estado de obligaciones (PR apilado sobre el de Previred, rama `brief/car-99-nomina-comprobantes`)
 

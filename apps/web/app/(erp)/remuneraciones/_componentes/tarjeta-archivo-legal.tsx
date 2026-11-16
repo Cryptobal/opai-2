@@ -38,10 +38,20 @@ export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: P
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const router = useRouter();
   const [archivo, setArchivo] = useState<Archivo | null>(null);
+  async function validarLre() {
+    const r = await ejecutar<Archivo>("nomina.lre.generar", { periodoId });
+    return r;
+  }
+  async function validarPrevired() {
+    const r = await ejecutar<Archivo>("nomina.previred.generar", { periodoId });
+    return r;
+  }
+  async function validarF301() {
+    const r = await ejecutar<Archivo>("nomina.f30_1.generar", { periodoId });
+    return r;
+  }
   async function validar() {
-    // Ids literales: el escáner de paridad verifica cada capacidad que llama la pantalla.
-    const cap = tipo === "lre" ? "nomina.lre.generar" : tipo === "previred" ? "nomina.previred.generar" : "nomina.f30_1.generar";
-    const r = await ejecutar<Archivo>(cap, { periodoId });
+    const r = tipo === "lre" ? await validarLre() : tipo === "previred" ? await validarPrevired() : await validarF301();
     if (!r) return;
     setArchivo(r);
     // Deja el resultado en el calendario de obligaciones (generado o con errores), si el mes no está cerrado.

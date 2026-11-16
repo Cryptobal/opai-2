@@ -19,6 +19,7 @@ test.describe("@preview nómina: archivos y declaraciones", () => {
     const href = await periodo.getAttribute("href");
     await page.goto(`${href}/archivos`);
     await expect(page.getByText("OPAI prepara y valida los archivos")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("Libro de remuneraciones", { exact: true })).toBeVisible();
     await expect(page.getByText("Formato por verificar").first()).toBeVisible();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "nomina-archivos");
