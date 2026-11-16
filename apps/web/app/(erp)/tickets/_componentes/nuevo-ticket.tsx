@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
+import { avisar, Button, Campo, Combobox, Input, Select, Sheet, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { TipoTicket } from "./datos";
+import type { InstalacionOpcion, TipoTicket } from "./datos";
+import { SIN_INSTALACION, useInstalacionesTicket } from "./instalaciones-ticket";
 
 // Solo el tipo viene de datos.ts: sus valores arrastran código de servidor al navegador.
 const PRIORIDADES = [
@@ -20,16 +21,20 @@ const PRIORIDADES = [
 /**
  * Nuevo ticket (Sheet de la bandeja). Un ticket nace solo cuando una persona lo crea aquí o por
  * `tickets.tickets.crear`: ninguna regla ni integración lo crea (regla de Carlos, 30-oct-2026). El
- * responsable lo fija el tipo; quien no ve todos los tickets no lo elige.
+ * responsable lo fija el tipo; quien no ve todos los tickets no lo elige. La instalación es opcional y
+ * solo aparece si quien crea ve alguna (su alcance).
  */
-export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
+export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: InstalacionOpcion[] }) {
+  const { tipos, instalaciones } = p;
   const router = useRouter();
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const inst = useInstalacionesTicket(instalaciones);
   const [abierto, setAbierto] = useState(false);
   const [tipoId, setTipoId] = useState("");
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [prioridad, setPrioridad] = useState("p3");
+  const [instalacionId, setInstalacionId] = useState(SIN_INSTALACION);
   const tipo = tipos.find((t) => t.id === tipoId);
   const valido = tipoId !== "" && titulo.trim().length >= 3 && descripcion.trim().length >= 3;
 
@@ -44,11 +49,13 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
       titulo: titulo.trim(),
       descripcion: descripcion.trim(),
       prioridad,
+      ...(instalacionId !== SIN_INSTALACION ? { instalacionId } : {}),
     });
     if (!r) return;
     avisar.exito(tipo?.requiereAprobacion ? "Solicitud enviada" : "Ticket creado");
     setTitulo("");
     setDescripcion("");
+    setInstalacionId(SIN_INSTALACION);
     setAbierto(false);
     router.push(`/tickets/${r.id}`);
   }
@@ -64,7 +71,11 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
         titulo="Nuevo ticket"
         acciones={
           <Button block size="lg" disabled={pendiente || !valido} onClick={() => void crear()}>
-            {pendiente ? "Creando…" : tipo?.requiereAprobacion ? "Enviar solicitud" : "Crear ticket"}
+            {pendiente
+              ? "Creando…"
+              : tipo?.requiereAprobacion
+                ? "Enviar solicitud"
+                : "Crear ticket"}
           </Button>
         }
       >
@@ -84,7 +95,12 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
             <p className="t-caption">Este tipo pasa por aprobación antes de resolverse.</p>
           ) : null}
           <Campo etiqueta="Título" htmlFor="nt-titulo" {...(error ? { error } : {})}>
-            <Input id="nt-titulo" value={titulo} maxLength={140} onChange={(e) => setTitulo(e.target.value)} />
+            <Input
+              id="nt-titulo"
+              value={titulo}
+              maxLength={140}
+              onChange={(e) => setTitulo(e.target.value)}
+            />
           </Campo>
           <Campo etiqueta="Descripción" htmlFor="nt-desc">
             <Textarea
@@ -95,6 +111,18 @@ export function NuevoTicket({ tipos }: { tipos: TipoTicket[] }) {
               onChange={(e) => setDescripcion(e.target.value)}
             />
           </Campo>
+          {instalaciones.length > 0 ? (
+            <Campo etiqueta="Instalación (opcional)" htmlFor="nt-inst">
+              <Combobox
+                id="nt-inst"
+                valor={instalacionId}
+                onCambiar={([v]) => setInstalacionId(v ?? SIN_INSTALACION)}
+                opciones={inst.opciones}
+                onBuscar={inst.buscar}
+                placeholder="Sin instalación"
+              />
+            </Campo>
+          ) : null}
           <Campo etiqueta="Prioridad" htmlFor="nt-prio">
             <Select valor={prioridad} opciones={PRIORIDADES} onCambiar={setPrioridad} />
           </Campo>

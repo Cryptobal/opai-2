@@ -1,6 +1,7 @@
 import type { PanelSueldo } from "@opai/capabilities";
 import { cargarPanelSueldo } from "@/lib/panel-sueldo";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
+import { Suspense } from "react";
 
 import { Loading, SplitScreen } from "@opai/ds";
 
