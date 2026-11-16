@@ -1,6 +1,6 @@
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
-import type { Parametros, SearchParams } from "@/lib/parametros";
+import { type Parametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { conCursor, contextoPagina, sinTildes, todas } from "./paginas";
