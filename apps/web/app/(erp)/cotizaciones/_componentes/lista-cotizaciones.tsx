@@ -26,6 +26,7 @@ export function ListaCotizaciones({
     <EnlaceBotonHoja
       href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`}
       icono={Plus}
+      variante={seleccionada ? "secondary" : "primary"}
     >
       Nueva
     </EnlaceBotonHoja>

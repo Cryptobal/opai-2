@@ -18,6 +18,7 @@ export const platformTenantsGet = defineCapability({
   input: z.object({ tenantId: uuidSchema }),
   output: z.object({
     tenant: tenantSchema,
+    activarModulosNuevos: z.boolean(),
     modulos: z.array(moduloEstadoSchema),
     administradores: z.array(
       z.object({
@@ -59,8 +60,10 @@ export const platformTenantsGet = defineCapability({
       e.apiKeys(),
       resumenUso(e, 30),
     ]);
+    const marca = await p.globales.tenantModulosNuevos(tenant.id);
     return {
       tenant,
+      activarModulosNuevos: marca?.activarModulosNuevosDesde != null,
       modulos,
       administradores: admins.map((m) => ({
         membershipId: m.id,
