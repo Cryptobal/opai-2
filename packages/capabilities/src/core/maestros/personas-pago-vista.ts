@@ -36,7 +36,7 @@ export const pagoVerSchema = z.object({
   vigente: cuentaSchema.describe("La cuenta por defecto: la que usa la nómina de pago."),
   cuentas: z
     .array(cuentaSchema.extend({ id: z.string(), porDefecto: z.boolean() }))
-    .describe("Todas las cuentas de la persona; la por defecto va primero (CAR-275)."),
+    .describe("Todas las cuentas de la persona; la marcada por defecto va primero."),
   solicitudPendiente: z
     .object({
       id: z.string(),

@@ -6,7 +6,7 @@ import { listarAjustes } from "./catalogo";
 import { AJUSTES_OCULTOS_A_EMPRESAS } from "./integraciones-habilitadas";
 import { type CampoAjuste, valorPorDefecto } from "./registro";
 
-export type Origen = "defecto" | "plataforma" | "tenant" | "usuario";
+type Origen = "defecto" | "plataforma" | "tenant" | "usuario";
 export type ValorEfectivo = { valor: unknown; origen: Origen; version?: number };
 
 const k = (modulo: string, clave: string) => `${modulo}.${clave}`;

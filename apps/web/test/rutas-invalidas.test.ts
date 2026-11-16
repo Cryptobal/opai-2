@@ -26,6 +26,7 @@ describe("ids inválidos en la URL (404 real desde el proxy)", () => {
       "/personas/vencimientos",
       "/instalaciones/nueva",
       "/configuracion/agentes/conectar",
+      "/configuracion/agentes/eventos",
       `/supervisor/personas/${UUID}`,
       "/configuracion/usuarios",
       "/",
@@ -40,6 +41,8 @@ describe("a qué página se reescribe un 404", () => {
     expect(destino404("/terreno/algo")).toBe("/terreno/no-encontrado");
     expect(destino404("/personas/abc")).toBe("/no-encontrado");
     expect(destino404("/configuracion/agentes/xyz")).toBe("/no-encontrado");
-    expect(destino404("/configuracion/grupo/noexiste")).toBe("/configuracion/no-encontrado?ruta=%2Fconfiguracion%2Fgrupo%2Fnoexiste");
+    expect(destino404("/configuracion/grupo/noexiste")).toBe(
+      "/configuracion/no-encontrado?ruta=%2Fconfiguracion%2Fgrupo%2Fnoexiste",
+    );
   });
 });

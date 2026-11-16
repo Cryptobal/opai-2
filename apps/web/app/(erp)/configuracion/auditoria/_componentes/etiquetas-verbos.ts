@@ -1,7 +1,7 @@
 /** Verbo (resto del código de la capacidad) → acción en español. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const VERBOS: Record<string, string> = {
   portal_inicio: "Portal de inicio", get: "Ver", excel: "Exportar a Excel", update: "Editar", list: "Listar", invite: "Invitar",
-  remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
+  salida: "Registrar salida", cerrar_bloque: "Cerrar en bloque", remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
   clases: "Ver clases", accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
   summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen", instalaciones: "Por instalación",
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado", iniciar_vida: "Iniciar prueba de vida", consentir: "Dar consentimiento", habilitar: "Habilitar", textos: "Textos vigentes",
@@ -24,7 +24,7 @@ export const VERBOS: Record<string, string> = {
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   estado_comercial: "Estado comercial", revocar: "Revocar", ver: "Ver", ofrecer: "Ofrecer",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
-  aplicar: "Aplicar", destinos: "Ver destinos", destinos_list: "Listar destinos", destino_crear: "Crear destino", destino_actualizar: "Editar destino", destino_rotar_secreto: "Rotar secreto", destino_eliminar: "Eliminar destino", entregas_list: "Listar entregas", entrega_reenviar: "Reenviar entrega", eventos_list: "Ver catálogo de eventos", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
+  aplicar: "Aplicar", activar: "Activar", destinos: "Ver destinos", destinos_list: "Listar destinos", destino_get: "Ver destino", destino_crear: "Crear destino", destino_actualizar: "Editar destino", destino_rotar_secreto: "Rotar secreto", destino_eliminar: "Eliminar destino", entregas_list: "Listar entregas", entrega_reenviar: "Reenviar entrega", eventos_list: "Ver catálogo de eventos", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", valores: "Valores", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
   confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
@@ -53,7 +53,7 @@ export const VERBOS: Record<string, string> = {
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
   pasar_a_cotizacion: "Pasar a cotización", rotar_token_formulario: "Renovar clave del formulario",
   recibir_formulario_web: "Recibir formulario web", crear: "Crear", reemplazar_etiqueta: "Reemplazar etiqueta",
-  fijar: "Fijar", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
+  fijar: "Fijar", monto_fijar: "Fijar monto", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
   cambiar_estado: "Cambiar estado", marcar_pagado: "Marcar como pagado", cargar: "Cargar",
   aplicar_cuotas: "Aplicar cuotas", reglas_listar: "Listar reglas", fijar_regla: "Fijar regla",
   generar_calendario: "Generar calendario", leer: "Leer", deshacer: "Deshacer", registrar: "Registrar",
@@ -96,6 +96,8 @@ export const VERBOS: Record<string, string> = {
   // Slack (CAR-291, ADR-093).
   canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
   usuarios: "Ver personas en Slack", vincular_usuarios: "Vincular personas con Slack",
+  // Plataforma (CAR-323, CAR-529).
+  miembros: "Ver miembros", reenviar: "Reenviar", set_modulos_nuevos: "Activar módulos nuevos",
   // Indicadores de gestión (CAR-305).
   medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",

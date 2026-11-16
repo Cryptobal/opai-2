@@ -8,8 +8,8 @@ const num = (d: { toString(): string } | number | null | undefined): number | nu
 const dia = (d: Date | null | undefined): string | null =>
   d ? d.toISOString().slice(0, 10) : null;
 
-export const horaSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Hora HH:MM");
-export const intervaloSchema = z.object({
+const horaSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Hora HH:MM");
+const intervaloSchema = z.object({
   cadaMin: z.number().int().min(1).max(1440),
   desde: horaSchema,
   hasta: horaSchema,
@@ -76,7 +76,7 @@ export function vistaPunto(p: FilaPunto): z.input<typeof puntoSchema> {
   };
 }
 
-export const plantillaPuntoSchema = z.object({
+const plantillaPuntoSchema = z.object({
   puntoId: z.string(),
   orden: z.number(),
   obligatorio: z.boolean(),

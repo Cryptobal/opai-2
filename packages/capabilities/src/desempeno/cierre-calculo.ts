@@ -6,7 +6,7 @@ import { type DetalleIndicador, resultadosDe } from "./calculo";
 import { versionesDe } from "./comun";
 
 /** "2026-12" → "2027-01". */
-export function mesSiguiente(periodo: string): string {
+function mesSiguiente(periodo: string): string {
   const s = periodoSiguiente(Number(periodo.slice(0, 4)), Number(periodo.slice(5, 7)));
   return `${s.anio}-${String(s.mes).padStart(2, "0")}`;
 }

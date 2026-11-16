@@ -3,7 +3,7 @@ import { esAprobadorDeRegla, PERMISOS_CORE, puedeResolver, type ReglaAprobacion 
 import type { Contexto } from "../../types";
 
 /** Quién es la persona frente a las reglas (CAR-252): su rol base, su rol personalizado y sus grupos. */
-export type PersonaAprobadora = { rol: string | null; roleId: string | null; grupos: string[] };
+type PersonaAprobadora = { rol: string | null; roleId: string | null; grupos: string[] };
 
 /** Regla tal como se guarda: el monto viene como BigInt de la base. */
 type FilaRegla = Omit<ReglaAprobacion, "montoMinimo"> & { montoMinimo: bigint | null };
@@ -14,9 +14,9 @@ export const reglaDeFila = (f: FilaRegla): ReglaAprobacion => ({
 });
 
 /** Dueños y administradores (o quien tenga `core:aprobaciones.manage`) aprueban todo, siempre. */
-export const apruebaTodo = (ctx: Contexto) => ctx.autorizar(PERMISOS_CORE.aprobacionesManage);
+const apruebaTodo = (ctx: Contexto) => ctx.autorizar(PERMISOS_CORE.aprobacionesManage);
 
-export async function personaAprobadora(ctx: Contexto): Promise<PersonaAprobadora | null> {
+async function personaAprobadora(ctx: Contexto): Promise<PersonaAprobadora | null> {
   const userId = ctx.actor.tipo === "user" ? ctx.actor.id : null;
   if (!userId) return null;
   const [m, grupos] = await Promise.all([
@@ -27,7 +27,7 @@ export async function personaAprobadora(ctx: Contexto): Promise<PersonaAprobador
 }
 
 /** Aprobador de la regla por rol base, rol personalizado o grupo. */
-export const esAprobador = (r: ReglaAprobacion, p: PersonaAprobadora) =>
+const esAprobador = (r: ReglaAprobacion, p: PersonaAprobadora) =>
   esAprobadorDeRegla(r, p) || (!!r.aprobadorRol && r.aprobadorRol === p.roleId);
 
 /**

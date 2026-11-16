@@ -5,4 +5,11 @@ export type Resumen = {
   ultimaActividad: string;
   archivada: boolean;
 };
-export type Guardado = { rol: "usuario" | "agente"; texto: string; pasos?: string[] };
+import type { ReferenciaEntidad } from "./tipos";
+
+export type Guardado = {
+  rol: "usuario" | "agente";
+  texto: string;
+  pasos?: string[];
+  referencias?: ReferenciaEntidad[];
+};

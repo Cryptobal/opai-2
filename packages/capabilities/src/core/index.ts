@@ -5,6 +5,7 @@ import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
 import { capacidadesPush } from "./push";
 export { avisarAlCelular } from "./push-avisar";
+export { aplicarModulosNuevosRegistrados } from "./modulos-nuevos-aplicar";
 import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
@@ -71,7 +72,13 @@ import { ping } from "./ping";
 import { capacidadesTenantsEscritura } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
 import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
-import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
+import { platformTenantsSetModulosNuevos } from "./modulos-nuevos";
+import { platformTenantsGet } from "./platform-tenants";
+import {
+  platformInvitacionesReenviar,
+  platformInvitacionesRevocar,
+  platformTenantsMiembros,
+} from "./plataforma/miembros";
 import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from "./plataforma";
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
@@ -114,12 +121,15 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usageSummary,
   platformTenantsList,
   platformTenantsGet,
+  platformTenantsMiembros,
+  platformInvitacionesRevocar,
+  platformInvitacionesReenviar,
   ...capacidadesTenantsEscritura,
   platformTenantsUpdate,
   platformTenantsSetEstado,
+  platformTenantsSetModulosNuevos,
   platformModulesSet,
   platformAdminsInvite,
-  platformUsageSummary,
   // Brief 02 · servicios del núcleo
   consumosResumen,
   consumosPorAgente,
