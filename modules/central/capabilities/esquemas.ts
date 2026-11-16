@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { cursorDe, pagina } from "@opai/capabilities/src/core/maestros/comun";
+import { cursorDe, pagina } from "../../../packages/capabilities/src/core/maestros/comun";
 
 import { ESTADOS, SEVERIDADES } from "../domain";
 
