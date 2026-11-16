@@ -16,7 +16,7 @@ import {
   type ColeccionDef,
 } from "@opai/domain";
 
-import { seccionEntregaHtml, seccionEstilo, type EstiloEmpresa } from "./prompt-html-estilo";
+import { seccionEntregaHtml, seccionEstilo, seccionSecciones, type EstiloEmpresa } from "./prompt-html-estilo";
 
 export type EntradaPrompt = {
   /** Campos que la propuesta puede resolver hoy para quien consulta. */
@@ -106,6 +106,7 @@ export function generarPromptPropuesta(e: EntradaPrompt): PromptExportable {
     "- Los alias de la tabla siguen funcionando, pero escribe siempre la clave principal.",
     "",
     ...seccionEstilo(e.estilo),
+    ...(disp.some((c) => c.clave === "bloque.secciones") ? seccionSecciones() : []),
     "## Marcadores disponibles",
     "",
     ...tablaCampos(disp),

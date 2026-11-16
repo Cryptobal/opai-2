@@ -1,5 +1,5 @@
 // Tokens del catálogo único en los textos de la propuesta técnica (CAR-138, PR 3). Puro: valida contra
-// la finalidad «propuesta», arma el contrato que se congela al enviar y aplica los valores congelados.
+// la finalidad «propuesta» y arma el contrato que se congela al enviar.
 import {
   VERSION_CATALOGO_CAMPOS,
   renderizarPlantillaCampos,
@@ -106,37 +106,4 @@ export function snapshotParaLectura(snapshotJson: string): string {
   } catch {
     return snapshotJson;
   }
-}
-
-/** Aplica los valores congelados a un texto. Sin contrato, o si algo no valida, devuelve el texto tal cual. */
-export function aplicarContratoATexto(
-  texto: string,
-  contrato: ContratoCamposEnvio | undefined,
-): string {
-  if (!contrato) return texto;
-  const r = renderizarPlantillaCampos(texto, contrato.valores, { finalidad: "propuesta" });
-  return r.ok ? r.texto : texto;
-}
-
-/** Aplica el contrato a las ediciones manuales dentro del JSON de bloques del armador. */
-export function aplicarContratoABloques(
-  bloquesJson: string,
-  contrato: ContratoCamposEnvio | undefined,
-): string {
-  if (!contrato) return bloquesJson;
-  const bloques = parseBloquesArmadorPropuesta(bloquesJson).map((b) =>
-    b.contenidoOverride
-      ? { ...b, contenidoOverride: aplicarContratoATexto(b.contenidoOverride, contrato) }
-      : b,
-  );
-  return JSON.stringify(bloques);
-}
-
-export function textosBibliotecaConContrato(
-  textos: Readonly<Record<string, string>>,
-  contrato: ContratoCamposEnvio | undefined,
-): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(textos).map(([k, v]) => [k, aplicarContratoATexto(v, contrato)]),
-  );
 }

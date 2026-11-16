@@ -48,3 +48,17 @@ export function seccionEntregaHtml(): string[] {
     "- No escribas atributos `on…` (por ejemplo `onclick`). Lo que no esté permitido hace que OPAI rechace el HTML al importarlo.",
   ];
 }
+
+/** `{{secciones}}`: el lugar del documento donde OPAI inserta las secciones que la empresa arma en el armador. */
+export function seccionSecciones(): string[] {
+  return [
+    "## Secciones del documento",
+    "",
+    "El texto de cada propuesta lo arma la empresa en OPAI, sección por sección (comprensión del servicio, metodología, condiciones, etc.). Tú diseñas el marco: el marcador `{{secciones}}` en su propia línea, fuera de tablas y de otros marcadores, es donde OPAI inserta ese contenido.",
+    "- OPAI inserta, en orden, el índice, el título y el texto de cada sección activa, el detalle del servicio y los capítulos por instalación. Las secciones sin texto no aparecen.",
+    "- Usa `{{secciones}}` una sola vez. Si lo omites, OPAI pone las secciones al final del documento.",
+    "- No redactes ni repitas esas secciones: diseña lo que va antes (portada, datos del cliente y del negocio) y después (cierre, contacto), con sus marcadores.",
+    "- Los títulos y párrafos que OPAI inserta toman el estilo del documento (colores y tipografía de la empresa).",
+    "",
+  ];
+}

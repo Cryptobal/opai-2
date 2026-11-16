@@ -1,5 +1,6 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
+import { VERSION_CATALOGO_CAMPOS } from "@opai/domain";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const resolver = vi.hoisted(() => vi.fn());
@@ -69,7 +70,7 @@ describe("contrato de campos de la propuesta", () => {
     const p = await preparar("Para {{cuenta.nombre}}");
     const c = await contratoCamposPropuesta(p.ctx, p.entrada);
     expect(c?.usados).toEqual(["cuenta.nombre"]);
-    expect(c?.versionCatalogo).toBe(3);
+    expect(c?.versionCatalogo).toBe(VERSION_CATALOGO_CAMPOS);
     expect(c?.valores.campos["cuenta.nombre"]).toBe("Cliente Ficticio SpA");
     expect(resolver.mock.calls[0]?.[1]).toMatchObject({ finalidad: "propuesta" });
   });

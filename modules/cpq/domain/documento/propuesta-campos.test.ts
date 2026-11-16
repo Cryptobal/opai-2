@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  aplicarContratoABloques,
-  aplicarContratoATexto,
   contratoCamposDeEnvio,
   snapshotParaLectura,
   textosConTokens,
@@ -69,37 +67,9 @@ describe("tokens de la propuesta", () => {
       [],
       valores,
     );
-    expect(c.versionCatalogo).toBe(3);
+    expect(c.versionCatalogo).toBe(4);
     expect(c.faltantes).toEqual(["cuenta.giro"]);
     expect(c.valores.campos).toEqual({ "cuenta.nombre": "Cliente Ficticio SpA" });
-  });
-
-  it("aplica los valores congelados a textos y a las ediciones manuales", () => {
-    const c = contratoCamposDeEnvio(
-      [],
-      ["cuenta.nombre", "instalacion.nombre"],
-      ["instalaciones"],
-      valores,
-    );
-    expect(
-      aplicarContratoATexto(
-        "Para {{cuenta.nombre}}: {{#cada instalaciones}}[{{instalacion.nombre}}]{{/cada}}",
-        c,
-      ),
-    ).toBe("Para Cliente Ficticio SpA: [Planta Norte][Planta Sur]");
-    const json = JSON.stringify([
-      {
-        id: "a",
-        tipo: "texto_libre",
-        activo: true,
-        fijo: false,
-        opcional: true,
-        contenidoOverride: "{{cuenta.nombre}}",
-      },
-    ]);
-    expect(JSON.parse(aplicarContratoABloques(json, c))[0].contenidoOverride).toBe(
-      "Cliente Ficticio SpA",
-    );
   });
 
   it("congela solo las claves usadas, sin instalaciones si no hay repetición", () => {
@@ -138,9 +108,5 @@ describe("tokens de la propuesta", () => {
     expect(leido.camposContrato.usados).toEqual(["cuenta.nombre"]);
     expect(snapshotParaLectura('{"destinatarios":[]}')).toBe('{"destinatarios":[]}');
     expect(snapshotParaLectura("no es json")).toBe("no es json");
-  });
-
-  it("sin contrato deja los textos intactos", () => {
-    expect(aplicarContratoATexto("{{cuenta.nombre}}", undefined)).toBe("{{cuenta.nombre}}");
   });
 });

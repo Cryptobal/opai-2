@@ -25,4 +25,15 @@ export const CAMPOS_BLOQUE_PROPUESTA: readonly CampoDef[] = [
     contenidoHtml: true,
     ejemplo: "<table>…</table>",
   },
+  {
+    clave: "bloque.secciones",
+    descripcion: "Secciones activas del armador (índice, títulos y textos), en orden; sin el marcador van al final",
+    tipo: "texto",
+    fuente: "cpq",
+    sensibilidad: "publica",
+    finalidades: ["propuesta"],
+    alias: ["secciones"],
+    contenidoHtml: true,
+    ejemplo: "<h2>1. Comprensión del servicio</h2><p>…</p>",
+  },
 ];

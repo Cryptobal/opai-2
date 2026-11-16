@@ -1,6 +1,7 @@
 import { noEncontrado, reglaDeNegocio, type Contexto } from "@opai/capabilities";
 
 import { type DestinatarioEnvio, type SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecnica";
+import { conSecciones } from "../domain/documento/html-secciones";
 import { asegurarMarcaDocumento } from "./marca-documento";
 import { contratoCamposPropuesta } from "./propuesta-campos";
 import { plantillaHtmlEnUso } from "./propuesta-html-uso";
@@ -40,7 +41,7 @@ export async function construirSnapshotEnvioPropuesta(
         propuestaBloquesJson,
         bloquesBiblioteca,
         destinatarios: input.destinatarios,
-        ...(html ? { plantillaHtml: html.htmlSaneado } : {}),
+        ...(html ? { plantillaHtml: conSecciones(html.htmlSaneado, "") } : {}),
       })
     : undefined;
   return {

@@ -12,8 +12,9 @@ import type { CampoDef, ColeccionDef, FinalidadCampo } from "./tipos";
 /**
  * Sube con cada campo nuevo o cambio de clave (los alias antiguos se mantienen). Lo congelado al enviar
  * guarda esta versión. v3 (CAR-571): puestos, bloques HTML y resolución CPQ/tenant en propuestas.
+ * v4 (CAR-575): `secciones`, las secciones del armador dentro de la plantilla HTML.
  */
-export const VERSION_CATALOGO_CAMPOS = 3;
+export const VERSION_CATALOGO_CAMPOS = 4;
 
 /** El catálogo único. Documentos, contratos, CPQ y propuestas consumen este contrato; no hay otro local. */
 export const CATALOGO_CAMPOS: readonly CampoDef[] = [

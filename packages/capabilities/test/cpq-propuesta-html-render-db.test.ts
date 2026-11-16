@@ -1,6 +1,6 @@
-// CAR-533 · La propuesta usa la plantilla HTML en uso de la empresa, contra Postgres real y dos empresas: la vista
-// previa reemplaza los campos con datos reales, sin plantilla vuelve al formato actual, el envío congela la
-// versión usada (una versión nueva no cambia lo enviado) y una empresa nunca usa la plantilla de la otra.
+// CAR-533 · CAR-575 · Un solo motor de documento, contra Postgres real y dos empresas: la plantilla HTML en uso (o la
+// base de OPAI) con las secciones activas del armador donde está `{{secciones}}`; la vista previa usa datos reales, el
+// envío congela plantilla y textos, y una empresa nunca usa la plantilla de la otra.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -16,7 +16,17 @@ import type * as ModuloCapacidades from "../src";
 import { registrarModuloComercial } from "./comercial-modulo";
 
 type Res<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
-const HTML = (titulo: string) => `<section><h1>${titulo} para {{cuenta.nombre}}</h1><p>Servicio de guardias.</p></section>`;
+const HTML = (titulo: string, cierre = "{{secciones}}<p>Cierre de la plantilla.</p>") =>
+  `<section><h1>${titulo} para {{cuenta.nombre}}</h1>${cierre}</section>`;
+const bloque = (id: string, tipo: string, contenidoOverride?: string) => ({
+  id, tipo, activo: true, fijo: false, opcional: true, ...(contenidoOverride ? { contenidoOverride } : {}),
+});
+const BLOQUES = JSON.stringify([
+  bloque("b1", "comprension_servicio", "Entendemos la necesidad de {{cuenta.nombre}}."),
+  bloque("b2", "metodologia", "Metodología de trabajo propia."),
+  bloque("b3", "condiciones", "Pago a 30 días."),
+  bloque("b4", "certificaciones"),
+]);
 
 describe.skipIf(!urlPropietario)("cpq · la propuesta usa la plantilla HTML de la empresa", () => {
   let e: Entorno;
@@ -48,7 +58,7 @@ describe.skipIf(!urlPropietario)("cpq · la propuesta usa la plantilla HTML de l
     const version = await e.admin.cpqVersion.create({ data: { tenantId: t.id, cotizacionId: cot.id, numero: 1, estado: "borrador", creadoPorId: usuario } });
     const plantilla = await e.admin.cpqPlantillaDocumento.create({ data: { tenantId: t.id, tipo: "propuesta_tecnica", bloquesJson: "[]" } });
     const prop = await e.admin.cpqPropuestaTecnica.create({
-      data: { tenantId: t.id, cotizacionId: cot.id, versionId: version.id, base: "clasica", plantillaDocumentoId: plantilla.id, plantillaDocumentoVersion: 1, estado: "borrador", bloquesJson: "[]", creadoPorId: usuario },
+      data: { tenantId: t.id, cotizacionId: cot.id, versionId: version.id, base: "clasica", plantillaDocumentoId: plantilla.id, plantillaDocumentoVersion: 1, estado: "borrador", bloquesJson: BLOQUES, creadoPorId: usuario },
     });
     return { tenantId: t.id, cotizacionId: cot.id, codigo: cot.codigo, propuestaId: prop.id };
   }
@@ -57,6 +67,7 @@ describe.skipIf(!urlPropietario)("cpq · la propuesta usa la plantilla HTML de l
     const r = await run<{ pdfBase64: string }>(x.tenantId, "cpq.propuestas_tecnica.preview_pdf", { id: x.propuestaId, cotizacionId: x.cotizacionId });
     return (await leerPdf(Buffer.from(r.pdfBase64, "base64"))).paginas.join(" ");
   };
+  const pos = (t: string, x: string) => t.indexOf(x);
   const importar = (x: Esc, titulo: string) =>
     run<{ id: string; activa: boolean }>(x.tenantId, "cpq.propuestas_html.importar", { nombre: "Base", html: HTML(titulo) });
   const enviado = async (x: Esc, snap: Awaited<ReturnType<typeof construirSnapshotEnvioPropuesta>>) => {
@@ -81,27 +92,52 @@ describe.skipIf(!urlPropietario)("cpq · la propuesta usa la plantilla HTML de l
     await e?.cerrar();
   });
 
-  it("con plantilla en uso, la vista previa sale del HTML con los datos reales; la otra empresa sigue con el formato actual", async () => {
-    expect(await vista(a)).not.toContain("Propuesta para");
+  it("sin plantilla de la empresa sale la base de OPAI con las secciones activas, en orden y sin las vacías", async () => {
+    const t = await vista(a);
+    expect(t).toContain("Guardias");
+    expect(t).toContain("Preparada para");
+    expect(pos(t, "1. Comprensión del servicio")).toBeGreaterThan(0);
+    expect(pos(t, "2. Metodología de trabajo")).toBeGreaterThan(pos(t, "1. Comprensión del servicio"));
+    expect(pos(t, "3. Condiciones comerciales")).toBeGreaterThan(pos(t, "2. Metodología de trabajo"));
+    expect(t).toContain("Entendemos la necesidad de Alfa.");
+    expect(t).toContain("Pago a 30 días.");
+    expect(t).not.toContain("Certificaciones");
+    expect(await vista(b)).toContain("Entendemos la necesidad de Beta.");
+  });
+
+  it("con plantilla en uso, las secciones van donde está {{secciones}}; la otra empresa sigue con la base", async () => {
     expect((await importar(a, "Propuesta")).activa).toBe(true);
-    expect(await vista(a)).toContain("Propuesta para Alfa");
+    const t = await vista(a);
+    expect(pos(t, "Propuesta para Alfa")).toBeLessThan(pos(t, "1. Comprensión del servicio"));
+    expect(pos(t, "3. Condiciones comerciales")).toBeLessThan(pos(t, "Cierre de la plantilla."));
     expect(await vista(b)).not.toContain("Propuesta para");
   });
 
-  it("el envío congela la versión usada: una versión nueva cambia la vista previa, no lo enviado", async () => {
+  it("sin el marcador, las secciones se agregan al final de la plantilla", async () => {
+    await run(a.tenantId, "cpq.propuestas_html.importar", { nombre: "Sin marcador", html: HTML("Informe", "<p>Solo portada.</p>") });
+    const t = await vista(a);
+    expect(pos(t, "Solo portada.")).toBeLessThan(pos(t, "1. Comprensión del servicio"));
+    await importar(a, "Propuesta");
+  });
+
+  it("el envío congela plantilla y textos: lo editado después no cambia lo enviado", async () => {
     const snap = await construirSnapshotEnvioPropuesta(ctx(a.tenantId), { cotizacionId: a.cotizacionId, propuestaTecnicaId: a.propuestaId, destinatarios: [] });
-    expect(snap.plantillaHtml?.version).toBe(1);
     expect(snap.camposContrato?.valores.campos["cuenta.nombre"]).toBe("Alfa");
+    const version = snap.plantillaHtml?.version;
     await importar(a, "Oferta");
-    expect(await vista(a)).toContain("Oferta para Alfa");
+    await e.admin.cpqPropuestaTecnica.update({ where: { id: a.propuestaId }, data: { bloquesJson: JSON.stringify([bloque("b9", "texto_libre", "Texto nuevo")]) } });
+    const vigente = await vista(a);
+    expect(vigente).toContain("Oferta para Alfa");
+    expect(vigente).toContain("Texto nuevo");
     const pdf = await enviado(a, snap);
     expect(pdf).toContain("Propuesta para Alfa");
-    expect(pdf).not.toContain("Oferta");
-    // Otra empresa no puede usar la plantilla congelada de esta.
+    expect(pdf).toContain("Entendemos la necesidad de Alfa.");
+    expect(pdf).not.toMatch(/Oferta|Texto nuevo/);
+    expect(version).toBeGreaterThan(0);
     await expect(enviado(b, snap)).rejects.toThrow();
   });
 
-  it("al desactivarla vuelve al formato actual y el envío no congela plantilla", async () => {
+  it("al desactivarla vuelve a la base y el envío no congela plantilla", async () => {
     const enUso = (await run<{ plantillas: { id: string; estado: string }[] }>(a.tenantId, "cpq.propuestas_html.list", {})).plantillas.find((p) => p.estado === "activa");
     await run(a.tenantId, "cpq.propuestas_html.activar", { id: enUso?.id, activa: false });
     expect(await vista(a)).not.toContain("Oferta para");

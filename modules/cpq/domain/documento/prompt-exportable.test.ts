@@ -93,6 +93,15 @@ describe("prompt exportable de la propuesta", () => {
     expect(t).toContain("`<img>`");
   });
 
+  it("explica `{{secciones}}`: dónde van las secciones del armador y qué pasa si falta", () => {
+    const t = prompt().texto;
+    expect(t).toContain("## Secciones del documento");
+    expect(t).toContain("`{{secciones}}`");
+    expect(t).toContain("las secciones al final");
+    expect(t).toContain("| {{bloque.secciones}} |");
+    expect(prompt().claves).toContain("bloque.secciones");
+  });
+
   it("suma el estilo guardado de la empresa: colores, tipografía y logo", () => {
     const t = prompt().texto;
     expect(t).toContain("`#0a3d62`");

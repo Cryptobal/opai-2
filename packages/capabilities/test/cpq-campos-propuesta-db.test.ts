@@ -57,7 +57,8 @@ describe.skipIf(!urlPropietario)("cpq · marcadores HTML de propuesta (CAR-571)"
     await sembrarComercial(e.admin.$extends({}), tenantId);
     cuentaNombre = "Cliente Ficticio CP571";
     const run = async <T>(id: string, input: unknown) => {
-      const r = (await mod.executeCapability(ctx(tenantId), id, input, { dryRun: false })) as
+      const sistema = mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol: "owner", modulosActivos: ["comercial", "cpq"], medidor });
+      const r = (await mod.executeCapability(sistema, id, input, { dryRun: false })) as
         | { ok: true; data: T }
         | { ok: false; error: unknown };
       if (!r.ok) throw new Error(`${id}: ${JSON.stringify(r.error)}`);

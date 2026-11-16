@@ -27,12 +27,11 @@ export async function plantillaHtmlDeEnvio(ctx: Contexto, ref: { id: string; has
   return f.htmlSaneado;
 }
 
-/** Reemplaza los campos (escapados) y vuelve a sanear: al PDF solo llega HTML seguro y sin recursos externos. */
 export function htmlConValores(html: string, valores: ValoresHtml = SIN_VALORES): string {
   const r = renderizarPlantillaCampos(html, valores, { finalidad: "propuesta", html: true });
   if (!r.ok) {
     throw reglaDeNegocio(
-      `La plantilla HTML tiene campos que no se pueden usar: ${r.problemas.slice(0, 3).map((p) => p.mensaje).join(" ")}`,
+      `La propuesta tiene campos que no se pueden usar: ${r.problemas.slice(0, 3).map((p) => p.mensaje).join(" ")}`,
     );
   }
   const s = sanearHtml(r.texto);
