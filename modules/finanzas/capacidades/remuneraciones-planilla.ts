@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { executeCapability, hoyChile, type Contexto } from "@opai/capabilities";
 import { finSemanaIso, formatearFecha } from "@opai/domain";
 
@@ -7,6 +5,7 @@ import type { CeldaFlujo } from "../domain";
 import { agruparRemuneraciones, type ConceptoFlujo, type ItemRemuneracion } from "../domain/remuneraciones";
 import type { celdaSchema } from "./esquemas";
 import { FILA_ANTICIPO, FILA_PREVIRED, FILA_SUELDOS } from "./filas-virtuales";
+import { idEstable } from "./util";
 import type { z } from "zod";
 
 type Vista = z.infer<typeof celdaSchema>;
@@ -16,11 +15,6 @@ const FILA: Record<ConceptoFlujo, string> = { sueldos: FILA_SUELDOS, anticipo: F
 const NOMBRE: Record<ConceptoFlujo, string> = { sueldos: "Sueldos", anticipo: "Anticipo de quincena", previred: "Previred" };
 /** La lectura de Nómina acepta rangos de hasta 6 meses: se pide por tramos de 5 meses. */
 const TRAMO_DIAS = 150;
-
-const idEstable = (texto: string): string => {
-  const h = createHash("sha1").update(texto).digest("hex");
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
-};
 
 const masDias = (iso: string, n: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 

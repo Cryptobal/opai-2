@@ -60,7 +60,7 @@ export const flujoDerivadasListar = defineCapability({
           id: "nomina",
           nombre: "Nómina",
           disponible: nomina.length > 0,
-          descripcion: "Sueldos, anticipo de quincena y Previred proyectados desde Nómina (CAR-344).",
+          descripcion: "Sueldos, anticipo de quincena y Previred proyectados desde Nómina.",
           celdas: nomina,
         },
       ],
