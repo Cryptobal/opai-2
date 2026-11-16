@@ -1,7 +1,7 @@
 // CAR-143 · CAF endurecido: parser, cifrado, dryRun y aislamiento entre tenants.
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { SLUG_TENANT_QA_FINANZAS } from "@opai/domain";
+import { SLUG_TENANT_QA_FINANZAS, sumarDiasIso } from "@opai/domain";
 import { urlPropietario } from "../../db/test/entorno";
 
 import { cafXmlSintetico } from "./finanzas-caf-fixture";
@@ -232,13 +232,12 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
   });
 
   it("listar avisa folios que vencerán sin usar", async () => {
-    const manana = new Date();
-    manana.setUTCDate(manana.getUTCDate() + 1);
-    manana.setUTCHours(0, 0, 0, 0);
     await s.e.admin.dteFolio.updateMany({
       where: { tenantId: s.tenantId, activo: true },
       data: { activo: false },
     });
+    const hoyIso = new Date().toISOString().slice(0, 10);
+    const cafVenceEn = new Date(`${sumarDiasIso(hoyIso, 30)}T00:00:00.000Z`);
     await s.e.admin.dteFolio.create({
       data: {
         tenantId: s.tenantId,
@@ -246,7 +245,7 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
         folioDesde: 1,
         folioHasta: 10,
         folioActual: 8,
-        cafVenceEn: manana,
+        cafVenceEn,
         activo: true,
       },
     });
