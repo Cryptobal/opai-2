@@ -18,6 +18,7 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
   let ana = "";
   let persona = "";
   let personaB = "";
+  let cargo = "";
   let instalacion = "";
   let otraInstalacion = "";
   let activo = "";
@@ -60,6 +61,20 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     personaB = (await e.admin.persona.create({ data: { tenantId: b, nombres: "Bea", apellidos: "Paz", rut: "30000003-6" } })).id;
     instalacion = await sitio(a, "Planta Norte");
     otraInstalacion = await sitio(a, "Bodega Sur");
+    cargo = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Guardia" } })).id;
+    await e.admin.vinculoLaboral.create({
+      data: {
+        tenantId: a,
+        personaId: persona,
+        cargoId: cargo,
+        instalacionId: instalacion,
+        tipo: "indefinido",
+        inicio: new Date("2026-01-01"),
+        estado: "vigente",
+        horasSemanales: 44,
+        distribucion: "4x4",
+      },
+    });
     const tel = await dato<{ id: string }>(ctx(a), "inventario.tipos.crear", { categoria: "activo", nombre: "Teléfono" });
     activo = (await dato<{ id: string }>(ctx(a), "inventario.activos.crear", { tipoId: tel.id, codigo: "TEL-1" })).id;
     camisa = (await dato<{ id: string }>(ctx(a), "inventario.tipos.crear", { categoria: "ropa", nombre: "Camisa", tallas: ["M"] })).id;
@@ -74,17 +89,17 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     await dato(ctx(a), "inventario.entregas.entregar_activo", { activoId: activo, personaId: persona }, { dryRun: true });
     expect(await e.admin.inventarioEntrega.count({ where: { tenantId: a } })).toBe(0);
     const r = await dato<Entrega>(ctx(a), "inventario.entregas.entregar_activo", { activoId: activo, personaId: persona });
-    expect(r).toMatchObject({ item: "TEL-1", destino: "Pedro Soto", devueltaEn: null });
+    expect(r).toMatchObject({ item: "TEL-1", destino: "Pedro Soto · Planta Norte", devueltaEn: null });
     expect((await e.admin.inventarioActivo.findFirst({ where: { id: activo } }))?.estado).toBe("asignado");
     expect(await codigo(ctx(a), "inventario.entregas.entregar_activo", { activoId: activo, instalacionId: instalacion })).toBe("UNPROCESSABLE");
     expect(await codigo(ctx(a), "inventario.activos.cambiar_estado", { id: activo, estado: "de_baja", motivo: "Perdido" })).toBe("UNPROCESSABLE");
   });
 
-  it("R19: exige un solo destino y de la misma empresa", async () => {
+  it("R19: exige destino y de la misma empresa (CAR-487: persona + imputación)", async () => {
     const r = await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1 });
     expect(r).toBe("UNPROCESSABLE");
     const ambos = { tipoId: camisa, talla: "M", cantidad: 1, personaId: persona, instalacionId: instalacion };
-    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", ambos)).toBe("UNPROCESSABLE");
+    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", ambos)).toBe("OK");
     expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, personaId: personaB })).toBe("NOT_FOUND");
     const instalacionB = await sitio(b, "Otra empresa");
     expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: instalacionB })).toBe("NOT_FOUND");
@@ -94,7 +109,7 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     const r = await dato<Entrega>(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "m", cantidad: 3, instalacionId: instalacion });
     expect(r).toMatchObject({ item: "Camisa talla M", destino: "Planta Norte", cantidad: 3 });
     expect(await existencia("M")).toBe(2);
-    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 3, personaId: persona })).toBe("UNPROCESSABLE");
+    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, personaId: persona })).toBe("OK");
     await dato(ctx(a), "inventario.entregas.devolver", { id: r.id, nota: "Cierre del servicio" });
     expect(await existencia("M")).toBe(5);
     expect(await codigo(ctx(a), "inventario.entregas.devolver", { id: r.id })).toBe("CONFLICT");

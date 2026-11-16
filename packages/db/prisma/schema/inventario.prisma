@@ -19,6 +19,8 @@ model InventarioTipo {
   tallas            String[] @default([])
   /// Clave de la prenda del uniforme de Personas (CAR-408) a la que corresponde un tipo de ropa.
   prendaClave       String?  @map("prenda_clave")
+  /// Si el tipo se entrega a personas (CAR-487): cada entrega lleva persona e instalación de imputación.
+  entregaAPersona   Boolean  @default(false) @map("entrega_a_persona")
   activo            Boolean  @default(true)
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -95,9 +97,9 @@ model InventarioMovimiento {
   @@schema("inventario")
 }
 
-/// Entrega de inventario a una persona o a una instalación (CAR-238): un activo (queda «asignado»
-/// hasta devolverlo) o unidades de una talla de ropa (descuentan existencias). Un activo tiene a lo
-/// más una entrega abierta (R20).
+/// Entrega de inventario (CAR-238, CAR-487): a instalación sola o a persona con instalación de
+/// imputación (donde estaba al entregar; el costo no se mueve). Un activo tiene a lo más una entrega
+/// abierta (R20).
 model InventarioEntrega {
   id             String    @id @default(uuid(7)) @db.Uuid
   tenantId       String    @map("tenant_id") @db.Uuid

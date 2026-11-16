@@ -21,7 +21,7 @@ export const entregarActivo = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    await exigirDestino(ctx, input);
+    const destino = await exigirDestino(ctx, input);
     const activo = await ctx.db.inventarioActivo.findFirst({ where: { id: input.activoId } });
     if (!activo) throw noEncontrado("El activo");
     if (activo.estado !== "disponible")
@@ -36,7 +36,7 @@ export const entregarActivo = defineCapability({
       tipoId: null,
       talla: null,
       cantidad: null,
-      ...destinoDe(input),
+      ...destinoDe(destino, input.nota),
     };
     return registrar(ctx, datos, dryRun, async (tx) => {
       // Solo si sigue disponible: dos entregas a la vez no se pisan (R20).
@@ -65,7 +65,7 @@ export const entregarRopa = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    await exigirDestino(ctx, input);
+    const destino = await exigirDestino(ctx, input);
     const tipo = await tipoDeRopa(ctx, input.tipoId);
     if (!tipo.activo) throw reglaDeNegocio("El tipo está desactivado.");
     const talla = normalizarTalla(input.talla);
@@ -76,7 +76,7 @@ export const entregarRopa = defineCapability({
       tipoId: tipo.id,
       talla,
       cantidad: input.cantidad,
-      ...destinoDe(input),
+      ...destinoDe(destino, input.nota),
     };
     return registrar(ctx, datos, dryRun, async (tx) => {
       await aplicarMovimiento(ctx, tx, {

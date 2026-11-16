@@ -16,15 +16,11 @@ export type DatosEntrega = {
   nota: string | null;
 };
 
-/** Destino y nota comunes a las dos entregas. */
-export const destinoDe = (i: {
-  personaId?: string | undefined;
-  instalacionId?: string | undefined;
-  nota?: string | undefined;
-}) => ({
-  personaId: i.personaId ?? null,
-  instalacionId: i.instalacionId ?? null,
-  nota: i.nota || null,
+/** Destino y nota comunes a las dos entregas (destino ya resuelto por exigirDestino). */
+export const destinoDe = (destino: { personaId: string | null; instalacionId: string | null }, nota?: string) => ({
+  personaId: destino.personaId,
+  instalacionId: destino.instalacionId,
+  nota: nota || null,
 });
 
 /** Vista previa o registro: el efecto (activo asignado o existencias descontadas) y la entrega van juntos (R20). */

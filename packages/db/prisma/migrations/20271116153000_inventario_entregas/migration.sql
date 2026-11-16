@@ -29,8 +29,11 @@ CREATE TABLE "inventario"."entregas" (
       ("activo_id" IS NOT NULL AND "tipo_id" IS NULL AND "talla" IS NULL AND "cantidad" IS NULL)
       OR ("activo_id" IS NULL AND "tipo_id" IS NOT NULL AND "talla" IS NOT NULL AND "cantidad" > 0)
     ),
-    -- A una persona o a una instalación, nunca a las dos (R19).
-    CONSTRAINT "entregas_destino_check" CHECK (("persona_id" IS NULL) <> ("instalacion_id" IS NULL)),
+    -- R19 / CAR-487: solo instalación, o persona con instalación de imputación (snapshot).
+    CONSTRAINT "entregas_destino_check" CHECK (
+      ("persona_id" IS NULL AND "instalacion_id" IS NOT NULL)
+      OR ("persona_id" IS NOT NULL AND "instalacion_id" IS NOT NULL)
+    ),
     CONSTRAINT "entregas_devolucion_check" CHECK ("devuelta_en" IS NULL OR "devuelta_en" >= "entregada_en")
 );
 
