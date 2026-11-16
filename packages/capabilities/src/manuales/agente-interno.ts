@@ -1,4 +1,4 @@
-export const MANUAL_AGENTE_INTERNO = `Agente interno del tenant (ADR-049).
+export const MANUAL_AGENTE_INTERNO = `Agente interno del tenant.
 Requiere licencia agente activa y permiso agente:usar; configuración: agente:configurar.
 La sesión humana llama agente.modelos.list y agente.turno.preparar con mensaje, modelo
 y nivel aprobar_todo o paso_a_paso. El servidor ejecuta lecturas y solo dryRun para escribir.
