@@ -238,3 +238,26 @@ model NominaLiquidacion {
   @@map("liquidaciones")
   @@schema("nomina")
 }
+
+/// Registro en Mi DT de un alta, baja o anexo (Cumplimiento DT, CAR-99). Solo existe tras marcar registrado;
+/// los pendientes se derivan de vínculos y anexos aprobados.
+model NominaRegistroMiDt {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  /// "alta" | "baja" | "anexo".
+  movimientoTipo String  @map("movimiento_tipo")
+  /// Id del vínculo (alta/baja) o del anexo aprobado.
+  referenciaId  String   @map("referencia_id") @db.Uuid
+  personaId     String   @map("persona_id") @db.Uuid
+  hechoEn       DateTime @map("hecho_en") @db.Date
+  registradoEn  DateTime @map("registrado_en") @db.Date
+  /// Comprobante que entrega Mi DT, en core.documentos.
+  documentoId   String?  @map("documento_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, movimientoTipo, referenciaId])
+  @@index([tenantId, personaId])
+  @@map("registros_mi_dt")
+  @@schema("nomina")
+}

@@ -73,4 +73,10 @@
 - Migración `20261116210000_nomina_liquidacion_portal`: `documento_id` y `publicada_en` en `nomina.liquidaciones` (FK y trigger mismo tenant con `core.documentos`). Recalcular anula publicación.
 - `nomina.liquidaciones.publicar` (dryRun, `nomina:periodos.manage`): solo liquidación **revisada**; PDF en R2 + documento con `visibleEn: ['trabajador']`; evento `nomina.liquidacion.publicada`; comunicable transaccional (correo personal + in-app). Consumidor `nomina.liquidacion.publicada`.
 - Pantalla liquidación de persona: botón **Publicar al trabajador** (diseño 04) con vista previa y leyenda de correo personal. Lecturas exponen `publicadaEn` y correo para la leyenda.
-- **Pendiente:** Cumplimiento DT (siguiente bloque CAR-99).
+## Cumplimiento DT contratos (PR apilado sobre #989, rama `cursor/cumplimiento-dt-ab10`)
+
+- Migración `20261116220000_nomina_registros_mi_dt`: seguimiento de registro en Mi DT (comprobante y fecha) por alta, baja o anexo.
+- Capacidades MCP: `nomina.midt.listar`, `nomina.midt.exportar_pendientes`, `nomina.midt.datos` y `nomina.midt.registrar` (marca con comprobante; lecturas auditadas).
+- Pantalla `/remuneraciones/cumplimiento-dt/contratos` (diseño 07): segmento Por registrar / Registrados, descarga CSV, datos por fila y diálogo Marcar registrado. Navegación «Cumplimiento DT». Sin API Mi DT.
+
+- **Pendiente:** Finiquitos Mi DT (diseño 07 fin), F29, pago banco y entitlements del complemento.
