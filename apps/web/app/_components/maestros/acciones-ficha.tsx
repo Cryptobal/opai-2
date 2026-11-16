@@ -42,3 +42,22 @@ export function AccionesFicha({
     </div>
   );
 }
+
+type AgenteFicha = { contexto: Contexto; nombre: string; articulo: string };
+
+/** Props repetidas en fichas piloto (CAR-546, simplicidad). */
+export function AccionesCabeceraFicha({
+  etiqueta,
+  editarHref,
+  acciones,
+  agente,
+}: {
+  etiqueta: string;
+  editarHref: string;
+  acciones: AccionEntidad[];
+  agente: AgenteFicha;
+}) {
+  return (
+    <AccionesFicha etiqueta={etiqueta} editar={{ href: editarHref }} acciones={acciones} agente={agente} />
+  );
+}

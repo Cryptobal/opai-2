@@ -42,7 +42,10 @@ test.describe("@preview CAR-546 cabecera de ficha", () => {
     await fila.click();
     await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}/, { timeout: 60_000 });
     await expect(page.getByRole("link", { name: "Nueva cuenta", exact: true })).toHaveCount(0);
-    await expect(nuevaLista(page)).toHaveClass(/ds-primario/);
+    // En teléfono el panel lista queda oculto con ficha abierta (`SplitScreen` telefono=detalle).
+    if (enCabecera) {
+      await expect(nuevaLista(page)).toHaveClass(/ds-primario/);
+    }
     const detalle = page.locator("[data-detalle]");
     await expect(detalle.getByRole("link", { name: "Editar", exact: true })).toBeVisible();
     await esperarFijarVisible(page, detalle, enCabecera);

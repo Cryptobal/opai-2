@@ -4,7 +4,7 @@ import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
 import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
-import { AccionesFicha } from "@/app/_components/maestros/acciones-ficha";
+import { AccionesCabeceraFicha } from "@/app/_components/maestros/acciones-ficha";
 import type { AccionEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_CUENTA, estadoDe } from "@/app/_components/maestros/estados";
 import { fecha, rut } from "@/lib/fechas";
@@ -93,9 +93,9 @@ export function FichaCuenta(p: {
                 </>
               ),
               acciones: (
-                <AccionesFicha
+                <AccionesCabeceraFicha
                   etiqueta="Acciones de la cuenta"
-                  editar={{ href: "?editar=1" }}
+                  editarHref="?editar=1"
                   acciones={accionesCuenta(c)}
                   agente={{
                     contexto: { tipo: "cuenta", id: c.id },

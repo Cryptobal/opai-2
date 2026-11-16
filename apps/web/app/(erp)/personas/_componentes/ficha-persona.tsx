@@ -5,7 +5,7 @@ import { Avatar, Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
 import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
-import { AccionesFicha } from "@/app/_components/maestros/acciones-ficha";
+import { AccionesCabeceraFicha } from "@/app/_components/maestros/acciones-ficha";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { fecha, rut } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
@@ -62,9 +62,9 @@ export function FichaPersona(x: {
                 </>
               ),
               acciones: (
-                <AccionesFicha
+                <AccionesCabeceraFicha
                   etiqueta="Más acciones"
-                  editar={{ href: editarHref }}
+                  editarHref={editarHref}
                   acciones={accionesPersona(p)}
                   agente={{
                     contexto: { tipo: "persona", id: p.id },
