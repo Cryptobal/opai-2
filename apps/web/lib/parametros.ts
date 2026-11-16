@@ -11,8 +11,8 @@ export async function leerParametros(sp: SearchParams): Promise<Parametros> {
 export const conBusqueda = (ruta: string, q?: string) =>
   q ? `${ruta}?q=${encodeURIComponent(q)}` : ruta;
 
-/** Filtros de una lista que sobreviven al abrir una ficha y al volver (`?q=`, `?estado=`, `?con=`, `?etiqueta=`). */
-const FILTROS_DE_LISTA = ["q", "estado", "con", "etiqueta"] as const;
+/** Filtros de lista (y paginación CAR-585) que sobreviven al abrir una ficha y volver. */
+const FILTROS_DE_LISTA = ["q", "estado", "con", "etiqueta", "cursor", "prev", "limite"] as const;
 
 /** Ruta con los filtros vigentes de la lista: abrir otra ficha no vuelve a «todos» ni pierde Cliente activo / Inactivo. */
 export function conFiltros(ruta: string, p?: Parametros): string {

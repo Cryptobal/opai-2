@@ -8,6 +8,8 @@ import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etique
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_CUENTA, estadoDe, monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { rut } from "@/lib/fechas";
 import { conFiltros, type Parametros } from "@/lib/parametros";
 import type { CuentaFila } from "@/lib/tipos-maestros";
@@ -35,6 +37,7 @@ function Facturar({ c }: { c: CuentaFila }) {
 export function ListaCuentas(p: {
   state: EstadoPantalla;
   items: CuentaFila[];
+  siguiente?: string | null;
   seleccionada?: string;
   /** Filtros vigentes (búsqueda, estado, instalaciones, etiqueta): se conservan al abrir una ficha y al volver. */
   filtros?: Parametros | undefined;
@@ -42,6 +45,12 @@ export function ListaCuentas(p: {
   etiquetas?: OpcionEtiqueta[];
 }) {
   const activas = p.items.filter((c) => c.estado === "cliente_activo").length;
+  const f = p.filtros ?? {};
+  const porPagina = tamanoPagina(f);
+  const filtrando = Boolean(f.q || f.estado || f.con || f.etiqueta);
+  const metaConteo = filtrando
+    ? `${p.items.length}${p.siguiente ? "+" : ""} ${p.items.length === 1 ? "resultado" : "resultados"}`
+    : `${p.items.length}${p.siguiente ? "+" : ""} cuentas · ${activas} ${activas === 1 ? "cliente activo" : "clientes activos"}`;
   const nueva = (
     <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus} variante={p.seleccionada ? "secondary" : "primary"}>
       Nueva
@@ -70,16 +79,31 @@ export function ListaCuentas(p: {
         },
         ...filtroDeEtiquetas(p.etiquetas ?? []),
       ]}
-      meta={{
-        izquierda: `${p.items.length} cuentas · ${activas} ${activas === 1 ? "cliente activo" : "clientes activos"}`,
-        derecha: "Nombre A–Z",
-      }}
+      meta={{ izquierda: metaConteo, derecha: "Nombre A–Z" }}
       seleccionada={p.seleccionada}
-      vacio={{
-        titulo: "Aún no hay cuentas",
-        descripcion: "Crea la primera para registrar sus instalaciones, contactos y documentos.",
-        accion: nueva,
-      }}
+      vacio={
+        filtrando
+          ? {
+              titulo: "Sin resultados",
+              descripcion: "Prueba otro nombre, RUT o quita un filtro.",
+            }
+          : {
+              titulo: "Aún no hay cuentas",
+              descripcion: "Crea la primera para registrar sus instalaciones, contactos y documentos.",
+              accion: nueva,
+            }
+      }
+      pie={
+        p.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={f}
+            rutaBase="/cuentas"
+            mostrados={p.items.length}
+            siguiente={p.siguiente ?? null}
+            porPagina={porPagina}
+          />
+        ) : undefined
+      }
       filas={p.items.map((c) => {
         const e = estadoDe(ESTADO_CUENTA, c.estado);
         return {
