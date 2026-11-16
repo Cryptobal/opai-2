@@ -1,7 +1,8 @@
 import type { BetterAuthPlugin } from "better-auth";
 import { APIError, createAuthEndpoint, getSessionFromCtx } from "better-auth/api";
-import { setSessionCookie } from "better-auth/cookies";
 import { z } from "zod";
+
+import { responderSesionAbierta } from "./sesion-cookie";
 
 import {
   claveCodigoApp,
@@ -62,9 +63,7 @@ export const sesionApp = {
         }
         const usuario = await ctx.context.internalAdapter.findUserById(datos.userId);
         if (!usuario) throw new APIError("FORBIDDEN", { message: INVALIDO });
-        const sesion = await ctx.context.internalAdapter.createSession(usuario.id);
-        await setSessionCookie(ctx, { session: sesion, user: usuario });
-        return ctx.json({ ok: true });
+        return responderSesionAbierta(ctx, usuario);
       },
     ),
   },
