@@ -1,5 +1,6 @@
 import { cerrarClientes, dbAdmin, enTransaccion, type TenantTx } from "../src/index";
 import { exigirBaseE2E } from "./exigir-base-e2e";
+import { activarModulos, sembrarRondasE2E } from "./rondas-e2e";
 
 // Fixture de Pauta (CAR-81) para el e2e: una instalación ficticia con dos puestos (día y noche) y dos
 // personas con vínculo vigente. Idempotente: deja los puestos sin serie ni excepciones para que el
@@ -19,17 +20,15 @@ async function main() {
   exigirBaseE2E();
   const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await enTransaccion(tenantId, (db) => sembrar(db, tenantId));
+  // Rondas (E3e de terreno) va con la Pauta porque corre en el mismo paso de CI, después de los maestros.
+  const rondas = await enTransaccion(tenantId, (db) => sembrarRondasE2E(db, tenantId));
   await cerrarClientes();
-  console.log("Fixture de Pauta listo.");
+  console.log(`Fixture de Pauta listo.${rondas ? " Ronda E2E lista." : " Sin «Planta Quilicura»: sin Ronda E2E."}`);
 }
 
 async function sembrar(db: TenantTx, tenantId: string) {
-  // El módulo Pauta se activa en la empresa de pruebas (navegación y capacidades).
-  await db.tenantModule.upsert({
-    where: { tenantId_moduloId: { tenantId, moduloId: "pauta" } },
-    update: { estado: "activo" },
-    create: { tenantId, moduloId: "pauta", estado: "activo" },
-  });
+  // Sin el módulo activo sus capacidades responden «Módulo inactivo» y sus e2e no prueban nada (CAR-507, CAR-497).
+  await activarModulos(db, tenantId, ["pauta", "desempeno", "acceso"]);
   const cuenta = await db.cuenta.upsert({
     where: { id: "00000000-0000-7000-8000-0000000b0010" },
     update: {},

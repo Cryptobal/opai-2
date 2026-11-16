@@ -6,6 +6,7 @@ import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { EVENTO_PESTANA_BARRA } from "@opai/ds";
 
 import type { SolicitudAgente } from "./abrir-agente";
+import { solicitudDesdePantalla } from "./contexto-pantalla-agente";
 
 // Ni el botón ni el panel pesan en el JS inicial: se descargan solo donde el agente existe (ADR-037).
 const PanelAgente = dynamic(() => import("./panel-agente").then((m) => m.PanelAgente), {
@@ -14,6 +15,13 @@ const PanelAgente = dynamic(() => import("./panel-agente").then((m) => m.PanelAg
 const BotonAgente = dynamic(() => import("./boton-agente").then((m) => m.BotonAgente));
 
 type Pedido = SolicitudAgente & { n: number };
+
+function siguientePedido(
+  prev: Pedido | null,
+  solicitud: SolicitudAgente = {},
+): Pedido {
+  return { ...solicitud, n: (prev?.n ?? 0) + 1 };
+}
 
 /**
  * Agente interno en el shell (CAR-120): estado abierto/cerrado, atajo Ctrl/⌘+J, `?agente=1` en la URL
@@ -24,13 +32,18 @@ type Pedido = SolicitudAgente & { n: number };
 export function useAgenteShell(disponible: boolean, portal: string) {
   const [abierto, setAbierto] = useState(false);
   const [pedido, setPedido] = useState<Pedido | null>(null);
-  const alternar = useCallback(() => setAbierto((v) => !v), []);
+  const alternar = useCallback(() => {
+    setAbierto((v) => {
+      if (!v) setPedido((p) => siguientePedido(p, solicitudDesdePantalla()));
+      return !v;
+    });
+  }, []);
   useEffect(() => {
     if (!disponible) return;
     const tecla = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
-        setAbierto((v) => !v);
+        alternar();
       }
     };
     // Teléfono del diseño nuevo (CAR-416): tocar Inicio, Menú o Yo en la barra deja la pestaña Agente.
@@ -41,7 +54,7 @@ export function useAgenteShell(disponible: boolean, portal: string) {
       window.removeEventListener("keydown", tecla);
       window.removeEventListener(EVENTO_PESTANA_BARRA, salir);
     };
-  }, [disponible]);
+  }, [disponible, alternar]);
   useEffect(() => {
     if (!disponible) return;
     let baja: (() => void) | undefined;
@@ -49,7 +62,7 @@ export function useAgenteShell(disponible: boolean, portal: string) {
     void import("./escucha-agente").then((m) => {
       if (!vigente) return;
       baja = m.escuchar((s) => {
-        setPedido((p) => ({ ...s, n: (p?.n ?? 0) + 1 }));
+        setPedido((p) => siguientePedido(p, s));
         setAbierto(true);
       });
     });

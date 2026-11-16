@@ -39,7 +39,7 @@ export function indicadoresDeLaEmpresa(ctx: Contexto): Map<string, IndicadorGest
   return new Map(activos.map((i) => [i.id, i]));
 }
 
-export const itemSchema = z.object({
+const itemSchema = z.object({
   indicador: z.string().describe("Id del indicador en el catálogo de indicadores de gestión."),
   meta: z.number().describe("Meta mensual, en la unidad del indicador."),
   peso: z.number().describe("Peso en el puntaje, en puntos porcentuales."),

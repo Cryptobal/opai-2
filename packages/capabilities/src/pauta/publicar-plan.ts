@@ -19,7 +19,7 @@ export const publicacionInput = z.object({
 });
 export type PublicacionInput = z.output<typeof publicacionInput>;
 
-export type TurnosPersona = { personaId: string; dias: string[] };
+type TurnosPersona = { personaId: string; dias: string[] };
 
 /** Días del mes `aaaa-mm` en orden. */
 export function diasDelMes(mes: string): string[] {

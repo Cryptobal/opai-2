@@ -28,6 +28,7 @@ import {
   ventasEnviarSii,
 } from "./ventas-escritura";
 import { reporteResultados } from "./reportes-resultados";
+import { rentabilidadInstalaciones } from "./rentabilidad";
 import { ventasBuscar } from "./ventas-buscar";
 import { impuestosBorradorF29 } from "./impuestos-f29";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
@@ -63,6 +64,7 @@ import { cierreActualizar } from "./cierre-actualizar";
 import { cierreEmitirLote } from "./cierre-emitir-lote";
 
 export { ajustesFinanzas } from "./ajustes";
+export { buscadoresFinanzas } from "./buscadores";
 export { ventasProgramadasPorPeriodo } from "./ventas-programacion-netas";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
@@ -90,6 +92,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   impuestosBorradorF29,
   ventasBuscar,
   reporteResultados,
+  rentabilidadInstalaciones,
   cobranzaResumen,
   cobranzaDeudor,
   cobranzaRecordar,
@@ -133,3 +136,5 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   dteConfigObtener,
   dteConfigActualizar,
 ];
+
+export { logoDeMarca } from "./ventas-pdf-logo";

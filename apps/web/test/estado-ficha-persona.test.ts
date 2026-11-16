@@ -66,18 +66,26 @@ describe("insignias del Resumen de la ficha (CAR-124)", () => {
     ).toBeNull();
   });
   it("uniforme cuenta las tallas faltantes", () => {
-    const u = { tallaCamisa: "L", tallaPantalon: "44", tallaChaqueta: "L", tallaZapato: "42" };
-    expect(estadoUniforme(u).etiqueta).toBe("Completo");
-    expect(estadoUniforme({ ...u, tallaCamisa: null }).etiqueta).toBe("Falta 1 talla");
-    expect(estadoUniforme(null).etiqueta).toBe("Faltan 4 tallas");
+    const t = (prenda: string, talla: string | null, enKit = true) => ({
+      prenda,
+      nombre: prenda,
+      talla,
+      enKit,
+    });
+    const kit = [t("camisa", "L"), t("pantalon", "44"), t("chaqueta", "L"), t("calzado", "42")];
+    expect(estadoUniforme(kit).etiqueta).toBe("Completo");
+    expect(estadoUniforme([...kit.slice(1), t("camisa", null)]).etiqueta).toBe("Falta 1 talla");
+    // Una prenda que la empresa ya no usa no cuenta como faltante (CAR-408).
+    expect(estadoUniforme([...kit, t("vieja", null, false)]).etiqueta).toBe("Completo");
+    expect(estadoUniforme(kit.map((x) => ({ ...x, talla: null }))).etiqueta).toBe(
+      "Faltan 4 tallas",
+    );
   });
   it("jornada: manda el plazo fijo; sin plazo, completa con horas y distribución", () => {
     const j = { horasSemanales: "42", distribucion: "4x4" };
     expect(estadoJornada(HOY, j).etiqueta).toBe("Completo");
     expect(estadoJornada(HOY, { ...j, distribucion: null }).etiqueta).toBe("Incompleto");
-    expect(estadoJornada(HOY, j, "2026-11-26").etiqueta).toBe(
-      "Vence en 15 días",
-    );
+    expect(estadoJornada(HOY, j, "2026-11-26").etiqueta).toBe("Vence en 15 días");
     expect(estadoJornada(HOY, j, "2027-06-01").etiqueta).toBe("Al día");
   });
   it("OS-10 sin fecha queda «Sin registro»", () => {

@@ -31,7 +31,7 @@ jobs:
     name: preview-e2e
     if: github.event_name != 'pull_request' || (github.event.label.name == 'e2e' && github.event.pull_request.draft != true)
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 40
+    timeout-minutes: 60
     permissions:
       contents: read
       checks: read
@@ -148,6 +148,8 @@ jobs:
           E2E_TOTP_SECRET: ${{ secrets.E2E_TOTP_SECRET }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
           CI: "true"
+          E2E_PROSPECTO_EMAIL: ${{ secrets.E2E_PROSPECTO_EMAIL }}
+          E2E_PROSPECTO_PASSWORD: ${{ secrets.E2E_PROSPECTO_PASSWORD }}
         # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
         run: pnpm --filter @opai/web exec playwright test --grep @preview --workers=2 --reporter=list --output=test-results/playwright
       - name: Subir las capturas

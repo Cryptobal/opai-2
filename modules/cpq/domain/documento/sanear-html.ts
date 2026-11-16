@@ -16,7 +16,7 @@ import {
 type Nodo = DefaultTreeAdapterMap["childNode"];
 type Elemento = DefaultTreeAdapterMap["element"];
 
-export type CodigoHtml =
+type CodigoHtml =
   | "elemento_activo" | "recurso_externo" | "elemento_no_permitido" | "manejador_evento" | "url_no_permitida"
   | "estilo_no_permitido" | "token_en_atributo" | "token" | "marcador_movido" | "limite" | "vacio";
 export type ProblemaHtml = { codigo: CodigoHtml; mensaje: string; detalle?: string };

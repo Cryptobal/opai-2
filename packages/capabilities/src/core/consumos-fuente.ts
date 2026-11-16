@@ -11,7 +11,7 @@ export type GrupoConsumo = {
 };
 
 /** "aaaa-mm" → [inicio, fin) del mes en UTC; por defecto el mes actual. */
-export function rangoMes(mes?: string, ahora = new Date()) {
+function rangoMes(mes?: string, ahora = new Date()) {
   const [a, m] = mes
     ? (mes.split("-").map(Number) as [number, number])
     : [ahora.getUTCFullYear(), ahora.getUTCMonth() + 1];

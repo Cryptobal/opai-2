@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE, TIPOS_AUSENCIA_BASE } from "@opai/domain";
+import { PERMISOS_CORE, prendasValidas, TIPOS_AUSENCIA_BASE } from "@opai/domain";
 
 import { defineAjustes } from "./registro";
 
@@ -63,6 +63,26 @@ export const AJUSTES_PERSONAS = defineAjustes(
         soloPersonas: true,
         control: "json",
       }),
+    // CAR-408: prendas del uniforme cuyas tallas guarda la ficha. Vacío = las de la vertical (@opai/domain).
+    personas_prendas_uniforme: z
+      .array(z.object({ nombre: z.string().trim().min(2).max(60) }))
+      .max(30)
+      // Dos nombres con la misma clave («Pantalón» y «pantalon») harían que la ficha volviera en silencio al rubro.
+      .refine(
+        (xs) => prendasValidas(xs) !== null,
+        "Hay prendas repetidas (mismo nombre sin tildes ni mayúsculas).",
+      )
+      .default([])
+      .meta({
+        etiqueta: "Prendas del uniforme",
+        ayuda:
+          'La ficha pide la talla de cada prenda. Vacío: las de tu rubro. Ej.: [{ "nombre": "Cotona" }, { "nombre": "Calzado" }]. Cambiar el nombre de una prenda la cuenta como nueva.',
+        grupo: "Personas",
+        ambito: "tenant",
+        permiso: PERMISOS_CORE.personasLaboralManage,
+        soloPersonas: true,
+        control: "json",
+      }),
     personas_no_recontratar_vigencia_maxima_dias: z
       .number()
       .int()
@@ -72,7 +92,7 @@ export const AJUSTES_PERSONAS = defineAjustes(
       .meta({
         etiqueta: 'Plazo máximo de vigencia de la marca "No recontratar" (días)',
         ayuda:
-          "TODO(decisión Carlos): sin plazo máximo definido. Con 0 no hay tope; la fecha de vencimiento la fija quien marca, por persona.",
+          "Con 0 no hay tope de vigencia. Con un valor, la marca «No recontratar» no puede superar ese número de días; quien marca puede fijar una fecha menor.",
         grupo: "Personas",
         ambito: "tenant",
         permiso: PERMISOS_CORE.personasNoRecontratarManage,

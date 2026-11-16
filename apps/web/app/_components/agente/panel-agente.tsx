@@ -1,16 +1,17 @@
 "use client";
 
-import { History, Plus, Sparkles, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { History, Plus } from "lucide-react";
+import { useState } from "react";
 
-import { Banda, Button, Empty, PanelLateral, Skeleton } from "@opai/ds";
+import { Banda, Button, PanelLateral } from "@opai/ds";
 
 import { BarraModelo } from "./barra-modelo";
+import { ChipContextoFicha } from "./chip-contexto-ficha";
 import { Compositor } from "./compositor";
-import { HiloAgente } from "./hilo-agente";
-import { HistorialAgente } from "./historial-agente";
 import { MenuDelHilo } from "./menu-del-hilo";
 import type { SolicitudAgente } from "./abrir-agente";
+import { PanelAgenteContenido } from "./panel-agente-contenido";
+import { usePanelAgentePedidos } from "./use-panel-agente-pedidos";
 import { useAgente } from "./use-agente";
 import { useHistorial } from "./use-historial";
 
@@ -32,22 +33,12 @@ export function PanelAgente({
   solicitud: (SolicitudAgente & { n: number }) | null;
 }) {
   const a = useAgente(portal, abierto);
-  // El historial se muestra hasta que llega un pedido nuevo (retomar o preguntar por una ficha).
   const [histEn, setHistEn] = useState<number | null>(null);
   const verHistorial = histEn === (solicitud?.n ?? 0);
   const setVerHistorial = (v: boolean | ((x: boolean) => boolean)) =>
     setHistEn((typeof v === "function" ? v(verHistorial) : v) ? (solicitud?.n ?? 0) : null);
   const h = useHistorial(portal, abierto && verHistorial);
-  const { cargar, sobreFicha } = a;
-  const { abrir } = h;
-  useEffect(() => {
-    if (!solicitud) return;
-    const { conversacionId, contexto, etiqueta } = solicitud;
-    if (conversacionId) {
-      void abrir(conversacionId).then((r) => r && cargar(conversacionId, r.hilo, r.meta));
-    } else if (contexto) sobreFicha({ contexto, etiqueta });
-  }, [solicitud, abrir, cargar, sobreFicha]);
-  const sinModelos = a.modelos !== null && a.modelos.length === 0;
+  usePanelAgentePedidos(abierto, solicitud, a, h);
   const volver = () => {
     a.nueva();
     setVerHistorial(false);
@@ -92,54 +83,14 @@ export function PanelAgente({
           onNivel={a.setNivel}
         />
       ) : null}
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3" aria-live="polite">
-        {verHistorial ? (
-          <HistorialAgente
-            lista={h.lista}
-            error={h.error}
-            onBorrar={(id) => {
-              if (id === a.conversacionId) a.nueva();
-              void h.borrar(id);
-            }}
-            onAbrir={(id) =>
-              void h.abrir(id).then((r) => {
-                if (!r) return;
-                a.cargar(id, r.hilo, r.meta);
-                setVerHistorial(false);
-              })
-            }
-          />
-        ) : a.modelos === null && !a.errorModelos ? (
-          <Skeleton className="h-24 w-full" />
-        ) : a.errorModelos ? (
-          <Empty titulo="No pudimos abrir el agente" descripcion="Reintenta en unos minutos." />
-        ) : sinModelos ? (
-          <Empty
-            titulo="El agente no está disponible ahora en tu empresa"
-            descripcion="Avísale a un administrador: falta conectar un modelo de IA en Integraciones."
-          />
-        ) : a.mensajes.length === 0 ? (
-          <Empty
-            icono={<Sparkles className="size-5" aria-hidden />}
-            titulo={a.ficha ? "Pregúntame sobre esta ficha" : "¿En qué te ayudo?"}
-            descripcion="Pregunta por tus datos o pide un cambio. Antes de escribir algo, te muestro el plan para que lo confirmes."
-          />
-        ) : (
-          <HiloAgente mensajes={a.mensajes} onDecidir={(id, ok) => void a.decidir(id, ok)} />
-        )}
-      </div>
+      <PanelAgenteContenido
+        a={a}
+        h={h}
+        verHistorial={verHistorial}
+        onVerHistorial={(v) => setVerHistorial(v)}
+      />
       {a.ficha && !verHistorial ? (
-        <p className="t-caption flex flex-none items-center justify-between gap-2 border-t border-border px-3 py-1">
-          <span className="truncate">Sobre {a.ficha.etiqueta ?? "esta ficha"}</span>
-          <Button
-            variant="ghost"
-            aria-label="Quitar la ficha"
-            className="size-11 p-0"
-            onClick={a.quitarFicha}
-          >
-            <X className="size-4" aria-hidden />
-          </Button>
-        </p>
+        <ChipContextoFicha etiqueta={a.ficha.etiqueta ?? "esta ficha"} onQuitar={a.quitarFicha} />
       ) : null}
       {typeof navigator !== "undefined" && !navigator.onLine ? (
         <Banda flotante={false} mensaje="Sin conexión. Tu borrador se conserva." />

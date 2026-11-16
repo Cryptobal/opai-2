@@ -49,7 +49,7 @@ export function verificacionFalsa(): VerificacionIdentidad {
 /** Error claro cuando no hay proveedor de verificación en un entorno que lo exige (N2 real). */
 export class VerificacionNoConfigurada extends Error {
   constructor() {
-    super("Verificación de identidad no configurada: falta el proveedor de prueba de vida (R13).");
+    super("Verificación de identidad no configurada: falta el proveedor de prueba de vida.");
     this.name = "VerificacionNoConfigurada";
   }
 }

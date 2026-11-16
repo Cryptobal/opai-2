@@ -81,9 +81,7 @@ function Formulario({
     });
     if (r) {
       avisar.exito("Reemplazo asignado");
-      if (r.variante === "refuerzo_extra") {
-        avisar.info("Quedará como turno extra por aprobar.");
-      }
+      avisar.info("Quedó como turno extra por aprobar.");
       onCerrar();
     }
   }
