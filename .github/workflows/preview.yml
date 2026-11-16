@@ -117,6 +117,12 @@ jobs:
           # correr fuera de una rama preview/pr-N (nunca main ni dev). Un fallo real sigue en rojo.
           PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:huerfanas
           DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
+      - name: Semillas ficticias qa-e2e en la rama preview
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
+          PREVIEW_RAMA: ${{ env.RAMA }}
+        run: bash packages/db/scripts/qa-e2e/aplicar-en-preview.sh
       - name: Contraseña propia de opai_app y DATABASE_URL de la preview
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         env:

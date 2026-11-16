@@ -1,11 +1,12 @@
 -- CAR-544: cotización enviada ficticia en `qa-e2e` para capturar la ficha «Documento y envío» en `preview-e2e`.
--- Idempotente, solo `qa-e2e` (nunca Gard). Usa la cuenta de `factura-aceptada.sql`. Correr en Neon `main`
--- (desde ahí nacen las ramas de vista previa), con respaldo previo como el resto de scripts `qa-e2e/`.
+-- Idempotente, solo `qa-e2e` (nunca Gard). Se aplica en `main` y en cada rama `preview/pr-N`
+-- (`packages/db/scripts/qa-e2e/aplicar-en-preview.sh` en el workflow `preview`).
 
 DO $$
 DECLARE
   t uuid := (SELECT id FROM core.tenants WHERE slug = 'qa-e2e');
-  cuenta uuid := '00000000-0000-7000-8000-000000267001'::uuid;
+  cuenta_fija uuid := '00000000-0000-7000-8000-000000267001'::uuid;
+  cuenta uuid;
   embudo uuid;
   etapa uuid;
   owner uuid;
@@ -33,6 +34,17 @@ BEGIN
   LIMIT 1;
   IF embudo IS NULL OR etapa IS NULL OR owner IS NULL THEN
     RAISE EXCEPTION 'qa-e2e sin embudo, etapa abierta u owner';
+  END IF;
+
+  INSERT INTO core.cuentas (id, tenant_id, nombre, rut, estado, updated_at)
+  VALUES (cuenta_fija, t, 'Cliente ficticio QA CPQ preview', '76999002-K', 'cliente_activo', now())
+  ON CONFLICT (id) DO NOTHING;
+  SELECT COALESCE(
+    (SELECT id FROM core.cuentas WHERE tenant_id = t AND id = cuenta_fija),
+    (SELECT id FROM core.cuentas WHERE tenant_id = t ORDER BY created_at LIMIT 1)
+  ) INTO cuenta;
+  IF cuenta IS NULL THEN
+    RAISE EXCEPTION 'qa-e2e sin cuenta para cotización preview';
   END IF;
 
   INSERT INTO comercial.negocios
