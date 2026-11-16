@@ -7,15 +7,22 @@ import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { cuando, type FilaEgreso, montoLegible, type Recurrente } from "./tipos";
+import { cuando, type FilaEgreso, montoLegible, type ProveedorOpcion, type Recurrente } from "./tipos";
 
 /** Con un cambio «desde una fecha» (CAR-413), desde cuándo rige el tramo vigente. */
 const cuandoTramo = (r: Recurrente) => (r.anteriorId ? `${cuando(r)} desde el ${formatearFecha(r.inicio)}` : cuando(r));
 const Estado = ({ r }: { r: Recurrente }) => <Badge tono={r.activa ? "success" : "neutro"}>{r.activa ? "Activo" : "Pausado"}</Badge>;
 
 /** Lista de gastos recurrentes (CAR-382): fila, monto con su unidad, frecuencia y estado. */
-export function ListaRecurrentes(p: { state: EstadoPantalla; items: Recurrente[]; filas: FilaEgreso[]; configura: boolean }) {
+export function ListaRecurrentes(p: {
+  state: EstadoPantalla;
+  items: Recurrente[];
+  filas: FilaEgreso[];
+  proveedores: ProveedorOpcion[];
+  configura: boolean;
+}) {
   const filaDe = new Map(p.filas.map((f) => [f.id, f.etiqueta]));
+  const proveedorDe = new Map(p.proveedores.map((x) => [x.id, x.razonSocial]));
   const fila = (r: Recurrente) => filaDe.get(r.filaId) ?? "Fila archivada";
   return (
     <ListScreen<Recurrente>
@@ -31,10 +38,10 @@ export function ListaRecurrentes(p: { state: EstadoPantalla; items: Recurrente[]
           titulo: "Aún no hay gastos recurrentes",
           descripcion: p.filas.length
             ? "Agrega el arriendo, los honorarios o el retiro de cada socio: el flujo los proyecta solos y los da por pagados cuando llega el cargo del banco."
-            : "Crea el gasto y, si hace falta, una fila nueva desde la misma hoja. También puedes administrarlas en Configuración › Finanzas › Flujo de caja.",
+            : "Crea el gasto y, si hace falta, una fila nueva desde la misma hoja.",
           ...(p.configura
-            ? {}
-            : { accion: <EnlaceBoton href="/configuracion/modulo/finanzas?seccion=flujo-caja" variante="secondary">Administrar filas</EnlaceBoton> }),
+            ? { accion: <EnlaceBoton href="?filas=1" variante="secondary">Administrar filas</EnlaceBoton> }
+            : {}),
         },
       }}
       tarjeta={(x) => (
@@ -51,6 +58,11 @@ export function ListaRecurrentes(p: { state: EstadoPantalla; items: Recurrente[]
       )}
       columnas={[
         { id: "c", etiqueta: "Concepto", render: (x) => <span className="font-medium">{x.concepto}</span> },
+        {
+          id: "p",
+          etiqueta: "Proveedor",
+          render: (x) => (x.proveedorId ? (proveedorDe.get(x.proveedorId) ?? "—") : "—"),
+        },
         { id: "f", etiqueta: "Fila del flujo", render: fila },
         { id: "m", etiqueta: "Monto por cuota", className: "t-numeric", render: montoLegible },
         { id: "q", etiqueta: "Cuándo", render: cuandoTramo },

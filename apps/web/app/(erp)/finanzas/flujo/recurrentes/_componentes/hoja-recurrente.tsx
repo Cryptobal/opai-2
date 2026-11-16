@@ -13,7 +13,18 @@ import { GRUPO_POR_DEFECTO, type GrupoEgreso } from "../../_componentes/grupos-e
 import { SelectorGrupoEgreso } from "../../_componentes/selector-grupo-egreso";
 import { CamposUf } from "./campos-uf";
 import { SelectorFilaEgreso } from "./selector-fila-egreso";
-import { type FilaEgreso, FRECUENCIAS, montoEditable, montoEscrito, type PoliticaUf, type Recurrente, type Unidad } from "./tipos";
+import {
+  type FilaEgreso,
+  FRECUENCIAS,
+  montoEditable,
+  montoEscrito,
+  type PoliticaUf,
+  type ProveedorOpcion,
+  type Recurrente,
+  type Unidad,
+} from "./tipos";
+
+const SIN_PROVEEDOR = "";
 
 const UNIDADES = [
   { valor: "clp", etiqueta: "Pesos" },
@@ -22,7 +33,7 @@ const UNIDADES = [
 ];
 
 /** Nuevo gasto recurrente o editar uno existente (CAR-382). La fila, la frecuencia y el día cambian desde una fecha (CAR-413). */
-export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) {
+export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[]; proveedores: ProveedorOpcion[] }) {
   const url = useParametros();
   const id = url.valor("editar");
   const r = p.items.find((x) => x.id === id);
@@ -40,6 +51,7 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
   const [fin, setFin] = useState(r?.fin ?? "");
   const [politica, setPolitica] = useState<PoliticaUf>(r?.politicaUf ?? "dia_cuota");
   const [ufDia, setUfDia] = useState(r?.ufDiaFijo != null ? String(r.ufDiaFijo) : "1");
+  const [proveedorId, setProveedorId] = useState(r?.proveedorId ?? SIN_PROVEEDOR);
   const [nota, setNota] = useState(r?.nota ?? "");
   const [activa, setActiva] = useState(r?.activa ?? true);
   // El grupo es de la fila del flujo, no del gasto: se cambia al guardar y vale para toda la fila.
@@ -65,6 +77,7 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
       diaDelMes: frecuencia === "mensual" ? diaN : null,
       fin: fin || null,
       nota: nota.trim() || null,
+      proveedorId: proveedorId || null,
     };
     if (grupo !== grupoActual && !(await ejecutar("finanzas.filas.actualizar", { id: fila, grupo }))) return;
     const res = await ejecutar<Recurrente>(
@@ -101,6 +114,18 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
         <SelectorGrupoEgreso id="rc-grupo" valor={grupo} onCambiar={(g) => setCambioGrupo({ filaId: fila, grupo: g })} ayuda="Dónde se agrupa esta fila en el flujo de caja; cambia para toda la fila." />
         <Campo etiqueta="Concepto" htmlFor="rc-concepto">
           <Input id="rc-concepto" value={concepto} onChange={(e) => setConcepto(e.target.value)} autoFocus={!r} />
+        </Campo>
+        <Campo etiqueta="Proveedor" htmlFor="rc-proveedor" ayuda="Opcional. Elige del maestro de proveedores si el pago es siempre al mismo.">
+          <Select
+            id="rc-proveedor"
+            valor={proveedorId || SIN_PROVEEDOR}
+            onCambiar={(v) => setProveedorId(v === SIN_PROVEEDOR ? "" : v)}
+            placeholder="Sin proveedor"
+            opciones={[
+              { valor: SIN_PROVEEDOR, etiqueta: "Sin proveedor" },
+              ...p.proveedores.map((x) => ({ valor: x.id, etiqueta: x.razonSocial })),
+            ]}
+          />
         </Campo>
         <Campo etiqueta="Unidad del monto" htmlFor="rc-unidad">
           <Select id="rc-unidad" valor={unidad} onCambiar={(v) => { setUnidad(v as Unidad); setMonto(""); }} opciones={UNIDADES} />

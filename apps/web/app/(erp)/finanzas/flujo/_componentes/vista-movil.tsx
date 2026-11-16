@@ -8,6 +8,7 @@ import { Button, cn, type FilaPlanilla } from "@opai/ds";
 import { esFilaVirtual } from "./celda-agregada";
 import { clp, type ArmadoPlanilla, type Planilla } from "./datos";
 import { HojaMover } from "./hoja-mover";
+import { filaTienePlanMovible } from "./semanas-con-plan";
 
 const SANGRIA = { 0: "", 1: "pl-4", 2: "pl-8" } as const;
 
@@ -72,8 +73,10 @@ export function VistaMovilFlujo({
   onAlternar: Acciones["onAlternar"];
 }) {
   const [mover, setMover] = useState<string | null>(null);
-  const conPlan = new Set(planilla.filas.filter((f) => !esFilaVirtual(f.id)).map((f) => f.id));
-  const filas = armado.filas.map((f) => (gestiona && conPlan.has(f.id) ? { ...f, accion: "Reprogramar" } : f));
+  const filasPlan = planilla.filas.filter((f) => !esFilaVirtual(f.id));
+  const filas = armado.filas.map((f) =>
+    gestiona && filaTienePlanMovible(planilla, f.id) ? { ...f, accion: "Reprogramar" } : f,
+  );
   const acciones = { armado, onCelda, onAlternar, onAccion: setMover };
   return (
     <div className="flex flex-col gap-4">
@@ -96,8 +99,8 @@ export function VistaMovilFlujo({
       ))}
       {mover ? (
         <HojaMover
-          filas={planilla.filas.filter((f) => conPlan.has(f.id))}
-          semanas={planilla.semanas.map((s) => s.semana)}
+          filas={filasPlan.filter((f) => filaTienePlanMovible(planilla, f.id))}
+          planilla={planilla}
           semanasPasadas={planilla.semanas.filter((s) => s.pasada).map((s) => s.semana)}
           horizonte={planilla.semanas.length}
           filaInicial={mover}

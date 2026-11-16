@@ -2,62 +2,18 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Checkbox, Campo, Input } from "@opai/ds";
+import { avisar, Button, Checkbox, Campo, Input } from "@opai/ds";
 
+import { LinkNext } from "@/app/_components/link-next";
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import type { GrupoEgreso } from "@/app/(erp)/finanzas/flujo/_componentes/grupos-egreso";
-import { SelectorGrupoEgreso } from "@/app/(erp)/finanzas/flujo/_componentes/selector-grupo-egreso";
+import type { AjustesFlujo, FilaFlujo } from "@/app/(erp)/finanzas/flujo/_componentes/datos";
 import { CalendarioPagosEditor } from "./calendario-pagos";
-import { FilaEgresoEditor } from "./fila-egreso-editor";
-import type { FilaFlujo, AjustesFlujo } from "@/app/(erp)/finanzas/flujo/_componentes/datos";
 
-export function EditorFlujoCaja({
-  filas,
-  ajustes,
-}: {
-  filas: FilaFlujo[];
-  ajustes: AjustesFlujo;
-}) {
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const [etiqueta, setEtiqueta] = useState("");
-  const [grupo, setGrupo] = useState<GrupoEgreso>("gastos");
+export function EditorFlujoCaja({ ajustes }: { filas: FilaFlujo[]; ajustes: AjustesFlujo }) {
+  const { ejecutar, pendiente } = useCapacidad("erp");
   const [aj, setAj] = useState(ajustes);
-  // La lista se actualiza al instante con lo que devuelve cada capacidad y se vuelve a alinear cuando el
-  // servidor revalida la página (CAR-198/CAR-220).
-  const [lista, setLista] = useState(filas);
-  const [filasPrevias, setFilasPrevias] = useState(filas);
-  if (filas !== filasPrevias) {
-    setFilasPrevias(filas);
-    setLista(filas);
-  }
-  const ingresos = lista.filter((f) => f.seccion === "ingreso");
-  const egresos = lista.filter((f) => f.seccion === "egreso");
-
-  const poner = (f: FilaFlujo) =>
-    setLista((l) => (l.some((x) => x.id === f.id) ? l.map((x) => (x.id === f.id ? f : x)) : [...l, f]));
-
-  async function crearFila() {
-    const r = await ejecutar<FilaFlujo>("finanzas.filas.crear", { seccion: "egreso", etiqueta, grupo, arrastre: false });
-    if (!r) return;
-    poner(r);
-    avisar.exito("Egreso creado");
-    setEtiqueta("");
-  }
-
-  async function cambiarGrupo(id: string, nuevo: GrupoEgreso) {
-    const r = await ejecutar<FilaFlujo>("finanzas.filas.actualizar", { id, grupo: nuevo });
-    if (!r) return;
-    poner(r);
-    avisar.exito("Grupo actualizado");
-  }
-
-  async function archivarFila(id: string, archivar: boolean) {
-    const r = await ejecutar<FilaFlujo>("finanzas.filas.archivar", { id, archivar });
-    if (!r) return;
-    poner(r);
-    avisar.exito(archivar ? "Fila archivada" : "Fila restaurada");
-  }
 
   async function guardarAjustes() {
     const r = await ejecutar("finanzas.ajustes.actualizar", aj);
@@ -67,50 +23,22 @@ export function EditorFlujoCaja({
 
   return (
     <div className="flex flex-col gap-8">
-      {error ? <Alerta tono="danger" titulo={error} /> : null}
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium text-fg">Ingresos</h2>
+        <h2 className="text-lg font-medium text-fg">Filas y gastos recurrentes</h2>
         <p className="text-sm text-fg-muted">
-          Los ingresos salen solos de lo facturado y cobrado; no se crean a mano.
+          Las filas de egreso y los montos fijos se administran en el flujo de caja, no aquí. Los ingresos salen de lo facturado y de los cobros programados.
         </p>
-        <ul className="text-sm text-fg-muted">
-          {ingresos.map((f) => (
-            <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-1">
-              <span>{f.etiqueta}{f.activa ? "" : " · archivada"}</span>
-              {f.activa ? null : (
-                <Button variant="ghost" disabled={pendiente} onClick={() => void archivarFila(f.id, false)}>
-                  Restaurar
-                </Button>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium text-fg">Egresos planificados</h2>
-        <p className="text-sm text-fg-muted">
-          Archivar deja la fila de mostrarse; no borra lo registrado. Puedes restaurarla cuando quieras.
-        </p>
-        <ul className="text-sm text-fg-muted">
-          {egresos.map((f) => (
-            <FilaEgresoEditor
-              key={f.id}
-              fila={f}
-              pendiente={pendiente}
-              onGrupo={(g) => void cambiarGrupo(f.id, g)}
-              onArchivar={() => void archivarFila(f.id, f.activa)}
-            />
-          ))}
-        </ul>
-        <div className="flex flex-col gap-2 md:flex-row md:items-end">
-          <Campo etiqueta="Nuevo egreso (p. ej. Arriendo)" htmlFor="ff-etiq">
-            <Input id="ff-etiq" value={etiqueta} onChange={(e) => setEtiqueta(e.target.value)} />
-          </Campo>
-          <SelectorGrupoEgreso id="ff-grupo" valor={grupo} onCambiar={setGrupo} />
-          <Button disabled={pendiente || etiqueta.trim().length < 2} onClick={() => void crearFila()}>
-            Agregar egreso
-          </Button>
+        <div className="flex flex-wrap gap-2">
+          <EnlaceBoton href="/finanzas/flujo/recurrentes" variante="secondary">
+            Gastos recurrentes
+          </EnlaceBoton>
+          <EnlaceBoton href="/finanzas/flujo/recurrentes?filas=1" variante="secondary">
+            Administrar filas
+          </EnlaceBoton>
         </div>
+        <p className="text-sm text-fg-muted">
+          Desde un gasto recurrente también puedes crear una fila nueva con «+ Nueva fila…».
+        </p>
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-medium text-fg">Aviso de saldo bajo</h2>
@@ -137,14 +65,17 @@ export function EditorFlujoCaja({
       </section>
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-medium text-fg">Calendario de pagos</h2>
-        <p className="text-sm text-fg-muted">
-          Día del mes en que se paga cada concepto, para proyectar el flujo de caja.
-        </p>
-        <CalendarioPagosEditor
-          valor={aj.calendarioPagos}
-          onCambiar={(v) => setAj({ ...aj, calendarioPagos: v })}
-        />
+        <p className="text-sm text-fg-muted">Día del mes en que se paga cada concepto, para proyectar el flujo de caja.</p>
+        <CalendarioPagosEditor valor={aj.calendarioPagos} onCambiar={(v) => setAj({ ...aj, calendarioPagos: v })} />
+        <Button disabled={pendiente} onClick={() => void guardarAjustes()}>
+          Guardar calendario
+        </Button>
       </section>
+      <p className="text-sm text-fg-muted">
+        <LinkNext href="/finanzas/flujo" className="text-accent underline">
+          Volver al flujo de caja
+        </LinkNext>
+      </p>
     </div>
   );
 }

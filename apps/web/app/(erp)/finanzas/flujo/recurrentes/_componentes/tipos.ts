@@ -25,7 +25,9 @@ export type Recurrente = {
   claveOrigen: string | null;
   /** Tramo anterior del mismo gasto cuando cambió desde una fecha (CAR-413). */
   anteriorId?: string | null;
+  proveedorId: string | null;
 };
+export type ProveedorOpcion = { id: string; razonSocial: string };
 export type FilaEgreso = { id: string; etiqueta: string; seccion: string; grupo: GrupoEgreso | null; activa: boolean };
 
 /** Hasta 4 decimales con coma; sin miles cuando el texto va a un campo editable (formateador único, R4). */

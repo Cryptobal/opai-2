@@ -9,38 +9,40 @@ import { Button, type ItemMenu, Menu } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { HojaImportar } from "./hoja-importar";
 
-const RUTA_AJUSTES = "/configuracion/modulo/finanzas?seccion=flujo-caja";
+export const RUTA_AJUSTES = "/configuracion/modulo/finanzas?seccion=flujo-caja";
 
 type Props = {
   configura: boolean;
   onImportar: () => void;
 };
 
-/** Siempre visible: la pantalla de gastos recurrentes y el ajuste de filas. */
-export function AccesoRecurrentes({ gestiona }: { gestiona: boolean }) {
+/** Gastos recurrentes (el engranaje va al final de la cabecera; CAR-582). */
+export function AccesoRecurrentes({ gestiona: _gestiona }: { gestiona: boolean }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <EnlaceBoton href="/finanzas/flujo/recurrentes" variante="secondary">
-        Gastos recurrentes
-      </EnlaceBoton>
-      {gestiona ? (
-        <EnlaceBoton
-          href={RUTA_AJUSTES}
-          variante="secondary"
-          icono={Settings}
-          etiqueta="Filas y ajustes"
-          className="size-11 px-0"
-        >
-          {null}
-        </EnlaceBoton>
-      ) : null}
-    </div>
+    <EnlaceBoton href="/finanzas/flujo/recurrentes" variante="secondary">
+      Gastos recurrentes
+    </EnlaceBoton>
+  );
+}
+
+function EngranajeConfig({ configura }: { configura: boolean }) {
+  if (!configura) return null;
+  return (
+    <EnlaceBoton
+      href={RUTA_AJUSTES}
+      variante="secondary"
+      icono={Settings}
+      etiqueta="Ajustes del flujo"
+      className="size-11 px-0"
+    >
+      {null}
+    </EnlaceBoton>
   );
 }
 
 export function AccionesFlujoEscritorio({ configura, onImportar }: Props) {
   return (
-    <div className="hidden flex-wrap gap-2 xl:flex">
+    <div className="hidden flex-wrap items-center gap-2 xl:flex">
       <EnlaceBoton href="/finanzas/flujo/resumen" variante="secondary">
         Resumen por mes
       </EnlaceBoton>
@@ -52,6 +54,7 @@ export function AccionesFlujoEscritorio({ configura, onImportar }: Props) {
           Importar CSV…
         </Button>
       ) : null}
+      <EngranajeConfig configura={configura} />
     </div>
   );
 }
@@ -67,8 +70,8 @@ export function AccionesFlujoMovil({ configura, onImportar, enMovil = false }: P
   ];
   if (configura) {
     items.push(
-      { id: "config", etiqueta: "Filas y ajustes", onSelect: () => router.push(RUTA_AJUSTES) },
       { id: "import", etiqueta: "Importar CSV…", onSelect: onImportar },
+      { id: "config", etiqueta: "Ajustes del flujo", onSelect: () => router.push(RUTA_AJUSTES) },
     );
   }
   return (
@@ -93,6 +96,7 @@ export function CabeceraVistaMovil({ gestiona, configura }: { gestiona: boolean;
         <h2 className="t-title text-fg">Flujo de caja</h2>
         <div className="flex items-center gap-2">
           <AccesoRecurrentes gestiona={gestiona} />
+          <EngranajeConfig configura={configura} />
           <AccionesFlujoMovil configura={configura} enMovil onImportar={() => setImportar(true)} />
         </div>
       </div>

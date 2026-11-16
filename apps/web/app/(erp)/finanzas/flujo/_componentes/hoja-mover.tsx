@@ -7,18 +7,20 @@ import { Alerta, avisar, Button, Sheet } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { CamposMover } from "./campos-mover";
+import type { Planilla } from "./datos";
+import { semanasConPlan } from "./semanas-con-plan";
 
 /** Hoja «Reprogramar» de una fila: se abre desde la acción de la propia fila en la planilla (CAR-456). */
 export function HojaMover({
   filas,
-  semanas,
+  planilla,
   semanasPasadas,
   horizonte,
   filaInicial,
   onCerrar,
 }: {
   filas: { id: string; etiqueta: string }[];
-  semanas: string[];
+  planilla: Planilla;
   semanasPasadas: string[];
   horizonte: number;
   filaInicial: string;
@@ -26,17 +28,18 @@ export function HojaMover({
 }) {
   const { ejecutar, pendiente, error, codigo, limpiarError } = useCapacidad("erp");
   const [filaId, setFilaId] = useState(filaInicial);
-  const [semana, setSemana] = useState(semanas[0] ?? "");
+  const semanasDisponibles = useMemo(() => semanasConPlan(planilla, filaId), [planilla, filaId]);
+  const [semana, setSemana] = useState(() => semanasConPlan(planilla, filaInicial)[0] ?? "");
+  const semanaEfectiva =
+    semana && semanasDisponibles.includes(semana) ? semana : (semanasDisponibles[0] ?? "");
   const [por, setPor] = useState("1");
   const [confirmarPasada, setConfirmarPasada] = useState(false);
-  const [vista, setVista] = useState<{ movimientos: { desde: string; hasta: string; monto: number }[] } | null>(
-    null,
-  );
+  const [vista, setVista] = useState<{ movimientos: { desde: string; hasta: string; monto: number }[] } | null>(null);
   const pasadasSet = useMemo(() => new Set(semanasPasadas), [semanasPasadas]);
 
   const entrada = () => ({
     filaId,
-    semanas: [semana],
+    semanas: [semanaEfectiva],
     por: Number(por),
     ...(confirmarPasada ? { confirmarSemanaPasada: true as const } : {}),
   });
@@ -70,6 +73,7 @@ export function HojaMover({
         El movimiento no queda respaldado por la cartola importada. Confirma antes de aplicar.
       </Alerta>
     ) : null;
+  const sinSemanas = semanasDisponibles.length === 0;
 
   return (
     <Sheet
@@ -87,7 +91,7 @@ export function HojaMover({
               Aplicar
             </Button>
           ) : (
-            <Button disabled={pendiente || !filaId || !semana} onClick={() => void previsualizar()}>
+            <Button disabled={pendiente || !filaId || !semanaEfectiva || sinSemanas} onClick={() => void previsualizar()}>
               Ver vista previa
             </Button>
           )}
@@ -96,7 +100,7 @@ export function HojaMover({
     >
       <div className="flex flex-col gap-4">
         {error ? (
-          <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
+          <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avísale a un administrador." : error}>
             {errorServidor ? (
               <Button variant="secondary" className="mt-2" onClick={() => void previsualizar()}>
                 Reintentar
@@ -104,20 +108,36 @@ export function HojaMover({
             ) : null}
           </Alerta>
         ) : null}
+        {sinSemanas ? (
+          <Alerta tono="info" titulo="Sin planificación en la fila">
+            Esta fila no tiene cifras planificadas guardadas en la planilla. Solo se pueden mover celdas Plan con monto; las proyecciones de gastos recurrentes no se reprograman aquí.
+          </Alerta>
+        ) : null}
         {avisoPasada}
         <CamposMover
           filas={filas}
-          semanas={semanas}
+          semanas={semanasDisponibles}
           filaId={filaId}
-          semana={semana}
+          semana={semanaEfectiva}
           por={por}
           vista={vista}
           requierePasada={Boolean(vista && requiereConfirmacionPasada(vista.movimientos))}
           confirmarPasada={confirmarPasada}
           on={{
-            fila: (v) => { setFilaId(v); setVista(null); },
-            semana: (v) => { setSemana(v); setVista(null); setConfirmarPasada(false); },
-            por: (v) => { setPor(v); setVista(null); },
+            fila: (v) => {
+              setFilaId(v);
+              setSemana(semanasConPlan(planilla, v)[0] ?? "");
+              setVista(null);
+            },
+            semana: (v) => {
+              setSemana(v);
+              setVista(null);
+              setConfirmarPasada(false);
+            },
+            por: (v) => {
+              setPor(v);
+              setVista(null);
+            },
             confirmar: setConfirmarPasada,
           }}
         />

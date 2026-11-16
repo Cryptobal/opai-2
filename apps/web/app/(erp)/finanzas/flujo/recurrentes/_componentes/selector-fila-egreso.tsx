@@ -10,9 +10,9 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { FilaEgreso } from "./tipos";
 
 const NUEVA = "__nueva";
-const HREF_FILAS = "/configuracion/modulo/finanzas?seccion=flujo-caja";
+const HREF_FILAS = "/finanzas/flujo/recurrentes?filas=1";
 
-/** Selector de fila de egreso con «+ Nueva fila…» (CAR-535) y enlace a la configuración. */
+/** Selector de fila de egreso con «+ Nueva fila…» (CAR-535) y enlace a administrar filas. */
 export function SelectorFilaEgreso(p: {
   valor: string;
   onCambiar: (id: string) => void;

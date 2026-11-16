@@ -11,6 +11,7 @@ import { AvisosProyeccion } from "./avisos-proyeccion";
 import { esFilaVirtual } from "./celda-agregada";
 import { celdaEditable, type Planilla } from "./datos";
 import { filaBase } from "./grupos-cobro";
+import { filaTienePlanMovible } from "./semanas-con-plan";
 import type { ArmadoPlanilla } from "./datos";
 import { hojaEspecial, type HojaEspecial } from "./cobros-celda";
 
@@ -57,7 +58,7 @@ export function PlanillaFlujoEscritorio({
   // «Reprogramar» vive en cada fila con plan (CAR-456), no como botón suelto bajo la planilla.
   const [mover, setMover] = useState<string | null>(null);
   const filasPlan = p.filas.filter((f) => !esFilaVirtual(f.id));
-  const conAccion = (id: string) => gestiona && filasPlan.some((f) => f.id === id);
+  const conAccion = (id: string) => gestiona && filaTienePlanMovible(p, id);
   const filas = armado.filas.map((f) => (conAccion(f.id) ? { ...f, accion: "Reprogramar" } : f));
   return (
     <div className="flex min-w-0 flex-col gap-4 pb-24 md:pb-0">
@@ -84,7 +85,7 @@ export function PlanillaFlujoEscritorio({
           ...(textosError ?? {}),
           vacio: {
             titulo: "Sin filas en el flujo",
-            descripcion: "Agrega filas en Configuración › Módulos › Finanzas › Flujo de caja.",
+            descripcion: "Crea filas y gastos recurrentes desde Gastos recurrentes en el encabezado.",
           },
         }}
         filas={filas.length > 3 ? filas : []}
@@ -123,8 +124,8 @@ export function PlanillaFlujoEscritorio({
           />
           {mover ? (
             <HojaMover
-              filas={filasPlan}
-              semanas={p.semanas.map((s) => s.semana)}
+              filas={filasPlan.filter((f) => filaTienePlanMovible(p, f.id))}
+              planilla={p}
               semanasPasadas={p.semanas.filter((s) => s.pasada).map((s) => s.semana)}
               horizonte={p.semanas.length}
               filaInicial={mover}

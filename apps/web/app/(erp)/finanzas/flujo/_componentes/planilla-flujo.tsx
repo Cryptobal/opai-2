@@ -109,7 +109,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil, epo
           ...(textosError ?? {}),
           vacio: {
             titulo: "Sin filas en el flujo",
-            descripcion: "Agrega filas en Configuración › Módulos › Finanzas › Flujo de caja.",
+            descripcion: "Crea filas y gastos recurrentes desde Gastos recurrentes en el encabezado.",
           },
         }}
         filas={[]}
