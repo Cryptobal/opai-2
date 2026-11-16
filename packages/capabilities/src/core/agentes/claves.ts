@@ -60,6 +60,8 @@ export const apikeysUpdate = defineCapability({
           : input.expiraEn
             ? new Date(input.expiraEn)
             : null;
+    if (expiraEn && input.expiraEn && expiraEn.getTime() <= Date.now())
+      throw reglaDeNegocio("La expiración debe ser futura.");
     const presupuesto =
       input.presupuestoMensualUsd === undefined
         ? k.presupuestoMensualMicro

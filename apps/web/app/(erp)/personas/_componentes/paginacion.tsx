@@ -1,9 +1,8 @@
 import { cn, estilosBoton } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { anterioresDe, tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Parametros } from "@/lib/parametros";
-
-import { anteriores, POR_PAGINA } from "./datos";
 
 /** Query string con cambios (null borra la clave). */
 function con(p: Parametros, cambios: Record<string, string | null>) {
@@ -17,9 +16,10 @@ type Props = { p: Parametros; mostrados: number; siguiente: string | null; total
 
 /** "1–50 de 57 personas" con Anterior/Siguiente por cursor (la pila de cursores va en `?prev=`; "0" es la primera página). */
 export function Paginacion({ p, mostrados, siguiente, total }: Props) {
-  const pila = anteriores(p);
-  const desde = pila.length * POR_PAGINA + (mostrados ? 1 : 0);
-  const hasta = pila.length * POR_PAGINA + mostrados;
+  const tam = tamanoPagina(p);
+  const pila = anterioresDe(p);
+  const desde = pila.length * tam + (mostrados ? 1 : 0);
+  const hasta = pila.length * tam + mostrados;
   const previo = pila.slice(0, -1);
   const ultimo = pila.at(-1);
   const anterior =
