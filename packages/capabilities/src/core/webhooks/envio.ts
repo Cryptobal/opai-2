@@ -10,7 +10,7 @@ import { defineTrabajo } from "../../trabajos/registro";
 import type { Contexto } from "../../types";
 import { enviarUna } from "./envio-una";
 
-export const TRABAJO_ENVIAR_WEBHOOKS = "core.webhooks.enviar";
+const TRABAJO_ENVIAR_WEBHOOKS = "core.webhooks.enviar";
 /** Entregas por vuelta: van en paralelo y cada una espera como máximo 10 s. */
 const LOTE = 10;
 /** Mientras se envía, la entrega queda tomada por este tiempo (otra vuelta no la repite). */

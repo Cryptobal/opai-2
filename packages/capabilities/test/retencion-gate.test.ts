@@ -64,6 +64,7 @@ describe("ajustes de la política", () => {
         "gasto_agente_mes",
         "personas_contacto_laboral",
         "personas_pago_solicitudes",
+        "personas_tallas",
         "personas_uniforme",
         "representantes",
         "sesiones",

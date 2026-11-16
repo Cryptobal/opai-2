@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { fechaHora } from "@/lib/formato";
 
-import { clp } from "../../flujo/_componentes/datos";
+import { clp } from "../../flujo/_componentes/formato";
 import type { CuentaBanco } from "./bancos-tipos";
 import { origenSaldo } from "./origen-saldo";
 

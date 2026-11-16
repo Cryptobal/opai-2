@@ -1,6 +1,5 @@
 import type { FilaFlujo } from "../domain";
-import type { filaSchema } from "./esquemas";
-import type { z } from "zod";
+import type { FilaAutomatica } from "./esquemas";
 
 /**
  * Filas del sistema que no se guardan: reciben lo real de la cartola que no tiene una fila
@@ -44,7 +43,7 @@ export const FILAS_VIRTUALES_DOMINIO: FilaFlujo[] = [
   { id: FILA_PREVIRED, seccion: "egreso", arrastre: false },
 ];
 
-export const FILAS_VIRTUALES_VISTA: z.infer<typeof filaSchema>[] = [
+export const FILAS_VIRTUALES_VISTA: FilaAutomatica[] = [
   {
     id: FILA_SIN_CLASIFICAR_INGRESO,
     seccion: "ingreso",
@@ -100,7 +99,7 @@ export const FILAS_VIRTUALES_VISTA: z.infer<typeof filaSchema>[] = [
 ];
 
 /** Fila informativa de la diferencia del factoring: la etiqueta es la cuenta que elige la empresa. */
-export const filaDiferenciaFactoringVista = (etiqueta: string): z.infer<typeof filaSchema> => ({
+export const filaDiferenciaFactoringVista = (etiqueta: string): FilaAutomatica => ({
   id: FILA_DIFERENCIA_FACTORING,
   seccion: "egreso",
   etiqueta,

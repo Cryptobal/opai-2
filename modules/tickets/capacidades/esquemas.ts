@@ -97,6 +97,7 @@ export const ticketSchema = z.object({
   estado: estadoSchema,
   solicitanteId: uuidSchema,
   responsableId: uuidSchema,
+  instalacionId: uuidSchema.nullable().describe("Instalación a la que se refiere el ticket, si tiene."),
   motivoRechazo: z.string().nullable(),
   slaVenceEn: z.date().nullable(),
   resueltoEn: z.date().nullable(),

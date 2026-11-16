@@ -324,6 +324,8 @@ model Persona {
   vinculos    VinculoLaboral[]
   estructuras EstructuraSueldo[]
   anexos      AnexoContrato[]
+  contratoPeriodos ContratoPeriodo[]
+  tallas      PersonaTalla[]
   prevision   PersonaPrevision?
   pagos       PersonaPago[]
   pagoSolicitudes PersonaPagoSolicitud[]
@@ -374,6 +376,7 @@ model VinculoLaboral {
   persona Persona @relation(fields: [personaId], references: [id])
   cargo   Cargo   @relation(fields: [cargoId], references: [id])
   anexos  AnexoContrato[]
+  periodos ContratoPeriodo[]
 
   @@index([tenantId, personaId])
   @@index([tenantId, instalacionId, estado], map: "vinculos_tenant_instalacion_idx")
@@ -698,5 +701,55 @@ model SiiContribuyente {
 
   @@unique([tenantId, rut])
   @@map("sii_contribuyentes")
+  @@schema("core")
+}
+
+/// Historia de períodos del contrato (CAR-409, Estándares H-3b): plazo fijo y paso a indefinido. Un registro
+/// por período; el vigente es el último sin anular. Un período mal registrado se anula, no se borra.
+model ContratoPeriodo {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  personaId       String    @map("persona_id") @db.Uuid
+  vinculoId       String    @map("vinculo_id") @db.Uuid
+  /// "plazo_fijo" | "indefinido"
+  tipo            String
+  inicio          DateTime  @db.Date
+  /// Obligatorio en plazo fijo; nulo en indefinido (CHECK en la migración).
+  termino         DateTime? @db.Date
+  registradoPorId String?   @map("registrado_por") @db.Uuid
+  anuladoEn       DateTime? @map("anulado_en") @db.Timestamptz(6)
+  anuladoPorId    String?   @map("anulado_por") @db.Uuid
+  motivoAnulacion String?   @map("motivo_anulacion")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id])
+  persona Persona        @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  vinculo VinculoLaboral @relation(fields: [vinculoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, vinculoId, inicio])
+  @@index([tenantId, personaId])
+  @@map("contrato_periodos")
+  @@schema("core")
+}
+
+/// Talla de la persona por prenda del uniforme (CAR-408): la prenda sale del kit de la empresa o de su vertical
+/// (`personas_prendas_uniforme`, @opai/domain), no de columnas fijas. Una fila por persona y prenda.
+model PersonaTalla {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  personaId String   @map("persona_id") @db.Uuid
+  /// Clave de la prenda (`clavePrenda` de @opai/domain).
+  prenda    String
+  talla     String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@unique([personaId, prenda])
+  @@index([tenantId, personaId])
+  @@map("personas_tallas")
   @@schema("core")
 }

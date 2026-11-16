@@ -101,28 +101,14 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
       if (seccion === "contacto-laboral")
         valores.telefonoSecundario = valores.emergenciaTelefono = "+56912345678";
       if (seccion === "pago" || seccion === "pago-agregar") valores.rutTitular = "";
-      if (seccion === "jornada-dt") Object.assign(valores, { termino1: "2026-03-31", termino2: "2026-06-30" });
       const input = c.armar(ID, cambiosDe(c, {}, valores));
       expect(capacidad?.input.safeParse(input).error?.issues ?? []).toEqual([]);
     },
   );
 
-  it("jornada DT envía los tres términos de plazo fijo como una lista ordenada (CAR-277)", () => {
+  it("jornada DT ya no edita los períodos de plazo fijo: van a la historia del contrato (CAR-409)", () => {
     const c = cfg["jornada-dt"];
-    const input = c.armar(ID, cambiosDe(c, {}, { termino1: "2026-03-31", termino2: "", termino3: "2026-09-30" }));
-    expect((input as { jornadaDt: { terminosPlazoFijo: string[] } }).jornadaDt.terminosPlazoFijo).toEqual([
-      "2026-03-31",
-      "2026-09-30",
-    ]);
-    // El período es la casilla del último término (3), no la cantidad (2).
-    expect((input as { jornadaDt: { plazoFijoPeriodo: number | null } }).jornadaDt.plazoFijoPeriodo).toBe(3);
-    expect(obtenerCapacidad(c.capacidad)?.input.safeParse(input).success).toBe(true);
-  });
-
-  it("jornada DT de un registro antiguo de período 2 conserva el período al guardar (CAR-277)", () => {
-    const c = cfg["jornada-dt"];
-    const input = c.armar(ID, cambiosDe(c, {}, { termino1: "", termino2: "2026-08-31", termino3: "" }));
-    expect(input).toMatchObject({ jornadaDt: { terminosPlazoFijo: ["2026-08-31"], plazoFijoPeriodo: 2 } });
+    expect(c.campos.map((x) => x.clave).filter((k) => /termino|plazo/i.test(k) && k !== "avisoTerminoDias")).toEqual([]);
   });
 
   it("toda hoja de Laboral se carga al abrir su enlace (la carga diferida conoce su parámetro)", () => {

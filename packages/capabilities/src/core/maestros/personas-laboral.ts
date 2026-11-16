@@ -9,12 +9,17 @@ import { personaFicha } from "./personas-ficha-comun";
 import { aplicarLaboralParcial } from "./personas-laboral-escritura";
 import { actualizarLaboralInput } from "./personas-laboral-input";
 import { cargarLaboral, laboralSchema } from "./personas-laboral-vista";
+import { exigirPrendasDelKit } from "./uniforme-prendas";
+
+/** Períodos del contrato (CAR-409): se registran aparte de la ficha laboral, como historia. */
+export { capacidadesContratoPeriodos } from "./contrato-periodos";
 
 export const personasLaboralVer = defineCapability({
-  auditarLectura: (s) => [s.personaId],
+  // CAR-429: el id del documento OS-10 que respalda la ficha también queda como revelado.
+  auditarLectura: (s) => [s.personaId, ...(s.os10Respaldo ? [s.os10Respaldo.documentoId] : [])],
   id: "core.personas.laboral_ver",
   descripcion:
-    "Muestra uniforme, jornada DT, credencial OS-10 y contacto laboral de una persona. La lectura queda auditada.",
+    "Muestra uniforme, jornada DT, credencial OS-10 (con su documento vigente en Documentos, si existe) y contacto laboral de una persona. La lectura queda auditada.",
   permiso: PERMISOS_CORE.personasLaboralRead,
   input: z.object({ id: uuidSchema }),
   output: laboralSchema,
@@ -37,6 +42,7 @@ export const personasLaboralActualizar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const p = await personaFicha(ctx, input.id);
+    await exigirPrendasDelKit(ctx, input.uniforme?.tallas);
     if (dryRun) return cargarLaboral(ctx, p.id);
     await escribirConEvento(
       ctx,

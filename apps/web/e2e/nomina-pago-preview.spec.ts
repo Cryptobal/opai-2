@@ -13,7 +13,7 @@ test.describe("@preview nómina: día de pago de sueldos", () => {
 
   test("muestra los ajustes de pago de sueldos", async ({ page }, info) => {
     await entrar(page);
-    await page.goto("/configuracion/modulo/nomina");
+    await page.goto("/configuracion/modulo/nomina?seccion=ajustes");
     await expect(page.getByText("Día de pago de sueldos").first()).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Los sueldos se pagan el mes siguiente").first()).toBeVisible();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);

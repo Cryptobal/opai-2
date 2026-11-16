@@ -17,6 +17,9 @@ it("traduce acciones de personas y agentes con el mismo diccionario", () => {
   expect(frase("core.instalaciones.create", {})).toBe("creó la instalación");
   expect(frase("comercial.negocios.update", {})).toBe("actualizó el negocio");
   expect(frase("platform.modules.set", {})).toBe("cambió los módulos activos");
+  expect(frase("platform.tenants.set_modulos_nuevos", { activo: true })).toBe(
+    "activó los módulos nuevos automáticos",
+  );
 });
 
 it("usa un respaldo español sin revelar fragmentos de ids desconocidos", () => {
@@ -64,5 +67,14 @@ it("contrae «de el» y «a el», y la ficha sin nombre dice «de una persona» 
   );
   expect(frase("rendiciones.rendiciones.marcar_pagado", {})).toBe(
     "registró el pago de la rendición",
+  );
+});
+
+it("eventos salientes (CAR-352): dice qué se hizo con el destino", () => {
+  expect(frase("core.webhooks.destino_crear", { url: "https://x.test" })).toBe(
+    "creó un destino de eventos salientes",
+  );
+  expect(frase("core.webhooks.destino_rotar_secreto", {})).toBe(
+    "rotó el secreto de un destino de eventos salientes",
   );
 });
