@@ -74,7 +74,7 @@ export const importarPlantilla = defineCapability({
 export const importarEjecutar = defineCapability({
   id: "core.importar.ejecutar",
   descripcion:
-    "Importa cuentas, contactos, instalaciones o negocios desde una planilla CSV o Excel, filas estructuradas o el export JSON de OPAI 1. La vista previa (simulación) muestra fila por fila qué se crearía, qué se completaría y qué errores hay, sin guardar nada. Reconoce lo que ya existe (RUT, correo, nombre o id de origen), así que repetir la carga no duplica. Cada carga queda como un lote que se puede revertir.",
+    "Importa cuentas, contactos, instalaciones o negocios desde una planilla CSV o Excel, filas estructuradas o un export JSON heredado. La vista previa (simulación) muestra fila por fila qué se crearía, qué se completaría y qué errores hay, sin guardar nada. Reconoce lo que ya existe (RUT, correo, nombre o id de origen), así que repetir la carga no duplica. Cada carga queda como un lote que se puede revertir.",
   permiso: PERMISO_IMPORTAR,
   portales: ["erp"],
   input: inputEjecutar,
