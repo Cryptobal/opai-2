@@ -845,9 +845,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
-| trabajador | `/trabajador/solicitudes` | `portal_trabajador.solicitudes.listar` | `portal_trabajador_solicitudes_listar` | existe |
 | trabajador | `/trabajador/notificaciones` | `portal_trabajador.preferencias_notificacion.obtener` | `portal_trabajador_preferencias_notificacion_obtener` | existe |
 | trabajador | `/trabajador/privacidad` | `portal_trabajador.privacidad.obtener` | `portal_trabajador_privacidad_obtener` | existe |
+| trabajador | `/trabajador/solicitudes` | `portal_trabajador.solicitudes.listar` | `portal_trabajador_solicitudes_listar` | existe |
 | trabajador | `/trabajador` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
