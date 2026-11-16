@@ -11,14 +11,21 @@ export const RONDAS_E2E = {
   ],
 } as const;
 
+/** Deja activos los módulos indicados en la empresa de pruebas (navegación y capacidades). */
+export async function activarModulos(db: TenantTx, tenantId: string, modulos: readonly string[]) {
+  for (const moduloId of modulos) {
+    await db.tenantModule.upsert({
+      where: { tenantId_moduloId: { tenantId, moduloId } },
+      update: { estado: "activo" },
+      create: { tenantId, moduloId, estado: "activo" },
+    });
+  }
+}
+
 export async function sembrarRondasE2E(db: TenantTx, tenantId: string): Promise<boolean> {
   const instalacion = await db.instalacion.findFirst({ where: { nombre: "Planta Quilicura" }, select: { id: true } });
   if (!instalacion) return false;
-  await db.tenantModule.upsert({
-    where: { tenantId_moduloId: { tenantId, moduloId: "rondas" } },
-    update: { estado: "activo" },
-    create: { tenantId, moduloId: "rondas", estado: "activo" },
-  });
+  await activarModulos(db, tenantId, ["rondas"]);
   for (const p of RONDAS_E2E.puntos) {
     await db.puntoControl.upsert({
       where: { id: p.id },

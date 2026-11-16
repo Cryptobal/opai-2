@@ -23,6 +23,11 @@ export function abrirAgente(solicitud: SolicitudAgente = {}): void {
   window.dispatchEvent(new CustomEvent<SolicitudAgente>(EVENTO_AGENTE, { detail: solicitud }));
 }
 
+/** Botón IA de la barra o pestaña Agente: abre con la ficha visible si hay una (CAR-547). */
+export function abrirAgenteDesdeShell(): void {
+  void import("./contexto-pantalla-agente").then((m) => abrirAgente(m.solicitudDesdePantalla()));
+}
+
 let escuchas = 0;
 const suscritos = new Set<() => void>();
 const avisar = () => suscritos.forEach((f) => f());

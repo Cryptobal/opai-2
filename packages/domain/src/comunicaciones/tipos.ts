@@ -34,5 +34,5 @@ export const v = (
   descripcion,
 });
 
-export const EMPRESA = v("empresa.nombre", "texto", "Gard Security", "Nombre de la empresa.");
+export const EMPRESA = v("empresa.nombre", "texto", "Empresa Demo SpA", "Nombre de la empresa.");
 export const URL = (d: string) => v("url", "url", "https://test.opai.cl/configuracion", d);

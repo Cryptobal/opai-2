@@ -1,9 +1,7 @@
-import { Plus } from "lucide-react";
 import { Suspense } from "react";
 
 import { Loading, SplitScreen } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { conBusqueda, type SearchParams } from "@/lib/parametros";
 
@@ -25,22 +23,9 @@ export default function Contacto({ params, searchParams }: Props) {
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
+      // «Nuevo» está en la lista; no se repite arriba (CAR-360).
       opciones={(d) => ({
         volver: { href: conBusqueda("/contactos", d.p.q), etiqueta: "Contactos" },
-        // Con permiso de crear (CAR-337), como «Nueva cuenta» en la ficha de una cuenta.
-        ...(d.lista.gestionar
-          ? {
-              acciones: (
-                <EnlaceBoton
-                  href="/contactos?contacto=nuevo"
-                  icono={Plus}
-                  className="max-lg:hidden"
-                >
-                  Nuevo contacto
-                </EnlaceBoton>
-              ),
-            }
-          : {}),
       })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);

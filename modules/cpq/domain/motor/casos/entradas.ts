@@ -68,7 +68,7 @@ export function entradaReal(c: Caso) {
   const version = versionPrueba(lineas); version.margenPct = c.margenPct * 10_000; version.instrumentos = instrumentos;
   const proveedor: ProveedorCostoEmpleador = { obtener: ({ lineaId }) => {
     const costoMensualClp = costos[lineaId];
-    return costoMensualClp === undefined ? null : { costoMensualClp, origen: `${c.caso}: referencia 1.0` };
+    return costoMensualClp === undefined ? null : { costoMensualClp, origen: `${c.caso}: referencia histórica` };
   } };
   return { version, modelo, parametros: parametrosPrueba, proveedor };
 }
