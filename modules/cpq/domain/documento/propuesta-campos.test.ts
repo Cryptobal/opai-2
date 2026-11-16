@@ -69,7 +69,7 @@ describe("tokens de la propuesta", () => {
       [],
       valores,
     );
-    expect(c.versionCatalogo).toBe(2);
+    expect(c.versionCatalogo).toBe(3);
     expect(c.faltantes).toEqual(["cuenta.giro"]);
     expect(c.valores.campos).toEqual({ "cuenta.nombre": "Cliente Ficticio SpA" });
   });
@@ -114,7 +114,7 @@ describe("tokens de la propuesta", () => {
     const sin = contratoCamposDeEnvio(["{{cuenta.nombre}}"], ["cuenta.nombre"], [], grande);
     expect(sin.valores).toEqual({
       campos: { "cuenta.nombre": "Cliente Ficticio SpA" },
-      colecciones: { instalaciones: [], referencias: [] },
+      colecciones: { instalaciones: [], referencias: [], puestos: [] },
     });
     const con = contratoCamposDeEnvio(
       ["{{#cada instalaciones}}{{instalacion.nombre}}{{/cada}}"],
@@ -133,7 +133,7 @@ describe("tokens de la propuesta", () => {
     const leido = JSON.parse(snapshotParaLectura(json));
     expect(leido.camposContrato.valores).toEqual({
       campos: {},
-      colecciones: { instalaciones: [], referencias: [] },
+      colecciones: { instalaciones: [], referencias: [], puestos: [] },
     });
     expect(leido.camposContrato.usados).toEqual(["cuenta.nombre"]);
     expect(snapshotParaLectura('{"destinatarios":[]}')).toBe('{"destinatarios":[]}');

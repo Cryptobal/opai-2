@@ -98,7 +98,7 @@ export function snapshotParaLectura(snapshotJson: string): string {
     const raw = JSON.parse(snapshotJson) as { camposContrato?: ContratoCamposEnvio };
     if (!raw.camposContrato) return snapshotJson;
     const { versionCatalogo, finalidad, usados, faltantes } = raw.camposContrato;
-    const valores = { campos: {}, colecciones: { instalaciones: [], referencias: [] } };
+    const valores = { campos: {}, colecciones: { instalaciones: [], referencias: [], puestos: [] } };
     return JSON.stringify({
       ...raw,
       camposContrato: { versionCatalogo, finalidad, usados, valores, faltantes },
