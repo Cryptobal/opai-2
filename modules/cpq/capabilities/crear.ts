@@ -27,7 +27,7 @@ export const cotizacionesCreate = defineCapability({
     titulo: z.string().trim().min(3).max(160),
     moneda: monedaSchema.default("CLP"),
     validaHasta: z.iso.date().optional().describe("Por defecto, hoy más 30 días."),
-    alternativaDeId: uuidSchema.optional().describe("Otra cotización del mismo negocio (R23)."),
+    alternativaDeId: uuidSchema.optional().describe("Otra cotización del mismo negocio del que parte esta alternativa."),
   }),
   output: z.object({
     id: uuidSchema,

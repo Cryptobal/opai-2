@@ -11,7 +11,7 @@ import { CUENTA_SE_ACTIVA, INSTALACION_SE_ACTIVA, planGanar } from "./ganar-efec
  */
 export const consumidorNegocioGanado = defineConsumidor({
   id: "comercial.ganar.activar",
-  descripcion: "Activa la cuenta y las instalaciones del negocio ganado (R18).",
+  descripcion: "Activa la cuenta y las instalaciones del negocio ganado.",
   eventos: ["comercial.negocio.ganado"],
   async handler(ctx, ev) {
     if (!ev.entidadId) return;
