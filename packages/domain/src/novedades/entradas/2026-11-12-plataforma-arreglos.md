@@ -7,7 +7,7 @@ car: CAR-323
 ruta: /configuracion/modulos
 portales: erp
 ---
-En **Configuración › Módulos**, cada tarjeta ya no muestra la versión técnica («Versión 0.1.0»). Solo dice de qué otros módulos depende.
+En **Configuración › Módulos**, cada tarjeta ya no muestra la versión técnica del módulo. Solo dice de qué otros módulos depende.
 
 Para el equipo de OPAI que administra la plataforma:
 

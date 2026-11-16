@@ -12,7 +12,7 @@ export const firmasFirmaAutomaticaAutorizar = defineCapability({
   // Solo personas: autorizar la firma automática del representante solo puede hacerlo él (R16).
   soloPersonas: true,
   descripcion:
-    "Autoriza que la firma del representante de la empresa salga automática en un tipo de documento, con vigencia opcional, revocable y auditada; reemplaza una autorización vigente de la misma clase (R16, P5).",
+    "Autoriza que la firma del representante de la empresa salga automática en un tipo de documento, con vigencia opcional, revocable y auditada; reemplaza una autorización vigente de la misma clase.",
   permiso: PERMISO_FIRMAS_CONFIG,
   input: z.object({
     firmanteEmpresaId: uuidSchema,
@@ -28,7 +28,7 @@ export const firmasFirmaAutomaticaAutorizar = defineCapability({
     // R16: solo el propio representante autoriza su firma automática; ni owner ni admin por él.
     const actorId = ctx.actor.id;
     if (!actorId || actorId !== fe.usuarioId) {
-      throw prohibido("Solo el propio firmante autoriza su firma automática (R16).");
+      throw prohibido("Solo el propio firmante autoriza su firma automática.");
     }
     if (!fe.activo) throw reglaDeNegocio("El firmante de la empresa está inactivo.");
     const hasta = input.vigenciaHasta ? new Date(input.vigenciaHasta) : null;
@@ -79,7 +79,7 @@ export const firmasFirmaAutomaticaRevocar = defineCapability({
   id: "core.firmas.firma_automatica_revocar",
   soloPersonas: true,
   descripcion:
-    "Revoca una autorización de firma automática del representante de la empresa; desde la revocación esa clase ya no sale firmada automáticamente (R16).",
+    "Revoca una autorización de firma automática del representante de la empresa; desde la revocación esa clase ya no sale firmada automáticamente.",
   permiso: PERMISO_FIRMAS_CONFIG,
   input: z.object({ autorizacionId: uuidSchema }),
   output: autorizacionSchema,
@@ -94,7 +94,7 @@ export const firmasFirmaAutomaticaRevocar = defineCapability({
     const fe = await ctx.db.firmanteEmpresa.findUnique({ where: { id: a.firmanteEmpresaId } });
     if (!fe) throw noEncontrado("La autorización");
     if (!ctx.actor.id || ctx.actor.id !== fe.usuarioId) {
-      throw prohibido("Solo el propio firmante revoca su firma automática (R16).");
+      throw prohibido("Solo el propio firmante revoca su firma automática.");
     }
     if (a.revocadaEn) throw conflicto("La autorización ya está revocada.");
     const base = {
