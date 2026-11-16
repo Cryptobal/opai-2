@@ -1,8 +1,22 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page, type TestInfo } from "@playwright/test";
 
-import { CODIGO_COTIZACION_QA, asegurarCotizacionEnLista } from "./cpq-seed-preview";
+import { abrirCotizacionQa } from "./cpq-seed-preview";
 import { capturar } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
+
+const CARPETA_CAPTURAS =
+  /^https:\/\//.test(process.env["BASE_URL"] ?? "") || process.env["CI"]
+    ? "test-results/capturas"
+    : "e2e/__screenshots__";
+
+/** En iPad (1024 px) `fullPage` deforma el layout; misma regla que `capturarHoja` en preview.ts. */
+async function capturarCotizaciones(page: Page, info: TestInfo, nombre: string) {
+  if (info.project.name === "ipad") {
+    await page.screenshot({ path: `${CARPETA_CAPTURAS}/${nombre}-ipad.png` });
+    return;
+  }
+  await capturar(page, info, nombre);
+}
 
 // CAR-544: lista con filtros/vistas y paso «Documento y envío» con tarjetas PDF/propuesta.
 // Datos: semillas `qa-e2e/*.sql` en el workflow `preview` (`aplicar-en-preview.sh`); fallback UI en el spec.
@@ -23,19 +37,12 @@ test.describe("@preview CPQ: lista y documento", () => {
     await expect(page.getByLabel("Enviada hasta")).toBeVisible();
     // Otros filtros sin valor siguen como menú punteado (misma fila en los 3 viewports).
     await expect(page.getByRole("button", { name: "Filtrar por cuenta" })).toBeVisible();
-    await capturar(page, info, "cotizaciones-lista-filtros");
+    await capturarCotizaciones(page, info, "cotizaciones-lista-filtros");
 
-    await asegurarCotizacionEnLista(page);
-    let cotizacion = page.getByRole("link").filter({ hasText: CODIGO_COTIZACION_QA }).first();
-    if (!(await cotizacion.isVisible({ timeout: 3_000 }).catch(() => false))) {
-      await page.goto("/cotizaciones");
-      cotizacion = page.getByRole("link").filter({ hasText: /CPQ-\d{4}-\d+/ }).first();
-    }
-    await expect(cotizacion).toBeVisible({ timeout: 30_000 });
-    await cotizacion.click();
+    await abrirCotizacionQa(page);
     await page.getByRole("button", { name: /Documento y envío/i }).click();
     await expect(page.getByRole("button", { name: "Ver cotización (PDF)" })).toBeVisible({ timeout: 60_000 });
     await expect(page.getByRole("button", { name: /propuesta técnica/i })).toBeVisible();
-    await capturar(page, info, "cotizaciones-documento-tarjetas");
+    await capturarCotizaciones(page, info, "cotizaciones-documento-tarjetas");
   });
 });
