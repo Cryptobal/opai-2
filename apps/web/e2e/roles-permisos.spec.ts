@@ -57,7 +57,7 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
     await entrar(page);
     await page.goto("/configuracion/usuarios/roles");
     await expect(page.getByText("Del sistema", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Si vienes de OPAI 1.0")).toBeVisible();
+    await expect(page.getByText("Si migras desde una instalación anterior")).toBeVisible();
     await expect(page.getByText("central_monitoreo")).toBeVisible();
     await captura(page, "lista", info);
     // Por href: otros specs crean roles personalizados que también empiezan con «Supervisor».

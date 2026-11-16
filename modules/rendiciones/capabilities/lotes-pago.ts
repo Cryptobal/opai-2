@@ -17,7 +17,7 @@ const fechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA
 export const lotesGenerarNomina = defineCapability({
   id: "rendiciones.lotes.generar_nomina",
   descripcion:
-    "Genera la nómina de transferencias Santander de un lote aprobado y lo deja en «generado». Revisa que cada persona tenga RUT, cuenta y banco, y que el total de la nómina sea el del lote. Solo genera el archivo: OPAI no transmite nada al banco. No devuelve números de cuenta; el archivo lo baja una persona. Espera la confirmación del formato por Carlos.",
+    "Genera la nómina de transferencias Santander de un lote aprobado y lo deja en «generado». Revisa que cada persona tenga RUT, cuenta y banco, y que el total de la nómina sea el del lote. Solo genera el archivo: la plataforma no transmite nada al banco. No devuelve números de cuenta; el archivo lo baja una persona autorizada. Requiere que el formato de nómina esté confirmado en configuración.",
   permiso: PERMISO_PAGAR,
   portales: ["erp"],
   input: z.object({ id: uuidSchema }),
