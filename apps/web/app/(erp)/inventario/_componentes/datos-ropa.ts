@@ -5,8 +5,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { leerEntrada, type Pagina, todasLasPaginas } from "./paginas";
 import type { MovimientoRopa, Prenda, TipoInventario } from "./tipos";
-
-const sinTildes = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+import { sinTildes } from "./texto";
 
 /** Tipos de ropa con sus existencias, página a página (la lista nunca se corta). */
 export async function cargarRopa(p: Parametros) {

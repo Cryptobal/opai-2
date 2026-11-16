@@ -5,12 +5,7 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import type { TipoInventario } from "./tipos";
-
-const sinTildes = (t: string) =>
-  t
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
+import { sinTildes } from "./texto";
 
 type Pagina = { items: TipoInventario[]; siguiente: string | null };
 
