@@ -10,6 +10,7 @@ import {
 import { capitulosDePropuesta } from "../persistencia/propuesta-capitulos";
 import { vistaMarcaDocumento } from "../persistencia/marca-documento";
 import { pdfPropuestaVista } from "../persistencia/pdf-propuesta-vista";
+import { textosPorDefecto } from "../persistencia/propuesta-textos-defecto";
 import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
 import {
   actualizarPropuestaArmador,
@@ -19,7 +20,7 @@ import {
 } from "../persistencia/propuesta-tecnica";
 import { cargarFilasVersion, packServicioCotizacion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
 import { PERMISO_MANAGE, PERMISO_READ } from "./permisos";
-import { bloqueArmadorSchema } from "./propuesta-tecnica-esquemas";
+import { armadorPropuestaVistaSchema, bloqueArmadorSchema } from "./propuesta-tecnica-esquemas";
 import { uuidSchema } from "./esquemas";
 import { cotizacionDe } from "./util";
 
@@ -29,20 +30,7 @@ export const propuestaTecnicaGet = defineCapability({
   descripcion: "Lee el armador de propuesta técnica de la cotización (no crea filas).",
   permiso: PERMISO_READ,
   input: z.object({ cotizacionId: uuidSchema }),
-  output: z
-    .object({
-      id: z.string(),
-      cotizacionId: z.string(),
-      versionId: z.string(),
-      base: z.enum(BASES_PLANTILLA),
-      estado: z.enum(["borrador", "congelada"]),
-      bloques: z.array(bloqueArmadorSchema),
-      servicioDesactualizado: z.boolean(),
-      editadoParaCliente: z.boolean(),
-      codigo: z.string(),
-      versionNumero: z.number().int(),
-    })
-    .nullable(),
+  output: armadorPropuestaVistaSchema.nullable(),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -52,13 +40,15 @@ export const propuestaTecnicaGet = defineCapability({
     const prop = await ctx.db.cpqPropuestaTecnica.findFirst({ where: { versionId: pack.version.id } });
     if (!prop) return null;
     const servicio = servicioDesdeFilas(packServicioCotizacion(c, pack));
+    const bloques = parseBloquesArmadorPropuesta(prop.bloquesJson);
     return {
       id: prop.id,
       cotizacionId: prop.cotizacionId,
       versionId: prop.versionId,
       base: prop.base as (typeof BASES_PLANTILLA)[number],
       estado: prop.estado as "borrador" | "congelada",
-      bloques: parseBloquesArmadorPropuesta(prop.bloquesJson),
+      bloques,
+      textosPorDefecto: await textosPorDefecto(ctx, bloques),
       servicioDesactualizado: propuestaServicioDesactualizado(prop, servicio),
       editadoParaCliente: prop.editadoParaCliente,
       codigo: c.codigo,

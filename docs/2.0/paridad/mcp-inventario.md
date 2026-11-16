@@ -190,6 +190,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.biblioteca_bloques.guardar_texto_tipo` | `cpq_biblioteca_bloques_guardar_texto_tipo` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.biblioteca_bloques.list` | `cpq_biblioteca_bloques_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.list` | `cpq_catalogo_categorias_list` | existe |

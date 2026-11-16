@@ -15,3 +15,14 @@ export const NOMBRES_BLOQUE_PROPUESTA: Readonly<Record<string, string>> = {
   texto_libre: "Información adicional",
   salto_pagina: "Salto de página",
 };
+
+/** Bloques que salen del CPQ, la marca o la estructura: no llevan texto que la persona redacte. */
+const SIN_TEXTO = new Set(["portada", "indice", "detalle_servicio", "resumen_economico", "contacto_ejecutivo", "salto_pagina"]);
+export const esSeccionDeTexto = (tipo: string) => !SIN_TEXTO.has(tipo);
+
+/**
+ * Secciones con texto tipo de la empresa: cada cotización nueva lo trae precargado. «Texto libre» se repite y no tiene
+ * texto tipo; las condiciones por defecto son las de la marca.
+ */
+export const tieneTextoTipo = (tipo: string) =>
+  esSeccionDeTexto(tipo) && tipo !== "texto_libre" && tipo !== "condiciones" && tipo in NOMBRES_BLOQUE_PROPUESTA;
