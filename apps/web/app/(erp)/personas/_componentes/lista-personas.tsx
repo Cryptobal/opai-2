@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { EnlaceAltaLista } from "@/app/_components/maestros/enlace-alta-lista";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { rut } from "@/lib/fechas";
@@ -46,9 +46,9 @@ const estadoVisible = (x: PersonaFila) =>
  */
 export function ListaPersonas(x: Props) {
   const nueva = (
-    <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
+    <EnlaceAltaLista href="?nueva=1" icono={Plus}>
       Nueva
-    </EnlaceBotonHoja>
+    </EnlaceAltaLista>
   );
   const filtrando = Boolean(x.p["q"] || x.p["cargo"] || x.p["estado"] || x.p["anexo"]);
   const total = x.total ?? x.items.length;
@@ -57,11 +57,8 @@ export function ListaPersonas(x: Props) {
       state={x.state}
       titulo={x.titulo}
       vistas={{ lista: "personas", ruta: "/personas" }}
-      accion={
-        <>
-          {nueva}
-        </>
-      }
+      accion={nueva}
+      accionFlotante
       buscar="Buscar por nombre o RUT"
       filtros={[
         { param: "cargo", etiqueta: "Cargo", opciones: x.cargos },
