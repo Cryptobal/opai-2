@@ -20,7 +20,8 @@ test.describe("configuración · acceso", () => {
     await page.goto("/configuracion/api-keys");
     // La redirección llega tras el streaming de una ruta que compila en frío.
     await expect(page).toHaveURL(/\/configuracion\/agentes$/, { timeout: 45_000 });
-    await expect(page.getByRole("link", { name: "Conectar tu IA", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Conectar tu IA/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Eventos salientes/ }).first()).toBeVisible();
     await captura(page, "config-agentes", p);
     await page.goto("/configuracion/agentes/conectar");
     await expect(page.getByText(/\/api\/mcp/).first()).toBeVisible();
@@ -53,6 +54,24 @@ test.describe("configuración · acceso", () => {
     await page.getByRole("button", { name: "Revocar key" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Revocar" }).click();
     await page.waitForURL(/\/configuracion\/agentes$/, { timeout: 60_000 });
+    await page.goto("/configuracion/agentes?estado=revocadas");
     await expect(page.getByText("Revocada").first()).toBeVisible();
+  });
+
+  // CAR-54: el owner restablece el MFA de un miembro de su empresa (irreversible, con aviso por
+  // correo). Usa el teammate sembrado con MFA activo (`seed:e2e`): nadie más depende de su estado.
+  test("restablecer el MFA de un miembro con el segundo factor activo", async ({ page }, info) => {
+    test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
+    await entrar(page);
+    await page.goto("/configuracion/usuarios");
+    await page.getByRole("link", { name: "Restablecer MFA E2E" }).click();
+    await page.waitForURL(/\?editar=/);
+    await page.getByRole("button", { name: "Restablecer segundo factor" }).click();
+    const dialogo = page.getByRole("dialog", {
+      name: "¿Restablecer el segundo factor de Restablecer MFA E2E?",
+    });
+    await expect(dialogo.getByText("Esta acción es irreversible")).toBeVisible();
+    await dialogo.getByRole("button", { name: "Restablecer", exact: true }).click();
+    await expect(page.getByText("Segundo factor restablecido")).toBeVisible();
   });
 });

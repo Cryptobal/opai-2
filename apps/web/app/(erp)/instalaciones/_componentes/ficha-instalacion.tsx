@@ -15,7 +15,15 @@ import { accionesInstalacion } from "./acciones-instalacion";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 export type TabInstalacion =
-  "resumen" | "puestos" | "sueldo" | "negocios" | "rondas" | "dispositivos" | "documentos" | "actividad";
+  | "resumen"
+  | "puestos"
+  | "sueldo"
+  | "negocios"
+  | "rondas"
+  | "accesos"
+  | "dispositivos"
+  | "documentos"
+  | "actividad";
 
 /** Ficha de instalación (07/08): estado y vigencia, nombre, cuenta; tabs con "Personas" deshabilitada. */
 export function FichaInstalacion(p: {
@@ -29,6 +37,8 @@ export function FichaInstalacion(p: {
   negocios?: boolean;
   /** Pestaña aportada por Rondas (Brief 14): solo con el módulo activo y permiso de lectura. */
   rondas?: boolean;
+  /** Pestaña «Accesos» (CAR-475): Control de acceso activo y permiso de lectura. */
+  accesos?: boolean;
   children: ReactNode;
 }) {
   const i = p.instalacion;
@@ -89,24 +99,20 @@ export function FichaInstalacion(p: {
             etiqueta: "Sueldo",
             href: conFiltrosInstalaciones(`${base}/sueldo`, p.parametros),
           },
-          ...(p.negocios
-            ? [
-                {
-                  id: "negocios",
-                  etiqueta: "Negocios",
-                  href: conFiltrosInstalaciones(`${base}/negocios`, p.parametros),
-                },
-              ]
-            : []),
-          ...(p.rondas
-            ? [
-                {
-                  id: "rondas",
-                  etiqueta: "Rondas",
-                  href: conFiltrosInstalaciones(`${base}/rondas`, p.parametros),
-                },
-              ]
-            : []),
+          // Pestañas de módulo: solo si el módulo está activo y el usuario puede leerlo (ADR-041.5).
+          ...(
+            [
+              [p.negocios, "negocios", "Negocios"],
+              [p.rondas, "rondas", "Rondas"],
+              [p.accesos, "accesos", "Accesos"],
+            ] as const
+          )
+            .filter(([ver]) => ver)
+            .map(([, id, etiqueta]) => ({
+              id,
+              etiqueta,
+              href: conFiltrosInstalaciones(`${base}/${id}`, p.parametros),
+            })),
           {
             id: "personas",
             etiqueta: p.persona,

@@ -28,7 +28,7 @@ const personas = (n: number) => `${n} ${n === 1 ? "persona" : "personas"}`;
 export function ListaInstalaciones(p: Props) {
   const total = p.items.reduce((t, i) => t + i.dotacion, 0);
   const nueva = (
-    <EnlaceBoton href="/instalaciones/nueva" icono={Plus}>
+    <EnlaceBoton href="/instalaciones/nueva" icono={Plus} variante={p.seleccionada ? "secondary" : "primary"}>
       Nueva
     </EnlaceBoton>
   );

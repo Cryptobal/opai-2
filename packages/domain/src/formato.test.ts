@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { formatearRut } from "./rut";
 import {
+  formatearHora,
+  nombreDiaSemana,
+  nombreMesCivil,
   formatearClp,
   formatearFecha,
   formatearFechaHora,
@@ -46,5 +49,17 @@ describe("formateador central", () => {
     expect(formatearFecha(null)).toBe("—");
     expect(formatearFecha("2026-11-01T02:30:00Z")).toBe("31-10-2026");
     expect(formatearFechaHora("2026-11-03T15:05:00Z")).toBe("03-11-2026 12:05");
+  });
+});
+
+describe("hora, día y mes (CAR-462)", () => {
+  it("hora en la zona del tenant, también cruzando medianoche", () => {
+    expect(formatearHora("2026-11-16T23:00:00Z", "America/Santiago")).toBe("20:00");
+    expect(formatearHora("2026-11-17T11:05:00Z", "America/Santiago")).toBe("08:05");
+  });
+
+  it("día de la semana y mes de una fecha civil, sin correr el día", () => {
+    expect(nombreDiaSemana("2026-11-16")).toBe("lunes");
+    expect(nombreMesCivil("2026-12-01")).toBe("diciembre");
   });
 });

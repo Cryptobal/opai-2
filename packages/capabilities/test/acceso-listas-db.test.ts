@@ -200,17 +200,21 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
   });
 
   it("los registros se listan con el documento enmascarado, en sitio o todos, solo de la propia empresa", async () => {
-    const dentro = await ok<{ nombre: string; documento: string; salidaEn: string | null }[]>(
-      "A",
-      "acceso.registros.listar",
-      { instalacionId: inst.A, soloEnSitio: true },
-    );
+    const dentro = (
+      await ok<{ items: { nombre: string; documento: string; salidaEn: string | null }[] }>(
+        "A",
+        "acceso.registros.listar",
+        { instalacionId: inst.A, soloEnSitio: true },
+      )
+    ).items;
     expect(dentro.map((x) => x.nombre)).toContain("Visita Uno");
     expect(JSON.stringify(dentro)).not.toContain("12345678");
     expect(dentro[0]?.documento).toBe("12.3••.•••-5");
     expect((await run("B", "acceso.registros.listar", { instalacionId: inst.A })).ok).toBe(false);
-    const deB = await ok<unknown[]>("B", "acceso.registros.listar", { instalacionId: inst.B });
-    expect(deB).toHaveLength(0);
+    const deB = await ok<{ items: unknown[] }>("B", "acceso.registros.listar", {
+      instalacionId: inst.B,
+    });
+    expect(deB.items).toHaveLength(0);
   });
 
   it("la patente completa solo la ve quien tiene el permiso restringido", async () => {
@@ -238,9 +242,10 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
     const patentes = (items: { nombre: string; patente: string | null }[]) =>
       items.find((x) => x.nombre === "Conductor")?.patente;
     type Item = { nombre: string; patente: string | null };
-    expect(
-      patentes(await ok<Item[]>("A", "acceso.registros.listar", { instalacionId: inst.A })),
-    ).toBe("BBCC12");
+    const todos = await ok<{ items: Item[] }>("A", "acceso.registros.listar", {
+      instalacionId: inst.A,
+    });
+    expect(patentes(todos.items)).toBe("BBCC12");
     const supervisor = mod.crearContexto({
       tenantId: t.A,
       actor: { tipo: "system" },
@@ -253,6 +258,6 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
       instalacionId: inst.A,
     });
     expect(r.ok).toBe(true);
-    expect(patentes((r as { data: Item[] }).data)).toBeNull();
+    expect(patentes((r as { data: { items: Item[] } }).data.items)).toBeNull();
   });
 });

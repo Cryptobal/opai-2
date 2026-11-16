@@ -67,6 +67,8 @@ async function intentarTrabajador(erp: Page, trabajador: Page): Promise<string |
     .first()
     .waitFor({ timeout: 20_000 })
     .catch(() => undefined);
+  const tarjetaPin = erp.getByText("PIN de terreno").first();
+  if (await tarjetaPin.count()) await tarjetaPin.scrollIntoViewIfNeeded();
   const rut = (await erp.locator("body").innerText()).match(/\b\d{1,2}\.\d{3}\.\d{3}-[\dK]\b/)?.[0];
   const asignar = erp.getByRole("button", { name: /^(Asignar|Cambiar) PIN$/ });
   if (!rut) return "la persona no muestra RUT en Laboral";

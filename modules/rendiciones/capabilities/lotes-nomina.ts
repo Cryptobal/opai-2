@@ -13,12 +13,12 @@ type ItemLote = { personaId: string; cuentaVersion: Date; montoClp: number };
 export async function exigirFormatoConfirmado(ctx: Contexto): Promise<void> {
   if (!(await ajuste<boolean>(ctx, "rendiciones", "nomina_formato_confirmado")))
     throw reglaDeNegocio(
-      "La nómina Santander está activa solo en la empresa de pruebas (R3, decisión de Carlos del 6-nov-2026). El lote se puede aprobar y marcar como pagado sin archivo.",
+      "La nómina Santander en formato de archivo no está activa en esta empresa. El lote se puede aprobar y marcar como pagado sin archivo.",
     );
 }
 
 /** Cuenta de origen: una cuenta activa de Bancos de la empresa (elegida en la configuración), nunca texto libre. */
-export async function cuentaOrigenDe(ctx: Contexto): Promise<string> {
+async function cuentaOrigenDe(ctx: Contexto): Promise<string> {
   const id = await ajuste<string>(ctx, "rendiciones", "nomina_cuenta_origen_id");
   if (!id) return "";
   const c = await ctx.db.cuentaBancaria.findFirst({ where: { id, activa: true }, select: { numeroVisible: true } });

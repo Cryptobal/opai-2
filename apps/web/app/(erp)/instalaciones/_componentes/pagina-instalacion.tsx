@@ -1,11 +1,9 @@
 import type { PanelSueldo } from "@opai/capabilities";
 import { cargarPanelSueldo } from "@/lib/panel-sueldo";
-import { Plus } from "lucide-react";
 import { type ReactNode, Suspense } from "react";
 
 import { Loading, SplitScreen } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
@@ -21,7 +19,7 @@ type Props = {
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
   tab: TabInstalacion;
-  /** Acción principal de la pestaña; por defecto, "Nueva instalación". */
+  /** Acción principal de la pestaña; sin ella no hay botón arriba: «Nueva» está en la lista (CAR-360). */
   acciones?: ReactNode;
   children: (i: InstalacionDetalle, p: Parametros, panel?: PanelSueldo) => ReactNode;
 };
@@ -37,13 +35,7 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      acciones={
-        acciones ?? (
-          <EnlaceBoton href="/instalaciones/nueva" icono={Plus} className="max-lg:hidden">
-            Nueva instalación
-          </EnlaceBoton>
-        )
-      }
+      {...(acciones ? { acciones } : {})}
       cargar={async () => {
         const [{ id }, p, voc] = await Promise.all([
           params,

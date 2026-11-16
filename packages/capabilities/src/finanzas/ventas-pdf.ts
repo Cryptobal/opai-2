@@ -9,7 +9,7 @@ import { pdfDeDocumento } from "./ventas-pdf-doc";
 export const ventasPdf = defineCapability({
   id: "finanzas.ventas.pdf",
   descripcion:
-    "Genera el PDF de un documento emitido del libro de ventas (representación impresa con timbre PDF417 textual en PR 1).",
+    "Genera el PDF de un documento emitido del libro de ventas (representación impresa con timbre PDF417 en texto).",
   permiso: PERMISO_READ,
   input: z.object({ documentoId: uuidSchema }),
   output: z.object({
