@@ -6,9 +6,9 @@ import { Alerta, Badge, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { VisorPdf } from "@/app/_components/visor-pdf";
+import { etiquetaBloquePropuesta } from "@/lib/cpq-bloques-propuesta";
 import { etiquetaBasePlantillaCpq } from "@/lib/cpq-plantilla-presentacion";
 
-import { etiquetaBloquePropuesta } from "./etiquetas-bloque-propuesta";
 import { urlDePdf } from "./use-vista-previa-pdf";
 
 export type PropuestaInline = {
