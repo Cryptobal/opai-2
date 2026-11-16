@@ -2,13 +2,14 @@ import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { fechaCorta } from "@/lib/formato";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { AccionesPeriodo } from "./acciones-periodo";
 import { ESTADO_PERIODO } from "./etiquetas";
-import type { Periodo } from "./tipos";
+import type { ListaLiquidaciones, Periodo } from "./tipos";
 
 /** Panel derecho de un período: estado, fechas y acciones del cierre. */
-export function DetallePeriodo({
+export async function DetallePeriodo({
   periodo,
   state,
   gestiona,
@@ -24,6 +25,11 @@ export function DetallePeriodo({
   /** Generar LRE y Previred (diseño 06): obligaciones más sueldos sensibles; la capacidad lo vuelve a exigir. */
   puedeArchivos?: boolean;
 }) {
+  const liquidaciones =
+    periodo && puedeVerNovedades && (periodo.estado === "en_revision" || periodo.estado === "cerrado")
+      ? await ejecutarComoUsuario<ListaLiquidaciones>("erp", "nomina.liquidaciones.listar", { periodoId: periodo.id, limite: 1 })
+      : null;
+  const total = liquidaciones?.ok ? liquidaciones.data.total : null;
   const est = periodo ? ESTADO_PERIODO[periodo.estado] : null;
   return (
     <DetailScreen
@@ -53,7 +59,9 @@ export function DetallePeriodo({
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
             {puedeVerNovedades ? <EnlacesPeriodo id={periodo.id} archivos={puedeArchivos} /> : null}
-            {gestiona ? <AccionesPeriodo periodo={periodo} puedePagar={puedePagar} /> : null}
+            {gestiona ? (
+              <AccionesPeriodo periodo={periodo} puedePagar={puedePagar} liquidaciones={total} />
+            ) : null}
           </div>
         </div>
       ) : null}
