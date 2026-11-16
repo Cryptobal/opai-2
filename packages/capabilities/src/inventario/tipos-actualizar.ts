@@ -31,6 +31,7 @@ export const tiposActualizar = defineCapability({
     campos: z.array(campoEntradaSchema).max(LIMITES_TIPO.campos).optional(),
     tallas: z.array(tallaSchema).max(LIMITES_TIPO.tallas).optional(),
     prendaClave: prendaSchema.nullable().optional(),
+    entregaAPersona: z.boolean().optional(),
     activo: z.boolean().optional(),
   }),
   output: tipoSchema,
@@ -52,6 +53,7 @@ export const tiposActualizar = defineCapability({
       campos: input.campos ? camposConClave(input.campos, [...existentes]) : guardados,
       tallas: input.tallas ? input.tallas.map(normalizarTalla) : actual.tallas,
       prendaClave: input.prendaClave !== undefined ? input.prendaClave : actual.prendaClave,
+      entregaAPersona: input.entregaAPersona ?? actual.entregaAPersona,
       activo: input.activo ?? actual.activo,
     };
     const categoria = actual.categoria === "ropa" ? "ropa" : "activo";
@@ -80,6 +82,7 @@ export const tiposActualizar = defineCapability({
             campos: f.campos,
             tallas: f.tallas,
             prendaClave: f.prendaClave,
+            entregaAPersona: f.entregaAPersona,
             activo: f.activo,
           },
         }),

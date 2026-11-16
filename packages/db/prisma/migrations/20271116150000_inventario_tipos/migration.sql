@@ -18,6 +18,7 @@ CREATE TABLE "inventario"."tipos" (
     "campos" JSONB NOT NULL DEFAULT '[]',
     "tallas" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "prenda_clave" TEXT,
+    "entrega_a_persona" BOOLEAN NOT NULL DEFAULT false,
     "activo" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,

@@ -1,6 +1,6 @@
 // Entregas de Inventario (CAR-238): destino validado en la empresa y en el alcance, y la vista de una
 // entrega con los nombres de lo entregado y de quién lo tiene.
-import { errorDeDestino } from "@opai/domain";
+import { errorDeDestino, errorDeDestinoResuelto } from "@opai/domain";
 import { z } from "zod";
 
 import { dondePersona, instalacionesEnAlcance } from "../core/maestros/alcance";
@@ -8,8 +8,11 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
 export const destinoSchema = {
-  personaId: z.uuid().optional().describe("Persona que recibe (o instalacionId, no ambos)."),
-  instalacionId: z.uuid().optional().describe("Instalación que recibe (o personaId, no ambos)."),
+  personaId: z.uuid().optional().describe("Persona que recibe. Con CAR-487 se imputa a su instalación vigente."),
+  instalacionId: z
+    .uuid()
+    .optional()
+    .describe("Instalación de imputación o destino directo (bodega). Con personaId debe coincidir con el contrato vigente."),
 };
 
 export const entregaSchema = z.object({
@@ -38,19 +41,43 @@ export async function dondeEntregaEnAlcance(ctx: Contexto) {
   return { OR: [{ instalacionId: { in: [...ids] } }, { personaId: { in: personas.map((p) => p.id) } }] };
 }
 
-/** R19 y alcance (ADR-022): el destino existe en la empresa y está a cargo de quien entrega. */
-export async function exigirDestino(ctx: Contexto, d: { personaId?: string | undefined; instalacionId?: string | undefined }) {
+/** R19 / CAR-487 y alcance (ADR-022): destino válido y, si hay persona, instalación de imputación. */
+export async function exigirDestino(
+  ctx: Contexto,
+  d: { personaId?: string | undefined; instalacionId?: string | undefined },
+): Promise<{ personaId: string | null; instalacionId: string | null }> {
   const error = errorDeDestino(d);
   if (error) throw reglaDeNegocio(error);
   if (d.personaId) {
     const p = await ctx.db.persona.findFirst({ where: { id: d.personaId, AND: [dondePersona(ctx)] }, select: { id: true } });
     if (!p) throw noEncontrado("La persona");
-  } else if (d.instalacionId) {
+    const vinculo = await ctx.db.vinculoLaboral.findFirst({
+      where: {
+        personaId: d.personaId,
+        estado: "vigente",
+        instalacionId: { not: null },
+      },
+      select: { instalacionId: true },
+      orderBy: { inicio: "desc" },
+    });
+    const imputacion = vinculo?.instalacionId ?? null;
+    if (!imputacion)
+      throw reglaDeNegocio("La persona no tiene contrato vigente con instalación para imputar esta entrega.");
+    if (d.instalacionId && d.instalacionId !== imputacion)
+      throw reglaDeNegocio("La instalación indicada no coincide con la instalación vigente de la persona.");
     const ids = instalacionesEnAlcance(ctx);
-    if (ids && !ids.includes(d.instalacionId)) throw noEncontrado("La instalación");
-    const i = await ctx.db.instalacion.findFirst({ where: { id: d.instalacionId }, select: { id: true } });
-    if (!i) throw noEncontrado("La instalación");
+    if (ids && !ids.includes(imputacion)) throw noEncontrado("La instalación de imputación");
+    const resuelto = { personaId: d.personaId, instalacionId: imputacion };
+    const errorResuelto = errorDeDestinoResuelto(resuelto);
+    if (errorResuelto) throw reglaDeNegocio(errorResuelto);
+    return resuelto;
   }
+  if (!d.instalacionId) throw reglaDeNegocio(errorDeDestino(d) ?? "Destino inválido.");
+  const ids = instalacionesEnAlcance(ctx);
+  if (ids && !ids.includes(d.instalacionId)) throw noEncontrado("La instalación");
+  const i = await ctx.db.instalacion.findFirst({ where: { id: d.instalacionId }, select: { id: true } });
+  if (!i) throw noEncontrado("La instalación");
+  return { personaId: null, instalacionId: d.instalacionId };
 }
 
 type Fila = {
@@ -92,7 +119,10 @@ export async function vistasEntrega(ctx: Contexto, filas: Fila[]): Promise<Vista
     cantidad: f.cantidad,
     personaId: f.personaId,
     instalacionId: f.instalacionId,
-    destino: nombre.get(f.personaId ?? f.instalacionId ?? "") ?? "",
+    destino:
+      f.personaId && f.instalacionId
+        ? `${nombre.get(f.personaId) ?? ""} · ${nombre.get(f.instalacionId) ?? ""}`
+        : (nombre.get(f.personaId ?? f.instalacionId ?? "") ?? ""),
     nota: f.nota,
     entregadaEn: f.entregadaEn.toISOString(),
     devueltaEn: f.devueltaEn ? f.devueltaEn.toISOString() : null,

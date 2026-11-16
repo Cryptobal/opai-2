@@ -11,6 +11,11 @@ export type TipoCampoInventario = (typeof TIPOS_CAMPO_INVENTARIO)[number];
 /** Campo propio de un tipo de activo: la clave es estable aunque cambie la etiqueta. */
 export type CampoTipo = { clave: string; etiqueta: string; tipo: TipoCampoInventario; obligatorio: boolean };
 
+/** CAR-487: por defecto la ropa se entrega a personas; los activos solo si se marca en configuración. */
+export function entregaAPersonaPorDefecto(categoria: CategoriaTipo): boolean {
+  return categoria === "ropa";
+}
+
 export const LIMITES_TIPO = {
   nombreMin: 2,
   nombreMax: 80,

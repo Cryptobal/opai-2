@@ -2283,13 +2283,13 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 
 **Contexto.** ADR-030 dejó Inventario en el backlog y la línea base de paridad lo marcó «no copiar». Carlos lo pidió después como módulo de la Versión 1.0: activos (teléfonos y otros), ropa con tipos configurables para uniformes, asignación a persona o instalación, vendible aparte.
 
-**Decisión.** Inventario es un módulo vendible (`inventario`), sin dependencias de otros módulos, en el área Operaciones del ERP. Alcance en [`modulos/inventario.md`](modulos/inventario.md), decidido por la sesión con autonomía (ADR-114) y en revisión de Carlos en el issue «Decide Carlos» CAR-487:
+**Decisión.** Inventario es un módulo vendible (`inventario`), sin dependencias de otros módulos, en el área Operaciones del ERP. Alcance en [`modulos/inventario.md`](modulos/inventario.md). CAR-487 quedó **aprobado (opción 1, 16-nov-2026)** con regla de entrega a persona + instalación de imputación (costo fijo al snapshot). Lo decidido antes por la sesión (ADR-114):
 
 1. Catálogo de tipos por empresa en dos categorías: **activo** (por unidad, con campos propios) y **ropa** (por existencias y talla, ligada a las prendas del uniforme de Personas, CAR-408).
 2. La línea telefónica de 1.0 es un tipo de activo más; no se portan los datos técnicos de MDM.
 3. Se asigna a **personas o instalaciones** del núcleo, nunca a usuarios.
-4. Forma de cobro: **en espera de Carlos** (CAR-487). La propuesta es por instalación activa; mientras no decida, Inventario no tiene entrada en el catálogo de cobro.
+4. Forma de cobro: **en espera** (issue hijo de CAR-487). La propuesta es por instalación activa; Inventario no tiene entrada en el catálogo de cobro en esta pila.
 
-**Decisión (revisar), 14-nov-2026, 19:56 CLT (Carlos, chat de la Sesión Inventario, sobre CAR-487):** «apruebo el alcance». Los puntos 1 a 3 y la hoja de alcance quedan aprobados; la forma de cobro (punto 4) queda en espera y no se implementa aún.
+**Decisión, 16-nov-2026 (Carlos, CAR-487):** alcance aprobado. Los tipos que se entregan a personas se marcan en configuración; cada entrega o retiro a persona registra **persona** e **instalación de imputación** (donde estaba la persona al entregar); el costo no se mueve si cambia de instalación.
 
 **Referente.** Rippling (equipos asignados al empleado, con devolución al salir) y Snipe-IT (categorías con campos propios, activos por unidad y artículos por existencias). Se aparta en la ropa por talla, por regla del rubro.

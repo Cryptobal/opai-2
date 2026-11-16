@@ -1,4 +1,4 @@
-import { nombreNormalizado, tiposSugeridos } from "@opai/domain";
+import { entregaAPersonaPorDefecto, nombreNormalizado, tiposSugeridos } from "@opai/domain";
 import { z } from "zod";
 
 import { prendasDeLaEmpresa } from "../core/maestros/uniforme-prendas";
@@ -34,7 +34,12 @@ export const tiposCargarSugeridos = defineCapability({
     if (dryRun || nuevos.length === 0) return resultado;
     const creados = await ctx.transaccion(async (tx) => {
       const filas = await tx.inventarioTipo.createManyAndReturn({
-        data: nuevos.map((s) => ({ ...s, nombreNormalizado: nombreNormalizado(s.nombre), tenantId: ctx.tenantId })),
+        data: nuevos.map((s) => ({
+          ...s,
+          nombreNormalizado: nombreNormalizado(s.nombre),
+          entregaAPersona: entregaAPersonaPorDefecto(s.categoria),
+          tenantId: ctx.tenantId,
+        })),
         skipDuplicates: true,
         select: { id: true, nombre: true, categoria: true },
       });
