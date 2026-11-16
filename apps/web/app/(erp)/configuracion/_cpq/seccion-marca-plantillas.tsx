@@ -8,6 +8,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { FormMarcaDocumentoDiferido } from "./form-marca-documento-diferido";
 import { FormPlantillaDocumentoDiferido } from "./form-plantilla-documento-diferido";
 import { FormPlantillaPropuestaDiferido } from "./form-plantilla-propuesta-diferido";
+import { SeccionPlantillasHtml } from "./seccion-plantillas-html";
 
 async function cargarMarca() {
   const r = await ejecutarComoUsuario<{
@@ -98,6 +99,7 @@ export async function SeccionMarcaPlantillasCpq() {
               <BotonCopiar texto={prompt} etiqueta="Copiar prompt" />
             </div>
           ) : null}
+          <SeccionPlantillasHtml />
         </div>
       ) : null}
     </Estado>
