@@ -23,7 +23,7 @@ export function sanearCssBloque(texto: string): ResultadoCssBloque {
     }
     const selector = bruto.slice(0, i).trim();
     const cuerpo = bruto.slice(i + 1).trim();
-    if (!/^[\w#.\[\]:,\s\-*>+~|'"]+$/.test(selector) || /[<\\]/.test(selector)) {
+    if (!/^[\w#.[\]:,\s\-*>+~|'"]+$/.test(selector) || /[<\\]/.test(selector)) {
       errores.push(`Selector no permitido: ${selector.slice(0, 60)}`);
       continue;
     }
