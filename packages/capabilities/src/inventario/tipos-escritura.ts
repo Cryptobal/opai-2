@@ -1,6 +1,7 @@
 import {
   CATEGORIAS_TIPO,
   camposConClave,
+  entregaAPersonaPorDefecto,
   errorDeTipo,
   LIMITES_TIPO,
   nombreNormalizado,
@@ -37,6 +38,7 @@ export const tiposCrear = defineCapability({
     campos: z.array(campoEntradaSchema).max(LIMITES_TIPO.campos).default([]),
     tallas: z.array(tallaSchema).max(LIMITES_TIPO.tallas).default([]),
     prendaClave: prendaSchema.optional(),
+    entregaAPersona: z.boolean().optional().describe("Si el tipo se entrega a personas (CAR-487)."),
   }),
   output: tipoSchema,
   efecto: "escritura",
@@ -59,6 +61,7 @@ export const tiposCrear = defineCapability({
       campos,
       tallas,
       prendaClave: input.prendaClave ?? null,
+      entregaAPersona: input.entregaAPersona ?? entregaAPersonaPorDefecto(input.categoria),
     };
     if (dryRun) return vistaTipo({ id: ID_VISTA_PREVIA, activo: true, ...data });
     const creado = await ctx.transaccion(async (tx) => {
