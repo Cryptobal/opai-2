@@ -56,11 +56,11 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     // Traer los datos de la empresa desde OPAI 1 (CAR-279): el exportador de 1.0 (`/api/export/opai2/v1`)
     // pide una llave de solo lectura que crea el dueño en OPAI 1 y pega aquí. Nunca va en variables de entorno.
     id: "opai1",
-    nombre: "OPAI 1 (traer datos)",
+    nombre: "Migración (exportar datos)",
     categoria: "migracion",
     modalidades: ["propia"] as const,
     secretos: [
-      { nombre: "api_key", etiqueta: "Llave de solo lectura de OPAI 1" },
+      { nombre: "api_key", etiqueta: "Llave de solo lectura del exportador" },
       { nombre: "url", etiqueta: "Dirección del exportador (https://…/api/export/opai2/v1)" },
     ],
     config: sinConfig,

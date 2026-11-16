@@ -1,4 +1,4 @@
-import { ajustesNomina, capacidadesNomina, defineModule } from "@opai/capabilities";
+import { ajustesNomina, buscadoresNomina, capacidadesNomina, defineModule } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Nómina (ADR-003, Brief 25). El núcleo deriva navegación, permisos,
@@ -53,4 +53,5 @@ export const manifest = defineModule({
     { id: "nomina.liquidaciones.revisadas", descripcion: "Se marcaron como revisadas las liquidaciones calculadas de un período." },
   ],
   capacidades: capacidadesNomina,
+  buscadores: buscadoresNomina,
 });

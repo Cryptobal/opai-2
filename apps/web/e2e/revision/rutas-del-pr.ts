@@ -49,7 +49,6 @@ const rutas = new Set<string>();
 for (const f of cambiados) {
   if (
     f.startsWith("packages/ds/") ||
-    f.includes("app/_components/hilo") ||
     f.includes("portal-layout")
   ) {
     CLAVE.forEach((r) => rutas.add(r));

@@ -27,7 +27,7 @@ export function mesAnterior(periodo: string): string {
 }
 
 /** Cierra `periodo`: guarda el resultado de cada persona y deja el mes fijo. Un mes cerrado no se reabre. */
-export async function cerrarPeriodo(
+async function cerrarPeriodo(
   ctx: Contexto,
   periodo: string,
   origen: "manual" | "automatico",
@@ -101,11 +101,11 @@ const ACTIVOS = ["activo", "trial", "solo_lectura"];
 
 /** Día de cierre de la empresa; si el ajuste no está declarado (registro sin cargar), el de fábrica. */
 async function diaDeCierre(ctx: Contexto): Promise<number> {
-  const campo = campoAjuste("desempeno", "dia_cierre");
+  const campo = campoAjuste("desempeno", "dia_cierre_mes");
   if (!campo) return DIA_CIERRE_DEFECTO;
   // Un error al leer se propaga: el trabajo reintenta en vez de cerrar en un día equivocado.
   const v = await valoresEfectivos(ctx, [campo]);
-  return (v.get("desempeno.dia_cierre")?.valor as number | undefined) ?? DIA_CIERRE_DEFECTO;
+  return (v.get("desempeno.dia_cierre_mes")?.valor as number | undefined) ?? DIA_CIERRE_DEFECTO;
 }
 
 export const trabajoCierreAutomatico = defineTrabajo({

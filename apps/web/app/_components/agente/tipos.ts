@@ -13,12 +13,21 @@ export type PasoPlan = {
   clave: string;
   vistaPrevia: { data: unknown };
 };
+/** Entidad con href interno salido de una capacidad (CAR-446). */
+export type ReferenciaEntidad = {
+  id: string;
+  titulo: string;
+  detalle: string | null;
+  href: string;
+};
+
 export type Turno = {
   conversacionId: string | null;
   token: string | null;
   texto: string;
   pasos: PasoPlan[];
   tokens: number;
+  referencias?: ReferenciaEntidad[];
 };
 export type Resolucion = {
   estado: "completo" | "rechazado" | "fallido" | "aprobacion" | "pendiente" | "prevista";
@@ -54,6 +63,8 @@ export type Mensaje = {
   /** Aviso que no invalida la respuesta (p. ej. no quedó en el historial). */
   aviso?: string;
   plan?: PlanVista;
+  /** Fichas para enlaces y tarjetas; solo hrefs de capacidades. */
+  referencias?: ReferenciaEntidad[];
 };
 
 /** El plan firmado vale una hora (`VIGENCIA_PLAN_MS` en `modules/agente/planes.ts`). */
