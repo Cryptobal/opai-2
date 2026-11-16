@@ -21,22 +21,34 @@ export const AJUSTES_NUCLEO = defineAjustes(
       permiso: "core:comunicaciones.manage",
       control: "texto",
     }),
-    comunicaciones_cco_comercial: correoOpcional.default("").meta({
-      etiqueta: "Copia oculta · comercial",
+    notificaciones_correo_defecto: correoOpcional.default("").meta({
+      etiqueta: "Copia oculta por defecto en avisos",
+      ayuda:
+        "Correo en copia oculta en los avisos que envía Comunicaciones. No afecta invitaciones ni recuperación de clave. El correo comercial del perfil va en las propuestas y documentos al cliente.",
       grupo: "Comunicaciones",
       ambito: "tenant",
       permiso: "core:comunicaciones.manage",
       control: "texto",
     }),
-    comunicaciones_cco_operaciones: correoOpcional.default("").meta({
-      etiqueta: "Copia oculta · operaciones",
+    notificaciones_correo_comercial: correoOpcional.default("").meta({
+      etiqueta: "Copia oculta · avisos comerciales",
+      ayuda: "Solo eventos de Comercial y cotizaciones. Vacío: se usa la copia por defecto.",
       grupo: "Comunicaciones",
       ambito: "tenant",
       permiso: "core:comunicaciones.manage",
       control: "texto",
     }),
-    comunicaciones_cco_finanzas: correoOpcional.default("").meta({
-      etiqueta: "Copia oculta · finanzas",
+    notificaciones_correo_operaciones: correoOpcional.default("").meta({
+      etiqueta: "Copia oculta · avisos de operaciones",
+      ayuda: "Asistencia, rondas y módulos de terreno. Vacío: se usa la copia por defecto.",
+      grupo: "Comunicaciones",
+      ambito: "tenant",
+      permiso: "core:comunicaciones.manage",
+      control: "texto",
+    }),
+    notificaciones_correo_finanzas: correoOpcional.default("").meta({
+      etiqueta: "Copia oculta · avisos de finanzas",
+      ayuda: "Solo eventos del módulo Finanzas. Vacío: se usa la copia por defecto.",
       grupo: "Comunicaciones",
       ambito: "tenant",
       permiso: "core:comunicaciones.manage",
