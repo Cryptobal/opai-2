@@ -44,7 +44,7 @@ export const recurrenteSchema = z.object({
   claveOrigen: z.string().nullable(),
   anteriorId: uuidSchema
     .nullable()
-    .describe("Tramo anterior del mismo gasto: existe cuando la fila, la frecuencia o el día cambiaron desde una fecha (CAR-413)."),
+    .describe("Tramo anterior del mismo gasto: existe cuando la fila, la frecuencia o el día cambiaron desde una fecha."),
 });
 
 type FilaDb = {

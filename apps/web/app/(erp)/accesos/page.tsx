@@ -3,6 +3,7 @@ import { DoorOpen } from "lucide-react";
 import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { puedeGestionarRegistros } from "@/lib/pestanas-modulos";
 import type { SearchParams } from "@/lib/parametros";
 
 import { cargarRegistros } from "./_componentes/datos";
@@ -19,7 +20,13 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
       titulo="Accesos"
       ruta="/accesos"
       completo
-      cargar={() => cargarRegistros(searchParams)}
+      cargar={async () => {
+        const [l, gestiona] = await Promise.all([
+          cargarRegistros(searchParams),
+          puedeGestionarRegistros(),
+        ]);
+        return { ...l, gestiona };
+      }}
     >
       {(d) => (
         <>
