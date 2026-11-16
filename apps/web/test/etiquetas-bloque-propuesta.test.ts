@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { TIPOS_BLOQUE_PROPUESTA } from "../../../modules/cpq/domain/documento/propuesta-tecnica";
 import {
+  type BloqueArmador,
   TIPOS_BLOQUE_ETIQUETADOS,
   conTextoAceptado,
   esSeccionDeTexto,
@@ -43,9 +44,10 @@ describe("gestor de bloques de la propuesta (CAR-530)", () => {
 });
 
 describe("IA por sección (CAR-534)", () => {
-  const bloques = [
-    { id: "a", tipo: "texto_libre", activo: true, contenidoOverride: "manual" },
-    { id: "b", tipo: "metodologia", activo: true },
+  const base = { activo: true, fijo: false, opcional: true } as const;
+  const bloques: BloqueArmador[] = [
+    { ...base, id: "a", tipo: "texto_libre", contenidoOverride: "manual" },
+    { ...base, id: "b", tipo: "metodologia" },
   ];
   it("aceptar un borrador cambia solo la sección elegida", () => {
     const r = conTextoAceptado(bloques, "b", "borrador");
