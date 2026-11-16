@@ -20,7 +20,7 @@ export async function responsableActual(ctx: Contexto, db: TenantTx = ctx.db): P
 }
 
 /** Pausa vigente del agente para la empresa o para la instalación. */
-export async function agentePausado(db: TenantTx, instalacionId: string | null) {
+async function agentePausado(db: TenantTx, instalacionId: string | null) {
   const p = await db.centralPausa.findFirst({
     where: { reanudadaEn: null, OR: [{ instalacionId: null }, ...(instalacionId ? [{ instalacionId }] : [])] },
     select: { id: true },
