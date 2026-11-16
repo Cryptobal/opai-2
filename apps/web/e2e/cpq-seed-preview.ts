@@ -8,13 +8,26 @@ export const TITULO_COTIZACION_QA = "Cotización ficticia preview";
 /** Id fijo de `packages/db/scripts/qa-e2e/cotizacion-ficha.sql` (solo qa-e2e). */
 export const ID_COTIZACION_QA = "00000000-0000-7000-8000-000000544002";
 
-async function fichaSemillaVisible(page: Page): Promise<boolean> {
-  await page.goto(`/cotizaciones/${ID_COTIZACION_QA}`);
+const RUTA_FICHA = `/cotizaciones/${ID_COTIZACION_QA}`;
+
+/** El código CPQ puede no ir en `heading` en teléfono (patrón lista+ficha). */
+async function codigoVisibleEnFicha(page: Page, timeout = 60_000): Promise<boolean> {
   return page
-    .getByRole("heading", { name: CODIGO_COTIZACION_QA })
+    .getByText(CODIGO_COTIZACION_QA, { exact: true })
     .first()
-    .isVisible({ timeout: 45_000 })
+    .isVisible({ timeout })
     .catch(() => false);
+}
+
+async function abrirFichaSemilla(page: Page): Promise<boolean> {
+  const reintentos = EN_PREVIEW ? 4 : 1;
+  for (let i = 0; i < reintentos; i++) {
+    await page.goto(RUTA_FICHA);
+    await page.waitForURL(new RegExp(`/cotizaciones/${ID_COTIZACION_QA}`), { timeout: 60_000 }).catch(() => undefined);
+    if (await codigoVisibleEnFicha(page, EN_PREVIEW ? 30_000 : 60_000)) return true;
+    if (i < reintentos - 1) await page.waitForTimeout(2_500);
+  }
+  return false;
 }
 
 async function filaSemillaEnLista(page: Page): Promise<boolean> {
@@ -27,10 +40,11 @@ async function filaSemillaEnLista(page: Page): Promise<boolean> {
 
 /** Abre la cotización de semilla en ficha (preview-e2e) o la crea en local. Solo qa-e2e. */
 export async function abrirCotizacionQa(page: Page): Promise<void> {
-  if (await fichaSemillaVisible(page)) return;
+  if (await abrirFichaSemilla(page)) return;
+
   if (await filaSemillaEnLista(page)) {
-    await page.goto(`/cotizaciones/${ID_COTIZACION_QA}`);
-    await expect(page.getByRole("heading", { name: CODIGO_COTIZACION_QA }).first()).toBeVisible({
+    await page.goto(RUTA_FICHA);
+    await expect(page.getByText(CODIGO_COTIZACION_QA, { exact: true }).first()).toBeVisible({
       timeout: 60_000,
     });
     return;
@@ -40,7 +54,7 @@ export async function abrirCotizacionQa(page: Page): Promise<void> {
   const porTitulo = page.locator('a[href^="/cotizaciones/"]').filter({ hasText: /CPQ-\d{4}-\d+/ });
   if (await porTitulo.first().isVisible({ timeout: 15_000 }).catch(() => false)) {
     await porTitulo.first().click();
-    await expect(page.getByRole("heading", { name: /^CPQ-/ }).first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText(/^CPQ-\d{4}-\d+/).first()).toBeVisible({ timeout: 60_000 });
     return;
   }
 
@@ -58,5 +72,5 @@ export async function abrirCotizacionQa(page: Page): Promise<void> {
   const enlace = page.locator('a[href^="/cotizaciones/"]').filter({ hasText: /CPQ-\d{4}-\d+/ }).first();
   await expect(enlace).toBeVisible({ timeout: 60_000 });
   await enlace.click();
-  await expect(page.getByRole("heading", { name: /^CPQ-/ }).first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(/^CPQ-\d{4}-\d+/).first()).toBeVisible({ timeout: 60_000 });
 }

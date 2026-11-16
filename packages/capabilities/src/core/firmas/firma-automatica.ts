@@ -79,7 +79,7 @@ export const firmasFirmaAutomaticaRevocar = defineCapability({
   id: "core.firmas.firma_automatica_revocar",
   soloPersonas: true,
   descripcion:
-    "Revoca una autorización de firma automática del representante de la empresa; desde la revocación esa clase ya no sale firmada automáticamente (R16).",
+    "Revoca una autorización de firma automática del representante de la empresa; desde la revocación esa clase ya no sale firmada automáticamente.",
   permiso: PERMISO_FIRMAS_CONFIG,
   input: z.object({ autorizacionId: uuidSchema }),
   output: autorizacionSchema,
