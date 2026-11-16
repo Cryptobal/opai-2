@@ -6,6 +6,7 @@ import { estadoPantalla } from "@/lib/formato";
 
 import {
   cargarAlerta,
+  cargarPropuestasAlerta,
   puedeAtender,
   ETIQUETA_ESTADO,
   ETIQUETA_SEVERIDAD,
@@ -14,6 +15,8 @@ import {
   TONO_SEVERIDAD,
 } from "../../_componentes/datos";
 import { AccionesAlerta } from "./_componentes/acciones";
+import { ControlAgente } from "./_componentes/control-agente";
+import { PropuestasAgente } from "./_componentes/propuestas";
 
 export const metadata = { title: "Alerta" };
 type Props = { params: Promise<{ id: string }> };
@@ -48,17 +51,19 @@ export default function AlertaFicha({ params }: Props) {
       ruta="/central"
       cargar={async () => {
         const { id } = await params;
-        const [r, atender] = await Promise.all([cargarAlerta(id), puedeAtender()]);
-        return { id, r, atender };
+        const [r, atender, propuestas] = await Promise.all([cargarAlerta(id), puedeAtender(), cargarPropuestasAlerta(id)]);
+        return { id, r, atender, propuestas };
       }}
       opciones={({ r }) => ({ titulo: r.ok ? r.data.alerta.titulo : "Alerta" })}
     >
-      {({ id, r, atender }) => {
+      {({ id, r, atender, propuestas }) => {
         const a = r.ok ? r.data.alerta : null;
         const eventos = r.ok ? r.data.eventos : [];
+        const intentos = r.ok ? r.data.intentos : [];
+        const propsPendientes = propuestas.ok ? propuestas.data.items : [];
         return (
           <DetailScreen
-            state={estadoPantalla(r)}
+            state={estadoPantalla(r, propuestas)}
             titulo={a?.titulo ?? "Alerta"}
             subtitulo={a ? `${a.instalacionNombre ?? "Instalación"} · ${haceCuanto(a.createdAt)}` : undefined}
             estado={
@@ -69,7 +74,14 @@ export default function AlertaFicha({ params }: Props) {
                 </span>
               ) : undefined
             }
-            acciones={a && atender ? <AccionesAlerta id={id} estado={a.estado} /> : undefined}
+            acciones={
+              a && atender ? (
+                <div className="flex w-full flex-col gap-2">
+                  <AccionesAlerta id={id} estado={a.estado} />
+                  <ControlAgente id={id} estado={a.estado} eventos={eventos} />
+                </div>
+              ) : undefined
+            }
           >
             {a ? (
               <div className="flex flex-col gap-4">
@@ -87,6 +99,22 @@ export default function AlertaFicha({ params }: Props) {
                     ]}
                   />
                 </section>
+                {atender && propsPendientes.length > 0 ? <PropuestasAgente propuestas={propsPendientes} /> : null}
+                {intentos.length > 0 ? (
+                  <section className="flex flex-col gap-2">
+                    <h3 className="t-label text-fg">Intentos de contacto</h3>
+                    <ul className="overflow-hidden rounded-lg border border-border bg-surface">
+                      {intentos.map((e) => (
+                        <li key={e.id} className="border-b border-border px-4 py-2.5 last:border-b-0">
+                          <span className="t-caption">
+                            Paso {e.paso} · {e.canal} · {e.resultado} · {cuandoCompleto(e.createdAt)}
+                          </span>
+                          {e.nota ? <span className="block text-base text-fg">{e.nota}</span> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
                 <section className="flex flex-col gap-2">
                   <h3 className="t-label text-fg">Bitácora</h3>
                   <ul className="overflow-hidden rounded-lg border border-border bg-surface">

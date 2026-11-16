@@ -34,6 +34,39 @@ export type EventoAlerta = {
   createdAt: string | Date;
 };
 
+export type IntentoContacto = {
+  id: string;
+  paso: number;
+  canal: string;
+  resultado: string;
+  nota: string | null;
+  createdAt: string | Date;
+};
+
+export type PropuestaAgente = {
+  id: string;
+  alertaId: string;
+  accion: string;
+  nota: string | null;
+  minutos: number | null;
+  severidad: string | null;
+  createdAt: string | Date;
+};
+
+export type TurnoEstado = {
+  responsable: { tipo: "turno" | "respaldo"; usuarioId: string } | null;
+  turno: {
+    id: string;
+    operadorId: string;
+    estado: "abierto" | "en_entrega" | "cerrado";
+    entregaAId: string | null;
+    notaEntrega: string | null;
+    createdAt: string | Date;
+  } | null;
+  pausadaEmpresa: boolean;
+  instalacionesPausadas: number;
+};
+
 export type EstadoCentral = {
   activas: Record<string, number>;
   pospuestas: number;
@@ -109,11 +142,24 @@ export function cargarEstado() {
 }
 
 export function cargarAlerta(id: string) {
-  return ejecutarComoUsuario<{ alerta: Alerta & { personaNombre: string | null }; eventos: EventoAlerta[] }>(
-    "erp",
-    "central.alertas.obtener",
-    { id },
-  );
+  return ejecutarComoUsuario<{
+    alerta: Alerta & { personaNombre: string | null };
+    eventos: EventoAlerta[];
+    intentos: IntentoContacto[];
+  }>("erp", "central.alertas.obtener", { id });
+}
+
+export async function cargarPropuestasAlerta(alertaId: string) {
+  const r = await ejecutarComoUsuario<{ items: PropuestaAgente[] }>("erp", "central.propuestas.listar", {
+    estado: "pendiente",
+    limite: 50,
+  });
+  if (!r.ok) return r;
+  return { ok: true as const, data: { items: r.data.items.filter((p) => p.alertaId === alertaId) } };
+}
+
+export function cargarTurnoEstado() {
+  return ejecutarComoUsuario<TurnoEstado>("erp", "central.turno.estado", {});
 }
 
 /** ¿Puede atender alertas? Oculta las acciones a quien solo ve la cola (ADR-022); el servidor igual lo valida. */
