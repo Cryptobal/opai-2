@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { abrirMenuUsuario } from "./menu-usuario";
+import { marcarPendientesDesktop } from "./novedades-preview-desktop";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -115,32 +116,7 @@ test.describe("@preview novedades y bandeja", () => {
         page.locator('nav a[href="/bandeja"] .bg-danger-fg').filter({ visible: true }).first(),
       ).toBeVisible({ timeout: 15_000 });
 
-    await page.goto("/novedades");
-    await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });
-    const filtroNovedades = page.getByRole("group", { name: "Filtrar novedades" });
-    await filtroNovedades.getByRole("button", { name: "Todas" }).click();
-    const marcarTodasBtn = () => page.getByRole("button", { name: "Marcar todas como leídas" });
-    if (await marcarTodasBtn().isVisible()) {
-      await marcarTodasBtn().click();
-      await expect(page.getByText("No pudimos marcar las novedades como leídas")).toHaveCount(0);
-      await expect.poll(() => pendientes(page), { timeout: 30_000 }).toBe(0);
-    } else if ((await pendientes(page)) > 0) {
-      await page.getByRole("button", { name: "Marcar como leída" }).first().click();
-      await expect.poll(() => pendientes(page), { timeout: 15_000 }).toBe(0);
-    }
-
-    await page.goto("/novedades");
-    await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });
-    await filtroNovedades.getByRole("button", { name: "Todas" }).click();
-    await expect.poll(async () => {
-      const resumen = (await page.getByText(RESUMEN).first().textContent()) ?? "";
-      if (/^Estás al día/.test(resumen)) return true;
-      const marcar = marcarTodasBtn();
-      if (await marcar.isVisible()) await marcar.click();
-      return /^Estás al día/.test((await page.getByText(RESUMEN).first().textContent()) ?? "");
-    }, { timeout: 45_000 }).toBe(true);
-    await expect(page.getByText(/^Estás al día/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Marcar como leída" })).toHaveCount(0);
+    await marcarPendientesDesktop(page);
     await capturar(page, info, "novedades-al-dia");
     expect(errores).toEqual([]);
   });

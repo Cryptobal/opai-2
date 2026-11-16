@@ -93,6 +93,8 @@ export async function cargarTickets(p: Parametros) {
   );
 }
 
+export type RespuestaTicketsLista = Awaited<ReturnType<typeof cargarTickets>>;
+
 export async function cargarTicket(id: string) {
   return ejecutarComoUsuario<{ ticket: Ticket; eventos: EventoTicket[] }>(
     "erp",
