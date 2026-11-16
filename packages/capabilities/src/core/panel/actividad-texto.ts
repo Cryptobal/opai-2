@@ -55,6 +55,10 @@ export function frase(capability: string, input: Input): string {
   const entidad = partes.at(-2) ?? "";
   if (capability === "platform.modules.set" || verbo === "set_modules")
     return "cambió los módulos activos";
+  if (capability === "platform.tenants.set_modulos_nuevos")
+    return input.activo
+      ? "activó los módulos nuevos automáticos"
+      : "desactivó los módulos nuevos automáticos";
   if (obtenerCapacidad(capability)?.efecto === "lectura") return "consultó información";
   const v = VERBO[verbo];
   const s = SUSTANTIVO[entidad];

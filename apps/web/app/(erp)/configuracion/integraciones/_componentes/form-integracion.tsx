@@ -104,7 +104,7 @@ export function FormIntegracion({
               <Campo
                 etiqueta="Nombre y correo del remitente"
                 htmlFor="i-remitente"
-                ayuda='Por ejemplo "Gard Security <avisos@gard.cl>"'
+                ayuda='Por ejemplo "Mi empresa <avisos@ejemplo.cl>"'
               >
                 <Input
                   id="i-remitente"

@@ -5,8 +5,6 @@ import { microAUsd, PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../define";
 import { consumosDelMes, sumarPor, type GrupoConsumo } from "./consumos-fuente";
 
-export { rangoMes } from "./consumos-fuente";
-
 const mesSchema = z
   .string()
   .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Formato aaaa-mm.")
@@ -29,7 +27,7 @@ const totalUsd = (grupos: GrupoConsumo[]) =>
 export const consumosResumen = defineCapability({
   id: "core.consumos.resumen",
   descripcion:
-    "Consumos de la empresa en un mes (ADR-031): total en USD y, por recurso (IA, correo, mapas, almacenamiento, ejecuciones) y por recurso y módulo, cantidad y costo.",
+    "Consumos de la empresa en un mes: total en USD y, por recurso (IA, correo, mapas, almacenamiento, ejecuciones) y por recurso y módulo, cantidad y costo.",
   permiso: PERMISOS_CORE.consumosRead,
   input: z.object({ mes: mesSchema }),
   output: z.object({
@@ -91,7 +89,7 @@ export const consumosPorRecurso = defineCapability({
 export const consumosPorAgente = defineCapability({
   id: "core.consumos.por_agente",
   descripcion:
-    "Consumos del mes por agente (API key): ejecuciones y costo en USD de cada key, para controlar presupuestos (ADR-032).",
+    "Consumos del mes por agente (API key): ejecuciones y costo en USD de cada key, para controlar presupuestos.",
   permiso: PERMISOS_CORE.consumosRead,
   input: z.object({ mes: mesSchema }),
   output: z.array(
