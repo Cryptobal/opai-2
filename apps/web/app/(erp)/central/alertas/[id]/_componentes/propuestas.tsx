@@ -6,7 +6,7 @@ import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { PropuestaAgente } from "../../../_componentes/datos";
+import type { PropuestaAgente } from "../../../_componentes/tipos-central";
 
 const ETIQUETA: Record<string, string> = {
   resolver: "Resolver",

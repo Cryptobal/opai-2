@@ -7,7 +7,7 @@ import { avisar, Button, Campo, Select, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { TurnoEstado } from "../../_componentes/datos";
+import type { TurnoEstado } from "../../_componentes/tipos-central";
 
 type Usuario = { userId: string; nombre: string };
 

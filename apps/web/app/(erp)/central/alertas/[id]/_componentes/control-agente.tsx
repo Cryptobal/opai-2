@@ -6,7 +6,7 @@ import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { EventoAlerta } from "../../../_componentes/datos";
+import type { EventoAlerta } from "../../../_componentes/tipos-central";
 
 type Props = { id: string; estado: string; eventos: EventoAlerta[] };
 

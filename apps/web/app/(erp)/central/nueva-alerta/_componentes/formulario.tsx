@@ -7,7 +7,7 @@ import { avisar, Button, Campo, Input, Select, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { SEVERIDADES, ETIQUETA_SEVERIDAD } from "../../_componentes/datos";
+import { SEVERIDADES, ETIQUETA_SEVERIDAD } from "../../_componentes/tipos-central";
 
 type Inst = { id: string; nombre: string };
 

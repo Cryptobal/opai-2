@@ -1,6 +1,6 @@
 import { LinkNext } from "@/app/_components/link-next";
 
-import { type TurnoEstado } from "./datos";
+import { type TurnoEstado } from "./tipos-central";
 
 type Props = { turno: TurnoEstado; nombres: Map<string, string> };
 
