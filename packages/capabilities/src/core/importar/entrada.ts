@@ -25,7 +25,7 @@ export const entradaSchema = {
   opai1: z
     .unknown()
     .optional()
-    .describe("Alternativa al archivo: el export JSON de OPAI 1 (accounts, contacts, installations, deals, pipelineStages). Se toma la parte que corresponde al importador elegido."),
+    .describe("Alternativa al archivo: el export JSON de migración (accounts, contacts, installations, deals, pipelineStages). Se toma la parte que corresponde al importador elegido."),
 };
 
 export type Entrada = { archivo?: { nombre: string; contenidoBase64: string } | undefined; filas?: Record<string, string | number | boolean | null>[] | undefined; opai1?: unknown };
@@ -47,7 +47,7 @@ export async function leerEntrada(importador: string, e: Entrada): Promise<Entra
   try {
     if (e.filas) return { tabla: tablaDeRegistros(e.filas), origen: "filas", sistema: SISTEMA_ARCHIVO, archivo: null };
     if (e.opai1 !== undefined && e.opai1 !== null && JSON.stringify(e.opai1).length > 8_000_000)
-      throw new ErrorPlanilla("El export de OPAI 1 supera el tamaño máximo (8 MB). Envíalo por partes.");
+      throw new ErrorPlanilla("El export de migración supera el tamaño máximo (8 MB). Envíalo por partes.");
     if (e.opai1 !== undefined && e.opai1 !== null)
       return { tabla: tablaDeRegistros(filasDeOpai1(importador, e.opai1)), origen: "opai1_json", sistema: "opai1", archivo: null };
     const archivo = e.archivo;

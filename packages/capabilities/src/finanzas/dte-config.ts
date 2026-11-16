@@ -48,7 +48,7 @@ export const dteConfigObtener = defineCapability({
 });
 
 const ACTECO_DTE =
-  "ACTECO principal de la empresa (CAR-243: vive en Configuración › Empresa; para varios códigos usar core.empresa.acteco_set). Un número lo fija como principal; null lo quita si es el único.";
+  "ACTECO principal de la empresa (Configuración › Empresa; para varios códigos usar core.empresa.acteco_set). Un número lo fija como principal; null lo quita si es el único.";
 
 export const dteConfigActualizar = defineCapability({
   id: "finanzas.dte_config.actualizar",
