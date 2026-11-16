@@ -5,12 +5,12 @@ import { senalRonda } from "./rondas-senales";
 type NovedadValida = {
   h: Hecho;
   p: {
-    puntoId?: string;
-    tipoIncidenteId?: string;
-    ejecucionClave?: string;
-    gravedad?: string;
+    puntoId?: string | undefined;
+    tipoIncidenteId?: string | undefined;
+    ejecucionClave?: string | undefined;
+    gravedad?: string | undefined;
     resumen: string;
-    detalle?: string | null;
+    detalle?: string | null | undefined;
   };
 };
 
