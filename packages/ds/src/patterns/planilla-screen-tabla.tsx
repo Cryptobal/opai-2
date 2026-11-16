@@ -4,6 +4,7 @@ import { cn } from "../cn";
 import { CabeceraFila } from "./planilla-screen-cabecera-fila";
 import {
   claseCeldaNumero,
+  claseFondoFila,
   TONO,
   type Celda,
   type ColumnaPlanilla,
@@ -34,12 +35,13 @@ type CeldaFilaProps = {
 function CeldaFila({ fila, columna, valor, editable, onCelda, onSeleccion }: CeldaFilaProps) {
   const tono = valor?.tono ?? "neutro";
   const texto = valor?.texto ?? "—";
+  const caja = cn("border-b border-border p-0.5", claseFondoFila(fila), fila.total && "border-t");
   if (!valor && !editable) {
-    return <td className="border-b border-border p-0.5" tabIndex={-1} />;
+    return <td className={caja} tabIndex={-1} />;
   }
   if (!editable) {
     return (
-      <td className="border-b border-border p-0.5">
+      <td className={caja}>
         <span
           tabIndex={-1}
           className={cn(
@@ -54,7 +56,7 @@ function CeldaFila({ fila, columna, valor, editable, onCelda, onSeleccion }: Cel
     );
   }
   return (
-    <td className="border-b border-border p-0.5">
+    <td className={caja}>
       <button
         type="button"
         aria-label={`${fila.etiqueta}, ${columna.etiqueta}: ${texto}${valor?.detalle ? ` (${valor.detalle})` : ""}. Editar`}
@@ -71,7 +73,7 @@ function CeldaFila({ fila, columna, valor, editable, onCelda, onSeleccion }: Cel
           "flex w-full cursor-pointer items-center justify-center rounded-sm px-1",
           claseCeldaNumero,
           TONO[tono],
-          "transition-shadow duration-150 hover:shadow-[inset_0_0_0_1px_var(--ds-accent)] motion-reduce:transition-none",
+          "scroll-ml-36 scroll-mb-24 transition-shadow duration-150 hover:shadow-[inset_0_0_0_1px_var(--ds-accent)] motion-reduce:transition-none md:scroll-ml-0 md:scroll-mb-0",
           "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
         )}
       >
@@ -96,7 +98,7 @@ export function PlanillaTabla({
       <table className="border-separate border-spacing-0 text-sm">
         <thead>
           <tr>
-            <th className="sticky top-0 left-0 z-20 min-w-40 border-r border-b border-border bg-surface px-3 py-2 text-left text-xs font-medium text-fg-subtle">
+            <th className="sticky top-0 left-0 z-20 w-36 min-w-36 max-w-36 border-r border-b border-border bg-surface px-3 py-2 text-left text-xs font-medium text-fg-subtle md:w-auto md:min-w-40 md:max-w-72">
               &nbsp;
             </th>
             {columnas.map((c) => (

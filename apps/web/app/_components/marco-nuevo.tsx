@@ -9,7 +9,7 @@ import { cookieMenu } from "@/lib/marco";
 import { cookieAnchoMenu } from "@/lib/menu-ancho";
 
 import { useAcentoEmpresa } from "./acento-empresa";
-import { abrirAgente } from "./agente/abrir-agente";
+import { abrirAgenteDesdeShell } from "./agente/abrir-agente";
 import { alternarTema } from "./alternar-tema";
 import { MarcoShell } from "./marco-shell";
 import type { DatosShell } from "./tipos-shell";
@@ -52,7 +52,7 @@ export function MarcoNuevo({ datos, menuPlegado, menuAncho, children }: Props) {
             document.cookie = cookieAnchoMenu(ancho);
           }}
           onTema={() => alternarTema(portal)}
-          {...(conAgente ? { onAgente: () => abrirAgente() } : {})}
+          {...(conAgente ? { onAgente: () => abrirAgenteDesdeShell() } : {})}
           pestanasDelPortal={terreno}
         />
       );

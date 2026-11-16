@@ -2,7 +2,7 @@ import { Badge, Empty } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/datos";
+import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/formato";
 import type { MovimientoBanco } from "./bancos-tipos";
 
 const ETIQUETA_ESTADO: Record<string, string> = {
