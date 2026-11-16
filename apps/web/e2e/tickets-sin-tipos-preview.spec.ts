@@ -8,14 +8,20 @@ test.describe("@preview tickets: sin tipos para el rol", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
   test("Nuevo ticket deshabilitado con explicación o tipos disponibles en qa-e2e", async ({ page }, info) => {
+    test.setTimeout(60_000);
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
     await page.goto("/tickets");
-    await expect(page.getByRole("heading", { name: "Tickets" }).first()).toBeVisible({ timeout: 60_000 });
+    await expect(
+      info.project.name === "telefono"
+        ? page.getByRole("heading", { name: "Tickets", level: 2 })
+        : page.locator('[data-shell="titulo"] h1'),
+    ).toBeVisible();
     const nuevo = page.getByRole("button", { name: "Nuevo ticket" });
-    await expect(nuevo).toBeVisible({ timeout: 30_000 });
-    if (await nuevo.isEnabled()) {
+    await expect(nuevo).toBeVisible();
+    const deshabilitado = await nuevo.isDisabled();
+    if (!deshabilitado) {
       info.annotations.push({
         type: "omitido",
         description: "qa-e2e tiene tipos de ticket; la bandeja permite crear",
@@ -27,11 +33,10 @@ test.describe("@preview tickets: sin tipos para el rol", () => {
     await expect(nuevo).toBeDisabled();
     if (info.project.name === "desktop") {
       await nuevo.hover();
-      await expect(page.getByRole("tooltip")).toContainText("Configuración", { timeout: 10_000 });
+      await expect(page.getByRole("tooltip")).toContainText("Configuración");
     }
-    await expect(
-      page.getByText(/Aún no puedes crear tickets|tipo disponible para tu rol|Configurar tipos de ticket/).first(),
-    ).toBeVisible();
+    await expect(page.getByText("Aún no puedes crear tickets", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Configurar tipos de ticket" })).toBeVisible();
     await capturar(page, info, "tickets-sin-tipos");
     expect(errores).toEqual([]);
   });

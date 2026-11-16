@@ -1,6 +1,7 @@
 import { Badge, Estado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import type { BloquePlantilla } from "@/lib/cpq-bloques-propuesta";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { FormMarcaDocumentoDiferido } from "./form-marca-documento-diferido";
@@ -33,7 +34,7 @@ async function cargarPlantillaPropuesta() {
     base: string;
     nombreVisible: string;
     aperturaMaxima: string;
-    bloques: { id: string; activo: boolean; fijo: boolean; opcional: boolean }[];
+    bloques: BloquePlantilla[];
     basesDisponibles: string[];
   }>("erp", "cpq.plantillas_propuesta.get", {});
   return r.ok ? r.data : null;
