@@ -10,6 +10,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { hoyIso } from "@/lib/fechas";
 
 import { CamposUf } from "./campos-uf";
+import { SelectorFilaEgreso } from "./selector-fila-egreso";
 import { type FilaEgreso, FRECUENCIAS, montoEditable, montoEscrito, type PoliticaUf, type Recurrente, type Unidad } from "./tipos";
 
 const UNIDADES = [
@@ -89,9 +90,7 @@ export function HojaRecurrente(p: { items: Recurrente[]; filas: FilaEgreso[] }) 
             <Button variant="secondary" onClick={() => url.fijar({ editar: null, cambiar: r.id })}>Cambiar desde una fecha</Button>
           </div>
         ) : null}
-        <Campo etiqueta="Fila del flujo" htmlFor="rc-fila">
-          <Select id="rc-fila" valor={fila} onCambiar={setFila} disabled={!!r} opciones={p.filas.map((f) => ({ valor: f.id, etiqueta: f.etiqueta }))} />
-        </Campo>
+        <SelectorFilaEgreso valor={fila} onCambiar={setFila} filas={p.filas} disabled={!!r} />
         <Campo etiqueta="Concepto" htmlFor="rc-concepto">
           <Input id="rc-concepto" value={concepto} onChange={(e) => setConcepto(e.target.value)} autoFocus={!r} />
         </Campo>

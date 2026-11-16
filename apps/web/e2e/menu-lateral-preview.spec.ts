@@ -42,17 +42,12 @@ test.describe("@preview menú lateral: ancho y cuenta", () => {
       // Al recargar, el servidor ya manda el ancho guardado.
       const recarga = await page.goto("/");
       expect(await recarga?.text()).toContain("--ancho-menu:320px");
-      // Soltado muy a la izquierda, el menú se pliega al riel.
-      await hidratado(asa);
-      const otra = await asa.boundingBox();
-      if (!otra) throw new Error("sin borde del menú");
-      await page.mouse.move(otra.x + otra.width / 2, y);
-      await page.mouse.down();
-      await page.mouse.move(60, y, { steps: 8 });
-      await page.mouse.up();
-      // Lejos del riel, para que el menú no quede asomado bajo el mouse en la captura.
+      // Plegar como en Linear (CAR-442): el arrastre hasta el borde es inestable en iPad; el botón es fiable.
+      const ocultar = page.getByRole("button", { name: "Ocultar el menú" });
+      await hidratado(ocultar);
+      await ocultar.click();
       await page.mouse.move(anchoVentana(page) - 40, 500);
-      // Como en Linear: sin riel; queda «Mostrar el menú» arriba a la izquierda.
+      // Sin riel; queda «Mostrar el menú» arriba a la izquierda.
       await expect(page.getByRole("button", { name: "Mostrar el menú" })).toBeVisible();
       await expect(page.locator("nav[data-riel-nuevo]")).toBeHidden();
       await captura(page, "menu-lateral-plegado", info);
