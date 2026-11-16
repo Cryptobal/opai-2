@@ -145,7 +145,7 @@ describe.skipIf(!urlPropietario)("programaciones recurrentes · base real", () =
           programacionId: p.id,
           periodo: mesActual,
         }),
-      ).rejects.toThrow(/OPAI 1.0/);
+      ).rejects.toThrow(/fecha de corte/);
     }
   });
 
