@@ -1,7 +1,8 @@
 // REGLA OBLIGATORIA DE CARLOS (30-oct-2026 23:14): ningún ticket se crea solo. Un ticket nace
 // únicamente cuando una persona lo crea a mano. Nada de reglas automáticas, hallazgos ni
 // integraciones que generen tickets (BRIEF-13 §1, ADR-025). Este test lo garantiza de tres formas:
-// (1) la única escritura de `ticket` en todo el código es la capacidad `tickets.tickets.crear`;
+// (1) la única escritura de `ticket` en todo el código es `insertarTicket`, que usan solo `tickets.tickets.crear` y el
+// alta del contacto en el Portal Cliente (`tickets.portal_tickets.crear`, CAR-519), ambas a mano y con sesión de persona;
 // (2) ningún consumidor de eventos ni trabajo programado la invoca o escribe tickets;
 // (3) la capacidad exige una sesión de persona: sin usuario (sistema, trabajo, evento) no crea nada.
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -18,7 +19,7 @@ const RAIZ = join(import.meta.dirname, "../../..");
 const OMITIR = new Set(["node_modules", ".next", ".turbo", "generated", "dist", "docs", "migrations"]);
 const ESCRIBE_TICKET = /\bticket\.(create|createMany|upsert)\s*\(/;
 const INVOCA_CREAR = /["'`]tickets\.tickets\.crear["'`]/;
-const AUTORIZADOS = new Set(["modules/tickets/capacidades/escritura.ts"]);
+const AUTORIZADOS = new Set(["modules/tickets/capacidades/util.ts"]);
 // Consumidores de Tickets que solo avisan en la campana (CAR-84): leen el ticket y crean notificaciones, nunca tickets.
 const SOLO_AVISAN = new Set(["modules/tickets/consumidor-avisos.ts"]);
 
@@ -40,7 +41,7 @@ beforeAll(() => {
 });
 
 describe("ningún ticket se crea solo", () => {
-  it("la única escritura de tickets en el código es tickets.tickets.crear", () => {
+  it("la única escritura de tickets en el código es insertarTicket", () => {
     const escritores = codigo.filter((f) => ESCRIBE_TICKET.test(f.texto)).map((f) => f.ruta);
     expect(escritores).toEqual([...AUTORIZADOS]);
   });

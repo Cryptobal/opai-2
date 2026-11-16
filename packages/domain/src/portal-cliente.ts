@@ -14,11 +14,13 @@ export const SECCIONES_PORTAL = [
   "novedades_texto",
   // Facturas emitidas a la cuenta (CAR-518): cada cuenta las enciende aparte.
   "facturas",
+  // Tickets que el contacto abre y sigue (CAR-519): cada cuenta los enciende aparte.
+  "tickets",
 ] as const;
 export type SeccionPortal = (typeof SECCIONES_PORTAL)[number];
 
 /** Secciones que una cuenta ve solo si la empresa las enciende para ella (apagadas por defecto, CAR-502). */
-const SECCIONES_OPCIONALES: readonly SeccionPortal[] = ["novedades_texto", "facturas"];
+const SECCIONES_OPCIONALES: readonly SeccionPortal[] = ["novedades_texto", "facturas", "tickets"];
 
 /** Estados de un acceso: solo `activo` abre el portal; `suspendido` es reversible, `revocado` cierra. */
 export const ESTADOS_ACCESO = ["activo", "suspendido", "revocado"] as const;

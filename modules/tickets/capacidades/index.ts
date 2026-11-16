@@ -5,6 +5,7 @@ import { ticketsAprobar, ticketsRechazar } from "./aprobacion";
 import { ticketsCrear, ticketsComentar } from "./escritura";
 import { ticketsCambiarEstado, ticketsReasignar } from "./estado";
 import { ticketsListar, ticketsObtener } from "./lectura";
+import { portalTicketsCrear, portalTicketsListar } from "./portal";
 import { tiposCrear, tiposListar } from "./tipos";
 import { tiposActualizar } from "./tipos-actualizar";
 
@@ -20,4 +21,6 @@ export const capacidades: readonly Capacidad[] = [
   ticketsReasignar,
   ticketsAprobar,
   ticketsRechazar,
+  portalTicketsListar,
+  portalTicketsCrear,
 ];

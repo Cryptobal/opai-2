@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Receipt } from "lucide-react";
+import { ChevronLeft, ChevronRight, Receipt, Ticket } from "lucide-react";
 
 import { Alerta, Card, CardContent, CardHeader, CardTitle, Empty } from "@opai/ds";
 
@@ -14,6 +14,7 @@ export type ResumenMes = {
   limitado: boolean;
   novedadesTexto: boolean;
   facturas: boolean;
+  tickets: boolean;
   instalaciones: {
     id: string;
     nombre: string;
@@ -25,7 +26,7 @@ export type ResumenMes = {
   }[];
 };
 
-/** Mes anterior y siguiente del informe, y el acceso a las facturas si la cuenta las tiene (CAR-518). */
+/** Mes anterior y siguiente del informe, y el acceso a facturas y tickets si la cuenta los tiene (CAR-518, CAR-519). */
 function NavMes({ r }: { r: ResumenMes }) {
   return (
     <nav aria-label="Mes del informe" className="flex flex-wrap items-center gap-2">
@@ -39,11 +40,18 @@ function NavMes({ r }: { r: ResumenMes }) {
         </EnlaceBoton>
       )}
       {r.mesEnCurso ? <span className="t-caption">Mes en curso</span> : null}
-      {r.facturas ? (
-        <EnlaceBoton href="/cliente/facturas" variante="secondary" icono={Receipt} className="sm:ml-auto">
-          Facturas
-        </EnlaceBoton>
-      ) : null}
+      <span className="flex gap-2 sm:ml-auto">
+        {r.tickets ? (
+          <EnlaceBoton href="/cliente/tickets" variante="secondary" icono={Ticket}>
+            Tickets
+          </EnlaceBoton>
+        ) : null}
+        {r.facturas ? (
+          <EnlaceBoton href="/cliente/facturas" variante="secondary" icono={Receipt}>
+            Facturas
+          </EnlaceBoton>
+        ) : null}
+      </span>
     </nav>
   );
 }

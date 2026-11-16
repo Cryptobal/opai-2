@@ -49,4 +49,13 @@ export const ajustesPortalCliente = z.object({
     permiso: "portal_cliente:config.manage",
     control: "switch",
   }),
+  seccion_tickets: z.boolean().default(true).meta({
+    etiqueta: "Permitir que los clientes abran tickets",
+    ayuda:
+      "Cada cuenta enciende aparte sus tickets en su configuración del portal (apagados por defecto). El cliente usa los tipos de ticket marcados como «Clientes» en Configuración → Tickets. Apagado aquí, ningún cliente los ve.",
+    grupo: "Secciones del portal",
+    ambito: "tenant",
+    permiso: "portal_cliente:config.manage",
+    control: "switch",
+  }),
 });

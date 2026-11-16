@@ -58,11 +58,13 @@ export const consumidorTicketsAvisos = defineConsumidor({
     const responsable = typeof p.responsableId === "string" ? p.responsableId : t.responsableId;
     const usuarioId = aviso.para === "solicitante" ? t.solicitanteId : responsable;
     if (usuarioId === ev.actorId || usuarioId === ev.viaUserId) return;
-    const activo = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: usuarioId, estado: "activa" }, select: { userId: true } });
+    const activo = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: usuarioId, estado: "activa" }, select: { portales: true } });
     if (!activo) return;
+    // El contacto del cliente sigue sus tickets en su portal (CAR-519); el resto, en la ficha del ERP.
+    const enlace = activo.portales.includes("erp") ? `/tickets/${t.id}` : "/cliente/tickets";
     if (await ctx.db.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId } })) return;
     await ctx.db.notificacion.create({
-      data: { tenantId: ctx.tenantId, usuarioId, eventoId: ev.id, titulo: aviso.titulo, cuerpo: aviso.cuerpo, enlace: `/tickets/${t.id}` },
+      data: { tenantId: ctx.tenantId, usuarioId, eventoId: ev.id, titulo: aviso.titulo, cuerpo: aviso.cuerpo, enlace },
     });
   },
 });

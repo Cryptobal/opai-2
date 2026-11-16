@@ -2,32 +2,12 @@ import { z } from "zod";
 
 import { NOMBRE_TIPO_DTE_VENTA, type TipoDteVenta } from "@opai/domain";
 
-import { ajuste } from "../core/config/valores";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { noEncontrado, prohibido } from "../errores";
+import { noEncontrado } from "../errores";
 import { pdfEnBase64 } from "../finanzas/ventas-pdf-doc";
-import type { Contexto } from "../types";
-import { type AccesoResuelto, PERMISO_PORTAL, accesoDelActor } from "./comun";
-import { configDeCuenta } from "./config-datos";
-
-/** ¿La cuenta ve sus facturas? Finanzas activo, la empresa no las apagó y la cuenta las encendió (CAR-518). */
-export async function facturasActivas(
-  ctx: Contexto,
-  visibles: readonly string[],
-): Promise<boolean> {
-  if (!ctx.modulosActivos.includes("finanzas") || !visibles.includes("facturas")) return false;
-  return (await ajuste<boolean>(ctx, "portal_cliente", "seccion_facturas")) !== false;
-}
-
-/** Acceso del contacto con las facturas encendidas, o FORBIDDEN. */
-async function accesoConFacturas(ctx: Contexto): Promise<AccesoResuelto> {
-  const a = await accesoDelActor(ctx);
-  const { config } = await configDeCuenta(ctx, a.cuentaId);
-  if (!(await facturasActivas(ctx, config.seccionesVisibles)))
-    throw prohibido("Tu empresa de seguridad no muestra las facturas en el portal.");
-  return a;
-}
+import { type AccesoResuelto, PERMISO_PORTAL } from "./comun";
+import { accesoConSeccion } from "./seccion-opcional";
 
 /**
  * Documentos emitidos que ve el contacto (ADR-022): de su cuenta y ya emitidos ante el SII. Los de una instalación,
@@ -77,7 +57,7 @@ export const facturasListar = defineCapability({
   dryRun: false,
   portales: ["cliente"],
   async handler(ctx, input) {
-    const a = await accesoConFacturas(ctx);
+    const a = await accesoConSeccion(ctx, "facturas");
     const donde = dondeFacturas(a);
     const desde = input.cursor
       ? await ctx.db.documentoEmitido.findFirst({
@@ -122,7 +102,7 @@ export const facturasPdf = defineCapability({
   dryRun: false,
   portales: ["cliente"],
   async handler(ctx, input) {
-    const a = await accesoConFacturas(ctx);
+    const a = await accesoConSeccion(ctx, "facturas");
     const doc = await ctx.db.documentoEmitido.findFirst({
       where: { ...dondeFacturas(a), id: input.documentoId },
     });

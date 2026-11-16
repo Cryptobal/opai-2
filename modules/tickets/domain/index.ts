@@ -37,3 +37,6 @@ export function esEstadoTerminal(estado: EstadoTicket): boolean {
 export function puedeAprobarse(estado: EstadoTicket): boolean {
   return estado === "abierto" || estado === "en_curso";
 }
+
+/** En `rolesPermitidos`, marca un tipo que los contactos del Portal Cliente pueden abrir (CAR-519). */
+export const ROL_PORTAL_CLIENTE = "cliente";
