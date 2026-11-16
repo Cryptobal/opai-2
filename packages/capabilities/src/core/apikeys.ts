@@ -97,7 +97,7 @@ export const apikeysCreate = defineCapability({
     const hereda = permisos === null;
     const scopeAmplio = input.scopes.includes("*");
     const advertencia = scopeAmplio
-      ? 'El scope "*" es amplio y transitorio (ADR-034): la key verá todos los módulos que se activen. Prefiere scopes mínimos por módulo.'
+      ? 'El scope "*" es amplio y transitorio: la key verá todos los módulos que se activen. Prefiere scopes mínimos por módulo.'
       : null;
     const tenant = await tenantActual(ctx);
     const { secreto, prefijo, hash } = generarApiKey(tenant.slug);

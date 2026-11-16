@@ -43,7 +43,7 @@ async function conectar(url: string) {
 describe("traer el export de OPAI 1 con la llave de la empresa", () => {
   it("sin la integración conectada explica dónde pegar la llave", async () => {
     const ctx = await habilitada(contextoDePrueba().ctx);
-    await expect(leerExportDeOpai1(ctx, async () => VACIO)).rejects.toThrow(/Configuración › Integraciones › OPAI 1/);
+    await expect(leerExportDeOpai1(ctx, async () => VACIO)).rejects.toThrow(/Migración \(exportar datos\)/);
   });
 
   it("entrega al lector la dirección y la llave guardadas, y la llave no queda en la auditoría", async () => {
@@ -78,7 +78,7 @@ describe("traer el export de OPAI 1 con la llave de la empresa", () => {
     await expect(falla("Exportador OPAI 1.0 respondió 403")).rejects.toThrow(/respondió 403/);
     const otro = await falla(`fetch failed con ${LLAVE}`).catch((e: Error) => e.message);
     expect(otro).not.toContain(LLAVE);
-    expect(otro).toMatch(/No se pudo leer OPAI 1/);
+    expect(otro).toMatch(/No se pudo leer el export de migración/);
   });
 
   it("solo se lee OPAI 1 cuando se pide y no viene un origen pegado", () => {
