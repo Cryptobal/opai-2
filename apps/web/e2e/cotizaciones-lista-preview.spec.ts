@@ -1,13 +1,15 @@
 import { expect, test } from "@playwright/test";
 
 import { capturar } from "./preview";
-import { E2E_PASSWORD as password, entrar } from "./sesion";
+import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-544: lista con filtros/vistas y paso «Documento y envío» con tarjetas PDF/propuesta.
-// `preview-e2e` entra como el owner de la empresa ficticia `qa-e2e` (mismo patrón que el resto de *-preview).
-// Cotización de muestra opcional: `packages/db/scripts/qa-e2e/cotizacion-ficha.sql` en Neon `main`.
+// `preview-e2e` entra como el owner de `qa-e2e`. Depende de `packages/db/scripts/qa-e2e/cotizacion-ficha.sql`
+// aplicado en Neon `main` (cotización ficticia `CPQ-2026-901`, tras `factura-aceptada.sql`).
+const CODIGO_COTIZACION_QA = "CPQ-2026-901";
+
 test.describe("@preview CPQ: lista y documento", () => {
-  test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  test.skip(!E2E_PASSWORD, "Falta E2E_PASSWORD");
 
   test("filtros, vistas y tarjetas de documento", async ({ page }, info) => {
     test.setTimeout(150_000);
@@ -25,13 +27,9 @@ test.describe("@preview CPQ: lista y documento", () => {
     await capturar(page, info, "cotizaciones-lista-filtros");
 
     await page.goto("/cotizaciones");
-    const primera = page.getByRole("link").filter({ hasText: /CPQ-\d{4}-\d+/ }).first();
-    const hayCotizacion = await primera
-      .isVisible({ timeout: 20_000 })
-      .catch(() => false);
-    test.skip(!hayCotizacion, "Sin cotizaciones en qa-e2e; aplicar cotizacion-ficha.sql en Neon main");
-
-    await primera.click();
+    const cotizacion = page.getByRole("link").filter({ hasText: CODIGO_COTIZACION_QA });
+    await expect(cotizacion).toBeVisible({ timeout: 60_000 });
+    await cotizacion.click();
     await page.getByRole("button", { name: /Documento y envío/i }).click();
     await expect(page.getByRole("button", { name: "Ver cotización (PDF)" })).toBeVisible({ timeout: 60_000 });
     await expect(page.getByRole("button", { name: /propuesta técnica/i })).toBeVisible();
