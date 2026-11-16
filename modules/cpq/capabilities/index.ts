@@ -61,7 +61,7 @@ import {
   propuestaTecnicaInicializar,
   propuestaTecnicaPreviewPdf,
   propuestaTecnicaSyncServicio,
-  propuestaTecnicaUpdate,
+  propuestaTecnicaUpdate, propuestaTecnicaVistaHtml,
 } from "./propuesta-tecnica";
 import { cotizacionesClonar, versionesCrear } from "./versiones";
 import { cotizacionesArchivar, cotizacionesRestaurar } from "./archivar";
@@ -134,7 +134,7 @@ export const capacidades: readonly Capacidad[] = [
   propuestaTecnicaInicializar,
   propuestaTecnicaUpdate,
   propuestaTecnicaSyncServicio,
-  propuestaTecnicaPreviewPdf,
+  propuestaTecnicaPreviewPdf, propuestaTecnicaVistaHtml,
   propuestaCapitulosList,
   propuestaCapitulosGuardar,
   propuestaPromptExportable, ...capacidadesPropuestaHtml,

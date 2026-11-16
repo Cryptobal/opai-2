@@ -20,16 +20,21 @@ test.describe("@preview cpq: IA por sección en el detalle de la cotización", (
     await page.getByRole("button", { name: "Revisar cotización" }).click();
     await page.getByRole("button", { name: "Confirmar creación" }).click();
     await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
-    const textos = page.getByRole("group", { name: "Textos de la propuesta" });
     const armar = page.getByRole("button", { name: "Armar propuesta técnica" });
     await expect(async () => {
-      if (!(await armar.isVisible())) await page.getByRole("button", { name: /Documento y envío/ }).click();
+      if (!(await armar.isVisible()))
+        await page.getByRole("button", { name: /Documento y envío/ }).click();
       await expect(armar).toBeVisible({ timeout: 5_000 });
     }).toPass({ timeout: 60_000 });
     await expect(async () => {
-      if (!(await textos.isVisible())) await page.getByRole("button", { name: "Armar propuesta técnica" }).click();
-      await expect(textos).toBeVisible({ timeout: 5_000 });
-    }).toPass({ timeout: 90_000 });
+      await armar.click();
+      await expect(page).toHaveURL(/\/propuesta-tecnica$/, { timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
+    await expect(page.getByRole("list", { name: "Bloques de la propuesta" })).toBeVisible({
+      timeout: 60_000,
+    });
+    await expect(page.getByRole("region", { name: "Documento de la propuesta" })).toBeVisible();
+    const textos = page.getByRole("group", { name: "Textos de la propuesta" });
     const seccion = textos.getByRole("group").first();
     await seccion.getByRole("button", { name: "Redactar con IA" }).click();
     const borrador = seccion.getByRole("region", { name: "Borrador de IA" });

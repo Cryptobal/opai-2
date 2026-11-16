@@ -452,6 +452,7 @@ cpq_propuestas_tecnica_preview_pdf
 cpq_propuestas_tecnica_prompt_exportable
 cpq_propuestas_tecnica_sync_servicio
 cpq_propuestas_tecnica_update
+cpq_propuestas_tecnica_vista_html
 cpq_puestos_confirmar
 cpq_puestos_ofrecer
 cpq_secciones_margen

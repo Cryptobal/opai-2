@@ -10,6 +10,7 @@ export {
   propuestaTecnicaSyncServicio,
   propuestaTecnicaPreviewPdf,
 } from "./propuesta-tecnica-armador-cap";
+export { propuestaTecnicaVistaHtml } from "./propuesta-tecnica-vista-html-cap";
 export { propuestaTecnicaInicializar } from "./propuesta-tecnica-inicializar-cap";
 export { enviosPropuestaList, enviosPropuestaAprobar } from "./propuesta-tecnica-envios-cap";
 export { enviosPropuestaSolicitar } from "./propuesta-tecnica-envios-solicitar-cap";
