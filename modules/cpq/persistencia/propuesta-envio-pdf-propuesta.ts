@@ -9,16 +9,15 @@ import type { SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecni
 import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
 import { cargarLogoMarca } from "./pdf/logo";
 import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
+import { renderPdfPropuestaHtml } from "./pdf-propuesta-html";
 import { renderPdfPropuestaTecnica } from "./pdf-propuesta-tecnica";
 import { marcaDocumentoEnVersion, type MarcaDocumentoVista, vistaMarcaDocumento } from "./marca-documento";
+import { htmlConValores, plantillaHtmlDeEnvio } from "./propuesta-html-uso";
 import { vistaPlantillaPropuesta } from "./plantilla-propuesta";
 import type { ServicioDesdeCotizacion } from "../domain/documento/propuesta-tecnica";
 import { capitulosDeEnvio } from "./propuesta-capitulos";
-import { htmlConValores, plantillaHtmlDeEnvio } from "./propuesta-html-uso";
-import { renderPdfPropuestaHtml } from "./pdf-propuesta-html";
 import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
 
-/** PDF con la versión de la plantilla HTML congelada en el envío y los valores del contrato de campos. */
 async function pdfHtmlDeEnvio(
   ctx: Contexto,
   snapshot: SnapshotEnvioPropuesta,
@@ -51,7 +50,9 @@ export async function pdfPropuestaDesdeSnapshot(
   const marca =
     (await marcaDocumentoEnVersion(ctx, snapshot.marcaDocumentoVersion)) ??
     (await vistaMarcaDocumento(ctx));
-  if (snapshot.plantillaHtml) return pdfHtmlDeEnvio(ctx, snapshot, snapshot.plantillaHtml, { ...input, marca });
+  if (snapshot.plantillaHtml) {
+    return pdfHtmlDeEnvio(ctx, snapshot, snapshot.plantillaHtml, { ...input, marca });
+  }
   const rowPl = await ctx.db.cpqPlantillaDocumento.findFirst({
     where: { id: snapshot.plantillaDocumentoId, tenantId: ctx.tenantId },
   });

@@ -1,12 +1,13 @@
-import { reglaDeNegocio, resolverCamposDocumento, type Contexto } from "@opai/capabilities";
+import { reglaDeNegocio, type Contexto } from "@opai/capabilities";
 import { renderizarPlantillaCampos, validarPlantillaCampos } from "@opai/domain";
 
 import type { ContratoCamposEnvio } from "../domain/documento/propuesta-tecnica";
 import { sanearHtml } from "../domain/documento/sanear-html";
 import { cuentaDeCotizacion } from "./propuesta-campos";
+import { resolverCamposPropuesta } from "./valores-campos-propuesta";
 
 type ValoresHtml = ContratoCamposEnvio["valores"];
-const SIN_VALORES: ValoresHtml = { campos: {}, colecciones: { instalaciones: [] } };
+const SIN_VALORES: ValoresHtml = { campos: {}, colecciones: { instalaciones: [], puestos: [] } };
 
 /** Plantilla HTML en uso de la empresa; con datos antiguos de más de una en uso, la más reciente. */
 export function plantillaHtmlEnUso(ctx: Contexto) {
@@ -17,9 +18,11 @@ export function plantillaHtmlEnUso(ctx: Contexto) {
   });
 }
 
-/** La versión congelada en un envío: el HTML guardado es inmutable y se comprueba su huella. */
 export async function plantillaHtmlDeEnvio(ctx: Contexto, ref: { id: string; hash: string }) {
-  const f = await ctx.db.cpqPropuestaHtml.findFirst({ where: { id: ref.id }, select: { htmlSaneado: true, hashSha256: true } });
+  const f = await ctx.db.cpqPropuestaHtml.findFirst({
+    where: { id: ref.id },
+    select: { htmlSaneado: true, hashSha256: true },
+  });
   if (!f || f.hashSha256 !== ref.hash) throw reglaDeNegocio("No se encontró la plantilla HTML congelada del envío.");
   return f.htmlSaneado;
 }
@@ -28,7 +31,9 @@ export async function plantillaHtmlDeEnvio(ctx: Contexto, ref: { id: string; has
 export function htmlConValores(html: string, valores: ValoresHtml = SIN_VALORES): string {
   const r = renderizarPlantillaCampos(html, valores, { finalidad: "propuesta", html: true });
   if (!r.ok) {
-    throw reglaDeNegocio(`La plantilla HTML tiene campos que no se pueden usar: ${r.problemas.slice(0, 3).map((p) => p.mensaje).join(" ")}`);
+    throw reglaDeNegocio(
+      `La plantilla HTML tiene campos que no se pueden usar: ${r.problemas.slice(0, 3).map((p) => p.mensaje).join(" ")}`,
+    );
   }
   const s = sanearHtml(r.texto);
   if (!s.ok) throw reglaDeNegocio("Los datos de la cotización no caben en la plantilla HTML: revisa los textos del cliente.");
@@ -41,10 +46,14 @@ export async function valoresVistaHtml(ctx: Contexto, cotizacionId: string, html
   if (v.usados.length === 0 && v.colecciones.length === 0) return SIN_VALORES;
   const cuentaId = await cuentaDeCotizacion(ctx, cotizacionId);
   if (!cuentaId) return SIN_VALORES;
-  const r = await resolverCamposDocumento(ctx, {
+  const r = await resolverCamposPropuesta(ctx, {
     finalidad: "propuesta",
     cuentaId,
+    cotizacionId,
     referencias: v.colecciones.includes("referencias"),
   });
-  return { campos: r.campos, colecciones: r.colecciones };
+  return {
+    campos: r.campos,
+    colecciones: { instalaciones: r.colecciones.instalaciones, referencias: r.colecciones.referencias, puestos: r.colecciones.puestos ?? [] },
+  };
 }

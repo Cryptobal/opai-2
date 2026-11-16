@@ -43,6 +43,8 @@ const ENTIDADES: Readonly<Record<string, string>> = {
   instalacion: "Instalación",
   negocio: "Negocio",
   cotizacion: "Cotización (única fuente de precios y condiciones)",
+  puesto: "Línea de puesto en la cotización",
+  bloque: "Bloques HTML generados por OPAI",
 };
 
 const fila = (c: CampoDef) =>
@@ -78,7 +80,9 @@ function ejemploRepeticion(disp: readonly CampoDef[], col: ColeccionDef | undefi
 export function generarPromptPropuesta(e: EntradaPrompt): PromptExportable {
   const disp = e.disponibles;
   // La repetición solo se explica si hay marcadores de la entidad que se repite.
-  const col = e.colecciones.find((c) => disp.some((d) => entidadDeCampo(d) === c.entidad));
+  const col =
+    e.colecciones.find((c) => c.clave === "puestos" && disp.some((d) => entidadDeCampo(d) === c.entidad)) ??
+    e.colecciones.find((c) => disp.some((d) => entidadDeCampo(d) === c.entidad));
   const lineas: string[] = [
     `# Prompt · Propuesta técnica OPAI (catálogo de campos v${VERSION_CATALOGO_CAMPOS})`,
     "",
@@ -88,7 +92,7 @@ export function generarPromptPropuesta(e: EntradaPrompt): PromptExportable {
     "## Reglas",
     "",
     "- Usa solo los marcadores de este prompt, tal como están escritos (minúsculas y guion bajo). Si un dato no tiene marcador, no lo escribas ni lo inventes.",
-    "- Precios, vigencia y condiciones económicas no tienen marcador todavía: no los escribas, no los calcules y no dejes espacios para ellos. OPAI los incorpora desde la cotización por otra vía.",
+    "- Precios y vigencia salen de los marcadores de `cotizacion.*`, de `puesto.precio_mensual` y de los bloques `{{tabla_servicio}}` y `{{resumen_economico}}`: no los inventes ni los calcules.",
     "- No inventes certificados, SLA, plazos, cantidades de personal ni nombres de personas.",
     "- Un marcador sin valor queda vacío y OPAI lo informa como faltante: no lo reemplaces por texto de relleno.",
     "- Los valores de ejemplo de este prompt son ficticios; no los copies al diseño final.",

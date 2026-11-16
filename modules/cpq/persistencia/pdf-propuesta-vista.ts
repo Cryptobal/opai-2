@@ -8,14 +8,11 @@ import { cargarLogoMarca } from "./pdf/logo";
 import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
 import { renderPdfPropuestaHtml } from "./pdf-propuesta-html";
 import { renderPdfPropuestaTecnica } from "./pdf-propuesta-tecnica";
-import type { PlantillaPropuestaVista } from "./plantilla-propuesta";
 import { htmlConValores, plantillaHtmlEnUso, valoresVistaHtml } from "./propuesta-html-uso";
+import type { PlantillaPropuestaVista } from "./plantilla-propuesta";
 import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
 
-/**
- * Vista previa (o borrador) del PDF de la propuesta técnica con los datos vigentes de la cotización. Si la empresa
- * tiene una plantilla HTML en uso, el PDF sale de ella; si no, del formato actual por bloques.
- */
+/** Vista previa (o borrador) del PDF de la propuesta técnica con los datos vigentes de la cotización. Con plantilla HTML en uso, sale de ella (CAR-533). */
 export async function pdfPropuestaVista(
   ctx: Contexto,
   d: {

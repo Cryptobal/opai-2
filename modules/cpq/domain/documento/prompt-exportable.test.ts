@@ -77,7 +77,7 @@ describe("prompt exportable de la propuesta", () => {
 
   it("explica la repetición y la condición con la sintaxis real y un ejemplo que valida", () => {
     const { texto } = prompt();
-    expect(texto).toContain("{{#cada instalaciones}}");
+    expect(texto).toContain("{{#cada puestos}}");
     expect(texto).toContain("{{#si clave}}");
     expect(texto).toContain("No se anida un `#cada`");
     const ej = texto.split("```")[1] ?? "";
@@ -89,7 +89,7 @@ describe("prompt exportable de la propuesta", () => {
     const t = prompt().texto.toLowerCase();
     for (const x of ["figma", "pptx", "powerpoint", "google cloud"]) expect(t).not.toContain(x);
     expect(t).toContain("un único fragmento html");
-    expect(t).toContain("no tienen marcador todavía");
+    expect(t).toContain("{{tabla_servicio}}");
     expect(t).toContain("`<img>`");
   });
 

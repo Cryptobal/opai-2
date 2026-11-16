@@ -2,16 +2,18 @@ import { CAMPOS_CONTACTO } from "./catalogo-contacto";
 import { CAMPOS_CUENTA } from "./catalogo-cuenta";
 import { CAMPOS_EMPRESA } from "./catalogo-empresa";
 import { CAMPOS_INSTALACION } from "./catalogo-lugares";
+import { CAMPOS_BLOQUE_PROPUESTA } from "./catalogo-bloques";
 import { CAMPOS_COTIZACION, CAMPOS_NEGOCIO } from "./catalogo-negocio";
 import { CAMPOS_PERSONA } from "./catalogo-personas";
+import { CAMPOS_PUESTO } from "./catalogo-puesto";
 import { CAMPOS_REFERENCIA } from "./catalogo-referencias";
 import type { CampoDef, ColeccionDef, FinalidadCampo } from "./tipos";
 
 /**
  * Sube con cada campo nuevo o cambio de clave (los alias antiguos se mantienen). Lo congelado al enviar
- * guarda esta versión. v2 (CAR-138 PR 7): colección `referencias`.
+ * guarda esta versión. v3 (CAR-571): puestos, bloques HTML y resolución CPQ/tenant en propuestas.
  */
-export const VERSION_CATALOGO_CAMPOS = 2;
+export const VERSION_CATALOGO_CAMPOS = 3;
 
 /** El catálogo único. Documentos, contratos, CPQ y propuestas consumen este contrato; no hay otro local. */
 export const CATALOGO_CAMPOS: readonly CampoDef[] = [
@@ -22,6 +24,8 @@ export const CATALOGO_CAMPOS: readonly CampoDef[] = [
   ...CAMPOS_INSTALACION,
   ...CAMPOS_NEGOCIO,
   ...CAMPOS_COTIZACION,
+  ...CAMPOS_PUESTO,
+  ...CAMPOS_BLOQUE_PROPUESTA,
   ...CAMPOS_REFERENCIA,
 ];
 
@@ -35,6 +39,11 @@ export const COLECCIONES_CAMPO: readonly ColeccionDef[] = [
     clave: "referencias",
     entidad: "referencia",
     descripcion: "Clientes activos que consintieron ser referencia (nunca la cuenta destinataria)",
+  },
+  {
+    clave: "puestos",
+    entidad: "puesto",
+    descripcion: "Líneas de puesto de la cotización (precio mensual por línea)",
   },
 ];
 

@@ -69,7 +69,7 @@ describe("contrato de campos de la propuesta", () => {
     const p = await preparar("Para {{cuenta.nombre}}");
     const c = await contratoCamposPropuesta(p.ctx, p.entrada);
     expect(c?.usados).toEqual(["cuenta.nombre"]);
-    expect(c?.versionCatalogo).toBe(2);
+    expect(c?.versionCatalogo).toBe(3);
     expect(c?.valores.campos["cuenta.nombre"]).toBe("Cliente Ficticio SpA");
     expect(resolver.mock.calls[0]?.[1]).toMatchObject({ finalidad: "propuesta" });
   });
