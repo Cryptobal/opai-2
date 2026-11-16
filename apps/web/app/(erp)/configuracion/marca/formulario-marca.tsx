@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Campo, Input, SeccionTarjeta } from "@opai/ds";
+import { Alerta, avisar, Campo, Input, SeccionTarjeta, Badge } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { Marca } from "./tipos";
+import { FormularioDocumentoMarca } from "./formulario-documento";
 import { VistaPreviaMarca } from "./vista-previa-marca";
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -63,6 +64,7 @@ export function FormularioMarca({ marca, puede, hoy }: Props) {
     colorPrimario: marca.colorPrimario ?? "",
     colorSecundario: marca.colorSecundario ?? "",
   });
+  const [doc, setDoc] = useState<Record<string, unknown>>({});
   const { ejecutar, error: falla } = useCapacidad("erp");
   const set = (k: keyof typeof d) => (v: string) => setD((x) => ({ ...x, [k]: v }));
   async function guardar() {
@@ -72,6 +74,7 @@ export function FormularioMarca({ marca, puede, hoy }: Props) {
       eslogan: d.eslogan.trim() || null,
       colorPrimario: d.colorPrimario || null,
       colorSecundario: d.colorSecundario || null,
+      ...doc,
     });
     if (r) avisar.exito("Marca guardada");
   }
@@ -126,6 +129,23 @@ export function FormularioMarca({ marca, puede, hoy }: Props) {
           </div>
         </SeccionTarjeta>
       </div>
+      <SeccionTarjeta titulo="Documentos PDF">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <p className="t-caption text-fg-muted">
+            Cotizaciones y propuestas técnicas. Los logos de arriba también aplican aquí.
+          </p>
+          {marca.documentoVersion > 0 ? (
+            <Badge tono="info">Versión v{marca.documentoVersion}</Badge>
+          ) : null}
+        </div>
+        <FormularioDocumentoMarca
+          tipografia={marca.documentoTipografia}
+          piePagina={marca.documentoPiePagina}
+          condicionesDefault={marca.documentoCondicionesDefault}
+          puede={puede}
+          onCambio={(v) => setDoc((x) => ({ ...x, ...v }))}
+        />
+      </SeccionTarjeta>
       <VistaPreviaMarca
         nombre={d.nombreComercial}
         primario={d.colorPrimario}
