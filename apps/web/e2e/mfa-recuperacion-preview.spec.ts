@@ -25,7 +25,7 @@ test.describe("@preview recuperar el segundo factor", () => {
   test("el owner ve «Restablecer segundo factor» con su advertencia", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/usuarios");
-    await page.locator('a[href*="?editar="]').first().click();
+    await page.getByRole("link", { name: "Restablecer MFA E2E" }).click();
     await page.waitForURL(/\?editar=/, { timeout: 60_000 });
     await page.getByRole("button", { name: "Restablecer segundo factor" }).click();
     const dialogo = page.getByRole("dialog", { name: /^¿Restablecer el segundo factor de / });
