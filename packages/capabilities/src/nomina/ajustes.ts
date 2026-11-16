@@ -10,8 +10,9 @@ const texto = (max: number) => z.string().trim().max(max).default("");
 
 export const ajustesNomina = z.object({
   dia_cierre: z.number().int().min(1).max(31).default(31).meta({
-    etiqueta: "Día de cierre del mes",
-    ayuda: "Día del mes en que se cierra el período de remuneraciones; si el mes es más corto, el último día.",
+    etiqueta: "Día de cierre del período de remuneraciones",
+    ayuda:
+      "Día del mes en que se cierra el período de remuneraciones; si el mes es más corto, el último día. Es distinto del cierre automático del mes en Desempeño.",
     grupo: "Período",
     ambito: "tenant",
     permiso: PERMISO_CONFIG,

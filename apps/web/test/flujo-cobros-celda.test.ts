@@ -32,6 +32,7 @@ const planilla = (): Planilla => ({
       id: FILA_COBROS_ESPERADOS,
       etiqueta: "Cobros esperados",
       seccion: "ingreso",
+      grupo: null,
       vinculo: null,
       arrastre: false,
       orden: 0,
@@ -111,6 +112,7 @@ describe("ivaDeSemana y hojaEspecial (CAR-397)", () => {
     p.filas.push({
       id: FILA_IVA,
       etiqueta: "IVA a pagar",
+      grupo: "impuestos",
       seccion: "egreso",
       vinculo: null,
       arrastre: false,

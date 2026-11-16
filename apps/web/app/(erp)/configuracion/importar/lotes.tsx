@@ -58,7 +58,7 @@ export function LotesImportacion({ lotes, nombres }: { lotes: Lote[]; nombres: R
               <Td className="whitespace-normal">
                 <span className="font-medium">{nombres[l.importador] ?? l.importador}</span>
                 <span className="t-caption block">
-                  {[fecha(l.iniciadaEn), l.archivo ?? (l.origen === "opai1_json" ? "Export de OPAI 1" : "Filas enviadas por un agente"), l.lanzadaPor].filter(Boolean).join(" · ")}
+                  {[fecha(l.iniciadaEn), l.archivo ?? (l.origen === "opai1_json" ? "Export de migración" : "Filas enviadas por un agente"), l.lanzadaPor].filter(Boolean).join(" · ")}
                 </span>
               </Td>
               <Td className="whitespace-normal tabular-nums">

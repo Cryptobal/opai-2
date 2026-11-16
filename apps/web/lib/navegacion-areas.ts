@@ -42,7 +42,7 @@ function validarLimitePorArea(items: readonly EntradaArea[]): void {
   for (const [area, n] of porArea) {
     if (n > MAXIMO_ENTRADAS_POR_AREA) {
       throw new Error(
-        `El área "${area}" declara ${n} entradas (máximo ${MAXIMO_ENTRADAS_POR_AREA}, D2 del Brief 05).`,
+        `El área "${area}" declara ${n} entradas (máximo ${MAXIMO_ENTRADAS_POR_AREA}).`,
       );
     }
   }

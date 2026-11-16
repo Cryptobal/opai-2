@@ -25,7 +25,7 @@ export const flujoDerivadasListar = defineCapability({
   id: "finanzas.derivadas.listar",
   descripcion:
     "Lista las celdas derivadas de hechos externos (DTE, banco conciliado, nómina) para una semana del flujo. " +
-    "La fuente DTE aporta comprometido desde ventas; banco desde conciliación (CAR-97); nómina cuando exista el motor.",
+    "La fuente DTE aporta comprometido desde ventas; banco desde conciliación bancaria; nómina cuando exista el motor.",
   permiso: PERMISO_VER,
   input: z.object({ semana: semanaSchema.optional() }),
   output: outputSchema,
@@ -53,7 +53,7 @@ export const flujoDerivadasListar = defineCapability({
           id: "banco",
           nombre: "Movimientos bancarios",
           disponible: banco.length > 0,
-          descripcion: "Capa real desde conciliación bancaria (CAR-97).",
+          descripcion: "Capa real desde conciliación bancaria.",
           celdas: banco,
         },
         {
