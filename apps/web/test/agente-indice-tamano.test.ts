@@ -6,12 +6,19 @@ import { asegurarRegistro } from "../lib/registro";
 
 asegurarRegistro();
 
-// CAR-333: el agente envía en cada llamada el índice con el nombre de todas las herramientas
-// (los esquemas se piden aparte). El turno tiene un tope de 128.000 tokens sumando hasta 12
-// llamadas, y el índice de hoy ocupa unos 6.000 por llamada. Si el registro crece hasta que el
-// índice solo se lleve cerca de 8.000 tokens por llamada (24.000 caracteres), hay que enviarlo por módulos o paginarlo antes
-// de que el agente vuelva a quedarse sin presupuesto. Aviso a futuro, no prueba de regresión.
-it("el índice de nombres del registro completo deja espacio al trabajo del turno", () => {
-  const caracteres = listarCapacidades().reduce((n, c) => n + c.id.length + 2, 0);
+// CAR-333 / CAR-543: el agente lleva en el mensaje de sistema un índice corto por módulo; los nombres
+// de herramientas se piden con listar-modulo. El turno tiene tope de 128.000 tokens (~24.000 caracteres
+// del índice por llamada en el historial); este tope no sube: si el índice modular se acerca, conviene
+// paginar módulos o acortar nombres antes de que falte presupuesto.
+it("el índice modular del registro deja espacio al trabajo del turno", () => {
+  const porModulo = new Map<string, number>();
+  for (const c of listarCapacidades()) {
+    if (c.modulo === "platform" || c.modulo === "agente") continue;
+    porModulo.set(c.modulo, (porModulo.get(c.modulo) ?? 0) + 1);
+  }
+  const caracteres = [...porModulo.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([modulo, n]) => `${modulo} (${n})`)
+    .join("\n").length;
   expect(caracteres).toBeLessThan(24_000);
 });

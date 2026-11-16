@@ -1,5 +1,6 @@
 // Capacidades de Control de acceso (CAR-78 · E4, CAR-474). Se exponen igual en UI, API /api/v1 y MCP (ADR-004, ADR-055).
 import type { Capacidad } from "../types";
+import { registrosAnular, registrosCerrarBloque, registrosSalida } from "./correcciones";
 import { intentosListar } from "./intentos";
 import { listasAgregar, listasListar, listasQuitar } from "./listas";
 import { registrosObtener } from "./registro-get";
@@ -12,4 +13,7 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   registrosListar,
   registrosObtener,
   intentosListar,
+  registrosAnular,
+  registrosSalida,
+  registrosCerrarBloque,
 ];

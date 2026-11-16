@@ -2,37 +2,29 @@
 
 import { Button } from "@opai/ds";
 import { Sparkles } from "lucide-react";
-import dynamic from "next/dynamic";
-import { type MouseEvent, useState } from "react";
-import { createPortal } from "react-dom";
+import { useMemo } from "react";
 
+import { abrirAgente } from "./abrir-agente";
+import { useFichaActual } from "./contexto-pantalla-agente";
 import type { Contexto } from "./tipos";
 
-const AgenteEnFicha = dynamic(() => import("./agente-en-ficha").then((m) => m.AgenteEnFicha));
-
 /**
- * «Preguntar a OPAI» en la cabecera de una ficha (CAR-335 D5): abre el agente dentro de la ficha, en
- * la ranura que deja `DetailScreen` bajo la cabecera. El código del agente se carga recién al abrirlo.
+ * «Preguntar a OPAI» en la cabecera de una ficha (CAR-547): abre el panel lateral con el contexto
+ * de la ficha; ya no hay bloque de agente dentro del detalle (reemplaza CAR-335 D5).
  */
 export function BotonAgenteFicha({ contexto, nombre }: { contexto: Contexto; nombre: string }) {
-  const [ranura, setRanura] = useState<Element | null>(null);
-  const alternar = (e: MouseEvent<HTMLButtonElement>) => {
-    if (ranura) return setRanura(null);
-    const lugar = e.currentTarget.closest("[data-detalle]")?.querySelector("[data-ficha-agente]");
-    setRanura(lugar ?? null);
-  };
+  const ficha = useMemo(
+    () => ({ contexto, etiqueta: nombre }),
+    [contexto.id, contexto.tipo, nombre],
+  );
+  useFichaActual(ficha);
   return (
-    <>
-      <Button variant="secondary" aria-expanded={Boolean(ranura)} onClick={alternar}>
-        <Sparkles className="size-4 text-accent" aria-hidden />
-        Preguntar a OPAI
-      </Button>
-      {ranura
-        ? createPortal(
-            <AgenteEnFicha contexto={contexto} nombre={nombre} onCerrar={() => setRanura(null)} />,
-            ranura,
-          )
-        : null}
-    </>
+    <Button
+      variant="secondary"
+      onClick={() => abrirAgente({ contexto, etiqueta: nombre })}
+    >
+      <Sparkles className="size-4 text-accent" aria-hidden />
+      Preguntar a OPAI
+    </Button>
   );
 }

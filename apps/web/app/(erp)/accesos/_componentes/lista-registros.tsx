@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Badge, type EstadoPantalla } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
@@ -6,6 +8,7 @@ import { conFiltros, type Parametros } from "@/lib/parametros";
 
 import { estadoPantalla } from "@/lib/formato";
 
+import { CerrarEnBloque } from "./acciones-registro";
 import type { DatosRegistros, Registro } from "./datos";
 import { cuando, estadoRegistro, OPCIONES_TIPO, tipoDe } from "./etiquetas";
 
@@ -16,6 +19,8 @@ type Props = {
   p: Parametros;
   instalaciones: { id: string; nombre: string }[];
   seleccionado?: string;
+  /** Acción de la lista (p. ej. «Cerrar en bloque» en En sitio con una instalación elegida). */
+  accion?: ReactNode;
 };
 
 /** Ruta con los filtros de Accesos (instalación y tipo, además de búsqueda y estado). */
@@ -60,12 +65,21 @@ function filaDe(r: Registro, p: Parametros) {
 }
 
 /** Columna de registros (diseño `Accesos`): nombre, tipo y empresa, instalación y hora, estado. */
-function ListaRegistros({ state, items, siguiente, p, instalaciones, seleccionado }: Props) {
+function ListaRegistros({
+  state,
+  items,
+  siguiente,
+  p,
+  instalaciones,
+  seleccionado,
+  accion,
+}: Props) {
   const enSitio = p["estado"] === "en_sitio";
   return (
     <ListaMaestro
       state={state}
       titulo={enSitio ? "En sitio" : "Accesos"}
+      {...(accion ? { accion } : {})}
       buscar="Buscar por nombre, empresa o patente"
       filtros={[
         {
@@ -96,8 +110,21 @@ function ListaRegistros({ state, items, siguiente, p, instalaciones, seleccionad
   );
 }
 
+/** «Cerrar en bloque»: solo en En sitio, con una instalación elegida y para quien gestiona registros. */
+function accionDe(d: DatosRegistros & { gestiona: boolean }) {
+  const inst = d.p["instalacion"];
+  if (!d.gestiona || d.p["estado"] !== "en_sitio" || !inst || !d.r.ok) return {};
+  return { accion: <CerrarEnBloque instalacionId={inst} cuantos={d.r.data.items.length} /> };
+}
+
 /** La lista a partir de lo que carga `cargarRegistros` (la usan `/accesos` y `/accesos/[id]`). */
-export function ListaDeAccesos({ d, seleccionado }: { d: DatosRegistros; seleccionado?: string }) {
+export function ListaDeAccesos({
+  d,
+  seleccionado,
+}: {
+  d: DatosRegistros & { gestiona: boolean };
+  seleccionado?: string;
+}) {
   return (
     <ListaRegistros
       state={estadoPantalla(d.r)}
@@ -106,6 +133,7 @@ export function ListaDeAccesos({ d, seleccionado }: { d: DatosRegistros; selecci
       p={d.p}
       instalaciones={d.instalaciones}
       {...(seleccionado ? { seleccionado } : {})}
+      {...accionDe(d)}
     />
   );
 }

@@ -152,18 +152,26 @@ model EtiquetaAsignacion {
   @@schema("core")
 }
 
-/// CAR-27 · Campo personalizado de la empresa para cuentas, contactos o negocios. No se borra: se
-/// archiva (`activo = false`) para conservar los valores. La clave es estable y no cambia.
+/// CAR-27 · CAR-536 · Campo personalizado de la empresa para una ficha (registro en `@opai/domain`).
+/// No se borra: se archiva (`activo = false`) para conservar los valores. La clave es estable y no cambia.
 model CampoPersonalizado {
   id          String   @id @default(uuid(7)) @db.Uuid
   tenantId    String   @map("tenant_id") @db.Uuid
-  /// "cuenta" | "contacto" | "negocio" (CHECK).
+  /// "cuenta" | "contacto" | "negocio" | "instalacion" | "persona" (CHECK).
   entidad     String
   clave       String
   etiqueta    String
-  /// "texto" | "numero" | "fecha" | "lista" | "si_no" (CHECK).
+  /// `TIPOS_CAMPO_PERSONALIZADO` de `@opai/domain` (CHECK).
   tipo        String
+  /// Valor interno de cada opción (desplegable, radio, casillas): es lo que se guarda.
   opciones    String[] @default([])
+  /// Etiqueta visible de cada opción, en paralelo a `opciones`. Vacía = la etiqueta es el valor.
+  opcionesEtiquetas String[] @default([]) @map("opciones_etiquetas")
+  descripcion String?
+  /// Valor que se propone al llenar la ficha, validado por tipo.
+  valorDefecto Json?   @map("valor_defecto")
+  /// Solo números: "entero" | "decimal" | "moneda_clp" | "porcentaje" (CHECK).
+  formato     String?
   obligatorio Boolean  @default(false)
   orden       Int      @default(0)
   activo      Boolean  @default(true)
@@ -178,8 +186,8 @@ model CampoPersonalizado {
   @@schema("core")
 }
 
-/// CAR-27 · Valor de un campo personalizado en una cuenta, un contacto o un negocio: exactamente una
-/// columna (CHECK). Las FK a las entidades viven en la migración (sin @relation, como CAR-233).
+/// CAR-27 · CAR-536 · Valor de un campo personalizado en una ficha: exactamente una columna de entidad
+/// (CHECK). Las FK a las entidades viven en la migración (sin @relation, como CAR-233).
 model CampoValor {
   id         String   @id @default(uuid(7)) @db.Uuid
   tenantId   String   @map("tenant_id") @db.Uuid
@@ -187,6 +195,8 @@ model CampoValor {
   cuentaId   String?  @map("cuenta_id") @db.Uuid
   contactoId String?  @map("contacto_id") @db.Uuid
   negocioId  String?  @map("negocio_id") @db.Uuid
+  instalacionId String? @map("instalacion_id") @db.Uuid
+  personaId  String?  @map("persona_id") @db.Uuid
   valor      Json
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -196,6 +206,8 @@ model CampoValor {
   @@index([tenantId, cuentaId])
   @@index([tenantId, contactoId])
   @@index([tenantId, negocioId])
+  @@index([tenantId, instalacionId])
+  @@index([tenantId, personaId])
   @@map("campo_valores")
   @@schema("core")
 }
