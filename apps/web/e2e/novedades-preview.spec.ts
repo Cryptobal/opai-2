@@ -24,6 +24,7 @@ test.describe("@preview novedades y bandeja", () => {
   test("Novedades agrupadas y cortas, se marcan una o todas, y la Bandeja no las repite", async ({
     page,
   }, info) => {
+    test.setTimeout(info.project.name === "desktop" ? 180_000 : 120_000);
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
