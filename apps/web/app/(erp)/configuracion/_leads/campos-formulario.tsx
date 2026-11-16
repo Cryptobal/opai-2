@@ -32,7 +32,7 @@ export function CamposFormulario({
       <Campo
         etiqueta="Dominio autorizado"
         htmlFor="canal-dominio"
-        ayuda="Opcional. Solo el dominio, por ejemplo gard.cl. Si lo defines, los envíos desde el navegador deben venir de ese sitio."
+        ayuda="Opcional. Solo el dominio, por ejemplo ejemplo.cl. Si lo defines, los envíos desde el navegador deben venir de ese sitio."
       >
         <Input
           id="canal-dominio"

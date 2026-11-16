@@ -15,7 +15,7 @@ export const RECURSOS: Record<string, string> = {
   plantillas: "Plantillas", notificacion_reglas: "Reglas de aviso", notificaciones: "Notificaciones", push: "Avisos al celular",
   aprobaciones: "Aprobaciones", por_aprobar: "Por aprobar", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
   turno: "Turnos", plan: "Plan", historial: "Historial", negocios: "Negocios", solicitudes: "Solicitudes",
-  seguimiento_planes: "Planes de seguimiento", seguimientos: "Seguimientos", canales: "Canales", importar_1_0: "Importación desde OPAI 1.0", puntos: "Puntos de ronda",
+  seguimiento_planes: "Planes de seguimiento", seguimientos: "Seguimientos", canales: "Canales", importar_1_0: "Importación desde migración", puntos: "Puntos de ronda",
   programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos", mis_turnos: "Mis turnos", mis_documentos: "Mis documentos",
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
@@ -33,7 +33,7 @@ export const RECURSOS: Record<string, string> = {
   marca_documento: "Marca de documentos", plantillas_documento: "Plantillas de documento",
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
   propuestas_tecnica: "Propuestas técnicas", propuestas_html: "Plantillas HTML de propuesta", envios_propuesta: "Envíos de propuesta",
-  cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0", impuestos: "Impuestos",
+  cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura migrada", impuestos: "Impuestos",
   intentos: "Intentos de acceso denegados", informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
   // Grupos o equipos de usuarios (CAR-251).
   grupos: "Grupos",
@@ -50,5 +50,5 @@ export const RECURSOS: Record<string, string> = {
   hilo: "Hilo",
   // Permisos y licencias de una persona en la pauta (CAR-373).
   ausencias: "Permisos y licencias",
-  publicaciones: "Publicaciones de la pauta",
+  publicaciones: "Publicaciones de la pauta", visitas: "Visitas de supervisión",
 };
