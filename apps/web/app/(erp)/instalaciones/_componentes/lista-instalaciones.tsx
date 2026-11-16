@@ -44,10 +44,14 @@ export function ListaInstalaciones(p: Props) {
         {
           param: "estado",
           etiqueta: "Estado",
-          opciones: Object.entries(ESTADO_INSTALACION).map(([valor, e]) => ({
-            valor,
-            etiqueta: e.etiqueta,
-          })),
+          porDefecto: "activa",
+          opciones: [
+            ...Object.entries(ESTADO_INSTALACION).map(([valor, e]) => ({
+              valor,
+              etiqueta: e.etiqueta,
+            })),
+            { valor: "todas", etiqueta: "Todos" },
+          ],
         },
         { param: "region", etiqueta: "Región", opciones: REGIONES },
       ]}

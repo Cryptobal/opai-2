@@ -6,12 +6,14 @@ import type { CuentaFila, InstalacionDetalle, InstalacionFila, Pagina } from "@/
 
 /** Instalaciones filtradas por texto, cuenta, estado y región, con las cuentas para el filtro. */
 export async function cargarInstalaciones(p: Parametros) {
+  // Sin `estado` en la URL se abren las activas; `todas` quita el filtro.
+  const estado = p["estado"] ?? "activa";
   const [r, cuentas] = await Promise.all([
     ejecutarComoUsuario<Pagina<InstalacionFila>>("erp", "core.instalaciones.list", {
       limite: 100,
       ...(p["q"] ? { q: p["q"] } : {}),
       ...(p["cuenta"] ? { cuentaId: p["cuenta"] } : {}),
-      ...(p["estado"] ? { estado: p["estado"] } : {}),
+      ...(estado !== "todas" ? { estado } : {}),
       ...(p["region"] ? { region: p["region"] } : {}),
     }),
     ejecutarComoUsuario<Pagina<CuentaFila>>("erp", "core.cuentas.list", { limite: 100 }),
