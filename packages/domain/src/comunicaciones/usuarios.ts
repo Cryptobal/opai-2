@@ -7,7 +7,7 @@ export const COMUNICABLES_USUARIOS: readonly EventoComunicable[] = [
     descripcion: "Se envía a la persona invitada con su enlace de un solo uso.",
     transaccional: true,
     variables: [
-      v("invitador.nombre", "texto", "Carlos Irigoyen", "Quién invita."),
+      v("invitador.nombre", "texto", "María González", "Quién invita."),
       EMPRESA,
       v("rol", "texto", "admin", "Rol asignado."),
       URL("Enlace de aceptación (72 horas, un uso)."),

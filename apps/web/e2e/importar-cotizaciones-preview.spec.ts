@@ -13,7 +13,7 @@ test.describe("@preview comercial: importar cotizaciones", () => {
     const pestana = page.getByRole("link", { name: "Importar cotizaciones" }).first();
     await expect(pestana).toBeVisible({ timeout: 60_000 });
     await pestana.click();
-    await expect(page.getByRole("heading", { name: "Importar cotizaciones desde OPAI 1" })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Importar cotizaciones de la migración" })).toBeVisible({
       timeout: 60_000,
     });
     await expect(page.getByRole("button", { name: "Simular" })).toBeVisible();
