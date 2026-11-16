@@ -33,15 +33,20 @@ async function abrirPrimeraCuenta(page: Page): Promise<string> {
 }
 
 async function abrirAgenteDesdeBarra(page: Page) {
-  const superior = page.locator('button[title*="Ctrl+J"], button[title*="⌘J"]');
-  if (await superior.isVisible().catch(() => false)) {
-    await superior.click();
+  const barraTelefono = page
+    .getByRole("navigation", { name: "Principal" })
+    .filter({ visible: true });
+  const pestañaAgente = barraTelefono.getByRole("button", { name: /Agente/ });
+  if (await pestañaAgente.isVisible().catch(() => false)) {
+    await pestañaAgente.click();
     return;
   }
-  const barra = page.getByRole("navigation", { name: "Principal" }).filter({ visible: true });
-  const pestaña = barra.getByRole("button", { name: /Agente/ });
-  await expect(pestaña).toBeVisible();
-  await pestaña.click();
+  // iPad/escritorio: botón del shell en la barra superior (no el de la ficha ni la barra inferior).
+  const lanzador = page
+    .locator('header[data-shell="barra"]')
+    .getByRole("button", { name: "Preguntar a OPAI", exact: true });
+  await expect(lanzador).toBeVisible({ timeout: 15_000 });
+  await lanzador.click();
 }
 
 async function cerrarPanel(page: Page, panel: ReturnType<Page["locator"]>) {
