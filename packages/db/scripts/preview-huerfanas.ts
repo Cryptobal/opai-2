@@ -10,6 +10,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { Client } from "pg";
 
 import {
+  fallidasConSqlCorregido,
   fallidasHuerfanas,
   RAMA_PREVIEW,
   type RegistroAplicado,
@@ -69,6 +70,15 @@ async function main(): Promise<void> {
       console.log(`Marcada como revertida (ya no existe en el repo): ${r.migration_name}`);
     }
     if (!huerfanas.length) console.log("Sin migraciones fallidas huérfanas.");
+    const sqlCorregido = fallidasConSqlCorregido(rows, checksums);
+    for (const r of sqlCorregido) {
+      await client.query(
+        `UPDATE public._prisma_migrations SET rolled_back_at = now()
+          WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
+        [r.id],
+      );
+      console.log(`Marcada como revertida (SQL corregido en el repo): ${r.migration_name}`);
+    }
   } finally {
     await client.end();
   }

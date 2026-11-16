@@ -2,7 +2,12 @@
 // solo registros fallidos cuya migración ya no existe en el repo.
 import { describe, expect, it } from "vitest";
 
-import { fallidasHuerfanas, RAMA_PREVIEW, renombradas } from "../scripts/preview-huerfanas-reglas";
+import {
+  fallidasConSqlCorregido,
+  fallidasHuerfanas,
+  RAMA_PREVIEW,
+  renombradas,
+} from "../scripts/preview-huerfanas-reglas";
 
 const fila = (migration_name: string, terminada: boolean, revertida = false) => ({
   id: migration_name,
@@ -17,6 +22,25 @@ describe("destrabe de la rama Neon de preview", () => {
     for (const r of ["main", "dev", "preview/pr-", "preview/pr-1/x", "x/preview/pr-1", ""]) {
       expect(RAMA_PREVIEW.test(r), r).toBe(false);
     }
+  });
+
+  it("marca las fallidas cuyo SQL en el repo ya no coincide (checksum)", () => {
+    const repo = new Map([
+      ["20270123160000_comercial_negocios_probabilidad_etapa", "nuevo"],
+      ["20270122100000_tickets_instalacion", "ok"],
+    ]);
+    const con = (nombre: string, terminada: boolean, checksum: string) => ({
+      ...fila(nombre, terminada),
+      checksum,
+    });
+    const registros = [
+      con("20270123160000_comercial_negocios_probabilidad_etapa", false, "viejo"),
+      con("20270122100000_tickets_instalacion", true, "ok"),
+      con("20270122100000_tickets_instalacion", false, "ok"),
+    ];
+    expect(fallidasConSqlCorregido(registros, repo).map((r) => r.migration_name)).toEqual([
+      "20270123160000_comercial_negocios_probabilidad_etapa",
+    ]);
   });
 
   it("marca solo las fallidas que ya no están en el repo", () => {
