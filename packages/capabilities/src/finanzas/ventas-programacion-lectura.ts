@@ -13,8 +13,6 @@ import {
 import { ufCentavosUltima } from "./ventas-programacion-uf";
 import { detalleProgramacionSchema, extrasDetalle } from "./ventas-programacion-detalle";
 
-export { programacionSchema } from "./ventas-programacion-vistas";
-
 export const ventasProgramacionesListar = defineCapability({
   id: "finanzas.ventas_programacion.listar",
   descripcion:
