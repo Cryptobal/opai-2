@@ -1,6 +1,7 @@
 import { defineConsumidor } from "../eventos/consumidores";
 import type { Contexto } from "../types";
 import { asegurarAccesoContacto } from "./acceso-contacto";
+import { portalClienteActivo } from "./modulo-activo";
 import { registrarPropuestaEnviada } from "./propuesta-vigente";
 
 export type ResultadoAlAceptar = { cuentaId: string; cotizacionId: string | null }[];
@@ -12,7 +13,7 @@ export type ResultadoAlAceptar = { cuentaId: string; cotizacionId: string | null
  * revocado a mano no se toca (lo resuelven `asegurarAccesoContacto` y `registrarPropuestaEnviada`).
  */
 export async function propuestaAlAceptar(ctx: Contexto, membershipId: string): Promise<ResultadoAlAceptar> {
-  if (!ctx.modulosActivos.includes("portal_cliente")) return [];
+  if (!(await portalClienteActivo(ctx))) return [];
   const m = await ctx.db.membership.findUnique({
     where: { id: membershipId },
     select: { tenantId: true, user: { select: { email: true } } },

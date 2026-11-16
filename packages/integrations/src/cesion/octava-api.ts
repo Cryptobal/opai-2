@@ -7,7 +7,7 @@ export const OCTAVA_BASE_URL = "https://www.appoctava.cl/apirestcesion";
 export type OctavaAmbiente = "0" | "1";
 
 /** Códigos del RPETC devueltos por ConsultaEstadoAEC. */
-export type OctavaCodigoCesion = "EOK" | "RSC" | "RFS" | "RCR" | "RDC" | "RCS" | "EAN" | "PEN";
+type OctavaCodigoCesion = "EOK" | "RSC" | "RFS" | "RCR" | "RDC" | "RCS" | "EAN" | "PEN";
 
 export type OctavaRespuestaBase = {
   status?: string;

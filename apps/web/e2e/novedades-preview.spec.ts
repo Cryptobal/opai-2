@@ -4,9 +4,9 @@ import { abrirMenuUsuario } from "./menu-usuario";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// CAR-316: Novedades con indicador de no leídas, texto legible, «Marcar como leída» por novedad y
-// «Marcar todas», la Bandeja resaltada con cualquier pendiente y, en los portales sin Bandeja, el punto
-// rojo sobre el avatar (decisiones de Carlos del 11-nov). Corre en `preview-e2e` con el usuario de la
+// CAR-316 y CAR-430: Novedades agrupadas por fecha (Hoy / Esta semana / Antes), tarjetas cortas con
+// «Probarlo» y «Ver más», «Marcar como leída» por novedad y «Marcar todas». La Bandeja ya no repite las
+// novedades; su aviso va en el avatar y en el botón «Yo», también en el ERP. Corre en `preview-e2e` con el usuario de la
 // empresa ficticia `qa-e2e` (nunca Gard). Las escrituras (marcar) solo las hace el proyecto de 1280 px:
 // los tres tamaños comparten usuario y correrían en paralelo.
 
@@ -17,17 +17,12 @@ async function pendientes(page: Page): Promise<number> {
   return Number(/^(\d+)/.exec(texto)?.[1] ?? 0);
 }
 
-/** Novedades que la Bandeja dice tener sin leer (0 si no aparece su aviso). */
-async function pendientesEnBandeja(page: Page): Promise<number> {
-  const aviso = page.getByText(/^\d+ novedad(?:es)? de OPAI sin leer$/);
-  if (!(await aviso.count())) return 0;
-  return Number(/^(\d+)/.exec((await aviso.first().textContent()) ?? "")?.[1] ?? 0);
-}
-
 test.describe("@preview novedades y bandeja", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
-  test("Novedades se lee sin asteriscos, se marca una o todas, y la Bandeja se resalta", async ({ page }, info) => {
+  test("Novedades agrupadas y cortas, se marcan una o todas, y la Bandeja no las repite", async ({
+    page,
+  }, info) => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
@@ -36,6 +31,16 @@ test.describe("@preview novedades y bandeja", () => {
     await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });
     // El texto llega con formato: ninguna tarjeta muestra los asteriscos de la negrita.
     expect(await page.locator("main").first().innerText()).not.toContain("**");
+    // CAR-430: agrupadas por fecha y sin la etiqueta interna «Núcleo».
+    await expect(
+      page.getByRole("heading", { name: /^(Hoy|Esta semana|Antes)$/ }).first(),
+    ).toBeVisible();
+    await expect(page.locator("main").getByText("Núcleo", { exact: true })).toHaveCount(0);
+    const verMas = page.getByRole("button", { name: "Ver más" }).first();
+    if (await verMas.count()) {
+      await verMas.click();
+      await expect(page.getByRole("button", { name: "Ver menos" }).first()).toBeVisible();
+    }
     await capturar(page, info, "novedades-lista");
 
     // CAR-245: filtro «Todas / No leídas». En «No leídas» no queda ninguna tarjeta leída; sin
@@ -55,13 +60,25 @@ test.describe("@preview novedades y bandeja", () => {
 
     await page.goto("/bandeja");
     // La Bandeja ya cargó cuando su título trae el número («Bandeja · N»).
-    await expect(page.getByRole("heading", { name: /^Bandeja · \d+$/ })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: /^Bandeja · \d+$/ })).toBeVisible({
+      timeout: 30_000,
+    });
+    // CAR-430: la Bandeja ya no repite «N novedades de OPAI sin leer».
+    await expect(page.getByText(/novedad(?:es)? de OPAI sin leer/)).toHaveCount(0);
     await capturar(page, info, "novedades-bandeja");
 
+    // CAR-430: en el ERP, el avatar (o el botón «Yo» en teléfono) avisa las novedades sin leer.
+    await page.goto("/novedades");
+    await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });
+    if ((await pendientes(page)) > 0) {
+      const avatarErp = page
+        .getByRole("button", { name: /^(Menú de usuario|Yo)/ })
+        .filter({ visible: true })
+        .first();
+      await expect(avatarErp).toHaveAccessibleName(/hay novedades sin leer/, { timeout: 15_000 });
+    }
     const filaNovedades = page.getByRole("menuitem", { name: /Novedades/ });
     await abrirMenuUsuario(page, filaNovedades);
-    if ((await pendientesEnBandeja(page)) > 0)
-      await expect(filaNovedades).toContainText(/\d+/, { timeout: 15_000 });
     await capturar(page, info, "novedades-menu-cuenta");
     await page.keyboard.press("Escape");
 
@@ -69,8 +86,16 @@ test.describe("@preview novedades y bandeja", () => {
     // Sin ese portal (el usuario de `qa-e2e` es solo ERP), la página queda en «Sin permisos» y se omite.
     await page.goto("/supervisor/novedades");
     const lista = page.getByText(RESUMEN).first();
-    if (await lista.waitFor({ timeout: 20_000 }).then(() => true, () => false)) {
-      const avatar = page.getByRole("button", { name: /^Menú de usuario/ }).filter({ visible: true }).first();
+    if (
+      await lista.waitFor({ timeout: 20_000 }).then(
+        () => true,
+        () => false,
+      )
+    ) {
+      const avatar = page
+        .getByRole("button", { name: /^(Menú de usuario|Yo)/ })
+        .filter({ visible: true })
+        .first();
       if ((await page.getByText(RESUMEN).count()) > 0 && (await pendientes(page)) > 0)
         await expect(avatar).toHaveAccessibleName(/hay novedades sin leer/, { timeout: 15_000 });
       await capturar(page, info, "novedades-avatar-sin-bandeja");
@@ -84,9 +109,11 @@ test.describe("@preview novedades y bandeja", () => {
     await page.goto("/bandeja");
     const titulo = page.getByRole("heading", { name: /^Bandeja · \d+$/ });
     await expect(titulo).toBeVisible({ timeout: 30_000 });
-    // Con cualquier pendiente, el número de la Bandeja va en píldora roja en la barra lateral.
+    // Con avisos o aprobaciones pendientes, el número de la Bandeja va en píldora roja en la barra lateral.
     if (Number(/(\d+)$/.exec((await titulo.textContent()) ?? "")?.[1] ?? 0) > 0)
-      await expect(page.locator('nav a[href="/bandeja"] .bg-danger-fg').filter({ visible: true }).first()).toBeVisible({ timeout: 15_000 });
+      await expect(
+        page.locator('nav a[href="/bandeja"] .bg-danger-fg').filter({ visible: true }).first(),
+      ).toBeVisible({ timeout: 15_000 });
 
     await page.goto("/novedades");
     await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });
@@ -94,18 +121,11 @@ test.describe("@preview novedades y bandeja", () => {
     if (antes > 0) {
       // Una sola: el botón de la tarjeta baja el número en uno.
       await page.getByRole("button", { name: "Marcar como leída" }).first().click();
-      await expect
-        .poll(() => pendientes(page), { timeout: 15_000 })
-        .toBe(antes - 1);
+      await expect.poll(() => pendientes(page), { timeout: 15_000 }).toBe(antes - 1);
     }
     if (antes > 1) {
-      // Con pendientes, la Bandeja muestra el aviso y su número va resaltado en el menú.
-      await page.goto("/bandeja");
-      const aviso = page.getByText(/novedad(?:es)? de OPAI sin leer/);
-      await expect(aviso).toBeVisible({ timeout: 30_000 });
-      await capturar(page, info, "novedades-bandeja-pendientes");
-      await page.getByRole("button", { name: "Marcar novedades como leídas" }).click();
-      await expect(aviso).toHaveCount(0, { timeout: 15_000 });
+      await page.getByRole("button", { name: "Marcar todas como leídas" }).click();
+      await expect.poll(() => pendientes(page), { timeout: 15_000 }).toBe(0);
     }
 
     await page.goto("/novedades");

@@ -55,7 +55,7 @@ export const platformBitacoraEstado = defineCapability({
 const dia = z.object({ dia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) });
 
 /** Verificación diaria de la cadena; si se rompe, emite `core.bitacora.rota` (ADR-023). */
-export const trabajoVerificarBitacora = defineTrabajo({
+const trabajoVerificarBitacora = defineTrabajo({
   tipo: "core.bitacora.verificar",
   descripcion: "Verifica a diario la bitácora encadenada del tenant.",
   payload: dia,
@@ -72,7 +72,7 @@ export const trabajoVerificarBitacora = defineTrabajo({
 });
 
 /** Consolida los consumos del día anterior y purga los crudos vencidos (ADR-031). */
-export const trabajoConsolidarConsumos = defineTrabajo({
+const trabajoConsolidarConsumos = defineTrabajo({
   tipo: "core.consumos.consolidar",
   descripcion: "Consolida a diario los consumos del día anterior.",
   payload: dia,
@@ -83,7 +83,7 @@ export const trabajoConsolidarConsumos = defineTrabajo({
   },
 });
 
-export const trabajoPurgarIdempotencia = defineTrabajo({
+const trabajoPurgarIdempotencia = defineTrabajo({
   tipo: "core.idempotencia.purgar",
   descripcion: "Borra a diario las claves de idempotencia vencidas (más de 24 horas).",
   payload: dia,
