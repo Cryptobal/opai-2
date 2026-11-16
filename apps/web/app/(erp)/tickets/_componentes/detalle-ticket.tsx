@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import { identidadActual } from "@/lib/servidor";
 
 import { AccionesTicket } from "../[id]/_componentes/acciones";
-import { cargarTicket, nombreInstalacion, type Ticket } from "./datos";
+import { nombreInstalacion, type Ticket } from "./datos";
+import type { cargarTicket } from "./datos";
 import { FichaTicket, type TabTicket } from "./ficha-ticket";
 import { TabResumenTicket } from "./tab-resumen-ticket";
 
