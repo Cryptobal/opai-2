@@ -29,6 +29,19 @@ HubSpot y Salesforce: objetos asociados, embudos con reglas por etapa, propiedad
 | C-3 | **Fusión de duplicados.** Se detectan solicitudes duplicadas, pero no se encontró fusionar dos cuentas o dos contactos. | `comercial.solicitudes.buscar_duplicadas`; sin capacidades de fusión | Media | Ajustar: fusión con vista previa y reversión |
 | C-4 | **Un solo embudo.** El modelo admite más de uno (`Embudo.porDefecto`), pero el segundo solo se puede crear por siembra: las capacidades `comercial.config.*` manejan las etapas del embudo por defecto. | `packages/capabilities/src/comercial/`, `packages/db/src/catalogo-comercial.ts` | Media | Ajustar cuando entre la segunda vertical |
 
+## Estado al 16-nov-2026
+
+Repaso semanal contra `main` en `886e262` (CAR-586). Se cerró una media y otra quedó resuelta en el servidor.
+
+| # | Estado | Qué cambió y dónde se comprueba |
+|---|---|---|
+| C-1 | Parcial | CAR-536 (#923, integrado). La empresa define campos propios con tipos al estilo de HubSpot: `core.campos_personalizados.list`, `create` y `update` (`packages/capabilities/src/core/crm/`). El editor con todos los tipos y las tarjetas en las fichas de instalación y persona siguen en PR (#924 y #926) |
+| C-2 | Abierta | No hay un modelo de vista guardada en `main`. CAR-544 (#931, abierto) agrega vistas y filtros a Cotizaciones; al integrarse hay que comprobar si la vista se guarda y se comparte o si son vistas fijas |
+| C-3 | Cerrada | `core.cuentas.fusionar` y `core.contactos.fusionar` (`packages/capabilities/src/core/maestros/cuentas-fusion.ts`, `contactos-fusion.ts`), con eventos `core.cuenta.fusionada` y `core.contacto.fusionado` |
+| C-4 | Abierta | Sin cambios |
+
+**Nuevo en la semana, sin brecha.** La propuesta comercial pasó a plantillas HTML versionadas con una sola activa y bloques ordenables (CAR-530, CAR-531 y CAR-532; #916, #920 y #927), con PandaDoc y HubSpot Quotes como referentes declarados. Esos dos productos no están en la vara: ver «Capas sin referente» en el [README](README.md).
+
 ## Qué se mantiene tal cual
 
 Todo lo descrito arriba. El ciclo solicitud → negocio → cotización → aprobación → envío → ganar es el del referente, y además corre igual por MCP.

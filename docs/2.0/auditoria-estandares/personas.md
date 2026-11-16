@@ -28,6 +28,19 @@ Rippling: un registro del que cuelga todo, cambios con vigencia, ingreso y salid
 | H-2 | **Terminar el vínculo no corta todo el acceso.** `core.vinculos.terminar` marca el vínculo, deja la persona inactiva si no quedan vigentes y emite un evento que nadie consume. El ingreso por PIN sí se corta (exige persona activa); la membresía sigue activa, así que una sesión abierta o un acceso por correo continúan. | `packages/capabilities/src/core/maestros/vinculos-terminar.ts`; `packages/auth/src/pin-verificacion.ts` | Media | Ajustar dentro de H-1: suspender la membresía y la credencial de terreno en el mismo acto |
 | H-3 | **Sin cambios programados ni historia de cargo.** El vínculo tiene un solo cargo, una instalación, inicio y término. Solo las estructuras de sueldo tienen vigencia. | `VinculoLaboral` en `schema/maestros.prisma` | Media | Ajustar: historia con vigencia para cargo, jefatura y lugar de trabajo |
 
+## Estado al 16-nov-2026
+
+Repaso semanal contra `main` en `886e262` (CAR-586). Se cerraron la alta y una media. La revisión diaria abrió cuatro brechas nuevas durante la semana y las cuatro están cerradas.
+
+| # | Estado | Qué cambió y dónde se comprueba |
+|---|---|---|
+| H-1 | Cerrada | CAR-355. Listas de ingreso y de salida con pasos, responsable y plazo: `packages/capabilities/src/core/procesos-persona/` (`core.procesos_persona.listar`, `paso_actualizar`), abiertas por un consumidor al crear o terminar el vínculo |
+| H-2 | Cerrada | CAR-355 parte 2 (#614) y CAR-385. Terminar el último vínculo corta los accesos (`core/maestros/vinculos-corte.ts`); con fecha futura, el corte se programa para ese día (`vinculos-corte-programado.ts`) |
+| H-3 | Parcial | CAR-409 agregó la historia de períodos del contrato (plazo fijo y paso a indefinido) en `schema/maestros.prisma`. El cargo, la jefatura y el lugar de trabajo del vínculo siguen sin historia ni cambios programados |
+| H-4 (nueva) | Cerrada | Vacaciones, licencias y permisos como registro de la persona y no solo como excepción de la pauta. CAR-393 |
+| H-5 (nueva) | Cerrada | Tallas de uniforme por prenda del kit de la vertical, no columnas fijas. CAR-408 |
+| H-6 (nueva) | Cerrada | Discapacidad y tipo de pensión cifrados, igual que el plan de isapre. CAR-411 |
+
 ## Qué se mantiene tal cual
 
 Persona única, capas de sueldo con vigencia, solicitud y aprobación para datos de pago, lecturas auditadas, jefatura y anexos.
