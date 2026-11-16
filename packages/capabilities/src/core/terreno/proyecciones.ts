@@ -5,7 +5,7 @@ import type { MotivoRechazo } from "./hechos-evaluar";
 import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
 import { resolverNovedades } from "./rondas-novedades";
-import { emitirAnomalias } from "./rondas-senales";
+import { escribirHechosProyectados } from "./proyecciones-escribir";
 
 export type Proyecciones = {
   /** Hechos que el servidor no puede resolver (QR ajeno, documento inválido, módulo inactivo…). */
@@ -44,46 +44,7 @@ export async function prepararProyecciones(
   return {
     rechazos,
     dependientesDe: (caidas) => rondas.dependientesDe(caidas),
-    async escribir(tx, nuevos, _desfaseMs, aceptadas) {
-      const ids = await rondas.iniciar(tx, aceptadas);
-      const filas = nuevos.flatMap((h) => {
-        const m = marcas.get(h.clave);
-        if (!m || !("marca" in m)) return [];
-        const { puntoId, geocerca, distanciaM, precisionM, anomalias } = m.marca;
-        return [
-          {
-            tenantId: ctx.tenantId,
-            instalacionId: equipo.instalacionId,
-            dispositivoId: equipo.id,
-            clave: h.clave,
-            personaId: h.personaId ?? null,
-            horaCorregida: t.corregir(new Date(h.horaHecho)),
-            puntoId,
-            geocerca,
-            distanciaM,
-            precisionM,
-            anomalias,
-            ejecucionId: m.marca.ejecucionClave ? (ids.get(m.marca.ejecucionClave) ?? null) : null,
-          },
-        ];
-      });
-      const creadas = filas.length
-        ? await tx.marcaRonda.createManyAndReturn({
-            skipDuplicates: true,
-            data: filas,
-            select: {
-              id: true,
-              puntoId: true,
-              personaId: true,
-              anomalias: true,
-              ejecucionId: true,
-            },
-          })
-        : [];
-      await emitirAnomalias(tx, ctx.eventos, equipo.instalacionId, creadas);
-      await rondas.cerrar(tx, aceptadas, ids);
-      await novedades.escribir(tx, aceptadas, ids);
-      await acceso.escribir(tx, aceptadas);
-    },
+    escribir: (tx, nuevos, _desfaseMs, aceptadas) =>
+      escribirHechosProyectados(ctx, equipo, t, marcas, rondas, novedades, acceso, tx, nuevos, aceptadas),
   };
 }
