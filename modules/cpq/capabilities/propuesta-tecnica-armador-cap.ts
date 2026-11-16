@@ -115,7 +115,7 @@ export const propuestaTecnicaSyncServicio = defineCapability({
 export const propuestaTecnicaPreviewPdf = defineCapability({
   auditarLectura: (_s, input) => [input.id, input.cotizacionId],
   id: "cpq.propuestas_tecnica.preview_pdf",
-  descripcion: "Genera PDF de propuesta técnica (marca de agua BORRADOR si no está enviada). Si la empresa tiene una plantilla HTML en uso, sale de ella con los datos de la cotización; si no, del formato por bloques.",
+  descripcion: "Genera PDF de propuesta técnica (marca de agua BORRADOR si no está enviada). Sale de la plantilla HTML en uso de la empresa (o de la base de OPAI) con los datos de la cotización; `{{secciones}}` inserta las secciones activas del armador.",
   permiso: PERMISO_READ,
   input: z.object({ id: uuidSchema, cotizacionId: uuidSchema }),
   output: z.object({ pdfBase64: z.string(), bytes: z.number().int(), borrador: z.boolean() }),
@@ -142,7 +142,6 @@ export const propuestaTecnicaPreviewPdf = defineCapability({
       cotizacionId: input.cotizacionId,
       codigo: c.codigo,
       titulo: c.titulo,
-      fecha: calculo.fecha,
       borrador: prop.estado !== "congelada",
       bloquesJson: prop.bloquesJson,
       plantilla,

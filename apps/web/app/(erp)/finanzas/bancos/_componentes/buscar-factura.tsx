@@ -6,7 +6,7 @@ import { Button, Campo, Input } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { clp } from "../../flujo/_componentes/datos";
+import { clp } from "../../flujo/_componentes/formato";
 import { etiquetaDoc, type Elegida } from "./seleccion-conciliacion";
 
 type Venta = { id: string; folio: number | null; tipoDte: number; cuentaNombre: string; montoTotal: number; montoCobrado: number; montoPendiente: number; estadoCobro: string };

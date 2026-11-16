@@ -1,4 +1,4 @@
-import { reglaDeNegocio, resolverCamposDocumento, type Contexto } from "@opai/capabilities";
+import { reglaDeNegocio, type Contexto } from "@opai/capabilities";
 
 import {
   contratoCamposDeEnvio,
@@ -7,6 +7,7 @@ import {
 } from "../domain/documento/propuesta-campos";
 import type { ContratoCamposEnvio, DestinatarioEnvio } from "../domain/documento/propuesta-tecnica";
 import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
+import { resolverCamposPropuesta } from "./valores-campos-propuesta";
 
 /** Faltante del render cuando el texto repite `referencias` y no hay ninguna autorizada (CAR-138 PR 7). */
 const SIN_REFERENCIAS = "colecciones.referencias";
@@ -30,12 +31,14 @@ export async function contratoCamposPropuesta(
     propuestaBloquesJson: string;
     bloquesBiblioteca: Readonly<Record<string, number>>;
     destinatarios: readonly DestinatarioEnvio[];
-    /** HTML de la plantilla de la empresa en uso: sus campos se congelan igual que los del texto. */
     plantillaHtml?: string;
   },
 ): Promise<ContratoCamposEnvio | undefined> {
   const textos = [
-    ...textosConTokens(input.propuestaBloquesJson, await textosBiblioteca(ctx, input.propuestaBloquesJson, input.bloquesBiblioteca)),
+    ...textosConTokens(
+      input.propuestaBloquesJson,
+      await textosBiblioteca(ctx, input.propuestaBloquesJson, input.bloquesBiblioteca),
+    ),
     ...(input.plantillaHtml ? [input.plantillaHtml] : []),
   ];
   const v = validarTextosPropuesta(textos);
@@ -55,11 +58,12 @@ export async function contratoCamposPropuesta(
     );
   }
   const contactoId = input.destinatarios.find((d) => d.contactoId)?.contactoId;
-  const r = await resolverCamposDocumento(ctx, {
+  const r = await resolverCamposPropuesta(ctx, {
     finalidad: "propuesta",
     cuentaId,
     contactoId,
-    // Solo se consultan (y se auditan) las referencias si el texto las repite.
+    cotizacionId: input.cotizacionId,
+    enviada: true,
     referencias: v.colecciones.includes("referencias"),
   });
   const contrato = contratoCamposDeEnvio(textos, v.usados, v.colecciones, {

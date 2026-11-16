@@ -1,13 +1,11 @@
 import { noEncontrado, reglaDeNegocio, type Contexto } from "@opai/capabilities";
 
-import {
-  parseBloquesArmadorPropuesta,
-  type DestinatarioEnvio,
-  type SnapshotEnvioPropuesta,
-} from "../domain/documento/propuesta-tecnica";
+import { type DestinatarioEnvio, type SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecnica";
+import { conSecciones } from "../domain/documento/html-secciones";
 import { asegurarMarcaDocumento } from "./marca-documento";
 import { contratoCamposPropuesta } from "./propuesta-campos";
 import { plantillaHtmlEnUso } from "./propuesta-html-uso";
+import { bibliotecaDeBloquesEnvio } from "./propuesta-envio-biblioteca";
 import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "./plantilla-propuesta";
 
 export async function construirSnapshotEnvioPropuesta(
@@ -20,7 +18,11 @@ export async function construirSnapshotEnvioPropuesta(
 ): Promise<SnapshotEnvioPropuesta> {
   const marcaRow = await asegurarMarcaDocumento(ctx);
   const plantillaRow = await plantillaActivaPropuestaLectura(ctx);
-  if (!plantillaRow) throw reglaDeNegocio("Falta la plantilla activa de propuesta técnica; configúrala antes de enviar.");
+  if (!plantillaRow) {
+    throw reglaDeNegocio(
+      "Falta la plantilla activa de propuesta técnica; configúrala antes de enviar.",
+    );
+  }
   const plantilla = vistaPlantillaPropuesta(plantillaRow);
   let propuestaBloquesJson = "[]";
   const bloquesBiblioteca: Record<string, number> = {};
@@ -30,21 +32,7 @@ export async function construirSnapshotEnvioPropuesta(
     });
     if (!prop) throw noEncontrado("La propuesta técnica");
     propuestaBloquesJson = prop.bloquesJson;
-    const bloques = parseBloquesArmadorPropuesta(prop.bloquesJson);
-    const claves = [
-      ...new Set(
-        bloques.map((b) => b.bibliotecaClave).filter((c): c is string => Boolean(c?.trim())),
-      ),
-    ];
-    if (claves.length) {
-      const rows = await ctx.db.cpqBibliotecaBloque.findMany({
-        where: { tenantId: ctx.tenantId, clave: { in: claves } },
-        select: { clave: true, versionPublicada: true },
-      });
-      for (const r of rows) {
-        bloquesBiblioteca[r.clave] = r.versionPublicada;
-      }
-    }
+    Object.assign(bloquesBiblioteca, await bibliotecaDeBloquesEnvio(ctx, prop.bloquesJson));
   }
   const html = input.propuestaTecnicaId ? await plantillaHtmlEnUso(ctx) : null;
   const camposContrato = input.propuestaTecnicaId
@@ -53,7 +41,7 @@ export async function construirSnapshotEnvioPropuesta(
         propuestaBloquesJson,
         bloquesBiblioteca,
         destinatarios: input.destinatarios,
-        ...(html ? { plantillaHtml: html.htmlSaneado } : {}),
+        ...(html ? { plantillaHtml: conSecciones(html.htmlSaneado, "") } : {}),
       })
     : undefined;
   return {
