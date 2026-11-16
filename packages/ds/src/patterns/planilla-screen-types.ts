@@ -12,6 +12,8 @@ export type FilaPlanilla = {
   nivel?: 1 | 2;
   /** Fila que se abre para mostrar su detalle; `abierta` dice si ya se ve. */
   plegable?: { abierta: boolean };
+  /** Acción propia de la fila (ej. «Reprogramar»): botón en la misma fila, visible al pasar el mouse o con foco. */
+  accion?: string;
 };
 export type ColumnaPlanilla = { id: string; etiqueta: string; destacada?: boolean };
 
@@ -34,6 +36,8 @@ export type PlanillaScreenProps = {
   onCelda?: (filaId: string, columnaId: string) => void;
   /** Se invoca al abrir o cerrar una fila `plegable`. */
   onAlternarFila?: (filaId: string) => void;
+  /** Se invoca al tocar la `accion` de una fila. */
+  onAccionFila?: (filaId: string) => void;
 };
 
 /* Códigos de turno del diseño: D info, N acento, L libre (sin fondo), V success, X danger (sin cubrir). */
