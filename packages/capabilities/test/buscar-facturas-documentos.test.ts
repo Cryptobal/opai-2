@@ -1,14 +1,8 @@
 // CAR-526: facturas (DTE) y documentos en ⌘K / `core.buscar`, con permiso y módulo. Solo datos ficticios.
 import { beforeEach, describe, expect, it } from "vitest";
 
-import {
-  buscadoresFinanzas,
-  capacidadesDelNucleo,
-  executeCapability,
-  limpiarRegistro,
-  registrarBuscadores,
-  registrarCapacidades,
-} from "../src";
+import { manifest as manifestFinanzas } from "../../../modules/finanzas/manifest";
+import { capacidadesDelNucleo, executeCapability, limpiarRegistro, registrarCapacidades, registrarModulos } from "../src";
 import { limpiarBuscadores } from "../src/core/maestros/buscadores";
 import { TENANT_DE_PRUEBA as T, contextoDePrueba } from "../src/testing";
 
@@ -68,7 +62,7 @@ beforeEach(() => {
   limpiarRegistro();
   limpiarBuscadores();
   registrarCapacidades(capacidadesDelNucleo);
-  registrarBuscadores(buscadoresFinanzas);
+  registrarModulos([manifestFinanzas]);
 });
 
 describe("buscador facturas y documentos (CAR-526)", () => {
@@ -78,7 +72,7 @@ describe("buscador facturas y documentos (CAR-526)", () => {
       {
         id: F,
         titulo: "Factura electrónica 9001",
-        detalle: "Cliente Zafiro SpA · $1.190.000",
+        detalle: "Zafiro SpA",
         href: `/finanzas/ventas/${F}`,
       },
     ]);
