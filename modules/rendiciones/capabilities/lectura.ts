@@ -3,43 +3,72 @@ import { z } from "zod";
 import { defineCapability, prohibido } from "@opai/capabilities";
 
 import { estadoSchema, rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
+import {
+  contadoresPropias,
+  cursorDe,
+  dondeBusqueda,
+  entradaPaginaSchema,
+  filtrosListaSchema,
+  mapResumenes,
+  pagina,
+} from "./pagina-lista";
 import { PERMISO_APROBAR, PERMISO_RENDIR, PORTALES_RENDIR, PERMISO_VER_TODAS } from "./permisos";
 import { actorId, rendicionDe } from "./util";
 import { nombresDe, resumenDe, vistaDe } from "./vista";
 
+const filaTodasSchema = resumenSchema.extend({
+  solicitanteNombre: z.string().nullable(),
+});
+
 export const rendicionesListar = defineCapability({
   id: "rendiciones.rendiciones.listar",
   descripcion:
-    "Lista rendiciones según el alcance pedido: «propias» (las que rindió quien consulta), «por_aprobar» (enviadas y asignadas a quien consulta) o «todas» (solo con permiso de ver todas). Filtra por estado.",
+    "Lista rendiciones según el alcance: «propias», «por_aprobar» o «todas» (con permiso). Búsqueda por código, descripción o quien rinde; filtros y paginación por cursor.",
   permiso: PERMISO_RENDIR,
   portales: PORTALES_RENDIR,
-  input: z.object({
+  input: entradaPaginaSchema.merge(filtrosListaSchema).extend({
     alcance: z.enum(["propias", "por_aprobar", "todas"]).default("propias"),
-    estado: estadoSchema.optional(),
-    limite: z.number().int().min(1).max(100).default(50),
+    incluirContadores: z
+      .boolean()
+      .default(false)
+      .describe("Solo con alcance «propias»: totales por estado para las pestañas."),
   }),
-  output: z.object({ rendiciones: z.array(resumenSchema) }),
+  output: z.object({
+    items: z.array(filaTodasSchema),
+    siguiente: z.string().nullable(),
+    contadores: z.record(z.string(), z.number().int()).optional(),
+  }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (s) => s.rendiciones.map((r) => r.id),
+  auditarLectura: (s) => s.items.map((r) => r.id),
   async handler(ctx, input) {
     const yo = actorId(ctx);
     if (input.alcance === "todas" && !ctx.autorizar(PERMISO_VER_TODAS)) throw prohibido("No puedes ver las rendiciones de toda la empresa.");
     if (input.alcance === "por_aprobar" && !ctx.autorizar(PERMISO_APROBAR)) throw prohibido("No tienes permiso para aprobar rendiciones.");
-    const donde =
-      input.alcance === "propias" ? { solicitanteId: yo }
-      : input.alcance === "por_aprobar" ? { aprobadorId: yo, estado: "enviada" }
-      : {};
+    const alcance =
+      input.alcance === "propias"
+        ? { solicitanteId: yo }
+        : input.alcance === "por_aprobar"
+          ? { aprobadorId: yo, estado: "enviada" as const }
+          : {};
     const filas = await ctx.db.rendicion.findMany({
-      where: { ...donde, ...(input.estado ? { estado: input.estado } : {}) },
-      orderBy: { codigo: "desc" },
-      take: input.limite,
+      where: { ...alcance, ...(await dondeBusqueda(ctx, input)) },
+      orderBy: [{ codigo: "desc" }, { id: "desc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
-    const nombres = await nombresDe(
-      ctx,
-      filas.map((f) => f.aprobadorId),
-    );
-    return { rendiciones: filas.map((f) => resumenDe(f, nombres)) };
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    const contadores =
+      input.alcance === "propias" && input.incluirContadores && !input.estado
+        ? await contadoresPropias(ctx, yo)
+        : undefined;
+    return {
+      siguiente,
+      contadores,
+      items: await mapResumenes(ctx, items, (f, n) => ({
+        ...resumenDe(f, n),
+        solicitanteNombre: n.get(f.solicitanteId) ?? null,
+      })),
+    };
   },
 });
 

@@ -29,16 +29,16 @@ export function PaginaBandeja({ searchParams, params }: { searchParams: Promise<
       }}
     >
       {({ filtros, bandeja, detalle, id, yoId }) => {
-        const personas = [...new Map(bandeja.rendiciones.map((r) => [r.solicitanteId, r.solicitanteNombre ?? "Persona"])).entries()].map(([pid, nombre]) => ({ id: pid, nombre }));
+        const personas = [...new Map(bandeja.items.map((r) => [r.solicitanteId, r.solicitanteNombre ?? "Persona"])).entries()].map(([pid, nombre]) => ({ id: pid, nombre }));
         const lista = (
           <div className="flex flex-col p-4 md:p-0">
             <Estado
-              state={bandeja.rendiciones.length === 0 ? "empty" : "ready"}
+              state={bandeja.items.length === 0 ? "empty" : "ready"}
               variante="lista"
               textos={{ vacio: { titulo: filtros.estado === "enviada" ? "No tienes rendiciones por revisar" : "Sin rendiciones en este estado", descripcion: "Aquí aparecerán las rendiciones que te asignen." } }}
             >
               <ul>
-                {bandeja.rendiciones.map((r) => (
+                {bandeja.items.map((r) => (
                   <li key={r.id}>
                     <FilaSeleccionable
                       Link={LinkNext}

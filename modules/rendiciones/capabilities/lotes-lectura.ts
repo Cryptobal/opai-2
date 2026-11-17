@@ -8,6 +8,7 @@ import { estadoLoteSchema, loteDetalleSchema, loteResumenSchema } from "./lotes-
 import { cuentasDeSolicitantes } from "./lotes-util";
 import { loteResumenDe } from "./lotes-vista";
 import { PERMISO_APROBAR_LOTE, PERMISO_PAGAR } from "./permisos";
+import { cursorDe, pagina } from "./pagina-lista";
 import { actorId } from "./util";
 import { nombresDe, resumenDe } from "./vista";
 
@@ -59,15 +60,24 @@ export const lotesListar = defineCapability({
   descripcion: "Lista los lotes de pago de la empresa, del más nuevo al más antiguo, con su estado y total. Filtra por estado.",
   permiso: null,
   portales: ["erp"],
-  input: z.object({ estado: estadoLoteSchema.optional(), limite: z.number().int().min(1).max(100).default(50) }),
-  output: z.object({ lotes: z.array(loteResumenSchema) }),
+  input: z.object({
+    estado: estadoLoteSchema.optional(),
+    cursor: uuidSchema.optional(),
+    limite: z.number().int().min(1).max(200).default(50),
+  }),
+  output: z.object({ items: z.array(loteResumenSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (s) => s.lotes.map((l) => l.id),
+  auditarLectura: (s) => s.items.map((l) => l.id),
   async handler(ctx, input) {
     exigirLotes(ctx);
-    const filas = await ctx.db.lotePago.findMany({ where: input.estado ? { estado: input.estado } : {}, orderBy: { codigo: "desc" }, take: input.limite });
-    return { lotes: filas.map(loteResumenDe) };
+    const filas = await ctx.db.lotePago.findMany({
+      where: input.estado ? { estado: input.estado } : {},
+      orderBy: [{ codigo: "desc" }, { id: "desc" }],
+      ...cursorDe(input.cursor, input.limite),
+    });
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    return { items: items.map(loteResumenDe), siguiente };
   },
 });
 
