@@ -3,6 +3,7 @@
 import { avisar, Button, Campo, Combobox, Input, Select, Textarea } from "@opai/ds";
 
 import { buscarCandidatosDocumento } from "@/app/_acciones/candidatos-documento";
+import { opcionesDeCandidatos } from "@/app/_components/documentos/opciones-candidatos";
 import { subirDocumento } from "@/app/_components/documentos/subir";
 
 const TIPOS = [
@@ -28,10 +29,8 @@ type Props = {
   error?: string;
 };
 
-const buscar = async (tipo: "persona" | "instalacion", q: string) => {
-  const r = await buscarCandidatosDocumento({ tipo, q });
-  return r.ok ? r.items : [];
-};
+const buscar = async (tipo: "persona" | "instalacion", q: string) =>
+  opcionesDeCandidatos(await buscarCandidatosDocumento({ tipo, q }));
 
 export function FormRegistrarContingencia(p: Props) {
   return (

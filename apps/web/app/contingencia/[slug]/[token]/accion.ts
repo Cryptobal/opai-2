@@ -1,18 +1,15 @@
 "use server";
 
-import { responderContingencia } from "./ver";
+import type { EstadoForm } from "@/app/_components/enlace-respuesta/formulario-rut";
 
-export type EstadoRespuesta =
-  | { estado: "inicial" }
-  | { estado: "listo"; decision: "aceptada" | "rechazada" }
-  | { estado: "error"; texto: string };
+import { responderContingencia } from "./ver";
 
 export async function accionResponder(
   slug: string,
   token: string,
-  _: EstadoRespuesta,
+  _: EstadoForm,
   datos: FormData,
-): Promise<EstadoRespuesta> {
+): Promise<EstadoForm> {
   const decision = datos.get("decision") === "rechazada" ? "rechazada" : "aceptada";
   const rut = String(datos.get("rut") ?? "").trim();
   const comentario = String(datos.get("comentario") ?? "").trim();

@@ -7,7 +7,7 @@ import { Alerta, Button, Campo, Input, Textarea } from "@opai/ds";
 type EstadoInicial = { estado: "inicial" };
 type EstadoListo = { estado: "listo"; decision?: string; resultado?: string };
 type EstadoError = { estado: "error"; texto: string };
-type EstadoForm = EstadoInicial | EstadoListo | EstadoError;
+export type EstadoForm = EstadoInicial | EstadoListo | EstadoError;
 
 type Props = {
   slug: string;

@@ -1,3 +1,5 @@
+import { CheckCircle } from "lucide-react";
+
 import { Empty } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -32,7 +34,11 @@ export default function Pagina() {
       {({ state, items, zona }) => (
         <EstadoLista state={state}>
           {items.length === 0 ? (
-            <Empty icon="check-circle" title="No tienes contingencias pendientes" description="Si RR. HH. propone una marca a tu nombre, aparecerá aquí." />
+            <Empty
+              icono={<CheckCircle className="size-6 text-success-fg" aria-hidden />}
+              titulo="No tienes contingencias pendientes"
+              descripcion="Si RR. HH. propone una marca a tu nombre, aparecerá aquí."
+            />
           ) : (
             <div className="flex flex-col gap-4">
               {items.map((item) => (

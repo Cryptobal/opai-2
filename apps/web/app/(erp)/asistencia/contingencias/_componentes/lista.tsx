@@ -33,21 +33,33 @@ export function ListaContingencias({ state, items, zona }: { state: EstadoPantal
         state={state}
         titulo="Contingencias"
         subtitulo="Marcas cuando el sistema no estuvo disponible."
-        acciones={<Button onClick={() => setAbierto(true)}>Registrar marca</Button>}
+        accionPrincipal={<Button onClick={() => setAbierto(true)}>Registrar marca</Button>}
         items={items}
         clave={(x) => x.id}
         columnas={[
-          { id: "persona", cabecera: "Trabajador", celda: (x) => x.personaNombre },
-          { id: "marca", cabecera: "Marca", celda: (x) => `${x.tipoEtiqueta} · ${hora.format(new Date(x.horaDeclarada))}` },
-          { id: "inst", cabecera: "Instalación", celda: (x) => x.instalacionNombre },
-          { id: "estado", cabecera: "Estado", celda: (x) => <Badge tono={TONO[x.estado]}>{x.estado}</Badge> },
+          { id: "persona", etiqueta: "Trabajador", render: (x) => x.personaNombre },
+          {
+            id: "marca",
+            etiqueta: "Marca",
+            render: (x) => `${x.tipoEtiqueta} · ${hora.format(new Date(x.horaDeclarada))}`,
+          },
+          { id: "inst", etiqueta: "Instalación", render: (x) => x.instalacionNombre },
+          {
+            id: "estado",
+            etiqueta: "Estado",
+            render: (x) => <Badge tono={TONO[x.estado]}>{x.estado}</Badge>,
+          },
         ]}
-        tarjeta={(x) => ({
-          titulo: x.personaNombre,
-          subtitulo: `${x.tipoEtiqueta} · ${x.instalacionNombre}`,
-          detalle: x.motivo,
-          pie: <Badge tono={TONO[x.estado]}>{x.estado}</Badge>,
-        })}
+        tarjeta={(x) => (
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="truncate text-base font-medium text-fg">{x.personaNombre}</span>
+            <span className="t-caption">
+              {x.tipoEtiqueta} · {x.instalacionNombre}
+            </span>
+            <span className="t-caption muted">{x.motivo}</span>
+            <Badge tono={TONO[x.estado]}>{x.estado}</Badge>
+          </span>
+        )}
       />
       <RegistrarContingencia abierto={abierto} onCerrar={() => setAbierto(false)} onListo={() => router.refresh()} />
     </>
