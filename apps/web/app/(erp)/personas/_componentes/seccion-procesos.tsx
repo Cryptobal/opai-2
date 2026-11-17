@@ -50,6 +50,56 @@ function acciones(p: Paso, yo: string): AccionEntidad[] {
   ];
 }
 
+function BloqueProceso({
+  pr,
+  gestiona,
+  inventario,
+  yo,
+}: {
+  pr: Proceso;
+  gestiona: boolean;
+  inventario: boolean;
+  yo: string;
+}) {
+  const pendientes = pr.pasos.filter((p) => p.estado === "por_hacer").length;
+  return (
+    <section key={pr.id} aria-label={pr.tipo === "ingreso" ? "Lista de ingreso" : "Lista de salida"}>
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <h4 className="t-label">{pr.tipo === "ingreso" ? "Ingreso" : "Salida"}</h4>
+        <Badge tono={pr.estado === "cerrado" ? "success" : "info"}>
+          {pr.estado === "cerrado" ? "Completa" : `${pendientes} por hacer`}
+        </Badge>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {pr.pasos.map((p) => (
+          <li key={p.id} className="flex flex-wrap items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="t-body">{p.titulo}</p>
+              <p className="t-caption">
+                Vence {fecha(p.vence)} · {p.responsable ?? "Sin responsable"}
+                {p.nota ? ` · ${p.nota}` : ""}
+              </p>
+              {inventario && pr.tipo === "salida" && p.titulo === TITULO_PASO_DEVOLVER_INVENTARIO ? (
+                <p className="mt-1">
+                  <Enlace Link={LinkNext} href={`/inventario/entregas`}>
+                    Ir a Inventario › Entregas
+                  </Enlace>
+                </p>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-1">
+              <Badge tono={ESTADO[p.estado].tono}>{ESTADO[p.estado].texto}</Badge>
+              {gestiona ? (
+                <AccionesEntidad etiqueta={`Acciones de «${p.titulo}»`} acciones={acciones(p, yo)} />
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /** CAR-355: las listas de ingreso y salida de la persona, con responsable, plazo y estado de cada paso. */
 export async function SeccionProcesos({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
@@ -70,45 +120,9 @@ export async function SeccionProcesos({ personaId }: { personaId: string }) {
         </p>
       )}
       <div className="flex flex-col gap-5">
-        {procesos.map((pr) => {
-          const pendientes = pr.pasos.filter((p) => p.estado === "por_hacer").length;
-          return (
-            <section key={pr.id} aria-label={pr.tipo === "ingreso" ? "Lista de ingreso" : "Lista de salida"}>
-              <div className="mb-2 flex flex-wrap items-center gap-2">
-                <h4 className="t-label">{pr.tipo === "ingreso" ? "Ingreso" : "Salida"}</h4>
-                <Badge tono={pr.estado === "cerrado" ? "success" : "info"}>
-                  {pr.estado === "cerrado" ? "Completa" : `${pendientes} por hacer`}
-                </Badge>
-              </div>
-              <ul className="flex flex-col gap-2">
-                {pr.pasos.map((p) => (
-                  <li key={p.id} className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <p className="t-body">{p.titulo}</p>
-                      <p className="t-caption">
-                        Vence {fecha(p.vence)} · {p.responsable ?? "Sin responsable"}
-                        {p.nota ? ` · ${p.nota}` : ""}
-                      </p>
-                      {inventario && pr.tipo === "salida" && p.titulo === TITULO_PASO_DEVOLVER_INVENTARIO ? (
-                        <p className="mt-1">
-                          <Enlace Link={LinkNext} href={`/inventario/entregas`}>
-                            Ir a Inventario › Entregas
-                          </Enlace>
-                        </p>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Badge tono={ESTADO[p.estado].tono}>{ESTADO[p.estado].texto}</Badge>
-                      {gestiona ? (
-                        <AccionesEntidad etiqueta={`Acciones de «${p.titulo}»`} acciones={acciones(p, identidad.usuario.id)} />
-                      ) : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
+        {procesos.map((pr) => (
+          <BloqueProceso key={pr.id} pr={pr} gestiona={gestiona} inventario={inventario} yo={identidad.usuario.id} />
+        ))}
       </div>
     </SeccionTarjeta>
   );
