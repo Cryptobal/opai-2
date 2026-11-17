@@ -6,15 +6,8 @@ import type { Contexto } from "../../types";
 import { documentosEnAlcance } from "../documentos/alcance-doc";
 import { filtroDocumentoSensible } from "../documentos/sensibles";
 import { politicaEfectiva } from "./comun";
-import { registrarEvidencia } from "./comun-flujo";
-import {
-  construirFirmantes,
-  type FirmanteInput,
-  validarFirmantes,
-  validarNivelEnvio,
-  vistaPreview,
-} from "./enviar-util";
-import { vistaSolicitud } from "./vistas";
+import { crearSolicitudFirma } from "./enviar-ejecutar-crear";
+import { type FirmanteInput, validarFirmantes, validarNivelEnvio, vistaPreview } from "./enviar-util";
 
 export type EnvioFirmaInput = {
   documentoId: string;
@@ -26,11 +19,7 @@ export type EnvioFirmaInput = {
   firmantes: readonly FirmanteInput[];
 };
 
-export async function ejecutarEnvioFirma(
-  ctx: Contexto,
-  input: EnvioFirmaInput,
-  dryRun: boolean,
-) {
+export async function ejecutarEnvioFirma(ctx: Contexto, input: EnvioFirmaInput, dryRun: boolean) {
   const permitidos = await documentosEnAlcance(ctx);
   const doc = await ctx.db.documento.findFirst({
     where: {
@@ -61,35 +50,5 @@ export async function ejecutarEnvioFirma(
     plazoVence: vence,
   };
   if (dryRun) return vistaPreview(base, input.firmantes);
-  const firmantes = construirFirmantes(ctx.tenantId, input.firmantes, vence);
-  const creada = await ctx.transaccion(async (tx) => {
-    const s = await tx.solicitudFirma.create({
-      data: {
-        tenantId: ctx.tenantId,
-        ...base,
-        estado: "enviada",
-        enviadaPorTipo: ctx.actor.tipo,
-        enviadaPorId: ctx.actor.tipo === "user" ? ctx.actor.id : null,
-        viaUserId: ctx.actor.viaUserId ?? null,
-      },
-    });
-    for (const f of firmantes) await tx.firmante.create({ data: { ...f.row, solicitudId: s.id } });
-    const hecho = await registrarEvidencia(ctx, tx, s, {
-      tipo: "enviada",
-      nivel: input.nivel,
-      sha256: doc.sha256,
-    });
-    await tx.solicitudFirma.update({ where: { id: s.id }, data: { bitacoraSeq: hecho.seq } });
-    await ctx.eventos.emitir(tx, {
-      tipo: "documentos.firma.solicitada",
-      entidadTipo: "solicitud_firma",
-      entidadId: s.id,
-      payload: { clase: input.clase, nivel: input.nivel, orden, pendientes: firmantes.length },
-    });
-    return tx.solicitudFirma.findUniqueOrThrow({
-      where: { id: s.id },
-      include: { firmantes: true },
-    });
-  });
-  return vistaSolicitud(creada);
+  return crearSolicitudFirma(ctx, doc, { ...input, orden }, vence);
 }

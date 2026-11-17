@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
   ambitoDeClase,
   enviarRequiereAprobacion,
-  nombreSeguro,
   PERMISOS_CORE,
   type ClasePlantilla,
   type ClaseFirma,
@@ -15,13 +14,8 @@ import { defineCapability } from "../../define";
 import { prohibido, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { diaSchema, hoy } from "../maestros/comun";
-import { marcaDe } from "../comunicaciones/resolver";
-import { logoDeMarca } from "../../finanzas/ventas-pdf-logo";
-import { ejecutarEnvioFirma } from "../firmas/enviar-ejecutar";
-import { claseFirmaDePlantilla, firmantesLaborales } from "./firmantes-laborales";
-import { calcularRelleno } from "./rellenar-calculo";
-import { generarPdfLaboral } from "./pdf-laboral";
-import { guardarPdfGenerado } from "./guardar-generado";
+import { claseFirmaDePlantilla } from "./firmantes-laborales";
+import { filaEnvioMasivo } from "./enviar-masivo-fila";
 import { plantillaVigente } from "./plantilla-vigente";
 
 const MAX = 100;
@@ -67,87 +61,26 @@ export const documentoPlantillasEnviarMasivo = defineCapability({
       throw reglaDeNegocio("Un agente necesita aprobación para enviar este documento a firma.");
     if (!dryRun && !ctx.servicios.almacenamiento.disponible)
       throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
-    const fecha = input.fecha ?? hoy();
     const ids = [...new Set(input.personaIds)];
-    if (ids.length !== input.personaIds.length)
-      throw reglaDeNegocio("Hay personas repetidas en la lista.");
+    if (ids.length !== input.personaIds.length) throw reglaDeNegocio("Hay personas repetidas en la lista.");
+    const fecha = input.fecha ?? hoy();
     const filas: z.infer<typeof fila>[] = [];
     let exitosas = 0;
     let fallidas = 0;
-    const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
-    const logo = await logoDeMarca(ctx);
     for (const personaId of ids) {
-      let nombre = personaId;
-      try {
-        const { persona, relleno, faltantes } = await calcularRelleno(ctx, {
-          plantillaId: plantilla.id,
-          personaId,
-          fecha,
-        });
-        nombre = `${persona.nombres} ${persona.apellidos}`.trim();
-        if (faltantes.length) {
-          throw reglaDeNegocio(`Faltan datos: ${faltantes.map((f) => f.etiqueta).join(", ")}.`);
-        }
-        const firmantes = await firmantesLaborales(ctx, { firmantes: (plantilla.firmantes ?? "ambos") as "ambos" }, persona);
-        if (dryRun) {
-          filas.push({
-            personaId,
-            estado: "ok",
-            nombre,
-            documentoId: null,
-            solicitudFirmaId: null,
-            mensaje: "Listo para generar y enviar.",
-          });
-          exitosas += 1;
-          continue;
-        }
-        const { bytes } = await generarPdfLaboral({
-          titulo: plantilla.nombre,
-          marca,
-          parrafos: relleno.parrafos,
-          logo,
-        });
-        const pdfNombre = nombreSeguro(`${plantilla.nombre}-${persona.rut}.pdf`);
-        const documento = await guardarPdfGenerado(ctx, {
-          bytes,
-          nombre: pdfNombre,
-          titulo: `${plantilla.nombre} · ${nombre}`.trim(),
-          plantilla,
-          version,
-          propietario: { tipo: "persona", id: persona.id },
-        });
-        const solicitud = await ejecutarEnvioFirma(
-          ctx,
-          {
-            documentoId: documento.id,
-            clase: clase as ClaseFirma,
-            nivel,
-            ...(input.mensaje ? { mensaje: input.mensaje } : {}),
-            firmantes,
-          },
-          false,
-        );
-        filas.push({
-          personaId,
-          estado: "ok",
-          nombre,
-          documentoId: documento.id,
-          solicitudFirmaId: solicitud.id,
-          mensaje: null,
-        });
-        exitosas += 1;
-      } catch (e) {
-        const mensaje = e instanceof Error ? e.message : "No se pudo procesar.";
-        filas.push({
-          personaId,
-          estado: "error",
-          nombre,
-          documentoId: null,
-          solicitudFirmaId: null,
-          mensaje,
-        });
-        fallidas += 1;
-      }
+      const r = await filaEnvioMasivo(ctx, {
+        plantilla,
+        version,
+        personaId,
+        fecha,
+        clase: clase as ClaseFirma,
+        nivel,
+        ...(input.mensaje ? { mensaje: input.mensaje } : {}),
+        dryRun,
+      });
+      filas.push(r);
+      if (r.estado === "ok") exitosas += 1;
+      else fallidas += 1;
     }
     return { procesadas: filas.length, exitosas, fallidas, filas };
   },
