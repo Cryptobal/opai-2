@@ -1,54 +1,53 @@
 import { notFound } from "next/navigation";
 
-import { consultaListaCursor, POR_PAGINA } from "@/lib/lista-cursor";
-
 import { exigirDatos } from "@/lib/carga";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type {
   DetalleRendicion,
+  EstadoRendicion,
   OpcionesRendicion,
   PortalRendicion,
   ResumenRendicion,
 } from "./tipos";
 
-type PaginaMias = { rendiciones: ResumenRendicion[]; siguiente: string | null };
+type PaginaRendiciones = {
+  items: (ResumenRendicion & { solicitanteNombre?: string | null })[];
+  siguiente: string | null;
+  contadores?: Partial<Record<EstadoRendicion, number>>;
+};
 
-/** Mis rendiciones de la pestaña activa, paginadas por cursor (CAR-624). */
-export async function cargarMias(
+export async function cargarListaPropias(
   portal: PortalRendicion,
   p: Parametros,
-  estado?: ResumenRendicion["estado"],
-): Promise<PaginaMias> {
-  const r = await ejecutarComoUsuario<PaginaMias>(portal, "rendiciones.rendiciones.listar", {
+  estado?: EstadoRendicion,
+): Promise<PaginaRendiciones> {
+  const r = await ejecutarComoUsuario<PaginaRendiciones>(portal, "rendiciones.rendiciones.listar", {
     alcance: "propias",
-    ...consultaListaCursor(p),
+    incluirContadores: true,
+    limite: 50,
     ...(estado ? { estado } : {}),
+    ...(p.q ? { q: p.q } : {}),
+    ...(p.cursor ? { cursor: p.cursor } : {}),
   });
   return exigirDatos(r);
 }
 
-/** Contadores de pestañas: una página por estado (tope 100 por pestaña, suficiente para el badge). */
-export async function cargarContadoresPestanas(portal: PortalRendicion): Promise<ResumenRendicion[]> {
-  const estados: ResumenRendicion["estado"][] = [
-    "borrador",
-    "enviada",
-    "aprobada",
-    "rechazada",
-    "devuelta",
-    "pagada",
-  ];
-  const paginas = await Promise.all(
-    estados.map((estado) =>
-      ejecutarComoUsuario<PaginaMias>(portal, "rendiciones.rendiciones.listar", {
-        alcance: "propias",
-        limite: POR_PAGINA,
-        estado,
-      }),
-    ),
-  );
-  return paginas.flatMap((r) => (r.ok ? r.data.rendiciones : []));
+export async function cargarTodas(p: Parametros): Promise<PaginaRendiciones> {
+  const r = await ejecutarComoUsuario<PaginaRendiciones>("erp", "rendiciones.rendiciones.listar", {
+    alcance: "todas",
+    limite: 50,
+    ...(p.estado ? { estado: p.estado as EstadoRendicion } : {}),
+    ...(p.q ? { q: p.q } : {}),
+    ...(p.persona ? { solicitanteId: p.persona } : {}),
+    ...(p.instalacion ? { instalacionId: p.instalacion } : {}),
+    ...(p.centro ? { centroCosto: p.centro as "instalacion" | "administracion" } : {}),
+    ...(p.desde ? { desde: p.desde } : {}),
+    ...(p.hasta ? { hasta: p.hasta } : {}),
+    ...(p.cursor ? { cursor: p.cursor } : {}),
+  });
+  return exigirDatos(r);
 }
 
 export async function cargarOpciones(
@@ -73,12 +72,10 @@ export async function cargarRendicion(
     "rendiciones.rendiciones.obtener",
     { id },
   );
-  // Un id que no existe o que la persona no puede ver da el mismo «no encontrado» (ADR-022).
   if (!r.ok && (r.error.code === "NOT_FOUND" || r.error.code === "INVALID_INPUT")) notFound();
   return exigirDatos(r).rendicion;
 }
 
-/** Nombre del administrador de la empresa para el «sin permiso»; si falla o no hay, null (texto genérico). */
 export async function cargarAdministrador(portal: PortalRendicion): Promise<string | null> {
   const r = await ejecutarComoUsuario<{ nombre: string | null }>(
     portal,

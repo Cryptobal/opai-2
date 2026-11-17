@@ -3,7 +3,7 @@ import type { DetalleRendicion, EstadoRendicion, ResumenRendicion } from "../tip
 type FilaBandeja = ResumenRendicion & { solicitanteId: string; solicitanteNombre: string | null };
 
 export type Bandeja = {
-  rendiciones: FilaBandeja[];
+  items: FilaBandeja[];
   siguiente: string | null;
   porRevisar: number;
   montoPorRevisar: number;
@@ -26,27 +26,27 @@ export type FiltrosBandeja = {
   solicitanteId?: string;
   desde?: string;
   hasta?: string;
+  q?: string;
   cursor?: string;
-  prev?: string;
 };
 
 export const RUTA_BANDEJA = "/rendiciones/bandeja";
 
 /** Lee los filtros de la URL; lo que no es válido se ignora (nunca llega a la capacidad). */
-export function filtrosDe(q: Record<string, string | string[] | undefined>): FiltrosBandeja {
-  const uno = (k: string) => (typeof q[k] === "string" ? (q[k] as string) : undefined);
+export function filtrosDe(sp: Record<string, string | string[] | undefined>): FiltrosBandeja {
+  const uno = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const estado = FILTROS_ESTADO.find((f) => f.id === uno("estado"))?.id ?? "enviada";
   const fecha = (v?: string) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
   const sol = uno("solicitante");
+  const buscar = uno("q")?.trim();
   const cursor = uno("cursor");
-  const prev = uno("prev");
   return {
     estado,
+    ...(buscar ? { q: buscar } : {}),
+    ...(cursor && /^[0-9a-f-]{36}$/i.test(cursor) ? { cursor } : {}),
     ...(sol && /^[0-9a-f-]{36}$/i.test(sol) ? { solicitanteId: sol } : {}),
     ...(fecha(uno("desde")) ? { desde: fecha(uno("desde"))! } : {}),
     ...(fecha(uno("hasta")) ? { hasta: fecha(uno("hasta"))! } : {}),
-    ...(cursor && /^[0-9a-f-]{36}$/i.test(cursor) ? { cursor } : {}),
-    ...(prev ? { prev } : {}),
   };
 }
 
@@ -56,8 +56,8 @@ export function hrefBandeja(f: FiltrosBandeja, id?: string): string {
   if (f.solicitanteId) p.set("solicitante", f.solicitanteId);
   if (f.desde) p.set("desde", f.desde);
   if (f.hasta) p.set("hasta", f.hasta);
+  if (f.q) p.set("q", f.q);
   if (f.cursor) p.set("cursor", f.cursor);
-  if (f.prev) p.set("prev", f.prev);
   const q = p.toString();
   return `${RUTA_BANDEJA}${id ? `/${id}` : ""}${q ? `?${q}` : ""}`;
 }

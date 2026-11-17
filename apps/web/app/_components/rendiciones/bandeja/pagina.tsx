@@ -1,9 +1,9 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { identidadActual } from "@/lib/servidor";
 
+import { ContenidoBandeja } from "./contenido";
 import { cargarBandeja, cargarDetalleBandeja } from "./datos";
 import { filtrosDe, RUTA_BANDEJA } from "./tipos";
-import { VistaBandeja } from "./vista-bandeja";
 
 type Q = Record<string, string | string[] | undefined>;
 
@@ -27,7 +27,7 @@ export function PaginaBandeja({ searchParams, params }: { searchParams: Promise<
         return { filtros, bandeja, detalle, id, yoId: identidad?.usuario.id ?? "" };
       }}
     >
-      {(props) => <VistaBandeja {...props} />}
+      {(d) => <ContenidoBandeja filtros={d.filtros} bandeja={d.bandeja} detalle={d.detalle} id={d.id} yoId={d.yoId} />}
     </PaginaPortal>
   );
 }

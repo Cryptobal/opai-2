@@ -1,14 +1,13 @@
+import { Forbidden } from "@opai/ds";
+
+import type { SearchParams } from "@/lib/parametros";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { CargaFallida } from "@/lib/carga";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
-import { identidadActual } from "@/lib/servidor";
 
-import { cargarAdministrador, cargarContadoresPestanas, cargarMias } from "./datos";
+import { cargaMisRendiciones } from "./carga-mis-rendiciones";
+import { CuerpoMisRendiciones } from "./cuerpo-mis-rendiciones";
 import { BASE, PESTANAS, type PestanaId, type PortalRendicion } from "./tipos";
-import { VistaMisRendiciones } from "./vista-mis-rendiciones";
 
-/** «Mis rendiciones»: una consulta (`rendiciones.listar`), pestañas por ruta con contador. */
+/** «Mis rendiciones»: lista paginada, búsqueda y contadores por pestaña. */
 export function PaginaMisRendiciones({
   portal,
   pestana,
@@ -16,44 +15,39 @@ export function PaginaMisRendiciones({
 }: {
   portal: PortalRendicion;
   pestana: PestanaId;
-  searchParams?: SearchParams;
+  searchParams: SearchParams;
 }) {
-  const base = BASE[portal];
   const def = PESTANAS.find((p) => p.id === pestana) ?? PESTANAS[0];
+  const base = BASE[portal];
   return (
     <PaginaPortal
       portal={portal}
       titulo="Rendiciones"
       ruta={`${base}${def.segmento}`}
-      cargar={async () => {
-        const i = portal === "erp" ? await identidadActual() : null;
-        const puede = i ? puedeDeIdentidad(i) : () => false;
-        const accesos = {
-          aprobar: puede("rendiciones:aprobar"),
-          pagar: puede("rendiciones:pagar"),
-          reporte: puede("rendiciones:ver_todas"),
-        };
-        const p = searchParams ? await leerParametros(searchParams) : {};
-        try {
-          const [pagina, contadores] = await Promise.all([
-            cargarMias(portal, p, def.estado),
-            cargarContadoresPestanas(portal),
-          ]);
-          return { pagina, contadores, p, empresa: null, admin: null, accesos };
-        } catch (e) {
-          if (!(e instanceof CargaFallida) || e.code !== "FORBIDDEN") throw e;
-          return {
-            pagina: { rendiciones: [], siguiente: null },
-            contadores: [],
-            p,
-            empresa: (await identidadActual())?.actual?.tenant.nombre ?? "tu empresa",
-            admin: await cargarAdministrador(portal),
-            accesos,
-          };
-        }
-      }}
+      cargar={() => cargaMisRendiciones(portal, pestana, searchParams)}
     >
-      {(props) => <VistaMisRendiciones portal={portal} pestana={pestana} {...props} />}
+      {(d) =>
+        d.empresa ? (
+          <Forbidden
+            titulo="No tienes acceso a Rendiciones"
+            descripcion={
+              d.admin
+                ? `Necesitas el permiso Rendir. Pídele acceso a ${d.admin}, administrador de ${d.empresa}.`
+                : `Necesitas el permiso Rendir. Pídele acceso al administrador de ${d.empresa}.`
+            }
+          />
+        ) : (
+          <CuerpoMisRendiciones
+            portal={portal}
+            pestana={pestana}
+            pagina={d.pagina}
+            accesos={d.accesos}
+            rutaBase={d.base}
+            segmento={d.segmento}
+            p={d.p}
+          />
+        )
+      }
     </PaginaPortal>
   );
 }
