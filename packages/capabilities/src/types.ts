@@ -96,6 +96,11 @@ export interface Contexto {
   revalidarAccesoEnTransaccion?: (tx: TenantTx) => Promise<string>;
   /** Garantía de MFA comprobada en el borde; nunca procede del input de una capacidad. */
   mfa?: EstadoMfa;
+  /**
+   * «Ver como» (CAR-528): el contexto es el de la persona vista y `porUserId` quien mira. Lo pone
+   * solo el borde; `restriccion` rechaza toda escritura y las lecturas auditadas registran a quien mira.
+   */
+  verComo?: { porUserId: string } | null;
   /** Tenant actual. Si `conTenant` es false (plataforma sin empresa elegida) es un id nulo. */
   tenantId: string;
   conTenant: boolean;

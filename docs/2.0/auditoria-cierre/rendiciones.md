@@ -102,3 +102,7 @@ Fuera de la cuenta por decisión: asiento contable (Contabilidad, CAR-354 cancel
 | R10 | Ayudas de configuración en lenguaje de producto | Editor de tramos en vez de JSON; quitar «solo empresa de pruebas» del nombre | Sin llaves `{}` ni textos de entorno en Configuración | Baja |
 
 Para el patrón de lista y ficha, ampliar CAR-564 a «Mis rendiciones», la ficha y los lotes, en vez de abrir otro ticket.
+
+## Tickets creados (16-nov)
+
+R1 CAR-597 · R2 CAR-598 · R3 CAR-612 · R4 CAR-613 · R5 CAR-614 · R6 CAR-615 · R7 CAR-616 · R8 CAR-617 · R9 CAR-618 · R10 CAR-619. El patrón de lista y ficha quedó como comentario en CAR-564.
