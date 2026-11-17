@@ -1,7 +1,7 @@
 "use client";
 
 import { SendHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button, Textarea } from "@opai/ds";
 
@@ -18,7 +18,11 @@ export function Compositor({
   /** Texto con el que arranca (⌘K → «Preguntar a OPAI»). */
   inicial?: string;
 }) {
+  const campo = useRef<HTMLTextAreaElement>(null);
   const [texto, setTexto] = useState(inicial);
+  useEffect(() => {
+    campo.current?.focus({ preventScroll: true });
+  }, []);
   const enviar = () => {
     const t = texto.trim();
     if (!t || deshabilitado) return;
@@ -28,6 +32,7 @@ export function Compositor({
   return (
     <div className="flex flex-none items-end gap-2 border-t border-border p-3">
       <Textarea
+        ref={campo}
         aria-label="Mensaje para OPAI"
         placeholder="Escribe lo que necesitas…"
         rows={1}
