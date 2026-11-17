@@ -25,6 +25,45 @@ const OPCIONES_VISTA = [
   { valor: "todos", etiqueta: "Todos" },
 ];
 
+function TarjetaTicket({ t }: { t: Ticket }) {
+  return (
+    <span className="flex min-w-0 flex-1 flex-col gap-1">
+      <span className="flex items-center gap-2">
+        <span className="truncate text-base font-medium text-fg">{t.titulo}</span>
+        <Badge tono={TONO_PRIORIDAD[t.prioridad] ?? "neutro"}>
+          {ETIQUETA_PRIORIDAD[t.prioridad] ?? t.prioridad}
+        </Badge>
+      </span>
+      <span className="t-caption">
+        {t.tipoNombre} ·{" "}
+        <Badge tono={TONO_ESTADO[t.estado] ?? "neutro"}>{ETIQUETA_ESTADO[t.estado] ?? t.estado}</Badge>
+      </span>
+    </span>
+  );
+}
+
+const COLUMNAS_TICKETS = [
+  { id: "numero", etiqueta: "N.º", render: (t: Ticket) => t.numero, className: "w-24" },
+  { id: "titulo", etiqueta: "Ticket", render: (t: Ticket) => t.titulo },
+  { id: "tipo", etiqueta: "Tipo", render: (t: Ticket) => t.tipoNombre },
+  {
+    id: "prioridad",
+    etiqueta: "Prioridad",
+    render: (t: Ticket) => (
+      <Badge tono={TONO_PRIORIDAD[t.prioridad] ?? "neutro"}>
+        {ETIQUETA_PRIORIDAD[t.prioridad] ?? t.prioridad}
+      </Badge>
+    ),
+  },
+  {
+    id: "estado",
+    etiqueta: "Estado",
+    render: (t: Ticket) => (
+      <Badge tono={TONO_ESTADO[t.estado] ?? "neutro"}>{ETIQUETA_ESTADO[t.estado] ?? t.estado}</Badge>
+    ),
+  },
+] as const;
+
 type Props = {
   p: Parametros;
   bandeja: Awaited<ReturnType<typeof cargarTickets>>;
@@ -46,45 +85,8 @@ export function TicketsLista({ p, bandeja, tipos, instalaciones }: Props) {
       clave={(t) => t.id}
       href={(t) => `/tickets/${t.id}`}
       Link={LinkNext}
-      tarjeta={(t) => (
-        <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="flex items-center gap-2">
-            <span className="truncate text-base font-medium text-fg">{t.titulo}</span>
-            <Badge tono={TONO_PRIORIDAD[t.prioridad] ?? "neutro"}>
-              {ETIQUETA_PRIORIDAD[t.prioridad] ?? t.prioridad}
-            </Badge>
-          </span>
-          <span className="t-caption">
-            {t.tipoNombre} ·{" "}
-            <Badge tono={TONO_ESTADO[t.estado] ?? "neutro"}>
-              {ETIQUETA_ESTADO[t.estado] ?? t.estado}
-            </Badge>
-          </span>
-        </span>
-      )}
-      columnas={[
-        { id: "numero", etiqueta: "N.º", render: (t) => t.numero, className: "w-24" },
-        { id: "titulo", etiqueta: "Ticket", render: (t) => t.titulo },
-        { id: "tipo", etiqueta: "Tipo", render: (t) => t.tipoNombre },
-        {
-          id: "prioridad",
-          etiqueta: "Prioridad",
-          render: (t) => (
-            <Badge tono={TONO_PRIORIDAD[t.prioridad] ?? "neutro"}>
-              {ETIQUETA_PRIORIDAD[t.prioridad] ?? t.prioridad}
-            </Badge>
-          ),
-        },
-        {
-          id: "estado",
-          etiqueta: "Estado",
-          render: (t) => (
-            <Badge tono={TONO_ESTADO[t.estado] ?? "neutro"}>
-              {ETIQUETA_ESTADO[t.estado] ?? t.estado}
-            </Badge>
-          ),
-        },
-      ]}
+      tarjeta={(t) => <TarjetaTicket t={t} />}
+      columnas={[...COLUMNAS_TICKETS]}
       textos={{
         vacio: {
           titulo: "Sin tickets",
