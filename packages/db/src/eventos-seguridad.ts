@@ -41,3 +41,10 @@ export async function registrarEventoSeguridad(e: EventoSeguridad, tx?: TenantTx
   };
   await agregarAAuditoriaGlobal("seguridad", hecho, tx);
 }
+
+/** «Ver como» (CAR-528): inicio y fin, en la transacción de la capacidad que ya lo autorizó. */
+export type EventoVerComo = EventoSeguridad & {
+  tipo: "seguridad.ver_como.inicio" | "seguridad.ver_como.fin";
+};
+
+export const registrarVerComo = (tx: TenantTx, e: EventoVerComo) => registrarEventoSeguridad(e, tx);
