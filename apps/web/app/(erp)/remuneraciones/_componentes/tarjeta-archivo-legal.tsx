@@ -33,15 +33,19 @@ const MARCABLE = new Set(["por_generar", "generado", "con_errores"]);
 
 type Props = { periodoId: string; tipo: "lre" | "previred" | "f30_1"; obligacion: ObligacionArchivo | null; tenantId: string };
 
+const CAP_GENERAR = {
+  lre: "nomina.lre.generar",
+  previred: "nomina.previred.generar",
+  f30_1: "nomina.f30_1.generar",
+} as const;
+
 export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: Props) {
   const t = TEXTOS[tipo];
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const router = useRouter();
   const [archivo, setArchivo] = useState<Archivo | null>(null);
   async function validar() {
-    // Ids literales: el escáner de paridad verifica cada capacidad que llama la pantalla.
-    const cap = tipo === "lre" ? "nomina.lre.generar" : tipo === "previred" ? "nomina.previred.generar" : "nomina.f30_1.generar";
-    const r = await ejecutar<Archivo>(cap, { periodoId });
+    const r = await ejecutar<Archivo>(CAP_GENERAR[tipo], { periodoId });
     if (!r) return;
     setArchivo(r);
     // Deja el resultado en el calendario de obligaciones (generado o con errores), si el mes no está cerrado.

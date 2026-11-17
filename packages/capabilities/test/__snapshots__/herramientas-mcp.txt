@@ -581,6 +581,7 @@ nomina_conceptos_actualizar
 nomina_conceptos_crear
 nomina_conceptos_listar
 nomina_costo_proyectado_listar
+nomina_f30_1_generar
 nomina_liquidaciones_calcular
 nomina_liquidaciones_listar
 nomina_liquidaciones_marcar_revisadas
