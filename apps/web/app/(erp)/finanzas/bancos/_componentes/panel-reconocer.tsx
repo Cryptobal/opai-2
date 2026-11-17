@@ -110,6 +110,7 @@ export function PanelReconocer({ movimiento, onCerrar }: { movimiento: Movimient
           esConciliado={esConciliado}
           error={error}
           sugerencias={sugerencias}
+          lotesRendiciones={lotesRendiciones}
           pendiente={pendiente}
           elegidas={elegidas}
           onElegidas={setElegidas}
