@@ -130,7 +130,6 @@ describe("menú del ERP sin duplicados ni ítems fuera de su área (CAR-182)", (
       "/remuneraciones": "Banknote",
       "/remuneraciones/cumplimiento-dt/contratos": "UserCheck",
       "/remuneraciones/cumplimiento-dt/finiquitos": "IdCard",
-      "/remuneraciones/cumplimiento-dt/contratos": "UserCheck",
       "/finanzas/bancos": "Landmark",
       "/finanzas/flujo": "ChartLine",
       "/negocios/seguimiento": "BellRing",
