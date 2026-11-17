@@ -1,6 +1,6 @@
 /** Valores editables de los instrumentos financieros de una cotización (CAR-214); tasas y UF escalados como en CPQ. */
-export const PCT_UNO = 10_000; // 1 % = 10.000
-export const UF_UNO = 10_000; // 1 UF = 10.000
+const PCT_UNO = 10_000; // 1 % = 10.000
+const UF_UNO = 10_000; // 1 UF = 10.000
 
 export type InstrumentosCompletos = {
   financiero: { habilitado: boolean; tasaPct: number };
