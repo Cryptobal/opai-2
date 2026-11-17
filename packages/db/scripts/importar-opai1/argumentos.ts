@@ -9,13 +9,13 @@ export type Argumentos = {
   salida: string | null;
 };
 
-export const USO =
+const USO =
   "Uso: pnpm --filter @opai/db importar:opai1 --dry-run --tenant <slug> --origen fixtures:<ruta.json> [--salida <reporte.json>]";
 
 export const MENSAJE_SIN_DRY_RUN =
   "La importación real desde OPAI 1.0 no está habilitada: requiere el OK explícito de Carlos y el CRM completo (Brief 07). Esta entrega solo simula: agrega --dry-run.";
 
-export function leerOrigen(valor: string): Origen | null {
+function leerOrigen(valor: string): Origen | null {
   if (valor === "opai1") return { tipo: "opai1" };
   if (valor.startsWith("fixtures:") && valor.length > "fixtures:".length)
     return { tipo: "fixtures", ruta: valor.slice("fixtures:".length) };

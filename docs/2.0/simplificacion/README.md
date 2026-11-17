@@ -21,7 +21,7 @@ El orden es el de trabajo: primero lo que más limpia con menos riesgo. Tamaño 
 1. Un tema por PR, chico, sin cambiar el comportamiento.
 2. Las pruebas existentes quedan en verde. Si la parte no tiene pruebas, el primer commit las escribe y fija el comportamiento actual; el segundo simplifica.
 3. No se toca un archivo que otra sesión tenga en un PR abierto: se anota en el ticket y se espera, o se coordina por Linear con la sesión dueña.
-4. Cada PR baja `simplicidad-base.json` con `pnpm simplicidad --actualizar`.
+4. Al integrar a `main`, quien hace squash baja `simplicidad-base.json` con `pnpm simplicidad --actualizar` (CAR-641: en PRs paralelos el check compara contra la base de `main`, no el archivo del branch).
 5. Se integra con la regla vigente: checks en verde, revisión final sin bloqueos y snapshot si hubiera migración (no debería).
 
 ## 1 · Archivos sin uso y una prueba que no corre (CAR-436)
@@ -182,3 +182,10 @@ No se tocan hasta que ese PR se integre:
 ## Pasada semanal
 
 Cada semana la Sesión Estándares corre `pnpm simplicidad --detalle`, compara con este informe, abre los PR chicos que correspondan y actualiza los tickets CAR-436 a CAR-440. Resultado esperado: las seis cifras de `simplicidad-base.json` solo bajan.
+
+## Pasadas semanales
+
+| Fecha | Duplicadas | Archivos largos | Funciones largas | Exportaciones sin uso | Archivos sin uso | Dependencias sin uso | PR |
+|---|---|---|---|---|---|---|---|
+| 14-nov-2026 (informe) | 3.620 | 38 | 681 | 567 | 6 | 35 | — |
+| 16-nov-2026 (medido en `main` `886e262`) | 3.223 | 36 | 670 | 265 | 0 | 0 | #967 (Finanzas, −29), #970 (componentes web, −19), #992 (núcleo, −18 y −13 líneas duplicadas). Al integrarse los tres: 3.210 duplicadas y 199 exportaciones sin uso. Se cerró #880 (lockfile), que ya no aportaba nada. |

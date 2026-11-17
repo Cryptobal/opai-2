@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import type { Contexto } from "@opai/capabilities";
 import { ajusteFinanzas, type DiferenciaFactoring, hoyChile, pagosImpuestosEsperados } from "@opai/capabilities";
 import { formatearFecha } from "@opai/domain";
@@ -7,14 +5,10 @@ import { formatearFecha } from "@opai/domain";
 import type { CeldaFlujo } from "../domain";
 import type { celdaSchema } from "./esquemas";
 import { FILA_DIFERENCIA_FACTORING, FILA_IVA, FILA_PPM } from "./filas-virtuales";
+import { idEstable } from "./util";
 import type { z } from "zod";
 
 type Vista = z.infer<typeof celdaSchema>;
-
-const idEstable = (texto: string): string => {
-  const h = createHash("sha1").update(texto).digest("hex");
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
-};
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const mesDe = (periodo: string) => `${MESES[Number(periodo.slice(5, 7)) - 1]} ${periodo.slice(0, 4)}`;
