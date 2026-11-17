@@ -2,7 +2,6 @@
 // se abre primero. Puro y sin cifras: solo cuenta causas que el servidor ya entrega a todos.
 
 export type BloqueFicha = "cliente" | "puestos" | "costos" | "documento";
-export const ORDEN_BLOQUES: readonly BloqueFicha[] = ["cliente", "puestos", "costos", "documento"];
 
 export type EntradaPasos = {
   /** Estado único del servidor (`meta.estadoFicha.estado`). */
@@ -17,7 +16,7 @@ export type EntradaPasos = {
   mutualPendiente: boolean;
 };
 
-export type PasoFicha = { bloque: BloqueFicha; pendientes: number; bloqueado: boolean };
+type PasoFicha = { bloque: BloqueFicha; pendientes: number; bloqueado: boolean };
 export type PasosFicha = { pasos: PasoFicha[]; primeroAbierto: BloqueFicha };
 
 const CERRADAS = new Set(["enviada", "aceptada", "rechazada", "vencida", "reemplazada", "archivada"]);
