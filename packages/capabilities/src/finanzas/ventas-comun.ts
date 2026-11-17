@@ -16,7 +16,6 @@ export {
   consumirFolio,
   folioVista,
   marcarBorradorEmitido,
-  type OpcionesFolioVista,
 } from "./ventas-folios-logica";
 
 export const PERMISO_VENTAS = "finanzas:ventas.manage";
