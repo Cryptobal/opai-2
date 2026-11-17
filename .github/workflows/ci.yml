@@ -113,7 +113,9 @@ jobs:
         if: steps.solo_docs.outputs.only_docs != 'true'
       - name: test:db
         if: steps.solo_docs.outputs.only_docs != 'true' && steps.base.outputs.db == 'true'
-        run: pnpm test:db
+        run: |
+          rm -f "${TMPDIR:-/tmp}/opai_cron_sii_test_pwd"
+          pnpm test:db
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
       - name: Solo documentación
