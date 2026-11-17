@@ -79,7 +79,7 @@
 - Capacidades MCP: `nomina.midt.listar`, `nomina.midt.exportar_pendientes`, `nomina.midt.datos` y `nomina.midt.registrar` (marca con comprobante; lecturas auditadas).
 - Pantalla `/remuneraciones/cumplimiento-dt/contratos` (diseño 07): segmento Por registrar / Registrados, descarga CSV, datos por fila y diálogo Marcar registrado. Navegación «Cumplimiento DT». Sin API Mi DT.
 
-- **Pendiente:** gate del LRE/Previred bajo el complemento (hoy siguen con solo `nomina`). Carta art. 162 y comprobantes en ficha finiquito (diseño 08 parcial).
+- **Pendiente (finiquito):** feriado proporcional mejorado, carta art. 162 y comprobantes en ficha (diseño 08 parcial).
 
 ### Pago banco (PR apilado sobre F29)
 
@@ -88,6 +88,10 @@
 ### F29 retención (PR apilado sobre finiquitos)
 
 - `nomina.f29.generar`: Excel con retenciones de impuesto único del período; tarjeta en Archivos. Formato por verificar.
+
+### LRE y Previred bajo complemento (PR apilado sobre #1012)
+
+- `nomina.lre.generar` y `nomina.previred.generar` exigen `nomina.cumplimiento_dt` (helper `complemento-dt.ts`).
 
 ### Complemento Cumplimiento DT · entitlements (PR apilado sobre #1007)
 

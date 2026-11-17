@@ -46,7 +46,7 @@ const semilla = (rutEmpleador: string | null) => ({
   ],
 });
 const como = (rol: "owner" | "gerente" = "owner", rut: string | null = "76.543.210-3", extra: Parameters<typeof contextoDePrueba>[0] = {}) =>
-  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla(rut), ...extra });
+  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina", "nomina.cumplimiento_dt"], semilla: semilla(rut), ...extra });
 type Salida = { nombre: string; contenido: string; filas: number; personaIds: string[]; errores: { personaId: string | null; personaNombre: string | null; mensaje: string }[]; advertencias: string[]; formatoVerificado: boolean };
 const generar = (c: ReturnType<typeof como>) => executeCapability(c.ctx, "nomina.lre.generar", { periodoId: PER });
 
@@ -111,5 +111,12 @@ describe("nomina.lre.generar", () => {
   it("un rol con alcance por instalación no puede generarlo", async () => {
     const r = await generar(como("owner", "76.543.210-3", { alcance: { instalaciones: [] } }));
     expect(r.ok).toBe(false);
+  });
+
+  it("rechaza sin el complemento Cumplimiento DT", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: ["nomina"], semilla: semilla("76.543.210-3") });
+    const r = await executeCapability(ctx, "nomina.lre.generar", { periodoId: PER });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error.message).toContain("Cumplimiento DT");
   });
 });
