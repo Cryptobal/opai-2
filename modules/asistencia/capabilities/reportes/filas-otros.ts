@@ -2,7 +2,7 @@ import type { Contexto } from "@opai/capabilities";
 
 import { correccionesVista } from "../correcciones-listar";
 import { ETIQUETA_TIPO } from "../formato";
-import { horaZona, type Col, type Fila, type FiltroFilas } from "./filas-comun";
+import { horaZona, type Col, type Fila, type FiltroFilas, whereDiasConsulta } from "./filas-comun";
 import { rangoDias } from "./esquema";
 
 const horaRango = (desde: string, hasta: string) => ({
@@ -11,12 +11,7 @@ const horaRango = (desde: string, hasta: string) => ({
 });
 
 export async function filasDomingosFestivos(ctx: Contexto, filtro: FiltroFilas, alcance: object) {
-  const whereDia = {
-    fecha: rangoDias(filtro.desde, filtro.hasta),
-    ...(filtro.personaId ? { personaId: filtro.personaId } : {}),
-    AND: [alcance, filtro.instalacionId ? { instalacionId: filtro.instalacionId } : {}],
-  };
-  const dias = await ctx.db.dia.findMany({ where: whereDia, orderBy: { fecha: "asc" } });
+  const dias = await ctx.db.dia.findMany({ where: whereDiasConsulta(filtro, alcance), orderBy: { fecha: "asc" } });
   const cal = await ctx.db.diaCalendario.findMany({
     where: {
       fecha: rangoDias(filtro.desde, filtro.hasta),

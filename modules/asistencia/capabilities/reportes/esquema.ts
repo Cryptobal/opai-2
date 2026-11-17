@@ -4,7 +4,7 @@ import { TIPOS_REPORTE_DT } from "../../domain/reportes";
 import { fecha } from "../dias-capacidades";
 import { uuid } from "../esquemas";
 
-export const MAX_DIAS_REPORTE = 93;
+const MAX_DIAS_REPORTE = 93;
 
 export const filtroReporte = z
   .object({
@@ -29,7 +29,7 @@ export const cabeceraSchema = z.object({
   periodo: z.string(),
 });
 
-export const filaSchema = z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]));
+const filaSchema = z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]));
 
 export const vistaReporteSchema = z.object({
   tipo: z.enum(TIPOS_REPORTE_DT),

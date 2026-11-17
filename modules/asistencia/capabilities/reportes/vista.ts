@@ -4,9 +4,8 @@ import { defineCapability } from "@opai/capabilities";
 
 import { METADATOS_REPORTE } from "../../domain/reportes";
 import { alcanceReportes } from "./alcance";
-import { cabeceraReporte } from "./cabecera";
 import { filtroReporte, vistaReporteSchema } from "./esquema";
-import { generarFilasReporte } from "./generar-filas";
+import { prepararReporteDt } from "./preparar";
 
 export const reportesVista = defineCapability({
   id: "asistencia.reportes.vista",
@@ -20,18 +19,9 @@ export const reportesVista = defineCapability({
   dryRun: false,
   auditarLectura: () => [],
   async handler(ctx, i) {
-    const alcance = alcanceReportes(ctx);
-    const meta = METADATOS_REPORTE[i.tipo];
-    const filtro = {
-      desde: i.desde,
-      hasta: i.hasta,
-      ...(i.personaId ? { personaId: i.personaId } : {}),
-      ...(i.instalacionId ? { instalacionId: i.instalacionId } : {}),
-    };
-    const cabecera = await cabeceraReporte(ctx, filtro);
-    const { columnas, filas, siglasUsadas, provisorio } = await generarFilasReporte(ctx, i.tipo, filtro, alcance);
+    const { meta, cabecera, columnas, filas, siglasUsadas, provisorio, tipo } = await prepararReporteDt(ctx, i);
     return {
-      tipo: i.tipo,
+      tipo,
       titulo: meta.titulo,
       cabecera,
       columnas,

@@ -1,18 +1,12 @@
 import ExcelJS from "exceljs";
 
-import type { z } from "zod";
-
-import type { cabeceraSchema } from "./esquema";
-
-type Cabecera = z.infer<typeof cabeceraSchema>;
-type Col = { clave: string; etiqueta: string };
-type Fila = Record<string, string | number | boolean | null>;
+import type { CabeceraReporteDt, ColumnaReporteDt, FilaReporteDt } from "./exportar-tipos";
 
 export async function xlsxReporteDt(
   titulo: string,
-  cabecera: Cabecera,
-  columnas: Col[],
-  filas: Fila[],
+  cabecera: CabeceraReporteDt,
+  columnas: ColumnaReporteDt[],
+  filas: FilaReporteDt[],
 ): Promise<string> {
   const wb = new ExcelJS.Workbook();
   const sh = wb.addWorksheet(titulo.slice(0, 31));

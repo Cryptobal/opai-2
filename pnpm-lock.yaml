@@ -107,6 +107,9 @@ importers:
       '@opai/integrations':
         specifier: workspace:*
         version: link:../../packages/integrations
+      '@opai/mod-asistencia':
+        specifier: workspace:*
+        version: link:../../modules/asistencia
       '@opai/modules':
         specifier: workspace:*
         version: link:../../modules/registry

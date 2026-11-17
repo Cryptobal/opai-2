@@ -2,13 +2,10 @@ import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
-import { METADATOS_REPORTE } from "../../domain/reportes";
-import { alcanceReportes } from "./alcance";
-import { cabeceraReporte } from "./cabecera";
 import { filtroReporte } from "./esquema";
 import { pdfReporteDt } from "./exportar-pdf";
 import { xlsxReporteDt } from "./exportar-xlsx";
-import { generarFilasReporte } from "./generar-filas";
+import { prepararReporteDt } from "./preparar";
 
 export const reportesExportar = defineCapability({
   id: "asistencia.reportes.exportar",
@@ -27,18 +24,9 @@ export const reportesExportar = defineCapability({
   dryRun: false,
   auditarLectura: () => [],
   async handler(ctx, i) {
-    const alcance = alcanceReportes(ctx);
-    const meta = METADATOS_REPORTE[i.tipo];
-    const filtro = {
-      desde: i.desde,
-      hasta: i.hasta,
-      ...(i.personaId ? { personaId: i.personaId } : {}),
-      ...(i.instalacionId ? { instalacionId: i.instalacionId } : {}),
-    };
-    const cabecera = await cabeceraReporte(ctx, filtro);
-    const { columnas, filas } = await generarFilasReporte(ctx, i.tipo, filtro, alcance);
+    const { meta, cabecera, columnas, filas, tipo } = await prepararReporteDt(ctx, i);
     if (filas.length > 20_000) throw reglaDeNegocio("El reporte es demasiado grande: acota el período o la instalación.");
-    const base = `reporte-dt-${i.tipo}-${i.desde}-${i.hasta}`;
+    const base = `reporte-dt-${tipo}-${i.desde}-${i.hasta}`;
     if (i.formato === "xlsx") {
       return {
         nombreArchivo: `${base}.xlsx`,

@@ -1,20 +1,14 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
-import type { z } from "zod";
-
-import type { cabeceraSchema } from "./esquema";
-
-type Cabecera = z.infer<typeof cabeceraSchema>;
-type Col = { clave: string; etiqueta: string };
-type Fila = Record<string, string | number | boolean | null>;
+import type { CabeceraReporteDt, ColumnaReporteDt, FilaReporteDt } from "./exportar-tipos";
 
 const MARGEN = 40;
 
 export async function pdfReporteDt(
   titulo: string,
-  cabecera: Cabecera,
-  columnas: Col[],
-  filas: Fila[],
+  cabecera: CabeceraReporteDt,
+  columnas: ColumnaReporteDt[],
+  filas: FilaReporteDt[],
 ): Promise<string> {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);

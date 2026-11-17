@@ -46,10 +46,6 @@ export const METADATOS_REPORTE: Record<
   },
 };
 
-export function esTipoReporteDt(v: string): v is TipoReporteDt {
-  return (TIPOS_REPORTE_DT as readonly string[]).includes(v);
-}
-
 /** Segundos a «h:mm:ss» (atrasos y sobretiempo sin redondeo de minutos). */
 export function segundosAHHMMSS(s: number): string {
   if (s <= 0) return "0:00:00";
