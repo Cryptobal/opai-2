@@ -20,10 +20,10 @@ export function ComprobanteObligacion({
 }: {
   obligacion: ObligacionArchivo;
   tenantId: string;
-  tipo: "lre" | "previred";
+  tipo: "lre" | "previred" | "f30_1";
 }) {
   const router = useRouter();
-  const estadoFinal = tipo === "lre" ? "cargado" : "pagado";
+  const estadoFinal = tipo === "previred" ? "pagado" : "cargado";
   if (obligacion.comprobanteDocumentoId)
     return <p className="t-caption text-fg-muted">Comprobante guardado en los documentos de la empresa.</p>;
   return (
@@ -31,7 +31,7 @@ export function ComprobanteObligacion({
       compacto
       tipos="PDF, JPG o PNG"
       accept="application/pdf,image/jpeg,image/png"
-      etiquetaBoton={tipo === "lre" ? "Subir comprobante de carga" : "Subir comprobante de pago"}
+      etiquetaBoton={tipo === "previred" ? "Subir comprobante de pago" : "Subir comprobante de carga"}
       procesar={async (archivo, progreso) => {
         const cambio = obligacion.estado === estadoFinal || obligacion.estado === "pagado" ? {} : { estado: estadoFinal };
         // Vista previa primero: si la obligación ya no admite el cambio, no se sube un documento huérfano.
@@ -44,7 +44,7 @@ export function ComprobanteObligacion({
           ...cambio,
         });
         if (!r.ok) throw new Error(r.error.message);
-        avisar.exito(tipo === "lre" ? "Comprobante de carga guardado" : "Comprobante de pago guardado");
+        avisar.exito(tipo === "previred" ? "Comprobante de pago guardado" : "Comprobante de carga guardado");
         router.refresh();
       }}
     />

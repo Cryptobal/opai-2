@@ -43,8 +43,9 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.listar", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.pendientes).toBeGreaterThanOrEqual(1);
-    expect(r.data.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
+    const d = r.data as { pendientes: number; items: { movimientoTipo: string; referenciaId: string }[] };
+    expect(d.pendientes).toBeGreaterThanOrEqual(1);
+    expect(d.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
   });
 
   it("exporta CSV de pendientes", async () => {
@@ -52,7 +53,8 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.exportar_pendientes", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.contenido).toContain("movimiento");
-    expect(r.data.filas).toBeGreaterThan(0);
+    const d = r.data as { contenido: string; filas: number };
+    expect(d.contenido).toContain("movimiento");
+    expect(d.filas).toBeGreaterThan(0);
   });
 });
