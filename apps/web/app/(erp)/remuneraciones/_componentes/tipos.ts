@@ -108,5 +108,3 @@ export type ListaLiquidaciones = {
   siguiente: string | null;
   total: { personas: number; revisadas: number; liquido: number; costoEmpresa: number };
 };
-=======
->>>>>>> origin/main
