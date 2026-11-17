@@ -4,7 +4,7 @@ import { conteo } from "./plural";
 export { conteo };
 
 /** Etiquetas en español para categorías del motor (nunca claves internas en UI). */
-export const ETIQUETA_CATEGORIA_CPQ: Record<string, string> = {
+const ETIQUETA_CATEGORIA_CPQ: Record<string, string> = {
   mano_obra: "Mano de obra",
   feriados: "Feriados",
   uniformes: "Uniformes",
