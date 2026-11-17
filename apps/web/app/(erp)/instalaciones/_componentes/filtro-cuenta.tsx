@@ -28,30 +28,33 @@ async function nombreCuenta(id: string): Promise<string> {
 export function FiltroCuentaInstalaciones({ cuentaInicial }: { cuentaInicial: string | null }) {
   const { valor, fijar } = useParametros();
   const actual = valor("cuenta");
-  const [etiqueta, setEtiqueta] = useState(cuentaInicial);
+  const [etiqueta, setEtiqueta] = useState<{ id: string; nombre: string } | null>(
+    cuentaInicial && actual ? { id: actual, nombre: cuentaInicial } : null,
+  );
 
   useEffect(() => {
-    if (!actual) {
-      setEtiqueta(null);
-      return;
-    }
-    if (etiqueta) return;
-    void nombreCuenta(actual).then(setEtiqueta);
-  }, [actual, etiqueta]);
+    if (!actual || etiqueta?.id === actual) return;
+    void nombreCuenta(actual).then((nombre) => setEtiqueta({ id: actual, nombre }));
+  }, [actual, etiqueta?.id]);
+
+  const nombre = actual && etiqueta?.id === actual ? etiqueta.nombre : null;
 
   const buscar = useCallback(async (q: string) => {
     const items = await buscarCuentas(q);
     const sel = actual ? items.find((i) => i.valor === actual) : null;
-    if (actual && etiqueta && !sel) return [{ valor: actual, etiqueta }, ...items];
+    if (actual && nombre && !sel) return [{ valor: actual, etiqueta: nombre }, ...items];
     return items;
-  }, [actual, etiqueta]);
+  }, [actual, nombre]);
 
-  if (actual && etiqueta) {
+  if (actual && nombre) {
     return (
       <Chip
         etiqueta="Cuenta"
-        valor={etiqueta}
-        onQuitar={() => fijar({ cuenta: null, cursor: null, prev: null })}
+        valor={nombre}
+        onQuitar={() => {
+          setEtiqueta(null);
+          fijar({ cuenta: null, cursor: null, prev: null });
+        }}
       />
     );
   }
@@ -68,7 +71,7 @@ export function FiltroCuentaInstalaciones({ cuentaInicial }: { cuentaInicial: st
         const id = ids[0];
         if (!id) return;
         void nombreCuenta(id).then((n) => {
-          setEtiqueta(n);
+          setEtiqueta({ id, nombre: n });
           fijar({ cuenta: id, cursor: null, prev: null });
         });
       }}

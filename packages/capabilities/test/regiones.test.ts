@@ -14,8 +14,9 @@ describe("core.regiones.list", () => {
     const r = await executeCapability(ctx, "core.regiones.list", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const data = r.data as { items: { nombre: string }[] };
+    const data = r.data as { items: { nombre: string }[]; siguiente: string | null };
     expect(data.items).toHaveLength(16);
+    expect(data.siguiente).toBeNull();
     expect(data.items.map((x) => x.nombre)).toContain("Región Metropolitana");
     expect(data.items.map((x) => x.nombre)).toContain("Ñuble");
   });

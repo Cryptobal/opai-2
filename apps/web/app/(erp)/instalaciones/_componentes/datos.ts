@@ -1,13 +1,11 @@
+import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { InstalacionDetalle, InstalacionFila, Pagina } from "@/lib/tipos-maestros";
 
-export const POR_PAGINA = 50;
-
-/** Cursores ya recorridos (`?prev=`) para volver con «Anterior». */
-export const anteriores = (p: Parametros) => (p["prev"] ? p["prev"].split(",") : []);
+export { POR_PAGINA };
 
 /** Instalaciones filtradas por texto, cuenta, estado y región, paginadas por cursor, con el catálogo de regiones. */
 export async function cargarInstalaciones(p: Parametros) {

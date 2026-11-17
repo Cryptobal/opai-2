@@ -1,4 +1,5 @@
 import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
+import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
@@ -8,7 +9,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 
 import { opcionesDeSubida } from "./subida-permisos";
 
-export const POR_PAGINA = 50;
+export { POR_PAGINA };
 
 export type FilaExplorador = Documento & {
   entidad: { tipo: string; id: string; nombre: string | null } | null;

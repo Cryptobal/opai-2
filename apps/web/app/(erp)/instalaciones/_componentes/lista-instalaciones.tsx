@@ -9,9 +9,10 @@ import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionFila } from "@/lib/tipos-maestros";
 
+import { PaginacionEnlaces } from "@/app/_components/maestros/paginacion-enlaces";
+
 import { FiltroCuentaInstalaciones } from "./filtro-cuenta";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
-import { PaginacionInstalaciones } from "./paginacion";
 
 type Props = {
   state: EstadoPantalla;
@@ -63,7 +64,12 @@ export function ListaInstalaciones(p: Props) {
       }
       meta={{ izquierda: `${p.items.length} en esta página`, derecha: personas(total) }}
       pie={
-        <PaginacionInstalaciones p={p.parametros} mostrados={p.items.length} siguiente={p.siguiente} />
+        <PaginacionEnlaces
+          p={p.parametros}
+          mostrados={p.items.length}
+          siguiente={p.siguiente}
+          etiquetaSinNav="instalaciones en esta página"
+        />
       }
       seleccionada={p.seleccionada}
       vacio={{
