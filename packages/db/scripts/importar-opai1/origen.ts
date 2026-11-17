@@ -4,19 +4,13 @@ import { z } from "zod";
 
 import { cotizacionOpai1, programacionRecurrenteOpai1 } from "./origen-recurrentes-cpq";
 
-export {
-  cotizacionOpai1,
-  lineaRecurrenteOpai1,
-  programacionRecurrenteOpai1,
-  referenciaRecurrenteOpai1,
-} from "./origen-recurrentes-cpq";
 export type { CotizacionOpai1, ProgramacionRecurrenteOpai1 } from "./origen-recurrentes-cpq";
 
 const fecha = z.iso.datetime({ offset: true });
 const texto = z.string().nullish();
 const bandera = z.boolean().default(false);
 
-export const cuentaOpai1 = z.object({
+const cuentaOpai1 = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   legalName: texto,
@@ -64,7 +58,7 @@ export const contactoOpai1 = z.object({
   updatedAt: fecha,
 });
 
-export const instalacionOpai1 = z.object({
+const instalacionOpai1 = z.object({
   id: z.string().min(1),
   accountId: texto,
   leadId: texto,
@@ -81,7 +75,7 @@ export const instalacionOpai1 = z.object({
   updatedAt: fecha,
 });
 
-export const etapaOpai1 = z.object({
+const etapaOpai1 = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   order: z.number().int(),
@@ -90,7 +84,7 @@ export const etapaOpai1 = z.object({
   isAccepted: bandera,
 });
 
-export const negocioOpai1 = z.object({
+const negocioOpai1 = z.object({
   id: z.string().min(1),
   accountId: z.string().min(1),
   stageId: z.string().min(1),
@@ -106,7 +100,7 @@ export const negocioOpai1 = z.object({
   createdAt: fecha,
 });
 
-export const actividadOpai1 = z.object({
+const actividadOpai1 = z.object({
   id: z.string().min(1),
   tipo: z.enum(["nota", "tarea", "reunion"]),
   negocioId: texto,
@@ -117,7 +111,7 @@ export const actividadOpai1 = z.object({
   estado: texto,
 });
 
-export const historialEtapaOpai1 = z.object({
+const historialEtapaOpai1 = z.object({
   id: z.string().min(1),
   dealId: z.string().min(1),
   fromStageId: texto,
@@ -125,14 +119,14 @@ export const historialEtapaOpai1 = z.object({
   changedAt: fecha,
 });
 
-export const negocioContactoOpai1 = z.object({
+const negocioContactoOpai1 = z.object({
   id: z.string().min(1),
   dealId: z.string().min(1),
   contactId: z.string().min(1),
   role: z.string().default("participant"),
 });
 
-export const usuarioOpai1 = z.object({
+const usuarioOpai1 = z.object({
   id: z.string().min(1),
   email: z.string().email(),
 });
@@ -160,10 +154,8 @@ export type ContactoOpai1 = z.infer<typeof contactoOpai1>;
 export type InstalacionOpai1 = z.infer<typeof instalacionOpai1>;
 export type EtapaOpai1 = z.infer<typeof etapaOpai1>;
 export type NegocioOpai1 = z.infer<typeof negocioOpai1>;
-export type ActividadOpai1 = z.infer<typeof actividadOpai1>;
 export type HistorialEtapaOpai1 = z.infer<typeof historialEtapaOpai1>;
 export type NegocioContactoOpai1 = z.infer<typeof negocioContactoOpai1>;
-export type UsuarioOpai1 = z.infer<typeof usuarioOpai1>;
 export type DatosOpai1 = z.infer<typeof datosOpai1>;
 
 export type { LectorOrigen } from "./origen-lectores";

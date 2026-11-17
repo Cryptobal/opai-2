@@ -5,7 +5,7 @@ import { cumple, type Fila, ordenar, type Where } from "./db-memoria-util";
 type Rel = { tabla: string; clave: string; muchos?: boolean };
 
 /** Relaciones por modelo: `clave` es la columna FK (local en «uno», del hijo en «muchos»). */
-export const RELACIONES: Record<string, Record<string, Rel>> = {
+const RELACIONES: Record<string, Record<string, Rel>> = {
   cpqCotizacion: { versiones: { tabla: "cpqVersion", clave: "cotizacionId", muchos: true } },
   cpqVersion: { cotizacion: { tabla: "cpqCotizacion", clave: "cotizacionId" } },
   cpqAprobacion: { version: { tabla: "cpqVersion", clave: "versionId" } },
