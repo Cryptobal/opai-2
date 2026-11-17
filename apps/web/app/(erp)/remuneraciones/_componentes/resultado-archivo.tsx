@@ -11,7 +11,13 @@ export type ArchivoLegal = {
 const ETIQUETA: Record<string, string> = { lre: "LRE", previred: "archivo de Previred", pago_banco: "pago bancario" };
 
 /** Resultado de validar un archivo legal: conteo, tabla de errores por persona y avisos de formato. */
-export function ResultadoArchivo({ archivo, tipo }: { archivo: ArchivoLegal; tipo: "lre" | "previred" | "pago_banco" }) {
+export function ResultadoArchivo({
+  archivo,
+  tipo,
+}: {
+  archivo: ArchivoLegal;
+  tipo: "lre" | "previred" | "pago_banco" | "f30_1";
+}) {
   const conErrores = archivo.errores.length > 0;
   return (
     <div className="flex flex-col gap-2">
