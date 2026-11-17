@@ -10,6 +10,7 @@ import { COMUNICABLES_DESEMPENO } from "./desempeno";
 import { COMUNICABLES_DOCUMENTOS } from "./documentos";
 import { COMUNICABLES_FINANZAS } from "./finanzas";
 import { COMUNICABLES_PRUEBAS } from "./pruebas";
+import { COMUNICABLES_RENDICIONES } from "./rendiciones";
 import { COMUNICABLES_SISTEMA } from "./sistema";
 import type { EventoComunicable } from "./tipos";
 import { COMUNICABLES_USUARIOS } from "./usuarios";
@@ -38,6 +39,7 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_DESCANSO,
   ...COMUNICABLES_LIMITES,
   ...COMUNICABLES_DESEMPENO,
+  ...COMUNICABLES_RENDICIONES,
 ];
 
 /** Datos de ejemplo anidados a partir de las rutas declaradas ("documento.tipo" → { documento: { tipo } }). */

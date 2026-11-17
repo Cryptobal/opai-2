@@ -66,7 +66,6 @@ import { cierreEmitirLote } from "./cierre-emitir-lote";
 export { ajustesFinanzas } from "./ajustes";
 export { buscadoresFinanzas } from "./buscadores";
 export { ventasProgramadasPorPeriodo } from "./ventas-programacion-netas";
-export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
 export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones, trabajoRecordatoriosCobranza, trabajoSincronizarRcv];
 
