@@ -3,6 +3,7 @@ import type { EventoPublicado } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
 import { datosDocumento, datosTarea, fechaCl } from "./variables-entidades";
 import { variablesCpq } from "./variables-cpq";
+import { variablesRendiciones } from "./variables-rendiciones";
 
 /**
  * Variables de cada evento comunicable a partir del evento del outbox. Los textos vienen de la base
@@ -51,6 +52,8 @@ export async function variablesDe(
   if (ev.tipo === "core.bitacora.rota")
     return { seq: p["primeraRota"] ?? "", empresa, url: `${base}/configuracion/auditoria` };
   if (ev.tipo.startsWith("cpq.")) return variablesCpq(ctx, ev, p, base, empresa);
+  if (ev.tipo.startsWith("rendiciones.rendicion."))
+    return variablesRendiciones(ctx, ev, base, empresa);
   if (ev.tipo === "comercial.solicitud.creada") {
     return {
       solicitud: {
