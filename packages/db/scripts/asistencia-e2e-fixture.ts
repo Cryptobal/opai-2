@@ -10,4 +10,5 @@ export const ASISTENCIA_E2E = {
   tokenDispositivo: "e2e-asistencia-dispositivo-token-ficticio-seguro-abc123",
   pin: "482915",
   trabajadorEmail: "asistencia-circuito-trabajador@opai.cl",
+  supervisorEmail: "supervisor-asistencia-hoy@opai.cl",
 } as const;

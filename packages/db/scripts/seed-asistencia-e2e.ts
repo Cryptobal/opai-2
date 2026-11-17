@@ -104,6 +104,24 @@ async function sembrar(db: TenantTx, tenantId: string) {
       },
     });
   }
+  const sup = await db.user.upsert({
+    where: { email: ASISTENCIA_E2E.supervisorEmail },
+    update: { name: "Supervisor Asistencia E2E", emailVerified: true },
+    create: { name: "Supervisor Asistencia E2E", email: ASISTENCIA_E2E.supervisorEmail, emailVerified: true },
+  });
+  const supCuenta = await db.account.findFirst({ where: { userId: sup.id, providerId: "credential" } });
+  if (supCuenta) await db.account.update({ where: { id: supCuenta.id }, data: { password: hash } });
+  else await db.account.create({ data: { userId: sup.id, providerId: "credential", accountId: sup.id, password: hash } });
+  const memb = await db.membership.upsert({
+    where: { tenantId_userId: { tenantId, userId: sup.id } },
+    update: { rol: "supervisor", portales: ["supervisor"], estado: "activa" },
+    create: { tenantId, userId: sup.id, rol: "supervisor", portales: ["supervisor"], estado: "activa" },
+  });
+  await db.supervisorInstalacion.upsert({
+    where: { membershipId_instalacionId: { membershipId: memb.id, instalacionId: ASISTENCIA_E2E.instalacion } },
+    update: {},
+    create: { tenantId, membershipId: memb.id, instalacionId: ASISTENCIA_E2E.instalacion },
+  });
 }
 
 async function main() {
