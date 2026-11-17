@@ -9,6 +9,7 @@ import { type Centro, diaCL, NOMBRE_DTE } from "../../_componentes/tipos";
 import { CentroCelda, Plazo } from "./celdas-compras";
 import type { cargarFichaCompra } from "./ficha-datos";
 import { montoCompra } from "./lista-compras-maestro";
+import { RecepcionCompraAcciones } from "./recepcion-compra-acciones";
 
 const RECEPCION = { pendiente_revision: "Pendiente de revisión", aceptado: "Aceptado", reclamado: "Reclamado" } as const;
 
@@ -45,9 +46,12 @@ export async function DetalleCompra({ datos, centros, gestiona }: { datos: Retur
         {dato("Centro de costo", <CentroCelda c={c} centros={centros} />)}
         {c.glosa ? dato("Glosa", c.glosa) : null}
       </dl>
-      {gestiona && !c.centroCostoId ? (
-        <div className="flex justify-end">
-          <EnlaceBotonHoja href="?lote=1" variante="secondary">Asignar centro de costo</EnlaceBotonHoja>
+      {gestiona ? (
+        <div className="flex flex-wrap justify-end gap-2">
+          {c.estadoRecepcion === "pendiente_revision" ? <RecepcionCompraAcciones compra={c} /> : null}
+          {!c.centroCostoId ? (
+            <EnlaceBotonHoja href="?lote=1" variante="secondary">Asignar centro de costo</EnlaceBotonHoja>
+          ) : null}
         </div>
       ) : null}
     </Card>

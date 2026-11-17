@@ -15,3 +15,6 @@ export const HojaRcv = hojaDiferida(["rcv"], () =>
 export const HojaSii = hojaDiferida(["sii"], () =>
   import("./hoja-sii").then((m) => m.HojaSii),
 );
+export const HojaRecepcion = hojaDiferida(["recepcion"], () =>
+  import("./hoja-recepcion").then((m) => m.HojaRecepcion),
+);

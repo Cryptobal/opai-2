@@ -22,5 +22,11 @@ test.describe("@preview finanzas: compras maestro-detalle", () => {
     await expect(page.getByText("RUT proveedor")).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "finanzas-compras-detalle");
+    const acuse = page.getByRole("link", { name: "Aceptar o reclamar ante el SII" });
+    if ((await acuse.count()) === 0) return;
+    await acuse.click();
+    await expect(page.getByRole("heading", { name: "Aceptar o reclamar ante el SII" })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "finanzas-compras-recepcion-sii");
   });
 });
