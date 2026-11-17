@@ -9,8 +9,8 @@ import { marcaDe } from "../comunicaciones/resolver";
 import { uuid7 } from "../documentos/uuid7";
 import { hoy } from "../maestros/comun";
 import { filasParaDocumento } from "./documento";
-import { renderizarAnexoHtml } from "./plantilla";
-import { pdfDeAnexo, plantillaAnexoPublicada } from "./plantilla-laboral";
+import { PLANTILLA_ANEXO, renderizarAnexoHtml } from "./plantilla";
+import { pdfDeAnexo, plantillaAnexoParaPdf } from "./plantilla-laboral";
 import type { FilaAnexo } from "./vista";
 
 /** Documento final del anexo en `core.documentos` (R15, ADR-039): plantilla base + marca del
@@ -22,15 +22,18 @@ export type ArchivoAnexo = { contenido: string | Buffer; mime: string; nombre: s
  *  transacción de aprobación: lee con `ctx.db`. */
 export async function prepararArchivoAnexo(ctx: Contexto, anexo: FilaAnexo, persona: PersonaDoc): Promise<ArchivoAnexo> {
   const filas = await filasParaDocumento(ctx, anexo);
-  const plantilla = await plantillaAnexoPublicada(ctx);
+  const plantilla = await plantillaAnexoParaPdf(ctx);
   const fecha = hoy();
   const rut = persona.rut.replace(/[^0-9a-zA-Z]/g, "");
   if (plantilla)
     return {
-      contenido: Buffer.from(await pdfDeAnexo(ctx, plantilla, persona, anexo, filas, fecha)),
+      contenido: Buffer.from(
+        await pdfDeAnexo(ctx, plantilla, persona, { motivoCambio: anexo.motivoCambio, vinculoId: anexo.vinculoId }, filas, fecha),
+      ),
       mime: "application/pdf",
       nombre: `anexo-contrato-${rut}.pdf`,
     };
+  if (!PLANTILLA_ANEXO.esEjemplo) throw new Error("Anexo sin plantilla legal");
   const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
   return {
     contenido: renderizarAnexoHtml(marca, {

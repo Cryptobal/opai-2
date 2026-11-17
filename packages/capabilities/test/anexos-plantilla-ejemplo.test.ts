@@ -1,9 +1,14 @@
-// CAR-58 (auditoría del Núcleo §I-19): mientras la plantilla base del anexo tenga texto de ejemplo,
-// ningún anexo se aprueba, tampoco en vista previa, y el borrador queda intacto (se puede rechazar).
-import { beforeEach, describe, expect, it } from "vitest";
+// CAR-58 (auditoría del Núcleo §I-19): si `esEjemplo` vuelve a activarse y no hay plantilla
+// publicada, ningún anexo se aprueba (tampoco en vista previa) y el borrador queda intacto.
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../src/core/anexos/plantilla", async (importOriginal) => {
+  const original = await importOriginal();
+  return { ...original, PLANTILLA_ANEXO: { version: "ejemplo-prueba", esEjemplo: true } };
+});
 
 import { executeCapability } from "../src";
-import { MENSAJE_PLANTILLA_EJEMPLO, PLANTILLA_ANEXO } from "../src/core/anexos/plantilla";
+import { MENSAJE_PLANTILLA_EJEMPLO } from "../src/core/anexos/plantilla";
 import { contextoDePrueba } from "../src/testing";
 import { dato, reiniciar } from "./maestros-ayuda";
 import { destinoVinculo } from "./vinculo-fixture";
@@ -11,10 +16,6 @@ import { destinoVinculo } from "./vinculo-fixture";
 beforeEach(reiniciar);
 
 describe("core.anexos.aprobar con la plantilla de ejemplo", () => {
-  it("la plantilla del repositorio sigue marcada como ejemplo (falta el texto legal)", () => {
-    expect(PLANTILLA_ANEXO.esEjemplo).toBe(true);
-  });
-
   it("rechaza aprobar y la vista previa con un mensaje de negocio; el borrador sigue vigente", async () => {
     const { ctx } = contextoDePrueba();
     const cargo = await dato<{ id: string }>(ctx, "core.cargos.create", { nombre: "Guardia" });
