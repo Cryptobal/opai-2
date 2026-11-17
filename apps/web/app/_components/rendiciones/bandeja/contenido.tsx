@@ -1,10 +1,11 @@
-import { Cabecera, Estado, FilaSeleccionable, KpiTile, Segmentado, SplitScreen, Badge } from "@opai/ds";
+import { Cabecera, KpiTile, Segmentado, SplitScreen } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
 import { pesos } from "../formato";
 import { DetalleRevision } from "./detalle";
 import { FiltrosBandejaForm } from "./filtros";
+import { ListaBandejaRendiciones } from "./lista-bandeja";
 import type { Bandeja, DetalleBandeja, FiltrosBandeja } from "./tipos";
 import { FILTROS_ESTADO, hrefBandeja } from "./tipos";
 
@@ -22,31 +23,7 @@ export function ContenidoBandeja({
   yoId: string;
 }) {
   const personas = [...new Map(bandeja.items.map((r) => [r.solicitanteId, r.solicitanteNombre ?? "Persona"])).entries()].map(([pid, nombre]) => ({ id: pid, nombre }));
-  const lista = (
-    <div className="flex flex-col p-4 md:p-0">
-      <Estado
-        state={bandeja.items.length === 0 ? "empty" : "ready"}
-        variante="lista"
-        textos={{ vacio: { titulo: filtros.estado === "enviada" ? "No tienes rendiciones por revisar" : "Sin rendiciones en este estado", descripcion: "Aquí aparecerán las rendiciones que te asignen." } }}
-      >
-        <ul>
-          {bandeja.items.map((r) => (
-            <li key={r.id}>
-              <FilaSeleccionable
-                Link={LinkNext}
-                href={hrefBandeja(filtros, r.id)}
-                seleccionada={r.id === id}
-                titulo={r.codigoVisible}
-                secundario={`${r.solicitanteNombre ?? "Persona"} · ${r.descripcion}`}
-                terciario={pesos(r.montoTotal)}
-                fin={<Badge tono={r.estado === "enviada" ? "info" : r.estado === "aprobada" ? "success" : r.estado === "devuelta" ? "warning" : "danger"}>{r.estado === "enviada" ? "Por revisar" : r.estado}</Badge>}
-              />
-            </li>
-          ))}
-        </ul>
-      </Estado>
-    </div>
-  );
+  const lista = <ListaBandejaRendiciones filtros={filtros} bandeja={bandeja} id={id} />;
   return (
     <>
       <Cabecera titulo="Bandeja del aprobador" subtitulo="Revisa y decide las rendiciones que te tocan." />
