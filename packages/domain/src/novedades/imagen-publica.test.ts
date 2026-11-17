@@ -1,11 +1,13 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 import { catalogoNovedades } from "./catalogo";
 
-const publicChangelog = join(process.cwd(), "../../apps/web/public/changelog");
+const raizRepo = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
+const publicChangelog = join(raizRepo, "apps/web/public/changelog");
 
 describe("novedades · imagen pública (CAR-520)", () => {
   it("cada entrada con imagen tiene el PNG en apps/web/public/changelog", () => {
