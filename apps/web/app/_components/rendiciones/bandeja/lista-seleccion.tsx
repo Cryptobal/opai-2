@@ -11,7 +11,7 @@ import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { pesos } from "../formato";
 import { hrefBandeja, RUTA_BANDEJA, type Bandeja, type FiltrosBandeja } from "./tipos";
 
-type Fila = Bandeja["rendiciones"][number];
+type Fila = Bandeja["items"][number];
 
 /** Selección múltiple en la bandeja (CAR-613): aprobar o rechazar con vista previa. */
 export function ListaBandejaSeleccion({

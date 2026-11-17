@@ -70,7 +70,7 @@ function bulk(tipo: Tipo, idCap: string, descripcion: string) {
     efecto: tipo === "aprobada" ? "irreversible" : "irreversible",
     dryRun: true,
     async handler(ctx, input, { dryRun }) {
-      const motivo = conMotivo && "motivo" in input ? input.motivo : null;
+      const motivo = conMotivo && "motivo" in input && typeof input.motivo === "string" ? input.motivo : null;
       const aplicadas: z.infer<typeof filaOk>[] = [];
       const omitidas: z.infer<typeof filaOm>[] = [];
       for (const id of input.ids) {
