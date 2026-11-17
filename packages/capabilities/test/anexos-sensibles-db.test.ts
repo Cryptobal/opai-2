@@ -260,7 +260,7 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
     );
   });
 
-  it("matriz, vencimientos y versiones no muestran el documento del anexo sin anexos.read", async () => {
+  it("matriz, vencimientos, versiones y la versión nueva no muestran el anexo sin anexos.read", async () => {
     const { personaId } = await persona();
     const { documentoId } = await anexoAprobado(personaId);
     const tipo = await e.admin.documentoTipo.create({
@@ -319,10 +319,14 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
         {},
       );
       expect(vencimientos.some((d) => d.id === documentoId)).toBe(ve);
-      const get = await dato<{ versiones: { id: string }[] }>(ctx(rol), "core.documentos.get", {
-        id: nueva.id,
-      });
-      expect(get.versiones.some((d) => d.id === documentoId)).toBe(ve);
+      // CAR-512: la versión nueva (o la copia firmada) de un anexo tampoco se ve sin anexos.read.
+      const get = await mod.executeCapability(ctx(rol), "core.documentos.get", { id: nueva.id });
+      expect(get.ok).toBe(ve);
+      if (!get.ok) expect(get.error.code).toBe("NOT_FOUND");
+      else {
+        const versiones = (get.data as { versiones: { id: string }[] }).versiones;
+        expect(versiones.some((d) => d.id === documentoId)).toBe(true);
+      }
     }
   });
 
