@@ -3,7 +3,7 @@
 - **Sesión:** Sesión Payroll
 - **PR:** #801 · rama `brief/car-99-nomina-liquidaciones`
 - **Estado:** En PR
-- **Migración:** `20261231100000_nomina_liquidaciones` (aditiva; se aplica en dev y main con snapshot antes de integrar)
+- **Migración:** `20261116195500_nomina_liquidaciones` (aditiva; se aplica en dev y main con snapshot antes de integrar)
 - **Apilado sobre / espera:** apilado sobre #799 (CAR-344): reutiliza la carga de vínculos y capas del costo proyectado.
 
 ## Qué entra
