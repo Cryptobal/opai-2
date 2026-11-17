@@ -10,7 +10,7 @@ import { LinkNext } from "@/app/_components/link-next";
 const CONSERVA = ["q", "estado", "etapa"] as const;
 
 /** `/negocios` (tablero) o `/negocios?vista=lista`, con los filtros y la etapa de la URL actual. */
-export function hrefVista(vista: "tablero" | "lista", actual: URLSearchParams) {
+function hrefVista(vista: "tablero" | "lista", actual: URLSearchParams) {
   const p = new URLSearchParams();
   if (vista === "lista") p.set("vista", "lista");
   for (const k of CONSERVA) {
