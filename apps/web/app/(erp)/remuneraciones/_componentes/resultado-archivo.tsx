@@ -9,7 +9,13 @@ export type ArchivoLegal = {
 };
 
 /** Resultado de validar un archivo legal: conteo, tabla de errores por persona y avisos de formato. */
-export function ResultadoArchivo({ archivo, tipo }: { archivo: ArchivoLegal; tipo: "lre" | "previred" }) {
+export function ResultadoArchivo({
+  archivo,
+  tipo,
+}: {
+  archivo: ArchivoLegal;
+  tipo: "lre" | "previred" | "f30_1";
+}) {
   const conErrores = archivo.errores.length > 0;
   return (
     <div className="flex flex-col gap-2">

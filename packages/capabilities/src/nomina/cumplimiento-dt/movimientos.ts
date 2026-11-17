@@ -49,6 +49,45 @@ function personaNombre(p: { nombres: string; apellidos: string }) {
   return `${p.apellidos} ${p.nombres}`.trim();
 }
 
+type RegistroMiDt = { registradoEn: Date; documentoId: string | null };
+
+function personaBase(p: { id: string; rut: string; nombres: string; apellidos: string }, tipoContrato: string) {
+  return {
+    personaId: p.id,
+    personaNombre: personaNombre(p),
+    nombres: p.nombres,
+    apellidos: p.apellidos,
+    rut: formatearRut(p.rut),
+    tipoContrato,
+  };
+}
+
+function filaMovimiento(
+  hoyCivil: string,
+  reg: RegistroMiDt | undefined,
+  tipo: TipoMovimientoMiDt,
+  referenciaId: string,
+  hechoEn: string,
+  hechoTexto: string,
+  base: ReturnType<typeof personaBase>,
+): MovimientoMiDt {
+  const plazo = etiquetaPlazoMiDt(hechoEn, hoyCivil, null);
+  return {
+    ...base,
+    clave: `${tipo}:${referenciaId}`,
+    movimientoTipo: tipo,
+    referenciaId,
+    hechoEn,
+    hechoTexto,
+    plazoLimite: plazoMiDtHasta(hechoEn),
+    plazoEtiqueta: reg ? `Registrado el ${formatearFecha(dia(reg.registradoEn)!)}` : plazo.etiqueta,
+    plazoTono: reg ? "success" : plazo.tono,
+    registrado: !!reg,
+    registradoEn: reg ? dia(reg.registradoEn) : null,
+    comprobanteDocumentoId: reg?.documentoId ?? null,
+  };
+}
+
 /** Lista movimientos Mi DT (altas, bajas y anexos) derivados del núcleo más los registros. */
 export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<MovimientoMiDt[]> {
   const registros = await registrosPorClave(ctx);
@@ -69,78 +108,50 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
   const items: MovimientoMiDt[] = [];
 
   for (const v of vinculos) {
-    const base = {
-      personaId: v.personaId,
-      personaNombre: personaNombre(v.persona),
-      nombres: v.persona.nombres,
-      apellidos: v.persona.apellidos,
-      rut: formatearRut(v.persona.rut),
-      tipoContrato: v.tipo,
-    };
-    const hechoAlta = dia(v.inicio);
-    const regAlta = registros.get(`alta:${v.id}`);
-    const plazoAlta = etiquetaPlazoMiDt(hechoAlta, hoyCivil, null);
-    items.push({
-      clave: `alta:${v.id}`,
-      movimientoTipo: "alta",
-      referenciaId: v.id,
-      hechoEn: hechoAlta,
-      hechoTexto: `Ingreso el ${formatearFecha(hechoAlta)}`,
-      plazoLimite: plazoMiDtHasta(hechoAlta),
-      plazoEtiqueta: regAlta ? `Registrado el ${formatearFecha(dia(regAlta.registradoEn))}` : plazoAlta.etiqueta,
-      plazoTono: regAlta ? "success" : plazoAlta.tono,
-      registrado: !!regAlta,
-      registradoEn: regAlta ? dia(regAlta.registradoEn) : null,
-      comprobanteDocumentoId: regAlta?.documentoId ?? null,
-      ...base,
-    });
-
+    const base = { ...personaBase(v.persona, v.tipo), personaId: v.personaId };
+    const hechoAlta = dia(v.inicio)!;
+    items.push(
+      filaMovimiento(
+        hoyCivil,
+        registros.get(`alta:${v.id}`),
+        "alta",
+        v.id,
+        hechoAlta,
+        `Ingreso el ${formatearFecha(hechoAlta)}`,
+        base,
+      ),
+    );
     if (v.estado === "terminado" && v.termino) {
-      const hechoBaja = dia(v.termino);
-      const regBaja = registros.get(`baja:${v.id}`);
-      const plazoBaja = etiquetaPlazoMiDt(hechoBaja, hoyCivil, null);
+      const hechoBaja = dia(v.termino)!;
       const motivo = v.motivoTermino ? ` · ${v.motivoTermino}` : "";
-      items.push({
-        clave: `baja:${v.id}`,
-        movimientoTipo: "baja",
-        referenciaId: v.id,
-        hechoEn: hechoBaja,
-        hechoTexto: `Término el ${formatearFecha(hechoBaja)}${motivo}`,
-        plazoLimite: plazoMiDtHasta(hechoBaja),
-        plazoEtiqueta: regBaja ? `Registrado el ${formatearFecha(dia(regBaja.registradoEn))}` : plazoBaja.etiqueta,
-        plazoTono: regBaja ? "success" : plazoBaja.tono,
-        registrado: !!regBaja,
-        registradoEn: regBaja ? dia(regBaja.registradoEn) : null,
-        comprobanteDocumentoId: regBaja?.documentoId ?? null,
-        ...base,
-      });
+      items.push(
+        filaMovimiento(
+          hoyCivil,
+          registros.get(`baja:${v.id}`),
+          "baja",
+          v.id,
+          hechoBaja,
+          `Término el ${formatearFecha(hechoBaja)}${motivo}`,
+          base,
+        ),
+      );
     }
   }
 
   for (const a of anexos) {
-    const hecho = dia(a.aprobadoEn!);
-    const reg = registros.get(`anexo:${a.id}`);
-    const plazo = etiquetaPlazoMiDt(hecho, hoyCivil, null);
+    const hecho = dia(a.aprobadoEn)!;
     const cambio = MOTIVO_ANEXO[a.motivoCambio] ?? a.motivoCambio;
-    items.push({
-      clave: `anexo:${a.id}`,
-      movimientoTipo: "anexo",
-      referenciaId: a.id,
-      personaId: a.personaId,
-      personaNombre: personaNombre(a.persona),
-      nombres: a.persona.nombres,
-      apellidos: a.persona.apellidos,
-      rut: formatearRut(a.persona.rut),
-      tipoContrato: "anexo",
-      hechoEn: hecho,
-      hechoTexto: `Cambio de ${cambio} · firmado el ${formatearFecha(hecho)}`,
-      plazoLimite: plazoMiDtHasta(hecho),
-      plazoEtiqueta: reg ? `Registrado el ${formatearFecha(dia(reg.registradoEn))}` : plazo.etiqueta,
-      plazoTono: reg ? "success" : plazo.tono,
-      registrado: !!reg,
-      registradoEn: reg ? dia(reg.registradoEn) : null,
-      comprobanteDocumentoId: reg?.documentoId ?? null,
-    });
+    items.push(
+      filaMovimiento(
+        hoyCivil,
+        registros.get(`anexo:${a.id}`),
+        "anexo",
+        a.id,
+        hecho,
+        `Cambio de ${cambio} · firmado el ${formatearFecha(hecho)}`,
+        personaBase(a.persona, "anexo"),
+      ),
+    );
   }
 
   const orden = (m: MovimientoMiDt) => (m.registrado ? 1 : 0) * 10_000 + Date.parse(`${m.plazoLimite}T00:00:00.000Z`);
