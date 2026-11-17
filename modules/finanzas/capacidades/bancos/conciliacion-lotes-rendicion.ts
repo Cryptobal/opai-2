@@ -18,7 +18,7 @@ export type LoteRendicionSugerido = z.infer<typeof loteRendicionSchema>;
 
 export async function lotesRendicionConciliables(
   ctx: Contexto,
-  mov: { monto: unknown; fecha: Date; glosa: string },
+  mov: { monto: bigint; fecha: Date; glosa: string },
 ): Promise<LoteRendicionSugerido[]> {
   const montoMov = montoDe(mov.monto);
   if (montoMov >= 0) return [];
