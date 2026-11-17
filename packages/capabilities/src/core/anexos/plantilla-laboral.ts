@@ -1,7 +1,13 @@
-// Anexos sobre las plantillas de Documentos (CAR-58): si hay una plantilla de clase «Anexo» publicada
-// (el texto legal que Carlos escribe en el editor), el documento final sale de ella; si no, el anexo
-// sigue sin poder aprobarse (la plantilla de ejemplo no tiene validez laboral).
-import { documentoUsaVariablesSensibles, etiquetaDeVariable, fechaDeDocumento, rellenarPlantilla, variablesDeDocumento } from "@opai/domain";
+// Anexos y plantillas de Documentos (CAR-58): prioriza la plantilla «Anexo» publicada del tenant;
+// si no hay, usa el texto legal base del repositorio (mientras `esEjemplo` sea false).
+import {
+  documentoUsaVariablesSensibles,
+  etiquetaDeVariable,
+  fechaDeDocumento,
+  parrafosDePlantilla,
+  rellenarPlantilla,
+  variablesDeDocumento,
+} from "@opai/domain";
 
 import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
@@ -9,7 +15,14 @@ import { logoDeMarca } from "../../finanzas/ventas-pdf-logo";
 import { generarPdfLaboral } from "../documentos/pdf-laboral";
 import { valoresDePersona } from "../documentos/rellenar-valores";
 import { marcaDe } from "../comunicaciones/resolver";
-import type { FilaAnexoDoc } from "./plantilla";
+import {
+  MENSAJE_PLANTILLA_EJEMPLO,
+  PLANTILLA_ANEXO,
+  TEXTO_LEGAL_ANEXO_APROBADO,
+  rellenarTextoLegalAnexo,
+  type FilaAnexoDoc,
+} from "./plantilla";
+import { valoresLegalesAnexo } from "./plantilla-valores";
 
 const TITULO_MOTIVO: Record<string, string> = {
   capa: "capa de sueldo",
@@ -17,6 +30,24 @@ const TITULO_MOTIVO: Record<string, string> = {
   instalacion: "instalación o puesto",
   rol: "rol de turno",
 };
+
+export type PlantillaAnexoPdf =
+  | { origen: "tenant"; id: string; nombre: string; version: number; contenido: string }
+  | { origen: "base"; nombre: string; contenido: string };
+
+/** Plantilla del tenant publicada o, si la base ya no es ejemplo, el texto legal del repositorio. */
+export async function plantillaAnexoParaPdf(ctx: Contexto): Promise<PlantillaAnexoPdf | null> {
+  const pub = await plantillaAnexoPublicada(ctx);
+  if (pub) return { origen: "tenant", ...pub };
+  if (PLANTILLA_ANEXO.esEjemplo) return null;
+  return { origen: "base", nombre: "Anexo de contrato de trabajo", contenido: TEXTO_LEGAL_ANEXO_APROBADO };
+}
+
+/** Sin plantilla del tenant publicada: ejemplo bloquea; con texto legal base, los faltantes se validan después. */
+export async function exigirPlantillaAntesDeMaterializar(ctx: Contexto) {
+  if (await plantillaAnexoPublicada(ctx)) return;
+  if (PLANTILLA_ANEXO.esEjemplo) throw reglaDeNegocio(MENSAJE_PLANTILLA_EJEMPLO);
+}
 
 /** Plantilla activa de clase «Anexo» con versión publicada (la más reciente), o null. */
 export async function plantillaAnexoPublicada(ctx: Contexto) {
@@ -31,15 +62,39 @@ export async function plantillaAnexoPublicada(ctx: Contexto) {
 
 type PersonaAnexo = { id: string; nombres: string; apellidos: string; rut: string; calle: string | null; comuna: string | null };
 
-/** PDF del anexo: persona, contrato y sueldo de la ficha más motivo y detalle del cambio. */
+/** PDF del anexo: plantilla del tenant o texto legal base con los datos de la persona y el cambio. */
 export async function pdfDeAnexo(
   ctx: Contexto,
-  plantilla: NonNullable<Awaited<ReturnType<typeof plantillaAnexoPublicada>>>,
+  plantilla: PlantillaAnexoPdf,
   persona: PersonaAnexo,
-  anexo: { motivoCambio: string },
+  anexo: { motivoCambio: string; vinculoId: string },
   filas: readonly FilaAnexoDoc[],
   fecha: string,
 ) {
+  const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
+  const logo = await logoDeMarca(ctx);
+  if (plantilla.origen === "base") {
+    const p = await ctx.db.persona.findUniqueOrThrow({
+      where: { id: persona.id },
+      select: { nacionalidad: true },
+    });
+    const { valores, faltantes } = await valoresLegalesAnexo(
+      ctx,
+      { ...persona, nacionalidad: p.nacionalidad },
+      anexo,
+      filas,
+      fecha,
+    );
+    const relleno = rellenarTextoLegalAnexo(plantilla.contenido, valores);
+    if (relleno.faltantes.length || faltantes.length)
+      throw reglaDeNegocio(
+        `Faltan datos para generar el anexo: ${[...new Set([...relleno.faltantes, ...faltantes])].join(", ")}.`,
+      );
+    const parrafos = parrafosDePlantilla(relleno.texto).map((s) =>
+      s.map((x) => ({ texto: x.tipo === "texto" ? x.texto : x.clave, negrita: x.negrita, cursiva: x.cursiva, faltante: null })),
+    );
+    return (await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos, logo })).bytes;
+  }
   const claves = variablesDeDocumento(plantilla.contenido);
   const { valores } = await valoresDePersona(ctx, persona, fecha, claves, documentoUsaVariablesSensibles(plantilla.contenido));
   const relleno = rellenarPlantilla(plantilla.contenido, {
@@ -49,7 +104,6 @@ export async function pdfDeAnexo(
     "contrato.cambios": filas.map((f) => `${f.concepto}: ${f.antes} → ${f.despues}`).join("; ") || null,
   });
   if (relleno.faltantes.length)
-    throw reglaDeNegocio(`Faltan datos para generar el anexo: ${relleno.faltantes.map((c) => etiquetaDeVariable(c)).join(", ")}.`);
-  const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
-  return (await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo: await logoDeMarca(ctx) })).bytes;
+    throw reglaDeNegocio(`Faltan datos para generar el anexo: ${relleno.faltantes.map(etiquetaDeVariable).join(", ")}.`);
+  return (await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo })).bytes;
 }

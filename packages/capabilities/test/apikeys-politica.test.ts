@@ -10,9 +10,11 @@ import { semillaTenant } from "./semilla";
 const DIA = 86_400_000;
 const crear = (input: Record<string, unknown>, rol: "owner" | "admin" = "owner") => {
   const { ctx, tabla } = contextoDePrueba({ rol, semilla: semillaTenant() });
-  return executeCapability(ctx, "core.apikeys.create", { nombre: "Agente", scopes: ["core"], ...input }).then(
-    (r) => ({ r, keys: tabla("apiKey") }),
-  );
+  return executeCapability(ctx, "core.apikeys.create", { nombre: "Agente", scopes: ["core"], ...input }).then((r) => ({
+    r,
+    ctx,
+    keys: tabla("apiKey"),
+  }));
 };
 
 describe("política de llaves nuevas (CAR-351)", () => {
@@ -56,5 +58,29 @@ describe("política de llaves nuevas (CAR-351)", () => {
     } finally {
       process.env.NODE_ENV = antes;
     }
+  });
+});
+
+describe("política al editar llaves (CAR-588)", () => {
+  beforeEach(() => {
+    limpiarRegistro();
+    registrarCapacidades(capacidadesDelNucleo);
+  });
+
+  it("rechaza quitar el vencimiento", async () => {
+    const { r, ctx, keys } = await crear({ heredarPermisos: true });
+    expect(r.ok).toBe(true);
+    const id = (keys[0] as { id: string }).id;
+    const upd = await executeCapability(ctx, "core.apikeys.update", { id, expiraEn: null });
+    expect(upd).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("rechaza un vencimiento más allá del máximo de la empresa", async () => {
+    const { r, ctx, keys } = await crear({ heredarPermisos: true });
+    expect(r.ok).toBe(true);
+    const id = (keys[0] as { id: string }).id;
+    const lejos = new Date(Date.now() + 400 * DIA).toISOString();
+    const upd = await executeCapability(ctx, "core.apikeys.update", { id, expiraEn: lejos });
+    expect(upd).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 });
