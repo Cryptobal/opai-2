@@ -38,7 +38,7 @@ export const tiposCrear = defineCapability({
     campos: z.array(campoEntradaSchema).max(LIMITES_TIPO.campos).default([]),
     tallas: z.array(tallaSchema).max(LIMITES_TIPO.tallas).default([]),
     prendaClave: prendaSchema.optional(),
-    entregaAPersona: z.boolean().optional().describe("Si el tipo se entrega a personas (CAR-487)."),
+    entregaAPersona: z.boolean().optional().describe("Si el tipo se asigna a personas (guardias o colaboradores)."),
   }),
   output: tipoSchema,
   efecto: "escritura",
