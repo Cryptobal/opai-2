@@ -9,6 +9,7 @@ import {
   prerregistrosListar,
   prerregistrosObtener,
 } from "./prerregistros-leer";
+import { gruposCambiar, gruposListar } from "./grupos-lista";
 import { listasAgregar, listasListar, listasQuitar } from "./listas";
 import { puntosCambiar, puntosListar } from "./puntos";
 import { aparienciaCambiar, aparienciaGet } from "./apariencia";
@@ -36,6 +37,8 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   configCambiar,
   puntosListar,
   puntosCambiar,
+  gruposListar,
+  gruposCambiar,
   aparienciaGet,
   aparienciaCambiar,
   reportesProbar,

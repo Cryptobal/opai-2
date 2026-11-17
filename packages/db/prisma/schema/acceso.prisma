@@ -2,11 +2,42 @@
 // la clave de plataforma ACCESO_HUELLA_SECRET, versionada por `huellaKid`) y su MÁSCARA; nunca el número completo
 // (decisión de Carlos del 7-nov-2026, Ley 21.719). El tenant_id no lleva @relation: la FK va en el SQL.
 
+/// Grupo de instalaciones que comparten listas (CAR-506).
+model GrupoLista {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  nombre    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  miembros GrupoListaInstalacion[]
+  entradas EntradaLista[]
+
+  @@map("grupos_lista")
+  @@schema("acceso")
+}
+
+model GrupoListaInstalacion {
+  tenantId      String     @map("tenant_id") @db.Uuid
+  grupoId       String     @map("grupo_id") @db.Uuid
+  instalacionId String     @map("instalacion_id") @db.Uuid
+  grupo         GrupoLista @relation(fields: [grupoId], references: [id], onDelete: Cascade, map: "grupos_lista_instalaciones_grupo_fkey")
+
+  @@id([grupoId, instalacionId])
+  @@map("grupos_lista_instalaciones")
+  @@schema("acceso")
+}
+
 /// Entrada de lista autorizada o bloqueada (editable). El motivo de un bloqueo solo lo ve quien gestiona listas.
 model EntradaLista {
   id            String    @id @default(uuid(7)) @db.Uuid
   tenantId      String    @map("tenant_id") @db.Uuid
-  instalacionId String    @map("instalacion_id") @db.Uuid
+  /// "empresa" | "cuenta" | "instalacion" | "grupo" (CAR-506).
+  alcance       String    @default("instalacion")
+  instalacionId String?   @map("instalacion_id") @db.Uuid
+  cuentaId      String?   @map("cuenta_id") @db.Uuid
+  grupoId       String?   @map("grupo_id") @db.Uuid
+  agregadaPor   String?   @map("agregada_por") @db.Uuid
   /// "autorizada" | "bloqueada".
   tipo          String
   /// "run" | "pasaporte" | "otro" | "patente".
@@ -26,9 +57,12 @@ model EntradaLista {
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  grupo     GrupoLista?      @relation(fields: [grupoId], references: [id], onDelete: Restrict, map: "entradas_lista_grupo_fkey")
   registros RegistroAcceso[]
 
   @@index([tenantId, instalacionId, docTipo, huella], map: "entradas_lista_busqueda_idx")
+  @@index([tenantId, cuentaId, docTipo, huella], map: "entradas_lista_cuenta_idx")
+  @@index([tenantId, docTipo, huella], map: "entradas_lista_empresa_idx")
   @@map("entradas_lista")
   @@schema("acceso")
 }

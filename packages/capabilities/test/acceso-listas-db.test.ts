@@ -217,6 +217,39 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
     expect(deB.items).toHaveLength(0);
   });
 
+  it("un bloqueo a nivel empresa gana sobre autorizado en la instalación (R7)", async () => {
+    await ok("A", "acceso.listas.agregar", {
+      instalacionId: inst.A,
+      tipo: "autorizada",
+      documento: { tipo: "run", numero: "16.666.666-6" },
+    });
+    await ok("A", "acceso.listas.agregar", {
+      instalacionId: inst.A,
+      alcance: "empresa",
+      tipo: "bloqueada",
+      documento: { tipo: "run", numero: "16.666.666-6" },
+      motivo: "Bloqueo global",
+    });
+    const h = {
+      clave: randomUUID(),
+      tipo: "acceso.entrada",
+      payload: {
+        tipoRegistro: "visita",
+        documento: { tipo: "run", numero: "16.666.666-6" },
+        nombre: "Empresa bloqueada",
+      },
+      horaHecho: new Date(Date.now() - 20_000).toISOString(),
+    };
+  await run("A", "core.hechos_terreno.recibir", {
+      dispositivoId: disp.A,
+      horaEnvio: new Date().toISOString(),
+      hechos: [h],
+    });
+    expect(
+      (await e.admin.intentoDenegado.findFirstOrThrow({ where: { clave: h.clave } })).motivo,
+    ).toBe("bloqueado");
+  });
+
   it("la patente completa solo la ve quien tiene el permiso restringido", async () => {
     await ok("A", "acceso.listas.agregar", {
       instalacionId: inst.A,

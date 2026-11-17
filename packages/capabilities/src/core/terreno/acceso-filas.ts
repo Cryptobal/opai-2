@@ -2,6 +2,10 @@ import { randomUUID } from "node:crypto";
 
 import { decidirAcceso, type EntradaLista, normalizarPatente } from "@opai/domain";
 
+import {
+  metaListasInstalacion,
+  whereEntradasAplicanAInstalacion,
+} from "../../acceso/listas-alcance";
 import { fechaDia } from "../../acceso/prerregistro-comun";
 import type { Contexto } from "../../types";
 import type { Doc, Entrada } from "./acceso-entradas";
@@ -19,12 +23,16 @@ type Reglas = { zona: string; fueraDeLista: boolean; puntos: ReadonlySet<string>
 
 /** Entradas de lista de la instalación que coinciden con alguna huella del lote, y si hay lista autorizada. */
 async function listasDe(ctx: Contexto, instalacionId: string, huellas: string[]) {
+  const meta = await metaListasInstalacion(ctx, instalacionId);
+  const alcance = whereEntradasAplicanAInstalacion(meta, instalacionId);
   const [lista, hayAutorizadas] = await Promise.all([
     ctx.db.entradaLista.findMany({
-      where: { instalacionId, huella: { in: huellas } },
+      where: { AND: [alcance, { huella: { in: huellas } }] },
       include: { registros: { select: { id: true }, take: 1 } },
     }),
-    ctx.db.entradaLista.count({ where: { instalacionId, tipo: "autorizada" } }),
+    ctx.db.entradaLista.count({
+      where: { AND: [alcance, { tipo: "autorizada" }] },
+    }),
   ]);
   return { lista, hayAutorizadas: hayAutorizadas > 0 };
 }
