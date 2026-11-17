@@ -13,7 +13,7 @@ function suscribir(avisar: () => void) {
 }
 
 /** Pantalla táctil sin cursor (teléfono, tablet): el visor de PDF en iframe no se pinta en iOS (CAR-192). */
-export function useEsTactil(): boolean {
+function useEsTactil(): boolean {
   return useSyncExternalStore(
     suscribir,
     () => window.matchMedia(TACTIL).matches,
@@ -21,7 +21,7 @@ export function useEsTactil(): boolean {
   );
 }
 
-export function descargarPdf(pdfUrl: string, nombre: string) {
+function descargarPdf(pdfUrl: string, nombre: string) {
   const a = document.createElement("a");
   a.href = pdfUrl;
   a.download = nombre;

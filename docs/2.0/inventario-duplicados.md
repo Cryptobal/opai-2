@@ -50,7 +50,7 @@ Paridad entre portales (misma UI ERP/supervisor): rendiciones; catch-alls `/:rut
 
 Inventario de paridad pantalla ↔ MCP: `docs/2.0/paridad/mcp-inventario.md`, gate `paridad-inventario.test.ts`. No se encontraron IDs de capacidad repetidos en el registro.
 
-Datos de configuración que **no** son ajustes del catálogo (tablas o capacidades propias): flujo de caja (`finanzas.flujo_ajustes`), embudo y catálogos comerciales (`comercial.config.*`), marca CPQ vs marca empresa (CPQ enlaza a `/configuracion/marca` para logos).
+Datos de configuración que **no** son ajustes del catálogo (tablas o capacidades propias): flujo de caja (`finanzas.flujo_ajustes`), embudo y catálogos comerciales (`comercial.config.*`), marca CPQ vs marca empresa (CPQ enlaza a `/configuracion/marca` para logos), **Control de acceso** (`acceso.configuraciones` + capacidades `acceso.config.*`, empresa e instalación — CAR-630; no duplicar en ajustes del núcleo).
 
 ## 5. Decisiones resueltas (CAR-581)
 
@@ -61,6 +61,12 @@ Datos de configuración que **no** son ajustes del catálogo (tablas o capacidad
 | Marca documental (tipografía, pie, condiciones) | `perfil_empresa` + `core.marca.*` | Migra desde `cpq.marca_documento`; UI en Configuración › Marca. CPQ mantiene `cpq.marca_documento.*` como delegado MCP y versiones de PDF. |
 | Flujo de caja vs cobranza/facturación | Dos capas | `finanzas.flujo_ajustes` (planilla) vs ajustes manifest Finanzas (cobranza). Ayudas actualizadas en Configuración › Finanzas › Flujo de caja y en el módulo. |
 | Geocerca asistencia vs rondas | Dos módulos | Asistencia: defecto 100 m en marcas. Rondas: 15 m en puntos (`RADIO_GEOCERCA_M`). Etiquetas de ayuda distinguen ambos usos. |
+
+### Resuelto (acceso)
+
+| Concepto | Dónde estaba | Dueño | Acción |
+| --- | --- | --- | --- |
+| Configuración de Control de acceso (tipos, fuera de lista, etc.) | PR #963 (ajustes núcleo) y PR #917 (`acceso.configuraciones`) | Tabla `acceso.configuraciones` + `acceso.config.get/set` (#917, R1) | #963 cerrado; decisión en CAR-479 (CAR-630) |
 
 ## 6. Regla CI
 
