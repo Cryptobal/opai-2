@@ -11,7 +11,7 @@ export const NOMBRE_TIPO_DTE: Readonly<Record<TipoDteCompra, string>> = {
   61: "Nota de crédito",
 };
 
-/** Estado de recepción ante el SII. Cambiarlo exige el adaptador RCV (pendiente, requiere credenciales). */
+/** Estado de recepción ante el SII. Lo cambia `finanzas.compras.recepcion_sii` (CAR-644) vía SimpleAPI. */
 export const ESTADOS_RECEPCION = ["pendiente_revision", "aceptado", "reclamado"] as const;
 export type EstadoRecepcion = (typeof ESTADOS_RECEPCION)[number];
 

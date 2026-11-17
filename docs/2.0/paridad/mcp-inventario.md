@@ -402,6 +402,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.get` | `finanzas_compras_get` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.importar` | `finanzas_compras_importar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.listar` | `finanzas_compras_listar` | existe |
+| compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.recepcion_sii` | `finanzas_compras_recepcion_sii` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.registrar` | `finanzas_compras_registrar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.sincronizar_rcv` | `finanzas_compras_sincronizar_rcv` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |

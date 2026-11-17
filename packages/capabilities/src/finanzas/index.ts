@@ -2,6 +2,7 @@
 import type { Capacidad } from "../types";
 import { centrosListar } from "./centros";
 import { comprasAsignarCentro } from "./compras-centro";
+import { comprasRecepcionSii } from "./compras-recepcion-sii";
 import { comprasRegistrar } from "./compras-escritura";
 import { comprasImportar } from "./compras-importar";
 import { comprasSincronizarRcv, trabajoSincronizarRcv } from "./compras-rcv";
@@ -86,6 +87,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   comprasImportar,
   comprasSincronizarRcv,
   comprasAsignarCentro,
+  comprasRecepcionSii,
   ventasListar,
   ventasObtener,
   ventasLibroResumen,
