@@ -59,7 +59,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · bandeja bulk (CAR-613)", () => 
     const prev = await mod.executeCapability(ctx(aprueba), "rendiciones.bandeja.aprobar_varias", { ids }, { dryRun: true });
     expect(prev.ok).toBe(true);
     if (!prev.ok) throw new Error("dryRun");
-    expect(prev.data.aplicadas).toHaveLength(2);
+    expect((prev.data as { aplicadas: unknown[] }).aplicadas).toHaveLength(2);
     const ok = await mod.executeCapability(ctx(aprueba), "rendiciones.bandeja.aprobar_varias", { ids });
     expect(ok.ok).toBe(true);
     const estados = await e.admin.rendicion.findMany({ where: { id: { in: ids } }, select: { estado: true } });
