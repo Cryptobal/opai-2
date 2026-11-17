@@ -1,9 +1,7 @@
 import { avisoEsSueldoFaltante, avisosCpq, type AvisoCpq, type AvisoServidorCpq } from "./cpq-avisos";
 
 /** Texto compacto cuando falta sueldo: encabezado y resumen, sin repetir el aviso de la línea. */
-export const TEXTO_COSTO_PENDIENTE = "Costo pendiente";
-
-export { avisoEsSueldoFaltante };
+const TEXTO_COSTO_PENDIENTE = "Costo pendiente";
 
 /** Resumen de la ficha: un solo «Costo pendiente» si falta sueldo; el detalle queda en la línea del puesto. */
 export function avisosResumenCpq(calculo: {

@@ -6,7 +6,7 @@ import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import type { BorradorF29 } from "./tipos";
 
 /** Mes anterior al de hoy en hora de Chile: el F29 que toca declarar. */
-export function mesPorDefecto(hoy = hoyIso()): string {
+function mesPorDefecto(hoy = hoyIso()): string {
   const [a, m] = hoy.split("-").map(Number) as [number, number];
   const i = a * 12 + (m - 1) - 1;
   return `${Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}`;
