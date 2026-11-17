@@ -2,20 +2,35 @@
 
 import { Button, Campo, Select, Textarea } from "@opai/ds";
 
+import { ResumenEntrega } from "./resumen-entrega";
+
 type Props = {
   usuarios: { userId: string; nombre: string }[];
   entregaA: string;
   notaEntrega: string;
   pendiente: boolean;
+  alertasTomadas: number;
+  propuestasPendientes: number;
   onEntregaA: (v: string) => void;
   onNota: (v: string) => void;
   onEntregar: () => void;
 };
 
-export function PanelEntregaTurno({ usuarios, entregaA, notaEntrega, pendiente, onEntregaA, onNota, onEntregar }: Props) {
+export function PanelEntregaTurno({
+  usuarios,
+  entregaA,
+  notaEntrega,
+  pendiente,
+  alertasTomadas,
+  propuestasPendientes,
+  onEntregaA,
+  onNota,
+  onEntregar,
+}: Props) {
   return (
     <section className="flex flex-col gap-2 rounded-lg border border-border p-4">
       <h3 className="t-label text-fg">Entregar turno</h3>
+      <ResumenEntrega alertasTomadas={alertasTomadas} propuestasPendientes={propuestasPendientes} />
       <Select
         valor={entregaA}
         onCambiar={onEntregaA}

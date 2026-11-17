@@ -18,7 +18,20 @@ export default function TurnoCentral() {
       volver={{ href: "/central", etiqueta: "Central" }}
       cargar={cargarPantallaTurno}
     >
-      {({ turno, t, operador, entregaPara, lista, atender, gobernar, respaldo, operadorNombre }) => (
+      {({
+        turno,
+        t,
+        operador,
+        entregaPara,
+        lista,
+        atender,
+        gobernar,
+        respaldo,
+        operadorNombre,
+        configurar,
+        alertasTomadas,
+        propuestasPendientes,
+      }) => (
         <DetailScreen state={estadoPantalla(turno)} titulo="Turno de central" subtitulo="Quién está a cargo y si el agente puede actuar">
           {t ? (
             <div className="flex flex-col gap-4">
@@ -47,6 +60,9 @@ export default function TurnoCentral() {
                 gobernar={gobernar}
                 atender={atender}
                 respaldoId={respaldo}
+                configurar={configurar}
+                alertasTomadas={alertasTomadas}
+                propuestasPendientes={propuestasPendientes}
               />
             </div>
           ) : null}

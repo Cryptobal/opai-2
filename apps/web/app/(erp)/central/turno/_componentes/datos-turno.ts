@@ -18,9 +18,36 @@ export async function cargarPantallaTurno() {
   const operador = identidad?.usuario?.id ?? null;
   const atender = identidad ? puedeDeIdentidad(identidad)("central:alertas.atender") : false;
   const gobernar = identidad ? puedeDeIdentidad(identidad)("central:agente.gobernar") : false;
+  const configurar = identidad ? puedeDeIdentidad(identidad)("central:config.manage") : false;
   const respaldo =
     (ajustes.ok ? ajustes.data.find((v) => v.clave === "responsable_respaldo")?.valor : "")?.toString() ?? "";
   const t = turno.ok ? turno.data : null;
   const operadorNombre = t?.turno ? (nombres.get(t.turno.operadorId) ?? "Operador") : null;
-  return { turno, t, operador, entregaPara: operador, lista, atender, gobernar, respaldo, operadorNombre };
+  let alertasTomadas = 0;
+  let propuestasPendientes = 0;
+  if (operador) {
+    const [propuestas, alertas] = await Promise.all([
+      ejecutarComoUsuario<{ items: unknown[] }>("erp", "central.propuestas.listar", { estado: "pendiente", limite: 200 }),
+      ejecutarComoUsuario<{ items: { tomadaPorId: string | null }[] }>("erp", "central.alertas.listar", {
+        vista: "activas",
+        limite: 200,
+      }),
+    ]);
+    if (propuestas.ok) propuestasPendientes = propuestas.data.items.length;
+    if (alertas.ok) alertasTomadas = alertas.data.items.filter((a) => a.tomadaPorId === operador).length;
+  }
+  return {
+    turno,
+    t,
+    operador,
+    entregaPara: operador,
+    lista,
+    atender,
+    gobernar,
+    configurar,
+    respaldo,
+    operadorNombre,
+    alertasTomadas,
+    propuestasPendientes,
+  };
 }

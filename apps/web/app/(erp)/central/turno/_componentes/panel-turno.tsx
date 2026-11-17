@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import type { TurnoEstado } from "../../_componentes/tipos-central";
-import { NotaRespaldo } from "./nota-respaldo";
+import { SelectorRespaldo } from "./selector-respaldo";
 import { BotonesTurno } from "./panel-botones";
 import { PanelAgenteCentral } from "./panel-agente";
 import { PanelEntregaTurno } from "./panel-entrega";
@@ -19,9 +19,23 @@ type Props = {
   gobernar: boolean;
   atender: boolean;
   respaldoId: string;
+  configurar: boolean;
+  alertasTomadas: number;
+  propuestasPendientes: number;
 };
 
-export function PanelTurno({ turno, operador, entregaPara, usuarios, gobernar, atender, respaldoId }: Props) {
+export function PanelTurno({
+  turno,
+  operador,
+  entregaPara,
+  usuarios,
+  gobernar,
+  atender,
+  respaldoId,
+  configurar,
+  alertasTomadas,
+  propuestasPendientes,
+}: Props) {
   const { ejecutar, pendiente, error, run } = useAccionesTurno();
   const [entregaA, setEntregaA] = useState("");
   const [notaEntrega, setNotaEntrega] = useState("");
@@ -50,6 +64,8 @@ export function PanelTurno({ turno, operador, entregaPara, usuarios, gobernar, a
           entregaA={entregaA}
           notaEntrega={notaEntrega}
           pendiente={pendiente}
+          alertasTomadas={alertasTomadas}
+          propuestasPendientes={propuestasPendientes}
           onEntregaA={setEntregaA}
           onNota={setNotaEntrega}
           onEntregar={() =>
@@ -65,7 +81,7 @@ export function PanelTurno({ turno, operador, entregaPara, usuarios, gobernar, a
         onPausar={() => run(ejecutar("central.agente.pausar", { instalacionId: null }), "Agente en pausa")}
         onReanudar={() => run(ejecutar("central.agente.reanudar", { instalacionId: null }), "Agente reanudado")}
       />
-      <NotaRespaldo respaldoId={respaldoId} usuarios={usuarios} />
+      <SelectorRespaldo respaldoId={respaldoId} usuarios={usuarios} puedeEditar={configurar} />
     </div>
   );
 }

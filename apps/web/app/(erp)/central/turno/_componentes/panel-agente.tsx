@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@opai/ds";
-
 import type { TurnoEstado } from "../../_componentes/tipos-central";
+
+import { PausaInstalacion } from "./pausa-instalacion";
 
 type Props = {
   turno: TurnoEstado;
@@ -18,16 +18,14 @@ export function PanelAgenteCentral({ turno, gobernar, atender, pendiente, onPaus
   return (
     <section className="flex flex-col gap-2 rounded-lg border border-border p-4">
       <h3 className="t-label text-fg">Agente de central</h3>
-      <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" disabled={pendiente} onClick={onPausar}>
-          Pausar en toda la empresa
-        </Button>
-        {gobernar && turno.pausadaEmpresa ? (
-          <Button variant="primary" disabled={pendiente} onClick={onReanudar}>
-            Reanudar en toda la empresa
-          </Button>
-        ) : null}
-      </div>
+      <PausaInstalacion
+        atender={atender}
+        gobernar={gobernar}
+        pendiente={pendiente}
+        pausadaEmpresa={turno.pausadaEmpresa}
+        onPausarEmpresa={onPausar}
+        onReanudarEmpresa={onReanudar}
+      />
     </section>
   );
 }
