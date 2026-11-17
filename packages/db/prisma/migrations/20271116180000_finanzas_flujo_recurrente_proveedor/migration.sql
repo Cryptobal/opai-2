@@ -38,3 +38,19 @@ WHERE f.tenant_id = t.id
   AND (f.etiqueta ILIKE 'TEST QA%' OR f.etiqueta ILIKE '%(QA)%');
 
 COMMIT;
+
+-- Reversión: restaurar filas/celdas borradas solo desde respaldo Neon previo; en esquema:
+--   DROP TRIGGER mismo_tenant ON "finanzas"."flujo_recurrentes";
+--   CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "finanzas"."flujo_recurrentes"
+--     FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('fila_id', 'finanzas.flujo_filas');
+--   DROP INDEX IF EXISTS "finanzas"."flujo_recurrentes_proveedor_id_idx";
+--   ALTER TABLE "finanzas"."flujo_recurrentes" DROP CONSTRAINT IF EXISTS "flujo_recurrentes_proveedor_id_fkey";
+--   ALTER TABLE "finanzas"."flujo_recurrentes" DROP COLUMN IF EXISTS "proveedor_id";
+
+-- Reversión: restaurar filas/celdas borradas solo desde respaldo Neon previo; en esquema:
+--   DROP TRIGGER mismo_tenant ON "finanzas"."flujo_recurrentes";
+--   CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "finanzas"."flujo_recurrentes"
+--     FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('fila_id', 'finanzas.flujo_filas');
+--   DROP INDEX IF EXISTS "finanzas"."flujo_recurrentes_proveedor_id_idx";
+--   ALTER TABLE "finanzas"."flujo_recurrentes" DROP CONSTRAINT IF EXISTS "flujo_recurrentes_proveedor_id_fkey";
+--   ALTER TABLE "finanzas"."flujo_recurrentes" DROP COLUMN IF EXISTS "proveedor_id";
