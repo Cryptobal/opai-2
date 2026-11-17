@@ -16,18 +16,55 @@ export const PAUTA_E2E = {
   titular: "00000000-0000-7000-8000-0000000b0021",
 } as const;
 
-async function main() {
-  exigirBaseE2E();
-  const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
-  await enTransaccion(tenantId, (db) => sembrar(db, tenantId));
-  // Rondas (E3e de terreno) va con la Pauta porque corre en el mismo paso de CI, después de los maestros.
-  const rondas = await enTransaccion(tenantId, (db) => sembrarRondasE2E(db, tenantId));
-  await cerrarClientes();
-  console.log(`Fixture de Pauta listo.${rondas ? " Ronda E2E lista." : " Sin «Planta Quilicura»: sin Ronda E2E."}`);
+type CargoPauta = { id: string };
+
+async function upsertPuesto(
+  db: TenantTx,
+  tenantId: string,
+  cargoId: string,
+  id: string,
+  nombre: string,
+  horaInicio: string,
+  horaFin: string,
+) {
+  await db.puesto.upsert({
+    where: { id },
+    update: {},
+    create: {
+      id, tenantId, instalacionId: PAUTA_E2E.instalacion, cargoId, nombre,
+      diasTrabajo: 4, diasDescanso: 4, horaInicio, horaFin,
+    },
+  });
 }
 
-async function sembrar(db: TenantTx, tenantId: string) {
-  // Sin el módulo activo sus capacidades responden «Módulo inactivo» y sus e2e no prueban nada (CAR-507, CAR-497).
+async function upsertPersonaConVinculo(
+  db: TenantTx,
+  tenantId: string,
+  cargo: CargoPauta,
+  id: string,
+  nombres: string,
+  apellidos: string,
+  rut: string,
+) {
+  await db.persona.upsert({
+    where: { id },
+    update: {},
+    create: { id, tenantId, nombres, apellidos, rut, estado: "activa" },
+  });
+  await db.vinculoLaboral.upsert({
+    where: { id: id.replace("0000000b00", "0000000b01") },
+    update: { estado: "vigente", termino: null },
+    create: {
+      id: id.replace("0000000b00", "0000000b01"), tenantId, personaId: id, cargoId: cargo.id,
+      instalacionId: PAUTA_E2E.instalacion, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente",
+    },
+  });
+}
+
+async function sembrarInstalacionYPuestos(
+  db: TenantTx,
+  tenantId: string,
+): Promise<{ cargo: CargoPauta; cuentaId: string }> {
   await activarModulos(db, tenantId, ["pauta", "desempeno", "acceso", "asistencia"]);
   const cuenta = await db.cuenta.upsert({
     where: { id: "00000000-0000-7000-8000-0000000b0010" },
@@ -44,39 +81,21 @@ async function sembrar(db: TenantTx, tenantId: string) {
     update: {},
     create: { id: PAUTA_E2E.instalacion, tenantId, cuentaId: cuenta.id, nombre: "Planta Pauta E2E" },
   });
-  const puesto = (id: string, nombre: string, horaInicio: string, horaFin: string) =>
-    db.puesto.upsert({
-      where: { id },
-      update: {},
-      create: {
-        id, tenantId, instalacionId: PAUTA_E2E.instalacion, cargoId: cargo.id, nombre,
-        diasTrabajo: 4, diasDescanso: 4, horaInicio, horaFin,
-      },
-    });
-  await puesto(PAUTA_E2E.puestoDia, "Portería Día", "08:00", "20:00");
-  await puesto(PAUTA_E2E.puestoNoche, "Portería Noche", "20:00", "08:00");
-  const persona = async (id: string, nombres: string, apellidos: string, rut: string) => {
-    await db.persona.upsert({
-      where: { id },
-      update: {},
-      create: { id, tenantId, nombres, apellidos, rut, estado: "activa" },
-    });
-    await db.vinculoLaboral.upsert({
-      where: { id: id.replace("0000000b00", "0000000b01") },
-      update: { estado: "vigente", termino: null },
-      create: {
-        id: id.replace("0000000b00", "0000000b01"), tenantId, personaId: id, cargoId: cargo.id,
-        instalacionId: PAUTA_E2E.instalacion, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente",
-      },
-    });
-  };
-  await persona(PAUTA_E2E.ana, "Ana", "Pauta E2E", "70.000.001-0");
-  await persona(PAUTA_E2E.luis, "Luis", "Pauta E2E", "70.000.002-9");
-  // CAR-206: segunda instalación con un guardia vinculado y un patrón 4×4 activo, sin puestos sembrados.
+  await upsertPuesto(db, tenantId, cargo.id, PAUTA_E2E.puestoDia, "Portería Día", "08:00", "20:00");
+  await upsertPuesto(db, tenantId, cargo.id, PAUTA_E2E.puestoNoche, "Portería Noche", "20:00", "08:00");
+  return { cargo, cuentaId: cuenta.id };
+}
+
+async function sembrarPersonasPauta(db: TenantTx, tenantId: string, cargo: CargoPauta) {
+  await upsertPersonaConVinculo(db, tenantId, cargo, PAUTA_E2E.ana, "Ana", "Pauta E2E", "70.000.001-0");
+  await upsertPersonaConVinculo(db, tenantId, cargo, PAUTA_E2E.luis, "Luis", "Pauta E2E", "70.000.002-9");
+}
+
+async function sembrarInstalacionTitular(db: TenantTx, tenantId: string, cuentaId: string, cargo: CargoPauta) {
   await db.instalacion.upsert({
     where: { id: PAUTA_E2E.instalacionTitular },
     update: {},
-    create: { id: PAUTA_E2E.instalacionTitular, tenantId, cuentaId: cuenta.id, nombre: "Planta Titular E2E" },
+    create: { id: PAUTA_E2E.instalacionTitular, tenantId, cuentaId, nombre: "Planta Titular E2E" },
   });
   const guardia = PAUTA_E2E.titular;
   await db.persona.upsert({
@@ -93,9 +112,28 @@ async function sembrar(db: TenantTx, tenantId: string) {
       instalacionId: PAUTA_E2E.instalacionTitular, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente",
     },
   });
+}
+
+async function reiniciarSeriesPauta(db: TenantTx) {
   const puestos = { in: [PAUTA_E2E.puestoDia, PAUTA_E2E.puestoNoche] };
   await db.excepcionPauta.deleteMany({ where: { puestoId: puestos } });
   await db.seriePauta.deleteMany({ where: { puestoId: puestos } });
+}
+
+async function sembrar(db: TenantTx, tenantId: string) {
+  const { cargo, cuentaId } = await sembrarInstalacionYPuestos(db, tenantId);
+  await sembrarPersonasPauta(db, tenantId, cargo);
+  await sembrarInstalacionTitular(db, tenantId, cuentaId, cargo);
+  await reiniciarSeriesPauta(db);
+}
+
+async function main() {
+  exigirBaseE2E();
+  const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
+  await enTransaccion(tenantId, (db) => sembrar(db, tenantId));
+  const rondas = await enTransaccion(tenantId, (db) => sembrarRondasE2E(db, tenantId));
+  await cerrarClientes();
+  console.log(`Fixture de Pauta listo.${rondas ? " Ronda E2E lista." : " Sin «Planta Quilicura»: sin Ronda E2E."}`);
 }
 
 main().catch((e) => {
