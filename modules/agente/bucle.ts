@@ -34,10 +34,16 @@ function exigirAgente(ctx: Contexto) {
 }
 
 /** El modelo nunca recibe una función que escriba: aquí solo se ejecutan lecturas y dryRun. */
-export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversador): Promise<Plan> {
+export async function prepararTurno(
+  ctx: Contexto,
+  texto: string,
+  ia: Conversador,
+  historial: Mensaje[] = [],
+): Promise<Plan> {
   exigirAgente(ctx);
   const mensajes: Mensaje[] = [
     { rol: "sistema", texto: `${sistema()}\n\n${GUIA}\n\n${indiceDelAgente(ctx)}` },
+    ...historial,
     { rol: "usuario", texto },
   ];
   const plan: Plan = { id: randomUUID(), pasos: [], texto: "", tokens: 0, referencias: [] };
