@@ -8,6 +8,7 @@ import { pesos } from "../formato";
 import { cargarBandeja, cargarDetalleBandeja } from "./datos";
 import { DetalleRevision } from "./detalle";
 import { FiltrosBandejaForm } from "./filtros";
+import { ListaBandejaSeleccion } from "./lista-seleccion";
 import { FILTROS_ESTADO, filtrosDe, hrefBandeja, RUTA_BANDEJA } from "./tipos";
 
 type Q = Record<string, string | string[] | undefined>;
@@ -37,21 +38,25 @@ export function PaginaBandeja({ searchParams, params }: { searchParams: Promise<
               variante="lista"
               textos={{ vacio: { titulo: filtros.estado === "enviada" ? "No tienes rendiciones por revisar" : "Sin rendiciones en este estado", descripcion: "Aquí aparecerán las rendiciones que te asignen." } }}
             >
-              <ul>
-                {bandeja.rendiciones.map((r) => (
-                  <li key={r.id}>
-                    <FilaSeleccionable
-                      Link={LinkNext}
-                      href={hrefBandeja(filtros, r.id)}
-                      seleccionada={r.id === id}
-                      titulo={r.codigoVisible}
-                      secundario={`${r.solicitanteNombre ?? "Persona"} · ${r.descripcion}`}
-                      terciario={pesos(r.montoTotal)}
-                      fin={<Badge tono={r.estado === "enviada" ? "info" : r.estado === "aprobada" ? "success" : r.estado === "devuelta" ? "warning" : "danger"}>{r.estado === "enviada" ? "Por revisar" : r.estado}</Badge>}
-                    />
-                  </li>
-                ))}
-              </ul>
+              {filtros.estado === "enviada" ? (
+                <ListaBandejaSeleccion filtros={filtros} rendiciones={bandeja.rendiciones} idActiva={id} />
+              ) : (
+                <ul>
+                  {bandeja.rendiciones.map((r) => (
+                    <li key={r.id}>
+                      <FilaSeleccionable
+                        Link={LinkNext}
+                        href={hrefBandeja(filtros, r.id)}
+                        seleccionada={r.id === id}
+                        titulo={r.codigoVisible}
+                        secundario={`${r.solicitanteNombre ?? "Persona"} · ${r.descripcion}`}
+                        terciario={pesos(r.montoTotal)}
+                        fin={<Badge tono={r.estado === "enviada" ? "info" : r.estado === "aprobada" ? "success" : r.estado === "devuelta" ? "warning" : "danger"}>{r.estado === "enviada" ? "Por revisar" : r.estado}</Badge>}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Estado>
           </div>
         );
