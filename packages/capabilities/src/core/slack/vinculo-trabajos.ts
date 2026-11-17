@@ -11,7 +11,7 @@ import type { Contexto } from "../../types";
 import { instalacionSlack, PROVEEDOR_SLACK } from "./comun";
 import { buscarEnSlack, candidatos, guardarVinculos } from "./vinculo";
 
-export const TIPO_VINCULAR = "core.slack.vincular_pendientes";
+const TIPO_VINCULAR = "core.slack.vincular_pendientes";
 /** Tope de continuaciones por ciclo: 25 × 40 = 1.000 personas por empresa y día. */
 const MAX_VUELTAS = 25;
 
