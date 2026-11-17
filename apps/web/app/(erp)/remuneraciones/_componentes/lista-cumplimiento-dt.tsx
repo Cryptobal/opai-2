@@ -24,7 +24,6 @@ export type MovimientoMiDt = {
 
 const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo", finiquito: "Finiquito" } as const;
 
-
 /** Contratos y anexos para Mi DT (diseño 07). */
 export function ListaCumplimientoDt({
   items,
