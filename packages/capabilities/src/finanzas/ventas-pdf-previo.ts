@@ -21,7 +21,7 @@ const dia = (d: Date | null | undefined) => d?.toISOString().slice(0, 10);
  * Número interno estable: prefijo, período y correlativo de la corrida dentro del período en la empresa. Las corridas no
  * se borran (un borrador descartado conserva su corrida), así que el número no cambia al reenviar.
  */
-export async function numeroInterno(
+async function numeroInterno(
   ctx: Contexto,
   tipo: TipoPrevio,
   documentoId: string,
