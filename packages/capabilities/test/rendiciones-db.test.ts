@@ -221,7 +221,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     );
     expect(p1.items).toHaveLength(50);
     expect(p1.siguiente).toBeTruthy();
-    expect(p1.contadores?.borrador).toBe(baseBorrador + 55);
+    expect(p1.contadores?.borrador).toBe(55);
     const p2 = await dato<{ items: { id: string }[]; siguiente: string | null }>(
       await limpio("rendiciones.rendiciones.listar", { alcance: "propias", limite: 50, cursor: p1.siguiente! }),
     );
