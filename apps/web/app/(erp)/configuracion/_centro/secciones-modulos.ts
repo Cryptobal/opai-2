@@ -33,7 +33,11 @@ type SeccionModulo = {
  * Registro de secciones de configuración por módulo: cada módulo agrega aquí sus líneas (como
  * `lib/existencia-ruta.ts` para las fichas). El orden es el de las pestañas; «Ajustes» va al final.
  */
+<<<<<<< HEAD
 const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
+=======
+export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
+>>>>>>> origin/cursor/car-accesos-solo-instalacion-00df
   acceso: [
     {
       id: "formulario",
