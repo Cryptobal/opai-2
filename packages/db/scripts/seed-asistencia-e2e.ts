@@ -1,8 +1,6 @@
 // Fixture de Asistencia para e2e de CI (CAR-599): módulo activo, turno de hoy, kiosco emparejado y trabajador con PIN.
 import "dotenv/config";
 
-import { hashPassword } from "better-auth/crypto";
-
 import { cerrarClientes, dbAdmin, enTransaccion, hashPin, hmacDispositivo, type TenantTx } from "../src/index";
 import { ASISTENCIA_E2E } from "./asistencia-e2e-fixture";
 import { exigirBaseE2E } from "./exigir-base-e2e";
@@ -59,26 +57,6 @@ async function sembrar(db: TenantTx, tenantId: string) {
       id: ASISTENCIA_E2E.dispositivo, tenantId, instalacionId: ASISTENCIA_E2E.instalacion,
       identificador: "KIOSCO-ASISTENCIA-E2E", tokenHash: hmacDispositivo(ASISTENCIA_E2E.tokenDispositivo),
     },
-  });
-  const password = process.env["SEED_OWNER_PASSWORD"];
-  if (!password) throw new Error("Falta SEED_OWNER_PASSWORD (la fija el workflow de e2e).");
-  const hash = await hashPassword(password);
-  const user = await db.user.upsert({
-    where: { email: ASISTENCIA_E2E.trabajadorEmail },
-    update: { name: "Ana Circuito E2E", emailVerified: true },
-    create: { name: "Ana Circuito E2E", email: ASISTENCIA_E2E.trabajadorEmail, emailVerified: true },
-  });
-  const cuenta = await db.account.findFirst({ where: { userId: user.id, providerId: "credential" } });
-  if (cuenta) await db.account.update({ where: { id: cuenta.id }, data: { password: hash } });
-  else await db.account.create({ data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash } });
-  await db.membership.upsert({
-    where: { tenantId_userId: { tenantId, userId: user.id } },
-    update: { rol: "viewer", portales: ["trabajador"], estado: "activa" },
-    create: { tenantId, userId: user.id, rol: "viewer", portales: ["trabajador"], estado: "activa" },
-  });
-  await db.persona.update({
-    where: { id: ASISTENCIA_E2E.ana },
-    data: { usuarioId: user.id, emailLaboral: ASISTENCIA_E2E.trabajadorEmail },
   });
   await db.ajuste.upsert({
     where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "asistencia", clave: "telefono_personal_permitido" } },
