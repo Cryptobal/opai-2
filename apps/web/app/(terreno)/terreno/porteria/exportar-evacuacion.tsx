@@ -13,7 +13,7 @@ export function ExportarEvacuacion({ copia, enLinea }: Props) {
     const texto = textoEvacuacion(copia);
     const nombre = `evacuacion-${diaOperativoChile()}.txt`;
     const archivo = new File([texto], nombre, { type: "text/plain;charset=utf-8" });
-    if (navigator.share?.canShare?.({ files: [archivo] })) {
+    if (typeof navigator.share === "function") {
       try {
         await navigator.share({ title: "Lista de evacuación", files: [archivo] });
         return;

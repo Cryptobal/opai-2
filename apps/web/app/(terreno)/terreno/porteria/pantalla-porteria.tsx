@@ -7,12 +7,15 @@ import { LinkNext } from "@/app/_components/link-next";
 
 import { usePersonaElegida } from "@/lib/terreno/persona";
 
+import { BienvenidaPorteria } from "./bienvenida-porteria";
+import { SelectorPunto, usePunto } from "./punto-porteria";
 import { usarSitioPorteria } from "./usar-sitio-porteria";
 
 const FormularioEntrada = dynamic(
   () => import("./formulario-entrada").then((m) => m.FormularioEntrada),
   { ssr: false },
 );
+const Esperados = dynamic(() => import("./esperados").then((m) => m.Esperados), { ssr: false });
 const ListaEnSitio = dynamic(() => import("./lista-en-sitio").then((m) => m.ListaEnSitio), {
   ssr: false,
 });
@@ -22,12 +25,12 @@ const ExportarEvacuacion = dynamic(
 );
 
 /**
- * Portería del equipo de terreno (CAR-78 · E4d; CAR-631 · R26): registrar entrada y salida con copia cifrada
- * para evacuación sin red.
+ * Portería del equipo de terreno (CAR-78 · E4d; CAR-631 · R26): registrar con copia cifrada para evacuación sin red.
  */
 export function PantallaPorteria() {
   const persona = usePersonaElegida();
   const { sitio, copia, sinRed, falla, enLinea, recargar } = usarSitioPorteria();
+  const punto = usePunto(sitio?.puntos ?? []);
 
   if (persona === undefined) return null;
   if (!persona) {
@@ -47,6 +50,8 @@ export function PantallaPorteria() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-6 pt-safe pb-safe">
       <h1 className="t-title text-fg">Portería</h1>
+      <BienvenidaPorteria b={sitio?.bienvenida ?? null} />
+      <SelectorPunto puntos={sitio?.puntos ?? []} id={punto.id} onElegir={punto.elegir} />
       {!sitio && !falla ? <Loading variante="lista" /> : null}
       {sitio && !sitio.activo ? (
         <Empty
@@ -55,9 +60,9 @@ export function PantallaPorteria() {
         />
       ) : null}
       {sinRed ? (
-        <Alerta tono="info" titulo="Modo sin conexión">
-          La lista «en sitio» es la última copia guardada en este teléfono. Las entradas y salidas que
-          registres quedan en cola hasta volver la señal.
+        <Alerta tono="info" titulo="Sin conexión">
+          Ves la última lista en sitio guardada en este teléfono. Los registros que guardes se encolan hasta volver la
+          señal.
         </Alerta>
       ) : null}
       {falla && !sinRed ? (
@@ -77,12 +82,19 @@ export function PantallaPorteria() {
       ) : null}
       {muestraPorteria ? (
         <>
+          <Esperados personaId={persona.id} puntoId={punto.id} alRegistrar={recargar} />
           <FormularioEntrada
             personaId={persona.id}
-            urlPrivacidad={sitio?.urlPrivacidad}
-            avisoLinea={sitio?.avisoLinea}
+            config={sitio?.config ?? null}
+            puntoId={punto.id}
           />
-          {sitio ? <ListaEnSitio items={sitio.items} personaId={persona.id} /> : null}
+          {sitio ? (
+            <ListaEnSitio
+              items={sitio.items}
+              personaId={persona.id}
+              permanenciaMaxMin={sitio.config?.permanenciaMaxMin ?? null}
+            />
+          ) : null}
           <ExportarEvacuacion copia={copia} enLinea={enLinea && !sinRed} />
         </>
       ) : null}
