@@ -143,3 +143,18 @@ function filaDe(l: Liq, p: PersonaArchivo, v: { inicio: Date; termino: Date | nu
     ficha: f ? { tramo: f.tramoAsignacion, simples: f.cargasSimples, maternales: f.cargasMaternales, invalidez: f.cargasInvalidez, jubilado: f.jubilado } : null,
   };
 }
+
+/** Campos comunes por persona en LRE, libro y otros archivos del período. */
+export const montosFilaArchivo = (f: FilaArchivo) => ({
+  personaId: f.personaId,
+  rut: f.persona.rut,
+  inicioContrato: f.inicio,
+  terminoContrato: f.terminoEnMes,
+  diasTrabajados: f.diasTrabajados,
+  diasLicencia: f.diasLicencia,
+  haberes: f.haberes,
+  descuentosLegales: f.descuentosLegales,
+  otrosDescuentos: f.otrosDescuentos,
+  aportesEmpleador: f.aportesEmpleador,
+  liquido: f.liquido,
+});
