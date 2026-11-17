@@ -4,7 +4,7 @@
 
 ## Qué entra
 
-- `ci.yml`: el gate pasa de un job en serie a jobs paralelos (`typecheck · lint`, `test` en 2 partes, `test:db` en 3) más el job resumen `typecheck · lint · test · test:db`, que es el check obligatorio.
+- `ci.yml`: el gate pasa de un job en serie a jobs paralelos (`typecheck` y `test` en 2 partes cada uno, `test:db` en 4) más el job resumen `typecheck · lint · test · test:db`, que es el check obligatorio.
 - Los checks obligatorios corren en runners de GitHub, no en la flota Spot (variable `RUNNER_GATE` para volver a runners propios).
 - `package.json`: `test:db` se divide en `test:db:base` y `test:db:capacidades` (el comando completo sigue igual).
 - `.github/actions/preparar`: pasos comunes (pnpm, Node, store, instalación, caché de Turborepo con el SHA en la clave).
@@ -17,5 +17,5 @@
 
 ## Riesgo
 
-- Cada PR ocupa hasta 7 runners de GitHub a la vez; si el tope de jobs simultáneos de la cuenta queda corto, se vuelve a ver espera.
+- Cada PR ocupa hasta 9 runners de GitHub a la vez; si el tope de jobs simultáneos de la cuenta queda corto, se vuelve a ver espera.
 - Si el repositorio vuelve a ser privado, los runners de GitHub tienen costo: fijar `RUNNER_GATE` a runners propios on-demand de 8 CPU.
