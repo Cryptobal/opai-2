@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, prohibido } from "@opai/capabilities";
 
-import { estadoSchema, rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
+import { rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
 import {
   contadoresPropias,
   dondeBusqueda,
