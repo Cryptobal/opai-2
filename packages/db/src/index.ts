@@ -47,7 +47,12 @@ export type { HechoPlataforma } from "./plataforma-aprobaciones";
 // La auditoría global solo se escribe por operaciones con nombre: `accesoPlataforma()` (ámbito
 // `plataforma`) y `registrarEventoSeguridad` (ámbito `seguridad`, CAR-42). No se exporta el append.
 export type { AmbitoAuditoriaGlobal, HechoGlobal } from "./auditoria-global";
-export { type EventoSeguridad, registrarEventoSeguridad } from "./eventos-seguridad";
+export {
+  type EventoSeguridad,
+  type EventoVerComo,
+  registrarEventoSeguridad,
+  registrarVerComo,
+} from "./eventos-seguridad";
 export {
   type FiltroTrabajos,
   operacionesEmpresa,
