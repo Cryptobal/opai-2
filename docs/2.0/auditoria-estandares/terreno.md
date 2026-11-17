@@ -23,6 +23,17 @@ Connecteam: marcación con geocerca, formularios y listas de control con foto y 
 | T-1 | **Formularios y listas de control a medida.** Las rondas tienen plantillas de puntos; no hay un formulario genérico que la empresa arme (entrega de turno, revisión de equipo) con foto y firma. | `schema/rondas.prisma`, `tickets.prisma`, `terreno.prisma` | Media | Ajustar cuando entre la segunda vertical (aseo, mantenimiento) |
 | T-2 | **«Mi día» del trabajador en terreno.** La app parte de la acción (marcar, ronda); el inicio no muestra el turno ni la pauta del día. | `apps/web/app/(terreno)/terreno/page.tsx` | Media | Va junto con R-1 de Portales |
 
+## Estado al 16-nov-2026
+
+Repaso semanal contra `main` en `886e262` (CAR-586). Sin brechas cerradas esta semana.
+
+| # | Estado | Qué cambió y dónde se comprueba |
+|---|---|---|
+| T-1 | Abierta | Sin cambios |
+| T-2 | Abierta | Sin cambios en Terreno. El trabajador ya ve sus turnos en su portal (R-1 de Portales), no en el inicio de Terreno |
+
+**Nuevo en la semana.** Control de acceso (portería) entró como módulo: listas de acceso por instalación (CAR-475, #840) y anular, salida y cierre en bloque (CAR-477, #845), con la corrección como hecho nuevo inmutable (ADR-023). Los PR declaran a Envoy como referente, que no está en la vara: ver «Capas sin referente» en el [README](README.md). Hay una observación abierta en el PR #933 (mapa de puntos de ronda): usa teselas y búsqueda de OpenStreetMap por fuera del servicio de geolocalización del núcleo (ADR-027 y ADR-031). Si se integra así, pasa a Linear.
+
 ## Qué se mantiene tal cual
 
 Cola sin conexión, dispositivo emparejado, marcación y rondas.

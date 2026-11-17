@@ -4,7 +4,7 @@ import type { ConFacturar } from "./tipos-facturar";
 
 export type Pagina<T> = { items: T[]; siguiente: string | null };
 
-export type Cuenta = {
+type Cuenta = {
   id: string;
   nombre: string;
   razonSocial: string | null;
@@ -102,7 +102,7 @@ export type Instalacion = {
 export type InstalacionFila = Instalacion & { puestos: number; dotacion: number };
 export type InstalacionDetalle = Instalacion & { puestos: Puesto[]; documentos: number };
 
-export type VinculoResumen = {
+type VinculoResumen = {
   id: string;
   cargoId: string;
   cargo: string;
@@ -110,7 +110,7 @@ export type VinculoResumen = {
   inicio: string;
   termino: string | null;
 };
-export type Persona = {
+type Persona = {
   id: string;
   nombres: string;
   apellidos: string;
