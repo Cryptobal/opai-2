@@ -104,6 +104,6 @@ export async function pdfDeAnexo(
     "contrato.cambios": filas.map((f) => `${f.concepto}: ${f.antes} → ${f.despues}`).join("; ") || null,
   });
   if (relleno.faltantes.length)
-    throw reglaDeNegocio(`Faltan datos para generar el anexo: ${relleno.faltantes.map(etiquetaDeVariable).join(", ")}.`);
+    throw reglaDeNegocio(`Faltan datos para generar el anexo: ${relleno.faltantes.map((c) => etiquetaDeVariable(c)).join(", ")}.`);
   return (await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo })).bytes;
 }
