@@ -40,7 +40,7 @@ export type ItemRendicion = {
   sinRespaldoMotivo: string | null;
 };
 
-export type ViajeRendicion = {
+type ViajeRendicion = {
   origen: string;
   origenLat: number;
   origenLng: number;
@@ -62,7 +62,7 @@ export type DetalleRendicion = ResumenRendicion & {
   viaje: ViajeRendicion | null;
 };
 
-export type Persona = { id: string; nombre: string };
+type Persona = { id: string; nombre: string };
 export type InstalacionOpcion = Persona & {
   direccion: string | null;
   lat: number | null;
