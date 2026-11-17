@@ -6,7 +6,7 @@ import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { externo } from "../../externo";
 import type { Contexto } from "../../types";
 import { instalacionesEnAlcance } from "../maestros/alcance";
-import { cursorDe, pagina } from "../maestros/comun";
+import { pagina } from "../maestros/comun";
 import { iso } from "./hechos-comun";
 
 type LibroNovedad = Awaited<ReturnType<Contexto["db"]["libroNovedad"]["findFirstOrThrow"]>>;
