@@ -13,7 +13,7 @@ import { autorizaPrerregistro, type VisitanteDia } from "./acceso-prerregistro";
 import type { Equipo, FilaIntento, FilaRegistro, FilaUso, Tiempo } from "./acceso-tipos";
 
 /** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
-export const DIFERIDO_MS = 120_000;
+const DIFERIDO_MS = 120_000;
 
 const esDiferido = (t: Tiempo, horaHecho: string) =>
   t.recibidoEn.getTime() - new Date(horaHecho).getTime() > DIFERIDO_MS;

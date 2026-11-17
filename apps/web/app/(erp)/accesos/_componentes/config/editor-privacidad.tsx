@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 
-import { Alerta, Button, Campo, CodigoQr, Input, SeccionTarjeta, Textarea } from "@opai/ds";
+import { Alerta, Button, Campo, SeccionTarjeta, Textarea } from "@opai/ds";
 import type { ConfigAcceso } from "@opai/domain/acceso-config";
 
 import type { CartelPrivacidad } from "./cartel-accion";
 import { cartelPrivacidad } from "./cartel-accion";
 import type { Punto } from "./editor-puntos";
+import { SelectorPuntoPrivacidad } from "./selector-punto-privacidad";
+import { VistaCartelPrivacidad } from "./vista-cartel-privacidad";
 
 export function EditorPrivacidad({
   instalacionId,
@@ -47,42 +49,12 @@ export function EditorPrivacidad({
             onChange={(e) => onCambiar({ avisoPrivacidad: e.target.value })}
           />
         </Campo>
-        {puntos.length ? (
-          <Campo etiqueta="Punto (opcional)" htmlFor="pv-punto" ayuda="El QR incluye el punto si eliges uno.">
-            <Input
-              id="pv-punto"
-              list="puntos-lista"
-              disabled={disabled}
-              placeholder="Todos los puntos"
-              onChange={(e) => {
-                const p = puntos.find((x) => x.nombre === e.target.value.trim());
-                setPuntoId(p?.id ?? "");
-              }}
-            />
-            <datalist id="puntos-lista">
-              {puntos.map((p) => (
-                <option key={p.id ?? p.nombre} value={p.nombre} />
-              ))}
-            </datalist>
-          </Campo>
-        ) : null}
+        <SelectorPuntoPrivacidad puntos={puntos} disabled={disabled} onElegir={setPuntoId} />
         {error ? <Alerta tono="danger" titulo={error} /> : null}
         <Button variant="secondary" disabled={disabled || cargando} onClick={() => void verCartel()}>
           {cargando ? "Preparando…" : "Preparar cartel"}
         </Button>
-        {cartel ? (
-          <article className="rounded-lg border border-border bg-bg p-4 print:border-0">
-            <p className="t-caption mb-1">{cartel.empresa}</p>
-            <h2 className="t-title mb-2">{cartel.instalacion}</h2>
-            {cartel.punto ? <p className="t-body mb-2">{cartel.punto}</p> : null}
-            <p className="t-body mb-4 whitespace-pre-wrap">{cartel.aviso}</p>
-            <CodigoQr svg={cartel.qrSvg} alt="QR a la política de privacidad" className="mx-auto" />
-            <p className="t-caption mt-2 break-all text-center text-fg-muted">{cartel.urlPolitica}</p>
-            <Button className="mt-4 print:hidden" onClick={() => window.print()}>
-              Imprimir o guardar PDF
-            </Button>
-          </article>
-        ) : null}
+        {cartel ? <VistaCartelPrivacidad cartel={cartel} /> : null}
       </div>
     </SeccionTarjeta>
   );
