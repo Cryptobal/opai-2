@@ -1,8 +1,8 @@
 {
-  "lineasDuplicadas": 3223,
-  "archivosLargos": 36,
-  "funcionesLargas": 670,
-  "exportacionesSinUso": 246,
+  "lineasDuplicadas": 3220,
+  "archivosLargos": 35,
+  "funcionesLargas": 664,
+  "exportacionesSinUso": 244,
   "archivosSinUso": 0,
   "dependenciasSinUso": 0
 }

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+import { consultaListaCursor } from "@/lib/lista-cursor";
 
 import { exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -13,7 +13,7 @@ export async function cargarBandeja(f: FiltrosBandeja): Promise<Bandeja> {
   return exigirDatos(
     await ejecutarComoUsuario<Bandeja>("erp", "rendiciones.bandeja.listar", {
       ...filtros,
-      limite: POR_PAGINA,
+      ...consultaListaCursor(f),
     }),
   );
 }

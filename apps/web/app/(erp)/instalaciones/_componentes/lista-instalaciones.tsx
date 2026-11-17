@@ -13,6 +13,8 @@ import { PaginacionCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { REGIONES } from "./datos";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
+const dotacion = (n: number) => `${n} ${n === 1 ? "persona" : "personas"}`;
+
 type Props = {
   state: EstadoPantalla;
   items: InstalacionFila[];
@@ -24,8 +26,6 @@ type Props = {
   /** Búsqueda vigente: se conserva al abrir una ficha y al volver. */
   parametros: Parametros;
 };
-
-const personas = (n: number) => `${n} ${n === 1 ? "persona" : "personas"}`;
 
 /** Columna de instalaciones (06): icono, nombre, "cuenta · comuna", estado y dotación. */
 export function ListaInstalaciones(p: Props) {
@@ -56,7 +56,7 @@ export function ListaInstalaciones(p: Props) {
       ]}
       meta={{
         izquierda: `${p.items.length}${p.siguiente ? "+" : ""} ${p.titulo.toLowerCase()}`,
-        derecha: personas(total),
+        derecha: dotacion(total),
       }}
       seleccionada={p.seleccionada}
       vacio={{
@@ -86,7 +86,7 @@ export function ListaInstalaciones(p: Props) {
           fin: (
             <>
               <Badge tono={e.tono}>{e.etiqueta}</Badge>
-              <span className="t-caption hidden md:block">{personas(i.dotacion)}</span>
+              <span className="t-caption hidden md:block">{dotacion(i.dotacion)}</span>
             </>
           ),
         };

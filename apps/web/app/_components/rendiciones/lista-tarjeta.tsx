@@ -1,12 +1,13 @@
-import { Badge, Card } from "@opai/ds";
+import { Badge, Card, Table, Td, Th, Tr } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { lineaEstado, pesos } from "./formato";
+import { fechaDe, lineaEstado, pesos, revisaDe } from "./formato";
 import {
   BASE,
   ETIQUETA_ESTADO,
+  ETIQUETA_TIPO,
   type PortalRendicion,
   type ResumenRendicion,
   TONO_ESTADO,
@@ -30,7 +31,7 @@ function Motivo({ r }: { r: ResumenRendicion }) {
   );
 }
 
-export function CorregirRendicion({
+function CorregirRendicion({
   r,
   portal,
   className,
@@ -66,5 +67,67 @@ export function TarjetaRendicion({ r, portal }: { r: ResumenRendicion; portal: P
       <Motivo r={r} />
       <CorregirRendicion r={r} portal={portal} className="w-full" />
     </Card>
+  );
+}
+
+/** Tabla de escritorio de «Mis rendiciones». */
+export function TablaRendiciones({
+  items,
+  portal,
+}: {
+  items: readonly ResumenRendicion[];
+  portal: PortalRendicion;
+}) {
+  return (
+    <Table>
+      <thead>
+        <tr>
+          <Th>Código</Th>
+          <Th>Motivo</Th>
+          <Th className="text-right">Total</Th>
+          <Th>Estado</Th>
+          <Th className="hidden xl:table-cell">Fecha</Th>
+          <Th className="hidden xl:table-cell">Quién revisa</Th>
+          <Th>
+            <span className="sr-only">Acción</span>
+          </Th>
+        </tr>
+      </thead>
+      <tbody>
+        {items.map((r) => (
+          <Tr key={r.id} className="relative">
+            <Td>
+              <LinkNext
+                href={`${BASE[portal]}/${r.id}`}
+                className="font-medium text-fg after:absolute after:inset-0 hover:underline"
+              >
+                {r.codigoVisible}
+              </LinkNext>
+            </Td>
+            <Td>
+              <span className="block">{r.descripcion}</span>
+              <span className="text-sm text-fg-muted">{ETIQUETA_TIPO[r.tipo] ?? r.tipo}</span>
+              <span className="block text-sm text-fg-muted xl:hidden">
+                {fechaDe(r)} · {revisaDe(r)}
+              </span>
+              {r.estado === "devuelta" && r.motivoDecision ? (
+                <span className="mt-1 block text-sm text-warning-fg">Devuelta: {r.motivoDecision}</span>
+              ) : null}
+            </Td>
+            <Td className="text-right tabular-nums">{pesos(r.montoTotal)}</Td>
+            <Td>
+              <Estadotag r={r} />
+            </Td>
+            <Td className="hidden xl:table-cell">{fechaDe(r)}</Td>
+            <Td className="hidden xl:table-cell">{revisaDe(r).replace("Revisa: ", "")}</Td>
+            <Td>
+              <span className="relative">
+                <CorregirRendicion r={r} portal={portal} />
+              </span>
+            </Td>
+          </Tr>
+        ))}
+      </tbody>
+    </Table>
   );
 }

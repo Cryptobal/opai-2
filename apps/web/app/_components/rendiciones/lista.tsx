@@ -1,23 +1,9 @@
 import type { ReactNode } from "react";
 
-import { Badge, Estado, type EstadoPantalla, Table, Td, Th, Tr } from "@opai/ds";
+import { Estado, type EstadoPantalla } from "@opai/ds";
 
-import { LinkNext } from "@/app/_components/link-next";
-
-import { fechaDe, pesos, revisaDe } from "./formato";
-import { CorregirRendicion, TarjetaRendicion } from "./lista-tarjeta";
-import {
-  BASE,
-  ETIQUETA_ESTADO,
-  ETIQUETA_TIPO,
-  type PortalRendicion,
-  type ResumenRendicion,
-  TONO_ESTADO,
-} from "./tipos";
-
-const Estadotag = ({ r }: { r: ResumenRendicion }) => (
-  <Badge tono={TONO_ESTADO[r.estado]}>{ETIQUETA_ESTADO[r.estado]}</Badge>
-);
+import { TablaRendiciones, TarjetaRendicion } from "./lista-tarjeta";
+import { type PortalRendicion, type ResumenRendicion } from "./tipos";
 
 /** «Mis rendiciones»: tarjetas en teléfono y tabla en md+; estados vacío, error y sin permiso del patrón. */
 export function ListaRendiciones({
@@ -53,58 +39,7 @@ export function ListaRendiciones({
         ))}
       </ul>
       <div className="hidden md:block">
-        <Table>
-          <thead>
-            <tr>
-              <Th>Código</Th>
-              <Th>Motivo</Th>
-              <Th className="text-right">Total</Th>
-              <Th>Estado</Th>
-              <Th className="hidden xl:table-cell">Fecha</Th>
-              <Th className="hidden xl:table-cell">Quién revisa</Th>
-              <Th>
-                <span className="sr-only">Acción</span>
-              </Th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((r) => (
-              <Tr key={r.id} className="relative">
-                <Td>
-                  <LinkNext
-                    href={`${BASE[portal]}/${r.id}`}
-                    className="font-medium text-fg after:absolute after:inset-0 hover:underline"
-                  >
-                    {r.codigoVisible}
-                  </LinkNext>
-                </Td>
-                <Td>
-                  <span className="block">{r.descripcion}</span>
-                  <span className="text-sm text-fg-muted">{ETIQUETA_TIPO[r.tipo] ?? r.tipo}</span>
-                  <span className="block text-sm text-fg-muted xl:hidden">
-                    {fechaDe(r)} · {revisaDe(r)}
-                  </span>
-                  {r.estado === "devuelta" && r.motivoDecision ? (
-                    <span className="mt-1 block text-sm text-warning-fg">
-                      Devuelta: {r.motivoDecision}
-                    </span>
-                  ) : null}
-                </Td>
-                <Td className="text-right tabular-nums">{pesos(r.montoTotal)}</Td>
-                <Td>
-                  <Estadotag r={r} />
-                </Td>
-                <Td className="hidden xl:table-cell">{fechaDe(r)}</Td>
-                <Td className="hidden xl:table-cell">{revisaDe(r).replace("Revisa: ", "")}</Td>
-                <Td>
-                  <span className="relative">
-                    <CorregirRendicion r={r} portal={portal} />
-                  </span>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
+        <TablaRendiciones items={items} portal={portal} />
       </div>
       {pie}
     </Estado>

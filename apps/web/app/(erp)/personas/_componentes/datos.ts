@@ -1,13 +1,10 @@
-import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+import { consultaListaCursor, itemsPaginaDe } from "@/lib/lista-cursor";
 
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
-import type { Cargo, Pagina, PersonaDetalle, PersonaFila } from "@/lib/tipos-maestros";
-import type { PuestoDeCargo, SueldoEfectivo, Vinculo } from "@/lib/tipos-sueldo";
-
-export { POR_PAGINA, anteriores } from "@/app/_components/maestros/paginacion-cursor";
+import type { Pagina, PersonaDetalle, PersonaFila } from "@/lib/tipos-maestros";
 
 type PaginaPersonas = Pagina<PersonaFila> & {
   total: number;
@@ -21,26 +18,17 @@ type PaginaPersonas = Pagina<PersonaFila> & {
  */
 export async function cargarPersonas(p: Parametros) {
   const r = await ejecutarComoUsuario<PaginaPersonas>("erp", "core.personas.list", {
-    limite: POR_PAGINA,
+    ...consultaListaCursor(p),
     incluirFiltros: true,
     ...(p["q"] ? { q: p["q"] } : {}),
     ...(p["cargo"] ? { cargoId: p["cargo"] } : {}),
     ...(p["estado"] ? { estado: p["estado"] } : {}),
     ...(p["anexo"] === "borrador" ? { anexo: "borrador" } : {}),
-    ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
   });
   return {
-    state: estadoPantalla(r),
-    items: r.ok ? r.data.items : [],
-    siguiente: r.ok ? r.data.siguiente : null,
-    total: r.ok ? r.data.total : null,
+    ...itemsPaginaDe(r),
     cargos: r.ok ? (r.data.cargos ?? []).map((c) => ({ valor: c.id, etiqueta: c.nombre })) : [],
   };
-}
-
-export async function cargarCargos(incluirInactivos = false) {
-  const r = await ejecutarComoUsuario<Cargo[]>("erp", "core.cargos.list", { incluirInactivos });
-  return r.ok ? r.data : [];
 }
 
 export async function cargarPersona(id: string) {
@@ -49,30 +37,4 @@ export async function cargarPersona(id: string) {
   });
   requerirEncontrado(r);
   return { state: estadoPantalla(r), persona: r.ok ? r.data : null };
-}
-
-/** Vínculos (vigente e historial) y sueldo efectivo concepto a concepto, con el puesto elegido. */
-export async function cargarLaboral(persona: PersonaDetalle, puestoId?: string, fecha?: string, instalacionId?: string) {
-  const cargoId = persona.vinculoVigente?.cargoId;
-  const [v, s, puestos] = await Promise.all([
-    ejecutarComoUsuario<Vinculo[]>("erp", "core.vinculos.list", { personaId: persona.id }),
-    ejecutarComoUsuario<SueldoEfectivo>("erp", "core.estructuras.efectiva", {
-      personaId: persona.id,
-      ...(puestoId ? { puestoId } : {}),
-      ...(fecha ? { fecha } : {}),
-      ...(instalacionId ? { instalacionId } : {}),
-    }),
-    cargoId
-      ? ejecutarComoUsuario<PuestoDeCargo[]>("erp", "core.puestos.list", {
-          cargoId,
-          soloActivos: true,
-        })
-      : Promise.resolve(null),
-  ]);
-  return {
-    vinculos: v.ok ? v.data : [],
-    sueldo: s.ok ? s.data : null,
-    sueldoBloqueado: !s.ok && s.error.code === "FORBIDDEN",
-    puestos: puestos?.ok ? puestos.data : [],
-  };
 }

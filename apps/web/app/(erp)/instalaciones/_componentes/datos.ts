@@ -1,4 +1,4 @@
-import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+import { consultaListaCursor, itemsPaginaDe } from "@/lib/lista-cursor";
 
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
@@ -10,19 +10,16 @@ import type { CuentaFila, InstalacionDetalle, InstalacionFila, Pagina } from "@/
 export async function cargarInstalaciones(p: Parametros) {
   const [r, cuentas] = await Promise.all([
     ejecutarComoUsuario<Pagina<InstalacionFila>>("erp", "core.instalaciones.list", {
-      limite: POR_PAGINA,
+      ...consultaListaCursor(p),
       ...(p["q"] ? { q: p["q"] } : {}),
       ...(p["cuenta"] ? { cuentaId: p["cuenta"] } : {}),
       ...(p["estado"] ? { estado: p["estado"] } : {}),
       ...(p["region"] ? { region: p["region"] } : {}),
-      ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
     }),
     ejecutarComoUsuario<Pagina<CuentaFila>>("erp", "core.cuentas.list", { limite: 100 }),
   ]);
   return {
-    state: estadoPantalla(r),
-    items: r.ok ? r.data.items : [],
-    siguiente: r.ok ? r.data.siguiente : null,
+    ...itemsPaginaDe(r),
     cuentas: cuentas.ok ? cuentas.data.items.map((c) => ({ valor: c.id, etiqueta: c.nombre })) : [],
   };
 }

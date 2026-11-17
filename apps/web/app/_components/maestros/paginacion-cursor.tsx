@@ -1,12 +1,10 @@
 import { cn, estilosBoton } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { POR_PAGINA } from "@/lib/lista-cursor";
 import type { Parametros } from "@/lib/parametros";
 
-export const POR_PAGINA = 50;
-
-/** Cursores ya recorridos (`?prev=a,b`) para volver con «Anterior» en una paginación por cursor. */
-export const anteriores = (p: Parametros) => (p["prev"] ? p["prev"].split(",") : []);
+const anteriores = (p: Parametros) => (p["prev"] ? p["prev"].split(",") : []);
 
 function con(p: Parametros, cambios: Record<string, string | null>) {
   const q = new URLSearchParams();

@@ -1,7 +1,3 @@
-import { Cabecera, Forbidden } from "@opai/ds";
-
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-import { PaginacionCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { CargaFallida } from "@/lib/carga";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -9,9 +5,8 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { identidadActual } from "@/lib/servidor";
 
 import { cargarAdministrador, cargarContadoresPestanas, cargarMias } from "./datos";
-import { ListaRendiciones } from "./lista";
-import { PestanasRendiciones } from "./pestanas";
 import { BASE, PESTANAS, type PestanaId, type PortalRendicion } from "./tipos";
+import { VistaMisRendiciones } from "./vista-mis-rendiciones";
 
 /** «Mis rendiciones»: una consulta (`rendiciones.listar`), pestañas por ruta con contador. */
 export function PaginaMisRendiciones({
@@ -33,7 +28,11 @@ export function PaginaMisRendiciones({
       cargar={async () => {
         const i = portal === "erp" ? await identidadActual() : null;
         const puede = i ? puedeDeIdentidad(i) : () => false;
-        const accesos = { aprobar: puede("rendiciones:aprobar"), pagar: puede("rendiciones:pagar"), reporte: puede("rendiciones:ver_todas") };
+        const accesos = {
+          aprobar: puede("rendiciones:aprobar"),
+          pagar: puede("rendiciones:pagar"),
+          reporte: puede("rendiciones:ver_todas"),
+        };
         const p = searchParams ? await leerParametros(searchParams) : {};
         try {
           const [pagina, contadores] = await Promise.all([
@@ -54,78 +53,7 @@ export function PaginaMisRendiciones({
         }
       }}
     >
-      {({ pagina, contadores, p, empresa, admin, accesos }) => {
-        if (empresa)
-          return (
-            <Forbidden
-              titulo="No tienes acceso a Rendiciones"
-              descripcion={
-                admin
-                  ? `Necesitas el permiso Rendir. Pídele acceso a ${admin}, administrador de ${empresa}.`
-                  : `Necesitas el permiso Rendir. Pídele acceso al administrador de ${empresa}.`
-              }
-            />
-          );
-        const items = pagina.rendiciones;
-        const todas = contadores;
-        const nueva = (
-          <>
-            {accesos.aprobar ? <EnlaceBoton href="/rendiciones/bandeja" variante="secondary">Bandeja del aprobador</EnlaceBoton> : null}
-            {accesos.pagar ? <EnlaceBoton href="/rendiciones/lotes" variante="secondary">Lotes de pago</EnlaceBoton> : null}
-            {accesos.reporte ? <EnlaceBoton href="/rendiciones/reporte" variante="secondary">Reporte</EnlaceBoton> : null}
-            <EnlaceBoton href={`${base}/nueva`} className="hidden md:inline-flex">
-              Nueva rendición
-            </EnlaceBoton>
-          </>
-        );
-        // Teléfono: botón flotante abajo a la derecha, como en el diseño aprobado.
-        const flotante = (
-          <EnlaceBoton
-            href={`${base}/nueva`}
-            className="fixed right-4 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 shadow-overlay md:hidden"
-          >
-            Nueva rendición
-          </EnlaceBoton>
-        );
-        return (
-          <div className="flex flex-col gap-4 pb-24 md:pb-0">
-            <Cabecera titulo="Mis rendiciones" acciones={nueva} accionesSiempre />
-            <PestanasRendiciones portal={portal} activa={pestana} rendiciones={todas} />
-            <ListaRendiciones
-              state="ready"
-              items={items}
-              portal={portal}
-              pie={
-                <div className="flex justify-end border-t border-border px-4 py-3">
-                  <PaginacionCursor
-                    p={p}
-                    mostrados={items.length}
-                    siguiente={pagina.siguiente}
-                    total={null}
-                  />
-                </div>
-              }
-              textos={
-                contadores.length === 0
-                  ? {
-                      titulo: "Aún no has rendido gastos",
-                      descripcion: "Saca una foto de la boleta y envíala a aprobación.",
-                      accion: (
-                        <EnlaceBoton href={`${base}/nueva`} className="md:hidden">
-                          Nueva rendición
-                        </EnlaceBoton>
-                      ),
-                    }
-                  : {
-                      titulo: `No tienes rendiciones ${def.etiqueta.toLowerCase()}`,
-                      descripcion: "Aquí aparecerán cuando cambien de estado.",
-                    }
-              }
-            />
-            {todas.length > 0 ? flotante : null}
-          </div>
-        );
-      }}
+      {(props) => <VistaMisRendiciones portal={portal} pestana={pestana} {...props} />}
     </PaginaPortal>
   );
 }

@@ -1,9 +1,9 @@
 import type { BadgeProps } from "@opai/ds";
 
-import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+import { consultaListaCursor } from "@/lib/lista-cursor";
 
 import { ejecutarComoUsuario } from "@/lib/servidor";
-import type { Parametros, SearchParams } from "@/lib/parametros";
+import type { Parametros } from "@/lib/parametros";
 
 export type Ticket = {
   id: string;
@@ -80,21 +80,15 @@ export const TONO_PRIORIDAD: Record<string, NonNullable<BadgeProps["tono"]>> = {
   p4: "neutro",
 };
 
-export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
-  const p = await sp;
-  return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
-}
-
 /** Lista paginada por cursor (`siguiente`). */
 export async function cargarTickets(p: Parametros) {
   return ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
     "erp",
     "tickets.tickets.listar",
     {
-      limite: POR_PAGINA,
+      ...consultaListaCursor(p),
       vista: p["vista"] ?? "mios",
       ...(p["estado"] ? { estado: p["estado"] } : {}),
-      ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
     },
   );
 }

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+import { consultaListaCursor, POR_PAGINA } from "@/lib/lista-cursor";
 
 import { exigirDatos } from "@/lib/carga";
 import type { Parametros } from "@/lib/parametros";
@@ -23,9 +23,8 @@ export async function cargarMias(
 ): Promise<PaginaMias> {
   const r = await ejecutarComoUsuario<PaginaMias>(portal, "rendiciones.rendiciones.listar", {
     alcance: "propias",
-    limite: POR_PAGINA,
+    ...consultaListaCursor(p),
     ...(estado ? { estado } : {}),
-    ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
   });
   return exigirDatos(r);
 }

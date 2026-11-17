@@ -16,8 +16,8 @@ const raiz = path.resolve(import.meta.dirname, "..");
 describe("listas de pantalla con cursor (CAR-624)", () => {
   it.each(PANTALLAS)("%s usa limite y expone siguiente en la consulta", (rel) => {
     const texto = readFileSync(path.join(raiz, rel), "utf8");
-    expect(texto).toMatch(/limite:\s*POR_PAGINA/);
+    expect(texto).toMatch(/consultaListaCursor|limite:\s*POR_PAGINA/);
     expect(texto).toMatch(/cursor/);
-    expect(texto).toMatch(/siguiente/);
+    expect(texto).toMatch(/siguiente|itemsPaginaDe/);
   });
 });
