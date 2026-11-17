@@ -56,8 +56,6 @@ export const RESULTADO: Record<NonNullable<ActividadVista["resultado"]>, string>
   volver_a_llamar: "pidió volver a llamar",
 };
 
-export const PRIORIDAD: Record<string, string> = { alta: "alta", media: "media", baja: "baja" };
-
 export type ItemOrdenado = ItemTimeline & { orden: string };
 
 export const FILTROS_ACTIVIDAD = [
