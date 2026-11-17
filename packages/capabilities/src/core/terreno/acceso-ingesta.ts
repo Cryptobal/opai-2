@@ -5,6 +5,7 @@ import {
   emitirSalida,
 } from "../../acceso/eventos-acceso";
 import type { Contexto } from "../../types";
+import { registrarIntentosEnLibro } from "./acceso-libro-novedades";
 import { evaluarEntradas } from "./acceso-entradas";
 import { escribirSalidas, validarSalidas } from "./acceso-salidas";
 import type { Equipo, FilaUso, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
@@ -92,6 +93,7 @@ export async function resolverAcceso(
         usos.filter((u) => reg.some((r) => r.id === u.registroId)),
       );
       if (int.length) await tx.intentoDenegado.createMany({ skipDuplicates: true, data: int });
+      await registrarIntentosEnLibro(tx, ctx, equipo, int);
       const salidasEscritas = await escribirSalidas(
         tx,
         ctx,

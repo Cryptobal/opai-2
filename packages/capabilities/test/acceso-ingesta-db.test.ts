@@ -143,6 +143,11 @@ describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-
       (await e.admin.intentoDenegado.findFirstOrThrow({ where: { clave: h.clave } })).motivo,
     ).toBe("bloqueado");
     expect(await e.admin.hechoTerreno.count({ where: { clave: h.clave } })).toBe(1);
+    const libro = await e.admin.libroNovedad.findFirstOrThrow({ where: { idempotencyKey: h.clave } });
+    expect(libro.modulo).toBe("acceso");
+    expect(libro.gravedad).toBe("alta");
+    expect(libro.resumen).toMatch(/Entrada denegada/);
+    expect(libro.resumen).not.toMatch(/Visita/);
   });
 
   it("la lista de una empresa no afecta a la otra (misma persona, huella distinta)", async () => {
