@@ -32,7 +32,7 @@ export const alertasProponer = defineCapability({
     const a = await alertaVisible(ctx, i.id);
     await exigirAgenteHabilitado(ctx, ctx.db, a);
     if (i.severidad && pesoSeveridad(i.severidad) <= pesoSeveridad(a.severidad)) throw reglaDeNegocio("La severidad propuesta no es más baja.");
-    if (i.accion === "bajar_severidad" && senalDe(a.origen)?.fija) throw reglaDeNegocio("Un botón de emergencia es siempre crítico (R5).");
+    if (i.accion === "bajar_severidad" && senalDe(a.origen)?.fija) throw reglaDeNegocio("Un botón de emergencia es siempre crítico.");
     const estadoActual = estadoEfectivo(a, new Date());
     if (i.accion !== "bajar_severidad" && !transicion(estadoActual, i.accion)) throw reglaDeNegocio(`No se puede proponer «${i.accion}» en una alerta «${estadoActual}».`);
     if (dryRun) return { id: a.id };
