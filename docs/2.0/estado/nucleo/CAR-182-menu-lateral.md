@@ -1,6 +1,6 @@
 # CAR-182 · Menú lateral: separación (slice)
 
-- **Rama:** `brief/car-182-menu-lateral`
+- **Rama:** `cursor/car-182-menu-lateral-a488`
 - **Apilado sobre:** `main` (orden y visual CAR-182 ya integrados o en PR previos)
 - **Estado:** En PR
 
@@ -15,5 +15,5 @@
 
 ## Pendiente
 
-- Gates del ruleset en el head del PR (revisión final sin etiqueta `e2e`).
+- Gates del ruleset en el head del PR tras `origin/main` al día (revisión final; etiqueta `e2e` conservada).
 - Integración: modo noche / Carlos (no auto-merge de agente).
