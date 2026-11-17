@@ -1032,6 +1032,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
+| `core.ver_como.iniciar` | Solo personas: «ver como» es una vista de pantalla de quien tiene la sesión (CAR-528); un agente ya lee esos datos con sus propias capacidades. |
+| `core.ver_como.terminar` | Solo personas: cierra la vista «ver como» de quien tiene la sesión (CAR-528). |
 | `core.webhooks.destino_actualizar` | Solo personas: cambiar la dirección de un destino redirige los eventos de la empresa (ADR-032). |
 | `core.webhooks.destino_crear` | Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032). |
 | `core.webhooks.destino_eliminar` | Solo personas: gobierna una integración de la empresa (ADR-032). |
@@ -1131,6 +1133,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | `/configuracion/usuarios` | no | reservada a personas |
+| `core.ver_como.iniciar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
+| `core.ver_como.terminar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
 | `core.webhooks.destino_actualizar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
 | `core.webhooks.destino_crear` | `/configuracion/agentes/eventos` | no | reservada a personas |
 | `core.webhooks.destino_eliminar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
