@@ -5,20 +5,20 @@ import { LinkNext } from "@/app/_components/link-next";
 import {
   BASE,
   PESTANAS,
+  type EstadoRendicion,
   type PestanaId,
   type PortalRendicion,
-  type ResumenRendicion,
 } from "./tipos";
 
-/** Pestañas por ruta de «Mis rendiciones» (server-first, ADR-037), con su contador. */
+/** Pestañas por ruta de «Mis rendiciones» (server-first, ADR-037), con contador del servidor. */
 export function PestanasRendiciones({
   portal,
   activa,
-  rendiciones,
+  contadores,
 }: {
   portal: PortalRendicion;
   activa: PestanaId;
-  rendiciones: readonly ResumenRendicion[];
+  contadores: Partial<Record<EstadoRendicion, number>>;
 }) {
   return (
     <Tabs
@@ -28,7 +28,7 @@ export function PestanasRendiciones({
         id: p.id,
         etiqueta: p.etiqueta,
         href: `${BASE[portal]}${p.segmento}`,
-        contador: rendiciones.filter((r) => r.estado === p.estado).length,
+        contador: contadores[p.estado] ?? 0,
       }))}
     />
   );
