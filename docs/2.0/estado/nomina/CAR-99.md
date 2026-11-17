@@ -79,4 +79,10 @@
 - Capacidades MCP: `nomina.midt.listar`, `nomina.midt.exportar_pendientes`, `nomina.midt.datos` y `nomina.midt.registrar` (marca con comprobante; lecturas auditadas).
 - Pantalla `/remuneraciones/cumplimiento-dt/contratos` (diseño 07): segmento Por registrar / Registrados, descarga CSV, datos por fila y diálogo Marcar registrado. Navegación «Cumplimiento DT». Sin API Mi DT.
 
-- **Pendiente:** Finiquitos Mi DT (diseño 07 fin), F29, pago banco y entitlements del complemento.
+- **Pendiente:** F29, pago banco y entitlements del complemento. Cálculo completo del finiquito (diseño 08) sigue fuera de alcance.
+
+### Finiquitos Mi DT (PR apilado sobre #1004)
+
+- Tipo `finiquito` en movimientos Mi DT (un pendiente por vínculo terminado, distinto de la baja).
+- Pantalla `/remuneraciones/cumplimiento-dt/finiquitos` y enlace «Finiquitos Mi DT» en el menú.
+- Sin migración (el tipo ya era texto libre en `registros_mi_dt`).

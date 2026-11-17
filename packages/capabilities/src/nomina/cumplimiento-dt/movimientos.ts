@@ -114,6 +114,23 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
         comprobanteDocumentoId: regBaja?.documentoId ?? null,
         ...base,
       });
+
+      const regFin = registros.get(`finiquito:${v.id}`);
+      const plazoFin = etiquetaPlazoMiDt(hechoBaja, hoyCivil, null);
+      items.push({
+        clave: `finiquito:${v.id}`,
+        movimientoTipo: "finiquito",
+        referenciaId: v.id,
+        hechoEn: hechoBaja,
+        hechoTexto: `Finiquito tras término el ${formatearFecha(hechoBaja)}`,
+        plazoLimite: plazoMiDtHasta(hechoBaja),
+        plazoEtiqueta: regFin ? `Registrado el ${formatearFecha(dia(regFin.registradoEn))}` : plazoFin.etiqueta,
+        plazoTono: regFin ? "success" : plazoFin.tono,
+        registrado: !!regFin,
+        registradoEn: regFin ? dia(regFin.registradoEn) : null,
+        comprobanteDocumentoId: regFin?.documentoId ?? null,
+        ...base,
+      });
     }
   }
 

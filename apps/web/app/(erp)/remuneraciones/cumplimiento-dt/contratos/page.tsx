@@ -30,12 +30,19 @@ export default function ContratosMiDt() {
       {(d) => (
         <Estado state={estadoPantalla(d.r)} variante="lista">
           {d.r.ok ? (
-            <ListaCumplimientoDt
-              items={d.r.data.items}
-              pendientes={d.r.data.pendientes}
-              gestiona={d.permisos.cumplimientoDt}
-              tenantId={d.tenantId}
-            />
+            (() => {
+              const items = d.r.data.items.filter((m) => m.movimientoTipo !== "finiquito");
+              const pendientes = items.filter((m) => !m.registrado).length;
+              return (
+                <ListaCumplimientoDt
+                  items={items}
+                  pendientes={pendientes}
+                  gestiona={d.permisos.cumplimientoDt}
+                  tenantId={d.tenantId}
+                  variante="contratos"
+                />
+              );
+            })()
           ) : null}
         </Estado>
       )}

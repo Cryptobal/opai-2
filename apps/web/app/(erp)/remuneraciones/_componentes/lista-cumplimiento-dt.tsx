@@ -10,7 +10,7 @@ import { MarcarRegistroMiDt } from "./marcar-registro-midt";
 
 export type MovimientoMiDt = {
   clave: string;
-  movimientoTipo: "alta" | "baja" | "anexo";
+  movimientoTipo: "alta" | "baja" | "anexo" | "finiquito";
   referenciaId: string;
   personaNombre: string;
   rut: string;
@@ -20,7 +20,7 @@ export type MovimientoMiDt = {
   registrado: boolean;
 };
 
-const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo" } as const;
+const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo", finiquito: "Finiquito" } as const;
 
 function descargar(nombre: string, contenido: string) {
   const url = URL.createObjectURL(new Blob([contenido], { type: "text/csv;charset=utf-8" }));
@@ -35,11 +35,13 @@ export function ListaCumplimientoDt({
   pendientes,
   gestiona,
   tenantId,
+  variante = "contratos",
 }: {
   items: MovimientoMiDt[];
   pendientes: number;
   gestiona: boolean;
   tenantId: string;
+  variante?: "contratos" | "finiquitos";
 }) {
   const { ejecutar, pendiente } = useCapacidad("erp");
   const [seg, setSeg] = useState<"pen" | "reg">("pen");
@@ -65,8 +67,12 @@ export function ListaCumplimientoDt({
   if (items.length === 0)
     return (
       <Empty
-        titulo="No hay movimientos por registrar"
-        descripcion="Cuando contrates, desvincules o firmes un anexo, aparecerá aquí con su plazo."
+        titulo={variante === "finiquitos" ? "No hay finiquitos en curso" : "No hay movimientos por registrar"}
+        descripcion={
+          variante === "finiquitos"
+            ? "Cuando registres el término de un vínculo, el finiquito a subir a Mi DT aparecerá aquí con su plazo."
+            : "Cuando contrates, desvincules o firmes un anexo, aparecerá aquí con su plazo."
+        }
       />
     );
 

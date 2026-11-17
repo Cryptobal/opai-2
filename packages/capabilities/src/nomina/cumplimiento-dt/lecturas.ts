@@ -19,7 +19,7 @@ async function movimientoDe(ctx: Parameters<typeof movimientosMiDt>[0], movimien
 export const cumplimientoDtMovimientosListar = defineCapability({
   id: "nomina.midt.listar",
   descripcion:
-    "Lista los movimientos de contratos para Mi DT: altas al iniciar un vínculo, bajas al terminarlo y anexos aprobados, con plazo de 15 días y si ya quedaron registrados con comprobante.",
+    "Lista los movimientos para Mi DT: altas, bajas, anexos aprobados y finiquitos tras el término del vínculo, con plazo de 15 días y si ya quedaron registrados con comprobante.",
   permiso: PERMISO_READ,
   input: z.object({}),
   output: z.object({ pendientes: z.number().int(), registrados: z.number().int(), items: z.array(movimientoSchema) }),

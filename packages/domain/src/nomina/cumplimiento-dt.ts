@@ -3,13 +3,14 @@ import { sumarDias } from "../calendario/fechas";
 /** Plazo legal para registrar contratos y anexos en Mi DT (Ley 21.327). */
 export const PLAZO_MI_DT_DIAS = 15;
 
-export const TIPOS_MOVIMIENTO_MI_DT = ["alta", "baja", "anexo"] as const;
+export const TIPOS_MOVIMIENTO_MI_DT = ["alta", "baja", "anexo", "finiquito"] as const;
 export type TipoMovimientoMiDt = (typeof TIPOS_MOVIMIENTO_MI_DT)[number];
 
 export const ETIQUETA_MOVIMIENTO_MI_DT: Record<TipoMovimientoMiDt, string> = {
   alta: "Alta",
   baja: "Baja",
   anexo: "Anexo",
+  finiquito: "Finiquito",
 };
 
 /** Fecha límite civil (día 15 desde el hecho, inclusive del día 0). */

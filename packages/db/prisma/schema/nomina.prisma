@@ -244,7 +244,7 @@ model NominaLiquidacion {
 model NominaRegistroMiDt {
   id            String   @id @default(uuid(7)) @db.Uuid
   tenantId      String   @map("tenant_id") @db.Uuid
-  /// "alta" | "baja" | "anexo".
+  /// "alta" | "baja" | "anexo" | "finiquito".
   movimientoTipo String  @map("movimiento_tipo")
   /// Id del vínculo (alta/baja) o del anexo aprobado.
   referenciaId  String   @map("referencia_id") @db.Uuid

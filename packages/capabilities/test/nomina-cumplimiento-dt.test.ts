@@ -15,6 +15,7 @@ import { semillaTenant } from "./semilla";
 
 const P1 = "0192f3a0-0000-7000-8000-00000000f601";
 const V1 = "0192f3a0-0000-7000-8000-00000000f602";
+const V2 = "0192f3a0-0000-7000-8000-00000000f603";
 const f = (s: string) => new Date(`${s}T00:00:00.000Z`);
 
 const semilla = () => ({
@@ -22,6 +23,17 @@ const semilla = () => ({
   persona: [{ id: P1, tenantId: T, nombres: "Ana", apellidos: "Prueba", rut: "12345678-5", estado: "activa" }],
   vinculoLaboral: [
     { id: V1, tenantId: T, personaId: P1, cargoId: "c", tipo: "indefinido", inicio: f("2026-10-01"), termino: null, estado: "vigente" },
+    {
+      id: V2,
+      tenantId: T,
+      personaId: P1,
+      cargoId: "c",
+      tipo: "indefinido",
+      inicio: f("2024-01-01"),
+      termino: f("2026-09-15"),
+      estado: "terminado",
+      motivoTermino: "necesidades de la empresa",
+    },
   ],
   anexoContrato: [],
 });
@@ -45,6 +57,16 @@ describe("nomina.cumplimiento_dt", () => {
     if (!r.ok) return;
     expect(r.data.pendientes).toBeGreaterThanOrEqual(1);
     expect(r.data.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
+  });
+
+  it("lista finiquito pendiente tras término de vínculo", async () => {
+    const { ctx } = como();
+    const r = await executeCapability(ctx, "nomina.midt.listar", {});
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const fin = r.data.items.find((m) => m.movimientoTipo === "finiquito" && m.referenciaId === V2);
+    expect(fin?.registrado).toBe(false);
+    expect(fin?.hechoEn).toBe("2026-09-15");
   });
 
   it("exporta CSV de pendientes", async () => {

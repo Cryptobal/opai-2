@@ -14,7 +14,7 @@ import { movimientosMiDt } from "./movimientos";
 export const cumplimientoDtMovimientosRegistrar = defineCapability({
   id: "nomina.midt.registrar",
   descripcion:
-    "Marca un alta, baja o anexo como registrado en Mi DT con la fecha de registro y el comprobante (PDF o imagen). OPAI no envía nada al portal.",
+    "Marca un alta, baja, anexo o finiquito como registrado en Mi DT con la fecha de registro y el comprobante (PDF o imagen). OPAI no envía nada al portal.",
   permiso: PERMISO_OBLIGACIONES,
   input: z.object({ movimientoTipo: z.enum(TIPOS_MOVIMIENTO_MI_DT), referenciaId: uuidSchema, registradoEn: diaSchema, documentoId: uuidSchema }),
   output: movimientoSchema,
