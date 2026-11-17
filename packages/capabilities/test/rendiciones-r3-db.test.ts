@@ -84,13 +84,13 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R3 (db)", () => {
     const enviar = ok(await como(u.rinde2, "gerente", t.a)("rendiciones.rendiciones.crear", { descripcion: "Pendiente de revisar", centroCosto: "administracion", aprobadorId: u.otroAprueba, items: [{ fecha: "2026-11-03", proveedor: "Papelería ficticia", folio: "P-9", descripcion: "x", monto: 3_000, sinRespaldoMotivo: "Prueba" }] }));
     ok(await como(u.rinde2, "gerente", t.a)("rendiciones.rendiciones.enviar", { id: String(enviar["id"]) }));
     const mia = ok(await como(u.otroAprueba, "viewer", t.a)("rendiciones.bandeja.listar"));
-    expect((mia["rendiciones"] as unknown[]).length).toBe(1);
+    expect((mia["items"] as unknown[]).length).toBe(1);
     expect(mia).toMatchObject({ porRevisar: 1, montoPorRevisar: 3_000 });
     const otro = ok(await como(u.aprueba, "viewer", t.a)("rendiciones.bandeja.listar"));
-    expect((otro["rendiciones"] as unknown[]).length).toBe(0);
+    expect((otro["items"] as unknown[]).length).toBe(0);
     expect(otro["aprobadasSinPagar"]).toBe(4);
     const filtrada = ok(await como(u.otroAprueba, "viewer", t.a)("rendiciones.bandeja.listar", { solicitanteId: u.rinde, desde: "2020-01-01", hasta: "2030-01-01" }));
-    expect((filtrada["rendiciones"] as unknown[]).length).toBe(0);
+    expect((filtrada["items"] as unknown[]).length).toBe(0);
     expect(await como(u.viewer, "viewer", t.a)("rendiciones.bandeja.listar")).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(await como(u.otroAprueba, "viewer", t.a)("rendiciones.bandeja.obtener", { id: rend["r1"] })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await como(u.otroAprueba, "viewer", t.a)("rendiciones.bandeja.obtener", { id: String(enviar["id"]) })).toMatchObject({ ok: true });
@@ -185,7 +185,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R3 (db)", () => {
 
   it("otra empresa no ve ni toca los lotes", async () => {
     const b = como(u.duenoB, "owner", t.b);
-    expect((ok(await b("rendiciones.lotes.listar"))["lotes"] as unknown[]).length).toBe(0);
+    expect((ok(await b("rendiciones.lotes.listar"))["items"] as unknown[]).length).toBe(0);
     expect(await b("rendiciones.lotes.obtener", { id: rend["lote"] })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await b("rendiciones.lotes.anular", { id: rend["lote"], motivo: "intento" })).toMatchObject({ ok: false });
   });
