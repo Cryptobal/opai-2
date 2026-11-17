@@ -17,7 +17,7 @@ export type PantallaPortalPatron = {
  * Fuente compartida con `docs/2.0/inventario-portales-lista-ficha.md`.
  * Quitar `pendiente` al integrar el PR del portal correspondiente.
  */
-export const PANTALLAS_PORTAL_PATRON: readonly PantallaPortalPatron[] = [
+const PANTALLAS_PORTAL_PATRON: readonly PantallaPortalPatron[] = [
   {
     portal: "supervisor",
     ruta: "/supervisor/rendiciones",
