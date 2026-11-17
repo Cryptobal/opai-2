@@ -31,6 +31,21 @@ Roles hechos de permisos que **se suman**, varios roles por persona, roles asign
 | P-5 | **El acceso no sigue al cargo.** El usuario (membresía) y la persona (ficha) se vinculan a mano (`core.personas.vincular_usuario`); cambiar el cargo no cambia el rol. | `packages/capabilities/src/core/maestros/` | Media | Decisión de producto (ver README) |
 | P-6 | **No hay «por qué puede o no puede».** Existen `core.permisos.catalogo`, `core.excepciones.list` y `core.me` (los propios); ninguna explica los permisos efectivos de otro miembro. | `packages/capabilities/src/core/permisos/` | Media | Ajustar: `core.permisos.explicar` con pantalla en la ficha del miembro |
 
+## Estado al 16-nov-2026
+
+Repaso semanal contra `main` en `886e262` (CAR-586). Dos de las tres brechas altas quedaron cerradas y la tercera casi: falta un hueco al editar llaves y una tarea operativa, revocar la llave `*` de Gard. Quedan las tres medias.
+
+| # | Estado | Qué cambió y dónde se comprueba |
+|---|---|---|
+| P-1 | Cerrada | CAR-350 (#656) y CAR-387. Gerente, lector y supervisor salen de una lista explícita (`packages/domain/src/permisos-patrones.ts`, `permisos-base*.ts`); `apps/web/test/permisos-base.test.ts` falla si un permiso del catálogo queda sin clasificar. Solo owner y admin conservan `*` |
+| P-2 | Cerrada | CAR-359. Varios roles por miembro y roles a grupos: `RolMiembro` y `RolGrupo` en `schema/roles-asignados.prisma`; `core/permisos/roles-adicionales.ts` y `core/grupos/roles.ts`. Nadie asigna un rol que no podría dar |
+| P-3 | Parcial | CAR-351. Toda llave nueva vence dentro del máximo de la empresa (`apikey-politica.ts`, ajuste `apikeys_vida_maxima_dias`), heredar todos los permisos dejó de ser el valor por defecto y el scope `*` en producción solo lo crea un owner. **Hueco nuevo (P-3b, alta, [CAR-588](https://linear.app/carlos-irigoyen/issue/CAR-588)):** la regla solo rige al crear; `core.apikeys.update` (`core/agentes/claves.ts`) acepta `expiraEn: null` o una fecha sin tope, así que el vencimiento se puede quitar después. Además sigue pendiente revocar la llave `*` de Gard (ADR-051): toca al tenant Gard y lo decide Carlos |
+| P-4 | Abierta | Sin cambios |
+| P-5 | Abierta | Sin cambios; decisión de producto |
+| P-6 | Abierta | Sin cambios: no existe `core.permisos.explicar` |
+
+**Nuevo en la semana, sin brecha.** «Ver como» (CAR-528, PR #910, #911 y #913, abiertos al 16-nov) sigue el patrón de Stripe e Intercom: permiso propio (`core:ver_como.iniciar`, sin rol base), solo lectura bloqueada en el servidor, vencimiento a los 30 minutos, inicio y fin en la auditoría de seguridad, y no se puede ver como alguien de un rol superior. Se revisó contra esta capa y no se encontró brecha.
+
 ## Qué se mantiene tal cual
 
 Permisos finos por capacidad, roles a medida, excepciones con motivo, la regla de no conceder más de lo propio, auditoría encadenada, separación de plataforma y lecturas sensibles auditadas. Están al nivel del referente.
