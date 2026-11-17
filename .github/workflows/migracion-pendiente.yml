@@ -23,7 +23,8 @@ concurrency:
 
 jobs:
   migracion-pendiente:
-    if: github.event.pull_request.draft == false
+    # merge_group no trae pull_request; misma condición que el gate en ci.yml (CAR-647).
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     name: migración pendiente
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 5
