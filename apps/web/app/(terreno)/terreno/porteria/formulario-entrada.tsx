@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Alerta, Button, Campo, Select } from "@opai/ds";
+import { AVISO_PRIVACIDAD_PORTERIA } from "@opai/domain/acceso-config";
 import {
   camposDelTipo,
   CONFIG_ACCESO_DEFECTO,
@@ -26,10 +27,14 @@ export function FormularioEntrada({
   personaId,
   config,
   puntoId,
+  urlPrivacidad,
+  avisoLinea,
 }: {
   personaId: string;
-  config: ConfigAcceso | null;
-  puntoId: string | null;
+  config?: ConfigAcceso | null;
+  puntoId?: string | null;
+  urlPrivacidad?: string;
+  avisoLinea?: string;
 }) {
   const c = config ?? CONFIG_ACCESO_DEFECTO;
   const [tipo, setTipo] = useState<string>(c.tipos[0] ?? "visita");
@@ -121,6 +126,17 @@ export function FormularioEntrada({
           {error}
         </Alerta>
       ) : null}
+      <p className="t-caption text-fg-muted">
+        {avisoLinea ?? AVISO_PRIVACIDAD_PORTERIA.split("·")[0]?.trim()}
+        {urlPrivacidad ? (
+          <>
+            {" · "}
+            <a href={urlPrivacidad} className="underline" target="_blank" rel="noreferrer">
+              Más información
+            </a>
+          </>
+        ) : null}
+      </p>
       <Button onClick={() => void registrar()} disabled={estado === "guardando"}>
         {estado === "guardando" ? "Guardando…" : "Registrar entrada"}
       </Button>

@@ -242,6 +242,19 @@ model PuntoAcceso {
 
 /// Fondo y mensaje de bienvenida de la portería de una instalación (CAR-553). Sin fila, la portería usa la marca
 /// de la empresa. El fondo es un documento de imagen de la instalación (FK en el SQL).
+/// Hasta cuándo ya se reportaron los registros de una instalación (R27): evita duplicar envíos.
+model ReporteAccesoCursor {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  ultimoHasta   DateTime @map("ultimo_hasta") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, instalacionId], map: "reportes_cursor_instalacion_key")
+  @@map("reportes_cursor")
+  @@schema("acceso")
+}
+
 model AparienciaAcceso {
   id               String   @id @default(uuid(7)) @db.Uuid
   tenantId         String   @map("tenant_id") @db.Uuid

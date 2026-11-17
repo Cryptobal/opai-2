@@ -61,6 +61,6 @@ export const manifest = defineModule({
       control: "switch",
     }),
   }),
-  eventos: [],
+  eventos: [{ id: "acceso.reporte", descripcion: "Se envió el reporte periódico de accesos de una instalación." }],
   capacidades: capacidadesAcceso,
 });

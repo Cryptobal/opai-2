@@ -169,6 +169,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.quitar` | `acceso_listas_quitar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.privacidad.cartel` | `acceso_privacidad_cartel` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.list` | `acceso_puntos_list` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.set` | `acceso_puntos_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.anular` | `acceso_registros_anular` | existe |
@@ -176,6 +177,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.get` | `acceso_registros_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.salida` | `acceso_registros_salida` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.reportes.probar` | `acceso_reportes_probar` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.cancelar` | `acceso_prerregistros_cancelar` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.crear` | `acceso_prerregistros_crear` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.get` | `acceso_prerregistros_get` | existe |
@@ -902,6 +904,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion` | Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial. |
+| `app/(erp)/accesos/_componentes/config/cartel-accion.ts#cartelPrivacidad` | Prepara el cartel de privacidad con acceso.privacidad.cartel y el QR de la política pública (herramienta MCP existente). |
 | `app/api/agente/route.ts` | Agente interno (ADR-049): agente.turno.preparar/agente.plan.confirmar (solo personas, con motivo); un agente externo usa el MCP. |
 | `app/api/auth/[...all]/route.ts` | Better Auth (sesión, OAuth y verificación de correo). |
 | `app/api/cron/programador/route.ts` | Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029). |

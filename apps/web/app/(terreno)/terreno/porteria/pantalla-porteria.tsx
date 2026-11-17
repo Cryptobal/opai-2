@@ -77,7 +77,11 @@ export function PantallaPorteria() {
       ) : null}
       {muestraPorteria ? (
         <>
-          <FormularioEntrada personaId={persona.id} />
+          <FormularioEntrada
+            personaId={persona.id}
+            urlPrivacidad={sitio?.urlPrivacidad}
+            avisoLinea={sitio?.avisoLinea}
+          />
           {sitio ? <ListaEnSitio items={sitio.items} personaId={persona.id} /> : null}
           <ExportarEvacuacion copia={copia} enLinea={enLinea && !sinRed} />
         </>

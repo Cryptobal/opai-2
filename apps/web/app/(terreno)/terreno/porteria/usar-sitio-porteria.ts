@@ -11,7 +11,12 @@ import { instantanea, suscribir } from "@/lib/terreno/estado";
 
 import type { EnSitio } from "./lista-en-sitio";
 
-type Sitio = { activo: boolean; items: EnSitio[] };
+type Sitio = {
+  activo: boolean;
+  items: EnSitio[];
+  urlPrivacidad?: string;
+  avisoLinea?: string;
+};
 
 /** Carga «en sitio» del servidor, copia cifrada offline (R26) y estado de conexión. */
 export function usarSitioPorteria() {

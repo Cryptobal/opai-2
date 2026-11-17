@@ -35,7 +35,7 @@ export async function SeccionConfigAcceso({ instalacionId }: { instalacionId?: s
             </>
           ) : null}
           <EditorConfig
-            {...(instalacionId ? { instalacionId } : {})}
+            {...(instalacionId ? { instalacionId, puntos: p?.ok ? p.data.items : [] } : {})}
             efectiva={r.data.efectiva}
             personalizada={r.data.personalizada}
           />

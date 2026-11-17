@@ -1,3 +1,4 @@
+import { COMUNICABLES_ACCESO } from "./acceso";
 import { COMUNICABLES_ACTIVIDADES } from "./actividades";
 import { COMUNICABLES_ASISTENCIA } from "./asistencia";
 import { COMUNICABLES_CONTINGENCIA } from "./asistencia-contingencia";
@@ -23,6 +24,7 @@ export type {
 } from "./tipos";
 
 export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
+  ...COMUNICABLES_ACCESO,
   ...COMUNICABLES_USUARIOS,
   ...COMUNICABLES_DOCUMENTOS,
   ...COMUNICABLES_SISTEMA,

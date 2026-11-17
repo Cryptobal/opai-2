@@ -8,11 +8,15 @@ import type { ConfigAcceso } from "@opai/domain/acceso-config";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { CamposConfig } from "./campos-config";
+import { EditorPrivacidad } from "./editor-privacidad";
+import type { Punto } from "./editor-puntos";
+import { EditorReportes } from "./editor-reportes";
 import { ReglasConfig, TiposConfig } from "./reglas-config";
 
 type Props = {
   /** Sin instalación, edita la de la empresa. */
   instalacionId?: string;
+  puntos?: Punto[];
   efectiva: ConfigAcceso;
   personalizada: boolean;
 };
@@ -21,7 +25,7 @@ type Props = {
  * Configuración de acceso (CAR-479, diseño `ConfigAcceso`): la de la empresa en Configuración y, en la ficha, la de
  * la instalación, que hereda la de la empresa hasta que se personaliza y entonces la reemplaza entera.
  */
-export function EditorConfig({ instalacionId, efectiva, personalizada }: Props) {
+export function EditorConfig({ instalacionId, puntos = [], efectiva, personalizada }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [c, setC] = useState(efectiva);
   const [propia, setPropia] = useState(personalizada || !instalacionId);
@@ -61,6 +65,21 @@ export function EditorConfig({ instalacionId, efectiva, personalizada }: Props) 
         onCambiar={(campos) => cambiar({ campos })}
         disabled={pendiente || !propia}
       />
+      <EditorReportes
+        {...(instalacionId ? { instalacionId } : {})}
+        config={c}
+        onCambiar={cambiar}
+        disabled={pendiente || !propia}
+      />
+      {instalacionId ? (
+        <EditorPrivacidad
+          instalacionId={instalacionId}
+          puntos={puntos}
+          config={c}
+          onCambiar={cambiar}
+          disabled={pendiente || !propia}
+        />
+      ) : null}
       {propia ? (
         <div className="flex flex-wrap justify-end gap-2">
           {instalacionId && personalizada ? (

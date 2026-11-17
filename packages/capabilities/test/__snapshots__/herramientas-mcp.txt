@@ -11,6 +11,7 @@ acceso_prerregistros_crear
 acceso_prerregistros_get
 acceso_prerregistros_invitacion
 acceso_prerregistros_listar
+acceso_privacidad_cartel
 acceso_puntos_list
 acceso_puntos_set
 acceso_registros_anular
@@ -18,6 +19,7 @@ acceso_registros_cerrar_bloque
 acceso_registros_get
 acceso_registros_listar
 acceso_registros_salida
+acceso_reportes_probar
 agente_conversaciones_archivar
 agente_conversaciones_borrar
 agente_conversaciones_get
@@ -667,6 +669,7 @@ preview_acceso_puntos_set
 preview_acceso_registros_anular
 preview_acceso_registros_cerrar_bloque
 preview_acceso_registros_salida
+preview_acceso_reportes_probar
 preview_agente_conversaciones_archivar
 preview_agente_conversaciones_borrar
 preview_agente_conversaciones_renombrar
