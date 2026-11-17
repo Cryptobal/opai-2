@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { resumirCobertura } from "@opai/domain";
 
-import { ajuste } from "../core/config/valores";
 import { cargarMes } from "../pauta/cargar";
 import type { Contexto } from "../types";
 
@@ -17,15 +16,6 @@ export const coberturaSchema = z.object({
   porcentaje: z.number().nullable(),
 });
 type CoberturaCliente = z.output<typeof coberturaSchema>;
-
-/**
- * ¿La sección Cobertura tiene datos para esta empresa y esta cuenta? Requiere la Pauta activa (de ahí salen los
- * turnos), el ajuste de la empresa encendido y la sección visible en la configuración de la cuenta.
- */
-export async function coberturaActiva(ctx: Contexto, seccionesCuenta: readonly string[]): Promise<boolean> {
-  if (!ctx.modulosActivos.includes("pauta") || !seccionesCuenta.includes("cobertura")) return false;
-  return (await ajuste<boolean>(ctx, "portal_cliente", "seccion_cobertura")) !== false;
-}
 
 /**
  * Cobertura del mes (aaaa-mm) por instalación, con la misma cuenta que el resumen de la Pauta (series, excepciones,
