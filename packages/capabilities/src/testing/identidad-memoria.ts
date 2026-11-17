@@ -46,6 +46,9 @@ export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
           Object.assign(u, { twoFactorEnabled: false, passkeyEnabled: false });
       return { enrolamientos, passkeys, sesiones: quitar("session", userId) };
     },
+    async registrarVerComo(_tx, e) {
+      tabla("auditoriaSeguridad").push({ ...e });
+    },
     ...metodosEnMemoria(tabla),
     ...appsOAuthEnMemoria(tabla),
     async borrarUsuario(_tx, userId) {
