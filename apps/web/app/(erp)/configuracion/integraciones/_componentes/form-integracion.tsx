@@ -23,8 +23,6 @@ const OPCIONES = {
 
 import { FORM_INTEGRACION } from "../../_centro/formularios";
 
-export { FORM_INTEGRACION } from "../../_centro/formularios";
-
 /** Modalidad y configuración no secreta (29); "Guardar" de la barra superior envía este formulario. */
 export function FormIntegracion({
   items,
@@ -104,7 +102,7 @@ export function FormIntegracion({
               <Campo
                 etiqueta="Nombre y correo del remitente"
                 htmlFor="i-remitente"
-                ayuda='Por ejemplo "Gard Security <avisos@gard.cl>"'
+                ayuda='Por ejemplo "Mi empresa <avisos@ejemplo.cl>"'
               >
                 <Input
                   id="i-remitente"

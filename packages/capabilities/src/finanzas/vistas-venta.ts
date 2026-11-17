@@ -16,7 +16,7 @@ export const lineaSchema = z.object({
   orden: z.number().int(),
   glosa: z.string(),
   monto: z.number().int(),
-  cantidad: z.string().nullish().describe("Cantidad de la línea, si se informó (CAR-248: para editar un borrador)."),
+  cantidad: z.string().nullish().describe("Cantidad de la línea, si se informó; sirve para editar un borrador."),
   unidad: z.string().nullish(),
   precioUnitario: z.number().int().nullish(),
   descuentoPct: z.number().int().nullish(),
@@ -51,10 +51,15 @@ export const ventaSchema = z.object({
   trackIdSii: z.string().nullable(),
   documentoReferenciaId: z.string().nullable(),
   lineas: z.array(lineaSchema),
+  titulo: z
+    .string()
+    .optional()
+    .describe("Etiqueta corta para el agente (enlace); p. ej. «Factura electrónica 123»."),
+  href: z.string().optional().describe("Ruta interna de la ficha (`/finanzas/ventas/…`)."),
   emisionPrevista: z
     .object({ proveedor: z.enum(["simulado", "simpleapi"]), ambiente: z.enum(["certificacion", "produccion"]) })
     .optional()
-    .describe("Solo en la vista previa de emitir: proveedor y ambiente con que se firmaría (CAR-242)."),
+    .describe("Solo en la vista previa de emitir: proveedor y ambiente con que se firmaría."),
 });
 
 type FilaVenta = {
@@ -128,6 +133,8 @@ export function vistaVenta(
     trackIdSii: d.trackIdSii,
     documentoReferenciaId: d.documentoReferenciaId,
     lineas,
+    titulo: `${NOMBRE_TIPO_DTE_VENTA[tipo] ?? `DTE ${d.tipoDte}`} ${d.folio ?? "borrador"}`,
+    href: `/finanzas/ventas/${d.id}`,
   };
 }
 

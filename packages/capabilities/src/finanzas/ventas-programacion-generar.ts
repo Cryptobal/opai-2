@@ -68,7 +68,7 @@ export async function periodosAGenerar(
   if (!fecha)
     throw reglaDeNegocio(`El período ${periodo} no está en la agenda de la programación.`);
   if (!permitidoPorCorte(fecha, corte))
-    throw reglaDeNegocio(`El período ${periodo} ya se facturó en OPAI 1.0 (fecha de corte).`);
+    throw reglaDeNegocio(`El período ${periodo} ya se facturó antes de la migración (fecha de corte).`);
   return [{ periodo, fecha }];
 }
 
