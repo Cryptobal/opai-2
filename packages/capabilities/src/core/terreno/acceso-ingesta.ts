@@ -102,7 +102,10 @@ export async function resolverAcceso(
           motivo: i.motivo,
           tipoRegistro: i.tipoRegistro,
           personaId: i.personaId ?? null,
-          horaCorregida: new Date(i.horaCorregida as Date | string),
+          horaCorregida:
+            i.horaCorregida instanceof Date
+              ? i.horaCorregida
+              : new Date(i.horaCorregida as string | Date),
         })),
       );
       const salidasEscritas = await escribirSalidas(
