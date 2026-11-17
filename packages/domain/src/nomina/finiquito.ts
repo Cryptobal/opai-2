@@ -1,5 +1,6 @@
 import { sumarDiasHabiles, type AmbitoHabil } from "../calendario/habiles";
 import { formatearFecha } from "../formato";
+import { diasVacacionesAcumulados } from "./vacaciones-proporcional";
 
 export type LineaFiniquito = {
   id: string;
@@ -28,7 +29,7 @@ const mesesEntre = (desde: string, hasta: string) => {
   return Math.max(0, Math.round((b - a) / (86_400_000 * 30.4375)));
 };
 
-/** Propuesta de finiquito (diseño 08): montos orientativos, sin contador de vacaciones ni carta art. 162. */
+/** Propuesta de finiquito (diseño 08): montos orientativos; feriado estimado sin contador oficial (ADR-056). */
 export function propuestaFiniquito(
   datos: {
     vinculoId: string;
@@ -38,6 +39,8 @@ export function propuestaFiniquito(
     motivoTermino: string | null;
     sueldoBase: number | null;
     diasTrabajadosMes: number | null;
+    /** Días calendario de vacaciones ya tomados (ausencias aprobadas), si se conocen. */
+    diasVacacionesTomados?: number;
   },
   hoy: string,
   feriados: AmbitoHabil = new Set(),
@@ -70,7 +73,17 @@ export function propuestaFiniquito(
       monto: sueldo,
     });
   }
-  avisos.push("Feriado proporcional pendiente del contador de vacaciones (ADR-056).");
+  const acumVac = diasVacacionesAcumulados(meses);
+  const tomados = datos.diasVacacionesTomados ?? 0;
+  const pendientesVac = Math.max(0, Math.round((acumVac - tomados) * 100) / 100);
+  if (pendientesVac > 0 && sueldo > 0) {
+    lineas.push({
+      id: "feriado_proporcional",
+      concepto: `Feriado proporcional · ${pendientesVac} días`,
+      origen: `Estimación ${acumVac} días acum. · ${tomados} tomados (sin contador oficial)`,
+      monto: Math.round((sueldo * pendientesVac) / 30),
+    });
+  }
   if (datos.diasTrabajadosMes != null && datos.diasTrabajadosMes > 0 && sueldo > 0) {
     lineas.push({
       id: "dias_trabajados",

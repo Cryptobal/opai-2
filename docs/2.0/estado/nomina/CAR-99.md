@@ -79,7 +79,7 @@
 - Capacidades MCP: `nomina.midt.listar`, `nomina.midt.exportar_pendientes`, `nomina.midt.datos` y `nomina.midt.registrar` (marca con comprobante; lecturas auditadas).
 - Pantalla `/remuneraciones/cumplimiento-dt/contratos` (diseño 07): segmento Por registrar / Registrados, descarga CSV, datos por fila y diálogo Marcar registrado. Navegación «Cumplimiento DT». Sin API Mi DT.
 
-- **Pendiente (finiquito):** feriado proporcional mejorado, carta art. 162 y comprobantes en ficha (diseño 08 parcial).
+- *(Cubierto en PR apilado `cursor/finiquito-completo-ab10` sobre gate LRE.)*
 
 ### Pago banco (PR apilado sobre F29)
 
@@ -93,6 +93,12 @@
 
 - `nomina.lre.generar` y `nomina.previred.generar` exigen `nomina.cumplimiento_dt` (helper `complemento-dt.ts`).
 
+### Finiquito · feriado, carta y preview (PR apilado sobre gate LRE)
+
+- Feriado proporcional estimado (`vacaciones-proporcional.ts` + ausencias tipo vacaciones).
+- Ficha diseño 08: tarjetas carta art. 162 (solicitud `carta_trabajador`) y comprobante Mi DT.
+- Semilla `qa-e2e/nomina-finiquito-cumplimiento-dt.sql` y e2e `@preview` de la ficha.
+
 ### Complemento Cumplimiento DT · entitlements (PR apilado sobre #1007)
 
 - Catálogo `nomina.cumplimiento_dt` (ADR-057, CAR-204): cobro por trabajador, depende de `nomina`.
@@ -101,7 +107,7 @@
 ### Finiquito diseño 08 · propuesta (PR apilado sobre entitlements)
 
 - Dominio `propuestaFiniquito`, capacidad `nomina.finiquito.obtener`, ficha `/remuneraciones/cumplimiento-dt/finiquitos/[vinculoId]`.
-- Sin feriado proporcional ni carta art. 162 (contador de vacaciones y documentos pendientes).
+- Feriado y documentos ampliados en PR `cursor/finiquito-completo-ab10` (ver sección anterior).
 
 ### Finiquitos Mi DT (PR apilado sobre #1004)
 

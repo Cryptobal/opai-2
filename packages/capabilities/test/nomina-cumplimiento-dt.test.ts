@@ -108,8 +108,17 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.finiquito.obtener", { vinculoId: V2 });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.propuesta.lineas.length).toBeGreaterThan(0);
-    expect(r.data.personaNombre).toContain("Prueba");
+    const data = r.data as {
+      propuesta: { lineas: { id: string }[] };
+      comprobanteMiDt: unknown;
+      cartaArt162: unknown;
+      personaNombre: string;
+    };
+    expect(data.propuesta.lineas.length).toBeGreaterThan(0);
+    expect(data.propuesta.lineas.some((l) => l.id === "feriado_proporcional")).toBe(true);
+    expect(data.comprobanteMiDt).toBeNull();
+    expect(data.cartaArt162).toBeNull();
+    expect(data.personaNombre).toContain("Prueba");
   });
 
   it("rechaza sin el complemento Cumplimiento DT", async () => {

@@ -20,6 +20,25 @@ describe("propuestaFiniquito", () => {
     expect(p.lineas.some((l) => l.id === "indemnizacion_anios")).toBe(true);
     expect(p.total).toBeGreaterThan(500_000);
     expect(p.plazoPagoHasta).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(p.lineas.some((l) => l.id === "feriado_proporcional")).toBe(true);
+  });
+
+  it("resta vacaciones tomadas del feriado", () => {
+    const p = propuestaFiniquito(
+      {
+        vinculoId: "v3",
+        personaId: "p3",
+        inicio: "2022-01-01",
+        termino: "2026-09-15",
+        motivoTermino: null,
+        sueldoBase: 500_000,
+        diasTrabajadosMes: 15,
+        diasVacacionesTomados: 20,
+      },
+      "2026-09-20",
+    );
+    const feriado = p.lineas.find((l) => l.id === "feriado_proporcional");
+    expect(feriado?.origen).toContain("20 tomados");
   });
 
   it("avisa sin sueldo base", () => {

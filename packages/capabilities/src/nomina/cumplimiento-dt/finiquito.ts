@@ -10,6 +10,7 @@ import { PERMISO_READ } from "../comun";
 import type { Contexto } from "../../types";
 import { exigeComplementoCumplimientoDt } from "./comun";
 import { diasDelVinculo, inicioMes, finMes } from "../costo-proyectado-datos";
+import { diasVacacionesTomados, documentosFiniquito } from "./finiquito-datos";
 
 const lineaSchema = z.object({
   id: z.string(),
@@ -26,6 +27,17 @@ const salidaSchema = z.object({
   instalacion: z.string().nullable(),
   hechoTexto: z.string(),
   registradoMiDt: z.boolean(),
+  comprobanteMiDt: z
+    .object({ documentoId: z.string(), nombre: z.string(), registradoEn: z.string() })
+    .nullable(),
+  cartaArt162: z
+    .object({
+      documentoId: z.string(),
+      titulo: z.string(),
+      estadoFirma: z.string(),
+      solicitudId: z.string(),
+    })
+    .nullable(),
   propuesta: z.object({
     vinculoId: z.string(),
     terminoEn: z.string(),
@@ -38,8 +50,6 @@ const salidaSchema = z.object({
     avisos: z.array(z.string()),
   }),
 });
-
-import type { Contexto } from "../../types";
 
 async function sueldoAlTermino(ctx: Contexto, personaId: string, puestoId: string | null, instalacionId: string | null, termino: string) {
   const t = aFecha(termino);
@@ -96,6 +106,8 @@ export const cumplimientoDtFiniquitoObtener = defineCapability({
     const reg = await ctx.db.nominaRegistroMiDt.findFirst({
       where: { tenantId: ctx.tenantId, movimientoTipo: "finiquito", referenciaId: vinculoId },
     });
+    const vacacionesTomadas = await diasVacacionesTomados(ctx, v.personaId, termino);
+    const docs = await documentosFiniquito(ctx, v.personaId, reg);
     const propuesta = propuestaFiniquito(
       {
         vinculoId,
@@ -105,6 +117,7 @@ export const cumplimientoDtFiniquitoObtener = defineCapability({
         motivoTermino: v.motivoTermino,
         sueldoBase,
         diasTrabajadosMes,
+        diasVacacionesTomados: vacacionesTomadas,
       },
       hoy(),
     );
@@ -117,6 +130,8 @@ export const cumplimientoDtFiniquitoObtener = defineCapability({
       instalacion: v.instalacion?.nombre ?? null,
       hechoTexto: `Término el ${termino}${v.motivoTermino ? ` · ${v.motivoTermino}` : ""}`,
       registradoMiDt: !!reg,
+      comprobanteMiDt: docs.comprobanteMiDt,
+      cartaArt162: docs.cartaArt162,
       propuesta,
     };
   },

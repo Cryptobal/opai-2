@@ -11,6 +11,7 @@ export * from "./previred";
 export * from "./f30-1";
 export * from "./cumplimiento-dt";
 export * from "./finiquito";
+export * from "./vacaciones-proporcional";
 export * from "./libro-remuneraciones";
 export * from "./libro-remuneraciones-excel";
 export * from "./f29-retencion";
