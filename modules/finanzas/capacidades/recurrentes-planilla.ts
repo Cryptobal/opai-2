@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { ventasProgramadasPorPeriodo, type Contexto } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 import { formatearFecha } from "@opai/domain";
@@ -11,17 +9,12 @@ import { montoCuota, type MontoCuota, type PoliticaUf, type UnidadRecurrente } f
 import { cuotasDelFlujo } from "../domain/recurrentes-semana";
 import { baseMonto } from "./recurrentes-base";
 import { aNumeroSeguro, type celdaSchema } from "./esquemas";
-import { aFecha, aIso } from "./util";
+import { aFecha, aIso, idEstable } from "./util";
 
 const DIA_MS = 86_400_000;
 const mas = (iso: string, dias: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + dias * DIA_MS).toISOString().slice(0, 10);
 const VENCIDAS_DIAS = 31;
 const ETIQUETA = { pagada: "pagada esta semana", parcial: "saldo por pagar", proyectada: "por pagar" } as const;
-
-function idEstable(texto: string): string {
-  const h = createHash("sha1").update(texto).digest("hex");
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
-}
 
 /**
  * Cuotas de los gastos recurrentes desde la semana en curso hasta la última semana pedida (CAR-349). Se derivan al

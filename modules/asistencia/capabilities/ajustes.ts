@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import {
-  CANALES, MINUTOS_ALERTA_INICIO_DEFECTO, PLAZO_CORRECCION_HORAS_DEFECTO,
+  CANALES, LIMITES_JORNADA_DEFECTO, MINUTOS_ALERTA_INICIO_DEFECTO, PLAZO_CORRECCION_HORAS_DEFECTO,
 } from "../domain";
 
 // Ajustes del módulo Asistencia (ADR-018): los lee el centro de configuración del núcleo desde el
@@ -88,6 +88,24 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "switch",
   }),
+  limites_jornada: z
+    .object({
+      vigenteDesde: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      avisoSemanalHoras: z.number().min(1).max(80),
+      maxSemanalHoras: z.number().min(1).max(80),
+      maxDiarioHoras: z.number().min(1).max(24),
+      maxExtraDiarioHoras: z.number().min(0).max(12),
+    })
+    .default(LIMITES_JORNADA_DEFECTO)
+    .meta({
+      etiqueta: "Límites de jornada (Ley 21.561)",
+      ayuda:
+        "Aviso a las 40 h semanales, tope crítico a las 42 h, 12 h diarias de trabajo y 2 h extraordinarias diarias. vigenteDesde: fecha desde la que se evalúan (defecto 2024-04-26, DS 48).",
+      grupo: "Límites de jornada",
+      ambito: "tenant",
+      permiso: PERMISO,
+      control: "json",
+    }),
   correo_copia_est: z.string().trim().email().or(z.literal("")).default("").meta({
     etiqueta: "Correo del EST para copia del comprobante",
     ayuda:
