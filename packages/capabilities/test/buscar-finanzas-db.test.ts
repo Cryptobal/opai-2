@@ -62,14 +62,14 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Finanzas (CAR-402)", 
   afterAll(async () => { await e?.cerrar(); });
 
   it("encuentra la factura por folio, solo de su empresa", async () => {
-    expect(await buscar(ctx(t.a, LECTOR), "9402", "documentos-venta")).toEqual([
+    expect(await buscar(ctx(t.a, LECTOR), "9402", "facturas")).toEqual([
       { id: d["factura"], titulo: "Factura electrónica 9402", detalle: "Cliente Zafiro Ficticio", href: `/finanzas/ventas/${d["factura"]}` },
     ]);
-    expect((await buscar(ctx(t.b, LECTOR), "9402", "documentos-venta"))?.map((x) => x.id)).toEqual([d["beta"]]);
+    expect((await buscar(ctx(t.b, LECTOR), "9402", "facturas"))?.map((x) => x.id)).toEqual([d["beta"]]);
   });
 
   it("por nombre del cliente trae facturas, notas y borradores de esa empresa", async () => {
-    const items = (await buscar(ctx(t.a, LECTOR), "zafiro", "documentos-venta")) ?? [];
+    const items = (await buscar(ctx(t.a, LECTOR), "zafiro", "facturas")) ?? [];
     expect(items.map((x) => x.id).sort()).toEqual([d["factura"], d["nc"], d["borrador"]].sort());
     expect(items.map((x) => x.titulo)).toContain("Nota de crédito electrónica 9403");
     expect(items.map((x) => x.titulo)).toContain("Factura electrónica · borrador");
@@ -83,7 +83,7 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Finanzas (CAR-402)", 
 
   it("sin permiso de Finanzas no aparece ninguno de los dos grupos", async () => {
     const sin = ctx(t.a, ["core:tenant.read"]);
-    expect(await buscar(sin, "zafiro", "documentos-venta")).toBeNull();
+    expect(await buscar(sin, "zafiro", "facturas")).toBeNull();
     expect(await buscar(sin, "proveedora", "proveedores")).toBeNull();
   });
 });

@@ -11,6 +11,14 @@ export function folioDeBusqueda(q: string): number | null {
   return m ? Number(m[1]) : null;
 }
 
+/** Monto en pesos: solo dígitos, con `$`, puntos o espacios opcionales (CAR-526). */
+function montoDeBusqueda(q: string): number | null {
+  const limpio = q.replace(/[$\s.]/g, "").replace(",", "");
+  if (!/^\d{1,12}$/.test(limpio)) return null;
+  const n = Number(limpio);
+  return Number.isSafeInteger(n) && n > 0 ? n : null;
+}
+
 /** Nombre visible de las cuentas (clientes) de esta empresa, por id. */
 async function nombresDeCuentas(ctx: Contexto, where: object): Promise<Map<string, string>> {
   const cs = await ctx.db.cuenta.findMany({ where, select: { id: true, nombre: true, razonSocial: true }, take: 50 });
@@ -21,13 +29,18 @@ async function nombresDeCuentas(ctx: Contexto, where: object): Promise<Map<strin
 export const buscadoresFinanzas: readonly Buscador[] = [
   {
     modulo: "finanzas",
-    grupo: "documentos-venta",
+    grupo: "facturas",
     titulo: "Facturas y notas",
     permiso: PERMISO_READ,
     async buscar(ctx, q) {
       const folio = folioDeBusqueda(q);
+      const monto = montoDeBusqueda(q);
       const cuentas = await nombresDeCuentas(ctx, { OR: [{ nombre: contiene(q) }, { razonSocial: contiene(q) }] });
-      const coincide = [...(folio !== null ? [{ folio }] : []), ...(cuentas.size ? [{ cuentaId: { in: [...cuentas.keys()] } }] : [])];
+      const coincide = [
+        ...(folio !== null ? [{ folio }] : []),
+        ...(monto !== null ? [{ montoTotal: monto }] : []),
+        ...(cuentas.size ? [{ cuentaId: { in: [...cuentas.keys()] } }] : []),
+      ];
       if (!coincide.length) return [];
       const filas = await ctx.db.documentoEmitido.findMany({
         where: { OR: coincide },
