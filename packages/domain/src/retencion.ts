@@ -86,29 +86,8 @@ export const POLITICA_RETENCION: readonly ReglaRetencion[] = [
   { clave: "solicitudes", nombre: "Solicitudes de titulares", tabla: "solicitudes_arco", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Constancia de que cada solicitud de un titular se atendió dentro de plazo: no se borra." },
   { clave: "retencion_registro", nombre: "Registro de retención", tabla: "retencion_ejecuciones", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Constancia de lo que hizo la política de retención, sin datos personales: no se modifica ni se borra." },
   { clave: "incidentes", nombre: "Incidentes", tabla: "incidentes", categoria: "contacto", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Registro de incidentes de seguridad y de sus avisos: no se modifica ni se borra." },
-  {
-    clave: "acceso_registros",
-    nombre: "Registros de acceso",
-    tabla: "registros_acceso",
-    categoria: "identificacion",
-    accion: "anonimizar",
-    desde: "creacion",
-    diasPropuestos: 90,
-    gestion: "externa",
-    motivo:
-      "Visitas y entradas al recinto: el trabajo diario del módulo Acceso anonimiza lo vencido (R18); el hecho se conserva.",
-  },
-  {
-    clave: "acceso_intentos",
-    nombre: "Intentos de acceso denegados",
-    tabla: "intentos_denegados",
-    categoria: "identificacion",
-    accion: "anonimizar",
-    desde: "creacion",
-    diasPropuestos: 180,
-    gestion: "externa",
-    motivo: "Quien no pudo entrar: el trabajo diario del módulo Acceso anonimiza lo vencido (R18).",
-  },
+  { clave: "acceso_registros", nombre: "Registros de acceso", tabla: "registros_acceso", categoria: "identificacion", accion: "anonimizar", desde: "creacion", diasPropuestos: 90, gestion: "externa", motivo: "Visitas y entradas al recinto: el trabajo diario del módulo Acceso anonimiza lo vencido (R18); el hecho se conserva." },
+  { clave: "acceso_intentos", nombre: "Intentos de acceso denegados", tabla: "intentos_denegados", categoria: "identificacion", accion: "anonimizar", desde: "creacion", diasPropuestos: 180, gestion: "externa", motivo: "Quien no pudo entrar: el trabajo diario del módulo Acceso anonimiza lo vencido (R18)." },
 ];
 
 export const reglaDe = (tabla: string): ReglaRetencion | undefined =>
