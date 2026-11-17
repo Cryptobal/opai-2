@@ -45,7 +45,7 @@ export async function cargarGenerable(ctx: Contexto, id: string) {
 }
 
 /** Períodos a generar: el pedido (aunque sea antiguo) o los pendientes de la ventana de recuperación. */
-export async function periodosAGenerar(
+async function periodosAGenerar(
   ctx: Contexto,
   p: Awaited<ReturnType<typeof cargarGenerable>>,
   periodo?: string,
