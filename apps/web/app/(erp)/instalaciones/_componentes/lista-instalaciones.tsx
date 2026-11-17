@@ -3,18 +3,22 @@ import { MapPin, Plus } from "lucide-react";
 import { Badge, cn, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionFila } from "@/lib/tipos-maestros";
 
-import { REGIONES } from "./datos";
+import { FiltroCuentaInstalaciones } from "./filtro-cuenta";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
+import { PaginacionInstalaciones } from "./paginacion";
 
 type Props = {
   state: EstadoPantalla;
   items: InstalacionFila[];
-  cuentas: { valor: string; etiqueta: string }[];
+  regiones: { valor: string; etiqueta: string }[];
+  siguiente: string | null;
+  cuentaEtiqueta: string | null;
   titulo: string;
   singular: string;
   seleccionada?: string;
@@ -39,19 +43,28 @@ export function ListaInstalaciones(p: Props) {
       accion={nueva}
       vistas={{ lista: "instalaciones", ruta: "/instalaciones" }}
       buscar={`Buscar ${p.singular}`}
-      filtros={[
-        { param: "cuenta", etiqueta: "Cuenta", opciones: p.cuentas },
-        {
-          param: "estado",
-          etiqueta: "Estado",
-          opciones: Object.entries(ESTADO_INSTALACION).map(([valor, e]) => ({
-            valor,
-            etiqueta: e.etiqueta,
-          })),
-        },
-        { param: "region", etiqueta: "Región", opciones: REGIONES },
-      ]}
-      meta={{ izquierda: `${p.items.length} ${p.titulo.toLowerCase()}`, derecha: personas(total) }}
+      vista={
+        <div className="flex flex-wrap items-center gap-2 pb-2.5 md:px-4 md:pb-0">
+          <FiltroCuentaInstalaciones cuentaInicial={p.cuentaEtiqueta} />
+          <ChipsFiltro
+            filtros={[
+              {
+                param: "estado",
+                etiqueta: "Estado",
+                opciones: Object.entries(ESTADO_INSTALACION).map(([valor, e]) => ({
+                  valor,
+                  etiqueta: e.etiqueta,
+                })),
+              },
+              { param: "region", etiqueta: "Región", opciones: p.regiones },
+            ]}
+          />
+        </div>
+      }
+      meta={{ izquierda: `${p.items.length} en esta página`, derecha: personas(total) }}
+      pie={
+        <PaginacionInstalaciones p={p.parametros} mostrados={p.items.length} siguiente={p.siguiente} />
+      }
       seleccionada={p.seleccionada}
       vacio={{
         titulo: `Aún no hay ${p.titulo.toLowerCase()}`,
