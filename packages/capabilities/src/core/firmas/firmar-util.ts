@@ -69,7 +69,7 @@ export async function resolverFirmante(
 /** Firmante autenticado y solicitud viva del mismo tenant (ver_firmante, documento_url). */
 export async function resolverFirmanteYSolicitud(
   ctx: Contexto,
-  input: { token?: string; solicitudId?: string },
+  input: { token?: string | undefined; solicitudId?: string | undefined },
 ) {
   const firmante = await resolverFirmante(ctx, input);
   const solicitud = await ctx.db.solicitudFirma.findFirst({
