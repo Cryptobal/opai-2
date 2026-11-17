@@ -31,7 +31,7 @@ const semanasEntre = (a: string, b: string) => Math.round((Date.parse(b) - Date.
  * De dónde sale el saldo de la serie: el banco de hoy (ADR-073) o, si ninguna cuenta tiene saldo, $0. No hay saldo de
  * partida: el flujo proyecta desde lo que hay hoy en el banco (regla de Carlos del 13-nov-2026, CAR-391).
  */
-export type FuenteSaldo = "banco" | "sin_banco";
+type FuenteSaldo = "banco" | "sin_banco";
 
 /**
  * Serie de saldos única de la planilla, el aviso y la vista previa de «Reprogramar» (ADR-073).

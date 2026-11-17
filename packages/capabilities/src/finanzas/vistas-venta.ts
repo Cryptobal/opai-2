@@ -139,4 +139,4 @@ export function vistaVenta(
 }
 
 /** Fecha de emisión efectiva para vistas (borrador sin fecha → hoy). */
-export const emisionVisible = (d: FilaVenta) => dia(d.fechaEmision) ?? hoy();
+const emisionVisible = (d: FilaVenta) => dia(d.fechaEmision) ?? hoy();

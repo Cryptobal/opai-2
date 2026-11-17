@@ -74,6 +74,6 @@ export function validarCafConRangos(
   return validacion.lectura;
 }
 
-export type RangoFolioTx = Awaited<
+type RangoFolioTx = Awaited<
   ReturnType<TenantTx["dteFolio"]["findMany"]>
 >[number];

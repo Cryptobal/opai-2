@@ -15,7 +15,7 @@ export const PERMISO_READ = "finanzas:read";
 export const PERMISO_PLAN = "finanzas:plan.manage";
 export const PERMISO_PROVEEDORES = "finanzas:proveedores.manage";
 export const PERMISO_COMPRAS = "finanzas:compras.manage";
-export { PERMISO_VENTAS, PERMISO_VENTAS_CONFIGURE } from "./ventas-comun";
+export { PERMISO_VENTAS_CONFIGURE } from "./ventas-comun";
 
 /** Plazo de pago de un proveedor nuevo si no se indica; igual al `.default()` del ajuste (ADR-021). */
 export const PLAZO_PAGO_DEFECTO = 30;
@@ -95,4 +95,3 @@ export const tipoDteSchema = z
 
 export const montoSchema = z.number().int().min(0).max(2_000_000_000);
 
-export type { TipoDteCompra };

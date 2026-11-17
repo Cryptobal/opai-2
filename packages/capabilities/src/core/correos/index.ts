@@ -14,5 +14,3 @@ export const capacidadesCorreos: readonly Capacidad[] = [
   correosRecibir,
 ];
 
-export { asegurarBuzon, direccionDelBuzon } from "./comun";
-export { registrarSaliente, type Saliente } from "./registrar";

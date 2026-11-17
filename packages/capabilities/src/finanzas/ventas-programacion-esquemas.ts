@@ -15,7 +15,7 @@ import { textoOpcional } from "../core/maestros/comun";
 
 const fechaIso = z.iso.date();
 
-export const lineaProgramacionSchema = z.object({
+const lineaProgramacionSchema = z.object({
   glosa: z.string().trim().min(1).max(300),
   cantidad: z
     .string()
@@ -137,4 +137,4 @@ export const programacionBaseSchema = z.object({
 });
 
 export type ProgramacionInput = z.infer<typeof programacionBaseSchema>;
-export type LineaProgramacionInput = z.infer<typeof lineaProgramacionSchema>;
+type LineaProgramacionInput = z.infer<typeof lineaProgramacionSchema>;
