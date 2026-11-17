@@ -16,7 +16,7 @@ export type PorAgente = {
 }[];
 
 /** "aaaa-mm" del mes anterior. */
-export function mesAnterior(mes: string) {
+function mesAnterior(mes: string) {
   const [a, m] = mes.split("-").map(Number) as [number, number];
   const d = new Date(Date.UTC(a, m - 2, 1));
   return d.toISOString().slice(0, 7);
