@@ -6,6 +6,7 @@ export * from "./simpleapi-suscripcion";
 export * from "./simpleapi-token";
 export * from "./simpleapi-key-formato";
 export * from "./simpleapi-rcv";
+export * from "./simpleapi-acuse";
 export * from "./xml-iso";
 export * from "./caf-bytes";
 export * from "./certificado-pfx";
