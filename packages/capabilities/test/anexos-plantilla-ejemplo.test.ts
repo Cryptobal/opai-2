@@ -2,8 +2,10 @@
 // publicada, ningún anexo se aprueba (tampoco en vista previa) y el borrador queda intacto.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as PlantillaMod from "../src/core/anexos/plantilla";
+
 vi.mock("../src/core/anexos/plantilla", async (importOriginal) => {
-  const original = await importOriginal();
+  const original = await importOriginal<typeof PlantillaMod>();
   return { ...original, PLANTILLA_ANEXO: { version: "ejemplo-prueba", esEjemplo: true } };
 });
 
