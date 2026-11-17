@@ -15,6 +15,8 @@ const itemSchema = z.object({
   estadoSolicitud: z.string(),
 });
 
+const TOPE_ESCANEO = 200;
+
 /**
  * Lo que el usuario autenticado debe firmar en su portal (supervisor o trabajador): solo solicitudes
  * vivas donde es firmante pendiente y le corresponde el turno (R7). Alcance propio (ADR-022).
@@ -27,9 +29,10 @@ export const firmasMisPendientes = defineCapability({
   soloPersonas: true,
   portales: ["trabajador", "supervisor", "erp", "terreno"],
   input: z.object({
+    cursor: z.string().optional().describe("Id de la última solicitud de la página anterior."),
     limite: z.number().int().min(1).max(50).default(50),
   }),
-  output: z.object({ items: z.array(itemSchema) }),
+  output: z.object({ items: z.array(itemSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (r) => r.items.map((i) => i.solicitudId),
@@ -49,9 +52,9 @@ export const firmasMisPendientes = defineCapability({
       },
       include: { solicitud: { include: { firmantes: true } } },
       orderBy: { solicitud: { plazoVence: "asc" } },
-      take: input.limite,
+      take: TOPE_ESCANEO,
     });
-    const items = filas
+    const todos = filas
       .filter((f) => esSuTurno(f.solicitud.orden, f.solicitud.firmantes, f))
       .map((f) => ({
         solicitudId: f.solicitudId,
@@ -61,6 +64,16 @@ export const firmasMisPendientes = defineCapability({
         plazoVence: f.solicitud.plazoVence.toISOString(),
         estadoSolicitud: f.solicitud.estado,
       }));
-    return { items };
+    let offset = 0;
+    if (input.cursor) {
+      const idx = todos.findIndex((i) => i.solicitudId === input.cursor);
+      offset = idx >= 0 ? idx + 1 : todos.length;
+    }
+    const items = todos.slice(offset, offset + input.limite);
+    const siguiente =
+      items.length === input.limite && offset + input.limite < todos.length
+        ? items[items.length - 1]!.solicitudId
+        : null;
+    return { items, siguiente };
   },
 });

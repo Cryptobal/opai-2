@@ -4,7 +4,6 @@ import {
   ListaFirmasPendientes,
   type FirmaPendiente,
 } from "@/app/_components/firmas/lista-pendientes";
-import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { estadoTrabajador } from "../_componentes/estado";

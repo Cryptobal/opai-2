@@ -1,6 +1,7 @@
 "use client";
 
 import { Alerta, Button } from "@opai/ds";
+import { formatearFecha } from "@opai/domain";
 
 import { ETIQUETA_CLASE } from "./etiquetas";
 import { FirmaN1AlertaSinAccion, FirmaN1Campos } from "./firma-n1-campos";
@@ -60,7 +61,7 @@ export function FirmarSesion({
       {datos.mensaje ? <p className="text-base text-fg-muted">{datos.mensaje}</p> : null}
       <p className="t-caption">
         {ETIQUETA_CLASE[datos.clase] ?? datos.clase} · Nivel {datos.nivel} · vence{" "}
-        {new Date(datos.plazoVence).toLocaleDateString("es-CL")}
+        {formatearFecha(datos.plazoVence.slice(0, 10))}
       </p>
       <Button variant="secondary" disabled={ui.verificandoDocumento} onClick={() => void ui.verDocumento()}>
         {ui.verificandoDocumento ? "Abriendo…" : "Ver documento"}
