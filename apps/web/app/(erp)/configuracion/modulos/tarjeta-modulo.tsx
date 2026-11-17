@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Badge } from "@opai/ds";
 
 type Tono = "success" | "info" | "warning" | "neutro";
-export const ESTADO_MODULO: Record<string, { etiqueta: string; tono: Tono }> = {
+const ESTADO_MODULO: Record<string, { etiqueta: string; tono: Tono }> = {
   activo: { etiqueta: "Activo", tono: "success" },
   trial: { etiqueta: "En trial", tono: "info" },
   suspendido: { etiqueta: "Suspendido", tono: "warning" },
