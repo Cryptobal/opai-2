@@ -47,7 +47,7 @@ const dia = (v: string | null | undefined) => {
 };
 
 /** `status` de 1.0; si falta, `type` / `isActive` heredados. Sin información queda prospecto. */
-export function estadoCuenta(f: CuentaOpai1): DatosCuenta["estado"] {
+function estadoCuenta(f: CuentaOpai1): DatosCuenta["estado"] {
   const status = textoLimpio(f.status)?.toLowerCase();
   if (status === "client_active") return "cliente_activo";
   if (status === "client_inactive") return "cliente_inactivo";
@@ -82,7 +82,7 @@ export function datosCuenta(f: CuentaOpai1): DatosCuenta {
 }
 
 /** `prospecto` es el estado por defecto de 2.0: equivale a «sin dato» y puede completarse. */
-export const EQUIVALENTES_CUENTA = { estado: "prospecto" } as const;
+const EQUIVALENTES_CUENTA = { estado: "prospecto" } as const;
 
 export function planCuentas(filas: readonly CuentaOpai1[], destino: EstadoDestino): PlanCuentas {
   const ids = indiceIds(destino, "cuenta");
