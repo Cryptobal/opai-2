@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { CeldaPauta } from "@opai/domain";
+
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { candidatosDeInstalacion } from "./candidatos";
@@ -69,7 +71,7 @@ export const dotacionInstalacionListar = defineCapability({
       candidatosDeInstalacion(ctx, input.instalacionId),
     ]);
     const nom = (id: string) => mes.personas.find((p) => p.id === id)?.nombre ?? "—";
-    const tramosConNombre = (celdas: typeof mes.puestos[0]["celdas"], variante: "reemplazo" | "refuerzo") =>
+    const tramosConNombre = (celdas: CeldaPauta[], variante: "reemplazo" | "refuerzo") =>
       tramosVariante(celdas, variante).map((t) => ({ ...t, persona: nom(t.personaId) }));
     return {
       instalacionId: mes.instalacionId,
@@ -83,9 +85,9 @@ export const dotacionInstalacionListar = defineCapability({
         funcion: p.funcion,
         horario: p.horario,
         serie: p.serie,
-        reemplazos: tramosConNombre(p.celdas, "reemplazo"),
-        refuerzos: tramosConNombre(p.celdas, "refuerzo"),
-        vacantes: tramosPpc(p.celdas),
+        reemplazos: tramosConNombre(p.celdas as CeldaPauta[], "reemplazo"),
+        refuerzos: tramosConNombre(p.celdas as CeldaPauta[], "refuerzo"),
+        vacantes: tramosPpc(p.celdas as CeldaPauta[]),
       })),
     };
   },
