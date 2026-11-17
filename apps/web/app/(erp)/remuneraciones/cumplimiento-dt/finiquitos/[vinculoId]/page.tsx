@@ -1,7 +1,6 @@
-import Link from "next/link";
+import { Estado } from "@opai/ds";
 
-import { Button, Estado } from "@opai/ds";
-
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -29,9 +28,9 @@ export default function FiniquitoVinculo({ params }: { params: Promise<{ vinculo
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h1 className="t-title">{d.r.data.personaNombre}</h1>
-                <Button variant="secondary" asChild>
-                  <Link href="/remuneraciones/cumplimiento-dt/finiquitos">Volver a finiquitos</Link>
-                </Button>
+                <EnlaceBoton href="/remuneraciones/cumplimiento-dt/finiquitos" variante="secondary">
+                  Volver a finiquitos
+                </EnlaceBoton>
               </div>
               <FiniquitoDetalle datos={d.r.data} />
             </div>
