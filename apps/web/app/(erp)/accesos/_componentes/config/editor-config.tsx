@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button } from "@opai/ds";
+import { Alerta, avisar } from "@opai/ds";
 import type { ConfigAcceso } from "@opai/domain/acceso-config";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { AccionesEditorConfig } from "./acciones-editor-config";
+import { AvisoConfigEmpresa } from "./aviso-config-empresa";
 import { CamposConfig } from "./campos-config";
 import { EditorPrivacidad } from "./editor-privacidad";
 import type { Punto } from "./editor-puntos";
@@ -49,14 +51,7 @@ export function EditorConfig({ instalacionId, puntos = [], efectiva, personaliza
 
   return (
     <div className="flex flex-col gap-4">
-      {instalacionId && !propia ? (
-        <Alerta tono="info" titulo="Usa la configuración de la empresa">
-          <p>Lo que cambies en Configuración › Módulos › Control de acceso rige también aquí.</p>
-          <Button variant="secondary" className="mt-2" onClick={() => setPropia(true)}>
-            Personalizar para esta instalación
-          </Button>
-        </Alerta>
-      ) : null}
+      {instalacionId && !propia ? <AvisoConfigEmpresa onPersonalizar={() => setPropia(true)} /> : null}
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       <TiposConfig config={c} onCambiar={cambiar} disabled={pendiente || !propia} />
       <ReglasConfig config={c} onCambiar={cambiar} disabled={pendiente || !propia} />
@@ -81,16 +76,13 @@ export function EditorConfig({ instalacionId, puntos = [], efectiva, personaliza
         />
       ) : null}
       {propia ? (
-        <div className="flex flex-wrap justify-end gap-2">
-          {instalacionId && personalizada ? (
-            <Button variant="ghost" disabled={pendiente} onClick={() => void heredar()}>
-              Volver a la de la empresa
-            </Button>
-          ) : null}
-          <Button disabled={pendiente} onClick={() => void guardar()}>
-            {pendiente ? "Guardando…" : "Guardar configuración"}
-          </Button>
-        </div>
+        <AccionesEditorConfig
+          {...(instalacionId ? { instalacionId } : {})}
+          personalizada={personalizada}
+          pendiente={pendiente}
+          onHeredar={() => void heredar()}
+          onGuardar={() => void guardar()}
+        />
       ) : null}
     </div>
   );
