@@ -3,7 +3,7 @@ import type { BadgeProps } from "@opai/ds";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Parametros, SearchParams } from "@/lib/parametros";
 
-export type Firmante = {
+type Firmante = {
   id: string;
   orden: number;
   rol: string;

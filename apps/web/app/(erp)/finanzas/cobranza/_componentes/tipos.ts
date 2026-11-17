@@ -29,7 +29,7 @@ export type FacturaVencida = {
   pasosEnviados: number[];
 };
 
-export type Gestion = {
+type Gestion = {
   id: string;
   documentoId: string;
   canal: "correo" | "whatsapp_manual" | "nota";
