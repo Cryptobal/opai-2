@@ -68,7 +68,7 @@ export async function periodosHechos(
  * más antiguo se genera a mano (`generar` con `periodo`), para que activar una programación vieja
  * sin fecha de corte nunca dispare meses de facturas atrasadas.
  */
-export const DIAS_RECUPERACION = 31;
+const DIAS_RECUPERACION = 31;
 export const desdeRecuperacion = (fechaHoy: string) => sumarDiasIso(fechaHoy, -DIAS_RECUPERACION);
 
 /** Próxima fecha de generación dentro de la ventana (o null si la agenda terminó). */

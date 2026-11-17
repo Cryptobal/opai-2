@@ -5,12 +5,9 @@ import { useState } from "react";
 import { Alerta, Button, Campo, CodigoQr, Input, SeccionTarjeta, Textarea } from "@opai/ds";
 import type { ConfigAcceso } from "@opai/domain/acceso-config";
 
-import type { Punto } from "./editor-puntos";
+import type { CartelPrivacidad } from "./cartel-accion";
 import { cartelPrivacidad } from "./cartel-accion";
-
-type Cartel = Awaited<ReturnType<typeof cartelPrivacidad>> extends { ok: true; data: infer D }
-  ? D
-  : never;
+import type { Punto } from "./editor-puntos";
 
 export function EditorPrivacidad({
   instalacionId,
@@ -25,7 +22,7 @@ export function EditorPrivacidad({
   disabled: boolean;
   puntos: Punto[];
 }) {
-  const [cartel, setCartel] = useState<Cartel | null>(null);
+  const [cartel, setCartel] = useState<CartelPrivacidad | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
   const [puntoId, setPuntoId] = useState("");
