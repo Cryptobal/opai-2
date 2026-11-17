@@ -3,6 +3,7 @@ import { Badge, cn, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { diaLargo } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
+import { formatearHora } from "@opai/domain";
 import type { Resultado } from "@opai/capabilities";
 
 type Item = {
@@ -60,8 +61,8 @@ function Kpis({ r, className }: { r: DatosAsistenciaHoy["resumen"]; className: s
 
 export function ListaAsistenciaHoy({ resultado }: { resultado: Resultado<DatosAsistenciaHoy> }) {
   const d = resultado.ok ? resultado.data : null;
-  const hora = new Intl.DateTimeFormat("es-CL", { timeStyle: "short", hourCycle: "h23", timeZone: d?.zona ?? "America/Santiago" });
-  const h = (v: string | null) => (v ? hora.format(new Date(v)) : "—");
+  const zona = d?.zona ?? "America/Santiago";
+  const h = (v: string | null) => (v ? formatearHora(v, zona) : "—");
 
   return (
     <div className="flex flex-col gap-4">
