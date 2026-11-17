@@ -9,7 +9,7 @@ export type Argumentos = {
   salida: string | null;
 };
 
-export const USO =
+const USO =
   "Uso: pnpm --filter @opai/db importar:rondas-etiquetas --dry-run --origen fixtures:<ruta.json> [--salida <reporte.json>]";
 
 export const MENSAJE_SIN_DRY_RUN =
