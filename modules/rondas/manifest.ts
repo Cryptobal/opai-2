@@ -35,7 +35,26 @@ export const manifest = defineModule({
       descripcion: "Configurar y publicar el modelo de confianza de rondas",
     },
   ],
-  navegacion: [],
+  navegacion: [
+    {
+      portal: "erp",
+      href: "/rondas/historial",
+      etiqueta: "Historial de rondas",
+      icono: "History",
+      area: "operaciones",
+      orden: 35,
+      permiso: "rondas:read",
+    },
+    {
+      portal: "erp",
+      href: "/rondas/informe",
+      etiqueta: "Informe de rondas",
+      icono: "FileBarChart",
+      area: "operaciones",
+      orden: 36,
+      permiso: "rondas:read",
+    },
+  ],
   configuracion: ajustesRondas,
   eventos: [
     { id: "rondas.ejecucion.iniciada", descripcion: "Comenzó una ronda." },
