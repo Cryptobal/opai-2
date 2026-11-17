@@ -15,7 +15,7 @@ export default async function Page(props: Props) {
   const tarifas = await ejecutarComoUsuario<{
     instalacionClp: number | null;
     puestos: { puestoId: string; montoClp: number | null }[];
-  }>("erp", "pauta.turnos_extra.tarifas_listar", { instalacionId: id });
+  }>("erp", "pauta.turnos_extra.tarifas_leer", { instalacionId: id });
   const puedeEditar = puedeDeIdentidad(identidad)("pauta:write");
 
   return (

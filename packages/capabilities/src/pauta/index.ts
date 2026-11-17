@@ -28,7 +28,7 @@ import { titularTrasladar } from "./titular-trasladar";
 import { turnosExtraAprobar } from "./turnos-extra-aprobar";
 import { turnosExtraListar } from "./turnos-extra-listar";
 import { turnosExtraMontoFijar } from "./turnos-extra-monto";
-import { turnosExtraTarifasListar } from "./turnos-extra-tarifas-listar";
+import { turnosExtraTarifasLeer } from "./turnos-extra-tarifas-leer";
 import { turnosExtraRechazar } from "./turnos-extra-rechazar";
 import { turnosExtraRegistrar } from "./turnos-extra-registrar";
 
@@ -65,7 +65,7 @@ export const capacidadesPauta: readonly Capacidad[] = [
   turnosExtraAprobar,
   turnosExtraRechazar,
   turnosExtraMontoFijar,
-  turnosExtraTarifasListar,
+  turnosExtraTarifasLeer,
   alertasListar,
   exportarPauta,
   publicacionesPublicar,

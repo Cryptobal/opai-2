@@ -7,8 +7,8 @@ import { noEncontrado } from "../errores";
 import { PERMISO_READ } from "./comun";
 
 /** Lee tarifas sugeridas de turno extra de una instalación y sus puestos (CAR-620). */
-export const turnosExtraTarifasListar = defineCapability({
-  id: "pauta.turnos_extra.tarifas_listar",
+export const turnosExtraTarifasLeer = defineCapability({
+  id: "pauta.turnos_extra.tarifas_leer",
   descripcion:
     "Devuelve el monto sugerido de turno extra de la instalación y de cada puesto activo. Solo lectura; no cambia turnos ya registrados.",
   permiso: PERMISO_READ,
@@ -18,6 +18,7 @@ export const turnosExtraTarifasListar = defineCapability({
     puestos: z.array(z.object({ puestoId: z.string(), montoClp: z.number().int().nullable() })),
   }),
   efecto: "lectura",
+  auditarLectura: (s, input) => [input.instalacionId, ...s.puestos.map((p) => p.puestoId)],
   dryRun: false,
   async handler(ctx, { instalacionId }) {
     const ok = await ctx.db.instalacion.findFirst({
