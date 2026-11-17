@@ -78,6 +78,23 @@ async function registrosDelPeriodo(
   return items;
 }
 
+async function avanzarCursorReporte(
+  ctx: Contexto,
+  instalacionId: string,
+  frecuencia: FrecuenciaReporte,
+  ultimoHasta: Date | null,
+) {
+  const { timezone } = await tenantActual(ctx);
+  const hoy = await hoyEmpresa(ctx);
+  const ventana = ventanaReporte(frecuencia, hoy, timezone, ultimoHasta);
+  if (!ventana) return;
+  await ctx.db.reporteAccesoCursor.upsert({
+    where: { tenantId_instalacionId: { tenantId: ctx.tenantId, instalacionId } },
+    create: { tenantId: ctx.tenantId, instalacionId, ultimoHasta: ventana.hasta },
+    update: { ultimoHasta: ventana.hasta },
+  });
+}
+
 /** Envía (o simula) el reporte de una instalación y avanza el cursor si corresponde. */
 export async function enviarReporteAcceso(
   ctx: Contexto,
@@ -131,14 +148,6 @@ export async function enviarReporteAcceso(
     },
   );
   if (!ok) return { enviados: 0, registros: filas.length, omitido: "correo_fallido" };
-  if (!opts.prueba) {
-    const ventana = ventanaReporte(frecuencia, hoy, timezone, cursor?.ultimoHasta ?? null);
-    if (ventana)
-      await ctx.db.reporteAccesoCursor.upsert({
-        where: { tenantId_instalacionId: { tenantId: ctx.tenantId, instalacionId } },
-        create: { tenantId: ctx.tenantId, instalacionId, ultimoHasta: ventana.hasta },
-        update: { ultimoHasta: ventana.hasta },
-      });
-  }
+  if (!opts.prueba) await avanzarCursorReporte(ctx, instalacionId, frecuencia, cursor?.ultimoHasta ?? null);
   return { enviados: destinatarios.length, registros: filas.length };
 }

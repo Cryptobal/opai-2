@@ -12,6 +12,14 @@ const FRECUENCIAS = [
   { valor: "mensual", etiqueta: "Mensual (día 1)" },
 ];
 
+function parseDestinatarios(texto: string): string[] {
+  return texto
+    .split(/[,;\s]+/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .slice(0, 20);
+}
+
 export function EditorReportes({
   instalacionId,
   config,
@@ -54,15 +62,7 @@ export function EditorReportes({
             id="rep-correos"
             disabled={disabled}
             value={dest}
-            onChange={(e) =>
-              onCambiar({
-                reporteDestinatarios: e.target.value
-                  .split(/[,;\s]+/)
-                  .map((x) => x.trim())
-                  .filter(Boolean)
-                  .slice(0, 20),
-              })
-            }
+            onChange={(e) => onCambiar({ reporteDestinatarios: parseDestinatarios(e.target.value) })}
           />
         </Campo>
       </div>

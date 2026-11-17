@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { forTenant, tenantPorSlug } from "@opai/db";
 import { AuthCard, Loading } from "@opai/ds";
 
+import { avisoPrivacidadDeValor } from "./aviso-config";
+
 export const metadata = { title: "Privacidad · Control de acceso" };
 
 type Props = {
@@ -45,13 +47,7 @@ async function Contenido({ params, searchParams }: Props) {
         select: { valor: true },
       })
     : await db.configAcceso.findFirst({ where: { instalacionId: null }, select: { valor: true } });
-  const aviso =
-    typeof fila?.valor === "object" &&
-    fila.valor !== null &&
-    "avisoPrivacidad" in fila.valor &&
-    typeof (fila.valor as { avisoPrivacidad?: string }).avisoPrivacidad === "string"
-      ? (fila.valor as { avisoPrivacidad: string }).avisoPrivacidad
-      : "Tratamos tus datos para controlar el ingreso y la seguridad del recinto, según la Ley 21.719. Puedes ejercer tus derechos contactando al responsable indicado abajo.";
+  const aviso = avisoPrivacidadDeValor(fila?.valor);
   return (
     <AuthCard titulo="Control de acceso">
       <div className="flex flex-col gap-3 text-left">
