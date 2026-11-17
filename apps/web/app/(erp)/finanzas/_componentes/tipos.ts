@@ -1,7 +1,7 @@
 // Formas que las pantallas de Finanzas leen de las capacidades `finanzas.*` (los esquemas de salida
 // viven en packages/capabilities/src/finanzas). Solo lo que las pantallas usan.
 
-export type Sugerencia = { centroCostoId: string; origen: "proveedor" | "ultima_compra" };
+type Sugerencia = { centroCostoId: string; origen: "proveedor" | "ultima_compra" };
 
 export type Compra = {
   id: string;
