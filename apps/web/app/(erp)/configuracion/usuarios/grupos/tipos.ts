@@ -8,7 +8,7 @@ export type GrupoVista = {
 };
 
 /** Miembro del detalle (`core.grupos.get`). */
-export type MiembroGrupo = {
+type MiembroGrupo = {
   userId: string;
   nombre: string;
   email: string;

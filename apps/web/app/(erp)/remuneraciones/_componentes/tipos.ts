@@ -83,7 +83,6 @@ export type Concepto = {
   activo: boolean;
 };
 
-
 /** Liquidación del período (Brief 27). */
 export type LiquidacionResumen = {
   id: string;
@@ -109,3 +108,5 @@ export type ListaLiquidaciones = {
   siguiente: string | null;
   total: { personas: number; liquido: number; costoEmpresa: number };
 };
+=======
+>>>>>>> origin/main
