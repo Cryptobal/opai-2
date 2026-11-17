@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
-import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { enmascararCuenta, enmascararCuentaEnLectura } from "./personas-ficha-comun";
 import { catalogoDe } from "./personas-pago-catalogo";
@@ -129,12 +128,4 @@ export async function vistaPago(ctx: Contexto, personaId: string) {
         }
       : null,
   };
-}
-
-export async function solicitudPendiente(ctx: Contexto, personaId: string) {
-  const s = await ctx.db.personaPagoSolicitud.findFirst({
-    where: { personaId, estado: "pendiente" },
-  });
-  if (!s) throw noEncontrado("La solicitud pendiente");
-  return s;
 }
