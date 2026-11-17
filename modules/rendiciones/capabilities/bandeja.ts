@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
+import { cursorDe, listaSchema, pagina } from "./comun";
+
 import { rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
 import { PERMISO_APROBAR, PERMISO_VER_TODAS } from "./permisos";
 import { actorId, rendicionDe } from "./util";
@@ -25,15 +27,15 @@ export const bandejaListar = defineCapability({
     "Bandeja del aprobador: rendiciones enviadas que esperan su revisión (o ya decididas), con filtros por estado, por quien rinde y por rango de fechas de envío, y los totales por revisar. Cada aprobador ve las que le tocan; quien puede ver todas, las de la empresa.",
   permiso: PERMISO_APROBAR,
   portales: ["erp"],
-  input: z.object({
+  input: listaSchema.pick({ cursor: true, limite: true }).extend({
     estado: z.enum(ESTADOS_BANDEJA).default("enviada"),
     solicitanteId: uuidSchema.optional(),
     desde: fechaSchema.optional().describe("Enviada desde esta fecha (AAAA-MM-DD), inclusive."),
     hasta: fechaSchema.optional().describe("Enviada hasta esta fecha (AAAA-MM-DD), inclusive."),
-    limite: z.number().int().min(1).max(100).default(50),
   }),
   output: z.object({
     rendiciones: z.array(filaSchema),
+    siguiente: z.string().nullable(),
     porRevisar: z.number().int().describe("Rendiciones enviadas que esperan su decisión."),
     montoPorRevisar: z.number().int().describe("Suma en CLP entero de lo que espera su decisión."),
     aprobadasSinPagar: z.number().int().describe("Rendiciones aprobadas que todavía no están en ningún lote activo."),
@@ -55,16 +57,18 @@ export const bandejaListar = defineCapability({
         ...(input.solicitanteId ? { solicitanteId: input.solicitanteId } : {}),
         ...(input.desde || input.hasta ? { enviadaEn } : {}),
       },
-      orderBy: { codigo: "desc" },
-      take: input.limite,
+      orderBy: [{ codigo: "desc" }, { id: "asc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
+    const p = pagina(filas, input.limite, input.cursor);
     const [pendientes, aprobadas] = await Promise.all([
       ctx.db.rendicion.aggregate({ where: { ...base, estado: "enviada" }, _count: true, _sum: { montoTotal: true } }),
       ctx.db.rendicion.count({ where: { ...base, estado: "aprobada", lotes: { none: { activo: true } } } }),
     ]);
-    const nombres = await nombresDe(ctx, [...filas.map((f) => f.aprobadorId), ...filas.map((f) => f.solicitanteId)]);
+    const nombres = await nombresDe(ctx, [...p.items.map((f) => f.aprobadorId), ...p.items.map((f) => f.solicitanteId)]);
     return {
-      rendiciones: filas.map((f) => ({ ...resumenDe(f, nombres), solicitanteNombre: nombres.get(f.solicitanteId) ?? null })),
+      rendiciones: p.items.map((f) => ({ ...resumenDe(f, nombres), solicitanteNombre: nombres.get(f.solicitanteId) ?? null })),
+      siguiente: p.siguiente,
       porRevisar: pendientes._count,
       montoPorRevisar: pendientes._sum.montoTotal ?? 0,
       aprobadasSinPagar: aprobadas,

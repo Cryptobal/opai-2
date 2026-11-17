@@ -1,6 +1,7 @@
 import { Cabecera, Estado, FilaSeleccionable, KpiTile, Segmentado, SplitScreen, Badge } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { PaginacionCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { identidadActual } from "@/lib/servidor";
 
@@ -53,6 +54,14 @@ export function PaginaBandeja({ searchParams, params }: { searchParams: Promise<
                 ))}
               </ul>
             </Estado>
+            <div className="flex justify-end border-t border-border pt-3">
+              <PaginacionCursor
+                p={filtros}
+                mostrados={bandeja.rendiciones.length}
+                siguiente={bandeja.siguiente}
+                total={null}
+              />
+            </div>
           </div>
         );
         return (

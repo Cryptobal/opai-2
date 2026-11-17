@@ -1,12 +1,14 @@
 import { Cabecera, Forbidden } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { PaginacionCursor } from "@/app/_components/maestros/paginacion-cursor";
+import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { CargaFallida } from "@/lib/carga";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { identidadActual } from "@/lib/servidor";
-import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { cargarAdministrador, cargarMias } from "./datos";
+import { cargarAdministrador, cargarContadoresPestanas, cargarMias } from "./datos";
 import { ListaRendiciones } from "./lista";
 import { PestanasRendiciones } from "./pestanas";
 import { BASE, PESTANAS, type PestanaId, type PortalRendicion } from "./tipos";
@@ -15,9 +17,11 @@ import { BASE, PESTANAS, type PestanaId, type PortalRendicion } from "./tipos";
 export function PaginaMisRendiciones({
   portal,
   pestana,
+  searchParams,
 }: {
   portal: PortalRendicion;
   pestana: PestanaId;
+  searchParams?: SearchParams;
 }) {
   const base = BASE[portal];
   const def = PESTANAS.find((p) => p.id === pestana) ?? PESTANAS[0];
@@ -30,12 +34,19 @@ export function PaginaMisRendiciones({
         const i = portal === "erp" ? await identidadActual() : null;
         const puede = i ? puedeDeIdentidad(i) : () => false;
         const accesos = { aprobar: puede("rendiciones:aprobar"), pagar: puede("rendiciones:pagar"), reporte: puede("rendiciones:ver_todas") };
+        const p = searchParams ? await leerParametros(searchParams) : {};
         try {
-          return { todas: await cargarMias(portal), empresa: null, admin: null, accesos };
+          const [pagina, contadores] = await Promise.all([
+            cargarMias(portal, p, def.estado),
+            cargarContadoresPestanas(portal),
+          ]);
+          return { pagina, contadores, p, empresa: null, admin: null, accesos };
         } catch (e) {
           if (!(e instanceof CargaFallida) || e.code !== "FORBIDDEN") throw e;
           return {
-            todas: [],
+            pagina: { rendiciones: [], siguiente: null },
+            contadores: [],
+            p,
             empresa: (await identidadActual())?.actual?.tenant.nombre ?? "tu empresa",
             admin: await cargarAdministrador(portal),
             accesos,
@@ -43,7 +54,7 @@ export function PaginaMisRendiciones({
         }
       }}
     >
-      {({ todas, empresa, admin, accesos }) => {
+      {({ pagina, contadores, p, empresa, admin, accesos }) => {
         if (empresa)
           return (
             <Forbidden
@@ -55,7 +66,8 @@ export function PaginaMisRendiciones({
               }
             />
           );
-        const items = todas.filter((r) => r.estado === def.estado);
+        const items = pagina.rendiciones;
+        const todas = contadores;
         const nueva = (
           <>
             {accesos.aprobar ? <EnlaceBoton href="/rendiciones/bandeja" variante="secondary">Bandeja del aprobador</EnlaceBoton> : null}
@@ -83,8 +95,18 @@ export function PaginaMisRendiciones({
               state="ready"
               items={items}
               portal={portal}
+              pie={
+                <div className="flex justify-end border-t border-border px-4 py-3">
+                  <PaginacionCursor
+                    p={p}
+                    mostrados={items.length}
+                    siguiente={pagina.siguiente}
+                    total={null}
+                  />
+                </div>
+              }
               textos={
-                todas.length === 0
+                contadores.length === 0
                   ? {
                       titulo: "Aún no has rendido gastos",
                       descripcion: "Saca una foto de la boleta y envíala a aprobación.",

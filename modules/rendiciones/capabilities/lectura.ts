@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { defineCapability, prohibido } from "@opai/capabilities";
 
+import { cursorDe, listaSchema, pagina } from "./comun";
+
 import { estadoSchema, rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
 import { PERMISO_APROBAR, PERMISO_RENDIR, PORTALES_RENDIR, PERMISO_VER_TODAS } from "./permisos";
 import { actorId, rendicionDe } from "./util";
@@ -13,12 +15,11 @@ export const rendicionesListar = defineCapability({
     "Lista rendiciones según el alcance pedido: «propias» (las que rindió quien consulta), «por_aprobar» (enviadas y asignadas a quien consulta) o «todas» (solo con permiso de ver todas). Filtra por estado.",
   permiso: PERMISO_RENDIR,
   portales: PORTALES_RENDIR,
-  input: z.object({
+  input: listaSchema.pick({ cursor: true, limite: true }).extend({
     alcance: z.enum(["propias", "por_aprobar", "todas"]).default("propias"),
     estado: estadoSchema.optional(),
-    limite: z.number().int().min(1).max(100).default(50),
   }),
-  output: z.object({ rendiciones: z.array(resumenSchema) }),
+  output: z.object({ rendiciones: z.array(resumenSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => s.rendiciones.map((r) => r.id),
@@ -32,14 +33,15 @@ export const rendicionesListar = defineCapability({
       : {};
     const filas = await ctx.db.rendicion.findMany({
       where: { ...donde, ...(input.estado ? { estado: input.estado } : {}) },
-      orderBy: { codigo: "desc" },
-      take: input.limite,
+      orderBy: [{ codigo: "desc" }, { id: "asc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
+    const p = pagina(filas, input.limite, input.cursor);
     const nombres = await nombresDe(
       ctx,
-      filas.map((f) => f.aprobadorId),
+      p.items.map((f) => f.aprobadorId),
     );
-    return { rendiciones: filas.map((f) => resumenDe(f, nombres)) };
+    return { rendiciones: p.items.map((f) => resumenDe(f, nombres)), siguiente: p.siguiente };
   },
 });
 

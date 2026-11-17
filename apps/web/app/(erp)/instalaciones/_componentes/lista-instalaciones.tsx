@@ -8,12 +8,15 @@ import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionFila } from "@/lib/tipos-maestros";
 
+import { PaginacionCursor } from "@/app/_components/maestros/paginacion-cursor";
+
 import { REGIONES } from "./datos";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 type Props = {
   state: EstadoPantalla;
   items: InstalacionFila[];
+  siguiente: string | null;
   cuentas: { valor: string; etiqueta: string }[];
   titulo: string;
   singular: string;
@@ -51,7 +54,10 @@ export function ListaInstalaciones(p: Props) {
         },
         { param: "region", etiqueta: "Región", opciones: REGIONES },
       ]}
-      meta={{ izquierda: `${p.items.length} ${p.titulo.toLowerCase()}`, derecha: personas(total) }}
+      meta={{
+        izquierda: `${p.items.length}${p.siguiente ? "+" : ""} ${p.titulo.toLowerCase()}`,
+        derecha: personas(total),
+      }}
       seleccionada={p.seleccionada}
       vacio={{
         titulo: `Aún no hay ${p.titulo.toLowerCase()}`,
@@ -85,6 +91,16 @@ export function ListaInstalaciones(p: Props) {
           ),
         };
       })}
+      pie={
+        <div className="flex items-center justify-between gap-2 border-t border-border px-4 py-3">
+          <PaginacionCursor
+            p={p.parametros}
+            mostrados={p.items.length}
+            siguiente={p.siguiente}
+            total={null}
+          />
+        </div>
+      }
     />
   );
 }

@@ -1,9 +1,11 @@
-import { Badge, Card, Estado, type EstadoPantalla, Table, Td, Th, Tr } from "@opai/ds";
+import type { ReactNode } from "react";
+
+import { Badge, Estado, type EstadoPantalla, Table, Td, Th, Tr } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { fechaDe, lineaEstado, pesos, revisaDe } from "./formato";
+import { fechaDe, pesos, revisaDe } from "./formato";
+import { CorregirRendicion, TarjetaRendicion } from "./lista-tarjeta";
 import {
   BASE,
   ETIQUETA_ESTADO,
@@ -17,70 +19,19 @@ const Estadotag = ({ r }: { r: ResumenRendicion }) => (
   <Badge tono={TONO_ESTADO[r.estado]}>{ETIQUETA_ESTADO[r.estado]}</Badge>
 );
 
-/** Motivo que escribió quien revisó: texto de otra persona, se muestra como dato. */
-function Motivo({ r }: { r: ResumenRendicion }) {
-  if (!r.motivoDecision || (r.estado !== "devuelta" && r.estado !== "rechazada")) return null;
-  const devuelta = r.estado === "devuelta";
-  return (
-    <p className="rounded-md bg-warning-muted px-3 py-2 text-base text-warning-fg" role="note">
-      <span className="font-semibold">
-        {devuelta ? "Devuelta" : "Rechazada"}
-        {r.aprobadorNombre ? ` por ${r.aprobadorNombre}` : ""}:
-      </span>{" "}
-      «{r.motivoDecision}»{devuelta ? " Corrígela y reenvíala." : ""}
-    </p>
-  );
-}
-
-const Corregir = ({
-  r,
-  portal,
-  className,
-}: {
-  r: ResumenRendicion;
-  portal: PortalRendicion;
-  className?: string;
-}) =>
-  r.estado === "devuelta" ? (
-    <EnlaceBoton
-      href={`${BASE[portal]}/${r.id}/corregir`}
-      variante="primary"
-      {...(className ? { className } : {})}
-    >
-      Corregir y reenviar
-    </EnlaceBoton>
-  ) : null;
-
-/** Tarjeta (teléfono): el cuerpo es un enlace a la ficha; el botón de corregir va aparte, sin anidar enlaces. */
-function Tarjeta({ r, portal }: { r: ResumenRendicion; portal: PortalRendicion }) {
-  return (
-    <Card className="flex flex-col gap-3 p-4">
-      <LinkNext href={`${BASE[portal]}/${r.id}`} className="flex flex-col gap-2">
-        <span className="flex items-center justify-between gap-2">
-          <span className="t-label text-fg">{r.codigoVisible}</span>
-          <Estadotag r={r} />
-        </span>
-        <span className="text-md font-medium text-fg">{r.descripcion}</span>
-        <span className="t-title text-fg">{pesos(r.montoTotal)}</span>
-        <span className="text-base text-fg-muted">{lineaEstado(r)}</span>
-      </LinkNext>
-      <Motivo r={r} />
-      <Corregir r={r} portal={portal} className="w-full" />
-    </Card>
-  );
-}
-
 /** «Mis rendiciones»: tarjetas en teléfono y tabla en md+; estados vacío, error y sin permiso del patrón. */
 export function ListaRendiciones({
   state,
   items,
   portal,
   textos,
+  pie,
 }: {
   state: EstadoPantalla;
   items: readonly ResumenRendicion[];
   portal: PortalRendicion;
   textos: { titulo: string; descripcion: string; accion?: React.ReactNode };
+  pie?: ReactNode;
 }) {
   return (
     <Estado
@@ -97,7 +48,7 @@ export function ListaRendiciones({
       <ul className="flex flex-col gap-3 md:hidden">
         {items.map((r) => (
           <li key={r.id}>
-            <Tarjeta r={r} portal={portal} />
+            <TarjetaRendicion r={r} portal={portal} />
           </li>
         ))}
       </ul>
@@ -147,7 +98,7 @@ export function ListaRendiciones({
                 <Td className="hidden xl:table-cell">{revisaDe(r).replace("Revisa: ", "")}</Td>
                 <Td>
                   <span className="relative">
-                    <Corregir r={r} portal={portal} />
+                    <CorregirRendicion r={r} portal={portal} />
                   </span>
                 </Td>
               </Tr>
@@ -155,6 +106,7 @@ export function ListaRendiciones({
           </tbody>
         </Table>
       </div>
+      {pie}
     </Estado>
   );
 }

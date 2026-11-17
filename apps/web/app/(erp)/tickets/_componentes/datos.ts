@@ -1,5 +1,7 @@
 import type { BadgeProps } from "@opai/ds";
 
+import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Parametros, SearchParams } from "@/lib/parametros";
 
@@ -83,13 +85,16 @@ export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
   return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
 }
 
+/** Lista paginada por cursor (`siguiente`). */
 export async function cargarTickets(p: Parametros) {
   return ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
     "erp",
     "tickets.tickets.listar",
     {
+      limite: POR_PAGINA,
       vista: p["vista"] ?? "mios",
       ...(p["estado"] ? { estado: p["estado"] } : {}),
+      ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
     },
   );
 }

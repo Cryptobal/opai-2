@@ -1,6 +1,7 @@
 import { Badge, ListScreen } from "@opai/ds";
 
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
+import { PaginacionCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
@@ -46,14 +47,18 @@ export default function Tickets({ searchParams }: Props) {
         return { p, r, tipos: tipos.ok ? tipos.data : [], instalaciones };
       }}
     >
-      {({ r, tipos, instalaciones }) => {
+      {({ p, r, tipos, instalaciones }) => {
         const items = r.ok ? r.data.items : [];
+        const siguiente = r.ok ? r.data.siguiente : null;
         return (
           <ListScreen<Ticket>
             state={estadoPantalla(r)}
             titulo="Tickets"
             accionPrincipal={<NuevoTicket tipos={tipos} instalaciones={instalaciones} />}
             filtros={<ChipsFiltro filtros={[{ param: "vista", etiqueta: "Vista", opciones: OPCIONES_VISTA }]} />}
+            paginacion={
+              <PaginacionCursor p={p} mostrados={items.length} siguiente={siguiente} total={null} />
+            }
             items={items}
             clave={(t) => t.id}
             href={(t) => `/tickets/${t.id}`}

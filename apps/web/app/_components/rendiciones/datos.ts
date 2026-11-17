@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 
+import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+
 import { exigirDatos } from "@/lib/carga";
+import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type {
@@ -10,17 +13,43 @@ import type {
   ResumenRendicion,
 } from "./tipos";
 
-/** Mis rendiciones (una consulta): las pestañas y sus contadores salen de esta misma lista. */
-export async function cargarMias(portal: PortalRendicion): Promise<ResumenRendicion[]> {
-  const r = await ejecutarComoUsuario<{ rendiciones: ResumenRendicion[] }>(
-    portal,
-    "rendiciones.rendiciones.listar",
-    {
-      alcance: "propias",
-      limite: 100,
-    },
+type PaginaMias = { rendiciones: ResumenRendicion[]; siguiente: string | null };
+
+/** Mis rendiciones de la pestaña activa, paginadas por cursor (CAR-624). */
+export async function cargarMias(
+  portal: PortalRendicion,
+  p: Parametros,
+  estado?: ResumenRendicion["estado"],
+): Promise<PaginaMias> {
+  const r = await ejecutarComoUsuario<PaginaMias>(portal, "rendiciones.rendiciones.listar", {
+    alcance: "propias",
+    limite: POR_PAGINA,
+    ...(estado ? { estado } : {}),
+    ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
+  });
+  return exigirDatos(r);
+}
+
+/** Contadores de pestañas: una página por estado (tope 100 por pestaña, suficiente para el badge). */
+export async function cargarContadoresPestanas(portal: PortalRendicion): Promise<ResumenRendicion[]> {
+  const estados: ResumenRendicion["estado"][] = [
+    "borrador",
+    "enviada",
+    "aprobada",
+    "rechazada",
+    "devuelta",
+    "pagada",
+  ];
+  const paginas = await Promise.all(
+    estados.map((estado) =>
+      ejecutarComoUsuario<PaginaMias>(portal, "rendiciones.rendiciones.listar", {
+        alcance: "propias",
+        limite: POR_PAGINA,
+        estado,
+      }),
+    ),
   );
-  return exigirDatos(r).rendiciones;
+  return paginas.flatMap((r) => (r.ok ? r.data.rendiciones : []));
 }
 
 export async function cargarOpciones(

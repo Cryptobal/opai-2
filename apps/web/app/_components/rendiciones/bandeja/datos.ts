@@ -1,14 +1,20 @@
 import { notFound } from "next/navigation";
 
+import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+
 import { exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type { Bandeja, DetalleBandeja, FiltrosBandeja } from "./tipos";
 
-/** La bandeja y sus totales salen de una sola capacidad (`rendiciones.bandeja.listar`). */
+/** La bandeja y sus totales salen de una sola capacidad (`rendiciones.bandeja.listar`), con `siguiente` para paginar. */
 export async function cargarBandeja(f: FiltrosBandeja): Promise<Bandeja> {
+  const { prev: _prev, ...filtros } = f;
   return exigirDatos(
-    await ejecutarComoUsuario<Bandeja>("erp", "rendiciones.bandeja.listar", { ...f, limite: 100 }),
+    await ejecutarComoUsuario<Bandeja>("erp", "rendiciones.bandeja.listar", {
+      ...filtros,
+      limite: POR_PAGINA,
+    }),
   );
 }
 
