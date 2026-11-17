@@ -14,17 +14,17 @@ permissions:
 
 concurrency:
   group: preview-${{ github.event.pull_request.number }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   rama-neon:
     # Sin rama Neon para PR en borrador; al cerrar siempre se limpia.
-    if: github.event.action == 'closed' || github.event.pull_request.draft != true
+    if: github.event.action == 'closed' || github.event.pull_request.draft == false
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 15
     permissions:
-      contents: read
-      pull-requests: read # solo para saber si un PR huérfano ya está cerrado
+      contents: write # borrar la rama Git al cerrar el PR (CAR-629)
+      pull-requests: read # saber si un PR huérfano ya está cerrado
     env:
       RAMA: preview/pr-${{ github.event.pull_request.number }}
       RAMA_GIT: ${{ github.head_ref }}
@@ -55,15 +55,32 @@ jobs:
           exit 1
       - uses: actions/checkout@v4
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        run: .github/scripts/ci-solo-documentacion.sh
+      - name: Solo documentación
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs == 'true'
+        run: echo "PR de solo *.md o docs/** — preview Neon/Vercel omitida (CAR-640)."
       - uses: pnpm/action-setup@v4
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
       - uses: actions/setup-node@v4
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - name: Borrar ramas Neon huérfanas (PR ya cerrado)
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
@@ -97,16 +114,18 @@ jobs:
             fi
           done
       - name: Crear o reutilizar la rama Neon
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
         id: neon
-        uses: neondatabase/create-branch-action@v6
-        with:
-          project_id: ${{ secrets.NEON_PROJECT_ID }}
-          branch_name: ${{ env.RAMA }}
-          parent_branch: main
-          api_key: ${{ secrets.NEON_API_KEY }}
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: .github/scripts/neon-preview-branch.sh
       - name: Migrar la rama
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
         run: |
@@ -118,7 +137,9 @@ jobs:
           PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:huerfanas
           DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
       - name: Contraseña propia de opai_app y DATABASE_URL de la preview
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
           DB_URL_POOLED: ${{ steps.neon.outputs.db_url_pooled }}
@@ -177,7 +198,9 @@ jobs:
           fi
           printf '%s' "$URL_APP" | npx --yes "$VERCEL_CLI" env add DATABASE_URL preview "$RAMA_GIT" >/dev/null
       - name: Redesplegar la preview con la base de su rama
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
         # El despliegue automático de Vercel pudo partir antes de fijar la variable: se repite. Se
         # redespliega el despliegue de Git de ESTE commit (vercel redeploy conserva su rama), para
         # que tome la DATABASE_URL de la rama del PR. Un `vercel deploy` desde el checkout (merge
@@ -200,6 +223,16 @@ jobs:
             exit 1
           fi
           npx --yes "$VERCEL_CLI" redeploy "$URL" --target preview >/dev/null
+      - name: Suspender compute al terminar la preview
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          ep=$(npx --yes "$NEONCTL" postgres computes list --branch "$RAMA" --project-id "$NEON_PROJECT_ID" --output json | jq -r '.[0].id // empty')
+          [ -z "$ep" ] || npx --yes "$NEONCTL" postgres computes suspend "$ep" --project-id "$NEON_PROJECT_ID" || true
       - name: Borrar la rama Neon y la variable al cerrar
         if: steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
         env:
@@ -219,4 +252,18 @@ jobs:
             echo "$salida"
             echo "$salida" | grep -qiE 'not found|no existing' || exit 1
             echo "La variable DATABASE_URL de $RAMA_GIT ya no existe."
+          fi
+      - name: Borrar rama Git del PR
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.ref != 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref="${{ github.event.pull_request.head.ref }}"
+          if ! gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${ref}" 2>&1; then
+            echo "La rama Git $ref ya no existe o no se pudo borrar."
+          else
+            echo "Rama Git $ref borrada."
           fi
