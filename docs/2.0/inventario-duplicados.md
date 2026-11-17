@@ -52,7 +52,7 @@ Paridad entre portales (misma UI ERP/supervisor): rendiciones; catch-alls `/:rut
 
 Inventario de paridad pantalla ↔ MCP: `docs/2.0/paridad/mcp-inventario.md`, gate `paridad-inventario.test.ts`. No se encontraron IDs de capacidad repetidos en el registro.
 
-Datos de configuración que **no** son ajustes del catálogo (tablas o capacidades propias): flujo de caja (`finanzas.flujo_ajustes`), embudo y catálogos comerciales (`comercial.config.*`), marca CPQ vs marca empresa (CPQ enlaza a `/configuracion/marca` para logos).
+Datos de configuración que **no** son ajustes del catálogo (tablas o capacidades propias): flujo de caja (`finanzas.flujo_ajustes`), embudo y catálogos comerciales (`comercial.config.*`), marca CPQ vs marca empresa (CPQ enlaza a `/configuracion/marca` para logos), **Control de acceso** (`acceso.configuraciones` + capacidades `acceso.config.*`, empresa e instalación — CAR-630; no duplicar en ajustes del núcleo).
 
 ## 5. Decisiones pendientes
 
@@ -62,6 +62,12 @@ Datos de configuración que **no** son ajustes del catálogo (tablas o capacidad
 | Marca documental CPQ vs Marca empresa | CPQ pestaña vs `/configuracion/marca` | Ya enlazados; CPQ guarda tipografía/pie distinto de logos | Mantener dueño dual con enlace (actual) o mover todo a Marca |
 | Ajustes de flujo en tabla `finanzas.flujo_ajustes` vs ajustes manifest Finanzas | Módulo Finanzas | Modelos distintos (planilla vs reglas de cobranza/facturación) | Documentar en ayuda de Configuración que son capas distintas |
 | Geocerca por defecto (Rondas) vs radio de alerta (Asistencia) | Dos módulos | Ley y producto distintos (ronda vs marca) | Revisar si el tenant debería tener un solo «radio por defecto» transversal |
+
+### Resuelto (acceso)
+
+| Concepto | Dónde estaba | Dueño | Acción |
+| --- | --- | --- | --- |
+| Configuración de Control de acceso (tipos, fuera de lista, etc.) | PR #963 (ajustes núcleo) y PR #917 (`acceso.configuraciones`) | Tabla `acceso.configuraciones` + `acceso.config.get/set` (#917, R1) | #963 cerrado; decisión en CAR-479 (CAR-630) |
 
 ## 6. Regla CI
 
