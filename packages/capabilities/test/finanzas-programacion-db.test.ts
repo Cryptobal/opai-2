@@ -125,7 +125,7 @@ describe.skipIf(!urlPropietario)("programaciones recurrentes · base real", () =
     if (r0 && r0.estado === "omitido") expect(r0.motivo).toMatch(/Sin UF publicada/);
   });
 
-  it("no genera períodos anteriores a la fecha de corte con 1.0", async () => {
+  it("no genera períodos anteriores a la fecha de corte", async () => {
     await s.dato("finanzas.dte_config.actualizar", {
       ambiente: "certificacion",
       rutEmisor: "76111222-8",
