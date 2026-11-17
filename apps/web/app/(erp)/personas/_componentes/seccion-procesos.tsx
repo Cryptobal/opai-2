@@ -63,7 +63,7 @@ function BloqueProceso({
 }) {
   const pendientes = pr.pasos.filter((p) => p.estado === "por_hacer").length;
   return (
-    <section key={pr.id} aria-label={pr.tipo === "ingreso" ? "Lista de ingreso" : "Lista de salida"}>
+    <section aria-label={pr.tipo === "ingreso" ? "Lista de ingreso" : "Lista de salida"}>
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <h4 className="t-label">{pr.tipo === "ingreso" ? "Ingreso" : "Salida"}</h4>
         <Badge tono={pr.estado === "cerrado" ? "success" : "info"}>
