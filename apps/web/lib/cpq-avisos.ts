@@ -3,7 +3,7 @@ export const RUTA_REMUNERACIONES = "/configuracion/remuneraciones";
 /** Abre la confirmación de la mutual adicional al llegar a Remuneraciones. */
 export const RUTA_CONFIRMAR_MUTUAL = `${RUTA_REMUNERACIONES}?mutual=1`;
 
-export type AccionAvisoCpq = { tipo: "editar_linea"; lineaId: string; etiqueta: string };
+type AccionAvisoCpq = { tipo: "editar_linea"; lineaId: string; etiqueta: string };
 
 export type AvisoCpq = {
   id: string;
