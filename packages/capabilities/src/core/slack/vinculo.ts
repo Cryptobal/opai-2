@@ -7,7 +7,7 @@ import type { Contexto } from "../../types";
 import { instalacionSlack, tokenSlack } from "./comun";
 
 /** Portales que hacen «interno» a un usuario. Trabajador, terreno y cliente nunca se vinculan (decisión 5). */
-export const PORTALES_INTERNOS = ["erp", "supervisor"] as const;
+const PORTALES_INTERNOS = ["erp", "supervisor"] as const;
 /** Búsquedas por corrida: `users.lookupByEmail` es de nivel 3 en Slack (~50 por minuto). */
 export const MAX_POR_CORRIDA = 40;
 
@@ -20,7 +20,7 @@ export const MOTIVOS_SIN_VINCULO = [
   "ya_ligado",
   "error",
 ] as const;
-export type MotivoSinVinculo = (typeof MOTIVOS_SIN_VINCULO)[number];
+type MotivoSinVinculo = (typeof MOTIVOS_SIN_VINCULO)[number];
 
 export type Resultado =
   | { userId: string; estado: "vinculado"; slackUserId: string }
@@ -29,7 +29,7 @@ export type Resultado =
 export const slackUsuarios = () => clienteSlackUsuarios((url, init) => fetch(url, init));
 
 /** Decide el vínculo de una persona según lo que respondió Slack (sin escribir nada). */
-export function decidir(userId: string, u: UsuarioSlack | null, teamId: string): Resultado {
+function decidir(userId: string, u: UsuarioSlack | null, teamId: string): Resultado {
   const sin = (motivo: MotivoSinVinculo): Resultado => ({ userId, estado: "sin_vincular", motivo });
   if (!u) return sin("no_encontrado");
   if (u.teamId !== teamId) return sin("otro_espacio");
