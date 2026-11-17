@@ -9,6 +9,7 @@ import {
   membresiaBloqueada,
   metodosDeUsuario,
   quitarPasskey,
+  registrarVerComo,
   renombrarPasskey,
   restablecerSegundoFactor,
   ultimosAccesos,
@@ -28,6 +29,7 @@ export const identidadEnDb: Identidad = {
   quitarPasskey,
   desactivarTotp,
   consumirReautenticacion,
+  registrarVerComo,
   appsConectadas,
   desconectarApp,
 };

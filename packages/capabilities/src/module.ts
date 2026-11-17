@@ -29,7 +29,7 @@ export type EntradaNavegacion = {
 };
 
 /** Acción de ⌘K (Brief 05, §7 de `NAVEGACION.md`): solo navega, nunca ejecuta una escritura directa. */
-export type AccionNavegacion = {
+type AccionNavegacion = {
   capacidad: string;
   etiqueta: string;
   href: string;
