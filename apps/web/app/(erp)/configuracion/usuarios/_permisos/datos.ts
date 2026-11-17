@@ -6,8 +6,6 @@ import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 import { idsCatalogo, type ModuloCatalogo } from "./etiquetas";
 import type { RolVista } from "./roles";
 
-export type { RolVista } from "./roles";
-
 export type DatosPermisos = {
   catalogo: Resultado<ModuloCatalogo[]>;
   roles: Resultado<RolVista[]>;
