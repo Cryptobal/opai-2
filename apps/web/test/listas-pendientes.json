@@ -126,5 +126,10 @@
   "portal_trabajador.arco.listar",
   "rendiciones.bandeja.listar",
   "rendiciones.lotes.listar",
-  "rendiciones.rendiciones.listar"
+  "rendiciones.rendiciones.listar",
+  "rondas.incidentes_tipo.listar",
+  "rondas.plantillas.listar",
+  "rondas.programaciones.listar",
+  "rondas.puntos.listar",
+  "tickets.tipos.listar"
 ]
