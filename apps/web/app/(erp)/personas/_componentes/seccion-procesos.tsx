@@ -1,6 +1,7 @@
-import { PERMISOS_CORE } from "@opai/domain";
-import { Badge, SeccionTarjeta } from "@opai/ds";
+import { PERMISOS_CORE, TITULO_PASO_DEVOLVER_INVENTARIO } from "@opai/domain";
+import { Badge, Enlace, SeccionTarjeta } from "@opai/ds";
 
+import { LinkNext } from "@/app/_components/link-next";
 import { AccionesEntidad, type AccionEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { fecha } from "@/lib/fechas";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -58,6 +59,7 @@ export async function SeccionProcesos({ personaId }: { personaId: string }) {
   const r = await ejecutarComoUsuario<{ procesos: Proceso[] }>("erp", "core.procesos_persona.listar", { personaId });
   if (!r.ok) return <SeccionError titulo={TITULO} que="las listas de ingreso y salida" />;
   const gestiona = puede(PERMISOS_CORE.vinculosManage);
+  const inventario = identidad.modulosActivos.includes("inventario");
   const procesos = r.data.procesos;
   return (
     <SeccionTarjeta titulo={TITULO}>
@@ -87,6 +89,13 @@ export async function SeccionProcesos({ personaId }: { personaId: string }) {
                         Vence {fecha(p.vence)} · {p.responsable ?? "Sin responsable"}
                         {p.nota ? ` · ${p.nota}` : ""}
                       </p>
+                      {inventario && pr.tipo === "salida" && p.titulo === TITULO_PASO_DEVOLVER_INVENTARIO ? (
+                        <p className="mt-1">
+                          <Enlace Link={LinkNext} href={`/inventario/entregas`}>
+                            Ir a Inventario › Entregas
+                          </Enlace>
+                        </p>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-1">
                       <Badge tono={ESTADO[p.estado].tono}>{ESTADO[p.estado].texto}</Badge>
