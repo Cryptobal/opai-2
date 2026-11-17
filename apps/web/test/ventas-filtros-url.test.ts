@@ -7,16 +7,18 @@ describe("conFiltros (CAR-255)", () => {
     expect(conFiltros("/finanzas/ventas", {})).toBe("/finanzas/ventas");
   });
 
-  it("conserva período, estado y búsqueda y descarta el resto (cursor, editar)", () => {
+  it("conserva filtros y paginación (CAR-585) y descarta editar", () => {
     const r = conFiltros("/finanzas/ventas/x", { periodo: "2026-10", estado: "borrador", q: "ñandú 1", cursor: "abc", editar: "1" });
     const q = new URL(r, "http://x").searchParams;
     expect(r.startsWith("/finanzas/ventas/x?")).toBe(true);
-    expect([...q.keys()].sort()).toEqual(["estado", "periodo", "q"]);
+    expect([...q.keys()].sort()).toEqual(["cursor", "estado", "periodo", "q"]);
     expect(q.get("q")).toBe("ñandú 1");
   });
 
-  it("conserva también el tipo y el orden del libro (CAR-270)", () => {
-    expect(conFiltros("/f", { tipo: "61", orden: "mayor_monto", cursor: "x" })).toBe("/f?tipo=61&orden=mayor_monto");
+  it("conserva también el tipo, orden y cursor del libro (CAR-270, CAR-585)", () => {
+    expect(conFiltros("/f", { tipo: "61", orden: "mayor_monto", cursor: "x" })).toBe(
+      "/f?tipo=61&orden=mayor_monto&cursor=x",
+    );
   });
 
   it("agrega parámetros extra sin perder los filtros", () => {
