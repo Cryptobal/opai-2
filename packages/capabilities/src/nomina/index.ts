@@ -11,6 +11,7 @@ import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
 import { lreGenerar } from "./lre";
 import { previredGenerar } from "./previred";
 import { f301Generar } from "./f30-1";
+import { f29RetencionGenerar } from "./f29";
 import { consumidorLiquidacionPublicada } from "./consumidor-liquidacion-publicada";
 import { libroRemuneracionesExcel, libroRemuneracionesPdf } from "./libro-remuneraciones";
 import { liquidacionesPublicar } from "./liquidaciones-publicar";
@@ -62,6 +63,7 @@ export const capacidadesNomina: readonly Capacidad[] = [
   lreGenerar,
   previredGenerar,
   f301Generar,
+  f29RetencionGenerar,
   libroRemuneracionesExcel,
   libroRemuneracionesPdf,
   liquidacionesPublicar,

@@ -12,4 +12,6 @@ export * from "./f30-1";
 export * from "./cumplimiento-dt";
 export * from "./libro-remuneraciones";
 export * from "./libro-remuneraciones-excel";
+export * from "./f29-retencion";
+export * from "./f29-retencion-excel";
 export * from "./liquidacion-pdf";

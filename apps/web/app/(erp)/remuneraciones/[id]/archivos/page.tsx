@@ -5,6 +5,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { obligacionesArchivos } from "../../_componentes/datos";
 import { opcionesPeriodo, periodoDeRuta } from "../../_componentes/pagina-periodo";
 import { TarjetaArchivoLegal } from "../../_componentes/tarjeta-archivo-legal";
+import { TarjetaF29Retencion } from "../../_componentes/tarjeta-f29-retencion";
 import { TarjetaLibroRemuneraciones } from "../../_componentes/tarjeta-libro-remuneraciones";
 
 export const metadata = { title: "Archivos y declaraciones" };
@@ -43,6 +44,7 @@ export default function ArchivosPeriodo({ params }: Props) {
             <TarjetaArchivoLegal periodoId={d.id} tipo="lre" obligacion={d.obl?.lre ?? null} tenantId={d.obl?.tenantId ?? ""} />
             <TarjetaArchivoLegal periodoId={d.id} tipo="previred" obligacion={d.obl?.previred ?? null} tenantId={d.obl?.tenantId ?? ""} />
             <TarjetaArchivoLegal periodoId={d.id} tipo="f30_1" obligacion={d.obl?.f30_1 ?? null} tenantId={d.obl?.tenantId ?? ""} />
+            <TarjetaF29Retencion periodoId={d.id} obligacion={d.obl?.f29 ?? null} />
             <TarjetaLibroRemuneraciones periodoId={d.id} />
           </div>
         );

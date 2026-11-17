@@ -41,5 +41,12 @@ export async function obligacionesArchivos(anio: number, mes: number) {
     identidadActual(),
   ]);
   const del = (tipo: string) => (r.ok ? (r.data.find((o) => o.tipo === tipo && o.mes === mes) ?? null) : null);
-  return { ok: r.ok, lre: del("lre"), previred: del("previred"), f30_1: del("f30_1"), tenantId: identidad?.actual?.tenantId ?? "" };
+  return {
+    ok: r.ok,
+    lre: del("lre"),
+    previred: del("previred"),
+    f30_1: del("f30_1"),
+    f29: del("f29_retencion"),
+    tenantId: identidad?.actual?.tenantId ?? "",
+  };
 }
