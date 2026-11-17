@@ -31,7 +31,7 @@ function accionesLibro(gestiona: boolean) {
   );
 }
 
-function avisoSinCentro(resumen: ResumenLibro, gestiona: boolean) {
+function avisoSinCentro(resumen: ResumenLibro | undefined, gestiona: boolean) {
   if (!resumen || resumen.sinCentroCosto <= 0) return undefined;
   return (
     <Alerta
