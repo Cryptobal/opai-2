@@ -40,7 +40,7 @@ const semilla = () => ({
 
 const como = () => contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: ["nomina"], semilla: semilla() });
 
-type ItemMidt = { movimientoTipo: string; referenciaId: string };
+type ItemMidt = { movimientoTipo: string; referenciaId: string; registrado?: boolean; hechoEn?: string };
 
 beforeEach(() => {
   limpiarRegistro();
@@ -67,7 +67,8 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.listar", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const fin = r.data.items.find((m) => m.movimientoTipo === "finiquito" && m.referenciaId === V2);
+    const data = r.data as { items: ItemMidt[] };
+    const fin = data.items.find((m) => m.movimientoTipo === "finiquito" && m.referenciaId === V2);
     expect(fin?.registrado).toBe(false);
     expect(fin?.hechoEn).toBe("2026-09-15");
   });
