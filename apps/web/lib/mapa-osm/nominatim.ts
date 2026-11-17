@@ -1,4 +1,4 @@
-const UA = "OPAI-2/1.0 (mapas rondas; contacto opai.cl)";
+const UA = "OPAI mapas rondas (contacto opai.cl)";
 
 export type SugerenciaUbicacion = {
   lat: number;
