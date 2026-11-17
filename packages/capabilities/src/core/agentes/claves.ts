@@ -9,6 +9,7 @@ import { obtenerCapacidad } from "../../registry";
 import type { Contexto } from "../../types";
 import { iso } from "../comun";
 import { uuidSchema } from "../esquemas";
+import { vencimientoConPolitica } from "../apikey-politica";
 import { expiracionDeKey, SCOPE_PLATAFORMA } from "../apikey-scopes";
 
 const usdAMicro = (usd: number) => BigInt(Math.round(usd * 1_000_000));
@@ -52,16 +53,17 @@ export const apikeysUpdate = defineCapability({
       throw prohibido("Cambiar el presupuesto de un agente requiere el permiso de agentes.");
     }
     // Una key de plataforma no se puede dejar sin vencimiento ni pasar de 7 días (CAR-40).
+    // Las demás aplican la misma política que al crear (CAR-588).
     const expiraEn =
       input.expiraEn === undefined
         ? k.expiraEn
         : k.scopes.includes(SCOPE_PLATAFORMA)
           ? expiracionDeKey(k.scopes, input.expiraEn ?? undefined)
-          : input.expiraEn
-            ? new Date(input.expiraEn)
-            : null;
-    if (expiraEn && input.expiraEn && expiraEn.getTime() <= Date.now())
-      throw reglaDeNegocio("La expiración debe ser futura.");
+          : input.expiraEn === null
+            ? (() => {
+                throw reglaDeNegocio("Una API key debe tener fecha de vencimiento.");
+              })()
+            : await vencimientoConPolitica(ctx, input.expiraEn);
     const presupuesto =
       input.presupuestoMensualUsd === undefined
         ? k.presupuestoMensualMicro
