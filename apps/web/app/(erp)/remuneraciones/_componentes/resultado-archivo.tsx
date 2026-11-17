@@ -8,7 +8,12 @@ export type ArchivoLegal = {
   advertencias: string[];
 };
 
-const ETIQUETA: Record<string, string> = { lre: "LRE", previred: "archivo de Previred", pago_banco: "pago bancario" };
+const ETIQUETA: Record<string, string> = {
+  lre: "LRE",
+  previred: "archivo de Previred",
+  pago_banco: "pago bancario",
+  f30_1: "certificado F30-1",
+};
 
 /** Resultado de validar un archivo legal: conteo, tabla de errores por persona y avisos de formato. */
 export function ResultadoArchivo({
