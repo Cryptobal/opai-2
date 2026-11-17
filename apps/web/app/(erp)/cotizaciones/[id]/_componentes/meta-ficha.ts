@@ -1,5 +1,5 @@
 /** Metadatos de la ficha que usa la pantalla (subconjunto de `meta` de `cpq.cotizaciones.ficha`). */
-export type EstadoFichaMeta = {
+type EstadoFichaMeta = {
   estado: string;
   etiqueta: string;
   siguiente: { accion: string; etiqueta: string };
