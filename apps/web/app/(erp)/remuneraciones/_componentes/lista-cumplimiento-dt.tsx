@@ -6,6 +6,7 @@ import { Alerta, avisar, Badge, Button, Empty, Segmentado, Table, Td, Th } from 
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { descargarTexto } from "./descargar-texto";
 import { MarcarRegistroMiDt } from "./marcar-registro-midt";
 
 export type MovimientoMiDt = {
@@ -21,13 +22,6 @@ export type MovimientoMiDt = {
 };
 
 const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo", finiquito: "Finiquito" } as const;
-
-function descargar(nombre: string, contenido: string) {
-  const url = URL.createObjectURL(new Blob([contenido], { type: "text/csv;charset=utf-8" }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: nombre });
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
-}
 
 /** Contratos y anexos para Mi DT (diseño 07). */
 export function ListaCumplimientoDt({
@@ -51,7 +45,7 @@ export function ListaCumplimientoDt({
   async function exportarPendientes() {
     const r = await ejecutar<{ nombre: string; contenido: string }>("nomina.midt.exportar_pendientes", {});
     if (r) {
-      descargar(r.nombre, r.contenido);
+      descargarTexto(r.nombre, r.contenido);
       avisar.exito("Archivo de pendientes descargado");
     }
   }
@@ -61,7 +55,7 @@ export function ListaCumplimientoDt({
       movimientoTipo: m.movimientoTipo,
       referenciaId: m.referenciaId,
     });
-    if (r) descargar(r.nombre, r.contenido);
+    if (r) descargarTexto(r.nombre, r.contenido);
   }
 
   if (items.length === 0)
