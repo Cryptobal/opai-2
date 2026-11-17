@@ -30,7 +30,7 @@ type Fila = { fila: ContactoOpai1; datos: DatosContacto; cuenta: CuentaResuelta 
 /** Vínculo adicional de la misma persona (correo) en otra cuenta. */
 export const MOTIVO_VINCULO_PERSONA = "persona_unica_vinculo";
 /** @deprecated Usar MOTIVO_VINCULO_PERSONA; alias para tests heredados. */
-export const MOTIVO_NN = MOTIVO_VINCULO_PERSONA;
+const MOTIVO_NN = MOTIVO_VINCULO_PERSONA;
 
 function vinculoDe(
   destino: EstadoDestino,

@@ -4,7 +4,7 @@ import { rutValido } from "@opai/domain";
 import type { DatosCuenta } from "./cuentas";
 
 /** Campos obligatorios para emitir DTE manual con datos del cliente (sin inventar defaults). */
-export const CAMPOS_TRIBUTARIOS = [
+const CAMPOS_TRIBUTARIOS = [
   "rut",
   "razon_social",
   "giro",
