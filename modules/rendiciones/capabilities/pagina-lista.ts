@@ -3,6 +3,9 @@ import { z } from "zod";
 import type { Contexto } from "@opai/capabilities";
 
 import { estadoSchema, uuidSchema } from "./esquemas";
+
+type WhereRendicion = NonNullable<NonNullable<Parameters<Contexto["db"]["rendicion"]["findMany"]>[0]>["where"]>;
+type WhereLotePago = NonNullable<NonNullable<Parameters<Contexto["db"]["lotePago"]["findMany"]>[0]>["where"]>;
 import { nombresDe } from "./vista";
 
 export const fechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD.");
@@ -43,27 +46,31 @@ function pagina<T extends { id: string }>(filas: T[], limite: number, cursor: st
 
 const ordenCodigoDesc = [{ codigo: "desc" as const }, { id: "desc" as const }];
 
-function takePagina(cursor: string | undefined, limite: number) {
-  return { orderBy: ordenCodigoDesc, ...cursorDe(cursor, limite) };
-}
-
 export async function rendicionesDePagina(
   ctx: Contexto,
-  where: NonNullable<Parameters<Contexto["db"]["rendicion"]["findMany"]>[0]>["where"],
+  where: WhereRendicion,
   cursor: string | undefined,
   limite: number,
 ) {
-  const filas = await ctx.db.rendicion.findMany({ where, ...takePagina(cursor, limite) });
+  const filas = await ctx.db.rendicion.findMany({
+    where,
+    orderBy: ordenCodigoDesc,
+    ...cursorDe(cursor, limite),
+  });
   return pagina(filas, limite, cursor);
 }
 
 export async function lotesDePagina(
   ctx: Contexto,
-  where: NonNullable<Parameters<Contexto["db"]["lotePago"]["findMany"]>[0]>["where"],
+  where: WhereLotePago,
   cursor: string | undefined,
   limite: number,
 ) {
-  const filas = await ctx.db.lotePago.findMany({ where, ...takePagina(cursor, limite) });
+  const filas = await ctx.db.lotePago.findMany({
+    where,
+    orderBy: ordenCodigoDesc,
+    ...cursorDe(cursor, limite),
+  });
   return pagina(filas, limite, cursor);
 }
 
