@@ -51,7 +51,7 @@ export const manifest = defineModule({
       area: "personas",
       href: "/remuneraciones/cumplimiento-dt/finiquitos",
       etiqueta: "Finiquitos Mi DT",
-      icono: "UserCheck",
+      icono: "IdCard",
       orden: 7,
       permiso: "nomina:read",
     },

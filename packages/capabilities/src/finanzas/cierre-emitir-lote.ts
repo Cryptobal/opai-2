@@ -13,7 +13,7 @@ import { foliosPrevistos } from "./ventas-folios-logica";
 import { enviarEmitidosAlSii, montoDocumentos } from "./ventas-aprobacion-texto";
 import type { Contexto } from "../types";
 
-export const MAX_LOTE_CIERRE = 50;
+const MAX_LOTE_CIERRE = 50;
 
 const resultadoSchema = z.object({
   documentoId: z.string(),

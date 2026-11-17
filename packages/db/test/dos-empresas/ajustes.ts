@@ -462,6 +462,18 @@ export const AJUSTES: Record<string, Ajuste> = {
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
   "nomina.periodos": { fijas: ["mes"], valores: () => ({ mes: 1 }) },
   "nomina.obligaciones": { fijas: ["mes", "tipo"], valores: () => ({ tipo: "lre", mes: 1 }) },
+  "nomina.registros_mi_dt": {
+    dependencias: ["core.personas"],
+    fijas: ["movimiento_tipo"],
+    valores: (ctx) => ({
+      movimiento_tipo: "alta",
+      referencia_id: id(ctx, "core.personas"),
+      persona_id: id(ctx, "core.personas"),
+      hecho_en: "2026-01-01",
+      registrado_en: "2026-01-02",
+      documento_id: null,
+    }),
+  },
   // Finanzas · Flujo de caja (CAR-91): sección válida y semanas en lunes (CHECK de cada tabla).
   "finanzas.flujo_filas": { valores: () => ({ seccion: "ingreso" }) },
   "finanzas.flujo_celdas": { valores: () => ({ semana: "2026-01-05", monto: 1 }) },
