@@ -76,7 +76,7 @@ export function PieArmarLote({
         <span className="text-base text-fg-muted">{cantidad} rendiciones seleccionadas</span>
         <span className="flex items-center gap-3">
           <b className="tabular-nums">{pesos(total)}</b>
-          <Button variant={varianteBoton} disabled={deshabilitado ?? cantidad === 0 || ocupado} onClick={() => void onCrear()}>
+          <Button variant={varianteBoton} disabled={deshabilitado ?? (cantidad === 0 || ocupado)} onClick={() => void onCrear()}>
             {ocupado ? "Creando…" : etiquetaBoton}
           </Button>
         </span>
