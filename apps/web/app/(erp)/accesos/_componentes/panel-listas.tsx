@@ -9,6 +9,7 @@ import { QuitarEntrada } from "./quitar-entrada";
 
 export type EntradaLista = {
   id: string;
+  alcance: "empresa" | "cuenta" | "instalacion" | "grupo";
   tipo: "autorizada" | "bloqueada";
   mascara: string;
   nombre: string | null;
@@ -20,6 +21,14 @@ export type EntradaLista = {
   desdeMin: number | null;
   hastaMin: number | null;
   usoUnico: boolean;
+  autorNombre: string | null;
+};
+
+const ETIQUETA_ALCANCE: Record<EntradaLista["alcance"], string> = {
+  empresa: "Empresa",
+  cuenta: "Cuenta cliente",
+  instalacion: "Instalación",
+  grupo: "Grupo",
 };
 
 const DIA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -50,6 +59,8 @@ function columnasDe(bloq: boolean): Columna<EntradaLista>[] {
       render: (e) => <span className="t-numeric">{e.mascara}</span>,
     },
     { id: "tipos", etiqueta: "Tipos", render: tipos },
+    { id: "alcance", etiqueta: "Alcance", render: (e) => ETIQUETA_ALCANCE[e.alcance] ?? e.alcance },
+    { id: "autor", etiqueta: "Autor", render: (e) => e.autorNombre ?? "—" },
     { id: "vig", etiqueta: "Vigencia", render: vigencia },
     bloq
       ? { id: "motivo", etiqueta: "Motivo", render: (e) => e.motivo ?? "—" }

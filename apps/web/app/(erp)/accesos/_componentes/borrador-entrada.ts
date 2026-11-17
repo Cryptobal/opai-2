@@ -1,4 +1,6 @@
 // Borrador de la hoja «Agregar» de una lista de acceso (CAR-475).
+export type AlcanceLista = "empresa" | "cuenta" | "instalacion" | "grupo";
+
 export type Borrador = {
   nombre: string;
   docTipo: string;
@@ -11,6 +13,8 @@ export type Borrador = {
   hastaHora: string;
   usoUnico: boolean;
   motivo: string;
+  alcance: AlcanceLista;
+  grupoId: string;
 };
 
 export const BORRADOR_VACIO: Borrador = {
@@ -25,7 +29,16 @@ export const BORRADOR_VACIO: Borrador = {
   hastaHora: "",
   usoUnico: false,
   motivo: "",
+  alcance: "instalacion",
+  grupoId: "",
 };
+
+export const ALCANCES_LISTA = [
+  { valor: "instalacion" as const, etiqueta: "Esta instalación" },
+  { valor: "cuenta" as const, etiqueta: "Toda la cuenta cliente" },
+  { valor: "empresa" as const, etiqueta: "Toda la empresa" },
+  { valor: "grupo" as const, etiqueta: "Grupo de instalaciones" },
+];
 
 export const DOCS = [
   { valor: "run", etiqueta: "RUN" },

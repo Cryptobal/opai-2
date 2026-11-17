@@ -18,10 +18,43 @@ export async function SeccionListas({
   segmento: ReactNode;
 }) {
   const tipo = lista === "bloqueada" ? "bloqueada" : "autorizada";
-  const r = await ejecutarComoUsuario<EntradaLista[]>("erp", "acceso.listas.listar", {
+  const r = await ejecutarComoUsuario<
+    {
+      id: string;
+      alcance: EntradaLista["alcance"];
+      agregadaPor: string | null;
+      tipo: "autorizada" | "bloqueada";
+      mascara: string;
+      nombre: string | null;
+      motivo: string | null;
+      tiposRegistro: string[];
+      vigenteDesde: string | null;
+      vigenteHasta: string | null;
+      dias: number[];
+      desdeMin: number | null;
+      hastaMin: number | null;
+      usoUnico: boolean;
+    }[]
+  >("erp", "acceso.listas.listar", {
     instalacionId,
     tipo,
   });
+  const porId = new Map<string, string>();
+  if (r.ok && r.data.some((e) => e.agregadaPor)) {
+    const u = await ejecutarComoUsuario<{ userId: string; nombre: string }[]>(
+      "erp",
+      "core.users.list",
+      {},
+    );
+    if (u.ok) for (const x of u.data) porId.set(x.userId, x.nombre);
+  }
+  const entradas: EntradaLista[] = r.ok
+    ? r.data.map((e) => ({
+        ...e,
+        tipo: e.tipo,
+        autorNombre: e.agregadaPor ? (porId.get(e.agregadaPor) ?? null) : null,
+      }))
+    : [];
   return (
     <div className="flex flex-col gap-3">
       {segmento}
@@ -29,7 +62,7 @@ export async function SeccionListas({
         state={estadoPantalla(r)}
         instalacionId={instalacionId}
         tipo={tipo}
-        entradas={r.ok ? r.data : []}
+        entradas={entradas}
         href={(t) => `${base}?sub=listas&lista=${t}`}
       />
     </div>
