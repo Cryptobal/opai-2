@@ -1,6 +1,7 @@
 import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { itemsYZonaCorrecciones } from "@/lib/asistencia-correcciones-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -34,6 +35,14 @@ function Lista({ state, items, zona }: { state: EstadoPantalla; items: Fila[]; z
       subtitulo="Propuestas sobre marcas existentes. Mientras están pendientes, rige el valor original."
       items={items}
       clave={(x) => x.correccionId}
+      tarjeta={(x) => (
+        <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="truncate text-base font-medium text-fg">{x.personaNombre}</span>
+          <span className="t-caption text-muted">
+            {legible(x.original)} → {legible(x.propuesta)} · <Badge tono={TONO[x.estado]}>{x.estado}</Badge>
+          </span>
+        </span>
+      )}
       columnas={[
         { id: "persona", etiqueta: "Trabajador", render: (x) => x.personaNombre },
         { id: "original", etiqueta: "Original", render: (x) => legible(x.original) },
@@ -56,11 +65,7 @@ export default function PaginaCorrecciones() {
           ejecutarComoUsuario<{ items: Fila[] }>("erp", "asistencia.correcciones.listar", {}),
           ejecutarComoUsuario<{ zona: string }>("erp", "asistencia.dias.hoy", {}),
         ]);
-        return {
-          state: estadoPantalla(lista),
-          items: lista.ok ? lista.data.items : [],
-          zona: hoy.ok ? hoy.data.zona : "America/Santiago",
-        };
+        return { state: estadoPantalla(lista), ...itemsYZonaCorrecciones(lista, hoy) };
       }}
     >
       {({ state, items, zona }) => <Lista state={state} items={items} zona={zona} />}

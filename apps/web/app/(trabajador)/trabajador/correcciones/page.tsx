@@ -1,7 +1,10 @@
+import { CheckCircle } from "lucide-react";
+
 import { Empty } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
+import { itemsYZonaCorrecciones } from "@/lib/asistencia-correcciones-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { estadoTrabajador } from "../_componentes/estado";
@@ -22,17 +25,17 @@ export default function Pagina() {
           ejecutarComoUsuario<{ items: Fila[] }>("trabajador", "asistencia.correcciones.listar", { estado: "pendiente" }),
           ejecutarComoUsuario<{ zona: string }>("trabajador", "asistencia.dias.hoy", {}),
         ]);
-        return {
-          state: estadoTrabajador(lista),
-          items: lista.ok ? lista.data.items : [],
-          zona: hoy.ok ? hoy.data.zona : "America/Santiago",
-        };
+        return { state: estadoTrabajador(lista), ...itemsYZonaCorrecciones(lista, hoy) };
       }}
     >
       {({ state, items, zona }) => (
         <EstadoLista state={state}>
           {items.length === 0 ? (
-            <Empty icon="check-circle" title="No tienes correcciones pendientes" description="Si tu empleador propone cambiar una marca, aparecerá aquí." />
+            <Empty
+              icono={<CheckCircle className="size-6" aria-hidden />}
+              titulo="No tienes correcciones pendientes"
+              descripcion="Si tu empleador propone cambiar una marca, aparecerá aquí."
+            />
           ) : (
             <div className="flex flex-col gap-4">
               {items.map((item) => (

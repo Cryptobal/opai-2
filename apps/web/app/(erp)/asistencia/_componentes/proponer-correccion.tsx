@@ -2,19 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import { avisar, Button, Campo, Select, Sheet, Textarea } from "@opai/ds";
+import { avisar, Button, Sheet } from "@opai/ds";
 
 import { subirDocumento } from "@/app/_components/documentos/subir";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-const TIPOS = [
-  { valor: "entrada", etiqueta: "Entrada" },
-  { valor: "salida", etiqueta: "Salida" },
-  { valor: "inicio_colacion", etiqueta: "Inicio de colación" },
-  { valor: "fin_colacion", etiqueta: "Fin de colación" },
-];
-
-type Marca = { id: string; tipo: string; horaServidor: string };
+import { CamposProponerCorreccion, type MarcaCorreccion } from "./proponer-correccion-campos";
 
 type Props = {
   abierto: boolean;
@@ -26,9 +19,21 @@ type Props = {
   hasta: string;
 };
 
+function subirEvidencia(personaId: string, onListo: (id: string) => void) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.onchange = async () => {
+    const archivo = input.files?.[0];
+    if (!archivo) return;
+    const id = await subirDocumento({ tipo: "persona", id: personaId }, archivo, {}, () => {}, "erp");
+    if (id) onListo(id);
+  };
+  input.click();
+}
+
 export function ProponerCorreccion(p: Props) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
-  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [marcas, setMarcas] = useState<MarcaCorreccion[]>([]);
   const [marcaId, setMarcaId] = useState("");
   const [tipo, setTipo] = useState("entrada");
   const [hora, setHora] = useState("");
@@ -38,7 +43,7 @@ export function ProponerCorreccion(p: Props) {
 
   useEffect(() => {
     if (!p.abierto) return;
-    void ejecutar<{ items: Marca[] }>("asistencia.marcas.listar", {
+    void ejecutar<{ items: MarcaCorreccion[] }>("asistencia.marcas.listar", {
       personaId: p.personaId,
       desde: p.desde,
       hasta: p.hasta,
@@ -49,8 +54,6 @@ export function ProponerCorreccion(p: Props) {
       }
     });
   }, [p.abierto, p.personaId, p.desde, p.hasta, ejecutar]);
-
-  const marca = marcas.find((m) => m.id === marcaId);
 
   async function previsualizar() {
     limpiarError();
@@ -95,45 +98,21 @@ export function ProponerCorreccion(p: Props) {
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
-        <Campo etiqueta="Marca a corregir">
-          <Select
-            valor={marcaId}
-            opciones={marcas.map((m) => ({ valor: m.id, etiqueta: `${m.tipo} · ${new Date(m.horaServidor).toLocaleString("es-CL")}` }))}
-            onCambiar={setMarcaId}
-          />
-        </Campo>
-        {marca ? <p className="t-caption text-fg-muted">Original: {marca.tipo} · {new Date(marca.horaServidor).toLocaleString("es-CL")}</p> : null}
-        <Campo etiqueta="Tipo propuesto">
-          <Select valor={tipo} opciones={TIPOS} onCambiar={setTipo} />
-        </Campo>
-        <Campo etiqueta="Hora propuesta" htmlFor="hora-cor">
-          <input id="hora-cor" type="datetime-local" className="w-full rounded-md border border-border bg-surface px-3 py-2" value={hora} onChange={(e) => setHora(e.target.value)} />
-        </Campo>
-        <Campo etiqueta="Motivo" {...(error ? { error } : {})}>
-          <Textarea rows={3} maxLength={500} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        </Campo>
-        <Campo etiqueta="Evidencia">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              const input = document.createElement("input");
-              input.type = "file";
-              input.onchange = async () => {
-                const archivo = input.files?.[0];
-                if (!archivo) return;
-                const id = await subirDocumento({ tipo: "persona", id: p.personaId }, archivo, {}, () => {}, "erp");
-                if (id) setDocId(id);
-              };
-              input.click();
-            }}
-          >
-            {docId ? "Cambiar archivo" : "Subir evidencia"}
-          </Button>
-        </Campo>
-        {vistaPrevia ? <p className="t-caption text-fg-muted">Si no responde antes del {vistaPrevia}, vence con el valor original.</p> : null}
-      </div>
+      <CamposProponerCorreccion
+        marcas={marcas}
+        marcaId={marcaId}
+        onMarcaId={setMarcaId}
+        tipo={tipo}
+        onTipo={setTipo}
+        hora={hora}
+        onHora={setHora}
+        motivo={motivo}
+        onMotivo={setMotivo}
+        docId={docId}
+        {...(error ? { error } : {})}
+        vistaPrevia={vistaPrevia}
+        onSubirEvidencia={() => subirEvidencia(p.personaId, setDocId)}
+      />
     </Sheet>
   );
 }
