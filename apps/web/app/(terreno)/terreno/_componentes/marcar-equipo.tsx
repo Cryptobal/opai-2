@@ -1,10 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-import { Alerta, Enlace } from "@opai/ds";
+import { Alerta, Enlace, Loading } from "@opai/ds";
 
-import { Marcar } from "@/app/_components/asistencia/marcar";
+const Marcar = dynamic(() => import("@/app/_components/asistencia/marcar").then((m) => m.Marcar), {
+  ssr: false,
+  loading: () => <Loading variante="detalle" />,
+});
 import { usePersonaElegida } from "@/lib/terreno/persona";
 import { ejecutarAsistenciaEquipo } from "@/app/_acciones/terreno-asistencia";
 

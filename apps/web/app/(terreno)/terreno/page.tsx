@@ -9,7 +9,7 @@ import { loginDe } from "@/lib/login-destino";
 import { identidadActual } from "@/lib/servidor";
 import { personasDelEquipo } from "@/lib/terreno-servidor";
 
-import { PantallaEquipo } from "./_componentes/pantalla-equipo";
+import { CargadorEquipo } from "./_componentes/cargador-equipo";
 
 export const metadata = { title: "Terreno" };
 
@@ -21,7 +21,7 @@ async function Contenido() {
   if (!equipo) redirect(loginDe("/terreno"));
   if (equipo.estado !== "activo") redirect("/terreno/emparejar");
   const { instalacion, personas } = await personasDelEquipo(equipo);
-  return <PantallaEquipo instalacion={instalacion} personas={personas} />;
+  return <CargadorEquipo instalacion={instalacion} personas={personas} />;
 }
 
 export default function Pagina() {
