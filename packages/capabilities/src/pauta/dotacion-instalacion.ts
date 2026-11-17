@@ -1,15 +1,10 @@
 import { z } from "zod";
 
-import type { CeldaPauta } from "@opai/domain";
-
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
-import { noEncontrado } from "../errores";
 import { candidatosDeInstalacion } from "./candidatos";
-import { cargarMes } from "./cargar";
-import { PERMISO_READ, hoy, mesSchema } from "./comun";
-import { nombresDePersonas, vistaSerie } from "./nombres";
+import { PERMISO_READ, mesSchema } from "./comun";
+import { mesLeer } from "./lectura-mes";
 import { tramosPpc, tramosVariante } from "./tramos-celdas";
 import { serieVistaSchema } from "./vistas";
 
@@ -69,55 +64,29 @@ export const dotacionInstalacionListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const inst = await ctx.db.instalacion.findFirst({
-      where: { id: input.instalacionId, AND: [dondeInstalacion(ctx)] },
-      select: { id: true, nombre: true, region: true },
-    });
-    if (!inst) throw noEncontrado("La instalación");
-    const puestos = await ctx.db.puesto.findMany({
-      where: { instalacionId: inst.id, estado: "activo", AND: [dondePuesto(ctx)] },
-      include: { funcion: { select: { nombre: true } } },
-      orderBy: [{ nombre: "asc" }, { horaInicio: "asc" }],
-    });
-    const hoyCivil = await hoy(ctx);
-    const m = await cargarMes(ctx, puestos, [inst], input.anio, input.mes);
-    const idsNombres = new Set<string>();
-    for (const p of puestos) {
-      const serie = m.series.get(p.id);
-      if (serie?.titularId) idsNombres.add(serie.titularId);
-      for (const c of m.celdas.get(p.id) ?? []) {
-        if (c.cubiertoPorId) idsNombres.add(c.cubiertoPorId);
-        if (c.titularId) idsNombres.add(c.titularId);
-      }
-    }
-    const nombres = await nombresDePersonas(ctx, [...idsNombres]);
-    const nom = (id: string) => nombres.get(id) ?? "—";
-    const tramosConNombre = (celdas: CeldaPauta[], variante: "reemplazo" | "refuerzo") =>
-      tramosVariante(celdas, variante).map((t) => ({
-        ...t,
-        persona: nom(t.personaId),
-      }));
-    const [vinculos] = await Promise.all([candidatosDeInstalacion(ctx, inst.id)]);
+    const [mes, vinculos] = await Promise.all([
+      mesLeer.handler(ctx, input, { dryRun: false }),
+      candidatosDeInstalacion(ctx, input.instalacionId),
+    ]);
+    const nom = (id: string) => mes.personas.find((p) => p.id === id)?.nombre ?? "—";
+    const tramosConNombre = (celdas: typeof mes.puestos[0]["celdas"], variante: "reemplazo" | "refuerzo") =>
+      tramosVariante(celdas, variante).map((t) => ({ ...t, persona: nom(t.personaId) }));
     return {
-      instalacionId: inst.id,
-      anio: input.anio,
-      mes: input.mes,
-      hoy: hoyCivil,
+      instalacionId: mes.instalacionId,
+      anio: mes.anio,
+      mes: mes.mes,
+      hoy: mes.hoy,
       vinculos,
-      puestos: puestos.map((p) => {
-        const celdas = m.celdas.get(p.id) ?? [];
-        const serie = m.series.get(p.id);
-        return {
-          id: p.id,
-          nombre: p.nombre,
-          funcion: p.funcion?.nombre ?? null,
-          horario: `${p.horaInicio}–${p.horaFin}`,
-          serie: serie ? vistaSerie(serie, nombres) : null,
-          reemplazos: tramosConNombre(celdas, "reemplazo"),
-          refuerzos: tramosConNombre(celdas, "refuerzo"),
-          vacantes: tramosPpc(celdas),
-        };
-      }),
+      puestos: mes.puestos.map((p) => ({
+        id: p.id,
+        nombre: p.nombre,
+        funcion: p.funcion,
+        horario: p.horario,
+        serie: p.serie,
+        reemplazos: tramosConNombre(p.celdas, "reemplazo"),
+        refuerzos: tramosConNombre(p.celdas, "refuerzo"),
+        vacantes: tramosPpc(p.celdas),
+      })),
     };
   },
 });

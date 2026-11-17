@@ -4,8 +4,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { MOTIVO, fechaCl, nombreMes } from "@/app/(erp)/pauta/_componentes/etiquetas";
 import type { Parametros } from "@/lib/parametros";
 
-import { cargarDotacion } from "../datos-dotacion";
-import type { DotacionPuesto } from "../dotacion-tipos";
+import { cargarDotacion, type DotacionPuesto } from "../datos-dotacion";
 
 function lineasTramo(
   items: { etiqueta: string; desde: string; hasta: string; dias: number }[],
