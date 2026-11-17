@@ -4,17 +4,14 @@ import { rutValido } from "@opai/domain";
 import type { DatosCuenta } from "./cuentas";
 
 /** Campos obligatorios para emitir DTE manual con datos del cliente (sin inventar defaults). */
-const CAMPOS_TRIBUTARIOS = [
-  "rut",
-  "razon_social",
-  "giro",
-  "calle",
-  "comuna",
-  "ciudad",
-  "email_dte",
-] as const;
-
-export type CampoTributario = (typeof CAMPOS_TRIBUTARIOS)[number];
+export type CampoTributario =
+  | "rut"
+  | "razon_social"
+  | "giro"
+  | "calle"
+  | "comuna"
+  | "ciudad"
+  | "email_dte";
 
 export function faltantesTributarios(d: DatosCuenta): CampoTributario[] {
   const f: CampoTributario[] = [];

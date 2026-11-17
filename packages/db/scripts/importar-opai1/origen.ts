@@ -154,10 +154,8 @@ export type ContactoOpai1 = z.infer<typeof contactoOpai1>;
 export type InstalacionOpai1 = z.infer<typeof instalacionOpai1>;
 export type EtapaOpai1 = z.infer<typeof etapaOpai1>;
 export type NegocioOpai1 = z.infer<typeof negocioOpai1>;
-type ActividadOpai1 = z.infer<typeof actividadOpai1>;
 export type HistorialEtapaOpai1 = z.infer<typeof historialEtapaOpai1>;
 export type NegocioContactoOpai1 = z.infer<typeof negocioContactoOpai1>;
-type UsuarioOpai1 = z.infer<typeof usuarioOpai1>;
 export type DatosOpai1 = z.infer<typeof datosOpai1>;
 
 export type { LectorOrigen } from "./origen-lectores";
