@@ -53,7 +53,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · avisos (CAR-598)", () => {
       rol: uid === aprueba ? "gerente" : "supervisor",
       modulosActivos: ["rendiciones"],
       medidor: { registrar: async () => undefined },
-      servicios: { correo: { nombre: "memoria", enviar: async () => ({ ok: true }) } },
+      servicios: { correo: { nombre: "memoria", enviar: async () => undefined } },
     });
 
   it("al enviar, avisa al aprobador una sola vez (campana y correo)", async () => {
