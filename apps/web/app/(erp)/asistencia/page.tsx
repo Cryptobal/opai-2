@@ -1,6 +1,7 @@
-import { Badge, cn, EnlaceBoton, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
+import { Badge, cn, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
 
 import { Buscador } from "@/app/_components/maestros/buscador";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { diaLargo } from "@/lib/fechas";

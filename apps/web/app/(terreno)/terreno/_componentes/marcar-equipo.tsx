@@ -17,7 +17,9 @@ export function MarcarEquipo() {
   useEffect(() => {
     let vivo = true;
     void ejecutarAsistenciaEquipo("asistencia.rostro.textos", {}).then((r) => {
-      if (vivo && r.ok) setTexto(r.data.items.find((t) => t.proposito === "biometria_asistencia")?.texto ?? "");
+      if (!vivo || !r.ok) return;
+      const data = r.data as { items: { proposito: string; texto: string }[] };
+      setTexto(data.items.find((t) => t.proposito === "biometria_asistencia")?.texto ?? "");
     });
     return () => {
       vivo = false;
