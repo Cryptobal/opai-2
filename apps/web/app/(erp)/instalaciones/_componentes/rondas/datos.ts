@@ -41,13 +41,13 @@ export async function cargarPuntos(instalacionId: string) {
     instalacionId,
     incluirArchivados: true,
   });
-  return { state: estadoPantalla(r), puntos: r.ok ? r.data : [] };
+  return { state: estadoPantalla(r), puntos: r.ok ? r.data.items : [] };
 }
 
 /** Plantillas de la instalación con su secuencia de puntos. */
 export async function cargarPlantillas(instalacionId: string) {
   const r = await ejecutarComoUsuario<Plantilla[]>("erp", "rondas.plantillas.listar", { instalacionId });
-  return { state: estadoPantalla(r), plantillas: r.ok ? r.data : [] };
+  return { state: estadoPantalla(r), plantillas: r.ok ? r.data.items : [] };
 }
 
 /** Programaciones de la instalación. */
@@ -55,5 +55,5 @@ export async function cargarProgramaciones(instalacionId: string) {
   const r = await ejecutarComoUsuario<Programacion[]>("erp", "rondas.programaciones.listar", {
     instalacionId,
   });
-  return { state: estadoPantalla(r), programaciones: r.ok ? r.data : [] };
+  return { state: estadoPantalla(r), programaciones: r.ok ? r.data.items : [] };
 }

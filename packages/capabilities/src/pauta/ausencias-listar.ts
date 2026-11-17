@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
+import { listaSchema } from "../core/maestros/comun";
 import { dondePuesto } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
 import type { Contexto } from "../types";
@@ -24,11 +25,13 @@ const grupoSchema = z.object({
 
 export const entradaListaAusencias = z.object({
   personaId: uuidSchema,
-  limite: z.number().int().min(1).max(100).default(30),
+  cursor: listaSchema.shape.cursor,
+  limite: z.number().int().min(1).max(200).default(30),
 });
 export const salidaListaAusencias = z.object({
   personaId: z.string(),
-  grupos: z.array(grupoSchema),
+  items: z.array(grupoSchema),
+  siguiente: z.string().nullable(),
 });
 
 /**
@@ -44,7 +47,7 @@ export const ausenciasListar = defineCapability({
   input: entradaListaAusencias,
   output: salidaListaAusencias,
   // El motivo es texto libre y puede ser de salud: la lectura queda auditada con la persona revelada.
-  auditarLectura: (s) => [s.personaId, ...s.grupos.map((g) => g.ausenciaId)],
+  auditarLectura: (s) => [s.personaId, ...s.items.map((g) => g.ausenciaId)],
   efecto: "lectura",
   dryRun: false,
   handler: (ctx, input) => listarAusencias(ctx, input),
@@ -67,7 +70,7 @@ export async function listarAusencias(
         select: { id: true, createdAt: true },
       })
     : null;
-  if (cursor && !desdeCursor) return { personaId, grupos: [], siguiente: null };
+  if (cursor && !desdeCursor) return { personaId, items: [], siguiente: null };
   const registros = await ctx.db.ausencia.findMany({
     where: {
       personaId,
@@ -93,11 +96,11 @@ export async function listarAusencias(
     select: { id: true, instalacion: { select: { nombre: true } } },
   });
   const instalacionDe = new Map(puestos.map((p) => [p.id, p.instalacion.nombre]));
-  const grupos: z.infer<typeof grupoSchema>[] = [];
+  const items: z.infer<typeof grupoSchema>[] = [];
   let siguiente: string | null = null;
   for (const r of registros) {
-    if (grupos.length >= limite) {
-      siguiente = grupos[grupos.length - 1]!.ausenciaId;
+    if (items.length >= limite) {
+      siguiente = items[items.length - 1]!.ausenciaId;
       break;
     }
     // Un registro vigente cuenta sus turnos activos; uno anulado, los que tuvo.
@@ -110,7 +113,7 @@ export async function listarAusencias(
     // Con turnos fuera del alcance, el rango que se muestra es el de los turnos visibles (ADR-022).
     const fechas =
       enAlcance.length < suyos.length ? enAlcance.map((t) => fechaIso(t.fecha)).sort() : null;
-    grupos.push({
+    items.push({
       ausenciaId: r.id,
       tipo: tipoExcepcionSchema.parse(r.tipo),
       motivo: r.motivo,
@@ -123,5 +126,5 @@ export async function listarAusencias(
       instalaciones: [...new Set(visibles)],
     });
   }
-  return { personaId, grupos, siguiente };
+  return { personaId, items, siguiente };
 }

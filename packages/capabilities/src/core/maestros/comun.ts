@@ -69,6 +69,25 @@ export function pagina<T extends { id: string }>(
 export const cursorDe = (cursor: string | undefined, limite: number) =>
   cursor ? { cursor: { id: cursor }, take: limite + 2 } : { take: limite + 1 };
 
+/** Misma semántica que `pagina`, para arreglos ya materializados (p. ej. PPC o alertas). */
+export function paginaMemoria<T extends { id: string }>(
+  filas: readonly T[],
+  limite: number,
+  cursor: string | undefined,
+) {
+  let start = 0;
+  if (cursor) {
+    const i = filas.findIndex((f) => f.id === cursor);
+    start = i >= 0 ? i + 1 : 0;
+  }
+  const items = filas.slice(start, start + limite);
+  const siguiente =
+    start + limite < filas.length ? (items.at(-1)?.id ?? null) : null;
+  return { items, siguiente };
+}
+
+export const limiteLista = z.number().int().min(1).max(200).default(50);
+
 /** Escritura con su evento de dominio en la misma transacción (outbox, ADR-029). */
 export async function escribirConEvento<T extends { id: string }>(
   ctx: Contexto,

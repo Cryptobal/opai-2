@@ -108,10 +108,6 @@
   "nomina.obligaciones.listar",
   "nomina.periodos.listar",
   "nomina.prestamos.listar",
-  "pauta.alertas.listar",
-  "pauta.ausencias.listar",
-  "pauta.ppc.listar",
-  "pauta.titulares.listar",
   "platform.ajustes.get",
   "platform.auditoria.list",
   "platform.catalogo.list",
@@ -130,10 +126,5 @@
   "portal_trabajador.arco.listar",
   "rendiciones.bandeja.listar",
   "rendiciones.lotes.listar",
-  "rendiciones.rendiciones.listar",
-  "rondas.incidentes_tipo.listar",
-  "rondas.plantillas.listar",
-  "rondas.programaciones.listar",
-  "rondas.puntos.listar",
-  "tickets.tipos.listar"
+  "rendiciones.rendiciones.listar"
 ]
