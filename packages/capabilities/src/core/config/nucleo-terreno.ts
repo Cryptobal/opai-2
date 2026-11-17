@@ -46,7 +46,7 @@ export const AJUSTES_TERRENO = defineAjustes(
     biometria_umbral_similitud: z.number().min(70).max(99.9).default(90).meta({
       etiqueta: "Umbral de similitud facial (0 a 100)",
       ayuda:
-        "Similitud mínima para aceptar un rostro al marcar. Lo fija la plataforma, no cada empresa (T-03). Un valor fuera de rango cae al defecto.",
+        "Similitud mínima para aceptar un rostro al marcar. Lo fija la plataforma de OPAI, no cada empresa. Un valor fuera de rango cae al defecto.",
       grupo: "Biometría",
       ambito: "plataforma",
       control: "numero",
