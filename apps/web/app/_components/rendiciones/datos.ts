@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { exigirDatos } from "@/lib/carga";
+import { consultaListaCursor } from "@/lib/lista-cursor";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -26,10 +27,9 @@ export async function cargarListaPropias(
   const r = await ejecutarComoUsuario<PaginaRendiciones>(portal, "rendiciones.rendiciones.listar", {
     alcance: "propias",
     incluirContadores: true,
-    limite: 50,
+    ...consultaListaCursor(p),
     ...(estado ? { estado } : {}),
     ...(p.q ? { q: p.q } : {}),
-    ...(p.cursor ? { cursor: p.cursor } : {}),
   });
   return exigirDatos(r);
 }
@@ -37,7 +37,7 @@ export async function cargarListaPropias(
 export async function cargarTodas(p: Parametros): Promise<PaginaRendiciones> {
   const r = await ejecutarComoUsuario<PaginaRendiciones>("erp", "rendiciones.rendiciones.listar", {
     alcance: "todas",
-    limite: 50,
+    ...consultaListaCursor(p),
     ...(p.estado ? { estado: p.estado as EstadoRendicion } : {}),
     ...(p.q ? { q: p.q } : {}),
     ...(p.persona ? { solicitanteId: p.persona } : {}),
@@ -45,7 +45,6 @@ export async function cargarTodas(p: Parametros): Promise<PaginaRendiciones> {
     ...(p.centro ? { centroCosto: p.centro as "instalacion" | "administracion" } : {}),
     ...(p.desde ? { desde: p.desde } : {}),
     ...(p.hasta ? { hasta: p.hasta } : {}),
-    ...(p.cursor ? { cursor: p.cursor } : {}),
   });
   return exigirDatos(r);
 }
