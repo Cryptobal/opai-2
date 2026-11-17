@@ -8,7 +8,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 
 import { opcionesDeSubida } from "./subida-permisos";
 
-export const POR_PAGINA = 50;
+const POR_PAGINA = 50;
 
 export type FilaExplorador = Documento & {
   entidad: { tipo: string; id: string; nombre: string | null } | null;
@@ -24,7 +24,7 @@ const dentro = (v: string | undefined, validos: string[]) =>
   v && validos.includes(v) ? v : undefined;
 
 /** Parámetros de la URL → entrada de la capacidad; lo que no es válido se ignora (la URL es del usuario). */
-export function entradaDe(p: Parametros) {
+function entradaDe(p: Parametros) {
   const vigencia = dentro(p["estado"], VIGENCIAS);
   const entidadTipo = dentro(p["entidad"], ENTIDADES);
   const orden = dentro(p["orden"], ORDENES);

@@ -2,8 +2,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
-import type { Cargo, Pagina, PersonaDetalle, PersonaFila } from "@/lib/tipos-maestros";
-import type { PuestoDeCargo, SueldoEfectivo, Vinculo } from "@/lib/tipos-sueldo";
+import type { Pagina, PersonaDetalle, PersonaFila } from "@/lib/tipos-maestros";
 
 export const POR_PAGINA = 50;
 
@@ -39,11 +38,6 @@ export async function cargarPersonas(p: Parametros) {
   };
 }
 
-export async function cargarCargos(incluirInactivos = false) {
-  const r = await ejecutarComoUsuario<Cargo[]>("erp", "core.cargos.list", { incluirInactivos });
-  return r.ok ? r.data : [];
-}
-
 export async function cargarPersona(id: string) {
   const r = await ejecutarComoUsuario<PersonaDetalle>("erp", "core.personas.get", {
     id: requerirUuid(id),
@@ -52,28 +46,3 @@ export async function cargarPersona(id: string) {
   return { state: estadoPantalla(r), persona: r.ok ? r.data : null };
 }
 
-/** Vínculos (vigente e historial) y sueldo efectivo concepto a concepto, con el puesto elegido. */
-export async function cargarLaboral(persona: PersonaDetalle, puestoId?: string, fecha?: string, instalacionId?: string) {
-  const cargoId = persona.vinculoVigente?.cargoId;
-  const [v, s, puestos] = await Promise.all([
-    ejecutarComoUsuario<Vinculo[]>("erp", "core.vinculos.list", { personaId: persona.id }),
-    ejecutarComoUsuario<SueldoEfectivo>("erp", "core.estructuras.efectiva", {
-      personaId: persona.id,
-      ...(puestoId ? { puestoId } : {}),
-      ...(fecha ? { fecha } : {}),
-      ...(instalacionId ? { instalacionId } : {}),
-    }),
-    cargoId
-      ? ejecutarComoUsuario<PuestoDeCargo[]>("erp", "core.puestos.list", {
-          cargoId,
-          soloActivos: true,
-        })
-      : Promise.resolve(null),
-  ]);
-  return {
-    vinculos: v.ok ? v.data : [],
-    sueldo: s.ok ? s.data : null,
-    sueldoBloqueado: !s.ok && s.error.code === "FORBIDDEN",
-    puestos: puestos?.ok ? puestos.data : [],
-  };
-}
