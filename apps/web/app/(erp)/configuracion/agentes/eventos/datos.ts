@@ -30,7 +30,7 @@ export type EventoCatalogo = { id: string; descripcion: string };
 type Pagina<T> = { items: T[]; siguiente: string | null };
 
 /** Catálogo de eventos para elegir (CAR-353: hasta 200 por página; se piden todas). */
-export async function cargarCatalogo(): Promise<EventoCatalogo[]> {
+async function cargarCatalogo(): Promise<EventoCatalogo[]> {
   const todos: EventoCatalogo[] = [];
   let cursor: string | null = null;
   do {
