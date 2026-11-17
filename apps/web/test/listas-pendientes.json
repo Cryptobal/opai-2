@@ -3,7 +3,6 @@
   "agente.conversaciones.list",
   "agente.historial.list",
   "agente.modelos.list",
-  "asistencia.contingencias.listar",
   "asistencia.correcciones.listar",
   "asistencia.dias.hoy",
   "asistencia.dias.resumen_periodo",

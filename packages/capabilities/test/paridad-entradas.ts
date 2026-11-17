@@ -85,6 +85,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Identidad: core.invitations.request_new (interna con motivo), sin sesión.",
   "app/correccion/[slug]/[token]/accion.ts#accionResponder":
     "Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador.",
+  "app/contingencia/[slug]/[token]/accion.ts#accionResponder":
+    "Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial.",
   "app/firmar/[slug]/[token]/acciones.ts#verFirma":
     "Firma: core.firmas.ver_firmante (interna con motivo): el enlace personal es la credencial (firma.md §5).",
   "app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace":

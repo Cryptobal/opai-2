@@ -1,0 +1,63 @@
+import "server-only";
+
+import { headers } from "next/headers";
+import { connection } from "next/server";
+
+import { executeCapability, type Resultado } from "@opai/capabilities";
+import { tenantPorSlug } from "@opai/db";
+
+import { fuentesReales } from "@/lib/fuentes";
+import { contextoSistema } from "@/lib/medidor";
+import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
+
+export type ContingenciaVista = {
+  tipo: string;
+  hora: string;
+  motivo: string;
+  venceEn: string;
+  estado: "pendiente" | "aceptada" | "rechazada";
+};
+
+export async function contextoPublico(slug: string, token: string) {
+  await connection();
+  const ip = ipDeCabeceras(await headers());
+  const [porToken, porIp, porTokenSolo] = await Promise.all([
+    permitir(`contingencia-publica:${ip}:${token.slice(0, 12)}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs, { fallarCerrado: true }),
+    permitir(`contingencia-publica-ip:${ip}`, LIMITES.verificar.maximo * 2, LIMITES.verificar.ventanaMs, { fallarCerrado: true }),
+    permitir(`contingencia-publica-enlace:${token.slice(0, 24)}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs * 10, { fallarCerrado: true }),
+  ]);
+  if (!porToken || !porIp || !porTokenSolo) return "limitada" as const;
+  const tenant = await tenantPorSlug(slug);
+  if (!tenant) return null;
+  const modulos = await fuentesReales.modulosActivos(tenant.id);
+  if (!modulos.includes("asistencia")) return null;
+  return contextoSistema(tenant.id, modulos);
+}
+
+export async function verContingencia(
+  slug: string,
+  token: string,
+): Promise<{ limitada: true } | { ok: true; data: ContingenciaVista } | { ok: false }> {
+  const ctx = await contextoPublico(slug, token);
+  if (ctx === "limitada") return { limitada: true };
+  if (!ctx) return { ok: false };
+  const r: Resultado = await executeCapability(ctx, "asistencia.contingencias.ver_enlace", { token });
+  return r.ok ? { ok: true, data: r.data as ContingenciaVista } : { ok: false };
+}
+
+export async function responderContingencia(
+  slug: string,
+  entrada: { token: string; rut: string; decision: "aceptada" | "rechazada"; comentario: string },
+): Promise<"ok" | "limitada" | "rechazada" | "comentario"> {
+  const ctx = await contextoPublico(slug, entrada.token);
+  if (ctx === "limitada") return "limitada";
+  if (!ctx) return "rechazada";
+  const r: Resultado = await executeCapability(ctx, "asistencia.contingencias.responder_enlace", {
+    token: entrada.token,
+    rut: entrada.rut,
+    decision: entrada.decision,
+    ...(entrada.comentario ? { comentario: entrada.comentario } : {}),
+  });
+  if (r.ok) return "ok";
+  return r.error.code === "UNPROCESSABLE" ? "comentario" : "rechazada";
+}
