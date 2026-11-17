@@ -32,6 +32,7 @@ export { consumidorCpqEnlace } from "@opai/mod-cpq/consumidor-enlace";
 export { trabajosCpq } from "@opai/mod-cpq/trabajos";
 export { consumidorTicketsAvisos } from "@opai/mod-tickets/consumidor-avisos";
 export { trabajosTickets } from "@opai/mod-tickets/trabajos";
+export { consumidorRendicionesAvisos } from "@opai/mod-rendiciones/consumidor-avisos";
 
 /**
  * Registro de módulos vendibles (ADR-003). `pnpm scaffold:module <id>` agrega el import y la entrada.
