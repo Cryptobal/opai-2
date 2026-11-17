@@ -5,16 +5,16 @@ import { defineCapability, prohibido } from "@opai/capabilities";
 import { estadoSchema, rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
 import {
   contadoresPropias,
-  cursorDe,
   dondeBusqueda,
   entradaPaginaSchema,
   filtrosListaSchema,
   mapResumenes,
-  pagina,
+  metaListaLectura,
+  rendicionesDePagina,
 } from "./pagina-lista";
 import { PERMISO_APROBAR, PERMISO_RENDIR, PORTALES_RENDIR, PERMISO_VER_TODAS } from "./permisos";
 import { actorId, rendicionDe } from "./util";
-import { nombresDe, resumenDe, vistaDe } from "./vista";
+import { nombresDe, resumenListaSolicitante, vistaDe } from "./vista";
 
 const filaTodasSchema = resumenSchema.extend({
   solicitanteNombre: z.string().nullable(),
@@ -38,9 +38,7 @@ export const rendicionesListar = defineCapability({
     siguiente: z.string().nullable(),
     contadores: z.record(z.string(), z.number().int()).optional(),
   }),
-  efecto: "lectura",
-  dryRun: false,
-  auditarLectura: (s) => s.items.map((r) => r.id),
+  ...metaListaLectura,
   async handler(ctx, input) {
     const yo = actorId(ctx);
     if (input.alcance === "todas" && !ctx.autorizar(PERMISO_VER_TODAS)) throw prohibido("No puedes ver las rendiciones de toda la empresa.");
@@ -51,12 +49,12 @@ export const rendicionesListar = defineCapability({
         : input.alcance === "por_aprobar"
           ? { aprobadorId: yo, estado: "enviada" as const }
           : {};
-    const filas = await ctx.db.rendicion.findMany({
-      where: { ...alcance, ...(await dondeBusqueda(ctx, input)) },
-      orderBy: [{ codigo: "desc" }, { id: "desc" }],
-      ...cursorDe(input.cursor, input.limite),
-    });
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    const { items, siguiente } = await rendicionesDePagina(
+      ctx,
+      { ...alcance, ...(await dondeBusqueda(ctx, input)) },
+      input.cursor,
+      input.limite,
+    );
     const contadores =
       input.alcance === "propias" && input.incluirContadores && !input.estado
         ? await contadoresPropias(ctx, yo)
@@ -64,10 +62,7 @@ export const rendicionesListar = defineCapability({
     return {
       siguiente,
       contadores,
-      items: await mapResumenes(ctx, items, (f, n) => ({
-        ...resumenDe(f, n),
-        solicitanteNombre: n.get(f.solicitanteId) ?? null,
-      })),
+      items: await mapResumenes(ctx, items, (f, n) => resumenListaSolicitante(f, n)),
     };
   },
 });

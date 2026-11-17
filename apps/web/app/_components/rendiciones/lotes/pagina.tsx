@@ -20,8 +20,7 @@ async function permisosDe(): Promise<PermisosLote> {
 }
 
 /** «Lotes de pago»: aprobadas listas para pagar (arriba, solo quien paga) y los lotes de la empresa. */
-import type { SearchParams } from "@/lib/parametros";
-import { leerParametros } from "@/lib/parametros";
+import { conFiltros, leerParametros, type SearchParams } from "@/lib/parametros";
 
 export function PaginaLotes({ searchParams }: { searchParams: SearchParams }) {
   return (
@@ -73,7 +72,7 @@ export function PaginaLotes({ searchParams }: { searchParams: SearchParams }) {
               </Table>
               {lotes.siguiente ? (
                 <LinkNext
-                  href={`${RUTA_LOTES}?cursor=${encodeURIComponent(lotes.siguiente)}`}
+                  href={conFiltros(RUTA_LOTES, { cursor: lotes.siguiente })}
                   className="t-label px-4 py-3 text-accent"
                 >
                   Siguiente página

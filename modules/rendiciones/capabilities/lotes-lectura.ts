@@ -8,7 +8,7 @@ import { estadoLoteSchema, loteDetalleSchema, loteResumenSchema } from "./lotes-
 import { cuentasDeSolicitantes } from "./lotes-util";
 import { loteResumenDe } from "./lotes-vista";
 import { PERMISO_APROBAR_LOTE, PERMISO_PAGAR } from "./permisos";
-import { cursorDe, pagina } from "./pagina-lista";
+import { lotesDePagina } from "./pagina-lista";
 import { actorId } from "./util";
 import { nombresDe, resumenDe } from "./vista";
 
@@ -71,12 +71,12 @@ export const lotesListar = defineCapability({
   auditarLectura: (s) => s.items.map((l) => l.id),
   async handler(ctx, input) {
     exigirLotes(ctx);
-    const filas = await ctx.db.lotePago.findMany({
-      where: input.estado ? { estado: input.estado } : {},
-      orderBy: [{ codigo: "desc" }, { id: "desc" }],
-      ...cursorDe(input.cursor, input.limite),
-    });
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    const { items, siguiente } = await lotesDePagina(
+      ctx,
+      input.estado ? { estado: input.estado } : {},
+      input.cursor,
+      input.limite,
+    );
     return { items: items.map(loteResumenDe), siguiente };
   },
 });

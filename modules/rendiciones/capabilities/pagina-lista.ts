@@ -5,7 +5,14 @@ import type { Contexto } from "@opai/capabilities";
 import { estadoSchema, uuidSchema } from "./esquemas";
 import { nombresDe } from "./vista";
 
-const fechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD.");
+export const fechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD.");
+
+/** Campos comunes de `defineCapability` para listas paginadas de rendiciones. */
+export const metaListaLectura = {
+  efecto: "lectura" as const,
+  dryRun: false as const,
+  auditarLectura: (s: { items: { id: string }[] }) => s.items.map((r) => r.id),
+};
 
 export const entradaPaginaSchema = z.object({
   cursor: uuidSchema.optional().describe("Id de la última rendición de la página anterior."),
@@ -24,14 +31,40 @@ export const filtrosListaSchema = z.object({
 
 type Filtros = z.infer<typeof filtrosListaSchema>;
 
-export function cursorDe(cursor: string | undefined, limite: number) {
+function cursorDe(cursor: string | undefined, limite: number) {
   return cursor ? { cursor: { id: cursor }, take: limite + 2 } : { take: limite + 1 };
 }
 
-export function pagina<T extends { id: string }>(filas: T[], limite: number, cursor: string | undefined) {
+function pagina<T extends { id: string }>(filas: T[], limite: number, cursor: string | undefined) {
   const resto = cursor && filas[0]?.id === cursor ? filas.slice(1) : filas;
   const items = resto.slice(0, limite);
   return { items, siguiente: resto.length > limite ? (items.at(-1)?.id ?? null) : null };
+}
+
+const ordenCodigoDesc = [{ codigo: "desc" as const }, { id: "desc" as const }];
+
+function takePagina(cursor: string | undefined, limite: number) {
+  return { orderBy: ordenCodigoDesc, ...cursorDe(cursor, limite) };
+}
+
+export async function rendicionesDePagina(
+  ctx: Contexto,
+  where: NonNullable<Parameters<Contexto["db"]["rendicion"]["findMany"]>[0]>["where"],
+  cursor: string | undefined,
+  limite: number,
+) {
+  const filas = await ctx.db.rendicion.findMany({ where, ...takePagina(cursor, limite) });
+  return pagina(filas, limite, cursor);
+}
+
+export async function lotesDePagina(
+  ctx: Contexto,
+  where: NonNullable<Parameters<Contexto["db"]["lotePago"]["findMany"]>[0]>["where"],
+  cursor: string | undefined,
+  limite: number,
+) {
+  const filas = await ctx.db.lotePago.findMany({ where, ...takePagina(cursor, limite) });
+  return pagina(filas, limite, cursor);
 }
 
 const codigoDe = (q: string) => {

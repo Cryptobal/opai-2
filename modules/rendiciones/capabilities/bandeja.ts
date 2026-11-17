@@ -3,10 +3,17 @@ import { z } from "zod";
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
-import { cursorDe, dondeBusqueda, entradaPaginaSchema, mapResumenes, pagina } from "./pagina-lista";
+import {
+  dondeBusqueda,
+  entradaPaginaSchema,
+  fechaSchema,
+  mapResumenes,
+  metaListaLectura,
+  rendicionesDePagina,
+} from "./pagina-lista";
 import { PERMISO_APROBAR, PERMISO_VER_TODAS } from "./permisos";
 import { actorId, rendicionDe } from "./util";
-import { nombresDe, resumenDe, vistaDe } from "./vista";
+import { nombresDe, resumenListaSolicitante, vistaDe } from "./vista";
 
 const ESTADOS_BANDEJA = ["enviada", "aprobada", "rechazada", "devuelta"] as const;
 
@@ -28,8 +35,8 @@ export const bandejaListar = defineCapability({
     estado: z.enum(ESTADOS_BANDEJA).default("enviada"),
     solicitanteId: uuidSchema.optional(),
     q: z.string().trim().max(120).optional(),
-    desde: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    hasta: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    desde: fechaSchema.optional(),
+    hasta: fechaSchema.optional(),
   }),
   output: z.object({
     items: z.array(filaSchema),
@@ -38,9 +45,7 @@ export const bandejaListar = defineCapability({
     montoPorRevisar: z.number().int(),
     aprobadasSinPagar: z.number().int(),
   }),
-  efecto: "lectura",
-  dryRun: false,
-  auditarLectura: (s) => s.items.map((r) => r.id),
+  ...metaListaLectura,
   async handler(ctx, input) {
     const yo = actorId(ctx);
     const base = alcance(ctx, yo);
@@ -49,25 +54,27 @@ export const bandejaListar = defineCapability({
       ...(input.desde ? { gte: fecha(input.desde) } : {}),
       ...(input.hasta ? { lt: new Date(fecha(input.hasta).getTime() + 86_400_000) } : {}),
     };
-    const filas = await ctx.db.rendicion.findMany({
-      where: {
-        ...base,
-        estado: input.estado,
-        ...(input.solicitanteId ? { solicitanteId: input.solicitanteId } : {}),
-        ...(input.desde || input.hasta ? { enviadaEn } : {}),
-        ...(input.q ? await dondeBusqueda(ctx, { q: input.q }) : {}),
-      },
-      orderBy: [{ codigo: "desc" }, { id: "desc" }],
-      ...cursorDe(input.cursor, input.limite),
-    });
-    const [pendientes, aprobadas] = await Promise.all([
+    const whereBusqueda = input.q ? await dondeBusqueda(ctx, { q: input.q }) : {};
+    const [pendientes, aprobadas, paginada] = await Promise.all([
       ctx.db.rendicion.aggregate({ where: { ...base, estado: "enviada" }, _count: true, _sum: { montoTotal: true } }),
       ctx.db.rendicion.count({ where: { ...base, estado: "aprobada", lotes: { none: { activo: true } } } }),
+      rendicionesDePagina(
+        ctx,
+        {
+          ...base,
+          estado: input.estado,
+          ...(input.solicitanteId ? { solicitanteId: input.solicitanteId } : {}),
+          ...(input.desde || input.hasta ? { enviadaEn } : {}),
+          ...whereBusqueda,
+        },
+        input.cursor,
+        input.limite,
+      ),
     ]);
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    const { items, siguiente } = paginada;
     return {
       siguiente,
-      items: await mapResumenes(ctx, items, (f, n) => ({ ...resumenDe(f, n), solicitanteNombre: n.get(f.solicitanteId) ?? null })),
+      items: await mapResumenes(ctx, items, (f, n) => resumenListaSolicitante(f, n)),
       porRevisar: pendientes._count,
       montoPorRevisar: pendientes._sum.montoTotal ?? 0,
       aprobadasSinPagar: aprobadas,
