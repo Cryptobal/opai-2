@@ -1,5 +1,4 @@
 import { validarCaf } from "@opai/domain";
-import type { TenantTx } from "@opai/db";
 
 import { hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
@@ -73,7 +72,3 @@ export function validarCafConRangos(
   if (!validacion.ok) errorDeValidacionCaf(validacion.error);
   return validacion.lectura;
 }
-
-export type RangoFolioTx = Awaited<
-  ReturnType<TenantTx["dteFolio"]["findMany"]>
->[number];
