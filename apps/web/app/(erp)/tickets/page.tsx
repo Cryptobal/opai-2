@@ -1,9 +1,9 @@
 import { Badge, ListScreen } from "@opai/ds";
 
+import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
 import { NuevoTicket } from "./_componentes/nuevo-ticket";
@@ -18,6 +18,7 @@ import {
   TONO_PRIORIDAD,
   type Ticket,
 } from "./_componentes/datos";
+import { PaginacionTickets } from "./_componentes/paginacion";
 
 export const metadata = { title: "Tickets" };
 type Props = { searchParams: SearchParams };
@@ -38,22 +39,26 @@ export default function Tickets({ searchParams }: Props) {
       completo
       cargar={async () => {
         const p = await filtrosDe(searchParams);
-        const [r, tipos, instalaciones] = await Promise.all([
+        const [bandeja, tipos, instalaciones] = await Promise.all([
           cargarTickets(p),
           cargarTipos(),
           cargarInstalaciones(),
         ]);
-        return { p, r, tipos: tipos.ok ? tipos.data : [], instalaciones };
+        return { p, bandeja, tipos: tipos.ok ? tipos.data : [], instalaciones };
       }}
     >
-      {({ r, tipos, instalaciones }) => {
-        const items = r.ok ? r.data.items : [];
+      {({ p, bandeja, tipos, instalaciones }) => {
+        const items = bandeja.items;
         return (
           <ListScreen<Ticket>
-            state={estadoPantalla(r)}
+            state={bandeja.state}
             titulo="Tickets"
             accionPrincipal={<NuevoTicket tipos={tipos} instalaciones={instalaciones} />}
+            buscador={<Buscador placeholder="Número, asunto o solicitante" />}
             filtros={<ChipsFiltro filtros={[{ param: "vista", etiqueta: "Vista", opciones: OPCIONES_VISTA }]} />}
+            paginacion={
+              <PaginacionTickets p={p} mostrados={items.length} siguiente={bandeja.siguiente} />
+            }
             items={items}
             clave={(t) => t.id}
             href={(t) => `/tickets/${t.id}`}
@@ -75,6 +80,7 @@ export default function Tickets({ searchParams }: Props) {
               </span>
             )}
             columnas={[
+              { id: "numero", etiqueta: "N.º", render: (t) => t.numero, className: "w-24" },
               { id: "titulo", etiqueta: "Ticket", render: (t) => t.titulo },
               { id: "tipo", etiqueta: "Tipo", render: (t) => t.tipoNombre },
               {

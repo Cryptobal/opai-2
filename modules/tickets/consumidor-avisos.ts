@@ -24,6 +24,8 @@ function avisoDe(ev: EventoPublicado, titulo: string, estado: string): Aviso | n
       return { para: "solicitante", titulo: "Aprobaron tu solicitud", cuerpo: `${ticket} fue aprobada.` };
     case "tickets.ticket.rechazado":
       return { para: "solicitante", titulo: "Rechazaron tu solicitud", cuerpo: `${ticket} fue rechazada. Revisa el motivo en la ficha.` };
+    case "tickets.ticket.sla_vencido":
+      return { para: "responsable", titulo: "SLA vencido en un ticket", cuerpo: `${ticket} pasó su plazo SLA. Revísalo en la bandeja.` };
     default:
       return null;
   }
@@ -43,6 +45,7 @@ export const consumidorTicketsAvisos = defineConsumidor({
     "tickets.ticket.estado_cambiado",
     "tickets.ticket.aprobado",
     "tickets.ticket.rechazado",
+    "tickets.ticket.sla_vencido",
   ],
   async handler(ctx, ev) {
     if (ev.entidadTipo !== "ticket" || !ev.entidadId) return;

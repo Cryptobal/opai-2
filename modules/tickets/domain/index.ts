@@ -37,3 +37,5 @@ export function esEstadoTerminal(estado: EstadoTicket): boolean {
 export function puedeAprobarse(estado: EstadoTicket): boolean {
   return estado === "abierto" || estado === "en_curso";
 }
+
+export { debeAvisarSlaVencido, numeroTicket, slaVenceEnDesde, type TicketSla } from "./sla";

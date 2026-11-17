@@ -1,10 +1,16 @@
 import type { BadgeProps } from "@opai/ds";
 
 import { ejecutarComoUsuario } from "@/lib/servidor";
+import { estadoPantalla } from "@/lib/formato";
 import type { Parametros, SearchParams } from "@/lib/parametros";
+
+export const POR_PAGINA = 50;
+
+export const anteriores = (p: Parametros) => (p["prev"] ? p["prev"].split(",") : []);
 
 export type Ticket = {
   id: string;
+  numero: string;
   tipoId: string;
   tipoNombre: string;
   tipoRequiereAprobacion: boolean;
@@ -84,14 +90,23 @@ export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
 }
 
 export async function cargarTickets(p: Parametros) {
-  return ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
+  const r = await ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
     "erp",
     "tickets.tickets.listar",
     {
       vista: p["vista"] ?? "mios",
+      limite: POR_PAGINA,
       ...(p["estado"] ? { estado: p["estado"] } : {}),
+      ...(p["q"] ? { q: p["q"] } : {}),
+      ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
     },
   );
+  return {
+    state: estadoPantalla(r),
+    items: r.ok ? r.data.items : [],
+    siguiente: r.ok ? r.data.siguiente : null,
+    error: r,
+  };
 }
 
 export async function cargarTicket(id: string) {

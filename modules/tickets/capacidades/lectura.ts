@@ -3,6 +3,8 @@ import { z } from "zod";
 import type { Contexto } from "@opai/capabilities";
 import { defineCapability, prohibido } from "@opai/capabilities";
 
+import { numeroTicket } from "../domain";
+import { dondeTexto } from "./busqueda";
 import {
   cursorDe,
   estadoSchema,
@@ -37,6 +39,7 @@ function vistaTicket(
 ): z.infer<typeof ticketSchema> {
   return {
     id: t.id,
+    numero: numeroTicket(t.id),
     tipoId: t.tipoId,
     tipoNombre: tipo.nombre,
     tipoRequiereAprobacion: tipo.requiereAprobacion,
@@ -83,14 +86,17 @@ export const ticketsListar = defineCapability({
     estado: estadoSchema.optional(),
     tipoId: uuidSchema.optional(),
     instalacionId: uuidSchema.optional().describe("Solo los tickets de esta instalación."),
+    q: z.string().trim().min(2).max(80).optional().describe("Asunto, solicitante o número del ticket."),
   }),
   output: z.object({ items: z.array(ticketSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    const texto = await dondeTexto(ctx, input.q);
     const filas = await ctx.db.ticket.findMany({
       where: {
         ...dondeVista(ctx, input.vista),
+        ...texto,
         ...(input.estado ? { estado: input.estado } : {}),
         ...(input.tipoId ? { tipoId: input.tipoId } : {}),
         ...(input.instalacionId ? { instalacionId: input.instalacionId } : {}),
