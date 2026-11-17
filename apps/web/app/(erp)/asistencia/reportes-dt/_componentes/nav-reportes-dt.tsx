@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { cn } from "@opai/ds";
+import { Button, cn } from "@opai/ds";
 
 import type { CatalogoReporte } from "./tipos";
 
@@ -23,11 +23,13 @@ export function NavReportesDt({
       {catalogo
         .filter((c) => c.obligatorio)
         .map((c) => (
-          <button
+          <Button
             key={c.id}
             type="button"
+            variant="ghost"
+            block
             className={cn(
-              "flex min-h-11 w-full flex-col items-start gap-0.5 rounded-md px-2 py-1.5 text-left",
+              "h-auto min-h-11 flex-col items-start gap-0.5 px-2 py-1.5 text-left font-normal",
               activo === c.id ? "bg-fill" : "hover:bg-fill/60",
             )}
             onClick={() =>
@@ -36,7 +38,7 @@ export function NavReportesDt({
           >
             <span className="t-body-sm font-medium">{c.titulo}</span>
             <span className="t-caption text-muted">{c.descripcion}</span>
-          </button>
+          </Button>
         ))}
       <span className="t-caption mt-2 border-t border-border px-2 py-1 text-muted">Otros</span>
       <Link href="/verificar/marca" className="t-body-sm px-2 py-2 text-accent hover:underline">
