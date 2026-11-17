@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
+import { entradaPaginaLista } from "@/app/_components/maestros/paginacion-cursor";
 import { cargarOpcionesEtiqueta, filtroEtiquetaDe } from "@/app/_components/etiquetas/opciones";
 import type { EtiquetaDeFila } from "@/lib/tipos-etiquetas";
 import { estadoPantalla } from "@/lib/formato";
@@ -60,11 +60,9 @@ type Lista = { items: NegocioFila[]; siguiente: string | null };
 
 /** Lista de negocios filtrada (etapa, estado, responsable) para la columna del embudo/lista. */
 export async function cargarNegocios(f: Record<string, string | undefined>) {
-  const limite = tamanoPagina(f);
   const [r, etiquetas] = await Promise.all([
     ejecutarComoUsuario<Lista>("erp", "comercial.negocios.list", {
-      limite,
-      ...(f.cursor && esUuid(f.cursor) ? { cursor: f.cursor } : {}),
+      ...entradaPaginaLista(f),
       ...filtroEtiquetaDe(f),
       ...(f["q"] ? { q: f["q"] } : {}),
       ...(f["etapa"] && esUuid(f["etapa"]) ? { etapaId: f["etapa"] } : {}),
