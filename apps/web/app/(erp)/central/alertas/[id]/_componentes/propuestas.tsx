@@ -40,7 +40,7 @@ export function PropuestasAgente({ propuestas }: Props) {
             {p.nota ? <p className="t-caption text-fg-muted">{p.nota}</p> : null}
             <div className="mt-2 flex flex-wrap gap-2">
               <Button variant="primary" disabled={pendiente} onClick={() => void resolver(p.id, true)}>
-                Aceptar
+                Aceptar propuesta
               </Button>
               <Button variant="secondary" disabled={pendiente} onClick={() => void resolver(p.id, false)}>
                 Rechazar

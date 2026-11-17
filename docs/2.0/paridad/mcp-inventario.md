@@ -198,10 +198,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/central/nueva-alerta/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/central/turno/_componentes` | `central.agente.pausar` | `central_agente_pausar` | existe |
 | compartido | `app/(erp)/central/turno/_componentes` | `central.agente.reanudar` | — | excepción |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.alertas.listar` | `central_alertas_listar` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.propuestas.listar` | `central_propuestas_listar` | existe |
 | compartido | `app/(erp)/central/turno/_componentes` | `central.turno.abrir` | — | excepción |
 | compartido | `app/(erp)/central/turno/_componentes` | `central.turno.aceptar` | — | excepción |
 | compartido | `app/(erp)/central/turno/_componentes` | `central.turno.cerrar` | — | excepción |
 | compartido | `app/(erp)/central/turno/_componentes` | `central.turno.entregar` | — | excepción |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.config.set` | `core_config_set` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.schema` | `core_config_schema` | existe |
@@ -662,8 +668,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
-| erp | `/central/turno` | `core.config.get` | `core_config_get` | existe |
-| erp | `/central/turno` | `core.users.list` | `core_users_list` | existe |
 | erp | `/central` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
