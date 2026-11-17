@@ -318,14 +318,14 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
         "core.documentos.vencimientos",
         {},
       );
-      expect(vencimientos.some((d) => d.id === documentoId)).toBe(ve);
+      expect(vencimientos.items.some((d) => d.id === documentoId)).toBe(ve);
       // CAR-512: la versión nueva (o la copia firmada) de un anexo tampoco se ve sin anexos.read.
       const get = await mod.executeCapability(ctx(rol), "core.documentos.get", { id: nueva.id });
       expect(get.ok).toBe(ve);
       if (!get.ok) expect(get.error.code).toBe("NOT_FOUND");
       else {
         const versiones = (get.data as { versiones: { id: string }[] }).versiones;
-        expect(versiones.some((d) => d.id === documentoId)).toBe(ve);
+        expect(versiones.some((d) => d.id === documentoId)).toBe(true);
       }
     }
   });
