@@ -20,7 +20,7 @@ export function ComprobanteObligacion({
 }: {
   obligacion: ObligacionArchivo;
   tenantId: string;
-  tipo: "lre" | "previred";
+  tipo: "lre" | "previred" | "f30_1";
 }) {
   const router = useRouter();
   const estadoFinal = tipo === "lre" ? "cargado" : "pagado";
