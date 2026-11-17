@@ -4,7 +4,7 @@ import { acumularPaginas } from "@/lib/lista-completa";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import { leerParametros, type Parametros } from "@/lib/parametros";
 
-export type Firmante = {
+type Firmante = {
   id: string;
   orden: number;
   rol: string;
