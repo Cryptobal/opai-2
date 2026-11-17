@@ -16,6 +16,7 @@ async function main() {
   const hash = await hashPassword(password);
   const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   const user = await usuarioE2E(ASISTENCIA_E2E.trabajadorEmail, "Ana Circuito E2E", hash);
+  const supervisor = await usuarioE2E(ASISTENCIA_E2E.supervisorEmail, "Supervisor Asistencia E2E", hash);
   await enTransaccion(tenantId, async (db) => {
     await db.membership.upsert({
       where: { tenantId_userId: { tenantId, userId: user.id } },
@@ -25,6 +26,16 @@ async function main() {
     await db.persona.update({
       where: { id: ASISTENCIA_E2E.ana },
       data: { usuarioId: user.id, emailLaboral: ASISTENCIA_E2E.trabajadorEmail },
+    });
+    const membSup = await db.membership.upsert({
+      where: { tenantId_userId: { tenantId, userId: supervisor.id } },
+      update: { rol: "supervisor", portales: ["supervisor"], estado: "activa" },
+      create: { tenantId, userId: supervisor.id, rol: "supervisor", portales: ["supervisor"], estado: "activa" },
+    });
+    await db.supervisorInstalacion.upsert({
+      where: { membershipId_instalacionId: { membershipId: membSup.id, instalacionId: ASISTENCIA_E2E.instalacion } },
+      update: {},
+      create: { tenantId, membershipId: membSup.id, instalacionId: ASISTENCIA_E2E.instalacion },
     });
   });
   await cerrarClientes();

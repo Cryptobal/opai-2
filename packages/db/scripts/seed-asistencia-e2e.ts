@@ -9,7 +9,7 @@ import { activarModulos } from "./rondas-e2e";
 const HOY = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
 const MES = () => `${HOY().slice(0, 7)}-01`;
 
-async function sembrar(db: TenantTx, tenantId: string) {
+async function sembrarPautaYTurno(db: TenantTx, tenantId: string) {
   await activarModulos(db, tenantId, ["asistencia", "pauta"]);
   await db.ajuste.upsert({
     where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "asistencia", clave: "marcas_habilitadas" } },
@@ -42,6 +42,9 @@ async function sembrar(db: TenantTx, tenantId: string) {
       fecha: new Date(`${hoy}T00:00:00Z`), inicio, fin, instalacionId: ASISTENCIA_E2E.instalacion, origen: "pauta", colacionMin: 0, vigente: true,
     },
   });
+}
+
+async function sembrarMarcasKiosco(db: TenantTx, tenantId: string) {
   const pinHash = await hashPin(ASISTENCIA_E2E.pin);
   await db.credencialTerreno.upsert({
     where: { personaId: ASISTENCIA_E2E.ana },
@@ -82,30 +85,15 @@ async function sembrar(db: TenantTx, tenantId: string) {
       },
     });
   }
-  const sup = await db.user.upsert({
-    where: { email: ASISTENCIA_E2E.supervisorEmail },
-    update: { name: "Supervisor Asistencia E2E", emailVerified: true },
-    create: { name: "Supervisor Asistencia E2E", email: ASISTENCIA_E2E.supervisorEmail, emailVerified: true },
-  });
-  const supCuenta = await db.account.findFirst({ where: { userId: sup.id, providerId: "credential" } });
-  if (supCuenta) await db.account.update({ where: { id: supCuenta.id }, data: { password: hash } });
-  else await db.account.create({ data: { userId: sup.id, providerId: "credential", accountId: sup.id, password: hash } });
-  const memb = await db.membership.upsert({
-    where: { tenantId_userId: { tenantId, userId: sup.id } },
-    update: { rol: "supervisor", portales: ["supervisor"], estado: "activa" },
-    create: { tenantId, userId: sup.id, rol: "supervisor", portales: ["supervisor"], estado: "activa" },
-  });
-  await db.supervisorInstalacion.upsert({
-    where: { membershipId_instalacionId: { membershipId: memb.id, instalacionId: ASISTENCIA_E2E.instalacion } },
-    update: {},
-    create: { tenantId, membershipId: memb.id, instalacionId: ASISTENCIA_E2E.instalacion },
-  });
 }
 
 async function main() {
   exigirBaseE2E();
   const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
-  await enTransaccion(tenantId, (db) => sembrar(db, tenantId));
+  await enTransaccion(tenantId, async (db) => {
+    await sembrarPautaYTurno(db, tenantId);
+    await sembrarMarcasKiosco(db, tenantId);
+  });
   await cerrarClientes();
   console.log(`Fixture de Asistencia E2E listo (${HOY()}, turno Ana, kiosco y trabajador ${ASISTENCIA_E2E.trabajadorEmail}).`);
 }
