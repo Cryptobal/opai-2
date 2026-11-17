@@ -28,11 +28,13 @@ export async function documentoIdsTicket(ctx: Contexto) {
   return ctx.transaccion((tx) => {
     if (verTodos) {
       return tx.$queryRaw<{ documentoId: string }[]>`
+    /* nucleo-h:propietarios-ticket-todos */
     SELECT dv.documento_id AS "documentoId" FROM core.documento_vinculos dv
     WHERE dv.tenant_id = ${ctx.tenantId}::uuid AND dv.rol = 'propietario' AND dv.entidad_tipo = 'ticket'
     ORDER BY dv.id FOR SHARE`;
     }
     return tx.$queryRaw<{ documentoId: string }[]>`
+    /* nucleo-h:propietarios-ticket */
     SELECT dv.documento_id AS "documentoId" FROM core.documento_vinculos dv
     JOIN tickets.tickets t ON t.id = dv.entidad_id AND t.tenant_id = dv.tenant_id
     WHERE dv.tenant_id = ${ctx.tenantId}::uuid AND dv.rol = 'propietario' AND dv.entidad_tipo = 'ticket'
