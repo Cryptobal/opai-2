@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-  # Ahorro de Actions (13-nov-2026, decisión de Carlos; AGENTS.md «Revisiones largas»): en cada PR solo
-  # corre lo rápido (typecheck, lint, test, secretos); lo largo corre de noche o a pedido.
+  # Ahorro de Actions (13-nov-2026; urgencia cola 17-nov-2026): en pull_request solo el gate rápido
+  # (typecheck/lint/test en lo tocado, secretos); test:db y build completos solo en merge_group, main o a pedido.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parte: [1, 2]
+        parte: ${{ github.event_name == 'pull_request' && fromJSON('[1]') || fromJSON('[1, 2]') }}
     env:
       TURBO_CACHE_DIR: .turbo
       NODE_OPTIONS: --max-old-space-size=4096
@@ -63,11 +63,14 @@ jobs:
         if: steps.solo_docs.outputs.only_docs != 'true'
         with:
           turbo: typecheck-${{ matrix.parte }}
+      - name: typecheck y lint (PR, paquetes tocados)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'pull_request' && matrix.parte == 1
+        run: .github/scripts/ci-typecheck-lint-pr.sh
       - name: typecheck
-        if: steps.solo_docs.outputs.only_docs != 'true'
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name != 'pull_request'
         run: .github/scripts/ci-typecheck-parte.sh ${{ matrix.parte }} 2
       - name: lint
-        if: steps.solo_docs.outputs.only_docs != 'true' && matrix.parte == 1
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name != 'pull_request' && matrix.parte == 1
         run: pnpm turbo run lint --concurrency=2
 
   test:
@@ -78,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parte: [1, 2]
+        parte: ${{ github.event_name == 'pull_request' && fromJSON('[1]') || fromJSON('[1, 2]') }}
     env:
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
@@ -93,13 +96,17 @@ jobs:
         run: .github/scripts/ci-novedad-visual.sh
       - uses: ./.github/actions/preparar
         if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: test (PR, cambios)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'pull_request'
+        run: .github/scripts/ci-test-pr.sh
       # La configuración local usa 2 procesos; en CI, uno por CPU.
-      - run: pnpm test --shard=${{ matrix.parte }}/2 --maxWorkers="$(nproc)"
-        if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: test (completo, en shards)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name != 'pull_request'
+        run: pnpm test --shard=${{ matrix.parte }}/2 --maxWorkers="$(nproc)"
 
   test-db:
     name: test:db · ${{ matrix.nombre }}
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    if: github.event_name != 'pull_request'
     runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 20
     strategy:
@@ -134,35 +141,11 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
-      # test:db corre siempre fuera de los PR y, en un PR, cuando toca código que esas pruebas ejercen
-      # (paquetes y módulos, salvo el DS), no solo Prisma: así un PR no llega verde a la cola de merge
-      # para caer ahí en test:db (17-nov-2026, #1036).
-      - name: Detectar cambios de base
-        id: base
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-          SOLO_DOCS: ${{ steps.solo_docs.outputs.only_docs }}
-        run: |
-          if [ "$SOLO_DOCS" = true ]; then
-            echo "db=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
-            echo "db=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if git diff --name-only "$BASE...$HEAD" \
-            | grep -E '^(packages|modules)/|(^|/)prisma/|/migrations/|^(package\.json|pnpm-lock\.yaml)$|^\.github/(workflows/ci\.yml|actions/)' \
-            | grep -vE '^packages/ds/' | grep -q .; then
-            echo "db=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "db=false" >> "$GITHUB_OUTPUT"
-          fi
+      # test:db solo en merge_group, main, cron y workflow_dispatch (17-nov-2026, cola de Actions).
       - uses: ./.github/actions/preparar
-        if: steps.base.outputs.db == 'true'
+        if: steps.solo_docs.outputs.only_docs != 'true'
       - name: test:db
-        if: steps.base.outputs.db == 'true'
+        if: steps.solo_docs.outputs.only_docs != 'true'
         run: |
           rm -f "${TMPDIR:-/tmp}/opai_cron_sii_test_pwd"
           ${{ matrix.comando }}
@@ -182,8 +165,13 @@ jobs:
           TEST: ${{ needs.test.result }}
           TEST_DB: ${{ needs.test-db.result }}
         run: |
-          echo "typecheck-lint=$TYPECHECK_LINT test=$TEST test-db=$TEST_DB"
-          test "$TYPECHECK_LINT" = success && test "$TEST" = success && test "$TEST_DB" = success
+          echo "typecheck-lint=$TYPECHECK_LINT test=$TEST test-db=$TEST_DB event=$GITHUB_EVENT_NAME"
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            test "$TYPECHECK_LINT" = success && test "$TEST" = success
+            test "$TEST_DB" = skipped
+          else
+            test "$TYPECHECK_LINT" = success && test "$TEST" = success && test "$TEST_DB" = success
+          fi
 
   presupuesto:
     name: build · presupuesto de JS
