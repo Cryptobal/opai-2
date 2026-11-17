@@ -45,8 +45,8 @@ export async function escribirSalidas(
   equipo: Equipo,
   salidas: readonly Salida[],
   t: Tiempo,
-): Promise<void> {
-  if (salidas.length === 0) return;
+): Promise<readonly { registroId: string; instalacionId: string }[]> {
+  if (salidas.length === 0) return [];
   const ids = await tx.registroAcceso.findMany({
     where: {
       instalacionId: equipo.instalacionId,
@@ -70,5 +70,6 @@ export async function escribirSalidas(
       },
     ];
   });
-  await tx.salidaAcceso.createMany({ skipDuplicates: true, data });
+  if (data.length) await tx.salidaAcceso.createMany({ skipDuplicates: true, data });
+  return data.map((s) => ({ registroId: s.registroId, instalacionId: s.instalacionId }));
 }

@@ -44,3 +44,4 @@ export const capacidadesAcceso: readonly Capacidad[] = [
 
 export { trabajoCierreAutomatico } from "./cierre";
 export { trabajoReportesAcceso } from "./reportes-trabajo";
+export { trabajoRetencionAcceso } from "./retencion-trabajo";

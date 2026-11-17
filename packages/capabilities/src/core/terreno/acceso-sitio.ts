@@ -71,6 +71,7 @@ export const accesoEnSitioTerreno = defineCapability({
           instalacionId: disp.instalacionId,
           salida: null,
           anulacion: null,
+          anonimizadoEn: null,
           horaCorregida: { gte: desde },
         },
         orderBy: { horaCorregida: "desc" },

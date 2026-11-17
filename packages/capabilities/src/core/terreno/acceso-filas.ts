@@ -9,7 +9,10 @@ import { autorizaPrerregistro, type VisitanteDia } from "./acceso-prerregistro";
 import type { Equipo, FilaIntento, FilaRegistro, FilaUso, Tiempo } from "./acceso-tipos";
 
 /** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
-const DIFERIDO_MS = 120_000;
+export const DIFERIDO_MS = 120_000;
+
+const esDiferido = (t: Tiempo, horaHecho: string) =>
+  t.recibidoEn.getTime() - new Date(horaHecho).getTime() > DIFERIDO_MS;
 type Lista = { e: Entrada; d: Doc; pre?: VisitanteDia | undefined };
 /** Zona de la empresa, si la instalación permite ingresos fuera de lista (R2) y sus puntos activos (CAR-479). */
 type Reglas = { zona: string; fueraDeLista: boolean; puntos: ReadonlySet<string> };
@@ -84,10 +87,7 @@ function filaRegistro(
     entradaListaId,
     camposExtra: x.e.p.campos ?? [],
     puntoId: x.e.p.puntoId && puntos.has(x.e.p.puntoId) ? x.e.p.puntoId : null,
-    origen:
-      t.recibidoEn.getTime() - new Date(x.e.h.horaHecho).getTime() > DIFERIDO_MS
-        ? "diferido"
-        : "en_linea",
+    origen: esDiferido(t, x.e.h.horaHecho) ? "diferido" : "en_linea",
   };
 }
 
@@ -98,11 +98,18 @@ export async function escribirFilas(
   listos: readonly Lista[],
   t: Tiempo,
   reglas: Reglas,
-): Promise<{ registros: FilaRegistro[]; intentos: FilaIntento[]; usos: FilaUso[] }> {
+): Promise<{
+  registros: FilaRegistro[];
+  intentos: FilaIntento[];
+  usos: FilaUso[];
+  /** Hechos de entrada diferida cuya sync reveló un bloqueo en lista (R22). */
+  bloqueadoDiferido: ReadonlySet<string>;
+}> {
   const registros: FilaRegistro[] = [];
   const intentos: FilaIntento[] = [];
   const usos: FilaUso[] = [];
-  if (listos.length === 0) return { registros, intentos, usos };
+  const bloqueadoDiferido = new Set<string>();
+  if (listos.length === 0) return { registros, intentos, usos, bloqueadoDiferido };
   const l = await listasDe(
     ctx,
     equipo.instalacionId,
@@ -127,7 +134,10 @@ export async function escribirFilas(
       horaCorregida: hora,
     };
     if (decision.resultado === "denegado") {
-      intentos.push({ ...comun, motivo: decision.motivo });
+      const id = randomUUID();
+      if (decision.motivo === "bloqueado" && esDiferido(t, x.e.h.horaHecho))
+        bloqueadoDiferido.add(x.e.h.clave);
+      intentos.push({ ...comun, id, motivo: decision.motivo });
       continue;
     }
     const id = randomUUID();
@@ -140,5 +150,5 @@ export async function escribirFilas(
         registroId: id,
       });
   }
-  return { registros, intentos, usos };
+  return { registros, intentos, usos, bloqueadoDiferido };
 }

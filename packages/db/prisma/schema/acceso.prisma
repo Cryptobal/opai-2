@@ -60,6 +60,8 @@ model RegistroAcceso {
   horaCorregida  DateTime @map("hora_corregida") @db.Timestamptz(6)
   recibidoEn     DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  /// Anonimización por retención (R18): la fila se conserva, pero deja de identificar al visitante.
+  anonimizadoEn  DateTime? @map("anonimizado_en") @db.Timestamptz(6)
 
   entradaLista EntradaLista?    @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
   punto        PuntoAcceso?     @relation(fields: [puntoId], references: [id], onDelete: Restrict, map: "registros_acceso_punto_fkey")
@@ -116,6 +118,7 @@ model IntentoDenegado {
   motivo        String
   horaCorregida DateTime @map("hora_corregida") @db.Timestamptz(6)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  anonimizadoEn DateTime? @map("anonimizado_en") @db.Timestamptz(6)
 
   @@unique([tenantId, dispositivoId, clave], map: "intentos_denegados_clave_key")
   @@map("intentos_denegados")

@@ -60,7 +60,12 @@ export async function evaluarEntradas(
   crudas: readonly { h: Hecho; p: Payload }[],
   t: Tiempo,
   rechazos: Rechazos,
-): Promise<{ registros: FilaRegistro[]; intentos: FilaIntento[]; usos: FilaUso[] }> {
+): Promise<{
+  registros: FilaRegistro[];
+  intentos: FilaIntento[];
+  usos: FilaUso[];
+  bloqueadoDiferido: ReadonlySet<string>;
+}> {
   // Días, días de semana y horarios se evalúan en la zona horaria de la empresa (`core.tenants.timezone`).
   const [{ timezone: zona }, config, puntos] = await Promise.all([
     tenantActual(ctx),

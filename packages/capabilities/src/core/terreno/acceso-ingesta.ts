@@ -1,3 +1,9 @@
+import {
+  emitirEntrada,
+  emitirIngresoBloqueadoDiferido,
+  emitirIntentoDenegado,
+  emitirSalida,
+} from "../../acceso/eventos-acceso";
 import type { Contexto } from "../../types";
 import { evaluarEntradas } from "./acceso-entradas";
 import { escribirSalidas, validarSalidas } from "./acceso-salidas";
@@ -61,7 +67,13 @@ export async function resolverAcceso(
       rechazos.set(h.clave, "modulo_inactivo");
     return vacio;
   }
-  const { registros, intentos, usos } = await evaluarEntradas(ctx, equipo, entradas, t, rechazos);
+  const { registros, intentos, usos, bloqueadoDiferido } = await evaluarEntradas(
+    ctx,
+    equipo,
+    entradas,
+    t,
+    rechazos,
+  );
   const salidasOk = await validarSalidas(
     ctx,
     equipo,
@@ -80,13 +92,39 @@ export async function resolverAcceso(
         usos.filter((u) => reg.some((r) => r.id === u.registroId)),
       );
       if (int.length) await tx.intentoDenegado.createMany({ skipDuplicates: true, data: int });
-      await escribirSalidas(
+      const salidasEscritas = await escribirSalidas(
         tx,
         ctx,
         equipo,
         salidasOk.filter((s) => aceptadas.has(s.h.clave)),
         t,
       );
+      for (const r of reg) {
+        await emitirEntrada(tx, ctx, {
+          instalacionId: r.instalacionId,
+          registroId: r.id as string,
+          clave: r.clave,
+        });
+      }
+      for (const i of int) {
+        const intentoId = i.id as string;
+        await emitirIntentoDenegado(tx, ctx, {
+          instalacionId: i.instalacionId,
+          intentoId,
+          motivo: i.motivo,
+          clave: i.clave,
+        });
+        if (bloqueadoDiferido.has(i.clave)) {
+          await emitirIngresoBloqueadoDiferido(tx, ctx, {
+            instalacionId: i.instalacionId,
+            intentoId,
+            clave: i.clave,
+          });
+        }
+      }
+      for (const s of salidasEscritas) {
+        await emitirSalida(tx, ctx, { instalacionId: s.instalacionId, registroId: s.registroId });
+      }
     },
   };
 }

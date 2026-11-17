@@ -9,6 +9,7 @@ import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
 import type { Contexto } from "../types";
 import { cerrarAbiertos } from "./cierre";
 import { esUnica, PERMISO_REGISTROS, quien } from "./comun";
+import { emitirSalida } from "./eventos-acceso";
 
 const motivo = z.string().trim().min(3).max(300);
 
@@ -75,24 +76,26 @@ export const registrosSalida = defineCapability({
     if (r.salida) throw reglaDeNegocio("Este registro ya tiene salida.");
     const ahora = new Date();
     if (dryRun) return { id, salidaEn: ahora.toISOString() };
-    // Si la portería registra la misma salida a la vez, la unicidad por registro la frena: se dice como regla.
-    await ctx.db.salidaAcceso
-      .create({
-        data: {
-          tenantId: ctx.tenantId,
-          instalacionId: r.instalacionId,
-          registroId: id,
-          clave: randomUUID(),
-          origen: "erp",
-          registradaPor: quien(ctx),
-          motivo: m ?? null,
-          horaCorregida: ahora,
-        },
-      })
-      .catch((e: unknown) => {
-        if (esUnica(e)) throw reglaDeNegocio("Este registro ya tiene salida.");
-        throw e;
-      });
+    await ctx.transaccion(async (tx) => {
+      await tx.salidaAcceso
+        .create({
+          data: {
+            tenantId: ctx.tenantId,
+            instalacionId: r.instalacionId,
+            registroId: id,
+            clave: randomUUID(),
+            origen: "erp",
+            registradaPor: quien(ctx),
+            motivo: m ?? null,
+            horaCorregida: ahora,
+          },
+        })
+        .catch((e: unknown) => {
+          if (esUnica(e)) throw reglaDeNegocio("Este registro ya tiene salida.");
+          throw e;
+        });
+      await emitirSalida(tx, ctx, { instalacionId: r.instalacionId, registroId: id });
+    });
     return { id, salidaEn: ahora.toISOString() };
   },
 });

@@ -61,6 +61,15 @@ export const manifest = defineModule({
       control: "switch",
     }),
   }),
-  eventos: [{ id: "acceso.reporte", descripcion: "Se envió el reporte periódico de accesos de una instalación." }],
+  eventos: [
+    { id: "acceso.entrada", descripcion: "Se registró una entrada en una instalación." },
+    { id: "acceso.salida", descripcion: "Se registró la salida de un visitante." },
+    { id: "acceso.intento_denegado", descripcion: "Alguien no pudo entrar (bloqueado, fuera de lista u otro motivo)." },
+    {
+      id: "acceso.ingreso_bloqueado_diferido",
+      descripcion: "Al sincronizar, un ingreso sin red coincide con la lista bloqueada vigente (R22).",
+    },
+    { id: "acceso.reporte", descripcion: "Se envió el reporte periódico de accesos de una instalación." },
+  ],
   capacidades: capacidadesAcceso,
 });

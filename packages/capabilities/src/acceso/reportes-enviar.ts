@@ -54,6 +54,7 @@ async function registrosDelPeriodo(
     const lote = await ctx.db.registroAcceso.findMany({
       where: {
         instalacionId,
+        anonimizadoEn: null,
         horaCorregida: { gte: desde, lt: hasta, ...(cursor ? { gt: cursor } : {}) },
       },
       orderBy: { horaCorregida: "asc" },
@@ -106,6 +107,7 @@ export async function enviarReporteAcceso(
   const filas = await registrosDelPeriodo(ctx, instalacionId, v.desde, v.hasta);
   const csv = csvDe(filas);
   const [para, ...cc] = destinatarios;
+  if (!para) return { enviados: 0, registros: filas.length, omitido: "sin_destinatarios" };
   const asuntoPrueba = opts.prueba ? "[Prueba] " : "";
   const datos = {
     "instalacion.nombre": inst.nombre,
@@ -129,7 +131,7 @@ export async function enviarReporteAcceso(
     },
   );
   if (!ok) return { enviados: 0, registros: filas.length, omitido: "correo_fallido" };
-  if (!opts.prueba && frecuencia !== "desactivado") {
+  if (!opts.prueba) {
     const ventana = ventanaReporte(frecuencia, hoy, timezone, cursor?.ultimoHasta ?? null);
     if (ventana)
       await ctx.db.reporteAccesoCursor.upsert({
