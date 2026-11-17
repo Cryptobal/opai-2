@@ -135,7 +135,7 @@ export function autorizador(
  * Key de plataforma (ADR-055): scope explícito "platform" (el "*" nunca lo cubre), tipo "usuario" y
  * hereda los permisos del responsable. El `platformRole` del responsable se cruza aparte, en vivo.
  */
-export function claveDePlataforma(clave: ClaveApi | null | undefined): boolean {
+function claveDePlataforma(clave: ClaveApi | null | undefined): boolean {
   return Boolean(clave?.plataforma) && !clave?.servicio && clave?.permisos === null;
 }
 
