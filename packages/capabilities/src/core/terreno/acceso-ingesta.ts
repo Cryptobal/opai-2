@@ -93,7 +93,21 @@ export async function resolverAcceso(
         usos.filter((u) => reg.some((r) => r.id === u.registroId)),
       );
       if (int.length) await tx.intentoDenegado.createMany({ skipDuplicates: true, data: int });
-      await registrarIntentosEnLibro(tx, ctx, equipo, int);
+      await registrarIntentosEnLibro(
+        tx,
+        ctx,
+        equipo,
+        int.map((i) => ({
+          clave: i.clave,
+          motivo: i.motivo,
+          tipoRegistro: i.tipoRegistro,
+          personaId: i.personaId ?? null,
+          horaCorregida:
+            i.horaCorregida instanceof Date
+              ? i.horaCorregida
+              : new Date(i.horaCorregida as string | Date),
+        })),
+      );
       const salidasEscritas = await escribirSalidas(
         tx,
         ctx,
