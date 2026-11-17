@@ -206,6 +206,10 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
   });
 
   it("lista propias: paginación, búsqueda y contadores (CAR-597)", async () => {
+    const borradorAntes =
+      (await dato<{ contadores?: Record<string, number> }>(
+        await yo("rendiciones.rendiciones.listar", { alcance: "propias", incluirContadores: true, limite: 1 }),
+      )).contadores?.borrador ?? 0;
     const ids: string[] = [];
     for (let i = 0; i < 55; i++) {
       const c = await dato<{ id: string }>(await yo("rendiciones.rendiciones.crear", cuerpo({ descripcion: `Lote contador ${i}`, items: [item({ folio: `PC-${i}` })] })));
@@ -216,7 +220,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     );
     expect(p1.items).toHaveLength(50);
     expect(p1.siguiente).toBeTruthy();
-    expect(p1.contadores?.borrador).toBe(55);
+    expect(p1.contadores?.borrador).toBe(borradorAntes + 55);
     const p2 = await dato<{ items: { id: string }[]; siguiente: string | null }>(
       await yo("rendiciones.rendiciones.listar", { alcance: "propias", limite: 50, cursor: p1.siguiente! }),
     );
