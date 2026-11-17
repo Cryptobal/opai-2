@@ -2,17 +2,9 @@
 
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-export type DatosFirma = {
-  nombre: string;
-  rol: string;
-  estadoFirmante: string;
-  estadoSolicitud: string;
-  clase: string;
-  nivel: string;
-  mensaje: string | null;
-  plazoVence: string;
-  documentoVersion: number;
-};
+import type { DatosFirma } from "./tipos";
+
+export type { DatosFirma };
 
 export async function verFirmaSesion(portal: string, solicitudId: string) {
   return ejecutarComoUsuario<DatosFirma>(portal, "core.firmas.ver_firmante", { solicitudId });

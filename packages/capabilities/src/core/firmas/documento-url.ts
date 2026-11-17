@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
-import { uuidSchema } from "../esquemas";
-import { resolverFirmante } from "./firmar-util";
+import { inputTokenOSolicitud } from "./esquema-input";
+import { resolverFirmanteYSolicitud } from "./firmar-util";
 
 /**
  * URL firmada de corta duración para revisar el documento congelado antes de firmar (firma.md R5:
@@ -20,14 +20,7 @@ export const firmasDocumentoUrl = defineCapability({
     "URL firmada de corta duración para ver el documento congelado de una solicitud antes de firmar, a partir del enlace personal del firmante (firma.md R5).",
   permiso: null,
   interna: true,
-  input: z
-    .object({
-      token: z.string().min(10).max(200).optional(),
-      solicitudId: uuidSchema.optional(),
-    })
-    .refine((v) => Boolean(v.token) !== Boolean(v.solicitudId), {
-      message: "Indica el enlace personal o la solicitud, no ambos.",
-    }),
+  input: inputTokenOSolicitud,
   sensibles: ["token"],
   output: z.object({
     url: z.string(),
@@ -38,14 +31,7 @@ export const firmasDocumentoUrl = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const firmante = await resolverFirmante(ctx, {
-      token: input.token,
-      solicitudId: input.solicitudId,
-    });
-    const s = await ctx.db.solicitudFirma.findFirst({
-      where: { tenantId: ctx.tenantId, id: firmante.solicitudId },
-    });
-    if (!s) throw noEncontrado("La solicitud de firma");
+    const { solicitud: s } = await resolverFirmanteYSolicitud(ctx, input);
     const doc = await ctx.db.documento.findFirst({
       where: { tenantId: ctx.tenantId, id: s.documentoId },
     });

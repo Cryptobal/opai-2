@@ -1,4 +1,4 @@
-import { prohibido, reglaDeNegocio } from "../../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { hashToken } from "./comun-flujo";
 
@@ -64,6 +64,19 @@ export async function resolverFirmante(
     return f;
   }
   throw prohibido("Falta el enlace personal o la sesión del firmante.");
+}
+
+/** Firmante autenticado y solicitud viva del mismo tenant (ver_firmante, documento_url). */
+export async function resolverFirmanteYSolicitud(
+  ctx: Contexto,
+  input: { token?: string; solicitudId?: string },
+) {
+  const firmante = await resolverFirmante(ctx, input);
+  const solicitud = await ctx.db.solicitudFirma.findFirst({
+    where: { tenantId: ctx.tenantId, id: firmante.solicitudId },
+  });
+  if (!solicitud) throw noEncontrado("La solicitud de firma");
+  return { firmante, solicitud };
 }
 
 /**
