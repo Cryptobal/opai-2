@@ -48,7 +48,7 @@ export const titularesListar = defineCapability({
   ],
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { puestoId }) {
+  async handler(ctx, { puestoId, cursor, limite }) {
     // También un puesto inactivo: su historial se puede consultar (no se le asigna).
     const puesto = await ctx.db.puesto.findFirst({
       where: { id: puestoId, AND: [dondePuesto(ctx)] },
@@ -108,8 +108,8 @@ export const titularesListar = defineCapability({
     const vigente = items.find((i) => i.desde <= hoyCivil && (i.hasta === null || i.hasta >= hoyCivil));
     const { items: pagina, siguiente } = paginaMemoria(
       items.map((i) => ({ ...i, id: i.serieId })),
-      input.limite,
-      input.cursor,
+      limite,
+      cursor,
     );
     return {
       puestoId,

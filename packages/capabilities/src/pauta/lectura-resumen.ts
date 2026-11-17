@@ -92,7 +92,7 @@ export const ppcListar = defineCapability({
   auditarLectura: (s) => [...new Set(s.items.map((x) => x.puestoId))],
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { anio, mes, instalacionId }) {
+  async handler(ctx, { anio, mes, instalacionId, cursor, limite }) {
     const instalaciones = await ctx.db.instalacion.findMany({
       where: { archivadaEn: null, AND: [dondeInstalacion(ctx), instalacionId ? { id: instalacionId } : {}] },
       select: { id: true, nombre: true, region: true },
@@ -116,6 +116,7 @@ export const ppcListar = defineCapability({
           actual.dias += 1;
         } else if (inst) {
           actual = {
+            id: `${p.id}:${c.fecha}:${c.motivo}`,
             instalacionId: inst.id,
             instalacion: inst.nombre,
             puestoId: p.id,
@@ -129,10 +130,8 @@ export const ppcListar = defineCapability({
         }
       }
     }
-    const ordenada = salida
-      .map((row) => ({ ...row, id: `${row.puestoId}:${row.desde}:${row.motivo}` }))
-      .sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0));
-    const { items, siguiente } = paginaMemoria(ordenada, input.limite, input.cursor);
+    const ordenada = salida.sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0));
+    const { items, siguiente } = paginaMemoria(ordenada, limite, cursor);
     return { items, siguiente };
   },
 });
