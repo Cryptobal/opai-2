@@ -33,7 +33,7 @@ export type IngresoEsperado = IngresoProyectadoDesdeDte & {
 };
 
 /** Días promedio de pago por cliente (cuentaId): solo con 3 o más facturas pagadas con cobro conciliado. */
-export async function promediosDePagoPorCliente(ctx: Contexto, hoy: string): Promise<Map<string, number>> {
+async function promediosDePagoPorCliente(ctx: Contexto, hoy: string): Promise<Map<string, number>> {
   const desde = sumarDiasCobro(hoy, -30 * MESES_HISTORIA_PROMEDIO);
   const pagadas = await ctx.db.documentoEmitido.findMany({
     where: {
