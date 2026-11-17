@@ -1,5 +1,6 @@
 import type { Contexto } from "../../types";
 import { resolverAcceso } from "./acceso-ingesta";
+import { resolverAsistencia } from "./asistencia-ingesta";
 import type { Equipo, Hecho, Tiempo } from "./acceso-tipos";
 import type { MotivoRechazo } from "./hechos-evaluar";
 import { resolverEjecuciones } from "./rondas-ejecucion";
@@ -31,11 +32,13 @@ export async function prepararProyecciones(
   t: Tiempo,
 ): Promise<Proyecciones> {
   const marcas = await resolverMarcas(ctx, equipo.instalacionId, hechos);
+  const asistencia = await resolverAsistencia(ctx, equipo, hechos);
   const acceso = await resolverAcceso(ctx, equipo, hechos, t);
   const rondas = await resolverEjecuciones(ctx, equipo, hechos, t);
   const novedades = await resolverNovedades(ctx, equipo, hechos, t);
   const rechazos = new Map<string, MotivoRechazo>([
     ...acceso.rechazos,
+    ...asistencia.rechazos,
     ...rondas.rechazos,
     ...novedades.rechazos,
   ]);

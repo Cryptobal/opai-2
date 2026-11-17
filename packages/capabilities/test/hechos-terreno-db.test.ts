@@ -3,6 +3,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { PIN_SIMULADO } from "../../../modules/asistencia/capabilities";
+import { manifest } from "../../../modules/asistencia/manifest";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -27,12 +29,13 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
   let personaB = "";
   let personaSinPuesto = "";
 
-  const ctx = (tenantId: string) =>
+  const ctx = (tenantId: string, modulos: string[] = []) =>
     mod.crearContexto({
       tenantId,
       actor: { tipo: "system" },
       rol: "owner",
       alcance: null,
+      modulosActivos: modulos,
       medidor,
     });
   const run = (tenant: string, id: string, input: unknown, o = {}) =>
@@ -60,7 +63,9 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
     e = await prepararEntorno();
     mod = await import("../src");
     mod.limpiarRegistro();
+    mod.limpiarModulos();
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
+    mod.registrarModulos([manifest]);
     const sufijo = randomUUID().slice(0, 8);
     for (const k of ["A", "B"] as const) {
       t[k] = (
@@ -172,7 +177,7 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
 
   it("rechaza lo que no está en la lista blanca o no cumple su esquema, y el resto del lote sigue", async () => {
     const bueno = latido();
-    const tipoAjeno = latido({ tipo: "asistencia.marca" });
+    const tipoAjeno = latido({ tipo: "modulo.inexistente" });
     const payloadMalo = latido({ payload: { version: "x", ademas: 1 } });
     const posterior = latido({ horaHecho: new Date(Date.now() + 3_600_000).toISOString() });
     const antiguo = latido({ horaHecho: new Date(Date.now() - 20 * 24 * 3_600_000).toISOString() });
@@ -262,6 +267,83 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
       dispositivoId: disp.B,
     });
     expect(sinNadie.items).toEqual([]);
+  });
+
+  it("marca de asistencia por cola: idempotente, origen offline_queue y credencial sin persistir", async () => {
+    const slug = randomUUID().slice(0, 8);
+    const slugA = `qa-a-${slug}`;
+    const slugB = `qa-b-${slug}`;
+    const tA = (await e.admin.tenant.create({ data: { slug: slugA, nombre: "QA A", vertical: "seguridad" } })).id;
+    const tB = (await e.admin.tenant.create({ data: { slug: slugB, nombre: "QA B", vertical: "seguridad" } })).id;
+    const instA = (
+      await dato<{ id: string }>(tA, "core.instalaciones.create", {
+        cuentaId: (await dato<{ id: string }>(tA, "core.cuentas.create", { nombre: "Mandante" })).id,
+        nombre: "Planta QA A",
+      })
+    ).id;
+    const instB = (
+      await dato<{ id: string }>(tB, "core.instalaciones.create", {
+        cuentaId: (await dato<{ id: string }>(tB, "core.cuentas.create", { nombre: "Mandante" })).id,
+        nombre: "Planta QA B",
+      })
+    ).id;
+    const dispA = (
+      await e.admin.dispositivo.create({
+        data: { tenantId: tA, instalacionId: instA, identificador: `D-${slug}`, estado: "activo", tokenHash: `th-${slug}-a` },
+      })
+    ).id;
+    const dispB = (
+      await e.admin.dispositivo.create({
+        data: { tenantId: tB, instalacionId: instB, identificador: `D-${slug}`, estado: "activo", tokenHash: `th-${slug}-b` },
+      })
+    ).id;
+    const persona = async (tenantId: string, instId: string, rut: string) => {
+      const cargo = await e.admin.cargo.create({ data: { tenantId, nombre: "Guardia" } });
+      const pid = (await e.admin.persona.create({ data: { tenantId, rut, nombres: "Noa", apellidos: "Cola" } })).id;
+      await e.admin.vinculoLaboral.create({
+        data: { tenantId, personaId: pid, cargoId: cargo.id, instalacionId: instId, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" },
+      });
+      return pid;
+    };
+    const pA = await persona(tA, instA, `5${slug.slice(0, 7)}-9`);
+    const pB = await persona(tB, instB, `6${slug.slice(0, 7)}-9`);
+    for (const tid of [tA, tB]) {
+      await e.admin.ajuste.create({
+        data: { tenantId: tid, ambito: "tenant", sujetoId: tid, modulo: "asistencia", clave: "marcas_habilitadas", valor: true },
+      });
+    }
+    const marca = (personaId: string) => ({
+      clave: randomUUID(),
+      tipo: "asistencia.marca",
+      personaId,
+      payload: { metodo: "rut_pin", credencial: PIN_SIMULADO },
+      horaHecho: new Date(Date.now() - 60_000).toISOString(),
+    });
+    const hA = marca(pA);
+    const hB = marca(pB);
+    const ctxA = () => ctx(tA, ["asistencia"]);
+    const ctxB = () => ctx(tB, ["asistencia"]);
+    const recibirA = (hechos: unknown[]) =>
+      mod.executeCapability(ctxA(), "core.hechos_terreno.recibir", { dispositivoId: dispA, horaEnvio: new Date().toISOString(), hechos });
+    const recibirB = (hechos: unknown[]) =>
+      mod.executeCapability(ctxB(), "core.hechos_terreno.recibir", { dispositivoId: dispB, horaEnvio: new Date().toISOString(), hechos });
+    const rA = await recibirA([hA]);
+    const rB = await recibirB([hB]);
+    expect(rA.ok && rB.ok).toBe(true);
+    const filaA = await e.admin.hechoTerreno.findFirstOrThrow({ where: { clave: hA.clave } });
+    expect(filaA.payload).toEqual({ metodo: "rut_pin" });
+    const mA = await e.admin.marca.findFirstOrThrow({ where: { tenantId: tA, idempotencyKey: hA.clave } });
+    expect(mA.origen).toBe("offline_queue");
+    expect(mA.personaId).toBe(pA);
+    await recibirA([hA]);
+    expect(await e.admin.marca.count({ where: { tenantId: tA, idempotencyKey: hA.clave } })).toBe(1);
+    const cruzada = await mod.executeCapability(ctxB(), "core.hechos_terreno.recibir", {
+      dispositivoId: dispB,
+      horaEnvio: new Date().toISOString(),
+      hechos: [{ ...hA, personaId: pB }],
+    });
+    expect(cruzada.ok).toBe(true);
+    if (cruzada.ok) expect((cruzada.data as Recepcion).resultados[0]?.motivo).toBe("persona_no_valida");
   });
 
   it("dos empresas: un equipo de A no recibe con el contexto de B y B no ve los hechos de A", async () => {
