@@ -77,7 +77,7 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
       rut: formatearRut(v.persona.rut),
       tipoContrato: v.tipo,
     };
-    const hechoAlta = dia(v.inicio);
+    const hechoAlta = dia(v.inicio)!;
     const regAlta = registros.get(`alta:${v.id}`);
     const plazoAlta = etiquetaPlazoMiDt(hechoAlta, hoyCivil, null);
     items.push({
@@ -96,7 +96,7 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
     });
 
     if (v.estado === "terminado" && v.termino) {
-      const hechoBaja = dia(v.termino);
+      const hechoBaja = dia(v.termino)!;
       const regBaja = registros.get(`baja:${v.id}`);
       const plazoBaja = etiquetaPlazoMiDt(hechoBaja, hoyCivil, null);
       const motivo = v.motivoTermino ? ` · ${v.motivoTermino}` : "";
@@ -135,7 +135,7 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
   }
 
   for (const a of anexos) {
-    const hecho = dia(a.aprobadoEn!);
+    const hecho = dia(a.aprobadoEn)!;
     const reg = registros.get(`anexo:${a.id}`);
     const plazo = etiquetaPlazoMiDt(hecho, hoyCivil, null);
     const cambio = MOTIVO_ANEXO[a.motivoCambio] ?? a.motivoCambio;
