@@ -43,11 +43,7 @@ export function PanelTurno({
 
   return (
     <div className="flex flex-col gap-4">
-      {error ? (
-        <p role="alert" className="text-danger">
-          {error}
-        </p>
-      ) : null}
+      {error ? <p role="alert" className="text-danger">{error}</p> : null}
       <BotonesTurno
         turno={turno}
         operador={operador}
