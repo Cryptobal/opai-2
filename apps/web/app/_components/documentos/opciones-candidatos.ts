@@ -2,8 +2,8 @@ import type { OpcionCombobox } from "@opai/ds";
 
 import type { Candidatos } from "@/app/_acciones/candidatos-documento";
 
-export const ERROR = "__error";
-export const MAS = "__mas";
+const ERROR = "__error";
+const MAS = "__mas";
 /** Filas informativas del buscador: se muestran pero nunca se pueden elegir. */
 export const FILA_INFO: ReadonlySet<string> = new Set([ERROR, MAS]);
 

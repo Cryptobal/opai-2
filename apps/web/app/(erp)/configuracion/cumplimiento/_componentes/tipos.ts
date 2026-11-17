@@ -1,6 +1,6 @@
 // Tipos y etiquetas de Cumplimiento (Ley 21.719), sin dependencias de servidor: los usan islas cliente.
 
-export type Tono = "neutro" | "success" | "warning" | "danger" | "info" | "accent";
+type Tono = "neutro" | "success" | "warning" | "danger" | "info" | "accent";
 type Etiqueta = { etiqueta: string; tono: Tono };
 
 export type Solicitud = {
