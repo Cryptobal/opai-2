@@ -73,5 +73,3 @@ export async function cargarTurnosExtra(p: Parametros) {
     yoId: identidad.usuario.id,
   };
 }
-
-export type DatosTurnosExtra = Awaited<ReturnType<typeof cargarTurnosExtra>>;

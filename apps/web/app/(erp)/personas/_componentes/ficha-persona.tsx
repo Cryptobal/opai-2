@@ -11,6 +11,7 @@ import { fecha, rut } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
 
 import { accionesPersona } from "./acciones-persona";
+import { pestanasPersona } from "./ficha-persona-pestanas";
 
 export type TabPersona =
   | "resumen"
@@ -84,25 +85,12 @@ export function FichaPersona(x: {
           : {})}
         tabActiva={x.tab}
         Link={LinkNext}
-        tabs={[
-          { id: "resumen", etiqueta: "Resumen", href: `${base}${q}` },
-          { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral${q}` },
-          { id: "ausencias", etiqueta: "Ausencias", href: `${base}/ausencias${q}` },
-          ...(x.turnosExtra
-            ? [{ id: "turnos-extra" as const, etiqueta: "Turnos extra", href: `${base}/turnos-extra${q}` }]
-            : []),
-          { id: "sueldo", etiqueta: "Sueldo", href: `${base}/sueldo${q}` },
-          { id: "anexos", etiqueta: "Anexos", href: `${base}/anexos${q}` },
-          {
-            id: "documentos",
-            etiqueta: "Documentos",
-            contador: p?.documentos ?? 0,
-            href: `${base}/documentos${q}`,
-          },
-
-          { id: "privacidad", etiqueta: "Privacidad", href: `${base}/privacidad${q}` },
-          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad${q}` },
-        ]}
+        tabs={pestanasPersona({
+          base,
+          q,
+          documentos: p?.documentos ?? 0,
+          ...(x.turnosExtra !== undefined ? { turnosExtra: x.turnosExtra } : {}),
+        })}
       >
         {x.children}
       </DetailScreen>
