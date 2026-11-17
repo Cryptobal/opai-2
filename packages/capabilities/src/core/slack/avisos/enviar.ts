@@ -13,7 +13,7 @@ import { slackMensajes } from "./cliente";
 import { configSiConectada, TIPO_ENVIAR_AVISO, type TipoAviso } from "./registrar";
 
 /** Errores que no se arreglan reintentando: se registran y el aviso queda «fallido». */
-const ERRORES_DEFINITIVOS = new Set([
+export const ERRORES_DEFINITIVOS = new Set([
   "not_in_channel",
   "channel_not_found",
   "is_archived",
@@ -27,7 +27,7 @@ const ERRORES_DEFINITIVOS = new Set([
 ]);
 
 /** Fecha civil (AAAA-MM-DD) en la zona de la empresa. */
-function fechaEnZona(instante: Date, zona: string): string {
+export function fechaEnZona(instante: Date, zona: string): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: zona,
     year: "numeric",
