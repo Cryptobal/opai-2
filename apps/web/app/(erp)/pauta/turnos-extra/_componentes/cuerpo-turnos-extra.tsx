@@ -10,9 +10,14 @@ import type { cargarTurnosExtra } from "./datos";
 
 export type VistaTurnosExtra = Awaited<ReturnType<typeof cargarTurnosExtra>>;
 
-export function CuerpoTurnosExtra({ d }: { d: VistaTurnosExtra }) {
-  const filtros = { estado: d.estado, inst: d.instalacionId ?? undefined };
-  const lista = (
+function ListaTurnosExtra({
+  d,
+  filtros,
+}: {
+  d: VistaTurnosExtra;
+  filtros: { estado: VistaTurnosExtra["estado"]; inst?: string | undefined };
+}) {
+  return (
     <div className="flex flex-col p-4 md:p-0">
       <Estado
         state={d.items.length ? "ready" : "empty"}
@@ -37,6 +42,10 @@ export function CuerpoTurnosExtra({ d }: { d: VistaTurnosExtra }) {
       </Estado>
     </div>
   );
+}
+
+export function CuerpoTurnosExtra({ d }: { d: VistaTurnosExtra }) {
+  const filtros = { estado: d.estado, inst: d.instalacionId ?? undefined };
   return (
     <>
       <Cabecera titulo="Turnos extra" subtitulo="Aprueba o rechaza los reemplazos y refuerzos pagados de la pauta." />
@@ -62,7 +71,7 @@ export function CuerpoTurnosExtra({ d }: { d: VistaTurnosExtra }) {
         etiquetaLista="Turnos"
         etiquetaDetalle="Detalle"
         vacio={{ texto: "Elige un turno de la lista." }}
-        lista={lista}
+        lista={<ListaTurnosExtra d={d} filtros={filtros} />}
         {...(d.turno ? {
           detalle: (
             <div className="flex flex-col gap-4 p-4 md:p-0">

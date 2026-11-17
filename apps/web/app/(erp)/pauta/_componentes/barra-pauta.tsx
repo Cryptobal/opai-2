@@ -41,6 +41,38 @@ type Props = {
   puedeEditar: boolean;
 };
 
+function BarraPautaFiltrosInst({
+  inst,
+  anio,
+  mes,
+  diaria,
+  fecha,
+  verPpc,
+  puedeEditar,
+  fijar,
+}: {
+  inst: string;
+  anio: number;
+  mes: number;
+  diaria: boolean;
+  fecha: string;
+  verPpc: boolean;
+  puedeEditar: boolean;
+  fijar: ReturnType<typeof useParametros>["fijar"];
+}) {
+  return (
+    <BarraPautaAccionesInst
+      inst={inst}
+      anio={anio}
+      mes={mes}
+      diaria={diaria}
+      puedeEditar={puedeEditar}
+      urlExportar={(formato) => urlExportar(inst, formato, anio, mes, fecha, diaria, verPpc)}
+      onAlertas={() => fijar({ alertas: "1" })}
+    />
+  );
+}
+
 /** Selector de instalación y de mes, filtro «Sin cubrir» y acceso al historial (todo en la URL). */
 export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha, puedeEditar }: Props) {
   const { fijar } = useParametros();
@@ -84,14 +116,15 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
           onCambiar={(a) => fijar({ ver: a ? "ppc" : null })}
         />
         {inst ? (
-          <BarraPautaAccionesInst
+          <BarraPautaFiltrosInst
             inst={inst}
             anio={anio}
             mes={mes}
             diaria={diaria}
+            fecha={fecha}
+            verPpc={verPpc}
             puedeEditar={puedeEditar}
-            urlExportar={(formato) => urlExportar(inst, formato, anio, mes, fecha, diaria, verPpc)}
-            onAlertas={() => fijar({ alertas: "1" })}
+            fijar={fijar}
           />
         ) : null}
       </div>

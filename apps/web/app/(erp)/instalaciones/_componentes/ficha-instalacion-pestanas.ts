@@ -2,6 +2,20 @@ import type { Parametros } from "@/lib/parametros";
 
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
+function pestanasModulosOpcionales(
+  base: string,
+  parametros: Parametros,
+  modulos: readonly (readonly [boolean | undefined, string, string])[],
+) {
+  return modulos
+    .filter(([ver]) => ver)
+    .map(([, id, etiqueta]) => ({
+      id,
+      etiqueta,
+      href: conFiltrosInstalaciones(`${base}/${id}`, parametros),
+    }));
+}
+
 export function pestanasInstalacion(p: {
   base: string;
   parametros: Parametros;
@@ -26,20 +40,12 @@ export function pestanasInstalacion(p: {
       etiqueta: "Sueldo",
       href: conFiltrosInstalaciones(`${p.base}/sueldo`, p.parametros),
     },
-    ...(
-      [
-        [p.negocios, "negocios", "Negocios"],
-        [p.rondas, "rondas", "Rondas"],
-        [p.turnosExtra, "turnos-extra", "Turnos extra"],
-        [p.accesos, "accesos", "Accesos"],
-      ] as const
-    )
-      .filter(([ver]) => ver)
-      .map(([, id, etiqueta]) => ({
-        id,
-        etiqueta,
-        href: conFiltrosInstalaciones(`${p.base}/${id}`, p.parametros),
-      })),
+    ...pestanasModulosOpcionales(p.base, p.parametros, [
+      [p.negocios, "negocios", "Negocios"],
+      [p.rondas, "rondas", "Rondas"],
+      [p.turnosExtra, "turnos-extra", "Turnos extra"],
+      [p.accesos, "accesos", "Accesos"],
+    ]),
     {
       id: "personas" as const,
       etiqueta: p.persona,
