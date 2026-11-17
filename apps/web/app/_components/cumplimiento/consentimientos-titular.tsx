@@ -19,7 +19,7 @@ type Consentimientos = {
   }[];
 };
 
-export const PROPOSITOS: Record<string, string> = {
+const PROPOSITOS: Record<string, string> = {
   comunicaciones_comerciales: "Comunicaciones comerciales",
   encuestas: "Encuestas de satisfacción",
   eventos: "Invitaciones a eventos",
