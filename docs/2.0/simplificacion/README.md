@@ -21,7 +21,7 @@ El orden es el de trabajo: primero lo que más limpia con menos riesgo. Tamaño 
 1. Un tema por PR, chico, sin cambiar el comportamiento.
 2. Las pruebas existentes quedan en verde. Si la parte no tiene pruebas, el primer commit las escribe y fija el comportamiento actual; el segundo simplifica.
 3. No se toca un archivo que otra sesión tenga en un PR abierto: se anota en el ticket y se espera, o se coordina por Linear con la sesión dueña.
-4. Cada PR baja `simplicidad-base.json` con `pnpm simplicidad --actualizar`.
+4. Al integrar a `main`, quien hace squash baja `simplicidad-base.json` con `pnpm simplicidad --actualizar` (CAR-641: en PRs paralelos el check compara contra la base de `main`, no el archivo del branch).
 5. Se integra con la regla vigente: checks en verde, revisión final sin bloqueos y snapshot si hubiera migración (no debería).
 
 ## 1 · Archivos sin uso y una prueba que no corre (CAR-436)
