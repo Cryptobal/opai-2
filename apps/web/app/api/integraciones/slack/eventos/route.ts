@@ -1,16 +1,13 @@
 import { crearContexto, executeCapability } from "@opai/capabilities";
 import { resolverInstalacionSlack } from "@opai/db";
-import { appSlackDelEntorno, verificarFirmaSlack } from "@opai/integrations";
 
 import { medidorDiferido } from "@/lib/medidor";
-import { ipDe, permitir } from "@/lib/rate-limit";
+import { permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
-import { leerEventoSlack, MAX_CUERPO_SLACK } from "@/lib/slack-eventos";
+import { leerEventoSlack } from "@/lib/slack-eventos";
+import { cuerpoFirmadoSlack, demasiadas, listo } from "@/lib/slack-firma";
 
 asegurarRegistro();
-
-const listo = () => new Response(null, { status: 200 });
-const demasiadas = () => new Response(null, { status: 429, headers: { "Retry-After": "60" } });
 
 /**
  * Events API de la app de Slack «OPAI» (CAR-291, ADR-093 §10). Sin la app en el entorno o sin firma
@@ -19,19 +16,9 @@ const demasiadas = () => new Response(null, { status: 429, headers: { "Retry-Aft
  * SECURITY DEFINER y ejecuta `core.slack.desinstalada` (interna). Lo demás se ignora sin guardar nada.
  */
 export async function POST(req: Request): Promise<Response> {
-  // Por IP antes de la firma (un flujo sin firmar no agota el cupo de Slack) y global después.
-  if (!(await permitir(`slack-eventos-ip:${ipDe(req)}`, 300, 60_000))) return demasiadas();
-  const app = appSlackDelEntorno();
-  if (!app) return new Response(null, { status: 401 });
-  if (Number(req.headers.get("content-length") ?? 0) > MAX_CUERPO_SLACK)
-    return new Response(null, { status: 413 });
-  const cuerpo = await req.text();
-  if (cuerpo.length > MAX_CUERPO_SLACK) return new Response(null, { status: 413 });
-  const firmada = verificarFirmaSlack(app.signingSecret, cuerpo, {
-    timestamp: req.headers.get("x-slack-request-timestamp"),
-    firma: req.headers.get("x-slack-signature"),
-  });
-  if (!firmada) return new Response(null, { status: 401 });
+  // Por IP antes de la firma y global después.
+  const cuerpo = await cuerpoFirmadoSlack(req, "slack-eventos-ip");
+  if (cuerpo instanceof Response) return cuerpo;
   if (!(await permitir("slack-eventos", 1200, 60_000))) return demasiadas();
 
   const ev = leerEventoSlack(cuerpo);

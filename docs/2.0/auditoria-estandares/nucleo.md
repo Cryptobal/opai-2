@@ -39,6 +39,22 @@ Stripe: recursos predecibles, idempotencia, errores tipados con parámetro e ide
 | N-6 | **Exportar o cerrar una empresa no es función del producto.** Existe el permiso `tenantDelete` y la exportación de datos de una persona (ARCO), pero no se encontró una capacidad que exporte o cierre la empresa completa. | `permisos-patrones.ts`; `packages/capabilities/src/core/tenant.ts` | Media | Ajustar antes del primer cliente externo |
 | N-7 | **Quitar a un miembro borra la membresía en duro y no revoca sus accesos como filas.** No es un hueco funcional: las llaves, la sesión y las apps OAuth se validan en cada solicitud contra la membresía vigente y dejan de servir. Queda por comprobar si un acceso antiguo revive al reinvitar a la misma persona. | `core.users.remove` en `users.ts`; `apps/web/lib/api-key.ts`, `actor.ts`, `oauth-mcp.ts` | Baja, por verificar | Prueba de reinvitación; si revive, revocar al quitar |
 
+## Estado al 16-nov-2026
+
+Repaso semanal contra `main` en `886e262` (CAR-586). Se cerró una de las dos altas y la otra quedó con el contrato y la prueba puestos, falta migrar las listas antiguas.
+
+| # | Estado | Qué cambió y dónde se comprueba |
+|---|---|---|
+| N-1 | Cerrada | CAR-352. Eventos salientes por empresa con secreto, reintentos y registro de entregas: `packages/capabilities/src/core/webhooks/` (`core.webhooks.destino_crear`, `entregas_list`, `entrega_reenviar`, `eventos_list`) |
+| N-2 | Parcial | CAR-353. Existe el contrato (`cursor`, `limite`, `{ items, siguiente }`, en `REGLAS-codigo.md`) y la prueba `apps/web/test/listas-contrato.test.ts`. Las listas anteriores al contrato están congeladas en `apps/web/test/listas-pendientes.json`: 137 al 16-nov. La brecha se cierra cuando esa lista llegue a cero; CAR-585 (PR #961, abierto) empieza por Cotizaciones |
+| N-3 | Abierta | Sin cambios |
+| N-4 | Abierta | Sin cambios |
+| N-5 | Abierta | Sin cambios; decisión de producto |
+| N-6 | Abierta | Sin cambios |
+| N-7 | Por verificar | Sin cambios |
+
+**Nuevo en la semana, sin brecha.** Activar módulos por empresa (CAR-529, #909) sigue a Linear (módulos por organización); se aparta en que el alta automática de un módulo nuevo es opción de cada empresa y viene apagada, por decisión de Carlos. El agente quedó como un solo panel lateral con el contexto de la ficha (CAR-547, #937); ese PR se integró sin la línea «Referente seguido y en qué se aparta» y quedó avisado en el PR.
+
 ## En qué se aparta a propósito
 
 - **Avisos de Slack con su propia gestión (PR #569, abierto).** `core.slack_avisos` guarda el estado de gestión del aviso (abierto, tomado, cerrado) junto al envío. En el referente el aviso es independiente del canal. Comentado en el PR; revisar al integrar.
