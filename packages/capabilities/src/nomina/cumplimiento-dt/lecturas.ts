@@ -15,20 +15,43 @@ async function movimientoDe(ctx: Parameters<typeof movimientosMiDt>[0], movimien
   return m;
 }
 
+const entradaListaMidt = z.object({
+  cursor: z.string().optional().describe("Clave del último movimiento de la página anterior."),
+  limite: z.number().int().min(1).max(200).default(200),
+});
+
+function paginaMidt<T extends { clave: string }>(filas: T[], limite: number, cursor?: string) {
+  const desde = cursor ? Math.max(0, filas.findIndex((f) => f.clave === cursor) + 1) : 0;
+  const resto = filas.slice(desde);
+  const items = resto.slice(0, limite);
+  return { items, siguiente: resto.length > limite ? (items.at(-1)?.clave ?? null) : null };
+}
+
 /** Lista altas, bajas y anexos con plazo Mi DT y estado de registro. */
 export const cumplimientoDtMovimientosListar = defineCapability({
   id: "nomina.midt.listar",
   descripcion:
     "Lista los movimientos de contratos para Mi DT: altas al iniciar un vínculo, bajas al terminarlo y anexos aprobados, con plazo de 15 días y si ya quedaron registrados con comprobante.",
   permiso: PERMISO_READ,
-  input: z.object({}),
-  output: z.object({ pendientes: z.number().int(), registrados: z.number().int(), items: z.array(movimientoSchema) }),
+  input: entradaListaMidt,
+  output: z.object({
+    pendientes: z.number().int(),
+    registrados: z.number().int(),
+    items: z.array(movimientoSchema),
+    siguiente: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => s.items.map((i) => i.personaId),
-  async handler(ctx) {
-    const items = await movimientosMiDt(ctx);
-    return { items: items.map(vistaMovimiento), pendientes: items.filter((m) => !m.registrado).length, registrados: items.filter((m) => m.registrado).length };
+  async handler(ctx, input) {
+    const todos = await movimientosMiDt(ctx);
+    const { items, siguiente } = paginaMidt(todos, input.limite, input.cursor);
+    return {
+      items: items.map(vistaMovimiento),
+      pendientes: todos.filter((m) => !m.registrado).length,
+      registrados: todos.filter((m) => m.registrado).length,
+      siguiente,
+    };
   },
 });
 
