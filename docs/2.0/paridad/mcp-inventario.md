@@ -486,6 +486,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.listar` | `pauta_dotacion_listar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
