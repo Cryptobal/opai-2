@@ -3,7 +3,7 @@ import { formatearPorcentaje } from "@opai/domain";
 import { CargaFallida, exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-export type FilaRentabilidad = {
+type FilaRentabilidad = {
   instalacionId: string | null;
   nombre: string;
   puestos: number;
