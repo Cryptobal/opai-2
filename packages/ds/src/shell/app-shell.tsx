@@ -88,7 +88,7 @@ export function AppShell(props: AppShellProps) {
         boton={botonesMenu?.sidebar}
         Link={Link}
       />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <TopBarTelefono {...barra} acciones={accionesTelefono ?? null} />
         <AppBar
           {...barra}
@@ -99,6 +99,7 @@ export function AppShell(props: AppShellProps) {
         <main
           className={cn(
             "mx-auto flex w-full flex-1 flex-col px-4 pt-1 pb-[calc(96px+env(safe-area-inset-bottom))] md:px-6 md:pt-5 md:pb-8 xl:pl-8 xl:pr-[calc(2rem+var(--panel-lateral,0px))]",
+            completo && "min-h-0 overflow-hidden",
             !completo && "max-w-[1280px]",
             className,
           )}

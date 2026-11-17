@@ -560,6 +560,14 @@
 [data-marco="nuevo"] nav[data-shell="riel"]:not([data-riel-nuevo]) {
   display: none !important;
 }
+/* Vista dividida: el split ocupa el alto del lienzo; cada columna scrollea (CAR-548). */
+@media (min-width: 48rem) {
+  [data-marco="nuevo"] main:has(> [data-split]:not([data-contenido])) > [data-split] {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+  }
+}
 /* Listas con ficha a la derecha en el diseño nuevo (ADR-109, CAR-336): desde 1024 px, sin ficha la
    lista usa todo el ancho (sin un panel casi vacío al lado) y, con ficha, la ficha toma el 58 %. No
    aplica a Configuración (`data-contenido`), que tiene su propio menú a la izquierda. */
