@@ -3,6 +3,7 @@ import { COMUNICABLES_ASISTENCIA } from "./asistencia";
 import { COMUNICABLES_CONTINGENCIA } from "./asistencia-contingencia";
 import { COMUNICABLES_DESCANSO } from "./asistencia-descanso";
 import { COMUNICABLES_GEOCERCA } from "./asistencia-geocerca";
+import { COMUNICABLES_LIMITES } from "./asistencia-limites";
 import { COMUNICABLES_CUMPLIMIENTO } from "./cumplimiento";
 import { COMUNICABLES_COMERCIAL } from "./comercial";
 import { COMUNICABLES_CPQ } from "./cpq";
@@ -38,6 +39,7 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_CONTINGENCIA,
   ...COMUNICABLES_DESCANSO,
   ...COMUNICABLES_GEOCERCA,
+  ...COMUNICABLES_LIMITES,
   ...COMUNICABLES_DESEMPENO,
   ...COMUNICABLES_RENDICIONES,
 ];
