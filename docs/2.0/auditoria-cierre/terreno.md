@@ -1,6 +1,6 @@
 # Auditoría de cierre · 08 · Terreno
 
-**Fecha:** 16-nov-2026 · **Sesión:** Auditoría de cierre (tanda 06, 07 y 08) · **Foto:** `main` en `5c0a5a8`.
+**Fecha:** 16-nov-2026 · **Sesión:** Auditoría de cierre (tanda 06, 07 y 08) · **Foto:** `main` en `4a5f7168`.
 
 **Avance real: 61 %** (Linear: 3 de 7 en Done). Corregido el 16-nov en la tanda 09-10-11: el modo supervisor no estaba, ver ítem 10.
 
