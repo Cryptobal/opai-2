@@ -1,7 +1,8 @@
 // Check `simplicidad` (ADR-115): mide el repositorio y lo compara con la línea base.
 // Falla solo si una cifra empeora; lo que ya existía no bloquea.
 //   pnpm simplicidad               mide y compara con simplicidad-base.json
-//   pnpm simplicidad --actualizar  reescribe la base con las cifras de hoy
+//   pnpm simplicidad --actualizar  reescribe la base con las cifras de hoy (solo al integrar a main)
+//   SIMPLICIDAD_BASE=local       compara contra el JSON del branch (legado; CAR-641 usa main por defecto)
 //   pnpm simplicidad --detalle     además lista todos los hallazgos
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -10,6 +11,23 @@ import { medirLargos } from "./simplicidad/largos";
 
 const BASE = "simplicidad-base.json";
 const RAMA_BASE = process.env.SIMPLICIDAD_RAMA_BASE ?? "origin/main";
+
+/** Línea base: por defecto la de `main` en git (CAR-641); evita conflictos en PRs paralelos. */
+function cargarBase(): Cifras {
+  if (process.env.SIMPLICIDAD_BASE === "local") {
+    return JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
+  }
+  try {
+    return JSON.parse(
+      execFileSync("git", ["show", `${RAMA_BASE}:${BASE}`], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }),
+    ) as Cifras;
+  } catch {
+    return JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
+  }
+}
 
 const ETIQUETAS = {
   lineasDuplicadas: "Líneas de código duplicado",
@@ -102,7 +120,7 @@ if (args.includes("--actualizar")) {
   process.exit(0);
 }
 
-const base = JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
+const base = cargarBase();
 const faltantes = (Object.keys(ETIQUETAS) as Metrica[]).filter((m) => typeof base[m] !== "number");
 if (faltantes.length > 0) {
   console.error(
