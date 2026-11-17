@@ -5,7 +5,6 @@ import { renderizar } from "@opai/domain";
 import { comunicableDe, plantillaVigente } from "../core/comunicaciones/resolver";
 import { enviarCorreo } from "../core/comunicaciones/envio";
 import { defineConsumidor, type EventoPublicado } from "../eventos/consumidores";
-import type { Contexto } from "../types";
 
 import { EVENTO_LIQUIDACION_PUBLICADA } from "./liquidaciones-publicar";
 
