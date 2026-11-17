@@ -23,14 +23,14 @@ const TONO: Record<Fila["estado"], "warning" | "success" | "danger"> = {
   rechazada: "danger",
 };
 
-export function ListaContingencias({ items, zona }: { items: Fila[]; zona: string }) {
+export function ListaContingencias({ state, items, zona }: { state: EstadoPantalla; items: Fila[]; zona: string }) {
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
   const hora = new Intl.DateTimeFormat("es-CL", { dateStyle: "short", timeStyle: "short", timeZone: zona, hourCycle: "h23" });
   return (
     <>
       <ListScreen<Fila>
-        state={{ estado: "listo" }}
+        state={state}
         titulo="Contingencias"
         subtitulo="Marcas cuando el sistema no estuvo disponible."
         acciones={<Button onClick={() => setAbierto(true)}>Registrar marca</Button>}
