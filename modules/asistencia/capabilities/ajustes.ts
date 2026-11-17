@@ -97,6 +97,14 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "texto",
   }),
+  retencion_bitacora_anios: z.number().int().min(5).max(10).default(5).meta({
+    etiqueta: "Retención mínima de la bitácora (años)",
+    ayuda: "Los respaldos de marcas se conservan al menos este tiempo, según el art. 14 b de la Res. 38.",
+    grupo: "Reportes DT",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "numero",
+  }),
   tolerancia_atraso_min: z.number().int().min(0).max(120).default(15).meta({
     etiqueta: "Tolerancia de atraso para Desempeño (minutos)",
     ayuda:

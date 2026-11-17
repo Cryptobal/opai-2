@@ -70,6 +70,7 @@ export {
 export { type ClienteCatalogo, sembrarCatalogo } from "./catalogo-tenant";
 export { type ClienteComercial, sembrarComercial } from "./catalogo-comercial";
 export { resolverTokenSeguimiento } from "./seguimiento-token";
+export { empleadorPorRut, resolverClaveFiscalizacion } from "./fiscalizacion-publica";
 export { resolverBuzonCorreo } from "./buzon-correo";
 export { resolverInstalacionSlack } from "./slack-instalacion";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";

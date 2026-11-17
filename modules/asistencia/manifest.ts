@@ -22,6 +22,9 @@ export const manifest = defineModule({
   navegacion: [
     { portal: "erp", href: "/asistencia", etiqueta: "Asistencia", icono: "UserCheck", area: "operaciones", orden: 50, permiso: "asistencia:ver" },
     { portal: "erp", href: "/asistencia/reportes-dt", etiqueta: "Reportes DT", icono: "FileText", area: "operaciones", orden: 51, permiso: "asistencia:reportes" },
+    { portal: "erp", href: "/asistencia/auditoria-fiscalizador", etiqueta: "Auditoría fiscalizador", icono: "Eye", area: "operaciones", orden: 52, permiso: "asistencia:reportes" },
+    { portal: "erp", href: "/asistencia/mandantes", etiqueta: "Accesos mandante", icono: "Briefcase", area: "operaciones", orden: 53, permiso: "asistencia:reportes" },
+    { portal: "erp", href: "/asistencia/respaldos", etiqueta: "Respaldos", icono: "Download", area: "operaciones", orden: 54, permiso: "asistencia:reportes" },
   ],
   configuracion: ajustesAsistencia,
   eventos: [

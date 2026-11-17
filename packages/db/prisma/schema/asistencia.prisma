@@ -233,3 +233,117 @@ model Dia {
   @@map("dias")
   @@schema("asistencia")
 }
+
+/// Clave temporal para que un fiscalizador DT ingrese al portal (Res. 38). Solo guardamos el hash.
+model FiscalizacionClave {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  correo        String
+  claveHash     String    @map("clave_hash")
+  venceEn       DateTime  @map("vence_en") @db.Timestamptz(6)
+  revocadoEn    DateTime? @map("revocado_en") @db.Timestamptz(6)
+  revocadoPorId String?   @map("revocado_por_id") @db.Uuid
+  creadoPorId   String    @map("creado_por_id") @db.Uuid
+  usos          Int       @default(0)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([claveHash])
+  @@index([tenantId, correo])
+  @@map("fiscalizacion_claves")
+  @@schema("asistencia")
+}
+
+/// Auditoría de cada acceso al portal de fiscalización (solo INSERT).
+model FiscalizacionAcceso {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  correo       String
+  empleadorRut String   @map("empleador_rut")
+  ip           String?
+  /// correo | clave
+  via          String
+  detalle      String
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, createdAt])
+  @@map("fiscalizacion_accesos")
+  @@schema("asistencia")
+}
+
+/// Acceso voluntario de mandante o EST (art. 26) a registros de asistencia por instalación.
+model MandanteAcceso {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  tenantId            String    @map("tenant_id") @db.Uuid
+  cuentaId            String    @map("cuenta_id") @db.Uuid
+  /// mandante | est
+  tipo                String
+  correo              String
+  /// activo | revocado
+  estado              String    @default("activo")
+  todasInstalaciones  Boolean   @default(false) @map("todas_instalaciones")
+  creadoPorId         String    @map("creado_por_id") @db.Uuid
+  revocadoPorId       String?   @map("revocado_por_id") @db.Uuid
+  revocadoEn          DateTime? @map("revocado_en") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  instalaciones MandanteAccesoInstalacion[]
+  eventos       MandanteAccesoEvento[]
+
+  @@index([tenantId, cuentaId])
+  @@index([tenantId, correo])
+  @@map("mandante_accesos")
+  @@schema("asistencia")
+}
+
+model MandanteAccesoInstalacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  accesoId      String   @map("acceso_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  acceso MandanteAcceso @relation(fields: [accesoId], references: [id], onDelete: Cascade)
+
+  @@unique([accesoId, instalacionId])
+  @@index([tenantId, instalacionId])
+  @@map("mandante_acceso_instalaciones")
+  @@schema("asistencia")
+}
+
+/// Historial de otorgamiento, uso y revocación de accesos de mandante.
+model MandanteAccesoEvento {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  accesoId  String   @map("acceso_id") @db.Uuid
+  actorId   String?  @map("actor_id") @db.Uuid
+  tipo      String
+  detalle   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  acceso MandanteAcceso @relation(fields: [accesoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, accesoId, createdAt])
+  @@map("mandante_acceso_eventos")
+  @@schema("asistencia")
+}
+
+/// Respaldo periódico de la bitácora con manifiesto SHA-256 (art. 14 b).
+model RespaldoBitacora {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  /// manual | automatico
+  origen              String
+  manifiestoSha256    String   @map("manifiesto_sha256")
+  documentoId         String   @map("documento_id") @db.Uuid
+  totalMarcas         Int      @map("total_marcas")
+  desdeSeq            Int      @map("desde_seq")
+  hastaSeq            Int      @map("hasta_seq")
+  cadenaVerificadaOk  Boolean  @map("cadena_verificada_ok")
+  generadoPorId       String?  @map("generado_por_id") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, createdAt])
+  @@map("respaldos_bitacora")
+  @@schema("asistencia")
+}

@@ -21,8 +21,15 @@ import { marcasObtener, marcasListar } from "./lecturas";
 import { marcasRegistrar } from "./registrar";
 import { marcasVerificar } from "./verificar";
 import { certificacionChecklist } from "./certificacion";
+import { fiscalizacionAccesosListar, fiscalizacionRegistrarAcceso } from "./fiscalizacion/accesos";
+import { fiscalizacionClavesGenerar, fiscalizacionClavesListar, fiscalizacionClavesRevocar } from "./fiscalizacion/claves";
+import { fiscalizacionEmpleadorBuscar } from "./fiscalizacion/empleador";
+import { fiscalizacionPortalIngresar } from "./fiscalizacion/portal";
+import { mandanteAccesosDar, mandanteAccesosHistorial, mandanteAccesosListar, mandanteAccesosRevocar } from "./mandantes/accesos";
+import { mandanteMarcasListar } from "./mandantes/lectura";
 import { reportesExportar } from "./reportes/exportar";
 import { reportesCatalogo, reportesVista } from "./reportes/vista";
+import { respaldosBitacoraGenerar, respaldosBitacoraListar, respaldosBitacoraVerificar } from "./respaldos/bitacora";
 
 export { ajustesAsistencia } from "./ajustes";
 export { indicadoresAsistencia } from "./indicadores";
@@ -37,4 +44,8 @@ export const capacidades = [
   rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, rostroTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
   reportesCatalogo, reportesVista, reportesExportar, certificacionChecklist,
+  fiscalizacionClavesListar, fiscalizacionClavesGenerar, fiscalizacionClavesRevocar,
+  fiscalizacionAccesosListar, fiscalizacionRegistrarAcceso, fiscalizacionEmpleadorBuscar, fiscalizacionPortalIngresar,
+  mandanteAccesosListar, mandanteAccesosDar, mandanteAccesosRevocar, mandanteAccesosHistorial, mandanteMarcasListar,
+  respaldosBitacoraListar, respaldosBitacoraGenerar, respaldosBitacoraVerificar,
 ];

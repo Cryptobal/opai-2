@@ -11,3 +11,4 @@ export * from "./jornadas";
 export * from "./consolidar";
 export * from "./biometria";
 export * from "./reportes";
+export * from "./fiscalizacion";
