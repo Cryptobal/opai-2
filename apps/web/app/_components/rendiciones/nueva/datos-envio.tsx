@@ -6,10 +6,10 @@ import type { DetalleRendicion, OpcionesRendicion } from "../tipos";
 
 export type DatosEnvio = { motivo: string; centro: string; aprobadorId: string };
 
-export const ADMIN = "administracion";
+const ADMIN = "administracion";
 
 /** Valores iniciales: el aprobador por defecto de la empresa y Administración como centro. */
-export function envioInicial(o: OpcionesRendicion, base?: Partial<DatosEnvio>): DatosEnvio {
+function envioInicial(o: OpcionesRendicion, base?: Partial<DatosEnvio>): DatosEnvio {
   return {
     motivo: "",
     centro: ADMIN,
