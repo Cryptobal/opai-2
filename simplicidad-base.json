@@ -1,8 +1,15 @@
 {
+<<<<<<< HEAD
   "lineasDuplicadas": 3214,
   "archivosLargos": 36,
   "funcionesLargas": 669,
   "exportacionesSinUso": 246,
+=======
+  "lineasDuplicadas": 3207,
+  "archivosLargos": 36,
+  "funcionesLargas": 666,
+  "exportacionesSinUso": 203,
+>>>>>>> origin/main
   "archivosSinUso": 0,
   "dependenciasSinUso": 0
 }
