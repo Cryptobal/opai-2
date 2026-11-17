@@ -62,6 +62,7 @@ test.describe("@preview barra inferior del teléfono (CAR-416)", () => {
     await agente.click();
     const panel = page.locator("aside[data-panel-lateral]");
     await expect(panel).toBeVisible();
+    await expect(panel.getByRole("textbox", { name: "Mensaje para OPAI" })).toBeFocused();
     await expect(barra).toBeVisible();
     await expect(panel.locator("[data-panel-cerrar]")).toBeHidden();
     const cajaPanel = await panel.boundingBox();
