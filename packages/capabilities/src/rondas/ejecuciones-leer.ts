@@ -4,7 +4,8 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
 import { dondeInstalacionId, PERMISO_READ } from "./comun";
-import { derivarEstado, ejecucionDetalleSchema, iso } from "./ejecuciones-comun";
+import { ejecucionDetalleSchema } from "./ejecuciones-comun";
+import { mapearEjecucionDetalle } from "./ejecuciones-leer-mapear";
 
 /** Detalle de una ronda con sus marcas y anomalías por punto. */
 export const ejecucionesLeer = defineCapability({
@@ -57,29 +58,6 @@ export const ejecucionesLeer = defineCapability({
         })
       : [];
     const nombres = new Map(puntos.map((p) => [p.id, p.nombre]));
-    const ahora = new Date();
-    const oblig = e.cierre?.puntosObligatorios ?? e.plantilla.puntos.length;
-    return {
-      id: e.id,
-      instalacionId: e.instalacionId,
-      plantillaId: e.plantillaId,
-      plantillaNombre: e.plantilla.nombre,
-      adhoc: e.adhoc,
-      estado: derivarEstado(e.cierre, e.horaInicio, e.plantilla.tiempoMaxMin, ahora),
-      horaInicio: iso(e.horaInicio),
-      horaCierre: e.cierre ? iso(e.cierre.horaCierre) : null,
-      puntosMarcados: e.cierre?.puntosMarcados ?? e.marcas.length,
-      puntosObligatorios: oblig,
-      anomalias: e.marcas.reduce((n, m) => n + m.anomalias.length, 0),
-      motivoCierre: e.cierre?.motivo ?? null,
-      marcas: e.marcas.map((m) => ({
-        id: m.id,
-        puntoId: m.puntoId,
-        puntoNombre: nombres.get(m.puntoId) ?? "Punto",
-        hora: iso(m.horaCorregida),
-        geocerca: m.geocerca,
-        anomalias: m.anomalias,
-      })),
-    };
+    return mapearEjecucionDetalle(e, nombres, new Date());
   },
 });

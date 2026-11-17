@@ -61,5 +61,3 @@ export async function cargarHistorial(p: Parametros) {
     ejecucion,
   };
 }
-
-export type DatosHistorial = Awaited<ReturnType<typeof cargarHistorial>>;

@@ -25,17 +25,15 @@ export type EjecucionResumen = {
   anomalias: number;
 };
 
-export type MarcaDetalle = {
-  id: string;
-  puntoId: string;
-  puntoNombre: string;
-  hora: string;
-  geocerca: string;
-  anomalias: string[];
-};
-
 export type EjecucionDetalle = EjecucionResumen & {
-  marcas: MarcaDetalle[];
+  marcas: {
+    id: string;
+    puntoId: string;
+    puntoNombre: string;
+    hora: string;
+    geocerca: string;
+    anomalias: string[];
+  }[];
   motivoCierre: string | null;
 };
 

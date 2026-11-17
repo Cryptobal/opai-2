@@ -3,7 +3,7 @@ import { z } from "zod";
 import { uuidSchema } from "../core/esquemas";
 
 /** Estados visibles en historial e informes (rondas.md §6). */
-export const ESTADOS_EJECUCION = [
+const ESTADOS_EJECUCION = [
   "en_curso",
   "atrasada",
   "completada",
@@ -29,7 +29,7 @@ export const ejecucionResumenSchema = z.object({
   anomalias: z.number().int(),
 });
 
-export const marcaDetalleSchema = z.object({
+const marcaDetalleSchema = z.object({
   id: uuidSchema,
   puntoId: uuidSchema,
   puntoNombre: z.string(),
