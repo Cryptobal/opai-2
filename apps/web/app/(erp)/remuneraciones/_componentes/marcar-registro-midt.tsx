@@ -11,7 +11,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { MovimientoMiDt } from "./lista-cumplimiento-dt";
 
-const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo" } as const;
+const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo", finiquito: "Finiquito" } as const;
 
 export function MarcarRegistroMiDt({
   movimiento,
