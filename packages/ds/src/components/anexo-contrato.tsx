@@ -51,8 +51,7 @@ const BADGE_ESTADO = {
   rechazado: { tono: "danger", texto: "Rechazado" },
 } as const satisfies Record<EstadoAnexo, { tono: "warning" | "success" | "danger"; texto: string }>;
 
-/** Documento del anexo (plantilla base + marca, R12): antes/después, texto de ejemplo hasta el
- * texto legal definitivo (D15); en modo oscuro conserva su papel claro. */
+/** Vista previa del anexo en borrador (R12): tabla antes/después; el PDF legal sale al aprobar. */
 export function DocumentoBorrador({
   filas,
   estado,
@@ -96,9 +95,9 @@ export function DocumentoBorrador({
       ) : (
         <p className="text-sm opacity-70">Sin detalle de montos para este cambio.</p>
       )}
-      <p className="mt-3 text-xs opacity-60">
-        {pieLegal ?? "Texto de ejemplo (D15): el texto legal definitivo lo fija Carlos."}
-      </p>
+      {pieLegal ? (
+        <p className="mt-3 text-xs opacity-60">{pieLegal}</p>
+      ) : null}
     </div>
   );
 }
