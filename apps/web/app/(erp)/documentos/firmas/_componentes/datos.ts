@@ -71,7 +71,18 @@ export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
 }
 
 export async function cargarFirmas(p: Parametros) {
-  return ejecutarComoUsuario<{ solicitudes: Solicitud[] }>("erp", "core.firmas.list", {
-    ...(p["estado"] ? { estado: p["estado"] } : {}),
-  });
+  const filtro = { ...(p["estado"] ? { estado: p["estado"] } : {}), limite: 200 };
+  const acum: Solicitud[] = [];
+  let cursor: string | undefined;
+  for (;;) {
+    const r = await ejecutarComoUsuario<{ items: Solicitud[]; siguiente: string | null }>(
+      "erp",
+      "core.firmas.list",
+      { ...filtro, ...(cursor ? { cursor } : {}) },
+    );
+    if (!r.ok) return r;
+    acum.push(...r.data.items);
+    if (!r.data.siguiente) return { ok: true as const, data: { solicitudes: acum } };
+    cursor = r.data.siguiente;
+  }
 }

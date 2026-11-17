@@ -1,6 +1,7 @@
 import type { Capacidad } from "../../types";
 import { documentosConfirmarSubida } from "./confirmar";
-import { documentosGet, documentosList } from "./consulta";
+import { documentosList } from "./consulta";
+import { documentosGet } from "./consulta-get";
 import { documentosExplorar } from "./explorar";
 import { documentosMatriz } from "./matriz";
 import { documentoPlantillasGet, documentoPlantillasList } from "./plantillas";

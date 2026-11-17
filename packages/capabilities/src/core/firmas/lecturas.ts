@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { ESTADOS_SOLICITUD_FIRMA } from "@opai/domain";
 
+import type { Prisma } from "@opai/db";
+
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { documentosEnAlcance } from "../documentos/alcance-doc";
@@ -65,28 +67,61 @@ export const firmasList = defineCapability({
     estado: z.enum(ESTADOS_SOLICITUD_FIRMA).optional(),
     clase: claseSchema.optional(),
     documentoId: uuidSchema.optional(),
-    limite: z.number().int().min(1).max(100).default(50),
+    cursor: uuidSchema.optional().describe("`siguiente` de la página anterior."),
+    limite: z.number().int().min(1).max(200).default(50),
   }),
-  output: z.object({ solicitudes: z.array(solicitudVistaSchema) }),
+  output: z.object({
+    items: z.array(solicitudVistaSchema),
+    siguiente: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (r) => r.solicitudes.map((s) => s.id),
+  auditarLectura: (r) => r.items.map((s) => s.id),
   async handler(ctx, input) {
+    const permitidos = await documentosEnAlcance(ctx);
+    const documentosVisiblesIds = (
+      await ctx.db.documento.findMany({
+        where: {
+          AND: [
+            filtroDocumentoSensible(ctx),
+            ...(permitidos ? [{ id: { in: [...permitidos] } }] : []),
+          ],
+        },
+        select: { id: true },
+      })
+    ).map((d) => d.id);
+    if (!documentosVisiblesIds.length) return { items: [], siguiente: null };
+    if (input.documentoId && !documentosVisiblesIds.includes(input.documentoId))
+      return { items: [], siguiente: null };
+    const base: Prisma.SolicitudFirmaWhereInput = {
+      tenantId: ctx.tenantId,
+      ...(input.documentoId
+        ? { documentoId: input.documentoId }
+        : { documentoId: { in: documentosVisiblesIds } }),
+      ...(input.estado ? { estado: input.estado } : {}),
+      ...(input.clase ? { clase: input.clase } : {}),
+    };
+    const ancla = input.cursor
+      ? await ctx.db.solicitudFirma.findFirst({ where: { AND: [base, { id: input.cursor }] } })
+      : null;
+    if (input.cursor && !ancla) throw noEncontrado("La página pedida");
+    const orden = [{ createdAt: "desc" as const }, { id: "desc" as const }];
+    const trasAncla: Prisma.SolicitudFirmaWhereInput | undefined = ancla
+      ? {
+          OR: [
+            { createdAt: { lt: ancla.createdAt } },
+            { createdAt: ancla.createdAt, id: { lt: ancla.id } },
+          ],
+        }
+      : undefined;
     const filas = await ctx.db.solicitudFirma.findMany({
-      where: {
-        tenantId: ctx.tenantId,
-        ...(input.estado ? { estado: input.estado } : {}),
-        ...(input.clase ? { clase: input.clase } : {}),
-        ...(input.documentoId ? { documentoId: input.documentoId } : {}),
-      },
+      where: trasAncla ? { AND: [base, trasAncla] } : base,
       include: { firmantes: true },
-      orderBy: { createdAt: "desc" },
-      take: input.limite,
+      orderBy: orden,
+      take: input.limite + 1,
     });
-    const visibles = await documentosVisibles(
-      ctx,
-      filas.map((f) => f.documentoId),
-    );
-    return { solicitudes: filas.filter((f) => visibles.has(f.documentoId)).map(vistaSolicitud) };
+    const pagina = filas.slice(0, input.limite);
+    const siguiente = filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null;
+    return { items: pagina.map(vistaSolicitud), siguiente };
   },
 });

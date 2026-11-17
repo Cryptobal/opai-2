@@ -313,12 +313,12 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       );
       const celdas = matriz.filas.flatMap((f) => f.celdas.map((c) => c.documentoId));
       expect(celdas.includes(documentoId)).toBe(ve);
-      const vencimientos = await dato<{ id: string }[]>(
+      const vencimientos = await dato<{ items: { id: string }[] }>(
         ctx(rol),
         "core.documentos.vencimientos",
         {},
       );
-      expect(vencimientos.some((d) => d.id === documentoId)).toBe(ve);
+      expect(vencimientos.items.some((d) => d.id === documentoId)).toBe(ve);
       const get = await dato<{ versiones: { id: string }[] }>(ctx(rol), "core.documentos.get", {
         id: nueva.id,
       });
