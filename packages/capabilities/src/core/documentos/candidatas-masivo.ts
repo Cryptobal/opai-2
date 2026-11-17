@@ -4,9 +4,10 @@ import { z } from "zod";
 import { ambitoDeClase, PERMISOS_CORE, type ClasePlantilla } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
+import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { diaSchema, hoy } from "../maestros/comun";
+import { diaSchema, hoy, paginaCursorLimite200 } from "../maestros/comun";
+import { consultaPersonasPaginada } from "../maestros/persona-pagina-db";
 import { itemDesdePersona, whereCandidatas } from "./candidatas-masivo-helpers";
 import { plantillaVigente } from "./plantilla-vigente";
 
@@ -27,9 +28,7 @@ export const documentoPlantillasCandidatas = defineCapability({
       .describe("Si es verdadero, solo personas con un anexo de contrato en borrador."),
     fecha: diaSchema.optional(),
     q: z.string().trim().max(80).optional(),
-    cursor: uuidSchema.optional().describe("Para seguir: el valor `siguiente` anterior."),
-    limite: z.number().int().min(1).max(200).default(200),
-  }),
+  }).extend(paginaCursorLimite200),
   output: z.object({
     items: z.array(
       z.object({
@@ -53,31 +52,16 @@ export const documentoPlantillasCandidatas = defineCapability({
     const rut = (input.q ?? "").replace(/[.\s]/g, "").toUpperCase();
     const fecha = input.fecha ?? hoy();
     const where = whereCandidatas(ctx, input, rut);
-    if (input.cursor) {
-      const ancla = await ctx.db.persona.findFirst({ where: { AND: [where, { id: input.cursor }] } });
-      if (!ancla) throw noEncontrado("La página pedida");
-    }
-    const filas = await ctx.db.persona.findMany({
+    const { items: paginaPersonas, siguiente } = await consultaPersonasPaginada(
+      ctx,
       where,
-      orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-      include: {
-        vinculos: {
-          where: { estado: "vigente" },
-          include: { cargo: { select: { nombre: true } }, instalacion: { select: { nombre: true } } },
-          take: 1,
-        },
-      },
-    });
-    const pagina = filas.slice(0, input.limite);
-    const items = await Promise.all(
-      pagina.map((p) => itemDesdePersona(ctx, plantilla.id, version.contenido, p, fecha)),
+      input.cursor,
+      input.limite,
+      { instalacion: true },
     );
-    return {
-      items,
-      siguiente: filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null,
-      total: items.length,
-    };
+    const items = await Promise.all(
+      paginaPersonas.map((p) => itemDesdePersona(ctx, plantilla.id, version.contenido, p, fecha)),
+    );
+    return { items, siguiente, total: items.length };
   },
 });
