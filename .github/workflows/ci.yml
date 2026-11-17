@@ -17,8 +17,8 @@ on:
 permissions:
   contents: read
 
-# Un push nuevo al mismo PR cancela la corrida anterior. Un workflow_dispatch manual comparte el
-# grupo de su ref y también cancela corridas previas en curso (CAR-627).
+# Un push nuevo al mismo PR cancela la corrida anterior (CAR-627, CAR-640). En main/merge_group/cron
+# no se cancela la corrida en curso.
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
