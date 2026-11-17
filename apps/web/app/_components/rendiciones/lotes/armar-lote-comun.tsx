@@ -33,8 +33,20 @@ export function totalesSeleccion<T extends FilaLote>(candidatas: readonly T[], s
   return { elegidas, total };
 }
 
-export async function crearLoteDesdeSeleccion(
-  capacidad: string,
+async function trasCrearLote(
+  r: Awaited<ReturnType<typeof ejecutarCapacidad>>,
+  mensajeOk: string,
+  router: ReturnType<typeof useRouter>,
+  setOcupado: (v: boolean) => void,
+  setError: (v: string | null) => void,
+): Promise<void> {
+  setOcupado(false);
+  if (!r.ok) return setError(r.error.message);
+  avisar.exito(mensajeOk);
+  router.push(`${RUTA_LOTES}/${(r.data as { id: string }).id}`);
+}
+
+export async function crearLotePago(
   rendicionIds: string[],
   mensajeOk: string,
   router: ReturnType<typeof useRouter>,
@@ -43,11 +55,31 @@ export async function crearLoteDesdeSeleccion(
 ): Promise<void> {
   setOcupado(true);
   setError(null);
-  const r = await ejecutarCapacidad("erp", capacidad, { rendicionIds });
-  setOcupado(false);
-  if (!r.ok) return setError(r.error.message);
-  avisar.exito(mensajeOk);
-  router.push(`${RUTA_LOTES}/${(r.data as { id: string }).id}`);
+  await trasCrearLote(
+    await ejecutarCapacidad("erp", "rendiciones.lotes.crear", { rendicionIds }),
+    mensajeOk,
+    router,
+    setOcupado,
+    setError,
+  );
+}
+
+export async function crearLoteReversa(
+  rendicionIds: string[],
+  mensajeOk: string,
+  router: ReturnType<typeof useRouter>,
+  setOcupado: (v: boolean) => void,
+  setError: (v: string | null) => void,
+): Promise<void> {
+  setOcupado(true);
+  setError(null);
+  await trasCrearLote(
+    await ejecutarCapacidad("erp", "rendiciones.lotes.crear_reversa", { rendicionIds }),
+    mensajeOk,
+    router,
+    setOcupado,
+    setError,
+  );
 }
 
 export function PieArmarLote({

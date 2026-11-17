@@ -3,7 +3,7 @@
 import { Checkbox, Table, Td, Th, Tr } from "@opai/ds";
 
 import { pesos } from "../formato";
-import { crearLoteDesdeSeleccion, PieArmarLote, totalesSeleccion, useSeleccionArmarLote } from "./armar-lote-comun";
+import { crearLoteReversa, PieArmarLote, totalesSeleccion, useSeleccionArmarLote } from "./armar-lote-comun";
 import { type CandidataReversa } from "./tipos";
 
 /** Rendiciones pagadas que pueden revertirse a Aprobada mediante un lote de reversa. */
@@ -39,14 +39,7 @@ export function ArmarReversa({ candidatas }: { candidatas: readonly CandidataRev
         etiquetaBoton="Crear lote de reversa"
         varianteBoton="secondary"
         onCrear={() =>
-          void crearLoteDesdeSeleccion(
-            "rendiciones.lotes.crear_reversa",
-            elegidas.map((c) => c.id),
-            "Lote de reversa creado en borrador",
-            router,
-            setOcupado,
-            setError,
-          )
+          void crearLoteReversa(elegidas.map((c) => c.id), "Lote de reversa creado en borrador", router, setOcupado, setError)
         }
       />
     </div>

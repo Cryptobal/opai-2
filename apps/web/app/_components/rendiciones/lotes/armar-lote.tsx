@@ -3,7 +3,7 @@
 import { Badge, Checkbox, Table, Td, Th, Tr } from "@opai/ds";
 
 import { pesos } from "../formato";
-import { crearLoteDesdeSeleccion, PieArmarLote, totalesSeleccion, useSeleccionArmarLote } from "./armar-lote-comun";
+import { crearLotePago, PieArmarLote, totalesSeleccion, useSeleccionArmarLote } from "./armar-lote-comun";
 import { type Candidata } from "./tipos";
 
 /** Aprobadas listas para pagar. El total que se ve es una ayuda: el servidor lo suma al crear el lote. */
@@ -43,14 +43,7 @@ export function ArmarLote({ candidatas }: { candidatas: readonly Candidata[] }) 
         error={error}
         etiquetaBoton="Crear lote"
         onCrear={() =>
-          void crearLoteDesdeSeleccion(
-            "rendiciones.lotes.crear",
-            elegidas.map((c) => c.id),
-            "Lote creado en borrador",
-            router,
-            setOcupado,
-            setError,
-          )
+          void crearLotePago(elegidas.map((c) => c.id), "Lote creado en borrador", router, setOcupado, setError)
         }
       />
     </div>
