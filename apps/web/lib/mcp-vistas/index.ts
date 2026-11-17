@@ -1,7 +1,7 @@
 import { htmlPendientes, URI_PENDIENTES } from "./pendientes";
 
 /** Tipo MIME de una vista MCP App (spec 2026-01-26). */
-export const MIME_VISTA = "text/html;profile=mcp-app";
+const MIME_VISTA = "text/html;profile=mcp-app";
 
 type Servidor = {
   registerResource(
@@ -13,7 +13,7 @@ type Servidor = {
 };
 
 /** Herramienta MCP → vista que la dibuja dentro del cliente (CAR-287). */
-export const VISTAS: Record<string, string> = { core_inicio_pendientes: URI_PENDIENTES };
+const VISTAS: Record<string, string> = { core_inicio_pendientes: URI_PENDIENTES };
 
 /** `_meta` de una herramienta con vista, o undefined. */
 export const metaDeVista = (herramienta: string) => {

@@ -1,16 +1,9 @@
 import { listarModulos } from "@opai/capabilities";
-import { type AreaNav, PERMISOS_CORE, type Rol, type Vocabulario } from "@opai/domain";
+import { PERMISOS_CORE, type Vocabulario } from "@opai/domain";
 
 import type { EntradaArea } from "./navegacion-areas";
 
 const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-/** Área principal por defecto del rol (§3 de `NAVEGACION.md`, sin la columna "Buscar"). Si el área
- *  no tiene entradas visibles, `entradasAreaPrincipal` cae a la primera disponible, sin error (§10). */
-export function areaPrincipalPorRol(rol: Rol): AreaNav {
-  if (rol === "supervisor") return "operaciones";
-  return "comercial";
-}
 
 /** Entradas del núcleo (Brief 05, §4.3): Inicio suelta, Cuentas (en Comercial desde CAR-182) y
  *  Personas con sus permisos. Cargos es un catálogo: vive en Configuración › Operación (CAR-182). */

@@ -1,5 +1,5 @@
 /** Textos de la cola de Terreno en lenguaje de negocio (CAR-78 · E1). */
-export const ETIQUETA_TIPO: Record<string, string> = {
+const ETIQUETA_TIPO: Record<string, string> = {
   "terreno.latido": "Aviso de que el teléfono estuvo activo",
   "rondas.marca": "Marca de un punto de ronda",
   "rondas.inicio": "Inicio de una ronda",
@@ -12,7 +12,7 @@ export const ETIQUETA_TIPO: Record<string, string> = {
 export const etiquetaTipo = (tipo: string): string => ETIQUETA_TIPO[tipo] ?? "Registro de terreno";
 
 /** Por qué el servidor no aceptó un hecho: qué pasó y qué hacer. */
-export const MOTIVO_RECHAZO: Record<string, string> = {
+const MOTIVO_RECHAZO: Record<string, string> = {
   tipo_no_permitido: "Este tipo de registro ya no se acepta desde el teléfono.",
   payload_invalido: "Los datos del registro no eran válidos.",
   posterior_al_envio: "La hora del teléfono estaba adelantada. Revisa la fecha y hora del equipo.",
