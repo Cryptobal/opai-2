@@ -21,7 +21,7 @@ import { SeccionSeguimiento } from "@/app/(erp)/configuracion/_comercial/seccion
  * módulo no tiene página de configuración propia; el núcleo monta estas pestañas junto a los ajustes
  * del manifest. `Contenido` es un componente de servidor que lee y escribe solo por capacidades.
  */
-export type SeccionModulo = {
+type SeccionModulo = {
   id: string;
   etiqueta: string;
   /** Permiso para ver la pestaña: sin él no aparece (sin pestañas deshabilitadas, ADR-041.5). */
