@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
-import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { enmascararCuenta, enmascararCuentaEnLectura } from "./personas-ficha-comun";
 import { catalogoDe } from "./personas-pago-catalogo";
