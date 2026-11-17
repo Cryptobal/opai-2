@@ -7,7 +7,7 @@ const fechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato aaaa-mm-dd.
 const monto = z.number().int().min(-2_147_483_647).max(2_147_483_647);
 const montoDoc = z.number().int().min(0).max(2_147_483_647);
 
-export const entradaAperturaSchema = z.object({
+const entradaAperturaSchema = z.object({
   saldos: z
     .array(z.object({ banco: z.string().max(80), numeroVisible: z.string().max(40), moneda: z.string().max(8).default("CLP"), saldo: monto }))
     .max(200),

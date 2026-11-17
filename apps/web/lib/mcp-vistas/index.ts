@@ -1,7 +1,8 @@
+import { htmlFichaCuenta, URI_FICHA_CUENTA } from "./ficha-cuenta";
 import { htmlPendientes, URI_PENDIENTES } from "./pendientes";
 
 /** Tipo MIME de una vista MCP App (spec 2026-01-26). */
-const MIME_VISTA = "text/html;profile=mcp-app";
+export const MIME_VISTA = "text/html;profile=mcp-app";
 
 type Servidor = {
   registerResource(
@@ -13,7 +14,10 @@ type Servidor = {
 };
 
 /** Herramienta MCP → vista que la dibuja dentro del cliente (CAR-287). */
-const VISTAS: Record<string, string> = { core_inicio_pendientes: URI_PENDIENTES };
+export const VISTAS: Record<string, string> = {
+  core_inicio_pendientes: URI_PENDIENTES,
+  core_cuentas_get: URI_FICHA_CUENTA,
+};
 
 /** `_meta` de una herramienta con vista, o undefined. */
 export const metaDeVista = (herramienta: string) => {
@@ -30,6 +34,14 @@ export function registrarVistas(server: Servidor, base: string): void {
     { title: "Pendientes de OPAI", mimeType: MIME_VISTA },
     async (uri) => ({
       contents: [{ uri: uri.href, mimeType: MIME_VISTA, text: htmlPendientes(base) }],
+    }),
+  );
+  server.registerResource(
+    "vista-ficha-cuenta",
+    URI_FICHA_CUENTA,
+    { title: "Ficha de cuenta · OPAI", mimeType: MIME_VISTA },
+    async (uri) => ({
+      contents: [{ uri: uri.href, mimeType: MIME_VISTA, text: htmlFichaCuenta(base) }],
     }),
   );
 }
