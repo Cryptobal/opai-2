@@ -1,5 +1,6 @@
-import { Badge, cn, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
+import { Badge, cn, EnlaceBoton, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
 
+import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { diaLargo } from "@/lib/fechas";
@@ -16,7 +17,7 @@ type Item = {
   correccionPendiente: boolean; descansoInsuficiente: boolean; marcaFueraDeTurno: boolean;
 };
 type Datos = {
-  fecha: string; zona: string; truncado: boolean;
+  fecha: string; zona: string; siguiente: string | null;
   resumen: { turnos: number; presentes: number; sinMarca: number; ausentes: number; incompletos: number; atrasos: number };
   items: Item[];
 };
@@ -51,18 +52,27 @@ function duracion(min: number): string {
 
 const formatoHora = (zona: string) => new Intl.DateTimeFormat("es-CL", { timeStyle: "short", hourCycle: "h23", timeZone: zona });
 
+function hrefMas(p: Record<string, string | null | undefined>, cursor: string) {
+  const q = new URLSearchParams({ cursor });
+  if (p.estado) q.set("estado", p.estado);
+  if (p.q) q.set("q", p.q);
+  return `/asistencia?${q}`;
+}
+
 /** «Asistencia de hoy» (A3): presentes, sin marca, atrasos y correcciones pendientes de los turnos del día. */
-export default function AsistenciaHoy({ searchParams }: Props) {
+export default async function AsistenciaHoy({ searchParams }: Props) {
+  const p = await leerParametros(searchParams);
   return (
     <PaginaPortal
       portal="erp"
       titulo="Asistencia de hoy"
       ruta="/asistencia"
       completo
-      cargar={async () => {
-        const p = await leerParametros(searchParams);
-        return ejecutarComoUsuario<Datos>("erp", "asistencia.dias.hoy", p["estado"] ? { estado: p["estado"] } : {});
-      }}
+      cargar={async () => ejecutarComoUsuario<Datos>("erp", "asistencia.dias.hoy", {
+        ...(p.estado ? { estado: p.estado } : {}),
+        ...(p.q ? { q: p.q } : {}),
+        ...(p.cursor ? { cursor: p.cursor } : {}),
+      })}
     >
       {(r) => {
         const d = r.ok ? r.data : null;
@@ -78,6 +88,7 @@ export default function AsistenciaHoy({ searchParams }: Props) {
               filtros={
                 <div className="flex w-full flex-col gap-3">
                   {d ? <Kpis r={d.resumen} className={cn("grid grid-cols-2 gap-3 md:hidden", GRILLA_KPI_HILO)} /> : null}
+                  <Buscador placeholder="Buscar por persona o instalación…" />
                   <ChipsFiltro filtros={[{ param: "estado", etiqueta: "Estado", opciones: OPCIONES }]} />
                 </div>
               }
@@ -120,6 +131,11 @@ export default function AsistenciaHoy({ searchParams }: Props) {
                 vacio: { titulo: "Sin turnos hoy", descripcion: "Cuando haya turnos esperados para hoy, aparecerán aquí con su asistencia." },
               }}
             />
+            {d?.siguiente ? (
+              <div className="flex justify-center">
+                <EnlaceBoton href={hrefMas(p, d.siguiente)} variante="secondary">Cargar más</EnlaceBoton>
+              </div>
+            ) : null}
           </div>
         );
       }}
