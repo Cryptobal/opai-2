@@ -73,7 +73,7 @@ type Lote = Pick<Plan, "cuentas" | "contactos" | "instalaciones" | "programacion
 const CLAVES: (keyof Lote)[] = ["cuentas", "contactos", "instalaciones", "programaciones", "negocios", "cotizaciones"];
 
 /** Parte el plan en lotes de a lo más `tam` filas por entidad, respetando el orden de dependencias. */
-export function partirEnLotes(plan: Plan, tam: number = TAMANO_LOTE): Plan[] {
+function partirEnLotes(plan: Plan, tam: number = TAMANO_LOTE): Plan[] {
   const lotes: Plan[] = [];
   const vacio = { cuentas: [], contactos: [], instalaciones: [], programaciones: [], negocios: [], cotizaciones: [] };
   for (const clave of CLAVES) {
