@@ -4,7 +4,7 @@ import { type ReactNode, useState } from "react";
 
 import { InputBusqueda } from "@opai/ds";
 
-export type FilaLista = { id: string; texto: string; nodo: ReactNode };
+type FilaLista = { id: string; texto: string; nodo: ReactNode };
 
 const sinTildes = (t: string) =>
   t
