@@ -11,9 +11,9 @@ import type { Contexto } from "../../types";
 import { filaIntegracionSlack, instalacionSlack, tokenSlack } from "./comun";
 import { slackUsuarios } from "./vinculo";
 
-export const TIPO_MENSAJE_DIRECTO = "core.slack.mensaje_directo";
+const TIPO_MENSAJE_DIRECTO = "core.slack.mensaje_directo";
 /** Canal con que queda el envío en `core.envios`. */
-export const CANAL_SLACK_DM = "slack_dm";
+const CANAL_SLACK_DM = "slack_dm";
 
 /** Errores de Slack que no se arreglan reintentando: se registra el fallo y no se reintenta. */
 const DEFINITIVOS = new Set([
