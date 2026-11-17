@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { type CentroCostoRef, NOMBRE_CENTRO_GENERAL } from "@opai/domain";
+import {
+  type CentroCostoRef,
+  NOMBRE_CENTRO_GENERAL,
+} from "@opai/domain";
 
 import { ajuste } from "../core/config";
 import { uuidSchema } from "../core/esquemas";
@@ -90,4 +93,3 @@ export const tipoDteSchema = z
   .describe("Tipo de DTE: 33 factura, 34 factura exenta, 56 nota de débito, 61 nota de crédito.");
 
 export const montoSchema = z.number().int().min(0).max(2_000_000_000);
-
