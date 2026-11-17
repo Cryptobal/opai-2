@@ -3,7 +3,7 @@ import { Badge, Cabecera, Estado, FilaSeleccionable, KpiTile, Segmentado, SplitS
 import { LinkNext } from "@/app/_components/link-next";
 
 import type { cargarHistorial } from "./datos";
-import { ESTADOS, etiquetaEstado, hrefHistorial, tonoEstado } from "./tipos";
+import { ESTADOS, etiquetaEstado, hrefHistorial, tonoEstado, type EstadoFiltro } from "./tipos";
 
 type VistaHistorial = Awaited<ReturnType<typeof cargarHistorial>>;
 
@@ -46,7 +46,7 @@ function ListaRondasHistorial({
   filtros,
 }: {
   d: VistaHistorial;
-  filtros: { estado: string; inst?: string; desde?: string; hasta?: string };
+  filtros: { estado: EstadoFiltro; inst?: string; desde?: string; hasta?: string };
 }) {
   return (
     <div className="flex flex-col p-4 md:p-0">
@@ -85,7 +85,7 @@ function BarraFiltrosHistorial({
   filtros,
 }: {
   d: VistaHistorial;
-  filtros: { estado: string; inst?: string; desde?: string; hasta?: string };
+  filtros: { estado: EstadoFiltro; inst?: string; desde?: string; hasta?: string };
 }) {
   return (
     <div className={`flex-col gap-3 px-4 pb-3 md:px-0 ${d.ejecucion ? "hidden md:flex" : "flex"}`}>
