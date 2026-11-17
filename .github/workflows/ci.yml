@@ -24,14 +24,94 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
-  gate:
-    name: typecheck · lint · test · test:db
+  # El gate corre en paralelo (typecheck y test en 2 partes, test:db en 4) y el job «gate» lo
+  # resume con el nombre del check obligatorio del ruleset. Antes iba en serie en un solo job de 25 a
+  # 35 min. Los checks obligatorios usan runners de GitHub (gratis con el repositorio público): la
+  # flota Spot corría 4 jobs a la vez con 40 corridas en espera y cortaba jobs a media corrida, lo que
+  # en la cola de merge saca al PR (17-nov-2026). Para volver a runners propios: variable RUNNER_GATE.
+  typecheck-lint:
+    name: typecheck ${{ matrix.parte }}/2${{ matrix.parte == 1 && ' · lint' || '' }}
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 35
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [1, 2]
     env:
       TURBO_CACHE_DIR: .turbo
       NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - name: Ampliar swap (runner ~7 GB)
+        if: steps.solo_docs.outputs.only_docs != 'true' && runner.environment == 'github-hosted'
+        run: |
+          sudo swapoff -a 2>/dev/null || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+      - uses: ./.github/actions/preparar
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        with:
+          turbo: typecheck-${{ matrix.parte }}
+      - name: typecheck
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        run: .github/scripts/ci-typecheck-parte.sh ${{ matrix.parte }} 2
+      - name: lint
+        if: steps.solo_docs.outputs.only_docs != 'true' && matrix.parte == 1
+        run: pnpm turbo run lint --concurrency=2
+
+  test:
+    name: test ${{ matrix.parte }}/2
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [1, 2]
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - name: Aviso de novedad in-app (CAR-260, no bloquea)
+        if: github.event_name == 'pull_request' && steps.solo_docs.outputs.only_docs != 'true' && matrix.parte == 1
+        run: .github/scripts/ci-novedad-visual.sh
+      - uses: ./.github/actions/preparar
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      # La configuración local usa 2 procesos; en CI, uno por CPU.
+      - run: pnpm test --shard=${{ matrix.parte }}/2 --maxWorkers="$(nproc)"
+        if: steps.solo_docs.outputs.only_docs != 'true'
+
+  test-db:
+    name: test:db · ${{ matrix.nombre }}
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nombre: base y auth
+            comando: pnpm test:db:base
+          - nombre: capacidades 1/3
+            comando: pnpm test:db:capacidades --shard=1/3
+          - nombre: capacidades 2/3
+            comando: pnpm test:db:capacidades --shard=2/3
+          - nombre: capacidades 3/3
+            comando: pnpm test:db:capacidades --shard=3/3
     services:
       postgres:
         image: postgres:16
@@ -52,73 +132,56 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
+      # test:db corre siempre fuera de los PR y, en un PR, cuando toca código que esas pruebas ejercen
+      # (paquetes y módulos, salvo el DS), no solo Prisma: así un PR no llega verde a la cola de merge
+      # para caer ahí en test:db (17-nov-2026, #1036).
       - name: Detectar cambios de base
         id: base
         env:
-          BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          SOLO_DOCS: ${{ steps.solo_docs.outputs.only_docs }}
         run: |
+          if [ "$SOLO_DOCS" = true ]; then
+            echo "db=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
             echo "db=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if git diff --name-only "$BASE...$HEAD" | grep -qE '(^|/)prisma/|/migrations/'; then
+          if git diff --name-only "$BASE...$HEAD" \
+            | grep -E '^(packages|modules)/|(^|/)prisma/|/migrations/|^(package\.json|pnpm-lock\.yaml)$|^\.github/(workflows/ci\.yml|actions/)' \
+            | grep -vE '^packages/ds/' | grep -q .; then
             echo "db=true" >> "$GITHUB_OUTPUT"
           else
             echo "db=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Aviso de novedad in-app (CAR-260, no bloquea)
-        if: github.event_name == 'pull_request' && steps.solo_docs.outputs.only_docs != 'true'
-        run: .github/scripts/ci-novedad-visual.sh
-      - name: Ampliar swap (runner ~7 GB)
-        if: steps.solo_docs.outputs.only_docs != 'true' && runner.environment == 'github-hosted'
-        run: |
-          sudo swapoff -a 2>/dev/null || true
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-          free -h
-      - uses: pnpm/action-setup@v4
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - uses: actions/setup-node@v4
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - name: Restaurar store de pnpm
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Restaurar caché de Turborepo
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-      - name: Instalar dependencias
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        run: .github/scripts/ci-install.sh
-      - run: pnpm turbo run typecheck --concurrency=1
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - run: pnpm turbo run lint --concurrency=1
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - run: pnpm test
-        if: steps.solo_docs.outputs.only_docs != 'true'
+      - uses: ./.github/actions/preparar
+        if: steps.base.outputs.db == 'true'
       - name: test:db
-        if: steps.solo_docs.outputs.only_docs != 'true' && steps.base.outputs.db == 'true'
-        run: pnpm test:db
+        if: steps.base.outputs.db == 'true'
+        run: |
+          rm -f "${TMPDIR:-/tmp}/opai_cron_sii_test_pwd"
+          ${{ matrix.comando }}
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
-      - name: Solo documentación
-        if: steps.solo_docs.outputs.only_docs == 'true'
-        run: 'echo "PR de solo *.md y docs/** — gate omitido."'
+
+  gate:
+    name: typecheck · lint · test · test:db
+    needs: [typecheck-lint, test, test-db]
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Comprobar typecheck · lint, test y test:db
+        env:
+          TYPECHECK_LINT: ${{ needs.typecheck-lint.result }}
+          TEST: ${{ needs.test.result }}
+          TEST_DB: ${{ needs.test-db.result }}
+        run: |
+          echo "typecheck-lint=$TYPECHECK_LINT test=$TEST test-db=$TEST_DB"
+          test "$TYPECHECK_LINT" = success && test "$TEST" = success && test "$TEST_DB" = success
 
   presupuesto:
     name: build · presupuesto de JS
@@ -160,7 +223,7 @@ jobs:
   secretos:
     name: secretos
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
