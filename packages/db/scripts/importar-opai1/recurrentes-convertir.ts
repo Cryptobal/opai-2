@@ -6,7 +6,7 @@ import { correo, rut, textoLimpio } from "./normalizar";
 import type { ProgramacionRecurrenteOpai1 } from "./origen";
 import type { DatosProgramacion, DestinatarioCorreo, LineaProgramacion } from "./recurrentes-tipos";
 
-export const TIPOS_DTE = [33, 34, 56, 61] as const;
+const TIPOS_DTE = [33, 34, 56, 61] as const;
 const FRECUENCIAS: Record<string, string> = {
   monthly: "mensual",
   biweekly: "quincenal",
@@ -60,7 +60,7 @@ function convertirLinea(
 }
 
 /** Mes de la última corrida exitosa de 1.0 (zona de Chile): la 1.ª generación de 2.0 es la siguiente. */
-export function ultimoPeriodo(f: ProgramacionRecurrenteOpai1): string | null {
+function ultimoPeriodo(f: ProgramacionRecurrenteOpai1): string | null {
   const exacto = textoLimpio(f.lastSuccessfulRun?.period);
   if (exacto && RE_PERIODO.test(exacto)) return exacto;
   const fuente = f.lastSuccessfulRun?.runAt ?? f.lastRunAt;
@@ -74,7 +74,7 @@ export function ultimoPeriodo(f: ProgramacionRecurrenteOpai1): string | null {
     .slice(0, 7);
 }
 
-export function correosDestinatarios(f: ProgramacionRecurrenteOpai1): DestinatarioCorreo[] {
+function correosDestinatarios(f: ProgramacionRecurrenteOpai1): DestinatarioCorreo[] {
   const salida: DestinatarioCorreo[] = [];
   const visto = new Set<string>();
   const agregar = (valor: string | null | undefined, tipo: "para" | "cc") => {
