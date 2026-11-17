@@ -35,6 +35,12 @@ test.describe("@preview cpq: marcadores HTML de propuesta (CAR-571)", () => {
     for (const t of ["empresa.nombre", "cuenta.nombre", "cotizacion.codigo", "tabla_servicio", "puestos"]) {
       await expect(reconocidos).toContainText(`{{${t}}}`);
     }
+    const vistaCpq = page.getByLabel("Ver con la cotización");
+    await vistaCpq.scrollIntoViewIfNeeded();
+    await vistaCpq.getByRole("combobox").click();
+    await page.getByPlaceholder("Buscar por código, título o cuenta").fill("e2e");
+    await page.getByRole("option").first().click({ timeout: 30_000 });
+    await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible({ timeout: 60_000 });
     await page.getByTitle("Vista previa del HTML subido").scrollIntoViewIfNeeded();
     await capturar(page, info, "cpq-propuesta-html-marcadores-vista");
   });

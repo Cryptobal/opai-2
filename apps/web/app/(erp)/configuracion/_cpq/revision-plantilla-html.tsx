@@ -1,3 +1,5 @@
+"use client";
+
 import { Alerta, Badge } from "@opai/ds";
 
 type Problema = { codigo: string; mensaje: string; detalle?: string };
@@ -12,18 +14,7 @@ export type RevisionHtml = {
   tokens: { usados: string[] };
 };
 
-/** HTML ya saneado en un marco aislado: sin scripts, sin red y sin acceso a la página. */
-export function VistaHtml({ html, titulo }: { html: string; titulo: string }) {
-  return (
-    <iframe
-      title={titulo}
-      sandbox=""
-      referrerPolicy="no-referrer"
-      srcDoc={html}
-      className="h-96 w-full rounded-md border border-border bg-white"
-    />
-  );
-}
+import { VistaPreviaCpqPlantilla } from "./vista-previa-cpq-plantilla";
 
 function Lista({ items }: { items: Problema[] }) {
   return (
@@ -66,7 +57,9 @@ export function RevisionPlantillaHtml({ r }: { r: RevisionHtml }) {
           ))}
         </div>
       ) : null}
-      {r.html ? <VistaHtml html={r.html} titulo="Vista previa del HTML subido" /> : null}
+      {r.html ? (
+        <VistaPreviaCpqPlantilla htmlBorrador={r.html} titulo="Vista previa del HTML subido" />
+      ) : null}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { parse, type DefaultTreeAdapterMap } from "parse5";
 import { VERSION_CATALOGO_CAMPOS, validarPlantillaCampos } from "@opai/domain";
 
 import { sanearEstilo } from "./html-estilo";
+import { sanearCssBloque } from "./sanear-css-bloque";
 import {
   ELEMENTOS_ACTIVOS, ELEMENTOS_IGNORADOS, ELEMENTOS_PERMITIDOS, ELEMENTOS_RECURSO, ELEMENTOS_VACIOS, LIMITES_HTML,
   atributosPermitidos,
@@ -112,6 +113,16 @@ export function sanearHtml(entrada: string): ResultadoSaneado {
     else if (ELEMENTOS_RECURSO.has(tag)) marcar(problemas, { codigo: "recurso_externo", mensaje: `El elemento <${tag}> carga o declara recursos externos.`, detalle: tag });
     else if (!permitido) marcar(problemas, { codigo: "elemento_no_permitido", mensaje: `El elemento <${tag}> no está permitido.`, detalle: tag });
     const attrs = atributos(el, tag);
+    if (tag === "style") {
+      if (!emitir || !permitido) return "";
+      const crudo = el.childNodes
+        .map((c) => (c.nodeName === "#text" ? (c as DefaultTreeAdapterMap["textNode"]).value : ""))
+        .join("");
+      const saneado = sanearCssBloque(crudo);
+      saneado.errores.forEach((m) => marcar(problemas, { codigo: "estilo_no_permitido", mensaje: m, detalle: m }));
+      if (saneado.errores.length || !saneado.css) return "";
+      return `<style>${saneado.css}</style>`;
+    }
     const hijos = el.childNodes.map((c) => recorrer(c, nivel + 1, emitir && permitido)).join("");
     if (!emitir || !permitido) return "";
     return ELEMENTOS_VACIOS.has(tag) ? `<${tag}${attrs}>` : `<${tag}${attrs}>${hijos}</${tag}>`;
