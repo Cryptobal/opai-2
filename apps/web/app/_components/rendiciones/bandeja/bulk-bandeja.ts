@@ -6,12 +6,6 @@ export type AccionBulk = "aprobar" | "rechazar";
 
 export type SalidaBulk = { aplicadas: { codigoVisible: string }[]; omitidas: { motivo: string }[] };
 
-const cap = (accion: AccionBulk) =>
-  accion === "aprobar" ? "rendiciones.bandeja.aprobar_varias" : "rendiciones.bandeja.rechazar_varias";
-
-const entrada = (accion: AccionBulk, ids: string[], motivo: string) =>
-  accion === "aprobar" ? { ids } : { ids, motivo: motivo.trim() };
-
 export function textoVistaPrevia(d: SalidaBulk): string {
   return (
     `Listas: ${d.aplicadas.map((x) => x.codigoVisible).join(", ") || "ninguna"}.` +
@@ -25,5 +19,8 @@ export async function ejecutarBulk(
   motivo: string,
   dryRun: boolean,
 ): Promise<Resultado> {
-  return ejecutarCapacidad("erp", cap(accion), entrada(accion, ids, motivo), dryRun);
+  if (accion === "aprobar") {
+    return ejecutarCapacidad("erp", "rendiciones.bandeja.aprobar_varias", { ids }, dryRun);
+  }
+  return ejecutarCapacidad("erp", "rendiciones.bandeja.rechazar_varias", { ids, motivo: motivo.trim() }, dryRun);
 }
