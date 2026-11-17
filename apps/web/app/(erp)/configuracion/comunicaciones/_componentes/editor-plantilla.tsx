@@ -11,8 +11,6 @@ import { VistaPrevia } from "./vista-previa";
 
 import { FORM_PLANTILLA } from "../../_centro/formularios";
 
-export { FORM_PLANTILLA } from "../../_centro/formularios";
-
 type Props = {
   evento: string;
   canal: string;
