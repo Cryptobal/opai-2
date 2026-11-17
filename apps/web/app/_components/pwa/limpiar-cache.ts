@@ -32,7 +32,7 @@ async function borrarTodasLasCaches(): Promise<void> {
 }
 
 /** Borra TODAS las cachés del service worker. Degrada sin romper si no hay Cache Storage (§10). */
-export async function limpiarCachesPwa(): Promise<void> {
+async function limpiarCachesPwa(): Promise<void> {
   if (typeof caches === "undefined") return;
   const sw = typeof navigator !== "undefined" ? navigator.serviceWorker?.controller : null;
   try {
