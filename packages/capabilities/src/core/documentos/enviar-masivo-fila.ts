@@ -2,10 +2,9 @@ import type { ClaseFirma, NivelFirma } from "@opai/domain";
 
 import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
-import { ejecutarEnvioFirma } from "../firmas/enviar-ejecutar";
 import { firmantesLaborales } from "./firmantes-laborales";
 import { calcularRelleno } from "./rellenar-calculo";
-import { generarPdfLaboralPersona } from "./generar-pdf-persona";
+import { ejecutarFilaMasivo } from "./enviar-masivo-fila-ejecutar";
 
 export type FilaEnvioMasivo = {
   personaId: string;
@@ -54,36 +53,7 @@ export async function filaEnvioMasivo(
       { firmantes: (opts.plantilla.firmantes ?? "ambos") as "ambos" },
       persona,
     );
-    if (opts.dryRun) {
-      return {
-        personaId: opts.personaId,
-        estado: "ok",
-        nombre,
-        documentoId: null,
-        solicitudFirmaId: null,
-        mensaje: "Listo para generar y enviar.",
-      };
-    }
-    const { documento } = await generarPdfLaboralPersona(ctx, opts.plantilla, opts.version, persona, relleno);
-    const solicitud = await ejecutarEnvioFirma(
-      ctx,
-      {
-        documentoId: documento.id,
-        clase: opts.clase,
-        nivel: opts.nivel,
-        ...(opts.mensaje ? { mensaje: opts.mensaje } : {}),
-        firmantes,
-      },
-      false,
-    );
-    return {
-      personaId: opts.personaId,
-      estado: "ok",
-      nombre,
-      documentoId: documento.id,
-      solicitudFirmaId: solicitud.id,
-      mensaje: null,
-    };
+    return ejecutarFilaMasivo(ctx, { ...opts, persona, relleno, nombre, firmantes });
   } catch (e) {
     return {
       personaId: opts.personaId,
