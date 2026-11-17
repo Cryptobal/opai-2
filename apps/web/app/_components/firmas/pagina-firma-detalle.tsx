@@ -23,8 +23,8 @@ export function PaginaFirmaDetalle({ config, params }: { config: Config; params:
       portal={portal}
       titulo="Firmar documento"
       ruta={listaHref}
-      volver={volverPortal}
-      volverSoloTelefono={volverSoloTelefono}
+      {...(volverPortal ? { volver: volverPortal } : {})}
+      {...(volverSoloTelefono ? { volverSoloTelefono } : {})}
       cargando="formulario"
       cargar={async () => {
         const { id } = await params;
@@ -34,7 +34,7 @@ export function PaginaFirmaDetalle({ config, params }: { config: Config; params:
       }}
       opciones={(d) => ({
         titulo: d.datos ? `Firmar · ${ETIQUETA_CLASE[d.datos.clase] ?? d.datos.clase}` : "Firmar documento",
-        volver: volverOpciones,
+        ...(volverOpciones ? { volver: volverOpciones } : {}),
       })}
     >
       {({ id, datos }) =>
