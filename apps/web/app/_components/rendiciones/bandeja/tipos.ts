@@ -1,6 +1,6 @@
 import type { DetalleRendicion, EstadoRendicion, ResumenRendicion } from "../tipos";
 
-export type FilaBandeja = ResumenRendicion & { solicitanteId: string; solicitanteNombre: string | null };
+type FilaBandeja = ResumenRendicion & { solicitanteId: string; solicitanteNombre: string | null };
 
 export type Bandeja = {
   rendiciones: FilaBandeja[];
