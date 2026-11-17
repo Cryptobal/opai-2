@@ -1,6 +1,7 @@
 import type { BadgeProps } from "@opai/ds";
 
-import { listaCompleta } from "@/lib/lista-completa";
+import { acumularPaginas } from "@/lib/lista-completa";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 import { leerParametros, type Parametros } from "@/lib/parametros";
 
 export type Firmante = {
@@ -68,8 +69,9 @@ export const ETIQUETA_CLASE: Record<string, string> = {
 export const filtrosDe = leerParametros;
 
 export async function cargarFirmas(p: Parametros) {
-  const r = await listaCompleta<Solicitud>("erp", "core.firmas.list", {
-    ...(p["estado"] ? { estado: p["estado"] } : {}),
-  });
+  const base = { ...(p["estado"] ? { estado: p["estado"] } : {}) };
+  const r = await acumularPaginas<Solicitud>((extra) =>
+    ejecutarComoUsuario("erp", "core.firmas.list", { ...base, ...extra }),
+  );
   return r.ok ? { ok: true as const, data: { solicitudes: r.data } } : r;
 }

@@ -3,7 +3,8 @@ import { agruparVencimientos, VENTANAS_VENCIMIENTO_DEFECTO } from "@opai/domain"
 import type { Documento } from "@/app/_components/documentos/tipos";
 import { hoyIso } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
-import { listaCompleta } from "@/lib/lista-completa";
+import { acumularPaginas } from "@/lib/lista-completa";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { etiquetasEntidad } from "../../_componentes/etiquetas";
@@ -21,7 +22,9 @@ export type FilaVencimiento = Documento & {
 export async function cargarVencimientos() {
   const dias = Math.max(...VENTANAS_VENCIMIENTO_DEFECTO);
   const [r, voc] = await Promise.all([
-    listaCompleta<FilaVencimiento>("erp", "core.documentos.vencimientos", { dias }),
+    acumularPaginas<FilaVencimiento>((extra) =>
+      ejecutarComoUsuario("erp", "core.documentos.vencimientos", { dias, ...extra }),
+    ),
     vocabularioActual(),
   ]);
   const filas = r.ok ? r.data.filter((d) => esTipoVencimiento(d.entidad?.tipo)) : [];
