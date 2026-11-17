@@ -26,20 +26,15 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
-  # El gate corre en paralelo (typecheck y test en 2 partes, test:db en 4) y el job «gate» lo
-  # resume con el nombre del check obligatorio del ruleset. Antes iba en serie en un solo job de 25 a
-  # 35 min. Los checks obligatorios usan runners de GitHub (gratis con el repositorio público): la
-  # flota Spot corría 4 jobs a la vez con 40 corridas en espera y cortaba jobs a media corrida, lo que
-  # en la cola de merge saca al PR (17-nov-2026). Para volver a runners propios: variable RUNNER_GATE.
-  typecheck-lint:
-    name: typecheck ${{ matrix.parte }}/2${{ matrix.parte == 1 && ' · lint' || '' }}
+  # Cuatro jobs por corrida del gate (verificar + test-db + agregador + secretos): misma cobertura que
+  # el matrix en 2+2+4 shards, pero en serie dentro de cada job para no saturar ~20 runners (17-nov-2026).
+  # El job «gate» conserva el nombre del check obligatorio del ruleset. Compatible con el fast path de
+  # #1078 (pull_request vs merge_group): solo habría que ramificar los pasos de «verificar» y «test-db».
+  verificar:
+    name: verificar · typecheck lint test
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        parte: [1, 2]
+    timeout-minutes: 45
     env:
       TURBO_CACHE_DIR: .turbo
       NODE_OPTIONS: --max-old-space-size=4096
@@ -59,61 +54,22 @@ jobs:
           sudo mkswap /swapfile
           sudo swapon /swapfile
           free -h
-      - uses: ./.github/actions/preparar
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        with:
-          turbo: typecheck-${{ matrix.parte }}
-      - name: typecheck
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        run: .github/scripts/ci-typecheck-parte.sh ${{ matrix.parte }} 2
-      - name: lint
-        if: steps.solo_docs.outputs.only_docs != 'true' && matrix.parte == 1
-        run: pnpm turbo run lint --concurrency=2
-
-  test:
-    name: test ${{ matrix.parte }}/2
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        parte: [1, 2]
-    env:
-      NODE_OPTIONS: --max-old-space-size=4096
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Detectar solo documentación
-        id: solo_docs
-        run: .github/scripts/ci-solo-documentacion.sh
       - name: Aviso de novedad in-app (CAR-260, no bloquea)
-        if: github.event_name == 'pull_request' && steps.solo_docs.outputs.only_docs != 'true' && matrix.parte == 1
+        if: github.event_name == 'pull_request' && steps.solo_docs.outputs.only_docs != 'true'
         run: .github/scripts/ci-novedad-visual.sh
       - uses: ./.github/actions/preparar
         if: steps.solo_docs.outputs.only_docs != 'true'
-      # La configuración local usa 2 procesos; en CI, uno por CPU.
-      - run: pnpm test --shard=${{ matrix.parte }}/2 --maxWorkers="$(nproc)"
+        with:
+          turbo: typecheck-1
+      - name: typecheck · lint · test
         if: steps.solo_docs.outputs.only_docs != 'true'
+        run: .github/scripts/ci-verificar-completo.sh
 
   test-db:
-    name: test:db · ${{ matrix.nombre }}
+    name: test:db
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - nombre: base y auth
-            comando: pnpm test:db:base
-          - nombre: capacidades 1/3
-            comando: pnpm test:db:capacidades --shard=1/3
-          - nombre: capacidades 2/3
-            comando: pnpm test:db:capacidades --shard=2/3
-          - nombre: capacidades 3/3
-            comando: pnpm test:db:capacidades --shard=3/3
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:16
@@ -163,27 +119,24 @@ jobs:
         if: steps.base.outputs.db == 'true'
       - name: test:db
         if: steps.base.outputs.db == 'true'
-        run: |
-          rm -f "${TMPDIR:-/tmp}/opai_cron_sii_test_pwd"
-          ${{ matrix.comando }}
+        run: .github/scripts/ci-test-db-completo.sh
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
 
   gate:
     name: typecheck · lint · test · test:db
-    needs: [typecheck-lint, test, test-db]
+    needs: [verificar, test-db]
     if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Comprobar typecheck · lint, test y test:db
         env:
-          TYPECHECK_LINT: ${{ needs.typecheck-lint.result }}
-          TEST: ${{ needs.test.result }}
+          VERIFICAR: ${{ needs.verificar.result }}
           TEST_DB: ${{ needs.test-db.result }}
         run: |
-          echo "typecheck-lint=$TYPECHECK_LINT test=$TEST test-db=$TEST_DB"
-          test "$TYPECHECK_LINT" = success && test "$TEST" = success && test "$TEST_DB" = success
+          echo "verificar=$VERIFICAR test-db=$TEST_DB"
+          test "$VERIFICAR" = success && test "$TEST_DB" = success
 
   presupuesto:
     name: build · presupuesto de JS
