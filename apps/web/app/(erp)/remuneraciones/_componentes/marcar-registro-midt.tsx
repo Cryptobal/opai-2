@@ -11,7 +11,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { MovimientoMiDt } from "./lista-cumplimiento-dt";
 
-const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo" } as const;
+const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo", finiquito: "Finiquito" } as const;
 
 export function MarcarRegistroMiDt({
   movimiento,
@@ -32,7 +32,9 @@ export function MarcarRegistroMiDt({
       abierto={movimiento !== null}
       onCerrar={onCerrar}
       titulo={titulo}
-      {...(movimiento ? { descripcion: `${movimiento.personaNombre} · ${movimiento.hechoTexto}` } : {})}
+      {...(movimiento
+        ? { descripcion: `${movimiento.personaNombre} · ${movimiento.hechoTexto}` }
+        : {})}
       acciones={
         <Button disabled={pendiente || !fecha} form="form-midt-reg">
           Marcar registrado
