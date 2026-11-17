@@ -62,8 +62,6 @@ describe("nomina.cumplimiento_dt", () => {
     expect(data.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
   });
 
-<<<<<<< HEAD
-=======
   it("lista baja pendiente tras término de vínculo", async () => {
     const { ctx } = como();
     const r = await executeCapability(ctx, "nomina.midt.listar", {});
@@ -74,8 +72,6 @@ describe("nomina.cumplimiento_dt", () => {
     expect(baja?.registrado).toBe(false);
     expect(baja?.hechoEn).toBe("2026-09-15");
   });
-
->>>>>>> origin/cursor/cumplimiento-dt-ab10
   it("exporta CSV de pendientes", async () => {
     const { ctx } = como();
     const r = await executeCapability(ctx, "nomina.midt.exportar_pendientes", {});
