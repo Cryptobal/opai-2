@@ -1,24 +1,36 @@
 // Dominio puro de los lotes de pago (CAR-208, R3): estados, totales, unicidad y reglas de
 // segregación. Sin base de datos, React ni Next (REGLAS-codigo). Dinero en CLP entero.
 
-export const ESTADOS_LOTE = ["borrador", "aprobado", "generado", "pagado", "anulado"] as const;
+export const ESTADOS_LOTE = ["borrador", "aprobado", "generado", "pagado", "anulado", "aplicado"] as const;
 export type EstadoLote = (typeof ESTADOS_LOTE)[number];
 
 /**
- * Transiciones del lote. «Pagado» se marca a mano con fecha y referencia; puede venir de «aprobado»
- * (pago por otro medio, sin archivo de nómina) o de «generado». Un lote pagado no se anula: la
- * reversa de un pago es un lote de reversa (fuera de R3).
+ * Transiciones del lote de pago. «Pagado» se marca a mano con fecha y referencia; puede venir de «aprobado»
+ * (pago por otro medio, sin archivo de nómina) o de «generado». Un lote pagado no se anula: la reversa
+ * de un pago es un lote de reversa (CAR-614).
  */
-const TRANSICIONES: Readonly<Record<EstadoLote, readonly EstadoLote[]>> = {
+const TRANSICIONES_PAGO: Readonly<Record<EstadoLote, readonly EstadoLote[]>> = {
   borrador: ["aprobado", "anulado"],
   aprobado: ["generado", "pagado", "anulado"],
   generado: ["pagado", "anulado"],
   pagado: [],
   anulado: [],
+  aplicado: [],
 };
 
-export function puedeTransitarLote(desde: EstadoLote, hacia: EstadoLote): boolean {
-  return TRANSICIONES[desde].includes(hacia);
+/** Lote de reversa: borrador → aprobado → aplicado (revierte rendiciones pagadas a aprobadas). */
+const TRANSICIONES_REVERSA: Readonly<Record<EstadoLote, readonly EstadoLote[]>> = {
+  borrador: ["aprobado", "anulado"],
+  aprobado: ["aplicado", "anulado"],
+  aplicado: [],
+  anulado: [],
+  generado: [],
+  pagado: [],
+};
+
+export function puedeTransitarLote(desde: EstadoLote, hacia: EstadoLote, esReversa = false): boolean {
+  const mapa = esReversa ? TRANSICIONES_REVERSA : TRANSICIONES_PAGO;
+  return (mapa[desde] ?? []).includes(hacia);
 }
 
 export const codigoLote = (n: number): string => `LP-${n}`;
@@ -66,6 +78,24 @@ export function validarSeleccion(ids: readonly string[], encontradas: readonly R
 /** Ninguna rendición del lote es de quien actúa: nadie crea, aprueba ni paga lo suyo (decisión 4-nov-2026). */
 export function sinRendicionPropia(actorId: string, solicitantes: readonly string[]): boolean {
   return !solicitantes.includes(actorId);
+}
+
+export type RendicionParaReversa = { id: string; estado: string; montoTotal: number; solicitanteId: string; lotePagadoId: string | null; enReversaAbierta: boolean };
+
+/** Valida la selección de un lote de reversa (rendiciones pagadas en un lote ya marcado pagado). */
+export function validarSeleccionReversa(ids: readonly string[], encontradas: readonly RendicionParaReversa[]): string[] {
+  const problemas: string[] = [];
+  if (ids.length === 0) problemas.push("Elige al menos una rendición.");
+  if (new Set(ids).size !== ids.length) problemas.push("Una rendición está repetida en la selección.");
+  if (ids.length > MAX_RENDICIONES_LOTE) problemas.push(`Un lote admite hasta ${MAX_RENDICIONES_LOTE} rendiciones.`);
+  const porId = new Map(encontradas.map((r) => [r.id, r]));
+  if (ids.some((id) => !porId.has(id))) problemas.push("Una rendición no existe.");
+  for (const r of encontradas) {
+    if (r.estado !== "pagada") problemas.push("Solo se reversan rendiciones pagadas.");
+    if (!r.lotePagadoId) problemas.push("Una rendición pagada no está en un lote pagado.");
+    if (r.enReversaAbierta) problemas.push("Una rendición ya está en otro lote de reversa abierto.");
+  }
+  return [...new Set(problemas)];
 }
 
 /**

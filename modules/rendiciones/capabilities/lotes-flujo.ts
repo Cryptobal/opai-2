@@ -18,8 +18,8 @@ export async function loteConSolicitantes(ctx: Contexto, id: string) {
   return { lote: l, solicitantes: rends.map((r) => r.solicitanteId) };
 }
 
-export function pasoPermitido(desde: string, hacia: EstadoLote): void {
-  if (!puedeTransitarLote(desde as EstadoLote, hacia)) throw reglaDeNegocio(`Un lote «${desde}» no puede pasar a «${hacia}».`);
+export function pasoPermitido(desde: string, hacia: EstadoLote, esReversa = false): void {
+  if (!puedeTransitarLote(desde as EstadoLote, hacia, esReversa)) throw reglaDeNegocio(`Un lote «${desde}» no puede pasar a «${hacia}».`);
 }
 
 export const lotesAprobar = defineCapability({
@@ -35,7 +35,7 @@ export const lotesAprobar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const yo = actorId(ctx);
     const { lote, solicitantes } = await loteConSolicitantes(ctx, input.id);
-    pasoPermitido(lote.estado, "aprobado");
+    pasoPermitido(lote.estado, "aprobado", lote.esReversa);
     if (!sinRendicionPropia(yo, solicitantes)) throw prohibido("Nadie aprueba un lote de pago con una rendición propia.");
     const personas = await aprobadoresDeLote(ctx);
     if (!puedeAprobarLote(lote.creadoPorId, yo, personas)) throw prohibido("Quien creó el lote no lo aprueba: lo aprueba otra persona con ese permiso.");
@@ -64,7 +64,7 @@ export const lotesAnular = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const yo = actorId(ctx);
     const { lote } = await loteConSolicitantes(ctx, input.id);
-    pasoPermitido(lote.estado, "anulado");
+    pasoPermitido(lote.estado, "anulado", lote.esReversa);
     const salida = { id: lote.id, estado: "anulado" as const, totalClp: lote.totalClp, cantidad: lote.cantidad };
     if (dryRun) return salida;
     await ctx.transaccion(async (tx) => {

@@ -1,12 +1,16 @@
-export type EstadoLote = "borrador" | "aprobado" | "generado" | "pagado" | "anulado";
+export type EstadoLote = "borrador" | "aprobado" | "generado" | "pagado" | "anulado" | "aplicado";
 
 export const RUTA_LOTES = "/rendiciones/lotes";
 
 export const ETIQUETA_LOTE: Record<EstadoLote, string> = {
-  borrador: "Borrador", aprobado: "Aprobado", generado: "Generado", pagado: "Pagado", anulado: "Anulado",
+  borrador: "Borrador", aprobado: "Aprobado", generado: "Generado", pagado: "Pagado", anulado: "Anulado", aplicado: "Reversa aplicada",
 };
 export const TONO_LOTE: Record<EstadoLote, "neutro" | "info" | "success" | "danger" | "warning"> = {
-  borrador: "neutro", aprobado: "info", generado: "warning", pagado: "success", anulado: "danger",
+  borrador: "neutro", aprobado: "info", generado: "warning", pagado: "success", anulado: "danger", aplicado: "success",
+};
+
+export type CandidataReversa = {
+  id: string; codigoVisible: string; descripcion: string; montoTotal: number; solicitanteNombre: string | null;
 };
 
 export type Candidata = {
@@ -15,7 +19,7 @@ export type Candidata = {
 };
 
 export type LoteResumen = {
-  id: string; codigoVisible: string; estado: EstadoLote; totalClp: number; cantidad: number;
+  id: string; codigoVisible: string; esReversa: boolean; estado: EstadoLote; totalClp: number; cantidad: number;
   creadoPorId: string; aprobadoPorId: string | null; aprobadoEn: string | null; generadoEn: string | null;
   pagadoEn: string | null; fechaPago: string | null; referenciaPago: string | null; creadoEn: string;
 };

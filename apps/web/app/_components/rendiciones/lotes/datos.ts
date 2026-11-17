@@ -4,13 +4,18 @@ import { exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type { CuentaOrigen } from "./cuenta-origen";
-import type { Candidata, LoteDetalle, LoteResumen } from "./tipos";
+import type { Candidata, CandidataReversa, LoteDetalle, LoteResumen } from "./tipos";
 
 export async function cargarLotes(): Promise<LoteResumen[]> {
   return exigirDatos(await ejecutarComoUsuario<{ lotes: LoteResumen[] }>("erp", "rendiciones.lotes.listar", { limite: 100 })).lotes;
 }
 
 /** Aprobadas sin lote activo: solo quien arma lotes; sin ese permiso la lista llega vacía y no se pide. */
+export async function cargarCandidatasReversa(puedePagar: boolean): Promise<CandidataReversa[]> {
+  if (!puedePagar) return [];
+  return exigirDatos(await ejecutarComoUsuario<{ rendiciones: CandidataReversa[] }>("erp", "rendiciones.lotes.candidatas_reversa", { limite: 200 })).rendiciones;
+}
+
 export async function cargarCandidatas(puedePagar: boolean): Promise<Candidata[]> {
   if (!puedePagar) return [];
   return exigirDatos(await ejecutarComoUsuario<{ rendiciones: Candidata[] }>("erp", "rendiciones.lotes.candidatas", { limite: 200 })).rendiciones;

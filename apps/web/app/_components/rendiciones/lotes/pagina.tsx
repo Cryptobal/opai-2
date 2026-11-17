@@ -9,8 +9,9 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { pesos } from "../formato";
 import { AccionesLote } from "./acciones-lote";
 import { ArmarLote } from "./armar-lote";
+import { ArmarReversa } from "./armar-reversa";
 import { SelectorCuentaOrigen } from "./cuenta-origen";
-import { cargarCandidatas, cargarCuentasOrigen, cargarLote, cargarLotes } from "./datos";
+import { cargarCandidatas, cargarCandidatasReversa, cargarCuentasOrigen, cargarLote, cargarLotes } from "./datos";
 import { ETIQUETA_LOTE, type PermisosLote, RUTA_LOTES, TONO_LOTE } from "./tipos";
 
 async function permisosDe(): Promise<PermisosLote> {
@@ -28,16 +29,26 @@ export function PaginaLotes() {
       ruta={RUTA_LOTES}
       cargar={async () => {
         const permisos = await permisosDe();
-        const [candidatas, lotes, origen] = await Promise.all([cargarCandidatas(permisos.pagar), cargarLotes(), cargarCuentasOrigen(permisos.configurar)]);
-        return { candidatas, lotes, permisos, origen };
+        const [candidatas, candidatasReversa, lotes, origen] = await Promise.all([
+          cargarCandidatas(permisos.pagar), cargarCandidatasReversa(permisos.pagar), cargarLotes(), cargarCuentasOrigen(permisos.configurar),
+        ]);
+        return { candidatas, candidatasReversa, lotes, permisos, origen };
       }}
     >
-      {({ candidatas, lotes, permisos, origen }) => (
+      {({ candidatas, candidatasReversa, lotes, permisos, origen }) => (
         <div className="flex flex-col gap-4">
           <Cabecera titulo="Lotes de pago" subtitulo="Agrupa rendiciones aprobadas, genera la nómina y marca el pago." />
           {permisos.configurar ? (
             <SeccionTarjeta titulo="Nómina Santander">
               <SelectorCuentaOrigen cuentas={origen.cuentas} seleccionadaId={origen.seleccionadaId} />
+            </SeccionTarjeta>
+          ) : null}
+          {permisos.pagar ? (
+            <SeccionTarjeta titulo="Pagadas para revertir">
+              <p className="mb-3 text-base text-fg-muted">Si un pago se marcó por error, arma un lote de reversa. Tras aprobarlo, alguien con permiso de pagos debe aplicar la reversa y las rendiciones vuelven a Aprobada.</p>
+              <Estado state={candidatasReversa.length === 0 ? "empty" : "ready"} variante="lista" textos={{ vacio: { titulo: "No hay rendiciones pagadas para revertir", descripcion: "Solo aparecen las que están en un lote ya marcado pagado." } }}>
+                <ArmarReversa candidatas={candidatasReversa} />
+              </Estado>
             </SeccionTarjeta>
           ) : null}
           {permisos.pagar ? (
@@ -55,7 +66,7 @@ export function PaginaLotes() {
                   {lotes.map((l) => (
                     <Tr key={l.id}>
                       <Td><LinkNext href={`${RUTA_LOTES}/${l.id}`} className="font-medium text-fg hover:underline">{l.codigoVisible}</LinkNext></Td>
-                      <Td><Badge tono={TONO_LOTE[l.estado]}>{ETIQUETA_LOTE[l.estado]}</Badge></Td>
+                      <Td><Badge tono={TONO_LOTE[l.estado]}>{l.esReversa ? "Reversa · " : ""}{ETIQUETA_LOTE[l.estado]}</Badge></Td>
                       <Td className="text-right tabular-nums">{l.cantidad}</Td>
                       <Td className="text-right tabular-nums">{pesos(l.totalClp)}</Td>
                       <Td>{fechaCorta(l.creadoEn)}</Td>
@@ -87,8 +98,12 @@ export function PaginaLote({ params }: { params: Promise<{ id: string }> }) {
       {({ lote, permisos }) => (
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
           <Cabecera titulo={lote.codigoVisible} tituloSiempre sobre={<Badge tono={TONO_LOTE[lote.estado]}>{ETIQUETA_LOTE[lote.estado]}</Badge>} subtitulo={`${lote.cantidad} rendiciones · ${pesos(lote.totalClp)}`} />
+          {lote.esReversa ? <p role="note" className="rounded-md bg-warning-muted px-3 py-2 text-base text-warning-fg">Lote de reversa: no tiene nómina ni pago bancario. Aplícalo cuando esté aprobado.</p> : null}
           {lote.estado === "pagado" ? (
             <p role="note" className="rounded-md bg-success-muted px-3 py-2 text-base text-success-fg">Pagado el {lote.fechaPago ? fechaCorta(lote.fechaPago) : "—"} · referencia «{lote.referenciaPago}». Las rendiciones pasaron a Pagada.</p>
+          ) : null}
+          {lote.estado === "aplicado" ? (
+            <p role="note" className="rounded-md bg-success-muted px-3 py-2 text-base text-success-fg">Reversa aplicada. Las rendiciones volvieron a Aprobada.</p>
           ) : null}
           <SeccionTarjeta titulo="Rendiciones del lote" sinRelleno>
             <ul>
