@@ -67,6 +67,8 @@ const como = () => contextoDePrueba({ rol: "owner", portal: "erp", modulosActivo
 
 type ItemMidt = { movimientoTipo: string; referenciaId: string; registrado: boolean; hechoEn: string };
 
+type ItemMidt = { movimientoTipo: string; referenciaId: string };
+
 beforeEach(() => {
   limpiarRegistro();
   limpiarModulos();
