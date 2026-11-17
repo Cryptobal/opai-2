@@ -3,7 +3,7 @@
 import { qrSvg } from "@/lib/qr";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-type Cartel = {
+export type CartelPrivacidad = {
   urlPolitica: string;
   aviso: string;
   instalacion: string;
@@ -16,11 +16,11 @@ type Cartel = {
 export async function cartelPrivacidad(
   instalacionId: string,
   puntoId?: string,
-): Promise<{ ok: true; data: Cartel } | { ok: false; error: string }> {
-  const r = await ejecutarComoUsuario<Cartel>("erp", "acceso.privacidad.cartel", {
+): Promise<{ ok: true; data: CartelPrivacidad } | { ok: false; error: string }> {
+  const r = await ejecutarComoUsuario<Omit<CartelPrivacidad, "qrSvg">>("erp", "acceso.privacidad.cartel", {
     instalacionId,
     ...(puntoId ? { puntoId } : {}),
   });
-  if (!r.ok) return { ok: false, error: r.error.mensaje };
+  if (!r.ok) return { ok: false, error: r.error.message };
   return { ok: true, data: { ...r.data, qrSvg: qrSvg(r.data.urlPolitica) } };
 }
