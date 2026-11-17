@@ -9,9 +9,9 @@ export type ArchivoLegal = {
 };
 
 /** Resultado de validar un archivo legal: conteo, tabla de errores por persona y avisos de formato. */
-const ETIQUETA: Record<string, string> = { lre: "LRE", previred: "archivo de Previred", f30_1: "certificado F30-1" };
+const ETIQUETA: Record<string, string> = { lre: "LRE", previred: "archivo de Previred", f30_1: "certificado F30-1", pago_banco: "pago bancario" };
 
-export function ResultadoArchivo({ archivo, tipo }: { archivo: ArchivoLegal; tipo: "lre" | "previred" | "f30_1" }) {
+export function ResultadoArchivo({ archivo, tipo }: { archivo: ArchivoLegal; tipo: "lre" | "previred" | "f30_1" | "pago_banco" }) {
   const conErrores = archivo.errores.length > 0;
   return (
     <div className="flex flex-col gap-2">
