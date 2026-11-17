@@ -12,10 +12,10 @@ type Rango = { cafAmbiente?: string | null; cafIdk?: string | null; folioDesde: 
 export const NOMBRE_AMBIENTE_CAF: Record<AmbienteCaf, string> = { certificacion: "certificación", produccion: "producción" };
 
 /** Ambiente en que realmente se emite (el candado CAR-191 lo fuerza a certificación fuera de app.opai.cl). */
-export const ambienteEmisionDe = (cfg: CfgAmbiente): AmbienteCaf => ambienteTributarioEfectivo(cfg?.ambiente);
+const ambienteEmisionDe = (cfg: CfgAmbiente): AmbienteCaf => ambienteTributarioEfectivo(cfg?.ambiente);
 
 /** El modo simulado no envía nada al SII. */
-export const emisionSimulada = (cfg: CfgAmbiente): boolean => (cfg?.emisionProveedor ?? "simulado") === "simulado";
+const emisionSimulada = (cfg: CfgAmbiente): boolean => (cfg?.emisionProveedor ?? "simulado") === "simulado";
 
 /** Ambiente que debe tener el CAF para emitir: el de la emisión, y en simulado siempre certificación (CAR-240). */
 export const ambienteCafRequerido = (cfg: CfgAmbiente): AmbienteCaf =>
