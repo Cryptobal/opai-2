@@ -2,7 +2,7 @@ import type { BadgeProps } from "@opai/ds";
 
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import { estadoPantalla } from "@/lib/formato";
-import type { Parametros, SearchParams } from "@/lib/parametros";
+import type { Parametros } from "@/lib/parametros";
 
 export const POR_PAGINA = 50;
 
@@ -83,11 +83,6 @@ export const TONO_PRIORIDAD: Record<string, NonNullable<BadgeProps["tono"]>> = {
   p3: "info",
   p4: "neutro",
 };
-
-export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
-  const p = await sp;
-  return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
-}
 
 export async function cargarTickets(p: Parametros) {
   const r = await ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(

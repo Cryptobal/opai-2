@@ -66,8 +66,8 @@ describe.skipIf(omitirSuiteDb())("tickets.sla.vencidos (CAR-622)", () => {
 
   it("emite un evento y avisa al responsable una sola vez", async () => {
     const ahora = "2026-11-17T13:00:00.000Z";
-    const r1 = await trabajoTicketsSla.handler(ctx(), { ahora });
-    const r2 = await trabajoTicketsSla.handler(ctx(), { ahora });
+    const r1 = await trabajoTicketsSla.ejecutar(ctx(), { ahora });
+    const r2 = await trabajoTicketsSla.ejecutar(ctx(), { ahora });
     expect(r1).toMatchObject({ avisados: 1 });
     expect(r2).toMatchObject({ avisados: 0 });
 
