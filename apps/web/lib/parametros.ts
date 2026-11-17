@@ -12,7 +12,18 @@ export const conBusqueda = (ruta: string, q?: string) =>
   q ? `${ruta}?q=${encodeURIComponent(q)}` : ruta;
 
 /** Filtros de una lista que sobreviven al abrir una ficha y al volver (`?q=`, `?estado=`, `?con=`, `?etiqueta=`). */
-const FILTROS_DE_LISTA = ["q", "estado", "con", "etiqueta"] as const;
+const FILTROS_DE_LISTA = [
+  "q",
+  "estado",
+  "con",
+  "etiqueta",
+  "cursor",
+  "persona",
+  "instalacion",
+  "centro",
+  "desde",
+  "hasta",
+] as const;
 
 /** Ruta con los filtros vigentes de la lista: abrir otra ficha no vuelve a «todos» ni pierde Cliente activo / Inactivo. */
 export function conFiltros(ruta: string, p?: Parametros): string {
