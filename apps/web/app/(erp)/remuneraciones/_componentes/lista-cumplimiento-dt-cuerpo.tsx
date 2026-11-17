@@ -1,10 +1,7 @@
-import { Alerta, Badge, Button, Empty, Segmentado, Table, Td, Th } from "@opai/ds";
+import { Alerta, Button, Empty, Segmentado, Table, Th } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-
+import { FilaMovimientoMiDt } from "./lista-cumplimiento-dt-fila";
 import type { MovimientoMiDt } from "./lista-cumplimiento-dt";
-
-const ETIQUETA_MOV = { alta: "Alta", baja: "Baja", anexo: "Anexo", finiquito: "Finiquito" } as const;
 
 type Props = {
   items: MovimientoMiDt[];
@@ -57,36 +54,16 @@ export function ListaCumplimientoDtCuerpo(p: Props) {
           </thead>
           <tbody>
             {p.filas.map((m) => (
-              <tr key={m.clave}>
-                <Td className="font-medium">{ETIQUETA_MOV[m.movimientoTipo]}</Td>
-                <Td>
-                  <span className="block">{m.personaNombre}</span>
-                  <span className="t-mono t-caption text-fg-muted">{m.rut}</span>
-                </Td>
-                <Td className="text-fg-muted">{m.hechoTexto}</Td>
-                <Td>
-                  <Badge tono={m.plazoTono === "neutral" ? "neutro" : m.plazoTono} punto>
-                    {m.plazoEtiqueta}
-                  </Badge>
-                </Td>
-                <Td className="text-right">
-                  <div className="flex justify-end gap-1">
-                    {p.variante === "finiquitos" ? (
-                      <EnlaceBoton href={`/remuneraciones/cumplimiento-dt/finiquitos/${m.referenciaId}`} variante="ghost">
-                        Ver finiquito
-                      </EnlaceBoton>
-                    ) : null}
-                    <Button variant="ghost" disabled={p.pendienteCap} onClick={() => p.onDatos(m)}>
-                      Datos
-                    </Button>
-                    {p.gestiona && !m.registrado ? (
-                      <Button variant="secondary" disabled={p.pendienteCap} onClick={() => p.onMarcar(m)}>
-                        Marcar registrado
-                      </Button>
-                    ) : null}
-                  </div>
-                </Td>
-              </tr>
+              <FilaMovimientoMiDt
+                key={m.clave}
+                m={m}
+                seg={p.seg}
+                variante={p.variante}
+                gestiona={p.gestiona}
+                pendiente={p.pendienteCap}
+                onDatos={p.onDatos}
+                onMarcar={p.onMarcar}
+              />
             ))}
           </tbody>
         </Table>
