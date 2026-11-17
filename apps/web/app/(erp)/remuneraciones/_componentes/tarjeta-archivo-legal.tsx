@@ -9,6 +9,7 @@ import { Alerta, avisar, Badge, Button, Card } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { ComprobanteObligacion, type ObligacionArchivo } from "./comprobante-obligacion";
+import { descargarTexto } from "./descargar";
 import { type ArchivoLegal, ResultadoArchivo } from "./resultado-archivo";
 
 type Archivo = ArchivoLegal;
@@ -19,13 +20,6 @@ const TEXTOS = {
   f30_1: { titulo: "Certificado F30-1", desc: "Cumplimiento laboral y previsional del mes · texto por verificar", tipo: "text/plain" },
 } as const;
 
-function descargar(nombre: string, contenido: string, tipo: string) {
-  const url = URL.createObjectURL(new Blob([contenido], { type: `${tipo};charset=utf-8` }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: nombre });
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
 /** Un archivo legal del período (diseño 06): validar, ver los errores y descargar cuando no hay errores. */
 const CERRADA: Record<string, string> = { cargado: "Cargado con comprobante", pagado: "Pagado con comprobante" };
 /** Desde dónde el generador puede marcar el resultado de la validación (transiciones de `obligaciones.ts`). */
@@ -33,25 +27,19 @@ const MARCABLE = new Set(["por_generar", "generado", "con_errores"]);
 
 type Props = { periodoId: string; tipo: "lre" | "previred" | "f30_1"; obligacion: ObligacionArchivo | null; tenantId: string };
 
+const CAP_GENERAR = {
+  lre: "nomina.lre.generar",
+  previred: "nomina.previred.generar",
+  f30_1: "nomina.f30_1.generar",
+} as const;
+
 export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: Props) {
   const t = TEXTOS[tipo];
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const router = useRouter();
   const [archivo, setArchivo] = useState<Archivo | null>(null);
-  async function validarLre() {
-    const r = await ejecutar<Archivo>("nomina.lre.generar", { periodoId });
-    return r;
-  }
-  async function validarPrevired() {
-    const r = await ejecutar<Archivo>("nomina.previred.generar", { periodoId });
-    return r;
-  }
-  async function validarF301() {
-    const r = await ejecutar<Archivo>("nomina.f30_1.generar", { periodoId });
-    return r;
-  }
   async function validar() {
-    const r = tipo === "lre" ? await validarLre() : tipo === "previred" ? await validarPrevired() : await validarF301();
+    const r = await ejecutar<Archivo>(CAP_GENERAR[tipo], { periodoId });
     if (!r) return;
     setArchivo(r);
     // Deja el resultado en el calendario de obligaciones (generado o con errores), si el mes no está cerrado.
@@ -86,7 +74,7 @@ export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: P
           disabled={!listo}
           onClick={() => {
             if (!archivo) return;
-            descargar(archivo.nombre, archivo.contenido, t.tipo);
+            descargarTexto(archivo.nombre, archivo.contenido, t.tipo);
             avisar.exito(`Archivo descargado: ${archivo.filas} personas`);
           }}
         >
