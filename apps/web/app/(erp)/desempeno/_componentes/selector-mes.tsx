@@ -3,7 +3,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { mesCorto } from "./tipos";
 
 /** «aaaa-mm» ± n meses. */
-export function mesVecino(periodo: string, delta: number): string {
+function mesVecino(periodo: string, delta: number): string {
   const total = Number(periodo.slice(0, 4)) * 12 + Number(periodo.slice(5, 7)) - 1 + delta;
   return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
 }
