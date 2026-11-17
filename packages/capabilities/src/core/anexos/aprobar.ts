@@ -3,13 +3,12 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
+import { conflicto, noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { anexoDe } from "./comun";
 import { validarSnapshots } from "./validar-snapshots";
-import { MENSAJE_PLANTILLA_EJEMPLO, PLANTILLA_ANEXO } from "./plantilla";
 import { materializarDocumento, prepararArchivoAnexo } from "./materializar";
-import { plantillaAnexoPublicada } from "./plantilla-laboral";
+import { exigirPlantillaAntesDeMaterializar } from "./plantilla-laboral";
 import { anexoSchema, vistaAnexo } from "./vista";
 
 /** Serializa la aprobación/rechazo de un mismo anexo, dentro de la transacción de ejecución. */
@@ -34,8 +33,8 @@ export const anexosAprobar = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    // CAR-58: con la plantilla de ejemplo un anexo aprobado no tiene validez laboral; ni la vista previa.
-    if (PLANTILLA_ANEXO.esEjemplo && !(await plantillaAnexoPublicada(ctx))) throw reglaDeNegocio(MENSAJE_PLANTILLA_EJEMPLO);
+    // CAR-58: sin plantilla publicada, el ejemplo bloquea antes de validar datos del texto legal.
+    await exigirPlantillaAntesDeMaterializar(ctx);
     if (dryRun) {
       const a = await anexoDe(ctx, input.id);
       if (a.estado !== "borrador") throw conflicto("El anexo ya fue resuelto.");
