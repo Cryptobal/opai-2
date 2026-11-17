@@ -7,5 +7,3 @@ export function etiquetaBasePlantillaCpq(base: string) {
   };
   return map[base] ?? base;
 }
-
-export const BASES_PLANTILLA_CPQ = ["clasica", "ejecutiva", "compacta"] as const;
