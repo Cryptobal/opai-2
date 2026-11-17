@@ -37,8 +37,9 @@ test.describe("D1: /entrar lee la cookie del portal en el servidor", () => {
     await expect(page).toHaveURL(/\/entrar$/);
 
     // Con la cookie puesta en «platform», el servidor la lee y redirige a /platform sin selector.
+    const origen = new URL(page.url()).origin;
     await context.addCookies([
-      { name: "opai_portal", value: "platform", url: page.url() },
+      { name: "opai_portal", value: "platform", url: `${origen}/` },
     ]);
     await page.goto("/entrar");
     await page.waitForURL((u) => u.pathname === "/platform");
