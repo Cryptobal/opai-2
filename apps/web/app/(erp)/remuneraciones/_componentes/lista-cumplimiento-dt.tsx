@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Alerta, avisar, Badge, Button, Empty, Segmentado, Table, Td, Th } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { MarcarRegistroMiDt } from "./marcar-registro-midt";
@@ -120,16 +120,19 @@ export function ListaCumplimientoDt({
                 </Td>
                 <Td className="text-fg-muted">{m.hechoTexto}</Td>
                 <Td>
-                  <Badge tono={m.plazoTono} punto>
+                  <Badge tono={m.plazoTono === "neutral" ? "neutro" : m.plazoTono} punto>
                     {m.plazoEtiqueta}
                   </Badge>
                 </Td>
                 <Td className="text-right">
                   <div className="flex justify-end gap-1">
                     {variante === "finiquitos" ? (
-                      <Button variant="ghost" asChild>
-                        <Link href={`/remuneraciones/cumplimiento-dt/finiquitos/${m.referenciaId}`}>Ver finiquito</Link>
-                      </Button>
+                      <EnlaceBoton
+                        href={`/remuneraciones/cumplimiento-dt/finiquitos/${m.referenciaId}`}
+                        variante="ghost"
+                      >
+                        Ver finiquito
+                      </EnlaceBoton>
                     ) : null}
                     <Button variant="ghost" disabled={pendiente} onClick={() => void datos(m)}>
                       Datos
