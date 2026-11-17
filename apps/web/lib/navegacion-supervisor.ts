@@ -40,6 +40,7 @@ export function navegacionSupervisor(
     ...(puede(PERMISOS_CORE.instalacionesRead)
       ? [{ href: "/supervisor/instalaciones", etiqueta: "Instalaciones", icono: "MapPin" }]
       : []),
+    { href: "/supervisor/firmas", etiqueta: "Firmas", icono: "FileSignature" },
     // Módulos activos (Rendiciones, CAR-197): en «Más» del teléfono, sin tocar la barra inferior.
     ...entradasModulosPortal("supervisor", puede, modulosActivos).map((e) => ({
       ...e,

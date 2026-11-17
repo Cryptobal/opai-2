@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
+import { uuidSchema } from "../esquemas";
 import { resolverFirmante } from "./firmar-util";
 
 /**
@@ -15,7 +16,14 @@ export const firmasVerFirmante = defineCapability({
     "Muestra el documento, el nivel y el estado de una solicitud de firma a partir del enlace personal del firmante.",
   permiso: null,
   interna: true,
-  input: z.object({ token: z.string().min(10).max(200) }),
+  input: z
+    .object({
+      token: z.string().min(10).max(200).optional(),
+      solicitudId: uuidSchema.optional(),
+    })
+    .refine((v) => Boolean(v.token) !== Boolean(v.solicitudId), {
+      message: "Indica el enlace personal o la solicitud, no ambos.",
+    }),
   sensibles: ["token"],
   output: z.object({
     nombre: z.string(),
@@ -31,7 +39,10 @@ export const firmasVerFirmante = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const firmante = await resolverFirmante(ctx, { token: input.token });
+    const firmante = await resolverFirmante(ctx, {
+      token: input.token,
+      solicitudId: input.solicitudId,
+    });
     const s = await ctx.db.solicitudFirma.findFirst({
       where: { tenantId: ctx.tenantId, id: firmante.solicitudId },
     });

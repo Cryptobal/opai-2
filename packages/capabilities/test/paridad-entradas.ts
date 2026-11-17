@@ -93,6 +93,14 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9).",
   "app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace":
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
+  "app/_components/firmas/acciones-sesion.ts#verFirmaSesion":
+    "Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634).",
+  "app/_components/firmas/acciones-sesion.ts#firmarEnSesion":
+    "Firma: core.firmas.firmar (interna con motivo) con sesión del portal (CAR-634).",
+  "app/_components/firmas/acciones-sesion.ts#rechazarEnSesion":
+    "Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634).",
+  "app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion":
+    "Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634).",
   "app/_acciones/ingreso-pin.ts#accionEntrarConPin":
     "Identidad: ingreso del Portal Trabajador con RUT + PIN (CAR-78, D-02); abre una sesión, no es una operación de negocio. Tope por RUT y origen con fallo cerrado; bloqueo y auditoría en @opai/auth.",
   "app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo":
