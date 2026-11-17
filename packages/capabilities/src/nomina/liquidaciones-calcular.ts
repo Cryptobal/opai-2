@@ -95,7 +95,9 @@ export const liquidacionesCalcular = defineCapability({
               ...p,
               mutualAdicional: mutual ?? 0,
               novedades: mezcla.novedades,
-              diasPresentesAsistencia: mezcla.diasPresentes,
+              ...(mezcla.diasPresentes !== undefined
+                ? { diasPresentesAsistencia: mezcla.diasPresentes }
+                : {}),
             },
             juego,
           );

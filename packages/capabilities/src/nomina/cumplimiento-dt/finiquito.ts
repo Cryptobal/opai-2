@@ -39,8 +39,6 @@ const salidaSchema = z.object({
   }),
 });
 
-import type { Contexto } from "../../types";
-
 async function sueldoAlTermino(ctx: Contexto, personaId: string, puestoId: string | null, instalacionId: string | null, termino: string) {
   const t = aFecha(termino);
   const filas = await ctx.db.estructuraSueldo.findMany({
