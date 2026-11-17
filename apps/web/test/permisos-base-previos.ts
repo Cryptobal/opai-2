@@ -48,6 +48,7 @@ export const PREVIOS = {
       PERMISOS_CORE.remuneracionesManage,
       PERMISOS_CORE.remuneracionesAprobar,
       PERMISOS_CORE.remuneracionesRetroactivo,
+      PERMISOS_CORE.verComoIniciar,
       "tickets:tipos.manage",
       "desempeno:scorecards.manage",
       "cpq:aprobar",
