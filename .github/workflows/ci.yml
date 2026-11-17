@@ -26,12 +26,13 @@ concurrency:
 jobs:
   # El gate corre en paralelo (typecheck · lint, test en 2 partes y test:db en 3) y el job «gate» lo
   # resume con el nombre del check obligatorio del ruleset. Antes iba en serie en un solo job de 25 a
-  # 35 min. En la cola de merge los jobs obligatorios usan runners de GitHub: un runner Spot cortado a
-  # media corrida saca al PR de la cola (17-nov-2026).
+  # 35 min. Los checks obligatorios usan runners de GitHub (gratis con el repositorio público): la
+  # flota Spot corría 4 jobs a la vez con 40 corridas en espera y cortaba jobs a media corrida, lo que
+  # en la cola de merge saca al PR (17-nov-2026). Para volver a runners propios: variable RUNNER_GATE.
   typecheck-lint:
     name: typecheck · lint
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 20
     env:
       TURBO_CACHE_DIR: .turbo
@@ -43,6 +44,15 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
+      - name: Ampliar swap (runner ~7 GB)
+        if: steps.solo_docs.outputs.only_docs != 'true' && runner.environment == 'github-hosted'
+        run: |
+          sudo swapoff -a 2>/dev/null || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
       - uses: ./.github/actions/preparar
         if: steps.solo_docs.outputs.only_docs != 'true'
         with:
@@ -63,7 +73,7 @@ jobs:
   test:
     name: test ${{ matrix.parte }}/2
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -89,7 +99,7 @@ jobs:
   test-db:
     name: test:db · ${{ matrix.nombre }}
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -160,7 +170,6 @@ jobs:
     name: typecheck · lint · test · test:db
     needs: [typecheck-lint, test, test-db]
     if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
-    # Solo compara resultados: en un runner de GitHub no espera turno en la flota propia.
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -213,7 +222,7 @@ jobs:
   secretos:
     name: secretos
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
