@@ -38,11 +38,8 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_CONTINGENCIA,
   ...COMUNICABLES_DESCANSO,
   ...COMUNICABLES_DESEMPENO,
-<<<<<<< HEAD
   ...COMUNICABLES_NOMINA,
-=======
   ...COMUNICABLES_RENDICIONES,
->>>>>>> origin/cursor/libro-remuneraciones-ab10
 ];
 
 /** Datos de ejemplo anidados a partir de las rutas declaradas ("documento.tipo" → { documento: { tipo } }). */

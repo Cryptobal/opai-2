@@ -4,12 +4,8 @@ import { archivoLre } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-<<<<<<< HEAD
-import { datosArchivoPeriodo, personasReveladas, resultadoArchivo, salidaArchivo } from "./archivos-datos";
-import { exigeComplementoCumplimientoDt } from "./complemento-dt";
-=======
 import { datosArchivoPeriodo, montosFilaArchivo, personasReveladas, resultadoArchivo, salidaArchivo } from "./archivos-datos";
->>>>>>> origin/brief/car-99-cumplimiento-dt-entitlements
+import { exigeComplementoCumplimientoDt } from "./complemento-dt";
 import { PERMISO_OBLIGACIONES } from "./comun";
 
 // Libro de Remuneraciones Electrónico (CAR-99, ADR-057): arma el archivo del período con sus

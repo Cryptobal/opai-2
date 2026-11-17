@@ -206,18 +206,11 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
   });
 
   it("lista propias: paginación, búsqueda y contadores (CAR-597)", async () => {
-<<<<<<< HEAD
-    const base = await dato<{ contadores?: Record<string, number> }>(
-      await yo("rendiciones.rendiciones.listar", { alcance: "propias", incluirContadores: true, limite: 1 }),
-    );
-    const baseBorrador = base.contadores?.borrador ?? 0;
-=======
     // Rendidor sin historia: los tests anteriores dejan rendiciones de `rinde`, y aquí los totales son exactos.
     const rindeLimpio = randomUUID();
     await e.admin.user.create({ data: { id: rindeLimpio, name: "supervisor", email: `${rindeLimpio.slice(0, 8)}@rend.test` } });
     await e.admin.membership.create({ data: { tenantId: tenantA, userId: rindeLimpio, rol: "supervisor", portales: ["erp"] } });
     const limpio = como(rindeLimpio, "supervisor");
->>>>>>> origin/brief/car-99-cumplimiento-dt-entitlements
     const ids: string[] = [];
     for (let i = 0; i < 55; i++) {
       const c = await dato<{ id: string }>(await limpio("rendiciones.rendiciones.crear", cuerpo({ descripcion: `Lote contador ${i}`, items: [item({ folio: `PC-${i}` })] })));
