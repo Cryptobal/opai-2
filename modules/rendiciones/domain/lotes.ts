@@ -59,14 +59,19 @@ export function totalLote(rendiciones: readonly { montoTotal: number }[]): numbe
  * Valida la selección de un lote nuevo y devuelve los problemas (vacío = válida): sin duplicados,
  * todas aprobadas, ninguna en otro lote activo, con cuenta en la ficha y sin superar el tope.
  */
-export function validarSeleccion(ids: readonly string[], encontradas: readonly RendicionParaLote[]): string[] {
+function problemasSeleccionComunes(ids: readonly string[], encontradas: readonly { id: string }[]): string[] {
   const problemas: string[] = [];
   if (ids.length === 0) problemas.push("Elige al menos una rendición.");
   if (new Set(ids).size !== ids.length) problemas.push("Una rendición está repetida en la selección.");
   if (ids.length > MAX_RENDICIONES_LOTE) problemas.push(`Un lote admite hasta ${MAX_RENDICIONES_LOTE} rendiciones.`);
-  if (totalLote(encontradas) > MAX_TOTAL_LOTE) problemas.push("El total del lote supera el máximo permitido.");
   const porId = new Map(encontradas.map((r) => [r.id, r]));
   if (ids.some((id) => !porId.has(id))) problemas.push("Una rendición no existe.");
+  return problemas;
+}
+
+export function validarSeleccion(ids: readonly string[], encontradas: readonly RendicionParaLote[]): string[] {
+  const problemas = problemasSeleccionComunes(ids, encontradas);
+  if (totalLote(encontradas) > MAX_TOTAL_LOTE) problemas.push("El total del lote supera el máximo permitido.");
   for (const r of encontradas) {
     if (r.estado !== "aprobada") problemas.push("Solo se pagan rendiciones aprobadas.");
     if (r.loteActivoId) problemas.push("Una rendición ya está en otro lote activo.");
@@ -84,12 +89,7 @@ export type RendicionParaReversa = { id: string; estado: string; montoTotal: num
 
 /** Valida la selección de un lote de reversa (rendiciones pagadas en un lote ya marcado pagado). */
 export function validarSeleccionReversa(ids: readonly string[], encontradas: readonly RendicionParaReversa[]): string[] {
-  const problemas: string[] = [];
-  if (ids.length === 0) problemas.push("Elige al menos una rendición.");
-  if (new Set(ids).size !== ids.length) problemas.push("Una rendición está repetida en la selección.");
-  if (ids.length > MAX_RENDICIONES_LOTE) problemas.push(`Un lote admite hasta ${MAX_RENDICIONES_LOTE} rendiciones.`);
-  const porId = new Map(encontradas.map((r) => [r.id, r]));
-  if (ids.some((id) => !porId.has(id))) problemas.push("Una rendición no existe.");
+  const problemas = problemasSeleccionComunes(ids, encontradas);
   for (const r of encontradas) {
     if (r.estado !== "pagada") problemas.push("Solo se reversan rendiciones pagadas.");
     if (!r.lotePagadoId) problemas.push("Una rendición pagada no está en un lote pagado.");

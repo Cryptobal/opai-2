@@ -1,4 +1,8 @@
 -- CAR-614: lotes de reversa de pago (rendiciones pagadas → aprobadas con aprobación humana).
+-- Migración aditiva sobre lotes_pago; no migra filas existentes.
+
+BEGIN;
+SET LOCAL lock_timeout = '5s';
 
 ALTER TABLE "rendiciones"."lotes_pago" ADD COLUMN "es_reversa" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "rendiciones"."lotes_pago" ADD COLUMN "aplicado_por_id" UUID;
@@ -26,3 +30,9 @@ BEGIN
   END IF;
   RETURN NEW;
 END $$;
+
+COMMIT;
+
+-- Reversión: quitar columnas y constraints de reversa y restaurar el CHECK de estado anterior;
+-- si ya hay lotes con es_reversa o estado aplicado, no se deshace en caliente: restaurar desde el
+-- snapshot previo de Neon (docs/2.0/migraciones.md).
