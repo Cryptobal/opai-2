@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import { capturar } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
@@ -7,7 +7,7 @@ import { E2E_PASSWORD, entrar } from "./sesion";
 test.describe("@preview vista dividida: scroll por columna", () => {
   test.skip(!E2E_PASSWORD, "Falta E2E_PASSWORD");
 
-  async function comprobarScrollDividido(page: import("@playwright/test").Page) {
+  async function comprobarScrollDividido(page: Page) {
     await page.waitForSelector('[data-split][data-columna="lista"]', { timeout: 60_000 });
     const medidas = await page.evaluate(() => {
       const doc = document.documentElement;
