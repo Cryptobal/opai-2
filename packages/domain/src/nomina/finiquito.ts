@@ -28,6 +28,12 @@ const mesesEntre = (desde: string, hasta: string) => {
   return Math.max(0, Math.round((b - a) / (86_400_000 * 30.4375)));
 };
 
+const diasHabilesRestantes = (plazoHasta: string, hoy: string) => {
+  const fin = Date.parse(`${plazoHasta}T00:00:00.000Z`);
+  const h = Date.parse(`${hoy}T00:00:00.000Z`);
+  return fin >= h ? Math.round((fin - h) / 86_400_000) : null;
+};
+
 /** Propuesta de finiquito (diseño 08): montos orientativos, sin contador de vacaciones ni carta art. 162. */
 export function propuestaFiniquito(
   datos: {
@@ -48,10 +54,7 @@ export function propuestaFiniquito(
   const meses = mesesEntre(datos.inicio, datos.termino);
   const anios = Math.floor(meses / 12);
   const plazoPagoHasta = sumarDiasHabiles(datos.termino, 5, feriados);
-  const diasHabilesRestantesPago =
-    Date.parse(`${plazoPagoHasta}T00:00:00.000Z`) >= Date.parse(`${hoy}T00:00:00.000Z`)
-      ? Math.round((Date.parse(`${plazoPagoHasta}T00:00:00.000Z`) - Date.parse(`${hoy}T00:00:00.000Z`)) / 86_400_000)
-      : null;
+  const diasHabilesRestantesPago = diasHabilesRestantes(plazoPagoHasta, hoy);
 
   const lineas: LineaFiniquito[] = [];
   if (anios > 0 && sueldo > 0) {
