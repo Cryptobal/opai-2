@@ -10,7 +10,7 @@ import { aNumeroSeguro } from "./esquemas";
 export const ID_VISTA_PREVIA = "00000000-0000-0000-0000-000000000000";
 
 /** Zona civil que decide qué día es «hoy» hasta que el tenant fije la suya (hallazgo 7, CAR-181). */
-export const ZONA_FLUJO = "America/Santiago";
+const ZONA_FLUJO = "America/Santiago";
 
 /** Hoy como "aaaa-mm-dd" en la zona del negocio (nunca en UTC: el domingo en la noche ya es lunes en UTC). */
 export function hoyIso(ahora: Date = new Date()): string {

@@ -130,11 +130,3 @@ export async function vistaPago(ctx: Contexto, personaId: string) {
       : null,
   };
 }
-
-export async function solicitudPendiente(ctx: Contexto, personaId: string) {
-  const s = await ctx.db.personaPagoSolicitud.findFirst({
-    where: { personaId, estado: "pendiente" },
-  });
-  if (!s) throw noEncontrado("La solicitud pendiente");
-  return s;
-}
