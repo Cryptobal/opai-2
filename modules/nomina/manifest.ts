@@ -42,7 +42,7 @@ export const manifest = defineModule({
       area: "personas",
       href: "/remuneraciones/cumplimiento-dt/contratos",
       etiqueta: "Cumplimiento DT",
-      icono: "Landmark",
+      icono: "UserCheck",
       orden: 6,
       permiso: "nomina:read",
     },
