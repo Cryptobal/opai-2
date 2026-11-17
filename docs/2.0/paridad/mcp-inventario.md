@@ -465,6 +465,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.revocar` | `core_dispositivos_revocar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.instalacion_contactos.list` | `core_instalacion_contactos_list` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.instalacion_contactos.quitar` | `core_instalacion_contactos_quitar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.instalacion_contactos.set_roles` | `core_instalacion_contactos_set_roles` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.instalacion_contactos.vincular` | `core_instalacion_contactos_vincular` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |

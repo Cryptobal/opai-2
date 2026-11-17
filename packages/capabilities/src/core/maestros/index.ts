@@ -35,6 +35,12 @@ import {
   patronesUpdate,
 } from "./patrones";
 import { instalacionesGet, instalacionesList } from "./instalaciones";
+import {
+  instalacionesContactosList,
+  instalacionesContactosQuitar,
+  instalacionesContactosSetRoles,
+  instalacionesContactosVincular,
+} from "./instalaciones-contactos";
 import { instalacionesCreate, instalacionesUpdate } from "./instalaciones-escritura";
 import { instalacionesArchive, instalacionesSetEstado } from "./instalaciones-estado";
 import { personasGet, personasList } from "./personas";
@@ -91,6 +97,10 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   contactosRestaurar,
   instalacionesList,
   instalacionesGet,
+  instalacionesContactosList,
+  instalacionesContactosVincular,
+  instalacionesContactosSetRoles,
+  instalacionesContactosQuitar,
   instalacionesCreate,
   instalacionesUpdate,
   instalacionesSetEstado,

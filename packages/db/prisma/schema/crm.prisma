@@ -28,6 +28,26 @@ model ContactoCuenta {
   @@schema("core")
 }
 
+/// Vínculo contacto–instalación con roles operacionales (ADR-040 §5, CAR-608).
+model ContactoInstalacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  contactoId    String   @map("contacto_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  /// `jefe_sitio` | `recibe_reportes` | `autoriza_visitas` | `emergencia` (CHECK en migración).
+  roles         String[]
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  contacto    Contacto    @relation(fields: [contactoId], references: [id], onDelete: Cascade)
+  instalacion Instalacion @relation(fields: [instalacionId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, contactoId, instalacionId])
+  @@index([tenantId, instalacionId])
+  @@map("contacto_instalaciones")
+  @@schema("core")
+}
+
 /// Nota, llamada, correo, WhatsApp, reunión, visita o tarea. Se liga a negocio, cuenta, contacto e
 /// instalación por `actividad_vinculos`. Las tareas llevan prioridad, estado y responsables.
 model Actividad {

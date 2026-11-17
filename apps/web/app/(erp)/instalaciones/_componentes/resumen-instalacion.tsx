@@ -7,6 +7,7 @@ import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { fecha } from "@/lib/fechas";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
+import { ContactosInstalacion } from "./contactos-instalacion";
 import { SupervisoresInstalacion } from "./supervisores-instalacion";
 
 /** Resumen de una instalación (07): ubicación y vigencia con mapa, puestos activos y supervisores. */
@@ -97,6 +98,7 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           <p className="px-4 py-6 text-center text-base text-fg-muted">Sin puestos activos.</p>
         )}
       </SeccionTarjeta>
+      <ContactosInstalacion instalacionId={i.id} />
       <SupervisoresInstalacion instalacionId={i.id} />
     </div>
   );

@@ -582,6 +582,14 @@ export const AJUSTES: Record<string, Ajuste> = {
     }),
     valores: () => ({}),
   },
+  "core.contacto_instalaciones": {
+    dependencias: ["core.contactos", "core.instalaciones"],
+    valores: (ctx) => ({
+      contacto_id: id(ctx, "core.contactos"),
+      instalacion_id: id(ctx, "core.instalaciones"),
+      roles: ["jefe_sitio"],
+    }),
+  },
   // Referencias de clientes (CAR-138 PR 7): CHECK de estado, evidencia, vigencia y largos.
   "core.cuentas_referencias": {
     dependencias: ["core.cuentas", "core.contactos"],

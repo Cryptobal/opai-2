@@ -131,6 +131,7 @@ model Contacto {
   negocioContactos NegocioContacto[]
   // CRM PR 2a (CAR-26): vínculos N–N con cuentas, actividad y etiquetas. FK en core.*.
   cuentaVinculos ContactoCuenta[]
+  instalacionVinculos ContactoInstalacion[]
   actividadVinculos ActividadVinculo[]
   etiquetaAsignaciones EtiquetaAsignacion[]
 
@@ -171,6 +172,7 @@ model Instalacion {
   estructuras EstructuraSueldo[]
   /// Supervisores a cargo de esta instalación (alcance por filas, ADR-022 · Brief 07c B3).
   supervisores SupervisorInstalacion[]
+  contactoVinculos ContactoInstalacion[]
   // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocio_instalaciones.
   negocioInstalaciones NegocioInstalacion[]
 
