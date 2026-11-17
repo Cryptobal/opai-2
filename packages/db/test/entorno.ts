@@ -27,10 +27,10 @@ async function fijarPasswordCronSii(connectionString: string): Promise<string> {
       await pg.connect();
       await pg.query("SELECT pg_advisory_lock($1)", [lockPasswordCronSii]);
       try {
-        if (existsSync(marcadorPasswordCronSii)) {
-          return readFileSync(marcadorPasswordCronSii, "utf8");
-        }
-        const cronPassword = randomBytes(24).toString("base64url");
+        const cronPassword = existsSync(marcadorPasswordCronSii)
+          ? readFileSync(marcadorPasswordCronSii, "utf8")
+          : randomBytes(24).toString("base64url");
+        // Siempre ALTER: en CI el marcador puede venir de otra base efímera en el mismo runner.
         await pg.query(
           `ALTER ROLE opai_cron_sii WITH LOGIN PASSWORD ${pg.escapeLiteral(cronPassword)}`,
         );
