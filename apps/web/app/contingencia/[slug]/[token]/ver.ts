@@ -18,7 +18,7 @@ export type ContingenciaVista = {
   estado: "pendiente" | "aceptada" | "rechazada";
 };
 
-export async function contextoPublico(slug: string, token: string) {
+async function contextoPublico(slug: string, token: string) {
   await connection();
   const ip = ipDeCabeceras(await headers());
   const [porToken, porIp, porTokenSolo] = await Promise.all([
