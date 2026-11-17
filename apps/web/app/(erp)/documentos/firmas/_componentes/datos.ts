@@ -1,7 +1,7 @@
 import type { BadgeProps } from "@opai/ds";
 
-import { ejecutarComoUsuario } from "@/lib/servidor";
-import type { Parametros, SearchParams } from "@/lib/parametros";
+import { listaCompleta } from "@/lib/lista-completa";
+import { leerParametros, type Parametros } from "@/lib/parametros";
 
 export type Firmante = {
   id: string;
@@ -65,24 +65,11 @@ export const ETIQUETA_CLASE: Record<string, string> = {
   acta_reunion: "Acta de reunión",
 };
 
-export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
-  const p = await sp;
-  return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
-}
+export const filtrosDe = leerParametros;
 
 export async function cargarFirmas(p: Parametros) {
-  const filtro = { ...(p["estado"] ? { estado: p["estado"] } : {}), limite: 200 };
-  const acum: Solicitud[] = [];
-  let cursor: string | undefined;
-  for (;;) {
-    const r = await ejecutarComoUsuario<{ items: Solicitud[]; siguiente: string | null }>(
-      "erp",
-      "core.firmas.list",
-      { ...filtro, ...(cursor ? { cursor } : {}) },
-    );
-    if (!r.ok) return r;
-    acum.push(...r.data.items);
-    if (!r.data.siguiente) return { ok: true as const, data: { solicitudes: acum } };
-    cursor = r.data.siguiente;
-  }
+  const r = await listaCompleta<Solicitud>("erp", "core.firmas.list", {
+    ...(p["estado"] ? { estado: p["estado"] } : {}),
+  });
+  return r.ok ? { ok: true as const, data: { solicitudes: r.data } } : r;
 }

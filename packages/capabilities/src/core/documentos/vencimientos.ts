@@ -4,7 +4,6 @@ import { PERMISOS_CORE } from "@opai/domain";
 import type { Prisma } from "@opai/db";
 
 import { defineCapability } from "../../define";
-import { noEncontrado } from "../../errores";
 import { aFecha, hoy } from "../maestros/comun";
 import { uuidSchema } from "../esquemas";
 import { documentosEnAlcance } from "./alcance-doc";
@@ -12,7 +11,7 @@ import { tiposPorId } from "./consulta";
 import type { ENTIDADES } from "./vista";
 import { documentoSchema, vistaDocumento } from "./vista";
 import { propietariosDe } from "./explorar-entidades";
-import { desdeAncla } from "./explorar-filtros";
+import { paginaDocumentosVence } from "./pagina-vence";
 import { filtroDocumentoSensible } from "./sensibles";
 
 const filaSchema = documentoSchema.extend({
@@ -80,22 +79,12 @@ export const documentosVencimientos = defineCapability({
         : []),
     ];
     const where: Prisma.DocumentoWhereInput = { AND: filtros };
-    const ancla = input.cursor
-      ? await ctx.db.documento.findFirst({ where: { AND: [where, { id: input.cursor }] } })
-      : null;
-    if (input.cursor && !ancla) throw noEncontrado("La página pedida");
-    const orden = [
-      { venceEn: { sort: "asc" as const, nulls: "last" as const } },
-      { createdAt: "desc" as const },
-      { id: "asc" as const },
-    ];
-    const filas = await ctx.db.documento.findMany({
-      where: ancla ? { AND: [where, desdeAncla("vence", ancla)] } : where,
-      orderBy: orden,
-      take: input.limite + 1,
-    });
-    const docs = filas.slice(0, input.limite);
-    const siguiente = filas.length > input.limite ? (docs.at(-1)?.id ?? null) : null;
+    const { filas: docs, siguiente } = await paginaDocumentosVence(
+      ctx,
+      where,
+      input.limite,
+      input.cursor,
+    );
     const propietario = await propietariosDe(
       ctx,
       docs.map((d) => d.id),
