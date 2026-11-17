@@ -6,6 +6,11 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { type Apariencia, EditorApariencia } from "./editor-apariencia";
 import { EditorConfig } from "./editor-config";
+import {
+  EditorGruposLista,
+  type GrupoLista,
+  type InstalacionOpcion,
+} from "./editor-grupos-lista";
 import { EditorPuntos, type Punto } from "./editor-puntos";
 
 type Leida = { personalizada: boolean; efectiva: ConfigAcceso };
@@ -15,7 +20,7 @@ type Leida = { personalizada: boolean; efectiva: ConfigAcceso };
  * puntos de acceso (`acceso.puntos.list`) y la bienvenida de la portería (`acceso.apariencia.get`).
  */
 export async function SeccionConfigAcceso({ instalacionId }: { instalacionId?: string }) {
-  const [r, p, a] = await Promise.all([
+  const [r, p, a, g, insts] = await Promise.all([
     ejecutarComoUsuario<Leida>("erp", "acceso.config.get", instalacionId ? { instalacionId } : {}),
     instalacionId
       ? ejecutarComoUsuario<{ items: Punto[] }>("erp", "acceso.puntos.list", { instalacionId })
@@ -23,11 +28,20 @@ export async function SeccionConfigAcceso({ instalacionId }: { instalacionId?: s
     instalacionId
       ? ejecutarComoUsuario<Apariencia>("erp", "acceso.apariencia.get", { instalacionId })
       : null,
+    !instalacionId ? ejecutarComoUsuario<GrupoLista[]>("erp", "acceso.grupos.list", {}) : null,
+    !instalacionId
+      ? ejecutarComoUsuario<{ items: InstalacionOpcion[] }>("erp", "core.instalaciones.list", {
+          limite: 200,
+        })
+      : null,
   ]);
   return (
     <Estado state={estadoPantalla(r, ...(p && a ? [p, a] : []))} variante="formulario">
       {r.ok && (!p || p.ok) && (!a || a.ok) ? (
         <div className="flex flex-col gap-4">
+          {!instalacionId && g?.ok && insts?.ok ? (
+            <EditorGruposLista grupos={g.data} instalaciones={insts.data.items} />
+          ) : null}
           {instalacionId && p?.ok && a?.ok ? (
             <>
               <EditorPuntos instalacionId={instalacionId} puntos={p.data.items} />

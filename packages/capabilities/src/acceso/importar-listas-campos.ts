@@ -7,12 +7,36 @@ export const defListas: DefinicionImportador = {
     "Personas autorizadas o bloqueadas por instalación. Se reconocen por el documento dentro de la instalación y la lista; del documento se guarda solo la huella y la máscara, nunca el número.",
   campos: [
     {
+      clave: "alcance",
+      etiqueta: "Alcance",
+      tipo: "opcion",
+      sinonimos: ["ámbito", "nivel"],
+      ejemplo: "instalacion",
+      ayuda: "Si falta, la fila queda solo en la instalación indicada.",
+      opciones: {
+        empresa: ["empresa", "todas", "global"],
+        cuenta: ["cuenta", "cliente"],
+        instalacion: ["instalación", "instalacion", "sede", "local"],
+        grupo: ["grupo", "grupo de instalaciones"],
+      },
+    },
+    {
+      clave: "grupo",
+      etiqueta: "Grupo",
+      tipo: "texto",
+      sinonimos: ["nombre grupo", "grupo instalaciones"],
+      ejemplo: "Zona norte",
+      ayuda: "Obligatorio si el alcance es grupo.",
+      largoMaximo: 80,
+    },
+    {
       clave: "instalacion",
       etiqueta: "Instalación",
       tipo: "texto",
       requerido: true,
       sinonimos: ["sede", "sucursal", "recinto"],
       ejemplo: "Bodega Quilicura",
+      ayuda: "Instalación de referencia: define la cuenta en alcance cuenta y valida el acceso al importar.",
       largoMaximo: 200,
     },
     {

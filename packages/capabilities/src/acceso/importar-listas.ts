@@ -1,81 +1,82 @@
 // Importar listas autorizada y bloqueada desde una planilla (CAR-480) sobre el motor común (CAR-279).
-import { normalizarDocumento, type TipoDocumento } from "@opai/domain";
 import type { FilaNormalizada } from "@opai/domain/importacion";
 
-import { fecha, norm, texto } from "../core/importar/comun";
+import { norm, texto } from "../core/importar/comun";
 import type { FilaPlan, Importador } from "../core/importar/tipos";
 import type { Contexto } from "../types";
 import { PERMISO_LISTAS } from "./comun";
-import { huellasCandidatas, huellaVigente } from "./huella";
 import { defListas } from "./importar-listas-campos";
+import {
+  coincideEntradaLista,
+  type DatosLista,
+  type Inst,
+  instalacionDe,
+  leerFilaLista,
+} from "./importar-listas-leer";
+import { clavesAlcance, metaListasInstalacion } from "./listas-alcance";
 
-export type DatosLista = {
-  instalacionId: string;
-  tipo: string;
-  docTipo: string;
-  huella: string;
-  huellaKid: string;
-  mascara: string;
-  nombre: string | null;
-  motivo: string | null;
-  vigenteDesde: Date | null;
-  vigenteHasta: Date | null;
-};
+export type { DatosLista } from "./importar-listas-leer";
 
-const UN_DIA = 86_400_000;
-type Inst = { id: string; nombre: string };
+type FilaOk = { fila: number; datos: DatosLista; candidatas: string[]; inst: Inst };
 
-/** Datos de una fila ya validada, o el error (sin el número del documento: el motivo queda en el lote). */
-function leerFila(
-  ctx: Contexto,
-  f: FilaNormalizada,
-  inst: Inst | string,
-): { datos: DatosLista; candidatas: string[]; inst: Inst } | string {
-  if (typeof inst === "string") return inst;
-  const tipo = texto(f.datos["lista"]) ?? "";
-  const docTipo = (texto(f.datos["documento_tipo"]) ?? "run") as TipoDocumento;
-  const d = normalizarDocumento({
-    tipo: docTipo,
-    numero: texto(f.datos["documento"]) ?? "",
-    pais: texto(f.datos["pais"]) ?? "",
-  });
-  if (!d)
-    return "Documento inválido: revisa el dígito verificador del RUT o el país del pasaporte.";
-  const motivo = texto(f.datos["motivo"]);
-  if (tipo === "bloqueada" && !motivo) return "Un bloqueo necesita motivo.";
-  const desde = fecha(f.datos["vigente_desde"]);
-  const hasta = fecha(f.datos["vigente_hasta"]);
-  const fin = hasta ? new Date(hasta.getTime() + UN_DIA) : null;
-  if (desde && fin && desde >= fin) return "La vigencia termina antes de empezar.";
-  const doc = { tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave };
-  const h = huellaVigente(doc);
-  const datos: DatosLista = {
-    instalacionId: inst.id,
-    tipo,
-    docTipo: d.tipo,
-    huella: h.huella,
-    huellaKid: h.kid,
-    mascara: d.mascara,
-    nombre: texto(f.datos["nombre"]),
-    motivo,
-    vigenteDesde: desde,
-    vigenteHasta: fin,
-  };
-  return { datos, inst, candidatas: huellasCandidatas(doc).map((x) => x.huella) };
+function errorFila(fila: number, mensaje: string): FilaPlan<DatosLista> {
+  return { fila, clave: `fila:${fila}`, etiqueta: "", accion: "error", mensajes: [mensaje] };
 }
 
-async function instalacionDe(ctx: Contexto) {
-  const todas = await ctx.db.instalacion.findMany({
-    where: { archivadaEn: null },
-    select: { id: true, nombre: true },
-  });
-  return (nombre: string): Inst | string => {
-    const c = todas.filter((i) => norm(i.nombre) === norm(nombre));
-    if (c.length === 1 && c[0]) return c[0];
+async function planificarFilas(
+  ctx: Contexto,
+  filas: readonly FilaNormalizada[],
+): Promise<(FilaPlan<DatosLista> | FilaOk)[]> {
+  const resolver = await instalacionDe(ctx);
+  const insts = filas.map((f) => resolver(texto(f.datos["instalacion"]) ?? ""));
+  const gruposDb = await ctx.db.grupoLista.findMany({ select: { id: true, nombre: true } });
+  const grupoIdDe = (nombre: string): string | string => {
+    const c = gruposDb.filter((g) => norm(g.nombre) === norm(nombre));
+    if (c.length === 1 && c[0]) return c[0].id;
     return c.length > 1
-      ? `Hay ${c.length} instalaciones llamadas «${nombre}»: renombra una antes de importar.`
-      : `No existe la instalación «${nombre}».`;
+      ? `Hay ${c.length} grupos llamados «${nombre}».`
+      : `No existe el grupo «${nombre}».`;
   };
+
+  const listas: (FilaPlan<DatosLista> | FilaOk)[] = [];
+  for (let n = 0; n < filas.length; n++) {
+    const f = filas[n]!;
+    const leida = leerFilaLista(ctx, f, insts[n] ?? "");
+    if (typeof leida === "string") {
+      listas.push(errorFila(f.fila, leida));
+      continue;
+    }
+    let grupoId: string | null = null;
+    if (leida.alcance === "grupo" && leida.grupoNombre) {
+      const g = grupoIdDe(leida.grupoNombre);
+      if (typeof g === "string") {
+        listas.push(errorFila(f.fila, g));
+        continue;
+      }
+      grupoId = g;
+    }
+    const meta = await metaListasInstalacion(ctx, leida.inst.id);
+    const claves = clavesAlcance({
+      alcance: leida.alcance,
+      instalacionId: leida.inst.id,
+      grupoId,
+      meta,
+    });
+    const datos: DatosLista = {
+      ...claves,
+      tipo: leida.tipo,
+      docTipo: leida.docTipo,
+      huella: leida.huella,
+      huellaKid: leida.huellaKid,
+      mascara: leida.mascara,
+      nombre: leida.nombre,
+      motivo: leida.motivo,
+      vigenteDesde: leida.vigenteDesde,
+      vigenteHasta: leida.vigenteHasta,
+    };
+    listas.push({ fila: f.fila, datos, candidatas: leida.candidatas, inst: leida.inst });
+  }
+  return listas;
 }
 
 export const importadorListas: Importador<DatosLista> = {
@@ -85,35 +86,37 @@ export const importadorListas: Importador<DatosLista> = {
   modulo: "acceso",
   actualizables: ["nombre", "motivo", "vigenteDesde", "vigenteHasta"],
   async planificar(ctx, filas) {
-    const resolver = await instalacionDe(ctx);
-    const insts = filas.map((f) => resolver(texto(f.datos["instalacion"]) ?? ""));
-    const ids = insts.flatMap((i) => (typeof i === "string" ? [] : [i.id]));
-    const existentes = await ctx.db.entradaLista.findMany({
-      where: { instalacionId: { in: ids } },
-    });
-    return filas.map((f, n): FilaPlan<DatosLista> => {
-      const leida = leerFila(ctx, f, insts[n] ?? "");
-      if (typeof leida === "string")
-        return {
-          fila: f.fila,
-          clave: `fila:${f.fila}`,
-          etiqueta: "",
-          accion: "error",
-          mensajes: [leida],
-        };
-      const { datos, candidatas, inst } = leida;
-      const existente = existentes.find(
-        (e) =>
-          e.instalacionId === datos.instalacionId &&
-          e.tipo === datos.tipo &&
-          e.docTipo === datos.docTipo &&
-          candidatas.includes(e.huella),
-      );
+    const listas = await planificarFilas(ctx, filas);
+    const cuentaIds = new Set<string>();
+    const grupoIds = new Set<string>();
+    const instIds = new Set<string>();
+    let hayEmpresa = false;
+    for (const slot of listas) {
+      if (!("inst" in slot)) continue;
+      hayEmpresa ||= slot.datos.alcance === "empresa";
+      if (slot.datos.instalacionId) instIds.add(slot.datos.instalacionId);
+      if (slot.datos.cuentaId) cuentaIds.add(slot.datos.cuentaId);
+      if (slot.datos.grupoId) grupoIds.add(slot.datos.grupoId);
+    }
+    const or = [
+      ...(hayEmpresa ? [{ alcance: "empresa" as const }] : []),
+      ...(instIds.size ? [{ instalacionId: { in: [...instIds] } }] : []),
+      ...(cuentaIds.size ? [{ alcance: "cuenta" as const, cuentaId: { in: [...cuentaIds] } }] : []),
+      ...(grupoIds.size ? [{ alcance: "grupo" as const, grupoId: { in: [...grupoIds] } }] : []),
+    ];
+    const existentes =
+      or.length > 0 ? await ctx.db.entradaLista.findMany({ where: { OR: or } }) : [];
+
+    return listas.map((slot) => {
+      if (!("inst" in slot)) return slot;
+      const { fila, datos, candidatas, inst } = slot;
+      const existente = existentes.find((e) => coincideEntradaLista(e, datos, candidatas));
+      const clave = `${datos.alcance}|${datos.instalacionId ?? ""}|${datos.cuentaId ?? ""}|${datos.grupoId ?? ""}|${datos.tipo}|${datos.docTipo}|${datos.huella}`;
       return {
-        fila: f.fila,
-        clave: `${datos.instalacionId}|${datos.tipo}|${datos.docTipo}|${datos.huella}`,
-        etiqueta: `${datos.nombre ?? datos.mascara} · ${inst.nombre}`,
-        accion: existente ? "actualizar" : "crear",
+        fila,
+        clave,
+        etiqueta: `${datos.nombre ?? datos.mascara} · ${inst.nombre} (${datos.alcance})`,
+        accion: existente ? ("actualizar" as const) : ("crear" as const),
         mensajes: [],
         datos,
         ...(existente ? { existente } : {}),
@@ -123,7 +126,7 @@ export const importadorListas: Importador<DatosLista> = {
   async crear(tx, ctx, datos) {
     return (await tx.entradaLista.create({ data: { ...datos, tenantId: ctx.tenantId } })).id;
   },
-  async actualizar(tx, id, { instalacionId: _i, tipo: _t, docTipo: _d, ...cambios }) {
+  async actualizar(tx, id, { instalacionId: _i, tipo: _t, docTipo: _d, alcance: _a, ...cambios }) {
     await tx.entradaLista.update({ where: { id }, data: cambios });
   },
   actuales: (tx, ids) => tx.entradaLista.findMany({ where: { id: { in: [...ids] } } }),
