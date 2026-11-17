@@ -5,18 +5,9 @@ import { saldoPendiente, sugerirConciliacion } from "@opai/domain";
 
 import { PERMISO_BANCOS_VER } from "./permisos";
 import { montoDe } from "./esquemas";
+import { lotesRendicionConciliables, loteRendicionSchema } from "./conciliacion-lotes-rendicion";
 import { reglasQueCalzan, sugerenciaReglaSchema } from "./reglas-sugerir";
 import { aIso, movimientoDe } from "./util";
-
-const loteRendicionSchema = z.object({
-  loteId: z.string().uuid(),
-  codigoVisible: z.string(),
-  totalClp: z.number().int(),
-  fechaPago: z.string().nullable(),
-  referenciaPago: z.string().nullable(),
-  confianza: z.number(),
-  motivo: z.string(),
-});
 
 const sugerenciaSchema = z.object({
   documentoId: z.string(),
@@ -142,30 +133,7 @@ export const bancosConciliacionSugerir = defineCapability({
       ...emitidos.map((d) => [d.id, { folio: d.folio, tipoDte: d.tipoDte, contraparte: cuentasMap.get(d.cuentaId)?.nombre ?? null }] as const),
       ...recibidos.map((d) => [d.id, { folio: d.folio, tipoDte: null, contraparte: d.proveedor.razonSocial }] as const),
     ]);
-    const montoMov = montoDe(mov.monto);
-    let lotesRendiciones: z.infer<typeof loteRendicionSchema>[] = [];
-    if (montoMov < 0) {
-      const absoluto = Math.abs(montoMov);
-      const desdeL = new Date(mov.fecha);
-      desdeL.setUTCDate(desdeL.getUTCDate() - 12);
-      const hastaL = new Date(mov.fecha);
-      hastaL.setUTCDate(hastaL.getUTCDate() + 5);
-      const lotes = await ctx.db.lotePago.findMany({
-        where: { estado: "pagado", totalClp: absoluto, fechaPago: { gte: desdeL, lte: hastaL } },
-        orderBy: { codigo: "desc" },
-        take: 3,
-        select: { id: true, codigo: true, totalClp: true, fechaPago: true, referenciaPago: true },
-      });
-      lotesRendiciones = lotes.map((l) => ({
-        loteId: l.id,
-        codigoVisible: `LP-${l.codigo}`,
-        totalClp: l.totalClp,
-        fechaPago: l.fechaPago?.toISOString().slice(0, 10) ?? null,
-        referenciaPago: l.referenciaPago,
-        confianza: l.referenciaPago && mov.glosa.toLowerCase().includes(l.referenciaPago.toLowerCase()) ? 0.95 : 0.75,
-        motivo: "Mismo monto y fecha cercana a un lote de rendiciones marcado pagado.",
-      }));
-    }
+    const lotesRendiciones = await lotesRendicionConciliables(ctx, mov);
     return {
       reglas,
       lotesRendiciones,
