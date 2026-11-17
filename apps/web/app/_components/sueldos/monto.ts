@@ -1,5 +1,5 @@
-export const TOPE_MONTO = 100_000_000;
-export const ERROR_MONTO = "Solo pesos enteros, sin decimales ni signo";
+const TOPE_MONTO = 100_000_000;
+const ERROR_MONTO = "Solo pesos enteros, sin decimales ni signo";
 
 export function parsearMonto(valor: string): number | null {
   if (!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(valor)) return null;
