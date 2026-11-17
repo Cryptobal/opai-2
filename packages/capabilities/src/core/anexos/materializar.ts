@@ -10,7 +10,7 @@ import { uuid7 } from "../documentos/uuid7";
 import { hoy } from "../maestros/comun";
 import { filasParaDocumento } from "./documento";
 import { PLANTILLA_ANEXO, renderizarAnexoHtml } from "./plantilla";
-import { pdfDeAnexo, plantillaAnexoParaPdf } from "./plantilla-laboral";
+import { exigirPlantillaAntesDeMaterializar, pdfDeAnexo, plantillaAnexoParaPdf } from "./plantilla-laboral";
 import type { FilaAnexo } from "./vista";
 
 /** Documento final del anexo en `core.documentos` (R15, ADR-039): plantilla base + marca del
@@ -21,6 +21,7 @@ export type ArchivoAnexo = { contenido: string | Buffer; mime: string; nombre: s
 /** Arma el archivo del anexo (PDF desde la plantilla publicada o el HTML de ejemplo). Va FUERA de la
  *  transacción de aprobación: lee con `ctx.db`. */
 export async function prepararArchivoAnexo(ctx: Contexto, anexo: FilaAnexo, persona: PersonaDoc): Promise<ArchivoAnexo> {
+  await exigirPlantillaAntesDeMaterializar(ctx);
   const filas = await filasParaDocumento(ctx, anexo);
   const plantilla = await plantillaAnexoParaPdf(ctx);
   const fecha = hoy();

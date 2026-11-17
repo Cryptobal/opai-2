@@ -16,6 +16,7 @@ import { generarPdfLaboral } from "../documentos/pdf-laboral";
 import { valoresDePersona } from "../documentos/rellenar-valores";
 import { marcaDe } from "../comunicaciones/resolver";
 import {
+  MENSAJE_PLANTILLA_EJEMPLO,
   PLANTILLA_ANEXO,
   TEXTO_LEGAL_ANEXO_APROBADO,
   rellenarTextoLegalAnexo,
@@ -40,6 +41,12 @@ export async function plantillaAnexoParaPdf(ctx: Contexto): Promise<PlantillaAne
   if (pub) return { origen: "tenant", ...pub };
   if (PLANTILLA_ANEXO.esEjemplo) return null;
   return { origen: "base", nombre: "Anexo de contrato de trabajo", contenido: TEXTO_LEGAL_ANEXO_APROBADO };
+}
+
+/** Sin plantilla del tenant publicada: ejemplo bloquea; con texto legal base, los faltantes se validan después. */
+export async function exigirPlantillaAntesDeMaterializar(ctx: Contexto) {
+  if (await plantillaAnexoPublicada(ctx)) return;
+  if (PLANTILLA_ANEXO.esEjemplo) throw reglaDeNegocio(MENSAJE_PLANTILLA_EJEMPLO);
 }
 
 /** Plantilla activa de clase «Anexo» con versión publicada (la más reciente), o null. */
