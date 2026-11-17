@@ -16,7 +16,7 @@ export type CalendarioPagos = Partial<Record<(typeof CONCEPTOS)[number]["id"], n
 const DiaSchema = z.coerce.number().int().min(1).max(28);
 
 /** Texto del campo → día válido (1 a 28), vacío (sin proyección) o `null` si no es válido. */
-export function leerDia(texto: string): number | undefined | null {
+function leerDia(texto: string): number | undefined | null {
   if (texto.trim() === "") return undefined;
   const r = DiaSchema.safeParse(texto);
   return r.success ? r.data : null;
