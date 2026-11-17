@@ -56,7 +56,7 @@ const licenciaEn = (periodoId: string) => ({
 });
 
 describe("períodos", () => {
-  it("abre un mes con cierre previsto y crea sus tres obligaciones mensuales", async () => {
+  it("abre un mes con cierre previsto y crea sus obligaciones mensuales", async () => {
     const c = como();
     const p = data<{ estado: string; cierrePrevisto: string; etiqueta: string }>(
       await run(c, "nomina.periodos.abrir", { anio: 2026, mes: 2 }),
@@ -64,6 +64,7 @@ describe("períodos", () => {
     expect(p).toMatchObject({ estado: "abierto", etiqueta: "Febrero 2026", cierrePrevisto: "2026-02-28" });
     expect((c.tabla("nominaObligacion") as { tipo: string }[]).map((o) => o.tipo).sort()).toEqual([
       "f29_retencion",
+      "f30_1",
       "lre",
       "previred",
     ]);
@@ -288,7 +289,7 @@ describe("conceptos y calendario", () => {
 
   it("genera el calendario del año una sola vez y el plazo solo se informa verificado", async () => {
     const c = como();
-    expect(data<{ creadas: number }>(await run(c, "nomina.obligaciones.generar_calendario", { anio: 2026 })).creadas).toBe(38);
+    expect(data<{ creadas: number }>(await run(c, "nomina.obligaciones.generar_calendario", { anio: 2026 })).creadas).toBe(50);
     expect(data<{ creadas: number }>(await run(c, "nomina.obligaciones.generar_calendario", { anio: 2026 })).creadas).toBe(0);
     const [o] = data<{ id: string; plazo: string | null }[]>(await run(c, "nomina.obligaciones.listar", { anio: 2026 }));
     if (!o) throw new Error("sin obligaciones");
