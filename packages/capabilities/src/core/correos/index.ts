@@ -13,4 +13,3 @@ export const capacidadesCorreos: readonly Capacidad[] = [
   correosCrearDireccion,
   correosRecibir,
 ];
-
