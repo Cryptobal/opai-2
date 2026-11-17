@@ -17,29 +17,47 @@ import { conFiltrosCompras } from "./filtros-url";
 export const montoCompra = (c: Compra) => pesos(c.tipoDte === 61 ? -c.montoTotal : c.montoTotal);
 
 type Datos = Awaited<ReturnType<typeof cargarLibro>>;
+type ResumenLibro = NonNullable<Datos["libro"]>["resumen"];
 
-/** Columna izquierda del libro de compras (CAR-256): pestañas, aviso de centros, búsqueda, filtros y filas. */
-export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos: Datos; seleccionada?: string; params: Parametros }) {
-  const items = d.libro?.items ?? [];
-  const r = d.libro?.resumen;
-  const acciones = d.gestiona ? (
-    // Tres acciones: en una columna angosta pasan a otra línea en vez de salirse.
+function accionesLibro(gestiona: boolean) {
+  if (!gestiona) return undefined;
+  // Tres acciones: en una columna angosta pasan a otra línea en vez de salirse.
+  return (
     <div className="flex max-w-full flex-wrap justify-end gap-2">
       <EnlaceBotonHoja href="?sii=1" variante="secondary">Sincronizar con el SII</EnlaceBotonHoja>
       <EnlaceBotonHoja href="?rcv=1" variante="secondary">Importar RCV</EnlaceBotonHoja>
       <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>Registrar documento</EnlaceBotonHoja>
     </div>
-  ) : undefined;
-  const aviso =
-    r && r.sinCentroCosto > 0 ? (
-      <Alerta
-        tono="warning"
-        titulo={`${r.sinCentroCosto} ${r.sinCentroCosto === 1 ? "documento sin centro de costo" : "documentos sin centro de costo"}`}
-        {...(d.gestiona ? { accion: <EnlaceBotonHoja href="?lote=1" variante="secondary">Asignar en lote</EnlaceBotonHoja> } : {})}
-      >
-        Asígnalos para que el gasto llegue a la instalación correcta.
-      </Alerta>
-    ) : undefined;
+  );
+}
+
+function avisoSinCentro(resumen: ResumenLibro, gestiona: boolean) {
+  if (!resumen || resumen.sinCentroCosto <= 0) return undefined;
+  return (
+    <Alerta
+      tono="warning"
+      titulo={`${resumen.sinCentroCosto} ${resumen.sinCentroCosto === 1 ? "documento sin centro de costo" : "documentos sin centro de costo"}`}
+      {...(gestiona ? { accion: <EnlaceBotonHoja href="?lote=1" variante="secondary">Asignar en lote</EnlaceBotonHoja> } : {})}
+    >
+      Asígnalos para que el gasto llegue a la instalación correcta.
+    </Alerta>
+  );
+}
+
+function vacioLibro(d: Datos) {
+  if (d.filtrado) return { titulo: "Ningún documento coincide", descripcion: "Quita un filtro para ver más." };
+  return {
+    titulo: "El libro de compras está vacío",
+    descripcion: "Sincroniza con el SII, importa el archivo del RCV o registra un documento recibido.",
+    // Las tres acciones ya están arriba; el vacío ofrece solo la más común, como antes del maestro-detalle.
+    ...(d.gestiona ? { accion: <EnlaceBotonHoja href="?sii=1" variante="secondary">Sincronizar con el SII</EnlaceBotonHoja> } : {}),
+  };
+}
+
+/** Columna izquierda del libro de compras (CAR-256): pestañas, aviso de centros, búsqueda, filtros y filas. */
+export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos: Datos; seleccionada?: string; params: Parametros }) {
+  const items = d.libro?.items ?? [];
+  const r = d.libro?.resumen;
   return (
     <>
       <div className="md:px-4 md:pt-3">
@@ -48,8 +66,8 @@ export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos:
       <ListaMaestro
         state={d.state}
         titulo="Libro de compras"
-        accion={acciones}
-        vista={aviso}
+        accion={accionesLibro(d.gestiona)}
+        vista={avisoSinCentro(r, d.gestiona)}
         buscar="Buscar folio o proveedor"
         filtros={[
           { param: "periodo", etiqueta: "Período", opciones: periodosRecientes() },
@@ -58,18 +76,7 @@ export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos:
         ]}
         meta={{ izquierda: r ? `${r.documentos} documentos · Total ${pesos(r.total)}` : `${items.length} documentos` }}
         seleccionada={seleccionada}
-        vacio={
-          d.filtrado
-            ? { titulo: "Ningún documento coincide", descripcion: "Quita un filtro para ver más." }
-            : {
-                titulo: "El libro de compras está vacío",
-                descripcion: "Sincroniza con el SII, importa el archivo del RCV o registra un documento recibido.",
-                // Las tres acciones ya están arriba; el vacío ofrece solo la más común, como antes del maestro-detalle.
-                ...(d.gestiona
-                  ? { accion: <EnlaceBotonHoja href="?sii=1" variante="secondary">Sincronizar con el SII</EnlaceBotonHoja> }
-                  : {}),
-              }
-        }
+        vacio={vacioLibro(d)}
         filas={items.map((c) => ({
           id: c.id,
           href: conFiltrosCompras(`/finanzas/compras/${c.id}`, params),
