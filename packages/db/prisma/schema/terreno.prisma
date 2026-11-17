@@ -78,6 +78,22 @@ model CodigoEmparejamiento {
   @@schema("core")
 }
 
+/// Código persistente de 8 caracteres para marcar por enlace o QR público en una instalación (CAR-606).
+/// Rotar reemplaza el código anterior: solo se guarda su HMAC. Una instalación tiene a lo sumo uno vigente.
+model CodigoMarcacionPublica {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @unique @map("instalacion_id") @db.Uuid
+  codigoHash    String   @unique @map("codigo_hash")
+  creadoPor     String?  @map("creado_por") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId])
+  @@map("codigos_marcacion_publica")
+  @@schema("core")
+}
+
 /// Hecho que un equipo de terreno capturó (posiblemente sin señal) y envió en lote (CAR-78 · B3). Solo
 /// inserción: nada se edita ni se borra, una corrección es un hecho nuevo (ADR-023). La hora del servidor
 /// (`recibido_en`) manda; `hora_corregida` lleva la hora del equipo a la del servidor con el desfase del envío.

@@ -127,3 +127,10 @@ export {
   type DispositivoEmparejado,
   type DispositivoReconocido,
 } from "./dispositivos";
+export {
+  LARGO_CODIGO_MARCACION_PUBLICA,
+  marcacionPublicaPorCodigo,
+  normalizarCodigoMarcacionPublica,
+  nuevoCodigoMarcacionPublica,
+  type MarcacionPublicaResuelta,
+} from "./marcacion-publica";

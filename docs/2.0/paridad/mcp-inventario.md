@@ -32,6 +32,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/firmar/[slug]/[token]` | `core.firmas.firmar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.rechazar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.ver_firmante` | — | excepción |
+| — | `/marcar/[codigo]` | `asistencia.marcas.enlace_publico_resolver` | — | excepción |
+| — | `/marcar/[codigo]` | `asistencia.marcas.registrar` | — | excepción |
 | — | `/p/[slug]/[token]` | `cpq.compartir.ver` | — | excepción |
 | — | `/verificar/marca/[slug]/[hash]` | `asistencia.marcas.verificar` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
@@ -460,6 +462,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.actualizar` | `finanzas_cierre_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `asistencia.marcas.enlace_publico_rotar` | `asistencia_marcas_enlace_publico_rotar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
@@ -925,6 +928,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
 | `app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace` | Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5). |
 | `app/firmar/[slug]/[token]/acciones.ts#verFirma` | Firma: core.firmas.ver_firmante (interna con motivo): el enlace personal es la credencial (firma.md §5). |
+| `app/marcar/[codigo]/acciones.ts#marcarPorEnlacePublico` | Asistencia (CAR-606): marca pública por enlace de instalación con RUT + PIN; resuelve el código con marcacionPublicaPorCodigo y ejecuta asistencia.marcas.registrar con enlacePublicoValidado; tope por IP que falla cerrado. |
 
 ## Excepciones justificadas (sin herramienta MCP)
 
@@ -936,6 +940,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `asistencia.correcciones.responder` | Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
 | `asistencia.correcciones.ver_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial. |
+| `asistencia.marcas.enlace_publico_resolver` | Interna: la página pública `/marcar/<codigo>` la ejecuta sin sesión; el código rotativo de la instalación es la credencial (CAR-606). |
 | `asistencia.marcas.registrar` | Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador. |
 | `asistencia.marcas.verificar` | Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante. |
 | `asistencia.rostro.consentir` | Solo personas: el consentimiento expreso lo da el propio trabajador (L-13, T-04); un agente nunca consiente por él. |
@@ -1053,7 +1058,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
 | `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
-| `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
+| `asistencia.marcas.registrar` | `/marcar/[codigo]`, `app/_components` | no | reservada a personas |
 | `asistencia.rostro.consentir` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.enrolar` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.estado` | `app/_components` | no | reservada a personas |
@@ -1150,6 +1155,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
+- `asistencia.marcas.enlace_publico_estado`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
 - `central.alertas.abrir`

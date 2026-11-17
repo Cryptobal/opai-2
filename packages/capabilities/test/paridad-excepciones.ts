@@ -196,6 +196,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023).",
   "asistencia.contingencias.responder":
     "Solo personas: aceptar u objetar una contingencia propuesta a su nombre es un acto del propio trabajador; un agente nunca responde por él (ADR-023).",
+  "asistencia.marcas.enlace_publico_resolver":
+    "Interna: la página pública `/marcar/<codigo>` la ejecuta sin sesión; el código rotativo de la instalación es la credencial (CAR-606).",
   "asistencia.correcciones.ver_enlace":
     "Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial.",
   "asistencia.correcciones.responder_enlace":

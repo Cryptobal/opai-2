@@ -34,6 +34,8 @@ export const marcasRegistrar = defineCapability({
     origen: z.enum(["en_linea", "offline_queue"]).default("en_linea"),
     horaDispositivo: z.string().datetime().optional(),
     canal: z.enum(CANALES).optional(),
+    /** Solo el servidor público lo fija tras validar el código de la instalación (CAR-606). */
+    enlacePublicoValidado: z.literal(true).optional(),
     dispositivoId: uuid.optional(),
     lat: z.number().min(-90).max(90).optional(),
     lng: z.number().min(-180).max(180).optional(),

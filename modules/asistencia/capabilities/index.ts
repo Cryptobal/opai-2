@@ -18,6 +18,7 @@ import { rostroConsentir, rostroEnrolar, rostroEstado, rostroIniciarVida, rostro
 import { telefonoHabilitar } from "./telefono";
 import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incidentes";
 import { marcasObtener, marcasListar } from "./lecturas";
+import { capacidadesEnlacePublico } from "./enlace-publico";
 import { marcasRegistrar } from "./registrar";
 import { marcasVerificar } from "./verificar";
 
@@ -28,6 +29,7 @@ export const trabajosAsistencia = [trabajoVerificarCadenaMarcas, trabajoVencerCo
 export const consumidoresAsistencia = [consumidorComprobante, consumidorAvisoCorreccion, consumidorAvisoContingencia, consumidorDias, consumidorAlertas];
 export const capacidades = [
   marcasRegistrar, marcasListar, marcasObtener, marcasVerificar,
+  ...capacidadesEnlacePublico,
   correccionesProponer, correccionesListar, correccionesResponder, correccionesVerEnlace, correccionesResponderEnlace,
   contingenciasRegistrar, contingenciasListar, contingenciasResponder,
   incidentesRegistrar, incidentesCerrar, incidentesListar,

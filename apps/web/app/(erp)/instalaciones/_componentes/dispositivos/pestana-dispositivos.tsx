@@ -5,6 +5,7 @@ import { fechaHora } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
+import { AccionesEnlaceMarcacion } from "./acciones-enlace-marcacion";
 import { AccionesDispositivos, BotonRevocar } from "./acciones-dispositivos";
 
 type Item = {
@@ -21,7 +22,9 @@ type Item = {
 export async function PestanaDispositivos({ instalacionId }: { instalacionId: string }) {
   const identidad = await identidadActual();
   if (!identidad) return null;
-  const puedeGestionar = puedeDeIdentidad(identidad)(PERMISOS_CORE.instalacionesManage);
+  const puede = puedeDeIdentidad(identidad);
+  const puedeGestionar = puede(PERMISOS_CORE.instalacionesManage);
+  const puedeEnlaceMarcar = puedeGestionar || puede("asistencia:configurar");
   const r = await ejecutarComoUsuario<{ items: Item[] }>("erp", "core.dispositivos.listar", {
     instalacionId,
   });
@@ -29,7 +32,14 @@ export async function PestanaDispositivos({ instalacionId }: { instalacionId: st
   return (
     <SeccionTarjeta
       titulo="Dispositivos de terreno"
-      accion={puedeGestionar ? <AccionesDispositivos instalacionId={instalacionId} /> : undefined}
+      accion={
+        puedeGestionar || puedeEnlaceMarcar ? (
+          <div className="flex flex-wrap gap-2">
+            {puedeGestionar ? <AccionesDispositivos instalacionId={instalacionId} /> : null}
+            {puedeEnlaceMarcar ? <AccionesEnlaceMarcacion instalacionId={instalacionId} /> : null}
+          </div>
+        ) : undefined
+      }
     >
       {!r.ok ? (
         <p className="text-base text-fg-muted">
