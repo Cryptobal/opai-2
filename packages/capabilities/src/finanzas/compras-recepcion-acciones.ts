@@ -25,7 +25,7 @@ const MAPA_SII: Record<AccionRecepcionUi, AccionAcuseSii[] | "doble"> = {
 export const estadoTrasAccion = (accion: AccionRecepcionUi): EstadoRecepcion =>
   accion === "aceptar" || accion === "aceptar_contenido" ? "aceptado" : "reclamado";
 
-export const rotuloAccionRecepcion = (accion: AccionRecepcionUi): string =>
+const rotuloAccionRecepcion = (accion: AccionRecepcionUi): string =>
   ({
     aceptar: "Aceptar con acuse de mercaderías (ACD + ERM)",
     aceptar_contenido: "Aceptar solo el contenido (ACD)",

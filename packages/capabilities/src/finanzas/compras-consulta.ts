@@ -1,5 +1,6 @@
 import { type SugerenciaCentro, sugerirCentroCosto } from "@opai/domain";
 
+import { noEncontrado } from "../errores";
 import type { Contexto } from "../types";
 import { vistaCompra } from "./vistas-compra";
 
@@ -48,4 +49,13 @@ export async function vistasDeCompras(ctx: Contexto, filas: readonly FilaConProv
       sugerenciaDe(f),
     ),
   );
+}
+
+/** Vista de un documento del libro por id (detalle y respuestas de escritura). */
+export async function obtenerVistaCompra(ctx: Contexto, id: string) {
+  const fila = await ctx.db.documentoRecibido.findFirst({ where: { id }, include: { proveedor: true } });
+  if (!fila) throw noEncontrado("El documento");
+  const [vista] = await vistasDeCompras(ctx, [fila]);
+  if (!vista) throw noEncontrado("El documento");
+  return vista;
 }

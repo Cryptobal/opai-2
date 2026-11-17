@@ -9,8 +9,9 @@ import { uuidSchema } from "../core/esquemas";
 import { dia, escribirConEvento, hoy } from "../core/maestros/comun";
 import { consumoBase } from "../integraciones/consumo-base";
 import { noEncontrado, reglaDeNegocio } from "../errores";
+import type { Contexto } from "../types";
 import { credencialesSimpleApi } from "./adaptador-sii";
-import { vistasDeCompras } from "./compras-consulta";
+import { obtenerVistaCompra } from "./compras-consulta";
 import {
   ACCIONES_RECEPCION_UI,
   accionesSiiDe,
@@ -22,16 +23,45 @@ import {
 import { PERMISO_COMPRAS } from "./comun";
 import { ambienteDe } from "./ventas-comun";
 
-async function vistaCompra(ctx: Parameters<typeof vistasDeCompras>[0], id: string) {
-  const fila = await ctx.db.documentoRecibido.findFirst({ where: { id }, include: { proveedor: true } });
-  if (!fila) throw noEncontrado("El documento");
-  const [vista] = await vistasDeCompras(ctx, [fila]);
-  if (!vista) throw noEncontrado("El documento");
-  return vista;
-}
-
 const medirAcuse = (ctx: Parameters<typeof consumoBase>[0], cantidad: number, ok: boolean) =>
   ctx.medidor?.registrar({ ...consumoBase(ctx, "finanzas"), recurso: "sii.acuse_compra", unidad: "accion", cantidad, yaIncurrido: ok });
+
+type DocRecepcion = {
+  id: string;
+  tipoDte: number;
+  folio: number;
+  proveedor: { rut: string; razonSocial: string };
+};
+
+async function acusarEnSii(
+  ctx: Contexto,
+  doc: DocRecepcion,
+  accion: AccionRecepcionUi,
+  accionesSii: ReturnType<typeof accionesSiiDe>,
+  avisoInicial: string | undefined,
+) {
+  const creds = await credencialesSimpleApi(ctx);
+  if (!creds) throw reglaDeNegocio("Falta configurar Emisión DTE (API key de SimpleAPI y certificado) para acusar al SII.");
+  const ambiente = await ambienteDe(ctx);
+  const pedido = { tipoDte: doc.tipoDte, folio: doc.folio, rutProveedor: doc.proveedor.rut };
+  let trackId: string | undefined;
+  let aviso = avisoInicial;
+  if (accion === "aceptar") {
+    const r = await aceptarConAcuse(creds, pedido, ambiente);
+    await medirAcuse(ctx, 2, r.ok);
+    if (!r.ok) throw reglaDeNegocio(r.motivo);
+    trackId = r.trackId;
+    if (r.ermOk === false && r.motivo) aviso = (aviso ? `${aviso} ` : "") + r.motivo;
+  } else {
+    const accionSii = accionesSii[0];
+    if (!accionSii) throw reglaDeNegocio("Acción de recepción inválida.");
+    const r = await acuseRecibido(creds, { ...pedido, accion: accionSii }, ambiente);
+    await medirAcuse(ctx, 1, r.ok);
+    if (!r.ok) throw reglaDeNegocio(r.incierto ? `${r.motivo} El estado en OPAI no cambió; verifique en el SII antes de reintentar.` : r.motivo);
+    trackId = r.trackId;
+  }
+  return { trackId, aviso };
+}
 
 export const comprasRecepcionSii = defineCapability({
   id: "finanzas.compras.recepcion_sii",
@@ -74,35 +104,15 @@ export const comprasRecepcionSii = defineCapability({
       fueraDePlazo,
       ...(fueraDePlazo ? { aviso: "El plazo legal de 8 días ya venció; el SII puede rechazar la acción." } : {}),
     };
-    if (dryRun) return salidaRecepcionSii.parse({ ...base, compra: await vistaCompra(ctx, doc.id) });
+    if (dryRun) return salidaRecepcionSii.parse({ ...base, compra: await obtenerVistaCompra(ctx, doc.id) });
 
-    const creds = await credencialesSimpleApi(ctx);
-    if (!creds) throw reglaDeNegocio("Falta configurar Emisión DTE (API key de SimpleAPI y certificado) para acusar al SII.");
-    const ambiente = await ambienteDe(ctx);
-    const pedido = { tipoDte: doc.tipoDte, folio: doc.folio, rutProveedor: doc.proveedor.rut };
-    let trackId: string | undefined;
-    let aviso = base.aviso;
-    if (input.accion === "aceptar") {
-      const r = await aceptarConAcuse(creds, pedido, ambiente);
-      await medirAcuse(ctx, 2, r.ok);
-      if (!r.ok) throw reglaDeNegocio(r.motivo);
-      trackId = r.trackId;
-      if (r.ermOk === false && r.motivo) aviso = (aviso ? `${aviso} ` : "") + r.motivo;
-    } else {
-      const accion = accionesSii[0];
-      if (!accion) throw reglaDeNegocio("Acción de recepción inválida.");
-      const r = await acuseRecibido(creds, { ...pedido, accion }, ambiente);
-      await medirAcuse(ctx, 1, r.ok);
-      if (!r.ok) throw reglaDeNegocio(r.incierto ? `${r.motivo} El estado en OPAI no cambió; verifique en el SII antes de reintentar.` : r.motivo);
-      trackId = r.trackId;
-    }
-
+    const sii = await acusarEnSii(ctx, doc, input.accion, accionesSii, base.aviso);
     await escribirConEvento(
       ctx,
       {
         tipo: "finanzas.compras.recepcion_sii",
         entidadTipo: "documento_recibido",
-        payload: () => ({ documentoId: doc.id, accion: input.accion, accionesSii, trackId, fueraDePlazo, motivo: input.motivo ?? null }),
+        payload: () => ({ documentoId: doc.id, accion: input.accion, accionesSii, trackId: sii.trackId, fueraDePlazo, motivo: input.motivo ?? null }),
       },
       async (tx) => {
         await tx.documentoRecibido.update({ where: { id: doc.id }, data: { estadoRecepcion: estadoTrasAccion(input.accion) } });
@@ -111,9 +121,9 @@ export const comprasRecepcionSii = defineCapability({
     );
     return salidaRecepcionSii.parse({
       ...base,
-      trackId,
-      ...(aviso ? { aviso } : {}),
-      compra: await vistaCompra(ctx, doc.id),
+      trackId: sii.trackId,
+      ...(sii.aviso ? { aviso: sii.aviso } : {}),
+      compra: await obtenerVistaCompra(ctx, doc.id),
     });
   },
 });

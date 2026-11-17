@@ -26,18 +26,90 @@ const ACCIONES = [
   { valor: "reclamar_total", etiqueta: "Reclamar falta total" },
 ] as const;
 
+type AccionValor = (typeof ACCIONES)[number]["valor"];
+
+function FormularioRecepcion({
+  compra,
+  accion,
+  motivo,
+  vista,
+  error,
+  pendiente,
+  onAccion,
+  onMotivo,
+}: {
+  compra: Compra;
+  accion: AccionValor;
+  motivo: string;
+  vista: Vista | null;
+  error: string | null;
+  pendiente: boolean;
+  onAccion: (v: AccionValor) => void;
+  onMotivo: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      {error ? <Alerta tono="danger" titulo={error} /> : null}
+      {compra.diasParaReclamo < 0 ? (
+        <Alerta tono="warning" titulo="El plazo de 8 días para acusar ya venció; el SII puede rechazar la acción." />
+      ) : null}
+      <Campo etiqueta="Acción" htmlFor="recepcion-accion">
+        <Select id="recepcion-accion" valor={accion} onCambiar={(v) => onAccion(v as AccionValor)} opciones={[...ACCIONES]} />
+      </Campo>
+      <Campo etiqueta="Nota interna (opcional)" htmlFor="recepcion-motivo" ayuda="Solo auditoría en OPAI; no se envía al SII.">
+        <Textarea id="recepcion-motivo" value={motivo} onChange={(e) => onMotivo(e.target.value)} rows={2} maxLength={500} />
+      </Campo>
+      {vista ? (
+        <Alerta tono="info" titulo={`Quedará como «${vista.estadoNuevo === "aceptado" ? "Aceptado" : "Reclamado"}» ante el SII`}>
+          {`SimpleAPI enviará ${vista.accionesSii.join(" y ")}.`}
+          {vista.aviso ? ` ${vista.aviso}` : ""}
+        </Alerta>
+      ) : null}
+    </div>
+  );
+}
+
+function AccionesHojaRecepcion({
+  vista,
+  pendiente,
+  cerrar,
+  previsualizar,
+  enviar,
+}: {
+  vista: Vista | null;
+  pendiente: boolean;
+  cerrar: () => void;
+  previsualizar: () => void;
+  enviar: () => void;
+}) {
+  return (
+    <>
+      <Button variant="secondary" onClick={cerrar}>{vista ? "Cerrar" : "Cancelar"}</Button>
+      {vista ? (
+        <Button disabled={pendiente} onClick={enviar}>
+          {pendiente ? "Enviando al SII…" : "Confirmar ante el SII"}
+        </Button>
+      ) : (
+        <Button disabled={pendiente} onClick={previsualizar}>
+          {pendiente ? "Preparando…" : "Ver vista previa"}
+        </Button>
+      )}
+    </>
+  );
+}
+
 /** Notifica al SII la aceptación o el reclamo del documento (CAR-644). */
 export function HojaRecepcion({ compra }: { compra: Compra }) {
   const hoja = useHojaUrl("recepcion");
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
-  const [accion, setAccion] = useState<(typeof ACCIONES)[number]["valor"]>("aceptar");
+  const [accion, setAccion] = useState<AccionValor>("aceptar");
   const [motivo, setMotivo] = useState("");
   const [vista, setVista] = useState<Vista | null>(null);
 
   const tituloDoc = `${NOMBRE_DTE[compra.tipoDte] ?? compra.tipoDte} ${compra.folio}`;
   const entrada = () => ({ documentoId: compra.id, accion, ...(motivo.trim() ? { motivo: motivo.trim() } : {}) });
 
-  function cambiarAccion(v: (typeof ACCIONES)[number]["valor"]) {
+  function cambiarAccion(v: AccionValor) {
     setAccion(v);
     setVista(null);
     limpiarError();
@@ -61,38 +133,25 @@ export function HojaRecepcion({ compra }: { compra: Compra }) {
       titulo="Aceptar o reclamar ante el SII"
       descripcion={`${tituloDoc} · ${compra.proveedorNombre}. La acción queda registrada en el SII y no se puede deshacer desde OPAI.`}
       acciones={
-        <>
-          <Button variant="secondary" onClick={hoja.cerrar}>{vista ? "Cerrar" : "Cancelar"}</Button>
-          {vista ? (
-            <Button disabled={pendiente} onClick={() => void enviar()}>
-              {pendiente ? "Enviando al SII…" : "Confirmar ante el SII"}
-            </Button>
-          ) : (
-            <Button disabled={pendiente} onClick={() => void previsualizar()}>
-              {pendiente ? "Preparando…" : "Ver vista previa"}
-            </Button>
-          )}
-        </>
+        <AccionesHojaRecepcion
+          vista={vista}
+          pendiente={pendiente}
+          cerrar={hoja.cerrar}
+          previsualizar={() => void previsualizar()}
+          enviar={() => void enviar()}
+        />
       }
     >
-      <div className="flex flex-col gap-4">
-        {error ? <Alerta tono="danger" titulo={error} /> : null}
-        {compra.diasParaReclamo < 0 ? (
-          <Alerta tono="warning" titulo="El plazo de 8 días para acusar ya venció; el SII puede rechazar la acción." />
-        ) : null}
-        <Campo etiqueta="Acción" htmlFor="recepcion-accion">
-          <Select id="recepcion-accion" valor={accion} onCambiar={(v) => cambiarAccion(v as (typeof ACCIONES)[number]["valor"])} opciones={[...ACCIONES]} />
-        </Campo>
-        <Campo etiqueta="Nota interna (opcional)" htmlFor="recepcion-motivo" ayuda="Solo auditoría en OPAI; no se envía al SII.">
-          <Textarea id="recepcion-motivo" value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} maxLength={500} />
-        </Campo>
-        {vista ? (
-          <Alerta tono="info" titulo={`Quedará como «${vista.estadoNuevo === "aceptado" ? "Aceptado" : "Reclamado"}» ante el SII`}>
-            {`SimpleAPI enviará ${vista.accionesSii.join(" y ")}.`}
-            {vista.aviso ? ` ${vista.aviso}` : ""}
-          </Alerta>
-        ) : null}
-      </div>
+      <FormularioRecepcion
+        compra={compra}
+        accion={accion}
+        motivo={motivo}
+        vista={vista}
+        error={error}
+        pendiente={pendiente}
+        onAccion={cambiarAccion}
+        onMotivo={setMotivo}
+      />
     </Sheet>
   );
 }
