@@ -45,6 +45,10 @@ export async function nombresDe(
   return new Map(u.map((x) => [x.id, x.name]));
 }
 
+export function resumenListaSolicitante(r: Fila, nombres: ReadonlyMap<string, string>) {
+  return { ...resumenDe(r, nombres), solicitanteNombre: nombres.get(r.solicitanteId) ?? null };
+}
+
 export function resumenDe(r: Fila, nombres: ReadonlyMap<string, string> = new Map()) {
   return {
     id: r.id,
