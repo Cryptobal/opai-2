@@ -75,7 +75,8 @@ describe("nomina.pago_banco.generar", () => {
     const r = await executeCapability(c.ctx, "nomina.pago_banco.generar", { periodoId: PER_CERRADO });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.filas).toBe(0);
-    expect(r.data.errores.some((e) => e.personaId === P1)).toBe(true);
+    const data = r.data as { filas: number; errores: { personaId: string }[] };
+    expect(data.filas).toBe(0);
+    expect(data.errores.some((e) => e.personaId === P1)).toBe(true);
   });
 });

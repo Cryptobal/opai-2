@@ -11,7 +11,7 @@ const entradaSchema = z.object({
   id: z.string().describe("Id del cobrable: `base`, un módulo o una parte (`finanzas.bancos`)."),
   nombre: z.string(),
   incluye: z.string().describe("Qué incluye, en una frase."),
-  grupo: z.enum(["base", "modulo", "finanzas", "parte_finanzas"]),
+  grupo: z.enum(["base", "modulo", "finanzas", "parte_finanzas", "complemento_nomina"]),
   incluidoEnBase: z.boolean().describe("true: viene en el plan base y no tiene precio aparte."),
   formaSugerida: formaSchema.nullable(),
   unidadSugerida: unidadSchema.nullable(),

@@ -65,6 +65,8 @@ const modulos = ["nomina", "nomina.cumplimiento_dt"] as const;
 
 const como = () => contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: [...modulos], semilla: semilla() });
 
+type ItemMidt = { movimientoTipo: string; referenciaId: string; registrado: boolean; hechoEn: string };
+
 beforeEach(() => {
   limpiarRegistro();
   limpiarModulos();
@@ -80,8 +82,9 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.listar", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.pendientes).toBeGreaterThanOrEqual(1);
-    expect(r.data.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
+    const data = r.data as { pendientes: number; items: ItemMidt[] };
+    expect(data.pendientes).toBeGreaterThanOrEqual(1);
+    expect(data.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
   });
 
   it("lista finiquito pendiente tras término de vínculo", async () => {
@@ -89,7 +92,8 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.listar", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const fin = r.data.items.find((m) => m.movimientoTipo === "finiquito" && m.referenciaId === V2);
+    const lista = r.data as { items: ItemMidt[] };
+    const fin = lista.items.find((m) => m.movimientoTipo === "finiquito" && m.referenciaId === V2);
     expect(fin?.registrado).toBe(false);
     expect(fin?.hechoEn).toBe("2026-09-15");
   });
@@ -99,8 +103,9 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.exportar_pendientes", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.contenido).toContain("movimiento");
-    expect(r.data.filas).toBeGreaterThan(0);
+    const csv = r.data as { contenido: string; filas: number };
+    expect(csv.contenido).toContain("movimiento");
+    expect(csv.filas).toBeGreaterThan(0);
   });
 
   it("obtiene propuesta de finiquito del vínculo terminado", async () => {
@@ -108,8 +113,9 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.finiquito.obtener", { vinculoId: V2 });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.propuesta.lineas.length).toBeGreaterThan(0);
-    expect(r.data.personaNombre).toContain("Prueba");
+    const finiquito = r.data as { propuesta: { lineas: unknown[] }; personaNombre: string };
+    expect(finiquito.propuesta.lineas.length).toBeGreaterThan(0);
+    expect(finiquito.personaNombre).toContain("Prueba");
   });
 
   it("rechaza sin el complemento Cumplimiento DT", async () => {
