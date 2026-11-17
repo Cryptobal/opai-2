@@ -19,7 +19,7 @@ function TarjetaPuesto({ puesto }: { puesto: DotacionPuesto }) {
   const titular = puesto.serie?.titular ?? "Sin titular";
   return (
     <SeccionTarjeta titulo={puesto.nombre}>
-      <p className="t-caption mb-3 text-muted">
+      <p className="t-caption mb-3 text-fg-muted">
         {[puesto.funcion, puesto.horario].filter(Boolean).join(" · ") || "—"}
       </p>
       <ParesGrid
@@ -76,7 +76,7 @@ export async function PestanaPersonas({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <Badge tono="neutro">{nombreMes(d.anio, d.mes)}</Badge>
-        <span className="t-caption text-muted">Datos de la Pauta y vínculos vigentes en esta instalación.</span>
+        <span className="t-caption text-fg-muted">Datos de la Pauta y vínculos vigentes en esta instalación.</span>
       </div>
       <SeccionTarjeta titulo="Vínculos vigentes">
         {d.vinculos.length ? (
@@ -90,7 +90,7 @@ export async function PestanaPersonas({
             ))}
           </ul>
         ) : (
-          <p className="t-body text-muted">Nadie con vínculo vigente en esta instalación.</p>
+          <p className="t-body text-fg-muted">Nadie con vínculo vigente en esta instalación.</p>
         )}
       </SeccionTarjeta>
       <div className="flex flex-col gap-3">
