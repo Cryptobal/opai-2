@@ -76,7 +76,7 @@ export async function foliosPrevistos(ctx: TxLike, tipoDte: TipoDteVenta, cantid
   return seleccionarFoliosPrevistos(rangos, cfg, hoyIso, tipoDte, cantidad);
 }
 
-export type OpcionesFolioVista = {
+type OpcionesFolioVista = {
   umbralFoliosPct: number;
   avisoCafDias: number;
   hoyIso?: string;
