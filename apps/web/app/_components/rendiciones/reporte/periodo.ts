@@ -6,7 +6,7 @@ export const AGRUPAR = [
   { id: "categoria", etiqueta: "Categoría" },
   { id: "centro", etiqueta: "Centro de costo" },
 ] as const;
-export type AgruparReporte = (typeof AGRUPAR)[number]["id"];
+type AgruparReporte = (typeof AGRUPAR)[number]["id"];
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
