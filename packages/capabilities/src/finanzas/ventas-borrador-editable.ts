@@ -3,7 +3,7 @@
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
-export const TIPOS_BORRADOR = [33, 34, 56] as const;
+const TIPOS_BORRADOR = [33, 34, 56] as const;
 
 /** Carga el borrador y comprueba que siga siendo editable; el mensaje dice por qué no. */
 export async function cargarBorradorEditable(ctx: Pick<Contexto, "db">, documentoId: string) {
