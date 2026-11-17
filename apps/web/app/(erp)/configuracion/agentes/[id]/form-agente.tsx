@@ -15,7 +15,7 @@ const NIVELES = [
 ];
 
 /** "IRREVERSIBLE: termina un vínculo laboral con…" → "Termina un vínculo laboral con…". */
-export const accionDe = (d: string) => {
+const accionDe = (d: string) => {
   const t = (d.replace(/^IRREVERSIBLE:\s*/i, "").split(/[.:]\s/)[0] ?? d).trim();
   return `${t.charAt(0).toUpperCase()}${t.slice(1)}`;
 };
