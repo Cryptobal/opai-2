@@ -41,14 +41,14 @@ function DetalleMarcas({ ejecucion }: { ejecucion: VistaHistorial["ejecucion"] &
   );
 }
 
-export function CuerpoHistorialRondas({ d }: { d: VistaHistorial }) {
-  const filtros = {
-    estado: d.estado,
-    ...(d.instalacionId ? { inst: d.instalacionId } : {}),
-    ...(d.desde ? { desde: d.desde } : {}),
-    ...(d.hasta ? { hasta: d.hasta } : {}),
-  };
-  const lista = (
+function ListaRondasHistorial({
+  d,
+  filtros,
+}: {
+  d: VistaHistorial;
+  filtros: { estado: string; inst?: string; desde?: string; hasta?: string };
+}) {
+  return (
     <div className="flex flex-col p-4 md:p-0">
       <Estado
         state={d.items.length ? "ready" : "empty"}
@@ -78,32 +78,53 @@ export function CuerpoHistorialRondas({ d }: { d: VistaHistorial }) {
       </Estado>
     </div>
   );
+}
+
+function BarraFiltrosHistorial({
+  d,
+  filtros,
+}: {
+  d: VistaHistorial;
+  filtros: { estado: string; inst?: string; desde?: string; hasta?: string };
+}) {
+  return (
+    <div className={`flex-col gap-3 px-4 pb-3 md:px-0 ${d.ejecucion ? "hidden md:flex" : "flex"}`}>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <KpiTile etiqueta="En esta lista" valor={String(d.items.length)} />
+        <KpiTile etiqueta="Con anomalías" valor={String(d.items.filter((i) => i.anomalias > 0).length)} />
+      </div>
+      <Segmentado
+        etiqueta="Estado"
+        Link={LinkNext}
+        activa={d.estado}
+        opciones={ESTADOS.map((e) => ({
+          id: e.id,
+          etiqueta: e.etiqueta,
+          href: hrefHistorial({ ...filtros, estado: e.id }),
+        }))}
+      />
+    </div>
+  );
+}
+
+export function CuerpoHistorialRondas({ d }: { d: VistaHistorial }) {
+  const filtros = {
+    estado: d.estado,
+    ...(d.instalacionId ? { inst: d.instalacionId } : {}),
+    ...(d.desde ? { desde: d.desde } : {}),
+    ...(d.hasta ? { hasta: d.hasta } : {}),
+  };
   return (
     <>
       <Cabecera titulo="Historial de rondas" subtitulo="Rondas realizadas y programadas no iniciadas por instalación." />
-      <div className={`flex-col gap-3 px-4 pb-3 md:px-0 ${d.ejecucion ? "hidden md:flex" : "flex"}`}>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <KpiTile etiqueta="En esta lista" valor={String(d.items.length)} />
-          <KpiTile etiqueta="Con anomalías" valor={String(d.items.filter((i) => i.anomalias > 0).length)} />
-        </div>
-        <Segmentado
-          etiqueta="Estado"
-          Link={LinkNext}
-          activa={d.estado}
-          opciones={ESTADOS.map((e) => ({
-            id: e.id,
-            etiqueta: e.etiqueta,
-            href: hrefHistorial({ ...filtros, estado: e.id }),
-          }))}
-        />
-      </div>
+      <BarraFiltrosHistorial d={d} filtros={filtros} />
       <SplitScreen
         contenido
         telefono={d.ejecucion ? "detalle" : "lista"}
         etiquetaLista="Rondas"
         etiquetaDetalle="Detalle"
         vacio={{ texto: "Elige una ronda de la lista." }}
-        lista={lista}
+        lista={<ListaRondasHistorial d={d} filtros={filtros} />}
         {...(d.ejecucion
           ? {
               detalle: (

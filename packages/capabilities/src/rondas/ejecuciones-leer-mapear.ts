@@ -1,6 +1,8 @@
-import { derivarEstado, iso } from "./ejecuciones-comun";
+import type { z } from "zod";
 
-type EjecucionDb = {
+import { derivarEstado, iso, type ejecucionResumenSchema } from "./ejecuciones-comun";
+
+export type EjecucionResumenDb = {
   id: string;
   instalacionId: string;
   plantillaId: string;
@@ -14,10 +16,10 @@ type EjecucionDb = {
     puntosObligatorios: number;
     motivo: string | null;
   } | null;
-  marcas: { id: string; puntoId: string; horaCorregida: Date; geocerca: string; anomalias: string[] }[];
+  marcas: { anomalias: string[] }[];
 };
 
-export function mapearEjecucionDetalle(e: EjecucionDb, nombres: Map<string, string>, ahora: Date) {
+export function mapearEjecucionResumen(e: EjecucionResumenDb, ahora: Date): z.input<typeof ejecucionResumenSchema> {
   const oblig = e.cierre?.puntosObligatorios ?? e.plantilla.puntos.length;
   return {
     id: e.id,
@@ -31,6 +33,16 @@ export function mapearEjecucionDetalle(e: EjecucionDb, nombres: Map<string, stri
     puntosMarcados: e.cierre?.puntosMarcados ?? e.marcas.length,
     puntosObligatorios: oblig,
     anomalias: e.marcas.reduce((n, m) => n + m.anomalias.length, 0),
+  };
+}
+
+type EjecucionDb = Omit<EjecucionResumenDb, "marcas"> & {
+  marcas: { id: string; puntoId: string; horaCorregida: Date; geocerca: string; anomalias: string[] }[];
+};
+
+export function mapearEjecucionDetalle(e: EjecucionDb, nombres: Map<string, string>, ahora: Date) {
+  return {
+    ...mapearEjecucionResumen(e, ahora),
     motivoCierre: e.cierre?.motivo ?? null,
     marcas: e.marcas.map((m) => ({
       id: m.id,

@@ -4,51 +4,12 @@ import { uuidSchema } from "../core/esquemas";
 import { cursorDe, diaSchema, listaSchema, pagina } from "../core/maestros/comun";
 import { defineCapability } from "../define";
 import { dondeInstalacionId, instalacionEnAlcance, PERMISO_READ } from "./comun";
-import {
-  derivarEstado,
-  ejecucionResumenSchema,
-  estadoEjecucionSchema,
-  iso,
-  type EstadoEjecucion,
-} from "./ejecuciones-comun";
+import { ejecucionResumenSchema, estadoEjecucionSchema, seleccionEjecucionNucleo } from "./ejecuciones-comun";
+import { mapearEjecucionResumen, type EjecucionResumenDb } from "./ejecuciones-leer-mapear";
 import type { Contexto } from "../types";
 import { slotsNoRealizados } from "./programacion-slots";
 
-const seleccion = {
-  id: true,
-  instalacionId: true,
-  plantillaId: true,
-  adhoc: true,
-  horaInicio: true,
-  plantilla: { select: { nombre: true, tiempoMaxMin: true, puntos: { where: { obligatorio: true }, select: { id: true } } } },
-  cierre: {
-    select: {
-      estado: true,
-      horaCierre: true,
-      puntosMarcados: true,
-      puntosObligatorios: true,
-      motivo: true,
-    },
-  },
-  marcas: { select: { anomalias: true } },
-} as const;
-
-type Fila = {
-  id: string;
-  instalacionId: string;
-  plantillaId: string;
-  adhoc: boolean;
-  horaInicio: Date;
-  plantilla: { nombre: string; tiempoMaxMin: number; puntos: { id: string }[] };
-  cierre: {
-    estado: string;
-    horaCierre: Date;
-    puntosMarcados: number;
-    puntosObligatorios: number;
-    motivo: string | null;
-  } | null;
-  marcas: { anomalias: string[] }[];
-};
+const seleccion = { ...seleccionEjecucionNucleo, marcas: { select: { anomalias: true } } } as const;
 
 async function filasEjecucion(
   ctx: Contexto,
@@ -71,26 +32,7 @@ async function filasEjecucion(
     orderBy: [{ horaInicio: "desc" }, { id: "desc" }],
     ...cursorDe(input.cursor, input.limite),
     select: seleccion,
-  }) as Promise<Fila[]>;
-}
-
-function resumir(e: Fila, ahora: Date): z.input<typeof ejecucionResumenSchema> {
-  const oblig = e.cierre?.puntosObligatorios ?? e.plantilla.puntos.length;
-  const anomalias = e.marcas.reduce((n, m) => n + m.anomalias.length, 0);
-  const estado = derivarEstado(e.cierre, e.horaInicio, e.plantilla.tiempoMaxMin, ahora);
-  return {
-    id: e.id,
-    instalacionId: e.instalacionId,
-    plantillaId: e.plantillaId,
-    plantillaNombre: e.plantilla.nombre,
-    adhoc: e.adhoc,
-    estado,
-    horaInicio: iso(e.horaInicio),
-    horaCierre: e.cierre ? iso(e.cierre.horaCierre) : null,
-    puntosMarcados: e.cierre?.puntosMarcados ?? e.marcas.length,
-    puntosObligatorios: oblig,
-    anomalias,
-  };
+  }) as Promise<EjecucionResumenDb[]>;
 }
 
 /** Lista ejecuciones de ronda del alcance, paginada y filtrable por instalación, fechas y estado. */
@@ -131,7 +73,7 @@ export const ejecucionesListar = defineCapability({
       ...(input.cursor ? { cursor: input.cursor } : {}),
     });
     const { items: pag, siguiente } = pagina(filas, input.limite, input.cursor);
-    let items = pag.map((e) => resumir(e, ahora));
+    let items = pag.map((e) => mapearEjecucionResumen(e, ahora));
     if (input.estado) items = items.filter((i) => i.estado === input.estado);
     return { items, siguiente };
   },

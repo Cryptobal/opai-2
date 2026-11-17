@@ -65,3 +65,24 @@ export function derivarEstado(
 export function iso(d: Date): string {
   return d.toISOString();
 }
+
+/** Select Prisma compartido entre listar y leer ejecuciones. */
+export const seleccionEjecucionNucleo = {
+  id: true,
+  instalacionId: true,
+  plantillaId: true,
+  adhoc: true,
+  horaInicio: true,
+  plantilla: {
+    select: { nombre: true, tiempoMaxMin: true, puntos: { where: { obligatorio: true }, select: { id: true } } },
+  },
+  cierre: {
+    select: {
+      estado: true,
+      horaCierre: true,
+      puntosMarcados: true,
+      puntosObligatorios: true,
+      motivo: true,
+    },
+  },
+} as const;

@@ -29,6 +29,11 @@ export const informesCumplimiento = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    return calcularCumplimientoMes(ctx, input);
+    const { anio, mes, instalacionId } = input;
+    return calcularCumplimientoMes(ctx, {
+      anio,
+      mes,
+      ...(instalacionId !== undefined ? { instalacionId } : {}),
+    });
   },
 });

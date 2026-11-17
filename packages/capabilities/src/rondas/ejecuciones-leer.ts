@@ -4,7 +4,7 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
 import { dondeInstalacionId, PERMISO_READ } from "./comun";
-import { ejecucionDetalleSchema } from "./ejecuciones-comun";
+import { ejecucionDetalleSchema, seleccionEjecucionNucleo } from "./ejecuciones-comun";
 import { mapearEjecucionDetalle } from "./ejecuciones-leer-mapear";
 
 /** Detalle de una ronda con sus marcas y anomalías por punto. */
@@ -22,30 +22,10 @@ export const ejecucionesLeer = defineCapability({
     const e = await ctx.db.ejecucionRonda.findFirst({
       where: { id, ...dondeInstalacionId(ctx) },
       select: {
-        id: true,
-        instalacionId: true,
-        plantillaId: true,
-        adhoc: true,
-        horaInicio: true,
-        plantilla: { select: { nombre: true, tiempoMaxMin: true, puntos: { where: { obligatorio: true }, select: { id: true } } } },
-        cierre: {
-          select: {
-            estado: true,
-            horaCierre: true,
-            puntosMarcados: true,
-            puntosObligatorios: true,
-            motivo: true,
-          },
-        },
+        ...seleccionEjecucionNucleo,
         marcas: {
           orderBy: { horaCorregida: "asc" },
-          select: {
-            id: true,
-            puntoId: true,
-            horaCorregida: true,
-            geocerca: true,
-            anomalias: true,
-          },
+          select: { id: true, puntoId: true, horaCorregida: true, geocerca: true, anomalias: true },
         },
       },
     });
