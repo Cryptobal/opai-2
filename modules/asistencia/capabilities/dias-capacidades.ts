@@ -30,10 +30,6 @@ const vista = (d: DiaFila) => ({
   segundosExtra: d.segundosExtra, segundosSalidaAnticipada: d.segundosSalidaAnticipada, descansoInsuficiente: d.descansoInsuficiente,
   correccionPendiente: d.correccionPendiente, entrada: d.entrada?.toISOString() ?? null, salida: d.salida?.toISOString() ?? null,
 });
-const rango = z.object({ desde: fecha, hasta: fecha })
-  .refine((i) => i.hasta >= i.desde, "«hasta» no puede ser anterior a «desde».")
-  .refine((i) => Date.parse(i.hasta) - Date.parse(i.desde) <= MAX_DIAS * 86_400_000, `Como máximo ${MAX_DIAS} días.`);
-
 export const diasListar = defineCapability({
   id: "asistencia.dias.listar",
   descripcion:
