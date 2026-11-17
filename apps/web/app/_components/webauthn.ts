@@ -11,7 +11,7 @@ import { useSyncExternalStore } from "react";
 const lib = () => import("@simplewebauthn/browser");
 
 /** El navegador soporta passkeys (WebAuthn). */
-export function soportaPasskeys(): boolean {
+function soportaPasskeys(): boolean {
   return typeof window !== "undefined" && typeof window.PublicKeyCredential === "function";
 }
 
