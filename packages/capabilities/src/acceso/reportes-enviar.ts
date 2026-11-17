@@ -106,8 +106,8 @@ export async function enviarReporteAcceso(
   if (!inst) throw reglaDeNegocio("Instalación no encontrada.");
   const filas = await registrosDelPeriodo(ctx, instalacionId, v.desde, v.hasta);
   const csv = csvDe(filas);
-  const [para, ...cc] = destinatarios;
-  if (!para) return { enviados: 0, registros: filas.length, omitido: "sin_destinatarios" };
+  const para = destinatarios[0]!;
+  const cc = destinatarios.slice(1);
   const asuntoPrueba = opts.prueba ? "[Prueba] " : "";
   const datos = {
     "instalacion.nombre": inst.nombre,
