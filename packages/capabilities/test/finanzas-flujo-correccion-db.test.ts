@@ -160,4 +160,48 @@ describe.skipIf(omitirSuiteDb())("Finanzas · corrección del flujo (db)", () =>
     await ok("finanzas.ajustes.actualizar", { avisoActivo: true, umbral: 1_000_000_000_000 });
     expect(await e.admin.flujoAvisoEmitido.count({ where: { tenantId } })).toBeGreaterThan(0);
   });
+
+  it("la planilla de escritorio incluye la semana en curso", async () => {
+    const p = await ok<{
+      columnaHoy: string | null;
+      semanas: { semana: string; pasada: boolean }[];
+    }>("finanzas.planilla.obtener", { semanas: 8 });
+    expect(p.columnaHoy).toBe("2026-11-09");
+    expect(p.semanas.some((s) => !s.pasada)).toBe(true);
+  });
+
+  it("mover en vista previa usa los mismos saldos que la planilla", async () => {
+    const fila = await ok<{ id: string }>("finanzas.filas.crear", {
+      seccion: "egreso",
+      etiqueta: "Paridad mover",
+    });
+    const sem = "2026-11-30";
+    await ok("finanzas.celdas.fijar", { filaId: fila.id, semana: sem, monto: 220_000 });
+    const plan = await ok<{ semanas: { semana: string; saldoFinal: number }[] }>(
+      "finanzas.planilla.obtener",
+      { semanas: 10 },
+    );
+    const prev = await ok<{ saldos: { semana: string; saldoFinal: number }[] }>(
+      "finanzas.celdas.mover",
+      { filaId: fila.id, semanas: [sem], por: 1 },
+      { dryRun: true },
+    );
+    for (const s of prev.saldos) {
+      const filaPlan = plan.semanas.find((x) => x.semana === s.semana);
+      expect(filaPlan?.saldoFinal).toBe(s.saldoFinal);
+    }
+  });
+
+  it("re-avisa si la semana se recupera y vuelve a caer bajo el umbral", async () => {
+    await ok("finanzas.ajustes.actualizar", { avisoActivo: true, umbral: 0 });
+    const fila = await ok<{ id: string }>("finanzas.filas.crear", { seccion: "egreso", etiqueta: "Reaviso" });
+    const sem = "2026-12-07";
+    await ok("finanzas.celdas.fijar", { filaId: fila.id, semana: sem, monto: 400_000 });
+    const semanaDb = new Date(`${sem}T00:00:00Z`);
+    expect(await e.admin.flujoAvisoEmitido.count({ where: { tenantId, semana: semanaDb } })).toBe(1);
+    await ok("finanzas.ajustes.actualizar", { umbral: -50_000_000 });
+    expect(await e.admin.flujoAvisoEmitido.count({ where: { tenantId, semana: semanaDb } })).toBe(0);
+    await ok("finanzas.ajustes.actualizar", { umbral: 0 });
+    expect(await e.admin.flujoAvisoEmitido.count({ where: { tenantId, semana: semanaDb } })).toBe(1);
+  });
 });
