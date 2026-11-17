@@ -13,7 +13,15 @@ import type { PersonaDetalle } from "@/lib/tipos-maestros";
 import { accionesPersona } from "./acciones-persona";
 
 export type TabPersona =
-  "resumen" | "laboral" | "ausencias" | "sueldo" | "documentos" | "actividad" | "anexos" | "privacidad";
+  | "resumen"
+  | "laboral"
+  | "ausencias"
+  | "sueldo"
+  | "documentos"
+  | "actividad"
+  | "anexos"
+  | "privacidad"
+  | "turnos-extra";
 
 /** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · instalación · RUT"; tabs por ruta, en el orden del export
  * ficha-persona v1 (CAR-124): Resumen · Laboral · Sueldo · Anexos · Documentos · Privacidad · Actividad. */
@@ -24,6 +32,7 @@ export function FichaPersona(x: {
   tab: TabPersona;
   /** Búsqueda, filtros y página de la lista (`?q=…`), para que las pestañas no la reinicien. */
   consulta?: string;
+  turnosExtra?: boolean;
   children: ReactNode;
 }) {
   const p = x.persona;
@@ -79,6 +88,9 @@ export function FichaPersona(x: {
           { id: "resumen", etiqueta: "Resumen", href: `${base}${q}` },
           { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral${q}` },
           { id: "ausencias", etiqueta: "Ausencias", href: `${base}/ausencias${q}` },
+          ...(x.turnosExtra
+            ? [{ id: "turnos-extra" as const, etiqueta: "Turnos extra", href: `${base}/turnos-extra${q}` }]
+            : []),
           { id: "sueldo", etiqueta: "Sueldo", href: `${base}/sueldo${q}` },
           { id: "anexos", etiqueta: "Anexos", href: `${base}/anexos${q}` },
           {

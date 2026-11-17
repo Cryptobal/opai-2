@@ -20,6 +20,7 @@ export type TabInstalacion =
   | "sueldo"
   | "negocios"
   | "rondas"
+  | "turnos-extra"
   | "accesos"
   | "dispositivos"
   | "documentos"
@@ -37,6 +38,7 @@ export function FichaInstalacion(p: {
   negocios?: boolean;
   /** Pestaña aportada por Rondas (Brief 14): solo con el módulo activo y permiso de lectura. */
   rondas?: boolean;
+  turnosExtra?: boolean;
   /** Pestaña «Accesos» (CAR-475): Control de acceso activo y permiso de lectura. */
   accesos?: boolean;
   children: ReactNode;
@@ -104,6 +106,7 @@ export function FichaInstalacion(p: {
             [
               [p.negocios, "negocios", "Negocios"],
               [p.rondas, "rondas", "Rondas"],
+              [p.turnosExtra, "turnos-extra", "Turnos extra"],
               [p.accesos, "accesos", "Accesos"],
             ] as const
           )

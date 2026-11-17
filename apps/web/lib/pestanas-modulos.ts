@@ -27,6 +27,13 @@ export async function puedeExportarNegocios(): Promise<boolean> {
  * Pestaña «Rondas» de la ficha de instalación (Brief 14): solo si Rondas está activo para la empresa
  * y el usuario puede leer rondas. Sin pestañas deshabilitadas (ADR-041.5).
  */
+/** Pestaña «Turnos extra» (tarifas) en la ficha de instalación (CAR-620). */
+export async function verPestanaTurnosExtra(): Promise<boolean> {
+  const identidad = await identidadActual();
+  if (!identidad?.modulosActivos.includes("pauta")) return false;
+  return puedeDeIdentidad(identidad)("pauta:read");
+}
+
 export async function verPestanaRondas(): Promise<boolean> {
   const identidad = await identidadActual();
   if (!identidad?.modulosActivos.includes("rondas")) return false;
