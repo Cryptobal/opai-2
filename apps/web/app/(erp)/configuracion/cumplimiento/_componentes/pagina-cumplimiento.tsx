@@ -8,7 +8,7 @@ import { construirPuede } from "@/lib/permisos-ui";
 
 import { PaginaConfig } from "../../_centro/pagina-config";
 
-export type Pestana = "resumen" | "solicitudes" | "incidentes" | "retencion";
+type Pestana = "resumen" | "solicitudes" | "incidentes" | "retencion";
 
 const PESTANAS: readonly { id: Pestana; etiqueta: string; href: string }[] = [
   { id: "resumen", etiqueta: "Resumen", href: "/configuracion/cumplimiento" },
@@ -18,7 +18,7 @@ const PESTANAS: readonly { id: Pestana; etiqueta: string; href: string }[] = [
 ];
 
 /** Qué puede hacer el usuario en Cumplimiento (permisos efectivos, ADR-022). */
-export type PuedeCumplimiento = { gestionar: boolean; aceptarDpa: boolean };
+type PuedeCumplimiento = { gestionar: boolean; aceptarDpa: boolean };
 
 type Props<T> = {
   pestana: Pestana;
