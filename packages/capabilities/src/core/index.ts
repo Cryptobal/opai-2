@@ -88,6 +88,7 @@ import { seguridadMetodos, seguridadPasskeysRenombrar } from "./seguridad/metodo
 import { seguridadMetodosQuitar } from "./seguridad/quitar";
 import { appsConectadasDesconectar, appsConectadasList } from "./seguridad/apps";
 import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
+import { verComoIniciar, verComoTerminar } from "./ver-como/capacidades";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
 export const capacidadesDelNucleo: readonly Capacidad[] = [
@@ -107,6 +108,8 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   seguridadMetodosQuitar,
   appsConectadasList,
   appsConectadasDesconectar,
+  verComoIniciar,
+  verComoTerminar,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,

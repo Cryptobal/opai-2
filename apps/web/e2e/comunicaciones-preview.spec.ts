@@ -20,6 +20,8 @@ test.describe("@preview configuración: comunicaciones", () => {
     const sw = page.getByRole("switch", { name: "Activar Documento vencido" });
     await hidratado(sw);
     await expect(sw).toBeVisible();
+    // CAR-598: catálogo de avisos de rendiciones en Comunicaciones
+    await expect(page.getByText("Rendición enviada a aprobación")).toBeVisible();
     const telefono = (page.viewportSize()?.width ?? 0) < 768;
     await expect(page.getByRole("columnheader", { name: "Evento" })).toBeVisible({
       visible: !telefono,
