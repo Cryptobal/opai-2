@@ -8,7 +8,6 @@
   "asistencia.dias.hoy",
   "asistencia.dias.resumen_periodo",
   "asistencia.incidentes.listar",
-  "asistencia.marcas.listar",
   "asistencia.rostro.textos",
   "comercial.canales.get",
   "comercial.contexto.listar",

@@ -30,6 +30,7 @@ export type MarcaVista = z.infer<typeof marcaVistaSchema>;
 type Fila = {
   id: string; seq: number; personaId: string; tipo: string; horaServidor: Date; horaDispositivo: Date | null;
   desfaseS: number | null; origen: string; metodo: string; canal: string | null; instalacionId: string;
+  dispositivoId: string | null;
   gpsEstado: string; distanciaM: number | { toNumber(): number } | null; turnoEsperadoId: string | null;
   turnoInicio: Date | null; turnoFin: Date | null; hash: string;
 };
