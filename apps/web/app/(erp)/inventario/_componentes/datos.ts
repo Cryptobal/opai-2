@@ -5,26 +5,14 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import type { TipoInventario } from "./tipos";
+import { todasLasPaginas } from "./paginas";
 import { sinTildes } from "./texto";
-
-type Pagina = { items: TipoInventario[]; siguiente: string | null };
 
 /** Todos los tipos, página a página (son pocos; nunca se corta la lista). */
 async function todosLosTipos() {
-  const items: TipoInventario[] = [];
-  let cursor: string | null = null;
-  for (let vuelta = 0; vuelta < 20; vuelta++) {
-    const r: Awaited<ReturnType<typeof ejecutarComoUsuario<Pagina>>> = await ejecutarComoUsuario<Pagina>("erp", "inventario.tipos.list", {
-      incluirInactivos: true,
-      limite: 200,
-      ...(cursor ? { cursor } : {}),
-    });
-    if (!r.ok) return { r, items };
-    items.push(...r.data.items);
-    cursor = r.data.siguiente;
-    if (!cursor) return { r, items };
-  }
-  return { r: { ok: true as const }, items };
+  return todasLasPaginas<TipoInventario>((opts) =>
+    ejecutarComoUsuario("erp", "inventario.tipos.list", { incluirInactivos: true, ...opts }),
+  );
 }
 
 /** Catálogo de tipos: búsqueda, categoría y estado se filtran aquí. */
