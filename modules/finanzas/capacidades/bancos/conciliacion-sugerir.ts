@@ -8,6 +8,16 @@ import { montoDe } from "./esquemas";
 import { reglasQueCalzan, sugerenciaReglaSchema } from "./reglas-sugerir";
 import { aIso, movimientoDe } from "./util";
 
+const loteRendicionSchema = z.object({
+  loteId: z.string().uuid(),
+  codigoVisible: z.string(),
+  totalClp: z.number().int(),
+  fechaPago: z.string().nullable(),
+  referenciaPago: z.string().nullable(),
+  confianza: z.number(),
+  motivo: z.string(),
+});
+
 const sugerenciaSchema = z.object({
   documentoId: z.string(),
   tipo: z.enum(["documento_emitido", "documento_recibido"]),
@@ -33,13 +43,15 @@ export const bancosConciliacionSugerir = defineCapability({
     sugerencias: z.array(sugerenciaSchema),
     /** Reglas del banco que calzan: proponen la fila del flujo y la cuenta contable (CAR-328). */
     reglas: z.array(sugerenciaReglaSchema),
+    /** Lotes de rendiciones pagados que coinciden por monto y fecha (CAR-615). Solo lectura; no concilia solo. */
+    lotesRendiciones: z.array(loteRendicionSchema),
   }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s, input) => [input.movimientoId, ...s.sugerencias.map((x) => x.documentoId), ...s.reglas.map((r) => r.reglaId)],
   async handler(ctx, input) {
     const mov = await movimientoDe(ctx, input.movimientoId);
-    if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [], reglas: [] };
+    if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [], reglas: [], lotesRendiciones: [] };
     const reglas = await reglasQueCalzan(ctx, mov);
     const desde = new Date(mov.fecha);
     desde.setUTCDate(desde.getUTCDate() - 15);
@@ -130,8 +142,33 @@ export const bancosConciliacionSugerir = defineCapability({
       ...emitidos.map((d) => [d.id, { folio: d.folio, tipoDte: d.tipoDte, contraparte: cuentasMap.get(d.cuentaId)?.nombre ?? null }] as const),
       ...recibidos.map((d) => [d.id, { folio: d.folio, tipoDte: null, contraparte: d.proveedor.razonSocial }] as const),
     ]);
+    const montoMov = montoDe(mov.monto);
+    let lotesRendiciones: z.infer<typeof loteRendicionSchema>[] = [];
+    if (montoMov < 0) {
+      const absoluto = Math.abs(montoMov);
+      const desdeL = new Date(mov.fecha);
+      desdeL.setUTCDate(desdeL.getUTCDate() - 12);
+      const hastaL = new Date(mov.fecha);
+      hastaL.setUTCDate(hastaL.getUTCDate() + 5);
+      const lotes = await ctx.db.lotePago.findMany({
+        where: { estado: "pagado", totalClp: absoluto, fechaPago: { gte: desdeL, lte: hastaL } },
+        orderBy: { codigo: "desc" },
+        take: 3,
+        select: { id: true, codigo: true, totalClp: true, fechaPago: true, referenciaPago: true },
+      });
+      lotesRendiciones = lotes.map((l) => ({
+        loteId: l.id,
+        codigoVisible: `LP-${l.codigo}`,
+        totalClp: l.totalClp,
+        fechaPago: l.fechaPago?.toISOString().slice(0, 10) ?? null,
+        referenciaPago: l.referenciaPago,
+        confianza: l.referenciaPago && mov.glosa.toLowerCase().includes(l.referenciaPago.toLowerCase()) ? 0.95 : 0.75,
+        motivo: "Mismo monto y fecha cercana a un lote de rendiciones marcado pagado.",
+      }));
+    }
     return {
       reglas,
+      lotesRendiciones,
       sugerencias: sugerencias.map((x) => ({ ...x, ...(info.get(x.documentoId) ?? { folio: null, tipoDte: null, contraparte: null }) })),
     };
   },
