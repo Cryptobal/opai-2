@@ -20,7 +20,9 @@ permissions:
 # Un push nuevo al mismo PR cancela la corrida anterior (CAR-627, CAR-640). En main/merge_group/cron
 # no se cancela la corrida en curso.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  # La corrida nocturna va en su propio grupo: compartiendo el de main, una nocturna a medio cancelar
+  # (su job «e2e · informe» esperando runner) dejaba pendientes las corridas de cada push a main.
+  group: ci-${{ github.event.pull_request.number || github.ref }}${{ github.event_name == 'schedule' && '-nocturna' || '' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
