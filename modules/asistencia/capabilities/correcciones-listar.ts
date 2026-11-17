@@ -4,7 +4,7 @@ import { defineCapability, type Contexto } from "@opai/capabilities";
 
 import { estadoCorreccion, valorEfectivo, type TipoMarca } from "../domain";
 import { uuid } from "./esquemas";
-import { alcanceMarcas } from "./lecturas";
+import { alcanceMarcas } from "./alcance-marcas";
 
 const itemSchema = z.object({
   correccionId: z.string(), marcaId: z.string(), personaId: z.string(),

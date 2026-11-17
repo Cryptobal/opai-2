@@ -1,16 +1,16 @@
 import { z } from "zod";
 
-import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
+import { defineCapability } from "@opai/capabilities";
 
 import { esTipoJornada, TIPOS_JORNADA } from "../domain";
 import { uuid } from "./esquemas";
-import { alcanceMarcas } from "./lecturas";
+import { itemsResumenAsistenciaPeriodo } from "./dias-resumen-periodo";
+import { alcanceMarcas } from "./alcance-marcas";
 
 export const fecha = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD.");
 export const PORTALES = ["erp", "supervisor"] as const;
 const dia = (f: string) => new Date(`${f}T00:00:00Z`);
 const MAX_DIAS = 93;
-const MAX_FILAS = 20_000;
 
 const diaSchema = z.object({
   personaId: z.string(), fecha: z.string(), instalacionId: z.string().nullable(), tipoJornada: z.enum(TIPOS_JORNADA),
@@ -83,28 +83,7 @@ export const diasResumenPeriodo = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.items.map((r) => r.personaId),
   async handler(ctx, i) {
-    const alcance = await alcanceMarcas(ctx);
-    const filas = await ctx.db.dia.findMany({
-      where: { fecha: { gte: dia(i.desde), lte: dia(i.hasta) }, AND: [alcance, i.instalacionId ? { instalacionId: i.instalacionId } : {}] },
-      take: MAX_FILAS + 1,
-    });
-    if (filas.length > MAX_FILAS) throw reglaDeNegocio("El período es demasiado grande: acótalo por instalación o por fechas.");
-    const por = new Map<string, z.infer<typeof resumenSchema>>();
-    for (const d of filas) {
-      const r = por.get(d.personaId) ?? { personaId: d.personaId, dias: 0, presentes: 0, ausentes: 0, sinMarca: 0, incompletos: 0, minutosTrabajados: 0, segundosAtraso: 0, segundosExtra: 0, diasDescansoInsuficiente: 0, provisorio: false, siglas: {} };
-      r.dias += 1;
-      if (d.estado === "presente") r.presentes += 1;
-      if (d.estado === "ausente") r.ausentes += 1;
-      if (d.estado === "sin_marca") r.sinMarca += 1;
-      if (d.estado === "incompleto") r.incompletos += 1;
-      r.minutosTrabajados += d.minutosTrabajados;
-      r.segundosAtraso += d.segundosAtraso;
-      r.segundosExtra += d.segundosExtra;
-      if (d.descansoInsuficiente) r.diasDescansoInsuficiente += 1;
-      if (d.correccionPendiente) r.provisorio = true;
-      if (d.sigla) r.siglas[d.sigla] = (r.siglas[d.sigla] ?? 0) + 1;
-      por.set(d.personaId, r);
-    }
-    return { items: [...por.values()] };
+    const items = await itemsResumenAsistenciaPeriodo(ctx, i.desde, i.hasta, i.instalacionId);
+    return { items };
   },
 });

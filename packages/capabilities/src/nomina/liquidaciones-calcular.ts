@@ -10,6 +10,9 @@ import { mutualAdicionalTenant } from "../core/remuneraciones";
 import type { TenantTx } from "@opai/db";
 
 import type { Contexto } from "../types";
+import { resumenAsistenciaPeriodo } from "../../../../modules/asistencia/capabilities/dias-resumen-periodo";
+
+import { mezclarAsistenciaLiquidacion } from "./asistencia-liquidacion";
 import { bloquearPeriodoAbierto } from "./bloqueos";
 import { PERMISO_PERIODOS, periodoDe } from "./comun";
 import { cargarBase, juegoDelMes, ocultasDe, personasDelMes } from "./costo-proyectado-datos";
@@ -51,7 +54,7 @@ const omitidaSchema = z.object({ personaId: z.string(), motivo: z.enum(["sin_cap
 export const liquidacionesCalcular = defineCapability({
   id: "nomina.liquidaciones.calcular",
   descripcion:
-    "Calcula o recalcula las liquidaciones de un período abierto o en revisión: sueldo de la capa proporcional a los días trabajados, horas extra, cotizaciones, impuesto único, anticipos, cuotas de préstamo y descuentos. Es idempotente; omite con motivo a quien no tiene capa de sueldo completa.",
+    "Calcula o recalcula las liquidaciones de un período abierto o en revisión: sueldo de la capa proporcional a los días trabajados, horas extra, cotizaciones, impuesto único, anticipos, cuotas de préstamo y descuentos. Con el módulo Asistencia activo usa el resumen del período (días presentes, ausencias, atrasos y sobretiempo). Es idempotente; omite con motivo a quien no tiene capa de sueldo completa.",
   permiso: PERMISO_PERIODOS,
   input: z.object({ periodoId: uuidSchema }),
   output: z.object({
@@ -77,13 +80,27 @@ export const liquidacionesCalcular = defineCapability({
       throw prohibido("Calcular el período exige ver los sueldos de todo el personal (permiso de montos sensibles).");
     const grupo = personasDelMes(base, m, ocultas);
     const mutual = await mutualAdicionalTenant(ctx);
+    const usaAsistencia = ctx.modulosActivos.includes("asistencia");
+    const asistencia =
+      usaAsistencia && ini && fin ? await resumenAsistenciaPeriodo(ctx, ini, fin) : new Map();
     const calcular = async (db: Contexto["db"] | TenantTx) => {
       const novedades = await novedadesPorPersona(db, periodoId);
       const omitidas: z.infer<typeof omitidaSchema>[] = [...grupo.omitidas];
       const filas = grupo.personas.flatMap((p) => {
         try {
-          const l = liquidacionDelMes({ ...p, mutualAdicional: mutual ?? 0, novedades: novedades.get(p.personaId) ?? vacias() }, juego);
-          return [{ personaId: p.personaId, l }];
+          const base = novedades.get(p.personaId) ?? vacias();
+          const mezcla = mezclarAsistenciaLiquidacion(base, asistencia.get(p.personaId));
+          const l = liquidacionDelMes(
+            {
+              ...p,
+              mutualAdicional: mutual ?? 0,
+              novedades: mezcla.novedades,
+              diasPresentesAsistencia: mezcla.diasPresentes,
+            },
+            juego,
+          );
+          const advertencias = [...l.advertencias, ...mezcla.advertencias];
+          return [{ personaId: p.personaId, l: { ...l, advertencias } }];
         } catch {
           omitidas.push({ personaId: p.personaId, motivo: "error_calculo" });
           return [];

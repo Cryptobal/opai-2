@@ -7,7 +7,7 @@ import { calcularDia, fechaDe } from "./dias-calculo";
 import { PORTALES } from "./dias-capacidades";
 import { uuid } from "./esquemas";
 import { tenantBasico, nombreCompleto } from "./formato";
-import { alcanceMarcas } from "./lecturas";
+import { alcanceMarcas } from "./alcance-marcas";
 
 const LIMITE = 150;
 const ESTADOS = ["presente", "sin_marca", "ausente", "sin_turno", "incompleto"] as const;

@@ -35,6 +35,14 @@ describe("nomina · liquidación del mes", () => {
     expect(l.aportesEmpleador.reduce((s, a) => s + a.monto, 0) + l.totalHaberes).toBeLessThanOrEqual(l.costoEmpresa);
   });
 
+  it("usa días presentes de Asistencia cuando vienen en la entrada (CAR-601)", async () => {
+    const l = liquidacionDelMes(
+      entrada({ novedades: { ...sinNovedades, diasAusencia: 9 }, diasPresentesAsistencia: 18 }),
+      await juego(),
+    );
+    expect(l.diasTrabajados).toBe(18);
+  });
+
   it("CA2: 10 días de licencia pagan 20/30 del sueldo base", async () => {
     const l = liquidacionDelMes(entrada({ novedades: { ...sinNovedades, diasLicencia: 10 } }), await juego());
     expect(l.diasTrabajados).toBe(20);
