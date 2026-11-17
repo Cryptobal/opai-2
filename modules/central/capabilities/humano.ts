@@ -40,7 +40,7 @@ export async function exigirAgenteHabilitado(
 ) {
   if (!ctx.agente && ctx.principal?.tipo !== "servicio") return;
   if (!(await responsableActual(ctx, db)))
-    throw reglaDeNegocio("La central no tiene a nadie a cargo: el agente solo puede mirar (R12).");
-  if (await agentePausado(db, instalacionId)) throw reglaDeNegocio("El agente de central está en pausa aquí (R13).");
-  if (a?.tomadaPorId) throw reglaDeNegocio("Un operador tomó esta alerta: el agente no actúa en ella hasta que la devuelva (R13).");
+    throw reglaDeNegocio("La central no tiene a nadie a cargo: el agente solo puede mirar.");
+  if (await agentePausado(db, instalacionId)) throw reglaDeNegocio("El agente de central está en pausa aquí.");
+  if (a?.tomadaPorId) throw reglaDeNegocio("Un operador tomó esta alerta: el agente no actúa en ella hasta que la devuelva.");
 }
