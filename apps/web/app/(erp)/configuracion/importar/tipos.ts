@@ -1,7 +1,7 @@
 export type CampoCatalogo = {
   clave: string; etiqueta: string; tipo: string; requerido: boolean; ayuda: string | null; ejemplo: string; opciones: string[];
 };
-export type ImportadorCatalogo = { id: string; etiqueta: string; descripcion: string; disponible: boolean; campos: CampoCatalogo[] };
+type ImportadorCatalogo = { id: string; etiqueta: string; descripcion: string; disponible: boolean; campos: CampoCatalogo[] };
 export type Catalogo = {
   importadores: ImportadorCatalogo[];
   limites: { filasPorLlamada: number; filasPorArchivo: number; megabytes: number };

@@ -10,7 +10,7 @@ const nota = (texto: string) => <span className="t-caption">{texto}</span>;
 const vacio = (texto: string) => <p className="t-body-sm text-fg-muted">{texto}</p>;
 
 /** «$ 6,5 M» para etiquetas de barras; bajo un millón, el monto completo. */
-export const pesosCortos = (n: number) =>
+const pesosCortos = (n: number) =>
   n >= 1_000_000 ? `$ ${(n / 1_000_000).toFixed(1).replace(".", ",")} M` : pesos(n);
 
 const mesCorto = (mes: string) =>

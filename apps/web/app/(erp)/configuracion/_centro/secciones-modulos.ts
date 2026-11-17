@@ -21,7 +21,7 @@ import { SeccionSeguimiento } from "@/app/(erp)/configuracion/_comercial/seccion
  * módulo no tiene página de configuración propia; el núcleo monta estas pestañas junto a los ajustes
  * del manifest. `Contenido` es un componente de servidor que lee y escribe solo por capacidades.
  */
-export type SeccionModulo = {
+type SeccionModulo = {
   id: string;
   etiqueta: string;
   /** Permiso para ver la pestaña: sin él no aparece (sin pestañas deshabilitadas, ADR-041.5). */
@@ -33,7 +33,7 @@ export type SeccionModulo = {
  * Registro de secciones de configuración por módulo: cada módulo agrega aquí sus líneas (como
  * `lib/existencia-ruta.ts` para las fichas). El orden es el de las pestañas; «Ajustes» va al final.
  */
-export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
+const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
   acceso: [
     {
       id: "formulario",
