@@ -31,7 +31,7 @@ export function mesDelTrabajo(ahora = new Date()): { anio: number; mes: number }
 type Sincronizacion = ResultadoImportacion & { anio: number; mes: number; recibidos: number; omitidos: number };
 
 /** Escribe en el libro de compras lo consultado. Va dentro de la transacción; la consulta va antes (fuera). */
-export async function importarMes(ctx: Contexto, c: ConsultaRcv, dryRun: boolean): Promise<Sincronizacion> {
+async function importarMes(ctx: Contexto, c: ConsultaRcv, dryRun: boolean): Promise<Sincronizacion> {
   const vacio = { nuevos: 0, duplicados: 0, errores: 0, proveedoresCreados: 0, filas: [] };
   const r = c.documentos.length
     ? await importarDocumentosCompra(ctx, { documentos: c.documentos, crearProveedores: true }, dryRun, "sii_rcv")
