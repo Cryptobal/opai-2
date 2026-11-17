@@ -4,3 +4,4 @@ export {
   cumplimientoDtMovimientosListar,
 } from "./lecturas";
 export { cumplimientoDtMovimientosRegistrar } from "./registrar";
+export { cumplimientoDtFiniquitoObtener } from "./finiquito";

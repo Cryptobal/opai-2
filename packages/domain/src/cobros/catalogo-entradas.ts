@@ -1,5 +1,6 @@
 /** Entradas del catálogo comercial (CAR-204): una por cobrable. Ver `catalogo-modulos.ts`. */
 import {
+  COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT,
   type EntradaCatalogo,
   esIncluidoEnBase,
   MODULO_FINANZAS,
@@ -88,6 +89,16 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "por_unidad",
     "trabajador_activo",
   ),
+  {
+    id: COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT,
+    nombre: "Cumplimiento DT",
+    incluye: "LRE asistido, registro en Mi DT (contratos, anexos y finiquitos) y propuesta de finiquito.",
+    grupo: "complemento_nomina",
+    incluidoEnBase: false,
+    formaSugerida: "por_unidad",
+    unidadSugerida: "trabajador_activo",
+    dependencias: [["nomina"]],
+  },
   modulo(
     "pauta",
     "Operaciones",

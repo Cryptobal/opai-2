@@ -7,6 +7,7 @@ import { uuidSchema } from "../../core/esquemas";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { aFecha, diaSchema } from "../../core/maestros/comun";
 import { documentoExiste, PERMISO_OBLIGACIONES } from "../comun";
+import { exigeComplementoCumplimientoDt } from "./comun";
 import { movimientoSchema, vistaMovimiento } from "./esquemas";
 import { movimientosMiDt } from "./movimientos";
 
@@ -21,6 +22,7 @@ export const cumplimientoDtMovimientosRegistrar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    exigeComplementoCumplimientoDt(ctx);
     const items = await movimientosMiDt(ctx);
     const m = items.find((x) => x.movimientoTipo === input.movimientoTipo && x.referenciaId === input.referenciaId);
     if (!m) throw noEncontrado("El movimiento");

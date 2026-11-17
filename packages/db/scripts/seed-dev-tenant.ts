@@ -26,6 +26,7 @@ async function main(): Promise<void> {
     "portal_trabajador",
     "portal_cliente",
     "nomina",
+    "nomina.cumplimiento_dt",
     "finanzas",
     "cpq",
   ]) {

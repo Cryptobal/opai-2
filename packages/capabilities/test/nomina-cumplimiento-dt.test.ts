@@ -20,6 +20,7 @@ const f = (s: string) => new Date(`${s}T00:00:00.000Z`);
 
 const semilla = () => ({
   ...semillaTenant(),
+  cargo: [{ id: "c", tenantId: T, nombre: "Guardia", estado: "activo" }],
   persona: [{ id: P1, tenantId: T, nombres: "Ana", apellidos: "Prueba", rut: "12345678-5", estado: "activa" }],
   vinculoLaboral: [
     { id: V1, tenantId: T, personaId: P1, cargoId: "c", tipo: "indefinido", inicio: f("2026-10-01"), termino: null, estado: "vigente" },
@@ -36,9 +37,33 @@ const semilla = () => ({
     },
   ],
   anexoContrato: [],
+  estructuraSueldo: [
+    {
+      id: "0192f3a0-0000-7000-8000-00000000f604",
+      tenantId: T,
+      nivel: "persona",
+      personaId: P1,
+      cargoId: null,
+      puestoId: null,
+      instalacionId: null,
+      sueldoBase: 465_600,
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "legal_25",
+      gratificacionMonto: null,
+      vigenteDesde: f("2024-01-01"),
+      vigenteHasta: null,
+      estado: "vigente",
+      motivo: "prueba",
+      items: [],
+    },
+  ],
+  estructuraItem: [],
 });
 
-const como = () => contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: ["nomina"], semilla: semilla() });
+const modulos = ["nomina", "nomina.cumplimiento_dt"] as const;
+
+const como = () => contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: [...modulos], semilla: semilla() });
 
 beforeEach(() => {
   limpiarRegistro();
@@ -76,5 +101,22 @@ describe("nomina.cumplimiento_dt", () => {
     if (!r.ok) return;
     expect(r.data.contenido).toContain("movimiento");
     expect(r.data.filas).toBeGreaterThan(0);
+  });
+
+  it("obtiene propuesta de finiquito del vínculo terminado", async () => {
+    const { ctx } = como();
+    const r = await executeCapability(ctx, "nomina.finiquito.obtener", { vinculoId: V2 });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.data.propuesta.lineas.length).toBeGreaterThan(0);
+    expect(r.data.personaNombre).toContain("Prueba");
+  });
+
+  it("rechaza sin el complemento Cumplimiento DT", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: ["nomina"], semilla: semilla() });
+    const r = await executeCapability(ctx, "nomina.midt.listar", {});
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.error.message).toContain("Cumplimiento DT");
   });
 });

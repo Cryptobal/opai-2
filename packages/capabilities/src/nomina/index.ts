@@ -21,6 +21,7 @@ import {
   cumplimientoDtMovimientosExportar,
   cumplimientoDtMovimientosListar,
   cumplimientoDtMovimientosRegistrar,
+  cumplimientoDtFiniquitoObtener,
 } from "./cumplimiento-dt/capacidades";
 import { conceptosActualizar, conceptosCrear, conceptosListar } from "./conceptos";
 import { novedadesAnular, novedadesCargar, novedadesCrear } from "./novedades-escritura";
@@ -73,6 +74,7 @@ export const capacidadesNomina: readonly Capacidad[] = [
   cumplimientoDtMovimientosExportar,
   cumplimientoDtMovimientosDatos,
   cumplimientoDtMovimientosRegistrar,
+  cumplimientoDtFiniquitoObtener,
 ];
 
 export const consumidoresNomina = [consumidorLiquidacionPublicada];

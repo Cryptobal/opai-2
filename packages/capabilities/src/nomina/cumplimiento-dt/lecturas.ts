@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { uuidSchema } from "../../core/esquemas";
 import { noEncontrado } from "../../errores";
 import { PERMISO_READ } from "../comun";
+import { exigeComplementoCumplimientoDt } from "./comun";
 import { filaCsv, movimientosMiDt } from "./movimientos";
 import { movimientoSchema, vistaMovimiento } from "./esquemas";
 
@@ -27,6 +28,7 @@ export const cumplimientoDtMovimientosListar = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.items.map((i) => i.personaId),
   async handler(ctx) {
+    exigeComplementoCumplimientoDt(ctx);
     const items = await movimientosMiDt(ctx);
     return { items: items.map(vistaMovimiento), pendientes: items.filter((m) => !m.registrado).length, registrados: items.filter((m) => m.registrado).length };
   },
@@ -43,6 +45,7 @@ export const cumplimientoDtMovimientosExportar = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.personaIds,
   async handler(ctx) {
+    exigeComplementoCumplimientoDt(ctx);
     const pendientes = (await movimientosMiDt(ctx)).filter((m) => !m.registrado);
     return { nombre: nombreArchivoPendientesMiDt(), contenido: csvMovimientosMiDt(pendientes.map(filaCsv)), filas: pendientes.length, personaIds: pendientes.map((m) => m.personaId) };
   },
@@ -59,6 +62,7 @@ export const cumplimientoDtMovimientosDatos = defineCapability({
   dryRun: false,
   auditarLectura: (s) => [s.personaId],
   async handler(ctx, { movimientoTipo, referenciaId }) {
+    exigeComplementoCumplimientoDt(ctx);
     const m = await movimientoDe(ctx, movimientoTipo, referenciaId);
     return { nombre: `midt_${movimientoTipo}_${referenciaId.slice(0, 8)}.csv`, contenido: csvMovimientosMiDt([filaCsv(m)]), personaId: m.personaId };
   },

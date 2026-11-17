@@ -79,7 +79,7 @@
 - Capacidades MCP: `nomina.midt.listar`, `nomina.midt.exportar_pendientes`, `nomina.midt.datos` y `nomina.midt.registrar` (marca con comprobante; lecturas auditadas).
 - Pantalla `/remuneraciones/cumplimiento-dt/contratos` (diseño 07): segmento Por registrar / Registrados, descarga CSV, datos por fila y diálogo Marcar registrado. Navegación «Cumplimiento DT». Sin API Mi DT.
 
-- **Pendiente:** entitlements del complemento. Cálculo completo del finiquito (diseño 08) sigue fuera de alcance.
+- **Pendiente:** gate del LRE/Previred bajo el complemento (hoy siguen con solo `nomina`). Carta art. 162 y comprobantes en ficha finiquito (diseño 08 parcial).
 
 ### Pago banco (PR apilado sobre F29)
 
@@ -88,6 +88,16 @@
 ### F29 retención (PR apilado sobre finiquitos)
 
 - `nomina.f29.generar`: Excel con retenciones de impuesto único del período; tarjeta en Archivos. Formato por verificar.
+
+### Complemento Cumplimiento DT · entitlements (PR apilado sobre #1007)
+
+- Catálogo `nomina.cumplimiento_dt` (ADR-057, CAR-204): cobro por trabajador, depende de `nomina`.
+- Navegación y capacidades Mi DT exigen el complemento activo; semilla `gard` lo activa junto a nómina.
+
+### Finiquito diseño 08 · propuesta (PR apilado sobre entitlements)
+
+- Dominio `propuestaFiniquito`, capacidad `nomina.finiquito.obtener`, ficha `/remuneraciones/cumplimiento-dt/finiquitos/[vinculoId]`.
+- Sin feriado proporcional ni carta art. 162 (contador de vacaciones y documentos pendientes).
 
 ### Finiquitos Mi DT (PR apilado sobre #1004)
 
