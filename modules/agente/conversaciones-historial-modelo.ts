@@ -12,12 +12,28 @@ function aModelo(rol: "usuario" | "agente", texto: string): Mensaje | null {
   return rol === "usuario" ? { rol: "usuario", texto: t } : { rol: "asistente", texto: t };
 }
 
+function longitudTexto(m: Mensaje): number {
+  switch (m.rol) {
+    case "asistente":
+      return m.texto?.length ?? 0;
+    case "usuario":
+    case "sistema":
+      return m.texto.length;
+    case "herramienta":
+      return m.resultado.length;
+    default: {
+      const _agotado: never = m;
+      return 0;
+    }
+  }
+}
+
 function recortarCola(mensajes: Mensaje[]): Mensaje[] {
   let total = 0;
   const out: Mensaje[] = [];
   for (let i = mensajes.length - 1; i >= 0; i--) {
     const m = mensajes[i]!;
-    const len = m.rol === "asistente" ? (m.texto?.length ?? 0) : m.texto.length;
+    const len = longitudTexto(m);
     if (total + len > TOPE_HISTORIAL_CHARS && out.length) break;
     total += len;
     out.unshift(m);
