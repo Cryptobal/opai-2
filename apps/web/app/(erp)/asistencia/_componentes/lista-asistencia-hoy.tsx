@@ -1,5 +1,6 @@
 import { Badge, cn, GRILLA_KPI_HILO, KpiTile, ListScreen } from "@opai/ds";
 import type { Resultado } from "@opai/capabilities";
+import { formatearHora } from "@opai/domain";
 
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -66,6 +67,52 @@ function hrefMas(p: Record<string, string | null | undefined>, cursor: string) {
   return `/asistencia?${q}`;
 }
 
+function hora(v: string | null, zona: string) {
+  return v ? formatearHora(v, zona) : "—";
+}
+
+function TarjetaAsistencia({ x, zona }: { x: Item; zona: string }) {
+  const h = (v: string | null) => hora(v, zona);
+  return (
+    <span className="flex min-w-0 flex-1 flex-col gap-1">
+      <span className="flex items-center gap-2">
+        <span className="truncate text-base font-medium text-fg">{x.nombre}</span>
+        <Badge tono={ESTADOS[x.estado]?.tono ?? "neutro"}>{ESTADOS[x.estado]?.etiqueta ?? x.estado}</Badge>
+      </span>
+      <span className="t-caption">
+        {x.instalacion ?? "Sin instalación"} · Turno {h(x.turnoInicio)}–{h(x.turnoFin)} · Entrada {h(x.entrada)}
+        {x.atrasoMin > 0 ? ` · Atraso ${duracion(x.atrasoMin)}` : ""}
+        {x.correccionPendiente ? " · Corrección pendiente" : ""}
+        {x.marcaFueraDeTurno ? " · Marca fuera de turno" : ""}
+      </span>
+    </span>
+  );
+}
+
+function columnasAsistencia(zona: string) {
+  const h = (v: string | null) => hora(v, zona);
+  return [
+    { id: "persona", etiqueta: "Persona", render: (x: Item) => x.nombre },
+    { id: "instalacion", etiqueta: "Instalación", render: (x: Item) => x.instalacion ?? "—" },
+    { id: "turno", etiqueta: "Turno", render: (x: Item) => `${h(x.turnoInicio)}–${h(x.turnoFin)}` },
+    { id: "entrada", etiqueta: "Entrada", render: (x: Item) => h(x.entrada) },
+    { id: "salida", etiqueta: "Salida", render: (x: Item) => h(x.salida) },
+    { id: "atraso", etiqueta: "Atraso", render: (x: Item) => (x.atrasoMin > 0 ? duracion(x.atrasoMin) : "—") },
+    {
+      id: "estado",
+      etiqueta: "Estado",
+      render: (x: Item) => (
+        <span className="flex flex-wrap items-center gap-1">
+          <Badge tono={ESTADOS[x.estado]?.tono ?? "neutro"}>{ESTADOS[x.estado]?.etiqueta ?? x.estado}</Badge>
+          {x.correccionPendiente ? <Badge tono="info">Corrección pendiente</Badge> : null}
+          {x.descansoInsuficiente ? <Badge tono="warning">Descanso insuficiente</Badge> : null}
+          {x.marcaFueraDeTurno ? <Badge tono="warning">Marca fuera de turno</Badge> : null}
+        </span>
+      ),
+    },
+  ];
+}
+
 export function ListaAsistenciaHoyErp({
   resultado,
   parametros,
@@ -74,8 +121,7 @@ export function ListaAsistenciaHoyErp({
   parametros: Record<string, string | null | undefined>;
 }) {
   const d = resultado.ok ? resultado.data : null;
-  const hora = new Intl.DateTimeFormat("es-CL", { timeStyle: "short", hourCycle: "h23", timeZone: d?.zona ?? "America/Santiago" });
-  const h = (v: string | null) => (v ? hora.format(new Date(v)) : "—");
+  const zona = d?.zona ?? "America/Santiago";
 
   return (
     <div className="flex flex-col gap-4">
@@ -93,40 +139,8 @@ export function ListaAsistenciaHoyErp({
         }
         items={d?.items ?? []}
         clave={(x) => x.personaId}
-        tarjeta={(x) => (
-          <span className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="flex items-center gap-2">
-              <span className="truncate text-base font-medium text-fg">{x.nombre}</span>
-              <Badge tono={ESTADOS[x.estado]?.tono ?? "neutro"}>{ESTADOS[x.estado]?.etiqueta ?? x.estado}</Badge>
-            </span>
-            <span className="t-caption">
-              {x.instalacion ?? "Sin instalación"} · Turno {h(x.turnoInicio)}–{h(x.turnoFin)} · Entrada {h(x.entrada)}
-              {x.atrasoMin > 0 ? ` · Atraso ${duracion(x.atrasoMin)}` : ""}
-              {x.correccionPendiente ? " · Corrección pendiente" : ""}
-              {x.marcaFueraDeTurno ? " · Marca fuera de turno" : ""}
-            </span>
-          </span>
-        )}
-        columnas={[
-          { id: "persona", etiqueta: "Persona", render: (x) => x.nombre },
-          { id: "instalacion", etiqueta: "Instalación", render: (x) => x.instalacion ?? "—" },
-          { id: "turno", etiqueta: "Turno", render: (x) => `${h(x.turnoInicio)}–${h(x.turnoFin)}` },
-          { id: "entrada", etiqueta: "Entrada", render: (x) => h(x.entrada) },
-          { id: "salida", etiqueta: "Salida", render: (x) => h(x.salida) },
-          { id: "atraso", etiqueta: "Atraso", render: (x) => (x.atrasoMin > 0 ? duracion(x.atrasoMin) : "—") },
-          {
-            id: "estado",
-            etiqueta: "Estado",
-            render: (x) => (
-              <span className="flex flex-wrap items-center gap-1">
-                <Badge tono={ESTADOS[x.estado]?.tono ?? "neutro"}>{ESTADOS[x.estado]?.etiqueta ?? x.estado}</Badge>
-                {x.correccionPendiente ? <Badge tono="info">Corrección pendiente</Badge> : null}
-                {x.descansoInsuficiente ? <Badge tono="warning">Descanso insuficiente</Badge> : null}
-                {x.marcaFueraDeTurno ? <Badge tono="warning">Marca fuera de turno</Badge> : null}
-              </span>
-            ),
-          },
-        ]}
+        tarjeta={(x) => <TarjetaAsistencia x={x} zona={zona} />}
+        columnas={columnasAsistencia(zona)}
         textos={{ vacio: { titulo: "Sin turnos hoy", descripcion: "Cuando haya turnos esperados para hoy, aparecerán aquí con su asistencia." } }}
       />
       {d?.siguiente ? (

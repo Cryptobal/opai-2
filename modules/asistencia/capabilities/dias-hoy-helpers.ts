@@ -71,26 +71,39 @@ export async function itemsResumenDia(
   for (const t of turnosTodos) {
     if (vistos.has(t.personaId)) continue;
     vistos.add(t.personaId);
-    const d = await calcularDia(ctx, t.personaId, hoy, ahora, zona, alcanceInst);
-    items.push({
-      personaId: t.personaId,
-      nombre: nombre.get(t.personaId) ?? "",
-      instalacionId: d.instalacionId,
-      instalacion: d.instalacionId ? (instalacion.get(d.instalacionId) ?? null) : null,
-      turnoInicio: d.turno?.inicio.toISOString() ?? null,
-      turnoFin: d.turno?.fin.toISOString() ?? null,
-      entrada: d.entrada?.toISOString() ?? null,
-      salida: d.salida?.toISOString() ?? null,
-      estado: d.estado,
-      sigla: d.sigla,
-      atrasoMin: Math.floor(d.segundosAtraso / 60),
-      tipoJornada: d.tipoJornada,
-      correccionPendiente: d.correccionPendiente,
-      descansoInsuficiente: d.descansoInsuficiente,
-      marcaFueraDeTurno: d.marcaFueraDeTurno,
-    });
+    items.push(await itemDiaPersona(ctx, t.personaId, hoy, ahora, zona, alcanceInst, nombre, instalacion));
   }
   return items;
+}
+
+async function itemDiaPersona(
+  ctx: Contexto,
+  personaId: string,
+  hoy: string,
+  ahora: Date,
+  zona: string,
+  alcanceInst: string[] | undefined,
+  nombre: Map<string, string>,
+  instalacion: Map<string, string>,
+) {
+  const d = await calcularDia(ctx, personaId, hoy, ahora, zona, alcanceInst);
+  return {
+    personaId,
+    nombre: nombre.get(personaId) ?? "",
+    instalacionId: d.instalacionId,
+    instalacion: d.instalacionId ? (instalacion.get(d.instalacionId) ?? null) : null,
+    turnoInicio: d.turno?.inicio.toISOString() ?? null,
+    turnoFin: d.turno?.fin.toISOString() ?? null,
+    entrada: d.entrada?.toISOString() ?? null,
+    salida: d.salida?.toISOString() ?? null,
+    estado: d.estado,
+    sigla: d.sigla,
+    atrasoMin: Math.floor(d.segundosAtraso / 60),
+    tipoJornada: d.tipoJornada,
+    correccionPendiente: d.correccionPendiente,
+    descansoInsuficiente: d.descansoInsuficiente,
+    marcaFueraDeTurno: d.marcaFueraDeTurno,
+  };
 }
 
 export function resumenItems(items: Item[]) {
