@@ -5,7 +5,7 @@ export const TIPOS_AUSENCIA = [
   { valor: "ausencia", etiqueta: "Ausencia" },
 ] as const;
 
-export type TipoAusencia = (typeof TIPOS_AUSENCIA)[number]["valor"];
+type TipoAusencia = (typeof TIPOS_AUSENCIA)[number]["valor"];
 
 export const etiquetaTipo = (t: string) => TIPOS_AUSENCIA.find((x) => x.valor === t)?.etiqueta ?? t;
 
