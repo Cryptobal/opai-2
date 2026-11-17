@@ -108,7 +108,7 @@ export function AgregarEntrada({
             id="ae-alcance"
             valor={b.alcance}
             opciones={ALCANCES_LISTA}
-            onCambiar={(v) => set({ ...b, alcance: v as AlcanceLista, grupoId: "" })}
+            onCambiar={(v) => setB({ ...b, alcance: v as AlcanceLista, grupoId: "" })}
           />
         </Campo>
         {b.alcance === "grupo" ? (
@@ -120,7 +120,7 @@ export function AgregarEntrada({
                 { valor: "", etiqueta: "Elige un grupo…" },
                 ...gruposDeInstalacion.map((g) => ({ valor: g.id, etiqueta: g.nombre })),
               ]}
-              onCambiar={(v) => set({ ...b, grupoId: v })}
+              onCambiar={(v) => setB({ ...b, grupoId: v })}
             />
           </Campo>
         ) : null}

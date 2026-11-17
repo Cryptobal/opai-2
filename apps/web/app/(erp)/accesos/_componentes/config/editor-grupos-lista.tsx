@@ -30,7 +30,7 @@ export function EditorGruposLista({
     if (!r) return;
     setGs(
       r.map((g) => ({
-        id: g.id,
+        ...(g.id ? { id: g.id } : {}),
         nombre: g.nombre,
         instalacionIds: g.instalacionIds,
       })),
