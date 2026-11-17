@@ -109,3 +109,7 @@ No se portan por decisión (backlog): protocolo y exámenes (Conocimiento), cám
 | I7 | Finanzas en la ficha | Enlazar la rentabilidad por instalación (CAR-174) y el gasto rendido (Rendiciones) | Tarjeta en Resumen con enlace al informe | Baja |
 
 No se proponen tickets para el patrón de ficha ni para pestañas cortadas: ya están en CAR-550 y CAR-557.
+
+## Tickets creados (16-nov)
+
+I1 CAR-595 · I2 CAR-596 · I3 CAR-607 · I4 CAR-608 · I5 CAR-609 · I6 CAR-610 (proyecto 11 Portales) · I7 CAR-611. Transversal: CAR-624 (listas que descartan `siguiente`, proyecto 22).
