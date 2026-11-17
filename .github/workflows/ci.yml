@@ -24,47 +24,14 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
-  # El gate corre en tres jobs paralelos (typecheck, lint · test, test:db) y el job «gate» los resume con
-  # el nombre del check obligatorio del ruleset. Antes iban en serie en un solo job de 25 a 35 min.
-  typecheck:
-    name: typecheck
+  # El gate corre en paralelo (typecheck · lint, test en 2 partes y test:db en 3) y el job «gate» lo
+  # resume con el nombre del check obligatorio del ruleset. Antes iba en serie en un solo job de 25 a
+  # 35 min. En la cola de merge los jobs obligatorios usan runners de GitHub: un runner Spot cortado a
+  # media corrida saca al PR de la cola (17-nov-2026).
+  typecheck-lint:
+    name: typecheck · lint
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 25
-    env:
-      TURBO_CACHE_DIR: .turbo
-      NODE_OPTIONS: --max-old-space-size=4096
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Detectar solo documentación
-        id: solo_docs
-        run: .github/scripts/ci-solo-documentacion.sh
-      - name: Ampliar swap (runner ~7 GB)
-        if: steps.solo_docs.outputs.only_docs != 'true' && runner.environment == 'github-hosted'
-        run: |
-          sudo swapoff -a 2>/dev/null || true
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-          free -h
-      - uses: ./.github/actions/preparar
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        with:
-          turbo: typecheck
-      # Un tsc por cada 2 CPU: 4 en los runners 2xlarge y 1 en los de 2 CPU (cada tsc usa hasta 4 GB).
-      - name: typecheck
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        run: |
-          n=$(( $(nproc) / 2 ))
-          pnpm turbo run typecheck --concurrency="$(( n > 0 ? n : 1 ))"
-
-  lint-test:
-    name: lint · test
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 20
     env:
       TURBO_CACHE_DIR: .turbo
@@ -76,23 +43,64 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
-      - name: Aviso de novedad in-app (CAR-260, no bloquea)
-        if: github.event_name == 'pull_request' && steps.solo_docs.outputs.only_docs != 'true'
-        run: .github/scripts/ci-novedad-visual.sh
       - uses: ./.github/actions/preparar
         if: steps.solo_docs.outputs.only_docs != 'true'
         with:
-          turbo: lint
-      - run: pnpm turbo run lint --concurrency=1
+          turbo: typecheck
+      # Un tsc por CPU (dejando una libre) y por cada 4 GB de memoria: 7 en un 2xlarge, 3 en un runner
+      # de GitHub y 1 en una máquina de 2 CPU.
+      - name: typecheck
         if: steps.solo_docs.outputs.only_docs != 'true'
-      - run: pnpm test
+        run: |
+          cpus=$(( $(nproc) - 1 ))
+          mem=$(awk '/MemTotal/ { print int($2 / 1048576 / 4) }' /proc/meminfo)
+          n=$(( cpus < mem ? cpus : mem ))
+          pnpm turbo run typecheck --concurrency="$(( n > 0 ? n : 1 ))"
+      - name: lint
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        run: pnpm turbo run lint --concurrency=2
+
+  test:
+    name: test ${{ matrix.parte }}/2
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [1, 2]
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - name: Aviso de novedad in-app (CAR-260, no bloquea)
+        if: github.event_name == 'pull_request' && steps.solo_docs.outputs.only_docs != 'true' && matrix.parte == 1
+        run: .github/scripts/ci-novedad-visual.sh
+      - uses: ./.github/actions/preparar
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - run: pnpm test --shard=${{ matrix.parte }}/2
         if: steps.solo_docs.outputs.only_docs != 'true'
 
   test-db:
-    name: test:db
+    name: test:db · ${{ matrix.nombre }}
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 25
+    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nombre: base y auth
+            comando: pnpm test:db:base
+          - nombre: capacidades 1/2
+            comando: pnpm test:db:capacidades --shard=1/2
+          - nombre: capacidades 2/2
+            comando: pnpm test:db:capacidades --shard=2/2
     services:
       postgres:
         image: postgres:16
@@ -110,12 +118,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      # test:db corre siempre fuera de los PR y, en un PR, cuando toca código que esas pruebas ejercen
-      # (paquetes y módulos, salvo el DS), no solo Prisma: así un PR no llega verde a la cola de merge
-      # para caer ahí en test:db (17-nov-2026, #1036).
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
+      # test:db corre siempre fuera de los PR y, en un PR, cuando toca código que esas pruebas ejercen
+      # (paquetes y módulos, salvo el DS), no solo Prisma: así un PR no llega verde a la cola de merge
+      # para caer ahí en test:db (17-nov-2026, #1036).
       - name: Detectar cambios de base
         id: base
         env:
@@ -132,7 +140,7 @@ jobs:
             exit 0
           fi
           if git diff --name-only "$BASE...$HEAD" \
-            | grep -E '^(packages|modules)/|(^|/)prisma/|/migrations/|^pnpm-lock\.yaml$|^\.github/(workflows/ci\.yml|actions/)' \
+            | grep -E '^(packages|modules)/|(^|/)prisma/|/migrations/|^(package\.json|pnpm-lock\.yaml)$|^\.github/(workflows/ci\.yml|actions/)' \
             | grep -vE '^packages/ds/' | grep -q .; then
             echo "db=true" >> "$GITHUB_OUTPUT"
           else
@@ -144,25 +152,25 @@ jobs:
         if: steps.base.outputs.db == 'true'
         run: |
           rm -f "${TMPDIR:-/tmp}/opai_cron_sii_test_pwd"
-          pnpm test:db
+          ${{ matrix.comando }}
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
 
   gate:
     name: typecheck · lint · test · test:db
-    needs: [typecheck, lint-test, test-db]
+    needs: [typecheck-lint, test, test-db]
     if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
-      - name: Comprobar typecheck, lint · test y test:db
+      - name: Comprobar typecheck · lint, test y test:db
         env:
-          TYPECHECK: ${{ needs.typecheck.result }}
-          LINT_TEST: ${{ needs.lint-test.result }}
+          TYPECHECK_LINT: ${{ needs.typecheck-lint.result }}
+          TEST: ${{ needs.test.result }}
           TEST_DB: ${{ needs.test-db.result }}
         run: |
-          echo "typecheck=$TYPECHECK lint-test=$LINT_TEST test-db=$TEST_DB"
-          test "$TYPECHECK" = success && test "$LINT_TEST" = success && test "$TEST_DB" = success
+          echo "typecheck-lint=$TYPECHECK_LINT test=$TEST test-db=$TEST_DB"
+          test "$TYPECHECK_LINT" = success && test "$TEST" = success && test "$TEST_DB" = success
 
   presupuesto:
     name: build · presupuesto de JS
@@ -204,7 +212,7 @@ jobs:
   secretos:
     name: secretos
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'merge_group' && 'ubuntu-latest' || vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
