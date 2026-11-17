@@ -8,7 +8,7 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
 export const destinoSchema = {
-  personaId: z.uuid().optional().describe("Persona que recibe. Con CAR-487 se imputa a su instalación vigente."),
+  personaId: z.uuid().optional().describe("Persona que recibe; se imputa a su instalación vigente."),
   instalacionId: z
     .uuid()
     .optional()
