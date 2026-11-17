@@ -5,7 +5,10 @@ const META_DEK = "evacuacion-dek";
 
 type Sobre = { iv: string; ct: string };
 
-const b64 = (b: ArrayBuffer) => btoa(String.fromCharCode(...new Uint8Array(b)));
+const b64 = (b: ArrayBuffer | Uint8Array) => {
+  const u8 = b instanceof Uint8Array ? b : new Uint8Array(b);
+  return btoa(String.fromCharCode(...u8));
+};
 const deB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
 /** Día operativo de control de acceso en Chile (mismo criterio que el servidor: «hoy» en sitio). */

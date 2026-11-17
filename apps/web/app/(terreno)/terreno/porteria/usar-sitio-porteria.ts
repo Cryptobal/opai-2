@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import type { ConfigAcceso } from "@opai/domain/acceso-config";
+
 import {
   guardarEvacuacion,
   leerEvacuacion,
@@ -9,13 +11,29 @@ import {
 } from "@/lib/terreno/evacuacion";
 import { instantanea, suscribir } from "@/lib/terreno/estado";
 
+import type { Bienvenida } from "./bienvenida-porteria";
 import type { EnSitio } from "./lista-en-sitio";
+import type { PuntoPorteria } from "./punto-porteria";
 
-type Sitio = { activo: boolean; items: EnSitio[] };
+export type SitioPorteria = {
+  activo: boolean;
+  config: ConfigAcceso | null;
+  puntos: PuntoPorteria[];
+  bienvenida: Bienvenida | null;
+  items: EnSitio[];
+};
+
+const sitioDeCopia = (items: EnSitio[]): SitioPorteria => ({
+  activo: true,
+  config: null,
+  puntos: [],
+  bienvenida: null,
+  items,
+});
 
 /** Carga «en sitio» del servidor, copia cifrada offline (R26) y estado de conexión. */
 export function usarSitioPorteria() {
-  const [sitio, setSitio] = useState<Sitio | null>(null);
+  const [sitio, setSitio] = useState<SitioPorteria | null>(null);
   const [copia, setCopia] = useState<SnapshotEvacuacion | null>(null);
   const [sinRed, setSinRed] = useState(false);
   const [falla, setFalla] = useState(false);
@@ -32,13 +50,13 @@ export function usarSitioPorteria() {
   useEffect(() => {
     let vivo = true;
     const usarCopia = (snap: SnapshotEvacuacion) => {
-      setSitio({ activo: true, items: snap.items });
+      setSitio(sitioDeCopia(snap.items));
       setSinRed(true);
       setFalla(false);
     };
     fetch("/api/terreno/porteria/sitio", { cache: "no-store", credentials: "same-origin" })
       .then((r) =>
-        r.ok ? (r.json() as Promise<Sitio>) : Promise.reject(new Error(String(r.status))),
+        r.ok ? (r.json() as Promise<SitioPorteria>) : Promise.reject(new Error(String(r.status))),
       )
       .then(async (x) => {
         if (!vivo) return;
@@ -77,7 +95,7 @@ export function usarSitioPorteria() {
     }
     void leerEvacuacion().then((snap) => {
       if (snap?.items.length) {
-        setSitio({ activo: true, items: snap.items });
+        setSitio(sitioDeCopia(snap.items));
         setSinRed(true);
         setCopia(snap);
       }
