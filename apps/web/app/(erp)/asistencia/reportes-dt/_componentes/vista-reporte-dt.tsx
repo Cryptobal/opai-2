@@ -1,5 +1,7 @@
 import { SIGLAS } from "@opai/mod-asistencia/domain/siglas";
-import { Alerta, Badge, Table, Td, Th, Tr, cn, estilosBoton } from "@opai/ds";
+import { Alerta, Badge, Table, Td, Th, Tr, cn } from "@opai/ds";
+
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import type { VistaReporteDt } from "./tipos";
 
 function urlExport(params: Record<string, string | undefined>, formato: "xlsx" | "pdf") {
@@ -34,12 +36,12 @@ function EncabezadoReporteDt({
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <a className={estilosBoton({ variant: "secondary" })} href={urlExport(params, "xlsx")}>
+        <EnlaceBoton href={urlExport(params, "xlsx")} variante="secondary">
           Excel
-        </a>
-        <a className={estilosBoton({ variant: "secondary" })} href={urlExport(params, "pdf")}>
+        </EnlaceBoton>
+        <EnlaceBoton href={urlExport(params, "pdf")} variante="secondary">
           PDF
-        </a>
+        </EnlaceBoton>
       </div>
     </div>
     {vista.provisorio ? (
