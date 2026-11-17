@@ -23,8 +23,6 @@ const OPCIONES = {
 
 import { FORM_INTEGRACION } from "../../_centro/formularios";
 
-export { FORM_INTEGRACION } from "../../_centro/formularios";
-
 /** Modalidad y configuración no secreta (29); "Guardar" de la barra superior envía este formulario. */
 export function FormIntegracion({
   items,

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import type { Contexto } from "@opai/capabilities";
 
 import { PERMISO_ATENDER, uuidSchema } from "./esquemas";
 
@@ -10,16 +11,34 @@ const persona = (ctx: { usuario: { id: string } | null }) => {
   return ctx.usuario.id;
 };
 
-export const turnoAbrir = defineCapability({
-  id: "central.turno.abrir",
-  descripcion: "Abre tu turno de central: desde ahora eres la persona a cargo y respondes por el agente.",
-  permiso: PERMISO_ATENDER,
-  soloPersonas: true, // R12: quien está a cargo es siempre una persona.
-  input: z.object({}),
-  output: salida,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, _i, { dryRun }) {
+type SalidaTurno = z.infer<typeof salida>;
+
+function turnoPersona<Input extends z.ZodTypeAny>(
+  id: string,
+  descripcion: string,
+  input: Input,
+  handler: (ctx: Contexto, input: z.infer<Input>, dryRun: boolean) => Promise<SalidaTurno>,
+) {
+  return defineCapability({
+    id,
+    descripcion,
+    permiso: PERMISO_ATENDER,
+    soloPersonas: true,
+    input,
+    output: salida,
+    efecto: "escritura",
+    dryRun: true,
+    async handler(ctx, i, { dryRun }) {
+      return handler(ctx, i, dryRun);
+    },
+  });
+}
+
+export const turnoAbrir = turnoPersona(
+  "central.turno.abrir",
+  "Abre tu turno de central: desde ahora eres la persona a cargo y respondes por el agente.",
+  z.object({}),
+  async (ctx, _i, dryRun) => {
     const yo = persona(ctx);
     if (await ctx.db.centralTurno.findFirst({ where: { estado: { not: "cerrado" } }, select: { id: true } }))
       throw reglaDeNegocio("Ya hay un turno de central abierto: pide que te lo entreguen.");
@@ -27,24 +46,17 @@ export const turnoAbrir = defineCapability({
     const t = await ctx
       .transaccion((tx) => tx.centralTurno.create({ data: { tenantId: ctx.tenantId, operadorId: yo } }))
       .catch((e: unknown) => {
-        // Dos aperturas a la vez: el índice único deja una sola.
         throw (e as { code?: string }).code === "P2002" ? reglaDeNegocio("Ya hay un turno de central abierto.") : e;
       });
     return { id: t.id, estado: t.estado };
   },
-});
+);
 
-export const turnoEntregar = defineCapability({
-  id: "central.turno.entregar",
-  descripcion:
-    "Entrega tu turno de central a otra persona con una nota (alertas abiertas, pendientes); queda en entrega hasta que ella lo acepte.",
-  permiso: PERMISO_ATENDER,
-  soloPersonas: true, // R15: la entrega es entre personas.
-  input: z.object({ aUsuarioId: uuidSchema, nota: z.string().trim().max(2000).default("") }),
-  output: salida,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, i, { dryRun }) {
+export const turnoEntregar = turnoPersona(
+  "central.turno.entregar",
+  "Entrega tu turno de central a otra persona con una nota (alertas abiertas, pendientes); queda en entrega hasta que ella lo acepte.",
+  z.object({ aUsuarioId: uuidSchema, nota: z.string().trim().max(2000).default("") }),
+  async (ctx, i, dryRun) => {
     const yo = persona(ctx);
     const t = await ctx.db.centralTurno.findFirst({ where: { estado: "abierto", operadorId: yo } });
     if (!t) throw reglaDeNegocio("No tienes un turno de central abierto.");
@@ -61,19 +73,13 @@ export const turnoEntregar = defineCapability({
     });
     return { id: t.id, estado: "en_entrega" };
   },
-});
+);
 
-export const turnoAceptar = defineCapability({
-  id: "central.turno.aceptar",
-  descripcion:
-    "Acepta el turno de central que te entregaron: el anterior se cierra y las alertas que tenía tomadas pasan a tu nombre.",
-  permiso: PERMISO_ATENDER,
-  soloPersonas: true, // R15.
-  input: z.object({}),
-  output: salida,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, _i, { dryRun }) {
+export const turnoAceptar = turnoPersona(
+  "central.turno.aceptar",
+  "Acepta el turno de central que te entregaron: el anterior se cierra y las alertas que tenía tomadas pasan a tu nombre.",
+  z.object({}),
+  async (ctx, _i, dryRun) => {
     const yo = persona(ctx);
     const t = await ctx.db.centralTurno.findFirst({ where: { estado: "en_entrega", entregaAId: yo } });
     if (!t) throw reglaDeNegocio("No hay un turno de central entregado a ti.");
@@ -89,19 +95,13 @@ export const turnoAceptar = defineCapability({
     });
     return { id: nuevo.id, estado: nuevo.estado };
   },
-});
+);
 
-export const turnoCerrar = defineCapability({
-  id: "central.turno.cerrar",
-  descripcion:
-    "Cierra tu turno de central sin entregarlo: queda a cargo el responsable de respaldo; tus alertas tomadas siguen a tu nombre.",
-  permiso: PERMISO_ATENDER,
-  soloPersonas: true, // R12.
-  input: z.object({}),
-  output: salida,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, _i, { dryRun }) {
+export const turnoCerrar = turnoPersona(
+  "central.turno.cerrar",
+  "Cierra tu turno de central sin entregarlo: queda a cargo el responsable de respaldo; tus alertas tomadas siguen a tu nombre.",
+  z.object({}),
+  async (ctx, _i, dryRun) => {
     const yo = persona(ctx);
     const t = await ctx.db.centralTurno.findFirst({ where: { estado: { not: "cerrado" }, operadorId: yo } });
     if (!t) throw reglaDeNegocio("No tienes un turno de central abierto.");
@@ -114,4 +114,4 @@ export const turnoCerrar = defineCapability({
     );
     return { id: t.id, estado: "cerrado" };
   },
-});
+);

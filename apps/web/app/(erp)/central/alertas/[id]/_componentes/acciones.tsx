@@ -9,6 +9,7 @@ import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { GrupoBotonesActivos } from "./grupo-botones";
 import type { ConNota } from "./dialogos";
 
 const DialogosAlerta = dynamic(() => import("./dialogos"));
@@ -16,6 +17,7 @@ const DialogosAlerta = dynamic(() => import("./dialogos"));
 type Props = { id: string; estado: string };
 
 const ACTIVOS = new Set(["nueva", "en_contacto", "escalada", "en_atencion", "pospuesta"]);
+
 /** Acciones de la alerta (spec §6): cada botón llama a la misma capacidad que el MCP. */
 export function AccionesAlerta({ id, estado }: Props) {
   const router = useRouter();
@@ -42,32 +44,16 @@ export function AccionesAlerta({ id, estado }: Props) {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {activa && estado !== "en_atencion" && estado !== "pospuesta" ? (
-        <Button variant="primary" disabled={pendiente} onClick={() => correr(ejecutar("central.alertas.hacerse_cargo", { id }), "Quedaste a cargo")}>
-          Me hago cargo
-        </Button>
-      ) : null}
       {activa ? (
-        <>
-          {estado !== "pospuesta" ? (
-            <Button variant={estado === "en_atencion" ? "primary" : "secondary"} disabled={pendiente} onClick={() => setDialogo("resolver")}>
-              Resolver
-            </Button>
-          ) : null}
-          <Button variant="secondary" disabled={pendiente} onClick={() => setDialogo("falsa_alarma")}>
-            Falsa alarma
-          </Button>
-          {estado !== "pospuesta" ? (
-            <Button variant="secondary" disabled={pendiente} onClick={() => setDialogo("posponer")}>
-              Posponer
-            </Button>
-          ) : null}
-          {estado !== "pospuesta" ? (
-            <Button variant="secondary" disabled={pendiente} onClick={() => correr(ejecutar("central.alertas.escalar", { id }), "Alerta escalada")}>
-              Escalar
-            </Button>
-          ) : null}
-        </>
+        <GrupoBotonesActivos
+          estado={estado}
+          pendiente={pendiente}
+          onCargo={() => correr(ejecutar("central.alertas.hacerse_cargo", { id }), "Quedaste a cargo")}
+          onResolver={() => setDialogo("resolver")}
+          onFalsa={() => setDialogo("falsa_alarma")}
+          onPosponer={() => setDialogo("posponer")}
+          onEscalar={() => correr(ejecutar("central.alertas.escalar", { id }), "Alerta escalada")}
+        />
       ) : (
         <Button variant="secondary" disabled={pendiente} onClick={() => setDialogo("reabrir")}>
           Reabrir
