@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-  "lineasDuplicadas": 3210,
-=======
-  "lineasDuplicadas": 3207,
->>>>>>> origin/main
+  "lineasDuplicadas": 3194,
   "archivosLargos": 36,
   "funcionesLargas": 666,
   "exportacionesSinUso": 203,
