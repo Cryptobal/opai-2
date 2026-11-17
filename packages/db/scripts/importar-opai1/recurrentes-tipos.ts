@@ -16,7 +16,7 @@ export type LineaProgramacion = {
   tieneCuentaContable1_0: boolean;
 };
 
-export type ReceptorCongelado = {
+type ReceptorCongelado = {
   rut: string | null;
   razonSocial: string | null;
   giro: string | null;

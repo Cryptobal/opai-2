@@ -3,6 +3,7 @@
 import type {
   HechoBitacora,
   AppConectada,
+  EventoVerComo,
   MetodosUsuario,
   OrigenCambio,
   ResultadoBorrado,
@@ -149,6 +150,8 @@ export type Identidad = {
     clientId: string,
     o: OrigenCambio,
   ): Promise<boolean>;
+  /** Inicio o fin de «ver como» en la cadena `seguridad`, en la transacción del llamador (CAR-528). */
+  registrarVerComo(tx: TenantTx, e: EventoVerComo): Promise<void>;
   /** Consume la confirmación de identidad reciente (≤ 5 min) que dejó la pantalla. */
   consumirReautenticacion(tx: TenantTx, userId: string): Promise<boolean>;
   /** Borra un usuario sin rol de plataforma ni referencias, en la transacción del llamador. */
