@@ -1,4 +1,4 @@
-import { PageHeader, Table, Td, Th, Tr } from "@opai/ds";
+import { Cabecera, Table, Td, Th, Tr } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -24,10 +24,10 @@ export default function RespaldosAsistencia() {
     >
       {(r) => (
         <div className="flex flex-col gap-4">
-          <PageHeader
-            eyebrow="Asistencia"
-            title="Respaldos y retención"
-            subtitle={r.ok ? `Retención mínima: ${r.data.retencionAnios} años.` : "Respaldos de la bitácora con manifiesto SHA-256."}
+          <Cabecera
+            sobre="Asistencia"
+            titulo="Respaldos y retención"
+            subtitulo={r.ok ? `Retención mínima: ${r.data.retencionAnios} años.` : "Respaldos de la bitácora con manifiesto SHA-256."}
           />
           <Table etiqueta="Respaldos">
             <thead>
@@ -38,8 +38,8 @@ export default function RespaldosAsistencia() {
                 <Tr key={a.id}>
                   <Td>{a.generadoEn}</Td>
                   <Td>{a.origen}</Td>
-                  <Td numeric>{a.totalMarcas}</Td>
-                  <Td mono className="max-w-[200px] truncate">{a.manifiestoSha256}</Td>
+                  <Td className="tabular-nums text-right">{a.totalMarcas}</Td>
+                  <Td className="max-w-[200px] truncate font-mono">{a.manifiestoSha256}</Td>
                   <Td>{a.cadenaVerificadaOk ? "OK" : "—"}</Td>
                 </Tr>
               ))}

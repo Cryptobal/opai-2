@@ -1,4 +1,4 @@
-import { PageHeader, Table, Td, Th, Tr } from "@opai/ds";
+import { Cabecera, Table, Td, Th, Tr } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -17,7 +17,11 @@ export default function MandantesAsistencia() {
     >
       {(r) => (
         <div className="flex flex-col gap-4">
-          <PageHeader eyebrow="Asistencia" title="Accesos de mandante y EST" subtitle="Solo lectura a instalaciones elegidas." />
+          <Cabecera
+            sobre="Asistencia"
+            titulo="Accesos de mandante y EST"
+            subtitulo="Solo lectura a instalaciones elegidas."
+          />
           <Table etiqueta="Accesos activos y revocados">
             <thead>
               <Tr><Th>Correo</Th><Th>Tipo</Th><Th>Estado</Th><Th>Cuenta</Th></Tr>
@@ -25,7 +29,7 @@ export default function MandantesAsistencia() {
             <tbody>
               {(r.ok ? r.data.items : []).map((a) => (
                 <Tr key={a.id}>
-                  <Td>{a.correo}</Td><Td>{a.tipo}</Td><Td>{a.estado}</Td><Td mono>{a.cuentaId.slice(0, 8)}…</Td>
+                  <Td>{a.correo}</Td><Td>{a.tipo}</Td><Td>{a.estado}</Td><Td className="font-mono">{a.cuentaId.slice(0, 8)}…</Td>
                 </Tr>
               ))}
             </tbody>

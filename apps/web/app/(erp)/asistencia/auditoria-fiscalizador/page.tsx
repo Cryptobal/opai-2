@@ -1,4 +1,4 @@
-import { PageHeader, Table, Td, Th, Tr } from "@opai/ds";
+import { Cabecera, Table, Td, Th, Tr } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -17,7 +17,11 @@ export default function AuditoriaFiscalizador() {
     >
       {(r) => (
         <div className="flex flex-col gap-4">
-          <PageHeader eyebrow="Asistencia" title="Auditoría de accesos del fiscalizador" subtitle="Cada ingreso queda registrado y no se puede borrar." />
+          <Cabecera
+            sobre="Asistencia"
+            titulo="Auditoría de accesos del fiscalizador"
+            subtitulo="Cada ingreso queda registrado y no se puede borrar."
+          />
           <Table etiqueta="Accesos">
             <thead>
               <Tr><Th>Fecha</Th><Th>Correo</Th><Th>RUT</Th><Th>Vía</Th><Th>Detalle</Th></Tr>
@@ -25,7 +29,7 @@ export default function AuditoriaFiscalizador() {
             <tbody>
               {(r.ok ? r.data.items : []).map((a) => (
                 <Tr key={`${a.cuando}-${a.correo}`}>
-                  <Td>{a.cuando}</Td><Td>{a.correo}</Td><Td mono>{a.empleadorRut}</Td><Td>{a.via}</Td><Td>{a.detalle}</Td>
+                  <Td>{a.cuando}</Td><Td>{a.correo}</Td><Td className="font-mono">{a.empleadorRut}</Td><Td>{a.via}</Td><Td>{a.detalle}</Td>
                 </Tr>
               ))}
             </tbody>
