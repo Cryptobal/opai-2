@@ -45,18 +45,20 @@ async function sembrarEscenario(pg: Client): Promise<Escenario> {
     [tenant, `prob-${tenant.slice(0, 8)}`],
   );
   await pg.query(
-    `INSERT INTO core.cuentas (id, tenant_id, nombre, estado) VALUES ($1, $2, 'Cuenta', 'prospecto')`,
+    `INSERT INTO core.cuentas (id, tenant_id, nombre, estado, created_at, updated_at)
+     VALUES ($1, $2, 'Cuenta', 'prospecto', now(), now())`,
     [cuenta, tenant],
   );
   await pg.query(
-    `INSERT INTO comercial.embudos (id, tenant_id, nombre, por_defecto, activo) VALUES ($1, $2, 'V', true, true)`,
+    `INSERT INTO comercial.embudos (id, tenant_id, nombre, por_defecto, activo, created_at, updated_at)
+     VALUES ($1, $2, 'V', true, true, now(), now())`,
     [embudo, tenant],
   );
   await pg.query(
-    `INSERT INTO comercial.etapas (id, tenant_id, embudo_id, nombre, orden, tipo, probabilidad, tono, exige, activa)
-     VALUES ($1, $2, $3, 'Prospecto', 0, 'abierta', 10, 'neutral', '{}', true),
-            ($4, $2, $3, 'Propuesta enviada', 3, 'abierta', 50, 'warning', '{}', true),
-            ($5, $2, $3, 'Adjudicado', 6, 'ganada', 100, 'success', '{}', true)`,
+    `INSERT INTO comercial.etapas (id, tenant_id, embudo_id, nombre, orden, tipo, probabilidad, tono, exige, activa, created_at, updated_at)
+     VALUES ($1, $2, $3, 'Prospecto', 0, 'abierta', 10, 'neutral', '{}', true, now(), now()),
+            ($4, $2, $3, 'Propuesta enviada', 3, 'abierta', 50, 'warning', '{}', true, now(), now()),
+            ($5, $2, $3, 'Adjudicado', 6, 'ganada', 100, 'success', '{}', true, now(), now())`,
     [e0, tenant, embudo, e3, ganada],
   );
   const stale = id();
@@ -66,8 +68,8 @@ async function sembrarEscenario(pg: Client): Promise<Escenario> {
   const cerrado = id();
   const ins = async (nid: string, etapa: string, prob: number, estado: string) => {
     await pg.query(
-      `INSERT INTO comercial.negocios (id, tenant_id, cuenta_id, embudo_id, etapa_id, estado, titulo, probabilidad)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      `INSERT INTO comercial.negocios (id, tenant_id, cuenta_id, embudo_id, etapa_id, estado, titulo, probabilidad, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now())`,
       [nid, tenant, cuenta, embudo, etapa, estado, `N-${nid.slice(0, 6)}`, prob],
     );
   };
