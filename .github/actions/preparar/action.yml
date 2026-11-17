@@ -1,0 +1,36 @@
+# Preparación común de los jobs del gate: pnpm, Node, store de pnpm e instalación.
+name: preparar
+description: Instala pnpm, Node y las dependencias con el store en caché.
+inputs:
+  turbo:
+    description: Tarea de Turborepo cuya caché se restaura y guarda (vacío, sin caché de Turborepo).
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+    - name: Restaurar store de pnpm
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/pnpm/store
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+    - name: Instalar dependencias
+      shell: bash
+      run: .github/scripts/ci-install.sh
+    # La clave lleva el SHA para que cada corrida guarde su caché: con la clave fija por lockfile nunca
+    # se actualizaba y el typecheck rehacía casi todos los paquetes (3 de 26 en caché, 15 min).
+    - name: Restaurar caché de Turborepo
+      if: inputs.turbo != ''
+      uses: actions/cache@v4
+      with:
+        path: .turbo
+        key: ${{ runner.os }}-turbo-${{ inputs.turbo }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-${{ inputs.turbo }}-
+          ${{ runner.os }}-turbo-

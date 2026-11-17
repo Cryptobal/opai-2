@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Detecta PR/push/cola de merge cuyo diff solo toca *.md o docs/** (checks obligatorios en verde al instante).
+# Detecta PR/push/cola de merge cuyo diff solo toca *.md, docs/** o .github/** (sin código de app;
+# checks obligatorios en verde al instante; evita contenedor Postgres en runner con 5432 ocupado).
 set -euo pipefail
 
 case "${GITHUB_EVENT_NAME}" in
@@ -35,7 +36,7 @@ fi
 only_docs=true
 for f in "${files[@]}"; do
   case "$f" in
-    *.md|docs/*) ;;
+    *.md|docs/*|.github/*) ;;
     *)
       only_docs=false
       break
