@@ -1,16 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
-
 import { Alerta, AuthCard, Button, Campo, Input } from "@opai/ds";
 
 import { MarcarPin } from "@/app/_components/asistencia/marcar-pin";
-import { MarcarResultado, type MarcaListo } from "@/app/_components/asistencia/marcar-resultado";
-import { ubicacion } from "@/app/_components/asistencia/etiquetas";
+import { MarcarResultado } from "@/app/_components/asistencia/marcar-resultado";
 
-import { marcarPorEnlacePublico } from "./acciones";
+import { useMarcacionPublica } from "./use-marcacion-publica";
 
-/** Marca pública: RUT para ubicar la persona y PIN como en el kiosco (CAR-606). */
+/** Marca pública: RUT para ubicar la persona y PIN como en el kiosco. */
 export function FormularioMarcacionPublica({
   codigo,
   instalacion,
@@ -20,38 +17,12 @@ export function FormularioMarcacionPublica({
   instalacion: string;
   empresa: string;
 }) {
-  const [paso, setPaso] = useState<"rut" | "pin">("rut");
-  const [rut, setRut] = useState("");
-  const [pin, setPin] = useState("");
-  const [pendiente, setPendiente] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [listo, setListo] = useState<MarcaListo | null>(null);
-  const clave = useRef(crypto.randomUUID());
-
-  async function marcar() {
-    setPendiente(true);
-    setError(null);
-    const ub = await ubicacion();
-    const r = await marcarPorEnlacePublico(codigo, {
-      rut,
-      pin,
-      claveDispositivo: clave.current,
-      ...(ub ?? {}),
-    });
-    setPendiente(false);
-    if (!r.ok) {
-      setError(r.error.message);
-      setPin("");
-      return;
-    }
-    setListo((r.data as { marca: MarcaListo }).marca);
-  }
-
-  if (listo) return <MarcarResultado m={listo} instalacion={instalacion} />;
+  const m = useMarcacionPublica(codigo);
+  if (m.listo) return <MarcarResultado m={m.listo} instalacion={instalacion} />;
 
   return (
     <AuthCard titulo="Marcar asistencia" subtitulo={`${empresa} · ${instalacion}`}>
-      {paso === "rut" ? (
+      {m.paso === "rut" ? (
         <div className="flex flex-col gap-4">
           <Campo etiqueta="Tu RUT" htmlFor="rut" ayuda="Para identificarte antes de marcar.">
             <Input
@@ -60,37 +31,28 @@ export function FormularioMarcacionPublica({
               autoComplete="off"
               inputMode="text"
               placeholder="12.345.678-9"
-              value={rut}
-              onChange={(e) => setRut(e.target.value)}
+              value={m.rut}
+              onChange={(e) => m.setRut(e.target.value)}
               required
             />
           </Campo>
-          <Button size="lg" block onClick={() => rut.trim() && setPaso("pin")} disabled={!rut.trim()}>
+          <Button size="lg" block onClick={() => m.rut.trim() && m.setPaso("pin")} disabled={!m.rut.trim()}>
             Continuar
           </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {error ? <Alerta tono="danger" titulo={error} /> : null}
+          {m.error ? <Alerta tono="danger" titulo={m.error} /> : null}
           <MarcarPin
-            pin={pin}
-            onPin={setPin}
+            pin={m.pin}
+            onPin={m.setPin}
             motivo="otro"
             onMotivo={() => {}}
             pideMotivo={false}
-            pendiente={pendiente}
-            onMarcar={() => void marcar()}
+            pendiente={m.pendiente}
+            onMarcar={() => void m.marcar()}
           />
-          <Button
-            variant="ghost"
-            block
-            onClick={() => {
-              setPaso("rut");
-              setPin("");
-              setError(null);
-            }}
-            disabled={pendiente}
-          >
+          <Button variant="ghost" block onClick={m.cambiarRut} disabled={m.pendiente}>
             Cambiar RUT
           </Button>
         </div>

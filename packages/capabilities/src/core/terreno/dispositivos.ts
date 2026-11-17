@@ -7,8 +7,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import { dondeInstalacion } from "../maestros/alcance";
-import { quien } from "./comun";
+import { instalacionVisible, quien } from "./comun";
 
 const iso = (d: Date | null) => (d ? d.toISOString() : null);
 
@@ -34,16 +33,6 @@ const vista = (d: Fila) => ({
   versionApp: d.versionApp,
   revocadoEn: iso(d.revocadoEn),
 });
-
-/** La instalación dentro del alcance del actor, o NOT_FOUND (igual que si fuera de otra empresa). */
-async function instalacionVisible(ctx: Contexto, id: string) {
-  const i = await ctx.db.instalacion.findFirst({
-    where: { id, AND: [dondeInstalacion(ctx)] },
-    select: { id: true },
-  });
-  if (!i) throw noEncontrado("La instalación");
-  return i;
-}
 
 /** El dispositivo de una instalación dentro del alcance del actor, o NOT_FOUND. */
 async function dispositivoVisible(ctx: Contexto, id: string) {

@@ -1,15 +1,10 @@
 import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
+import { instalacionVisible } from "../../../packages/capabilities/src/core/terreno/comun";
 import { hmacDispositivo, normalizarCodigoMarcacionPublica, nuevoCodigoMarcacionPublica } from "@opai/db";
-import type { Contexto } from "@opai/capabilities";
 
 import { uuid } from "./esquemas";
-
-async function instalacionVisible(ctx: Contexto, instalacionId: string) {
-  const i = await ctx.db.instalacion.findFirst({ where: { id: instalacionId }, select: { id: true } });
-  if (!i) throw noEncontrado("La instalación");
-}
 
 const codigoSchema = z.object({
   aplicado: z.boolean(),
@@ -75,7 +70,7 @@ const enlacePublicoEstado = defineCapability({
 
 const codigoEntrada = z.string().min(4).max(16);
 
-export const enlacePublicoResolver = defineCapability({
+const enlacePublicoResolver = defineCapability({
   id: "asistencia.marcas.enlace_publico_resolver",
   descripcion:
     "Resuelve el enlace público de marcación para mostrar la instalación antes de identificarse. No revela datos personales.",

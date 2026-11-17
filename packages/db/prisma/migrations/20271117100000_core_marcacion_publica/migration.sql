@@ -46,3 +46,7 @@ REVOKE ALL ON FUNCTION "core"."marcacion_publica_por_codigo"(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION "core"."marcacion_publica_por_codigo"(text) TO opai_app;
 
 COMMIT;
+
+-- Reversión: REVOKE EXECUTE ON FUNCTION "core"."marcacion_publica_por_codigo"(text) FROM opai_app;
+-- DROP FUNCTION IF EXISTS "core"."marcacion_publica_por_codigo"(text);
+-- DROP TABLE IF EXISTS "core"."codigos_marcacion_publica";
