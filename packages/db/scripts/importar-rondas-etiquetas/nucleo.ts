@@ -9,15 +9,15 @@ import { planearImportacion1_0, type Checkpoint1_0, type ResumenImportacion } fr
  * §11). `qrCode` se trata como el contenido literal del QR impreso; si al verificar 1.0 resulta ser
  * un ID interno u otro formato, hay que ajustar el mapeo antes de aplicar nada.
  */
-export const checkpointOpai1 = z.object({
+const checkpointOpai1 = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   qrCode: z.string().nullish(),
   verificationMode: z.string().nullish(),
 });
-export type CheckpointOpai1 = z.infer<typeof checkpointOpai1>;
+type CheckpointOpai1 = z.infer<typeof checkpointOpai1>;
 
-export const exportOpai1 = z.object({ checkpoints: z.array(checkpointOpai1) });
+const exportOpai1 = z.object({ checkpoints: z.array(checkpointOpai1) });
 
 function aCheckpoint(c: CheckpointOpai1): Checkpoint1_0 {
   return { id: c.id, nombre: c.name, codigoQr: c.qrCode ?? null, modo: c.verificationMode ?? null };
