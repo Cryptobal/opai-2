@@ -82,11 +82,11 @@ export const personasList = defineCapability({
     ]);
     // Sin cursor ni fila extra, la página contiene TODO el resultado: contar otra vez es redundante.
     // Con más páginas (o cursor) se mantiene el total exacto, con idéntico filtro y alcance.
-    const total =
-      !input.cursor && consulta.items.length <= input.limite
-        ? consulta.items.length
-        : await ctx.db.persona.count({ where });
     const p = consulta;
+    const total =
+      !input.cursor && !p.siguiente
+        ? p.items.length
+        : await ctx.db.persona.count({ where });
     const alertas = await alertasDocumentos(
       ctx,
       "persona",
