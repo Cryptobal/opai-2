@@ -99,7 +99,7 @@ export const VERBOS: Record<string, string> = {
   // Plataforma (CAR-323, CAR-529).
   miembros: "Ver miembros", reenviar: "Reenviar", set_modulos_nuevos: "Activar módulos nuevos",
   // Avisos de terreno en Slack (CAR-294).
-  tomar: "Tomar", pedir_refuerzo: "Pedir refuerzo", vinculado_de: "Resolver persona vinculada", efimero: "Aviso efímero",
+  pedir_refuerzo: "Pedir refuerzo", vinculado_de: "Resolver persona vinculada", efimero: "Aviso efímero",
   // Indicadores de gestión (CAR-305).
   medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
