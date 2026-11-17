@@ -21,6 +21,7 @@ export const manifest = defineModule({
   ],
   navegacion: [
     { portal: "erp", href: "/asistencia", etiqueta: "Asistencia", icono: "UserCheck", area: "operaciones", orden: 50, permiso: "asistencia:ver" },
+    { portal: "erp", href: "/asistencia/reportes-dt", etiqueta: "Reportes DT", icono: "FileText", area: "operaciones", orden: 51, permiso: "asistencia:reportes" },
   ],
   configuracion: ajustesAsistencia,
   eventos: [

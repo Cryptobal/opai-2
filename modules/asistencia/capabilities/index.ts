@@ -20,6 +20,9 @@ import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incid
 import { marcasObtener, marcasListar } from "./lecturas";
 import { marcasRegistrar } from "./registrar";
 import { marcasVerificar } from "./verificar";
+import { certificacionChecklist } from "./certificacion";
+import { reportesExportar } from "./reportes/exportar";
+import { reportesCatalogo, reportesVista } from "./reportes/vista";
 
 export { ajustesAsistencia } from "./ajustes";
 export { indicadoresAsistencia } from "./indicadores";
@@ -33,4 +36,5 @@ export const capacidades = [
   incidentesRegistrar, incidentesCerrar, incidentesListar,
   rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, rostroTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
+  reportesCatalogo, reportesVista, reportesExportar, certificacionChecklist,
 ];
