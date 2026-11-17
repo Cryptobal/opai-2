@@ -1,6 +1,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 
 import type { Contexto } from "../../types";
+import { NIVELES_VERSION_ANEXO, sinAnexo } from "../documentos/sensibles";
 
 type Fila = {
   capability: string;
@@ -43,12 +44,13 @@ export async function visibleSinAnexos(
   const ids = [...new Set(filas.flatMap(documentosDe))];
   const deAnexo = new Set(
     ids.length
-      ? (
-          await ctx.db.anexoContrato.findMany({
-            where: { documentoId: { in: ids } },
-            select: { documentoId: true },
+      ? // CAR-512: también las versiones del documento del anexo, como la copia firmada.
+        (
+          await ctx.db.documento.findMany({
+            where: { id: { in: ids }, NOT: sinAnexo(NIVELES_VERSION_ANEXO) },
+            select: { id: true },
           })
-        ).flatMap((a) => (a.documentoId ? [a.documentoId] : []))
+        ).map((d) => d.id)
       : [],
   );
   return (f) =>
