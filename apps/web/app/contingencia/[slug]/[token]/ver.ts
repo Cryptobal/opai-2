@@ -1,14 +1,8 @@
 import "server-only";
 
-import { headers } from "next/headers";
-import { connection } from "next/server";
-
 import { executeCapability, type Resultado } from "@opai/capabilities";
-import { tenantPorSlug } from "@opai/db";
 
-import { fuentesReales } from "@/lib/fuentes";
-import { contextoSistema } from "@/lib/medidor";
-import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
+import { contextoPublicoAsistencia } from "@/lib/contexto-publico-asistencia";
 
 export type ContingenciaVista = {
   tipo: string;
@@ -18,21 +12,7 @@ export type ContingenciaVista = {
   estado: "pendiente" | "aceptada" | "rechazada";
 };
 
-async function contextoPublico(slug: string, token: string) {
-  await connection();
-  const ip = ipDeCabeceras(await headers());
-  const [porToken, porIp, porTokenSolo] = await Promise.all([
-    permitir(`contingencia-publica:${ip}:${token.slice(0, 12)}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs, { fallarCerrado: true }),
-    permitir(`contingencia-publica-ip:${ip}`, LIMITES.verificar.maximo * 2, LIMITES.verificar.ventanaMs, { fallarCerrado: true }),
-    permitir(`contingencia-publica-enlace:${token.slice(0, 24)}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs * 10, { fallarCerrado: true }),
-  ]);
-  if (!porToken || !porIp || !porTokenSolo) return "limitada" as const;
-  const tenant = await tenantPorSlug(slug);
-  if (!tenant) return null;
-  const modulos = await fuentesReales.modulosActivos(tenant.id);
-  if (!modulos.includes("asistencia")) return null;
-  return contextoSistema(tenant.id, modulos);
-}
+const contextoPublico = (slug: string, token: string) => contextoPublicoAsistencia(slug, token, "contingencia-publica");
 
 export async function verContingencia(
   slug: string,
