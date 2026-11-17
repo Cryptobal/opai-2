@@ -28,7 +28,7 @@ async function main() {
 
 async function sembrar(db: TenantTx, tenantId: string) {
   // Sin el módulo activo sus capacidades responden «Módulo inactivo» y sus e2e no prueban nada (CAR-507, CAR-497).
-  await activarModulos(db, tenantId, ["pauta", "desempeno", "acceso"]);
+  await activarModulos(db, tenantId, ["pauta", "desempeno", "acceso", "asistencia"]);
   const cuenta = await db.cuenta.upsert({
     where: { id: "00000000-0000-7000-8000-0000000b0010" },
     update: {},
