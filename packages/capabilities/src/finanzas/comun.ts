@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  type CentroCostoRef,
-  NOMBRE_CENTRO_GENERAL,
-  type TipoDteCompra,
-} from "@opai/domain";
+import { type CentroCostoRef, NOMBRE_CENTRO_GENERAL } from "@opai/domain";
 
 import { ajuste } from "../core/config";
 import { uuidSchema } from "../core/esquemas";

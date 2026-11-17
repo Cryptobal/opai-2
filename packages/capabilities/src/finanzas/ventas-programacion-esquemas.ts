@@ -137,4 +137,3 @@ export const programacionBaseSchema = z.object({
 });
 
 export type ProgramacionInput = z.infer<typeof programacionBaseSchema>;
-type LineaProgramacionInput = z.infer<typeof lineaProgramacionSchema>;
