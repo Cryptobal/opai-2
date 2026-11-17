@@ -7,16 +7,10 @@ import { Alerta, avisar, Badge, Button, Card } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { descargarTexto } from "./descargar-texto";
 import { type ArchivoLegal, ResultadoArchivo } from "./resultado-archivo";
 
 type Props = { periodoId: string; periodoEstado: string };
-
-function descargar(nombre: string, contenido: string) {
-  const url = URL.createObjectURL(new Blob([contenido], { type: "text/csv;charset=utf-8" }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: nombre });
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
-}
 
 /** Archivo de pago bancario del período cerrado (diseño 06). */
 export function TarjetaPagoBanco({ periodoId, periodoEstado }: Props) {
@@ -55,7 +49,7 @@ export function TarjetaPagoBanco({ periodoId, periodoEstado }: Props) {
           disabled={pendiente || !listo}
           onClick={() => {
             if (!archivo) return;
-            descargar(archivo.nombre, archivo.contenido);
+            descargarTexto(archivo.nombre, archivo.contenido);
             avisar.exito(`Pago banco · ${archivo.filas} transferencias`);
           }}
         >
