@@ -63,7 +63,6 @@ describe("nomina.cumplimiento_dt", () => {
   });
 
   it("lista finiquito pendiente tras término de vínculo", async () => {
->>>>>>> origin/brief/car-601-asistencia-liquidacion
     const { ctx } = como();
     const r = await executeCapability(ctx, "nomina.midt.listar", {});
     expect(r.ok).toBe(true);
@@ -72,7 +71,6 @@ describe("nomina.cumplimiento_dt", () => {
     const fin = data.items.find((m) => m.movimientoTipo === "finiquito" && m.referenciaId === V2);
     expect(fin?.registrado).toBe(false);
     expect(fin?.hechoEn).toBe("2026-09-15");
->>>>>>> origin/brief/car-601-asistencia-liquidacion
   });
 
   it("exporta CSV de pendientes", async () => {
