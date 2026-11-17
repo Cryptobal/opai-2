@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { datosArchivoPeriodo, personasReveladas, resultadoArchivo } from "./archivos-datos";
+import type { Contexto } from "../types";
+import { datosArchivoPeriodo, montosFilaArchivo, personasReveladas, resultadoArchivo } from "./archivos-datos";
 import { PERMISO_OBLIGACIONES } from "./comun";
 import { pdfLibroRemuneraciones } from "./libro-remuneraciones-pdf";
 
@@ -17,80 +18,72 @@ const salidaBinaria = z.object({
   advertencias: z.array(z.string()),
 });
 
+const ADVERTENCIAS_LIBRO = ["Totales alineados con las liquidaciones del período; no sustituye el LRE ante la DT."];
+
 function filasLibro(ctx: Awaited<ReturnType<typeof datosArchivoPeriodo>>) {
   return ctx.filas.map((f) =>
     filaLibroRemuneraciones({
-      personaId: f.personaId,
-      rut: f.persona.rut,
+      ...montosFilaArchivo(f),
       nombre: ctx.nombres.get(f.personaId) ?? `${f.persona.nombres} ${f.persona.apellidos}`.trim(),
-      inicioContrato: f.inicio,
-      terminoContrato: f.terminoEnMes,
-      diasTrabajados: f.diasTrabajados,
-      diasLicencia: f.diasLicencia,
-      haberes: f.haberes,
-      descuentosLegales: f.descuentosLegales,
-      otrosDescuentos: f.otrosDescuentos,
-      aportesEmpleador: f.aportesEmpleador,
-      liquido: f.liquido,
     }),
   );
 }
 
-const advertenciasLibro = () => ["Totales alineados con las liquidaciones del período; no sustituye el LRE ante la DT."];
+async function salidaLibroBinaria(
+  ctx: Contexto,
+  periodoId: string,
+  generar: (datos: Awaited<ReturnType<typeof datosArchivoPeriodo>>, filas: ReturnType<typeof filasLibro>) => Promise<{ mime: string; ext: "pdf" | "xlsx"; bytes: Uint8Array }>,
+) {
+  const datos = await datosArchivoPeriodo(ctx, periodoId, "libro");
+  const filas = filasLibro(datos);
+  const { mime, ext, bytes } = await generar(datos, filas);
+  const nombre = nombreLibroRemuneraciones(datos.periodo.anio, datos.periodo.mes, ext);
+  const común = resultadoArchivo({ errores: [] }, datos);
+  return {
+    ...común,
+    filas: filas.length,
+    nombre,
+    mime,
+    base64: Buffer.from(bytes).toString("base64"),
+    advertencias: ADVERTENCIAS_LIBRO,
+  };
+}
+
+const capLibroBinario = (
+  id: `nomina.libro_remuneraciones.${string}`,
+  descripcion: string,
+  generar: Parameters<typeof salidaLibroBinaria>[2],
+) =>
+  defineCapability({
+    id,
+    descripcion,
+    permiso: PERMISO_OBLIGACIONES,
+    input: z.object({ periodoId: uuidSchema }),
+    output: salidaBinaria,
+    efecto: "lectura",
+    dryRun: false,
+    auditarLectura: personasReveladas,
+    handler: (ctx, { periodoId }) => salidaLibroBinaria(ctx, periodoId, generar),
+  });
 
 /** Excel del libro de remuneraciones (CAR-99, diseño 06). */
-export const libroRemuneracionesExcel = defineCapability({
-  id: "nomina.libro_remuneraciones.excel",
-  descripcion:
-    "Genera el Excel del libro de remuneraciones del período: una fila por liquidación con totales imponibles, no imponibles, descuentos y líquido. Mismas cifras que el LRE por persona.",
-  permiso: PERMISO_OBLIGACIONES,
-  input: z.object({ periodoId: uuidSchema }),
-  output: salidaBinaria,
-  efecto: "lectura",
-  dryRun: false,
-  auditarLectura: personasReveladas,
-  async handler(ctx, { periodoId }) {
-    const datos = await datosArchivoPeriodo(ctx, periodoId, "libro");
-    const filas = filasLibro(datos);
-    const bytes = await excelLibroRemuneraciones(filas);
-    const nombre = nombreLibroRemuneraciones(datos.periodo.anio, datos.periodo.mes, "xlsx");
-    const común = resultadoArchivo({ errores: [] }, datos);
-    return {
-      ...común,
-      filas: filas.length,
-      nombre,
-      mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      base64: Buffer.from(bytes).toString("base64"),
-      advertencias: advertenciasLibro(),
-    };
-  },
-});
+export const libroRemuneracionesExcel = capLibroBinario(
+  "nomina.libro_remuneraciones.excel",
+  "Genera el Excel del libro de remuneraciones del período: una fila por liquidación con totales imponibles, no imponibles, descuentos y líquido. Mismas cifras que el LRE por persona.",
+  async (_datos, filas) => ({
+    mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ext: "xlsx",
+    bytes: await excelLibroRemuneraciones(filas),
+  }),
+);
 
 /** PDF del libro de remuneraciones (CAR-99, diseño 06). */
-export const libroRemuneracionesPdf = defineCapability({
-  id: "nomina.libro_remuneraciones.pdf",
-  descripcion:
-    "Genera el PDF del libro de remuneraciones del período: tabla resumida por persona con los mismos totales que el Excel y el LRE.",
-  permiso: PERMISO_OBLIGACIONES,
-  input: z.object({ periodoId: uuidSchema }),
-  output: salidaBinaria,
-  efecto: "lectura",
-  dryRun: false,
-  auditarLectura: personasReveladas,
-  async handler(ctx, { periodoId }) {
-    const datos = await datosArchivoPeriodo(ctx, periodoId, "libro");
-    const filas = filasLibro(datos);
-    const titulo = `Libro de remuneraciones · ${datos.periodo.mes}/${datos.periodo.anio}`;
-    const bytes = await pdfLibroRemuneraciones(titulo, filas);
-    const nombre = nombreLibroRemuneraciones(datos.periodo.anio, datos.periodo.mes, "pdf");
-    const común = resultadoArchivo({ errores: [] }, datos);
-    return {
-      ...común,
-      filas: filas.length,
-      nombre,
-      mime: "application/pdf",
-      base64: Buffer.from(bytes).toString("base64"),
-      advertencias: advertenciasLibro(),
-    };
-  },
-});
+export const libroRemuneracionesPdf = capLibroBinario(
+  "nomina.libro_remuneraciones.pdf",
+  "Genera el PDF del libro de remuneraciones del período: tabla resumida por persona con los mismos totales que el Excel y el LRE.",
+  async (datos, filas) => ({
+    mime: "application/pdf",
+    ext: "pdf",
+    bytes: await pdfLibroRemuneraciones(`Libro de remuneraciones · ${datos.periodo.mes}/${datos.periodo.anio}`, filas),
+  }),
+);
