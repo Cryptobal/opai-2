@@ -87,3 +87,5 @@ export async function PestanaAccesos({
     />
   );
 }
+
+export { COLUMNAS } from "./seccion-registros";

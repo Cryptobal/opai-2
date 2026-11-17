@@ -37,6 +37,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/accesos` | `acceso.portal_registros.listar` | `acceso_portal_registros_listar` | existe |
+| cliente | `/cliente/accesos` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
 | cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
 | cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |

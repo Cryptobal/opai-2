@@ -10,6 +10,7 @@ import {
   prerregistrosObtener,
 } from "./prerregistros-leer";
 import { listasAgregar, listasListar, listasQuitar } from "./listas";
+import { portalRegistrosListar } from "./portal-cliente";
 import { puntosCambiar, puntosListar } from "./puntos";
 import { registrosObtener } from "./registro-get";
 import { registrosListar } from "./registros";
@@ -33,6 +34,7 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   configCambiar,
   puntosListar,
   puntosCambiar,
+  portalRegistrosListar,
 ];
 
 export { trabajoCierreAutomatico } from "./cierre";
