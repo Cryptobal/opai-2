@@ -8,7 +8,7 @@ import { useEnviarLoteMasivo } from "./use-enviar-lote-masivo";
 export function useEnvioMasivo(plantillaId: string) {
   const cap = useCapacidad("erp");
   const c = useCandidatasMasivo(plantillaId, cap);
-  const e = useEnviarLoteMasivo(plantillaId, cap, c.candidatas, c.setCandidatas, c.seleccion);
+  const e = useEnviarLoteMasivo(plantillaId, cap.ejecutar, c.candidatas, c.setCandidatas, c.seleccion);
 
   const cargar = async () => {
     await c.cargar();

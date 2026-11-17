@@ -4,13 +4,11 @@ import { z } from "zod";
 import { ambitoDeClase, PERMISOS_CORE, type ClasePlantilla } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { reglaDeNegocio } from "../../errores";
+import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { diaSchema, hoy } from "../maestros/comun";
 import { itemDesdePersona, whereCandidatas } from "./candidatas-masivo-helpers";
 import { plantillaVigente } from "./plantilla-vigente";
-
-const LIMITE = 500;
 
 export const documentoPlantillasCandidatas = defineCapability({
   id: "core.documento_plantillas.candidatas",
@@ -29,6 +27,8 @@ export const documentoPlantillasCandidatas = defineCapability({
       .describe("Si es verdadero, solo personas con un anexo de contrato en borrador."),
     fecha: diaSchema.optional(),
     q: z.string().trim().max(80).optional(),
+    cursor: uuidSchema.optional().describe("Para seguir: el valor `siguiente` anterior."),
+    limite: z.number().int().min(1).max(200).default(200),
   }),
   output: z.object({
     items: z.array(
@@ -40,7 +40,8 @@ export const documentoPlantillasCandidatas = defineCapability({
         motivoBloqueo: z.string().nullable(),
       }),
     ),
-    total: z.number().int(),
+    siguiente: z.string().nullable(),
+    total: z.number().int().describe("Personas en esta página."),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -51,10 +52,16 @@ export const documentoPlantillasCandidatas = defineCapability({
       throw reglaDeNegocio("Solo las plantillas laborales admiten envío masivo.");
     const rut = (input.q ?? "").replace(/[.\s]/g, "").toUpperCase();
     const fecha = input.fecha ?? hoy();
+    const where = whereCandidatas(ctx, input, rut);
+    if (input.cursor) {
+      const ancla = await ctx.db.persona.findFirst({ where: { AND: [where, { id: input.cursor }] } });
+      if (!ancla) throw noEncontrado("La página pedida");
+    }
     const filas = await ctx.db.persona.findMany({
-      where: whereCandidatas(ctx, input, rut),
+      where,
       orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
-      take: LIMITE,
+      take: input.limite + 1,
+      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
       include: {
         vinculos: {
           where: { estado: "vigente" },
@@ -63,9 +70,14 @@ export const documentoPlantillasCandidatas = defineCapability({
         },
       },
     });
+    const pagina = filas.slice(0, input.limite);
     const items = await Promise.all(
-      filas.map((p) => itemDesdePersona(ctx, plantilla.id, version.contenido, p, fecha)),
+      pagina.map((p) => itemDesdePersona(ctx, plantilla.id, version.contenido, p, fecha)),
     );
-    return { items, total: items.length };
+    return {
+      items,
+      siguiente: filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null,
+      total: items.length,
+    };
   },
 });

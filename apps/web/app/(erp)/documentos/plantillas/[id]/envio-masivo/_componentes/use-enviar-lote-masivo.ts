@@ -11,7 +11,7 @@ type Cap = ReturnType<typeof useCapacidad>;
 
 export function useEnviarLoteMasivo(
   plantillaId: string,
-  cap: Cap,
+  ejecutar: Cap["ejecutar"],
   candidatas: CandidataMasivo[],
   setCandidatas: Dispatch<SetStateAction<CandidataMasivo[]>>,
   seleccion: Set<string>,
@@ -24,7 +24,7 @@ export function useEnviarLoteMasivo(
     async (dryRun: boolean) => {
       const ids = [...seleccion].filter((id) => candidatas.find((p) => p.personaId === id)?.puedeGenerar);
       if (!ids.length) return;
-      const r = await cap.ejecutar<{
+      const r = await ejecutar<{
         exitosas: number;
         fallidas: number;
         filas: { nombre: string; estado: string; mensaje: string | null }[];
@@ -51,7 +51,7 @@ export function useEnviarLoteMasivo(
         }),
       );
     },
-    [candidatas, clave, cap.ejecutar, plantillaId, seleccion, setCandidatas],
+    [candidatas, clave, ejecutar, plantillaId, seleccion, setCandidatas],
   );
 
   return { resumen, confirmar, setConfirmar, enviar, limpiarResumen: () => setResumen(null) };

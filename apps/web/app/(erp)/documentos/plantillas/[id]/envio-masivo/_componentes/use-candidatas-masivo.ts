@@ -10,15 +10,16 @@ import type { FiltrosEnvioMasivo as Filtros } from "./filtros-envio-masivo";
 
 type Cap = ReturnType<typeof useCapacidad>;
 
-export function useCandidatasMasivo(plantillaId: string, cap: Cap) {
+export function useCandidatasMasivo(plantillaId: string, { ejecutar }: Cap) {
   const [filtros, setFiltros] = useState<Filtros>({ instalacionId: "", cargoId: "", anexoBorrador: false });
   const [candidatas, setCandidatas] = useState<CandidataMasivo[]>([]);
   const [seleccion, setSeleccion] = useState<Set<string>>(new Set());
   const [vista, setVista] = useState<VistaRellenoPersona | null>(null);
 
   const cargar = useCallback(async () => {
-    const r = await cap.ejecutar<{ items: CandidataMasivo[] }>("core.documento_plantillas.candidatas", {
+    const r = await ejecutar<{ items: CandidataMasivo[] }>("core.documento_plantillas.candidatas", {
       plantillaId,
+      limite: 200,
       ...(filtros.instalacionId ? { instalacionId: filtros.instalacionId } : {}),
       ...(filtros.cargoId ? { cargoId: filtros.cargoId } : {}),
       ...(filtros.anexoBorrador ? { anexoBorrador: true } : {}),
@@ -27,17 +28,17 @@ export function useCandidatasMasivo(plantillaId: string, cap: Cap) {
     setCandidatas(r.items);
     setSeleccion(new Set(r.items.filter((p) => p.puedeGenerar).map((p) => p.personaId)));
     setVista(null);
-  }, [cap.ejecutar, plantillaId, filtros]);
+  }, [ejecutar, plantillaId, filtros]);
 
   const previsualizar = useCallback(
     async (personaId: string) => {
-      const r = await cap.ejecutar<VistaRellenoPersona>("core.documento_plantillas.rellenar", {
+      const r = await ejecutar<VistaRellenoPersona>("core.documento_plantillas.rellenar", {
         plantillaId,
         personaId,
       });
       if (r) setVista(r);
     },
-    [cap.ejecutar, plantillaId],
+    [ejecutar, plantillaId],
   );
 
   const toggleSeleccion = useCallback((personaId: string, marcado: boolean) => {
