@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-  # Ahorro de Actions (13-nov-2026, decisión de Carlos; AGENTS.md «Revisiones largas»): en cada PR solo
-  # corre lo rápido (typecheck, lint, test, secretos); lo largo corre de noche o a pedido.
+  # Ahorro de Actions (13-nov-2026; urgencia cola 17-nov-2026): en pull_request solo el gate rápido
+  # (typecheck/lint/test en lo tocado, secretos); test:db y build completos solo en merge_group, main o a pedido.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
@@ -61,13 +61,19 @@ jobs:
         if: steps.solo_docs.outputs.only_docs != 'true'
         with:
           turbo: typecheck-1
-      - name: typecheck · lint · test
-        if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: typecheck y lint (PR, paquetes tocados)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'pull_request'
+        run: .github/scripts/ci-typecheck-lint-pr.sh
+      - name: test (PR, cambios)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'pull_request'
+        run: .github/scripts/ci-test-pr.sh
+      - name: typecheck · lint · test (completo)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name != 'pull_request'
         run: .github/scripts/ci-verificar-completo.sh
 
   test-db:
     name: test:db
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    if: github.event_name != 'pull_request'
     runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 45
     services:
@@ -90,35 +96,11 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
-      # test:db corre siempre fuera de los PR y, en un PR, cuando toca código que esas pruebas ejercen
-      # (paquetes y módulos, salvo el DS), no solo Prisma: así un PR no llega verde a la cola de merge
-      # para caer ahí en test:db (17-nov-2026, #1036).
-      - name: Detectar cambios de base
-        id: base
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-          SOLO_DOCS: ${{ steps.solo_docs.outputs.only_docs }}
-        run: |
-          if [ "$SOLO_DOCS" = true ]; then
-            echo "db=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
-            echo "db=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if git diff --name-only "$BASE...$HEAD" \
-            | grep -E '^(packages|modules)/|(^|/)prisma/|/migrations/|^(package\.json|pnpm-lock\.yaml)$|^\.github/(workflows/ci\.yml|actions/)' \
-            | grep -vE '^packages/ds/' | grep -q .; then
-            echo "db=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "db=false" >> "$GITHUB_OUTPUT"
-          fi
+      # test:db solo en merge_group, main, cron y workflow_dispatch (17-nov-2026, cola de Actions).
       - uses: ./.github/actions/preparar
-        if: steps.base.outputs.db == 'true'
+        if: steps.solo_docs.outputs.only_docs != 'true'
       - name: test:db
-        if: steps.base.outputs.db == 'true'
+        if: steps.solo_docs.outputs.only_docs != 'true'
         run: .github/scripts/ci-test-db-completo.sh
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
@@ -135,8 +117,13 @@ jobs:
           VERIFICAR: ${{ needs.verificar.result }}
           TEST_DB: ${{ needs.test-db.result }}
         run: |
-          echo "verificar=$VERIFICAR test-db=$TEST_DB"
-          test "$VERIFICAR" = success && test "$TEST_DB" = success
+          echo "verificar=$VERIFICAR test-db=$TEST_DB event=$GITHUB_EVENT_NAME"
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            test "$VERIFICAR" = success
+            test "$TEST_DB" = skipped
+          else
+            test "$VERIFICAR" = success && test "$TEST_DB" = success
+          fi
 
   presupuesto:
     name: build · presupuesto de JS
