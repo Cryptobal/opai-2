@@ -131,10 +131,10 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R2b (db)", () => {
       ["B-9", "boleta"],
       ["F-9", "factura"],
     ]);
-    const { rendiciones } = await dato<{
-      rendiciones: { id: string; aprobadorNombre: string | null }[];
+    const { items } = await dato<{
+      items: { id: string; aprobadorNombre: string | null }[];
     }>(await supervisor("rendiciones.rendiciones.listar", { alcance: "propias" }));
-    expect(rendiciones.find((r) => r.id === creada.id)?.aprobadorNombre).toBe("Ana Aprueba");
+    expect(items.find((r) => r.id === creada.id)?.aprobadorNombre).toBe("Ana Aprueba");
     expect(
       await supervisor(
         "rendiciones.rendiciones.crear",
