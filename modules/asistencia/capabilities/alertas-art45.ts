@@ -8,12 +8,18 @@ import {
 import { fechaHora, tenantBasico } from "./formato";
 
 const H = 3_600_000;
-export type Tipo = "sin_marca_inicio" | "sin_marca_termino" | "compensables" | "descanso_insuficiente";
+export type Tipo =
+  | "sin_marca_inicio"
+  | "sin_marca_termino"
+  | "compensables"
+  | "descanso_insuficiente"
+  | "limite_jornada";
 const EVENTO: Record<Tipo, string> = {
   sin_marca_inicio: "asistencia.alerta.sin_marca_inicio",
   sin_marca_termino: "asistencia.alerta.sin_marca_termino",
   compensables: "asistencia.aviso.compensables",
   descanso_insuficiente: "asistencia.alerta.descanso_insuficiente",
+  limite_jornada: "asistencia.alerta.limite_jornada",
 };
 
 /** Crea la alerta si no existía (clave única) y, solo entonces, emite el evento que la envía: idempotente. */
