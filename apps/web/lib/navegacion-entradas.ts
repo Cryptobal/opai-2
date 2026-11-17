@@ -1,5 +1,5 @@
 import { listarModulos } from "@opai/capabilities";
-import { PERMISOS_CORE, type Vocabulario } from "@opai/domain";
+import { PERMISOS_CORE, type AreaNav, type Vocabulario } from "@opai/domain";
 
 import type { EntradaArea } from "./navegacion-areas";
 
