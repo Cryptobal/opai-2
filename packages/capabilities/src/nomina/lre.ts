@@ -4,8 +4,12 @@ import { archivoLre } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+<<<<<<< HEAD
 import { datosArchivoPeriodo, personasReveladas, resultadoArchivo, salidaArchivo } from "./archivos-datos";
 import { exigeComplementoCumplimientoDt } from "./complemento-dt";
+=======
+import { datosArchivoPeriodo, montosFilaArchivo, personasReveladas, resultadoArchivo, salidaArchivo } from "./archivos-datos";
+>>>>>>> origin/brief/car-99-cumplimiento-dt-entitlements
 import { PERMISO_OBLIGACIONES } from "./comun";
 
 // Libro de Remuneraciones Electrónico (CAR-99, ADR-057): arma el archivo del período con sus
@@ -31,12 +35,7 @@ export const lreGenerar = defineCapability({
     const { periodo, filas, rutEmpleador } = datos;
     const a = archivoLre({
       rutEmpleador, anio: periodo.anio, mes: periodo.mes,
-      filas: filas.map((f) => ({
-        personaId: f.personaId, rut: f.persona.rut, inicioContrato: f.inicio, terminoContrato: f.terminoEnMes,
-        diasTrabajados: f.diasTrabajados, diasLicencia: f.diasLicencia, haberes: f.haberes,
-        descuentosLegales: f.descuentosLegales, otrosDescuentos: f.otrosDescuentos,
-        aportesEmpleador: f.aportesEmpleador, liquido: f.liquido,
-      })),
+      filas: filas.map(montosFilaArchivo),
     });
     return resultadoArchivo(a, datos);
   },

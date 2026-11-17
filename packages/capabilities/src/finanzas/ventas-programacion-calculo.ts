@@ -64,7 +64,7 @@ export const omitido = (periodo: string, fecha: string, motivo: string): Resulta
   fechaFactura: null,
 });
 
-export const aLineaMonto = (l: LineaFila): LineaProgramacionMonto => ({
+const aLineaMonto = (l: LineaFila): LineaProgramacionMonto => ({
   glosa: l.glosa,
   cantidad: l.cantidad.toString(),
   precioUnitarioClp: l.precioUnitarioClp,

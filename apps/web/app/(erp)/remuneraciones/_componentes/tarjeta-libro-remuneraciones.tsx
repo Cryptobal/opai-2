@@ -7,15 +7,9 @@ import { Alerta, avisar, Badge, Button, Card } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-type Archivo = { nombre: string; mime: string; base64: string; filas: number; errores: { mensaje: string }[] };
+import { descargarBinario } from "./descargar";
 
-function descargarBinario(nombre: string, mime: string, base64: string) {
-  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-  const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: nombre });
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
-}
+type Archivo = { nombre: string; mime: string; base64: string; filas: number; errores: { mensaje: string }[] };
 
 type Props = { periodoId: string };
 
@@ -49,8 +43,7 @@ export function TarjetaLibroRemuneraciones({ periodoId }: Props) {
         </div>
         <span className="t-body-sm text-fg-muted">PDF y Excel con las mismas cifras por persona que el LRE · para archivo interno y DT.</span>
       </div>
-      {aviso ? <Alerta tono="warning" titulo={aviso} /> : null}
-      {error ? <Alerta tono="danger" titulo={error} /> : null}
+      {error ? <Alerta tono="danger" titulo={error} /> : aviso ? <Alerta tono="warning" titulo={aviso} /> : null}
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" disabled={pendiente} onClick={() => void pdf()}>
           <Download aria-hidden className="size-4" />

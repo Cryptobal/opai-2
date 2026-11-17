@@ -25,6 +25,44 @@ export type DatosFiniquito = {
   };
 };
 
+function TablaPropuesta({ lineas, total }: { lineas: DatosFiniquito["propuesta"]["lineas"]; total: number }) {
+  return (
+    <Table aria-label="Líneas del finiquito">
+      <thead>
+        <tr>
+          <Th>Concepto</Th>
+          <Th>Origen</Th>
+          <Th className="text-right">Monto</Th>
+        </tr>
+      </thead>
+      <tbody>
+        {lineas.map((l) => (
+          <tr key={l.id}>
+            <Td className="font-medium">{l.concepto}</Td>
+            <Td className="text-fg-muted">{l.origen}</Td>
+            <Td className="t-numeric text-right">{pesos(l.monto)}</Td>
+          </tr>
+        ))}
+        {lineas.length === 0 ? (
+          <tr>
+            <Td colSpan={3} className="text-fg-muted">
+              No hay líneas calculables sin sueldo de referencia.
+            </Td>
+          </tr>
+        ) : null}
+      </tbody>
+      <tfoot>
+        <tr>
+          <Td colSpan={2} className="font-medium">
+            Total orientativo
+          </Td>
+          <Td className="t-numeric text-right font-semibold">{pesos(total)}</Td>
+        </tr>
+      </tfoot>
+    </Table>
+  );
+}
+
 /** Detalle de finiquito (diseño 08). */
 export function FiniquitoDetalle({ datos }: { datos: DatosFiniquito }) {
   const p = datos.propuesta;
@@ -56,39 +94,7 @@ export function FiniquitoDetalle({ datos }: { datos: DatosFiniquito }) {
         </Alerta>
       ))}
       <span className="t-label">Cálculo del finiquito</span>
-      <Table aria-label="Líneas del finiquito">
-        <thead>
-          <tr>
-            <Th>Concepto</Th>
-            <Th>Origen</Th>
-            <Th className="text-right">Monto</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {p.lineas.map((l) => (
-            <tr key={l.id}>
-              <Td className="font-medium">{l.concepto}</Td>
-              <Td className="text-fg-muted">{l.origen}</Td>
-              <Td className="t-numeric text-right">{pesos(l.monto)}</Td>
-            </tr>
-          ))}
-          {p.lineas.length === 0 ? (
-            <tr>
-              <Td colSpan={3} className="text-fg-muted">
-                No hay líneas calculables sin sueldo de referencia.
-              </Td>
-            </tr>
-          ) : null}
-        </tbody>
-        <tfoot>
-          <tr>
-            <Td colSpan={2} className="font-medium">
-              Total orientativo
-            </Td>
-            <Td className="t-numeric text-right font-semibold">{pesos(p.total)}</Td>
-          </tr>
-        </tfoot>
-      </Table>
+      <TablaPropuesta lineas={p.lineas} total={p.total} />
     </div>
   );
 }

@@ -3,7 +3,7 @@
 // opai_app, sin BYPASSRLS) para no tocar la contraseña real del rol de aplicación.
 import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "pg";
@@ -28,7 +28,17 @@ async function fijarPasswordCronSii(connectionString: string): Promise<string> {
       await pg.query("SELECT pg_advisory_lock($1)", [lockPasswordCronSii]);
       try {
         if (existsSync(marcadorPasswordCronSii)) {
-          return readFileSync(marcadorPasswordCronSii, "utf8");
+          const cached = readFileSync(marcadorPasswordCronSii, "utf8");
+          const probe = new Client({
+            connectionString: urlParaRol(connectionString, "opai_cron_sii", cached),
+          });
+          try {
+            await probe.connect();
+            await probe.end();
+            return cached;
+          } catch {
+            unlinkSync(marcadorPasswordCronSii);
+          }
         }
         const cronPassword = randomBytes(24).toString("base64url");
         await pg.query(
