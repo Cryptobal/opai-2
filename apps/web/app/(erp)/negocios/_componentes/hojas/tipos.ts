@@ -14,7 +14,7 @@ export type Etapa = {
 };
 
 export type ItemCatalogo = { id: string; nombre: string; orden: number; activo: boolean };
-export type Motivo = ItemCatalogo & { codigo: string; exigeDetalle: boolean };
+type Motivo = ItemCatalogo & { codigo: string; exigeDetalle: boolean };
 
 /** Salida de `comercial.config.get`: el embudo por defecto y los catálogos del tenant. */
 export type ConfigComercial = {
@@ -36,7 +36,7 @@ export const PARAMS_HOJA = [
   "contactos",
   "transferir",
 ] as const;
-export type ParamHoja = (typeof PARAMS_HOJA)[number];
+type ParamHoja = (typeof PARAMS_HOJA)[number];
 
 /** Lo que necesitan las hojas abiertas; se lee en el servidor solo si hay una abierta. */
 export type DatosHojas = {
