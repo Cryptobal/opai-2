@@ -3,11 +3,13 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Badge, ListScreen, type EstadoPantalla } from "@opai/ds";
+import { ListScreen, type EstadoPantalla } from "@opai/ds";
 
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 
+import { columnasMarcas } from "./columnas-marcas";
+import { FILTROS_MARCAS } from "./filtros-marcas";
 import { HojaMarca } from "./hoja-marca";
 
 export type FilaMarca = {
@@ -22,23 +24,16 @@ export type FilaMarca = {
   diferida: boolean;
 };
 
-const GPS_TONO: Record<string, "success" | "warning" | "neutro"> = { Dentro: "success", Fuera: "warning", "Sin GPS": "neutro" };
-
-export function ListaMarcas({
-  state,
-  items,
-  zona,
-  hayMas,
-  marcaAbierta,
-  params,
-}: {
+type Props = {
   state: EstadoPantalla;
   items: FilaMarca[];
   zona: string;
   hayMas: boolean;
   marcaAbierta: string | null;
   params: Record<string, string | undefined>;
-}) {
+};
+
+export function ListaMarcas({ state, items, zona, hayMas, marcaAbierta, params }: Props) {
   const router = useRouter();
   const [marcaId, setMarcaId] = useState<string | null>(marcaAbierta);
   const hora = useMemo(
@@ -46,18 +41,18 @@ export function ListaMarcas({
     [zona],
   );
 
-  const filtros = [
-    { param: "metodoFamilia", etiqueta: "Método", opciones: [{ valor: "rostro", etiqueta: "Rostro" }, { valor: "pin", etiqueta: "PIN" }] },
-    {
-      param: "gps",
-      etiqueta: "GPS",
-      opciones: [
-        { valor: "dentro", etiqueta: "Dentro" },
-        { valor: "fuera", etiqueta: "Fuera" },
-        { valor: "sin_gps", etiqueta: "Sin GPS" },
-      ],
-    },
-  ];
+  const abrirMarca = (id: string) => {
+    setMarcaId(id);
+    const q = new URLSearchParams({ ...params, marca: id } as Record<string, string>);
+    router.replace(`/asistencia/marcas?${q}`, { scroll: false });
+  };
+
+  const cerrarMarca = () => {
+    setMarcaId(null);
+    const q = new URLSearchParams(params as Record<string, string>);
+    q.delete("marca");
+    router.replace(`/asistencia/marcas?${q}`, { scroll: false });
+  };
 
   return (
     <>
@@ -66,14 +61,10 @@ export function ListaMarcas({
         titulo="Marcas"
         subtitulo={`${items.length} en esta página${hayMas ? " · hay más" : ""}`}
         buscador={<Buscador placeholder="Trabajador o inicio de hash" />}
-        filtros={<ChipsFiltro filtros={filtros} conservarPaginacion={false} />}
+        filtros={<ChipsFiltro filtros={[...FILTROS_MARCAS]} conservarPaginacion={false} />}
         items={items}
         clave={(m) => m.id}
-        onSeleccionar={(m) => {
-          setMarcaId(m.id);
-          const q = new URLSearchParams({ ...params, marca: m.id } as Record<string, string>);
-          router.replace(`/asistencia/marcas?${q}`, { scroll: false });
-        }}
+        onSeleccionar={(m) => abrirMarca(m.id)}
         tarjeta={(m) => (
           <span className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium">{m.personaNombre}</span>
@@ -82,18 +73,7 @@ export function ListaMarcas({
             </span>
           </span>
         )}
-        columnas={[
-          { id: "hora", etiqueta: "Hora", render: (m) => hora.format(new Date(m.horaServidor)) },
-          { id: "persona", etiqueta: "Trabajador", render: (m) => m.personaNombre },
-          { id: "inst", etiqueta: "Instalación", render: (m) => m.instalacionNombre },
-          { id: "tipo", etiqueta: "Tipo", render: (m) => m.tipoEtiqueta },
-          { id: "metodo", etiqueta: "Método", render: (m) => m.metodoEtiqueta },
-          {
-            id: "gps",
-            etiqueta: "GPS",
-            render: (m) => <Badge tono={GPS_TONO[m.gpsEtiqueta] ?? "neutro"}>{m.gpsEtiqueta}</Badge>,
-          },
-        ]}
+        columnas={columnasMarcas(hora)}
         paginacion={
           hayMas && params.siguiente ? (
             <button
@@ -109,17 +89,7 @@ export function ListaMarcas({
           ) : null
         }
       />
-      <HojaMarca
-        marcaId={marcaId}
-        abierta={Boolean(marcaId)}
-        onCerrar={() => {
-          setMarcaId(null);
-          const q = new URLSearchParams(params as Record<string, string>);
-          q.delete("marca");
-          router.replace(`/asistencia/marcas?${q}`, { scroll: false });
-        }}
-        zona={zona}
-      />
+      <HojaMarca marcaId={marcaId} abierta={Boolean(marcaId)} onCerrar={cerrarMarca} zona={zona} />
     </>
   );
 }
