@@ -82,7 +82,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     expect(Number(b.codigoVisible.slice(4))).toBe(Number(a.codigoVisible.slice(4)) + 1);
     expect(a.montoTotal).toBe(12_000);
     expect(await dato(await yo("rendiciones.rendiciones.enviar", { id: a.id }))).toMatchObject({ estado: "enviada" });
-    expect(await dato<{ rendiciones: { id: string }[] }>(await jefe("rendiciones.rendiciones.listar", { alcance: "por_aprobar" })).then((r) => r.rendiciones.map((x) => x.id))).toContain(a.id);
+    expect(await dato<{ items: { id: string }[] }>(await jefe("rendiciones.rendiciones.listar", { alcance: "por_aprobar" })).then((r) => r.items.map((x) => x.id))).toContain(a.id);
     expect(await dato(await jefe("rendiciones.rendiciones.aprobar", { id: a.id }))).toMatchObject({ estado: "aprobada" });
     const { rendicion } = await dato<{ rendicion: { estado: string; items: unknown[] } }>(await yo("rendiciones.rendiciones.obtener", { id: a.id }));
     expect(rendicion.estado).toBe("aprobada");
@@ -193,8 +193,8 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     const deB = como(ajeno, "gerente", tenantB);
     expect(await deB("rendiciones.rendiciones.obtener", { id: r.id })).toMatchObject({ ok: false });
     expect(await deB("rendiciones.rendiciones.aprobar", { id: r.id })).toMatchObject({ ok: false });
-    const lista = await dato<{ rendiciones: unknown[] }>(await deB("rendiciones.rendiciones.listar", { alcance: "todas" }));
-    expect(lista.rendiciones).toHaveLength(0);
+    const lista = await dato<{ items: unknown[] }>(await deB("rendiciones.rendiciones.listar", { alcance: "todas" }));
+    expect(lista.items).toHaveLength(0);
     const propia = await deB("rendiciones.rendiciones.crear", cuerpo({ instalacionId: instB, aprobadorId: undefined, items: [item()] }));
     expect(propia).toMatchObject({ ok: true, data: { codigoVisible: "REN-1" } });
   });
@@ -203,5 +203,35 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     const r = await crear();
     const tercero = como(otroAprobador, "supervisor");
     expect(await tercero("rendiciones.rendiciones.obtener", { id: r.id })).toMatchObject({ ok: false });
+  });
+
+  it("lista propias: paginación, búsqueda y contadores (CAR-597)", async () => {
+    // Rendidor sin historia: los tests anteriores dejan rendiciones de `rinde`, y aquí los totales son exactos.
+    const rindeLimpio = randomUUID();
+    await e.admin.user.create({ data: { id: rindeLimpio, name: "supervisor", email: `${rindeLimpio.slice(0, 8)}@rend.test` } });
+    await e.admin.membership.create({ data: { tenantId: tenantA, userId: rindeLimpio, rol: "supervisor", portales: ["erp"] } });
+    const limpio = como(rindeLimpio, "supervisor");
+    const ids: string[] = [];
+    for (let i = 0; i < 55; i++) {
+      const c = await dato<{ id: string }>(await limpio("rendiciones.rendiciones.crear", cuerpo({ descripcion: `Lote contador ${i}`, items: [item({ folio: `PC-${i}` })] })));
+      ids.push(c.id);
+    }
+    const p1 = await dato<{ items: { id: string }[]; siguiente: string | null; contadores?: Record<string, number> }>(
+      await limpio("rendiciones.rendiciones.listar", { alcance: "propias", incluirContadores: true, limite: 50 }),
+    );
+    expect(p1.items).toHaveLength(50);
+    expect(p1.siguiente).toBeTruthy();
+    expect(p1.contadores?.borrador).toBe(55);
+    const p2 = await dato<{ items: { id: string }[]; siguiente: string | null }>(
+      await limpio("rendiciones.rendiciones.listar", { alcance: "propias", limite: 50, cursor: p1.siguiente! }),
+    );
+    expect(p2.items.length).toBe(5);
+    expect(p2.siguiente).toBeNull();
+    const busca = await dato<{ items: { descripcion: string }[] }>(
+      await limpio("rendiciones.rendiciones.listar", { alcance: "propias", q: "Lote contador 7" }),
+    );
+    expect(busca.items.some((r) => r.descripcion.includes("7"))).toBe(true);
+    const todas = await dato<{ items: unknown[] }>(await jefe("rendiciones.rendiciones.listar", { alcance: "todas", limite: 200 }));
+    expect(todas.items.length).toBeGreaterThanOrEqual(55);
   });
 });
