@@ -6,8 +6,13 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { CuentaOrigen } from "./cuenta-origen";
 import type { Candidata, CandidataReversa, LoteDetalle, LoteResumen } from "./tipos";
 
-export async function cargarLotes(): Promise<LoteResumen[]> {
-  return exigirDatos(await ejecutarComoUsuario<{ lotes: LoteResumen[] }>("erp", "rendiciones.lotes.listar", { limite: 100 })).lotes;
+export async function cargarLotes(cursor?: string): Promise<{ items: LoteResumen[]; siguiente: string | null }> {
+  return exigirDatos(
+    await ejecutarComoUsuario<{ items: LoteResumen[]; siguiente: string | null }>("erp", "rendiciones.lotes.listar", {
+      limite: 50,
+      ...(cursor ? { cursor } : {}),
+    }),
+  );
 }
 
 /** Aprobadas sin lote activo: solo quien arma lotes; sin ese permiso la lista llega vacía y no se pide. */

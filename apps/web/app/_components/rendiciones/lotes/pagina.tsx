@@ -21,16 +21,22 @@ async function permisosDe(): Promise<PermisosLote> {
 }
 
 /** «Lotes de pago»: aprobadas listas para pagar (arriba, solo quien paga) y los lotes de la empresa. */
-export function PaginaLotes() {
+import { conFiltros, leerParametros, type SearchParams } from "@/lib/parametros";
+
+export function PaginaLotes({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal
       portal="erp"
       titulo="Lotes de pago"
       ruta={RUTA_LOTES}
       cargar={async () => {
+        const p = await leerParametros(searchParams);
         const permisos = await permisosDe();
         const [candidatas, candidatasReversa, lotes, origen] = await Promise.all([
-          cargarCandidatas(permisos.pagar), cargarCandidatasReversa(permisos.pagar), cargarLotes(), cargarCuentasOrigen(permisos.configurar),
+          cargarCandidatas(permisos.pagar),
+          cargarCandidatasReversa(permisos.pagar),
+          cargarLotes(p.cursor),
+          cargarCuentasOrigen(permisos.configurar),
         ]);
         return { candidatas, candidatasReversa, lotes, permisos, origen };
       }}
@@ -59,11 +65,11 @@ export function PaginaLotes() {
             </SeccionTarjeta>
           ) : null}
           <SeccionTarjeta titulo="Lotes" sinRelleno>
-            <Estado state={lotes.length === 0 ? "empty" : "ready"} variante="lista" textos={{ vacio: { titulo: "Aún no hay lotes de pago", descripcion: "Crea el primero con las rendiciones aprobadas." } }}>
+            <Estado state={lotes.items.length === 0 ? "empty" : "ready"} variante="lista" textos={{ vacio: { titulo: "Aún no hay lotes de pago", descripcion: "Crea el primero con las rendiciones aprobadas." } }}>
               <Table>
                 <thead><tr><Th>Lote</Th><Th>Estado</Th><Th className="text-right">Rendiciones</Th><Th className="text-right">Total</Th><Th>Creado</Th></tr></thead>
                 <tbody>
-                  {lotes.map((l) => (
+                  {lotes.items.map((l) => (
                     <Tr key={l.id}>
                       <Td><LinkNext href={`${RUTA_LOTES}/${l.id}`} className="font-medium text-fg hover:underline">{l.codigoVisible}</LinkNext></Td>
                       <Td><Badge tono={TONO_LOTE[l.estado]}>{l.esReversa ? "Reversa · " : ""}{ETIQUETA_LOTE[l.estado]}</Badge></Td>
@@ -74,6 +80,14 @@ export function PaginaLotes() {
                   ))}
                 </tbody>
               </Table>
+              {lotes.siguiente ? (
+                <LinkNext
+                  href={conFiltros(RUTA_LOTES, { cursor: lotes.siguiente })}
+                  className="t-label px-4 py-3 text-accent"
+                >
+                  Siguiente página
+                </LinkNext>
+              ) : null}
             </Estado>
           </SeccionTarjeta>
         </div>
