@@ -16,7 +16,7 @@ const SIGUIENTES: Record<string, string[]> = {
   cliente_inactivo: ["cliente_activo"],
 };
 
-export function accionesCuenta(c: CuentaDetalle): AccionEntidad[] {
+function accionesCuenta(c: CuentaDetalle): AccionEntidad[] {
   return [
     { id: "editar", etiqueta: "Editar", parametro: { clave: "editar", valor: "1" } },
     ...(SIGUIENTES[c.estado] ?? []).map((estado, i) => ({
