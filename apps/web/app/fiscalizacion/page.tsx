@@ -1,4 +1,4 @@
-import { Wordmark, Button, Page, Alerta } from "@opai/ds";
+import { Alerta, Button } from "@opai/ds";
 
 import { buscarEmpleadorFiscalizacion, ingresarFiscalizacion, salirFiscalizacion, sesionFiscalizacionActual } from "./acciones";
 import { FormIngreso } from "./form-ingreso";
@@ -9,12 +9,14 @@ export const metadata = { title: "Portal de fiscalización", robots: { index: fa
 export default async function FiscalizacionPage() {
   const sesion = await sesionFiscalizacionActual();
   return (
-    <Page className="min-h-dvh bg-surface">
+    <main className="min-h-dvh bg-surface">
       <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
-        <Wordmark sufijo="Fiscalización" />
+        <p className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">
+          OPAI<span className="ml-1.5 font-medium text-fg-muted">Fiscalización</span>
+        </p>
         {sesion ? (
           <form action={salirFiscalizacion}>
-            <Button type="submit" variant="ghost" size="sm">Salir</Button>
+            <Button type="submit" variant="ghost" size="md">Salir</Button>
           </form>
         ) : null}
       </header>
@@ -33,6 +35,6 @@ export default async function FiscalizacionPage() {
           </>
         )}
       </div>
-    </Page>
+    </main>
   );
 }

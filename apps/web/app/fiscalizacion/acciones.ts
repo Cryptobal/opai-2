@@ -28,7 +28,7 @@ export async function ingresarFiscalizacion(form: FormData): Promise<{ ok: boole
   const r = await executeCapability(await ctxFiscalizacion(canon.tenantId), "asistencia.fiscalizacion_ingreso.validar", {
     correo, rutEmpleador: rut, clave, ip,
   });
-  if (!r.ok) return { ok: false, error: r.error?.mensaje ?? "No pudimos validar tu acceso." };
+  if (!r.ok) return { ok: false, error: r.error?.message ?? "No pudimos validar tu acceso." };
   const d = r.data as { slug: string; correo: string; empleadorRut: string; via: "correo" | "clave" };
   const token = emitirSesionFiscalizacion({
     tenantId: canon.tenantId, slug: d.slug, correo: d.correo, empleadorRut: d.empleadorRut, via: d.via,
@@ -46,10 +46,17 @@ export async function sesionFiscalizacionActual() {
   return leerSesionFiscalizacion(token);
 }
 
-export async function buscarEmpleadorFiscalizacion(rut: string) {
+type BusquedaFiscalizacion = {
+  encontrado: boolean;
+  razonSocial?: string | null;
+  rut?: string;
+  reportes?: { tipo: string; titulo: string; descripcion: string }[];
+};
+
+export async function buscarEmpleadorFiscalizacion(rut: string): Promise<BusquedaFiscalizacion | null> {
   const sesion = await sesionFiscalizacionActual();
   if (!sesion) return null;
   const ctx = await ctxFiscalizacion(sesion.tenantId);
   const r = await executeCapability(ctx, "asistencia.fiscalizacion_empleador.buscar", { rut });
-  return r.ok ? r.data : null;
+  return r.ok ? (r.data as BusquedaFiscalizacion) : null;
 }

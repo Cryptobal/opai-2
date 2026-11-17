@@ -32,7 +32,9 @@ export const fiscalizacionPortalIngresar = defineCapability({
     const emp = await empleadorPorRut(canon);
     if (!emp || emp.tenantId !== ctx.tenantId) throw reglaDeNegocio("No hay un empleador con ese RUT en OPAI.");
     const correo = i.correo.trim().toLowerCase();
-    if (modo.dryRun) return { via: "correo", correo, empleadorRut: emp.rut, slug: emp.slug, razonSocial: emp.razonSocial };
+    if (modo.dryRun) {
+      return { via: "correo" as const, correo, empleadorRut: emp.rut, slug: emp.slug, razonSocial: emp.razonSocial };
+    }
     let via: "correo" | "clave" = "correo";
     if (i.clave?.trim()) {
       const res = await resolverClaveFiscalizacion(hashClaveFiscalizacion(i.clave));
