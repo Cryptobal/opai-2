@@ -8,7 +8,7 @@ import type { Bandeja, DetalleBandeja, FiltrosBandeja } from "./tipos";
 /** La bandeja y sus totales salen de una sola capacidad (`rendiciones.bandeja.listar`). */
 export async function cargarBandeja(f: FiltrosBandeja): Promise<Bandeja> {
   return exigirDatos(
-    await ejecutarComoUsuario<Bandeja>("erp", "rendiciones.bandeja.listar", { ...f, limite: 100 }),
+    await ejecutarComoUsuario<Bandeja>("erp", "rendiciones.bandeja.listar", { ...f, limite: 50 }),
   );
 }
 
