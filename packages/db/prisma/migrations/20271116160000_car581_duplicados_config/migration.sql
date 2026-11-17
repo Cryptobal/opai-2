@@ -146,3 +146,5 @@ WHERE a.modulo = 'core'
   );
 
 COMMIT;
+
+-- Reversión: manual; quitar columnas de perfil, revertir ajustes notificaciones_correo_* y restaurar CCO en core.
