@@ -15,6 +15,7 @@ import { semillaTenant } from "./semilla";
 
 const P1 = "0192f3a0-0000-7000-8000-00000000f601";
 const V1 = "0192f3a0-0000-7000-8000-00000000f602";
+const V2 = "0192f3a0-0000-7000-8000-00000000f603";
 const f = (s: string) => new Date(`${s}T00:00:00.000Z`);
 
 const semilla = () => ({
@@ -22,11 +23,24 @@ const semilla = () => ({
   persona: [{ id: P1, tenantId: T, nombres: "Ana", apellidos: "Prueba", rut: "12345678-5", estado: "activa" }],
   vinculoLaboral: [
     { id: V1, tenantId: T, personaId: P1, cargoId: "c", tipo: "indefinido", inicio: f("2026-10-01"), termino: null, estado: "vigente" },
+    {
+      id: V2,
+      tenantId: T,
+      personaId: P1,
+      cargoId: "c",
+      tipo: "indefinido",
+      inicio: f("2024-01-01"),
+      termino: f("2026-09-15"),
+      estado: "terminado",
+      motivoTermino: "necesidades de la empresa",
+    },
   ],
   anexoContrato: [],
 });
 
 const como = () => contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: ["nomina"], semilla: semilla() });
+
+type ItemMidt = { movimientoTipo: string; referenciaId: string };
 
 beforeEach(() => {
   limpiarRegistro();
@@ -43,9 +57,9 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.listar", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const d = r.data as { pendientes: number; items: { movimientoTipo: string; referenciaId: string }[] };
-    expect(d.pendientes).toBeGreaterThanOrEqual(1);
-    expect(d.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
+    const data = r.data as { pendientes: number; items: ItemMidt[] };
+    expect(data.pendientes).toBeGreaterThanOrEqual(1);
+    expect(data.items.some((m) => m.movimientoTipo === "alta" && m.referenciaId === V1)).toBe(true);
   });
 
   it("exporta CSV de pendientes", async () => {
@@ -53,8 +67,8 @@ describe("nomina.cumplimiento_dt", () => {
     const r = await executeCapability(ctx, "nomina.midt.exportar_pendientes", {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const d = r.data as { contenido: string; filas: number };
-    expect(d.contenido).toContain("movimiento");
-    expect(d.filas).toBeGreaterThan(0);
+    const csv = r.data as { contenido: string; filas: number };
+    expect(csv.contenido).toContain("movimiento");
+    expect(csv.filas).toBeGreaterThan(0);
   });
 });

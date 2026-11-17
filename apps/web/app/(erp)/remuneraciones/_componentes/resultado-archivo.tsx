@@ -8,10 +8,21 @@ export type ArchivoLegal = {
   advertencias: string[];
 };
 
-/** Resultado de validar un archivo legal: conteo, tabla de errores por persona y avisos de formato. */
-const ETIQUETA: Record<string, string> = { lre: "LRE", previred: "archivo de Previred", f30_1: "certificado F30-1", pago_banco: "pago bancario" };
+const ETIQUETA: Record<string, string> = {
+  lre: "LRE",
+  previred: "archivo de Previred",
+  f30_1: "certificado F30-1",
+  pago_banco: "pago bancario",
+};
 
-export function ResultadoArchivo({ archivo, tipo }: { archivo: ArchivoLegal; tipo: "lre" | "previred" | "f30_1" | "pago_banco" }) {
+/** Resultado de validar un archivo legal: conteo, tabla de errores por persona y avisos de formato. */
+export function ResultadoArchivo({
+  archivo,
+  tipo,
+}: {
+  archivo: ArchivoLegal;
+  tipo: "lre" | "previred" | "f30_1" | "pago_banco";
+}) {
   const conErrores = archivo.errores.length > 0;
   return (
     <div className="flex flex-col gap-2">
@@ -20,7 +31,12 @@ export function ResultadoArchivo({ archivo, tipo }: { archivo: ArchivoLegal; tip
       </span>
       {conErrores ? (
         <Table etiqueta={`Errores del ${ETIQUETA[tipo] ?? tipo}`}>
-          <thead><tr><Th>Persona</Th><Th>Error</Th></tr></thead>
+          <thead>
+            <tr>
+              <Th>Persona</Th>
+              <Th>Error</Th>
+            </tr>
+          </thead>
           <tbody>
             {archivo.errores.map((e, i) => (
               <tr key={`${e.personaId ?? "empresa"}-${i}`}>
