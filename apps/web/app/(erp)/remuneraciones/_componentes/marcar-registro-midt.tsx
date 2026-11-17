@@ -32,7 +32,7 @@ export function MarcarRegistroMiDt({
       abierto={movimiento !== null}
       onCerrar={onCerrar}
       titulo={titulo}
-      descripcion={movimiento ? `${movimiento.personaNombre} · ${movimiento.hechoTexto}` : undefined}
+      {...(movimiento ? { descripcion: `${movimiento.personaNombre} · ${movimiento.hechoTexto}` } : {})}
       acciones={
         <Button disabled={pendiente || !fecha} form="form-midt-reg">
           Marcar registrado
@@ -67,11 +67,6 @@ export function MarcarRegistroMiDt({
                 const previa = await ejecutarCapacidad("erp", "nomina.midt.registrar", cuerpo, true);
                 if (!previa.ok) throw new Error(previa.error.message);
                 const r = await ejecutarCapacidad("erp", "nomina.midt.registrar", cuerpo);
-                  movimientoTipo: movimiento.movimientoTipo,
-                  referenciaId: movimiento.referenciaId,
-                  registradoEn: fecha,
-                  documentoId,
-                });
                 if (!r.ok) throw new Error(r.error.message);
                 avisar.exito("Registro en Mi DT guardado");
                 onCerrar();

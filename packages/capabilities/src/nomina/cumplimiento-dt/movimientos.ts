@@ -69,15 +69,18 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
   const items: MovimientoMiDt[] = [];
 
   for (const v of vinculos) {
+    const rutPersona = v.persona.rut;
+    if (!rutPersona) continue;
+    const hechoAlta = dia(v.inicio);
+    if (!hechoAlta) continue;
     const base = {
       personaId: v.personaId,
       personaNombre: personaNombre(v.persona),
       nombres: v.persona.nombres,
       apellidos: v.persona.apellidos,
-      rut: formatearRut(v.persona.rut),
+      rut: formatearRut(rutPersona),
       tipoContrato: v.tipo,
     };
-    const hechoAlta = dia(v.inicio);
     const regAlta = registros.get(`alta:${v.id}`);
     const plazoAlta = etiquetaPlazoMiDt(hechoAlta, hoyCivil, null);
     items.push({
@@ -97,6 +100,7 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
 
     if (v.estado === "terminado" && v.termino) {
       const hechoBaja = dia(v.termino);
+      if (!hechoBaja) continue;
       const regBaja = registros.get(`baja:${v.id}`);
       const plazoBaja = etiquetaPlazoMiDt(hechoBaja, hoyCivil, null);
       const motivo = v.motivoTermino ? ` · ${v.motivoTermino}` : "";
@@ -118,7 +122,10 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
   }
 
   for (const a of anexos) {
-    const hecho = dia(a.aprobadoEn!);
+    const rutPersona = a.persona.rut;
+    if (!rutPersona) continue;
+    const hecho = dia(a.aprobadoEn);
+    if (!hecho) continue;
     const reg = registros.get(`anexo:${a.id}`);
     const plazo = etiquetaPlazoMiDt(hecho, hoyCivil, null);
     const cambio = MOTIVO_ANEXO[a.motivoCambio] ?? a.motivoCambio;
@@ -130,7 +137,7 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
       personaNombre: personaNombre(a.persona),
       nombres: a.persona.nombres,
       apellidos: a.persona.apellidos,
-      rut: formatearRut(a.persona.rut),
+      rut: formatearRut(rutPersona),
       tipoContrato: "anexo",
       hechoEn: hecho,
       hechoTexto: `Cambio de ${cambio} · firmado el ${formatearFecha(hecho)}`,

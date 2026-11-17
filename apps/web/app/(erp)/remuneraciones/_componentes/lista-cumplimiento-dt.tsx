@@ -113,7 +113,7 @@ export function ListaCumplimientoDt({
                 </Td>
                 <Td className="text-fg-muted">{m.hechoTexto}</Td>
                 <Td>
-                  <Badge tono={m.plazoTono} punto>
+                  <Badge tono={m.plazoTono === "neutral" ? "neutro" : m.plazoTono} punto>
                     {m.plazoEtiqueta}
                   </Badge>
                 </Td>
