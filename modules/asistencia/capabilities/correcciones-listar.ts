@@ -3,11 +3,12 @@ import { z } from "zod";
 import { defineCapability, type Contexto } from "@opai/capabilities";
 
 import { estadoCorreccion, valorEfectivo, type TipoMarca } from "../domain";
+import { nombreCompleto } from "./formato";
 import { uuid } from "./esquemas";
 import { alcanceMarcas } from "./lecturas";
 
 const itemSchema = z.object({
-  correccionId: z.string(), marcaId: z.string(), personaId: z.string(),
+  correccionId: z.string(), marcaId: z.string(), personaId: z.string(), personaNombre: z.string(),
   original: z.object({ tipo: z.string(), hora: z.string() }),
   propuesta: z.object({ tipo: z.string(), hora: z.string() }),
   motivo: z.string(), venceEn: z.string().nullable(),
@@ -21,6 +22,12 @@ const itemSchema = z.object({
 export async function correccionesVista(ctx: Contexto, filtro: object, ahora = new Date()) {
   const filas = await ctx.db.correccion.findMany({ where: filtro, orderBy: { seq: "desc" }, take: 200 });
   const marcas = new Map((await ctx.db.marca.findMany({ where: { id: { in: filas.map((c) => c.marcaId) } } })).map((m) => [m.id, m]));
+  const personas = new Map(
+    (await ctx.db.persona.findMany({
+      where: { id: { in: [...new Set(filas.map((c) => c.personaId))] } },
+      select: { id: true, nombres: true, apellidos: true },
+    })).map((p) => [p.id, nombreCompleto(p)]),
+  );
   const respuestas = new Map((await ctx.db.correccionRespuesta.findMany({ where: { correccionId: { in: filas.map((c) => c.id) } } })).map((r) => [r.correccionId, r]));
   return filas.flatMap((c) => {
     const m = marcas.get(c.marcaId);
@@ -31,7 +38,7 @@ export async function correccionesVista(ctx: Contexto, filtro: object, ahora = n
     const propuesta = { tipo: c.tipoPropuesto as TipoMarca, hora: c.horaPropuesta };
     const e = valorEfectivo(original, propuesta, estado);
     return [{
-      correccionId: c.id, marcaId: c.marcaId, personaId: c.personaId,
+      correccionId: c.id, marcaId: c.marcaId, personaId: c.personaId, personaNombre: personas.get(c.personaId) ?? "—",
       original: { tipo: original.tipo, hora: original.hora.toISOString() },
       propuesta: { tipo: propuesta.tipo, hora: propuesta.hora.toISOString() },
       motivo: c.motivo, venceEn: c.venceEn?.toISOString() ?? null, estado,
