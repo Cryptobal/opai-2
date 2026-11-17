@@ -7,7 +7,7 @@ import { type ActividadVista, RESULTADO } from "./tipos";
 const cita = (t: string | null) => (t ? ` · «${t.length > 140 ? `${t.slice(0, 140)}…` : t}»` : "");
 
 /** Frase de la línea de tiempo para lo registrado a mano («registró una llamada… · contestó»). */
-export function fraseActividad(a: ActividadVista): string {
+function fraseActividad(a: ActividadVista): string {
   const con = a.vinculosDetalle.find((v) => v.tipo === "contacto")?.nombre;
   switch (a.tipo) {
     case "tarea": {
@@ -29,7 +29,7 @@ export function fraseActividad(a: ActividadVista): string {
   }
 }
 
-export const cuandoTimeline = (iso: string) => `${fecha(iso)} · ${hora(iso)}`;
+const cuandoTimeline = (iso: string) => `${fecha(iso)} · ${hora(iso)}`;
 
 /** Ítem de Timeline para una actividad registrada. */
 export function itemActividad(a: ActividadVista): ItemTimeline & { orden: string } {
