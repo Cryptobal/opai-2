@@ -13,7 +13,8 @@ vi.mock("../lib/fuentes", async (original) => ({
   fuentesReales: f.fuentes,
 }));
 
-const URI = "ui://opai/pendientes.html";
+const URI_PENDIENTES = "ui://opai/pendientes.html";
+const URI_FICHA_CUENTA = "ui://opai/ficha-cuenta.html";
 type Rpc = {
   result?: {
     tools?: { name: string; _meta?: { ui?: { resourceUri?: string } } }[];
@@ -42,20 +43,35 @@ describe("vistas del MCP (MCP Apps)", () => {
   it("la herramienta de pendientes declara su vista", async () => {
     const tools = (await rpc("tools/list")).result?.tools ?? [];
     const pendientes = tools.find((t) => t.name === "core_inicio_pendientes");
-    expect(pendientes?._meta?.ui?.resourceUri).toBe(URI);
+    expect(pendientes?._meta?.ui?.resourceUri).toBe(URI_PENDIENTES);
+  });
+
+  it("core_cuentas_get declara vista de ficha", async () => {
+    const tools = (await rpc("tools/list")).result?.tools ?? [];
+    const get = tools.find((t) => t.name === "core_cuentas_get");
+    expect(get?._meta?.ui?.resourceUri).toBe(URI_FICHA_CUENTA);
   });
 
   it("la vista se publica como recurso MCP App", async () => {
     const recursos = (await rpc("resources/list")).result?.resources ?? [];
-    expect(recursos.find((r) => r.uri === URI)?.mimeType).toBe("text/html;profile=mcp-app");
+    expect(recursos.find((r) => r.uri === URI_PENDIENTES)?.mimeType).toBe("text/html;profile=mcp-app");
+    expect(recursos.find((r) => r.uri === URI_FICHA_CUENTA)?.mimeType).toBe("text/html;profile=mcp-app");
   });
 
   it("la vista es autocontenida y usa el protocolo de MCP Apps", async () => {
-    const [c] = (await rpc("resources/read", { uri: URI })).result?.contents ?? [];
+    const [c] = (await rpc("resources/read", { uri: URI_PENDIENTES })).result?.contents ?? [];
     expect(c?.mimeType).toBe("text/html;profile=mcp-app");
     const html = c?.text ?? "";
     expect(html).toContain("ui/initialize");
     expect(html).toContain("ui/notifications/tool-result");
+    expect(html).not.toMatch(/<script[^>]+src=|<link[^>]+href=|@import/);
+    expect(html).not.toMatch(/#[0-9a-fA-F]{6}\b/);
+  });
+
+  it("la vista de ficha de cuenta es autocontenida", async () => {
+    const [c] = (await rpc("resources/read", { uri: URI_FICHA_CUENTA })).result?.contents ?? [];
+    const html = c?.text ?? "";
+    expect(html).toContain("ui/initialize");
     expect(html).not.toMatch(/<script[^>]+src=|<link[^>]+href=|@import/);
     expect(html).not.toMatch(/#[0-9a-fA-F]{6}\b/);
   });
