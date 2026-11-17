@@ -19,6 +19,7 @@ export * from "./mfa";
 export * from "./documentos";
 export * from "./comunicaciones";
 export * from "./permisos";
+export * from "./ver-como";
 export * from "./permisos-efectivos";
 export * from "./acceso-membresia";
 export * from "./portales";
