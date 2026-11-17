@@ -1,13 +1,11 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado, prohibido, type Contexto } from "@opai/capabilities";
+import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { alcanceMarcas } from "./alcance-marcas";
 import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
-import { personaPropia } from "./persona-propia";
 
 const PORTALES = ["erp", "supervisor", "trabajador", "terreno"] as const;
-const dePersona = (ctx: Contexto) => ctx.portal === "trabajador" || ctx.portal === "terreno";
 
 export { alcanceMarcas } from "./alcance-marcas";
 
