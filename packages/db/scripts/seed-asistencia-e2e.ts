@@ -9,13 +9,16 @@ import { activarModulos } from "./rondas-e2e";
 const HOY = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
 const MES = () => `${HOY().slice(0, 7)}-01`;
 
-async function sembrarPautaYTurno(db: TenantTx, tenantId: string) {
+async function ajusteMarcasHabilitadas(db: TenantTx, tenantId: string) {
   await activarModulos(db, tenantId, ["asistencia", "pauta"]);
   await db.ajuste.upsert({
     where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "asistencia", clave: "marcas_habilitadas" } },
     update: { valor: true },
     create: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "asistencia", clave: "marcas_habilitadas", valor: true },
   });
+}
+
+async function sembrarSerieYTurnoHoy(db: TenantTx, tenantId: string) {
   const patron = await db.patronTurno.upsert({
     where: { id: ASISTENCIA_E2E.patron },
     update: {},
@@ -44,7 +47,7 @@ async function sembrarPautaYTurno(db: TenantTx, tenantId: string) {
   });
 }
 
-async function sembrarMarcasKiosco(db: TenantTx, tenantId: string) {
+async function sembrarCredencialYDispositivo(db: TenantTx, tenantId: string) {
   const pinHash = await hashPin(ASISTENCIA_E2E.pin);
   await db.credencialTerreno.upsert({
     where: { personaId: ASISTENCIA_E2E.ana },
@@ -61,6 +64,9 @@ async function sembrarMarcasKiosco(db: TenantTx, tenantId: string) {
       identificador: "KIOSCO-ASISTENCIA-E2E", tokenHash: hmacDispositivo(ASISTENCIA_E2E.tokenDispositivo),
     },
   });
+}
+
+async function ajustesCanalesYConsentimiento(db: TenantTx, tenantId: string) {
   await db.ajuste.upsert({
     where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "asistencia", clave: "telefono_personal_permitido" } },
     update: { valor: true },
@@ -91,8 +97,10 @@ async function main() {
   exigirBaseE2E();
   const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await enTransaccion(tenantId, async (db) => {
-    await sembrarPautaYTurno(db, tenantId);
-    await sembrarMarcasKiosco(db, tenantId);
+    await ajusteMarcasHabilitadas(db, tenantId);
+    await sembrarSerieYTurnoHoy(db, tenantId);
+    await sembrarCredencialYDispositivo(db, tenantId);
+    await ajustesCanalesYConsentimiento(db, tenantId);
   });
   await cerrarClientes();
   console.log(`Fixture de Asistencia E2E listo (${HOY()}, turno Ana, kiosco y trabajador ${ASISTENCIA_E2E.trabajadorEmail}).`);
