@@ -28,7 +28,9 @@ export async function SeccionConfigAcceso({ instalacionId }: { instalacionId?: s
     instalacionId
       ? ejecutarComoUsuario<Apariencia>("erp", "acceso.apariencia.get", { instalacionId })
       : null,
-    !instalacionId ? ejecutarComoUsuario<GrupoLista[]>("erp", "acceso.grupos.list", {}) : null,
+    !instalacionId
+      ? ejecutarComoUsuario<{ items: GrupoLista[] }>("erp", "acceso.grupos.list", { limite: 200 })
+      : null,
     !instalacionId
       ? ejecutarComoUsuario<{ items: InstalacionOpcion[] }>("erp", "core.instalaciones.list", {
           limite: 200,
@@ -40,7 +42,7 @@ export async function SeccionConfigAcceso({ instalacionId }: { instalacionId?: s
       {r.ok && (!p || p.ok) && (!a || a.ok) ? (
         <div className="flex flex-col gap-4">
           {!instalacionId && g?.ok && insts?.ok ? (
-            <EditorGruposLista grupos={g.data} instalaciones={insts.data.items} />
+            <EditorGruposLista grupos={g.data.items} instalaciones={insts.data.items} />
           ) : null}
           {instalacionId && p?.ok && a?.ok ? (
             <>

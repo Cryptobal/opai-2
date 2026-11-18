@@ -67,7 +67,7 @@ export const manifest = defineModule({
     { id: "acceso.intento_denegado", descripcion: "Alguien no pudo entrar (bloqueado, fuera de lista u otro motivo)." },
     {
       id: "acceso.ingreso_bloqueado_diferido",
-      descripcion: "Al sincronizar, un ingreso sin red coincide con la lista bloqueada vigente (R22).",
+      descripcion: "Al sincronizar, un ingreso sin red coincide con la lista bloqueada vigente.",
     },
     { id: "acceso.reporte", descripcion: "Se envió el reporte periódico de accesos de una instalación." },
   ],

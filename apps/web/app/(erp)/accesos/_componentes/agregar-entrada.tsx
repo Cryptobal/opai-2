@@ -64,8 +64,8 @@ export function AgregarEntrada({
 
   useEffect(() => {
     if (!abierto) return;
-    void ejecutar("acceso.grupos.list", {}).then((g) => {
-      if (g && Array.isArray(g)) setGrupos(g as GrupoLista[]);
+    void ejecutar("acceso.grupos.list", { limite: 200 }).then((g) => {
+      if (g && "items" in g && Array.isArray(g.items)) setGrupos(g.items as GrupoLista[]);
     });
   }, [abierto, ejecutar]);
 

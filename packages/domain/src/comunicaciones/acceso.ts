@@ -57,7 +57,7 @@ export const COMUNICABLES_ACCESO: readonly EventoComunicable[] = [
     evento: "acceso.ingreso_bloqueado_diferido",
     nombre: "Ingreso sin conexión a revisar",
     descripcion:
-      "Al sincronizar, alguien que entró sin red coincide con la lista bloqueada actual (R22). Avisa al supervisor y al administrador.",
+      "Al sincronizar, alguien que entró sin red coincide con la lista bloqueada actual. Avisa al supervisor y al administrador.",
     transaccional: false,
     variables: [v("instalacion.nombre", "texto", "Planta Norte", "Instalación."), EMPRESA],
     plantillas: {

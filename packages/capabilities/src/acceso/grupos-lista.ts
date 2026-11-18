@@ -1,8 +1,10 @@
 import { z } from "zod";
 
-import { instalacionEnAlcance } from "../rondas/comun";
 import { uuidSchema } from "../core/esquemas";
+import { cursorDe, pagina } from "../core/maestros/comun";
 import { defineCapability } from "../define";
+import { instalacionEnAlcance } from "../rondas/comun";
+import { inputPaginaAcceso } from "./pagina-alcance";
 import { reglaDeNegocio } from "../errores";
 import { PERMISO_READ } from "./comun";
 import { PERMISO_CONFIG } from "./config-comun";
@@ -18,21 +20,26 @@ export const gruposListar = defineCapability({
   descripcion:
     "Lista los grupos de instalaciones que comparten listas de acceso: nombre y qué instalaciones incluye cada uno.",
   permiso: PERMISO_READ,
-  input: z.object({}),
-  output: z.array(grupoSchema),
+  input: z.object({ ...inputPaginaAcceso }),
+  output: z.object({ items: z.array(grupoSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (items) => items.map((g) => g.id),
-  async handler(ctx) {
+  auditarLectura: (s) => s.items.map((g) => g.id),
+  async handler(ctx, { cursor, limite }) {
     const filas = await ctx.db.grupoLista.findMany({
-      orderBy: { nombre: "asc" },
+      orderBy: [{ nombre: "asc" }, { id: "asc" }],
+      ...cursorDe(cursor, limite),
       include: { miembros: { select: { instalacionId: true } } },
     });
-    return filas.map((g) => ({
-      id: g.id,
-      nombre: g.nombre,
-      instalacionIds: g.miembros.map((m) => m.instalacionId),
-    }));
+    return pagina(
+      filas.map((g) => ({
+        id: g.id,
+        nombre: g.nombre,
+        instalacionIds: g.miembros.map((m) => m.instalacionId),
+      })),
+      limite,
+      cursor,
+    );
   },
 });
 

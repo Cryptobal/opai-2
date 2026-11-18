@@ -10,7 +10,8 @@ import {
   prerregistrosObtener,
 } from "./prerregistros-leer";
 import { gruposCambiar, gruposListar } from "./grupos-lista";
-import { listasAgregar, listasListar, listasQuitar } from "./listas";
+import { listasAgregar, listasListar } from "./listas";
+import { listasQuitar } from "./listas-quitar";
 import { puntosCambiar, puntosListar } from "./puntos";
 import { aparienciaCambiar, aparienciaGet } from "./apariencia";
 import { registrosObtener } from "./registro-get";
