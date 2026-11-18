@@ -6,8 +6,6 @@ import type { Parametros } from "@/lib/parametros";
 
 export const POR_PAGINA = 50;
 
-export const anteriores = (p: Parametros) => (p["prev"] ? p["prev"].split(",") : []);
-
 export type Ticket = {
   id: string;
   numero: string;

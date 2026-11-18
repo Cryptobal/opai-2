@@ -1,9 +1,12 @@
 import { cn, estilosBoton } from "@opai/ds";
+import type { ReactNode } from "react";
 
 import { LinkNext } from "@/app/_components/link-next";
 import type { Parametros } from "@/lib/parametros";
 
-import { anteriores, POR_PAGINA } from "./datos";
+function anterioresCursor(p: Parametros) {
+  return p["prev"] ? p["prev"].split(",") : [];
+}
 
 function con(p: Parametros, cambios: Record<string, string | null>) {
   const q = new URLSearchParams();
@@ -12,13 +15,21 @@ function con(p: Parametros, cambios: Record<string, string | null>) {
   return s ? `?${s}` : "?";
 }
 
-type Props = { p: Parametros; mostrados: number; siguiente: string | null };
+type Props = {
+  p: Parametros;
+  porPagina: number;
+  mostrados: number;
+  siguiente: string | null;
+  total: number | null;
+  /** Texto cuando no hay páginas (sin total): «12 tickets». */
+  etiquetaCorta?: string;
+};
 
 /** Anterior/Siguiente por cursor (`?prev=` guarda la pila de páginas). */
-export function PaginacionTickets({ p, mostrados, siguiente }: Props) {
-  const pila = anteriores(p);
-  const desde = pila.length * POR_PAGINA + (mostrados ? 1 : 0);
-  const hasta = pila.length * POR_PAGINA + mostrados;
+export function PaginacionCursor({ p, porPagina, mostrados, siguiente, total, etiquetaCorta }: Props) {
+  const pila = anterioresCursor(p);
+  const desde = pila.length * porPagina + (mostrados ? 1 : 0);
+  const hasta = pila.length * porPagina + mostrados;
   const previo = pila.slice(0, -1);
   const ultimo = pila.at(-1);
   const anterior =
@@ -30,11 +41,23 @@ export function PaginacionTickets({ p, mostrados, siguiente }: Props) {
     : null;
   const clase = (activo: boolean) =>
     cn(estilosBoton({ variant: "secondary" }), !activo && "pointer-events-none opacity-45");
-  if (!anterior && !proxima) return <span className="t-caption">{mostrados} tickets</span>;
+  let resumen: ReactNode;
+  if (!anterior && !proxima) {
+    resumen =
+      total === null ? (
+        <span className="t-caption">{etiquetaCorta ?? `${mostrados} resultados`}</span>
+      ) : (
+        <span className="t-caption">
+          {mostrados} de {total}
+        </span>
+      );
+    return resumen;
+  }
   return (
     <>
       <span className="t-caption">
         {desde}–{hasta}
+        {total !== null ? ` de ${total}` : ""}
       </span>
       <span className="flex gap-2">
         <LinkNext href={anterior ?? "#"} className={clase(Boolean(anterior))} aria-disabled={!anterior}>

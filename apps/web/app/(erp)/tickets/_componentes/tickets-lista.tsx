@@ -10,6 +10,7 @@ import {
   type cargarInstalaciones,
   ETIQUETA_ESTADO,
   ETIQUETA_PRIORIDAD,
+  POR_PAGINA,
   TONO_ESTADO,
   TONO_PRIORIDAD,
   type Ticket,
@@ -17,7 +18,7 @@ import {
   type cargarTickets,
 } from "./datos";
 import { NuevoTicket } from "./nuevo-ticket";
-import { PaginacionTickets } from "./paginacion";
+import { PaginacionCursor } from "@/lib/paginacion-cursor";
 
 const OPCIONES_VISTA = [
   { valor: "mios", etiqueta: "Míos" },
@@ -80,7 +81,16 @@ export function TicketsLista({ p, bandeja, tipos, instalaciones }: Props) {
       accionPrincipal={<NuevoTicket tipos={tipos} instalaciones={instalaciones} />}
       buscador={<Buscador placeholder="Número, asunto o solicitante" />}
       filtros={<ChipsFiltro filtros={[{ param: "vista", etiqueta: "Vista", opciones: OPCIONES_VISTA }]} />}
-      paginacion={<PaginacionTickets p={p} mostrados={items.length} siguiente={bandeja.siguiente} />}
+      paginacion={
+        <PaginacionCursor
+          p={p}
+          porPagina={POR_PAGINA}
+          mostrados={items.length}
+          siguiente={bandeja.siguiente}
+          total={null}
+          etiquetaCorta={`${items.length} tickets`}
+        />
+      }
       items={items}
       clave={(t) => t.id}
       href={(t) => `/tickets/${t.id}`}
