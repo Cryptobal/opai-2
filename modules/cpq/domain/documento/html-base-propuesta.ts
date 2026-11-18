@@ -55,7 +55,7 @@ export function htmlBasePropuesta(d: {
     `.meta-valor{font-size:13px;font-weight:600}`,
     `.cierre{margin-top:32px;padding:16px;border-top:2px solid var(--marca-sec);text-align:center;font-size:11px;color:#52525b}`,
   `</style>`,
-    '<section class="portada" aria-label="Portada">',
+    '<section class="portada" aria-label="Portada" style="break-after:page">',
     '<header class="portada-cab">',
     `<span class="marca">${escaparDato(d.marca.nombre)}</span>`,
     iconoDoc(),

@@ -36,9 +36,10 @@ test.describe("@preview cpq: marcadores HTML de propuesta (CAR-571)", () => {
       "bloque.tabla_servicio", "bloque.resumen_economico", "puesto.nombre", "puesto.cantidad"]) {
       await expect(reconocidos).toContainText(`{{${t}}}`);
     }
-    const vistaCpq = page.getByLabel("Ver con la cotización");
+    const vistaCpq = page.getByLabel("Ver con la cotización", { exact: true });
     await vistaCpq.scrollIntoViewIfNeeded();
-    await vistaCpq.getByRole("combobox").click();
+    // El label apunta al botón diferido; el input combobox aparece al abrirlo.
+    await vistaCpq.click();
     await page.getByPlaceholder("Buscar por código, título o cuenta").fill("e2e");
     await page.getByRole("option").first().click({ timeout: 30_000 });
     await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible({ timeout: 60_000 });

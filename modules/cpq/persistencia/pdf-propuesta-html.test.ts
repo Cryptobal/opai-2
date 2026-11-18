@@ -1,3 +1,4 @@
+import { htmlBasePropuesta } from "../domain/documento/html-base-propuesta";
 import { describe, expect, it } from "vitest";
 
 import type { MarcaDocumentoVista } from "./marca-documento";
@@ -27,4 +28,24 @@ describe("PDF de la propuesta con plantilla HTML (CAR-533)", () => {
     expect(paginas.length).toBeGreaterThan(1);
     expect(paginas.join(" ")).toContain("Párrafo 120");
   });
+});
+
+it("separa portada base de índice y no imprime CSS ni agrega páginas vacías", async () => {
+  const html = htmlBasePropuesta({ titulo: "Propuesta ficticia", cliente: "Cliente QA", marca: {
+    nombre: "Empresa QA", colorPrimario: null, colorSecundario: null, piePagina: null,
+  } }).replace("{{secciones}}", "<h2>Índice</h2><p>Resumen sintético</p>");
+  const { paginas } = await leerPdf(await renderPdfPropuestaHtml({ codigo: "QA-1", fecha: "", borrador: false, marca, logo: null, html }));
+  expect(paginas).toHaveLength(2);
+  expect(paginas[0]).toContain("Propuesta ficticia");
+  expect(paginas[0]).not.toContain("Índice");
+  expect(paginas[1]).toContain("Índice");
+  expect(paginas.join(" ")).not.toContain("min-height");
+});
+it("colapsa saltos iniciales, consecutivos y finales sin páginas vacías", async () => {
+  const salto = '<div style="page-break-before:always"></div>';
+  const html = salto + "<p>Primera QA</p>" + salto + salto + "<p>Segunda QA</p>" + salto;
+  const { paginas } = await leerPdf(await renderPdfPropuestaHtml({ codigo: "QA-2", fecha: "", borrador: false, marca, logo: null, html }));
+  expect(paginas).toHaveLength(2);
+  expect(paginas[0]).toContain("Primera QA");
+  expect(paginas[1]).toContain("Segunda QA");
 });
