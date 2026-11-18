@@ -3,10 +3,15 @@ import { estadoDeCierre } from "@opai/domain";
 import type { Contexto } from "../../types";
 import type { Hecho } from "./acceso-tipos";
 import type { Plantilla } from "./rondas-ejecucion-hechos";
+import { senalRonda } from "./rondas-senales";
 
-/** Inserta los cierres aceptados, calculando con las marcas ya guardadas si la ronda quedó completa o incompleta. */
+/**
+ * Inserta los cierres aceptados, calculando con las marcas ya guardadas si la ronda quedó completa o incompleta.
+ * Un cierre incompleto nuevo emite `rondas.ejecucion.incompleta` (CAR-501); un reenvío no lo repite.
+ */
 export async function escribirCierres(
   tx: Contexto["db"],
+  eventos: Contexto["eventos"],
   p: {
     base: { tenantId: string; instalacionId: string; dispositivoId: string };
     conocidas: ReadonlyMap<string, { plantilla: Plantilla; cerrada: boolean }>;
@@ -28,8 +33,9 @@ export async function escribirCierres(
       marcas.map((m) => m.puntoId).filter((x) => e.plantilla.obligatorios.has(x)),
     ).size;
     const obligatorios = e.plantilla.obligatorios.size;
-    await tx.cierreRonda.createMany({
+    const [nuevo] = await tx.cierreRonda.createManyAndReturn({
       skipDuplicates: true,
+      select: { estado: true },
       data: [
         {
           ...p.base,
@@ -46,6 +52,18 @@ export async function escribirCierres(
           horaCierre: p.corregir(new Date(c.h.horaHecho)),
         },
       ],
+    });
+    if (nuevo?.estado !== "incompleta") continue;
+    await eventos.emitir(tx, {
+      tipo: "rondas.ejecucion.incompleta",
+      entidadTipo: "ejecucion_ronda",
+      entidadId: ejecucionId,
+      payload: {
+        ...senalRonda(p.base.instalacionId, c.h.personaId),
+        plantillaId: e.plantilla.id,
+        puntosObligatorios: obligatorios,
+        puntosMarcados: marcados,
+      },
     });
   }
 }
