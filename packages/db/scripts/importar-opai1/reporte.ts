@@ -11,7 +11,7 @@ import type { ResumenTributario } from "./tributario-plan";
 
 const ACCIONES: Accion[] = ["crear", "actualizar", "sin_cambios", "conflicto", "omitido"];
 
-export type GrupoDetalle = {
+type GrupoDetalle = {
   entidad: EntidadImportada;
   accion: Accion;
   motivo: string;

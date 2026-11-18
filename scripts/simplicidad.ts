@@ -1,15 +1,14 @@
 // Check `simplicidad` (ADR-115): mide el repositorio y lo compara con la línea base.
 // Falla solo si una cifra empeora; lo que ya existía no bloquea.
 //   pnpm simplicidad               mide y compara con simplicidad-base.json
-//   pnpm simplicidad --actualizar  reescribe la base con las cifras de hoy
+//   pnpm simplicidad --actualizar  reescribe la base con las cifras de hoy (solo al integrar a main)
+//   SIMPLICIDAD_BASE=local       compara contra el JSON del branch (legado; CAR-641 usa main por defecto)
 //   pnpm simplicidad --detalle     además lista todos los hallazgos
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
+import { BASE, RAMA_BASE, cargarBase, type Cifras, type Metrica } from "./simplicidad/base";
 import { medirDuplicados, medirSinUso } from "./simplicidad/herramientas";
 import { medirLargos } from "./simplicidad/largos";
-
-const BASE = "simplicidad-base.json";
-const RAMA_BASE = process.env.SIMPLICIDAD_RAMA_BASE ?? "origin/main";
 
 const ETIQUETAS = {
   lineasDuplicadas: "Líneas de código duplicado",
@@ -20,8 +19,6 @@ const ETIQUETAS = {
   dependenciasSinUso: "Dependencias sin uso",
 } as const;
 
-type Metrica = keyof typeof ETIQUETAS;
-type Cifras = Record<Metrica, number>;
 type Detalle = Record<Metrica, string[]>;
 
 function medir(): { cifras: Cifras; detalle: Detalle } {
@@ -102,7 +99,7 @@ if (args.includes("--actualizar")) {
   process.exit(0);
 }
 
-const base = JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
+const base = cargarBase();
 const faltantes = (Object.keys(ETIQUETAS) as Metrica[]).filter((m) => typeof base[m] !== "number");
 if (faltantes.length > 0) {
   console.error(

@@ -1,18 +1,11 @@
-import { createHash } from "node:crypto";
-
 import type { Contexto } from "@opai/capabilities";
 import { type AvisoFlujo, type DiferenciaFactoring, hoyChile, type IngresoEsperado, proyeccionDeIngresos } from "@opai/capabilities";
 
 import type { CeldaFlujo } from "../domain";
 import type { celdaSchema } from "./esquemas";
 import { FILA_COBROS_ESPERADOS, FILA_DEPOSITO_FACTORING } from "./filas-virtuales";
+import { idEstable } from "./util";
 import type { z } from "zod";
-
-/** Id estable (UUID v5-like) para una celda proyectada que no tiene fila propia en la base. */
-function idEstable(texto: string): string {
-  const h = createHash("sha1").update(texto).digest("hex");
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
-}
 
 const ORIGEN: Record<string, string> = {
   manual: "fijada a mano",
