@@ -30,6 +30,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.push.quitar":
     "Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a).",
   "core.apikeys.create": "Solo personas: una key no se crea keys ni ve secretos (ADR-032).",
+  "core.ver_como.iniciar":
+    "Solo personas: «ver como» es una vista de pantalla de quien tiene la sesión (CAR-528); un agente ya lee esos datos con sus propias capacidades.",
+  "core.ver_como.terminar":
+    "Solo personas: cierra la vista «ver como» de quien tiene la sesión (CAR-528).",
   // CAR-352: un destino saca eventos de la empresa hacia afuera y lleva un secreto de firma.
   "core.webhooks.destino_crear":
     "Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032).",
