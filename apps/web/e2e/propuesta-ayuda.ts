@@ -1,5 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
+import { EN_PREVIEW } from "./preview";
+
 import { leerPdf } from "../../../modules/cpq/persistencia/pdf/prueba-pdf";
 import { crearNegocio, irANuevaCotizacion } from "./negocios-ayuda";
 
@@ -32,7 +34,7 @@ export async function textoDelUltimoPdf(page: Page, cantidad = 1): Promise<strin
 
 /** Crea un negocio y una cotización de prueba y abre «Armar propuesta técnica». */
 export async function abrirDisenadorDePropuesta(page: Page, negocio: string, titulo: string) {
-  await crearNegocio(page, negocio);
+  await crearNegocio(page, negocio, [], EN_PREVIEW ? "Cliente ficticio QA E2E (cesión)" : undefined);
   await irANuevaCotizacion(page);
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();

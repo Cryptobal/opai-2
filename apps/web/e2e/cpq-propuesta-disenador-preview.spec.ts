@@ -13,11 +13,11 @@ test.setTimeout(300_000);
 const CONDICIONES = "Pago a 30 días desde la factura (texto de prueba qa-e2e).";
 
 async function fijarCondiciones(page: Page, texto: string) {
-  await page.goto("/configuracion/modulo/cpq?seccion=marca-plantillas");
+  await page.goto("/configuracion/marca");
   const campo = page.getByLabel("Condiciones comerciales por defecto");
   await expect(async () => {
     await campo.fill(texto);
-    await page.getByRole("button", { name: "Guardar marca documental" }).click();
+    await page.getByRole("button", { name: "Guardar", exact: true }).click();
     await page.waitForLoadState("networkidle");
     await page.reload();
     await expect(campo).toHaveValue(texto, { timeout: 5_000 });
