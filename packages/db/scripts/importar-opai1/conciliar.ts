@@ -3,7 +3,7 @@ import type { Accion } from "./comun";
 import type { Plan } from "./plan";
 import type { DatosOpai1 } from "./origen";
 
-export type ResumenEntidad = {
+type ResumenEntidad = {
   entidad: string;
   enOrigen: number;
   importados: number;
