@@ -1,12 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { crearContexto, executeCapability } from "../src";
-import { MENSAJE_PLANTILLA_EJEMPLO } from "../src/core/anexos/plantilla";
 import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
 import { prepararVinculosJornada } from "./vinculos-jornada-fixture";
 
 // CAR-58: con una plantilla de clase «Anexo» publicada en Documentos, el anexo se aprueba y su documento
-// final es un PDF armado con ese texto; sin ella sigue bloqueado por la plantilla de ejemplo.
+// final es un PDF armado con ese texto; sin ella y sin perfil de empresa, el texto legal base reporta faltantes.
 describe("anexos sobre plantillas de Documentos", () => {
   let f: Awaited<ReturnType<typeof prepararVinculosJornada>>;
   const almacen = almacenamientoEnMemoria();
@@ -64,10 +63,12 @@ describe("anexos sobre plantillas de Documentos", () => {
     await f?.e.cerrar();
   });
 
-  it("sin plantilla publicada no se puede aprobar", async () => {
+  it("sin plantilla publicada ni perfil de empresa no se puede aprobar", async () => {
     const r = await executeCapability(ctx(), "core.anexos.aprobar", { id: anexoId });
     expect(r.ok).toBe(false);
-    expect(JSON.stringify(r)).toContain(MENSAJE_PLANTILLA_EJEMPLO.slice(0, 40));
+    if (r.ok) return;
+    expect(r.error.code).toBe("UNPROCESSABLE");
+    expect(r.error.message).toMatch(/Faltan datos para generar el anexo/);
   });
 
   it("con la plantilla publicada aprueba y deja el PDF en Documentos", async () => {

@@ -143,4 +143,3 @@ export function calcularPlan(
   };
 }
 
-export { etiquetasPropuestas } from "./etiquetas-propuestas";
