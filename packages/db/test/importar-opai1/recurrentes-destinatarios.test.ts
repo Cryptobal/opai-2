@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { contactoOpai1, programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen";
+import { contactoOpai1 } from "../../scripts/importar-opai1/origen";
+import { programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen-recurrentes-cpq";
 import { destinatariosRecurrenteOpai1 } from "../../scripts/importar-opai1/recurrentes";
 
 describe("destinatarios recurrentes 1.0", () => {
