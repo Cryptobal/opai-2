@@ -153,6 +153,7 @@ describe.skipIf(!urlPropietario)("ejecución de rondas en base real (CAR-78 E3d)
       puntosMarcados: 3,
     });
     expect(await e.admin.marca.count({ where: { tenantId: t.A } })).toBe(0);
+    expect(await e.admin.evento.count({ where: { entidadId: ej.id } })).toBe(0);
   });
 
   it("con faltantes sobre el umbral queda incompleta; los reenvíos no duplican", async () => {
@@ -166,6 +167,17 @@ describe.skipIf(!urlPropietario)("ejecución de rondas en base real (CAR-78 E3d)
     expect(ej.cierre).toMatchObject({ estado: "incompleta", puntosMarcados: 1 });
     expect((await recibir("A", lote)).every((x) => x.estado === "duplicado")).toBe(true);
     expect(await e.admin.ejecucionRonda.count({ where: { clave: i.clave } })).toBe(1);
+    // CAR-501: la señal para la Central sale una vez, con la instalación y sin persona si no se declaró.
+    const ev = await e.admin.evento.findMany({
+      where: { tipo: "rondas.ejecucion.incompleta", entidadId: ej.id },
+    });
+    expect(ev).toHaveLength(1);
+    expect(ev[0]?.payload).toEqual({
+      instalacionId: inst.A,
+      plantillaId: plantillaA,
+      puntosObligatorios: 3,
+      puntosMarcados: 1,
+    });
   });
 
   it("rechaza plantilla ajena o inexistente, ronda no permitida, ronda desconocida y segundo cierre", async () => {
