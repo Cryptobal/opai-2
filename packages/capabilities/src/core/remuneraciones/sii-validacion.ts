@@ -1,4 +1,4 @@
-export type ClaveSiiPublicable = "uf" | "utm";
+import type { ClaveSiiPublicable } from "@opai/domain";
 
 const RANGO_UF_CENTAVOS = { min: 1_000_000, max: 20_000_000 } as const;
 const RANGO_UTM_CLP = { min: 10_000, max: 500_000 } as const;

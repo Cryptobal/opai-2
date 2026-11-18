@@ -5,7 +5,7 @@ import type { TenantTx } from "../../src/transaccion";
 import { dependientesPostImport } from "./revertir-dependientes";
 import { previosDeFecha } from "./registro";
 
-export type FilaBloqueada = { entidad: string; id10: string; motivo: string };
+type FilaBloqueada = { entidad: string; id10: string; motivo: string };
 
 export type ResultadoReversion = {
   dryRun: boolean;
