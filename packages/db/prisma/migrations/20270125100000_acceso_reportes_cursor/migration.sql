@@ -28,3 +28,5 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "acceso"."reportes_cursor
   "core"."verificar_mismo_tenant"('instalacion_id', 'core.instalaciones');
 
 COMMIT;
+
+-- Reversión: DROP TABLE "acceso"."reportes_cursor";
