@@ -46,25 +46,10 @@ async function trasCrearLote(
   router.push(`${RUTA_LOTES}/${(r.data as { id: string }).id}`);
 }
 
-export async function crearLotePago(
-  rendicionIds: string[],
-  mensajeOk: string,
-  router: ReturnType<typeof useRouter>,
-  setOcupado: (v: boolean) => void,
-  setError: (v: string | null) => void,
-): Promise<void> {
-  setOcupado(true);
-  setError(null);
-  await trasCrearLote(
-    await ejecutarCapacidad("erp", "rendiciones.lotes.crear", { rendicionIds }),
-    mensajeOk,
-    router,
-    setOcupado,
-    setError,
-  );
-}
+export type CrearLoteCap = "rendiciones.lotes.crear" | "rendiciones.lotes.crear_reversa";
 
-export async function crearLoteReversa(
+export async function crearLoteEnUi(
+  capacidad: CrearLoteCap,
   rendicionIds: string[],
   mensajeOk: string,
   router: ReturnType<typeof useRouter>,
@@ -74,7 +59,7 @@ export async function crearLoteReversa(
   setOcupado(true);
   setError(null);
   await trasCrearLote(
-    await ejecutarCapacidad("erp", "rendiciones.lotes.crear_reversa", { rendicionIds }),
+    await ejecutarCapacidad("erp", capacidad, { rendicionIds }),
     mensajeOk,
     router,
     setOcupado,
