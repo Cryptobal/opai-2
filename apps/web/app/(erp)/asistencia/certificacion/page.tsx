@@ -35,7 +35,7 @@ export default function CertificacionDt() {
         return (
           <div className="flex flex-col gap-4">
             <Badge tono="warning">Sin certificar</Badge>
-            <p className="t-body-sm text-muted">{d.resumen}</p>
+            <p className="t-body-sm text-fg-muted">{d.resumen}</p>
             <Table etiqueta="Checklist Res. 38">
               <thead>
                 <Tr>
@@ -55,7 +55,7 @@ export default function CertificacionDt() {
                     <Td>
                       <Badge tono={tono[i.estado]}>{i.etiquetaEstado}</Badge>
                     </Td>
-                    <Td className="text-muted">{i.evidencia}</Td>
+                    <Td className="text-fg-muted">{i.evidencia}</Td>
                   </Tr>
                 ))}
               </tbody>
