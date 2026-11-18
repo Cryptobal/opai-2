@@ -6,7 +6,7 @@ import { limpiarReferencias } from "./origen-api-referencias";
 import type { Advertencia } from "./origen-tolerante";
 
 /** Recurso del exportador → clave de `DatosOpai1`. `correlativos` y `folios` no se leen: el correlativo CPQ se deriva de los códigos. */
-export const RECURSOS_V1 = {
+const RECURSOS_V1 = {
   cuentas: "accounts",
   contactos: "contacts",
   instalaciones: "installations",
