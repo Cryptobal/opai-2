@@ -15,7 +15,7 @@ import { estadoRegistro, tipoDe } from "./etiquetas";
 import { paginacion } from "./paginacion";
 import { Tarjeta } from "./tablas-instalacion";
 
-const COLUMNAS: Columna<Registro>[] = [
+export const COLUMNAS: Columna<Registro>[] = [
   { id: "nombre", etiqueta: "Nombre", render: (x) => x.nombre },
   { id: "tipo", etiqueta: "Tipo", render: (x) => tipoDe(x.tipoRegistro) },
   { id: "empresa", etiqueta: "Empresa", render: (x) => x.empresa ?? "—" },

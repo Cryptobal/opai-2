@@ -123,3 +123,5 @@ async function Seccion({
     }
   }
 }
+
+export { COLUMNAS } from "./seccion-registros";
