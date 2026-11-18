@@ -6,6 +6,7 @@ import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
 import { novedadesDelLibro } from "./libro-novedades-cola";
 import { resolverNovedades } from "./rondas-novedades";
+import { escribirHechosProyectados } from "./proyecciones-escribir";
 
 export type Proyecciones = {
   /** Hechos que el servidor no puede resolver (QR ajeno, documento inválido, módulo inactivo…). */
@@ -45,34 +46,20 @@ export async function prepararProyecciones(
   return {
     rechazos,
     dependientesDe: (caidas) => rondas.dependientesDe(caidas),
-    async escribir(tx, nuevos, _desfaseMs, aceptadas) {
-      const ids = await rondas.iniciar(tx, aceptadas);
-      const filas = nuevos.flatMap((h) => {
-        const m = marcas.get(h.clave);
-        if (!m || !("marca" in m)) return [];
-        const { puntoId, geocerca, distanciaM, precisionM, anomalias } = m.marca;
-        return [
-          {
-            tenantId: ctx.tenantId,
-            instalacionId: equipo.instalacionId,
-            dispositivoId: equipo.id,
-            clave: h.clave,
-            personaId: h.personaId ?? null,
-            horaCorregida: t.corregir(new Date(h.horaHecho)),
-            puntoId,
-            geocerca,
-            distanciaM,
-            precisionM,
-            anomalias,
-            ejecucionId: m.marca.ejecucionClave ? (ids.get(m.marca.ejecucionClave) ?? null) : null,
-          },
-        ];
-      });
-      if (filas.length > 0) await tx.marcaRonda.createMany({ skipDuplicates: true, data: filas });
-      await rondas.cerrar(tx, aceptadas, ids);
-      await novedades.escribir(tx, aceptadas, ids);
+    escribir: async (tx, nuevos, _desfaseMs, aceptadas) => {
+      await escribirHechosProyectados(
+        ctx,
+        equipo,
+        t,
+        marcas,
+        rondas,
+        novedades,
+        acceso,
+        tx,
+        nuevos,
+        aceptadas,
+      );
       await libro(tx, aceptadas);
-      await acceso.escribir(tx, aceptadas);
     },
   };
 }

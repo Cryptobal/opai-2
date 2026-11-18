@@ -1,11 +1,10 @@
 import type { Contexto } from "../../types";
 import type { Equipo, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
-import { insertarLibroNovedades } from "./libro-novedades-comun";
 import { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
+import { escribirNovedadesLibro } from "./rondas-novedades-escribir";
 
 export type NovedadesResueltas = {
   rechazos: Rechazos;
-  /** Escribe en el libro de novedades del núcleo las aceptadas; `ids` es clave de ronda → id (para enlazarlas). */
   escribir: (
     tx: Contexto["db"],
     aceptadas: ReadonlySet<string>,
@@ -15,11 +14,7 @@ export type NovedadesResueltas = {
 
 /**
  * Novedades de ronda por la cola (CAR-78 · E5a) hacia el libro de novedades del núcleo (CAR-77,
- * `core.libro_novedades`), con el equipo, la persona declarada y la hora del hecho corregida. El punto debe ser de
- * la instalación del equipo y el tipo de incidente del tenant y activo; la gravedad por defecto es la del tipo. La
- * clave del hecho es la clave de idempotencia de la novedad, así que reenviar no duplica. Si la ronda a la que
- * apunta no existe, la novedad se guarda igual sin ronda: una novedad nunca se pierde. Una novedad grave emite
- * `rondas.novedad.grave` (una vez, solo al insertarse). No marca presencia laboral.
+ * `core.libro_novedades`), con el equipo, la persona declarada y la hora del hecho corregida.
  */
 export async function resolverNovedades(
   ctx: Contexto,
@@ -40,6 +35,7 @@ export async function resolverNovedades(
     for (const { h } of nov) rechazos.set(h.clave, "modulo_inactivo");
     return { rechazos, escribir: async () => undefined };
   }
+
   const puntoIds = [...new Set(nov.flatMap((n) => (n.p.puntoId ? [n.p.puntoId] : [])))];
   const tipoIds = [
     ...new Set(nov.flatMap((n) => (n.p.tipoIncidenteId ? [n.p.tipoIncidenteId] : []))),
@@ -67,53 +63,10 @@ export async function resolverNovedades(
     else return true;
     return false;
   });
+
   return {
     rechazos,
-    async escribir(tx, aceptadas, ids) {
-      const aceptables = validas.filter(({ h }) => aceptadas.has(h.clave));
-      const faltan = [
-        ...new Set(
-          aceptables.flatMap(({ p }) =>
-            p.ejecucionClave && !ids.has(p.ejecucionClave) ? [p.ejecucionClave] : [],
-          ),
-        ),
-      ];
-      const otras = faltan.length
-        ? await tx.ejecucionRonda.findMany({
-            where: { dispositivoId: equipo.id, clave: { in: faltan } },
-            select: { id: true, clave: true },
-          })
-        : [];
-      const rondaDe = new Map([...ids, ...otras.map((e) => [e.clave, e.id] as const)]);
-      const data = aceptables.map(({ h, p }) => ({
-        tenantId: ctx.tenantId,
-        instalacionId: equipo.instalacionId,
-        modulo: "rondas",
-        origen: p.puntoId ? "punto" : p.ejecucionClave ? "ronda" : "manual",
-        ejecucionId: p.ejecucionClave ? (rondaDe.get(p.ejecucionClave) ?? null) : null,
-        puntoId: p.puntoId ?? null,
-        tipoIncidenteId: p.tipoIncidenteId ?? null,
-        gravedad:
-          p.gravedad ??
-          (p.tipoIncidenteId ? gravedadDe.get(p.tipoIncidenteId) : undefined) ??
-          "media",
-        resumen: p.resumen,
-        detalle: p.detalle ?? null,
-        dispositivoId: equipo.id,
-        personaId: h.personaId ?? null,
-        horaHecho: t.corregir(new Date(h.horaHecho)),
-        idempotencyKey: h.clave,
-      }));
-      const nuevas = await insertarLibroNovedades(tx, data);
-      if (nuevas.length === 0) return;
-      for (const n of nuevas.filter((x) => x.gravedad === "alta")) {
-        await ctx.eventos.emitir(tx, {
-          tipo: "rondas.novedad.grave",
-          entidadTipo: "libro_novedad",
-          entidadId: n.id,
-          payload: { instalacionId: equipo.instalacionId, numero: n.numero },
-        });
-      }
-    },
+    escribir: (tx, aceptadas, ids) =>
+      escribirNovedadesLibro(ctx, equipo, t, validas, gravedadDe, tx, aceptadas, ids),
   };
 }

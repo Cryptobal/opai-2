@@ -198,6 +198,20 @@ describe.skipIf(!urlPropietario)("marcas de ronda en base real (CAR-78 E3)", () 
     expect((await por(sinGps.clave)).geocerca).toBe("sin_gps");
     expect((await por(lejos.clave)).anomalias).toContain("fuera_de_geocerca");
     expect((await por(viejo.clave)).anomalias).toEqual(["etiqueta_reemplazada"]);
+    // CAR-501: cada marca con anomalía es una señal para la Central (con la persona declarada); sin anomalía, no.
+    const senal = async (clave: string) =>
+      e.admin.evento.findMany({
+        where: { tipo: "rondas.anomalia.detectada", entidadId: (await por(clave)).id },
+      });
+    expect(await senal(sinGps.clave)).toHaveLength(0);
+    const [ev] = await senal(viejo.clave);
+    expect(ev?.payload).toMatchObject({
+      instalacionId: inst.A,
+      personaId: personaA,
+      anomalias: ["etiqueta_reemplazada"],
+    });
+    await recibir(t.A, disp.A, [viejo]);
+    expect(await senal(viejo.clave)).toHaveLength(1);
   });
 
   it("una marca no es asistencia, y los hechos de una empresa no aparecen en la otra", async () => {
