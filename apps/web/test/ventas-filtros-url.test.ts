@@ -7,11 +7,19 @@ describe("conFiltros (CAR-255)", () => {
     expect(conFiltros("/finanzas/ventas", {})).toBe("/finanzas/ventas");
   });
 
-  it("conserva filtros y paginación (CAR-585) y descarta editar", () => {
-    const r = conFiltros("/finanzas/ventas/x", { periodo: "2026-10", estado: "borrador", q: "ñandú 1", cursor: "abc", editar: "1" });
+  it("conserva filtros y paginación; descarta editar (CAR-585)", () => {
+    const r = conFiltros("/finanzas/ventas/x", {
+      periodo: "2026-10",
+      estado: "borrador",
+      q: "ñandú 1",
+      cursor: "abc",
+      prev: "0,def",
+      limite: "50",
+      editar: "1",
+    });
     const q = new URL(r, "http://x").searchParams;
     expect(r.startsWith("/finanzas/ventas/x?")).toBe(true);
-    expect([...q.keys()].sort()).toEqual(["cursor", "estado", "periodo", "q"]);
+    expect([...q.keys()].sort()).toEqual(["cursor", "estado", "limite", "periodo", "prev", "q"]);
     expect(q.get("q")).toBe("ñandú 1");
   });
 
