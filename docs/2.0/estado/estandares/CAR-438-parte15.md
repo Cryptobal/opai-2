@@ -22,3 +22,12 @@ Se elimina el alias local `PrioridadTicket`, sin referencias, que quedó al reti
 Se conserva `PRIORIDADES_TICKET` y no cambian estados, transiciones ni comportamiento en ejecución.
 
 Fixes CAR-438
+
+## Rescate de checks
+
+Se integra main y se retiran marcadores de conflicto que habían quedado publicados en
+`simplicidad-base.json`, conservando exactamente los límites de main (sin relajarlos).
+El e2e anterior terminó con 364 aprobadas, 9 fallidas y 4 intermitentes: los fallos de
+login QA y foco del agente son comunes; las fichas de persona requieren validar la
+fixture y su espera de carga. No se relajan aserciones ni se agregan omisiones.
+El pase anterior no acredita este head; siguen pendientes CI y preview-e2e nuevos.
