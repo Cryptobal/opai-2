@@ -2,7 +2,7 @@ import type { TenantTx } from "@opai/db";
 
 import { fechaCivil } from "./comun";
 import { primerDiaMesAnterior, restarDiasCivil } from "./sii-parse";
-import type { ClaveSiiPublicable } from "./sii-validacion";
+import type { ClaveSiiPublicable } from "@opai/domain";
 
 export type RefVariacion =
   | { ok: true; valor: number; vigenteDesde: string }
