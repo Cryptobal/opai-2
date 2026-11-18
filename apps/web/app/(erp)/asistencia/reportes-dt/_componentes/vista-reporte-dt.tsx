@@ -12,7 +12,7 @@ function urlExport(params: Record<string, string | undefined>, formato: "xlsx" |
 function Par({ etiqueta, valor, mono, className }: { etiqueta: string; valor: string; mono?: boolean; className?: string }) {
   return (
     <div className={cn("flex flex-col gap-0.5", className)}>
-      <span className="t-caption text-muted">{etiqueta}</span>
+      <span className="t-caption text-fg-muted">{etiqueta}</span>
       <span className={cn("t-body-sm", mono && "font-mono")}>{valor || "—"}</span>
     </div>
   );
@@ -30,7 +30,7 @@ function EncabezadoReporteDt({
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h2 className="t-subheading m-0">{vista.titulo}</h2>
-        <p className="t-body-sm m-0 text-muted">
+        <p className="t-body-sm m-0 text-fg-muted">
           Vista previa · {vista.cabecera.periodo}
           {vista.provisorio ? " · incluye correcciones pendientes" : ""}
         </p>
@@ -55,7 +55,7 @@ function EncabezadoReporteDt({
 
 function TablaVistaReporte({ vista }: { vista: VistaReporteDt }) {
   if (!vista.filas.length) {
-    return <p className="t-body-sm text-muted">No hay registros en este período.</p>;
+    return <p className="t-body-sm text-fg-muted">No hay registros en este período.</p>;
   }
   return (
     <Table etiqueta={vista.titulo}>
@@ -87,7 +87,7 @@ export function VistaReporteDtPanel({
   params: Record<string, string | undefined>;
 }) {
   if (!vista) {
-    return <p className="t-body-sm text-muted">Elige un reporte y período.</p>;
+    return <p className="t-body-sm text-fg-muted">Elige un reporte y período.</p>;
   }
   return (
     <>
@@ -105,7 +105,7 @@ export function VistaReporteDtPanel({
           {vista.siglasUsadas.map((s) => (
             <div key={s} className="flex gap-2 text-sm">
               <dt className="font-mono font-medium">{s}</dt>
-              <dd className="text-muted">{SIGLAS[s as keyof typeof SIGLAS] ?? s}</dd>
+              <dd className="text-fg-muted">{SIGLAS[s as keyof typeof SIGLAS] ?? s}</dd>
             </div>
           ))}
         </dl>

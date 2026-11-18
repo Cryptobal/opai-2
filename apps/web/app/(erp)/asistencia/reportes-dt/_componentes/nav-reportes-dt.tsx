@@ -19,7 +19,7 @@ export function NavReportesDt({
   const router = useRouter();
   return (
     <nav className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-2" aria-label="Reportes DT">
-      <span className="t-caption px-2 py-1 text-muted">Reportes obligatorios</span>
+      <span className="t-caption px-2 py-1 text-fg-muted">Reportes obligatorios</span>
       {catalogo
         .filter((c) => c.obligatorio)
         .map((c) => (
@@ -37,10 +37,10 @@ export function NavReportesDt({
             }
           >
             <span className="t-body-sm font-medium">{c.titulo}</span>
-            <span className="t-caption text-muted">{c.descripcion}</span>
+            <span className="t-caption text-fg-muted">{c.descripcion}</span>
           </Button>
         ))}
-      <span className="t-caption mt-2 border-t border-border px-2 py-1 text-muted">Otros</span>
+      <span className="t-caption mt-2 border-t border-border px-2 py-1 text-fg-muted">Otros</span>
       <Link href="/verificar/marca" className="t-body-sm px-2 py-2 text-accent hover:underline">
         Verificar marcación por hash
       </Link>

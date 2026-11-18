@@ -14,6 +14,7 @@ agente_conversaciones_list
 agente_conversaciones_renombrar
 agente_historial_list
 agente_modelos_list
+asistencia_certificacion_checklist
 asistencia_contingencias_listar
 asistencia_contingencias_registrar
 asistencia_correcciones_listar
@@ -28,6 +29,9 @@ asistencia_incidentes_registrar
 asistencia_jornadas_fijar_tipo
 asistencia_marcas_listar
 asistencia_marcas_obtener
+asistencia_reportes_catalogo
+asistencia_reportes_exportar
+asistencia_reportes_vista
 asistencia_rostro_textos
 central_alertas_abrir
 central_alertas_contactar
