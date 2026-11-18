@@ -14,18 +14,21 @@ const RAMA_BASE = process.env.SIMPLICIDAD_RAMA_BASE ?? "origin/main";
 
 /** Línea base: por defecto la de `main` en git (CAR-641); evita conflictos en PRs paralelos. */
 function cargarBase(): Cifras {
-  if (process.env.SIMPLICIDAD_BASE === "local") {
-    return JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
-  }
+  const local = (): Cifras => JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
+  if (process.env.SIMPLICIDAD_BASE === "local") return local();
   try {
-    return JSON.parse(
+    const remota = JSON.parse(
       execFileSync("git", ["show", `${RAMA_BASE}:${BASE}`], {
         encoding: "utf8",
         stdio: ["ignore", "pipe", "ignore"],
       }),
-    ) as Cifras;
+    ) as Partial<Cifras>;
+    const incompleta = (Object.keys(ETIQUETAS) as Metrica[]).some(
+      (m) => typeof remota[m] !== "number",
+    );
+    return incompleta ? local() : (remota as Cifras);
   } catch {
-    return JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
+    return local();
   }
 }
 
