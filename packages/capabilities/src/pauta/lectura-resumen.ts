@@ -110,6 +110,7 @@ export const ppcListar = defineCapability({
       if (!inst) continue;
       for (const t of tramosPpc(m.celdas.get(p.id) ?? [])) {
         salida.push({
+          id: `${p.id}:${t.desde}:${t.motivo}`,
           instalacionId: inst.id,
           instalacion: inst.nombre,
           puestoId: p.id,

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
-import { listaSchema } from "../core/maestros/comun";
+import { limiteLista, listaSchema } from "../core/maestros/comun";
 import { dondePuesto } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
 import type { Contexto } from "../types";
@@ -26,7 +26,7 @@ const grupoSchema = z.object({
 export const entradaListaAusencias = z.object({
   personaId: uuidSchema,
   cursor: listaSchema.shape.cursor,
-  limite: z.number().int().min(1).max(200).default(30),
+  limite: limiteLista.default(30),
 });
 export const salidaListaAusencias = z.object({
   personaId: z.string(),

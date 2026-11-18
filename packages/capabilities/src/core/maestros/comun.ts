@@ -75,15 +75,10 @@ export function paginaMemoria<T extends { id: string }>(
   limite: number,
   cursor: string | undefined,
 ) {
-  let start = 0;
-  if (cursor) {
-    const i = filas.findIndex((f) => f.id === cursor);
-    start = i >= 0 ? i + 1 : 0;
-  }
-  const items = filas.slice(start, start + limite);
-  const siguiente =
-    start + limite < filas.length ? (items.at(-1)?.id ?? null) : null;
-  return { items, siguiente };
+  if (!cursor) return pagina([...filas], limite, undefined);
+  const i = filas.findIndex((f) => f.id === cursor);
+  const ventana = i >= 0 ? filas.slice(i) : [...filas];
+  return pagina(ventana, limite, cursor);
 }
 
 export const limiteLista = z.number().int().min(1).max(200).default(50);
