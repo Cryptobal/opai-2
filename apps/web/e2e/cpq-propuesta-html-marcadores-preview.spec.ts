@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { capturar } from "./preview";
+import { verificarVistaHtmlCpq } from "./cpq-vista-ayuda";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-571: marcadores de empresa, cotización y bloques en plantilla HTML (solo simulación en Configuración).
@@ -42,8 +43,9 @@ test.describe("@preview cpq: marcadores HTML de propuesta (CAR-571)", () => {
     await vistaCpq.click();
     await page.getByPlaceholder("Buscar por código, título o cuenta").fill("e2e");
     await page.getByRole("option").first().click({ timeout: 30_000 });
-    await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible({ timeout: 60_000 });
-    await page.getByTitle("Vista previa del HTML subido").scrollIntoViewIfNeeded();
+    const iframe = await verificarVistaHtmlCpq(page, ["QA E2E (ficticia)", "Cotización CPQ-", "Neto mensual"]);
     await capturar(page, info, "cpq-propuesta-html-marcadores-vista");
+    // Evidencia del frame aislado: fullPage puede capturar zonas aún sin pintar en móvil.
+    await capturar(page, info, "cpq-propuesta-html-marcadores-vista-documento", iframe);
   });
 });

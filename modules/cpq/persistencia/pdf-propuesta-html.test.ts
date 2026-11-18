@@ -37,6 +37,8 @@ it("separa portada base de índice y no imprime CSS ni agrega páginas vacías",
   const { paginas } = await leerPdf(await renderPdfPropuestaHtml({ codigo: "QA-1", fecha: "", borrador: false, marca, logo: null, html }));
   expect(paginas).toHaveLength(2);
   expect(paginas[0]).toContain("Propuesta ficticia");
+  expect(paginas[0]).toContain("Cliente: Cliente QA");
+  expect(paginas[0]).not.toContain("ClienteCliente");
   expect(paginas[0]).not.toContain("Índice");
   expect(paginas[1]).toContain("Índice");
   expect(paginas.join(" ")).not.toContain("min-height");

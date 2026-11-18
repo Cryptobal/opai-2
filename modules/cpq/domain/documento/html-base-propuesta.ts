@@ -14,7 +14,7 @@ const colorHex = (c: string | null, fallback: string) =>
   c && /^#[0-9a-f]{3,8}$/i.test(c) ? c : fallback;
 
 const filaMeta = (etiq: string, valor: string) =>
-  `<div class="meta-fila"><span class="meta-etiq">${escaparDato(etiq)}</span><span class="meta-valor">${escaparDato(valor)}</span></div>`;
+  `<div class="meta-fila"><span class="meta-etiq">${escaparDato(etiq)}: </span><span class="meta-valor">${escaparDato(valor)}</span></div>`;
 
 const iconoDoc = () =>
   '<svg class="ico" viewBox="0 0 24 24" width="32" height="32" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 2h8l6 6v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5"/></svg>';

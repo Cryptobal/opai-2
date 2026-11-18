@@ -65,9 +65,11 @@ export async function plegarHasta(boton: Locator, abierto: boolean): Promise<voi
   }).toPass({ timeout: 60_000 });
 }
 
-export async function capturar(page: Page, info: TestInfo, nombre: string): Promise<void> {
+export async function capturar(page: Page, info: TestInfo, nombre: string, objetivo?: Locator): Promise<void> {
   const carpeta = CARPETA_CAPTURAS;
-  await page.screenshot({ path: `${carpeta}/${nombre}-${info.project.name}.png`, fullPage: true });
+  const path = `${carpeta}/${nombre}-${info.project.name}.png`;
+  if (objetivo) await objetivo.screenshot({ path });
+  else await page.screenshot({ path, fullPage: true });
 }
 
 /**

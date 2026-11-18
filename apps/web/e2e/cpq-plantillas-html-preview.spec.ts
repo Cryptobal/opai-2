@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { capturar } from "./preview";
+import { verificarVistaHtmlCpq } from "./cpq-vista-ayuda";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Plantillas HTML de la propuesta (CAR-532) en `preview-e2e`, a 375, 1024 y 1280 px, con `qa-e2e`.
@@ -54,9 +55,10 @@ test.describe("@preview cpq: plantillas HTML en Marca y plantillas", () => {
     await vistaCpq.click();
     await page.getByPlaceholder("Buscar por código, título o cuenta").fill("e2e");
     await page.getByRole("option").first().click({ timeout: 30_000 });
-    await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible({ timeout: 60_000 });
-    await page.getByTitle("Vista previa del HTML subido").scrollIntoViewIfNeeded();
+    const iframe = await verificarVistaHtmlCpq(page, ["Propuesta para", "Servicio de seguridad"]);
     await capturar(page, info, "cpq-plantillas-html-vista");
+    // Evidencia del frame aislado: fullPage puede capturar zonas aún sin pintar en móvil.
+    await capturar(page, info, "cpq-plantillas-html-vista-documento", iframe);
   });
 
   test("revisa HTML con bloque style sanitizado y marcador de secciones", async ({ page }, info) => {
