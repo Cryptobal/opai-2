@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@opai/ds";
+import { formatearFechaHora } from "@opai/domain";
 
 import { diaOperativoChile, textoEvacuacion, type SnapshotEvacuacion } from "@/lib/terreno/evacuacion";
 
@@ -29,11 +30,7 @@ export function ExportarEvacuacion({ copia, enLinea }: Props) {
     URL.revokeObjectURL(url);
   };
 
-  const hora = new Date(copia.sincronizadoEn).toLocaleString("es-CL", {
-    timeZone: "America/Santiago",
-    dateStyle: "short",
-    timeStyle: "short",
-  });
+  const hora = formatearFechaHora(copia.sincronizadoEn);
 
   return (
     <section aria-label="Lista de evacuación" className="flex flex-col gap-2 rounded-lg border border-border bg-surface-muted p-4">
