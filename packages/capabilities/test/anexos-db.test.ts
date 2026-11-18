@@ -1,22 +1,16 @@
 // Anexo de contrato (Brief 07b, PR 4) contra Postgres real: aislamiento por tenant, permisos
 // (D8/D13), gobierno de agentes (soloPersonas) y el documento final con SHA-256 y bitácora.
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
-import type * as Plantilla from "../src/core/anexos/plantilla";
 import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
 import { destinoVinculo } from "./vinculo-fixture";
 
-// CAR-58: la plantilla del repositorio es de ejemplo y bloquea la aprobación (eso lo prueba
-// `anexos-plantilla-ejemplo.test.ts`). Aquí se simula el texto definitivo para seguir probando el
-// camino completo de aprobación (bloqueo, revalidación, documento con SHA-256 y bitácora).
-vi.mock("../src/core/anexos/plantilla", async (original) => ({
-  ...(await original<typeof Plantilla>()),
-  PLANTILLA_ANEXO: { version: "definitiva-de-prueba", esEjemplo: false },
-}));
+// CAR-58: el texto legal base ya está en el repositorio; el guard de `esEjemplo` se prueba en
+// `anexos-plantilla-ejemplo.test.ts`.
 
 describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
   let e: Entorno;
@@ -92,6 +86,17 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
   }
 
   beforeAll(async () => {
+    await e.admin.perfilEmpresa.create({
+      data: {
+        tenantId,
+        razonSocial: "Empresa Prueba SpA",
+        rut: "76123456-7",
+        calle: "Av. Providencia 100",
+        comuna: "Santiago",
+        representanteNombre: "Ana Representante",
+        representanteRut: "12345678-5",
+      },
+    });
     const cargo = await dato<{ id: string }>(ctx(), "core.cargos.create", { nombre: "Guardia" });
     const destino = await destinoVinculo(ctx());
     instalacionId = destino.instalacionId;
@@ -99,6 +104,8 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       nombres: "Elena",
       apellidos: "Ríos",
       rut: "17.123.456-5",
+      calle: "Los Alerces 45",
+      comuna: "Santiago",
       vinculo: { ...destino, cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
     });
     personaId = persona.id;
