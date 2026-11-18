@@ -4,7 +4,7 @@ import type { TenantTx } from "@opai/db";
 import type { Contexto } from "../../types";
 
 import { fuenteEsSii, valorEnRango, variacionPermitidaAcumulada, diasEntreCivil } from "./sii-validacion";
-import type { ClaveSiiPublicable } from "./sii-validacion";
+import type { ClaveSiiPublicable } from "@opai/domain";
 
 type PublicarInput = {
   clave: ClaveSiiPublicable;

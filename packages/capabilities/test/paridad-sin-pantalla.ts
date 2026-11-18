@@ -11,37 +11,56 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
   "central.turno.abrir": {
     encargo: "CAR-472",
     desde: "2026-11-14",
-    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+    motivo:
+      "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
   },
   "central.turno.entregar": {
     encargo: "CAR-472",
     desde: "2026-11-14",
-    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+    motivo:
+      "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
   },
   "central.turno.aceptar": {
     encargo: "CAR-472",
     desde: "2026-11-14",
-    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+    motivo:
+      "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
   },
   "central.turno.cerrar": {
     encargo: "CAR-472",
     desde: "2026-11-14",
-    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+    motivo:
+      "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
   },
   "central.alertas.tomar": {
     encargo: "CAR-472",
     desde: "2026-11-14",
-    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+    motivo:
+      "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
   },
   "central.alertas.devolver": {
     encargo: "CAR-472",
     desde: "2026-11-14",
-    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+    motivo:
+      "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
   },
   "central.agente.reanudar": {
     encargo: "CAR-472",
     desde: "2026-11-14",
-    motivo: "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+    motivo:
+      "Humano a cargo de la central: llega con las pantallas de la Central. Mientras tanto el agente solo mira si no hay nadie a cargo.",
+  },
+  "core.ver_como.iniciar": {
+    encargo: "CAR-528",
+    desde: "2026-11-15",
+    motivo:
+      "«Ver como…» con buscador: llega en la parte 2 de CAR-528 (selector, banner y Terreno). Mientras tanto nadie inicia una vista.",
+  },
+  "core.ver_como.terminar": {
+    encargo: "CAR-528",
+    desde: "2026-11-15",
+    motivo:
+      "«Salir» del banner de «ver como»: llega en la parte 2 de CAR-528, junto con el inicio.",
   },
   "central.alertas.hacerse_cargo": {
     encargo: "CAR-472",

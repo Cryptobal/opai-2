@@ -110,31 +110,3 @@ export function eventoAuditoria(
     },
   };
 }
-
-/** Fila de `core.consumos` de la propia ejecución (ADR-031): nunca rompe, mide igual si falló. */
-export function consumoDeEjecucion(
-  ctx: Contexto,
-  c: Capacidad,
-  tenantId: string,
-  opciones: OpcionesEjecucion,
-  ok: boolean,
-  duracionMs: number,
-) {
-  return {
-    tenantId,
-    recurso: "capacidad.ejecucion",
-    unidad: "llamada",
-    cantidad: 1,
-    modulo: c.modulo,
-    capability: c.id,
-    actorTipo: ctx.actor.tipo,
-    actorId: ctx.actor.id ?? null,
-    viaUserId: ctx.actor.viaUserId ?? null,
-    apiKeyId: ctx.actor.tipo === "agent" ? ctx.actor.id : null,
-    portal: ctx.portal,
-    efecto: c.efecto,
-    dryRun: opciones.dryRun === true,
-    ok,
-    duracionMs,
-  };
-}
