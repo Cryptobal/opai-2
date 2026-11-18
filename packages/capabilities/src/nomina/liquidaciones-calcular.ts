@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { liquidacionDelMes, type Liquidacion, type NovedadesLiquidacion } from "@opai/domain";
+import type { Liquidacion } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { prohibido, reglaDeNegocio } from "../errores";
@@ -9,44 +9,13 @@ import { dia } from "../core/maestros/comun";
 import { mutualAdicionalTenant } from "../core/remuneraciones";
 import type { TenantTx } from "@opai/db";
 
-import type { Contexto } from "../types";
 import { resumenAsistenciaPeriodo } from "../../../../modules/asistencia/capabilities/dias-resumen-periodo";
 
-import { mezclarAsistenciaLiquidacion } from "./asistencia-liquidacion";
 import { bloquearPeriodoAbierto } from "./bloqueos";
+import { calcularLiquidacionesPeriodo } from "./liquidaciones-calcular-nucleo";
 import { PERMISO_PERIODOS, periodoDe } from "./comun";
 import { cargarBase, juegoDelMes, ocultasDe, personasDelMes } from "./costo-proyectado-datos";
 import { exigirPeriodoAbierto } from "./novedades-util";
-
-const vacias = (): NovedadesLiquidacion =>
-  ({ diasLicencia: 0, diasAusencia: 0, minutosExtra: 0, anticipos: 0, prestamos: 0, descuentos: 0 });
-
-/** Novedades vigentes del período sumadas por persona, en las unidades del cálculo (se redondea al final). */
-async function novedadesPorPersona(db: Contexto["db"] | TenantTx, periodoId: string) {
-  const filas = await db.nominaNovedad.findMany({
-    where: { periodoId, estado: "vigente" },
-    select: { personaId: true, tipo: true, cantidad: true, montoClp: true },
-  });
-  const porPersona = new Map<string, NovedadesLiquidacion>();
-  for (const f of filas) {
-    const n = porPersona.get(f.personaId) ?? vacias();
-    const cantidad = Number(f.cantidad ?? 0);
-    const monto = f.montoClp ?? 0;
-    if (f.tipo === "licencia") n.diasLicencia += cantidad;
-    else if (f.tipo === "ausencia") n.diasAusencia += cantidad;
-    else if (f.tipo === "horas_extra") n.minutosExtra += cantidad * 60;
-    else if (f.tipo === "anticipo") n.anticipos += monto;
-    else if (f.tipo === "prestamo") n.prestamos += monto;
-    else if (f.tipo === "descuento") n.descuentos += monto;
-    porPersona.set(f.personaId, n);
-  }
-  for (const n of porPersona.values()) {
-    n.diasLicencia = Math.round(n.diasLicencia);
-    n.diasAusencia = Math.round(n.diasAusencia);
-    n.minutosExtra = Math.round(n.minutosExtra);
-  }
-  return porPersona;
-}
 
 const omitidaSchema = z.object({ personaId: z.string(), motivo: z.enum(["sin_capa", "oculta", "error_calculo"]) });
 
@@ -83,44 +52,12 @@ export const liquidacionesCalcular = defineCapability({
     const usaAsistencia = ctx.modulosActivos.includes("asistencia");
     const asistencia =
       usaAsistencia && ini && fin ? await resumenAsistenciaPeriodo(ctx, ini, fin) : new Map();
-    const calcular = async (db: Contexto["db"] | TenantTx) => {
-      const novedades = await novedadesPorPersona(db, periodoId);
-      const omitidas: z.infer<typeof omitidaSchema>[] = [...grupo.omitidas];
-      const filas = grupo.personas.flatMap((p) => {
-        try {
-          const base = novedades.get(p.personaId) ?? vacias();
-          const mezcla = mezclarAsistenciaLiquidacion(base, asistencia.get(p.personaId));
-          const l = liquidacionDelMes(
-            {
-              ...p,
-              mutualAdicional: mutual ?? 0,
-              novedades: mezcla.novedades,
-              ...(mezcla.diasPresentes !== undefined
-                ? { diasPresentesAsistencia: mezcla.diasPresentes }
-                : {}),
-            },
-            juego,
-          );
-          const advertencias = [...l.advertencias, ...mezcla.advertencias];
-          return [{ personaId: p.personaId, l: { ...l, advertencias } }];
-        } catch {
-          omitidas.push({ personaId: p.personaId, motivo: "error_calculo" });
-          return [];
-        }
-      });
-      const salida = {
-        calculadas: filas.length,
-        omitidas,
-        totalLiquido: filas.reduce((s, f) => s + f.l.liquido, 0),
-        advertencias: mutual == null ? ["Mutual adicional sin confirmar: se usa 0 %."] : [],
-      };
-      return { filas, salida };
-    };
-    if (dryRun) return (await calcular(ctx.db)).salida;
+    const nucleo = { periodoId, personas: grupo.personas, omitidasIniciales: grupo.omitidas, mutual, juego, asistencia };
+    if (dryRun) return (await calcularLiquidacionesPeriodo(ctx.db, nucleo)).salida;
     return ctx.transaccion(async (tx) => {
       await bloquearPeriodoAbierto(tx, ctx.tenantId, periodoId);
       // Con el período bloqueado, las novedades ya no cambian: se calcula con ellas.
-      const { filas, salida } = await calcular(tx);
+      const { filas, salida } = await calcularLiquidacionesPeriodo(tx, nucleo);
       // Se conservan las de quien falló el cálculo; se borran las de quien ya no tiene vínculo o capa.
       const conservar = [...filas.map((f) => f.personaId), ...salida.omitidas.filter((o) => o.motivo === "error_calculo").map((o) => o.personaId)];
       await tx.nominaLiquidacion.deleteMany({ where: { periodoId, personaId: { notIn: conservar } } });
