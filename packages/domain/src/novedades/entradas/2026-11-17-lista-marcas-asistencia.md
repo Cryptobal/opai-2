@@ -1,4 +1,5 @@
 ---
+id: lista-marcas-asistencia
 modulo: asistencia
 fecha: 2026-11-17
 titulo: Lista de marcas en Asistencia

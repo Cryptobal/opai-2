@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, prohibido, type Contexto } from "@opai/capabilities";
 
 import { ETIQUETA_GPS, ETIQUETA_METODO, ETIQUETA_TIPO, tenantBasico } from "./formato";
-import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
+import { marcaVistaDetalleSchema, uuid, vistaDeMarca } from "./esquemas";
 import { personaPropia } from "./persona-propia";
 
 const PORTALES = ["erp", "supervisor", "trabajador", "terreno"] as const;
@@ -26,16 +26,7 @@ export const marcasObtener = defineCapability({
   permiso: null,
   portales: PORTALES,
   input: z.object({ id: uuid }),
-  output: marcaVistaSchema.extend({
-    personaNombre: z.string(),
-    instalacionNombre: z.string(),
-    dispositivoId: z.string().nullable(),
-    dispositivoNombre: z.string().nullable(),
-    tipoEtiqueta: z.string(),
-    metodoEtiqueta: z.string(),
-    gpsEtiqueta: z.string(),
-    slugEmpresa: z.string(),
-  }),
+  output: marcaVistaDetalleSchema,
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => [s.id],

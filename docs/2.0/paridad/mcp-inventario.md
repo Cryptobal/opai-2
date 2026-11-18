@@ -173,6 +173,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.salida` | `acceso_registros_salida` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/asistencia/marcas/_componentes` | `asistencia.marcas.obtener` | `asistencia_marcas_obtener` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -640,6 +641,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
+| erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/asistencia/marcas` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
@@ -1155,8 +1158,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
-- `asistencia.marcas.listar`
-- `asistencia.marcas.obtener`
 - `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.escalar`

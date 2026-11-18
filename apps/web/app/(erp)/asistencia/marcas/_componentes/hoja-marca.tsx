@@ -30,9 +30,10 @@ export function HojaMarca({ marcaId, abierta, onCerrar, zona }: { marcaId: strin
   useEffect(() => {
     if (!abierta || !marcaId) return;
     let vivo = true;
-    setCargando(true);
-    setError(null);
-    void ejecutarCapacidad("erp", "asistencia.marcas.obtener", { id: marcaId }).then((r) => {
+    void (async () => {
+      setCargando(true);
+      setError(null);
+      const r = await ejecutarCapacidad("erp", "asistencia.marcas.obtener", { id: marcaId });
       if (!vivo) return;
       setCargando(false);
       if (!r.ok) {
@@ -41,7 +42,7 @@ export function HojaMarca({ marcaId, abierta, onCerrar, zona }: { marcaId: strin
         return;
       }
       setDetalle(r.data as Detalle);
-    });
+    })();
     return () => {
       vivo = false;
     };

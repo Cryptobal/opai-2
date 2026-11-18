@@ -6,20 +6,10 @@ import { GPS_ESTADOS, METODOS } from "../domain";
 import { fecha } from "./dias-capacidades";
 import { ETIQUETA_GPS, ETIQUETA_METODO, ETIQUETA_TIPO, nombreCompleto } from "./formato";
 import { alcanceMarcas } from "./lecturas";
-import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
+import { marcaVistaEnriquecidaSchema, uuid, vistaDeMarca } from "./esquemas";
 
 const MAX_DIAS = 62;
 const METODOS_PIN = ["rut_pin", "pin_respaldo"] as const;
-
-const itemListaSchema = marcaVistaSchema.extend({
-  personaNombre: z.string(),
-  instalacionNombre: z.string(),
-  dispositivoId: z.string().nullable(),
-  dispositivoNombre: z.string().nullable(),
-  tipoEtiqueta: z.string(),
-  metodoEtiqueta: z.string(),
-  gpsEtiqueta: z.string(),
-});
 
 export const marcasListar = defineCapability({
   id: "asistencia.marcas.listar",
@@ -42,7 +32,7 @@ export const marcasListar = defineCapability({
     })
     .refine((i) => i.hasta >= i.desde, "«hasta» no puede ser anterior a «desde».")
     .refine((i) => Date.parse(i.hasta) - Date.parse(i.desde) <= MAX_DIAS * 86_400_000, `Como máximo ${MAX_DIAS} días.`),
-  output: z.object({ items: z.array(itemListaSchema), siguiente: z.string().nullable() }),
+  output: z.object({ items: z.array(marcaVistaEnriquecidaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => s.items.map((m) => m.id),

@@ -27,6 +27,21 @@ export const marcaVistaSchema = z.object({
 });
 export type MarcaVista = z.infer<typeof marcaVistaSchema>;
 
+/** Vista enriquecida para listado y detalle de marcas en pantalla. */
+export const marcaVistaEnriquecidaSchema = marcaVistaSchema.extend({
+  personaNombre: z.string(),
+  instalacionNombre: z.string(),
+  dispositivoId: z.string().nullable(),
+  dispositivoNombre: z.string().nullable(),
+  tipoEtiqueta: z.string(),
+  metodoEtiqueta: z.string(),
+  gpsEtiqueta: z.string(),
+});
+
+export const marcaVistaDetalleSchema = marcaVistaEnriquecidaSchema.extend({
+  slugEmpresa: z.string(),
+});
+
 type Fila = {
   id: string; seq: number; personaId: string; tipo: string; horaServidor: Date; horaDispositivo: Date | null;
   desfaseS: number | null; origen: string; metodo: string; canal: string | null; instalacionId: string;

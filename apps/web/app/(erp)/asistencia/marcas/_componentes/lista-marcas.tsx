@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { ListScreen, type EstadoPantalla } from "@opai/ds";
+import { Button, ListScreen, type EstadoPantalla } from "@opai/ds";
 
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
@@ -68,7 +68,7 @@ export function ListaMarcas({ state, items, zona, hayMas, marcaAbierta, params }
         tarjeta={(m) => (
           <span className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium">{m.personaNombre}</span>
-            <span className="t-caption text-muted">
+            <span className="t-caption text-fg-muted">
               {hora.format(new Date(m.horaServidor))} · {m.tipoEtiqueta}
             </span>
           </span>
@@ -76,16 +76,15 @@ export function ListaMarcas({ state, items, zona, hayMas, marcaAbierta, params }
         columnas={columnasMarcas(hora)}
         paginacion={
           hayMas && params.siguiente ? (
-            <button
-              type="button"
-              className="t-body-sm text-accent hover:underline"
+            <Button
+              variant="secondary"
               onClick={() => {
                 const q = new URLSearchParams({ ...params, cursor: params.siguiente } as Record<string, string>);
                 router.push(`/asistencia/marcas?${q}`);
               }}
             >
               Cargar más
-            </button>
+            </Button>
           ) : null
         }
       />
