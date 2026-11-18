@@ -9,5 +9,6 @@ export * from "./correcciones";
 export * from "./hash-correccion";
 export * from "./jornadas";
 export * from "./consolidar";
+export * from "./limites-jornada";
 export * from "./biometria";
 export * from "./reportes";
