@@ -81,6 +81,7 @@ export * from "./portal-trabajador-arco";
 export * from "./nomina";
 
 // Nómina conserva el contador público; Pauta expone su lista de fechas con nombre propio.
+export { mesAnterior, mesSiguiente } from "./calendario-mes";
 export { diasDelMes } from "./nomina";
 export { diasDelMes as fechasDelMesPauta } from "./pauta";
 export * from "./pauta";
