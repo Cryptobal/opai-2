@@ -529,7 +529,10 @@ describe.skipIf(!urlPropietario)("firma · envío, firma, rechazo y verificació
       documentoId: doc.id,
       clase: "carta_trabajador",
       nivel: "N1",
-      firmantes: [{ tipo: "trabajador", personaId: persona.id, nombre: "Ana Portal", rol: "firma" }],
+      firmantes: [{
+        tipo: "trabajador", personaId: persona.id, nombre: "Ana Portal", rol: "firma",
+        email: "ana-portal@example.test",
+      }],
     });
     const portal = mod.crearContexto({
       tenantId: t.a.tenantId,
