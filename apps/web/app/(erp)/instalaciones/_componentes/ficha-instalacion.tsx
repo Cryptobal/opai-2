@@ -21,12 +21,13 @@ export type TabInstalacion =
   | "negocios"
   | "rondas"
   | "accesos"
+  | "personas"
   | "visitas"
   | "dispositivos"
   | "documentos"
   | "actividad";
 
-/** Ficha de instalación (07/08): estado y vigencia, nombre, cuenta; tabs con "Personas" deshabilitada. */
+/** Ficha de instalación (07/08): estado y vigencia, nombre, cuenta; pestañas de módulo según ADR-041.5. */
 export function FichaInstalacion(p: {
   aprobaciones?: PanelSueldo["aprobaciones"];
   state: EstadoPantalla;
@@ -40,6 +41,8 @@ export function FichaInstalacion(p: {
   rondas?: boolean;
   /** Pestaña «Accesos» (CAR-475): Control de acceso activo y permiso de lectura. */
   accesos?: boolean;
+  /** Pestaña de dotación (CAR-596): Pauta activa y permiso de lectura. */
+  personas?: boolean;
   /** Pestaña de visitas de supervisión (CAR-83): con Pauta activo y permiso de lectura. */
   visitas?: boolean;
   children: ReactNode;
@@ -108,6 +111,7 @@ export function FichaInstalacion(p: {
               [p.negocios, "negocios", "Negocios"],
               [p.rondas, "rondas", "Rondas"],
               [p.accesos, "accesos", "Accesos"],
+              [p.personas, "personas", p.persona],
               [p.visitas, "visitas", "Visitas"],
             ] as const
           )
@@ -117,12 +121,6 @@ export function FichaInstalacion(p: {
               etiqueta,
               href: conFiltrosInstalaciones(`${base}/${id}`, p.parametros),
             })),
-          {
-            id: "personas",
-            etiqueta: p.persona,
-            href: base,
-            deshabilitada: "Disponible con Operaciones",
-          },
           {
             id: "dispositivos",
             etiqueta: "Dispositivos",
