@@ -21,6 +21,8 @@ export const miembroSchema = z.object({
   ultimoAccesoEn: z.date().nullable(),
   /** Excepciones de permiso vigentes (A01: «Con excepciones» con el número). */
   excepciones: z.number(),
+  /** La membresía corresponde al usuario de la sesión actual (CAR-454). */
+  esPropio: z.boolean(),
 });
 
 export type Miembro = z.infer<typeof miembroSchema>;
@@ -44,7 +46,11 @@ export const INCLUIR_MIEMBRO = {
   _count: { select: { excepciones: true } },
 } as const;
 
-export function aMiembro(m: FilaMembresia, ultimoAccesoEn: Date | null): Miembro {
+export function aMiembro(
+  m: FilaMembresia,
+  ultimoAccesoEn: Date | null,
+  usuarioId: string | null | undefined,
+): Miembro {
   return {
     id: m.id,
     userId: m.userId,
@@ -57,6 +63,7 @@ export function aMiembro(m: FilaMembresia, ultimoAccesoEn: Date | null): Miembro
     estado: m.estado,
     ultimoAccesoEn,
     excepciones: m._count?.excepciones ?? 0,
+    esPropio: usuarioId != null && m.userId === usuarioId,
   };
 }
 
@@ -76,7 +83,7 @@ export async function buscar(ctx: Contexto, id: string): Promise<Miembro> {
   });
   if (!m) throw noEncontrado("El usuario");
   const ultimo = (await ultimosAccesos(ctx, [m.userId])).get(m.userId) ?? null;
-  return aMiembro(m, ultimo);
+  return aMiembro(m, ultimo, ctx.usuario?.id);
 }
 
 /** Owners activos además del indicado. El último owner nunca se degrada, suspende ni elimina. */
