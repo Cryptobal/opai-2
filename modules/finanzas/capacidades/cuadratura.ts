@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
+import { mesSiguiente } from "@opai/domain";
 
-import { cierreMesAnterior, cuadraturaMensual, mesSiguiente, type MovimientoSaldo } from "../domain/cuadratura";
+import { cierreMesAnterior, cuadraturaMensual, type MovimientoSaldo } from "../domain/cuadratura";
 import { saldoDelBanco } from "./bancos/saldo-banco";
 import { aNumeroSeguro, saldoSchema } from "./esquemas";
 import { PERMISO_VER } from "./permisos";
