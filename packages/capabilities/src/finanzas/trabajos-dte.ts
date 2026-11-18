@@ -28,7 +28,7 @@ async function marcarAceptadoSii(
   });
 }
 
-export const trabajoConsultarDteSii = defineTrabajo({
+const trabajoConsultarDteSii = defineTrabajo({
   tipo: "finanzas.dte.consultar_sii",
   descripcion:
     "Consulta el estado de un envío al SII con backoff (15 min × 2 h, luego diario hasta 7 días) y actualiza el documento.",
@@ -100,7 +100,7 @@ export async function encolarConsultaSiPendiente(ctx: Contexto, envioId: string,
   );
 }
 
-export const trabajoBarrerEnviosDte = defineTrabajo({
+const trabajoBarrerEnviosDte = defineTrabajo({
   tipo: "finanzas.dte.barrer_envios_pendientes",
   descripcion: "Encola consultas SII para envíos pendientes cuya próxima consulta ya venció.",
   periodicidad: "horaria",

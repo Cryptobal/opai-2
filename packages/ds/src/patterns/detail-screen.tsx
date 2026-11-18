@@ -50,8 +50,8 @@ export function DetailScreen({
       {...(accionesDebajoEnTelefono ? { accionesDebajoEnTelefono } : {})}
     />
   );
-  return (
-    <section data-detalle>
+  const cabeceraFija = (
+    <div className="md:sticky md:top-0 md:z-10 md:bg-bg md:pb-2">
       {inicio ? (
         <div className="flex items-start gap-4">
           <div className="flex-none">{inicio}</div>
@@ -60,6 +60,11 @@ export function DetailScreen({
       ) : (
         cabecera
       )}
+    </div>
+  );
+  return (
+    <section data-detalle>
+      {cabeceraFija}
       <Estado state={state} variante="detalle" {...(textos ? { textos } : {})}>
         {tabs && tabs.length > 0 ? (
           <Tabs
