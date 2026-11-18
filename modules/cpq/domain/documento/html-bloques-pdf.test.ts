@@ -39,3 +39,13 @@ describe("HTML de la plantilla → bloques del PDF (CAR-533)", () => {
     expect(bloquesDeHtml('<p style="color: red">Hola</p><p>  </p><h2></h2>')).toEqual([{ t: "parrafo", texto: "Hola", color: null }]);
   });
 });
+
+it("omite contenido no visible también dentro de párrafos, tablas y spans", () => {
+  const oculto = "<style>CSS_OCULTO</style><script>JS_OCULTO</script><template>TPL_OCULTO</template>";
+  const bloques = bloquesDeHtml(`<p>Visible${oculto}</p><table><tr><td>Celda${oculto}</td></tr></table><span>Texto${oculto}</span>`);
+  expect(bloques).toEqual([
+    { t: "parrafo", texto: "Visible", color: null },
+    { t: "tabla", filas: [{ celdas: ["Celda"], encabezado: false }] },
+    { t: "parrafo", texto: "Texto", color: null },
+  ]);
+});

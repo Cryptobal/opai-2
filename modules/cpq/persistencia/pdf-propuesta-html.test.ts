@@ -28,3 +28,12 @@ describe("PDF de la propuesta con plantilla HTML (CAR-533)", () => {
     expect(paginas.join(" ")).toContain("Párrafo 120");
   });
 });
+
+it("colapsa saltos iniciales, consecutivos y finales sin páginas vacías", async () => {
+  const salto = '<div style="page-break-before:always"></div>';
+  const html = salto + "<p>Primera QA</p>" + salto + salto + "<p>Segunda QA</p>" + salto;
+  const { paginas } = await leerPdf(await renderPdfPropuestaHtml({ codigo: "QA-2", fecha: "", borrador: false, marca, logo: null, html }));
+  expect(paginas).toHaveLength(2);
+  expect(paginas[0]).toContain("Primera QA");
+  expect(paginas[1]).toContain("Segunda QA");
+});
