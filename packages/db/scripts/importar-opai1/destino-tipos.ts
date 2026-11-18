@@ -54,7 +54,7 @@ export type VinculoDestino = {
   esPrincipal: boolean;
 };
 
-export type InstalacionDestino = {
+type InstalacionDestino = {
   id: string;
   cuentaId: string;
   nombre: string;
@@ -66,7 +66,7 @@ export type InstalacionDestino = {
   estado: string;
 };
 
-export type IdExternoDestino = {
+type IdExternoDestino = {
   entidadTipo: EntidadImportada;
   idExterno: string;
   entidadId: string;
