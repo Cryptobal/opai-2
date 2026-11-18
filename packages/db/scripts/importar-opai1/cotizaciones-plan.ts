@@ -11,8 +11,8 @@ import type { DatosCotizacion, DatosLineaCotizacion } from "./cotizaciones-tipos
 
 export type { DatosCotizacion, DatosLineaCotizacion } from "./cotizaciones-tipos";
 
-export const MOTIVO_SIN_NEGOCIO = "sin_negocio";
-export const MOTIVO_NEGOCIO_NO_IMPORTADO = "negocio_no_importado";
+const MOTIVO_SIN_NEGOCIO = "sin_negocio";
+const MOTIVO_NEGOCIO_NO_IMPORTADO = "negocio_no_importado";
 
 const ESTADOS_GANADA = ["approved", "accepted", "won", "active", "in_progress"];
 const ESTADOS_ENVIADA = ["sent", "viewed"];
