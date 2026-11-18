@@ -1,59 +1,92 @@
-import { escaparHtml, layoutCorreo, type MarcaCorreo } from "@opai/domain";
-
-const TITULO_MOTIVO: Record<string, string> = {
-  capa: "capa de sueldo",
-  monto: "monto de sueldo",
-  instalacion: "instalación o puesto",
-  rol: "rol de turno",
-};
-
 /**
- * Estado de la plantilla base (CAR-58, auditoría del Núcleo §I-19). Mientras `esEjemplo` sea `true`,
- * el texto no tiene validez laboral y `core.anexos.aprobar` se niega a aprobar. Pasa a `false` solo
- * en el PR que traiga el texto legal definitivo de Carlos y su abogado; nunca se inventa aquí.
+ * Plantilla base del anexo (CAR-58). `esEjemplo` en `false` indica texto legal aprobado; si vuelve a
+ * `true`, `core.anexos.aprobar` exige una plantilla de Anexo publicada en Documentos.
  */
 export const PLANTILLA_ANEXO: { readonly version: string; readonly esEjemplo: boolean } = {
-  version: "ejemplo-d15",
-  esEjemplo: true,
+  version: "legal-car58-2026-11",
+  esEjemplo: false,
 };
 
 export const MENSAJE_PLANTILLA_EJEMPLO =
   "Este anexo no se puede aprobar todavía: la plantilla del anexo de contrato tiene texto de ejemplo, sin validez laboral. Se podrá aprobar cuando esté cargado el texto legal definitivo. Mientras tanto puedes rechazarlo o dejarlo en borrador.";
 
-export type FilaAnexoDoc = { concepto: string; antes: string; despues: string };
+/** Texto legal aprobado (CAR-58); no editar sin nueva aprobación. */
+export const TEXTO_LEGAL_ANEXO_APROBADO = `ANEXO DE CONTRATO DE TRABAJO
 
-export type DatosAnexoDoc = {
-  persona: { nombres: string; apellidos: string; rut: string };
-  motivoCambio: string;
-  fecha: string;
-  filas: readonly FilaAnexoDoc[];
+En {{ciudad_firma}}, a {{fecha_anexo}}, entre {{empresa_razon_social}}, RUT {{empresa_rut}}, representada por {{representante_nombre}}, cédula de identidad N° {{representante_rut}}, ambos con domicilio en {{empresa_domicilio}}, en adelante «el Empleador», y don(ña) {{trabajador_nombre}}, cédula de identidad N° {{trabajador_rut}}, de nacionalidad {{trabajador_nacionalidad}}, domiciliado(a) en {{trabajador_domicilio}}, en adelante «el Trabajador», se acuerda el siguiente anexo al contrato de trabajo:
+
+PRIMERO: Antecedentes.
+Las partes celebraron un contrato de trabajo con fecha {{fecha_contrato_original}}, en virtud del cual el Trabajador presta servicios como {{cargo_actual}}.
+
+SEGUNDO: Modificación.
+De común acuerdo, y conforme a los artículos 5° y 11 del Código del Trabajo, las partes modifican la cláusula {{clausula_numero}}, referida a {{clausula_materia}}, del contrato de trabajo, la que queda redactada de la siguiente forma:
+
+«{{clausula_texto_nuevo}}»
+
+TERCERO: Vigencia.
+La modificación acordada en este anexo rige a contar del {{fecha_vigencia}}{{#fecha_termino}} y hasta el {{fecha_termino}}, fecha en la que vuelve a regir lo pactado originalmente{{/fecha_termino}}.
+
+CUARTO: Cláusulas no modificadas.
+Todas las demás cláusulas del contrato de trabajo y de sus anexos anteriores que no se modifiquen expresamente en este instrumento se mantienen plenamente vigentes.
+
+QUINTO: Ejemplares y firma.
+Este anexo se firma en dos ejemplares de igual tenor y fecha, y queda uno en poder de cada parte. Si se firma electrónicamente, la firma electrónica tiene el mismo valor que la firma manuscrita, de acuerdo con la Ley N° 19.799. El Trabajador declara recibir en este acto su ejemplar.
+
+Firmas: {{representante_nombre}}, p.p. {{empresa_razon_social}}, RUT {{empresa_rut}}, Empleador / {{trabajador_nombre}}, RUT {{trabajador_rut}}, Trabajador
+
+Valores sugeridos para {{clausula_materia}}: remuneración, cargo o funciones, jornada de trabajo, distribución de turnos y lugar de prestación de los servicios (instalación).`;
+
+export const CLAUSULA_MATERIA_ANEXO: Record<string, string> = {
+  capa: "remuneración",
+  monto: "remuneración",
+  instalacion: "lugar de prestación de los servicios (instalación)",
+  rol: "distribución de turnos y jornada de trabajo",
 };
 
-/**
- * Plantilla base del sistema (R12, D15): encabezado con la marca del tenant, partes, qué cambia y
- * desde cuándo, con texto de ejemplo hasta que Carlos fije el texto legal definitivo (§16.b del
- * brief); el editor por tenant es del Brief 09. Termina en «Aprobado y guardado en Documentos», sin
- * firma (D15).
- */
-export function renderizarAnexoHtml(marca: MarcaCorreo, datos: DatosAnexoDoc): string {
-  const nombrePersona = `${datos.persona.nombres} ${datos.persona.apellidos}`;
-  const titulo = TITULO_MOTIVO[datos.motivoCambio] ?? datos.motivoCambio;
+const BLOQUE_FECHA_TERMINO = /\{\{#fecha_termino\}\}([\s\S]*?)\{\{\/fecha_termino\}\}/;
+
+/** Si no hay fecha de término, oculta el bloque condicional sin quitarlo del texto fuente. */
+export function aplicarCondicionalFechaTermino(
+  texto: string,
+  fechaTermino: string | null | undefined,
+): string {
+  const valor = fechaTermino?.trim();
+  return texto.replace(BLOQUE_FECHA_TERMINO, (_, interior: string) =>
+    valor ? interior.replaceAll("{{fecha_termino}}", valor) : "",
+  );
+}
+
+export function rellenarTextoLegalAnexo(
+  texto: string,
+  valores: Readonly<Record<string, string | null | undefined>>,
+): { texto: string; faltantes: string[] } {
+  const sinBloque = aplicarCondicionalFechaTermino(texto, valores.fecha_termino);
+  const faltantes = new Set<string>();
+  const relleno = sinBloque.replace(/\{\{([a-z_]+)\}\}/g, (_, clave: string) => {
+    const valor = valores[clave]?.trim();
+    if (valor) return valor;
+    if (clave === "fecha_termino") return "";
+    faltantes.add(clave);
+    return `{{${clave}}}`;
+  });
+  return { texto: relleno, faltantes: [...faltantes] };
+}
+
+export type FilaAnexoDoc = { concepto: string; antes: string; despues: string };
+
+/** Respaldo HTML solo mientras `esEjemplo` siga activo en pruebas; no tiene validez laboral. */
+export function renderizarAnexoHtml(
+  marca: { nombre: string },
+  datos: {
+    persona: { nombres: string; apellidos: string; rut: string };
+    motivoCambio: string;
+    fecha: string;
+    filas: readonly FilaAnexoDoc[];
+  },
+): string {
+  const nombre = `${datos.persona.nombres} ${datos.persona.apellidos}`;
   const filas = datos.filas
-    .map(
-      (f) =>
-        `<tr><td style="padding:4px 12px 4px 0">${escaparHtml(f.concepto)}</td><td style="padding:4px 12px">${escaparHtml(f.antes)}</td><td style="padding:4px">${escaparHtml(f.despues)}</td></tr>`,
-    )
+    .map((f) => `<tr><td>${f.concepto}</td><td>${f.antes}</td><td>${f.despues}</td></tr>`)
     .join("");
-  const tabla = filas
-    ? `<table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px"><thead><tr style="text-align:left;border-bottom:1px solid #ccc"><th style="padding:4px 12px 4px 0">Concepto</th><th style="padding:4px 12px">Antes</th><th style="padding:4px">Después</th></tr></thead><tbody>${filas}</tbody></table>`
-    : "";
-  const cuerpo = `
-    <h1 style="font-size:18px;margin:0 0 16px">Anexo de contrato de trabajo</h1>
-    <p style="margin:0 0 8px"><strong>Empleador:</strong> ${escaparHtml(marca.nombre)}</p>
-    <p style="margin:0 0 16px"><strong>Trabajador:</strong> ${escaparHtml(nombrePersona)} (RUT ${escaparHtml(datos.persona.rut)})</p>
-    <p style="margin:0 0 8px">Por el presente anexo, las partes acuerdan modificar la ${escaparHtml(titulo)} del contrato de trabajo, a contar del ${escaparHtml(datos.fecha)}, en los términos que se indican a continuación.</p>
-    ${tabla}
-    <p style="margin:16px 0 0;font-size:12px;opacity:.7">Texto de ejemplo: la plantilla definitiva se publicará por empresa cuando esté lista; este documento no tiene validez laboral.</p>
-  `;
-  return layoutCorreo(marca, cuerpo);
+  return `<article><h1>Anexo de contrato</h1><p>${marca.nombre} / ${nombre}</p><table>${filas}</table><p>Vigencia: ${datos.fecha}</p></article>`;
 }
