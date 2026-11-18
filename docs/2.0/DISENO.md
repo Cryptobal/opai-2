@@ -61,7 +61,7 @@ Toda pantalla compone un patrón del DS. Los patrones reciben `state` y resuelve
 
 | Patrón | Uso | Notas |
 |---|---|---|
-| **Lista** (`ListScreen`, `SplitScreen`) | Colecciones: cuentas, personas, negocios | Fila como enlace (server-first), búsqueda y filtros con chips, `MetaLista` con conteos. En iPad y escritorio, `SplitScreen` (lista + «Elige un…»); en el celular, solo la lista |
+| **Lista** (`ListScreen`, `SplitScreen`) | Colecciones: cuentas, personas, negocios | Fila como enlace (server-first), búsqueda y filtros con chips, `MetaLista` con conteos. En iPad y escritorio, `SplitScreen` (lista + «Elige un…»); en el celular, solo la lista. **Vista dividida (md+):** la página no hace scroll; cada columna scrollea por separado; la cabecera de ficha y las herramientas de la lista quedan fijas arriba de su columna |
 | **Ficha** (`DetailScreen`, `Seccion`, `Pares`) | Detalle de una entidad | Pestañas por ruta en el orden de ADR-041: Resumen → propias → de módulos → Documentos → Actividad. Las etiquetas van como chips bajo el título y no hay pestañas deshabilitadas |
 | **Drawer** (`Sheet`) | Crear o editar sin perder el contexto de la lista | Se carga al abrirse (`hojaDiferida`, en `apps/web/app/_components/`). En el celular ocupa toda la pantalla; la acción principal queda fija abajo (`AccionFijaTelefono`) |
 | **Formulario** (`FormScreen`, `AjustesForm`) | Altas largas y configuración | Secciones con título; errores junto al campo; «Guardar» deshabilitado sin cambios; aviso al salir con cambios sin guardar |
