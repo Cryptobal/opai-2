@@ -19,7 +19,7 @@ export type DatosContacto = {
  * `recibe*` de 1.0 → roles del contacto en 2.0. `recibeNotasCredito` se funde en `facturacion`.
  * `recibeCesion` no tiene rol en el `Contacto` de main (llega con el vínculo del CRM PR 2): se avisa.
  */
-export function rolesDeContacto(f: ContactoOpai1): string[] {
+function rolesDeContacto(f: ContactoOpai1): string[] {
   const roles = new Set<string>();
   if (f.recibeFacturacion || f.recibeNotasCredito) roles.add("facturacion");
   if (f.recibeCobranza) roles.add("cobranza");
