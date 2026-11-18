@@ -89,10 +89,8 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
   await page.evaluate(() => {
     document.documentElement.dataset["theme"] = "light";
   });
-  // CAR-58: la plantilla base tiene texto de ejemplo, así que aprobar falla con un mensaje de
-  // negocio antes de generar el documento. El flujo completo (documento final con SHA-256 y
-  // bitácora) se verifica contra Postgres real, con la plantilla definitiva simulada y
-  // almacenamiento en memoria, en `packages/capabilities/test/anexos-db.test.ts`.
+  // CAR-58: con texto legal base, aprobar puede exigir datos del perfil de empresa o generar el PDF;
+  // el camino feliz completo se verifica en `packages/capabilities/test/anexos-db.test.ts`.
   await hidratado(page.getByRole("button", { name: "Aprobar", exact: true }));
   await page.getByRole("button", { name: "Aprobar", exact: true }).click();
   const confirmacion = page.getByRole("dialog", { name: "Aprobar el anexo" });
@@ -101,11 +99,9 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
   await expect(confirmacion).not.toBeVisible();
   await page.getByRole("button", { name: "Aprobar", exact: true }).click();
   await confirmacion.getByRole("button", { name: "Aprobar", exact: true }).click();
-  await expect(
-    page.getByText("Este anexo no se puede aprobar todavía", { exact: false }),
-  ).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Aprobar el anexo" })).not.toBeVisible({ timeout: 15000 });
   await page.screenshot({
-    path: info.outputPath("29-aprobar-plantilla-ejemplo.png"),
+    path: info.outputPath("29-aprobar-anexo.png"),
     fullPage: true,
     animations: "disabled",
   });
