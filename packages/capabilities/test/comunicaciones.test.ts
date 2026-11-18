@@ -99,6 +99,14 @@ describe("consumidor de comunicaciones", () => {
     });
     tabla("ajuste").push({
       tenantId: ctx.tenantId,
+      ambito: "tenant",
+      sujetoId: ctx.tenantId,
+      modulo: "core",
+      clave: "notificaciones_correo_defecto",
+      valor: "copia@empresa.cl",
+    });
+    tabla("ajuste").push({
+      tenantId: ctx.tenantId,
       ambito: "usuario",
       sujetoId: U2,
       modulo: "core",
@@ -113,6 +121,7 @@ describe("consumidor de comunicaciones", () => {
         .sort(),
     ).toEqual([USUARIO_DE_PRUEBA.id, U2].sort());
     expect(correos.map((c) => c.para)).toEqual(["ana@prueba.cl"]);
+    expect(correos[0]?.bcc).toEqual(["copia@empresa.cl"]);
     const omitido = tabla("envio").find((e) => e["destinatario"] === "beto@prueba.cl");
     expect(omitido).toMatchObject({ estado: "omitido" });
     const inbox = await dato<{ noLeidas: number; items: { id: string; titulo: string }[] }>(

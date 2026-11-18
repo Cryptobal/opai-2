@@ -2,7 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { abrirMenuUsuario } from "./menu-usuario";
 import { marcarPendientesDesktop } from "./novedades-preview-desktop";
-import { capturar } from "./preview";
+import { capturar, capturarNovedad } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-316 y CAR-430: Novedades agrupadas por fecha (Hoy / Esta semana / Antes), tarjetas cortas con
@@ -42,6 +42,20 @@ test.describe("@preview novedades y bandeja", () => {
     if (await verMas.count()) {
       await verMas.click();
       await expect(page.getByRole("button", { name: "Ver menos" }).first()).toBeVisible();
+    }
+    // CAR-520: captura de ejemplo ligada al id `novedades-mas-claras` (p. ej. al abrir «Ver más»).
+    const tarjetaEjemplo = page
+      .locator("section")
+      .filter({ hasText: "Novedades más cortas y ordenadas por fecha" });
+    if (await tarjetaEjemplo.count()) {
+      const verMasEjemplo = tarjetaEjemplo.getByRole("button", { name: "Ver más" });
+      if (await verMasEjemplo.isVisible().catch(() => false)) {
+        await verMasEjemplo.click();
+        await expect(
+          tarjetaEjemplo.locator('img[src="/changelog/novedades-mas-claras.png"]'),
+        ).toBeVisible();
+        await capturarNovedad(page, info, "novedades-mas-claras", "ver-mas");
+      }
     }
     await capturar(page, info, "novedades-lista");
 

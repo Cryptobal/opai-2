@@ -4,11 +4,12 @@ import { puedeGestionarListas } from "@/lib/pestanas-modulos";
 
 import { LinkNext } from "@/app/_components/link-next";
 
-export type ActivaAccesos = "registros" | "en_sitio" | "intentos" | "listas";
+export type ActivaAccesos = "registros" | "en_sitio" | "prerregistros" | "intentos" | "listas";
 
 const OPCIONES = [
   { id: "registros", etiqueta: "Registros", href: "/accesos" },
   { id: "en_sitio", etiqueta: "En sitio", href: "/accesos?estado=en_sitio" },
+  { id: "prerregistros", etiqueta: "Prerregistros", href: "/accesos/prerregistros" },
   { id: "listas", etiqueta: "Listas", href: "/accesos/listas" },
   { id: "intentos", etiqueta: "Intentos denegados", href: "/accesos/intentos" },
 ] as const;
