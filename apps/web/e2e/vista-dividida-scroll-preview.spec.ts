@@ -15,6 +15,11 @@ test.describe("@preview vista dividida: scroll por columna", () => {
     const detalle = split.locator(':scope > [data-columna="detalle"]');
     await expect(lista).toBeVisible();
     await expect(detalle).toBeVisible();
+    // La columna existe durante Suspense: esperar datos, no aprobar el skeleton.
+    await expect(detalle.getByRole("heading", { name: "Identificación", exact: true })).toBeVisible({
+      timeout: 60_000,
+    });
+    await expect(detalle.getByRole("heading", { name: "Representante legal", exact: true })).toBeAttached();
     // Esperar el layout de la ficha sin relajar el umbral de 2 px.
     await expect(async () => {
       const medidas = await split.evaluate((el) => ({
@@ -56,13 +61,13 @@ test.describe("@preview vista dividida: scroll por columna", () => {
     await page.setViewportSize({ width: 1280, height: 860 });
     await entrar(page);
     await page.goto("/cuentas");
-    const fila = page.locator('a[href^="/cuentas/"]').filter({ visible: true }).first();
+    const fila = page.locator('a[href^="/cuentas/"]').filter({ hasText: "Cliente ficticio QA E2E (cesión)", visible: true });
     // No confundir la carga pendiente con una empresa sin cuentas ni ocultar la prueba.
-    await expect(fila, "qa-e2e necesita al menos una cuenta para comprobar el scroll").toBeVisible({
+    await expect(fila, "qa-e2e necesita su cuenta ficticia de cesión para comprobar el scroll").toBeVisible({
       timeout: 30_000,
     });
     await fila.click();
-    await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}/, { timeout: 60_000 });
+    await page.waitForURL(/\/cuentas\/00000000-0000-7000-8000-000000267001(?:\?|$)/, { timeout: 60_000 });
     await comprobarScrollDividido(page);
     await capturar(page, info, "cuentas-scroll-dividido");
   });
@@ -72,13 +77,13 @@ test.describe("@preview vista dividida: scroll por columna", () => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await entrar(page);
     await page.goto("/cuentas");
-    const fila = page.locator('a[href^="/cuentas/"]').filter({ visible: true }).first();
+    const fila = page.locator('a[href^="/cuentas/"]').filter({ hasText: "Cliente ficticio QA E2E (cesión)", visible: true });
     // No confundir la carga pendiente con una empresa sin cuentas ni ocultar la prueba.
-    await expect(fila, "qa-e2e necesita al menos una cuenta para comprobar el scroll").toBeVisible({
+    await expect(fila, "qa-e2e necesita su cuenta ficticia de cesión para comprobar el scroll").toBeVisible({
       timeout: 30_000,
     });
     await fila.click();
-    await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}/, { timeout: 60_000 });
+    await page.waitForURL(/\/cuentas\/00000000-0000-7000-8000-000000267001(?:\?|$)/, { timeout: 60_000 });
     await comprobarScrollDividido(page);
     await capturar(page, info, "cuentas-scroll-1024");
   });

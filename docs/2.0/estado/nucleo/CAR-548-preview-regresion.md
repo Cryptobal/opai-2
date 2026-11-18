@@ -33,3 +33,11 @@
 - El artefacto contiene capturas finales, no los `test-failed-1.png` ni `error-context.md` referenciados en logs. Pendiente evidencia visual de estos fallos.
 - Todos los runs del SHA terminaron. Antes de suspender se verificaron 0 consultas activas y 0 transacciones abiertas (solo contadores de pg_stat_activity). Compute del preview suspendido e idle confirmado.
 - Gate agregado CI aprobó, pero el job real test:db se omitió. No se solicitó cola. Nueva ejecución y revisión independiente pendientes.
+
+## Capturas de la segunda ejecución
+
+- Head `fee9fd412660e85560684bb593fc64a6e2a850ab`, run [44403981294](https://github.com/opai-cl/opai-2/actions/runs/44403981294): seis casos de scroll pasaron, pero la suite terminó cancelada alrededor de 60 minutos y tuvo otros fallos. No se acredita suite verde.
+- Revisión de las seis capturas del artefacto `14477713486`: todas muestran el esqueleto del detalle. Ese resultado no valida scroll con la ficha cargada.
+- Se elige ahora la cuenta ficticia de cesión de la fixture QA, se comprueba su URL fija y se espera el encabezado Identificación visible y Representante legal adjunto dentro del detalle antes de medir. Un detalle que no cargue falla, no se omite.
+- CI aprobado; test:db real omitido. Preview suspendido tras 0 consultas activas y 0 transacciones; idle confirmado. No reintento ciego ni petición de cola.
+- Revisión independiente: estos encabezados acreditan la ficha principal, no todos sus Suspense internos (EtiquetasFicha/CamposFicha). No afirmar carga visual total hasta revisar nuevas capturas.
