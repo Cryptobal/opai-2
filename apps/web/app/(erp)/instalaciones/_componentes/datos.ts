@@ -1,11 +1,9 @@
-import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { InstalacionDetalle, InstalacionFila, Pagina } from "@/lib/tipos-maestros";
-
-export { POR_PAGINA };
 
 /** Instalaciones filtradas por texto, cuenta, estado y región, paginadas por cursor, con el catálogo de regiones. */
 export async function cargarInstalaciones(p: Parametros) {
@@ -27,9 +25,7 @@ export async function cargarInstalaciones(p: Parametros) {
     ? regiones.data.items.map((x) => ({ valor: x.nombre, etiqueta: x.nombre }))
   : [];
   return {
-    state: estadoPantalla(r),
-    items: r.ok ? r.data.items : [],
-    siguiente: r.ok ? r.data.siguiente : null,
+    ...vistaPaginaCursor(r),
     regiones: regionOpts,
     cuentaEtiqueta: cuentaSel?.ok ? cuentaSel.data.nombre : null,
   };

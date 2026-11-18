@@ -1,12 +1,10 @@
-import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
+import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Cargo, Pagina, PersonaDetalle, PersonaFila } from "@/lib/tipos-maestros";
 import type { PuestoDeCargo, SueldoEfectivo, Vinculo } from "@/lib/tipos-sueldo";
-
-export { POR_PAGINA };
 
 type PaginaPersonas = Pagina<PersonaFila> & {
   total: number;
@@ -29,9 +27,7 @@ export async function cargarPersonas(p: Parametros) {
     ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
   });
   return {
-    state: estadoPantalla(r),
-    items: r.ok ? r.data.items : [],
-    siguiente: r.ok ? r.data.siguiente : null,
+    ...vistaPaginaCursor(r),
     total: r.ok ? r.data.total : null,
     cargos: r.ok ? (r.data.cargos ?? []).map((c) => ({ valor: c.id, etiqueta: c.nombre })) : [],
   };
