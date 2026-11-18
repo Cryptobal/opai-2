@@ -29,9 +29,8 @@ function destino(argv: string[], env: NodeJS.ProcessEnv) {
   exigirTenantQaE2e(slug);
   if (!env["DATABASE_URL_MIGRATE"]) throw new Error("Falta DATABASE_URL_MIGRATE.");
   const clave = (rol: "gerente" | "aprobador") => {
-    const v = env[rol === "gerente" ? "QA_GERENTE_PASSWORD" : "QA_SUPERVISOR_PASSWORD"];
-    const fallback = env["E2E_PASSWORD"];
-    const p = v ?? fallback;
+    const raw = env[rol === "gerente" ? "QA_GERENTE_PASSWORD" : "QA_SUPERVISOR_PASSWORD"];
+    const p = raw && raw.length >= LARGO_MINIMO_PASSWORD ? raw : env["E2E_PASSWORD"];
     if (!p || p.length < LARGO_MINIMO_PASSWORD) throw new Error(`Falta contraseña para ${rol} en secretos de CI.`);
     return p;
   };

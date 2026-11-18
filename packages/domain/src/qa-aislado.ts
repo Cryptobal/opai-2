@@ -1,3 +1,5 @@
+import { esSlugEmpresaQa } from "./preview-qa";
+
 // Destino de QA aislado de Finanzas (CAR-221). Lógica pura: valida, sin tocar nada, que un script de siembra
 // apunte EXACTAMENTE al proyecto de QA vacío (base `opai2_qa`) y nunca a Gard, a main ni a una copia de datos.
 // Falla cerrado: ante cualquier duda, el script no escribe. Los mensajes nunca repiten una URL ni un secreto.
@@ -67,7 +69,7 @@ export function exigirDestinoQa(env: EntornoQa): void {
 
 /** El QA aislado solo tiene empresas `qa-*`: si hay otra (p. ej. `gard`), la base no es la vacía y se aborta. */
 export function exigirSoloEmpresasQa(slugs: readonly string[]): void {
-  const ajenas = slugs.filter((s) => !/^qa-[a-z0-9-]+$/.test(s));
+  const ajenas = slugs.filter((s) => !esSlugEmpresaQa(s));
   if (ajenas.length > 0) {
     throw new Error(`La base tiene empresas que no son de QA (${ajenas.length}): no es el QA aislado vacío.`);
   }
