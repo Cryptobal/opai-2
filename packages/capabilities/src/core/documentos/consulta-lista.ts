@@ -12,6 +12,7 @@ import { tiposPorId } from "./consulta";
 import { CAPA_DE } from "./entidad";
 import { dondeVigencia } from "./explorar-filtros";
 import { paginaDocumentosVence } from "./pagina-vence";
+import { inputPaginaDocumentos } from "./paginacion";
 import { filtroDocumentoSensible } from "./sensibles";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
 
@@ -27,8 +28,7 @@ export const documentosList = defineCapability({
     tipoId: uuidSchema.optional(),
     vigencia: z.enum(["vigente", "por_vencer", "vencido", "sin_fecha"]).optional(),
     incluirArchivados: z.boolean().default(false),
-    cursor: uuidSchema.optional().describe("`siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(50),
+    ...inputPaginaDocumentos,
   }),
   output: z.object({
     items: z.array(documentoSchema),

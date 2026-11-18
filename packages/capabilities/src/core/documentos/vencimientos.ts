@@ -5,23 +5,17 @@ import type { Prisma } from "@opai/db";
 
 import { defineCapability } from "../../define";
 import { aFecha, hoy } from "../maestros/comun";
-import { uuidSchema } from "../esquemas";
 import { documentosEnAlcance } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import type { ENTIDADES } from "./vista";
 import { documentoSchema, vistaDocumento } from "./vista";
+import { auditarLecturaFilasConPersona, entidadPropietarioSchema } from "./explorar-fila";
 import { propietariosDe } from "./explorar-entidades";
+import { inputPaginaDocumentos } from "./paginacion";
 import { paginaDocumentosVence } from "./pagina-vence";
 import { filtroDocumentoSensible } from "./sensibles";
 
-const filaSchema = documentoSchema.extend({
-  entidad: z
-    .object({ tipo: z.string(), id: z.string(), nombre: z.string().nullable() })
-    .nullable()
-    .describe(
-      "Propietario del documento; el nombre solo si el actor puede leer ese tipo de entidad.",
-    ),
-});
+const filaSchema = documentoSchema.extend({ entidad: entidadPropietarioSchema });
 
 const CAPA_ENTIDAD: Record<
   "empresa" | "cuenta" | "instalacion" | "persona" | "puesto",
@@ -35,12 +29,7 @@ const CAPA_ENTIDAD: Record<
 };
 
 export const documentosVencimientos = defineCapability({
-  auditarLectura: (s) => [
-    ...s.items.map((d) => d.id),
-    ...s.items.flatMap((d) =>
-      d.entidad?.tipo === "persona" && d.entidad.nombre ? [d.entidad.id] : [],
-    ),
-  ],
+  auditarLectura: auditarLecturaFilasConPersona,
   id: "core.documentos.vencimientos",
   descripcion:
     "Documentos vencidos y por vencer en los próximos N días (por defecto 30), con la entidad a la que pertenecen, filtrables por capa (empresa, cuenta, instalación, persona, puesto). Paginada por cursor.",
@@ -48,8 +37,7 @@ export const documentosVencimientos = defineCapability({
   input: z.object({
     dias: z.number().int().min(0).max(365).default(30),
     capa: z.enum(["empresa", "cuenta", "instalacion", "persona", "puesto"]).optional(),
-    cursor: uuidSchema.optional().describe("`siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(50),
+    ...inputPaginaDocumentos,
   }),
   output: z.object({
     items: z.array(filaSchema),

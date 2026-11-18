@@ -7,6 +7,7 @@ import type { Prisma } from "@opai/db";
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { documentosEnAlcance } from "../documentos/alcance-doc";
+import { inputPaginaDocumentos } from "../documentos/paginacion";
 import { filtroDocumentoSensible } from "../documentos/sensibles";
 import { uuidSchema } from "../esquemas";
 import { claseSchema } from "./comun";
@@ -18,20 +19,29 @@ import { solicitudVistaSchema, vistaSolicitud } from "./vistas";
  * sensibles (anexos de sueldo, cumplimiento) y el alcance por instalación del supervisor (ADR-022).
  * Una solicitud de firma no se revela si su documento no es visible para el actor.
  */
+async function idsDocumentosVisiblesEnTenant(
+  ctx: Parameters<typeof documentosEnAlcance>[0],
+): Promise<string[]> {
+  const permitidos = await documentosEnAlcance(ctx);
+  const docs = await ctx.db.documento.findMany({
+    where: {
+      AND: [
+        filtroDocumentoSensible(ctx),
+        ...(permitidos ? [{ id: { in: [...permitidos] } }] : []),
+      ],
+    },
+    select: { id: true },
+  });
+  return docs.map((d) => d.id);
+}
+
 async function documentosVisibles(
   ctx: Parameters<typeof documentosEnAlcance>[0],
   ids: readonly string[],
 ): Promise<Set<string>> {
   if (!ids.length) return new Set();
-  const permitidos = await documentosEnAlcance(ctx);
-  const docs = await ctx.db.documento.findMany({
-    where: {
-      ...filtroDocumentoSensible(ctx),
-      id: { in: permitidos ? [...ids].filter((i) => permitidos.includes(i)) : [...ids] },
-    },
-    select: { id: true },
-  });
-  return new Set(docs.map((d) => d.id));
+  const visibles = new Set(await idsDocumentosVisiblesEnTenant(ctx));
+  return new Set(ids.filter((i) => visibles.has(i)));
 }
 
 export const firmasEstado = defineCapability({
@@ -67,8 +77,7 @@ export const firmasList = defineCapability({
     estado: z.enum(ESTADOS_SOLICITUD_FIRMA).optional(),
     clase: claseSchema.optional(),
     documentoId: uuidSchema.optional(),
-    cursor: uuidSchema.optional().describe("`siguiente` de la página anterior."),
-    limite: z.number().int().min(1).max(200).default(50),
+    ...inputPaginaDocumentos,
   }),
   output: z.object({
     items: z.array(solicitudVistaSchema),
@@ -78,18 +87,7 @@ export const firmasList = defineCapability({
   dryRun: false,
   auditarLectura: (r) => r.items.map((s) => s.id),
   async handler(ctx, input) {
-    const permitidos = await documentosEnAlcance(ctx);
-    const documentosVisiblesIds = (
-      await ctx.db.documento.findMany({
-        where: {
-          AND: [
-            filtroDocumentoSensible(ctx),
-            ...(permitidos ? [{ id: { in: [...permitidos] } }] : []),
-          ],
-        },
-        select: { id: true },
-      })
-    ).map((d) => d.id);
+    const documentosVisiblesIds = await idsDocumentosVisiblesEnTenant(ctx);
     if (!documentosVisiblesIds.length) return { items: [], siguiente: null };
     if (input.documentoId && !documentosVisiblesIds.includes(input.documentoId))
       return { items: [], siguiente: null };
