@@ -127,7 +127,9 @@ jobs:
           QA_GERENTE_PASSWORD: ${{ secrets.QA_GERENTE_PASSWORD }}
           QA_SUPERVISOR_PASSWORD: ${{ secrets.QA_SUPERVISOR_PASSWORD }}
         run: |
-          PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" \
+          # Antes de fijar opai_app en Vercel, el seed usa la URL del propietario también como DATABASE_URL
+          # para `enTransaccion` (solo esta rama preview/pr-N y empresa qa-e2e).
+          PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" DATABASE_URL="$DB_URL" \
             pnpm --filter @opai/auth seed:qa-e2e-rendiciones --tenant qa-e2e --confirmar
       - name: Contraseña propia de opai_app y DATABASE_URL de la preview
         if: >-
