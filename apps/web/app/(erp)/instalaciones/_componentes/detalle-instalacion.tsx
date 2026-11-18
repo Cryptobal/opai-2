@@ -2,7 +2,13 @@ import type { PanelSueldo } from "@opai/capabilities";
 import type { ReactNode } from "react";
 
 import type { Parametros } from "@/lib/parametros";
-import { verPestanaAccesos, verPestanaNegocios, verPestanaRondas, verPestanaTurnosExtra } from "@/lib/pestanas-modulos";
+import {
+  verPestanaAccesos,
+  verPestanaNegocios,
+  verPestanaPersonas,
+  verPestanaRondas,
+  verPestanaTurnosExtra,
+} from "@/lib/pestanas-modulos";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
 import type { cargarInstalacion } from "./datos";
@@ -22,12 +28,13 @@ type Props = {
 
 /** Panel derecho de una instalación: carga sus datos dentro de su Suspense (la lista no espera por él). */
 export async function DetalleInstalacion({ datos, p, tab, persona, children, panel }: Props) {
-  const [ficha, negocios, rondas, turnosExtra, accesos] = await Promise.all([
+  const [ficha, negocios, rondas, turnosExtra, accesos, personas] = await Promise.all([
     datos,
     verPestanaNegocios(),
     verPestanaRondas(),
     verPestanaTurnosExtra(),
     verPestanaAccesos(),
+    verPestanaPersonas(),
   ]);
   return (
     <>
@@ -42,6 +49,7 @@ export async function DetalleInstalacion({ datos, p, tab, persona, children, pan
         rondas={rondas}
         turnosExtra={turnosExtra}
         accesos={accesos}
+        personas={personas}
       >
         {ficha.instalacion ? children(ficha.instalacion, p) : null}
       </FichaInstalacion>

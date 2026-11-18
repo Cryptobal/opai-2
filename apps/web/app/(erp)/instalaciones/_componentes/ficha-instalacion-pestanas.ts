@@ -25,6 +25,7 @@ export function pestanasInstalacion(p: {
   rondas?: boolean;
   turnosExtra?: boolean;
   accesos?: boolean;
+  personas?: boolean;
   persona: string;
 }) {
   return [
@@ -45,13 +46,8 @@ export function pestanasInstalacion(p: {
       [p.rondas, "rondas", "Rondas"],
       [p.turnosExtra, "turnos-extra", "Turnos extra"],
       [p.accesos, "accesos", "Accesos"],
+      [p.personas, "personas", p.persona],
     ]),
-    {
-      id: "personas" as const,
-      etiqueta: p.persona,
-      href: p.base,
-      deshabilitada: "Disponible con Operaciones",
-    },
     {
       id: "dispositivos" as const,
       etiqueta: "Dispositivos",

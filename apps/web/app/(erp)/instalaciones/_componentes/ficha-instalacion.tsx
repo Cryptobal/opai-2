@@ -22,11 +22,12 @@ export type TabInstalacion =
   | "rondas"
   | "turnos-extra"
   | "accesos"
+  | "personas"
   | "dispositivos"
   | "documentos"
   | "actividad";
 
-/** Ficha de instalación (07/08): estado y vigencia, nombre, cuenta; tabs con "Personas" deshabilitada. */
+/** Ficha de instalación (07/08): estado y vigencia, nombre, cuenta; pestañas de módulo según ADR-041.5. */
 export function FichaInstalacion(p: {
   aprobaciones?: PanelSueldo["aprobaciones"];
   state: EstadoPantalla;
@@ -41,6 +42,8 @@ export function FichaInstalacion(p: {
   turnosExtra?: boolean;
   /** Pestaña «Accesos» (CAR-475): Control de acceso activo y permiso de lectura. */
   accesos?: boolean;
+  /** Pestaña de dotación (CAR-596): Pauta activa y permiso de lectura. */
+  personas?: boolean;
   children: ReactNode;
 }) {
   const i = p.instalacion;
@@ -97,6 +100,7 @@ export function FichaInstalacion(p: {
           ...(p.rondas !== undefined ? { rondas: p.rondas } : {}),
           ...(p.turnosExtra !== undefined ? { turnosExtra: p.turnosExtra } : {}),
           ...(p.accesos !== undefined ? { accesos: p.accesos } : {}),
+          ...(p.personas !== undefined ? { personas: p.personas } : {}),
           persona: p.persona,
         })}
       >

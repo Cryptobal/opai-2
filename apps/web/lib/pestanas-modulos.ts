@@ -34,6 +34,16 @@ export async function verPestanaTurnosExtra(): Promise<boolean> {
   return puedeDeIdentidad(identidad)("pauta:read");
 }
 
+/**
+ * Pestaña «Personas» (dotación) de la ficha de instalación (CAR-596): Pauta activa y lectura de pauta.
+ * Sin Pauta, la pestaña no se muestra (ADR-041.5).
+ */
+export async function verPestanaPersonas(): Promise<boolean> {
+  const identidad = await identidadActual();
+  if (!identidad?.modulosActivos.includes("pauta")) return false;
+  return puedeDeIdentidad(identidad)("pauta:read");
+}
+
 export async function verPestanaRondas(): Promise<boolean> {
   const identidad = await identidadActual();
   if (!identidad?.modulosActivos.includes("rondas")) return false;
