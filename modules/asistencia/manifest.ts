@@ -36,6 +36,7 @@ export const manifest = defineModule({
     { id: "asistencia.alerta.descanso_insuficiente", descripcion: "El descanso entre dos jornadas fue menor al mínimo de su tipo de jornada (teletrabajo: 12 horas)." },
     { id: "asistencia.aviso.compensables", descripcion: "Aviso de horas compensables cada 30 días." },
     { id: "asistencia.alerta.sin_correo_personal", descripcion: "Un trabajador marcó y no tiene correo personal para recibir el comprobante." },
+    { id: "asistencia.alerta.fuera_de_geocerca", descripcion: "Un trabajador marcó fuera del radio de geocerca de la instalación." },
     { id: "asistencia.alerta.limite_jornada", descripcion: "Un trabajador superó un límite de jornada (aviso 40 h, 42 h semanales, 12 h diarias o 2 h extra)." },
   ],
   capacidades,
