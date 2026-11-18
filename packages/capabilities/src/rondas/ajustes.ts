@@ -44,8 +44,9 @@ export const ajustesRondas = z.object({
     .max(RADIO_GEOCERCA_M.max)
     .default(RADIO_GEOCERCA_M.defecto)
     .meta({
-      etiqueta: "Radio de geocerca por defecto (m)",
-      ayuda: "15 m por defecto, con un máximo de 20 m. Lo heredan los puntos nuevos salvo que definan otro radio.",
+      etiqueta: "Radio de geocerca en rondas (m)",
+      ayuda:
+        "15 m por defecto, con un máximo de 20 m. Solo para puntos de ronda; no cambia el radio de las marcas de asistencia. Lo heredan los puntos nuevos salvo que definan otro radio.",
       grupo: "Defectos de punto",
       ambito: "tenant",
       permiso: PERMISO_CONFIG,
