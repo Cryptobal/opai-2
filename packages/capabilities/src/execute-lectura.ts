@@ -22,7 +22,10 @@ export function ejecutarLecturaAuditada(
               tenantId: ctx.tenantId,
               capability: c.id,
               actor: ctx.actor,
-              payload: { ids: [...new Set(proyectar(validada.data, entrada))] },
+              payload: {
+                ids: [...new Set(proyectar(validada.data, entrada))],
+                ...(ctx.verComo ? { verComoPor: ctx.verComo.porUserId } : {}),
+              },
             },
           }
         : undefined,

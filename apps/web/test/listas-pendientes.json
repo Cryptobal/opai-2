@@ -109,6 +109,7 @@
   "nomina.periodos.listar",
   "nomina.prestamos.listar",
   "pauta.alertas.listar",
+  "pauta.dotacion.listar",
   "pauta.ausencias.listar",
   "pauta.ppc.listar",
   "pauta.titulares.listar",

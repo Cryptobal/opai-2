@@ -9,12 +9,15 @@ import { z } from "zod";
 import { prepararTurno, revalidarAccesoDelTurno } from "./bucle";
 import { lineaContexto, revalidarContexto } from "./conversaciones-contexto";
 import type { contextoSchema } from "./conversaciones-guardado";
+import { historialConversacionModelo } from "./conversaciones-historial-modelo";
 import { conErroresIa } from "./errores-ia";
 
 type Entrada = {
   mensaje: string;
   modelo: Parameters<typeof iaElegidaDelAgente>[1];
   contexto?: z.infer<typeof contextoSchema> | undefined;
+  conversacionId?: string | undefined;
+  turnoId?: string | undefined;
 };
 
 /** Fuera de la transacción de guardado; las herramientas conservan sus propias transacciones. */
@@ -29,7 +32,10 @@ export async function prepararSolicitud(ctx: Contexto, input: Entrada) {
     : input.mensaje;
   return conErroresIa(async () => {
     const ia = await iaElegidaDelAgente(delegado, input.modelo);
-    return prepararTurno(delegado, consulta, ia);
+    const historial = input.conversacionId
+      ? await historialConversacionModelo(delegado, input.conversacionId, input.turnoId)
+      : [];
+    return prepararTurno(delegado, consulta, ia, historial);
   });
 }
 
