@@ -1,14 +1,25 @@
 // Check `simplicidad` (ADR-115): mide el repositorio y lo compara con la línea base.
 // Falla solo si una cifra empeora; lo que ya existía no bloquea.
+//   pnpm simplicidad               mide y compara con simplicidad-base.json
+//   pnpm simplicidad --actualizar  reescribe la base con las cifras de hoy (solo al integrar a main)
+//   SIMPLICIDAD_BASE=local       compara contra el JSON del branch (legado; CAR-641 usa main por defecto)
+//   pnpm simplicidad --detalle     además lista todos los hallazgos
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
-import { cargarBase } from "./simplicidad/cargar-base";
+import { BASE, RAMA_BASE, cargarBase, type Cifras, type Metrica } from "./simplicidad/base";
 import { medirDuplicados, medirSinUso } from "./simplicidad/herramientas";
 import { medirLargos } from "./simplicidad/largos";
-import { ETIQUETAS, type Cifras, type Detalle, type Metrica } from "./simplicidad/tipos";
 
-const BASE = "simplicidad-base.json";
-const RAMA_BASE = process.env.SIMPLICIDAD_RAMA_BASE ?? "origin/main";
+const ETIQUETAS = {
+  lineasDuplicadas: "Líneas de código duplicado",
+  archivosLargos: "Archivos de más de 150 líneas",
+  funcionesLargas: "Funciones de más de 60 líneas",
+  exportacionesSinUso: "Exportaciones sin uso",
+  archivosSinUso: "Archivos sin uso",
+  dependenciasSinUso: "Dependencias sin uso",
+} as const;
+
+type Detalle = Record<Metrica, string[]>;
 
 function medir(): { cifras: Cifras; detalle: Detalle } {
   const duplicados = medirDuplicados();
@@ -29,6 +40,7 @@ function medir(): { cifras: Cifras; detalle: Detalle } {
   return { cifras, detalle };
 }
 
+/** Archivos que cambia la rama respecto de main: ahí suele estar lo que empeoró la cifra. */
 function archivosDelCambio(): string[] {
   try {
     const salida = execFileSync("git", ["diff", "--name-only", `${RAMA_BASE}...HEAD`], {
@@ -49,9 +61,15 @@ function explicar(metrica: Metrica, hallazgos: string[]): void {
   for (const h of lista.slice(0, 40)) console.error(`    - ${h}`);
 }
 
+/** Subir la base está permitido solo con justificación en el PR: se deja a la vista en el log. */
 function avisarSiSubioLaBase(base: Cifras): void {
   try {
-    const previa = cargarBase(RAMA_BASE);
+    const previa = JSON.parse(
+      execFileSync("git", ["show", `${RAMA_BASE}:${BASE}`], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }),
+    ) as Partial<Cifras>;
     for (const m of Object.keys(ETIQUETAS) as Metrica[]) {
       const antes = previa[m];
       if (typeof antes === "number" && base[m] > antes) {
@@ -61,7 +79,7 @@ function avisarSiSubioLaBase(base: Cifras): void {
       }
     }
   } catch {
-    // Sin línea base previa.
+    // La rama base todavía no tiene línea base: nada que comparar.
   }
 }
 
@@ -81,7 +99,7 @@ if (args.includes("--actualizar")) {
   process.exit(0);
 }
 
-const base = cargarBase(RAMA_BASE);
+const base = cargarBase();
 const faltantes = (Object.keys(ETIQUETAS) as Metrica[]).filter((m) => typeof base[m] !== "number");
 if (faltantes.length > 0) {
   console.error(
