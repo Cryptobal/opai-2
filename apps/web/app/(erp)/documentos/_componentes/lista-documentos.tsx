@@ -36,6 +36,23 @@ function conHoja(p: Parametros, hoja: Record<string, string>) {
   return `?${q.toString()}`;
 }
 
+function filtrosExplorador(tipos: TipoDocumento[], etiquetas: Record<string, string>) {
+  return (
+    <ChipsFiltro
+      filtros={[
+        { param: "estado", etiqueta: "Estado", opciones: OPCIONES_ESTADO },
+        { param: "tipo", etiqueta: "Tipo", opciones: tipos.map((t) => ({ valor: t.id, etiqueta: t.nombre })) },
+        {
+          param: "entidad",
+          etiqueta: "Entidad",
+          opciones: Object.entries(etiquetas).map(([valor, etiqueta]) => ({ valor, etiqueta })),
+        },
+        { param: "orden", etiqueta: "Orden", opciones: OPCIONES_ORDEN },
+      ]}
+    />
+  );
+}
+
 /** Explorador (01): tabla en md+, tarjetas en teléfono; la fila abre la vista previa del documento. */
 export function ListaDocumentos(x: Props) {
   const etiquetas = etiquetasEntidad(x.voc);
@@ -51,24 +68,7 @@ export function ListaDocumentos(x: Props) {
       titulo="Documentos"
       {...(subir ? { accionPrincipal: subir } : {})}
       buscador={<Buscador placeholder="Buscar por nombre, título o etiqueta" />}
-      filtros={
-        <ChipsFiltro
-          filtros={[
-            { param: "estado", etiqueta: "Estado", opciones: OPCIONES_ESTADO },
-            {
-              param: "tipo",
-              etiqueta: "Tipo",
-              opciones: x.tipos.map((t) => ({ valor: t.id, etiqueta: t.nombre })),
-            },
-            {
-              param: "entidad",
-              etiqueta: "Entidad",
-              opciones: Object.entries(etiquetas).map(([valor, etiqueta]) => ({ valor, etiqueta })),
-            },
-            { param: "orden", etiqueta: "Orden", opciones: OPCIONES_ORDEN },
-          ]}
-        />
-      }
+      filtros={filtrosExplorador(x.tipos, etiquetas)}
       items={x.items}
       clave={(d) => d.id}
       href={(d) => conHoja(x.p, { ver: d.id })}
