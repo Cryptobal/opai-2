@@ -4,46 +4,36 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button, Dialog } from "@opai/ds";
 
-import { qrDeEmparejamiento } from "@/app/_acciones/dispositivos";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { PanelCodigoUrl } from "./panel-codigo-url";
+import { useCodigoQrDialog } from "./use-codigo-qr-dialog";
 
 type Codigo = { codigo: string | null; venceEn: string | null; url: string | null };
 
 /** «Emparejar dispositivo»: genera el código, lo muestra una vez con su QR y el plazo de 10 minutos. */
 export function AccionesDispositivos({ instalacionId }: { instalacionId: string }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
-  const [codigo, setCodigo] = useState<Codigo | null>(null);
-  const [svg, setSvg] = useState<string | null>(null);
-  const [copiado, setCopiado] = useState(false);
+  const { codigo, svg, copiado, setCopiado, cerrar, mostrar, abierto } = useCodigoQrDialog(limpiarError);
 
   async function generar() {
     const r = await ejecutar<Codigo>("core.dispositivos.generar_codigo", { instalacionId });
-    if (!r?.codigo || !r.url) return;
-    setCodigo(r);
-    setSvg(await qrDeEmparejamiento(r.url));
+    await mostrar(r?.codigo && r.url ? { codigo: r.codigo, url: r.url } : null);
   }
-  const cerrar = () => {
-    setCodigo(null);
-    setSvg(null);
-    setCopiado(false);
-    limpiarError();
-  };
   return (
     <>
       <Button onClick={() => void generar()} disabled={pendiente}>
         Emparejar dispositivo
       </Button>
-      {error && !codigo ? <span className="text-sm text-danger-fg">{error}</span> : null}
+      {error && !abierto ? <span className="text-sm text-danger-fg">{error}</span> : null}
       <Dialog
-        abierto={codigo !== null}
+        abierto={abierto}
         onCerrar={cerrar}
         titulo="Emparejar dispositivo"
         descripcion="En el equipo de terreno abre Terreno → Emparejar y escribe el código o escanea el QR."
         acciones={<Button onClick={cerrar}>Listo</Button>}
       >
-        {codigo?.codigo && codigo.url ? (
+        {codigo ? (
           <>
             <PanelCodigoUrl
               codigo={codigo.codigo}
