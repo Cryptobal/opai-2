@@ -15,6 +15,9 @@ import { destinoVinculo } from "./vinculo-fixture";
 
 // CAR-58: aprobación con texto legal base (PDF); el guard de ejemplo en `anexos-plantilla-ejemplo.test.ts`.
 
+const cuerpoRutEmpresa = String(10_000_000 + Math.floor(Math.random() * 80_000_000));
+const rutEmpresaPrueba = `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`;
+
 type Fila = { concepto: string; antes: string; despues: string };
 /** Intl usa espacio duro («$\u00a0700.000») según la versión de ICU del runner. */
 const sinNbsp = (t: string | undefined) => (t ?? "").replace(/\u00a0/g, " ");
@@ -63,7 +66,7 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       data: {
         tenantId,
         razonSocial: "Empresa Prueba SpA",
-        rut: "76123456-7",
+        rut: rutEmpresaPrueba,
         calle: "Av. Providencia 100",
         comuna: "Santiago",
         representanteNombre: "Ana Representante",
