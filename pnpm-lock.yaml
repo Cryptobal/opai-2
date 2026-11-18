@@ -199,6 +199,9 @@ importers:
       '@opai/capabilities':
         specifier: workspace:*
         version: link:../../packages/capabilities
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@opai/integrations':
         specifier: workspace:*
         version: link:../../packages/integrations

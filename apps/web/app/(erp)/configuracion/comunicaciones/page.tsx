@@ -8,7 +8,6 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { PaginaConfig } from "../_centro/pagina-config";
 import { FilaEvento } from "./_componentes/fila-evento";
 import { type EventoComunicable, grupoDe, type Regla } from "./_componentes/tipos";
-
 export const metadata = { title: "Comunicaciones" };
 
 /** Comunicaciones (30): qué se avisa, por qué canal y a quién; silencio por defecto (ADR-020). */
@@ -30,7 +29,8 @@ export default function Comunicaciones() {
         const eventos = e.ok ? e.data : [];
         const grupos = [...new Set(eventos.map((x) => grupoDe(x.evento)))];
         return (
-          <Estado state={estadoPantalla(e, r)} variante="lista">
+          <div className="flex flex-col gap-6">
+            <Estado state={estadoPantalla(e, r)} variante="lista">
             <Table className="max-md:block" etiqueta="Avisos por evento">
               <thead className="max-md:hidden">
                 <tr>
@@ -65,6 +65,7 @@ export default function Comunicaciones() {
               </tbody>
             </Table>
           </Estado>
+          </div>
         );
       }}
     </PaginaConfig>

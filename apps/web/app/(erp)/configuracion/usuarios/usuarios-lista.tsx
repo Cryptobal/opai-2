@@ -21,6 +21,8 @@ export type Miembro = {
   excepciones: number;
   /** Último acceso (A4); null si no hay sesión registrada. */
   ultimoAccesoEn: Date | null;
+  /** Ficha del usuario con sesión (CAR-454). */
+  esPropio: boolean;
 };
 export type Invitacion = {
   id: string;

@@ -49,3 +49,9 @@ export const DIAS = [
   [6, "Sáb"],
   [0, "Dom"],
 ] as const;
+
+/** «09:30» → 570 minutos desde la medianoche. */
+export const minutos = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+};

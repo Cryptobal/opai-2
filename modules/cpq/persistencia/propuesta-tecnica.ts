@@ -6,7 +6,6 @@ import {
   basePropuestaDesdeCotizacion,
   cotizacionServicioCambio,
   huellaServicioCotizacion,
-  parseBloquesArmadorPropuesta,
   type BloqueArmadorPropuesta,
   type ServicioDesdeCotizacion,
 } from "../domain/documento/propuesta-tecnica";
@@ -123,10 +122,6 @@ export function propuestaServicioDesactualizado(
   servicio: ServicioDesdeCotizacion,
 ) {
   return cotizacionServicioCambio(row.servicioHuellaJson, servicio);
-}
-
-export function parseArmador(json: string) {
-  return parseBloquesArmadorPropuesta(json);
 }
 
 export async function congelarPropuestaTecnica(ctx: Contexto, propuestaId: string) {

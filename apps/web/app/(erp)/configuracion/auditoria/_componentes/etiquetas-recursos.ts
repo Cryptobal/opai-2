@@ -25,7 +25,7 @@ export const RECURSOS: Record<string, string> = {
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
   planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura", recurrentes: "Gastos recurrentes",
-  derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios",
+  derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios", descartes_bancarios: "Movimientos borrados por fechas",
   cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", reglas_banco: "Reglas del banco",
   tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", compartir: "Compartir cotización", lineas: "Líneas",
   versiones: "Versiones", secciones: "Secciones", correlativos: "Correlativos",
@@ -34,7 +34,7 @@ export const RECURSOS: Record<string, string> = {
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
   propuestas_tecnica: "Propuestas técnicas", propuestas_html: "Plantillas HTML de propuesta", envios_propuesta: "Envíos de propuesta",
   cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura migrada", impuestos: "Impuestos",
-  intentos: "Intentos de acceso denegados", informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
+  intentos: "Intentos de acceso denegados", prerregistros: "Prerregistros de visitas", informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
   // Grupos o equipos de usuarios (CAR-251).
   grupos: "Grupos",
   webhooks: "Eventos salientes",
