@@ -19,6 +19,7 @@
   },
   "scripts": {
     "gen:novedades-embed": "node scripts/embed-novedades-entradas.mjs",
+    "novedad:imagen": "node scripts/novedad-imagen-desde-capturas.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "test": "vitest run"
