@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
 import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
-import { programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen";
+import { programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen-recurrentes-cpq";
 import { construirReporte } from "../../scripts/importar-opai1/reporte";
 import { fixture } from "./memoria";
 
