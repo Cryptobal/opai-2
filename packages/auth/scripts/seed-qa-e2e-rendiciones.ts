@@ -81,8 +81,8 @@ async function main(): Promise<void> {
 }
 
 main()
-  .catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : error);
+  .catch((e: unknown) => {
+    console.error(e instanceof Error ? e.message : e);
     process.exitCode = 1;
   })
-  .finally(() => cerrarClientes());
+  .finally(cerrarClientes);
