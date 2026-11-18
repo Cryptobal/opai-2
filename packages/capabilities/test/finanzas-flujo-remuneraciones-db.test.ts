@@ -7,7 +7,7 @@ import { manifest } from "../../../modules/finanzas/manifest";
 import { FILA_ANTICIPO, FILA_PREVIRED, FILA_SUELDOS } from "../../../modules/finanzas/capacidades/filas-virtuales";
 import { lunesHoy } from "../../../modules/finanzas/capacidades/util";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
-import { repararConsultadaElIndicadores } from "../../db/test/valores-legales-prueba";
+import { prepararIndicadoresProyeccion, repararConsultadaElIndicadores } from "../../db/test/valores-legales-prueba";
 
 import type * as ModuloCapacidades from "../src";
 
@@ -72,6 +72,8 @@ describe.skipIf(omitirSuiteDb())("flujo · remuneraciones desde Nómina (db)", (
   });
 
   it("con Nómina activa la planilla se arma y las remuneraciones solo caen desde hoy, como egresos", async () => {
+    // merge_group: otras suites tocan `valor_publicado` (UF/UTM) en paralelo en la misma base.
+    await prepararIndicadoresProyeccion(e);
     const p = await planilla(["finanzas", "nomina"]);
     const rem = p.celdas.filter((c) => FILAS.includes(c.filaId));
     const desdeSemana = lunes();
