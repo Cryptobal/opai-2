@@ -1,8 +1,21 @@
 {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/brief/car-599-e2e-circuito-6bb0
   "lineasDuplicadas": 3201,
   "archivosLargos": 36,
   "funcionesLargas": 664,
   "exportacionesSinUso": 203,
+<<<<<<< HEAD
+=======
+=======
+  "lineasDuplicadas": 3194,
+  "archivosLargos": 36,
+  "funcionesLargas": 666,
+  "exportacionesSinUso": 185,
+>>>>>>> origin/main
+>>>>>>> origin/brief/car-599-e2e-circuito-6bb0
   "archivosSinUso": 0,
   "dependenciasSinUso": 0
 }
