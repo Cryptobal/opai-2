@@ -14,5 +14,4 @@ export const capacidadesRemuneraciones = [
 
 export { clavesFaltantes, mutualAdicionalTenant, publicacionesParaFecha } from "./publicaciones";
 export { trabajoCapturaIndicadoresSii } from "./trabajo-captura";
-export { platformIndicadoresPropuestas, platformIndicadoresResolver } from "./previsional-plataforma";
 export { trabajoCapturaPrevisional } from "./trabajo-captura-previsional";

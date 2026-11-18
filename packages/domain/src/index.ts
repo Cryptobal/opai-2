@@ -19,6 +19,7 @@ export * from "./mfa";
 export * from "./documentos";
 export * from "./comunicaciones";
 export * from "./permisos";
+export * from "./ver-como";
 export * from "./permisos-efectivos";
 export * from "./acceso-membresia";
 export * from "./portales";
@@ -79,6 +80,7 @@ export * from "./portal-trabajador-arco";
 export * from "./nomina";
 
 // Nómina conserva el contador público; Pauta expone su lista de fechas con nombre propio.
+export { mesAnterior, mesSiguiente } from "./calendario-mes";
 export { diasDelMes } from "./nomina";
 export { diasDelMes as fechasDelMesPauta } from "./pauta";
 export * from "./pauta";
