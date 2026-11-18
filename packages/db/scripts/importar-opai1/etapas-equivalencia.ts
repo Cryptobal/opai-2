@@ -2,7 +2,7 @@
 import gard from "./config/equivalencia-etapas.gard.json";
 import type { EtapaOpai1, HistorialEtapaOpai1, NegocioOpai1 } from "./origen";
 
-export type TipoEtapa = "abierta" | "ganada" | "perdida";
+type TipoEtapa = "abierta" | "ganada" | "perdida";
 export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
 
 export const ETAPA_PERDIDO_2 = "01a1839d-4893-72c8-9ef2-ad39950c50b1";

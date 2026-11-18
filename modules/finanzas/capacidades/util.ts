@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import type { Contexto } from "@opai/capabilities";
 import { noEncontrado } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
@@ -8,6 +10,12 @@ import { aNumeroSeguro } from "./esquemas";
 
 /** Id de relleno de las vistas previas (dry_run): no existe fila, pero cumple el esquema de salida. */
 export const ID_VISTA_PREVIA = "00000000-0000-0000-0000-000000000000";
+
+/** UUID estable a partir de un texto (vista del flujo sin fila persistida). */
+export function idEstable(texto: string): string {
+  const h = createHash("sha1").update(texto).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
 
 /** Zona civil que decide qué día es «hoy» hasta que el tenant fije la suya (hallazgo 7, CAR-181). */
 export const ZONA_FLUJO = "America/Santiago";
