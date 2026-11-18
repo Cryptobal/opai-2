@@ -35,6 +35,12 @@ En la app, cada ítem aparece como **tarjeta en la página Novedades** (fecha, m
 3. El gate de tests valida ids únicos y frontmatter mínimo. Dentro del mismo día las `destacada: true` salen arriba (la fecha no tiene hora).
 4. El CI (`.github/scripts/ci-novedad-visual.sh`) avisa, sin bloquear, si el PR toca pantallas o el DS y no agrega ni cambia un `.md` aquí. Si el cambio es solo interno, se ignora el aviso.
 
+## Imagen en «Ver más» (CAR-520)
+
+1. En la prueba `@preview` del cambio, después de armar la pantalla llama `capturarNovedad(page, info, id, escena)` (`apps/web/e2e/preview.ts`). El `id` debe coincidir con el frontmatter; el archivo queda como `novedad-{id}--{escena}-{proyecto}.png` en el artefacto `preview-e2e`.
+2. Tras `preview-e2e` en verde, corre `pnpm --filter @opai/domain novedad:imagen` (opcional `--capturas=ruta/al/artefacto`). Copia la captura de **escritorio** a `apps/web/public/changelog/{id}.png` y agrega `imagen:` al `.md` si falta.
+3. Vuelve a correr `gen:novedades-embed` si el script no lo hizo ya. Solo capturas con la empresa ficticia `qa-e2e`.
+
 El texto debe **describir el cambio visual**: qué botones, hojas o menús aparecen o cambian y dónde.
 
 Ver también `AGENTS.md` (convenciones) y `docs/2.0/CONTEXTO-agentes.md`.

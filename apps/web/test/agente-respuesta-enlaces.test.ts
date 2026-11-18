@@ -8,7 +8,9 @@ import type { Mensaje, ReferenciaEntidad } from "@/app/_components/agente/tipos"
 const cuenta: ReferenciaEntidad = {
   id: "11111111-1111-1111-1111-111111111111",
   titulo: "Acme SpA",
-  detalle: "Cliente activo",
+  detalle: "76.123.456-7",
+  campos: ["76.123.456-7", "Cliente"],
+  estado: "activa",
   href: "/cuentas/11111111-1111-1111-1111-111111111111",
 };
 const cotiz: ReferenciaEntidad = {
@@ -34,9 +36,9 @@ describe("respuesta del agente con enlaces y tarjetas (CAR-446)", () => {
     expect(h).toContain(`href="${cuenta.href}"`);
     expect(h).toContain(`href="${cotiz.href}"`);
     expect(h).toContain("Abrir");
-    expect(h).toContain("Cliente activo");
+    expect(h).toContain("activa");
+    expect(h).toContain("76.123.456-7");
     expect(h).toContain("<strong");
-    expect(h).toContain("<ul");
     expect(h).not.toContain("evil.example");
     expect(h).toContain("malo");
   });
@@ -51,5 +53,25 @@ describe("respuesta del agente con enlaces y tarjetas (CAR-446)", () => {
     ]);
     expect(h).not.toContain("href=");
     expect(h).toContain("esto");
+  });
+});
+
+describe("fichas del agente cuando se piden tarjetas (CAR-523)", () => {
+  it("con «tarjetas» dibuja fichas primero y quita la lista de viñetas", () => {
+    const h = html([
+      { id: "u", rol: "yo", texto: "Dame 2 cuentas en tarjetas" },
+      {
+        id: "a",
+        rol: "agente",
+        texto: `Aquí tienes:\n\n- [Acme SpA](${cuenta.href})\n- [Cotización 12](${cotiz.href})`,
+        referencias: [cuenta, cotiz],
+      },
+    ]);
+    expect(h).toContain("Abrir");
+    expect(h).toContain("activa");
+    expect(h).toContain("76.123.456-7");
+    expect(h).toContain("Aquí tienes");
+    expect(h).not.toContain("<ul");
+    expect(h.indexOf("Abrir")).toBeLessThan(h.indexOf("Aquí tienes"));
   });
 });

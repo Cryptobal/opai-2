@@ -12,7 +12,7 @@ import {
   solicitudesAbiertas,
 } from "./retencion-anonimizar";
 
-export { exclusionesAbiertas, type Exclusiones, type Lote } from "./retencion-lotes";
+export { exclusionesAbiertas } from "./retencion-lotes";
 
 /** Cómo busca y aplica el trabajo diario cada regla del catálogo (una por tabla con gestión «trabajo»). */
 export type Ejecutor = {
