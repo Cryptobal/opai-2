@@ -21,11 +21,14 @@ const CARPETA = new URL("../prisma/migrations/", import.meta.url);
 
 async function marcarRevertidos(client: Client, ids: string[], motivo: string) {
   for (const id of ids) {
+    await client.query("BEGIN");
+    await client.query("SET LOCAL lock_timeout = '5s'");
     await client.query(
       `UPDATE public._prisma_migrations SET rolled_back_at = now()
         WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
       [id],
     );
+    await client.query("COMMIT");
     console.log(`Marcada como revertida (${motivo})`);
   }
 }
@@ -59,6 +62,7 @@ async function main(): Promise<void> {
     );
     for (const r of renombradas(rows, checksums)) {
       await client.query("BEGIN");
+      await client.query("SET LOCAL lock_timeout = '5s'");
       await client.query(
         `UPDATE public._prisma_migrations SET rolled_back_at = now()
           WHERE migration_name = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,

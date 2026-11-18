@@ -1,5 +1,6 @@
 // Reglas del destrabe de la rama Neon de preview (workflow `preview`): solo ramas preview/pr-N y
 // solo registros fallidos cuya migración ya no existe en el repo.
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -17,6 +18,12 @@ const fila = (migration_name: string, terminada: boolean, revertida = false) => 
 });
 
 describe("destrabe de la rama Neon de preview", () => {
+  it("protege cada reversión con transacción y lock_timeout corto", () => {
+    const fuente = readFileSync(new URL("../scripts/preview-huerfanas.ts", import.meta.url), "utf8");
+    const helper = fuente.slice(fuente.indexOf("async function marcarRevertidos"), fuente.indexOf("async function main"));
+    expect(helper).toMatch(/query\("BEGIN"\)[\s\S]*SET LOCAL lock_timeout = '5s'[\s\S]*UPDATE public\._prisma_migrations[\s\S]*query\("COMMIT"\)/);
+  });
+
   it("solo acepta ramas preview/pr-N", () => {
     expect(RAMA_PREVIEW.test("preview/pr-469")).toBe(true);
     for (const r of ["main", "dev", "preview/pr-", "preview/pr-1/x", "x/preview/pr-1", ""]) {

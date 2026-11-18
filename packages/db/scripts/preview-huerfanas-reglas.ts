@@ -1,7 +1,6 @@
 // Reglas puras de `preview-huerfanas.ts` (sin base): qué rama se acepta y qué registros se destraban.
 
-/** Solo ramas Neon efímeras de preview por PR. Nunca main, dev ni otra rama. */
-export const RAMA_PREVIEW = /^preview\/pr-[0-9]+$/;
+export { RAMA_PREVIEW } from "@opai/domain";
 
 export type RegistroMigracion = {
   id: string;
