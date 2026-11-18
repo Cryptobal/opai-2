@@ -72,7 +72,7 @@ GitHub es la fuente de verdad del código y los archivos del repositorio (este c
 Un PR está terminado cuando:
 
 1. Cumple el brief o el encargo, o reporta y justifica la diferencia.
-2. CI está en verde en el último commit en los checks que corren en cada PR: `typecheck · lint · test · test:db` (test:db solo si el PR toca Prisma o migraciones) y `secretos`; más `migración pendiente` si el PR toca Prisma o migraciones (ver «Revisiones largas»).
+2. CI está en verde en el último commit en los checks que corren en cada PR: `typecheck · lint · test · test:db` (sin corrida real de `test:db` en el PR; verificación completa en `merge_group`) y `secretos`; más `migración pendiente` si el PR toca Prisma o migraciones (ver «Revisiones largas»).
 3. No tiene conflictos con `main` y la historia no se reescribió sin el OK de Carlos.
 4. Pasó la autorrevisión de un subagente y la **revisión final** de la sesión que construyó el PR: comentario en el PR con el **SHA completo** del head y **`sin bloqueos`** (o bloqueos concretos) en **seguridad, RLS/tenant, permisos, migraciones e integridad de datos**, usando `docs/2.0/checklists/revision.md` en esos ejes (`OPERACION-agentes.md` A2.2). El bot «Revisor OPAI 2.0» **no es obligatorio** salvo petición expresa de Carlos o riesgo grave sin resolver. Lo no bloqueante va a un PR de pendientes (ADR-054).
 5. Si tiene **cambio visual:** trae pruebas `@preview` de sus pantallas, el run **`preview-e2e`** (a pedido, con la etiqueta `e2e`) está en verde sobre el head y la sesión revisó las capturas del artefacto contra el diseño aprobado y dejó en el PR qué miró (`OPERACION-agentes.md` A2.10, ADR-092). Ya no se espera el primer vistazo de Carlos ni la señal `REVISIÓN VISUAL CARLOS:`; Carlos puede vetar o pedir cambios como siempre.
@@ -101,8 +101,8 @@ Cómo calza con el resto del contrato: lo que antes se preguntaba en el chat o c
 
 Regla permanente de Carlos (13-nov-2026, adenda de ADR-112), para bajar el gasto y la demora de GitHub Actions:
 
-1. **En cada PR** corre solo lo rápido: `typecheck`, `lint`, `test` (resumidos en el check `typecheck · lint · test · test:db`) y `secretos`. Un push nuevo cancela la corrida anterior del mismo PR. Ningún flujo corre en un PR en borrador.
-2. **Base:** `test:db`, «Choque de tablas» y «Migración pendiente» corren en el PR solo si toca Prisma o migraciones. `test:db` corre siempre al integrar a `main` y de noche.
+1. **En cada PR** corre solo lo rápido: `typecheck` y `lint` en paquetes tocados, `test` unitario con `vitest --changed`, el check agregador `typecheck · lint · test · test:db` (sin ejecutar `test:db` en el PR; el job `test-db` queda en `skipped`) y `secretos`. Un push nuevo cancela la corrida anterior del mismo PR. Ningún flujo corre en un PR en borrador.
+2. **Base:** «Choque de tablas» y «Migración pendiente» corren en el PR solo si toca Prisma o migraciones. `test:db` **no** corre en `pull_request`; corre en `merge_group`, al integrar a `main`, de noche y a pedido. En el PR el gate paralelo usa una sola partición de typecheck/test (no cuatro jobs `test:db`). Los checks obligatorios corren en runners de GitHub (variable `RUNNER_GATE` para volver a runners propios).
 3. **Build con presupuesto de JS:** solo al integrar a `main` o a pedido (`workflow_dispatch`). Quien toca pantallas lo corre en local antes de integrar.
 4. **e2e (10 grupos), `preview-e2e` y `rendimiento`:** una vez cada noche contra `main` y a pedido (`workflow_dispatch` o al poner la etiqueta `e2e` en un PR listo; prueban el head de ese momento, así que para un head nuevo se quita y se vuelve a poner la etiqueta). Nunca en cada push.
 5. **`revision-diseno` y `auditoria-diseno`:** solo a pedido, al poner la etiqueta `diseño`. Nunca automáticas.

@@ -37,7 +37,12 @@ export function ListaMaestro(p: Props) {
           principal se queda en el patrón (Brief 05 §8.3, REGLAS-codigo UI), arriba de la lista. */}
       {p.accion ? (
         <>
-          <div className={cn("md:px-4 md:pt-3", p.accionFlotante && "hidden lg:block")}>
+          <div
+            className={cn(
+              "md:sticky md:top-0 md:z-20 md:bg-surface md:px-4 md:pt-3",
+              p.accionFlotante && "hidden lg:block",
+            )}
+          >
             <Cabecera titulo={p.titulo} acciones={p.accion} accionesSiempre />
           </div>
           {p.accionFlotante ? <AccionListaFlotante>{p.accion}</AccionListaFlotante> : null}
