@@ -22,9 +22,12 @@ test.describe("@preview acceso: Accesos en el ERP", () => {
 
     const fila = page
       .locator(
-        'a[href^="/accesos/"]:not([href^="/accesos/intentos"]):not([href^="/accesos/listas"])',
+        'a[href^="/accesos/"]:not([href^="/accesos/intentos"]):not([href^="/accesos/listas"]):not([href^="/accesos/prerregistros"])',
       )
       .first();
+    await expect(
+      fila.or(page.getByText("Aún no hay registros", { exact: true })).first(),
+    ).toBeVisible();
     if ((await fila.count()) === 0) {
       // Sin registros (p. ej. test.opai.cl sin ACCESO_HUELLA_SECRET, CAR-483): la ficha no se recorre y se anota.
       test
