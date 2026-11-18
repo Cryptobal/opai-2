@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { enTransaccion } from "../../src/transaccion";
 import { aplicarPlanEnTransaccion } from "../../scripts/importar-opai1/aplicar";
 import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
-import { programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen";
+import { programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen-recurrentes-cpq";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
 import { type Entorno, prepararEntorno, urlPropietario } from "../entorno";
 import { fixture } from "./memoria";
