@@ -22,7 +22,7 @@
     "/(auth)/activar-mfa": 160,
     "/(erp)/configuracion*": 177,
     "/(erp)/configuracion/agentes": 181,
-    "/(erp)/configuracion/modulo/[id]": 192,
+    "/(erp)/configuracion/modulo/[id]": 193,
     "/(erp)/configuracion/campos-personalizados": 178,
     "/(erp)/instalaciones/nueva": 181,
     "/(erp)/negocios/[id]/seguimiento": 177,
