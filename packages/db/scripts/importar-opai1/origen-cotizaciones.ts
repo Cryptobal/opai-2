@@ -15,7 +15,7 @@ const decimalOpcional = z
   });
 
 /** Puesto cotizado de 1.0 (`CpqPosition`): horario, días, dotación y sueldo base. */
-export const puestoCotizacionOpai1 = z.object({
+const puestoCotizacionOpai1 = z.object({
   id: z.string().min(1),
   customName: texto,
   description: texto,
@@ -33,7 +33,7 @@ export const puestoCotizacionOpai1 = z.object({
 });
 
 /** Parámetros de venta de 1.0 (`CpqQuoteParameters`): lo que 2.0 conserva de la cotización. */
-export const parametrosCotizacionOpai1 = z.object({
+const parametrosCotizacionOpai1 = z.object({
   salePriceMonthly: decimalOpcional,
   contractMonths: decimalOpcional,
   marginPct: decimalOpcional,
