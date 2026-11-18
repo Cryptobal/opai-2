@@ -3,7 +3,7 @@
 // opai_app, sin BYPASSRLS) para no tocar la contraseña real del rol de aplicación.
 import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "pg";
@@ -16,43 +16,43 @@ import { migracionesAlDia } from "./migraciones-al-dia";
 export const urlPropietario = process.env["DATABASE_URL_TEST"];
 
 /** Una sola ALTER ROLE por base de tests: workers de Vitest comparten contraseña vía archivo + advisory lock. */
-const passwordsCronSiiLista = new Map<string, Promise<string>>();
+let passwordCronSiiLista: Promise<string> | undefined;
+const marcadorPasswordCronSii = join(tmpdir(), "opai_cron_sii_test_pwd");
 const lockPasswordCronSii = 148_148;
 
-function marcadorPasswordCronSii(connectionString: string): string {
-  const db = new URL(connectionString).pathname.replace(/^\//, "") || "postgres";
-  return join(tmpdir(), `opai_cron_sii_test_pwd_${db}`);
-}
-
 async function fijarPasswordCronSii(connectionString: string): Promise<string> {
-  const marcador = marcadorPasswordCronSii(connectionString);
-  let lista = passwordsCronSiiLista.get(marcador);
-  if (!lista) {
-    lista = (async () => {
+  if (!passwordCronSiiLista) {
+    passwordCronSiiLista = (async () => {
       const pg = new Client({ connectionString });
       await pg.connect();
       await pg.query("SELECT pg_advisory_lock($1)", [lockPasswordCronSii]);
       try {
-        let cronPassword: string;
-        if (existsSync(marcador)) {
-          cronPassword = readFileSync(marcador, "utf8").trim();
-        } else {
-          cronPassword = randomBytes(24).toString("base64url");
-          writeFileSync(marcador, cronPassword, { mode: 0o600 });
+        if (existsSync(marcadorPasswordCronSii)) {
+          const cached = readFileSync(marcadorPasswordCronSii, "utf8");
+          const probe = new Client({
+            connectionString: urlParaRol(connectionString, "opai_cron_sii", cached),
+          });
+          try {
+            await probe.connect();
+            await probe.end();
+            return cached;
+          } catch {
+            unlinkSync(marcadorPasswordCronSii);
+          }
         }
-        // Siempre alinear Postgres con el archivo: en CI la base es efímera pero /tmp puede persistir.
+        const cronPassword = randomBytes(24).toString("base64url");
         await pg.query(
           `ALTER ROLE opai_cron_sii WITH LOGIN PASSWORD ${pg.escapeLiteral(cronPassword)}`,
         );
+        writeFileSync(marcadorPasswordCronSii, cronPassword, { mode: 0o600 });
         return cronPassword;
       } finally {
         await pg.query("SELECT pg_advisory_unlock($1)", [lockPasswordCronSii]);
         await pg.end();
       }
     })();
-    passwordsCronSiiLista.set(marcador, lista);
   }
-  return lista;
+  return passwordCronSiiLista;
 }
 
 /** En local sin Postgres se omiten suites db; en CI deben fallar si falta la URL. */
@@ -93,10 +93,9 @@ export async function prepararEntorno() {
   process.env["DATABASE_URL"] = urlParaRol(url, rol, password);
   process.env["DATABASE_URL_MIGRATE"] = url;
   process.env["DATABASE_URL_CRON_SII"] = urlParaRol(url, "opai_cron_sii", cronPassword);
-  const { cerrarClientes } = await import("../src/client");
-  await cerrarClientes();
   const { forTenant } = await import("../src/for-tenant");
   const { forUser } = await import("../src/for-user");
+  const { cerrarClientes } = await import("../src/client");
 
   const admin = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
   const appSinTenant = new PrismaClient({
