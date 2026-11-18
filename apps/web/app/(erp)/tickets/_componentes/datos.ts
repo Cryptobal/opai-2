@@ -1,14 +1,7 @@
 import type { BadgeProps } from "@opai/ds";
 
 import { ejecutarComoUsuario } from "@/lib/servidor";
-<<<<<<< HEAD
 import type { Parametros, SearchParams } from "@/lib/parametros";
-=======
-import { estadoPantalla } from "@/lib/formato";
-import type { Parametros } from "@/lib/parametros";
-
-export const POR_PAGINA = 50;
->>>>>>> d34864525 (merge: traer main y paginación cursor compartida (CAR-622))
 
 export type Ticket = {
   id: string;
