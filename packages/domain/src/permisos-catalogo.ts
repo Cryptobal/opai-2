@@ -73,6 +73,8 @@ export const PERMISOS_CORE = {
   configManage: "core:config.manage",
   marcaManage: "core:marca.manage",
   integracionesManage: "core:integraciones.manage",
+  // Avisos de terreno en Slack (CAR-294): tomar, cerrar y pedir refuerzo. Owner, admin, gerente y supervisor.
+  avisosTerrenoGestionar: "core:avisos_terreno.gestionar",
   comunicacionesManage: "core:comunicaciones.manage",
   consumosRead: "core:consumos.read",
   aprobacionesManage: "core:aprobaciones.manage",
@@ -114,6 +116,9 @@ export const PERMISOS_CORE = {
   // CAR-279: importar datos desde planillas. Decisión de Carlos (11-nov-2026): también el gerente;
   // supervisor y viewer no. Además se exige el permiso de cada entidad que se importa.
   importarManage: "core:importar.manage",
+  // CAR-528 (decisión de Carlos, 15-nov-2026): ver los portales como otra persona de la empresa, en
+  // solo lectura y auditado. Solo owner y admin; nadie más salvo que un rol personalizado lo asigne.
+  verComoIniciar: "core:ver_como.iniciar",
 } as const;
 
 export const PERMISOS_PLATAFORMA = {

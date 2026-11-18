@@ -1,8 +1,8 @@
 /** Recurso (segunda parte de «modulo.recurso.verbo») → nombre de negocio. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const RECURSOS: Record<string, string> = {
-  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", bandeja: "Bandeja del aprobador", lotes: "Lotes de pago", nomina: "Nómina de pago", reporte: "Reporte de rendiciones", rentabilidad: "Rentabilidad por instalación", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", metodos_acceso: "Métodos de acceso", apps_conectadas: "Apps conectadas", invitations: "Invitaciones",
+  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", bandeja: "Bandeja del aprobador", lotes: "Lotes de pago", nomina: "Nómina de pago", reporte: "Reporte de rendiciones", rentabilidad: "Rentabilidad por instalación", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", metodos_acceso: "Métodos de acceso", apps_conectadas: "Apps conectadas", ver_como: "Ver como", invitations: "Invitaciones",
   modules: "Módulos", apikeys: "API keys", audit: "Auditoría", usage: "Uso", tenants: "Empresas",
-  admins: "Administradores", invitaciones: "Invitaciones", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
+  admins: "Administradores", avisos_terreno: "Avisos de terreno", invitaciones: "Invitaciones", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",
   cuentas: "Cuentas", cuentas_referencias: "Referencias de clientes", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
   patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos", procesos_persona: "Ingreso y salida",
@@ -19,7 +19,7 @@ export const RECURSOS: Record<string, string> = {
   programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos", mis_turnos: "Mis turnos", mis_documentos: "Mis documentos",
   preferencias_notificacion: "Preferencias de aviso", privacidad: "Privacidad", arco: "Derechos ARCO",
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
-  conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", mes: "Mes", ppc: "Puestos por cubrir",
+  conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", mes: "Mes", dotacion: "Dotación", ppc: "Puestos por cubrir",
   series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos", turnos_extra: "Turnos extra",
   alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",

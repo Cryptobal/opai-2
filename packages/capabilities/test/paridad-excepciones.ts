@@ -30,6 +30,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.push.quitar":
     "Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a).",
   "core.apikeys.create": "Solo personas: una key no se crea keys ni ve secretos (ADR-032).",
+  "core.ver_como.iniciar":
+    "Solo personas: «ver como» es una vista de pantalla de quien tiene la sesión (CAR-528); un agente ya lee esos datos con sus propias capacidades.",
+  "core.ver_como.terminar":
+    "Solo personas: cierra la vista «ver como» de quien tiene la sesión (CAR-528).",
   // CAR-352: un destino saca eventos de la empresa hacia afuera y lleva un secreto de firma.
   "core.webhooks.destino_crear":
     "Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032).",
@@ -52,6 +56,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: canjea el código del OAuth y guarda el token del bot cifrado; nunca por API ni MCP (ADR-027, ADR-093).",
   "core.slack.desconectar":
     "Solo personas: revoca y borra el token del bot de Slack; gobierno de credenciales (ADR-027, ADR-093).",
+  "core.slack.vinculado_de":
+    "Interna: solo la ejecuta /api/integraciones/slack/acciones, tras verificar la firma de Slack, para saber qué persona de OPAI apretó un botón (CAR-294).",
+  "core.slack.efimero":
+    "Interna: solo la ejecuta /api/integraciones/slack/acciones para avisar a quien apretó un botón por qué no se hizo nada (CAR-294).",
   "core.slack.desinstalada":
     "Interna: solo la ejecuta /api/integraciones/slack/eventos, tras verificar la firma de Slack, cuando la app se desinstala o su token se revoca.",
   "finanzas.folios.cargar_caf":

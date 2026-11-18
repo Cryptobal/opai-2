@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-  # Ahorro de Actions (13-nov-2026, decisión de Carlos; AGENTS.md «Revisiones largas»): en cada PR solo
-  # corre lo rápido (typecheck, lint, test, secretos); lo largo corre de noche o a pedido.
+  # Ahorro de Actions (13-nov-2026; urgencia cola 17-nov-2026): en pull_request solo el gate rápido
+  # (typecheck/lint/test en lo tocado, secretos); test:db y build completos solo en merge_group, main o a pedido.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
@@ -17,43 +17,24 @@ on:
 permissions:
   contents: read
 
-# Un push nuevo al mismo PR cancela la corrida anterior. El e2e a pedido (etiqueta `e2e`) llega como
-# workflow_dispatch desde `e2e-a-pedido.yml`, en su propio grupo.
+# Un push nuevo al mismo PR cancela la corrida anterior (CAR-627, CAR-640). En main/merge_group/cron
+# no se cancela la corrida en curso.
 concurrency:
-  group: ci-${{ github.event_name == 'workflow_dispatch' && 'a-pedido-' || '' }}${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # La corrida nocturna va en su propio grupo: compartiendo el de main, una nocturna a medio cancelar
+  # (su job «e2e · informe» esperando runner) dejaba pendientes las corridas de cada push a main.
+  group: ci-${{ github.event.pull_request.number || github.ref }}${{ github.event_name == 'schedule' && '-nocturna' || '' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
-  # ¿El PR toca la base (Prisma o migraciones)? Decide si corre test:db en el PR.
-  cambios:
-    name: cambios
-    if: github.event.pull_request.draft != true
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 3
-    outputs:
-      db: ${{ steps.base.outputs.db }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Detectar cambios de base
-        id: base
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then echo "db=true" >> "$GITHUB_OUTPUT"; exit 0; fi
-          if git diff --name-only "$BASE...$HEAD" | grep -qE '(^|/)prisma/|/migrations/'; then
-            echo "db=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "db=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  typecheck:
-    name: typecheck
-    if: github.event.pull_request.draft != true
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 25
+  # Cuatro jobs por corrida del gate (verificar + test-db + agregador + secretos): misma cobertura que
+  # el matrix en 2+2+4 shards, pero en serie dentro de cada job para no saturar ~20 runners (17-nov-2026).
+  # El job «gate» conserva el nombre del check obligatorio del ruleset. Compatible con el fast path de
+  # #1078 (pull_request vs merge_group): solo habría que ramificar los pasos de «verificar» y «test-db».
+  verificar:
+    name: verificar · typecheck lint test
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
+    timeout-minutes: 45
     env:
       TURBO_CACHE_DIR: .turbo
       NODE_OPTIONS: --max-old-space-size=4096
@@ -73,126 +54,28 @@ jobs:
           sudo mkswap /swapfile
           sudo swapon /swapfile
           free -h
-      - uses: pnpm/action-setup@v4
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - uses: actions/setup-node@v4
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - name: Restaurar caché de Turborepo
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
-      - run: pnpm install --frozen-lockfile
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - run: pnpm turbo run typecheck --concurrency=1
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - name: Solo documentación
-        if: steps.solo_docs.outputs.only_docs == 'true'
-        run: 'echo "PR de solo *.md y docs/** — typecheck omitido."'
-
-  lint:
-    name: lint
-    if: github.event.pull_request.draft != true
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    env:
-      TURBO_CACHE_DIR: .turbo
-      NODE_OPTIONS: --max-old-space-size=4096
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Detectar solo documentación
-        id: solo_docs
-        run: .github/scripts/ci-solo-documentacion.sh
       - name: Aviso de novedad in-app (CAR-260, no bloquea)
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.solo_docs.outputs.only_docs != 'true'
         run: .github/scripts/ci-novedad-visual.sh
-      - name: Ampliar swap (runner ~7 GB)
-        if: steps.solo_docs.outputs.only_docs != 'true' && runner.environment == 'github-hosted'
-        run: |
-          sudo swapoff -a 2>/dev/null || true
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-          free -h
-      - uses: pnpm/action-setup@v4
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/preparar
         if: steps.solo_docs.outputs.only_docs != 'true'
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - name: Restaurar caché de Turborepo
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
-      - run: pnpm install --frozen-lockfile
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - run: pnpm turbo run lint --concurrency=1
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - name: Solo documentación
-        if: steps.solo_docs.outputs.only_docs == 'true'
-        run: 'echo "PR de solo *.md y docs/** — lint omitido."'
-
-  test:
-    name: test
-    if: github.event.pull_request.draft != true
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    env:
-      TURBO_CACHE_DIR: .turbo
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Detectar solo documentación
-        id: solo_docs
-        run: .github/scripts/ci-solo-documentacion.sh
-      - uses: pnpm/action-setup@v4
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - uses: actions/setup-node@v4
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - name: Restaurar caché de Turborepo
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
-      - run: pnpm install --frozen-lockfile
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - run: pnpm test
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - name: Solo documentación
-        if: steps.solo_docs.outputs.only_docs == 'true'
-        run: 'echo "PR de solo *.md y docs/** — test omitido."'
+          turbo: typecheck-1
+      - name: typecheck y lint (PR, paquetes tocados)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'pull_request'
+        run: .github/scripts/ci-typecheck-lint-pr.sh
+      - name: test (PR, cambios)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'pull_request'
+        run: .github/scripts/ci-test-pr.sh
+      - name: typecheck · lint · test (completo)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name != 'pull_request'
+        run: .github/scripts/ci-verificar-completo.sh
 
   test-db:
     name: test:db
-    # En PR, solo si toca Prisma o migraciones; siempre al integrar, de noche y a pedido.
-    needs: cambios
-    if: github.event.pull_request.draft != true && needs.cambios.outputs.db == 'true'
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    # Margen sobre lo que tarda hoy (~19 min en main el 10-nov-2026, antes de omitir `migrate deploy` por archivo).
-    timeout-minutes: 30
-    env:
-      TURBO_CACHE_DIR: .turbo
+    if: github.event_name != 'pull_request'
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:16
@@ -213,60 +96,34 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
-      - uses: pnpm/action-setup@v4
+      # test:db solo en merge_group, main, cron y workflow_dispatch (17-nov-2026, cola de Actions).
+      - uses: ./.github/actions/preparar
         if: steps.solo_docs.outputs.only_docs != 'true'
-      - uses: actions/setup-node@v4
+      - name: test:db
         if: steps.solo_docs.outputs.only_docs != 'true'
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - name: Restaurar caché de Turborepo
-        if: steps.solo_docs.outputs.only_docs != 'true'
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
-      - run: pnpm install --frozen-lockfile
-        if: steps.solo_docs.outputs.only_docs != 'true'
-      - run: pnpm test:db
-        if: steps.solo_docs.outputs.only_docs != 'true'
+        run: .github/scripts/ci-test-db-completo.sh
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
-      - name: Solo documentación
-        if: steps.solo_docs.outputs.only_docs == 'true'
-        run: 'echo "PR de solo *.md y docs/** — test:db omitido."'
 
   gate:
     name: typecheck · lint · test · test:db
-    needs: [cambios, typecheck, lint, test, test-db]
-    if: always() && github.event.pull_request.draft != true
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
+    needs: [verificar, test-db]
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Comprobar jobs del gate
+      - name: Comprobar typecheck · lint, test y test:db
         env:
-          TYPECHECK: ${{ needs.typecheck.result }}
-          LINT: ${{ needs.lint.result }}
-          TEST: ${{ needs.test.result }}
+          VERIFICAR: ${{ needs.verificar.result }}
           TEST_DB: ${{ needs.test-db.result }}
-          CAMBIOS: ${{ needs.cambios.result }}
         run: |
-          set -euo pipefail
-          # Si `cambios` no terminó bien, test:db quedaría omitido sin razón: el gate falla.
-          for r in "$CAMBIOS" "$TYPECHECK" "$LINT" "$TEST"; do
-            if [ "$r" != success ]; then
-              echo "::error::Un job del gate terminó en $r (esperado: success)."
-              exit 1
-            fi
-          done
-          # test:db se omite en los PR que no tocan Prisma ni migraciones.
-          if [ "$TEST_DB" != success ] && [ "$TEST_DB" != skipped ]; then
-            echo "::error::test:db terminó en $TEST_DB."
-            exit 1
+          echo "verificar=$VERIFICAR test-db=$TEST_DB event=$GITHUB_EVENT_NAME"
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            test "$VERIFICAR" = success
+            test "$TEST_DB" = skipped
+          else
+            test "$VERIFICAR" = success && test "$TEST_DB" = success
           fi
-          echo "Gate en verde."
 
   presupuesto:
     name: build · presupuesto de JS
@@ -307,9 +164,9 @@ jobs:
 
   secretos:
     name: secretos
-    if: github.event.pull_request.draft != true
-    runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
-    timeout-minutes: 5
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -319,7 +176,7 @@ jobs:
         run: .github/scripts/ci-solo-documentacion.sh
       - name: Solo documentación
         if: steps.solo_docs.outputs.only_docs == 'true'
-        run: 'echo "PR de solo *.md y docs/** — gitleaks omitido (sin diff de código)."'
+        run: 'echo "PR de solo *.md y docs/** — gitleaks y simplicidad omitidos."'
       - name: Instalar gitleaks 8.24.0
         if: steps.solo_docs.outputs.only_docs != 'true'
         run: |
@@ -335,10 +192,33 @@ jobs:
       - name: Escanear la historia del repositorio (push)
         if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'push'
         run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 --log-opts="${{ github.sha }}" .
+      - uses: pnpm/action-setup@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Restaurar store de pnpm
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Instalar dependencias
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        run: .github/scripts/ci-install.sh
+      - name: simplicidad
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        env:
+          SIMPLICIDAD_RAMA_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || 'origin/main' }}
+        run: pnpm simplicidad
 
   e2e:
     name: e2e · shard ${{ matrix.shard }}/10
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 50
     strategy:
@@ -456,7 +336,7 @@ jobs:
   e2e-informe:
     name: e2e · informe
     needs: e2e
-    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    if: always() && github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 10
     steps:
@@ -488,7 +368,7 @@ jobs:
   e2e-check:
     name: e2e (Playwright)
     needs: [e2e, e2e-informe]
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
@@ -500,7 +380,7 @@ jobs:
 
   rendimiento:
     name: rendimiento
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule'
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 25
     services:

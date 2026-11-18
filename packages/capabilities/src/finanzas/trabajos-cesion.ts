@@ -4,7 +4,7 @@ import { defineTrabajo } from "../trabajos/registro";
 import { adaptadorCesionDe } from "./adaptador-cesion";
 import { sincronizarCobroDocumento } from "./cobros";
 
-export const trabajoConsultarCesionesRpetc = defineTrabajo({
+const trabajoConsultarCesionesRpetc = defineTrabajo({
   tipo: "finanzas.cesion.consultar_rpetc",
   descripcion: "Consulta el RPETC (Octava) para cesiones enviadas o aprobadas y actualiza su estado.",
   periodicidad: "horaria",

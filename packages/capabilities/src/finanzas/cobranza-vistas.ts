@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const tramoSchema = z.enum(["por_vencer", "1_30", "31_60", "61_mas"]);
+const tramoSchema = z.enum(["por_vencer", "1_30", "31_60", "61_mas"]);
 
 export const agingSchema = z.object({
   por_vencer: z.number().int(),

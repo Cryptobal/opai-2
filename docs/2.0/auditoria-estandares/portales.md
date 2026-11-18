@@ -22,6 +22,16 @@ Trabajador (Connecteam, Deputy): mis turnos, mis horas, mis documentos y liquida
 | R-2 | **El cliente solo ve cotizaciones.** Las secciones de servicio de su instalación están dibujadas pero vacías; no hay facturas ni tickets. | Rutas de `(cliente)`; `portal_cliente.resumen.leer`; `packages/domain/src/portal-cliente.ts` | Alta | Completar por partes; qué va primero es decisión de Carlos |
 | R-3 | **El supervisor no tiene su día en el portal.** Tiene rendiciones, personas e instalaciones; no tiene pauta del día, rondas ni asistencia de sus instalaciones; el único módulo con navegación en este portal es Rendiciones. | Rutas de `(supervisor)`; la ruta comodín responde 404 | Media | Completar junto con R-1: llevar al portal lo que el supervisor ya puede ver en el ERP |
 
+## Estado al 16-nov-2026
+
+Repaso semanal contra `main` en `886e262` (CAR-586). Las dos altas avanzaron: la del trabajador quedó a un paso y la del cliente está en PR.
+
+| # | Estado | Qué cambió y dónde se comprueba |
+|---|---|---|
+| R-1 | Parcial | Integrado: «Mi pauta» (CAR-462, #813: `portal_trabajador.mis_turnos.listar`) y «Mis documentos» (CAR-463, #820: `portal_trabajador.mis_documentos.listar` y `descargar`, con visibilidad que falla cerrada). Falta pedir permisos y vacaciones, y su aprobación por la jefatura (CAR-464 y CAR-508; #846 y #851, abiertos) |
+| R-2 | En curso | En `main` el cliente sigue viendo cotizaciones y el resumen. Carlos ya decidió qué ve (CAR-514). En PR, todos abiertos: cobertura (#827), rondas (#833), novedades (#838 y #860), facturas (#863), tickets (#881) y accesos (#941 a #943) |
+| R-3 | Abierta | Sin cambios |
+
 ## Qué se mantiene tal cual
 
 El modelo de acceso por portal, el alcance en la consulta, el acceso limitado del prospecto y las cotizaciones dentro del Portal Cliente.

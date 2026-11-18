@@ -64,6 +64,7 @@ export const CLASES_NUCLEO: Readonly<Record<string, ClaseBase>> = {
   [P.cumplimientoDpaAceptar]: "-",
   [P.calendarioRead]: "GLS",
   [P.calendarioManage]: "-",
+  [P.avisosTerrenoGestionar]: "GS",
   [P.remuneracionesRead]: "GL",
   [P.remuneracionesManage]: "-",
   [P.remuneracionesAprobar]: "-",
@@ -78,4 +79,5 @@ export const CLASES_NUCLEO: Readonly<Record<string, ClaseBase>> = {
   [P.correosSinAsignar]: "-",
   [P.indicadoresGestionRead]: "G",
   [P.importarManage]: "G",
+  [P.verComoIniciar]: "-",
 };
