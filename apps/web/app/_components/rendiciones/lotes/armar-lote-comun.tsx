@@ -3,9 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import type { Resultado } from "@opai/capabilities";
 import { avisar, Button } from "@opai/ds";
-
-import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
 import { pesos } from "../formato";
 import { RUTA_LOTES } from "./tipos";
@@ -34,7 +33,7 @@ export function totalesSeleccion<T extends FilaLote>(candidatas: readonly T[], s
 }
 
 async function trasCrearLote(
-  r: Awaited<ReturnType<typeof ejecutarCapacidad>>,
+  r: Resultado,
   mensajeOk: string,
   router: ReturnType<typeof useRouter>,
   setOcupado: (v: boolean) => void,
@@ -47,7 +46,7 @@ async function trasCrearLote(
 }
 
 export async function completarCreacionLote(
-  promesa: ReturnType<typeof ejecutarCapacidad>,
+  promesa: Promise<Resultado>,
   mensajeOk: string,
   router: ReturnType<typeof useRouter>,
   setOcupado: (v: boolean) => void,
