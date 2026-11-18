@@ -6,3 +6,5 @@ export * from "./etiqueta";
 export * from "./importacion";
 export * from "./marca";
 export * from "./cierre";
+export * from "./programacion";
+export * from "./vigilancia";
