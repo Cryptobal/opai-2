@@ -1,6 +1,6 @@
-import type { TenantTx } from "./transaccion";
+import type { ClaveSiiPublicable } from "@opai/domain";
 
-type ClaveSiiPublicable = "uf" | "utm";
+import type { TenantTx } from "./transaccion";
 
 export type PublicarSiiInput = {
   clave: ClaveSiiPublicable;
