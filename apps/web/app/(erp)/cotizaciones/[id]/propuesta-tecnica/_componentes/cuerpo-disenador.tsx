@@ -55,7 +55,7 @@ export function CuerpoDisenador(p: {
         <BloquesDeCotizacion
           propuestaId={p.propuesta.id}
           bloques={p.propuesta.bloques}
-          onGuardado={() => void recargar(p.ejecutar, p.cotizacionId, p.onPropuesta)}
+          onGuardado={() => recargar(p.ejecutar, p.cotizacionId, p.onPropuesta)}
         />
       ) : (
         <ListaBloquesPropuesta bloques={p.propuesta.bloques} />
