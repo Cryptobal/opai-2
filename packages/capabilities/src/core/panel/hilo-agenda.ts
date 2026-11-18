@@ -94,7 +94,11 @@ export const hiloAgenda = defineCapability({
     }
     if (ctx.autorizar(PERMISOS_CORE.documentosRead)) {
       fuentes.push("documentos");
-      const docs = await documentosVencimientos.handler(ctx, { dias: input.dias }, SIN_DRY);
+      const { items: docs } = await documentosVencimientos.handler(
+        ctx,
+        { dias: input.dias, limite: 200 },
+        SIN_DRY,
+      );
       for (const d of docs) {
         if (!d.venceEn) continue;
         const e = d.entidad;

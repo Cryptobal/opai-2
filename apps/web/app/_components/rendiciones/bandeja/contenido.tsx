@@ -6,6 +6,7 @@ import { pesos } from "../formato";
 import { DetalleRevision } from "./detalle";
 import { FiltrosBandejaForm } from "./filtros";
 import { ListaBandejaRendiciones } from "./lista-bandeja";
+import { ListaBandejaSeleccion } from "./lista-seleccion";
 import type { Bandeja, DetalleBandeja, FiltrosBandeja } from "./tipos";
 import { FILTROS_ESTADO, hrefBandeja } from "./tipos";
 
@@ -23,7 +24,12 @@ export function ContenidoBandeja({
   yoId: string;
 }) {
   const personas = [...new Map(bandeja.items.map((r) => [r.solicitanteId, r.solicitanteNombre ?? "Persona"])).entries()].map(([pid, nombre]) => ({ id: pid, nombre }));
-  const lista = <ListaBandejaRendiciones filtros={filtros} bandeja={bandeja} id={id} />;
+  const lista =
+    filtros.estado === "enviada" ? (
+      <ListaBandejaSeleccion filtros={filtros} rendiciones={bandeja.items} idActiva={id} />
+    ) : (
+      <ListaBandejaRendiciones filtros={filtros} bandeja={bandeja} id={id} />
+    );
   return (
     <>
       <Cabecera titulo="Bandeja del aprobador" subtitulo="Revisa y decide las rendiciones que te tocan." />

@@ -127,8 +127,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.valores_personalizados.get` | `core_valores_personalizados_get` | existe |
 | compartido | `app/_components` | `core.valores_personalizados.set` | `core_valores_personalizados_set` | existe |
 | compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
+| compartido | `app/_components` | `rendiciones.bandeja.aprobar_varias` | `rendiciones_bandeja_aprobar_varias` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.listar` | `rendiciones_bandeja_listar` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.obtener` | `rendiciones_bandeja_obtener` | existe |
+| compartido | `app/_components` | `rendiciones.bandeja.rechazar_varias` | `rendiciones_bandeja_rechazar_varias` | existe |
 | compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.anular` | `rendiciones_lotes_anular` | existe |

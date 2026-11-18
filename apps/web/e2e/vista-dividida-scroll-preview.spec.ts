@@ -8,39 +8,31 @@ test.describe("@preview vista dividida: scroll por columna", () => {
   test.skip(!E2E_PASSWORD, "Falta E2E_PASSWORD");
 
   async function comprobarScrollDividido(page: Page) {
-    await page.waitForSelector('[data-split] > [data-columna="lista"]', { timeout: 60_000 });
-    const medidas = await page.evaluate(() => {
-      const doc = document.documentElement;
-      const lista = document.querySelector('[data-columna="lista"]');
-      const detalle = document.querySelector('[data-columna="detalle"]');
-      return {
-        docAlto: doc.scrollHeight,
+    // Next puede conservar la ruta anterior oculta: medir solo la ficha visible, no el índice.
+    const split = page.locator('[data-split]:not([data-sin-detalle])').filter({ visible: true });
+    await expect(split).toHaveCount(1, { timeout: 60_000 });
+    const lista = split.locator(':scope > [data-columna="lista"]');
+    const detalle = split.locator(':scope > [data-columna="detalle"]');
+    await expect(lista).toBeVisible();
+    await expect(detalle).toBeVisible();
+    // Esperar el layout de la ficha sin relajar el umbral de 2 px.
+    await expect(async () => {
+      const medidas = await split.evaluate((el) => ({
+        docAlto: document.documentElement.scrollHeight,
         ventana: window.innerHeight,
-        lista: lista
-          ? {
-              scroll: lista.scrollHeight,
-              alto: lista.clientHeight,
-              overflowY: getComputedStyle(lista).overflowY,
-            }
-          : null,
-        detalle: detalle
-          ? {
-              scroll: detalle.scrollHeight,
-              alto: detalle.clientHeight,
-              overflowY: getComputedStyle(detalle).overflowY,
-            }
-          : null,
-      };
-    });
-    expect(medidas.docAlto).toBeLessThanOrEqual(medidas.ventana + 2);
-    expect(medidas.lista?.overflowY).toBe("auto");
-    expect(medidas.detalle?.overflowY).toBe("auto");
+        lista: getComputedStyle(el.querySelector(':scope > [data-columna="lista"]')!).overflowY,
+        detalle: getComputedStyle(el.querySelector(':scope > [data-columna="detalle"]')!).overflowY,
+      }));
+      expect(medidas.docAlto).toBeLessThanOrEqual(medidas.ventana + 2);
+      expect(medidas.lista).toBe("auto");
+      expect(medidas.detalle).toBe("auto");
+    }).toPass({ timeout: 15_000 });
     for (const nombre of ["lista", "detalle"] as const) {
-      const columna = page.locator(`[data-split] > [data-columna="${nombre}"]`);
+      const columna = split.locator(`:scope > [data-columna="${nombre}"]`);
       const desplazamiento = await columna.evaluate((el) => {
         if (el.scrollHeight <= el.clientHeight) return null;
         const otra = el.parentElement?.querySelector(
-          `[data-columna]:not([data-columna="${el.getAttribute("data-columna")}"])`,
+          `:scope > [data-columna]:not([data-columna="${el.getAttribute("data-columna")}"])`,
         );
         const antes = { propio: el.scrollTop, otra: otra?.scrollTop, documento: window.scrollY };
         el.scrollTop = antes.propio === 0 ? 1 : 0;

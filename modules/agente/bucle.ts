@@ -6,7 +6,12 @@ import type { Mensaje, RespuestaConversacion, SolicitudConversacion } from "@opa
 import { herramientasDelAgente } from "./herramientas";
 import { GUIA, esquemasADemanda, indiceDelAgente } from "./herramientas-demanda";
 import { type Paso, type Plan } from "./plan";
-import { enlazarTitulos, type Referencia } from "./referencias";
+import {
+  debeDibujarFichas,
+  enlazarTitulos,
+  textoRespaldoFichas,
+  type Referencia,
+} from "./referencias";
 import { sistema } from "./sistema";
 import { aplicarLlamadas } from "./turno-herramientas";
 
@@ -53,7 +58,9 @@ export async function prepararTurno(
   const cerrar = (): Plan => {
     const lista = [...refs.values()];
     plan.referencias = lista;
-    plan.texto = enlazarTitulos(plan.texto, lista);
+    let out = enlazarTitulos(plan.texto, lista);
+    if (debeDibujarFichas(texto, lista)) out = textoRespaldoFichas(out, lista);
+    plan.texto = out;
     return plan;
   };
   for (let turno = 0; turno < MAX_PASOS; turno++) {

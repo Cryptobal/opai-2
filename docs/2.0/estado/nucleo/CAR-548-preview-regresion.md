@@ -24,3 +24,12 @@
 - Chromium local no pudo arrancar por restricción de sockets del entorno; no se acredita ejecución visual ni CSS con esta prueba de DOM.
 - Pendientes: gate completo, ejecución `preview-e2e` con empresa ficticia `qa-e2e` y revisión de capturas. No se usaron credenciales, sesiones ni datos reales, no se sembró ni modificó ninguna base.
 - CAR-548 ya existe y sigue abierto; esta reparación de su prueba no cierra el ticket de producto ni CAR-664.
+
+## Primera ejecución remota y revisión
+
+- PR #1087, SHA `ec2944ba47d2ebb9e7bec52da661bb0897c51d32`, run [44391996113](https://github.com/opai-cl/opai-2/actions/runs/44391996113): 367 passed, 55 skipped, 13 failed. Los seis casos de scroll fallaron, no se declara resuelto.
+- El selector global encuentra dos listas tras navegar (la ficha y el índice retenido). La medición se acota ahora al único split visible con detalle y a sus hijos directos, sin `first()` ni omisiones.
+- Algunos intentos midieron documento de 1291 px para ventana de 860. Se espera hasta 15 segundos la misma condición original de altura/overflow para permitir el layout; si persiste el exceso, sigue fallando. No está probado que la altura excesiva sea solo transitoria.
+- El artefacto contiene capturas finales, no los `test-failed-1.png` ni `error-context.md` referenciados en logs. Pendiente evidencia visual de estos fallos.
+- Todos los runs del SHA terminaron. Antes de suspender se verificaron 0 consultas activas y 0 transacciones abiertas (solo contadores de pg_stat_activity). Compute del preview suspendido e idle confirmado.
+- Gate agregado CI aprobó, pero el job real test:db se omitió. No se solicitó cola. Nueva ejecución y revisión independiente pendientes.
