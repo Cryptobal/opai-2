@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as UtilMod from "./util";
+
 const ejecutar = vi.fn();
 vi.mock("@opai/capabilities", () => ({
   executeCapability: (...a: unknown[]) => ejecutar(...a),
 }));
 vi.mock("./util", async (importOriginal) => {
-  const original = await importOriginal<typeof import("./util")>();
+  const original = await importOriginal<typeof UtilMod>();
   return { ...original, hoyIso: () => "2026-11-18" };
 });
 
