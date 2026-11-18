@@ -303,6 +303,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.puestos.confirmar` | `cpq_puestos_confirmar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.contexto.sugerir_seccion` | `comercial_contexto_sugerir_seccion` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.decidir_envio` | `comercial_seguimientos_decidir_envio` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
@@ -327,15 +328,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.agregar_esquema` | `cpq_lineas_agregar_esquema` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.sync_servicio` | `cpq_propuestas_tecnica_sync_servicio` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.update` | `cpq_propuestas_tecnica_update` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.sueldos_referencia.list` | `cpq_sueldos_referencia_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.parametros` | `cpq_versiones_parametros` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.sync_servicio` | `cpq_propuestas_tecnica_sync_servicio` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.update` | `cpq_propuestas_tecnica_update` | existe |
 | compartido | `app/(erp)/cpq/biblioteca/_componentes` | `cpq.biblioteca_bloques.list` | `cpq_biblioteca_bloques_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.create` | `core_contactos_create` | existe |
@@ -1181,7 +1182,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
 - `comercial.contexto.listar`
-- `comercial.contexto.sugerir_seccion`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
 - `comercial.negocios.alertas`
@@ -1253,7 +1253,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.motor.simular`
 - `cpq.propuestas_tecnica.capitulo_guardar`
 - `cpq.propuestas_tecnica.capitulos_list`
-- `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
