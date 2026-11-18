@@ -6,6 +6,7 @@ acceso_intentos_listar
 acceso_listas_agregar
 acceso_listas_listar
 acceso_listas_quitar
+acceso_portal_registros_listar
 acceso_prerregistros_cancelar
 acceso_prerregistros_crear
 acceso_prerregistros_get
