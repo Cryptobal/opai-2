@@ -43,7 +43,9 @@ test.describe("@preview cpq: plantillas HTML en Marca y plantillas", () => {
     const limpio = HTML.replace("<p>{{cuenta.inventado}}</p><script>alert(1)</script>", "<p>Servicio de seguridad</p>");
     await archivo.setInputFiles({ name: "propuesta.html", mimeType: "text/html", buffer: Buffer.from(limpio) });
     await revisar.click();
-    await expect(page.getByTitle("Vista previa del HTML subido")).toBeVisible();
+    // La revisión valida el HTML; la vista se genera después de elegir la cotización.
+    await expect(page.getByText("Elige una cotización para ver la plantilla con datos reales.")).toBeVisible();
+    await expect(page.getByTitle("Vista previa del HTML subido")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Guardar plantilla HTML" })).toBeEnabled();
     await expect(page.getByLabel("Marcadores reconocidos")).toContainText("{{cuenta.nombre}}");
     const vistaCpq = page.getByLabel("Ver con la cotización");

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { leerPdf } from "../../../modules/cpq/persistencia/pdf/prueba-pdf";
 import { crearNegocio, irANuevaCotizacion } from "./negocios-ayuda";
-import { capturar } from "./preview";
+import { capturar, EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-575: un solo motor de documento. El PDF de la propuesta lleva el membrete, el índice y las secciones activas del
@@ -32,7 +32,8 @@ test.describe("@preview cpq: secciones de la propuesta en el PDF", () => {
   test("el PDF trae las secciones activas, numeradas y en el orden del armador", async ({ page }, info) => {
     await capturarPdfs(page);
     await entrar(page);
-    await crearNegocio(page, `Secciones ${info.project.name} ${Date.now()}`);
+    await crearNegocio(page, `Secciones ${info.project.name} ${Date.now()}`, [],
+      EN_PREVIEW ? "Cliente ficticio QA E2E (cesión)" : undefined);
     await irANuevaCotizacion(page);
     await page.getByLabel("Título", { exact: true }).fill("Propuesta con secciones");
     await page.getByRole("button", { name: "Revisar cotización" }).click();

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { leerPdf } from "../../../modules/cpq/persistencia/pdf/prueba-pdf";
 import { crearNegocio, irANuevaCotizacion } from "./negocios-ayuda";
-import { capturar } from "./preview";
+import { capturar, EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-584 PR2: plantilla base OPAI nivel agencia (portada + secciones internas en el PDF).
@@ -25,7 +25,8 @@ test.describe("@preview cpq: plantilla base OPAI (CAR-584)", () => {
       };
     });
     await entrar(page);
-    await crearNegocio(page, `Base OPAI ${Date.now()}`);
+    await crearNegocio(page, `Base OPAI ${Date.now()}`, [],
+      EN_PREVIEW ? "Cliente ficticio QA E2E (cesión)" : undefined);
     await irANuevaCotizacion(page);
     await page.getByLabel("Título", { exact: true }).fill("Propuesta base OPAI");
     await page.getByRole("button", { name: "Revisar cotización" }).click();
