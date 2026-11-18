@@ -605,6 +605,7 @@ pauta_ausencias_listar
 pauta_ausencias_registrar
 pauta_cobertura_confirmar
 pauta_cobertura_deshacer
+pauta_dotacion_listar
 pauta_excepciones_anular
 pauta_excepciones_crear
 pauta_exportar
