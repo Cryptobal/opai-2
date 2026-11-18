@@ -53,8 +53,8 @@ export function SplitScreen(props: Props) {
           : props.incrustado
             ? "overflow-hidden rounded-lg border border-border md:h-[440px]"
             : uno
-              ? "lg:-mx-[var(--lienzo-x,1.5rem)] lg:-mt-[var(--lienzo-t,1.25rem)] lg:-mb-[var(--lienzo-b,2rem)] lg:h-[calc(100dvh-var(--lienzo-resto,60px))] xl:-mx-[var(--lienzo-x,2rem)]"
-              : "md:-mx-[var(--lienzo-x,1.5rem)] md:-mt-[var(--lienzo-t,1.25rem)] md:-mb-[var(--lienzo-b,2rem)] md:h-[calc(100dvh-var(--lienzo-resto,60px))] xl:-mx-[var(--lienzo-x,2rem)]",
+              ? "lg:-mx-[var(--lienzo-x,1.5rem)] lg:-mt-[var(--lienzo-t,1.25rem)] lg:-mb-[var(--lienzo-b,2rem)] lg:min-h-0 lg:max-h-full lg:flex-1 lg:overflow-hidden xl:-mx-[var(--lienzo-x,2rem)]"
+              : "md:-mx-[var(--lienzo-x,1.5rem)] md:-mt-[var(--lienzo-t,1.25rem)] md:-mb-[var(--lienzo-b,2rem)] md:min-h-0 md:max-h-full md:flex-1 md:overflow-hidden xl:-mx-[var(--lienzo-x,2rem)]",
       )}
     >
       <section
@@ -63,8 +63,8 @@ export function SplitScreen(props: Props) {
         className={cn(
           "min-w-0 flex-col",
           uno
-            ? "lg:flex lg:flex-none lg:overflow-y-auto lg:border-r lg:border-border lg:bg-surface lg:w-[360px]"
-            : "md:flex md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
+            ? "lg:flex lg:min-h-0 lg:flex-none lg:overflow-y-auto lg:border-r lg:border-border lg:bg-surface lg:w-[360px]"
+            : "md:flex md:min-h-0 md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
           !uno && (props.contenido ? "md:w-64" : "md:w-[360px]"),
           !props.contenido && anchoXl === 400 && "xl:w-[400px]",
           telefono === "lista" ? "flex w-full" : "hidden",
@@ -78,8 +78,8 @@ export function SplitScreen(props: Props) {
         className={cn(
           "min-w-0 flex-1 flex-col",
           uno
-            ? "lg:flex lg:overflow-y-auto lg:px-6 lg:py-5"
-            : "md:flex md:overflow-y-auto md:px-6 md:py-5",
+            ? "lg:flex lg:min-h-0 lg:overflow-y-auto lg:px-6 lg:py-5"
+            : "md:flex md:min-h-0 md:overflow-y-auto md:px-6 md:py-5",
           telefono === "detalle" ? "flex" : uno ? "hidden lg:flex" : "hidden",
         )}
       >
@@ -102,7 +102,7 @@ export function SplitScreen(props: Props) {
 /** Herramientas sobre la lista de un `SplitScreen`: búsqueda y chips. */
 export function HerramientasLista({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-2.5 pb-3 md:border-b md:border-border md:px-4 md:pt-3">
+    <div className="sticky top-0 z-10 flex flex-col gap-2.5 bg-surface pb-3 md:border-b md:border-border md:px-4 md:pt-3">
       {children}
     </div>
   );
