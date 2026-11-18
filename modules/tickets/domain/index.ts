@@ -7,7 +7,6 @@ export type EstadoTicket = (typeof ESTADOS_TICKET)[number];
 
 /** p1 (más urgente) a p4 (extracción de 1.0, rondas-y-tickets.md §2). */
 export const PRIORIDADES_TICKET = ["p1", "p2", "p3", "p4"] as const;
-type PrioridadTicket = (typeof PRIORIDADES_TICKET)[number];
 
 /** Estados desde los que el ticket sigue vivo (acepta comentarios y cambios de dueño). */
 export const ESTADOS_VIVOS: readonly EstadoTicket[] = ["abierto", "en_curso", "resuelto"];

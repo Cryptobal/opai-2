@@ -16,4 +16,9 @@
 
 Tests finanzas/capabilities en verde.
 
+## Corrección de lint del 18-nov-2026
+
+Se elimina el alias local `PrioridadTicket`, sin referencias, que quedó al retirar su exportación.
+Se conserva `PRIORIDADES_TICKET` y no cambian estados, transiciones ni comportamiento en ejecución.
+
 Fixes CAR-438
