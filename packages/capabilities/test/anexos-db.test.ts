@@ -1,6 +1,6 @@
 // Anexo de contrato (Brief 07b, PR 4) contra Postgres real: aislamiento por tenant, permisos
 // (D8/D13), gobierno de agentes (soloPersonas) y el documento final con SHA-256 y bitácora.
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { digitoVerificador } from "@opai/domain";
@@ -13,9 +13,6 @@ import { destinoVinculo } from "./vinculo-fixture";
 
 // CAR-58: el texto legal base ya está en el repositorio; el guard de `esEjemplo` se prueba en
 // `anexos-plantilla-ejemplo.test.ts`.
-
-const cuerpoRutEmpresa = String(10_000_000 + Math.floor(Math.random() * 80_000_000));
-const rutEmpresaPrueba = `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`;
 
 describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
   let e: Entorno;
@@ -91,11 +88,13 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
   }
 
   beforeAll(async () => {
+    // El RUT es único en toda la base, también entre suites y corridas.
+    const cuerpoRutEmpresa = String(randomInt(10_000_000, 90_000_000));
     await e.admin.perfilEmpresa.create({
       data: {
         tenantId,
         razonSocial: "Empresa Prueba SpA",
-        rut: rutEmpresaPrueba,
+        rut: `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`,
         calle: "Av. Providencia 100",
         comuna: "Santiago",
         representanteNombre: "Ana Representante",

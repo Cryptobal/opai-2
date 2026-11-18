@@ -2,7 +2,7 @@
 // legítima de la persona, documento sin columnas vacías en un cambio de capa, y el documento del
 // anexo fuera de matriz, vencimientos, versiones, actividad, exportación y avisos para quien no
 // tiene `anexos.read` ni `estructuras.read_sensible`.
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { digitoVerificador } from "@opai/domain";
@@ -14,9 +14,6 @@ import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
 import { destinoVinculo } from "./vinculo-fixture";
 
 // CAR-58: aprobación con texto legal base (PDF); el guard de ejemplo en `anexos-plantilla-ejemplo.test.ts`.
-
-const cuerpoRutEmpresa = String(10_000_000 + Math.floor(Math.random() * 80_000_000));
-const rutEmpresaPrueba = `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`;
 
 type Fila = { concepto: string; antes: string; despues: string };
 /** Intl usa espacio duro («$\u00a0700.000») según la versión de ICU del runner. */
@@ -62,11 +59,13 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
     await e.admin.membership.create({
       data: { tenantId, userId, rol: "owner", portales: ["erp"] },
     });
+    // El RUT es único en toda la base, también entre suites y corridas.
+    const cuerpoRutEmpresa = String(randomInt(10_000_000, 90_000_000));
     await e.admin.perfilEmpresa.create({
       data: {
         tenantId,
         razonSocial: "Empresa Prueba SpA",
-        rut: rutEmpresaPrueba,
+        rut: `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`,
         calle: "Av. Providencia 100",
         comuna: "Santiago",
         representanteNombre: "Ana Representante",
