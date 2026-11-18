@@ -183,12 +183,31 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/central/_componentes` | `central.alertas.listar` | `central_alertas_listar` | existe |
 | compartido | `app/(erp)/central/_componentes` | `central.alertas.obtener` | `central_alertas_obtener` | existe |
 | compartido | `app/(erp)/central/_componentes` | `central.estado` | `central_estado` | existe |
+| compartido | `app/(erp)/central/_componentes` | `central.propuestas.listar` | `central_propuestas_listar` | existe |
+| compartido | `app/(erp)/central/_componentes` | `central.turno.estado` | `central_turno_estado` | existe |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.devolver` | — | excepción |
 | compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.escalar` | `central_alertas_escalar` | existe |
 | compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.falsa_alarma` | `central_alertas_falsa_alarma` | existe |
 | compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.hacerse_cargo` | — | excepción |
 | compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.posponer` | `central_alertas_posponer` | existe |
 | compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.reabrir` | `central_alertas_reabrir` | existe |
 | compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.resolver` | `central_alertas_resolver` | existe |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.alertas.tomar` | — | excepción |
+| compartido | `app/(erp)/central/alertas/[id]/_componentes` | `central.propuestas.resolver` | — | excepción |
+| compartido | `app/(erp)/central/nueva-alerta/_componentes` | `central.alertas.abrir` | `central_alertas_abrir` | existe |
+| compartido | `app/(erp)/central/nueva-alerta/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.agente.pausar` | `central_agente_pausar` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.agente.reanudar` | — | excepción |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.alertas.listar` | `central_alertas_listar` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.propuestas.listar` | `central_propuestas_listar` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.turno.abrir` | — | excepción |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.turno.aceptar` | — | excepción |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.turno.cerrar` | — | excepción |
+| compartido | `app/(erp)/central/turno/_componentes` | `central.turno.entregar` | — | excepción |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.config.set` | `core_config_set` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/central/turno/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.schema` | `core_config_schema` | existe |
@@ -485,6 +504,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.listar` | `pauta_dotacion_listar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
@@ -649,6 +669,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/central` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.set_autonomia` | — | excepción |
@@ -1039,6 +1060,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
+| `core.ver_como.iniciar` | Solo personas: «ver como» es una vista de pantalla de quien tiene la sesión (CAR-528); un agente ya lee esos datos con sus propias capacidades. |
+| `core.ver_como.terminar` | Solo personas: cierra la vista «ver como» de quien tiene la sesión (CAR-528). |
 | `core.webhooks.destino_actualizar` | Solo personas: cambiar la dirección de un destino redirige los eventos de la empresa (ADR-032). |
 | `core.webhooks.destino_crear` | Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032). |
 | `core.webhooks.destino_eliminar` | Solo personas: gobierna una integración de la empresa (ADR-032). |
@@ -1077,15 +1100,15 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.rostro.iniciar_vida` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
-| `central.agente.reanudar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
-| `central.alertas.devolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.agente.reanudar` | `app/(erp)/central/turno/_componentes` | no | reservada a personas |
+| `central.alertas.devolver` | `app/(erp)/central/alertas/[id]/_componentes` | no | reservada a personas |
 | `central.alertas.hacerse_cargo` | `app/(erp)/central/alertas/[id]/_componentes` | no | reservada a personas |
-| `central.alertas.tomar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
-| `central.propuestas.resolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
-| `central.turno.abrir` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
-| `central.turno.aceptar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
-| `central.turno.cerrar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
-| `central.turno.entregar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.alertas.tomar` | `app/(erp)/central/alertas/[id]/_componentes` | no | reservada a personas |
+| `central.propuestas.resolver` | `app/(erp)/central/alertas/[id]/_componentes` | no | reservada a personas |
+| `central.turno.abrir` | `app/(erp)/central/turno/_componentes` | no | reservada a personas |
+| `central.turno.aceptar` | `app/(erp)/central/turno/_componentes` | no | reservada a personas |
+| `central.turno.cerrar` | `app/(erp)/central/turno/_componentes` | no | reservada a personas |
+| `central.turno.entregar` | `app/(erp)/central/turno/_componentes` | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
@@ -1146,6 +1169,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | `/configuracion/usuarios` | no | reservada a personas |
+| `core.ver_como.iniciar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
+| `core.ver_como.terminar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
 | `core.webhooks.destino_actualizar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
 | `core.webhooks.destino_crear` | `/configuracion/agentes/eventos` | no | reservada a personas |
 | `core.webhooks.destino_eliminar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
@@ -1177,8 +1202,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.jornadas.fijar_tipo`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
-- `central.agente.pausar`
-- `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.proponer`
 - `central.avisos.acusar`
@@ -1195,7 +1218,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.propuestas.listar`
 - `central.reglas.guardar`
 - `central.reglas.listar`
-- `central.turno.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`

@@ -1,12 +1,25 @@
 import { ListScreen } from "@opai/ds";
 
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { type Alerta, cargarCola, cargarEstado, ETIQUETA_SEVERIDAD, ordenarCola, SEVERIDADES, VISTAS } from "./_componentes/datos";
+import {
+  type Alerta,
+  cargarCola,
+  cargarEstado,
+  cargarTurnoEstado,
+  ETIQUETA_SEVERIDAD,
+  ordenarCola,
+  SEVERIDADES,
+  VISTAS,
+} from "./_componentes/datos";
+import { CargarMasCola } from "./_componentes/cargar-mas";
+import { ResponsableTurno } from "./_componentes/responsable-turno";
 import { ResumenCentral } from "./_componentes/resumen";
 import { columnasCola, instalacion, TarjetaCola } from "./_componentes/vista-cola";
 
@@ -32,18 +45,43 @@ export default function Central({ searchParams }: Props) {
       completo
       cargar={async () => {
         const p = await leerParametros(searchParams);
-        const [cola, estado] = await Promise.all([cargarCola(p), cargarEstado()]);
-        return { cola, estado };
+        const [cola, estado, turno, usuarios] = await Promise.all([
+          cargarCola(p),
+          cargarEstado(),
+          cargarTurnoEstado(),
+          ejecutarComoUsuario<{ userId: string; nombre: string }[]>("erp", "core.users.list", {}),
+        ]);
+        const nombres = new Map((usuarios.ok ? usuarios.data : []).map((u) => [u.userId, u.nombre] as const));
+        return { cola, estado, turno, nombres };
       }}
+      opciones={() => ({
+        acciones: (
+          <EnlaceBoton href="/central/nueva-alerta" variante="secondary">
+            Abrir alerta
+          </EnlaceBoton>
+        ),
+      })}
     >
-      {({ cola, estado }) => (
+      {({ cola, estado, turno, nombres }) => (
         <ListScreen<Alerta>
-          state={estadoPantalla(cola)}
+          state={estadoPantalla(cola, estado, turno)}
           titulo="Central"
-          subtitulo={estado.ok ? <ResumenCentral estado={estado.data} /> : undefined}
+          subtitulo={
+            estado.ok && turno.ok ? (
+              <span className="flex flex-col gap-1">
+                <ResumenCentral estado={estado.data} />
+                <ResponsableTurno turno={turno.data} nombres={nombres} />
+              </span>
+            ) : undefined
+          }
           filtros={<ChipsFiltro filtros={FILTROS} />}
           paginacion={
-            cola.ok && cola.data.siguiente ? <span>Se muestran las 100 alertas más recientes; filtra por severidad para ver el resto.</span> : undefined
+            cola.ok && cola.data.siguiente ? (
+              <span className="flex flex-wrap items-center gap-3">
+                Hay más alertas en esta vista.
+                <CargarMasCola cursor={cola.data.siguiente} />
+              </span>
+            ) : undefined
           }
           items={ordenarCola(cola.ok ? cola.data.items : [])}
           clave={(a) => a.id}

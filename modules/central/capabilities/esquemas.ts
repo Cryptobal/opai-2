@@ -29,6 +29,7 @@ export const alertaSchema = z.object({
   origen: z.string(),
   pasoActual: z.number().int(),
   atencionPorId: uuidSchema.nullable(),
+  tomadaPorId: uuidSchema.nullable(),
   atencionVenceEn: z.date().nullable(),
   estado: estadoSchema.describe("Estado efectivo: una pospuesta vencida ya vuelve a su estado anterior."),
   pospuestaHasta: z.date().nullable(),
