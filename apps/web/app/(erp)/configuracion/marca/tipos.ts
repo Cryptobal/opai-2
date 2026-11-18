@@ -3,6 +3,10 @@ export type Marca = {
   eslogan: string | null;
   colorPrimario: string | null;
   colorSecundario: string | null;
+  documentoTipografia: string;
+  documentoPiePagina: string | null;
+  documentoCondicionesDefault: string | null;
+  documentoVersion: number;
   logoPrincipalId: string | null;
   logoClaroId: string | null;
   logoOscuroId: string | null;
