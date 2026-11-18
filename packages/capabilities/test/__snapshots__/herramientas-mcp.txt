@@ -581,6 +581,7 @@ nomina_conceptos_actualizar
 nomina_conceptos_crear
 nomina_conceptos_listar
 nomina_costo_proyectado_listar
+nomina_f29_generar
 nomina_f30_1_generar
 nomina_libro_remuneraciones_excel
 nomina_libro_remuneraciones_pdf
