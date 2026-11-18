@@ -1,3 +1,5 @@
+import { mesSiguiente } from "@opai/domain";
+
 // Cuadratura del saldo de una cuenta contra su cartola (CAR-343). Puro: sin base de datos.
 // El ancla es un saldo conocido al cierre de un día (saldo de apertura, saldo que informó el banco o saldo posterior
 // de un movimiento): ya incluye todo lo movido hasta ese día, inclusive. Fechas «aaaa-mm-dd», montos CLP enteros
@@ -32,11 +34,6 @@ export type MesCuadrado = {
 };
 
 const esMes = (mes: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(mes);
-
-export function mesSiguiente(mes: string): string {
-  const [a, m] = mes.split("-").map(Number) as [number, number];
-  return m === 12 ? `${a + 1}-01` : `${a}-${String(m + 1).padStart(2, "0")}`;
-}
 
 /** Último día del mes anterior a `mes`: el corte del saldo inicial. */
 export function cierreMesAnterior(mes: string): string {
