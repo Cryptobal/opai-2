@@ -1,6 +1,7 @@
 import { trabajoAlertasArt45, trabajoAvisoCompensables } from "./alertas-art45";
 import { trabajoVerificarCadenaMarcas } from "./cadena";
 import { consumidorAlertas } from "./consumidor-alertas";
+import { consumidorAlertaGeocerca } from "./alertas-geocerca";
 import { consumidorAvisoCorreccion, consumidorComprobante } from "./consumidores";
 import { consumidorDias, trabajoRecalcularDias } from "./dias";
 import { diasListar, diasResumenPeriodo } from "./dias-capacidades";
@@ -25,7 +26,9 @@ export { ajustesAsistencia } from "./ajustes";
 export { indicadoresAsistencia } from "./indicadores";
 export { PIN_SIMULADO } from "./identidad-registro";
 export const trabajosAsistencia = [trabajoVerificarCadenaMarcas, trabajoVencerCorrecciones, trabajoAlertasArt45, trabajoAvisoCompensables, trabajoRecalcularDias, trabajoSuprimirBiometria];
-export const consumidoresAsistencia = [consumidorComprobante, consumidorAvisoCorreccion, consumidorAvisoContingencia, consumidorDias, consumidorAlertas];
+export const consumidoresAsistencia = [
+  consumidorComprobante, consumidorAlertaGeocerca, consumidorAvisoCorreccion, consumidorAvisoContingencia, consumidorDias, consumidorAlertas,
+];
 export const capacidades = [
   marcasRegistrar, marcasListar, marcasObtener, marcasVerificar,
   correccionesProponer, correccionesListar, correccionesResponder, correccionesVerEnlace, correccionesResponderEnlace,
