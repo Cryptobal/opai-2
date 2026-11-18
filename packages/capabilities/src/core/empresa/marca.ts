@@ -5,8 +5,10 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
-import { definidos, escribirConEvento, textoOpcional } from "../maestros/comun";
+import { textoOpcional } from "../maestros/comun";
 import { perfilDe } from "./empresa";
+import { guardarMarca } from "./marca-escritura";
+import { marcaDocumentoDe, marcaDocumentoInputSchema, tipografiaDocumento } from "./marca-documento";
 
 const LOGOS = ["logoPrincipalId", "logoClaroId", "logoOscuroId", "isotipoId", "faviconId"] as const;
 const color = z
@@ -20,26 +22,33 @@ const marcaSchema = z.object({
   eslogan: z.string().nullable(),
   colorPrimario: z.string().nullable(),
   colorSecundario: z.string().nullable(),
+  documentoTipografia: tipografiaDocumento,
+  documentoPiePagina: z.string().nullable(),
+  documentoCondicionesDefault: z.string().nullable(),
+  documentoVersion: z.number().int(),
   ...Object.fromEntries(LOGOS.map((k) => [k, z.string().nullable()])),
   urls: z.record(z.string(), z.string()).describe("URL pública estable de cada logo cargado."),
 });
 
 const vista = async (ctx: Contexto, p: Partial<Record<string, unknown>> | null) => {
-  const tenant = await ctx.db.tenant.findUnique({
-    where: { id: ctx.tenantId },
-    select: { slug: true },
-  });
+  const [tenant, cpq] = await Promise.all([
+    ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { slug: true } }),
+    ctx.db.cpqMarcaDocumento.findUnique({ where: { tenantId: ctx.tenantId }, select: { version: true } }),
+  ]);
   const urls: Record<string, string> = {};
   for (const k of LOGOS) {
     if (p?.[k])
       urls[k] = `${ctx.servicios.urlBase}/api/marca/${tenant?.slug ?? ""}/${k.replace(/Id$/, "")}`;
   }
   const s = (k: string) => (p?.[k] as string | null | undefined) ?? null;
+  const doc = marcaDocumentoDe(p as Parameters<typeof marcaDocumentoDe>[0]);
   return {
     nombreComercial: s("nombreComercial"),
     eslogan: s("eslogan"),
     colorPrimario: s("colorPrimario"),
     colorSecundario: s("colorSecundario"),
+    ...doc,
+    documentoVersion: cpq?.version ?? 0,
     ...Object.fromEntries(LOGOS.map((k) => [k, s(k)])),
     urls,
   };
@@ -69,7 +78,7 @@ async function validarLogo(ctx: Contexto, id: string) {
 export const marcaGet = defineCapability({
   id: "core.marca.get",
   descripcion:
-    "Marca de la empresa: nombre comercial, eslogan, colores (como dato) y logos con su URL pública para correos, PDF y portales.",
+    "Marca de la empresa: nombre, eslogan, colores, logos y formato de documentos PDF (tipografía, pie y condiciones por defecto).",
   permiso: PERMISOS_CORE.tenantRead,
   input: z.object({}),
   output: marcaSchema,
@@ -81,40 +90,26 @@ export const marcaGet = defineCapability({
 export const marcaUpdate = defineCapability({
   id: "core.marca.update",
   descripcion:
-    "Actualiza la marca: nombre comercial, eslogan, colores #RRGGBB y logos (ids de documentos de imagen ya subidos con core.documentos.*).",
+    "Actualiza la marca: nombre, eslogan, colores #RRGGBB, logos (imágenes con core.documentos.*) y el formato de documentos PDF.",
   permiso: PERMISOS_CORE.marcaManage,
   input: z.object({
     nombreComercial: textoOpcional(120),
     eslogan: textoOpcional(200),
     colorPrimario: color,
     colorSecundario: color,
+    ...marcaDocumentoInputSchema(),
     ...Object.fromEntries(LOGOS.map((k) => [k, z.uuid().nullable().optional()])),
   }),
   output: marcaSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    for (const k of LOGOS) {
-      const id = (input as Record<string, string | null | undefined>)[k];
-      if (id) await validarLogo(ctx, id);
-    }
-    const data = definidos(input as Record<string, string | null | undefined>);
-    const actual = await perfilDe(ctx);
-    if (dryRun) return vista(ctx, { ...actual, ...data });
-    const r = await escribirConEvento(
+    return guardarMarca(
       ctx,
-      {
-        tipo: "core.marca.actualizada",
-        entidadTipo: "perfil_empresa",
-        payload: () => ({ campos: Object.keys(data) }),
-      },
-      (tx) =>
-        tx.perfilEmpresa.upsert({
-          where: { tenantId: ctx.tenantId },
-          create: { ...data, tenantId: ctx.tenantId },
-          update: data,
-        }),
+      input as Record<string, string | null | undefined>,
+      (p) => vista(ctx, p),
+      (id) => validarLogo(ctx, id),
+      dryRun,
     );
-    return vista(ctx, r);
   },
 });
