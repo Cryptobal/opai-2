@@ -98,6 +98,7 @@ export * from "./acceso";
 export * from "./contexto-comercial";
 export * from "./sugerencia-seccion";
 export * from "./qa-aislado";
+export * from "./preview-qa";
 export * from "./aprobaciones/resumen-humano";
 export * from "./aprobaciones/reglas";
 export * from "./webhooks/url";
