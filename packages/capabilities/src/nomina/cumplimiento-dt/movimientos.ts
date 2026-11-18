@@ -1,5 +1,4 @@
 import {
-  ETIQUETA_MOVIMIENTO_MI_DT,
   etiquetaPlazoMiDt,
   formatearFecha,
   formatearRut,
@@ -45,10 +44,6 @@ async function registrosPorClave(ctx: Contexto) {
   return m;
 }
 
-function personaNombre(p: { nombres: string; apellidos: string }) {
-  return `${p.apellidos} ${p.nombres}`.trim();
-}
-
 /** Lista movimientos Mi DT (altas, bajas y anexos) derivados del núcleo más los registros. */
 export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<MovimientoMiDt[]> {
   const registros = await registrosPorClave(ctx);
@@ -75,7 +70,7 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
     if (!hechoAlta) continue;
     const base = {
       personaId: v.personaId,
-      personaNombre: personaNombre(v.persona),
+      personaNombre: `${v.persona.apellidos} ${v.persona.nombres}`.trim(),
       nombres: v.persona.nombres,
       apellidos: v.persona.apellidos,
       rut: formatearRut(rutPersona),
@@ -134,7 +129,7 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
       movimientoTipo: "anexo",
       referenciaId: a.id,
       personaId: a.personaId,
-      personaNombre: personaNombre(a.persona),
+      personaNombre: `${a.persona.apellidos} ${a.persona.nombres}`.trim(),
       nombres: a.persona.nombres,
       apellidos: a.persona.apellidos,
       rut: formatearRut(rutPersona),
@@ -152,17 +147,4 @@ export async function movimientosMiDt(ctx: Contexto, hoyCivil = hoy()): Promise<
 
   const orden = (m: MovimientoMiDt) => (m.registrado ? 1 : 0) * 10_000 + Date.parse(`${m.plazoLimite}T00:00:00.000Z`);
   return items.sort((a, b) => orden(a) - orden(b) || b.hechoEn.localeCompare(a.hechoEn));
-}
-
-export function filaCsv(m: MovimientoMiDt) {
-  return {
-    movimiento: ETIQUETA_MOVIMIENTO_MI_DT[m.movimientoTipo],
-    rut: m.rut,
-    nombres: m.nombres,
-    apellidos: m.apellidos,
-    hechoEn: m.hechoEn,
-    plazoLimite: m.plazoLimite,
-    tipoContrato: m.tipoContrato,
-    referenciaId: m.referenciaId,
-  };
 }
