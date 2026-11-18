@@ -206,24 +206,29 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
   });
 
   it("lista propias: paginación, búsqueda y contadores (CAR-597)", async () => {
+    // Rendidor sin historia: los tests anteriores dejan rendiciones de `rinde`, y aquí los totales son exactos.
+    const rindeLimpio = randomUUID();
+    await e.admin.user.create({ data: { id: rindeLimpio, name: "supervisor", email: `${rindeLimpio.slice(0, 8)}@rend.test` } });
+    await e.admin.membership.create({ data: { tenantId: tenantA, userId: rindeLimpio, rol: "supervisor", portales: ["erp"] } });
+    const limpio = como(rindeLimpio, "supervisor");
     const ids: string[] = [];
     for (let i = 0; i < 55; i++) {
-      const c = await dato<{ id: string }>(await yo("rendiciones.rendiciones.crear", cuerpo({ descripcion: `Lote contador ${i}`, items: [item({ folio: `PC-${i}` })] })));
+      const c = await dato<{ id: string }>(await limpio("rendiciones.rendiciones.crear", cuerpo({ descripcion: `Lote contador ${i}`, items: [item({ folio: `PC-${i}` })] })));
       ids.push(c.id);
     }
     const p1 = await dato<{ items: { id: string }[]; siguiente: string | null; contadores?: Record<string, number> }>(
-      await yo("rendiciones.rendiciones.listar", { alcance: "propias", incluirContadores: true, limite: 50 }),
+      await limpio("rendiciones.rendiciones.listar", { alcance: "propias", incluirContadores: true, limite: 50 }),
     );
     expect(p1.items).toHaveLength(50);
     expect(p1.siguiente).toBeTruthy();
     expect(p1.contadores?.borrador).toBe(55);
     const p2 = await dato<{ items: { id: string }[]; siguiente: string | null }>(
-      await yo("rendiciones.rendiciones.listar", { alcance: "propias", limite: 50, cursor: p1.siguiente! }),
+      await limpio("rendiciones.rendiciones.listar", { alcance: "propias", limite: 50, cursor: p1.siguiente! }),
     );
     expect(p2.items.length).toBe(5);
     expect(p2.siguiente).toBeNull();
     const busca = await dato<{ items: { descripcion: string }[] }>(
-      await yo("rendiciones.rendiciones.listar", { alcance: "propias", q: "Lote contador 7" }),
+      await limpio("rendiciones.rendiciones.listar", { alcance: "propias", q: "Lote contador 7" }),
     );
     expect(busca.items.some((r) => r.descripcion.includes("7"))).toBe(true);
     const todas = await dato<{ items: unknown[] }>(await jefe("rendiciones.rendiciones.listar", { alcance: "todas", limite: 200 }));
