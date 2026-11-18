@@ -5,32 +5,10 @@
 //   SIMPLICIDAD_BASE=local       compara contra el JSON del branch (legado; CAR-641 usa main por defecto)
 //   pnpm simplicidad --detalle     además lista todos los hallazgos
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
+import { BASE, RAMA_BASE, cargarBase, type Cifras, type Metrica } from "./simplicidad/base";
 import { medirDuplicados, medirSinUso } from "./simplicidad/herramientas";
 import { medirLargos } from "./simplicidad/largos";
-
-const BASE = "simplicidad-base.json";
-const RAMA_BASE = process.env.SIMPLICIDAD_RAMA_BASE ?? "origin/main";
-
-/** Línea base: por defecto la de `main` en git (CAR-641); evita conflictos en PRs paralelos. */
-function cargarBase(): Cifras {
-  const local = (): Cifras => JSON.parse(readFileSync(BASE, "utf8")) as Cifras;
-  if (process.env.SIMPLICIDAD_BASE === "local") return local();
-  try {
-    const remota = JSON.parse(
-      execFileSync("git", ["show", `${RAMA_BASE}:${BASE}`], {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      }),
-    ) as Partial<Cifras>;
-    const incompleta = (Object.keys(ETIQUETAS) as Metrica[]).some(
-      (m) => typeof remota[m] !== "number",
-    );
-    return incompleta ? local() : (remota as Cifras);
-  } catch {
-    return local();
-  }
-}
 
 const ETIQUETAS = {
   lineasDuplicadas: "Líneas de código duplicado",
@@ -41,8 +19,6 @@ const ETIQUETAS = {
   dependenciasSinUso: "Dependencias sin uso",
 } as const;
 
-type Metrica = keyof typeof ETIQUETAS;
-type Cifras = Record<Metrica, number>;
 type Detalle = Record<Metrica, string[]>;
 
 function medir(): { cifras: Cifras; detalle: Detalle } {
