@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { cabecerasSeguridad, construirCsp } from "@/lib/cabeceras-seguridad";
+import { HOSTS_IMG_MAPA } from "@/lib/mapa-osm/capas";
 
 const mapa = (cs: { key: string; value: string }[]) =>
   Object.fromEntries(cs.map((c) => [c.key, c.value]));
@@ -50,6 +51,13 @@ describe("cabecerasSeguridad", () => {
     expect(csp).toContain(`img-src 'self' data: blob: ${r2}`);
     expect(csp).toContain(`connect-src 'self' ${r2}`);
     expect(csp).toContain(`frame-src 'self' blob: ${r2}`);
+  });
+
+  it("img-src admite los orígenes de teselas OSM, CARTO y satélite Esri", () => {
+    const csp = construirCsp(false);
+    for (const host of HOSTS_IMG_MAPA) {
+      expect(csp).toContain(host);
+    }
   });
 
   it("'unsafe-eval' solo en desarrollo (refresco de Next); nunca en producción", () => {
