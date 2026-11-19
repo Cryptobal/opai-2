@@ -187,18 +187,19 @@ describe("seguimiento del shell", () => {
       excepciones: [],
       instalaciones: null,
     };
-    expect(datosShell(i, "supervisor").nav.map((x) => x.href)).toEqual(["/supervisor"]);
+    expect(datosShell(i, "supervisor").nav.map((x) => x.href)).toEqual(["/supervisor", "/supervisor/firmas"]);
     i.acceso.excepciones = [
       { permiso: "core:documentos.read", conceder: false },
       { permiso: "core:instalaciones.read", conceder: true },
     ];
     expect(datosShell(i, "supervisor").nav.map((x) => x.href)).toEqual([
       "/supervisor/instalaciones",
+      "/supervisor/firmas",
     ]);
     i.acceso = { permisosRol: ["core:documentos.read"], excepciones: [], instalaciones: null };
-    expect(datosShell(i, "supervisor").nav).toEqual([]);
+    expect(datosShell(i, "supervisor").nav.map((x) => x.href)).toEqual(["/supervisor/firmas"]);
     i.acceso = { permisosRol: ["core:personas.read"], excepciones: [], instalaciones: null };
-    expect(datosShell(i, "supervisor").nav).toEqual([]);
+    expect(datosShell(i, "supervisor").nav.map((x) => x.href)).toEqual(["/supervisor/firmas"]);
   });
 
   it("permisos de plataforma dependen del rol global, no del rol del tenant", () => {

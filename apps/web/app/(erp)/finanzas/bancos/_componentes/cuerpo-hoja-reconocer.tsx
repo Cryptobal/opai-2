@@ -2,6 +2,7 @@ import { Alerta, Segmentado } from "@opai/ds";
 
 import type { MovimientoBanco } from "./bancos-tipos";
 import { BuscarFactura } from "./buscar-factura";
+import { ListaLotesRendicion, type LoteRendicionSugerido } from "./lista-lotes-rendicion";
 import { ListaSugerenciasReconocer, type SugerenciaReconocer } from "./lista-sugerencias-reconocer";
 import { PanelFilaFlujo } from "./panel-fila-flujo";
 import { PanelProrrateo } from "./panel-prorrateo";
@@ -13,6 +14,7 @@ export function CuerpoHojaReconocer({
   esConciliado,
   error,
   sugerencias,
+  lotesRendiciones,
   pendiente,
   elegidas,
   onElegidas,
@@ -22,6 +24,7 @@ export function CuerpoHojaReconocer({
   esConciliado: boolean;
   error: string | null;
   sugerencias: SugerenciaReconocer[];
+  lotesRendiciones: LoteRendicionSugerido[];
   pendiente: boolean;
   elegidas: Elegida[];
   onElegidas: (e: Elegida[]) => void;
@@ -62,6 +65,7 @@ export function CuerpoHojaReconocer({
         />
       ) : (
         <>
+          {movimiento.monto < 0 ? <ListaLotesRendicion lotes={lotesRendiciones} /> : null}
           <Alerta tono="info" titulo="Un abono puede pagar varias facturas">
             Agrega los documentos y reparte el monto. No se marca nada como pagado hasta que
             confirmes.

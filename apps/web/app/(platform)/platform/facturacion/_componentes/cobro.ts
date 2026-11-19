@@ -93,7 +93,7 @@ export type EntradaCatalogo = {
   version: number;
 };
 
-export type PruebaCobro = {
+type PruebaCobro = {
   moduloId: string;
   nombre: string;
   pruebaHasta: string;

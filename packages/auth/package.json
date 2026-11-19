@@ -18,6 +18,7 @@
     "seed:qa-finanzas-usuarios": "tsx scripts/seed-qa-finanzas-usuarios.ts",
     "seed:rendiciones-r3-e2e": "tsx scripts/seed-rendiciones-r3-e2e.ts",
     "seed:asistencia-e2e-usuario": "tsx scripts/seed-asistencia-e2e-usuario.ts",
+    "seed:qa-e2e-rendiciones": "tsx scripts/seed-qa-e2e-rendiciones.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -35,7 +36,7 @@
     "@better-auth/utils": "0.5.1",
     "@types/react": "^19",
     "dotenv": "^18.0.9",
-    "next": "16.4.2",
+    "next": "16.4.5",
     "react": "19.3.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",

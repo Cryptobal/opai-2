@@ -15,6 +15,7 @@ import {
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
   trabajoPruebasGratis,
+  trabajoVigilanciaRondas,
   trabajosComercial,
   trabajosDesempeno,
   consumidoresDesempeno,
@@ -51,6 +52,7 @@ export function asegurarRegistro(): void {
     ...trabajosCentral,
     trabajoCobrosMesAnterior,
     trabajoCobrosPruebas,
+    trabajoVigilanciaRondas,
   trabajoPruebasGratis,
   ]);
   registrarConsumidores([
