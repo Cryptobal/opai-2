@@ -1,7 +1,7 @@
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { POR_PAGINA } from "../../../personas/_componentes/datos";
+import { POR_PAGINA } from "@/app/_components/maestros/paginacion-cursor";
 import type { Visita } from "./tipos";
 
 /**
