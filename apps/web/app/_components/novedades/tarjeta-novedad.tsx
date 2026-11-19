@@ -3,7 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-import { Badge, Button, SeccionTarjeta } from "@opai/ds";
+import { Badge, Button, Enlace, SeccionTarjeta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
@@ -61,14 +61,9 @@ export function TarjetaNovedad({
           {item.pr != null ? (
             <>
               <span aria-hidden>·</span>
-              <a
-                href={`${URL_PR_NOVEDAD}/${item.pr}`}
-                className="underline-offset-2 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Enlace href={`${URL_PR_NOVEDAD}/${item.pr}`} variante="fila" className="min-h-0 text-inherit">
                 PR #{item.pr}
-              </a>
+              </Enlace>
             </>
           ) : null}
           {item.car ? (
