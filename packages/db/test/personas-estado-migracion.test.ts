@@ -27,7 +27,7 @@ describe.skipIf(!urlPropietario)("migración estados persona (CAR-674)", () => {
         .sort();
       for (const m of previas) await pg.query(await sql(m));
       await pg.query(
-        `INSERT INTO core.tenants (id, nombre, slug, estado) VALUES ('${randomUUID()}', 'T', 't', 'activo')`,
+        `INSERT INTO core.tenants (id, slug, nombre, vertical, estado, updated_at) VALUES ('${randomUUID()}', 't', 'T', 'seguridad', 'activo', now())`,
       );
       const tenantId = (await pg.query(`SELECT id FROM core.tenants LIMIT 1`)).rows[0].id;
       await pg.query(
