@@ -27,14 +27,16 @@ describe.skipIf(!urlPropietario)("migración estados persona (CAR-674)", () => {
         .sort();
       for (const m of previas) await pg.query(await sql(m));
       await pg.query(
-        `INSERT INTO core.tenants (id, slug, nombre, vertical, estado, updated_at) VALUES ('${randomUUID()}', 't', 'T', 'seguridad', 'activo', now())`,
+        `INSERT INTO core.tenants (id, slug, nombre, vertical, estado, created_at, updated_at)
+         VALUES ($1, $2, 'T', 'seguridad', 'activo', now(), now())`,
+        [randomUUID(), `t-${randomUUID().slice(0, 8)}`],
       );
       const tenantId = (await pg.query(`SELECT id FROM core.tenants LIMIT 1`)).rows[0].id;
       await pg.query(
-        `INSERT INTO core.personas (id, tenant_id, nombres, apellidos, rut, estado) VALUES
-         ('${randomUUID()}', $1, 'A', 'Uno', '11111111-1', 'activa'),
-         ('${randomUUID()}', $1, 'B', 'Dos', '22222222-2', 'inactiva')`,
-        [tenantId],
+        `INSERT INTO core.personas (id, tenant_id, nombres, apellidos, rut, estado, created_at, updated_at) VALUES
+         ($2, $1, 'A', 'Uno', '11111111-1', 'activa', now(), now()),
+         ($3, $1, 'B', 'Dos', '22222222-2', 'inactiva', now(), now())`,
+        [tenantId, randomUUID(), randomUUID()],
       );
       await pg.query(await sql(MIGRACION));
       const rows = await pg.query(`SELECT estado FROM core.personas ORDER BY rut`);
