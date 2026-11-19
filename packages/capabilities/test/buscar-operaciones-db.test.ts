@@ -70,7 +70,7 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Operaciones (CAR-404)
   it("con «ver todos», encuentra los tickets de la empresa por asunto, con tipo y estado, y nada de otra", async () => {
     const items = await buscar(ctx(u.ger, "gerente", t.a), "zafiro", "tickets");
     expect(items?.map((x) => x.id).sort()).toEqual([r["tPide"], r["tOtro"]].sort());
-    expect(items?.find((x) => x.id === r["tPide"])).toEqual({ id: r["tPide"], titulo: "Cambio de turno Zafiro", detalle: "Consulta · Abierto", href: `/tickets/${r["tPide"]}` });
+    expect(items?.find((x) => x.id === r["tPide"])).toEqual({ id: r["tPide"], titulo: "Cambio de turno Zafiro", detalle: `${r["tPide"]!.slice(0, 8).toUpperCase()} · Consulta · Abierto`, href: `/tickets/${r["tPide"]}` });
     expect(JSON.stringify(items)).not.toContain(r["tBeta"]!);
   });
 
