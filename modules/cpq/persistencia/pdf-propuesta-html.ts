@@ -57,6 +57,9 @@ function dibujar(h: Hoja, b: BloqueHtmlPdf): void {
       h.espacio(8);
       return;
     }
+    case "salto":
+      h.nueva();
+      return;
     case "regla":
       h.espacio(4);
       h.regla(LINEA, 0.6);
@@ -76,7 +79,15 @@ export async function renderPdfPropuestaHtml(i: EntradaPdfPropuestaHtml): Promis
   doc.setProducer("OPAI");
   const h = new Hoja(doc, await incrustarFuentes(doc), acentoDeMarca(i.marca.colorPrimario));
   await membrete(h, i.marca, i.logo, { etiqueta: "Propuesta técnica", codigo: i.codigo, detalle: i.fecha });
-  for (const b of bloquesDeHtml(i.html)) dibujar(h, b);
+  let saltoPendiente = false;
+  let contenido = false;
+  for (const b of bloquesDeHtml(i.html)) {
+    if (b.t === "salto") { saltoPendiente = contenido; continue; }
+    if (saltoPendiente) h.nueva();
+    saltoPendiente = false;
+    dibujar(h, b);
+    contenido = true;
+  }
   const nombre = i.marca.nombreComercial ?? i.marca.razonSocial ?? "";
   h.cerrar({ pie: i.marca.piePagina ?? `${nombre} · ${i.codigo}`, marcaAgua: i.borrador ? "BORRADOR" : null });
   return doc.save();

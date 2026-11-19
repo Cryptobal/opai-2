@@ -14,7 +14,8 @@ export type BloqueHtmlPdf =
   | { t: "parrafo"; texto: string; color: string | null }
   | { t: "item"; marca: string; texto: string }
   | { t: "tabla"; filas: FilaHtmlPdf[] }
-  | { t: "regla" };
+  | { t: "regla" }
+  | { t: "salto" };
 
 const TITULO = /^h([1-6])$/;
 const PARRAFOS = new Set(["p", "blockquote", "address", "pre", "figcaption", "dt", "dd", "caption"]);
@@ -29,6 +30,7 @@ const colorDe = (el: Elemento) => COLOR.exec(el.attrs.find((a) => a.name === "st
 function textoDe(n: Nodo): string {
   if (n.nodeName === "#text") return "value" in n ? n.value : "";
   if (!esElemento(n)) return "";
+  if (["style", "script", "template"].includes(n.tagName)) return "";
   if (n.tagName === "br") return "\n";
   return n.childNodes.map(textoDe).join("");
 }
@@ -54,6 +56,7 @@ export function bloquesDeHtml(html: string): BloqueHtmlPdf[] {
   };
   const bloque = (el: Elemento) => {
     const tag = el.tagName;
+    if (["style", "script", "template"].includes(tag)) return;
     const nivel = TITULO.exec(tag)?.[1];
     const texto = () => limpio(textoDe(el));
     if (nivel) out.push({ t: "titulo", nivel: Number(nivel), texto: texto(), color: colorDe(el) });
@@ -72,10 +75,13 @@ export function bloquesDeHtml(html: string): BloqueHtmlPdf[] {
         continue;
       }
       vaciar();
+      const estilo = n.attrs.find((a) => a.name === "style")?.value ?? "";
+      if (/(?:^|;)\s*(?:page-break-before|break-before)\s*:\s*(?:always|page)\s*(?:;|$)/i.test(estilo)) out.push({ t: "salto" });
       bloque(n);
+      if (/(?:^|;)\s*(?:page-break-after|break-after)\s*:\s*(?:always|page)\s*(?:;|$)/i.test(estilo)) out.push({ t: "salto" });
     }
     vaciar();
   };
   recorrer(parseFragment(html).childNodes);
-  return out.filter((b) => b.t === "regla" || (b.t === "tabla" ? b.filas.length > 0 : b.texto !== ""));
+  return out.filter((b) => b.t === "regla" || b.t === "salto" || (b.t === "tabla" ? b.filas.length > 0 : b.texto !== ""));
 }
