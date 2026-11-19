@@ -8,6 +8,16 @@ import { pasarProteccionDeVercel } from "./preview";
 // crudo que siembra `packages/auth/scripts/seed-e2e-mfa.ts`. No es un secreto real.
 export const E2E_EMAIL = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 export const E2E_PASSWORD = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
+const QA_GERENTE_EMAIL = (process.env.E2E_QA_GERENTE_EMAIL ?? "r3-gerente@opai.cl").toLowerCase();
+const QA_APROBADOR_EMAIL = (process.env.E2E_QA_APROBADOR_EMAIL ?? "r3-aprobador@opai.cl").toLowerCase();
+
+/** Contraseña del login e2e según el correo (secretos QA_* en preview-e2e). */
+export function claveParaCorreo(email: string): string | undefined {
+  const e = email.toLowerCase();
+  if (e === QA_GERENTE_EMAIL) return process.env.QA_GERENTE_PASSWORD ?? E2E_PASSWORD;
+  if (e === QA_APROBADOR_EMAIL) return process.env.QA_SUPERVISOR_PASSWORD ?? E2E_PASSWORD;
+  return E2E_PASSWORD;
+}
 // En `preview-e2e` (CAR-285) el usuario es el de la empresa ficticia `qa-e2e` y su secreto TOTP llega en
 // crudo por `E2E_TOTP_SECRET` (secreto de GitHub Actions; nunca se imprime). En local y en el e2e de CI
 // se usa el secreto fijo sembrado, que no es un secreto real.
@@ -21,7 +31,7 @@ export async function entrar(page: Page, email = E2E_EMAIL): Promise<void> {
   await pasarProteccionDeVercel(page);
   await page.goto("/login");
   await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
+  await page.getByLabel("Contraseña", { exact: true }).fill(claveParaCorreo(email) ?? "");
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await page.waitForURL((url) =>
     ["/mfa", "/", "/platform", "/elegir-empresa", "/supervisor"].includes(url.pathname),

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { rutValido } from "@opai/domain";
 
 /** Factor (cesionario) guardado para no reescribir sus datos en cada cesión. */
-export const factorCesionSchema = z.object({
+const factorCesionSchema = z.object({
   nombre: z.string().trim().min(1).max(120),
   rut: z.string().trim().refine(rutValido, "El RUT del factor no es válido."),
   // Octava corta el correo a 40 y la dirección a 70 caracteres: se valida igual que al ceder.
