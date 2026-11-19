@@ -20,6 +20,7 @@ const base = (): ItemNovedad => ({
   imagen: null,
   destacada: false,
   car: null,
+  pr: null,
   leida: false,
 });
 
