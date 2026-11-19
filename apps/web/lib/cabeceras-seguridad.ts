@@ -5,6 +5,8 @@
 // reanudación) sin nonce; un nonce en la respuesta anularía 'unsafe-inline' y rompería ese shell.
 // El proxy deja el nonce solo en el request, para TEMA/SW y los scripts que Next sí firma.
 
+import { HOSTS_IMG_MAPA } from "@/lib/mapa-osm/capas";
+
 export type Cabecera = { key: string; value: string };
 
 // Host de Cloudflare R2 (S3-compatible): subida PUT firmada directa desde el navegador, descarga y
@@ -14,9 +16,10 @@ const R2 = "https://*.r2.cloudflarestorage.com";
 
 /**
  * CSP en directivas. Lo que no necesita nonce ya va estricto: `default-src 'self'`, `object-src`,
- * `frame-ancestors` y `base-uri`/`form-action`. `img-src`/`connect-src`/`frame-src` suman R2 porque
- * la app sube, descarga y previsualiza archivos contra ese host (los mapas van por `/api/geo/mapa`,
- * self). `script-src`/`style-src` conservan `'unsafe-inline'` (y `'unsafe-eval'` solo en desarrollo,
+ * `frame-ancestors` y `base-uri`/`form-action`. `img-src` suma R2 y los orígenes de teselas Leaflet
+ * (OSM, CARTO y satélite Esri en `mapa-osm/capas.ts`). `connect-src`/`frame-src` suman R2 porque la
+ * app sube, descarga y previsualiza archivos contra ese host. `script-src`/`style-src` conservan
+ * `'unsafe-inline'` (y `'unsafe-eval'` solo en desarrollo,
  * para el refresco de Next) mientras el shell estático PPR no lleve nonce ni hash (CAR-57).
  */
 export function construirCsp(desarrollo: boolean, nonce?: string): string {
@@ -29,7 +32,7 @@ export function construirCsp(desarrollo: boolean, nonce?: string): string {
     "object-src 'none'",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    `img-src 'self' data: blob: ${R2}`,
+    `img-src 'self' data: blob: ${R2} ${HOSTS_IMG_MAPA.join(" ")}`,
     `connect-src 'self' ${R2}`,
     `frame-src 'self' blob: ${R2}`,
     script + (nonce ? ` 'nonce-${nonce}'` : ""),
