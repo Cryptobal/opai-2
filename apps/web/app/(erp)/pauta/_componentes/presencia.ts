@@ -1,4 +1,6 @@
-import type { CeldaDia, EstadoPresencia } from "./tipos";
+import type { EstadoPresencia } from "@opai/domain";
+
+import type { CeldaDia } from "./tipos";
 
 type Tono = "success" | "warning" | "danger" | "neutro";
 

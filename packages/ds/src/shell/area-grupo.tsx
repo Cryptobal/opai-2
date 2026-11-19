@@ -34,7 +34,7 @@ export function AreaGrupo({
 }: Props) {
   const id = useId();
   return (
-    <div className="flex flex-col gap-px">
+    <div className="flex flex-col gap-0.5">
       <button
         type="button"
         onClick={onAlternar}
@@ -68,7 +68,7 @@ export function AreaGrupo({
       >
         {/* La fila plegada mide 0: el relleno va en un hijo, así se anima junto con el alto y no asoma nada. */}
         <div className="min-h-0 overflow-hidden">
-          <div className="flex flex-col gap-0.5 pt-0.5 pb-1.5">{children}</div>
+          <div className="flex flex-col gap-1 pt-1 pb-2">{children}</div>
         </div>
       </div>
     </div>

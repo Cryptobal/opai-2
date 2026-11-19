@@ -26,12 +26,12 @@ export const VERBOS: Record<string, string> = {
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
   aplicar: "Aplicar", activar: "Activar", destinos: "Ver destinos", destinos_list: "Listar destinos", destino_get: "Ver destino", destino_crear: "Crear destino", destino_actualizar: "Editar destino", destino_rotar_secreto: "Rotar secreto", destino_eliminar: "Eliminar destino", entregas_list: "Listar entregas", entrega_reenviar: "Reenviar entrega", eventos_list: "Ver catálogo de eventos", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", valores: "Valores", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
-  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
+  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", enviar_masivo: "Enviar en lote", aprobar_varias: "Aprobar varias", rechazar_varias: "Rechazar varias", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
   politica_set: "Definir política", firmante_empresa_set: "Definir firmante de la empresa",
   firma_automatica_autorizar: "Autorizar firma automática", firma_automatica_revocar: "Revocar firma automática",
   enviar: "Enviar", recordar: "Recordar", firmar: "Firmar", ver_firmante: "Ver firmante",
-  documento_url: "Ver documento", schema: "Estructura", buscar: "Buscar", dpa_texto: "Ver acuerdo de datos",
+  mis_pendientes: "Mis pendientes", documento_url: "Ver documento", schema: "Estructura", buscar: "Buscar", dpa_texto: "Ver acuerdo de datos",
   dpa_aceptar: "Aceptar acuerdo de datos", dpo_set: "Definir delegado de datos", rat: "Registro de tratamientos",
   consentimiento_registrar: "Registrar consentimiento", consentimiento_revocar: "Revocar consentimiento",
   consentimientos_listar: "Listar consentimientos", solicitud_crear: "Crear solicitud",
@@ -52,7 +52,7 @@ export const VERBOS: Record<string, string> = {
   buscar_duplicadas: "Buscar duplicadas", acciones_agente: "Acciones del agente", derivar: "Derivar",
   descartar: "Descartar", marcar_duplicada: "Marcar como duplicada", convertir: "Convertir",
   pasar_a_cotizacion: "Pasar a cotización", rotar_token_formulario: "Renovar clave del formulario",
-  recibir_formulario_web: "Recibir formulario web", crear: "Crear", reemplazar_etiqueta: "Reemplazar etiqueta",
+  recibir_formulario_web: "Recibir formulario web", crear: "Crear", invitacion: "Ver invitación", reemplazar_etiqueta: "Reemplazar etiqueta",
   fijar: "Fijar", monto_fijar: "Fijar monto", parametros: "Parámetros", pausar: "Pausar", pdf: "PDF", obtener: "Ver", exportar: "Exportar", abrir: "Abrir",
   cambiar_estado: "Cambiar estado", marcar_pagado: "Marcar como pagado", cargar: "Cargar",
   aplicar_cuotas: "Aplicar cuotas", reglas_listar: "Listar reglas", fijar_regla: "Fijar regla",
@@ -74,6 +74,7 @@ export const VERBOS: Record<string, string> = {
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
   preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", rellenar_entidad: "Rellenar con datos de la entidad", generar_entidad: "Generar documento de la entidad", sync_servicio: "Sincronizar servicio",
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
+  guardar_texto_tipo: "Guardar texto tipo",
   prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
   resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar", transferir: "Transferir cartera", responsables: "Responsables posibles",
@@ -106,7 +107,7 @@ export const VERBOS: Record<string, string> = {
   // Hilo (CAR-331).
   actividad: "Ver actividad", agenda: "Ver agenda",
   // Bancos (CAR-341).
-  borrar_rango: "Borrar por fechas",
+  borrar_rango: "Borrar por fechas (restaurable)",
   // Impuestos (CAR-173).
   borrador_f29: "Borrador del F29",
 };

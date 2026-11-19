@@ -36,6 +36,17 @@ describe("app nativa OPAI (Brief 17)", () => {
   it("la página sin conexión existe y no carga nada de fuera", () => {
     const html = readFileSync(new URL("../www/sin-conexion.html", import.meta.url), "utf8");
     expect(html).toContain("No pudimos abrir OPAI");
+    expect(html).toContain("reintentarCarga");
     expect(html).not.toMatch(/https?:\/\//);
+  });
+
+  it("registra el esquema de vuelta desde el navegador (CAR-516) en Android e iOS", () => {
+    const leer = (ruta: string) => readFileSync(new URL(ruta, import.meta.url), "utf8");
+    const manifest = leer("../nativo/android/app/src/main/AndroidManifest.xml");
+    expect(manifest).toContain('android:scheme="cl.opai.app" android:host="canje"');
+    expect(manifest).toContain("android.intent.category.BROWSABLE");
+    expect(leer("../nativo/ios/App/App/Info.plist")).toMatch(
+      /CFBundleURLSchemes<\/key>\s*<array>\s*<string>cl\.opai\.app<\/string>/,
+    );
   });
 });

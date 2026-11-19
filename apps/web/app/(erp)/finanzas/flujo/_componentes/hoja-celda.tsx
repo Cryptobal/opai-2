@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Sheet, Textarea } from "@opai/ds";
+import { avisar, Button, Campo, Input, Sheet, Textarea } from "@opai/ds";
 
 import { formatearFecha } from "@opai/domain";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { AlertaErrorAccion } from "./alerta-error-accion";
 import { clp } from "./datos";
 import { parsearMontoUi } from "./monto-ui";
 
@@ -102,15 +103,11 @@ function HojaCeldaForm({ onCerrar, contexto }: { onCerrar: () => void; contexto:
       }
     >
       <div className="flex flex-col gap-4">
-        {error ? (
-          <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
-            {errorServidor ? (
-              <Button variant="secondary" className="mt-2" onClick={() => void guardar()}>
-                Reintentar
-              </Button>
-            ) : null}
-          </Alerta>
-        ) : null}
+        <AlertaErrorAccion
+          error={error}
+          errorServidor={errorServidor}
+          onReintentar={() => void guardar()}
+        />
         <p className="text-sm text-fg-muted">
           Es una proyección: cuando llegue el movimiento del banco, la semana muestra lo real.
         </p>

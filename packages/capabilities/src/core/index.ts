@@ -19,6 +19,7 @@ import {
 import { platformAuditoriaEstado, trabajoVerificarAuditoria } from "./auditoria";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
 import { geoAutocompletar, geoDetalle, geoGeocodificar, geoMapa, iaProbar } from "./geo-ia";
+import { regionesList } from "./regiones";
 import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
 import {
   integracionesConfigurar,
@@ -155,6 +156,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   geoDetalle,
   geoGeocodificar,
   geoMapa,
+  regionesList,
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,

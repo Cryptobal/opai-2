@@ -2,90 +2,94 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { ControlCampo, type Entrada } from "./control-campo";
 import { entradaDe, type CampoFicha, type EntidadCampos, type ValorCampo } from "./tipos";
 
-const VACIO = "_vacio";
-type Borrador = Record<string, string>;
+type Borrador = Record<string, Entrada>;
 
-const aTexto = (v: ValorCampo): string =>
-  v === null ? "" : typeof v === "boolean" ? (v ? "si" : "no") : Array.isArray(v) ? v.join(",") : String(v);
-
-function aValor(c: CampoFicha, t: string): ValorCampo {
-  if (t === "" || t === VACIO) return null;
-  if (c.tipo === "si_no") return t === "si";
-  if (c.tipo === "numero") return Number(t.replace(",", "."));
-  return t;
+function aEntrada(v: ValorCampo): Entrada {
+  if (v === null) return null;
+  if (typeof v === "boolean") return v;
+  if (Array.isArray(v)) return v;
+  return String(v);
 }
 
-/** Botón «Editar» y hoja con un control por campo; guarda solo lo que cambió. */
+function igual(a: Entrada, b: Entrada): boolean {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (typeof a === "boolean" && typeof b === "boolean") return a === b;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((x, i) => x === b[i]);
+  }
+  return String(a) === String(b);
+}
+
+function CampoEditable(p: { c: CampoFicha; valor: Entrada; onCambiar: (v: Entrada) => void }) {
+  const { c } = p;
+  return (
+    <Campo
+      etiqueta={c.obligatorio ? `${c.etiqueta} (obligatorio)` : c.etiqueta}
+      htmlFor={`campo-${c.clave}`}
+      {...(c.descripcion ? { ayuda: c.descripcion } : {})}
+    >
+      <ControlCampo c={c} id={`campo-${c.clave}`} valor={p.valor} onCambiar={p.onCambiar} />
+    </Campo>
+  );
+}
+
+async function guardarCambios(p: {
+  campos: CampoFicha[];
+  tipo: EntidadCampos;
+  id: string;
+  b: Borrador;
+  guardado: Borrador;
+  ejecutar: ReturnType<typeof useCapacidad>["ejecutar"];
+  cerrar: () => void;
+}) {
+  const valores = Object.fromEntries(
+    p.campos
+      .filter((c) => !igual(p.b[c.clave] ?? null, p.guardado[c.clave] ?? null))
+      .map((c) => [c.clave, p.b[c.clave] ?? null]),
+  );
+  if (Object.keys(valores).length === 0) return p.cerrar();
+  const input = { ...entradaDe(p.tipo, p.id), valores };
+  const ok =
+    p.tipo === "negocio"
+      ? await p.ejecutar("comercial.negocio_campos.set", input)
+      : await p.ejecutar("core.valores_personalizados.set", input);
+  if (ok) {
+    avisar.exito("Campos guardados");
+    p.cerrar();
+  }
+}
+
+/**
+ * Botón «Editar» y hoja con un control por campo; guarda solo lo que cambió. Un campo vacío con valor
+ * por defecto lo propone ya cargado (se guarda al confirmar).
+ */
 export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: CampoFicha[] }) {
-  const inicial = Object.fromEntries(p.campos.map((c) => [c.clave, aTexto(c.valor)]));
+  const guardado = Object.fromEntries(p.campos.map((c) => [c.clave, aEntrada(c.valor)]));
+  const propuesto = () =>
+    Object.fromEntries(p.campos.map((c) => [c.clave, aEntrada(c.valor ?? c.valorDefecto)]));
   const [abierto, setAbierto] = useState(false);
-  const [b, setB] = useState<Borrador>(inicial);
+  const [b, setB] = useState<Borrador>(propuesto);
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const cerrar = () => {
     setAbierto(false);
     limpiarError();
   };
-
-  async function guardar() {
-    const valores = Object.fromEntries(
-      p.campos
-        .filter((c) => (b[c.clave] ?? "") !== (inicial[c.clave] ?? ""))
-        .map((c) => [c.clave, aValor(c, b[c.clave] ?? "")]),
-    );
-    if (Object.keys(valores).length === 0) return cerrar();
-    const input = { ...entradaDe(p.tipo, p.id), valores };
-    const ok =
-      p.tipo === "negocio"
-        ? await ejecutar("comercial.negocio_campos.set", input)
-        : await ejecutar("core.valores_personalizados.set", input);
-    if (ok) {
-      avisar.exito("Campos guardados");
-      cerrar();
-    }
-  }
-
-  const control = (c: CampoFicha) => {
-    const id = `campo-${c.clave}`;
-    const valor = b[c.clave] ?? "";
-    const set = (v: string) => setB({ ...b, [c.clave]: v });
-    if (c.tipo === "fecha") return <InputFecha id={id} valor={valor} onCambiar={set} />;
-    if (c.tipo === "lista" || c.tipo === "si_no") {
-      const opciones =
-        c.tipo === "lista"
-          ? c.opciones
-          : [
-              { valor: "si", etiqueta: "Sí" },
-              { valor: "no", etiqueta: "No" },
-            ];
-      return (
-        <Select
-          id={id}
-          valor={valor || VACIO}
-          onCambiar={set}
-          opciones={[{ valor: VACIO, etiqueta: "Sin valor" }, ...opciones]}
-        />
-      );
-    }
-    return (
-      <Input
-        id={id}
-        value={valor}
-        maxLength={500}
-        {...(c.tipo === "numero" ? { inputMode: "decimal" as const } : {})}
-        onChange={(e) => set(e.target.value)}
-      />
-    );
+  const abrir = () => {
+    setB(propuesto());
+    setAbierto(true);
   };
 
   return (
     <>
-      <Button variant="ghost" onClick={() => setAbierto(true)}>
+      <Button variant="ghost" onClick={abrir}>
         Editar
       </Button>
       <Sheet
@@ -97,7 +101,20 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
             <Button variant="secondary" onClick={cerrar}>
               Cancelar
             </Button>
-            <Button disabled={pendiente} onClick={() => void guardar()}>
+            <Button
+              disabled={pendiente}
+              onClick={() =>
+                void guardarCambios({
+                  campos: p.campos,
+                  tipo: p.tipo,
+                  id: p.id,
+                  b,
+                  guardado,
+                  ejecutar,
+                  cerrar,
+                })
+              }
+            >
               Guardar
             </Button>
           </>
@@ -106,13 +123,12 @@ export function EditarCampos(p: { tipo: EntidadCampos; id: string; campos: Campo
         <div className="flex flex-col gap-4">
           {error ? <Alerta tono="danger" titulo={error} /> : null}
           {p.campos.map((c) => (
-            <Campo
+            <CampoEditable
               key={c.clave}
-              etiqueta={c.obligatorio ? `${c.etiqueta} (obligatorio)` : c.etiqueta}
-              htmlFor={`campo-${c.clave}`}
-            >
-              {control(c)}
-            </Campo>
+              c={c}
+              valor={b[c.clave] ?? null}
+              onCambiar={(v) => setB({ ...b, [c.clave]: v })}
+            />
           ))}
         </div>
       </Sheet>

@@ -48,7 +48,7 @@ const personasAusenciasListar = defineCapability({
   input: entradaListaAusencias.extend({ cursor: z.string().optional() }),
   output: z.object({
     personaId: z.string(),
-    items: salidaListaAusencias.shape.grupos,
+    items: salidaListaAusencias.shape.items,
     siguiente: z.string().nullable(),
   }),
   // El motivo es texto libre y puede ser de salud: la lectura queda auditada con lo revelado.
@@ -56,8 +56,7 @@ const personasAusenciasListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   handler: async (ctx, input) => {
-    const { personaId, grupos, siguiente } = await listarAusencias(ctx, input);
-    return { personaId, items: grupos, siguiente };
+    return listarAusencias(ctx, input);
   },
 });
 

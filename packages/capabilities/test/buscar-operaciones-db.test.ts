@@ -1,7 +1,7 @@
 // CAR-404: la búsqueda global encuentra tickets (por asunto) y puestos (por nombre o instalación), con el permiso
 // y el alcance de quien busca y sin cruzar empresas. Solo datos ficticios (empresas qa-buso*).
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { manifest as manifestPauta } from "../../../modules/pauta/manifest";
 import { manifest as manifestTickets } from "../../../modules/tickets/manifest";
@@ -31,17 +31,24 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Operaciones (CAR-404)
     return (res.data as { otros: Grupo[] }).otros.find((g) => g.grupo === grupo)?.items ?? null;
   };
 
-  beforeAll(async () => {
+  let cerrarCaso: (() => Promise<void>) | undefined;
+  beforeEach(async () => {
+    cerrarCaso = undefined;
     e = await prepararEntorno();
+    cerrarCaso = () => e.cerrar();
     mod = await import("../src");
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo]);
     mod.registrarModulos([manifestPauta, manifestTickets]);
-    const mk = (s: string) => e.admin.tenant.create({ data: { slug: `${s}-${randomUUID().slice(0, 8)}`, nombre: s, vertical: "seguridad" } });
+
+    t.a = t.b = "";
+    for (const clave of Object.keys(r)) delete r[clave];
+    for (const clave of Object.keys(u) as (keyof typeof u)[]) u[clave] = randomUUID();
+    const mk = (s: string) => e.admin.tenant.create({ data: { slug: `${s}-${randomUUID()}`, nombre: s, vertical: "seguridad" } });
     t.a = (await mk("qa-busoa")).id;
     t.b = (await mk("qa-busob")).id;
     for (const [id, tid, rol] of [[u.ger, t.a, "gerente"], [u.pide, t.a, "gerente"], [u.sup, t.a, "supervisor"], [u.dueB, t.b, "owner"]] as const) {
-      await e.admin.user.create({ data: { id, name: `Persona ${id.slice(0, 4)}`, email: `${id.slice(0, 8)}@buso.test` } });
+      await e.admin.user.create({ data: { id, name: `Persona ${id.slice(0, 4)}`, email: `${id}@buso.test` } });
       await e.admin.membership.create({ data: { tenantId: tid, userId: id, rol, portales: ["erp"] } });
     }
     const puesto = async (k: string, tenantId: string, instalacion: string, nombre: string) => {
@@ -65,7 +72,15 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Operaciones (CAR-404)
     await ticket("tOtro", t.a, tipoA, u.ger, u.ger);
     await ticket("tBeta", t.b, await tipo(t.b), u.dueB, u.dueB);
   });
-  afterAll(async () => { await e?.cerrar(); });
+  afterEach(async () => {
+    // Bitácoras y hechos son append-only: no borrar filas ni desactivar sus guardas.
+    // Cada caso usa UUID nuevos; la base local/CI efímera se descarta al terminar la corrida.
+    try {
+      await cerrarCaso?.();
+    } finally {
+      cerrarCaso = undefined;
+    }
+  });
 
   it("con «ver todos», encuentra los tickets de la empresa por asunto, con tipo y estado, y nada de otra", async () => {
     const items = await buscar(ctx(u.ger, "gerente", t.a), "zafiro", "tickets");
