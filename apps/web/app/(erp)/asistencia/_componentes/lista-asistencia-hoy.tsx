@@ -8,28 +8,10 @@ import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { diaLargo } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 
-export type DatosAsistenciaHoy = {
-  fecha: string;
-  zona: string;
-  siguiente: string | null;
-  resumen: { turnos: number; presentes: number; sinMarca: number; ausentes: number; incompletos: number; atrasos: number };
-  items: Item[];
-};
+import { BotonProponerCorreccion } from "./boton-proponer-correccion";
 
-type Item = {
-  personaId: string;
-  nombre: string;
-  instalacion: string | null;
-  turnoInicio: string | null;
-  turnoFin: string | null;
-  entrada: string | null;
-  salida: string | null;
-  estado: string;
-  atrasoMin: number;
-  correccionPendiente: boolean;
-  descansoInsuficiente: boolean;
-  marcaFueraDeTurno: boolean;
-};
+import type { DatosAsistenciaHoy, Item } from "./lista-asistencia-hoy-tipos";
+export type { DatosAsistenciaHoy } from "./lista-asistencia-hoy-tipos";
 
 const ESTADOS: Record<string, { etiqueta: string; tono: "success" | "warning" | "danger" | "info" | "neutro" }> = {
   presente: { etiqueta: "Presente", tono: "success" },
@@ -129,6 +111,7 @@ export function ListaAsistenciaHoyErp({
       <ListScreen<Item>
         state={estadoPantalla(resultado)}
         titulo="Asistencia de hoy"
+        accionPrincipal={<EnlaceBoton href="/asistencia/correcciones" variante="secondary">Correcciones</EnlaceBoton>}
         subtitulo={d ? `${diaLargo(new Date(`${d.fecha}T12:00:00Z`), d.zona)} · ${d.resumen.turnos} turnos` : undefined}
         filtros={
           <div className="flex w-full flex-col gap-3">
@@ -139,6 +122,9 @@ export function ListaAsistenciaHoyErp({
         }
         items={d?.items ?? []}
         clave={(x) => x.personaId}
+        acciones={(x) => d && (x.entrada || x.salida)
+          ? <BotonProponerCorreccion personaId={x.personaId} nombre={x.nombre} fecha={d.fecha} />
+          : null}
         tarjeta={(x) => <TarjetaAsistencia x={x} zona={zona} />}
         columnas={columnasAsistencia(zona)}
         textos={{ vacio: { titulo: "Sin turnos hoy", descripcion: "Cuando haya turnos esperados para hoy, aparecerán aquí con su asistencia." } }}

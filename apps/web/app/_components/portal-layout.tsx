@@ -29,7 +29,7 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   const vista = await verComoDe(identidad);
   if (vista?.portal === portal)
     return (
-      <MarcoVerComo vista={vista} portal={portal}>
+      <MarcoVerComo vista={vista} portal={portal} epocaSesion={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}>
         {children}
       </MarcoVerComo>
     );

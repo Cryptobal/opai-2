@@ -17,10 +17,12 @@ import { SoloLecturaVerComo } from "./solo-lectura";
 export async function MarcoVerComo({
   vista,
   portal,
+  epocaSesion,
   children,
 }: {
   vista: VistaVigente;
   portal: string;
+  epocaSesion: string;
   children: ReactNode;
 }) {
   const identidad = portal === "terreno" ? null : await identidadDeLaVista(vista);
@@ -35,6 +37,8 @@ export async function MarcoVerComo({
           datos={{
             ...datos,
             vista: true,
+            // La época identifica la sesión real, no la persona vista (sin recargas cruzadas).
+            epoca: epocaSesion,
             empresas: [],
             portales: datos.portales.filter((p) => p.id === portal),
           }}

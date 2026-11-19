@@ -36,6 +36,12 @@ const POR_RUTA: readonly [string, Modulo][] = [
   ["/mi-cuenta", { etiqueta: "Mi cuenta", icono: UserRound }],
 ];
 
+export type ItemModuloNovedad = { ruta: string | null; moduloEtiqueta: string };
+
+export function etiquetaModuloVisible(item: ItemModuloNovedad): string {
+  return moduloNovedad(item.ruta, item.moduloEtiqueta).etiqueta;
+}
+
 export function moduloNovedad(ruta: string | null, etiquetaCatalogo: string): Modulo {
   const encontrado = ruta
     ? POR_RUTA.find(

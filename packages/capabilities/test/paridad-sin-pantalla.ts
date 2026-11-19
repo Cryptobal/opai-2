@@ -109,12 +109,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Aceptar u objetar una contingencia desde el Portal Trabajador: la pantalla entra con el diseño aprobado del portal. Mientras tanto responde por la capacidad (solo personas).",
   },
-  "asistencia.correcciones.responder": {
-    encargo: "CAR-89",
-    desde: "2026-11-10",
-    motivo:
-      "Aceptar u objetar una corrección desde el Portal Trabajador: la pantalla entra con el diseño aprobado del portal (A3). Mientras tanto responde por el enlace del correo personal (página pública, capacidad interna).",
-  },
   "core.biometria.enrolar": {
     encargo: "CAR-78",
     desde: "2026-11-10",
