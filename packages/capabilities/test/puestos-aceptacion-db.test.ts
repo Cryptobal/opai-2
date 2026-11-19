@@ -54,7 +54,7 @@ describe.skipIf(!urlPropietario)("Puestos · ruta de aceptación CAR-206/207 (da
       const puestoDe = async (instalacionId: string, nombre: string) =>
         (await e.admin.puesto.create({ data: { tenantId, instalacionId, cargoId: cargo, nombre, diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00", patronId: pat } })).id;
       const persona = async (instalacionId: string, nombres: string, rut: string) => {
-        const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Ficticia", rut, estado: "activa" } })).id;
+        const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Ficticia", rut, estado: "activo" } })).id;
         await e.admin.vinculoLaboral.create({ data: { tenantId, personaId: id, cargoId: cargo, instalacionId, tipo: "indefinido", inicio: new Date("2026-01-01"), horasSemanales: 44, distribucion: "4x4", estado: "vigente" } });
         return id;
       };

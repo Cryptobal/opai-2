@@ -97,7 +97,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     puestoX2 = await puesto(tenantA, instA, a.cargo, "X2 · Día", "08:00", "20:00");
     puestoX3 = await puesto(tenantA, instA, a.cargo, "X3 · Día", "08:00", "20:00");
     const persona = async (tenantId: string, cargoId: string, instalacionId: string, nombres: string, rut: string) => {
-      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activa" } })).id;
+      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activo" } })).id;
       await e.admin.vinculoLaboral.create({ data: { tenantId, personaId: id, cargoId, instalacionId, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
       return id;
     };

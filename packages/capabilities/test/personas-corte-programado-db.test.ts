@@ -47,7 +47,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso programado (db)", 
     const uid = randomUUID();
     await e.admin.user.create({ data: { id: uid, name: "Usuario Ficticio", email: `${uid.slice(0, 8)}@c385.test` } });
     const m = await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol: "trabajador", portales: ["trabajador"] } });
-    const p = await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activa", usuarioId: uid } });
+    const p = await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activo", usuarioId: uid } });
     const v = await e.admin.vinculoLaboral.create({
       data: { tenantId: tenant, personaId: p.id, cargoId: cargo, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" },
     });

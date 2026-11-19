@@ -82,7 +82,7 @@ export const importadorContratos: Importador<DatosContrato> = {
     const estado = estadoDe(d.termino, hoy);
     const v = await tx.vinculoLaboral.create({ data: { ...d, tenantId: ctx.tenantId, estado }, select: { id: true } });
     // Igual que el alta manual: una persona inactiva con un contrato vigente nuevo vuelve a estar activa.
-    if (estado === "vigente") await tx.persona.updateMany({ where: { id: d.personaId, estado: { not: "activa" }, archivadaEn: null }, data: { estado: "activa" } });
+    if (estado === "vigente") await tx.persona.updateMany({ where: { id: d.personaId, estado: { not: "activo" }, archivadaEn: null }, data: { estado: "activo" } });
     await ctx.eventos.emitir(tx, {
       tipo: "core.vinculo.creado", entidadTipo: "vinculo", entidadId: v.id,
       payload: { personaId: d.personaId, cargoId: d.cargoId, tipo: d.tipo, inicio: dia(d.inicio), origen: "importacion" },

@@ -58,7 +58,7 @@ export async function cortarAccesos(
       m.userId !== quien.usuarioId,
   );
   if (aplicar) {
-    await db.persona.update({ where: { id: personaId }, data: { estado: "inactiva" } });
+    await db.persona.update({ where: { id: personaId }, data: { estado: "inactivo" } });
     if (suspender.length)
       await db.membership.updateMany({
         where: { tenantId: quien.tenantId, id: { in: suspender.map((m) => m.id) }, estado: "activa" },

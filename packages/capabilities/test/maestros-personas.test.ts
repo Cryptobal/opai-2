@@ -79,7 +79,7 @@ describe("core.personas.* y core.vinculos.*", () => {
       }),
     ).toMatchObject({ estado: "terminado" });
     expect(await dato(ctx, "core.personas.get", { id })).toMatchObject({
-      estado: "inactiva",
+      estado: "inactivo",
       vinculoVigente: null,
     });
     expect(await dato(ctx, "core.personas.archive", { id })).toMatchObject({
@@ -111,7 +111,7 @@ describe("core.personas.* y core.vinculos.*", () => {
       id: "m",
       tenantId: ctx.tenantId,
       userId: usuarioId,
-      estado: "activa",
+      estado: "activo",
     });
     await dato(ctx, "core.personas.vincular_usuario", { id, usuarioId });
     const otra = await dato<{ id: string }>(ctx, "core.personas.create", {

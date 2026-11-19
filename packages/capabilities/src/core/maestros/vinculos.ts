@@ -87,8 +87,8 @@ export const vinculosCreate = defineCapability({
     const creado = await ctx.transaccion(async (tx) => {
       await bloquearNoAnonimizado(tx, "persona", personaId);
       const r = await crearVinculo(ctx, tx, personaId, v);
-      if (p.estado !== "activa")
-        await tx.persona.update({ where: { id: personaId }, data: { estado: "activa" } });
+      if (p.estado !== "activo")
+        await tx.persona.update({ where: { id: personaId }, data: { estado: "activo" } });
       return r;
     });
     return vistaVinculo(creado);

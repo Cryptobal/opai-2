@@ -66,7 +66,7 @@ export async function anonimizarPersona(
       noRecontratarMotivo: null,
       noRecontratarEn: null,
       noRecontratarVenceEn: null,
-      estado: "inactiva",
+      estado: "inactivo",
       anonimizadaEn: ahora,
     },
   });

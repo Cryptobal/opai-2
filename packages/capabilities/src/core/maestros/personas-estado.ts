@@ -83,7 +83,7 @@ export const personasArchive = defineCapability({
     }
     return cambiar(ctx, input.id, dryRun, "core.persona.archivada", {
       archivadaEn: new Date(),
-      estado: "inactiva",
+      estado: "inactivo",
     });
   },
 });

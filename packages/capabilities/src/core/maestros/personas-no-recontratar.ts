@@ -69,8 +69,8 @@ export const personasMarcarNoRecontratar = defineCapability({
 export const personasQuitarNoRecontratar = defineCapability({
   id: "core.personas.quitar_no_recontratar",
   descripcion:
-    "Quita la marca «No recontratar» (marca P1) de una persona, con el motivo de levantarla. Solo RRHH y administradores; el motivo anterior se elimina.",
-  permiso: PERMISOS_CORE.personasNoRecontratarManage,
+    "Quita la marca «No recontratar» (marca P1) de una persona, con el motivo de levantarla. Solo administradores (permiso estado.admin); el motivo anterior se elimina.",
+  permiso: PERMISOS_CORE.personasEstadoAdmin,
   sensibles: ["motivo"],
   input: z.object({ id: uuidSchema, motivo }),
   output: marcaNoRecontratarSchema,

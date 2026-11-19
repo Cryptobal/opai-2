@@ -1,0 +1,88 @@
+import { z } from "zod";
+
+import { ESTADOS_PERSONA, PERMISOS_CORE, PERSONA_ESTADO_BLOQUEADO_PERMANENTE } from "@opai/domain";
+
+import { defineCapability } from "../../define";
+import type { Capacidad } from "../../types";
+import { reglaDeNegocio } from "../../errores";
+import { uuidSchema } from "../esquemas";
+import { aplicarEstadoPersona, type DefTransicionPersona } from "./personas-estado-aplicar";
+import { personaDe, personaSchema } from "./personas-vista";
+
+const motivo = z.string().trim().min(5).max(500).describe("Motivo (queda en la auditoría).");
+
+const NORMALES: readonly DefTransicionPersona[] = [
+  { id: "core.personas.a_evaluacion", hacia: "en_evaluacion", desde: "postulante", descripcion: "Pasa un postulante al estado «En evaluación» en reclutamiento." },
+  { id: "core.personas.rechazar", hacia: "rechazado", descripcion: "Marca a la persona como «Rechazada» (desde postulante o en evaluación)." },
+  { id: "core.personas.marcar_externo", hacia: "externo", descripcion: "Pasa la persona a «Externa» (turnos extra sin contrato vigente)." },
+  { id: "core.personas.activar", hacia: "activo", descripcion: "Pasa la persona a «Activa» (puede tener vínculo laboral)." },
+  { id: "core.personas.inactivar", hacia: "inactivo", desde: "activo", descripcion: "Pasa una persona activa a «Inactiva» (sin vínculo vigente)." },
+  { id: "core.personas.contratar_externo", hacia: "activo", desde: "externo", descripcion: "Contrata a una persona externa (pasa a «Activa»)." },
+  { id: "core.personas.reactivar", hacia: "activo", desde: "inactivo", descripcion: "Reactiva a una persona inactiva (pasa a «Activa»)." },
+  { id: "core.personas.externar", hacia: "externo", desde: "inactivo", descripcion: "Pasa una persona inactiva al estado «Externa» (turno extra)." },
+];
+
+function capTransicion(def: DefTransicionPersona) {
+  return defineCapability({
+    id: def.id,
+    descripcion: def.descripcion,
+    permiso: PERMISOS_CORE.personasManage,
+    input: z.object({ id: uuidSchema, motivo }),
+    output: personaSchema,
+    efecto: "escritura",
+    dryRun: true,
+    handler: (ctx, input, { dryRun }) => {
+      if (def.desde) {
+        return personaDe(ctx, input.id).then((p) => {
+          if ((p.estado ?? "activo") !== def.desde) {
+            throw reglaDeNegocio(`Esta acción solo aplica desde «${def.desde}».`);
+          }
+          return aplicarEstadoPersona(ctx, input.id, def.hacia, dryRun, "core.persona.estado_cambiado");
+        });
+      }
+      return aplicarEstadoPersona(ctx, input.id, def.hacia, dryRun, "core.persona.estado_cambiado");
+    },
+  });
+}
+
+export const personasEstadoBloquearPermanente = defineCapability({
+  id: "core.personas.bloquear_permanente",
+  descripcion: "Bloquea de forma permanente a la persona (no recontratable): desde cualquier estado salvo que ya esté bloqueada.",
+  permiso: PERMISOS_CORE.personasManage,
+  input: z.object({ id: uuidSchema, motivo }),
+  output: personaSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
+    const actual = await personaDe(ctx, input.id);
+    if (actual.estado === PERSONA_ESTADO_BLOQUEADO_PERMANENTE) {
+      throw reglaDeNegocio("La persona ya está bloqueada de forma permanente.");
+    }
+    return aplicarEstadoPersona(ctx, input.id, PERSONA_ESTADO_BLOQUEADO_PERMANENTE, dryRun, "core.persona.bloqueada_permanente");
+  },
+});
+
+export const personasEstadoDesbloquearPermanente = defineCapability({
+  id: "core.personas.desbloquear_permanente",
+  descripcion: "Quita el bloqueo permanente y deja a la persona en «Inactiva». Solo administradores (permiso estado.admin).",
+  permiso: PERMISOS_CORE.personasEstadoAdmin,
+  input: z.object({ id: uuidSchema, motivo }),
+  output: personaSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
+    const actual = await personaDe(ctx, input.id);
+    if (actual.estado !== PERSONA_ESTADO_BLOQUEADO_PERMANENTE) {
+      throw reglaDeNegocio("La persona no está bloqueada de forma permanente.");
+    }
+    return aplicarEstadoPersona(ctx, input.id, "inactivo", dryRun, "core.persona.desbloqueada_permanente", undefined, true);
+  },
+});
+
+export const capacidadesPersonasEstado: readonly Capacidad[] = [
+  ...NORMALES.map(capTransicion),
+  personasEstadoBloquearPermanente,
+  personasEstadoDesbloquearPermanente,
+];
+
+export const estadosPersonaSchema = z.enum(ESTADOS_PERSONA);

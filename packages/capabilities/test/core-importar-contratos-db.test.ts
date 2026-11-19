@@ -113,7 +113,7 @@ describe.skipIf(!urlPropietario)("core · importador de contratos en base real",
   });
 
   it("un contrato vigente nuevo reactiva a la persona inactiva, como el alta manual", async () => {
-    await x.e.admin.persona.updateMany({ where: { tenantId: x.t1, rut: "44444444-4" }, data: { estado: "inactiva" } });
+    await x.e.admin.persona.updateMany({ where: { tenantId: x.t1, rut: "44444444-4" }, data: { estado: "inactivo" } });
     await x.importar(x.t1, "contratos", { filas: [{ ...base, persona_rut: "44.444.444-4", inicio: "01-03-2024" }] });
     const p = await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "44444444-4" } });
     expect(p?.estado).toBe("activa");

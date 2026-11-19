@@ -47,7 +47,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
           nombres: "Admin",
           apellidos: "Ficticia",
           rut: "11111111-1",
-          estado: "activa",
+          estado: "activo",
         },
       })
     ).id;
@@ -91,7 +91,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
         desde: "2026-12-21",
         hasta: "2026-12-31",
         dias: 0,
-        estado: "activa",
+        estado: "activo",
       }),
     ]);
     expect(
@@ -140,7 +140,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
           nombres: "Otra",
           apellidos: "Ficticia",
           rut: "22222222-2",
-          estado: "activa",
+          estado: "activo",
         },
       })
     ).id;
@@ -222,7 +222,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
           nombres: "Otra",
           apellidos: "Ficticia",
           rut: "17777777-7",
-          estado: "activa",
+          estado: "activo",
         },
       })
     ).id;
@@ -250,7 +250,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
           nombres: "Ajena",
           apellidos: "Ficticia",
           rut: "17777777-7",
-          estado: "activa",
+          estado: "activo",
         },
       })
     ).id;

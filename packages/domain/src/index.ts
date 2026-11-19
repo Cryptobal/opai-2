@@ -54,6 +54,7 @@ export * from "./vencimientos-grupos";
 export * from "./vigencia";
 export * from "./calendario";
 export * from "./datos-personales";
+export * from "./personas/estado";
 export * from "./cumplimiento";
 export * from "./indicadores-gestion";
 export * from "./jefatura";

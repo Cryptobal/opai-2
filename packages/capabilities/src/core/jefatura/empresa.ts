@@ -11,7 +11,7 @@ async function jefaturaEmpresa(ctx: Contexto): Promise<Jefatura | null> {
   // Solo hay jefaturas si algún cargo reporta a otro.
   if (!cargos.some((c: CargoJefatura) => c.jefaturaCargoId !== null)) return null;
   const vinculos = await ctx.db.vinculoLaboral.findMany({
-    where: { estado: "vigente", persona: { estado: "activa" } },
+    where: { estado: "vigente", persona: { estado: "activo" } },
     select: {
       personaId: true,
       cargoId: true,
