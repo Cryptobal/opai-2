@@ -7,10 +7,10 @@ vi.mock("@opai/ds", () => ({
   KpiTile: () => null,
   cn: (...xs: string[]) => xs.join(" "),
   GRILLA_KPI_HILO: "grid",
-  ListScreen: ({ items, filtros, tarjeta, columnas, acciones }: {
-    items: unknown[]; filtros: ReactNode; tarjeta: (x: unknown) => ReactNode;
+  ListScreen: ({ items, filtros, tarjeta, columnas, acciones, accionPrincipal }: {
+    items: unknown[]; filtros: ReactNode; accionPrincipal: ReactNode; tarjeta: (x: unknown) => ReactNode;
     columnas: { render: (x: unknown) => ReactNode }[]; acciones: (x: unknown) => ReactNode;
-  }) => h("section", null, filtros, ...items.map((x, i) => h("div", { key: i },
+  }) => h("section", null, accionPrincipal, filtros, ...items.map((x, i) => h("div", { key: i },
     tarjeta(x), ...columnas.map((c, j) => h("span", { key: j }, c.render(x))), acciones(x)))),
 }));
 vi.mock("@/app/_components/maestros/buscador", () => ({ Buscador: () => h("input", { placeholder: "Buscar" }) }));
@@ -37,6 +37,11 @@ const render = (d: DatosAsistenciaHoy) => renderToStaticMarkup(h(ListaAsistencia
 }));
 
 describe("Asistencia de hoy conserva CAR-603 al agregar correcciones", () => {
+  it("mantiene acceso a Correcciones incluso sin turnos", () => {
+    const html = render({ ...datos, items: [], siguiente: null });
+    expect(html).toContain('href="/asistencia/correcciones"');
+    expect(html).toContain(">Correcciones</a>");
+  });
   it("mantiene búsqueda, filtros, cursor, avisos y acción para la persona exacta", () => {
     const html = render(datos);
     expect(html).toContain('placeholder="Buscar"');
