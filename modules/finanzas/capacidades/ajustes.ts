@@ -10,7 +10,7 @@ import { ajustesDe } from "./util";
 export const ajustesObtener = defineCapability({
   id: "finanzas.ajustes.obtener",
   descripcion:
-    "Entrega los ajustes del flujo de caja: umbral de saldo bajo (único), calendario de pagos y aviso de saldo.",
+    "Entrega los ajustes del flujo de caja (umbral, calendario y aviso). No incluye cobranza ni facturación; esos viven en la pestaña Ajustes del módulo Finanzas.",
   permiso: PERMISO_VER,
   input: z.object({}),
   output: ajustesSchema,
@@ -22,7 +22,7 @@ export const ajustesObtener = defineCapability({
 export const ajustesActualizar = defineCapability({
   id: "finanzas.ajustes.actualizar",
   descripcion:
-    "Fija el umbral de saldo bajo (único), el calendario de pagos y el aviso del flujo de caja; la planilla recalcula con ellos.",
+    "Fija umbral, calendario y aviso del flujo de caja; la planilla recalcula con ellos. Distinto de las reglas de cobranza y facturación en Configuración › Módulos › Finanzas › Ajustes.",
   permiso: PERMISO_CONFIGURAR,
   input: ajustesSchema.partial(),
   output: ajustesSchema,

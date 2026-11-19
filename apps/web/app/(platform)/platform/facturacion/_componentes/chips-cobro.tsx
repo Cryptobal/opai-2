@@ -9,13 +9,13 @@ import {
   textoCantidad,
 } from "./cobro";
 
-export const contratado = (m: ModuloCobro) => m.estado === "activo" || m.estado === "trial";
+const contratado = (m: ModuloCobro) => m.estado === "activo" || m.estado === "trial";
 
 /**
  * Módulos contratados o con condición: los demás no aportan a la vista. Lo incluido en el plan base
  * va aparte y una parte de Finanzas solo cuenta si tiene su propia condición.
  */
-export const relevantes = (e: EmpresaCobro) =>
+const relevantes = (e: EmpresaCobro) =>
   e.modulos.filter(
     (m) => !m.incluidoEnBase && (m.condicion || (contratado(m) && !esParteFinanzas(m.moduloId))),
   );
@@ -49,7 +49,7 @@ export function ChipNoSeFactura({ m }: { m: ModuloCobro }) {
   );
 }
 
-export function Grupo(props: { titulo: string; vacio: string; hijos: React.ReactNode[] }) {
+function Grupo(props: { titulo: string; vacio: string; hijos: React.ReactNode[] }) {
   return (
     <span className="flex flex-col gap-1">
       <span className="t-label-sm text-fg-muted">{props.titulo}</span>

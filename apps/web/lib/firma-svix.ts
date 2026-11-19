@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 /** Tolerancia entre la hora del mensaje y la del servidor (anti-replay), como pide Svix. */
-export const TOLERANCIA_SVIX_S = 300;
+const TOLERANCIA_SVIX_S = 300;
 
 export type CabecerasSvix = { id: string | null; timestamp: string | null; firma: string | null };
 

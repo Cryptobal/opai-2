@@ -4,7 +4,7 @@ import { defineCapability } from "@opai/capabilities";
 
 import { TIPOGRAFIAS } from "../domain/documento/bloques";
 import {
-  actualizarMarcaDocumento,
+  actualizarMarcaDocumentoCpq,
   vistaMarcaDocumento,
   type MarcaDocumentoVista,
 } from "../persistencia/marca-documento";
@@ -54,7 +54,7 @@ export const marcaDocumentoUpdate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    await actualizarMarcaDocumento(ctx, input as Partial<MarcaDocumentoVista>, !dryRun);
+    await actualizarMarcaDocumentoCpq(ctx, input as Partial<MarcaDocumentoVista>, !dryRun);
     return { ...(await vistaMarcaDocumento(ctx)), enlaceMarcaNucleo: "/configuracion/marca" as const };
   },
 });

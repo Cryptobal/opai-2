@@ -5,7 +5,7 @@ import { Avatar, Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
 import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
-import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
+import { AccionesCabeceraFicha } from "@/app/_components/maestros/acciones-ficha";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { fecha, rut } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
@@ -30,6 +30,7 @@ export function FichaPersona(x: {
   const e = p ? estadoDe(ESTADO_PERSONA, p.bloqueada ? "bloqueada" : p.estado) : null;
   const base = `/personas/${p?.id ?? ""}`;
   const q = x.consulta ?? "";
+  const editarHref = q ? `?editar=1&${q.slice(1)}` : "?editar=1";
   return (
     <>
       {p ? (
@@ -61,8 +62,9 @@ export function FichaPersona(x: {
                 </>
               ),
               acciones: (
-                <AccionesEntidad
+                <AccionesCabeceraFicha
                   etiqueta="Más acciones"
+                  editarHref={editarHref}
                   acciones={accionesPersona(p)}
                   agente={{
                     contexto: { tipo: "persona", id: p.id },
