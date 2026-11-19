@@ -14,7 +14,7 @@ export type CeldaExistente = { id: string; filaId: string; semana: Date; capa: s
 const clave = (etiqueta: string, semana: string) => `${etiqueta.toLowerCase()}|${semana}`;
 
 /** Si una misma celda viene repetida en el CSV, gana la última fila (igual que aplicar en orden). */
-export function ultimaPorCelda(filas: readonly FilaValida[]): FilaValida[] {
+function ultimaPorCelda(filas: readonly FilaValida[]): FilaValida[] {
   const m = new Map<string, FilaValida>();
   for (const f of filas) m.set(clave(f.etiqueta, f.semana), f);
   return [...m.values()];
