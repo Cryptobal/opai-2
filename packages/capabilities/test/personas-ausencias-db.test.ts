@@ -91,7 +91,7 @@ describe.skipIf(omitirSuiteDb())("Personas · ausencias sin pauta (db)", () => {
         desde: "2026-12-21",
         hasta: "2026-12-31",
         dias: 0,
-        estado: "activo",
+        estado: "activa",
       }),
     ]);
     expect(
