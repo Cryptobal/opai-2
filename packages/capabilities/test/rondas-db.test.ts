@@ -103,7 +103,13 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
 
   it("el owner de B ve sus propios puntos (control)", async () => {
     const r = await mod.executeCapability(ctxOwner(tenantB), "rondas.puntos.listar", { instalacionId: instB });
-    expect(r.ok && (r.data as unknown[]).length).toBe(1);
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error.code);
+    // CAR-623 devuelve una página: conserva el control positivo de RLS y su identidad exacta.
+    const pagina = r.data as { items: { id: string; instalacionId: string }[]; siguiente: string | null };
+    expect(pagina.items).toHaveLength(1);
+    expect(pagina.items[0]).toMatchObject({ id: puntoB, instalacionId: instB });
+    expect(pagina.siguiente).toBeNull();
   });
 
   it("el owner de A no ve la instalación de B: listar puntos da NOT_FOUND", async () => {

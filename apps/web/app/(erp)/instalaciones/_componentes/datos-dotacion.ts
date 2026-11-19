@@ -2,7 +2,7 @@ import { mesDeParametros } from "@/app/(erp)/pauta/_componentes/datos";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-/** Salida de `pauta.dotacion.listar` en la ficha de instalación (CAR-596). */
+/** Salida de `pauta.dotacion.get` en la ficha de instalación (CAR-596). */
 export type DotacionInstalacion = {
   instalacionId: string;
   anio: number;
@@ -31,7 +31,7 @@ export type DotacionPuesto = {
 /** Dotación de la instalación según la Pauta del mes pedido en `?mes=` (o el mes en curso). */
 export async function cargarDotacion(instalacionId: string, p: Parametros) {
   const { anio, mes } = mesDeParametros(p);
-  return ejecutarComoUsuario<DotacionInstalacion>("erp", "pauta.dotacion.listar", {
+  return ejecutarComoUsuario<DotacionInstalacion>("erp", "pauta.dotacion.get", {
     instalacionId,
     anio,
     mes,

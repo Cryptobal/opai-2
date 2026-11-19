@@ -21,7 +21,7 @@ export const prioridadSchema = z.enum(PRIORIDADES_TICKET);
 
 export const listaSchema = z.object({
   cursor: uuidSchema.optional().describe("Id de la última fila de la página anterior."),
-  limite: z.number().int().min(1).max(100).default(50),
+  limite: z.number().int().min(1).max(200).default(50),
 });
 
 /** Página por cursor sin `skip: 1` (CAR-400): se descarta la fila del cursor solo si vino. */
@@ -33,6 +33,22 @@ export function pagina<T extends { id: string }>(
   const resto = cursor && filas[0]?.id === cursor ? filas.slice(1) : filas;
   const items = resto.slice(0, limite);
   return { items, siguiente: resto.length > limite ? (items.at(-1)?.id ?? null) : null };
+}
+
+/** Paginación en memoria (catálogo chico con filtro de rol). */
+export function paginaMemoria<T extends { id: string }>(
+  filas: readonly T[],
+  limite: number,
+  cursor: string | undefined,
+) {
+  let start = 0;
+  if (cursor) {
+    const i = filas.findIndex((f) => f.id === cursor);
+    start = i >= 0 ? i + 1 : 0;
+  }
+  const items = filas.slice(start, start + limite);
+  const siguiente = start + limite < filas.length ? (items.at(-1)?.id ?? null) : null;
+  return { items, siguiente };
 }
 
 /** Tramo de la consulta: `take` y cursor (incluida su propia fila, que `pagina` descarta). */
