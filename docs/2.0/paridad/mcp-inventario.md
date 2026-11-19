@@ -185,6 +185,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.invitacion` | `acceso_prerregistros_invitacion` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.listar` | `acceso_prerregistros_listar` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/asistencia/_componentes` | `asistencia.correcciones.proponer` | `asistencia_correcciones_proponer` | existe |
+| compartido | `app/(erp)/asistencia/_componentes` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | compartido | `app/(erp)/asistencia/marcas/_componentes` | `asistencia.marcas.obtener` | `asistencia_marcas_obtener` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
@@ -666,9 +668,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
+| compartido | `app/(trabajador)/trabajador/correcciones/_componentes` | `asistencia.correcciones.responder` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
+| erp | `/asistencia/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
+| erp | `/asistencia/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/marcas` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
@@ -883,6 +888,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| trabajador | `/trabajador/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
+| trabajador | `/trabajador/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
@@ -1108,7 +1115,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
 | `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
-| `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
+| `asistencia.correcciones.responder` | `app/(trabajador)/trabajador/correcciones/_componentes` | no | reservada a personas |
 | `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.consentir` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.enrolar` | `app/_components` | no | reservada a personas |
@@ -1201,8 +1208,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
-- `asistencia.correcciones.listar`
-- `asistencia.correcciones.proponer`
 - `asistencia.dias.listar`
 - `asistencia.dias.recalcular`
 - `asistencia.dias.resumen_periodo`
