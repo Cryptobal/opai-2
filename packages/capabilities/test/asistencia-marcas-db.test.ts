@@ -60,7 +60,7 @@ describe.skipIf(!urlPropietario)("Asistencia · marca legal (Postgres real)", ()
     const cargo = (await e.admin.cargo.create({ data: { tenantId: tenant, nombre: "Guardia" } })).id;
     const ids: string[] = [];
     for (let i = 0; i < personas; i++) {
-      const p = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: `P${i}`, apellidos: "Prueba", rut: `${10 + i}${slug.length}.000.000-${i % 9}`, estado: "activa" } })).id;
+      const p = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: `P${i}`, apellidos: "Prueba", rut: `${10 + i}${slug.length}.000.000-${i % 9}`, estado: "activo" } })).id;
       await e.admin.vinculoLaboral.create({ data: { tenantId: tenant, personaId: p, cargoId: cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
       ids.push(p);
     }

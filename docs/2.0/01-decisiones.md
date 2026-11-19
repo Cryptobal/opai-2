@@ -1625,7 +1625,16 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 4. **Brief aprobado** (#365): pasa a Claude Design antes de cualquier código.
 5. **Un solo estado por persona** (Carlos, 15:22 Santiago): Postulante → Rechazado | Externo | Activo; Externo → Activo; Activo → Inactivo; Inactivo → Activo | Externo. Cualquier otra transición se rechaza. Solo «Activo» tiene vínculo laboral.
 
-**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`).
+**Adenda (19-nov-2026) · CAR-674: fases finales del modelo de estados.**
+
+- Valores en `core.personas.estado`: `postulante`, `en_evaluacion`, `rechazado`, `externo`, `activo`, `inactivo`, `bloqueado_permanente` (reemplaza `activa`/`inactiva` en datos).
+- **En evaluación:** Postulante → En evaluación → Activo | Rechazado | Externo.
+- **Bloqueado permanente, no recontratable:** estado distinto de la marca P1 «No recontratar» (con vencimiento); se alcanza desde cualquier estado y no puede volver a Activo; levantarlo exige `core:personas.estado.admin` (solo owner/admin).
+- **Externo** es el estado para turnos extra sin contrato vigente (ADR-083 §5).
+- Quitar la marca P1 pasa al mismo permiso admin (CAR-674).
+- Transiciones en dominio; cada arista es capacidad con `preview_`, MCP y permiso `core:personas.manage` salvo las dos acciones admin.
+
+**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`). La migración y el modelo completo de siete estados entran en CAR-674.
 
 **Adenda (8-nov-2026) · Decisiones de Operaciones II del 29-oct-2026, hasta ahora solo en Linear.** Registradas por «Operaciones · Auditoría» con su texto de Linear; ante choque manda lo más reciente de Carlos.
 

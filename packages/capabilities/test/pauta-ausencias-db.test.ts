@@ -97,7 +97,7 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     const persona = async (nombres: string, rut: string, instalacionId: string) => {
       const id = (
         await e.admin.persona.create({
-          data: { tenantId: tenantA, nombres, apellidos: "Prueba", rut, estado: "activa" },
+          data: { tenantId: tenantA, nombres, apellidos: "Prueba", rut, estado: "activo" },
         })
       ).id;
       await e.admin.vinculoLaboral.create({

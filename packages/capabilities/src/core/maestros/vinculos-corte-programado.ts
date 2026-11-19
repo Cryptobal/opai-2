@@ -86,7 +86,7 @@ export const trabajoCortarAccesosProgramado = defineTrabajo({
       const antes = await tx.persona.findUnique({ where: { id: v.personaId }, select: { estado: true } });
       const quien = { tenantId: ctx.tenantId, gestionaUsuarios: p.gestionaUsuarios, usuarioId: p.usuarioId };
       const accesos = await cortarAccesos(tx, v, quien, true);
-      if (accesos.personaInactiva && antes?.estado === "activa") {
+      if (accesos.personaInactiva && antes?.estado === "activo") {
         await ctx.eventos.emitir(tx, {
           tipo: "core.vinculo.accesos_cortados",
           entidadTipo: "vinculo",
