@@ -4,17 +4,7 @@ export const ATRIBUCION_OSM =
 export const ATRIBUCION_SATELITE =
   "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, USDA FSA, USGS, Aerogrid, IGN, IGP, and the GIS User Community";
 
-/** Orígenes exactos de teselas (CSP `img-src`; sin comodines amplios). */
-export const HOSTS_IMG_MAPA = [
-  "https://a.tile.openstreetmap.org",
-  "https://b.tile.openstreetmap.org",
-  "https://c.tile.openstreetmap.org",
-  "https://a.basemaps.cartocdn.com",
-  "https://b.basemaps.cartocdn.com",
-  "https://c.basemaps.cartocdn.com",
-  "https://d.basemaps.cartocdn.com",
-  "https://server.arcgisonline.com",
-] as const;
+export { HOSTS_IMG_MAPA } from "./hosts-csp";
 
 export function urlCapaMapa(tema: "light" | "dark"): string {
   if (tema === "dark") {

@@ -5,7 +5,7 @@
 // reanudación) sin nonce; un nonce en la respuesta anularía 'unsafe-inline' y rompería ese shell.
 // El proxy deja el nonce solo en el request, para TEMA/SW y los scripts que Next sí firma.
 
-import { HOSTS_IMG_MAPA } from "@/lib/mapa-osm/capas";
+import { HOSTS_IMG_MAPA } from "./mapa-osm/hosts-csp";
 
 export type Cabecera = { key: string; value: string };
 
@@ -17,7 +17,7 @@ const R2 = "https://*.r2.cloudflarestorage.com";
 /**
  * CSP en directivas. Lo que no necesita nonce ya va estricto: `default-src 'self'`, `object-src`,
  * `frame-ancestors` y `base-uri`/`form-action`. `img-src` suma R2 y los orígenes de teselas Leaflet
- * (OSM, CARTO y satélite Esri en `mapa-osm/capas.ts`). `connect-src`/`frame-src` suman R2 porque la
+ * (OSM, CARTO y satélite Esri en `mapa-osm/hosts-csp.ts`). `connect-src`/`frame-src` suman R2 porque la
  * app sube, descarga y previsualiza archivos contra ese host. `script-src`/`style-src` conservan
  * `'unsafe-inline'` (y `'unsafe-eval'` solo en desarrollo,
  * para el refresco de Next) mientras el shell estático PPR no lleve nonce ni hash (CAR-57).
