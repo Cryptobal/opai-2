@@ -1,6 +1,8 @@
 "use client";
 
-import { Button, Campo, Input, Select, Textarea } from "@opai/ds";
+import { Button, Campo, InputFecha, SelectorHora, Select, Textarea } from "@opai/ds";
+
+import { presentarHoraLocal } from "@/lib/asistencia-hora-local";
 
 const TIPOS = [
   { valor: "entrada", etiqueta: "Entrada" },
@@ -28,6 +30,7 @@ type Props = {
 };
 
 export function CamposProponerCorreccion(p: Props) {
+  const [dia = "", reloj = ""] = p.hora.split("T");
   const marca = p.marcas.find((m) => m.id === p.marcaId);
   return (
     <div className="flex flex-col gap-4">
@@ -36,26 +39,24 @@ export function CamposProponerCorreccion(p: Props) {
           valor={p.marcaId}
           opciones={p.marcas.map((m) => ({
             valor: m.id,
-            etiqueta: `${m.tipo} · ${new Date(m.horaServidor).toLocaleString("es-CL")}`,
+            etiqueta: `${m.tipo} · ${presentarHoraLocal(m.horaServidor)}`,
           }))}
           onCambiar={p.onMarcaId}
         />
       </Campo>
       {marca ? (
         <p className="t-caption text-fg-muted">
-          Original: {marca.tipo} · {new Date(marca.horaServidor).toLocaleString("es-CL")}
+          Original: {marca.tipo} · {presentarHoraLocal(marca.horaServidor)}
         </p>
       ) : null}
       <Campo etiqueta="Tipo propuesto">
         <Select valor={p.tipo} opciones={TIPOS} onCambiar={p.onTipo} />
       </Campo>
+      <Campo etiqueta="Fecha propuesta" htmlFor="fecha-cor">
+        <InputFecha id="fecha-cor" valor={dia} onCambiar={(fecha) => p.onHora(`${fecha}T${reloj}`)} />
+      </Campo>
       <Campo etiqueta="Hora propuesta" htmlFor="hora-cor">
-        <Input
-          id="hora-cor"
-          type="datetime-local"
-          value={p.hora}
-          onChange={(e) => p.onHora(e.target.value)}
-        />
+        <SelectorHora id="hora-cor" valor={reloj} onCambiar={(hora) => p.onHora(`${dia}T${hora}`)} />
       </Campo>
       <Campo etiqueta="Motivo" {...(p.error ? { error: p.error } : {})}>
         <Textarea rows={3} maxLength={500} value={p.motivo} onChange={(e) => p.onMotivo(e.target.value)} />

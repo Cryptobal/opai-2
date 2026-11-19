@@ -1,3 +1,5 @@
+import { formatearFechaHora } from "@opai/domain";
+
 import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -28,8 +30,7 @@ const TONO: Record<Fila["estado"], "warning" | "success" | "danger" | "neutro"> 
 };
 
 function Lista({ state, items, zona }: { state: EstadoPantalla; items: Fila[]; zona: string }) {
-  const hora = new Intl.DateTimeFormat("es-CL", { dateStyle: "short", timeStyle: "short", timeZone: zona, hourCycle: "h23" });
-  const legible = (t: { tipo: string; hora: string }) => `${t.tipo} · ${hora.format(new Date(t.hora))}`;
+  const legible = (t: { tipo: string; hora: string }) => `${t.tipo} · ${formatearFechaHora(t.hora, zona)}`;
   return (
     <ListScreen<Fila>
       state={state}
@@ -40,7 +41,7 @@ function Lista({ state, items, zona }: { state: EstadoPantalla; items: Fila[]; z
       tarjeta={(x) => (
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="truncate text-base font-medium text-fg">{x.personaNombre}</span>
-          <span className="t-caption text-muted">
+          <span className="t-caption text-fg-muted">
             {legible(x.original)} → {legible(x.propuesta)} · <Badge tono={TONO[x.estado]}>{x.estado}</Badge>
           </span>
         </span>

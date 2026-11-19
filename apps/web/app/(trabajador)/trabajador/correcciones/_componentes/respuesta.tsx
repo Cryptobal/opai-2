@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { formatearFechaHora } from "@opai/domain";
+
 import { Alerta, Button, Card, CardContent, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -13,8 +15,8 @@ export function TarjetaCorreccion({ item, zona }: { item: Fila; zona: string }) 
   const [objetar, setObjetar] = useState(false);
   const [comentario, setComentario] = useState("");
   const [listo, setListo] = useState<"aceptada" | "objetada" | null>(null);
-  const hora = new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "short", timeZone: zona, hourCycle: "h23" });
-  const legible = (t: { tipo: string; hora: string }) => `${t.tipo} · ${hora.format(new Date(t.hora))}`;
+  const hora = (valor: string) => formatearFechaHora(valor, zona, { fechaLarga: true });
+  const legible = (t: { tipo: string; hora: string }) => `${t.tipo} · ${hora(t.hora)}`;
 
   async function responder(resultado: "aceptada" | "objetada") {
     const r = await ejecutar("asistencia.correcciones.responder", {
@@ -33,7 +35,7 @@ export function TarjetaCorreccion({ item, zona }: { item: Fila; zona: string }) 
         <p className="text-base text-fg-muted">Original: {legible(item.original)}</p>
         <p className="t-title text-fg">Propuesta: {legible(item.propuesta)}</p>
         <p className="text-base text-fg">{item.motivo}</p>
-        {item.venceEn ? <p className="t-caption text-fg-muted">Responde antes del {hora.format(new Date(item.venceEn))}</p> : null}
+        {item.venceEn ? <p className="t-caption text-fg-muted">Responde antes del {hora(item.venceEn)}</p> : null}
         {objetar ? (
           <>
             <Textarea rows={3} maxLength={500} value={comentario} onChange={(e) => setComentario(e.target.value)} />

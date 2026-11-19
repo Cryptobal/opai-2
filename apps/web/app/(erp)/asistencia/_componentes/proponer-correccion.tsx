@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { avisar, Button, Sheet } from "@opai/ds";
 
+import { horaLocalCompleta, presentarHoraLocal } from "@/lib/asistencia-hora-local";
+
 import { subirDocumento } from "@/app/_components/documentos/subir";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -62,7 +64,7 @@ export function ProponerCorreccion(p: Props) {
       { marcaId, tipoPropuesto: tipo, horaPropuesta: new Date(hora).toISOString(), motivo: motivo.trim(), evidenciaDocumentoId: docId },
       true,
     );
-    if (r) setVistaPrevia(new Date(r.venceEn).toLocaleString("es-CL"));
+    if (r) setVistaPrevia(presentarHoraLocal(r.venceEn));
   }
 
   async function confirmar() {
@@ -79,7 +81,7 @@ export function ProponerCorreccion(p: Props) {
     p.onCerrar();
   }
 
-  const valido = marcaId && hora && motivo.trim().length >= 5 && docId;
+  const valido = marcaId && horaLocalCompleta(hora) && motivo.trim().length >= 5 && docId;
 
   return (
     <Sheet
