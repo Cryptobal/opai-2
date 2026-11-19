@@ -25,6 +25,7 @@ export const AJUSTES: Record<string, Ajuste> = {
   "central.alertas": {
     valores: () => ({ severidad: "alta", estado: "nueva", estado_previo: null, pospuesta_hasta: null, paso_actual: 0, cadena_id: null }),
   },
+  "central.reglas": { valores: () => ({ evento: "rondas.ejecucion.atrasada", severidad: "media", activa: true }) },
   "central.cadenas": {
     valores: () => ({
       instalacion_id: null,
