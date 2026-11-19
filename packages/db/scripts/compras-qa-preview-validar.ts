@@ -68,6 +68,12 @@ export function validarDestinoPreview(
     b.data.branch.project_id !== env.NEON_PROJECT_ID
   )
     throw invalido();
+  if (
+    es.data.endpoints.some(
+      (e) => e.branch_id !== b.data.branch.id || e.project_id !== env.NEON_PROJECT_ID,
+    )
+  )
+    throw invalido();
   const candidatos = es.data.endpoints.filter(
     (e) => e.branch_id === b.data.branch.id && e.type === "read_write",
   );

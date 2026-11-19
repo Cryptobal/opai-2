@@ -1,4 +1,5 @@
 import type { PrismaClient } from "../src/generated/prisma/client";
+import { enEtapaComprasQa as etapa } from "./compras-qa-preview-error";
 import { escribirComprasQa } from "./compras-qa-escribir";
 import { validarContextoPreview, validarDestinoPreview } from "./compras-qa-preview-validar";
 
@@ -10,7 +11,7 @@ export async function ejecutarComprasQaPreview(
   evento: unknown,
   deps: Dependencias,
 ) {
-  const { proyecto, ramaId } = validarContextoPreview(env, evento);
+  const { proyecto, ramaId } = await etapa("CONTEXTO", () => validarContextoPreview(env, evento));
   const base = `https://console.neon.tech/api/v2/projects/${proyecto}`;
   const leer = async (url: string): Promise<unknown> => {
     const r = await deps.fetch(url, {
@@ -23,13 +24,15 @@ export async function ejecutarComprasQaPreview(
       throw new Error("No se pudo verificar metadata de preview.");
     return r.json();
   };
-  const branch = await leer(`${base}/branches/${ramaId}`);
-  const endpoints = await leer(`${base}/endpoints`);
-  const url = validarDestinoPreview(env, branch, endpoints);
-  const db = deps.conectar(url);
+  const branch = await etapa("METADATA_RAMA", () => leer(`${base}/branches/${ramaId}`));
+  const endpoints = await etapa("METADATA_ENDPOINTS", () =>
+    leer(`${base}/branches/${ramaId}/endpoints`),
+  );
+  const url = await etapa("DESTINO", () => validarDestinoPreview(env, branch, endpoints));
+  const db = await etapa("CONSTRUIR_CLIENTE", () => deps.conectar(url));
   try {
-    await escribirComprasQa(db);
+    await etapa("FIXTURE", () => escribirComprasQa(db));
   } finally {
-    await db.$disconnect();
+    await etapa("CERRAR_CLIENTE", () => db.$disconnect());
   }
 }
