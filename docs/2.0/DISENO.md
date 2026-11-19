@@ -61,12 +61,24 @@ Toda pantalla compone un patrón del DS. Los patrones reciben `state` y resuelve
 
 | Patrón | Uso | Notas |
 |---|---|---|
-| **Lista** (`ListScreen`, `SplitScreen`) | Colecciones: cuentas, personas, negocios | Fila como enlace (server-first), búsqueda y filtros con chips, `MetaLista` con conteos. En iPad y escritorio, `SplitScreen` (lista + «Elige un…»); en el celular, solo la lista |
+| **Lista** (`ListScreen`, `SplitScreen`) | Colecciones: cuentas, personas, negocios | Fila como enlace (server-first), búsqueda y filtros con chips, `MetaLista` con conteos. En iPad y escritorio, `SplitScreen` (lista + «Elige un…»); en el celular, solo la lista. **Vista dividida (md+):** la página no hace scroll; cada columna scrollea por separado; la cabecera de ficha y las herramientas de la lista quedan fijas arriba de su columna |
 | **Ficha** (`DetailScreen`, `Seccion`, `Pares`) | Detalle de una entidad | Pestañas por ruta en el orden de ADR-041: Resumen → propias → de módulos → Documentos → Actividad. Las etiquetas van como chips bajo el título y no hay pestañas deshabilitadas |
 | **Drawer** (`Sheet`) | Crear o editar sin perder el contexto de la lista | Se carga al abrirse (`hojaDiferida`, en `apps/web/app/_components/`). En el celular ocupa toda la pantalla; la acción principal queda fija abajo (`AccionFijaTelefono`) |
 | **Formulario** (`FormScreen`, `AjustesForm`) | Altas largas y configuración | Secciones con título; errores junto al campo; «Guardar» deshabilitado sin cambios; aviso al salir con cambios sin guardar |
 | **Planilla** (`PlanillaScreen`) | Pautas, flujo de caja, cotizador | Columnas clave fijas; scroll dentro del contenedor, nunca de la página; números con `t-numeric` |
 | **Tablero** (`DashboardScreen`, `KpiTile`) | Inicio y reportes | Cifras con su período; cada tarjeta lleva a su lista |
+
+### Lista + ficha (obligatorio en todo el ERP)
+
+Regla de Carlos del 15-nov-2026 (19:23), épica [CAR-545](https://linear.app/carlos-irigoyen/issue/CAR-545). **Sin excepción:** toda sección que combine **lista y ficha** de una misma entidad —módulos actuales y pantallas nuevas— sigue el mismo patrón; no se arma la cabecera a mano ni se aparta en un solo módulo.
+
+1. **Lista:** «Nueva» / «Nuevo» en la cabecera de la lista, siempre botón **primario** (`variante` primary), haya o no ficha abierta en `SplitScreen` (revierte [CAR-360](https://linear.app/carlos-irigoyen/issue/CAR-360); [CAR-546](https://linear.app/carlos-irigoyen/issue/CAR-546)).
+2. **Ficha:** en la cabecera del `DetailScreen`, de izquierda a derecha y con el mismo estilo: **Editar** (secundario, si hay permiso) · **Fijar** (botón de ficha; entidades maestras fijables) · **⋯** (resto). Implementación compartida: `AccionesFicha` en `apps/web/app/_components/maestros/acciones-ficha.tsx`. **«Editar» no va en ⋯** ni se duplica con otro nombre («Editar datos», etc.).
+3. **Responsive:** bajo 1024 px, **Fijar** pasa al menú ⋯; **Editar** sigue visible ([CAR-65](https://linear.app/carlos-irigoyen/issue/CAR-65)).
+4. **Fijar en pestañas:** la ruta de fijado es la raíz de la ficha (`/modulo/[id]`), no la pestaña activa; el botón permanece en todas las pestañas.
+5. **Implementación:** las acciones secundarias del ⋯ se declaran en el módulo (`AccionEntidad[]`); la capa compartida filtra `editar` y pinta la fila estándar.
+
+Quien integra un módulo nuevo con lista + ficha debe usar `AccionesFicha` y cumplir lo anterior antes de merge; las migraciones del resto del producto van en [CAR-549](https://linear.app/carlos-irigoyen/issue/CAR-549) (Comercial), [CAR-550](https://linear.app/carlos-irigoyen/issue/CAR-550) (Operaciones) y [CAR-551](https://linear.app/carlos-irigoyen/issue/CAR-551) (Finanzas).
 
 **Estados obligatorios** en toda pantalla:
 

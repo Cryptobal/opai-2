@@ -18,14 +18,17 @@ test.describe("@preview acceso: Accesos en el ERP", () => {
     await expect(page.getByPlaceholder("Buscar por nombre, empresa o patente")).toBeVisible({
       timeout: 60_000,
     });
-    await capturar(page, info, "accesos-registros");
 
-    const fila = page
-      .locator(
-        'a[href^="/accesos/"]:not([href^="/accesos/intentos"]):not([href^="/accesos/listas"])',
-      )
-      .first();
+    // La navegación también enlaza a /accesos/prerregistros: no es una ficha.
+    const lista = page.getByRole("region", { name: "Lista de accesos", exact: true });
+    await expect(lista).toBeVisible();
+    const fila = lista.locator('a[href^="/accesos/"]').filter({ visible: true }).first();
+    const vacio = lista.getByRole("status").getByText("Aún no hay registros", { exact: true });
+    // Esperar datos o vacío real: la ausencia durante Suspense no acredita una lista vacía.
+    await expect(fila.or(vacio).first()).toBeVisible({ timeout: 60_000 });
+    await capturar(page, info, "accesos-registros");
     if ((await fila.count()) === 0) {
+      await expect(vacio).toBeVisible();
       // Sin registros (p. ej. test.opai.cl sin ACCESO_HUELLA_SECRET, CAR-483): la ficha no se recorre y se anota.
       test
         .info()

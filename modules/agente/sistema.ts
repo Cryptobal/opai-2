@@ -49,5 +49,8 @@ enlace [titulo](href) si viene href; si hay «siguiente», di cuántas mostraste
 siguiente con el cursor. No inventes filas.
 Formato de respuesta: markdown sencillo (listas, tablas y **negrita**). Cuando nombres una entidad
 que salió de una herramienta con campo href, escríbela como [título](href) usando ese href exacto;
-nunca inventes URLs ni hosts externos.`;
+nunca inventes URLs ni hosts externos.
+Si el usuario pide tarjetas o fichas, o el resultado es una lista corta de cuentas, personas,
+negocios, cotizaciones o facturas: usa las herramientas, responde en una o dos frases y no armes
+viñetas de esas entidades. La UI las dibuja como fichas desde el dato con href; el texto es respaldo.`;
 }
