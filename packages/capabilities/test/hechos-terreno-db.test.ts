@@ -340,10 +340,18 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
     const cruzada = await mod.executeCapability(ctxB(), "core.hechos_terreno.recibir", {
       dispositivoId: dispB,
       horaEnvio: new Date().toISOString(),
-      hechos: [{ ...hA, personaId: pB }],
+      // La persona de A sigue siendo ajena aunque la clave ya exista en A.
+      hechos: [hA],
     });
     expect(cruzada.ok).toBe(true);
-    if (cruzada.ok) expect((cruzada.data as Recepcion).resultados[0]?.motivo).toBe("persona_no_valida");
+    if (cruzada.ok) {
+      expect((cruzada.data as Recepcion).resultados).toEqual([
+        { clave: hA.clave, estado: "rechazado", motivo: "persona_no_valida" },
+      ]);
+    }
+    expect(await e.admin.hechoTerreno.count({ where: { tenantId: tB, clave: hA.clave } })).toBe(0);
+    expect(await e.admin.marca.count({ where: { tenantId: tB, idempotencyKey: hA.clave } })).toBe(0);
+    expect(await e.admin.marca.count({ where: { tenantId: tA, idempotencyKey: hA.clave } })).toBe(1);
   });
 
   it("dos empresas: un equipo de A no recibe con el contexto de B y B no ve los hechos de A", async () => {
