@@ -19,7 +19,7 @@ export function useEsTelefono(): boolean {
 
 type Respuesta = { termino: string; grupos: readonly GrupoPaleta[]; error: boolean };
 
-export const MINIMO_BUSQUEDA = 2;
+const MINIMO_BUSQUEDA = 2;
 
 /**
  * Una sola búsqueda para la paleta y la hoja del teléfono: con menos de dos letras muestra los grupos

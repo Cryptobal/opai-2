@@ -1,7 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { abrirMenuUsuario } from "./menu-usuario";
-import { capturar } from "./preview";
+import { marcarPendientesDesktop } from "./novedades-preview-desktop";
+import { capturar, capturarNovedad } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-316 y CAR-430: Novedades agrupadas por fecha (Hoy / Esta semana / Antes), tarjetas cortas con
@@ -23,6 +24,7 @@ test.describe("@preview novedades y bandeja", () => {
   test("Novedades agrupadas y cortas, se marcan una o todas, y la Bandeja no las repite", async ({
     page,
   }, info) => {
+    test.setTimeout(info.project.name === "desktop" ? 180_000 : 120_000);
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
@@ -40,6 +42,20 @@ test.describe("@preview novedades y bandeja", () => {
     if (await verMas.count()) {
       await verMas.click();
       await expect(page.getByRole("button", { name: "Ver menos" }).first()).toBeVisible();
+    }
+    // CAR-520: captura de ejemplo ligada al id `novedades-mas-claras` (p. ej. al abrir «Ver más»).
+    const tarjetaEjemplo = page
+      .locator("section")
+      .filter({ hasText: "Novedades más cortas y ordenadas por fecha" });
+    if (await tarjetaEjemplo.count()) {
+      const verMasEjemplo = tarjetaEjemplo.getByRole("button", { name: "Ver más" });
+      if (await verMasEjemplo.isVisible().catch(() => false)) {
+        await verMasEjemplo.click();
+        await expect(
+          tarjetaEjemplo.locator('img[src="/changelog/novedades-mas-claras.png"]'),
+        ).toBeVisible();
+        await capturarNovedad(page, info, "novedades-mas-claras", "ver-mas");
+      }
     }
     await capturar(page, info, "novedades-lista");
 
@@ -127,16 +143,7 @@ test.describe("@preview novedades y bandeja", () => {
         page.locator('nav a[href="/bandeja"] .bg-danger-fg').filter({ visible: true }).first(),
       ).toBeVisible({ timeout: 15_000 });
 
-    await page.goto("/novedades");
-    await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });
-    const marcarTodas = page.getByRole("button", { name: "Marcar todas como leídas" });
-    const antes = await pendientes(page);
-    // Una novedad nueva (por ejemplo la de la propuesta) deja pendientes: no exigimos «Estás al día».
-    if (antes > 0 && (await marcarTodas.count())) {
-      await marcarTodas.click();
-      await expect.poll(() => pendientes(page), { timeout: 30_000 }).toBeLessThan(antes);
-    }
-    await expect(page.getByText(RESUMEN).first()).toBeVisible();
+    await marcarPendientesDesktop(page);
     await capturar(page, info, "novedades-al-dia");
     expect(errores).toEqual([]);
   });

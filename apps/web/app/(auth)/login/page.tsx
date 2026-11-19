@@ -1,8 +1,10 @@
+import { headers } from "next/headers";
 import { Suspense } from "react";
 
 import { googleHabilitado } from "@opai/auth";
 import { Loading } from "@opai/ds";
 
+import { esAppNativa } from "@/lib/app-nativa";
 import { epocaDeIdentidad } from "@/lib/epoca-sesion";
 import { identidadActual } from "@/lib/servidor";
 
@@ -20,10 +22,14 @@ async function Contenido({ searchParams }: Props) {
   // Una app (por ejemplo Claude) pide entrar por OAuth: tras entrar se reanuda su autorización.
   const oauth = destinoContinuarOAuth(params);
   const epoca = epocaDeIdentidad(await identidadActual());
+  // Google bloquea su ingreso en las vistas web de las apps («disallowed_useragent»): dentro de la app
+  // nativa va por el navegador del sistema (CAR-515, CAR-516).
+  const enApp = esAppNativa((await headers()).get("user-agent") ?? "");
   return (
     <FormularioLogin
       destino={oauth ?? (next === undefined ? "" : destinoSeguro(next))}
-      google={googleHabilitado()}
+      google={googleHabilitado() && !enApp}
+      googleApp={googleHabilitado() && enApp}
       epoca={epoca}
     />
   );

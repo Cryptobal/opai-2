@@ -23,6 +23,7 @@ import { reemplazosSugerir } from "./reemplazos-sugerir";
 import { refuerzosAgregar } from "./refuerzos-agregar";
 import { seriesFijar } from "./series";
 import { titularAsignar } from "./titular-asignar";
+import { dotacionInstalacionGet } from "./dotacion-instalacion";
 import { titularesListar } from "./titulares-listar";
 import { titularTrasladar } from "./titular-trasladar";
 import { turnosExtraAprobar } from "./turnos-extra-aprobar";
@@ -41,6 +42,7 @@ export const capacidadesPauta: readonly Capacidad[] = [
   mesLeer,
   resumenLeer,
   ppcListar,
+  dotacionInstalacionGet,
   informeInstalaciones,
   historialListar,
   seriesFijar,

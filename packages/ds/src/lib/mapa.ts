@@ -1,7 +1,7 @@
 /** Geometría del mapa estático (Google Static Maps, Web Mercator): escala de metros a pixeles. */
 
 const METROS_POR_PIXEL_EN_ZOOM_0 = 156_543.03392;
-export const ANCHO_MAPA_PX = 640;
+const ANCHO_MAPA_PX = 640;
 export const ZOOM_MAPA = 16;
 const ZOOM_MIN = 12;
 const ZOOM_MAX = 17;

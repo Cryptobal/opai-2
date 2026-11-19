@@ -9,6 +9,7 @@ import {
   type BloquePlantillaPropuesta,
 } from "../domain/documento/propuesta-tecnica";
 import { publicarBloqueBiblioteca } from "../persistencia/biblioteca-bloques";
+import { textoDeContenido } from "../persistencia/pdf-propuesta-biblioteca";
 import {
   actualizarPlantillaPropuesta,
   plantillaActivaPropuesta,
@@ -34,6 +35,7 @@ export const bibliotecaBloquesList = defineCapability({
         titulo: z.string(),
         estado: z.enum(["borrador", "publicado"]),
         versionPublicada: z.number().int(),
+        texto: z.string(),
         fijo: z.boolean(),
         opcional: z.boolean(),
       }),
@@ -54,6 +56,7 @@ export const bibliotecaBloquesList = defineCapability({
         titulo: b.titulo,
         estado: b.estado as "borrador" | "publicado",
         versionPublicada: b.versionPublicada,
+        texto: textoDeContenido(b.contenidoJson),
         fijo: b.fijo,
         opcional: b.opcional,
       })),
@@ -109,6 +112,8 @@ export const plantillasPropuestaGet = defineCapability({
   },
 });
 
+const unicos = (l: string[]) => new Set(l).size === l.length;
+
 export const plantillasPropuestaUpdate = defineCapability({
   id: "cpq.plantillas_propuesta.update",
   descripcion: "Actualiza la plantilla de propuesta técnica del tenant.",
@@ -119,7 +124,7 @@ export const plantillasPropuestaUpdate = defineCapability({
     aperturaMaxima: z.enum(["por_instalacion", "por_categoria", "por_item"]).optional(),
     bloques: z
       .array(bloquePlantillaSchema)
-      .refine((l) => new Set(l.map((b) => b.tipo)).size === l.length, "Un bloque no puede repetirse.")
+      .refine((l) => unicos(l.filter((b) => b.tipo !== "texto_libre").map((b) => b.tipo)), "Solo «Texto libre» puede repetirse.")
       .optional(),
   }),
   output: plantillasPropuestaGet.output,
