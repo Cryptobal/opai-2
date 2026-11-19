@@ -22,7 +22,7 @@ type Props = {
 
 function FilaBloque({ bloques, onCambiar, i }: Props & { i: number }) {
   const b = bloques[i]!;
-  const nombre = etiquetaBloquePropuesta(b.tipo);
+  const nombre = etiquetaBloquePropuesta(b.tipo, b.titulo);
   const cambiar = (x: BloquePlantilla) => onCambiar(bloques.map((y, j) => (j === i ? x : y)));
   return (
     <li
@@ -128,7 +128,7 @@ export function EditorBloquesPropuesta(p: Props) {
         aria-label="Bloques de la propuesta"
       >
         {p.bloques.map((b, i) => (
-          <FilaBloque key={b.tipo} {...p} i={i} />
+          <FilaBloque key={`${b.tipo}-${i}`} {...p} i={i} />
         ))}
       </ol>
       <p className="t-caption text-fg-muted">

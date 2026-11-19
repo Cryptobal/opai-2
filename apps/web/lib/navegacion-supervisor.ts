@@ -2,7 +2,7 @@ import { listarModulos } from "@opai/capabilities";
 import { PERMISOS_CORE } from "@opai/domain";
 
 /** Entradas de un portal sin áreas (p. ej. Supervisor) que aportan los módulos activos (CAR-197). */
-export function entradasModulosPortal(
+function entradasModulosPortal(
   portal: string,
   puede: (permiso: string) => boolean,
   modulosActivos: readonly string[],
@@ -40,6 +40,7 @@ export function navegacionSupervisor(
     ...(puede(PERMISOS_CORE.instalacionesRead)
       ? [{ href: "/supervisor/instalaciones", etiqueta: "Instalaciones", icono: "MapPin" }]
       : []),
+    { href: "/supervisor/firmas", etiqueta: "Firmas", icono: "FileSignature" },
     // Módulos activos (Rendiciones, CAR-197): en «Más» del teléfono, sin tocar la barra inferior.
     ...entradasModulosPortal("supervisor", puede, modulosActivos).map((e) => ({
       ...e,

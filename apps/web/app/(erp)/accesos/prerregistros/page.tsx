@@ -7,7 +7,7 @@ import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
 import { filtroInstalacion } from "../_componentes/filtro-instalacion";
-import { rutaAccesos } from "../_componentes/lista-registros";
+import { rutaAccesos } from "../_componentes/ruta-accesos";
 import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 import { cargarPrerregistros, uuid } from "./_componentes/datos";
 import { ListaPrerregistros } from "./_componentes/lista-prerregistros";
