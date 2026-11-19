@@ -71,6 +71,24 @@ export async function capturar(page: Page, info: TestInfo, nombre: string): Prom
 }
 
 /**
+ * Captura ligada a una entrada de novedad (`id` del frontmatter). El archivo queda como
+ * `novedad-{id}--{escena}-{proyecto}.png` para que `pnpm novedad:imagen` lo copie a
+ * `apps/web/public/changelog/` (CAR-520). Solo empresa ficticia `qa-e2e`.
+ */
+export async function capturarNovedad(
+  page: Page,
+  info: TestInfo,
+  idNovedad: string,
+  escena: string,
+): Promise<void> {
+  const carpeta = CARPETA_CAPTURAS;
+  await page.screenshot({
+    path: `${carpeta}/novedad-${idNovedad}--${escena}-${info.project.name}.png`,
+    fullPage: true,
+  });
+}
+
+/**
  * Captura una hoja o diálogo recién abierto después de que termine su animación de entrada, para que no
  * quede semitransparente sobre la pantalla (CAR-417). Ignora animaciones infinitas (indicadores de carga)
  * y captura solo la ventana visible.

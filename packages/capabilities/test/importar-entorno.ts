@@ -8,7 +8,7 @@ import { type Entorno, prepararEntorno } from "../../db/test/entorno";
 import type * as ModuloCapacidades from "../src";
 import { registrarModuloComercial } from "./comercial-modulo";
 
-export type Res<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
+type Res<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
 export type Salida = {
   simulacion: boolean; bloqueos: string[]; totalFilas: number; siguiente: number | null; importacionId: string | null;
   conteos: { crear: number; actualizar: number; sin_cambio: number; error: number };

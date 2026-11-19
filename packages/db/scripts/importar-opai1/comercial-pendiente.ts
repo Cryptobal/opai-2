@@ -14,7 +14,7 @@ import type {
 export * from "./comercial-motivos";
 export * from "./comercial-pendientes-importacion";
 
-export type TipoEtapa = "abierta" | "ganada" | "perdida";
+type TipoEtapa = "abierta" | "ganada" | "perdida";
 export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
 
 /** @deprecated Usar equivalencia por tenant (`resolverEtapaNegocio`). Conservado para dry-run de etapas. */
@@ -22,7 +22,7 @@ export function mapearEtapa(e: EtapaOpai1): EtapaMapeada | { error: "etapa_ambig
   return mapearEtapaLegacy(e);
 }
 
-export const MOTIVOS_PERDIDA = [
+const MOTIVOS_PERDIDA = [
   "precio",
   "cobertura",
   "plazo",

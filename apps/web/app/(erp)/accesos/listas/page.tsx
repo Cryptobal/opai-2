@@ -7,6 +7,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarListas } from "../_componentes/datos";
 import { PanelListas } from "../_componentes/panel-listas";
+import { filtroInstalacion } from "../_componentes/filtro-instalacion";
 import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 
 export const metadata = { title: "Listas de acceso" };
@@ -34,9 +35,7 @@ export default function ListasAcceso({ searchParams }: { searchParams: SearchPar
               <ChipsFiltro
                 filtros={[
                   {
-                    param: "instalacion",
-                    etiqueta: "Instalación",
-                    opciones: d.instalaciones.map((i) => ({ valor: i.id, etiqueta: i.nombre })),
+                    ...filtroInstalacion(d.instalaciones),
                     ...(inst ? { porDefecto: inst } : {}),
                   },
                 ]}

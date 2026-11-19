@@ -9,12 +9,12 @@
 name: preview-e2e
 # Ahorro de Actions (13-nov-2026): ya no corre en cada push. Corre de noche contra el despliegue del último
 # commit de main (el de test.opai.cl, en su URL *.vercel.app, con la empresa ficticia qa-e2e) y a pedido:
-# al poner la etiqueta «e2e» en el PR (solo `preview-e2e`, no el CI completo; CAR-627). Para un head nuevo,
-# quitar y volver a poner la etiqueta. También con workflow_dispatch.
+# al poner la etiqueta «e2e» en el PR (solo `preview-e2e`, no el CI completo; CAR-627, CAR-646).
+# No corre en `synchronize` ni en otros eventos del PR: un push nuevo no relanza el workflow.
+# Para un head nuevo, quitar y volver a poner la etiqueta. También con workflow_dispatch.
 on:
-  # Etiqueta «e2e» a pedido; al pasar de borrador a listo se revalúa si ya lleva la etiqueta (CAR-640).
   pull_request:
-    types: [labeled, ready_for_review]
+    types: [labeled]
   schedule:
     # 03:30 America/Santiago (UTC−3) ≈ 06:30 UTC
     - cron: "30 6 * * *"
@@ -33,11 +33,8 @@ jobs:
     if: >-
       github.event_name != 'pull_request' || (
         github.event.pull_request.draft == false
-        && (
-          (github.event.action == 'labeled' && github.event.label.name == 'e2e')
-          || (github.event.action == 'ready_for_review'
-            && contains(toJSON(github.event.pull_request.labels), '"name":"e2e"'))
-        )
+        && github.event.action == 'labeled'
+        && github.event.label.name == 'e2e'
       )
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 60
@@ -159,13 +156,22 @@ jobs:
           CI: "true"
           E2E_PROSPECTO_EMAIL: ${{ secrets.E2E_PROSPECTO_EMAIL }}
           E2E_PROSPECTO_PASSWORD: ${{ secrets.E2E_PROSPECTO_PASSWORD }}
+          QA_GERENTE_PASSWORD: ${{ secrets.QA_GERENTE_PASSWORD }}
+          QA_SUPERVISOR_PASSWORD: ${{ secrets.QA_SUPERVISOR_PASSWORD }}
+          E2E_QA_GERENTE_EMAIL: ${{ vars.E2E_QA_GERENTE_EMAIL }}
+          E2E_QA_APROBADOR_EMAIL: ${{ vars.E2E_QA_APROBADOR_EMAIL }}
         # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
         run: pnpm --filter @opai/web exec playwright test --grep @preview --workers=2 --reporter=list --output=test-results/playwright
+      - name: Copiar capturas de novedad al repositorio (CAR-520)
+        if: steps.listo.outputs.ok == 'true'
+        run: pnpm --filter @opai/domain novedad:imagen
       - name: Subir las capturas
         if: ${{ always() && steps.listo.outputs.ok == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: preview-e2e-capturas
-          path: apps/web/test-results/capturas
+          path: |
+            apps/web/test-results/capturas
+            apps/web/public/changelog/*.png
           if-no-files-found: warn
           retention-days: 14

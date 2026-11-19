@@ -38,6 +38,30 @@ describe("plantillas de cuenta e instalación", () => {
     await f?.e.cerrar();
   });
 
+  it("rellena un campo personalizado de la cuenta en el contrato", async () => {
+    const campo = await executeCapability(ctx(f.tenantId), "core.campos_personalizados.create", {
+      entidad: "cuenta",
+      etiqueta: "Rubro doc",
+      tipo: "texto",
+    });
+    if (!campo.ok) throw new Error(JSON.stringify(campo));
+    const { clave } = campo.data as { clave: string };
+    const valor = await executeCapability(ctx(f.tenantId), "core.valores_personalizados.set", {
+      entidad: "cuenta",
+      id: cuentaId,
+      valores: { [clave]: "Seguridad" },
+    });
+    expect(valor.ok).toBe(true);
+    const plantilla = await crear("Con rubro", "contrato_servicio", `Rubro {cuenta.campo.${clave}}.`);
+    const r = await llamar("core.documento_plantillas.rellenar_entidad", { plantillaId: plantilla, entidadId: cuentaId });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(JSON.stringify(r));
+    const d = r.data as { parrafos: { texto: string }[][]; faltantes: { clave: string }[]; puedeGenerar: boolean };
+    expect(d.parrafos.flat().some((s) => s.texto === "Seguridad")).toBe(true);
+    expect(d.faltantes).toEqual([]);
+    expect(d.puedeGenerar).toBe(true);
+  });
+
   it("el contrato de servicio dice qué falta de la cuenta", async () => {
     const r = await llamar("core.documento_plantillas.rellenar_entidad", { plantillaId: contratoId, entidadId: cuentaId });
     expect(r.ok).toBe(true);

@@ -7,6 +7,7 @@ import { uuidSchema } from "../core/esquemas";
 import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { cargarMes } from "./cargar";
 import { PERMISO_READ, mesSchema } from "./comun";
+import { tramosPpc } from "./tramos-celdas";
 import { resumenSchema } from "./vistas";
 
 const filaInstalacion = z.object({
@@ -100,27 +101,15 @@ export const ppcListar = defineCapability({
     const salida: z.infer<typeof ppcSchema>[] = [];
     for (const p of puestos) {
       const inst = instalaciones.find((i) => i.id === p.instalacionId);
-      let actual: z.infer<typeof ppcSchema> | null = null;
-      for (const c of m.celdas.get(p.id) ?? []) {
-        if (c.estado === "libre") continue;
-        if (c.estado !== "ppc" || !c.motivo) {
-          actual = null;
-        } else if (actual && actual.motivo === c.motivo) {
-          actual.hasta = c.fecha;
-          actual.dias += 1;
-        } else if (inst) {
-          actual = {
-            instalacionId: inst.id,
-            instalacion: inst.nombre,
-            puestoId: p.id,
-            puesto: p.nombre,
-            motivo: c.motivo,
-            desde: c.fecha,
-            hasta: c.fecha,
-            dias: 1,
-          };
-          salida.push(actual);
-        }
+      if (!inst) continue;
+      for (const t of tramosPpc(m.celdas.get(p.id) ?? [])) {
+        salida.push({
+          instalacionId: inst.id,
+          instalacion: inst.nombre,
+          puestoId: p.id,
+          puesto: p.nombre,
+          ...t,
+        });
       }
     }
     return salida.sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0));

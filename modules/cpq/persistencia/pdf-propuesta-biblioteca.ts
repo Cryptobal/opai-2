@@ -3,7 +3,7 @@ import type { Contexto } from "@opai/capabilities";
 import { parseBloquesArmadorPropuesta } from "../domain/documento/propuesta-tecnica";
 
 /** Texto plano de un `contenidoJson` de biblioteca: cadena, `{ texto }` o `{ parrafos: [] }`; texto sin JSON se usa tal cual. */
-function textoDeContenido(contenidoJson: string): string {
+export function textoDeContenido(contenidoJson: string): string {
   let v: unknown;
   try {
     v = JSON.parse(contenidoJson);

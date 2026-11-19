@@ -12,7 +12,7 @@ const tokensSchema = z.object({ usados: z.array(z.string()), colecciones: z.arra
 const propuestaHtmlImportar = defineCapability({
   id: "cpq.propuestas_html.importar",
   descripcion:
-    "Importa un HTML como plantilla de propuesta de la empresa: lo sanea (sin scripts, sin red ni recursos remotos), valida que sus marcadores {{…}} sean del catálogo de campos y lo guarda como versión nueva. La empresa usa una sola plantilla: la nueva queda en uso si reemplaza a la del mismo nombre o si no hay otra en uso; si no, queda inactiva hasta activarla. Lo rechazado no se guarda. Devuelve el HTML saneado para la vista previa.",
+    "Importa un HTML como plantilla de propuesta de la empresa: lo sanea (sin scripts, sin red ni recursos remotos), valida que sus marcadores {{…}} sean del catálogo de campos y lo guarda como versión nueva. La empresa usa una sola plantilla: la nueva queda en uso si reemplaza a la del mismo nombre o si no hay otra en uso; si no, queda inactiva hasta activarla. La vista previa y el PDF de la propuesta técnica salen de la plantilla en uso. Lo rechazado no se guarda. Devuelve el HTML saneado para la vista previa.",
   permiso: PERMISO_BIBLIOTECA,
   input: z.object({
     nombre: z.string().min(1).max(120).describe("Nombre de la plantilla; cada importación con el mismo nombre crea una versión nueva."),
