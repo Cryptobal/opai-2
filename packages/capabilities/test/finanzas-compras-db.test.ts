@@ -4,9 +4,18 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { digitoVerificador, formatearRut } from "@opai/domain";
+
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
+
+// Identificadores sintéticos por slot: distintos, deterministas y con DV válido para el importador.
+function rutFicticio(slot: number, conPuntos = false): string {
+  const cuerpo = String(100_000 + slot);
+  const rut = `${cuerpo}-${digitoVerificador(cuerpo)}`;
+  return conPuntos ? formatearRut(rut) : rut;
+}
 
 type Datos = Record<string, unknown>;
 type Compra = { id: string; centroCostoId: string | null; sugerencia: { origen: string; centroCostoId: string } | null; estadoPago: string };
@@ -19,9 +28,9 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
   let proveedorId = "";
   const medidor = { registrar: async () => undefined };
   const usuarioId = randomUUID();
-  const ctx = () =>
+  const ctx = (tenant = tenantId) =>
     mod.crearContexto({
-      tenantId,
+      tenantId: tenant,
       actor: { tipo: "user", id: usuarioId },
       usuario: { id: usuarioId, nombre: "Admin de prueba", email: "admin@prueba.cl", platformRole: null },
       portal: "erp",
@@ -66,10 +75,10 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     mod = await import("../src");
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesFinanzas]);
-    tenantId = (await e.admin.tenant.create({ data: { slug: `fin-c-${randomUUID().slice(0, 8)}`, nombre: "Atlas Seguridad SpA", vertical: "seguridad" } })).id;
-    const cuentaId = (await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente Norte" } })).id;
-    instalacionId = (await e.admin.instalacion.create({ data: { tenantId, cuentaId, nombre: "Bodega Lampa" } })).id;
-    proveedorId = (await dato<{ id: string }>("finanzas.proveedores.crear", { rut: "76.543.210-3", razonSocial: "Uniformes del Sur SpA", plazoPagoDias: 45 })).id;
+    tenantId = (await e.admin.tenant.create({ data: { slug: `fin-c-${randomUUID().slice(0, 8)}`, nombre: "Empresa ficticia QA compras", vertical: "seguridad" } })).id;
+    const cuentaId = (await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente ficticio QA" } })).id;
+    instalacionId = (await e.admin.instalacion.create({ data: { tenantId, cuentaId, nombre: "Instalación ficticia QA" } })).id;
+    proveedorId = (await dato<{ id: string }>("finanzas.proveedores.crear", { rut: rutFicticio(1, true), razonSocial: "Proveedor ficticio QA principal", plazoPagoDias: 45 })).id;
   });
 
   afterAll(async () => {
@@ -111,10 +120,10 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
 
   it("importa en lote: vista previa, filas con error sin frenar, y repetir no duplica", async () => {
     const filas = [
-      { proveedorRut: "76.543.210-3", ...doc(2001), proveedorId: undefined },
-      { proveedorRut: "77.123.456-9", proveedorRazonSocial: "Seguridad Austral Ltda.", ...doc(2002), proveedorId: undefined },
-      { proveedorRut: "11.111.111-2", ...doc(2003), proveedorId: undefined },
-      { proveedorRut: "76.543.210-3", ...doc(1001), proveedorId: undefined },
+      { proveedorRut: rutFicticio(1, true), ...doc(2001), proveedorId: undefined },
+      { proveedorRut: rutFicticio(2, true), proveedorRazonSocial: "Proveedor ficticio QA importado", ...doc(2002), proveedorId: undefined },
+      { proveedorRut: "RUT-FICTICIO-INVALIDO", ...doc(2003), proveedorId: undefined },
+      { proveedorRut: rutFicticio(1, true), ...doc(1001), proveedorId: undefined },
     ];
     const prev = await dato<{ nuevos: number; duplicados: number; errores: number }>("finanzas.compras.importar", { documentos: filas, crearProveedores: true }, { dryRun: true });
     expect(prev).toMatchObject({ nuevos: 2, duplicados: 1, errores: 1 });
@@ -141,16 +150,16 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
       medidor,
     });
     const entrada = {
-      documentos: [{ proveedorRut: "78.000.000-7", proveedorRazonSocial: "Nuevo Ltda.", ...doc(4001), proveedorId: undefined }],
+      documentos: [{ proveedorRut: rutFicticio(3, true), proveedorRazonSocial: "Proveedor ficticio QA sin permiso", ...doc(4001), proveedorId: undefined }],
       crearProveedores: true,
     };
     for (const dryRun of [true, false]) {
       const r = await mod.executeCapability(soloCompras, "finanzas.compras.importar", entrada, { dryRun });
       expect(r, String(dryRun)).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     }
-    expect(await e.admin.proveedor.count({ where: { tenantId, rut: "78000000-7" } })).toBe(0);
+    expect(await e.admin.proveedor.count({ where: { tenantId, rut: rutFicticio(3) } })).toBe(0);
     // Sin crear proveedores, con uno existente, quien solo tiene compras sí importa.
-    const existente = { documentos: [{ proveedorRut: "76.543.210-3", ...doc(4002), proveedorId: undefined }] };
+    const existente = { documentos: [{ proveedorRut: rutFicticio(1, true), ...doc(4002), proveedorId: undefined }] };
     expect(await mod.executeCapability(soloCompras, "finanzas.compras.importar", existente)).toMatchObject({ ok: true });
   });
 
@@ -163,30 +172,44 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
   });
 
   it("sin proveedores.manage, importar un proveedor nuevo falla prohibido en dryRun y en real, sin escribir nada", async () => {
-    const filas = [{ proveedorRut: "19.876.543-0", proveedorRazonSocial: "Suministros Ficticios SpA", ...doc(5001), proveedorId: undefined }];
+    const filas = [{ proveedorRut: rutFicticio(4, true), proveedorRazonSocial: "Suministros Ficticios SpA", ...doc(5001), proveedorId: undefined }];
     const prev = await ejecutarSinProveedores("finanzas.compras.importar", { documentos: filas, crearProveedores: true }, { dryRun: true });
     expect(prev).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     const real = await ejecutarSinProveedores("finanzas.compras.importar", { documentos: filas, crearProveedores: true });
     expect(real).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
-    expect(await e.admin.proveedor.count({ where: { tenantId, rut: "19876543-0" } })).toBe(0);
+    expect(await e.admin.proveedor.count({ where: { tenantId, rut: rutFicticio(4) } })).toBe(0);
     expect(await e.admin.documentoRecibido.count({ where: { tenantId, folio: 5001 } })).toBe(0);
   });
 
   it("con proveedores.manage, importar un proveedor nuevo crea el proveedor y el documento", async () => {
-    const filas = [{ proveedorRut: "19.876.543-0", proveedorRazonSocial: "Suministros Ficticios SpA", ...doc(5002), proveedorId: undefined }];
+    const filas = [{ proveedorRut: rutFicticio(4, true), proveedorRazonSocial: "Suministros Ficticios SpA", ...doc(5002), proveedorId: undefined }];
     const real = await dato<{ nuevos: number; proveedoresCreados: number }>("finanzas.compras.importar", { documentos: filas, crearProveedores: true });
     expect(real).toMatchObject({ nuevos: 1, proveedoresCreados: 1 });
-    expect(await e.admin.proveedor.count({ where: { tenantId, rut: "19876543-0" } })).toBe(1);
+    expect(await e.admin.proveedor.count({ where: { tenantId, rut: rutFicticio(4) } })).toBe(1);
   });
 
   it("sin proveedores.manage pero sin proveedores nuevos, la importación pasa igual", async () => {
-    const filas = [{ proveedorRut: "76.543.210-3", ...doc(5003), proveedorId: undefined }];
+    const filas = [{ proveedorRut: rutFicticio(1, true), ...doc(5003), proveedorId: undefined }];
     const real = await ejecutarSinProveedores("finanzas.compras.importar", { documentos: filas, crearProveedores: true });
     expect(real).toMatchObject({ ok: true, data: { nuevos: 1, proveedoresCreados: 0 } });
   });
 
   it("el estado de pago sale de lo conciliado con el banco: parcial, pagada, y lo deshecho no cuenta (CAR-239)", async () => {
-    const c = await dato<Compra & { montoTotal: number }>("finanzas.compras.registrar", doc(9101, { fechaRecepcion: "2026-10-09" }));
+    // Este caso verifica totales por proveedor y tenant, no solo el documento recién creado.
+    // No debe heredar las facturas impagas de los casos anteriores del libro de compras.
+    const tenantId = (await e.admin.tenant.create({ data: {
+      slug: `fin-pago-${randomUUID()}`, nombre: "Empresa ficticia QA pagos", vertical: "seguridad",
+    } })).id;
+    const proveedorId = (await e.admin.proveedor.create({ data: {
+      tenantId, rut: "RUT-FICTICIO-NO-VALIDO", razonSocial: "Proveedor ficticio QA pagos", plazoPagoDias: 45,
+    } })).id;
+    const dato = async <T>(id: string, input: Datos): Promise<T> => {
+      const r = await mod.executeCapability(ctx(tenantId), id, input);
+      if (!r.ok) throw new Error(`${id}: ${r.error.code} ${r.error.message}`);
+      return r.data as T;
+    };
+    const libro = () => dato<{ items: Compra[] }>("finanzas.compras.listar", { periodo: "2026-10" });
+    const c = await dato<Compra & { montoTotal: number }>("finanzas.compras.registrar", doc(9101, { proveedorId, fechaRecepcion: "2026-10-09" }));
     const cuentaId = (await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco de prueba", numeroVisible: "****0001" } })).id;
     const pagar = async (monto: number, activa = true) => {
       const mov = await e.admin.movimientoBancario.create({
@@ -217,4 +240,3 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     expect(pagos.totalPorPagar).toBe(0);
   });
 });
-
