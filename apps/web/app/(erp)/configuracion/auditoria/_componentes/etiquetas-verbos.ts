@@ -31,7 +31,7 @@ export const VERBOS: Record<string, string> = {
   politica_set: "Definir política", firmante_empresa_set: "Definir firmante de la empresa",
   firma_automatica_autorizar: "Autorizar firma automática", firma_automatica_revocar: "Revocar firma automática",
   enviar: "Enviar", recordar: "Recordar", firmar: "Firmar", ver_firmante: "Ver firmante",
-  documento_url: "Ver documento", schema: "Estructura", buscar: "Buscar", dpa_texto: "Ver acuerdo de datos",
+  mis_pendientes: "Mis pendientes", documento_url: "Ver documento", schema: "Estructura", buscar: "Buscar", dpa_texto: "Ver acuerdo de datos",
   dpa_aceptar: "Aceptar acuerdo de datos", dpo_set: "Definir delegado de datos", rat: "Registro de tratamientos",
   consentimiento_registrar: "Registrar consentimiento", consentimiento_revocar: "Revocar consentimiento",
   consentimientos_listar: "Listar consentimientos", solicitud_crear: "Crear solicitud",

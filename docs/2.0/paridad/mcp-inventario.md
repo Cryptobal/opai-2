@@ -111,7 +111,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.etiquetas.de_entidad` | `core_etiquetas_de_entidad` | existe |
 | compartido | `app/_components` | `core.etiquetas.list` | `core_etiquetas_list` | existe |
 | compartido | `app/_components` | `core.etiquetas.quitar` | `core_etiquetas_quitar` | existe |
+| compartido | `app/_components` | `core.firmas.documento_url` | — | excepción |
 | compartido | `app/_components` | `core.firmas.enviar` | `core_firmas_enviar` | existe |
+| compartido | `app/_components` | `core.firmas.firmar` | — | excepción |
+| compartido | `app/_components` | `core.firmas.rechazar` | — | excepción |
+| compartido | `app/_components` | `core.firmas.ver_firmante` | — | excepción |
 | compartido | `app/_components` | `core.geo.autocompletar` | `core_geo_autocompletar` | existe |
 | compartido | `app/_components` | `core.geo.detalle` | `core_geo_detalle` | existe |
 | compartido | `app/_components` | `core.marca.get` | `core_marca_get` | existe |
@@ -852,12 +856,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/existe-ruta.ts` | `core.personas.get` | `core_personas_get` | existe |
 | servidor | `lib/mcp.ts` | `core.config.schema` | `core_config_schema` | existe |
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
+| supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
 | trabajador | `/trabajador/notificaciones` | `portal_trabajador.preferencias_notificacion.obtener` | `portal_trabajador_preferencias_notificacion_obtener` | existe |
+| trabajador | `/trabajador/por-firmar` | `core.firmas.mis_pendientes` | — | excepción |
 | trabajador | `/trabajador/privacidad` | `portal_trabajador.privacidad.obtener` | `portal_trabajador_privacidad_obtener` | existe |
 | trabajador | `/trabajador` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
@@ -896,6 +902,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
+| `app/_components/firmas/acciones-sesion.ts#firmarEnSesion` | Firma: core.firmas.firmar (interna con motivo) con sesión del portal (CAR-634). |
+| `app/_components/firmas/acciones-sesion.ts#rechazarEnSesion` | Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634). |
+| `app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion` | Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634). |
+| `app/_components/firmas/acciones-sesion.ts#verFirmaSesion` | Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634). |
 | `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
@@ -995,6 +1005,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.firmas.firma_automatica_revocar` | Solo personas: revocar la firma automática del representante es un acto suyo (firma.md §10, R16). |
 | `core.firmas.firmante_empresa_set` | Solo personas: define quién firma por la empresa (representante legal); gobierna la identidad de firma, no una key (firma.md §10, R16). |
 | `core.firmas.firmar` | Interna y solo personas: el enlace personal es la credencial (como al aceptar una invitación) y un agente nunca firma por una persona (firma.md R19, §10). |
+| `core.firmas.mis_pendientes` | Solo personas: son firmas pendientes del propio usuario en su portal, no de un agente ni de una key (firma.md R19, CAR-634). |
 | `core.firmas.rechazar` | Interna y solo personas: rechazar es un acto personal del firmante con su enlace como credencial; un agente nunca rechaza por nadie (firma.md R9, R19, §10). |
 | `core.firmas.ver_firmante` | Interna: se mira antes de existir sesión con el enlace personal como credencial, igual que core.invitations.peek (firma.md §5). |
 | `core.geo.mapa` | Interna: entrega la imagen del mapa al proxy `/api/geo/mapa` con la clave del tenant; una imagen no sirve a un agente y la clave nunca sale. |
@@ -1108,8 +1119,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.firmas.firma_automatica_autorizar` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
 | `core.firmas.firma_automatica_revocar` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
 | `core.firmas.firmante_empresa_set` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
-| `core.firmas.firmar` | `/firmar/[slug]/[token]` | no | reservada a personas |
-| `core.firmas.rechazar` | `/firmar/[slug]/[token]` | no | reservada a personas |
+| `core.firmas.firmar` | `/firmar/[slug]/[token]`, `app/_components` | no | reservada a personas |
+| `core.firmas.mis_pendientes` | `/supervisor/firmas`, `/trabajador/por-firmar` | no | reservada a personas |
+| `core.firmas.rechazar` | `/firmar/[slug]/[token]`, `app/_components` | no | reservada a personas |
 | `core.grupos.rol_asignar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
 | `core.grupos.rol_quitar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
