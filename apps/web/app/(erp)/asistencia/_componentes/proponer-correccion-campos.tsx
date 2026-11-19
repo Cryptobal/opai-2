@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Campo, Select, Textarea } from "@opai/ds";
+import { Button, Campo, Input, Select, Textarea } from "@opai/ds";
 
 const TIPOS = [
   { valor: "entrada", etiqueta: "Entrada" },
@@ -50,10 +50,9 @@ export function CamposProponerCorreccion(p: Props) {
         <Select valor={p.tipo} opciones={TIPOS} onCambiar={p.onTipo} />
       </Campo>
       <Campo etiqueta="Hora propuesta" htmlFor="hora-cor">
-        <input
+        <Input
           id="hora-cor"
           type="datetime-local"
-          className="w-full rounded-md border border-border bg-surface px-3 py-2"
           value={p.hora}
           onChange={(e) => p.onHora(e.target.value)}
         />
