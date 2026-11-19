@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
 
 import { urlSiembra } from "./fixtures-puestos-car8";
-import { hidratado } from "./hidratacion";
+import { contenidoHidratado, hidratado } from "./hidratacion";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-206: asignar titular desde la ficha del puesto. Flujo completo en iPad (escritura una vez):
@@ -49,7 +49,12 @@ test.describe("puestos · asignar titular (CAR-206)", () => {
     await expect(page.getByText(`Puesto ${NOMBRE} creado`)).toBeVisible();
 
     // Ficha: sin titular, PPC; asignar.
-    await page.getByRole("link", { name: new RegExp(NOMBRE) }).filter({ visible: true }).first().click();
+    const ficha = page.getByRole("link", { name: new RegExp(NOMBRE) }).filter({ visible: true }).first();
+    await hidratado(ficha);
+    const hrefPuesto = (await ficha.getAttribute("href")) ?? "";
+    await ficha.click();
+    await expect(page).toHaveURL(/puesto=/);
+    await contenidoHidratado(page);
     await expect(page.getByRole("heading", { name: "Titular", exact: true })).toBeVisible();
     await expect(page.getByText("Sin titular · puesto por cubrir")).toBeVisible();
     await page.getByRole("button", { name: "Asignar titular" }).click();
@@ -72,11 +77,10 @@ test.describe("puestos · asignar titular (CAR-206)", () => {
     await expect(page.getByText("Titular E2E").first()).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(`${NOMBRE}, ${HOY}: Cubierto`) })).toBeVisible();
 
-    // Historial en la ficha.
-    await page.goto(`/instalaciones/${INST}/puestos`);
-    const fila = page.getByRole("link", { name: new RegExp(NOMBRE) }).filter({ visible: true }).first();
-    await hidratado(fila);
-    await fila.click();
+    // Historial en la ficha (navegación completa: evita RSC en caché del router de antes de asignar).
+    await page.goto(`/instalaciones/${INST}/puestos${hrefPuesto.startsWith("?") ? hrefPuesto : `?${hrefPuesto}`}`);
+    await contenidoHidratado(page);
+    await expect(page.getByRole("heading", { name: "Editar puesto" })).toBeVisible();
     await expect(page.getByText("Historial de titulares")).toBeVisible();
     await expect(page.getByText(/asignó a Titular E2E/)).toBeVisible();
     await captura(page, "puestos-ficha-titular", info.project.name);

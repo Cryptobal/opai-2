@@ -8,7 +8,7 @@ Origen: `listarAjustes()` — núcleo (`packages/capabilities/src/core/config/*.
 
 | Módulo | Cantidad | Ubicación principal |
 | --- | ---: | --- |
-| `core` | 49 | Empresa, cumplimiento, comunicaciones, terreno, navegación, preferencias (usuario), plataforma |
+| `core` | 50 | Empresa, cumplimiento, comunicaciones, terreno, navegación, preferencias (usuario), plataforma |
 | `finanzas` | 14 | `packages/capabilities/src/finanzas/ajustes.ts` |
 | `comercial` | 5 | `packages/capabilities/src/comercial/ajustes.ts` |
 | `asistencia` | 11 | `modules/asistencia/capabilities/ajustes.ts` |
@@ -23,7 +23,7 @@ Origen: `listarAjustes()` — núcleo (`packages/capabilities/src/core/config/*.
 
 Ajustes de **plataforma** (ámbito `plataforma` en el catálogo): IMM, modelos de IA, DPA, biometría global, integraciones restringidas. Pantalla: `/platform/ajustes/*`.
 
-**Total declarado al cierre de esta revisión:** 122 campos.
+**Total declarado al cierre de esta revisión:** 123 campos (CAR-581).
 
 ### Hallazgo y resolución (ajustes)
 
@@ -52,14 +52,15 @@ Inventario de paridad pantalla ↔ MCP: `docs/2.0/paridad/mcp-inventario.md`, ga
 
 Datos de configuración que **no** son ajustes del catálogo (tablas o capacidades propias): flujo de caja (`finanzas.flujo_ajustes`), embudo y catálogos comerciales (`comercial.config.*`), marca CPQ vs marca empresa (CPQ enlaza a `/configuracion/marca` para logos), **Control de acceso** (`acceso.configuraciones` + capacidades `acceso.config.*`, empresa e instalación — CAR-630; no duplicar en ajustes del núcleo).
 
-## 5. Decisiones pendientes
+## 5. Decisiones resueltas (CAR-581)
 
-| Tema | Lugares | Por qué no se unificó en este PR | Recomendación |
-| --- | --- | --- | --- |
-| Correo comercial del perfil vs CCO comercial vs dirección de registro de correos | Empresa (perfil), Comunicaciones (CCO), Correos de clientes | Tres usos distintos (dato en DTE/plantillas, copia en avisos, historial CRM) | Confirmar si el contacto comercial del perfil debe ser la única fuente para los tres |
-| Marca documental CPQ vs Marca empresa | CPQ pestaña vs `/configuracion/marca` | Ya enlazados; CPQ guarda tipografía/pie distinto de logos | Mantener dueño dual con enlace (actual) o mover todo a Marca |
-| Ajustes de flujo en tabla `finanzas.flujo_ajustes` vs ajustes manifest Finanzas | Módulo Finanzas | Modelos distintos (planilla vs reglas de cobranza/facturación) | Documentar en ayuda de Configuración que son capas distintas |
-| Geocerca por defecto (Rondas) vs radio de alerta (Asistencia) | Dos módulos | Ley y producto distintos (ronda vs marca) | Revisar si el tenant debería tener un solo «radio por defecto» transversal |
+| Tema | Dueño | Acción |
+| --- | --- | --- |
+| Correo comercial | `perfil_empresa.correo_comercial` (Datos de la empresa) | Se retiran los CCO comerciales del núcleo; migración SQL desde `core.ajustes`. Cotizaciones y CPQ ya leían el perfil. |
+| Copias ocultas en avisos | `core.notificaciones_correo_*` | Defecto más overrides por área (comercial, finanzas, operaciones). UI en Configuración › Usuarios y permisos; el consumidor añade BCC en avisos (no en transaccionales). |
+| Marca documental (tipografía, pie, condiciones) | `perfil_empresa` + `core.marca.*` | Migra desde `cpq.marca_documento`; UI en Configuración › Marca. CPQ mantiene `cpq.marca_documento.*` como delegado MCP y versiones de PDF. |
+| Flujo de caja vs cobranza/facturación | Dos capas | `finanzas.flujo_ajustes` (planilla) vs ajustes manifest Finanzas (cobranza). Ayudas actualizadas en Configuración › Finanzas › Flujo de caja y en el módulo. |
+| Geocerca asistencia vs rondas | Dos módulos | Asistencia: defecto 100 m en marcas. Rondas: 15 m en puntos (`RADIO_GEOCERCA_M`). Etiquetas de ayuda distinguen ambos usos. |
 
 ### Resuelto (acceso)
 
