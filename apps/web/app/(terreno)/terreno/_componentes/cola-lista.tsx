@@ -43,15 +43,19 @@ const Fila = ({ children }: { children: ReactNode }) => (
   </li>
 );
 
+const FilaEncabezado = ({ tipo, horaHecho }: { tipo: string; horaHecho: string }) => (
+  <span className="flex items-center justify-between gap-3">
+    <span className="text-base text-fg">{etiquetaTipo(tipo)}</span>
+    <span className="t-mono text-sm text-fg-muted">{hora(horaHecho)}</span>
+  </span>
+);
+
 export function ListaPendientes({ hechos }: { hechos: HechoLocal[] }) {
   return (
     <Lista>
       {hechos.map((h) => (
         <Fila key={h.clave}>
-          <span className="flex items-center justify-between gap-3">
-            <span className="text-base text-fg">{etiquetaTipo(h.tipo)}</span>
-            <span className="t-mono text-sm text-fg-muted">{hora(h.horaHecho)}</span>
-          </span>
+          <FilaEncabezado tipo={h.tipo} horaHecho={h.horaHecho} />
           <span className="text-sm text-fg-muted">Guardado en este teléfono, falta enviarlo.</span>
         </Fila>
       ))}
@@ -64,10 +68,7 @@ export function ListaSincronizados({ hechos }: { hechos: ResultadoLocal[] }) {
     <Lista>
       {hechos.slice(0, 5).map((h) => (
         <Fila key={h.clave}>
-          <span className="flex items-center justify-between gap-3">
-            <span className="text-base text-fg">{etiquetaTipo(h.tipo)}</span>
-            <span className="t-mono text-sm text-fg-muted">{hora(h.horaHecho)}</span>
-          </span>
+          <FilaEncabezado tipo={h.tipo} horaHecho={h.horaHecho} />
           <span className="text-sm text-fg-muted">Ya llegó al servidor.</span>
         </Fila>
       ))}
@@ -86,10 +87,7 @@ export function ListaRechazados({
     <Lista>
       {hechos.map((h) => (
         <Fila key={h.clave}>
-          <span className="flex items-center justify-between gap-3">
-            <span className="text-base text-fg">{etiquetaTipo(h.tipo)}</span>
-            <span className="t-mono text-sm text-fg-muted">{hora(h.horaHecho)}</span>
-          </span>
+          <FilaEncabezado tipo={h.tipo} horaHecho={h.horaHecho} />
           <span role="alert" className="text-sm font-medium text-danger-fg">
             No se envió. {motivoRechazo(h.motivo)}
           </span>

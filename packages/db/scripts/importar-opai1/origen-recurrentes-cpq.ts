@@ -8,7 +8,7 @@ const bandera = z.boolean().default(false);
 const numero = z.union([z.number(), z.string().trim().min(1).pipe(z.coerce.number())]).pipe(z.number().finite());
 
 /** Una línea de `FinanceDteRecurringTemplate.lines`: el precio es CLP (`unitPrice`) o UF (`unitPriceUf`). */
-export const lineaRecurrenteOpai1 = z.object({
+const lineaRecurrenteOpai1 = z.object({
   itemName: texto,
   description: texto,
   quantity: numero.default(1),
@@ -21,7 +21,7 @@ export const lineaRecurrenteOpai1 = z.object({
   accountId: texto,
 });
 
-export const referenciaRecurrenteOpai1 = z.object({
+const referenciaRecurrenteOpai1 = z.object({
   fchRef: z.string().min(1),
   folioRef: z.string().min(1),
   razonRef: z.string().optional(),

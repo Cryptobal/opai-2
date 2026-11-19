@@ -14,7 +14,6 @@ export type ObjetivoVerComo = {
 export function rolVisible(ctx: Contexto, rol: string): boolean {
   return ctx.rol !== null && esRol(rol) && puedeAsignarRol(ctx.rol, rol);
 }
-
 /**
  * Membresía activa en esta empresa con el portal, y de rol no superior al de quien mira (un admin no
  * ve como el owner). La consulta va por `ctx.db`: otra empresa responde como inexistente.

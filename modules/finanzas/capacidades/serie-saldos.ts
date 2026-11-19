@@ -6,6 +6,7 @@ import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { celdasCobrosEsperados } from "./cobros-esperados";
 import { celdasRecurrentes } from "./recurrentes-planilla";
+import { celdasRemuneraciones } from "./remuneraciones-planilla";
 import { celdasRendiciones } from "./rendiciones-planilla";
 import { celdasAbonosSemana } from "./abonos-semana";
 import { llevarSaldo } from "./saldo-llevado";
@@ -31,7 +32,7 @@ const semanasEntre = (a: string, b: string) => Math.round((Date.parse(b) - Date.
  * De dónde sale el saldo de la serie: el banco de hoy (ADR-073) o, si ninguna cuenta tiene saldo, $0. No hay saldo de
  * partida: el flujo proyecta desde lo que hay hoy en el banco (regla de Carlos del 13-nov-2026, CAR-391).
  */
-export type FuenteSaldo = "banco" | "sin_banco";
+type FuenteSaldo = "banco" | "sin_banco";
 
 /**
  * Serie de saldos única de la planilla, el aviso y la vista previa de «Reprogramar» (ADR-073).
@@ -74,8 +75,9 @@ export async function serieSaldos(
   const abonos = await celdasAbonosSemana(ctx, hoy, movidos, tx);
   const recurrentes = await celdasRecurrentes(ctx, hoy, listaCalc, tx);
   const rendiciones = await celdasRendiciones(ctx, hoy, listaCalc, tx);
-  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio, ...recurrentes.dominio, ...rendiciones.dominio];
-  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...recurrentes.vista, ...rendiciones.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
+  const remuneraciones = await celdasRemuneraciones(ctx, listaCalc);
+  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio, ...recurrentes.dominio, ...rendiciones.dominio, ...remuneraciones.dominio];
+  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...recurrentes.vista, ...rendiciones.vista, ...remuneraciones.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,

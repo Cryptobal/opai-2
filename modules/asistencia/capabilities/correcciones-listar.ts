@@ -46,15 +46,25 @@ export const correccionesListar = defineCapability({
     "Lista las correcciones de marcas con su estado (pendiente, aceptada, objetada o vencida), el valor propuesto, el original y cuál rige hoy. El trabajador ve las suyas y el supervisor las de sus instalaciones.",
   permiso: null,
   portales: ["erp", "supervisor", "trabajador", "terreno"],
-  input: z.object({ marcaId: uuid.optional(), estado: z.enum(["pendiente", "aceptada", "objetada", "vencida"]).optional() }),
-  output: z.object({ items: z.array(itemSchema) }),
+  input: z.object({
+    marcaId: uuid.optional(), estado: z.enum(["pendiente", "aceptada", "objetada", "vencida"]).optional(),
+    cursor: z.string().uuid().optional(), limite: z.number().int().min(1).max(200).default(50),
+  }),
+  output: z.object({ items: z.array(itemSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => s.items.map((c) => c.correccionId),
   async handler(ctx, i) {
     const a = await alcanceMarcas(ctx);
     const marcas = await ctx.db.marca.findMany({ where: { ...a, ...(i.marcaId ? { id: i.marcaId } : {}) }, select: { id: true }, take: 5000 });
-    const items = await correccionesVista(ctx, { marcaId: { in: marcas.map((m) => m.id) } });
-    return { items: i.estado ? items.filter((x) => x.estado === i.estado) : items };
+    const todos = await correccionesVista(ctx, { marcaId: { in: marcas.map((m) => m.id) } });
+    const filtrados = i.estado ? todos.filter((x) => x.estado === i.estado) : todos;
+    let inicio = 0;
+    if (i.cursor) {
+      const ix = filtrados.findIndex((x) => x.correccionId === i.cursor);
+      if (ix >= 0) inicio = ix + 1;
+    }
+    const items = filtrados.slice(inicio, inicio + i.limite);
+    return { items, siguiente: filtrados.length > inicio + i.limite ? (items.at(-1)?.correccionId ?? null) : null };
   },
 });

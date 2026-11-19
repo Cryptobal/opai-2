@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Alerta, Button, Card, CardContent } from "@opai/ds";
 
 import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
+import { encolarHecho } from "@/lib/terreno/cola";
 
 import { CapturaRostro } from "./captura-rostro";
 import { EnrolarRostro } from "./enrolar-rostro";
@@ -43,6 +44,9 @@ export function Marcar({
   const [pin, setPin] = useState("");
   const [motivo, setMotivo] = useState("otro");
   const [listo, setListo] = useState<MarcaListo | null>(null);
+  const [colaPendiente, setColaPendiente] = useState(false);
+  const [guardandoCola, setGuardandoCola] = useState(false);
+  const [errorCola, setErrorCola] = useState<string | null>(null);
   const [intentoRostro, setIntentoRostro] = useState(false);
   const clave = useRef<string>(crypto.randomUUID());
   const base = useCallback(() => ({ ...(personaId ? { personaId } : {}), ...(modo === "equipo" ? { credencial: pin } : {}) }), [personaId, modo, pin]);
@@ -78,7 +82,33 @@ export function Marcar({
     if (!(await marcar({ metodo: "rostro", muestra }))) setPaso("inicio");
   }
   async function conPin() {
-    const r = await marcar({ metodo: rostroUsable ? "pin_respaldo" : "rut_pin", credencial: pin, ...(rostroUsable ? { motivoRespaldo: motivo } : {}) });
+    if (soloLectura) return;
+    const metodo = rostroUsable ? "pin_respaldo" : "rut_pin";
+    const pid = personaId ?? estado?.personaId;
+    const cuerpo = { metodo, credencial: pin, ...(rostroUsable ? { motivoRespaldo: motivo } : {}) };
+    if (modo === "equipo" && !navigator.onLine && pid) {
+      setGuardandoCola(true);
+      setErrorCola(null);
+      limpiarError();
+      try {
+        const ub = await ubicacion();
+        await encolarHecho({
+          tipo: "asistencia.marca",
+          payload: { ...cuerpo, ...(ub ?? {}) },
+          personaId: pid,
+        });
+        clave.current = crypto.randomUUID();
+        setColaPendiente(true);
+        setPin("");
+        setPaso("inicio");
+      } catch {
+        setErrorCola("No se pudo guardar la marca en el teléfono. Vuelve a intentar.");
+      } finally {
+        setGuardandoCola(false);
+      }
+      return;
+    }
+    const r = await marcar(cuerpo);
     if (!r) setPin("");
   }
 
@@ -88,9 +118,18 @@ export function Marcar({
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
       <div className="flex flex-col gap-1">
         <span className="t-caption text-fg-muted">{lugar} · {nombre}</span>
-        <span className="t-body-sm text-fg-muted">La hora la fija el servidor al marcar. Necesitas conexión.</span>
+        <span className="t-body-sm text-fg-muted">
+          {modo === "equipo"
+            ? "Con conexión la marca usa el servidor al instante. Sin señal, el PIN queda en el teléfono hasta sincronizar."
+            : "La hora la fija el servidor al marcar. Necesitas conexión."}
+        </span>
       </div>
-      {error ? <Alerta tono="danger" titulo={error} /> : null}
+      {colaPendiente ? (
+        <Alerta tono="neutral" titulo="Marca guardada en el teléfono">
+          Queda pendiente hasta que el equipo vuelva a tener conexión y el servidor la confirme. Revisa el estado en «Cola».
+        </Alerta>
+      ) : null}
+      {error ?? errorCola ? <Alerta tono="danger" titulo={error ?? errorCola ?? ""} /> : null}
       {paso === "inicio" ? (
         <Card><CardContent className="flex flex-col gap-4">
           {rostroUsable ? (
@@ -106,7 +145,7 @@ export function Marcar({
       ) : null}
       {paso === "pin" ? (
         <Card><CardContent className="flex flex-col gap-3">
-          <MarcarPin pin={pin} onPin={setPin} motivo={motivo} onMotivo={setMotivo} pideMotivo={rostroUsable} pendiente={pendiente} onMarcar={() => void conPin()} />
+          <MarcarPin pin={pin} onPin={setPin} motivo={motivo} onMotivo={setMotivo} pideMotivo={rostroUsable} pendiente={pendiente || guardandoCola} onMarcar={() => void conPin()} />
           <Button variant="ghost" block onClick={() => { limpiarError(); setPaso("inicio"); }}>Volver</Button>
         </CardContent></Card>
       ) : null}
