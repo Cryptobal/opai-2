@@ -22,6 +22,9 @@ export async function aplicarEstadoPersona(
 ) {
   const actual = await personaDe(ctx, id);
   exigirNoAnonimizado(actual, "La persona");
+  if (hacia === "activo" && actual.archivadaEn) {
+    throw reglaDeNegocio("La persona está archivada: no puede pasar a «Activa».");
+  }
   const desde = actual.estado ?? "activo";
   if (
     !forzar &&

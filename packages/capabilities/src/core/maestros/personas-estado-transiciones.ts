@@ -28,7 +28,12 @@ const NORMALES: readonly DefTransicionPersona[] = [
   { id: "core.personas.activar", hacia: "activo", descripcion: "Pasa la persona a «Activa» (puede tener vínculo laboral)." },
   { id: "core.personas.inactivar", hacia: "inactivo", desde: "activo", descripcion: "Pasa una persona activa a «Inactiva» (sin vínculo vigente)." },
   { id: "core.personas.contratar_externo", hacia: "activo", desde: "externo", descripcion: "Contrata a una persona externa (pasa a «Activa»)." },
-  { id: "core.personas.reactivar", hacia: "activo", desde: "inactivo", descripcion: "Reactiva a una persona inactiva (pasa a «Activa»)." },
+  {
+    id: "core.personas.reactivar",
+    hacia: "activo",
+    desde: "inactivo",
+    descripcion: "Reactiva a una persona inactiva no archivada (pasa a «Activa»).",
+  },
   { id: "core.personas.externar", hacia: "externo", desde: "inactivo", descripcion: "Pasa una persona inactiva al estado «Externa» (turno extra)." },
 ];
 
@@ -55,6 +60,9 @@ function capTransicion(def: DefTransicionPersona) {
           const actual = (p.estado ?? "activo") as EstadoPersona;
           if (!origenes.includes(actual)) {
             throw reglaDeNegocio(`Esta acción solo aplica desde «${origenes.join("» o «")}».`);
+          }
+          if (def.id === "core.personas.reactivar" && p.archivadaEn) {
+            throw reglaDeNegocio("La persona está archivada: no puede reactivarse.");
           }
           return aplicarEstadoPersona(ctx, input.id, def.hacia, dryRun, "core.persona.estado_cambiado");
         });

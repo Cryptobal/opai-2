@@ -9,7 +9,7 @@ type TxPersona = Pick<TenantTx, "persona">;
 import { reglaDeNegocio } from "../../errores";
 
 const BLOQUEADOS_VINCULO = new Set(["bloqueado_permanente", "rechazado"]);
-const NO_ARCHIVABLE = new Set(["bloqueado_permanente"]);
+const NO_ARCHIVABLE = new Set(["bloqueado_permanente", "rechazado"]);
 
 export type PersonaOperable = {
   estado: string | null;

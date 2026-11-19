@@ -141,6 +141,17 @@ describe.skipIf(!urlPropietario)("core · importador de contratos en base real",
     );
     expect(sBloq.conteos.error).toBe(1);
     expect(sBloq.filas[0]?.mensajes.join(" ")).toMatch(/bloqueada operativamente/);
+
+    const perm = (await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "11111111-1" }, select: { id: true } }))!;
+    await x.e.admin.persona.update({ where: { id: perm.id }, data: { estado: "bloqueado_permanente" } });
+    const sPerm = await x.importar(
+      x.t1,
+      "contratos",
+      { filas: [{ ...base, persona_rut: "11.111.111-1", inicio: "01-07-2024" }] },
+      true,
+    );
+    expect(sPerm.conteos.error).toBe(1);
+    expect(sPerm.filas[0]?.mensajes.join(" ")).toMatch(/bloqueada de forma permanente/);
   });
 
   it("no reactiva ni crea contrato vigente para una persona archivada", async () => {

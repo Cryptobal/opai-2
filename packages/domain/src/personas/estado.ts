@@ -21,7 +21,7 @@ export const PERSONA_ESTADO_BLOQUEADO_PERMANENTE: EstadoPersona = "bloqueado_per
 export const TRANSICIONES_PERSONA: Record<EstadoPersona, readonly EstadoPersona[]> = {
   postulante: ["en_evaluacion", "rechazado", "externo", "activo", "inactivo"],
   en_evaluacion: ["activo", "rechazado", "externo", "inactivo"],
-  rechazado: ["inactivo"],
+  rechazado: [],
   externo: ["activo", "inactivo"],
   activo: ["inactivo"],
   inactivo: ["activo", "externo"],

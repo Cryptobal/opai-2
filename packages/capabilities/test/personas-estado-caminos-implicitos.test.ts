@@ -52,7 +52,7 @@ describe("cambios de estado implícitos (CAR-674, B1)", () => {
     ).toBe("UNPROCESSABLE");
   });
 
-  it("core.personas.archive permite postulante y rechazada, no bloqueo permanente", async () => {
+  it("core.personas.archive permite postulante y rechaza rechazada o bloqueo permanente", async () => {
     const { ctx } = contextoDePrueba({ rol: "gerente" });
     const { id } = await dato<{ id: string }>(ctx, "core.personas.create", postulante);
     await dato(ctx, "core.personas.archive", { id });
@@ -61,7 +61,54 @@ describe("cambios de estado implícitos (CAR-674, B1)", () => {
       rut: "14.456.789-7",
     });
     await dato(ctx, "core.personas.rechazar", { id: rech.id, motivo: "No califica para el cargo" });
-    await dato(ctx, "core.personas.archive", { id: rech.id });
+    expect(await codigo(ctx, "core.personas.archive", { id: rech.id })).toBe("UNPROCESSABLE");
+  });
+
+  it("con solo personasManage no puede sacar a nadie de rechazado por ningún camino", async () => {
+    const { ctx: adminCtx, cargoId } = await base();
+    const gerente = contextoDePrueba({
+      rol: "gerente",
+      permisos: [PERMISOS_CORE.personasManage, PERMISOS_CORE.personasRead],
+    }).ctx;
+    const rech = await dato<{ id: string }>(gerente, "core.personas.create", {
+      ...postulante,
+      rut: "13.333.444-0",
+    });
+    await dato(gerente, "core.personas.rechazar", { id: rech.id, motivo: "No cumple el perfil del puesto" });
+    expect(await codigo(gerente, "core.personas.archive", { id: rech.id })).toBe("UNPROCESSABLE");
+    expect(await codigo(gerente, "core.personas.activar", { id: rech.id, motivo: "Intento de activar" })).toBe(
+      "UNPROCESSABLE",
+    );
+    expect(await codigo(gerente, "core.personas.reactivar", { id: rech.id, motivo: "Intento de reactivar" })).toBe(
+      "UNPROCESSABLE",
+    );
+    expect(await codigo(gerente, "core.personas.contratar_externo", { id: rech.id, motivo: "Intento externo" })).toBe(
+      "UNPROCESSABLE",
+    );
+    const vinculo = await codigo(gerente, "core.vinculos.create", {
+      personaId: rech.id,
+      ...(await destinoVinculo(adminCtx)),
+      cargoId,
+      tipo: "indefinido",
+      inicio: "2026-01-01",
+    });
+    expect(["FORBIDDEN", "UNPROCESSABLE"]).toContain(vinculo);
+    // Camino archive + reactivate (solo con postulante archivable, no desde rechazado).
+    const post = await dato<{ id: string }>(gerente, "core.personas.create", {
+      ...postulante,
+      rut: "12.345.678-5",
+    });
+    await dato(gerente, "core.personas.rechazar", { id: post.id, motivo: "Tampoco cumple requisitos mínimos" });
+    await gerente.db.persona.update({
+      where: { id: post.id },
+      data: { estado: "inactivo", archivadaEn: new Date("2026-01-15") },
+    });
+    expect(await codigo(gerente, "core.personas.reactivar", { id: post.id, motivo: "Bypass archivada" })).toBe(
+      "UNPROCESSABLE",
+    );
+    expect(await codigo(gerente, "core.personas.activar", { id: post.id, motivo: "Bypass activar" })).toBe(
+      "UNPROCESSABLE",
+    );
   });
 
   it("core.personas.archive rechaza bloqueo permanente", async () => {
