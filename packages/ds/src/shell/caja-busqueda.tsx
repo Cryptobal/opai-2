@@ -14,25 +14,24 @@ type Props = {
 
 /** Caja de búsqueda ⌘K de la barra de iPad y desktop; `data-shell="buscar"` la ubica en el diseño nuevo. */
 export function CajaBusqueda({ onBuscar, compacta, texto }: Props) {
+  const etiquetaTelefono = texto ?? (compacta ? "Buscar…" : "Buscar personas, clientes, folios");
+  const etiquetaEscritorio = texto ?? (compacta ? "Buscar…" : "Buscar");
   return (
     <div data-shell="buscar" className="flex min-w-0 flex-none">
       <button
         type="button"
         onClick={onBuscar}
-        aria-label="Buscar o ir a"
+        aria-label={compacta ? "Buscar, atajo Ctrl K" : "Buscar o ir a"}
+        title={compacta ? "Buscar… Ctrl K" : undefined}
         className={cn(
           "flex h-11 min-w-0 items-center gap-2 rounded-md border border-border bg-surface px-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9",
           // En iPad (768–1023 px) la caja más angosta deja sitio al título aun con el botón del agente a la vista.
-          compacta ? "w-auto" : "w-[200px] lg:w-[280px] xl:w-80",
+          compacta ? "w-auto min-w-[7.5rem]" : "w-[200px] lg:w-[280px] xl:w-80",
         )}
       >
         <Search className="size-4 flex-none" aria-hidden />
-        <span className={cn("flex-1 truncate text-left xl:hidden", compacta && "hidden")}>
-          {texto ?? "Buscar personas, clientes, folios"}
-        </span>
-        <span className={cn("hidden flex-1 text-left xl:inline", compacta && "xl:hidden")}>
-          {texto ?? "Buscar"}
-        </span>
+        <span className="flex-1 truncate text-left xl:hidden">{etiquetaTelefono}</span>
+        <span className="hidden flex-1 truncate text-left xl:inline">{etiquetaEscritorio}</span>
         <AtajoBusqueda className="hidden xl:inline-flex" />
       </button>
     </div>

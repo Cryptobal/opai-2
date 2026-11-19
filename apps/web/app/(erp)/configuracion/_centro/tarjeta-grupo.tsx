@@ -1,51 +1,42 @@
-import { FilaSeleccionable } from "@opai/ds";
+import { ChevronRight } from "lucide-react";
+
+import { cn } from "@opai/ds";
 
 import { LinkIndice } from "@/app/_components/link-indice";
 
 import type { GrupoConEntradas } from "./datos";
 
 /**
- * Tarjeta de grupo de la portada (brief §4.1). Sin contadores (ajuste aprobado 1): ícono, nombre,
- * línea corta y las 2–3 primeras entradas como texto. En iPad/escritorio toda la tarjeta es un enlace
- * a la primera entrada visible del grupo; en teléfono es una fila que lleva a la lista del grupo.
+ * Tarjeta de grupo de la portada (brief §4.1, MC-22): un solo enlace a la lista del grupo en todos
+ * los tamaños (evita dos destinos iguales en el DOM entre la fila de teléfono y la tarjeta de
+ * escritorio).
  */
 export function TarjetaGrupo({ grupo, entradas }: GrupoConEntradas) {
+  if (entradas.length === 0) return null;
   const Icono = grupo.icono;
-  const primera = entradas[0];
   const previas = entradas
     .slice(0, 3)
     .map((e) => e.titulo)
     .join(" · ");
+  const destino = `/configuracion/grupo/${grupo.id}`;
   return (
-    <>
-      {/* Teléfono: fila compacta a la lista del grupo. */}
-      <FilaSeleccionable
-        className="md:hidden"
-        Link={LinkIndice}
-        href={`/configuracion/grupo/${grupo.id}`}
-        inicio={
-          <span className="flex size-9 flex-none items-center justify-center rounded-md bg-fill text-fg-muted">
-            <Icono aria-hidden className="size-5" />
-          </span>
-        }
-        titulo={grupo.etiqueta}
-        secundario={grupo.corta}
-      />
-      {/* iPad/escritorio: la tarjeta entera es un enlace a la lista del grupo. */}
-      {primera ? (
-        <LinkIndice
-          href={`/configuracion/grupo/${grupo.id}`}
-          aria-label={`${grupo.etiqueta}: ${grupo.corta}`}
-          className="hidden min-h-[132px] flex-col rounded-lg border border-border bg-surface p-4 text-fg outline-none transition-colors duration-150 hover:border-fg-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus md:flex"
-        >
-          <span className="mb-2 flex size-10 items-center justify-center rounded-md bg-fill text-fg-muted">
-            <Icono aria-hidden className="size-5" />
-          </span>
-          <span className="t-subheading text-fg">{grupo.etiqueta}</span>
-          <span className="mt-0.5 text-sm text-fg-muted">{grupo.corta}</span>
-          {previas ? <span className="mt-2 t-caption truncate">{previas}</span> : null}
-        </LinkIndice>
-      ) : null}
-    </>
+    <LinkIndice
+      href={destino}
+      aria-label={`${grupo.etiqueta}: ${grupo.corta}`}
+      className={cn(
+        "text-fg outline-none transition-colors duration-150 hover:border-fg-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
+        "flex min-h-16 w-full items-center gap-3 border-b border-border py-2.5 pr-3 pl-4 md:min-h-[132px] md:flex-col md:items-stretch md:rounded-lg md:border md:bg-surface md:p-4 max-md:last:border-b-0",
+      )}
+    >
+      <span className="flex size-9 flex-none items-center justify-center rounded-md bg-fill text-fg-muted md:mb-2 md:size-10">
+        <Icono aria-hidden className="size-5" />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col md:flex-none">
+        <span className="t-subheading truncate text-fg max-md:text-base max-md:font-medium">{grupo.etiqueta}</span>
+        <span className="t-caption truncate text-fg-muted md:mt-0.5 md:text-sm">{grupo.corta}</span>
+        {previas ? <span className="mt-2 hidden t-caption truncate md:inline">{previas}</span> : null}
+      </span>
+      <ChevronRight aria-hidden className="size-5 flex-none text-fg-subtle md:hidden" />
+    </LinkIndice>
   );
 }

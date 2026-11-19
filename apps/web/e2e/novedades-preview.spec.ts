@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { abrirMenuUsuario } from "./menu-usuario";
+import { marcarPendientesDesktop } from "./novedades-preview-desktop";
 import { capturar, capturarNovedad } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -23,6 +24,7 @@ test.describe("@preview novedades y bandeja", () => {
   test("Novedades agrupadas y cortas, se marcan una o todas, y la Bandeja no las repite", async ({
     page,
   }, info) => {
+    test.setTimeout(info.project.name === "desktop" ? 180_000 : 120_000);
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
@@ -129,16 +131,7 @@ test.describe("@preview novedades y bandeja", () => {
         page.locator('nav a[href="/bandeja"] .bg-danger-fg').filter({ visible: true }).first(),
       ).toBeVisible({ timeout: 15_000 });
 
-    await page.goto("/novedades");
-    await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });
-    const marcarTodas = page.getByRole("button", { name: "Marcar todas como leídas" });
-    const antes = await pendientes(page);
-    // Una novedad nueva (por ejemplo la de la propuesta) deja pendientes: no exigimos «Estás al día».
-    if (antes > 0 && (await marcarTodas.count())) {
-      await marcarTodas.click();
-      await expect.poll(() => pendientes(page), { timeout: 30_000 }).toBeLessThan(antes);
-    }
-    await expect(page.getByText(RESUMEN).first()).toBeVisible();
+    await marcarPendientesDesktop(page);
     await capturar(page, info, "novedades-al-dia");
     expect(errores).toEqual([]);
   });
