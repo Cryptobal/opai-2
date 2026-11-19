@@ -93,6 +93,14 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9).",
   "app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace":
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
+  "app/_components/firmas/acciones-sesion.ts#verFirmaSesion":
+    "Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634).",
+  "app/_components/firmas/acciones-sesion.ts#firmarEnSesion":
+    "Firma: core.firmas.firmar (interna con motivo) con sesión del portal (CAR-634).",
+  "app/_components/firmas/acciones-sesion.ts#rechazarEnSesion":
+    "Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634).",
+  "app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion":
+    "Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634).",
   "app/_acciones/ingreso-pin.ts#accionEntrarConPin":
     "Identidad: ingreso del Portal Trabajador con RUT + PIN (CAR-78, D-02); abre una sesión, no es una operación de negocio. Tope por RUT y origen con fallo cerrado; bloqueo y auditoría en @opai/auth.",
   "app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo":
@@ -105,6 +113,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/porteria/sitio/route.ts":
     "Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
+  "app/api/terreno/libro/route.ts":
+    "Lee el libro de novedades de la instalación del equipo de terreno emparejado (CAR-77): cookie de dispositivo, sin sesión; ejecuta core.libro_novedades_equipo.listar (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/rondas/estado/route.ts":
     "Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/lote/route.ts":

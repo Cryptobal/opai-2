@@ -12,7 +12,7 @@ import { desdeVentana, SEMANAS_HISTORIA, serieSaldos } from "./serie-saldos";
 import { aIso, ajustesDe, lunesHoy } from "./util";
 
 /** Etiqueta de lectura para planes en semana pasada (no entran al saldo real de cartola). */
-export const PLAN_SIN_RESPALDO_CARTOLA = "Plan sin respaldo en cartola";
+const PLAN_SIN_RESPALDO_CARTOLA = "Plan sin respaldo en cartola";
 
 const semanaCalculadaSchema = z.object({
   semana: semanaSchema,
