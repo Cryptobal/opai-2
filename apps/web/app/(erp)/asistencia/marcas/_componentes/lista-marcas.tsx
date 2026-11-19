@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { formatearFechaHora } from "@opai/domain";
 import { Button, ListScreen, type EstadoPantalla } from "@opai/ds";
 
 import { Buscador } from "@/app/_components/maestros/buscador";
@@ -65,7 +66,7 @@ export function ListaMarcas({ state, items, zona, hayMas, marcaAbierta, params }
           <span className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium">{m.personaNombre}</span>
             <span className="t-caption text-fg-muted">
-              {hora.format(new Date(m.horaServidor))} · {m.tipoEtiqueta}
+              {formatearFechaHora(m.horaServidor, zona)} · {m.tipoEtiqueta}
             </span>
           </span>
         )}
