@@ -1,4 +1,4 @@
-export type TramoEsquema = {
+type TramoEsquema = {
   id: string;
   nombre: string;
   patronId: string;
