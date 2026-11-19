@@ -6,6 +6,7 @@ export * from "./inicio/indicadores";
 export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./bancos";
+export * from "./regiones-chile";
 export * from "./prevision-catalogos";
 export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";

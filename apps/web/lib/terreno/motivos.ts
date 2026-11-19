@@ -8,6 +8,7 @@ const ETIQUETA_TIPO: Record<string, string> = {
   "terreno.novedad": "Novedad en el libro",
   "acceso.entrada": "Entrada a la instalación",
   "acceso.salida": "Salida de la instalación",
+  "asistencia.marca": "Marca de asistencia",
 };
 
 export const etiquetaTipo = (tipo: string): string => ETIQUETA_TIPO[tipo] ?? "Registro de terreno";
@@ -34,6 +35,8 @@ const MOTIVO_RECHAZO: Record<string, string> = {
   salida_repetida: "Esta entrada ya tenía su salida registrada.",
   entrada_anulada: "La entrada se anuló desde la oficina; su salida no se guarda.",
   lote_invalido: "El envío no era válido y el servidor lo devolvió.",
+  credencial_invalida: "El PIN no coincide o la credencial está pausada.",
+  metodo_no_offline: "Este método de marca no se puede guardar sin conexión.",
 };
 
 export const motivoRechazo = (motivo: string | null): string =>

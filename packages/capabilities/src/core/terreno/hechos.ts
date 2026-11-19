@@ -13,6 +13,7 @@ import {
   type ResultadoHecho,
   resultadoHecho,
 } from "./hechos-evaluar";
+import { aplicarMarcasAsistenciaOffline, payloadHechoSinCredencial } from "./asistencia-aplicar";
 import { prepararProyecciones } from "./proyecciones";
 
 export const hechosRecibir = defineCapability({
@@ -87,6 +88,11 @@ export const hechosRecibir = defineCapability({
     if (dependientes.size > 0) {
       ({ resultados, nuevos } = evaluar(new Map([...proyecciones.rechazos, ...dependientes])));
     }
+    const aceptadas = new Set(
+      resultados.filter((r) => r.estado === "recibido").map((r) => r.clave),
+    );
+    const marcasOffline = nuevos.filter((h) => h.tipo === "asistencia.marca" && aceptadas.has(h.clave));
+    let guardoLote = false;
     if (!dryRun && nuevos.length > 0) {
       await ctx.transaccion(async (tx) => {
         // Doble envío simultáneo (la página y el service worker): la clave única lo deja pasar una sola vez.
@@ -98,7 +104,7 @@ export const hechosRecibir = defineCapability({
             instalacionId: disp.instalacionId,
             clave: h.clave,
             tipo: h.tipo,
-            payload: h.payload as object,
+            payload: payloadHechoSinCredencial(h),
             personaId: h.personaId ?? null,
             horaHecho: new Date(h.horaHecho),
             horaEnvio: envio,
@@ -111,6 +117,7 @@ export const hechosRecibir = defineCapability({
         await proyecciones.escribir(tx, nuevos, desfaseMs, new Set(nuevos.map((h) => h.clave)));
         // Si otra petición ganó la carrera no se insertó nada: tampoco se anuncia.
         if (count === 0) return;
+        guardoLote = true;
         // Un evento por lote (no por hecho): los módulos de terreno leen sus hechos por tipo en la tabla.
         const porTipo: Record<string, number> = {};
         for (const h of nuevos) porTipo[h.tipo] = (porTipo[h.tipo] ?? 0) + 1;
@@ -121,6 +128,8 @@ export const hechosRecibir = defineCapability({
           payload: { instalacionId: disp.instalacionId, porTipo },
         });
       });
+      if (guardoLote && marcasOffline.length > 0)
+        await aplicarMarcasAsistenciaOffline(ctx, disp, marcasOffline);
     }
     return {
       recibidoEn: iso(recibidoEn),
