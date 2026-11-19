@@ -22,10 +22,26 @@ BEGIN
   RAISE NOTICE 'CAR-674: % activa→activo, % inactiva→inactivo', v_activas, v_inactivas;
 END $$;
 
+ALTER TABLE core.personas ALTER COLUMN estado SET DEFAULT 'activo';
+
+ALTER TABLE core.personas
+  ADD CONSTRAINT personas_estado_valido CHECK (
+    estado IN (
+      'postulante', 'en_evaluacion', 'rechazado', 'externo', 'activo', 'inactivo', 'bloqueado_permanente'
+    )
+  ) NOT VALID;
+
+COMMIT;
+
+BEGIN;
+SET LOCAL lock_timeout = '5s';
+ALTER TABLE core.personas VALIDATE CONSTRAINT personas_estado_valido;
 COMMIT;
 
 -- Reversión (manual, rol propietario, tras snapshot): BEGIN; SET LOCAL lock_timeout = '5s';
---   UPDATE core.personas SET estado = 'activa' WHERE estado = 'activo' AND estado NOT IN ('postulante','en_evaluacion','rechazado','externo','bloqueado_permanente');
+--   ALTER TABLE core.personas DROP CONSTRAINT IF EXISTS personas_estado_valido;
+--   ALTER TABLE core.personas ALTER COLUMN estado SET DEFAULT 'activa';
+--   UPDATE core.personas SET estado = 'activa' WHERE estado = 'activo';
 --   UPDATE core.personas SET estado = 'inactiva' WHERE estado = 'inactivo';
 --   (los estados nuevos del encargo no existían antes: revisar filas a mano o restaurar desde snapshot de Neon).
 -- COMMIT;

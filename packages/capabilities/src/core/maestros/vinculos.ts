@@ -20,6 +20,7 @@ import { cargoParaVinculo, crearVinculo } from "./personas-escritura";
 import { personaDe } from "./personas-vista";
 import { camposVinculo, vinculoSchema, vistaVinculo } from "./vinculos-vista";
 import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
+import { transicionarPersonaEnTx } from "./personas-estado-implicito";
 
 export async function vinculoDe(ctx: Contexto, id: string) {
   const v = await ctx.db.vinculoLaboral.findFirst({
@@ -88,7 +89,7 @@ export const vinculosCreate = defineCapability({
       await bloquearNoAnonimizado(tx, "persona", personaId);
       const r = await crearVinculo(ctx, tx, personaId, v);
       if (p.estado !== "activo")
-        await tx.persona.update({ where: { id: personaId }, data: { estado: "activo" } });
+        await transicionarPersonaEnTx(tx, personaId, "activo", p.estado ?? "activo");
       return r;
     });
     return vistaVinculo(creado);

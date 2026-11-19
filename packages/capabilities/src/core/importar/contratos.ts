@@ -4,6 +4,7 @@
 // instalación de un contrato ya cargado no se cambian desde la importación (eso es un anexo).
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { transicionarPersonaEnTx } from "../maestros/personas-estado-implicito";
 import { exigirEdicionVinculo } from "../maestros/vinculos-validacion";
 import { norm } from "./comun";
 import { defContratos, erroresDeContrato, leerContrato, type DatosContrato, type Leidos } from "./contratos-campos";
@@ -81,8 +82,15 @@ export const importadorContratos: Importador<DatosContrato> = {
     const hoy = new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);
     const estado = estadoDe(d.termino, hoy);
     const v = await tx.vinculoLaboral.create({ data: { ...d, tenantId: ctx.tenantId, estado }, select: { id: true } });
-    // Igual que el alta manual: una persona inactiva con un contrato vigente nuevo vuelve a estar activa.
-    if (estado === "vigente") await tx.persona.updateMany({ where: { id: d.personaId, estado: { not: "activo" }, archivadaEn: null }, data: { estado: "activo" } });
+    if (estado === "vigente") {
+      const persona = await tx.persona.findUnique({
+        where: { id: d.personaId },
+        select: { estado: true },
+      });
+      if (persona && persona.estado !== "activo") {
+        await transicionarPersonaEnTx(tx, d.personaId, "activo", persona.estado ?? "activo");
+      }
+    }
     await ctx.eventos.emitir(tx, {
       tipo: "core.vinculo.creado", entidadTipo: "vinculo", entidadId: v.id,
       payload: { personaId: d.personaId, cargoId: d.cargoId, tipo: d.tipo, inicio: dia(d.inicio), origen: "importacion" },

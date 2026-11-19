@@ -45,7 +45,16 @@ export async function aplicarEstadoPersona(
     },
     async (tx) => {
       await bloquearNoAnonimizado(tx, "persona", id);
-      return tx.persona.update({ where: { id }, data });
+      const { count } = await tx.persona.updateMany({
+        where: { id, estado: desde },
+        data,
+      });
+      if (count === 0) {
+        throw reglaDeNegocio("El estado de la persona cambió: vuelve a abrir la operación.");
+      }
+      const p = await tx.persona.findFirst({ where: { id } });
+      if (!p) throw reglaDeNegocio("No se encontró la persona.");
+      return p;
     },
   );
   return vistaPersona(p, vigente);
@@ -54,6 +63,6 @@ export async function aplicarEstadoPersona(
 export type DefTransicionPersona = {
   id: string;
   hacia: EstadoPersona;
-  desde?: EstadoPersona;
+  desde?: EstadoPersona | readonly EstadoPersona[];
   descripcion: string;
 };

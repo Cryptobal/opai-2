@@ -11,6 +11,8 @@ import { z } from "zod";
 
 import type { TenantTx } from "@opai/db";
 
+import { transicionarPersonaEnTx } from "./personas-estado-implicito";
+
 export const corteAccesoSchema = z.object({
   /** La persona quedó inactiva (el PIN de terreno ya no sirve); con `corteProgramado`, lo que pasará ese día. */
   personaInactiva: z.boolean(),
@@ -44,7 +46,10 @@ export async function cortarAccesos(
   // En la vista previa el vínculo aún está vigente: se cuentan los demás.
   const quedan = await db.vinculoLaboral.count({ where: { personaId, estado: "vigente", id: { not: v.id } } });
   if (quedan) return SIN_CORTE;
-  const persona = await db.persona.findUnique({ where: { id: personaId }, select: { usuarioId: true } });
+  const persona = await db.persona.findUnique({
+    where: { id: personaId },
+    select: { usuarioId: true, estado: true },
+  });
   const membresias = persona?.usuarioId
     ? await db.membership.findMany({
         where: { tenantId: quien.tenantId, userId: persona.usuarioId, estado: "activa" },
@@ -58,7 +63,9 @@ export async function cortarAccesos(
       m.userId !== quien.usuarioId,
   );
   if (aplicar) {
-    await db.persona.update({ where: { id: personaId }, data: { estado: "inactivo" } });
+    if (persona) {
+      await transicionarPersonaEnTx(db, personaId, "inactivo", persona.estado ?? "activo");
+    }
     if (suspender.length)
       await db.membership.updateMany({
         where: { tenantId: quien.tenantId, id: { in: suspender.map((m) => m.id) }, estado: "activa" },

@@ -13,7 +13,12 @@ const motivo = z.string().trim().min(5).max(500).describe("Motivo (queda en la a
 
 const NORMALES: readonly DefTransicionPersona[] = [
   { id: "core.personas.a_evaluacion", hacia: "en_evaluacion", desde: "postulante", descripcion: "Pasa un postulante al estado «En evaluación» en reclutamiento." },
-  { id: "core.personas.rechazar", hacia: "rechazado", descripcion: "Marca a la persona como «Rechazada» (desde postulante o en evaluación)." },
+  {
+    id: "core.personas.rechazar",
+    hacia: "rechazado",
+    desde: ["postulante", "en_evaluacion"],
+    descripcion: "Marca a la persona como «Rechazada» (desde postulante o en evaluación).",
+  },
   { id: "core.personas.marcar_externo", hacia: "externo", descripcion: "Pasa la persona a «Externa» (turnos extra sin contrato vigente)." },
   { id: "core.personas.activar", hacia: "activo", descripcion: "Pasa la persona a «Activa» (puede tener vínculo laboral)." },
   { id: "core.personas.inactivar", hacia: "inactivo", desde: "activo", descripcion: "Pasa una persona activa a «Inactiva» (sin vínculo vigente)." },
@@ -22,20 +27,28 @@ const NORMALES: readonly DefTransicionPersona[] = [
   { id: "core.personas.externar", hacia: "externo", desde: "inactivo", descripcion: "Pasa una persona inactiva al estado «Externa» (turno extra)." },
 ];
 
+function estadosOrigen(def: DefTransicionPersona): readonly string[] | null {
+  if (!def.desde) return null;
+  return Array.isArray(def.desde) ? def.desde : [def.desde];
+}
+
 function capTransicion(def: DefTransicionPersona) {
+  const origenes = estadosOrigen(def);
   return defineCapability({
     id: def.id,
     descripcion: def.descripcion,
     permiso: PERMISOS_CORE.personasManage,
+    sensibles: ["motivo"],
     input: z.object({ id: uuidSchema, motivo }),
     output: personaSchema,
     efecto: "escritura",
     dryRun: true,
     handler: (ctx, input, { dryRun }) => {
-      if (def.desde) {
+      if (origenes) {
         return personaDe(ctx, input.id).then((p) => {
-          if ((p.estado ?? "activo") !== def.desde) {
-            throw reglaDeNegocio(`Esta acción solo aplica desde «${def.desde}».`);
+          const actual = p.estado ?? "activo";
+          if (!origenes.includes(actual)) {
+            throw reglaDeNegocio(`Esta acción solo aplica desde «${origenes.join("» o «")}».`);
           }
           return aplicarEstadoPersona(ctx, input.id, def.hacia, dryRun, "core.persona.estado_cambiado");
         });
@@ -48,7 +61,8 @@ function capTransicion(def: DefTransicionPersona) {
 export const personasEstadoBloquearPermanente = defineCapability({
   id: "core.personas.bloquear_permanente",
   descripcion: "Bloquea de forma permanente a la persona (no recontratable): desde cualquier estado salvo que ya esté bloqueada.",
-  permiso: PERMISOS_CORE.personasManage,
+  permiso: PERMISOS_CORE.personasEstadoAdmin,
+  sensibles: ["motivo"],
   input: z.object({ id: uuidSchema, motivo }),
   output: personaSchema,
   efecto: "escritura",
@@ -66,6 +80,7 @@ export const personasEstadoDesbloquearPermanente = defineCapability({
   id: "core.personas.desbloquear_permanente",
   descripcion: "Quita el bloqueo permanente y deja a la persona en «Inactiva». Solo administradores (permiso estado.admin).",
   permiso: PERMISOS_CORE.personasEstadoAdmin,
+  sensibles: ["motivo"],
   input: z.object({ id: uuidSchema, motivo }),
   output: personaSchema,
   efecto: "escritura",
