@@ -7,6 +7,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { PaginaConfig } from "../_centro/pagina-config";
 import { cargarPermisos } from "./_permisos/datos";
 import { PestanasUsuarios } from "./_permisos/pestanas";
+import { TarjetaCorreosNotificacion } from "./correos-notificacion";
 import { HojasUsuario } from "./diferidas";
 import { type Invitacion, type Miembro, UsuariosLista } from "./usuarios-lista";
 
@@ -53,6 +54,7 @@ export default function Usuarios() {
       {({ usuarios, invitaciones, miRol, roles, catalogo, concedibles, gestionaRoles }) => (
         <div className="flex flex-col gap-4">
           <PestanasUsuarios activa="usuarios" />
+          <TarjetaCorreosNotificacion />
           <UsuariosLista
             state={estadoPantalla(usuarios)}
             usuarios={usuarios.ok ? usuarios.data : []}
