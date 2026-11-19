@@ -67,6 +67,7 @@ function capTransicion(def: DefTransicionPersona) {
 export const personasEstadoBloquearPermanente = defineCapability({
   id: "core.personas.bloquear_permanente",
   descripcion: "Bloquea de forma permanente a la persona (no recontratable): desde cualquier estado salvo que ya esté bloqueada.",
+  soloPersonas: true,
   permiso: PERMISOS_CORE.personasEstadoAdmin,
   sensibles: ["motivo"],
   input: z.object({ id: uuidSchema, motivo }),
@@ -85,6 +86,7 @@ export const personasEstadoBloquearPermanente = defineCapability({
 export const personasEstadoDesbloquearPermanente = defineCapability({
   id: "core.personas.desbloquear_permanente",
   descripcion: "Quita el bloqueo permanente y deja a la persona en «Inactiva». Solo administradores (permiso estado.admin).",
+  soloPersonas: true,
   permiso: PERMISOS_CORE.personasEstadoAdmin,
   sensibles: ["motivo"],
   input: z.object({ id: uuidSchema, motivo }),

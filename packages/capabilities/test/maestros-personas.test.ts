@@ -111,7 +111,7 @@ describe("core.personas.* y core.vinculos.*", () => {
       id: "m",
       tenantId: ctx.tenantId,
       userId: usuarioId,
-      estado: "activo",
+      estado: "activa",
     });
     await dato(ctx, "core.personas.vincular_usuario", { id, usuarioId });
     const otra = await dato<{ id: string }>(ctx, "core.personas.create", {

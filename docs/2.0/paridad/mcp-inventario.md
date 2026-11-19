@@ -603,7 +603,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_registrar` | `core_personas_periodos_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.procesos_persona.listar` | `core_procesos_persona_listar` | existe |
@@ -1055,8 +1055,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.libro_novedades_equipo.listar` | Interna: la lee el equipo de terreno emparejado sin sesión (su cookie de dispositivo es la credencial) para la pantalla «Libro»; un agente lee el mismo libro con core.libro_novedades.listar, con permiso y alcance (CAR-77). |
 | `core.metodos_acceso.quitar` | Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP. |
 | `core.personas_terreno.listar` | Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3). |
+| `core.personas.bloquear_permanente` | Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674). |
+| `core.personas.desbloquear_permanente` | Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674). |
 | `core.personas.pago_aprobar_cambio` | Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01). |
 | `core.personas.pago_rechazar_cambio` | Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01). |
+| `core.personas.quitar_no_recontratar` | Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674). |
 | `core.push.quitar` | Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a). |
 | `core.push.suscribir` | Solo personas: la suscripción de Web Push es del navegador de quien tiene la sesión; un agente no tiene celular (CAR-356 PR 4a). |
 | `core.remuneraciones.confirmar` | Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034). |
@@ -1282,9 +1285,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.a_evaluacion`
 - `core.personas.activar`
 - `core.personas.asignar_jefe`
-- `core.personas.bloquear_permanente`
 - `core.personas.contratar_externo`
-- `core.personas.desbloquear_permanente`
 - `core.personas.externar`
 - `core.personas.inactivar`
 - `core.personas.list_a_cargo`

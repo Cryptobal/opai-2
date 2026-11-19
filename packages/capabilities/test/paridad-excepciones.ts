@@ -74,6 +74,12 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01).",
   "core.personas.pago_rechazar_cambio":
     "Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01).",
+  "core.personas.bloquear_permanente":
+    "Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674).",
+  "core.personas.desbloquear_permanente":
+    "Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674).",
+  "core.personas.quitar_no_recontratar":
+    "Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.reglas_guardar":
     "Solo personas: decide quién aprueba lo irreversible; un agente no puede cambiar la regla que lo frena (ADR-032, CAR-252).",
