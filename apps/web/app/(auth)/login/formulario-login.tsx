@@ -10,6 +10,7 @@ import { useEpocaSesion } from "@/app/_components/refresco-navegador";
 
 import { PiePortales } from "../pie-portales";
 import { EntrarConPasskey } from "./entrar-passkey";
+import { GoogleDesdeApp } from "./google-desde-app";
 
 
 const OLVIDO = "¿Olvidaste tu contraseña?";
@@ -17,6 +18,8 @@ const OLVIDO = "¿Olvidaste tu contraseña?";
 type Props = {
   destino: string;
   google: boolean;
+  /** Dentro de la app nativa, Google va por el navegador del sistema (CAR-516). */
+  googleApp?: boolean;
   inicial?: EstadoLogin;
   cargando?: boolean;
   /** Época de la sesión del request; sin ella (p. ej. en /ds) la página no participa. */
@@ -27,7 +30,14 @@ type Props = {
  * Login ERP / Plataforma / Supervisor según el diseño aprobado (export-acceso 01 y 02).
  * Sin cliente de auth en el navegador: el formulario llama a la Server Action (ADR-037).
  */
-export function FormularioLogin({ destino, google, inicial, cargando: forzado, epoca }: Props) {
+export function FormularioLogin({
+  destino,
+  google,
+  googleApp,
+  inicial,
+  cargando: forzado,
+  epoca,
+}: Props) {
   const [estado, entrar, pendiente] = useActionState(
     accionEntrar.bind(null, destino),
     inicial ?? ({ tipo: "inicial" } as EstadoLogin),
@@ -110,6 +120,7 @@ export function FormularioLogin({ destino, google, inicial, cargando: forzado, e
           </Button>
         </form>
       ) : null}
+      {googleApp ? <GoogleDesdeApp deshabilitado={cargando} /> : null}
     </AuthCard>
   );
 }

@@ -30,8 +30,6 @@ export const LIMITES = {
   formularioWeb: { maximo: 20, ventanaMs: 60_000 },
   /** Proxy de mapas, por usuario: 30 por minuto. */
   geoMapa: { maximo: 30, ventanaMs: 60_000 },
-  /** Búsqueda Nominatim (mapas interactivos), por usuario: 20 por minuto. */
-  geoBuscar: { maximo: 20, ventanaMs: 60_000 },
   /**
    * Entrar con passkey (opciones y verificación), por IP: 200 cada 15 minutos (CAR-286). Holgado
    * porque el login pide un desafío al cargar (autocompletado) y una oficina comparte IP; adivinar

@@ -30,7 +30,7 @@ export async function PestanaRondas({
 }) {
   const activa = subDe(sub);
   const puede = await puedeConfigurarRondas();
-  const centroInstalacion = await centroMapaInstalacion(instalacion);
+  const centroInstalacion = centroMapaInstalacion(instalacion);
   return (
     <div className="flex flex-col gap-4">
       <Segmentado

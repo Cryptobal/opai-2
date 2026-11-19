@@ -75,6 +75,20 @@ export function pagina<T extends { id: string }>(
 export const cursorDe = (cursor: string | undefined, limite: number) =>
   cursor ? { cursor: { id: cursor }, take: limite + 2 } : { take: limite + 1 };
 
+/** Misma semántica que `pagina`, para arreglos ya materializados (p. ej. PPC o alertas). */
+export function paginaMemoria<T extends { id: string }>(
+  filas: readonly T[],
+  limite: number,
+  cursor: string | undefined,
+) {
+  if (!cursor) return pagina([...filas], limite, undefined);
+  const i = filas.findIndex((f) => f.id === cursor);
+  const ventana = i >= 0 ? filas.slice(i) : [...filas];
+  return pagina(ventana, limite, cursor);
+}
+
+export const limiteLista = z.number().int().min(1).max(200).default(50);
+
 /** Escritura con su evento de dominio en la misma transacción (outbox, ADR-029). */
 export async function escribirConEvento<T extends { id: string }>(
   ctx: Contexto,

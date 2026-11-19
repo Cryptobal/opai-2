@@ -18,20 +18,7 @@ export function centroInstalacion(
   nombre: string,
   lat: number | null,
   lng: number | null,
-  resuelto?: { lat: number; lng: number } | null,
 ): CentroMapa {
   if (lat != null && lng != null) return { lat, lng, etiqueta: nombre };
-  if (resuelto) return { ...resuelto, etiqueta: nombre };
   return { ...SANTIAGO, etiqueta: nombre };
-}
-
-export function textoDireccionInstalacion(i: {
-  direccionFormateada: string | null;
-  calle: string | null;
-  comuna: string | null;
-  region: string | null;
-}): string | null {
-  const base = i.direccionFormateada?.trim() || [i.calle, i.comuna, i.region].filter(Boolean).join(", ").trim();
-  if (!base) return null;
-  return base.includes("Chile") ? base : `${base}, Chile`;
 }

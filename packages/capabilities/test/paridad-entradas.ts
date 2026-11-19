@@ -22,8 +22,6 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre.",
   "app/api/geo/mapa/route.ts":
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
-  "app/api/geo/buscar/route.ts":
-    "Proxy Nominatim (OpenStreetMap) para ubicar puntos de ronda en el mapa interactivo; sin datos de negocio ni escrituras.",
   "app/api/pauta/export/route.ts":
     "Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar.",
   "app/api/negocios/export/route.ts":
@@ -95,6 +93,12 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9).",
   "app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace":
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
+  "app/_acciones/app-nativa.ts#accionVolverALaApp":
+    "Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio.",
+  "app/_acciones/app-nativa.ts#accionCanjearApp":
+    "Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado.",
+  "app/(auth)/app/google/route.ts":
+    "Identidad: inicia el ingreso con Google de la app nativa en el navegador del sistema (CAR-516); guarda el reto PKCE en una cookie y redirige a Google.",
   "app/_components/firmas/acciones-sesion.ts#verFirmaSesion":
     "Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634).",
   "app/_components/firmas/acciones-sesion.ts#firmarEnSesion":

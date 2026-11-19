@@ -3,14 +3,14 @@
 import "./estilos-leaflet.css";
 
 import { useCallback, useState } from "react";
+import { Loader2, MapPin } from "lucide-react";
 import { MapContainer, Marker } from "react-leaflet";
 
-import { cn } from "@opai/ds";
+import { Button, cn } from "@opai/ds";
 
 import { coordsDeTexto, redondearCoord, type CentroMapa } from "@/lib/mapa-osm/coords";
 import { ClicMapa, VistaMapaPunto } from "@/lib/mapa-osm/marcadores-leaflet";
 
-import { BuscarUbicacion } from "./buscar-ubicacion";
 import { MarcadoresEdicionPunto } from "./mapa-edicion-marcadores";
 import { iconoInstalacion } from "./iconos";
 import { MapaCapaBase } from "./mapa-capa";
@@ -47,7 +47,11 @@ export function MapaEdicionPunto({ centro, latitud, longitud, radioM, onCoords }
   };
   return (
     <div className="flex flex-col gap-3">
-      <BuscarUbicacion onElegir={fijar} onMiUbicacion={miUbicacion} buscandoGps={buscandoGps} />
+      <Button type="button" variant="secondary" onClick={miUbicacion} disabled={buscandoGps}>
+        {buscandoGps ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <MapPin className="size-4" aria-hidden />}
+        Usar mi ubicación
+      </Button>
+      <p className="text-sm text-muted-foreground">Usa las coordenadas o mueve el pin. Sin coordenadas guardadas, el mapa parte en Santiago como referencia.</p>
       <div
         className={cn(
           "ds-mapa-leaflet relative aspect-video overflow-hidden rounded-md border border-border",
