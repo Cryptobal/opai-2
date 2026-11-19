@@ -5,6 +5,7 @@ import { saldoPendiente, sugerirConciliacion } from "@opai/domain";
 
 import { PERMISO_BANCOS_VER } from "./permisos";
 import { montoDe } from "./esquemas";
+import { lotesRendicionConciliables, loteRendicionSchema } from "./conciliacion-lotes-rendicion";
 import { reglasQueCalzan, sugerenciaReglaSchema } from "./reglas-sugerir";
 import { aIso, movimientoDe } from "./util";
 
@@ -33,13 +34,15 @@ export const bancosConciliacionSugerir = defineCapability({
     sugerencias: z.array(sugerenciaSchema),
     /** Reglas del banco que calzan: proponen la fila del flujo y la cuenta contable (CAR-328). */
     reglas: z.array(sugerenciaReglaSchema),
+    /** Lotes de rendiciones pagados que coinciden por monto y fecha (CAR-615). Solo lectura; no concilia solo. */
+    lotesRendiciones: z.array(loteRendicionSchema),
   }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s, input) => [input.movimientoId, ...s.sugerencias.map((x) => x.documentoId), ...s.reglas.map((r) => r.reglaId)],
   async handler(ctx, input) {
     const mov = await movimientoDe(ctx, input.movimientoId);
-    if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [], reglas: [] };
+    if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [], reglas: [], lotesRendiciones: [] };
     const reglas = await reglasQueCalzan(ctx, mov);
     const desde = new Date(mov.fecha);
     desde.setUTCDate(desde.getUTCDate() - 15);
@@ -130,8 +133,10 @@ export const bancosConciliacionSugerir = defineCapability({
       ...emitidos.map((d) => [d.id, { folio: d.folio, tipoDte: d.tipoDte, contraparte: cuentasMap.get(d.cuentaId)?.nombre ?? null }] as const),
       ...recibidos.map((d) => [d.id, { folio: d.folio, tipoDte: null, contraparte: d.proveedor.razonSocial }] as const),
     ]);
+    const lotesRendiciones = await lotesRendicionConciliables(ctx, mov);
     return {
       reglas,
+      lotesRendiciones,
       sugerencias: sugerencias.map((x) => ({ ...x, ...(info.get(x.documentoId) ?? { folio: null, tipoDte: null, contraparte: null }) })),
     };
   },

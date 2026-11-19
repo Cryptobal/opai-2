@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { Estructura } from "../estructuras";
 import { costoEmpleadorPorPersona } from "../remuneraciones/costo-empresa";
 import { horasExtraClp } from "../remuneraciones/horas-extra";
-import { entradaReferencia, publicacionesReferencia, REFERENCIA } from "../remuneraciones/referencia.fixture";
-import { juegoDeValores } from "../remuneraciones/valores";
+import { entradaReferencia, publicacionesReferencia } from "../remuneraciones/referencia.fixture";
+import { indicadorUsado, juegoDeValores } from "../remuneraciones/valores";
 import { liquidacionDelMes, type EntradaLiquidacion } from "./liquidacion";
 
 const capa = (over: Partial<Estructura> = {}): Estructura => ({
@@ -50,7 +50,7 @@ describe("nomina · liquidación del mes", () => {
   it("CA3: horas extra con R19, imponibles", async () => {
     const j = await juego();
     const l = liquidacionDelMes(entrada({ novedades: { ...sinNovedades, minutosExtra: 600 } }), j);
-    const valor = horasExtraClp({ sueldoBaseClp: 553_553, immClp: REFERENCIA.imm, jornadaLegalHoras: 42,
+    const valor = horasExtraClp({ sueldoBaseClp: 553_553, immClp: indicadorUsado(j, "imm").valor, jornadaLegalHoras: 42,
       jornadaMinutosSemanales: 42 * 60, minutosExtra: 600 });
     expect(l.haberes.find((h) => h.concepto === "Horas extra")?.monto).toBe(valor);
     expect(l.imponible).toBeGreaterThan(liquidacionDelMes(entrada(), j).imponible + valor - 1);

@@ -13,6 +13,8 @@ export const ENTIDADES_CAMPO = [
   "instalacion",
   "negocio",
   "cotizacion",
+  "puesto",
+  "bloque",
   "referencia",
 ] as const;
 export type EntidadCampo = (typeof ENTIDADES_CAMPO)[number];
@@ -42,6 +44,8 @@ export type CampoDef = {
   alias?: readonly string[];
   /** Valor ficticio, solo para ejemplos y para el prompt exportable. */
   ejemplo: string;
+  /** Si es verdadero, el render HTML no escapa el valor (fragmentos generados por OPAI). */
+  contenidoHtml?: boolean;
 };
 
 /** Colección repetible: `{{#cada instalaciones}}…{{/cada}}`. Dentro, los campos de `entidad` toman cada elemento. */
