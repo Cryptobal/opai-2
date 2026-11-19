@@ -42,11 +42,10 @@ test.describe("@preview cpq: documento del diseñador de la propuesta", () => {
     await expect(documento).toBeVisible({ timeout: 60_000 });
     const texto = await textoDelUltimoPdf(page);
     expect(texto).toContain("PROPUESTA TÉCNICA");
-    const orden = [
-      "1. Resumen económico",
-      "2. Condiciones comerciales",
-      "3. Su ejecutivo comercial",
-    ].map((t) => texto.indexOf(t));
+    // Otras pruebas pueden dar texto tipo a más secciones de `qa-e2e`: se mira el orden, no el número.
+    const orden = ["Resumen económico", "Condiciones comerciales", "Su ejecutivo comercial"].map((t) =>
+      texto.search(new RegExp(`\\d+\\. ${t}`)),
+    );
     expect(orden.every((i) => i > 0)).toBe(true);
     expect(orden).toEqual([...orden].sort((a, b) => a - b));
     expect(texto).toContain(CONDICIONES);

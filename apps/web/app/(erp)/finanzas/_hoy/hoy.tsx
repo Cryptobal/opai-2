@@ -5,7 +5,7 @@ import { Badge, Card, type EstadoPantalla } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
 
-export type Grupo = { cantidad: number; montoClp: number };
+type Grupo = { cantidad: number; montoClp: number };
 export type ResumenHoy = {
   hoy: string;
   emitir: { borradores: Grupo; programacionesPorGenerar: Grupo };

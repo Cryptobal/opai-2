@@ -64,6 +64,14 @@ test.describe("@preview menú lateral: ancho y cuenta", () => {
     }
   });
 
+  test("las áreas del acordeón se ven con más aire (CAR-182)", async ({ page }, info) => {
+    test.skip(anchoVentana(page) < 1024, "El acordeón del menú lateral es escritorio.");
+    await entrar(page);
+    await page.goto("/");
+    await expect(menu(page).getByRole("button", { name: /Comercial/ })).toBeVisible();
+    await captura(page, "menu-lateral-areas-car182", info);
+  });
+
   test("el menú de la cuenta lleva a Configuración, Novedades y Cerrar sesión", async ({
     page,
   }, info) => {

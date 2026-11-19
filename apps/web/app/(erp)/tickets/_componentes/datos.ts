@@ -105,7 +105,8 @@ export async function cargarTicket(id: string) {
 }
 
 export async function cargarTipos() {
-  return ejecutarComoUsuario<TipoTicket[]>("erp", "tickets.tipos.listar", {});
+  const r = await ejecutarComoUsuario<{ items: TipoTicket[] }>("erp", "tickets.tipos.listar", { limite: 200 });
+  return r.ok ? { ...r, data: r.data.items } : r;
 }
 
 export type InstalacionOpcion = { id: string; nombre: string };

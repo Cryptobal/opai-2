@@ -2,54 +2,51 @@
 
 import { useState } from "react";
 
-import type { EntidadCampoPersonalizado, OpcionCampo, TipoCampoPersonalizado } from "@opai/domain";
+import type { EntidadCampoPersonalizado } from "@opai/domain";
 import { Badge, Button, Empty, SeccionTarjeta } from "@opai/ds";
 
 import { EditorCampo } from "./editor-campo";
+import { resumenTipo, type CampoConfig, type FichaConfig } from "./tipos-campo";
 
-export type EntidadCampo = EntidadCampoPersonalizado;
-export type TipoCampo = TipoCampoPersonalizado;
-export type CampoConfig = {
-  id: string;
-  entidad: EntidadCampo;
-  clave: string;
-  etiqueta: string;
-  tipo: TipoCampo;
-  opciones: OpcionCampo[];
-  obligatorio: boolean;
-  orden: number;
-  activo: boolean;
-};
+type Editando =
+  | { campo: CampoConfig }
+  | { nuevo: EntidadCampoPersonalizado; nombre: string }
+  | null;
 
-export const ENTIDADES: { valor: EntidadCampo; etiqueta: string }[] = [
-  { valor: "cuenta", etiqueta: "Cuentas" },
-  { valor: "contacto", etiqueta: "Contactos" },
-  { valor: "negocio", etiqueta: "Negocios" },
-];
-export const TIPOS: { valor: TipoCampo; etiqueta: string }[] = [
-  { valor: "texto", etiqueta: "Texto" },
-  { valor: "numero", etiqueta: "Número" },
-  { valor: "fecha", etiqueta: "Fecha" },
-  { valor: "lista", etiqueta: "Lista de opciones" },
-  { valor: "si_no", etiqueta: "Sí o no" },
-];
-const nombreTipo = (t: TipoCampo) => TIPOS.find((x) => x.valor === t)?.etiqueta ?? t;
+function FilaCampo({ c, onEditar }: { c: CampoConfig; onEditar: () => void }) {
+  return (
+    <li className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="font-medium">{c.etiqueta}</span>
+          {c.obligatorio ? <Badge tono="accent">Obligatorio</Badge> : null}
+          {!c.activo ? <Badge>Archivado</Badge> : null}
+        </span>
+        <span className="t-caption">{resumenTipo(c)}</span>
+      </div>
+      <Button variant="secondary" onClick={onEditar}>
+        Editar
+      </Button>
+    </li>
+  );
+}
 
-type Editando = { campo: CampoConfig } | { nuevo: EntidadCampo } | null;
-
-/** Campos por entidad, cada grupo con «Nuevo campo» y cada campo con «Editar». */
-export function ListaCampos({ campos }: { campos: CampoConfig[] }) {
+/** Campos por ficha (solo las de módulos activos), cada grupo con «Nuevo campo» y cada campo con «Editar». */
+export function ListaCampos({ campos, fichas }: { campos: CampoConfig[]; fichas: FichaConfig[] }) {
   const [editando, setEditando] = useState<Editando>(null);
   return (
     <div className="flex flex-col gap-4">
-      {ENTIDADES.map((e) => {
-        const propios = campos.filter((c) => c.entidad === e.valor);
+      {fichas.map((f) => {
+        const propios = campos.filter((c) => c.entidad === f.valor);
         return (
           <SeccionTarjeta
-            key={e.valor}
-            titulo={e.etiqueta}
+            key={f.valor}
+            titulo={f.nombre}
             accion={
-              <Button variant="secondary" onClick={() => setEditando({ nuevo: e.valor })}>
+              <Button
+                variant="secondary"
+                onClick={() => setEditando({ nuevo: f.valor, nombre: f.nombre })}
+              >
                 Nuevo campo
               </Button>
             }
@@ -57,31 +54,13 @@ export function ListaCampos({ campos }: { campos: CampoConfig[] }) {
           >
             {propios.length === 0 ? (
               <Empty
-                titulo={`Sin campos en ${e.etiqueta.toLowerCase()}`}
+                titulo={`Sin campos en ${f.nombre.toLowerCase()}`}
                 descripcion="Agrega datos propios de tu empresa, por ejemplo rubro, tamaño o fecha de renovación."
               />
             ) : (
               <ul className="divide-y divide-border">
                 {propios.map((c) => (
-                  <li
-                    key={c.id}
-                    className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
-                  >
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium">{c.etiqueta}</span>
-                        {c.obligatorio ? <Badge tono="accent">Obligatorio</Badge> : null}
-                        {!c.activo ? <Badge>Archivado</Badge> : null}
-                      </span>
-                      <span className="t-caption">
-                        {nombreTipo(c.tipo)}
-                        {c.tipo === "lista" ? ` · ${c.opciones.map((o) => o.etiqueta).join(", ")}` : ""}
-                      </span>
-                    </div>
-                    <Button variant="secondary" onClick={() => setEditando({ campo: c })}>
-                      Editar
-                    </Button>
-                  </li>
+                  <FilaCampo key={c.id} c={c} onEditar={() => setEditando({ campo: c })} />
                 ))}
               </ul>
             )}
@@ -90,7 +69,9 @@ export function ListaCampos({ campos }: { campos: CampoConfig[] }) {
       })}
       {editando ? (
         <EditorCampo
-          {...("campo" in editando ? { campo: editando.campo } : { entidad: editando.nuevo })}
+          {...("campo" in editando
+            ? { campo: editando.campo }
+            : { entidad: editando.nuevo, nombreFicha: editando.nombre })}
           onCerrar={() => setEditando(null)}
         />
       ) : null}

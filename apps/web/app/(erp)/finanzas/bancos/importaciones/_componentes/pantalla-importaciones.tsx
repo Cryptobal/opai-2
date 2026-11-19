@@ -26,6 +26,8 @@ export function PantallaImportaciones({
   cuentaId,
   importaciones,
   descartes,
+  descartesSiguienteHref,
+  descartesInicioHref,
   gestiona,
 }: {
   state: EstadoPantalla;
@@ -33,6 +35,8 @@ export function PantallaImportaciones({
   cuentaId: string | null;
   importaciones: ImportacionCartola[];
   descartes: DescarteMovimientos[];
+  descartesSiguienteHref: string | null;
+  descartesInicioHref: string | null;
   gestiona: boolean;
 }) {
   const router = useRouter();
@@ -126,7 +130,7 @@ export function PantallaImportaciones({
           </ul>
         )}
         {gestiona && cuentaId ? <BorrarSincronizacion cuentaId={cuentaId} /> : null}
-        <ListaDescartes descartes={descartes} gestiona={gestiona} />
+        <ListaDescartes descartes={descartes} gestiona={gestiona} siguienteHref={descartesSiguienteHref} inicioHref={descartesInicioHref} />
       </div>
       <DialogDeshacerImportacion
         vista={vista}
