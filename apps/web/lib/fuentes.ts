@@ -40,7 +40,7 @@ export type ApiKeyFila = {
   autonomia: { capability: string; nivel: string }[];
 };
 
-export type UsuarioFila = { id: string; name: string; email: string; platformRole: string | null };
+type UsuarioFila = { id: string; name: string; email: string; platformRole: string | null };
 
 /**
  * Acceso efectivo de una membresía: rol personalizado (null = rol base), excepciones (ADR-022) y
