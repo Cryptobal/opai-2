@@ -63,7 +63,7 @@ describe.skipIf(!urlPropietario)("cpq · prompt exportable en base real", () => 
     if (!r.ok) return;
     expect(r.data.finalidad).toBe("propuesta");
     expect(r.data.claves).toEqual(expect.arrayContaining(["cuenta.nombre", "instalacion.nombre"]));
-    expect(r.data.texto).toContain("{{#cada instalaciones}}");
+    expect(r.data.texto).toContain("{{#cada puestos}}");
     expect(r.data.texto).toContain("Planta Ficticia Norte"); // ejemplo del catálogo, no un dato de la empresa
   });
 

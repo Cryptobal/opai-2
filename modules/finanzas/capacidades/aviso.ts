@@ -9,7 +9,7 @@ import type { ajustesDe } from "./util";
 type SemanaSaldo = { semana: string; saldoFinal: number };
 
 /** Saldos proyectados del horizonte configurado (solo lectura). */
-export async function semanasProyectadas(
+async function semanasProyectadas(
   ctx: Contexto,
   ajustes: Awaited<ReturnType<typeof ajustesDe>>,
   tx?: TenantTx,

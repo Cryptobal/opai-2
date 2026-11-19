@@ -11,7 +11,6 @@ import { useEpocaSesion } from "@/app/_components/refresco-navegador";
 import { PiePortales } from "../pie-portales";
 import { EntrarConPasskey } from "./entrar-passkey";
 
-export type { EstadoLogin };
 
 const OLVIDO = "¿Olvidaste tu contraseña?";
 
