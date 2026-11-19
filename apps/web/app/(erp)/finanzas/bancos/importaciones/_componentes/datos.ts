@@ -12,22 +12,28 @@ export async function cargarImportaciones(sp: SearchParams) {
   const puede = puedeDeIdentidad(await requerirIdentidad("/finanzas/bancos/importaciones"));
   const ver = puede("finanzas:bancos.ver");
   const gestiona = puede("finanzas:bancos.gestionar");
-  if (!ver) return { state: "forbidden" as const, cuentas: [], cuentaId: null, importaciones: [], descartes: [], gestiona: false };
+  if (!ver) return { state: "forbidden" as const, cuentas: [], cuentaId: null, importaciones: [], descartes: [], descartesSiguienteHref: null, descartesInicioHref: null, gestiona: false };
   const cuentas = await ejecutarComoUsuario<{ items: CuentaBanco[] }>("erp", "finanzas.bancos.listar", {});
   const items = cuentas.ok ? cuentas.data.items : [];
   const cuentaId = p["cuenta"] && items.some((c) => c.id === p["cuenta"]) ? p["cuenta"] : (items[0]?.id ?? null);
   const [lista, descartes] = cuentaId
     ? await Promise.all([
         ejecutarComoUsuario<{ items: ImportacionCartola[] }>("erp", "finanzas.cartolas.listar", { cuentaId, limite: 120 }),
-        ejecutarComoUsuario<{ items: DescarteMovimientos[] }>("erp", "finanzas.descartes_bancarios.list", { cuentaId, limite: 20 }),
+        ejecutarComoUsuario<{ items: DescarteMovimientos[]; siguiente: string | null }>("erp", "finanzas.descartes_bancarios.list", {
+          cuentaId, limite: 20, ...(p["cursorDescartes"] ? { cursor: p["cursorDescartes"] } : {}),
+        }),
       ])
     : [null, null];
+  const inicio = `/finanzas/bancos/importaciones?cuenta=${cuentaId}`;
+  const siguiente = descartes?.ok ? descartes.data.siguiente : null;
   return {
-    state: estadoPantalla(lista ?? cuentas),
+    state: estadoPantalla(lista ?? cuentas, descartes ?? cuentas),
     cuentas: items,
     cuentaId,
     importaciones: lista?.ok ? lista.data.items : [],
     descartes: descartes?.ok ? descartes.data.items : [],
+    descartesSiguienteHref: siguiente ? `${inicio}&cursorDescartes=${encodeURIComponent(siguiente)}` : null,
+    descartesInicioHref: p["cursorDescartes"] ? inicio : null,
     gestiona,
   };
 }

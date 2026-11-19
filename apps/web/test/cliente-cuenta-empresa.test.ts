@@ -8,6 +8,7 @@ import type { Identidad } from "@/lib/actor";
 import { membresia } from "./fuentes-falsas";
 
 const estado = vi.hoisted(() => ({ identidad: null as Identidad | null }));
+vi.mock("@/lib/ver-como", () => ({ verComoDe: async () => null }));
 vi.mock("@/lib/servidor", async () => ({
   ...(await import("@/lib/acceso-portal")),
   requerirIdentidad: async () => estado.identidad,

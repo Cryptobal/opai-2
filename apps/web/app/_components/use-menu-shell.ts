@@ -34,6 +34,7 @@ export function useMenuShell(
         ? { href: rutaNovedades(datos.portal), noLeidas: novedadesNoLeidas }
         : undefined,
       enErp && datos.nav.some((item) => item.href === "/configuracion"),
+      enErp && datos.verComo === true,
     );
     return { menuUsuario, novedadesNoLeidas };
   }, [
@@ -42,6 +43,7 @@ export function useMenuShell(
     datos.nav,
     datos.portal,
     datos.tenant,
+    datos.verComo,
     enErp,
     novedadesNoLeidas,
     onPassword,

@@ -46,7 +46,7 @@ export const inicialPersona = (p?: PersonaDetalle): DatosPersona => ({
 });
 
 const correoMalo = (c: string) => Boolean(c.trim()) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.trim());
-export const rutPersonaMalo = (r: string) => !r.trim() || !rutValido(r);
+const rutPersonaMalo = (r: string) => !r.trim() || !rutValido(r);
 export const invalidoPersona = (d: DatosPersona) =>
   d.nombres.trim().length < 2 ||
   d.apellidos.trim().length < 2 ||
