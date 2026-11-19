@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { formatearFechaHora } from "@opai/domain";
 import { Alerta, Sheet } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
@@ -48,12 +49,11 @@ export function HojaMarca({ marcaId, abierta, onCerrar, zona }: { marcaId: strin
     };
   }, [abierta, marcaId]);
 
-  const hora = (iso: string) =>
-    new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "medium", hourCycle: "h23", timeZone: zona }).format(new Date(iso));
+  const hora = (iso: string) => formatearFechaHora(iso, zona, { segundos: true, fechaLarga: true });
 
   return (
     <Sheet abierto={abierta} onCerrar={onCerrar} titulo="Detalle de la marca" telefono="completo">
-      {cargando ? <p className="t-body-sm text-muted">Cargando…</p> : null}
+      {cargando ? <p className="t-body-sm text-fg-muted">Cargando…</p> : null}
       {error ? <Alerta tono="danger" titulo="No se pudo cargar">{error}</Alerta> : null}
       {detalle ? (
         <dl className="flex flex-col gap-3">
@@ -84,7 +84,7 @@ export function HojaMarca({ marcaId, abierta, onCerrar, zona }: { marcaId: strin
 function Par({ etiqueta, valor, mono }: { etiqueta: string; valor: string; mono?: boolean }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <dt className="t-caption text-muted">{etiqueta}</dt>
+      <dt className="t-caption text-fg-muted">{etiqueta}</dt>
       <dd className={mono ? "t-body-sm font-mono break-all" : "t-body-sm"}>{valor}</dd>
     </div>
   );

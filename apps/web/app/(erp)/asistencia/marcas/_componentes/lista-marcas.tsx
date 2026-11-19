@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button, ListScreen, type EstadoPantalla } from "@opai/ds";
@@ -36,10 +36,6 @@ type Props = {
 export function ListaMarcas({ state, items, zona, hayMas, marcaAbierta, params }: Props) {
   const router = useRouter();
   const [marcaId, setMarcaId] = useState<string | null>(marcaAbierta);
-  const hora = useMemo(
-    () => new Intl.DateTimeFormat("es-CL", { dateStyle: "short", timeStyle: "short", hourCycle: "h23", timeZone: zona }),
-    [zona],
-  );
 
   const abrirMarca = (id: string) => {
     setMarcaId(id);
@@ -73,7 +69,7 @@ export function ListaMarcas({ state, items, zona, hayMas, marcaAbierta, params }
             </span>
           </span>
         )}
-        columnas={columnasMarcas(hora)}
+        columnas={columnasMarcas(zona)}
         paginacion={
           hayMas && params.siguiente ? (
             <Button
