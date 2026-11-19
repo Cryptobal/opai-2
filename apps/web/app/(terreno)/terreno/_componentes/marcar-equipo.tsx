@@ -17,7 +17,12 @@ export function MarcarEquipo() {
   useEffect(() => {
     let vivo = true;
     void ejecutarAsistenciaEquipo("asistencia.rostro.textos", {}).then((r) => {
-      if (vivo && r.ok) setTexto((r.data as { proposito: string; texto: string }[]).find((t) => t.proposito === "biometria_asistencia")?.texto ?? "");
+      if (vivo && r.ok)
+        setTexto(
+          (r.data as { proposito: string; texto: string }[]).find(
+            (t) => t.proposito === "biometria_asistencia",
+          )?.texto ?? "",
+        );
     });
     return () => {
       vivo = false;
@@ -27,9 +32,15 @@ export function MarcarEquipo() {
   if (persona === null)
     return (
       <div className="mx-auto flex max-w-xl flex-col gap-3">
-        <Alerta tono="neutral" titulo="Primero elige tu nombre">Elige quién eres para marcar tu asistencia.</Alerta>
-        <Enlace href="/terreno" Link={LinkNext}>Elegir mi nombre</Enlace>
+        <Alerta tono="neutral" titulo="Primero elige tu nombre">
+          Elige quién eres para marcar tu asistencia.
+        </Alerta>
+        <Enlace href="/terreno" Link={LinkNext}>
+          Elegir mi nombre
+        </Enlace>
       </div>
     );
-  return <Marcar modo="equipo" personaId={persona.id} nombre={persona.nombre} textoRostro={texto} />;
+  return (
+    <Marcar modo="equipo" personaId={persona.id} nombre={persona.nombre} textoRostro={texto} />
+  );
 }

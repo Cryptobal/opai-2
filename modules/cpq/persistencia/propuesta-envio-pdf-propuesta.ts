@@ -1,21 +1,13 @@
 import { reglaDeNegocio, type Contexto } from "@opai/capabilities";
 
-import {
-  aplicarContratoABloques,
-  textosBibliotecaConContrato,
-} from "../domain/documento/propuesta-campos";
-import { aperturaEfectiva } from "../domain/documento/propuesta-tecnica";
-import type { SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecnica";
-import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
-import { cargarLogoMarca } from "./pdf/logo";
-import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
-import { renderPdfPropuestaTecnica } from "./pdf-propuesta-tecnica";
+import type { ServicioDesdeCotizacion, SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecnica";
 import { marcaDocumentoEnVersion, vistaMarcaDocumento } from "./marca-documento";
+import { pdfPropuestaDocumento } from "./pdf-propuesta-documento";
 import { vistaPlantillaPropuesta } from "./plantilla-propuesta";
-import type { ServicioDesdeCotizacion } from "../domain/documento/propuesta-tecnica";
 import { capitulosDeEnvio } from "./propuesta-capitulos";
-import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
+import { plantillaHtmlDeEnvio } from "./propuesta-html-uso";
 
+/** PDF de la propuesta de un envío, con lo congelado en su snapshot: plantilla, textos, marca y valores de los campos. */
 export async function pdfPropuestaDesdeSnapshot(
   ctx: Contexto,
   snapshot: SnapshotEnvioPropuesta,
@@ -28,48 +20,29 @@ export async function pdfPropuestaDesdeSnapshot(
     propuestaTecnicaId?: string | null;
   },
 ) {
-  const marca =
-    (await marcaDocumentoEnVersion(ctx, snapshot.marcaDocumentoVersion)) ??
-    (await vistaMarcaDocumento(ctx));
   const rowPl = await ctx.db.cpqPlantillaDocumento.findFirst({
     where: { id: snapshot.plantillaDocumentoId, tenantId: ctx.tenantId },
   });
   if (!rowPl) throw reglaDeNegocio("No se encontró la plantilla congelada del envío.");
   const rev = await ctx.db.cpqPlantillaDocumentoRevision.findFirst({
-    where: {
-      plantillaDocumentoId: snapshot.plantillaDocumentoId,
-      version: snapshot.plantillaDocumentoVersion,
-    },
+    where: { plantillaDocumentoId: snapshot.plantillaDocumentoId, version: snapshot.plantillaDocumentoVersion },
   });
   const plantilla = vistaPlantillaPropuesta(
     rev ? { ...rowPl, base: rev.base, bloquesJson: rev.bloquesJson, version: rev.version } : rowPl,
   );
-  const tasaIva = await tasaIvaVentaTenant(ctx);
-  const entrada = await entradaPdfDesdeCotizacion(ctx, input.cotizacionId, { enviada: true });
-  return renderPdfPropuestaTecnica({
+  return pdfPropuestaDocumento(ctx, {
+    cotizacionId: input.cotizacionId,
     codigo: input.codigo,
     titulo: input.titulo,
     borrador: false,
-    bloquesJson: aplicarContratoABloques(snapshot.propuestaBloquesJson, snapshot.camposContrato),
-    marca,
+    bloquesJson: snapshot.propuestaBloquesJson,
+    versionesBiblioteca: snapshot.bloquesBiblioteca,
+    htmlPlantilla: snapshot.plantillaHtml ? await plantillaHtmlDeEnvio(ctx, snapshot.plantillaHtml) : null,
+    marca: (await marcaDocumentoEnVersion(ctx, snapshot.marcaDocumentoVersion)) ?? (await vistaMarcaDocumento(ctx)),
     servicio: input.servicio,
-    economia: {
-      secciones: entrada?.secciones ?? [],
-      cliente: entrada?.cliente ?? null,
-      ejecutivo: entrada?.ejecutivo ?? null,
-      negocio: entrada?.negocio ?? "",
-      validaHasta: entrada?.validaHasta ?? null,
-      condiciones: entrada?.condiciones ?? null,
-      fecha: entrada?.calculo.fecha ?? "",
-    },
     netoTotalClp: input.netoTotalClp,
-    apertura: aperturaEfectiva(plantilla.aperturaMaxima, plantilla.aperturaMaxima),
-    tasaIvaPct: tasaIva,
-    textosBiblioteca: textosBibliotecaConContrato(
-      await textosBiblioteca(ctx, snapshot.propuestaBloquesJson, snapshot.bloquesBiblioteca),
-      snapshot.camposContrato,
-    ),
-    logo: await cargarLogoMarca(ctx),
+    apertura: plantilla.aperturaMaxima,
     capitulos: await capitulosDeEnvio(ctx, input.propuestaTecnicaId ?? null),
+    ...(snapshot.camposContrato ? { valores: snapshot.camposContrato.valores } : {}),
   });
 }

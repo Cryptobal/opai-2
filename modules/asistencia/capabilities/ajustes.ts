@@ -18,10 +18,10 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "switch",
   }),
-  geocerca_radio_m: z.number().int().min(10).max(5000).default(300).meta({
-    etiqueta: "Radio de la geocerca para alertar (m)",
+  geocerca_radio_m: z.number().int().min(10).max(5000).default(100).meta({
+    etiqueta: "Radio de geocerca en marcas de asistencia (m)",
     ayuda:
-      "Por defecto 300 m (D-13). Fuera de este radio la marca se registra igual y queda señalada: la geocerca solo alerta y el GPS nunca bloquea una marca (Res. 38, arts. 38, 53 y 58 k). Una instalación puede fijar su propio radio.",
+      "Por defecto 100 m. Solo para marcas de asistencia: fuera de este radio la marca se registra igual y queda señalada; el GPS nunca bloquea una marca. En rondas el radio por defecto es otro (configuración del módulo Rondas). Una instalación puede fijar su propio radio.",
     grupo: "Marcas",
     ambito: "tenant",
     permiso: PERMISO,

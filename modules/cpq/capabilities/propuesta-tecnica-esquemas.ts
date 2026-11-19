@@ -34,6 +34,8 @@ export const armadorPropuestaVistaSchema = z.object({
   base: basesPlantillaSchema,
   estado: z.enum(["borrador", "congelada"]),
   bloques: z.array(bloqueArmadorSchema),
+  /** Texto que sale en cada sección sin texto propio (texto tipo o condiciones de la marca), por id de bloque. */
+  textosPorDefecto: z.record(z.string(), z.string()),
   servicioDesactualizado: z.boolean(),
   editadoParaCliente: z.boolean(),
   codigo: z.string(),

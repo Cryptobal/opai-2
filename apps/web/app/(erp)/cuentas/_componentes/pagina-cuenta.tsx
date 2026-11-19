@@ -16,7 +16,7 @@ type Props = {
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
   tab: TabCuenta;
-  /** Acción principal de la pestaña; sin ella no hay botón arriba: «Nueva» está en la lista (CAR-360). */
+  /** Acción extra en la cabecera del shell; «Nueva» está en la lista (CAR-546). */
   acciones?: ReactNode;
   children: (cuenta: CuentaDetalle, p: Parametros) => ReactNode;
 };
