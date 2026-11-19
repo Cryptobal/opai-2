@@ -3,7 +3,6 @@
   "agente.conversaciones.list",
   "agente.historial.list",
   "agente.modelos.list",
-  "asistencia.marcas.listar",
   "comercial.canales.get",
   "comercial.contexto.listar",
   "comercial.negocios.alertas",

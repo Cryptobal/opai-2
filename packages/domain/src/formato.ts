@@ -81,12 +81,20 @@ export function formatearFecha(valor: string | Date | null | undefined, zona = Z
     .replace(/\//g, "-");
 }
 
-/** `dd-mm-aaaa HH:mm` (24 h) en la zona del tenant. */
-export function formatearFechaHora(valor: string | Date | null | undefined, zona = ZONA): string {
+/** `dd-mm-aaaa HH:mm` por defecto; admite segundos y fecha larga en la zona del tenant. */
+export function formatearFechaHora(
+  valor: string | Date | null | undefined, zona = ZONA, opciones: { segundos?: boolean; fechaLarga?: boolean } = {},
+): string {
   if (!valor) return "—";
+  if (opciones.fechaLarga) {
+    return new Intl.DateTimeFormat("es-CL", {
+      dateStyle: "long", timeStyle: opciones.segundos ? "medium" : "short", hourCycle: "h23", timeZone: zona,
+    }).format(aFecha(valor));
+  }
   const hora = new Intl.DateTimeFormat("es-CL", {
     hour: "2-digit",
     minute: "2-digit",
+    ...(opciones.segundos ? { second: "2-digit" as const } : {}),
     hour12: false,
     timeZone: zona,
   }).format(aFecha(valor));
