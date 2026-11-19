@@ -14,7 +14,7 @@ import {
 
 describe("catálogo único de campos · integridad", () => {
   it("tiene versión y cada clave (y alias) es única y con forma entidad.campo", () => {
-    expect(VERSION_CATALOGO_CAMPOS).toBe(2);
+    expect(VERSION_CATALOGO_CAMPOS).toBe(4);
     const vistas = new Set<string>();
     for (const c of CATALOGO_CAMPOS) {
       expect(c.clave).toMatch(/^[a-z]+\.[a-z0-9_]+$/);
@@ -69,7 +69,7 @@ describe("catálogo único de campos · integridad", () => {
 
 describe("validación de plantillas", () => {
   it("rechaza tokens desconocidos y colecciones desconocidas", () => {
-    const r = validarPlantillaCampos("{{cuenta.sueldo}} {{#cada puestos}}x{{/cada}}", "propuesta");
+    const r = validarPlantillaCampos("{{cuenta.sueldo}} {{#cada lineas}}x{{/cada}}", "propuesta");
     expect(r.problemas.map((p) => p.codigo)).toEqual(["token_desconocido", "token_desconocido"]);
   });
 

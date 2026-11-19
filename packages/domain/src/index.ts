@@ -48,6 +48,7 @@ export * from "./documento-plantillas-ambito";
 export * from "./documento-plantillas-texto";
 export * from "./documento-plantillas-rellenar";
 export * from "./documento-plantillas-campos";
+export * from "./propuesta-bloques";
 export * from "./vencimientos-grupos";
 export * from "./vigencia";
 export * from "./calendario";
