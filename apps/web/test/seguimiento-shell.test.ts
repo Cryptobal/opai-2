@@ -11,6 +11,8 @@ import { NAV_PLATAFORMA, navegacionPortal } from "@/lib/navegacion";
 import { membresia } from "./fuentes-falsas";
 
 const sesion = vi.hoisted(() => ({ identidad: null as Identidad | null }));
+vi.mock("@/lib/ver-como", () => ({ verComoDe: async () => null }));
+vi.mock("@/app/_acciones/ver-como", () => ({ accionSalirVerComo: vi.fn() }));
 vi.mock("@/lib/servidor", () => ({
   identidadActual: async () => sesion.identidad,
   tieneAccesoAPortal: (i: Identidad, p: string) =>
