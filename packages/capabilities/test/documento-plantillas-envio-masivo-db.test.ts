@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { crearContexto, executeCapability } from "../src";
 import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
@@ -7,13 +7,18 @@ import { prepararVinculosJornada } from "./vinculos-jornada-fixture";
 describe("plantillas laborales: envío masivo", () => {
   let f: Awaited<ReturnType<typeof prepararVinculosJornada>>;
   let plantillaId = "";
-  const almacen = almacenamientoEnMemoria();
+  let almacen = almacenamientoEnMemoria();
+  let cerrarCaso: (() => Promise<void>) | undefined;
   const fecha = "2026-11-01";
   const ctx = (rol: "owner" | "gerente" = "owner") =>
     crearContexto({ tenantId: f.tenantId, rol, actor: { tipo: "system" }, servicios: { almacenamiento: almacen.almacenamiento } });
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    cerrarCaso = undefined;
+    almacen = almacenamientoEnMemoria();
+    // El helper crea dos tenants con UUID nuevos y sus fixtures para este caso.
     f = await prepararVinculosJornada();
+    cerrarCaso = () => f.e.cerrar();
     await f.e.forTenant(f.tenantId).vinculoLaboral.create({
       data: { tenantId: f.tenantId, personaId: f.personaId, cargoId: f.cargoId, instalacionId: f.a,
         tipo: "indefinido", inicio: new Date("2026-01-01T00:00:00Z"), estado: "vigente" },
@@ -28,18 +33,21 @@ describe("plantillas laborales: envío masivo", () => {
     if (!r.ok) throw new Error(JSON.stringify(r));
     plantillaId = (r.data as { id: string }).id;
   });
-  beforeEach(async () => {
-    await f.e.forTenant(f.tenantId).persona.update({
-      where: { id: f.personaId },
-      data: { calle: null, comuna: null, emailPersonal: null },
-    });
-  });
   const completarPersona = () => f.e.forTenant(f.tenantId).persona.update({
     where: { id: f.personaId },
     data: { calle: "Calle Ficticia 123", comuna: "Santiago", emailPersonal: "persona@example.invalid" },
   });
-  afterAll(async () => {
-    await f?.e.cerrar();
+  afterEach(async () => {
+    // La bitácora es append-only incluso para el propietario: no borrar tenants ni desactivar
+    // triggers. Las filas de estos UUID únicos se eliminan al destruir la base efímera de CI.
+    try {
+      await cerrarCaso?.();
+    } finally {
+      almacen.objetos.clear();
+      almacen.cuerpos.clear();
+      almacen.bytes.clear();
+      cerrarCaso = undefined;
+    }
   });
 
   it("lista candidatas y marca faltantes", async () => {

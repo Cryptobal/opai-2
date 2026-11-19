@@ -51,7 +51,7 @@ export function MapaEdicionPunto({ centro, latitud, longitud, radioM, onCoords }
         {buscandoGps ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <MapPin className="size-4" aria-hidden />}
         Usar mi ubicación
       </Button>
-      <p className="text-sm text-muted-foreground">Usa las coordenadas o mueve el pin. Sin coordenadas guardadas, el mapa parte en Santiago como referencia.</p>
+      <p className="t-body-sm text-fg-muted">Usa las coordenadas o mueve el pin. Sin coordenadas guardadas, el mapa parte en Santiago como referencia.</p>
       <div
         className={cn(
           "ds-mapa-leaflet relative aspect-video overflow-hidden rounded-md border border-border",

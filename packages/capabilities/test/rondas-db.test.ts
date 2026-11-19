@@ -4,7 +4,7 @@
 // pasando el id directo. Complementa el alcance por filas en memoria (rondas.test.ts) y la cobertura
 // de RLS del núcleo en packages/db.
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
@@ -38,16 +38,20 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
       medidor,
     });
 
-  beforeAll(async () => {
+  let cerrarCaso: (() => Promise<void>) | undefined;
+  beforeEach(async () => {
+    cerrarCaso = undefined;
     e = await prepararEntorno();
+    cerrarCaso = () => e.cerrar();
     mod = await import("../src");
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesRondas]);
 
+    tenantA = tenantB = "";
     const tenant = async (slug: string) =>
       (
         await e.admin.tenant.create({
-          data: { slug: `${slug}-${randomUUID().slice(0, 8)}`, nombre: slug, vertical: "seguridad" },
+          data: { slug: `qa-${slug}-${randomUUID()}`, nombre: slug, vertical: "seguridad" },
         })
       ).id;
     tenantA = await tenant("rondas-a");
@@ -97,8 +101,14 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
     });
   });
 
-  afterAll(async () => {
-    await e?.cerrar();
+  afterEach(async () => {
+    // Bitácoras y hechos son append-only: no borrar filas ni desactivar sus guardas.
+    // Cada caso usa UUID nuevos; la base local/CI efímera se descarta al terminar la corrida.
+    try {
+      await cerrarCaso?.();
+    } finally {
+      cerrarCaso = undefined;
+    }
   });
 
   it("el owner de B ve sus propios puntos (control)", async () => {
