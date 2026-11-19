@@ -41,7 +41,7 @@ export function parsearMontoClp(
 }
 
 /** Divide una línea CSV (RFC 4180): campos entre comillas con separador, comillas dobles escapadas. */
-export function dividirLineaCsv(linea: string, sep: string): string[] {
+function dividirLineaCsv(linea: string, sep: string): string[] {
   const out: string[] = [];
   let actual = "";
   let entre = false;
@@ -79,14 +79,6 @@ export function parsearCsv(texto: string): Record<string, string>[] {
       row[c] = vals[i] ?? "";
     });
     return row;
-  });
-}
-
-export function filasDesdeCsv(texto: string) {
-  return parsearCsv(texto).map((r, indice) => {
-    const parsed = filaDesdeRegistroCsv(r, indice);
-    if (!parsed.ok) throw reglaDeNegocio(parsed.motivo);
-    return parsed.fila;
   });
 }
 

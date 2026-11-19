@@ -5,7 +5,7 @@ import { Badge, ChipsEtiquetas, type EstadoPantalla, MonoAv } from "@opai/ds";
 
 import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etiquetas/opciones";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { EnlaceAltaLista } from "@/app/_components/maestros/enlace-alta-lista";
 import { ESTADO_CUENTA, estadoDe, monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { rut } from "@/lib/fechas";
@@ -43,15 +43,16 @@ export function ListaCuentas(p: {
 }) {
   const activas = p.items.filter((c) => c.estado === "cliente_activo").length;
   const nueva = (
-    <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus} variante={p.seleccionada ? "secondary" : "primary"}>
+    <EnlaceAltaLista href="/cuentas?nueva=1" icono={Plus}>
       Nueva
-    </EnlaceBotonHoja>
+    </EnlaceAltaLista>
   );
   return (
     <ListaMaestro
       state={p.state}
       titulo="Cuentas"
       accion={nueva}
+      accionFlotante
       vistas={{ lista: "cuentas", ruta: "/cuentas" }}
       buscar="Buscar por nombre o RUT"
       filtros={[

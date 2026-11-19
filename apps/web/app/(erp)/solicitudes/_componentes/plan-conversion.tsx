@@ -1,6 +1,6 @@
 import { Badge } from "@opai/ds";
 
-export type Accion = "reutiliza" | "crea" | "sin_contacto";
+type Accion = "reutiliza" | "crea" | "sin_contacto";
 export type Plan = {
   cuenta: { accion: Accion; nombre: string };
   contacto: { accion: Accion; nombre: string | null };

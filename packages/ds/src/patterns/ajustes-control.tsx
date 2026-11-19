@@ -1,9 +1,11 @@
 "use client";
 
+import { lazy, Suspense } from "react";
+
 import { Input, Textarea } from "../components/input";
 import { InputFecha } from "../components/input-fecha";
 import { Select } from "../components/select";
-import { Switch } from "../components/switch";
+const Switch = lazy(() => import("../components/switch").then((m) => ({ default: m.Switch })));
 import { ControlJson } from "./ajustes-control-json";
 
 export type CampoAjusteVista = {
@@ -43,13 +45,15 @@ export function Control({ campo, valor, onCambiar, id }: PropsCampo & { id: stri
   const deshabilitado = !campo.editable;
   if (tipo === "switch")
     return (
-      <Switch
-        soloControl
-        etiqueta={campo.etiqueta}
-        activo={valor === true}
-        disabled={deshabilitado}
-        onCambiar={onCambiar}
-      />
+      <Suspense fallback={<span role="status">Cargando control…</span>}>
+        <Switch
+          soloControl
+          etiqueta={campo.etiqueta}
+          activo={valor === true}
+          disabled={deshabilitado}
+          onCambiar={onCambiar}
+        />
+      </Suspense>
     );
   if (tipo === "seleccion") {
     const opciones = ((campo.esquema.enum as unknown[]) ?? []).map((v) => ({
@@ -87,7 +91,8 @@ export function Control({ campo, valor, onCambiar, id }: PropsCampo & { id: stri
         disabled={deshabilitado}
       />
     );
-  if (tipo === "json") return <ControlJson id={id} valor={valor} disabled={deshabilitado} onCambiar={onCambiar} />;
+  if (tipo === "json")
+    return <ControlJson id={id} valor={valor} disabled={deshabilitado} onCambiar={onCambiar} />;
   if (tipo === "lista")
     return (
       <Textarea
