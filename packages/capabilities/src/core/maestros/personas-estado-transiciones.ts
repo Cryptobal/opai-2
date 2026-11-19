@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { ESTADOS_PERSONA, PERMISOS_CORE, PERSONA_ESTADO_BLOQUEADO_PERMANENTE } from "@opai/domain";
+import {
+  ESTADOS_PERSONA,
+  PERMISOS_CORE,
+  PERSONA_ESTADO_BLOQUEADO_PERMANENTE,
+  type EstadoPersona,
+} from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import type { Capacidad } from "../../types";
@@ -27,9 +32,10 @@ const NORMALES: readonly DefTransicionPersona[] = [
   { id: "core.personas.externar", hacia: "externo", desde: "inactivo", descripcion: "Pasa una persona inactiva al estado «Externa» (turno extra)." },
 ];
 
-function estadosOrigen(def: DefTransicionPersona): readonly string[] | null {
-  if (!def.desde) return null;
-  return Array.isArray(def.desde) ? def.desde : [def.desde];
+function estadosOrigen(def: DefTransicionPersona): readonly EstadoPersona[] | null {
+  if (def.desde === undefined) return null;
+  const d = def.desde;
+  return typeof d === "string" ? [d] : [...d];
 }
 
 function capTransicion(def: DefTransicionPersona) {
@@ -46,7 +52,7 @@ function capTransicion(def: DefTransicionPersona) {
     handler: (ctx, input, { dryRun }) => {
       if (origenes) {
         return personaDe(ctx, input.id).then((p) => {
-          const actual = p.estado ?? "activo";
+          const actual = (p.estado ?? "activo") as EstadoPersona;
           if (!origenes.includes(actual)) {
             throw reglaDeNegocio(`Esta acción solo aplica desde «${origenes.join("» o «")}».`);
           }

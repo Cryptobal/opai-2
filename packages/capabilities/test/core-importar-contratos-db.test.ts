@@ -116,6 +116,20 @@ describe.skipIf(!urlPropietario)("core · importador de contratos en base real",
     await x.e.admin.persona.updateMany({ where: { tenantId: x.t1, rut: "44444444-4" }, data: { estado: "inactivo" } });
     await x.importar(x.t1, "contratos", { filas: [{ ...base, persona_rut: "44.444.444-4", inicio: "01-03-2024" }] });
     const p = await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "44444444-4" } });
-    expect(p?.estado).toBe("activa");
+    expect(p?.estado).toBe("activo");
+  });
+
+  it("no reactiva ni crea contrato vigente para una persona archivada", async () => {
+    const personaId = (await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "44444444-4" }, select: { id: true } }))!.id;
+    await x.e.admin.persona.update({
+      where: { id: personaId },
+      data: { estado: "inactivo", archivadaEn: new Date("2026-01-01") },
+    });
+    const s = await x.importar(x.t1, "contratos", { filas: [{ ...base, persona_rut: "44.444.444-4", inicio: "01-04-2024" }] }, true);
+    expect(s.conteos.error).toBeGreaterThanOrEqual(1);
+    expect(s.filas.some((f) => f.mensajes.join(" ").includes("archivada"))).toBe(true);
+    const p = await x.e.admin.persona.findFirst({ where: { id: personaId } });
+    expect(p?.estado).toBe("inactivo");
+    expect(p?.archivadaEn).not.toBeNull();
   });
 });

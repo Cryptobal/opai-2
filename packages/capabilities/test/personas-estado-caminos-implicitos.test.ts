@@ -52,10 +52,47 @@ describe("cambios de estado implícitos (CAR-674, B1)", () => {
     ).toBe("UNPROCESSABLE");
   });
 
-  it("core.personas.archive exige transición válida hacia inactivo", async () => {
+  it("core.personas.archive permite postulante y rechaza rechazada", async () => {
     const { ctx } = contextoDePrueba({ rol: "gerente" });
     const { id } = await dato<{ id: string }>(ctx, "core.personas.create", postulante);
-    expect(await codigo(ctx, "core.personas.archive", { id })).toBe("UNPROCESSABLE");
+    await dato(ctx, "core.personas.archive", { id });
+    const rech = await dato<{ id: string }>(ctx, "core.personas.create", {
+      ...postulante,
+      rut: "14.456.789-7",
+    });
+    await dato(ctx, "core.personas.rechazar", { id: rech.id, motivo: "No califica para el cargo" });
+    expect(await codigo(ctx, "core.personas.archive", { id: rech.id })).toBe("UNPROCESSABLE");
+  });
+
+  it("core.personas.archive rechaza bloqueo permanente", async () => {
+    const admin = contextoDePrueba({
+      rol: "gerente",
+      permisos: [PERMISOS_CORE.personasManage, PERMISOS_CORE.personasEstadoAdmin],
+    }).ctx;
+    const { id } = await dato<{ id: string }>(admin, "core.personas.create", {
+      ...postulante,
+      rut: "12.345.678-5",
+    });
+    await dato(admin, "core.personas.bloquear_permanente", { id, motivo: "No cumple política de contratación" });
+    expect(await codigo(admin, "core.personas.archive", { id })).toBe("UNPROCESSABLE");
+  });
+
+  it("core.vinculos.create dryRun falla si la persona está bloqueada operativamente", async () => {
+    const { ctx, cargoId } = await base();
+    const { id } = await dato<{ id: string }>(ctx, "core.personas.create", {
+      ...postulante,
+      rut: "13.333.444-0",
+    });
+    await dato(ctx, "core.personas.bloquear", { id, motivo: "Documentación pendiente de revisar" });
+    expect(
+      await codigo(ctx, "core.vinculos.create", {
+        personaId: id,
+        ...(await destinoVinculo(ctx)),
+        cargoId,
+        tipo: "indefinido",
+        inicio: "2026-01-01",
+      }),
+    ).toBe("UNPROCESSABLE");
   });
 
   it("terminar el último vínculo no inactiva a bloqueada permanente", async () => {

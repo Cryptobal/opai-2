@@ -1,11 +1,6 @@
 export { vinculosTerminar } from "./vinculos-terminar";
-import {
-  bloquearVinculo,
-  exigirEdicionVinculo,
-  reclutadorPorDefecto,
-  validarDestino,
-  validarReclutador,
-} from "./vinculos-validacion";
+export { vinculosCreate } from "./vinculos-create";
+import { bloquearVinculo, exigirEdicionVinculo, validarDestino, validarReclutador } from "./vinculos-validacion";
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
@@ -16,11 +11,8 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { dondePersona } from "./alcance";
 import { aFecha, definidos, opcionalAFecha } from "./comun";
-import { cargoParaVinculo, crearVinculo } from "./personas-escritura";
-import { personaDe } from "./personas-vista";
+import { cargoParaVinculo } from "./personas-escritura";
 import { camposVinculo, vinculoSchema, vistaVinculo } from "./vinculos-vista";
-import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
-import { transicionarPersonaEnTx } from "./personas-estado-implicito";
 
 export async function vinculoDe(ctx: Contexto, id: string) {
   const v = await ctx.db.vinculoLaboral.findFirst({
@@ -47,52 +39,6 @@ export const vinculosList = defineCapability({
       orderBy: { inicio: "desc" },
     });
     return filas.map(vistaVinculo);
-  },
-});
-
-export const vinculosCreate = defineCapability({
-  id: "core.vinculos.create",
-  descripcion:
-    "Crea un vínculo laboral con instalación, puesto opcional y jornada pactada. Si la persona ya tiene uno vigente responde con error: primero hay que terminarlo.",
-  permiso: PERMISOS_CORE.vinculosManage,
-  input: z.object({ personaId: uuidSchema, ...camposVinculo }),
-  output: vinculoSchema,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, { personaId, ...v }, { dryRun }) {
-    exigirEdicionVinculo(ctx);
-    await validarDestino(ctx, v);
-    const p = await personaDe(ctx, personaId);
-    exigirNoAnonimizado(p, "La persona");
-    if (p.archivadaEn) throw reglaDeNegocio("La persona está archivada.");
-    const vigente = await ctx.db.vinculoLaboral.findFirst({
-      where: { personaId, estado: "vigente" },
-    });
-    if (vigente)
-      throw reglaDeNegocio(
-        "La persona ya tiene un vínculo vigente: primero termínalo (core.vinculos.terminar).",
-      );
-    await cargoParaVinculo(ctx, v.cargoId);
-    if (dryRun) {
-      // La vista previa muestra y valida el mismo «Reclutado por» que dejaría la escritura.
-      if (v.reclutadoPorId) await validarReclutador(ctx, v.reclutadoPorId);
-      return vistaVinculo({
-        ...v,
-        reclutadoPorId: v.reclutadoPorId === undefined ? reclutadorPorDefecto(ctx) : v.reclutadoPorId,
-        id: "",
-        personaId,
-        inicio: aFecha(v.inicio),
-        termino: opcionalAFecha(v.termino) ?? null,
-      });
-    }
-    const creado = await ctx.transaccion(async (tx) => {
-      await bloquearNoAnonimizado(tx, "persona", personaId);
-      const r = await crearVinculo(ctx, tx, personaId, v);
-      if (p.estado !== "activo")
-        await transicionarPersonaEnTx(tx, personaId, "activo", p.estado ?? "activo");
-      return r;
-    });
-    return vistaVinculo(creado);
   },
 });
 

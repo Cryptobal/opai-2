@@ -37,6 +37,11 @@ export async function anonimizarPersona(
   corte: Date | null,
 ): Promise<boolean> {
   await bloquear(tx, "personas", id);
+  const elegible = await tx.persona.findFirst({
+    where: { id, anonimizadaEn: null, ...sinRelacionViva(corte) },
+    select: { estado: true },
+  });
+  if (!elegible) return false;
   const { count } = await tx.persona.updateMany({
     where: { id, anonimizadaEn: null, ...sinRelacionViva(corte) },
     data: {
@@ -66,7 +71,7 @@ export async function anonimizarPersona(
       noRecontratarMotivo: null,
       noRecontratarEn: null,
       noRecontratarVenceEn: null,
-      estado: "inactivo",
+      ...(elegible.estado === "bloqueado_permanente" ? {} : { estado: "inactivo" }),
       anonimizadaEn: ahora,
     },
   });

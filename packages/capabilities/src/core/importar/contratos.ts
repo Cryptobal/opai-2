@@ -83,11 +83,14 @@ export const importadorContratos: Importador<DatosContrato> = {
     const estado = estadoDe(d.termino, hoy);
     const v = await tx.vinculoLaboral.create({ data: { ...d, tenantId: ctx.tenantId, estado }, select: { id: true } });
     if (estado === "vigente") {
-      const persona = await tx.persona.findUnique({
-        where: { id: d.personaId },
+      const persona = await tx.persona.findFirst({
+        where: { id: d.personaId, archivadaEn: null },
         select: { estado: true },
       });
-      if (persona && persona.estado !== "activo") {
+      if (!persona) {
+        throw new Error("core.importar.contratos: persona archivada o ausente al crear vínculo vigente.");
+      }
+      if (persona.estado !== "activo") {
         await transicionarPersonaEnTx(tx, d.personaId, "activo", persona.estado ?? "activo");
       }
     }
