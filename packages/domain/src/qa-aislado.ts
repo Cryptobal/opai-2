@@ -13,6 +13,14 @@ export const QA_AISLADO = {
 export const ROLES_QA = ["owner", "admin", "gerente", "supervisor", "viewer"] as const;
 export type RolQa = (typeof ROLES_QA)[number];
 
+export const SLUG_EMPRESA_QA_E2E = "qa-e2e" as const;
+export const PATRON_SLUG_QA = /^qa-[a-z0-9-]+$/;
+export const RAMA_PREVIEW = /^preview\/pr-[0-9]+$/;
+
+export function esSlugEmpresaQa(slug: string): boolean {
+  return PATRON_SLUG_QA.test(slug);
+}
+
 export type EntornoQa = Readonly<Record<string, string | undefined>>;
 
 type Conexion = { host: string; puerto: string; base: string; usuario: string };
@@ -67,7 +75,7 @@ export function exigirDestinoQa(env: EntornoQa): void {
 
 /** El QA aislado solo tiene empresas `qa-*`: si hay otra (p. ej. `gard`), la base no es la vacía y se aborta. */
 export function exigirSoloEmpresasQa(slugs: readonly string[]): void {
-  const ajenas = slugs.filter((s) => !/^qa-[a-z0-9-]+$/.test(s));
+  const ajenas = slugs.filter((s) => !esSlugEmpresaQa(s));
   if (ajenas.length > 0) {
     throw new Error(`La base tiene empresas que no son de QA (${ajenas.length}): no es el QA aislado vacío.`);
   }
@@ -118,4 +126,20 @@ export function diagnosticoBaseQa(e: EstadoBaseQa): DiagnosticoBaseQa {
     if (ajenas.length > 0) problemas.push(`La base tiene ${ajenas.length} empresa(s) que no son de QA: no es el QA aislado.`);
   }
   return problemas.length > 0 ? { estado: "ajena", problemas } : { estado: "con_qa", problemas };
+}
+
+export function exigirRamaPreview(rama: string): void {
+  if (!RAMA_PREVIEW.test(rama)) {
+    throw new Error(`Solo corre en una rama Neon de preview (preview/pr-N); recibió «${rama}».`);
+  }
+}
+
+export function exigirTenantQaE2e(slug: string): void {
+  if (slug !== SLUG_EMPRESA_QA_E2E) {
+    throw new Error(`Solo la empresa ficticia «${SLUG_EMPRESA_QA_E2E}»; recibió «${slug}».`);
+  }
+}
+
+export function slugsEmpresasAjenasEnPreview(slugs: readonly string[]): string[] {
+  return slugs.filter((s) => !esSlugEmpresaQa(s));
 }

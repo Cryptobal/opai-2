@@ -7,17 +7,19 @@ export type Modelo = {
 export type Contexto = { tipo: "cuenta" | "instalacion" | "negocio" | "persona"; id: string };
 export type Nivel = "aprobar_todo" | "paso_a_paso";
 
-export type PasoPlan = {
+type PasoPlan = {
   capacidad: string;
   argumentos: unknown;
   clave: string;
   vistaPrevia: { data: unknown };
 };
-/** Entidad con href interno salido de una capacidad (CAR-446). */
+/** Entidad con href interno salido de una capacidad (CAR-446; campos CAR-523). */
 export type ReferenciaEntidad = {
   id: string;
   titulo: string;
   detalle: string | null;
+  estado?: string | null;
+  campos?: string[];
   href: string;
 };
 
@@ -35,7 +37,7 @@ export type Resolucion = {
   siguiente: string | null;
 };
 
-export type EstadoPlan =
+type EstadoPlan =
   | "propuesto"
   | "ejecutando"
   | "en_curso"

@@ -7,7 +7,7 @@ const cola = () => import("./cola");
  * Estado de Terreno en el teléfono, como almacén externo (`useSyncExternalStore`): conexión, hechos por
  * enviar y último intento. Lo alimentan los eventos del navegador y los mensajes del service worker.
  */
-export type EstadoTerreno = {
+type EstadoTerreno = {
   enLinea: boolean;
   pendientes: number;
   /** Rechazados por el servidor que la persona aún no descartó (se ven en «Cola»). */
@@ -27,7 +27,7 @@ const INICIAL: EstadoTerreno = {
 };
 const CLAVE_LATIDO = "opai.terreno.ultimoLatido";
 const CADA_LATIDO_MS = 5 * 60_000;
-export const VERSION_APP = "terreno-web-1";
+const VERSION_APP = "terreno-web-1";
 
 let estado = INICIAL;
 let iniciado = false;

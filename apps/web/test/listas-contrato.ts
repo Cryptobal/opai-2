@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { listarCapacidades } from "@opai/capabilities";
 
-export const TOPE_LIMITE = 200;
+const TOPE_LIMITE = 200;
 
 const desenvolver = (s: z.ZodType): z.ZodType => {
   if (s instanceof z.ZodOptional || s instanceof z.ZodNullable)
