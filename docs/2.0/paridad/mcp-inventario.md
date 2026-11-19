@@ -498,6 +498,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.get` | `pauta_dotacion_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.turnos_extra.monto_fijar` | `pauta_turnos_extra_monto_fijar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.actualizar` | `rondas_plantillas_actualizar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.crear` | `rondas_plantillas_crear` | existe |
@@ -562,6 +563,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.resumen.leer` | `pauta_resumen_leer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
 | compartido | `app/(erp)/pauta/instalaciones/_componentes` | `pauta.informes.instalaciones` | `pauta_informes_instalaciones` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.puestos.get` | `core_puestos_get` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `pauta.turnos_extra.aprobar` | `pauta_turnos_extra_aprobar` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `pauta.turnos_extra.listar` | `pauta_turnos_extra_listar` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `pauta.turnos_extra.rechazar` | `pauta_turnos_extra_rechazar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `asistencia.telefono.habilitar` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.anular` | `core_ausencias_anular` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.listar` | `core_ausencias_listar` | existe |
@@ -801,6 +809,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/[id]/puestos` | `core.funciones.list` | `core_funciones_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.patrones.list` | `core_patrones_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `pauta.titulares.listar` | `pauta_titulares_listar` | existe |
+| erp | `/instalaciones/[id]/turnos-extra` | `pauta.turnos_extra.tarifas_leer` | `pauta_turnos_extra_tarifas_leer` | existe |
 | erp | `/instalaciones/nueva` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | erp | `/instalaciones/nueva` | `core.instalaciones.create` | `core_instalaciones_create` | existe |
 | erp | `/instalaciones/nueva` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
@@ -813,6 +822,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/personas/[id]/ausencias` | `core.ausencias.clases` | `core_ausencias_clases` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
+| erp | `/personas/[id]/turnos-extra` | `pauta.turnos_extra.listar` | `pauta_turnos_extra_listar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.obtener` | `nomina_liquidaciones_obtener` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
@@ -1266,7 +1276,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.list_a_cargo`
 - `core.ping`
 - `core.procesos_persona.paso_actualizar`
-- `core.puestos.get`
 - `core.roles.adicionales_list`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`
@@ -1306,10 +1315,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
 - `pauta.publicaciones.listar`
-- `pauta.turnos_extra.aprobar`
-- `pauta.turnos_extra.listar`
-- `pauta.turnos_extra.monto_fijar`
-- `pauta.turnos_extra.rechazar`
 - `pauta.turnos_extra.registrar`
 - `pauta.visitas.cerrar`
 - `pauta.visitas.iniciar`

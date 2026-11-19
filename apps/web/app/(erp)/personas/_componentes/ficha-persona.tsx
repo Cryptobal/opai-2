@@ -11,9 +11,18 @@ import { fecha, rut } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
 
 import { accionesPersona } from "./acciones-persona";
+import { pestanasPersona } from "./ficha-persona-pestanas";
 
 export type TabPersona =
-  "resumen" | "laboral" | "ausencias" | "sueldo" | "documentos" | "actividad" | "anexos" | "privacidad";
+  | "resumen"
+  | "laboral"
+  | "ausencias"
+  | "sueldo"
+  | "documentos"
+  | "actividad"
+  | "anexos"
+  | "privacidad"
+  | "turnos-extra";
 
 /** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · instalación · RUT"; tabs por ruta, en el orden del export
  * ficha-persona v1 (CAR-124): Resumen · Laboral · Sueldo · Anexos · Documentos · Privacidad · Actividad. */
@@ -24,6 +33,7 @@ export function FichaPersona(x: {
   tab: TabPersona;
   /** Búsqueda, filtros y página de la lista (`?q=…`), para que las pestañas no la reinicien. */
   consulta?: string;
+  turnosExtra?: boolean;
   children: ReactNode;
 }) {
   const p = x.persona;
@@ -77,22 +87,12 @@ export function FichaPersona(x: {
           : {})}
         tabActiva={x.tab}
         Link={LinkNext}
-        tabs={[
-          { id: "resumen", etiqueta: "Resumen", href: `${base}${q}` },
-          { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral${q}` },
-          { id: "ausencias", etiqueta: "Ausencias", href: `${base}/ausencias${q}` },
-          { id: "sueldo", etiqueta: "Sueldo", href: `${base}/sueldo${q}` },
-          { id: "anexos", etiqueta: "Anexos", href: `${base}/anexos${q}` },
-          {
-            id: "documentos",
-            etiqueta: "Documentos",
-            contador: p?.documentos ?? 0,
-            href: `${base}/documentos${q}`,
-          },
-
-          { id: "privacidad", etiqueta: "Privacidad", href: `${base}/privacidad${q}` },
-          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad${q}` },
-        ]}
+        tabs={pestanasPersona({
+          base,
+          q,
+          documentos: p?.documentos ?? 0,
+          ...(x.turnosExtra !== undefined ? { turnosExtra: x.turnosExtra } : {}),
+        })}
       >
         {x.children}
       </DetailScreen>
