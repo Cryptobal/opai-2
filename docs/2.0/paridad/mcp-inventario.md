@@ -381,6 +381,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.guardar_borrador` | `core_documento_plantillas_guardar_borrador` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.publicar` | `core_documento_plantillas_publicar` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.update` | `core_documento_plantillas_update` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.candidatas` | `core_documento_plantillas_candidatas` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.enviar_masivo` | `core_documento_plantillas_enviar_masivo` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | compartido | `app/(erp)/documentos/vencimientos/_componentes` | `core.documentos.vencimientos` | `core_documentos_vencimientos` | existe |
 | compartido | `app/(erp)/finanzas/_hoy` | `finanzas.hoy.resumen` | `finanzas_hoy_resumen` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
@@ -768,6 +771,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.personas.list` | `core_personas_list` | existe |
 | erp | `/documentos/plantillas/[id]` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |

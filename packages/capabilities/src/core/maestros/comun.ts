@@ -50,6 +50,12 @@ export const listaSchema = z.object({
   incluirArchivadas: z.boolean().default(false),
 });
 
+/** CAR-353: paginación hasta 200 filas (listas de personas o candidatas). */
+export const paginaCursorLimite200 = {
+  cursor: z.uuid().optional().describe("Para seguir: el valor `siguiente` anterior."),
+  limite: z.number().int().min(1).max(200).default(200),
+};
+
 /**
  * Página por cursor (CAR-400). Sin `skip: 1`: Prisma ubica la fila del cursor aunque ya no cumpla el
  * filtro, y si dejó de cumplirlo `skip: 1` se comía la primera fila válida de la página siguiente.
