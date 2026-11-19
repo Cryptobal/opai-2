@@ -68,7 +68,13 @@ describe.skipIf(omitirSuiteDb())("Descartes: rollback y paginación reales", () 
     const ids = Array.from({ length: 21 }, () => randomUUID());
     await e.admin.movimientoBancarioDescarte.createMany({ data: ids.map((id) => ({
       id, tenantId, cuentaId: cuenta, desde: new Date("2026-11-01"), hasta: new Date("2026-11-01"),
-      origen: "manual", motivo: "Paginación ficticia", cantidad: 0, movimientos: [],
+      origen: "manual", motivo: "Paginación ficticia", cantidad: 1,
+      movimientos: [{
+        id: randomUUID(), cartolaId: null, fecha: "2026-11-01T00:00:00.000Z", monto: "1000",
+        glosa: "Movimiento ficticio", referencia: null, sucursal: null, saldoDespues: null,
+        claveDedupe: id, idExterno: null, estado: "pendiente", origen: "manual",
+        createdAt: "2026-11-01T00:00:00.000Z",
+      }],
     })) });
     type Pagina = { items: { id: string }[]; siguiente: string | null };
     const primera = await dato<Pagina>("finanzas.descartes_bancarios.list", { cuentaId: cuenta, limite: 20 });
