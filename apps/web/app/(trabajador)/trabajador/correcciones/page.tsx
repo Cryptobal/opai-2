@@ -2,9 +2,11 @@ import { CheckCircle } from "lucide-react";
 
 import { Empty } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
 import { itemsYZonaCorrecciones } from "@/lib/asistencia-correcciones-portal";
+import { conFiltros, leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { estadoTrabajador } from "../_componentes/estado";
@@ -14,7 +16,9 @@ import type { Fila } from "./_componentes/tipos";
 
 export const metadata = { title: tituloPagina("trabajador", "Correcciones") };
 
-export default function Pagina() {
+export default async function Pagina({ searchParams }: { searchParams: SearchParams }) {
+  const parametros = await leerParametros(searchParams);
+  const cursor = parametros.cursor;
   return (
     <PaginaPortal
       portal="trabajador"
@@ -22,13 +26,13 @@ export default function Pagina() {
       ruta="/trabajador/correcciones"
       cargar={async () => {
         const [lista, hoy] = await Promise.all([
-          ejecutarComoUsuario<{ items: Fila[] }>("trabajador", "asistencia.correcciones.listar", { estado: "pendiente" }),
+          ejecutarComoUsuario<{ items: Fila[]; siguiente: string | null }>("trabajador", "asistencia.correcciones.listar", { estado: "pendiente", ...(cursor ? { cursor } : {}) }),
           ejecutarComoUsuario<{ zona: string }>("trabajador", "asistencia.dias.hoy", {}),
         ]);
-        return { state: estadoTrabajador(lista), ...itemsYZonaCorrecciones(lista, hoy) };
+        return { state: estadoTrabajador(lista), ...itemsYZonaCorrecciones(lista, hoy), siguiente: lista.ok ? lista.data.siguiente : null };
       }}
     >
-      {({ state, items, zona }) => (
+      {({ state, items, zona, siguiente }) => (
         <EstadoLista state={state}>
           {items.length === 0 ? (
             <Empty
@@ -43,6 +47,7 @@ export default function Pagina() {
               ))}
             </div>
           )}
+          {siguiente ? <EnlaceBoton variante="secondary" href={conFiltros("/trabajador/correcciones", { ...parametros, cursor: siguiente })}>Cargar más</EnlaceBoton> : null}
         </EstadoLista>
       )}
     </PaginaPortal>

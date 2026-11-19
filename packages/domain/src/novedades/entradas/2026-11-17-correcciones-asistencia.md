@@ -1,4 +1,6 @@
 ---
+id: correcciones-asistencia
+fecha: 2026-11-17
 modulo: asistencia
 titulo: Correcciones desde pantalla
 ---

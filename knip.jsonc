@@ -24,6 +24,7 @@
       "ignoreDependencies": [
         "@capacitor/android",
         "@capacitor/app",
+        "@capacitor/browser",
         "@capacitor/core",
         "@capacitor/ios",
       ],

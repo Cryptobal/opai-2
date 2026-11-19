@@ -1,8 +1,10 @@
 import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { itemsYZonaCorrecciones } from "@/lib/asistencia-correcciones-portal";
 import { estadoPantalla } from "@/lib/formato";
+import { conFiltros, leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 export const metadata = { title: "Correcciones de marcas" };
@@ -54,7 +56,9 @@ function Lista({ state, items, zona }: { state: EstadoPantalla; items: Fila[]; z
   );
 }
 
-export default function PaginaCorrecciones() {
+export default async function PaginaCorrecciones({ searchParams }: { searchParams: SearchParams }) {
+  const parametros = await leerParametros(searchParams);
+  const cursor = parametros.cursor;
   return (
     <PaginaPortal
       portal="erp"
@@ -62,13 +66,18 @@ export default function PaginaCorrecciones() {
       ruta="/asistencia/correcciones"
       cargar={async () => {
         const [lista, hoy] = await Promise.all([
-          ejecutarComoUsuario<{ items: Fila[] }>("erp", "asistencia.correcciones.listar", {}),
+          ejecutarComoUsuario<{ items: Fila[]; siguiente: string | null }>("erp", "asistencia.correcciones.listar", { ...(cursor ? { cursor } : {}) }),
           ejecutarComoUsuario<{ zona: string }>("erp", "asistencia.dias.hoy", {}),
         ]);
-        return { state: estadoPantalla(lista), ...itemsYZonaCorrecciones(lista, hoy) };
+        return { state: estadoPantalla(lista), ...itemsYZonaCorrecciones(lista, hoy), siguiente: lista.ok ? lista.data.siguiente : null };
       }}
     >
-      {({ state, items, zona }) => <Lista state={state} items={items} zona={zona} />}
+      {({ state, items, zona, siguiente }) => (
+        <div className="flex flex-col gap-4">
+          <Lista state={state} items={items} zona={zona} />
+          {siguiente ? <EnlaceBoton variante="secondary" href={conFiltros("/asistencia/correcciones", { ...parametros, cursor: siguiente })}>Cargar más</EnlaceBoton> : null}
+        </div>
+      )}
     </PaginaPortal>
   );
 }

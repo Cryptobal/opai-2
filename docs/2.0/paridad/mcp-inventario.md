@@ -185,6 +185,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.correcciones.proponer` | `asistencia_correcciones_proponer` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
+| compartido | `app/(erp)/asistencia/marcas/_componentes` | `asistencia.marcas.obtener` | `asistencia_marcas_obtener` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -383,6 +384,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.guardar_borrador` | `core_documento_plantillas_guardar_borrador` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.publicar` | `core_documento_plantillas_publicar` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.update` | `core_documento_plantillas_update` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.candidatas` | `core_documento_plantillas_candidatas` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.enviar_masivo` | `core_documento_plantillas_enviar_masivo` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | compartido | `app/(erp)/documentos/vencimientos/_componentes` | `core.documentos.vencimientos` | `core_documentos_vencimientos` | existe |
 | compartido | `app/(erp)/finanzas/_hoy` | `finanzas.hoy.resumen` | `finanzas_hoy_resumen` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
@@ -476,6 +480,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
@@ -488,10 +493,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.regiones.list` | `core_regiones_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
-| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.listar` | `pauta_dotacion_listar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.get` | `pauta_dotacion_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
@@ -660,6 +666,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/asistencia/marcas` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
@@ -771,6 +779,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.personas.list` | `core_personas_list` | existe |
 | erp | `/documentos/plantillas/[id]` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
@@ -881,6 +892,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
+| `app/_acciones/app-nativa.ts#accionCanjearApp` | Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado. |
+| `app/_acciones/app-nativa.ts#accionVolverALaApp` | Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio. |
 | `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
@@ -918,6 +931,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
 | `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
+| `app/(auth)/app/google/route.ts` | Identidad: inicia el ingreso con Google de la app nativa en el navegador del sistema (CAR-516); guarda el reto PKCE en una cookie y redirige a Google. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
@@ -1184,7 +1198,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
-- `asistencia.marcas.obtener`
 - `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.escalar`

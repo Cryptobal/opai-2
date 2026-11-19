@@ -23,12 +23,13 @@ async function Contenido({ searchParams }: Props) {
   const oauth = destinoContinuarOAuth(params);
   const epoca = epocaDeIdentidad(await identidadActual());
   // Google bloquea su ingreso en las vistas web de las apps («disallowed_useragent»): dentro de la app
-  // nativa no se ofrece (CAR-515).
+  // nativa va por el navegador del sistema (CAR-515, CAR-516).
   const enApp = esAppNativa((await headers()).get("user-agent") ?? "");
   return (
     <FormularioLogin
       destino={oauth ?? (next === undefined ? "" : destinoSeguro(next))}
       google={googleHabilitado() && !enApp}
+      googleApp={googleHabilitado() && enApp}
       epoca={epoca}
     />
   );
