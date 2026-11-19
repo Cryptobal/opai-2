@@ -39,4 +39,14 @@ describe("app nativa OPAI (Brief 17)", () => {
     expect(html).toContain("reintentarCarga");
     expect(html).not.toMatch(/https?:\/\//);
   });
+
+  it("registra el esquema de vuelta desde el navegador (CAR-516) en Android e iOS", () => {
+    const leer = (ruta: string) => readFileSync(new URL(ruta, import.meta.url), "utf8");
+    const manifest = leer("../nativo/android/app/src/main/AndroidManifest.xml");
+    expect(manifest).toContain('android:scheme="cl.opai.app" android:host="canje"');
+    expect(manifest).toContain("android.intent.category.BROWSABLE");
+    expect(leer("../nativo/ios/App/App/Info.plist")).toMatch(
+      /CFBundleURLSchemes<\/key>\s*<array>\s*<string>cl\.opai\.app<\/string>/,
+    );
+  });
 });

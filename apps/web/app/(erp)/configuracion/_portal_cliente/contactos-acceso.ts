@@ -1,5 +1,5 @@
 /** Estado de acceso de cada contacto de una cuenta al Portal Cliente y qué se puede hacer (CAR-218). */
-export type EstadoContacto =
+type EstadoContacto =
   | "sin_acceso"
   | "invitacion_pendiente"
   | "activo"
