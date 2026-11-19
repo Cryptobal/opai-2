@@ -8,7 +8,8 @@ type TxPersona = Pick<TenantTx, "persona">;
 
 import { reglaDeNegocio } from "../../errores";
 
-const BLOQUEADOS = new Set(["bloqueado_permanente", "rechazado"]);
+const BLOQUEADOS_VINCULO = new Set(["bloqueado_permanente", "rechazado"]);
+const NO_ARCHIVABLE = new Set(["bloqueado_permanente"]);
 
 export type PersonaOperable = {
   estado: string | null;
@@ -22,13 +23,13 @@ export function exigirPersonaOperableVinculo(p: PersonaOperable, etiqueta = "La 
   if (p.archivadaEn) throw reglaDeNegocio("La persona está archivada.");
   if (p.bloqueada) throw reglaDeNegocio(`${etiqueta} está bloqueada (operativa): desbloquéala antes.`);
   const est = p.estado ?? "activo";
-  if (BLOQUEADOS.has(est)) {
+  if (BLOQUEADOS_VINCULO.has(est)) {
     throw reglaDeNegocio(`Una persona en «${est}» no puede tener un vínculo laboral nuevo.`);
   }
 }
 
 export function exigirArchivoPersona(desde: string): void {
-  if (BLOQUEADOS.has(desde)) {
+  if (NO_ARCHIVABLE.has(desde)) {
     throw reglaDeNegocio(`Una persona en «${desde}» no puede archivarse.`);
   }
 }
@@ -52,7 +53,7 @@ export async function archivarPersonaEnTx(
 }
 
 export function exigirTransicionPersonaPermitida(desde: string, hacia: EstadoPersona): void {
-  if (BLOQUEADOS.has(desde)) {
+  if (BLOQUEADOS_VINCULO.has(desde)) {
     throw reglaDeNegocio(`Una persona en «${desde}» no puede pasar a «${hacia}».`);
   }
   if (!puedeTransicionarPersona(desde, hacia)) {

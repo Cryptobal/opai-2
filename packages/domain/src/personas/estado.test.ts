@@ -20,6 +20,8 @@ describe("personas.estado (CAR-674)", () => {
     expect(puedeTransicionarPersona("activo", "inactivo")).toBe(true);
     expect(puedeTransicionarPersona("inactivo", "externo")).toBe(true);
     expect(puedeTransicionarPersona("rechazado", "activo")).toBe(false);
+    expect(puedeTransicionarPersona("postulante", "inactivo")).toBe(true);
+    expect(puedeTransicionarPersona("rechazado", "inactivo")).toBe(true);
     expect(puedeTransicionarPersona("bloqueado_permanente", PERSONA_ESTADO_ACTIVO)).toBe(false);
     expect(puedeTransicionarPersona("activo", "postulante")).toBe(false);
   });

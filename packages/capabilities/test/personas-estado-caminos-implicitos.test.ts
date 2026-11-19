@@ -52,7 +52,7 @@ describe("cambios de estado implícitos (CAR-674, B1)", () => {
     ).toBe("UNPROCESSABLE");
   });
 
-  it("core.personas.archive permite postulante y rechaza rechazada", async () => {
+  it("core.personas.archive permite postulante y rechazada, no bloqueo permanente", async () => {
     const { ctx } = contextoDePrueba({ rol: "gerente" });
     const { id } = await dato<{ id: string }>(ctx, "core.personas.create", postulante);
     await dato(ctx, "core.personas.archive", { id });
@@ -61,7 +61,7 @@ describe("cambios de estado implícitos (CAR-674, B1)", () => {
       rut: "14.456.789-7",
     });
     await dato(ctx, "core.personas.rechazar", { id: rech.id, motivo: "No califica para el cargo" });
-    expect(await codigo(ctx, "core.personas.archive", { id: rech.id })).toBe("UNPROCESSABLE");
+    await dato(ctx, "core.personas.archive", { id: rech.id });
   });
 
   it("core.personas.archive rechaza bloqueo permanente", async () => {

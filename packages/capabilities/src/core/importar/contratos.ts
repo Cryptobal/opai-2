@@ -13,6 +13,30 @@ import type { FilaPlan, Importador } from "./tipos";
 const dia = (d: Date) => d.toISOString().slice(0, 10);
 const estadoDe = (termino: Date | null, hoy: Date) => (termino && termino < hoy ? "terminado" : "vigente");
 
+type PersonaContrato = {
+  estado: string;
+  bloqueada: boolean;
+  archivadaEn: Date | null;
+  anonimizadaEn: Date | null;
+};
+
+function erroresPersonaContrato(p: PersonaContrato): string[] {
+  if (p.archivadaEn || p.anonimizadaEn) {
+    return ["La persona está archivada o anonimizada: no se le crea un contrato desde una importación."];
+  }
+  const errores: string[] = [];
+  if (p.bloqueada) {
+    errores.push("La persona está bloqueada operativamente: desbloquéala antes de importar un contrato.");
+  }
+  if (p.estado === "rechazado") {
+    errores.push("La persona está rechazada: no se le importa un contrato vigente.");
+  }
+  if (p.estado === "bloqueado_permanente") {
+    errores.push("La persona está bloqueada de forma permanente: no se le importa un contrato.");
+  }
+  return errores;
+}
+
 export const importadorContratos: Importador<DatosContrato> = {
   def: defContratos,
   entidad: "contrato",
@@ -25,7 +49,10 @@ export const importadorContratos: Importador<DatosContrato> = {
     const hoy = new Date(`${hoyTexto}T00:00:00.000Z`);
     const leidas = filas.map((f) => ({ f, l: leerContrato(f) }));
     const ruts = [...new Set(leidas.map((x) => x.l.rut))];
-    const personas = await ctx.db.persona.findMany({ where: { rut: { in: ruts } }, select: { id: true, rut: true, estado: true, archivadaEn: true, anonimizadaEn: true } });
+    const personas = await ctx.db.persona.findMany({
+      where: { rut: { in: ruts } },
+      select: { id: true, rut: true, estado: true, bloqueada: true, archivadaEn: true, anonimizadaEn: true },
+    });
     const porRut = new Map(personas.map((p) => [p.rut, p]));
     const cargos = await ctx.db.cargo.findMany({ where: { activo: true }, select: { id: true, nombre: true } });
     const instalaciones = await ctx.db.instalacion.findMany({ where: { archivadaEn: null }, select: { id: true, nombre: true, cuenta: { select: { nombre: true, rut: true } } } });
@@ -36,7 +63,7 @@ export const importadorContratos: Importador<DatosContrato> = {
       const errores = erroresDeContrato(l);
       const persona = porRut.get(l.rut);
       if (!persona) errores.push("No hay una persona con ese RUT en OPAI. Importa primero las personas.");
-      else if (persona.archivadaEn || persona.anonimizadaEn) errores.push("La persona está archivada o anonimizada: no se le crea un contrato desde una importación.");
+      else errores.push(...erroresPersonaContrato(persona));
       const cargo = cargos.find((c) => norm(c.nombre) === norm(l.cargo));
       if (!cargo) errores.push(`No existe el cargo «${l.cargo}»: créalo antes en Maestros › Cargos.`);
       const instalacion = elegirInstalacion(instalaciones, l, errores);

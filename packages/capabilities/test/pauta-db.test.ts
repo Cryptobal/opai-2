@@ -33,6 +33,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
   let luis = "";
   let rosa = "";
   let martin = "";
+  let cargoA = "";
   const userSup = randomUUID();
   const medidor = { registrar: async () => undefined };
   const manana = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
@@ -81,6 +82,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     };
     const a = await base(tenantA, "A");
     const b = await base(tenantB, "B");
+    cargoA = a.cargo;
     instA = a.inst;
     instB = b.inst;
     patron4x4 = a.patron;
@@ -289,6 +291,42 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     );
     expect(prevReemp.ok).toBe(true);
     expect(await e.admin.excepcionPauta.count({ where: { puestoId: puestoExtra, tipo: "reemplazo", fecha: new Date(`${dia}T00:00:00.000Z`) } })).toBe(0);
+  });
+
+  it("CAR-674: candidatos y reemplazos.sugerir incluyen persona activo con vínculo vigente", async () => {
+    const lista = await ejecutar(ctxOwner(tenantA), "pauta.titulares.listar", { puestoId: puestoExtra });
+    expect(lista.ok).toBe(true);
+    const candidatos = (lista as { data: { candidatos: { id: string }[] } }).data.candidatos.map((c) => c.id);
+    expect(candidatos).toContain(juan);
+    expect(candidatos).toContain(martin);
+
+    const inactivaId = (
+      await e.admin.persona.create({
+        data: { tenantId: tenantA, nombres: "Ina", apellidos: "Ctiva", rut: "77.777.777-7", estado: "inactivo" },
+      })
+    ).id;
+    await e.admin.vinculoLaboral.create({
+      data: {
+        tenantId: tenantA,
+        personaId: inactivaId,
+        cargoId: cargoA,
+        instalacionId: instA,
+        tipo: "indefinido",
+        inicio: new Date("2026-01-01"),
+        estado: "vigente",
+      },
+    });
+    const sinInactiva = await ejecutar(ctxOwner(tenantA), "pauta.titulares.listar", { puestoId: puestoExtra });
+    const otraVez = (sinInactiva as { data: { candidatos: { id: string }[] } }).data.candidatos.map((c) => c.id);
+    expect(otraVez).not.toContain(inactivaId);
+
+    const dia = sumar(24);
+    await fijar(puestoX3, { titularPersonaId: null, desde: dia, inicioCiclo: dia });
+    const sug = await ejecutar(ctxOwner(tenantA), "pauta.reemplazos.sugerir", { puestoId: puestoX3, fecha: dia });
+    expect(sug.ok).toBe(true);
+    const sugeridos = (sug as { data: { sugerencias: { personaId: string }[] } }).data.sugerencias.map((s) => s.personaId);
+    expect(sugeridos).toContain(martin);
+    expect(sugeridos).not.toContain(inactivaId);
   });
 
   it("PR2: confirma cobertura en día cubierto y deshace", async () => {

@@ -71,7 +71,9 @@ export async function anonimizarPersona(
       noRecontratarMotivo: null,
       noRecontratarEn: null,
       noRecontratarVenceEn: null,
-      ...(elegible.estado === "bloqueado_permanente" ? {} : { estado: "inactivo" }),
+      ...(elegible.estado === "bloqueado_permanente" || elegible.estado === "rechazado"
+        ? {}
+        : { estado: "inactivo" }),
       anonimizadaEn: ahora,
     },
   });
