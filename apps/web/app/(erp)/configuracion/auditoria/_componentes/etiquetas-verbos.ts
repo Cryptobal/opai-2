@@ -74,6 +74,7 @@ export const VERBOS: Record<string, string> = {
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
   preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", rellenar_entidad: "Rellenar con datos de la entidad", generar_entidad: "Generar documento de la entidad", sync_servicio: "Sincronizar servicio",
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
+  guardar_texto_tipo: "Guardar texto tipo",
   prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
   resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar", transferir: "Transferir cartera", responsables: "Responsables posibles",

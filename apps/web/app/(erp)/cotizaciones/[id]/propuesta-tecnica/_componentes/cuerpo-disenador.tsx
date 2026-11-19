@@ -17,6 +17,7 @@ export type Propuesta = {
   estado: string;
   servicioDesactualizado: boolean;
   bloques: BloqueArmador[];
+  textosPorDefecto: Record<string, string>;
 };
 
 type Ejecutar = ReturnType<typeof useCapacidad>["ejecutar"];
@@ -35,7 +36,7 @@ export function CuerpoDisenador(p: {
 }) {
   const editable = p.gestionar && p.propuesta.estado !== "congelada";
   const firma = p.propuesta.bloques
-    .map((b) => `${b.id}:${b.activo}:${b.contenidoOverride ?? ""}`)
+    .map((b) => `${b.id}:${b.activo}:${b.titulo ?? ""}:${b.contenidoOverride ?? ""}`)
     .join("|");
   return (
     <div className="space-y-4 p-4">
@@ -54,7 +55,7 @@ export function CuerpoDisenador(p: {
         <BloquesDeCotizacion
           propuestaId={p.propuesta.id}
           bloques={p.propuesta.bloques}
-          onGuardado={(bloques) => p.onPropuesta({ ...p.propuesta, bloques })}
+          onGuardado={() => recargar(p.ejecutar, p.cotizacionId, p.onPropuesta)}
         />
       ) : (
         <ListaBloquesPropuesta bloques={p.propuesta.bloques} />
@@ -64,6 +65,7 @@ export function CuerpoDisenador(p: {
           negocioId={p.negocioId}
           propuestaId={p.propuesta.id}
           bloques={p.propuesta.bloques}
+          textosPorDefecto={p.propuesta.textosPorDefecto}
           onGuardado={() => void recargar(p.ejecutar, p.cotizacionId, p.onPropuesta)}
         />
       ) : null}

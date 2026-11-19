@@ -9,6 +9,7 @@ import {
   type BloqueArmadorPropuesta,
   type ServicioDesdeCotizacion,
 } from "../domain/documento/propuesta-tecnica";
+import { conTextosTipo } from "./biblioteca-bloques";
 import { plantillaActivaCotizacionLectura } from "./plantilla-documento";
 import { plantillaActivaPropuesta, vistaPlantillaPropuesta } from "./plantilla-propuesta";
 
@@ -47,6 +48,17 @@ export function servicioDesdeFilas(input: {
   };
 }
 
+/** Base y bloques de una propuesta nueva: los activos de la plantilla, con el texto tipo de la empresa precargado. */
+export async function propuestaInicial(ctx: Contexto) {
+  const plantillaCot = await plantillaActivaCotizacionLectura(ctx);
+  const plantillaProp = vistaPlantillaPropuesta(await plantillaActivaPropuesta(ctx));
+  const base = basePropuestaDesdeCotizacion(plantillaCot.base, plantillaProp.base as BasePlantilla);
+  const activos: BloqueArmadorPropuesta[] = plantillaProp.bloques
+    .filter((b) => b.activo)
+    .map((b, i) => ({ ...b, id: `${b.tipo}-${i}` }));
+  return { plantillaProp, base, bloques: await conTextosTipo(ctx, activos) };
+}
+
 export async function obtenerOCrearPropuestaTecnica(
   ctx: Contexto,
   cotizacionId: string,
@@ -55,15 +67,7 @@ export async function obtenerOCrearPropuestaTecnica(
 ) {
   const existente = await ctx.db.cpqPropuestaTecnica.findFirst({ where: { versionId } });
   if (existente) return existente;
-  const plantillaCot = await plantillaActivaCotizacionLectura(ctx);
-  const plantillaProp = vistaPlantillaPropuesta(await plantillaActivaPropuesta(ctx));
-  const base = basePropuestaDesdeCotizacion(plantillaCot.base, plantillaProp.base as BasePlantilla);
-  const bloques: BloqueArmadorPropuesta[] = plantillaProp.bloques
-    .filter((b) => b.activo)
-    .map((b, i) => ({
-      ...b,
-      id: `${b.tipo}-${i}`,
-    }));
+  const { plantillaProp, base, bloques } = await propuestaInicial(ctx);
   return ctx.db.cpqPropuestaTecnica.create({
     data: {
       id: uuid7(),

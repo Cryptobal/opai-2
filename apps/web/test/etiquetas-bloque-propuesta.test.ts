@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { esSeccionDeTexto, tieneTextoTipo } from "@opai/domain";
+
 import { TIPOS_BLOQUE_PROPUESTA } from "../../../modules/cpq/domain/documento/propuesta-tecnica";
 import {
   type BloqueArmador,
   TIPOS_BLOQUE_ETIQUETADOS,
-  conTextoAceptado,
-  esSeccionDeTexto,
+  cambiarBloque,
   etiquetaBloquePropuesta,
   fijarBloque,
   moverBloque,
@@ -32,9 +33,10 @@ describe("gestor de bloques de la propuesta (CAR-530)", () => {
     expect(fijarBloque({ ...b("indice"), activo: false }, true)).toMatchObject({ fijo: true, opcional: false, activo: true });
     expect(fijarBloque(b("indice", true), false)).toMatchObject({ fijo: false, opcional: true });
   });
-  it("solo ofrece agregar los tipos que faltan", () => {
-    const faltan = tiposDisponibles([b("portada")]);
+  it("solo ofrece agregar los tipos que faltan, salvo «Texto libre», que se repite (CAR-576)", () => {
+    const faltan = tiposDisponibles([b("portada"), b("texto_libre"), b("texto_libre")]);
     expect(faltan).not.toContain("portada");
+    expect(faltan).toContain("texto_libre");
     expect(faltan).toHaveLength(TIPOS_BLOQUE_PROPUESTA.length - 1);
   });
   it("prefiere el título propio y cae al tipo desconocido", () => {
@@ -50,12 +52,20 @@ describe("IA por sección (CAR-534)", () => {
     { ...base, id: "b", tipo: "metodologia" },
   ];
   it("aceptar un borrador cambia solo la sección elegida", () => {
-    const r = conTextoAceptado(bloques, "b", "borrador");
+    const r = cambiarBloque(bloques, "b", { contenidoOverride: "borrador" });
     expect(r[1]?.contenidoOverride).toBe("borrador");
     expect(r[0]).toBe(bloques[0]);
   });
   it("las secciones sin texto propio no ofrecen IA", () => {
     expect(esSeccionDeTexto("portada")).toBe(false);
     expect(esSeccionDeTexto("metodologia")).toBe(true);
+  });
+  it("texto tipo por empresa: solo secciones de texto, sin «Texto libre» ni condiciones (CAR-576)", () => {
+    expect(tieneTextoTipo("metodologia")).toBe(true);
+    expect(tieneTextoTipo("seccion_institucional")).toBe(true);
+    for (const t of ["portada", "texto_libre", "condiciones", "resumen_economico", "inventado"]) expect(tieneTextoTipo(t)).toBe(false);
+  });
+  it("cambiar el título de un «Texto libre» no toca su texto", () => {
+    expect(cambiarBloque(bloques, "a", { titulo: "Alcance" })[0]).toMatchObject({ titulo: "Alcance", contenidoOverride: "manual" });
   });
 });
