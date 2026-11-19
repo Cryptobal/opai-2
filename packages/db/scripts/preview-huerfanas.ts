@@ -47,6 +47,7 @@ async function main(): Promise<void> {
     );
     for (const r of renombradas(rows, checksums)) {
       await client.query("BEGIN");
+      await client.query("SET LOCAL lock_timeout = '5s'");
       await client.query(
         `UPDATE public._prisma_migrations SET rolled_back_at = now()
           WHERE migration_name = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
@@ -61,11 +62,14 @@ async function main(): Promise<void> {
     }
     const huerfanas = fallidasHuerfanas(rows, enRepo);
     for (const r of huerfanas) {
+      await client.query("BEGIN");
+      await client.query("SET LOCAL lock_timeout = '5s'");
       await client.query(
         `UPDATE public._prisma_migrations SET rolled_back_at = now()
           WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
         [r.id],
       );
+      await client.query("COMMIT");
       console.log(`Marcada como revertida (ya no existe en el repo): ${r.migration_name}`);
     }
     if (!huerfanas.length) console.log("Sin migraciones fallidas huérfanas.");
