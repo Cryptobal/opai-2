@@ -20,8 +20,11 @@ export type ItemNovedad = {
   imagen: string | null;
   destacada: boolean;
   car: string | null;
+  pr: number | null;
   leida: boolean;
 };
+
+const URL_PR_NOVEDAD = "https://github.com/opai-cl/opai-2/pull";
 
 function formatearFecha(iso: string): string {
   const [y, m, d] = iso.split("-");
@@ -49,9 +52,32 @@ export function TarjetaNovedad({
       {...(item.leida ? {} : { className: "border-accent" })}
       accion={item.leida ? null : <Badge tono="danger">Nueva</Badge>}
     >
-      <p className="t-caption mb-2 flex items-center gap-1.5 text-fg-muted">
-        <Icono className="size-3.5" aria-hidden />
-        {modulo.etiqueta} · {formatearFecha(item.fecha)}
+      <p className="t-caption mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-fg-muted">
+        <Icono className="size-3.5 shrink-0" aria-hidden />
+        <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+          <span>{modulo.etiqueta}</span>
+          <span aria-hidden>·</span>
+          <span>{formatearFecha(item.fecha)}</span>
+          {item.pr != null ? (
+            <>
+              <span aria-hidden>·</span>
+              <a
+                href={`${URL_PR_NOVEDAD}/${item.pr}`}
+                className="underline-offset-2 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                PR #{item.pr}
+              </a>
+            </>
+          ) : null}
+          {item.car ? (
+            <>
+              <span aria-hidden>·</span>
+              <span>{item.car}</span>
+            </>
+          ) : null}
+        </span>
       </p>
       {abierta ? (
         <DetalleNovedad item={item} />
@@ -98,7 +124,6 @@ function DetalleNovedad({ item }: { item: ItemNovedad }) {
           <img src={item.imagen} alt="" className="aspect-video w-full object-cover" />
         </div>
       ) : null}
-      {item.car ? <p className="t-caption mt-2 text-fg-subtle">{item.car}</p> : null}
     </>
   );
 }
