@@ -6,7 +6,8 @@ import { noEncontrado, prohibido } from "../../errores";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { dondePersona } from "./alcance";
-import { cursorDe, listaSchema, pagina } from "./comun";
+import { listaSchema } from "./comun";
+import { consultaPersonasPaginada } from "./persona-pagina-db";
 import { personaSchema, vinculoVista, vistaPersona } from "./personas-vista";
 import { alertasDocumentos, alertasSchema } from "./resumenes";
 
@@ -69,19 +70,8 @@ export const personasList = defineCapability({
         : {}),
     };
     // Página con vínculo/cargo por include y catálogo opcional del filtro (ADR-045).
-    const [filas, cargos] = await Promise.all([
-      ctx.db.persona.findMany({
-        where,
-        orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
-        ...cursorDe(input.cursor, input.limite),
-        include: {
-          vinculos: {
-            where: { estado: "vigente" },
-            include: { cargo: { select: { nombre: true } } },
-            take: 1,
-          },
-        },
-      }),
+    const [consulta, cargos] = await Promise.all([
+      consultaPersonasPaginada(ctx, where, input.cursor, input.limite),
       input.incluirFiltros && ctx.autorizar(PERMISOS_CORE.estructurasRead)
         ? ctx.db.cargo.findMany({
             where: { activo: true },
@@ -92,11 +82,11 @@ export const personasList = defineCapability({
     ]);
     // Sin cursor ni fila extra, la página contiene TODO el resultado: contar otra vez es redundante.
     // Con más páginas (o cursor) se mantiene el total exacto, con idéntico filtro y alcance.
+    const p = consulta;
     const total =
-      !input.cursor && filas.length <= input.limite
-        ? filas.length
+      !input.cursor && !p.siguiente
+        ? p.items.length
         : await ctx.db.persona.count({ where });
-    const p = pagina(filas, input.limite, input.cursor);
     const alertas = await alertasDocumentos(
       ctx,
       "persona",

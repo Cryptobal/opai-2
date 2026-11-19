@@ -7,21 +7,27 @@ import { formatearFechaHora } from "@opai/domain";
 import { Alerta, avisar, Badge, Button, Dialog } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import { fechaDdMmAaaa } from "../../../flujo/_componentes/datos";
 import type { DescarteMovimientos, VistaRestaurar } from "./tipos";
 
 const movs = (n: number) => `${n} ${n === 1 ? "movimiento" : "movimientos"}`;
+type PropsLista = {
+  descartes: DescarteMovimientos[];
+  gestiona: boolean;
+  siguienteHref: string | null;
+  inicioHref: string | null;
+};
 
 /**
  * Movimientos sacados con «Borrar por fechas» (CAR-412). Cada descarte se puede restaurar, con vista previa: vuelven a
  * la cuenta tal como estaban, salvo los que ya volvieron por una cartola o por la sincronización.
  */
-export function ListaDescartes({ descartes, gestiona }: { descartes: DescarteMovimientos[]; gestiona: boolean }) {
+export function ListaDescartes({ descartes, gestiona, siguienteHref, inicioHref }: PropsLista) {
   const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [vista, setVista] = useState<VistaRestaurar | null>(null);
-
   async function preparar(d: DescarteMovimientos) {
     const r = await ejecutar<VistaRestaurar>("finanzas.descartes_bancarios.restaurar", { descarteId: d.id }, true);
     if (r) setVista(r);
@@ -34,8 +40,7 @@ export function ListaDescartes({ descartes, gestiona }: { descartes: DescarteMov
     setVista(null);
     router.refresh();
   }
-
-  if (descartes.length === 0) return null;
+  if (descartes.length === 0 && !inicioHref) return null;
   return (
     <section aria-labelledby="descartes-titulo" className="flex flex-col gap-2">
       <h2 id="descartes-titulo" className="t-subheading text-fg">Movimientos borrados por fechas</h2>
@@ -61,6 +66,12 @@ export function ListaDescartes({ descartes, gestiona }: { descartes: DescarteMov
           </li>
         ))}
       </ul>
+      {inicioHref || siguienteHref ? (
+        <nav aria-label="Páginas de movimientos borrados" className="flex flex-wrap gap-2">
+          {inicioHref ? <EnlaceBoton href={inicioHref} variante="secondary">Volver a los más recientes</EnlaceBoton> : null}
+          {siguienteHref ? <EnlaceBoton href={siguienteHref} variante="secondary">Ver descartes anteriores</EnlaceBoton> : null}
+        </nav>
+      ) : null}
       {vista ? (
         <DialogoRestaurar
           vista={vista}

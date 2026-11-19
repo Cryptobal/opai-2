@@ -58,6 +58,8 @@ export async function cargarAuditoria(p: Parametros) {
   );
 }
 
+export { queryConCambios as con } from "@/app/_components/maestros/paginacion-cursor";
+
 const RUTA: Record<string, string> = {
   cuenta: "/cuentas",
   instalacion: "/instalaciones",
