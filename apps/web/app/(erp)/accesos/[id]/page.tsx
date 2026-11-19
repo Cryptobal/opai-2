@@ -7,7 +7,8 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarRegistro, cargarRegistros } from "../_componentes/datos";
 import { DetalleRegistro } from "../_componentes/detalle-registro";
-import { ListaDeAccesos, rutaAccesos } from "../_componentes/lista-registros";
+import { ListaDeAccesos } from "../_componentes/lista-registros";
+import { rutaAccesos } from "../_componentes/ruta-accesos";
 import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 
 export const metadata = { title: "Accesos" };

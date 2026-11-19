@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Combobox, InputFecha, Sheet } from "@opai/ds";
@@ -49,6 +50,7 @@ function Formulario({
   quitar: boolean;
   onCerrar: () => void;
 }) {
+  const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const hoy = hoyCl();
   const [guardia, setGuardia] = useState("");
@@ -86,6 +88,9 @@ function Formulario({
     const r = await ejecutar("pauta.titular.asignar", input);
     if (r) {
       avisar.exito(quitar ? "Titular quitado: el puesto quedó por cubrir" : "Titular asignado");
+      // La ficha del puesto suele abrirse con `?puesto=`; el titular se edita con `?titular=`.
+      // Invalidar en el servidor no basta para ese RSC en caché del router (ADR-045).
+      router.refresh();
       onCerrar();
     }
   }
