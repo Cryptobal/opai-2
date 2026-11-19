@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { cabecerasSeguridad, construirCsp } from "@/lib/cabeceras-seguridad";
-import { HOSTS_IMG_MAPA } from "@/lib/mapa-osm/capas";
+import { HOSTS_IMG_MAPA } from "@/lib/mapa-osm/hosts-csp";
 
 const mapa = (cs: { key: string; value: string }[]) =>
   Object.fromEntries(cs.map((c) => [c.key, c.value]));
