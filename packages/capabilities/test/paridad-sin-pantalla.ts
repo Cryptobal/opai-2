@@ -127,4 +127,16 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "La verificación con prueba de vida se invoca desde la marcación de Asistencia (frente «Face ID»), que aporta la cámara; B4 deja el adaptador y la capacidad.",
   },
+  "core.personas.bloquear_permanente": {
+    encargo: "CAR-674",
+    desde: "2026-11-19",
+    motivo:
+      "Bloqueo permanente de reclutamiento: llega con las acciones de estado en la ficha de persona (mismo encargo). Mientras tanto solo sesión admin con permiso estado.admin.",
+  },
+  "core.personas.desbloquear_permanente": {
+    encargo: "CAR-674",
+    desde: "2026-11-19",
+    motivo:
+      "Quitar bloqueo permanente: llega con las acciones de estado en la ficha de persona (CAR-674). Mientras tanto solo sesión admin con permiso estado.admin.",
+  },
 };
