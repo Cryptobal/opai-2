@@ -1167,8 +1167,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.integraciones.guardar_certificado_dte` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.metodos_acceso.quitar` | `app/_acciones` | no | reservada a personas |
-| `core.personas.bloquear_permanente` | — | no | reservada a personas |
-| `core.personas.desbloquear_permanente` | — | no | reservada a personas |
+| `core.personas.bloquear_permanente` | sin pantalla todavía · CAR-674 · desde 2026-11-19 | no | reservada a personas |
+| `core.personas.desbloquear_permanente` | sin pantalla todavía · CAR-674 · desde 2026-11-19 | no | reservada a personas |
 | `core.personas.pago_aprobar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.pago_rechazar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.quitar_no_recontratar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
