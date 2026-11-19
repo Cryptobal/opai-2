@@ -1,7 +1,7 @@
 // Salida de core.documentos.matriz (semáforo de vencimientos por persona).
 
 export type EstadoCelda = "vigente" | "por_vencer" | "vencido" | "sin_fecha" | "falta";
-export type Celda = {
+type Celda = {
   tipoId: string;
   estado: EstadoCelda;
   dias: number | null;
@@ -27,7 +27,7 @@ export type Matriz = {
   };
 };
 
-export const PENDIENTES: EstadoCelda[] = ["vencido", "por_vencer", "falta"];
+const PENDIENTES: EstadoCelda[] = ["vencido", "por_vencer", "falta"];
 export const pendientes = (f: FilaMatriz) => f.celdas.filter((c) => PENDIENTES.includes(c.estado));
 
 /** Nombre corto de un tipo para chips densos ("Credencial OS-10" → "Credencial"). */

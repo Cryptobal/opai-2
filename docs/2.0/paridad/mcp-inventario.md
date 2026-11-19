@@ -67,7 +67,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `asistencia.rostro.revocar` | — | excepción |
 | compartido | `app/_components` | `asistencia.rostro.textos` | `asistencia_rostro_textos` | existe |
 | compartido | `app/_components` | `comercial.negocio_campos.get` | `comercial_negocio_campos_get` | existe |
-| compartido | `app/_components` | `comercial.negocio_campos.set` | `comercial_negocio_campos_set` | existe |
 | compartido | `app/_components` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/_components` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/_components` | `core.actividades.completar` | `core_actividades_completar` | existe |
@@ -111,7 +110,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.etiquetas.de_entidad` | `core_etiquetas_de_entidad` | existe |
 | compartido | `app/_components` | `core.etiquetas.list` | `core_etiquetas_list` | existe |
 | compartido | `app/_components` | `core.etiquetas.quitar` | `core_etiquetas_quitar` | existe |
+| compartido | `app/_components` | `core.firmas.documento_url` | — | excepción |
 | compartido | `app/_components` | `core.firmas.enviar` | `core_firmas_enviar` | existe |
+| compartido | `app/_components` | `core.firmas.firmar` | — | excepción |
+| compartido | `app/_components` | `core.firmas.rechazar` | — | excepción |
+| compartido | `app/_components` | `core.firmas.ver_firmante` | — | excepción |
 | compartido | `app/_components` | `core.geo.autocompletar` | `core_geo_autocompletar` | existe |
 | compartido | `app/_components` | `core.geo.detalle` | `core_geo_detalle` | existe |
 | compartido | `app/_components` | `core.marca.get` | `core_marca_get` | existe |
@@ -125,10 +128,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/_components` | `core.valores_personalizados.get` | `core_valores_personalizados_get` | existe |
-| compartido | `app/_components` | `core.valores_personalizados.set` | `core_valores_personalizados_set` | existe |
 | compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
+| compartido | `app/_components` | `rendiciones.bandeja.aprobar_varias` | `rendiciones_bandeja_aprobar_varias` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.listar` | `rendiciones_bandeja_listar` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.obtener` | `rendiciones_bandeja_obtener` | existe |
+| compartido | `app/_components` | `rendiciones.bandeja.rechazar_varias` | `rendiciones_bandeja_rechazar_varias` | existe |
 | compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.anular` | `rendiciones_lotes_anular` | existe |
@@ -173,6 +177,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.salida` | `acceso_registros_salida` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.cancelar` | `acceso_prerregistros_cancelar` | existe |
+| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.crear` | `acceso_prerregistros_crear` | existe |
+| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.get` | `acceso_prerregistros_get` | existe |
+| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.invitacion` | `acceso_prerregistros_invitacion` | existe |
+| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.listar` | `acceso_prerregistros_listar` | existe |
+| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/asistencia/marcas/_componentes` | `asistencia.marcas.obtener` | `asistencia_marcas_obtener` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -192,6 +203,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.biblioteca_bloques.guardar_texto_tipo` | `cpq_biblioteca_bloques_guardar_texto_tipo` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.biblioteca_bloques.list` | `cpq_biblioteca_bloques_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.list` | `cpq_catalogo_categorias_list` | existe |
@@ -204,8 +217,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.list` | `cpq_costos_predefinidos_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.guardar` | `cpq_esquemas_cobertura_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.list` | `cpq_esquemas_cobertura_list` | existe |
-| compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
-| compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.update` | `cpq_marca_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.get` | `cpq_plantillas_documento_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.update` | `cpq_plantillas_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_propuesta.get` | `cpq_plantillas_propuesta_get` | existe |
@@ -297,6 +308,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.puestos.confirmar` | `cpq_puestos_confirmar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.contexto.sugerir_seccion` | `comercial_contexto_sugerir_seccion` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.decidir_envio` | `comercial_seguimientos_decidir_envio` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
@@ -321,15 +333,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.agregar_esquema` | `cpq_lineas_agregar_esquema` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.sync_servicio` | `cpq_propuestas_tecnica_sync_servicio` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.update` | `cpq_propuestas_tecnica_update` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.sueldos_referencia.list` | `cpq_sueldos_referencia_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.parametros` | `cpq_versiones_parametros` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.sync_servicio` | `cpq_propuestas_tecnica_sync_servicio` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.update` | `cpq_propuestas_tecnica_update` | existe |
 | compartido | `app/(erp)/cpq/biblioteca/_componentes` | `cpq.biblioteca_bloques.list` | `cpq_biblioteca_bloques_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.create` | `core_contactos_create` | existe |
@@ -370,6 +382,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.guardar_borrador` | `core_documento_plantillas_guardar_borrador` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.publicar` | `core_documento_plantillas_publicar` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.update` | `core_documento_plantillas_update` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.candidatas` | `core_documento_plantillas_candidatas` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.enviar_masivo` | `core_documento_plantillas_enviar_masivo` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | compartido | `app/(erp)/documentos/vencimientos/_componentes` | `core.documentos.vencimientos` | `core_documentos_vencimientos` | existe |
 | compartido | `app/(erp)/finanzas/_hoy` | `finanzas.hoy.resumen` | `finanzas_hoy_resumen` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
@@ -385,6 +400,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.deshacer` | `finanzas_cartolas_deshacer` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.cartolas.listar` | `finanzas_cartolas_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.descartes_bancarios.list` | `finanzas_descartes_bancarios_list` | existe |
+| compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.descartes_bancarios.restaurar` | `finanzas_descartes_bancarios_restaurar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/importaciones/_componentes` | `finanzas.movimientos_bancarios.borrar_rango` | `finanzas_movimientos_bancarios_borrar_rango` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
 | compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
@@ -461,6 +478,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
@@ -473,10 +491,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.regiones.list` | `core_regiones_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
-| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.listar` | `pauta_dotacion_listar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.get` | `pauta_dotacion_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.turnos_extra.monto_fijar` | `pauta_turnos_extra_monto_fijar` | existe |
@@ -596,6 +615,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
@@ -648,6 +668,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
+| compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
+| compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
+| erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/asistencia/marcas` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
@@ -681,9 +705,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/calendario` | `core.calendario.archivar` | `core_calendario_archivar` | existe |
 | erp | `/configuracion/calendario` | `core.calendario.crear_feriado` | `core_calendario_crear_feriado` | existe |
 | erp | `/configuracion/calendario` | `core.calendario.listar` | `core_calendario_listar` | existe |
-| erp | `/configuracion/campos-personalizados` | `core.campos_personalizados.create` | `core_campos_personalizados_create` | existe |
 | erp | `/configuracion/campos-personalizados` | `core.campos_personalizados.list` | `core_campos_personalizados_list` | existe |
-| erp | `/configuracion/campos-personalizados` | `core.campos_personalizados.update` | `core_campos_personalizados_update` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
@@ -761,6 +783,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.personas.list` | `core_personas_list` | existe |
 | erp | `/documentos/plantillas/[id]` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
@@ -799,6 +824,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | erp | `/personas/[id]/turnos-extra` | `pauta.turnos_extra.listar` | `pauta_turnos_extra_listar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.obtener` | `nomina_liquidaciones_obtener` | existe |
+| erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
@@ -853,13 +880,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/existe-ruta.ts` | `core.personas.get` | `core_personas_get` | existe |
 | servidor | `lib/mcp.ts` | `core.config.schema` | `core_config_schema` | existe |
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
+| supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
 | trabajador | `/trabajador/notificaciones` | `portal_trabajador.preferencias_notificacion.obtener` | `portal_trabajador_preferencias_notificacion_obtener` | existe |
+| trabajador | `/trabajador/por-firmar` | `core.firmas.mis_pendientes` | — | excepción |
 | trabajador | `/trabajador/privacidad` | `portal_trabajador.privacidad.obtener` | `portal_trabajador_privacidad_obtener` | existe |
+| trabajador | `/trabajador/solicitudes` | `portal_trabajador.solicitudes.listar` | `portal_trabajador_solicitudes_listar` | existe |
 | trabajador | `/trabajador` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
@@ -868,6 +898,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
+| `app/_acciones/app-nativa.ts#accionCanjearApp` | Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado. |
+| `app/_acciones/app-nativa.ts#accionVolverALaApp` | Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio. |
 | `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
@@ -897,10 +929,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
+| `app/_components/firmas/acciones-sesion.ts#firmarEnSesion` | Firma: core.firmas.firmar (interna con motivo) con sesión del portal (CAR-634). |
+| `app/_components/firmas/acciones-sesion.ts#rechazarEnSesion` | Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634). |
+| `app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion` | Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634). |
+| `app/_components/firmas/acciones-sesion.ts#verFirmaSesion` | Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634). |
 | `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
 | `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
+| `app/(auth)/app/google/route.ts` | Identidad: inicia el ingreso con Google de la app nativa en el navegador del sistema (CAR-516); guarda el reto PKCE en una cookie y redirige a Google. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
@@ -926,6 +963,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
 | `app/api/terreno/contexto/route.ts` | Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
+| `app/api/terreno/libro/route.ts` | Lee el libro de novedades de la instalación del equipo de terreno emparejado (CAR-77): cookie de dispositivo, sin sesión; ejecuta core.libro_novedades_equipo.listar (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/lote/route.ts` | Recibe el lote de hechos del equipo de terreno emparejado (CAR-78 B3): cookie de dispositivo y mismo origen, sin sesión; ejecuta core.hechos_terreno.recibir (interna con motivo en EXCEPCIONES_PARIDAD). Su lectura por MCP es core.hechos_terreno.listar. |
 | `app/api/terreno/porteria/sitio/route.ts` | Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
@@ -996,6 +1034,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.firmas.firma_automatica_revocar` | Solo personas: revocar la firma automática del representante es un acto suyo (firma.md §10, R16). |
 | `core.firmas.firmante_empresa_set` | Solo personas: define quién firma por la empresa (representante legal); gobierna la identidad de firma, no una key (firma.md §10, R16). |
 | `core.firmas.firmar` | Interna y solo personas: el enlace personal es la credencial (como al aceptar una invitación) y un agente nunca firma por una persona (firma.md R19, §10). |
+| `core.firmas.mis_pendientes` | Solo personas: son firmas pendientes del propio usuario en su portal, no de un agente ni de una key (firma.md R19, CAR-634). |
 | `core.firmas.rechazar` | Interna y solo personas: rechazar es un acto personal del firmante con su enlace como credencial; un agente nunca rechaza por nadie (firma.md R9, R19, §10). |
 | `core.firmas.ver_firmante` | Interna: se mira antes de existir sesión con el enlace personal como credencial, igual que core.invitations.peek (firma.md §5). |
 | `core.geo.mapa` | Interna: entrega la imagen del mapa al proxy `/api/geo/mapa` con la clave del tenant; una imagen no sirve a un agente y la clave nunca sale. |
@@ -1008,6 +1047,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.invitations.accept` | Interna: crea la membresía de quien acepta el enlace; un agente no acepta invitaciones por nadie. |
 | `core.invitations.peek` | Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial). |
 | `core.invitations.request_new` | Interna: la pide quien aún no tiene sesión (token vencido o usado). |
+| `core.libro_novedades_equipo.listar` | Interna: la lee el equipo de terreno emparejado sin sesión (su cookie de dispositivo es la credencial) para la pantalla «Libro»; un agente lee el mismo libro con core.libro_novedades.listar, con permiso y alcance (CAR-77). |
 | `core.metodos_acceso.quitar` | Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP. |
 | `core.personas_terreno.listar` | Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3). |
 | `core.personas.pago_aprobar_cambio` | Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01). |
@@ -1109,8 +1149,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.firmas.firma_automatica_autorizar` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
 | `core.firmas.firma_automatica_revocar` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
 | `core.firmas.firmante_empresa_set` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
-| `core.firmas.firmar` | `/firmar/[slug]/[token]` | no | reservada a personas |
-| `core.firmas.rechazar` | `/firmar/[slug]/[token]` | no | reservada a personas |
+| `core.firmas.firmar` | `/firmar/[slug]/[token]`, `app/_components` | no | reservada a personas |
+| `core.firmas.mis_pendientes` | `/supervisor/firmas`, `/trabajador/por-firmar` | no | reservada a personas |
+| `core.firmas.rechazar` | `/firmar/[slug]/[token]`, `app/_components` | no | reservada a personas |
 | `core.grupos.rol_asignar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
 | `core.grupos.rol_quitar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
@@ -1165,8 +1206,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
-- `asistencia.marcas.listar`
-- `asistencia.marcas.obtener`
 - `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.escalar`
@@ -1179,13 +1218,15 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
 - `central.estado`
+- `central.reglas.guardar`
+- `central.reglas.listar`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
 - `comercial.contexto.listar`
-- `comercial.contexto.sugerir_seccion`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
+- `comercial.negocio_campos.set`
 - `comercial.negocios.alertas`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
@@ -1201,6 +1242,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
+- `core.campos_personalizados.create`
+- `core.campos_personalizados.update`
 - `core.consumos.por_recurso`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
@@ -1238,6 +1281,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
+- `core.valores_personalizados.set`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
@@ -1249,10 +1293,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.envios_propuesta.list`
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
+- `cpq.marca_documento.get`
+- `cpq.marca_documento.update`
 - `cpq.motor.simular`
 - `cpq.propuestas_tecnica.capitulo_guardar`
 - `cpq.propuestas_tecnica.capitulos_list`
-- `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`

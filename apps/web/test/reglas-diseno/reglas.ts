@@ -5,7 +5,7 @@ import { join, relative } from "node:path";
 // Reglas de uso de la UI que se pueden verificar leyendo el código. Las que dependen de la pantalla
 // dibujada las mide la auditoría de Playwright (`e2e/auditoria-diseno*.ts`).
 
-export const RAIZ = join(import.meta.dirname, "../../../..");
+const RAIZ = join(import.meta.dirname, "../../../..");
 
 const CARPETAS = ["apps/web/app", "packages/ds/src", "modules"];
 const OMITIR = /(\.test\.tsx?$|\/node_modules\/|\/test\/|\/e2e\/|\/domain\/src\/formato\.ts$)/;

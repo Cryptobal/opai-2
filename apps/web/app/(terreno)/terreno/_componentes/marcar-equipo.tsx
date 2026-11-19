@@ -1,10 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-import { Alerta, Enlace } from "@opai/ds";
+import { Alerta, Enlace, Loading } from "@opai/ds";
 
-import { Marcar } from "@/app/_components/asistencia/marcar";
+const Marcar = dynamic(() => import("@/app/_components/asistencia/marcar").then((m) => m.Marcar), {
+  ssr: false,
+  loading: () => <Loading variante="detalle" />,
+});
 import { usePersonaElegida } from "@/lib/terreno/persona";
 import { ejecutarAsistenciaEquipo } from "@/app/_acciones/terreno-asistencia";
 
@@ -17,7 +21,9 @@ export function MarcarEquipo() {
   useEffect(() => {
     let vivo = true;
     void ejecutarAsistenciaEquipo("asistencia.rostro.textos", {}).then((r) => {
-      if (vivo && r.ok) setTexto((r.data as { proposito: string; texto: string }[]).find((t) => t.proposito === "biometria_asistencia")?.texto ?? "");
+      if (!vivo || !r.ok) return;
+      const data = r.data as { items: { proposito: string; texto: string }[] };
+      setTexto(data.items.find((t) => t.proposito === "biometria_asistencia")?.texto ?? "");
     });
     return () => {
       vivo = false;
@@ -27,9 +33,15 @@ export function MarcarEquipo() {
   if (persona === null)
     return (
       <div className="mx-auto flex max-w-xl flex-col gap-3">
-        <Alerta tono="neutral" titulo="Primero elige tu nombre">Elige quién eres para marcar tu asistencia.</Alerta>
-        <Enlace href="/terreno" Link={LinkNext}>Elegir mi nombre</Enlace>
+        <Alerta tono="neutral" titulo="Primero elige tu nombre">
+          Elige quién eres para marcar tu asistencia.
+        </Alerta>
+        <Enlace href="/terreno" Link={LinkNext}>
+          Elegir mi nombre
+        </Enlace>
       </div>
     );
-  return <Marcar modo="equipo" personaId={persona.id} nombre={persona.nombre} textoRostro={texto} />;
+  return (
+    <Marcar modo="equipo" personaId={persona.id} nombre={persona.nombre} textoRostro={texto} />
+  );
 }

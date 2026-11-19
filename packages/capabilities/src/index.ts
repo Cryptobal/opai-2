@@ -15,7 +15,7 @@ export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/he
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
-export { ajustesRondas, capacidadesRondas, indicadoresRondas } from "./rondas";
+export { ajustesRondas, capacidadesRondas, indicadoresRondas, trabajoVigilanciaRondas } from "./rondas";
 export { ajustesNomina, buscadoresNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, ausenteSinJustificar, buscadoresPauta, capacidadesPauta, consumidorPautaCambio, consumidorPautaPublicada, diasConTurno, type DiaConTurno, fuentesAprobacionTurnosExtra, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
 export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
@@ -25,6 +25,7 @@ export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAcceso
 export { registrarPropuestaEnviada, type ResultadoPropuesta } from "./portal-cliente/propuesta-vigente";
 export { propuestaAlAceptar } from "./portal-cliente/propuesta-al-aceptar";
 export { ajustesFinanzas, buscadoresFinanzas, trabajosFinanzas, capacidadesFinanzas, ventasProgramadasPorPeriodo, logoDeMarca } from "./finanzas";
+export { actualizarMarcaDocumento, marcaDocumentoDe, marcaDocumentoEnVersion, type TipografiaDocumento } from "./core/empresa/marca-documento";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
 export { pagosImpuestosEsperados, type PagoImpuestoEsperado } from "./finanzas/impuestos-esperados-datos";
@@ -140,13 +141,5 @@ export { MANUALES } from "./manuales";
 
 export type { PanelSueldo } from "./core/maestros/estructuras-panel-schema";
 export { noRecontratarHabilitadaAhora } from "./core/maestros/personas-no-recontratar-vigencia";
-export {
-  clavesFaltantes,
-  mutualAdicionalTenant,
-  publicacionesParaFecha,
-} from "./core/remuneraciones";
-export {
-  resolverCamposDocumento,
-  type EntradaValoresCampos,
-  type ValoresCamposResueltos,
-} from "./core/campos/valores-resolver";
+export { clavesFaltantes, mutualAdicionalTenant, publicacionesParaFecha } from "./core/remuneraciones";
+export { resolverCamposDocumento, type EntradaValoresCampos, type ValoresCamposResueltos } from "./core/campos/valores-resolver";
