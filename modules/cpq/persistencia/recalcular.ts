@@ -39,12 +39,12 @@ export async function cargarFilasVersion(
   return { cot, version, secciones, lineas, costos };
 }
 
-type Filas = NonNullable<Awaited<ReturnType<typeof cargarFilasVersion>>>;
+export type PackFilasCotizacion = NonNullable<Awaited<ReturnType<typeof cargarFilasVersion>>>;
 /** Cambio en memoria para la vista previa (dryRun): el cálculo ve las filas como quedarían. */
 export type AjusteVistaPrevia = {
-  lineas?: (l: Filas["lineas"]) => Filas["lineas"];
-  version?: (v: Filas["version"]) => Filas["version"];
-  costos?: (c: Filas["costos"]) => Filas["costos"];
+  lineas?: (l: PackFilasCotizacion["lineas"]) => PackFilasCotizacion["lineas"];
+  version?: (v: PackFilasCotizacion["version"]) => PackFilasCotizacion["version"];
+  costos?: (c: PackFilasCotizacion["costos"]) => PackFilasCotizacion["costos"];
 };
 
 export async function recalcularVersion(

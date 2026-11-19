@@ -15,6 +15,7 @@ import { confirmarContraFila } from "./confirmar-fila";
 import { CuerpoHojaReconocer } from "./cuerpo-hoja-reconocer";
 import type { SugerenciaRegla } from "./destinos";
 import { useReconocerFila } from "./use-reconocer-fila";
+import type { LoteRendicionSugerido } from "./lista-lotes-rendicion";
 import type { SugerenciaReconocer } from "./lista-sugerencias-reconocer";
 import type { Elegida } from "./seleccion-conciliacion";
 
@@ -22,6 +23,7 @@ import type { Elegida } from "./seleccion-conciliacion";
 export function PanelReconocer({ movimiento, onCerrar }: { movimiento: MovimientoBanco | null; onCerrar: () => void }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [sugerencias, setSugerencias] = useState<SugerenciaReconocer[]>([]);
+  const [lotesRendiciones, setLotesRendiciones] = useState<LoteRendicionSugerido[]>([]);
   const [elegidas, setElegidas] = useState<Elegida[]>([]);
   const [deshacerAbierto, setDeshacerAbierto] = useState(false);
   const [motivoDeshacer, setMotivoDeshacer] = useState("");
@@ -35,12 +37,13 @@ export function PanelReconocer({ movimiento, onCerrar }: { movimiento: Movimient
     if (!movimientoId || movimientoEstado === "conciliado") return;
     limpiarError();
     let cancel = false;
-    void ejecutar<{ sugerencias: SugerenciaReconocer[]; reglas?: SugerenciaRegla[] }>("finanzas.conciliaciones.sugerir", {
+    void ejecutar<{ sugerencias: SugerenciaReconocer[]; reglas?: SugerenciaRegla[]; lotesRendiciones?: LoteRendicionSugerido[] }>("finanzas.conciliaciones.sugerir", {
       movimientoId,
     }).then((r) => {
       if (cancel) return;
       setElegidas([]);
       setSugerencias(r?.sugerencias ?? []);
+      setLotesRendiciones(r?.lotesRendiciones ?? []);
       alSugerir(r?.reglas ?? [], !!r?.sugerencias.length);
     });
     return () => {
@@ -107,6 +110,7 @@ export function PanelReconocer({ movimiento, onCerrar }: { movimiento: Movimient
           esConciliado={esConciliado}
           error={error}
           sugerencias={sugerencias}
+          lotesRendiciones={lotesRendiciones}
           pendiente={pendiente}
           elegidas={elegidas}
           onElegidas={setElegidas}
