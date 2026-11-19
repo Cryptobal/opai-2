@@ -10,6 +10,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { Client } from "pg";
 
 import {
+  fallidasConSqlCorregido,
   fallidasHuerfanas,
   RAMA_PREVIEW,
   type RegistroAplicado,
@@ -17,6 +18,20 @@ import {
 } from "./preview-huerfanas-reglas";
 
 const CARPETA = new URL("../prisma/migrations/", import.meta.url);
+
+async function marcarRevertidos(client: Client, ids: string[], motivo: string) {
+  for (const id of ids) {
+    await client.query("BEGIN");
+    await client.query("SET LOCAL lock_timeout = '5s'");
+    await client.query(
+      `UPDATE public._prisma_migrations SET rolled_back_at = now()
+        WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
+      [id],
+    );
+    await client.query("COMMIT");
+    console.log(`Marcada como revertida (${motivo})`);
+  }
+}
 
 async function main(): Promise<void> {
   const rama = process.env["PREVIEW_RAMA"] ?? "";
@@ -61,18 +76,18 @@ async function main(): Promise<void> {
       console.log(`Renombrada (mismo checksum, ya aplicada): ${r.desde} → ${r.hacia}`);
     }
     const huerfanas = fallidasHuerfanas(rows, enRepo);
-    for (const r of huerfanas) {
-      await client.query("BEGIN");
-      await client.query("SET LOCAL lock_timeout = '5s'");
-      await client.query(
-        `UPDATE public._prisma_migrations SET rolled_back_at = now()
-          WHERE id = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
-        [r.id],
-      );
-      await client.query("COMMIT");
-      console.log(`Marcada como revertida (ya no existe en el repo): ${r.migration_name}`);
-    }
+    await marcarRevertidos(
+      client,
+      huerfanas.map((r) => r.id),
+      "ya no existe en el repo",
+    );
     if (!huerfanas.length) console.log("Sin migraciones fallidas huérfanas.");
+    const sqlCorregido = fallidasConSqlCorregido(rows, checksums);
+    await marcarRevertidos(
+      client,
+      sqlCorregido.map((r) => r.id),
+      "SQL corregido en el repo",
+    );
   } finally {
     await client.end();
   }

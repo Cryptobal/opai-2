@@ -4,7 +4,7 @@ import { CLAVES_INDICADORES, type DatosIndicadores, type Indicador, type ValorIn
 import { juegoDeValores } from "./valores";
 import { FUENTES_REFERENCIA } from "./fuentes.fixture";
 
-const REFERENCIA: DatosIndicadores = {
+export const REFERENCIA: DatosIndicadores = {
   uf: 4_123_701, utm: 72_151, imm: 553_553,
   topes: { pensionSaludUf: 900_000, ipsUf: 600_000, cesantiaUf: 1_352_000, indemnizacionUf: 900_000 },
   afp: { obligatoria: 100_000, salud: 70_000,

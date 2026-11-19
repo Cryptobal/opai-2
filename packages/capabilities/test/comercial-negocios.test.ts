@@ -7,10 +7,14 @@ import { CU, I1, ctxComercial, etapaId, reiniciarComercial } from "./comercial-a
 beforeEach(reiniciarComercial);
 
 async function crear(ctx: Parameters<typeof dato>[0]) {
-  return dato<{ id: string; estado: string; etapaId: string }>(ctx, "comercial.negocios.create", {
-    cuentaId: CU,
-    titulo: "Guardias · Planta 1",
-  });
+  return dato<{ id: string; estado: string; etapaId: string; probabilidad: number }>(
+    ctx,
+    "comercial.negocios.create",
+    {
+      cuentaId: CU,
+      titulo: "Guardias · Planta 1",
+    },
+  );
 }
 
 describe("comercial · negocios (create/mover/ganar)", () => {
@@ -36,6 +40,35 @@ describe("comercial · negocios (create/mover/ganar)", () => {
     expect(await codigo(ctx, "comercial.negocios.mover", { id: n.id, etapaId: etapaId(1) })).toBe(
       "OK",
     );
+  });
+
+  it("al mover sincroniza la probabilidad con la de la etapa destino", async () => {
+    const { ctx } = ctxComercial();
+    const n = await crear(ctx);
+    expect(n.probabilidad).toBe(10);
+    await dato(ctx, "comercial.negocios.vincular_instalacion", {
+      negocioId: n.id,
+      instalacionId: I1,
+      tipo: "nueva",
+    });
+    const movido = await dato<{ etapaId: string; probabilidad: number }>(
+      ctx,
+      "comercial.negocios.mover",
+      { id: n.id, etapaId: etapaId(1) },
+    );
+    expect(movido.etapaId).toBe(etapaId(1));
+    expect(movido.probabilidad).toBe(20);
+    await dato(ctx, "comercial.negocios.update", {
+      id: n.id,
+      montoEstimadoMensual: 2_000_000,
+      cierreEstimado: "2026-12-01",
+    });
+    const propuesta = await dato<{ etapaId: string; probabilidad: number }>(
+      ctx,
+      "comercial.negocios.mover",
+      { id: n.id, etapaId: etapaId(3) },
+    );
+    expect(propuesta.probabilidad).toBe(50);
   });
 
   it("valida los requisitos de entrada de la etapa (R9)", async () => {

@@ -10,28 +10,8 @@ import { estadoPantalla } from "@/lib/formato";
 
 import { BotonProponerCorreccion } from "./boton-proponer-correccion";
 
-export type DatosAsistenciaHoy = {
-  fecha: string;
-  zona: string;
-  siguiente: string | null;
-  resumen: { turnos: number; presentes: number; sinMarca: number; ausentes: number; incompletos: number; atrasos: number };
-  items: Item[];
-};
-
-type Item = {
-  personaId: string;
-  nombre: string;
-  instalacion: string | null;
-  turnoInicio: string | null;
-  turnoFin: string | null;
-  entrada: string | null;
-  salida: string | null;
-  estado: string;
-  atrasoMin: number;
-  correccionPendiente: boolean;
-  descansoInsuficiente: boolean;
-  marcaFueraDeTurno: boolean;
-};
+import type { DatosAsistenciaHoy, Item } from "./lista-asistencia-hoy-tipos";
+export type { DatosAsistenciaHoy } from "./lista-asistencia-hoy-tipos";
 
 const ESTADOS: Record<string, { etiqueta: string; tono: "success" | "warning" | "danger" | "info" | "neutro" }> = {
   presente: { etiqueta: "Presente", tono: "success" },
