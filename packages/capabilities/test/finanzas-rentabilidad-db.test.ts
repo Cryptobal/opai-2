@@ -8,6 +8,7 @@ import { costoEmpleadorPorPersona, juegoDeValores } from "@opai/domain";
 import { manifest } from "../../../modules/finanzas/manifest";
 import { publicacionesReferencia } from "../../domain/src/remuneraciones/referencia.fixture";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
+import { repararConsultadaElIndicadores } from "../../db/test/valores-legales-prueba";
 import { costosDePuestos } from "../src/finanzas/rentabilidad-costos";
 
 import type * as Mod from "../src";
@@ -42,11 +43,7 @@ describe.skipIf(omitirSuiteDb())("finanzas.rentabilidad.get (db)", () => {
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo]);
     mod.registrarModulos([manifest]);
-    // Otras suites a veces dejan UF/UTM vigentes sin consultada_el; juegoDeValores falla («Falta fecha de consulta»).
-    await e.admin.valorPublicado.updateMany({
-      where: { consultadaEl: null, verificacion: "verificado" },
-      data: { consultadaEl: new Date("2026-11-01") },
-    });
+    await repararConsultadaElIndicadores(e);
     const mk = (s: string) => e.admin.tenant.create({ data: { slug: `${s}-${randomUUID().slice(0, 8)}`, nombre: s, vertical: "seguridad" } });
     t.a = (await mk("qa-renta")).id;
     t.b = (await mk("qa-rentb")).id;
