@@ -10,3 +10,12 @@ export function SoloLecturaVerComo({ children }: { children: ReactNode }) {
 }
 
 export const useSoloLectura = () => useContext(SoloLectura);
+
+/** Desactiva los controles de su contenido en «ver como» (los vínculos siguen andando). */
+export function DesactivarEnVista({ children }: { children: ReactNode }) {
+  return (
+    <fieldset disabled={useSoloLectura()} className="contents">
+      {children}
+    </fieldset>
+  );
+}

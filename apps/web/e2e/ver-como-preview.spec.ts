@@ -44,3 +44,35 @@ test.describe("@preview ver como: Terreno", () => {
     expect(errores).toEqual([]);
   });
 });
+
+test.describe("@preview ver como: Trabajador y Cliente", () => {
+  test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
+
+  for (const [portal, ruta] of [
+    ["trabajador", "/trabajador/mis-datos"],
+    ["cliente", "/cliente"],
+  ] as const) {
+    test(`${portal}: shell de la persona vista y botones que guardan desactivados`, async ({
+      page,
+    }, info) => {
+      await entrar(page);
+      await page.goto(`/ver-como?portal=${portal}`);
+      await expect(page.getByRole("search")).toBeVisible({ timeout: 60_000 });
+      const ver = page.getByRole("button", { name: /^Ver como / }).first();
+      if ((await ver.count()) === 0) {
+        info.annotations.push({ type: "sin-datos", description: `qa-e2e sin ${portal} para ver` });
+        return;
+      }
+      await ver.click();
+      const banda = page.getByRole("status").filter({ hasText: "Estás viendo como" });
+      await expect(banda).toBeVisible({ timeout: 60_000 });
+      await page.goto(ruta);
+      await expect(banda).toBeVisible({ timeout: 60_000 });
+      const guardar = page.getByRole("button", { name: "Guardar" });
+      if ((await guardar.count()) > 0) await expect(guardar.first()).toBeDisabled();
+      await capturar(page, info, `ver-como-${portal}`);
+      await banda.getByRole("button", { name: "Salir" }).click();
+      await expect(page.getByText("Estás viendo como")).toHaveCount(0, { timeout: 60_000 });
+    });
+  }
+});

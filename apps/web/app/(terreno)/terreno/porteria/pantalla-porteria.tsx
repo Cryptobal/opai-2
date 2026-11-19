@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, Button, Empty, Loading } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
-import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 import { usePersonaElegida } from "@/lib/terreno/persona";
 
@@ -31,7 +31,6 @@ export function PantallaPorteria() {
   const [sitio, setSitio] = useState<Sitio | null>(null);
   const [falla, setFalla] = useState(false);
   const [version, setVersion] = useState(0);
-  const soloLectura = useSoloLectura();
   const recargar = useCallback(() => setVersion((v) => v + 1), []);
 
   useEffect(() => {
@@ -98,11 +97,10 @@ export function PantallaPorteria() {
         </Alerta>
       ) : null}
       {!sitio || sitio.activo ? (
-        // En «ver como» se ven, pero desactivados (CAR-528).
-        <fieldset disabled={soloLectura} className="contents">
+        <DesactivarEnVista>
           <FormularioEntrada personaId={persona.id} />
           {sitio ? <ListaEnSitio items={sitio.items} personaId={persona.id} /> : null}
-        </fieldset>
+        </DesactivarEnVista>
       ) : null}
     </main>
   );
