@@ -77,7 +77,7 @@ export function ContenidoPauta({
             <HojaRefuerzo mes={d.mensual} puedeEditar={puedeEditar} />
             <AlertasPauta
               semanaDesde={d.alertas?.semanaDesde ?? null}
-              alertas={d.alertas === undefined ? null : (d.alertas?.alertas ?? [])}
+              alertas={d.alertas === undefined ? null : (d.alertas?.items ?? [])}
             />
           </>
         ) : null}

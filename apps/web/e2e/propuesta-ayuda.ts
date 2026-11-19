@@ -1,9 +1,8 @@
 import { expect, type Page } from "@playwright/test";
 
-import { EN_PREVIEW } from "./preview";
-
 import { leerPdf } from "../../../modules/cpq/persistencia/pdf/prueba-pdf";
 import { crearNegocio, irANuevaCotizacion } from "./negocios-ayuda";
+import { EN_PREVIEW } from "./preview";
 
 type ConPdfs = { __pdfs: string[] };
 

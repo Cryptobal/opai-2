@@ -32,7 +32,8 @@ test.describe("@preview cpq: marcadores HTML de propuesta (CAR-571)", () => {
     await page.getByRole("button", { name: "Revisar HTML" }).click();
     await expect(page.getByRole("alert").filter({ hasText: "No se puede guardar" })).toHaveCount(0);
     const reconocidos = page.getByLabel("Marcadores reconocidos");
-    for (const t of ["empresa.nombre", "cuenta.nombre", "cotizacion.codigo", "cotizacion.titulo", "bloque.tabla_servicio", "bloque.resumen_economico", "puesto.nombre", "puesto.cantidad"]) {
+    for (const t of ["empresa.nombre", "cuenta.nombre", "cotizacion.codigo", "cotizacion.titulo",
+      "bloque.tabla_servicio", "bloque.resumen_economico", "puesto.nombre", "puesto.cantidad"]) {
       await expect(reconocidos).toContainText(`{{${t}}}`);
     }
     await page.getByTitle("Vista previa del HTML subido").scrollIntoViewIfNeeded();

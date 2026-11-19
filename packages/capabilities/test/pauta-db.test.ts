@@ -206,7 +206,9 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect((await crear()).ok).toBe(true);
     expect(await crear()).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
     const ppc = await ejecutar(ctxOwner(tenantA), "pauta.ppc.listar", { anio, mes, instalacionId: instA });
-    expect((ppc as { data: { motivo: string }[] }).data.some((x) => x.motivo === "licencia")).toBe(true);
+    expect((ppc as { data: { items: { motivo: string }[] } }).data.items.some((x) => x.motivo === "licencia")).toBe(
+      true,
+    );
     const anular = await ejecutar(ctxOwner(tenantA), "pauta.excepciones.anular", { puestoId: puestoNoche, desde: manana, hasta: manana });
     expect(anular).toMatchObject({ ok: true, data: { anuladas: 1 } });
     expect((await crear()).ok).toBe(true); // anulada la anterior, el día queda libre para otra

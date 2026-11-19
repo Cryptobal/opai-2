@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useState } from "react";
+
 import { Alerta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -16,29 +18,39 @@ const LEYENDA = "Fijo: no se quita de este documento. Activo: sale en la propues
 export function BloquesDeCotizacion(p: {
   propuestaId: string;
   bloques: BloqueArmador[];
-  onGuardado: (bloques: BloqueArmador[]) => void;
+  onGuardado: () => Promise<void>;
 }) {
   const { ejecutar, error } = useCapacidad("erp");
+  const guardando = useRef(false);
+  const [pendiente, setPendiente] = useState(false);
   async function guardar(lista: BloquePlantilla[]) {
-    const bloques = conIds(p.bloques, lista);
-    const r = await ejecutar(
-      "cpq.propuestas_tecnica.update",
-      { id: p.propuestaId, bloques },
-      false,
-      "ninguna",
-      crypto.randomUUID(),
-    );
-    if (r) p.onGuardado(bloques);
+    if (guardando.current) return;
+    guardando.current = true;
+    setPendiente(true);
+    try {
+      const bloques = conIds(lista);
+      const r = await ejecutar(
+        "cpq.propuestas_tecnica.update",
+        { id: p.propuestaId, bloques },
+        false,
+        "ninguna",
+        crypto.randomUUID(),
+      );
+      if (r) await p.onGuardado();
+    } finally {
+      guardando.current = false;
+      setPendiente(false);
+    }
   }
   return (
-    <div className="space-y-2">
+    <fieldset disabled={pendiente} aria-busy={pendiente} className="space-y-2">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       <EditorBloquesPropuesta
         bloques={p.bloques}
         leyenda={LEYENDA}
         onCambiar={(lista) => void guardar(lista)}
       />
-    </div>
+    </fieldset>
   );
 }
 
@@ -57,14 +69,6 @@ export function ListaBloquesPropuesta({ bloques }: { bloques: BloqueArmador[] })
   );
 }
 
-function conIds(
-  previos: readonly BloqueArmador[],
-  lista: readonly BloquePlantilla[],
-): BloqueArmador[] {
-  return lista.map((b) => {
-    const previo = previos.find((x) => x.tipo === b.tipo);
-    return previo
-      ? { ...previo, activo: b.activo, fijo: b.fijo, opcional: b.opcional }
-      : { ...b, id: crypto.randomUUID() };
-  });
-}
+/** El editor devuelve los bloques existentes con su id; los recién agregados reciben uno nuevo. */
+const conIds = (lista: readonly BloquePlantilla[]): BloqueArmador[] =>
+  lista.map((b) => ("id" in b && typeof b.id === "string" ? (b as BloqueArmador) : { ...b, id: crypto.randomUUID() }));
