@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { correoQa, diagnosticoBaseQa, planUsuariosQa, exigirDestinoQa, exigirSoloEmpresasQa, exigirTenantQaAislado, problemasDestinoQa } from "./qa-aislado";
+import {
+  SLUG_EMPRESA_QA_E2E,
+  correoQa,
+  diagnosticoBaseQa,
+  esSlugEmpresaQa,
+  exigirDestinoQa,
+  exigirRamaPreview,
+  exigirSoloEmpresasQa,
+  exigirTenantQaAislado,
+  exigirTenantQaE2e,
+  planUsuariosQa,
+  problemasDestinoQa,
+  slugsEmpresasAjenasEnPreview,
+} from "./qa-aislado";
 
 const ok = {
   OPAI_ENTORNO: "qa-aislado",
@@ -74,5 +87,19 @@ describe("diagnosticoBaseQa (preflight de solo lectura)", () => {
     const r = diagnosticoBaseQa({ baseActual: "opai2_qa", esquemas: ["core"], slugs: ["qa-finanzas-a", "gard"] });
     expect(r.estado).toBe("ajena");
     expect(r.problemas.join(" ")).not.toContain("gard");
+  });
+});
+
+describe("preview · empresas y rama Neon", () => {
+  it("acepta slugs qa-* y rechaza Gard u otros", () => {
+    expect(esSlugEmpresaQa("qa-e2e")).toBe(true);
+    expect(esSlugEmpresaQa("gard")).toBe(false);
+    expect(slugsEmpresasAjenasEnPreview(["qa-e2e", "gard"])).toEqual(["gard"]);
+  });
+  it("exige rama preview/pr-N y siembra solo qa-e2e", () => {
+    expect(() => exigirRamaPreview("preview/pr-12")).not.toThrow();
+    expect(() => exigirRamaPreview("main")).toThrow(/preview\/pr-N/);
+    expect(() => exigirTenantQaE2e(SLUG_EMPRESA_QA_E2E)).not.toThrow();
+    expect(() => exigirTenantQaE2e("gard")).toThrow(/qa-e2e/);
   });
 });

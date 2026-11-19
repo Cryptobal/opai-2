@@ -7,6 +7,7 @@ import { supervisoresConDocEnAlcance } from "../documentos/alcance-doc";
 import { encolarMensajeDirecto } from "../slack/mensaje-directo";
 import { conAccesoAnexo, esDocumentoDeAnexo } from "./acceso-anexo";
 import { type Destinatario, destinatarios, silenciados } from "./destinatarios";
+import { correoNotificacionBcc } from "./correo-notificacion";
 import { enviarCorreo } from "./envio";
 import { comunicableDe, comunicables, plantillaVigente } from "./resolver";
 import { variablesDe } from "./variables";
@@ -67,6 +68,7 @@ async function entregar(
     });
     return;
   }
+  const bcc = await correoNotificacionBcc(ctx, ev.tipo);
   await enviarCorreo(
     {
       db: ctx.db,
@@ -78,6 +80,7 @@ async function entregar(
     ev.tipo,
     para.email,
     datos,
+    bcc ? { bcc: [bcc] } : {},
   );
 }
 

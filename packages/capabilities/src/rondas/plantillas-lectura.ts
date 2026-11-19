@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+import { cursorDe, limiteLista, listaSchema, pagina } from "../core/maestros/comun";
 import { PERMISO_READ, dondeInstalacionId, instalacionEnAlcance } from "./comun";
 import type { ordenSchema } from "./comun";
 import { plantillaSchema } from "./vistas";
@@ -44,8 +45,13 @@ export const plantillasListar = defineCapability({
   descripcion:
     "Lista las plantillas de ronda de una instalación con su orden (sugerido, estricto o aleatorio), tiempos máximos, umbral de incompleta y la secuencia de puntos obligatorios u opcionales.",
   permiso: PERMISO_READ,
-  input: z.object({ instalacionId: uuidSchema, incluirArchivadas: z.boolean().default(false) }),
-  output: z.array(plantillaSchema),
+  input: z.object({
+    instalacionId: uuidSchema,
+    incluirArchivadas: z.boolean().default(false),
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
+  }),
+  output: z.object({ items: z.array(plantillaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -57,9 +63,11 @@ export const plantillasListar = defineCapability({
         AND: [{ instalacionId: input.instalacionId }, dondeInstalacionId(ctx)],
         ...(input.incluirArchivadas ? {} : { estado: "activo" }),
       },
-      orderBy: { nombre: "asc" },
+      orderBy: [{ nombre: "asc" }, { id: "asc" }],
       include: incluirPuntos,
+      ...cursorDe(input.cursor, input.limite),
     });
-    return plantillas.map(vistaPlantilla);
+    const { items, siguiente } = pagina(plantillas, input.limite, input.cursor);
+    return { items: items.map(vistaPlantilla), siguiente };
   },
 });

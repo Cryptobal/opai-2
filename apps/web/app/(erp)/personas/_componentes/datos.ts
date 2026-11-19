@@ -1,13 +1,9 @@
+import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Pagina, PersonaDetalle, PersonaFila } from "@/lib/tipos-maestros";
-
-export const POR_PAGINA = 50;
-
-/** Cursores ya recorridos (`?prev=a,b`) para volver con "Anterior" en una paginación por cursor. */
-export const anteriores = (p: Parametros) => (p["prev"] ? p["prev"].split(",") : []);
 
 type PaginaPersonas = Pagina<PersonaFila> & {
   total: number;
@@ -30,9 +26,7 @@ export async function cargarPersonas(p: Parametros) {
     ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
   });
   return {
-    state: estadoPantalla(r),
-    items: r.ok ? r.data.items : [],
-    siguiente: r.ok ? r.data.siguiente : null,
+    ...vistaPaginaCursor(r),
     total: r.ok ? r.data.total : null,
     cargos: r.ok ? (r.data.cargos ?? []).map((c) => ({ valor: c.id, etiqueta: c.nombre })) : [],
   };

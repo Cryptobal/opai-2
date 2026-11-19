@@ -7,6 +7,7 @@ export const ETIQUETA_METODO: Record<string, string> = {
   rostro: "Reconocimiento facial", rut_pin: "RUT y PIN", pin_respaldo: "PIN de respaldo",
   manual_contingencia: "Registro por contingencia",
 };
+export const ETIQUETA_GPS: Record<string, string> = { dentro: "Dentro", fuera: "Fuera", sin_gps: "Sin GPS" };
 
 /** Fecha y hora en la zona de la empresa, con segundos (el comprobante lleva la hora del servidor). */
 export function fechaHora(d: Date, zona: string): string {

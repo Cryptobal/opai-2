@@ -33,3 +33,7 @@ export {
   type ConsentimientoReferencia,
   type FilaReferencia,
 } from "./mapeo-referencias";
+export { valoresEmpresa, type FilaEmpresa } from "./mapeo-empresa";
+export { valoresNegocio, valoresCotizacion } from "./mapeo-negocio-cotizacion";
+export { valoresPuesto, type FilaPuestoCotizacion } from "./mapeo-puesto";
+export { htmlTablaServicio, htmlResumenEconomico } from "./html-propuesta";

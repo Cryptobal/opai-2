@@ -7,6 +7,7 @@ import type { CuentaPago } from "./lecturas-ficha";
 type TonoEstado = "success" | "warning" | "danger" | "neutro";
 export type EstadoTarjeta = { tono: TonoEstado; etiqueta: string };
 
+/** Días cuando se acerca un vencimiento: desde aquí la insignia pasa a «Vence en N días». */
 const DIAS_AVISO_VENCIMIENTO = 30;
 
 const COMPLETO: EstadoTarjeta = { tono: "success", etiqueta: "Completo" };

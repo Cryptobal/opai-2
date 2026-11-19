@@ -1,5 +1,5 @@
 import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
-import { estadoPantalla } from "@/lib/formato";
+import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -7,8 +7,6 @@ import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { opcionesDeSubida } from "./subida-permisos";
-
-const POR_PAGINA = 50;
 
 export type FilaExplorador = Documento & {
   entidad: { tipo: string; id: string; nombre: string | null } | null;
@@ -60,9 +58,7 @@ export async function cargarExplorador(p: Parametros) {
     identidad.acceso.instalaciones !== null,
   );
   return {
-    state: estadoPantalla(r),
-    items: r.ok ? r.data.items : [],
-    siguiente: r.ok ? r.data.siguiente : null,
+    ...vistaPaginaCursor(r),
     total: r.ok ? r.data.total : null,
     tipos,
     ...subida,

@@ -19,7 +19,7 @@ export type CtxRastro = {
 };
 
 /** Código del `APIError` de Better Auth (o de los hooks de OPAI), sin el mensaje. */
-export function codigoDeError(r: unknown): string {
+function codigoDeError(r: unknown): string {
   if (!(r instanceof APIError)) return "ERROR";
   return (r.body as { code?: string } | undefined)?.code ?? String(r.statusCode);
 }

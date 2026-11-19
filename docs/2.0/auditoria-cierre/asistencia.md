@@ -117,3 +117,7 @@ Depende de Carlos (para «Decide Carlos», no para esta sesión): credenciales d
 
 - CAR-89 debería reabrirse o tener un hijo «Brief 19 · Reportes DT»; hoy nada en Linear lo pide.
 - La especificación `docs/2.0/modulos/asistencia.md` aún dice «propuesta, no implementada» y no hay hoja de alcance aprobada (`diseño/alcance-asistencia.md` no existe).
+
+## Tickets creados (16-nov)
+
+A1 CAR-590 · A2 CAR-591 · A3 CAR-592 · A4 CAR-593 · A5 CAR-594 · A6 CAR-599 · A7 CAR-600 · A8 CAR-601 (proyecto 12 Payroll) · A9 CAR-602 · A10 CAR-603 · A11 CAR-604 · A12 CAR-605 · A13 CAR-606. Relacionado: CAR-626 (marca sin conexión, proyecto 08 Terreno).

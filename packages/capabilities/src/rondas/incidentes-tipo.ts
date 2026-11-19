@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { definidos, sinDuplicado } from "../core/maestros/comun";
+import { cursorDe, definidos, limiteLista, listaSchema, pagina, sinDuplicado } from "../core/maestros/comun";
 import { PERMISO_CONFIG, PERMISO_READ, gravedadSchema, tipoIncidenteDe } from "./comun";
 import { tipoIncidenteSchema } from "./vistas";
 
@@ -32,16 +32,22 @@ export const incidentesTipoListar = defineCapability({
   descripcion:
     "Lista el catálogo de tipos de incidente del tenant, con su ícono, gravedad por defecto y si están activos, para la hoja de novedad y la configuración de Rondas.",
   permiso: PERMISO_READ,
-  input: z.object({ incluirInactivos: z.boolean().default(false) }),
-  output: z.array(tipoIncidenteSchema),
+  input: z.object({
+    incluirInactivos: z.boolean().default(false),
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
+  }),
+  output: z.object({ items: z.array(tipoIncidenteSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.tipoIncidente.findMany({
       where: input.incluirInactivos ? {} : { activo: true },
-      orderBy: [{ orden: "asc" }, { nombre: "asc" }],
+      orderBy: [{ orden: "asc" }, { nombre: "asc" }, { id: "asc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
-    return filas.map(vista);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    return { items: items.map(vista), siguiente };
   },
 });
 
