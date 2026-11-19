@@ -6,7 +6,9 @@ import { entrar } from "./sesion";
 const GERENTE = "r3-gerente@opai.cl";
 
 test.describe("@preview", () => {
-  test("gerente: ve Todas las rendiciones y busca por código", async ({ page }, info) => {
+  // TODO(CAR-664): reactivar tras provisionar los roles correctos en qa-e2e y validar la búsqueda.
+  // Fallback autorizado por Carlos después de 30 min; no sustituye la reparación preparada.
+  test.fixme("gerente: ve Todas las rendiciones y busca por código", async ({ page }, info) => {
     await entrar(page, GERENTE);
     await page.goto("/rendiciones/todas");
     await expect(page.getByRole("heading", { name: "Todas las rendiciones" })).toBeVisible();
@@ -18,7 +20,9 @@ test.describe("@preview", () => {
     await info.attach("todas-375", { body: await page.screenshot(), contentType: "image/png" });
   });
 
-  test("supervisor: Mis rendiciones con pestañas y búsqueda", async ({ page }, info) => {
+  // TODO(CAR-664): reactivar tras provisionar los roles correctos en qa-e2e y validar la búsqueda.
+  // Fallback autorizado por Carlos después de 30 min; no sustituye la reparación preparada.
+  test.fixme("supervisor: Mis rendiciones con pestañas y búsqueda", async ({ page }, info) => {
     await entrar(page, "r3-aprobador@opai.cl");
     await page.goto("/rendiciones");
     await expect(page.getByRole("heading", { name: "Mis rendiciones" })).toBeVisible();

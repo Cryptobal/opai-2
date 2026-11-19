@@ -4,7 +4,9 @@ import type { Equipo, Hecho, Tiempo } from "./acceso-tipos";
 import type { MotivoRechazo } from "./hechos-evaluar";
 import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
+import { novedadesDelLibro } from "./libro-novedades-cola";
 import { resolverNovedades } from "./rondas-novedades";
+import { escribirHechosProyectados } from "./proyecciones-escribir";
 
 export type Proyecciones = {
   /** Hechos que el servidor no puede resolver (QR ajeno, documento inválido, módulo inactivo…). */
@@ -21,7 +23,7 @@ export type Proyecciones = {
 };
 
 /**
- * Proyecciones de los hechos de terreno hacia los módulos (Rondas, Control de acceso). Cada hecho se guarda una
+ * Proyecciones de los hechos de terreno hacia los módulos (Rondas, Control de acceso) y el libro de novedades. Cada hecho se guarda una
  * sola vez en `core.hechos_terreno`; aquí se decide qué rechazar y qué fila inmutable nace junto con él.
  */
 export async function prepararProyecciones(
@@ -34,6 +36,7 @@ export async function prepararProyecciones(
   const acceso = await resolverAcceso(ctx, equipo, hechos, t);
   const rondas = await resolverEjecuciones(ctx, equipo, hechos, t);
   const novedades = await resolverNovedades(ctx, equipo, hechos, t);
+  const libro = novedadesDelLibro(ctx, equipo, hechos, t);
   const rechazos = new Map<string, MotivoRechazo>([
     ...acceso.rechazos,
     ...rondas.rechazos,
@@ -43,33 +46,20 @@ export async function prepararProyecciones(
   return {
     rechazos,
     dependientesDe: (caidas) => rondas.dependientesDe(caidas),
-    async escribir(tx, nuevos, _desfaseMs, aceptadas) {
-      const ids = await rondas.iniciar(tx, aceptadas);
-      const filas = nuevos.flatMap((h) => {
-        const m = marcas.get(h.clave);
-        if (!m || !("marca" in m)) return [];
-        const { puntoId, geocerca, distanciaM, precisionM, anomalias } = m.marca;
-        return [
-          {
-            tenantId: ctx.tenantId,
-            instalacionId: equipo.instalacionId,
-            dispositivoId: equipo.id,
-            clave: h.clave,
-            personaId: h.personaId ?? null,
-            horaCorregida: t.corregir(new Date(h.horaHecho)),
-            puntoId,
-            geocerca,
-            distanciaM,
-            precisionM,
-            anomalias,
-            ejecucionId: m.marca.ejecucionClave ? (ids.get(m.marca.ejecucionClave) ?? null) : null,
-          },
-        ];
-      });
-      if (filas.length > 0) await tx.marcaRonda.createMany({ skipDuplicates: true, data: filas });
-      await rondas.cerrar(tx, aceptadas, ids);
-      await novedades.escribir(tx, aceptadas, ids);
-      await acceso.escribir(tx, aceptadas);
+    escribir: async (tx, nuevos, _desfaseMs, aceptadas) => {
+      await escribirHechosProyectados(
+        ctx,
+        equipo,
+        t,
+        marcas,
+        rondas,
+        novedades,
+        acceso,
+        tx,
+        nuevos,
+        aceptadas,
+      );
+      await libro(tx, aceptadas);
     },
   };
 }

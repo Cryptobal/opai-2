@@ -1,4 +1,4 @@
-import { hkdfSync } from "node:crypto";
+import { createHmac, hkdfSync } from "node:crypto";
 
 import { type EntradaHuella, huellaDocumento } from "@opai/domain";
 
@@ -16,7 +16,12 @@ export type HuellaVersionada = { kid: string; huella: string };
  * huella y por lo tanto no se registra ni se cruza ningún documento. No pasa por el catálogo de integraciones
  * del tenant (no es una credencial de tenant), igual que la firma de etiquetas QR de Rondas.
  */
-function clave(secreto: string | undefined, kid: string, nombre: string): Buffer {
+function clave(
+  secreto: string | undefined,
+  kid: string,
+  nombre: string,
+  uso: "huella" | "invitacion" = "huella",
+): Buffer {
   if (!secreto || Buffer.byteLength(secreto, "utf8") < SECRETO_MIN_BYTES) {
     throw reglaDeNegocio(
       `${nombre} no está configurada o tiene menos de 32 bytes: no se registran ni cruzan documentos en este entorno.`,
@@ -29,7 +34,7 @@ function clave(secreto: string | undefined, kid: string, nombre: string): Buffer
       "sha256",
       Buffer.from(secreto, "utf8"),
       new Uint8Array(0),
-      `opai/acceso/huella/${kid}`,
+      `opai/acceso/${uso}/${kid}`,
       32,
     ),
   );
@@ -65,4 +70,19 @@ export function huellasCandidatas(e: EntradaHuella): HuellaVersionada[] {
     });
   }
   return lista;
+}
+
+/**
+ * Código del QR de invitación de un visitante para un día (CAR-478, R14): `A1.<kid>.<visitante>.<día>.<firma>`.
+ * No se guarda en la base: es una firma HMAC (clave derivada de ACCESO_HUELLA_SECRET con otro dominio) del
+ * tenant, el visitante y el día, así que se puede volver a mostrar y la portería la verifica sin buscar un secreto.
+ */
+export function codigoInvitacion(tenantId: string, visitanteId: string, dia: string): string {
+  const kid = process.env["ACCESO_HUELLA_KID"] ?? "v1";
+  const k = clave(process.env["ACCESO_HUELLA_SECRET"], kid, "ACCESO_HUELLA_SECRET", "invitacion");
+  const firma = createHmac("sha256", k)
+    .update(`${tenantId}.${visitanteId}.${dia}`)
+    .digest("base64url")
+    .slice(0, 22);
+  return `A1.${kid}.${visitanteId}.${dia}.${firma}`;
 }
