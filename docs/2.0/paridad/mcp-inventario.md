@@ -474,6 +474,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
@@ -486,6 +487,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.regiones.list` | `core_regiones_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |

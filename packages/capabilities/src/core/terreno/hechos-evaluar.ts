@@ -35,6 +35,8 @@ const MOTIVOS_RECHAZO = [
   "ronda_ya_cerrada",
   "punto_invalido",
   "tipo_incidente_invalido",
+  "credencial_invalida",
+  "metodo_no_offline",
 ] as const;
 export type MotivoRechazo = (typeof MOTIVOS_RECHAZO)[number];
 type Motivo = MotivoRechazo;
