@@ -18,13 +18,7 @@ export function ListaNovedades({ portal }: { portal: string }) {
   const [datos, setDatos] = useState<Respuesta | null>(null);
   const [error, setError] = useState(false);
   const [errorMarca, setErrorMarca] = useState(false);
-  const [filtro, setFiltroEstado] = useState<FiltroNovedades>("todas");
-  // Las que se leen con «No leídas» activo siguen visibles hasta cambiar de filtro: la lista no salta.
-  const [leidasAqui, setLeidasAqui] = useState<ReadonlySet<string>>(new Set());
-  const setFiltro = (f: FiltroNovedades) => {
-    setLeidasAqui(new Set());
-    setFiltroEstado(f);
-  };
+  const [filtro, setFiltro] = useState<FiltroNovedades>("todas");
 
   const cargar = useCallback(() => {
     setError(false);
@@ -60,15 +54,9 @@ export function ListaNovedades({ portal }: { portal: string }) {
     () => void cargar(),
   );
 
-  const marcarEnLista = useMarcarUnaNovedad(portal, datos, setDatos, setErrorMarca);
-  const marcarUna = (id: string) => {
-    if (filtro === "no_leidas") setLeidasAqui((s) => new Set(s).add(id));
-    marcarEnLista(id);
-  };
+  const marcarUna = useMarcarUnaNovedad(portal, datos, setDatos, setErrorMarca);
 
-  const visibles = (datos?.items ?? []).filter(
-    (i) => filtro === "todas" || !i.leida || leidasAqui.has(i.id),
-  );
+  const visibles = (datos?.items ?? []).filter((i) => filtro === "todas" || !i.leida);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">

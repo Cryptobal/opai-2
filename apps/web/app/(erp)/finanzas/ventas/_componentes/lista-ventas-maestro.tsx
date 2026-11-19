@@ -26,8 +26,9 @@ export type DatosLibro = {
 /** Columna izquierda del Libro de ventas (CAR-255): pestañas, búsqueda, filtros y filas seleccionables. */
 export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: DatosLibro; seleccionada?: string; params: Parametros }) {
   const items = d.libro?.items ?? [];
+  // Un solo botón principal por pantalla (CAR-370): con una ficha abierta, la principal es la de la ficha.
   const emitir = d.gestiona ? (
-    <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
+    <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus} variante={seleccionada ? "secondary" : "primary"}>
       Nueva factura
     </EnlaceBoton>
   ) : undefined;

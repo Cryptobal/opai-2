@@ -47,6 +47,7 @@ export * from "./documento-plantillas";
 export * from "./documento-plantillas-ambito";
 export * from "./documento-plantillas-texto";
 export * from "./documento-plantillas-rellenar";
+export * from "./propuesta-bloques";
 export * from "./vencimientos-grupos";
 export * from "./vigencia";
 export * from "./calendario";
@@ -80,6 +81,7 @@ export * from "./portal-trabajador-arco";
 export * from "./nomina";
 
 // Nómina conserva el contador público; Pauta expone su lista de fechas con nombre propio.
+export { mesAnterior, mesSiguiente } from "./calendario-mes";
 export { diasDelMes } from "./nomina";
 export { diasDelMes as fechasDelMesPauta } from "./pauta";
 export * from "./pauta";

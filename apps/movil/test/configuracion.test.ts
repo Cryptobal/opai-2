@@ -36,6 +36,7 @@ describe("app nativa OPAI (Brief 17)", () => {
   it("la página sin conexión existe y no carga nada de fuera", () => {
     const html = readFileSync(new URL("../www/sin-conexion.html", import.meta.url), "utf8");
     expect(html).toContain("No pudimos abrir OPAI");
+    expect(html).toContain("reintentarCarga");
     expect(html).not.toMatch(/https?:\/\//);
   });
 

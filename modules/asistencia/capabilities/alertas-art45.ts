@@ -13,12 +13,14 @@ export type Tipo =
   | "sin_marca_termino"
   | "compensables"
   | "descanso_insuficiente"
+  | "fuera_geocerca"
   | "limite_jornada";
 const EVENTO: Record<Tipo, string> = {
   sin_marca_inicio: "asistencia.alerta.sin_marca_inicio",
   sin_marca_termino: "asistencia.alerta.sin_marca_termino",
   compensables: "asistencia.aviso.compensables",
   descanso_insuficiente: "asistencia.alerta.descanso_insuficiente",
+  fuera_geocerca: "asistencia.alerta.fuera_de_geocerca",
   limite_jornada: "asistencia.alerta.limite_jornada",
 };
 

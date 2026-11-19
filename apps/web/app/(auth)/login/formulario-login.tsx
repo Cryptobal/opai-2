@@ -12,7 +12,6 @@ import { PiePortales } from "../pie-portales";
 import { EntrarConPasskey } from "./entrar-passkey";
 import { GoogleDesdeApp } from "./google-desde-app";
 
-export type { EstadoLogin };
 
 const OLVIDO = "¿Olvidaste tu contraseña?";
 
