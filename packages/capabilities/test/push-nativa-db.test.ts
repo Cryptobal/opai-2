@@ -74,13 +74,9 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
     ana = await usuarioEn(tenantA, "ana-nat");
     beto = await usuarioEn(tenantA, "beto-nat");
     caro = await usuarioEn(tenantB, "caro-nat", false);
-    const personaAna = await e.admin.persona.findFirst({ where: { tenantId: tenantA, usuarioId: ana } });
+    const pAna = (await e.admin.persona.findFirst({ where: { tenantId: tenantA, usuarioId: ana } }))!.id;
     await e.admin.preferenciaNotificacion.create({
-      data: {
-        tenantId: tenantA,
-        personaId: personaAna!.id,
-        preferencias: { pauta: { push: true, correo: false } },
-      },
+      data: { tenantId: tenantA, personaId: pAna, preferencias: { pauta: { push: true, correo: false } } },
     });
   });
 
