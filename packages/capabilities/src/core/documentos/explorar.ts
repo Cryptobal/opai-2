@@ -7,20 +7,16 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { hoy } from "../maestros/comun";
-import { documentosEnAlcance } from "./alcance-doc";
+import { filtroAlcanceDocumentos } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
+import { auditarLecturaFilasConPersona, entidadPropietarioSchema } from "./explorar-fila";
 import { firmaDe, propietariosDe } from "./explorar-entidades";
 import { dondeTexto, dondeVigencia, desdeAncla, ORDENES, ordenDe } from "./explorar-filtros";
 import { filtroDocumentoSensible } from "./sensibles";
 import { documentoSchema, ENTIDADES, vistaDocumento } from "./vista";
 
 const filaSchema = documentoSchema.extend({
-  entidad: z
-    .object({ tipo: z.string(), id: z.string(), nombre: z.string().nullable() })
-    .nullable()
-    .describe(
-      "Propietario del documento; el nombre solo si el actor puede leer ese tipo de entidad.",
-    ),
+  entidad: entidadPropietarioSchema,
   firma: z
     .enum(["pendiente", "firmado"])
     .nullable()
@@ -28,13 +24,7 @@ const filaSchema = documentoSchema.extend({
 });
 
 export const documentosExplorar = defineCapability({
-  auditarLectura: (s) => [
-    ...s.items.map((d) => d.id),
-    // Nombres de personas revelados por la página: mismo criterio que `core.documentos.matriz`.
-    ...s.items.flatMap((d) =>
-      d.entidad?.tipo === "persona" && d.entidad.nombre ? [d.entidad.id] : [],
-    ),
-  ],
+  auditarLectura: auditarLecturaFilasConPersona,
   id: "core.documentos.explorar",
   descripcion:
     "Explorador de documentos del tenant: página por cursor con búsqueda por texto (nombre, título y etiquetas), filtros por tipo de entidad propietaria, tipo de documento y vigencia, orden, y para cada documento su entidad propietaria y su estado de firma. Respeta el alcance del supervisor y excluye los documentos sensibles.",
@@ -65,11 +55,11 @@ export const documentosExplorar = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     // Alcance (ADR-022) y sensibles (cumplimiento, anexos) van en la misma consulta que lee los metadatos.
-    const permitidos = await documentosEnAlcance(ctx);
+    const permitidos = await filtroAlcanceDocumentos(ctx);
     const filtros: Prisma.DocumentoWhereInput[] = [
       filtroDocumentoSensible(ctx),
       { estado: { in: input.incluirArchivados ? ["disponible", "archivado"] : ["disponible"] } },
-      ...(permitidos ? [{ id: { in: [...permitidos] } }] : []),
+      permitidos,
       ...(input.tipoId ? [{ tipoId: input.tipoId }] : []),
       ...(input.entidadTipo
         ? [{ vinculos: { some: { rol: "propietario", entidadTipo: input.entidadTipo } } }]

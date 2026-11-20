@@ -13,10 +13,10 @@ import {
   registrarModulos,
   registrarTrabajos,
   trabajoCierreAutomatico,
-  trabajoReportesAcceso,
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
   trabajoPruebasGratis,
+  trabajoVigilanciaRondas,
   trabajosComercial,
   trabajosDesempeno,
   consumidoresDesempeno,
@@ -52,9 +52,9 @@ export function asegurarRegistro(): void {
     ...trabajosCpq,
     ...trabajosCentral,
     trabajoCierreAutomatico,
-    trabajoReportesAcceso,
     trabajoCobrosMesAnterior,
     trabajoCobrosPruebas,
+    trabajoVigilanciaRondas,
   trabajoPruebasGratis,
   ]);
   registrarConsumidores([

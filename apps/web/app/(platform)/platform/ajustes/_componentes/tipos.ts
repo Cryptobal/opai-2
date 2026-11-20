@@ -12,7 +12,7 @@ export type Ajuste = {
   porDefecto: unknown;
   version: number;
 };
-export type Modelo = { proveedor: string; modelo: string };
+type Modelo = { proveedor: string; modelo: string };
 export type ModelosIa = Record<"economica" | "estandar" | "potente", Modelo>;
 
 /** Micro-USD → texto en US$ con coma decimal ("0,0012"). */

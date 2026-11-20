@@ -5,6 +5,7 @@ import { cargarAsistenciaPropia, TEXTOS_SIN_ASISTENCIA, textoDe } from "@/app/_c
 import { MiRostro } from "@/app/_components/asistencia/mi-rostro";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 export const metadata = { title: tituloPagina("trabajador", "Mi rostro") };
 
@@ -21,7 +22,9 @@ export default function Pagina() {
           {estado ? (
             <div className="flex max-w-md flex-col gap-4">
               <h2 className="t-title text-fg md:hidden">Mi rostro</h2>
-              <MiRostro estado={estado} texto={textoDe(textos, "biometria_asistencia")} />
+              <DesactivarEnVista>
+                <MiRostro estado={estado} texto={textoDe(textos, "biometria_asistencia")} />
+              </DesactivarEnVista>
             </div>
           ) : null}
         </Estado>

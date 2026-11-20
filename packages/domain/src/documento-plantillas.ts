@@ -39,7 +39,17 @@ export type OrigenPlantilla = (typeof ORIGENES_PLANTILLA)[number];
 export const nivelPlantillaValido = (clase: ClasePlantilla, nivel: NivelPlantilla): boolean =>
   nivelValido(clase, nivel);
 
-export type GrupoVariable = "persona" | "vinculo" | "instalacion" | "cuenta" | "sueldo" | "contrato";
+export type GrupoVariable =
+  | "persona"
+  | "vinculo"
+  | "instalacion"
+  | "cuenta"
+  | "cuenta_campo"
+  | "sueldo"
+  | "contrato";
+
+/** Regex de tokens `{grupo…}`; admite `cuenta.campo.<clave>` (CAR-421). */
+export const TOKEN_VARIABLE_PLANTILLA = /\{([a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+)\}/g;
 
 export type VariablePlantilla = {
   /** Token tal como se escribe en el texto, sin llaves: `persona.rut`. */
@@ -81,12 +91,11 @@ export const VARIABLES_PLANTILLA: readonly VariablePlantilla[] = [
 ];
 
 const CLAVES = new Set(VARIABLES_PLANTILLA.map((x) => x.clave));
-const TOKEN = /\{([a-z]+\.[a-z_]+)\}/g;
 
 /** Claves `{grupo.clave}` que aparecen en el texto, sin repetir y en orden de aparición. */
 export function variablesDeDocumento(texto: string): string[] {
   const vistas = new Set<string>();
-  for (const m of texto.matchAll(TOKEN)) vistas.add(m[1] ?? "");
+  for (const m of texto.matchAll(TOKEN_VARIABLE_PLANTILLA)) vistas.add(m[1] ?? "");
   return [...vistas];
 }
 
