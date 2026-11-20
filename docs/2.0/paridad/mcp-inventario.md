@@ -13,6 +13,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | --- | --- | --- | --- | --- |
 | — | `/api/agente` | `agente.plan.confirmar` | — | excepción |
 | — | `/api/agente` | `agente.turno.preparar` | — | excepción |
+| — | `/api/asistencia/reportes-dt/export` | `asistencia.reportes.exportar` | `asistencia_reportes_exportar` | existe |
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
 | — | `/api/integraciones/slack/acciones` | `core.slack.efimero` | — | excepción |
 | — | `/api/integraciones/slack/acciones` | `core.slack.vinculado_de` | — | excepción |
@@ -685,10 +686,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
+| erp | `/asistencia/certificacion` | `asistencia.certificacion.checklist` | `asistencia_certificacion_checklist` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/marcas` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
+| erp | `/asistencia/reportes-dt` | `asistencia.reportes.catalogo` | `asistencia_reportes_catalogo` | existe |
+| erp | `/asistencia/reportes-dt` | `asistencia.reportes.vista` | `asistencia_reportes_vista` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
@@ -966,6 +970,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion` | Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial. |
 | `app/api/agente/route.ts` | Agente interno (ADR-049): agente.turno.preparar/agente.plan.confirmar (solo personas, con motivo); un agente externo usa el MCP. |
+| `app/api/asistencia/reportes-dt/export/route.ts` | Descarga de asistencia.reportes.exportar (Excel/PDF) con sesión; mismo permiso y datos que la herramienta MCP asistencia_reportes_exportar (CAR-590). |
 | `app/api/auth/[...all]/route.ts` | Better Auth (sesión, OAuth y verificación de correo). |
 | `app/api/cron/programador/route.ts` | Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029). |
 | `app/api/cron/trabajos/route.ts` | Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029). |
