@@ -17,6 +17,7 @@ const entrada = (id: string, ruta: string | null, extra: Partial<EntradaNovedad>
   descripcion: "d",
   ruta,
   car: null,
+  pr: null,
   permiso: null,
   imagen: null,
   destacada: false,

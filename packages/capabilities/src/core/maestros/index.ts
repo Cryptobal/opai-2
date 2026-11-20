@@ -16,7 +16,6 @@ import { cuentasCreate, cuentasUpdate } from "./cuentas-escritura";
 import { cuentasArchive, cuentasSetEstado, cuentasSetRepresentantes } from "./cuentas-estado";
 import { capacidadesReferencias } from "./referencias";
 import { cuentasAplicarSii, cuentasConsultarSii, cuentasFacturable } from "./cuentas-sii";
-import { trabajoConsultarContribuyenteSii, trabajoPurgarCacheSii } from "./cuentas-sii-trabajo";
 import { estructurasGet, estructurasList } from "./estructuras";
 import { estructurasEfectiva } from "./estructuras-efectiva";
 import { estructurasAnular, estructurasCreate } from "./estructuras-escritura";
@@ -45,8 +44,7 @@ import {
   personasDesbloquear,
   personasVincularUsuario,
 } from "./personas-estado";
-import { trabajoPersonasNoRecontratarVencer } from "./personas-no-recontratar-limpieza";
-import { trabajoCortarAccesosProgramado } from "./vinculos-corte-programado";
+import { capacidadesPersonasEstado } from "./personas-estado-transiciones";
 import {
   personasMarcarNoRecontratar,
   personasNoRecontratarVer,
@@ -121,6 +119,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasNoRecontratarVer,
   personasMarcarNoRecontratar,
   personasQuitarNoRecontratar,
+  ...capacidadesPersonasEstado,
   personasPrevisionVer,
   personasPrevisionActualizar,
   personasPagoVer,
@@ -150,6 +149,4 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   buscar,
 ];
 
-/** Trabajos diarios de los maestros, registrados por el borde (`apps/web/lib/registro.ts`). */
-// prettier-ignore
-export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer, trabajoConsultarContribuyenteSii, trabajoPurgarCacheSii, trabajoCortarAccesosProgramado];
+export { trabajosMaestros } from "./trabajos";

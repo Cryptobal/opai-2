@@ -25,7 +25,7 @@ export function RegistrarContingencia({ abierto, onCerrar, onListo }: Props) {
       personaId,
       instalacionId,
       tipo,
-      horaDeclarada: new Date(hora).toISOString(),
+      horaDeclarada: hora,
       motivo: motivo.trim(),
       evidenciaDocumentoId: docId,
     });

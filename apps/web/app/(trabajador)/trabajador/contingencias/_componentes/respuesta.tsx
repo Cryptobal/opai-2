@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { formatearFechaHora } from "@opai/domain";
+
 import { Alerta, Button, Card, CardContent, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -13,7 +15,7 @@ export function TarjetaRespuesta({ item, zona }: { item: Fila; zona: string }) {
   const [objetar, setObjetar] = useState(false);
   const [comentario, setComentario] = useState("");
   const [listo, setListo] = useState<"aceptada" | "rechazada" | null>(null);
-  const hora = new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "short", timeZone: zona, hourCycle: "h23" });
+  const hora = (iso: string) => formatearFechaHora(iso, zona, { fechaLarga: true });
 
   async function responder(decision: "aceptada" | "rechazada") {
     const r = await ejecutar("asistencia.contingencias.responder", {
@@ -30,7 +32,7 @@ export function TarjetaRespuesta({ item, zona }: { item: Fila; zona: string }) {
     <Card>
       <CardContent className="flex flex-col gap-3 pt-4">
         <p className="t-title text-fg">{item.tipoEtiqueta}</p>
-        <p className="text-base text-fg-muted">{hora.format(new Date(item.horaDeclarada))} · {item.instalacionNombre}</p>
+        <p className="text-base text-fg-muted">{hora(item.horaDeclarada)} · {item.instalacionNombre}</p>
         <p className="text-base text-fg">{item.motivo}</p>
         {objetar ? (
           <>

@@ -77,7 +77,7 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
           nombres: nombre,
           apellidos: "Prueba",
           rut,
-          estado: "activa",
+          estado: "activo",
           usuarioId: id,
         },
       });

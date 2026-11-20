@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 
+import { formatearFechaHora } from "@opai/domain";
+
 import { Alerta, AuthCard, Loading, Pares } from "@opai/ds";
 
 import { FormularioRespuesta } from "./formulario";
@@ -9,7 +11,8 @@ export const metadata = { title: "Marca de contingencia", robots: { index: false
 
 type Props = { params: Promise<{ slug: string; token: string }> };
 
-const formato = new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "short", hourCycle: "h23", timeZone: "America/Santiago" });
+const zona = "America/Santiago";
+const legible = (iso: string) => formatearFechaHora(iso, zona, { fechaLarga: true });
 
 const ESTADOS: Record<string, string> = {
   aceptada: "Ya aceptaste esta contingencia.",
@@ -38,9 +41,9 @@ async function Contenido({ params }: Props) {
         <Pares
           items={[
             { etiqueta: "Tipo", valor: c.tipo },
-            { etiqueta: "Hora declarada", valor: formato.format(new Date(c.hora)) },
+            { etiqueta: "Hora declarada", valor: legible(c.hora) },
             { etiqueta: "Motivo", valor: c.motivo },
-            ...(c.estado === "pendiente" ? [{ etiqueta: "Responde antes de", valor: formato.format(new Date(c.venceEn)) }] : []),
+            ...(c.estado === "pendiente" && c.venceEn ? [{ etiqueta: "Responde antes de", valor: legible(c.venceEn) }] : []),
           ]}
         />
         {c.estado === "pendiente" ? (

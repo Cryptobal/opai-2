@@ -1,6 +1,6 @@
 "use client";
 
-import { avisar, Button, Campo, Combobox, Input, Select, Textarea } from "@opai/ds";
+import { avisar, Button, Campo, Combobox, InputFecha, Select, SelectorHora, Textarea } from "@opai/ds";
 
 import { buscarCandidatosDocumento } from "@/app/_acciones/candidatos-documento";
 import { opcionesDeCandidatos } from "@/app/_components/documentos/opciones-candidatos";
@@ -32,7 +32,20 @@ type Props = {
 const buscar = async (tipo: "persona" | "instalacion", q: string) =>
   opcionesDeCandidatos(await buscarCandidatosDocumento({ tipo, q }));
 
+const dos = (n: number) => String(n).padStart(2, "0");
+const partesDeIso = (iso: string) => {
+  if (!iso) return { fecha: "", hora: "" };
+  const d = new Date(iso);
+  return {
+    fecha: `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`,
+    hora: `${dos(d.getHours())}:${dos(d.getMinutes())}`,
+  };
+};
+
 export function FormRegistrarContingencia(p: Props) {
+  const { fecha, hora } = partesDeIso(p.hora);
+  const actualizar = (f: string, h: string) => p.setHora(f ? new Date(`${f}T${h || "00:00"}`).toISOString() : "");
+
   return (
     <div className="flex flex-col gap-4">
       <Campo etiqueta="Trabajador">
@@ -56,8 +69,11 @@ export function FormRegistrarContingencia(p: Props) {
       <Campo etiqueta="Tipo">
         <Select valor={p.tipo} opciones={TIPOS} onCambiar={p.setTipo} />
       </Campo>
-      <Campo etiqueta="Fecha y hora declaradas" htmlFor="hora">
-        <Input id="hora" type="datetime-local" value={p.hora} onChange={(e) => p.setHora(e.target.value)} />
+      <Campo etiqueta="Fecha y hora declaradas">
+        <div className="grid grid-cols-2 gap-2">
+          <InputFecha id="hora-fecha" valor={fecha} onCambiar={(f) => actualizar(f, hora)} />
+          <SelectorHora aria-label="Hora declarada" valor={hora} onCambiar={(h) => actualizar(fecha, h)} disabled={!fecha} />
+        </div>
       </Campo>
       <Campo etiqueta="Motivo" {...(p.error ? { error: p.error } : {})}>
         <Textarea rows={3} maxLength={500} value={p.motivo} onChange={(e) => p.setMotivo(e.target.value)} />

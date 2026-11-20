@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { crearContexto, executeCapability } from "../src";
 import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
@@ -16,7 +16,8 @@ describe("plantillas de cuenta e instalación", () => {
   let contratoId = "";
   let actaId = "";
   let laboralId = "";
-  const almacen = almacenamientoEnMemoria();
+  let almacen = almacenamientoEnMemoria();
+  let cerrarCaso: (() => Promise<void>) | undefined;
   const ctx = (tenantId: string, rol: "owner" | "gerente" = "owner") =>
     crearContexto({ tenantId, rol, actor: { tipo: "system" }, servicios: { almacenamiento: almacen.almacenamiento } });
   const crear = async (nombre: string, clase: string, contenido: string) => {
@@ -27,15 +28,52 @@ describe("plantillas de cuenta e instalación", () => {
   const llamar = (id: string, input: Record<string, unknown>, opts: { dryRun?: boolean; rol?: "owner" | "gerente"; tenant?: string } = {}) =>
     executeCapability(ctx(opts.tenant ?? f.tenantId, opts.rol), id, { fecha: "2026-11-01", ...input }, { dryRun: opts.dryRun ?? false });
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    cerrarCaso = undefined;
+    almacen = almacenamientoEnMemoria();
+    // El helper crea dos tenants con UUID nuevos y sus fixtures para este caso.
     f = await prepararVinculosJornada();
+    cerrarCaso = () => f.e.cerrar();
     cuentaId = (await f.e.admin.instalacion.findUniqueOrThrow({ where: { id: f.a } })).cuentaId;
     contratoId = await crear("Contrato de servicio", "contrato_servicio", "Cliente {cuenta.razon_social}, RUT {cuenta.rut}, en {contrato.fecha}.");
     actaId = await crear("Acta de entrega", "acta", "Acta en {instalacion.nombre} de {cuenta.nombre}.");
     laboralId = await crear("Carta", "carta_trabajador", "Estimado {persona.nombre}.");
   });
-  afterAll(async () => {
-    await f?.e.cerrar();
+  afterEach(async () => {
+    // La bitácora es append-only incluso para el propietario: no borrar tenants ni desactivar
+    // triggers. Las filas de estos UUID únicos se eliminan al destruir la base efímera de CI.
+    try {
+      await cerrarCaso?.();
+    } finally {
+      almacen.objetos.clear();
+      almacen.cuerpos.clear();
+      almacen.bytes.clear();
+      cerrarCaso = undefined;
+    }
+  });
+
+  it("rellena un campo personalizado de la cuenta en el contrato", async () => {
+    const campo = await executeCapability(ctx(f.tenantId), "core.campos_personalizados.create", {
+      entidad: "cuenta",
+      etiqueta: "Rubro doc",
+      tipo: "texto",
+    });
+    if (!campo.ok) throw new Error(JSON.stringify(campo));
+    const { clave } = campo.data as { clave: string };
+    const valor = await executeCapability(ctx(f.tenantId), "core.valores_personalizados.set", {
+      entidad: "cuenta",
+      id: cuentaId,
+      valores: { [clave]: "Seguridad" },
+    });
+    expect(valor.ok).toBe(true);
+    const plantilla = await crear("Con rubro", "contrato_servicio", `Rubro {cuenta.campo.${clave}}.`);
+    const r = await llamar("core.documento_plantillas.rellenar_entidad", { plantillaId: plantilla, entidadId: cuentaId });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(JSON.stringify(r));
+    const d = r.data as { parrafos: { texto: string }[][]; faltantes: { clave: string }[]; puedeGenerar: boolean };
+    expect(d.parrafos.flat().some((s) => s.texto === "Seguridad")).toBe(true);
+    expect(d.faltantes).toEqual([]);
+    expect(d.puedeGenerar).toBe(true);
   });
 
   it("el contrato de servicio dice qué falta de la cuenta", async () => {

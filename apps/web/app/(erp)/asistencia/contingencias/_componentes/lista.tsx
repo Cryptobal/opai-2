@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { formatearFechaHora } from "@opai/domain";
+
 import { Badge, Button, type EstadoPantalla, ListScreen } from "@opai/ds";
 
 import { RegistrarContingencia } from "./registrar";
@@ -26,7 +28,7 @@ const TONO: Record<Fila["estado"], "warning" | "success" | "danger"> = {
 export function ListaContingencias({ state, items, zona }: { state: EstadoPantalla; items: Fila[]; zona: string }) {
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
-  const hora = new Intl.DateTimeFormat("es-CL", { dateStyle: "short", timeStyle: "short", timeZone: zona, hourCycle: "h23" });
+  const hora = (iso: string) => formatearFechaHora(iso, zona);
   return (
     <>
       <ListScreen<Fila>
@@ -41,7 +43,7 @@ export function ListaContingencias({ state, items, zona }: { state: EstadoPantal
           {
             id: "marca",
             etiqueta: "Marca",
-            render: (x) => `${x.tipoEtiqueta} · ${hora.format(new Date(x.horaDeclarada))}`,
+            render: (x) => `${x.tipoEtiqueta} · ${hora(x.horaDeclarada)}`,
           },
           { id: "inst", etiqueta: "Instalación", render: (x) => x.instalacionNombre },
           {
