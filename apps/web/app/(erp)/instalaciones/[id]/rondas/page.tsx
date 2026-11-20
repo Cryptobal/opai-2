@@ -1,4 +1,5 @@
 import type { SearchParams } from "@/lib/parametros";
+import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
 import { PaginaInstalacion } from "../../_componentes/pagina-instalacion";
 import { PestanaRondas } from "../../_componentes/rondas/pestana-rondas";
@@ -11,7 +12,9 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 export default function RondasInstalacion(props: Props) {
   return (
     <PaginaInstalacion {...props} tab="rondas">
-      {(i, p) => <PestanaRondas instalacionId={i.id} instalacionNombre={i.nombre} sub={p["sub"]} />}
+      {(i: InstalacionDetalle, p) => (
+        <PestanaRondas instalacion={i} sub={p["sub"]} />
+      )}
     </PaginaInstalacion>
   );
 }

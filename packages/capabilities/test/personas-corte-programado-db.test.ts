@@ -47,7 +47,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso programado (db)", 
     const uid = randomUUID();
     await e.admin.user.create({ data: { id: uid, name: "Usuario Ficticio", email: `${uid.slice(0, 8)}@c385.test` } });
     const m = await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol: "trabajador", portales: ["trabajador"] } });
-    const p = await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activa", usuarioId: uid } });
+    const p = await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activo", usuarioId: uid } });
     const v = await e.admin.vinculoLaboral.create({
       data: { tenantId: tenant, personaId: p.id, cargoId: cargo, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" },
     });
@@ -99,7 +99,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso programado (db)", 
     const r = await terminar(x.vinculo);
     expect(r.ok, JSON.stringify(r)).toBe(true);
     expect(r.data?.["accesos"]).toMatchObject({ personaInactiva: true, membresiasSuspendidas: 1 });
-    expect(await estado(x)).toEqual({ persona: "activa", membresia: "activa" });
+    expect(await estado(x)).toEqual({ persona: "activo", membresia: "activa" });
     const t = await trabajoDe(x.vinculo);
     expect(t?.programadoPara.toISOString()).toBe(instanteDeCorte(FUTURO, "America/Santiago")?.toISOString());
   });
@@ -111,7 +111,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso programado (db)", 
     await llegaLaFecha(x.vinculo);
     const r = await correr(x.vinculo);
     expect(r).toMatchObject({ personaInactiva: true, membresiasSuspendidas: 1 });
-    expect(await estado(x)).toEqual({ persona: "inactiva", membresia: "suspendida" });
+    expect(await estado(x)).toEqual({ persona: "inactivo", membresia: "suspendida" });
     const ev = await e.admin.evento.findFirst({ where: { tenantId: tenant, tipo: "core.vinculo.accesos_cortados", entidadId: x.vinculo } });
     expect(ev).not.toBeNull();
   });
@@ -124,7 +124,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso programado (db)", 
     });
     await llegaLaFecha(x.vinculo);
     expect(await correr(x.vinculo)).toMatchObject({ personaInactiva: false });
-    expect(await estado(x)).toEqual({ persona: "activa", membresia: "activa" });
+    expect(await estado(x)).toEqual({ persona: "activo", membresia: "activa" });
   });
 
   it("un vínculo reactivado y vuelto a terminar no lo corta el trabajo viejo", async () => {
@@ -135,7 +135,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso programado (db)", 
     expect((await terminar(x.vinculo, {}, "2099-06-30")).ok).toBe(true);
     expect(await trabajoCortarAccesosProgramado.ejecutar(ctxSistema(), viejo?.payload)).toEqual({ omitido: true });
     expect((await trabajoDe(x.vinculo))?.id).not.toBe(viejo?.id);
-    expect(await estado(x)).toEqual({ persona: "activa", membresia: "activa" });
+    expect(await estado(x)).toEqual({ persona: "activo", membresia: "activa" });
   });
 
   it("con otro vínculo terminado más tarde, el corte espera al término más lejano", async () => {

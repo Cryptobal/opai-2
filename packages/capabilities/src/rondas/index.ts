@@ -3,7 +3,10 @@
 // La ejecución en terreno (iniciar/marcar/cerrar/novedad/emergencia) llega en el PR 3 con su
 // excepción de paridad `soloPersonas`.
 import type { Capacidad } from "../types";
+import { ejecucionesLeer } from "./ejecuciones-leer";
+import { ejecucionesListar } from "./ejecuciones-listar";
 import { etiquetasPdf } from "./etiquetas";
+import { informesCumplimiento } from "./informes-cumplimiento";
 import { puntosReemplazarEtiqueta } from "./etiqueta-reemplazo";
 import { incidentesTipoActualizar, incidentesTipoCrear, incidentesTipoListar } from "./incidentes-tipo";
 import { plantillasActualizar, plantillasCrear } from "./plantillas-escritura";
@@ -15,8 +18,12 @@ import { puntosListar } from "./puntos-lectura";
 
 export { ajustesRondas } from "./ajustes";
 export { indicadoresRondas } from "./indicadores-gestion";
+export { trabajoVigilanciaRondas } from "./vigilancia";
 
 export const capacidadesRondas: readonly Capacidad[] = [
+  ejecucionesListar,
+  ejecucionesLeer,
+  informesCumplimiento,
   puntosListar,
   puntosCrear,
   puntosActualizar,

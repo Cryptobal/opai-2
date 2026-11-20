@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 
-import { Alerta, AuthCard, Button, Campo, Input, TecladoPin } from "@opai/ds";
+import { Alerta, AuthCard, Button, Campo, Enlace, Input, TecladoPin } from "@opai/ds";
 import { formatearRut, rutValido } from "@opai/domain";
 
 import { accionEntrarConPin, type EstadoPin } from "@/app/_acciones/ingreso-pin";
@@ -43,9 +43,11 @@ export function FormularioPin({
       titulo="Ingresa con tu RUT"
       subtitulo="Tu PIN de 6 dígitos"
       pie={
-        <LinkNext href="/login" className="font-medium text-accent">
+        // Cambio de formulario de acceso: WKWebView debe cargar el documento del mismo origen,
+        // no reutilizar la navegación RSC del formulario de PIN.
+        <Enlace href="/login" className="font-medium">
           Entrar con correo y contraseña
-        </LinkNext>
+        </Enlace>
       }
       Link={LinkNext}
     >

@@ -1,7 +1,7 @@
 import type { Parametros } from "@/lib/parametros";
 
 /** Filtros del libro de compras que viajan en la URL; abrir un documento y volver no los pierde (CAR-256). */
-const CLAVES = ["periodo", "sin_centro", "q"] as const;
+const CLAVES = ["periodo", "sin_centro", "con_saldo", "q"] as const;
 
 /** Ruta con los filtros vigentes del libro (`periodo`, `sin_centro`, `q`). */
 export function conFiltrosCompras(ruta: string, p: Parametros): string {

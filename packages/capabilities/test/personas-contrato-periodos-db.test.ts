@@ -70,7 +70,7 @@ describe.skipIf(omitirSuiteDb())("Personas · períodos del contrato CAR-409 (db
       });
       const personaId = (
         await e.admin.persona.create({
-          data: { tenantId, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activa" },
+          data: { tenantId, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activo" },
         })
       ).id;
       const cargoId = (await e.admin.cargo.create({ data: { tenantId, nombre: "Guardia" } })).id;

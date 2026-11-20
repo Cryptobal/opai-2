@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+import { cursorDe, limiteLista, listaSchema, pagina } from "../core/maestros/comun";
 import { PERMISO_READ, dondeInstalacionId, instalacionEnAlcance } from "./comun";
 import { programacionSchema, vistaProgramacion } from "./vistas";
 
@@ -11,8 +12,12 @@ export const programacionesListar = defineCapability({
   descripcion:
     "Lista las programaciones de ronda de una instalación: qué plantilla, en qué horarios y días, con qué tolerancia, a quién se asigna y si está activa o pausada.",
   permiso: PERMISO_READ,
-  input: z.object({ instalacionId: uuidSchema }),
-  output: z.array(programacionSchema),
+  input: z.object({
+    instalacionId: uuidSchema,
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
+  }),
+  output: z.object({ items: z.array(programacionSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -21,8 +26,10 @@ export const programacionesListar = defineCapability({
       // `instalacionId` y el alcance van en `AND`: el spread de `dondeInstalacionId` pisaría el
       // `instalacionId` pedido y listaría programaciones de todas las instalaciones del alcance.
       where: { AND: [{ instalacionId: input.instalacionId }, dondeInstalacionId(ctx)] },
-      orderBy: { nombre: "asc" },
+      orderBy: [{ nombre: "asc" }, { id: "asc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
-    return filas.map(vistaProgramacion);
+    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
+    return { items: items.map(vistaProgramacion), siguiente };
   },
 });

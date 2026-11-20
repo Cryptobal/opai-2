@@ -6,12 +6,12 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { dondeInstalacion, instalacionesEnAlcance } from "../maestros/alcance";
-import { cursorDe, pagina } from "../maestros/comun";
+import { cursorDe } from "../maestros/comun";
 import {
   estadoNovedadSchema,
   gravedadNovedadSchema,
-  novedadSchema,
-  vistaNovedad,
+  paginaNovedadesLibro,
+  salidaListaNovedadesSchema,
 } from "./libro-novedades-comun";
 
 /**
@@ -31,7 +31,7 @@ export const libroNovedadesListar = defineCapability({
     // CAR-353: contrato único de listas.
     cursor: z.uuid().optional().describe("Valor de «siguiente» de la página anterior."),
   }),
-  output: z.object({ items: z.array(novedadSchema), siguiente: z.string().nullable() }),
+  output: salidaListaNovedadesSchema,
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (salida) => salida.items.map((n) => n.id),
@@ -56,10 +56,6 @@ export const libroNovedadesListar = defineCapability({
       orderBy: [{ horaHecho: "desc" }, { id: "desc" }],
       ...cursorDe(input.cursor, input.limite),
     });
-    const p = pagina(filas, input.limite, input.cursor);
-    return {
-      siguiente: p.siguiente,
-      items: p.items.map(vistaNovedad),
-    };
+    return paginaNovedadesLibro(filas, input.limite, input.cursor);
   },
 });
