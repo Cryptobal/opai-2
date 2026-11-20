@@ -78,7 +78,6 @@ export function ListaInstalaciones(p: Props) {
             mostrados={p.items.length}
             siguiente={p.siguiente}
             porPagina={porPagina}
-            etiquetaSinNav={p.titulo.toLowerCase()}
           />
         ) : undefined
       }
