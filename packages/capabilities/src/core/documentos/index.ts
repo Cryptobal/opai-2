@@ -1,6 +1,7 @@
 import type { Capacidad } from "../../types";
 import { documentosConfirmarSubida } from "./confirmar";
-import { documentosGet, documentosList } from "./consulta";
+import { documentosGet } from "./consulta";
+import { documentosList } from "./consulta-lista";
 import { documentosExplorar } from "./explorar";
 import { documentosMatriz } from "./matriz";
 import { documentoPlantillasGet, documentoPlantillasList } from "./plantillas";
@@ -9,6 +10,8 @@ import {
   documentoPlantillasGuardarBorrador,
   documentoPlantillasPublicar,
 } from "./plantillas-editor";
+import { documentoPlantillasCandidatas } from "./candidatas-masivo";
+import { documentoPlantillasEnviarMasivo } from "./enviar-masivo";
 import { documentoPlantillasGenerar } from "./generar";
 import { documentoPlantillasGenerarEntidad } from "./generar-entidad";
 import { documentoPlantillasRellenar } from "./rellenar";
@@ -47,6 +50,8 @@ export const capacidadesDocumentos: readonly Capacidad[] = [
   documentoPlantillasGuardarBorrador,
   documentoPlantillasPublicar,
   documentoPlantillasRellenar,
+  documentoPlantillasCandidatas,
+  documentoPlantillasEnviarMasivo,
   documentoPlantillasGenerar,
   documentoPlantillasRellenarEntidad,
   documentoPlantillasGenerarEntidad,

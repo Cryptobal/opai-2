@@ -4,18 +4,19 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { EstadoAsistencia } from "./tipos";
 
 type Texto = { proposito: string; version: string; texto: string };
+type TextosList = { items: Texto[]; siguiente: null };
 
 /** Estado de la propia persona (sesión de Trabajador) y los textos de consentimiento. */
 export async function cargarAsistenciaPropia() {
   const [e, t] = await Promise.all([
     ejecutarComoUsuario<EstadoAsistencia>("trabajador", "asistencia.rostro.estado", {}),
-    ejecutarComoUsuario<Texto[]>("trabajador", "asistencia.rostro.textos", {}),
+    ejecutarComoUsuario<TextosList>("trabajador", "asistencia.rostro.textos", {}),
   ]);
   const sinModulo = [e, t].some((r) => !r.ok && (r.error?.message?.includes("Módulo inactivo") || r.error?.code === "NOT_FOUND"));
   return {
     state: sinModulo ? ("empty" as const) : estadoPantalla(e, t),
     estado: e.ok ? e.data : null,
-    textos: t.ok ? t.data : [],
+    textos: t.ok ? t.data.items : [],
   };
 }
 

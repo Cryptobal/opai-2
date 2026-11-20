@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Alerta, Button, Campo, Input } from "@opai/ds";
 
 import { encolarHecho } from "@/lib/terreno/cola";
+import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
 
 // El lector de la cámara se carga solo si el navegador lo soporta, para no pesar en el JS inicial.
 const EscanearQr = dynamic(() => import("./escanear-qr").then((m) => m.EscanearQr), { ssr: false });
@@ -41,6 +42,7 @@ export function MarcarPunto({
   // Este componente solo se monta en el navegador (carga diferida sin servidor): se puede consultar de una vez.
   const camara = "BarcodeDetector" in window && !!navigator.mediaDevices;
   const [estado, setEstado] = useState<"libre" | "guardando" | "guardada" | "error">("libre");
+  const soloLectura = useSoloLectura();
 
   const marcar = async () => {
     const c = codigo.trim();
@@ -87,7 +89,10 @@ export function MarcarPunto({
           }}
         />
       </Campo>
-      <Button onClick={() => void marcar()} disabled={!codigo.trim() || estado === "guardando"}>
+      <Button
+        onClick={() => void marcar()}
+        disabled={soloLectura || !codigo.trim() || estado === "guardando"}
+      >
         {estado === "guardando" ? "Guardando…" : "Marcar"}
       </Button>
       {estado === "guardada" ? (

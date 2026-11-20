@@ -33,7 +33,7 @@ describe.skipIf(omitirSuiteDb())("Personas · campos de la ficha CAR-277 (db)", 
     tenant = (await e.admin.tenant.create({ data: { slug: `qa-c277-${randomUUID().slice(0, 8)}`, nombre: "c277", vertical: "seguridad" } })).id;
     await e.admin.user.create({ data: { id: uid, name: "RRHH", email: `${uid.slice(0, 8)}@c277.test` } });
     await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol: "owner", portales: ["erp"] } });
-    personaId = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut: "11111111-1", estado: "activa" } })).id;
+    personaId = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut: "11111111-1", estado: "activo" } })).id;
   });
   afterAll(async () => {
     await e?.cerrar();

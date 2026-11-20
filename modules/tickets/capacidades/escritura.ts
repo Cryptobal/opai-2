@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
-import { ESTADOS_VIVOS } from "../domain";
+import { ESTADOS_VIVOS, slaVenceEnDesde } from "../domain";
 import { prioridadSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR, PERMISO_VER_TODOS } from "./permisos";
 import { exigirMiembroActivo, ID_VISTA_PREVIA, instalacionVisible, responsablePorDefecto, ticketDe, vistaDeFila } from "./util";
@@ -39,6 +39,8 @@ export const ticketsCrear = defineCapability({
     }
     const instalacionId = input.instalacionId ? await instalacionVisible(ctx, input.instalacionId) : null;
     if (dryRun) return { id: ID_VISTA_PREVIA };
+    const creadoEn = new Date();
+    const slaVenceEn = slaVenceEnDesde(creadoEn, tipo.slaHoras);
     const creado = await ctx.transaccion(async (tx) => {
       const t = await tx.ticket.create({
         data: {
@@ -51,6 +53,8 @@ export const ticketsCrear = defineCapability({
           solicitanteId: ctx.usuario!.id,
           responsableId,
           instalacionId,
+          slaVenceEn,
+          createdAt: creadoEn,
         },
       });
       await tx.ticketEvento.create({

@@ -27,17 +27,14 @@ export function validarRangoPrerregistro(desde: string, hasta: string, hoy: stri
   return null;
 }
 
-/**
- * Estado de un día (R15): «ingresó» si alguien del prerregistro entró ese día (aunque luego se cancelara), un día que
- * ya terminó sin ingresos queda «no llegó», sin esperar a ningún proceso.
- */
+/** Estado de un día (R15): un día que ya terminó sin usarse queda «no llegó», sin esperar a ningún proceso. */
 export function estadoDiaPrerregistro(d: {
   dia: string;
   hoy: string;
   cancelado: boolean;
-  ingresos: number;
+  ingresos?: number;
 }): EstadoDiaPrerregistro {
-  if (d.ingresos > 0) return "ingreso";
   if (d.cancelado) return "cancelado";
+  if ((d.ingresos ?? 0) > 0) return "ingreso";
   return ms(d.dia) < ms(d.hoy) ? "no_llego" : "pendiente";
 }

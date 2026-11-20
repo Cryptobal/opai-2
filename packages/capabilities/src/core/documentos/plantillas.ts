@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { claseSchema, editorSchema, plantillaSchema, vista, vistaEditor } from "./plantillas-comun";
+import { camposCuentaPlantilla } from "./plantillas-campos-cuenta";
 
 export const documentoPlantillasList = defineCapability({
   id: "core.documento_plantillas.list",
@@ -55,6 +56,6 @@ export const documentoPlantillasGet = defineCapability({
       where: { plantillaId: id, numero: p.versionVigente },
     });
     if (!v) throw noEncontrado("La versión vigente de la plantilla");
-    return vistaEditor(p, v);
+    return vistaEditor(p, v, await camposCuentaPlantilla(ctx));
   },
 });

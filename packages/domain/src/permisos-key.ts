@@ -1,3 +1,5 @@
+import { permisoSoloExplicitoEnKey } from "./permisos-explicitos-key";
+
 /**
  * Permisos concretos de una key: null conserva la delegación histórica (sin lista propia); servicio
  * falla cerrado (su lista es obligatoria). En ambos casos el permiso además debe estar entre los
@@ -13,6 +15,8 @@ export function permisoDeKey(
   if (permiso.startsWith("platform:")) return false;
   const enLista = servicio
     ? (permisos?.includes(permiso) ?? false)
-    : permisos === null || permisos.includes(permiso);
+    : permisos === null
+      ? !permisoSoloExplicitoEnKey(permiso)
+      : permisos.includes(permiso);
   return enLista && responsable(permiso);
 }
