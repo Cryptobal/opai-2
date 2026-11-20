@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
 
 import { ajuste, defineCapability } from "@opai/capabilities";
+import type { TenantTx } from "@opai/db";
 import { jsonCanonico } from "@opai/domain";
 
 import { marcaIntegra } from "../../domain";
@@ -19,7 +20,7 @@ type Manifiesto = {
   eslabones: { seq: number; hash: string }[];
 };
 
-async function construirManifiesto(tenantId: string, db: { marca: { findMany: Function } }): Promise<Manifiesto> {
+async function construirManifiesto(tenantId: string, db: Pick<TenantTx, "marca">): Promise<Manifiesto> {
   const eslabones: { seq: number; hash: string }[] = [];
   let desde = 1;
   for (;;) {

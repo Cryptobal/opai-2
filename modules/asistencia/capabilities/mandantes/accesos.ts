@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+import type { TenantTx } from "@opai/db";
 
-async function historial(ctx: { db: { mandanteAccesoEvento: { findMany: Function } } }, accesoId: string) {
+async function historial(ctx: { db: Pick<TenantTx, "mandanteAccesoEvento"> }, accesoId: string) {
   const ev = await ctx.db.mandanteAccesoEvento.findMany({
     where: { accesoId }, orderBy: { createdAt: "desc" }, take: 30,
   });
