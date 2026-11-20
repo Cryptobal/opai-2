@@ -66,7 +66,12 @@
   - Revisar contra lo visto: si alguien recalcula entre que otro mira la pantalla y aprieta el botón, quedan revisados montos que nadie vio. Solución simple: que el input traiga la `calculadaEn` máxima vista y rechazar con cambio concurrente si hay filas más nuevas.
   - `idempotencyKey` desde la pantalla (el efecto ya es idempotente: la segunda llamada devuelve 0).
   - Permiso propio para revisar (`nomina:liquidaciones.revisar`) si se quiere separar quien calcula de quien revisa.
-  - Prueba de concurrencia marcar/recalcular contra Postgres real (usa el mismo bloqueo ya probado).
+    - Prueba de concurrencia marcar/recalcular contra Postgres real (usa el mismo bloqueo ya probado).
+
+## Publicar liquidación al portal (#989)
+
+- `nomina.liquidaciones.publicar` (dryRun, `nomina:periodos.manage`): solo liquidación **revisada**; PDF en R2 + documento con `visibleEn: ['trabajador']`; evento `nomina.liquidacion.publicada`; comunicable transaccional (correo personal + in-app). Consumidor `nomina.liquidacion.publicada`.
+- Migración `20261116210000_nomina_liquidacion_portal` pendiente de aplicar en Neon (respaldos + quitar etiqueta).
 
 ## Cumplimiento DT contratos (PR apilado sobre #989, rama `cursor/cumplimiento-dt-ab10`)
 

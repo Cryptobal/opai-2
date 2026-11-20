@@ -60,6 +60,7 @@ export const manifest = defineModule({
     { id: "nomina.prestamo.cancelado", descripcion: "Se canceló un préstamo; sus cuotas pendientes se condonaron." },
     { id: "nomina.liquidaciones.calculadas", descripcion: "Se calcularon o recalcularon las liquidaciones de un período." },
     { id: "nomina.liquidaciones.revisadas", descripcion: "Se marcaron como revisadas las liquidaciones calculadas de un período." },
+    { id: "nomina.liquidacion.publicada", descripcion: "Se publicó la liquidación de una persona en el portal del trabajador." },
     { id: "nomina.cumplimiento_dt.registrado", descripcion: "Se marcó un alta, baja o anexo como registrado en Mi DT." },
   ],
   capacidades: capacidadesNomina,
