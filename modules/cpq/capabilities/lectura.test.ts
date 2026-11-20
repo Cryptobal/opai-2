@@ -26,6 +26,46 @@ async function conDosCotizaciones(permisos?: readonly string[]) {
 }
 
 describe("cpq.cotizaciones.list / get", () => {
+  it("aplica la búsqueda antes de paginar y conserva filtros de negocio y archivo", async () => {
+    const { h, a, b } = await conDosCotizaciones();
+    await h.ctx.db.cpqCotizacion.updateMany({
+      where: { id: { in: [a, b] } },
+      data: { archivadaEn: null },
+    });
+    const q = "Cuenta CPQ";
+    const primera = await executeCapability(h.ctx, "cpq.cotizaciones.list", { q, limite: 1 });
+    if (!primera.ok) throw new Error("lista filtrada");
+    const pagina = primera.data as { items: { id: string }[]; siguiente: string };
+    expect(pagina.items).toHaveLength(1);
+    expect(pagina.siguiente).toBeTruthy();
+    const segunda = await executeCapability(h.ctx, "cpq.cotizaciones.list", {
+      q,
+      limite: 1,
+      cursor: pagina.siguiente,
+    });
+    if (!segunda.ok) throw new Error("segunda página");
+    const resto = (segunda.data as { items: { id: string }[] }).items;
+    expect([...pagina.items, ...resto].map((fila) => fila.id).sort()).toEqual([a, b].sort());
+    expect(
+      await executeCapability(h.ctx, "cpq.cotizaciones.list", { q, negocioId: NEGOCIO_1 }),
+    ).toMatchObject({
+      ok: true,
+      data: { items: [{ id: a }] },
+    });
+    expect(
+      await executeCapability(h.ctx, "cpq.cotizaciones.list", { q, soloArchivadas: true }),
+    ).toMatchObject({
+      ok: true,
+      data: { items: [] },
+    });
+    expect(
+      await executeCapability(h.ctx, "cpq.cotizaciones.list", { q: "ASEO OFICINAS" }),
+    ).toMatchObject({
+      ok: true,
+      data: { items: [{ id: b }] },
+    });
+  });
+
   it("lista con la última versión y filtra por negocio y por estado", async () => {
     const { h, a } = await conDosCotizaciones();
     const todas = await executeCapability(h.ctx, "cpq.cotizaciones.list", {});

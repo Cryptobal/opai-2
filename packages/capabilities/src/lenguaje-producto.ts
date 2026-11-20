@@ -13,6 +13,8 @@ const PATRONES: readonly { id: string; re: RegExp }[] = [
   { id: "version_10", re: /\b1\.0\b/ },
   { id: "ref_brief_r", re: /\([R]\d{1,2}\)/ },
   { id: "todo_decision", re: /TODO\(decisión/i },
+  { id: "codigo_diseno", re: /\b[DTL]-\d{1,3}\b/ },
+  { id: "pendiente_confirmar", re: /pendiente de confirmar/i },
 ];
 
 /** Devuelve el id del primer patrón que coincide, o null si el texto es aceptable. */

@@ -111,7 +111,16 @@ export function ListaAsistenciaHoyErp({
       <ListScreen<Item>
         state={estadoPantalla(resultado)}
         titulo="Asistencia de hoy"
-        accionPrincipal={<EnlaceBoton href="/asistencia/correcciones" variante="secondary">Correcciones</EnlaceBoton>}
+        accionPrincipal={
+          <div className="flex flex-wrap justify-end gap-2">
+            <EnlaceBoton href="/asistencia/correcciones" variante="secondary">
+              Correcciones
+            </EnlaceBoton>
+            <EnlaceBoton href="/asistencia/reportes-dt" variante="secondary">
+              Reportes DT
+            </EnlaceBoton>
+          </div>
+        }
         subtitulo={d ? `${diaLargo(new Date(`${d.fecha}T12:00:00Z`), d.zona)} · ${d.resumen.turnos} turnos` : undefined}
         filtros={
           <div className="flex w-full flex-col gap-3">

@@ -1,5 +1,7 @@
 import type { EstadoPantalla } from "@opai/ds";
 
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
+import type { Parametros } from "@/lib/parametros";
 import { accesoCpq } from "@/lib/cpq-ui";
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
@@ -49,13 +51,15 @@ export async function cargarCotizaciones(
   cursor?: string,
   negocioId?: string,
   archivadas = false,
+  p: Parametros = {},
 ): Promise<DatosCotizaciones> {
   const acceso = accesoCpq(await identidadActual());
   if (!acceso.leer) {
     return { state: "forbidden", items: [], siguiente: null, crear: false, costos: false };
   }
   const r = await ejecutarComoUsuario<ListaCotizaciones>("erp", "cpq.cotizaciones.list", {
-    limite: 20,
+    limite: tamanoPagina(p, 20),
+    ...(p["q"]?.trim() ? { q: p["q"].trim().slice(0, 160) } : {}),
     ...(cursor && esUuid(cursor) ? { cursor } : {}),
     ...(negocioId ? { negocioId } : {}),
     ...(archivadas ? { soloArchivadas: true } : {}),
