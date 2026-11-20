@@ -2,6 +2,9 @@
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
+-- Preview Neon puede traer restos de intentos fallidos sin transacción (migración renumerada CAR-591).
+DROP TABLE IF EXISTS "asistencia"."contingencias_enlaces";
+
 CREATE TABLE "asistencia"."contingencias_enlaces" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
