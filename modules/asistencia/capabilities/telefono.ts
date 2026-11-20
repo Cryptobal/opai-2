@@ -7,7 +7,7 @@ import { uuid } from "./esquemas";
 export const telefonoHabilitar = defineCapability({
   id: "asistencia.telefono.habilitar",
   descripcion:
-    "RR. HH. habilita o deshabilita a una persona para marcar desde su teléfono personal (D-01). Además la persona debe aceptar su uso, la instalación debe incluir el canal y la empresa debe permitirlo. La persona necesita tener su PIN asignado.",
+    "RR. HH. habilita o deshabilita a una persona para marcar desde su teléfono personal. Además la persona debe aceptar su uso, la instalación debe incluir el canal y la empresa debe permitirlo. La persona necesita tener su PIN asignado.",
   permiso: "asistencia:configurar",
   portales: ["erp"],
   soloPersonas: true,

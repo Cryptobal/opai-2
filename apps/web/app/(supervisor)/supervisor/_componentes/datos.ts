@@ -51,7 +51,7 @@ export async function personaTerreno(id: string) {
     ejecutarComoUsuario<{ items: Documento[]; faltantes: { tipoId: string; nombre: string }[] }>(
       P,
       "core.documentos.list",
-      { entidad: { tipo: "persona", id } },
+      { entidad: { tipo: "persona", id }, limite: 200 },
     ),
   ]);
   // Sin `documentos:read` la ficha se ve sin documentos; otro fallo va al error.tsx (CAR-50).

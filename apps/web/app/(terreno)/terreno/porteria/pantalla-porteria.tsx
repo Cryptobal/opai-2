@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, Button, Empty, Loading } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 import { usePersonaElegida } from "@/lib/terreno/persona";
 
@@ -97,11 +98,11 @@ export function PantallaPorteria() {
         </Alerta>
       ) : null}
       {!sitio || sitio.activo ? (
-        <>
+        <DesactivarEnVista>
           <Esperados personaId={persona.id} alRegistrar={recargar} />
           <FormularioEntrada personaId={persona.id} />
           {sitio ? <ListaEnSitio items={sitio.items} personaId={persona.id} /> : null}
-        </>
+        </DesactivarEnVista>
       ) : null}
     </main>
   );

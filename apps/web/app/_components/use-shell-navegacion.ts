@@ -8,6 +8,7 @@ import { entradaInicio, entradasAreaPrincipal, areaNavActivaEnRuta, type GrupoAr
 import type { ItemNav } from "@/lib/navegacion";
 import { validarFichasNav } from "@/app/_acciones/validar-fichas-nav";
 
+import { raizDeFicha } from "./maestros/ficha-ruta";
 import { iconoShell } from "./icono-shell";
 import { useNavegacionArea } from "./use-navegacion-area";
 
@@ -87,7 +88,8 @@ export function useShellNavegacion(
   }, [rutaEfectiva, areaActiva, prefs]);
   const guardada = prefs.areaAbierta === "ninguna" ? null : prefs.areaAbierta;
   const areaAbierta = areaElegida === undefined ? (areaActiva ?? guardada) : areaElegida;
-  const esFicha = /^\/(cuentas|instalaciones|personas|cargos)\/[0-9a-f-]{36}$/.test(rutaEfectiva);
+  const raizFicha = raizDeFicha(rutaEfectiva);
+  const esFicha = raizFicha != null;
   return {
     navInferiorResuelto,
     fijados,
@@ -101,13 +103,11 @@ export function useShellNavegacion(
       ),
     onDesfijar: prefs.desfijar,
     esFicha,
-    fichaFijada: prefs.fijados.some((f) => f.href === rutaEfectiva),
+    fichaFijada: raizFicha != null && prefs.fijados.some((f) => f.href === raizFicha),
     onFijarFicha: async () => {
-      if ((await validarFichasNav([rutaEfectiva])).includes(rutaEfectiva))
-        prefs.fijar(
-          { tipo: "ficha", href: rutaEfectiva, etiqueta: titulo },
-          entradasPermitidas,
-        );
+      if (!raizFicha) return;
+      if ((await validarFichasNav([raizFicha])).includes(raizFicha))
+        prefs.fijar({ tipo: "ficha", href: raizFicha, etiqueta: titulo }, entradasPermitidas);
     },
     onAreaAbierta: (area: string) => {
       const siguiente = areaAbierta === area ? null : (area as AreaNav);

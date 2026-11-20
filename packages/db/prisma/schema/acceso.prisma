@@ -175,7 +175,7 @@ model PrerregistroVisitante {
   patente        String?
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  prerregistro Prerregistro      @relation(fields: [prerregistroId], references: [id], onDelete: Restrict, map: "prerregistro_visitantes_prerregistro_fkey")
+  prerregistro Prerregistro @relation(fields: [prerregistroId], references: [id], onDelete: Restrict, map: "prerregistro_visitantes_prerregistro_fkey")
   usos         PrerregistroUso[]
 
   @@index([prerregistroId], map: "prerregistro_visitantes_prerregistro_idx")

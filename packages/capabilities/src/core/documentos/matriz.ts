@@ -92,7 +92,7 @@ export const documentosMatriz = defineCapability({
     });
     const personas = await ctx.db.persona.findMany({
       // Alcance por filas (ADR-022): el supervisor solo ve las personas a su cargo (hoy ninguna, 07b).
-      where: { archivadaEn: null, estado: { not: "inactiva" }, AND: [dondePersona(ctx)] },
+      where: { archivadaEn: null, estado: { not: "inactivo" }, AND: [dondePersona(ctx)] },
       orderBy: [{ apellidos: "asc" }, { nombres: "asc" }],
       take: 2001,
     });
