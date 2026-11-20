@@ -37,23 +37,25 @@ export async function cargarDefectos(): Promise<DefectosRondas> {
 
 /** Puntos de la instalación (incluye archivados para la vista de configuración). */
 export async function cargarPuntos(instalacionId: string) {
-  const r = await ejecutarComoUsuario<Punto[]>("erp", "rondas.puntos.listar", {
+  const r = await ejecutarComoUsuario<{ items: Punto[] }>("erp", "rondas.puntos.listar", {
     instalacionId,
     incluirArchivados: true,
   });
-  return { state: estadoPantalla(r), puntos: r.ok ? r.data : [] };
+  return { state: estadoPantalla(r), puntos: r.ok ? r.data.items : [] };
 }
 
 /** Plantillas de la instalación con su secuencia de puntos. */
 export async function cargarPlantillas(instalacionId: string) {
-  const r = await ejecutarComoUsuario<Plantilla[]>("erp", "rondas.plantillas.listar", { instalacionId });
-  return { state: estadoPantalla(r), plantillas: r.ok ? r.data : [] };
+  const r = await ejecutarComoUsuario<{ items: Plantilla[] }>("erp", "rondas.plantillas.listar", {
+    instalacionId,
+  });
+  return { state: estadoPantalla(r), plantillas: r.ok ? r.data.items : [] };
 }
 
 /** Programaciones de la instalación. */
 export async function cargarProgramaciones(instalacionId: string) {
-  const r = await ejecutarComoUsuario<Programacion[]>("erp", "rondas.programaciones.listar", {
+  const r = await ejecutarComoUsuario<{ items: Programacion[] }>("erp", "rondas.programaciones.listar", {
     instalacionId,
   });
-  return { state: estadoPantalla(r), programaciones: r.ok ? r.data : [] };
+  return { state: estadoPantalla(r), programaciones: r.ok ? r.data.items : [] };
 }

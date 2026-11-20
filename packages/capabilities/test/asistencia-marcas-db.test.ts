@@ -60,7 +60,7 @@ describe.skipIf(!urlPropietario)("Asistencia · marca legal (Postgres real)", ()
     const cargo = (await e.admin.cargo.create({ data: { tenantId: tenant, nombre: "Guardia" } })).id;
     const ids: string[] = [];
     for (let i = 0; i < personas; i++) {
-      const p = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: `P${i}`, apellidos: "Prueba", rut: `${10 + i}${slug.length}.000.000-${i % 9}`, estado: "activa" } })).id;
+      const p = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: `P${i}`, apellidos: "Prueba", rut: `${10 + i}${slug.length}.000.000-${i % 9}`, estado: "activo" } })).id;
       await e.admin.vinculoLaboral.create({ data: { tenantId: tenant, personaId: p, cargoId: cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
       ids.push(p);
     }
@@ -138,7 +138,8 @@ describe.skipIf(!urlPropietario)("Asistencia · marca legal (Postgres real)", ()
     const rb = await marcar(ctx(B.tenant), B.persona, B.inst);
     expect(rb.ok).toBe(true);
     const hashA = (await e.admin.marca.findFirstOrThrow({ where: { tenantId: A.tenant } })).hash;
-    const lista = await ejecutar(ctx(B.tenant, "erp"), "asistencia.marcas.listar", { instalacionId: A.inst, desde: new Date(Date.now() - 86_400_000).toISOString(), hasta: new Date(Date.now() + 86_400_000).toISOString() });
+    const hoy = new Date().toISOString().slice(0, 10);
+    const lista = await ejecutar(ctx(B.tenant, "erp"), "asistencia.marcas.listar", { instalacionId: A.inst, desde: hoy, hasta: hoy });
     expect(lista.ok && lista.data.items).toEqual([]);
     const v = await ejecutar(ctx(B.tenant, "erp"), "asistencia.marcas.verificar", { hash: hashA });
     expect(v.data).toEqual({ valida: false });
@@ -153,7 +154,8 @@ describe.skipIf(!urlPropietario)("Asistencia · marca legal (Postgres real)", ()
       tenantId: A.tenant, actor: { tipo: "user", id: randomUUID() }, portal: "supervisor", portalesMembresia: ["supervisor"],
       rol: "supervisor", alcance: { instalaciones }, modulosActivos: ["asistencia"], medidor,
     });
-    const rango = { desde: new Date(Date.now() - 86_400_000).toISOString(), hasta: new Date(Date.now() + 86_400_000).toISOString() };
+    const hoy = new Date().toISOString().slice(0, 10);
+    const rango = { desde: hoy, hasta: hoy };
     const propias = await ejecutar(sup([A.inst]), "asistencia.marcas.listar", rango);
     expect(propias.ok && propias.data.items.length).toBeGreaterThan(0);
     const ajenas = await ejecutar(sup([otra]), "asistencia.marcas.listar", rango);

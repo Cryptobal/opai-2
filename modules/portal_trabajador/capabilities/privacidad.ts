@@ -10,7 +10,7 @@ const contacto = z.object({
   telefono: z.string().nullable(),
 });
 
-export const privacidadSchema = z.object({
+const privacidadSchema = z.object({
   /** Quien atiende los derechos del titular (DPO), según el perfil de la empresa. */
   dpo: contacto,
   empresa: z.string().nullable(),

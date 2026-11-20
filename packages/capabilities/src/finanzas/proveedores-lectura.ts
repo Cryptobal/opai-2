@@ -5,7 +5,8 @@ import { uuidSchema } from "../core/esquemas";
 import { cursorDe, listaSchema, pagina } from "../core/maestros/comun";
 import { PERMISO_READ, proveedorDe } from "./comun";
 import { proveedorSchema, vistaProveedor } from "./vistas";
-import { compraSchema, vistaCompra } from "./vistas-compra";
+import { vistasDeCompras } from "./compras-consulta";
+import { compraSchema } from "./vistas-compra";
 
 const cuentaCortaSchema = z.object({ id: z.string(), codigo: z.string(), nombre: z.string() });
 
@@ -86,11 +87,6 @@ export const proveedoresObtener = defineCapability({
         take: 20,
       }),
     ]);
-    const centros = await ctx.db.centroCosto.findMany({
-      where: { id: { in: compras.map((c) => c.centroCostoId).filter((x): x is string => !!x) } },
-      select: { id: true, nombre: true },
-    });
-    const nombreCentro = new Map(centros.map((c) => [c.id, c.nombre]));
     return {
       proveedor: vistaProveedor(p),
       cuentaGasto: cuentas.find((c) => c.id === p.cuentaGastoId) ?? null,
@@ -101,9 +97,8 @@ export const proveedoresObtener = defineCapability({
         sinCentroCosto: sinCentro,
         montoNeto: porTipo.reduce((a, g) => a + (g.tipoDte === 61 ? -1 : 1) * (g._sum.montoNeto ?? 0), 0),
       },
-      compras: compras.map((c) =>
-        vistaCompra(c, p, c.centroCostoId ? (nombreCentro.get(c.centroCostoId) ?? null) : null, null),
-      ),
+      // Mismas vistas que el libro: centro, sugerencia y estado de pago según la conciliación (CAR-239).
+      compras: await vistasDeCompras(ctx, compras.map((c) => ({ ...c, proveedor: p }))),
     };
   },
 });

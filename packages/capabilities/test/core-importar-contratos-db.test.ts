@@ -113,9 +113,58 @@ describe.skipIf(!urlPropietario)("core · importador de contratos en base real",
   });
 
   it("un contrato vigente nuevo reactiva a la persona inactiva, como el alta manual", async () => {
-    await x.e.admin.persona.updateMany({ where: { tenantId: x.t1, rut: "44444444-4" }, data: { estado: "inactiva" } });
+    await x.e.admin.persona.updateMany({ where: { tenantId: x.t1, rut: "44444444-4" }, data: { estado: "inactivo" } });
     await x.importar(x.t1, "contratos", { filas: [{ ...base, persona_rut: "44.444.444-4", inicio: "01-03-2024" }] });
     const p = await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "44444444-4" } });
-    expect(p?.estado).toBe("activa");
+    expect(p?.estado).toBe("activo");
+  });
+
+  it("rechaza contrato para persona rechazada o bloqueada operativamente (CAR-674)", async () => {
+    const rech = (await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "33333333-3" }, select: { id: true } }))!;
+    await x.e.admin.persona.update({ where: { id: rech.id }, data: { estado: "rechazado" } });
+    const sRech = await x.importar(
+      x.t1,
+      "contratos",
+      { filas: [{ ...base, persona_rut: "33.333.333-3", inicio: "01-05-2024" }] },
+      true,
+    );
+    expect(sRech.conteos.error).toBe(1);
+    expect(sRech.filas[0]?.mensajes.join(" ")).toMatch(/rechazada/);
+
+    const bloq = (await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "22222222-2" }, select: { id: true } }))!;
+    await x.e.admin.persona.update({ where: { id: bloq.id }, data: { bloqueada: true } });
+    const sBloq = await x.importar(
+      x.t1,
+      "contratos",
+      { filas: [{ ...base, persona_rut: "22.222.222-2", inicio: "01-06-2024" }] },
+      true,
+    );
+    expect(sBloq.conteos.error).toBe(1);
+    expect(sBloq.filas[0]?.mensajes.join(" ")).toMatch(/bloqueada operativamente/);
+
+    const perm = (await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "11111111-1" }, select: { id: true } }))!;
+    await x.e.admin.persona.update({ where: { id: perm.id }, data: { estado: "bloqueado_permanente" } });
+    const sPerm = await x.importar(
+      x.t1,
+      "contratos",
+      { filas: [{ ...base, persona_rut: "11.111.111-1", inicio: "01-07-2024" }] },
+      true,
+    );
+    expect(sPerm.conteos.error).toBe(1);
+    expect(sPerm.filas[0]?.mensajes.join(" ")).toMatch(/bloqueada de forma permanente/);
+  });
+
+  it("no reactiva ni crea contrato vigente para una persona archivada", async () => {
+    const personaId = (await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "44444444-4" }, select: { id: true } }))!.id;
+    await x.e.admin.persona.update({
+      where: { id: personaId },
+      data: { estado: "inactivo", archivadaEn: new Date("2026-01-01") },
+    });
+    const s = await x.importar(x.t1, "contratos", { filas: [{ ...base, persona_rut: "44.444.444-4", inicio: "01-04-2024" }] }, true);
+    expect(s.conteos.error).toBeGreaterThanOrEqual(1);
+    expect(s.filas.some((f) => f.mensajes.join(" ").includes("archivada"))).toBe(true);
+    const p = await x.e.admin.persona.findFirst({ where: { id: personaId } });
+    expect(p?.estado).toBe("inactivo");
+    expect(p?.archivadaEn).not.toBeNull();
   });
 });

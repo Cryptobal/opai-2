@@ -58,13 +58,21 @@ export const incidentesListar = defineCapability({
   id: "asistencia.incidentes.listar",
   descripcion: "Lista los incidentes técnicos del sistema de asistencia, los más recientes primero, con su inicio, fin y severidad.",
   permiso: "asistencia:ver",
-  input: z.object({ soloAbiertos: z.boolean().default(false) }),
-  output: z.object({ items: z.array(vistaSchema) }),
+  input: z.object({
+    soloAbiertos: z.boolean().default(false),
+    cursor: z.string().uuid().optional(), limite: z.number().int().min(1).max(200).default(50),
+  }),
+  output: z.object({ items: z.array(vistaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: () => [],
   async handler(ctx, i) {
-    const filas = await ctx.db.incidenteTecnico.findMany({ where: i.soloAbiertos ? { fin: null } : {}, orderBy: { inicio: "desc" }, take: 200 });
-    return { items: filas.map(vista) };
+    const filas = await ctx.db.incidenteTecnico.findMany({
+      where: i.soloAbiertos ? { fin: null } : {},
+      orderBy: [{ inicio: "desc" }, { id: "desc" }], take: i.limite + 1,
+      ...(i.cursor ? { cursor: { id: i.cursor }, skip: 1 } : {}),
+    });
+    const items = filas.slice(0, i.limite).map(vista);
+    return { items, siguiente: filas.length > i.limite ? (items.at(-1)?.id ?? null) : null };
   },
 });

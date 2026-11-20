@@ -19,7 +19,7 @@ type Fila = { icono: ComponentType<{ className?: string }>; t: string; d: string
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 
 /** Textos de la vista previa (GanarNegocio, diseño CRM v3 cierre §3.6). */
-export function filasEfectos(e: EfectosGanar, inicio: string | null): Fila[] {
+function filasEfectos(e: EfectosGanar, inicio: string | null): Fila[] {
   const filas: Fila[] = [];
   if (e.cuenta)
     filas.push({

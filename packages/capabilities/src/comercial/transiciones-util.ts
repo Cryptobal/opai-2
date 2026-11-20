@@ -6,7 +6,13 @@ import { estadoDeTipo, segundosEntre } from "./dominio";
 import { idAutor } from "../autor";
 
 type NegocioFila = { id: string; etapaId: string; estado: string; createdAt: Date };
-type EtapaFila = { id: string; tipo: string };
+type EtapaFila = { id: string; tipo: string; probabilidad?: number };
+
+async function probabilidadDeEtapa(tx: TenantTx, destino: EtapaFila) {
+  if (destino.probabilidad !== undefined) return destino.probabilidad;
+  return (await tx.etapa.findUnique({ where: { id: destino.id }, select: { probabilidad: true } }))
+    ?.probabilidad;
+}
 
 /**
  * Aplica un cambio de etapa dentro de una transacción: registra el historial con los segundos en la
@@ -23,6 +29,7 @@ export async function aplicarEtapa(
   },
 ) {
   const ahora = new Date();
+  const probabilidad = await probabilidadDeEtapa(tx, destino);
   const ultimo = await tx.historialEtapa.findFirst({
     where: { negocioId: negocio.id },
     orderBy: { cuando: "desc" },
@@ -32,7 +39,12 @@ export async function aplicarEtapa(
   // negocio entre la lectura y esta escritura (p. ej. ganar y mover a la vez), la fila ya no calza.
   const { count } = await tx.negocio.updateMany({
     where: { id: negocio.id, etapaId: negocio.etapaId, estado: negocio.estado },
-    data: { etapaId: destino.id, estado: estadoDeTipo(destino.tipo), ...(opts.datos ?? {}) },
+    data: {
+      etapaId: destino.id,
+      estado: estadoDeTipo(destino.tipo),
+      ...(probabilidad !== undefined ? { probabilidad } : {}),
+      ...(opts.datos ?? {}),
+    },
   });
   if (count === 0) throw conflicto("El negocio cambió de etapa mientras tanto; vuelve a cargarlo.");
   const r = await tx.negocio.findUnique({ where: { id: negocio.id } });
