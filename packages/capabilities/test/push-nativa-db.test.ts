@@ -15,6 +15,7 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
   let tenantB = "";
   let ana = "";
   let beto = "";
+  let caro = "";
   const tocados: { token: string; ruta: string }[] = [];
   const tokensVencidos = new Set<string>();
   const emisorNativo: EmisorFcm = {
@@ -49,39 +50,35 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
       ).id;
     tenantA = await crearTenant("push-nat-a");
     tenantB = await crearTenant("push-nat-b");
-    const usuario = async (nombre: string) => {
+    const usuarioEn = async (tenantId: string, nombre: string, persona = tenantId === tenantA) => {
       const id = (
         await e.admin.user.create({
-          data: {
-            name: nombre,
-            email: `${nombre}-${randomUUID().slice(0, 8)}@prueba.cl`,
-            emailVerified: true,
-          },
+          data: { name: nombre, email: `${nombre}-${randomUUID().slice(0, 8)}@prueba.cl`, emailVerified: true },
         })
       ).id;
-      await e.admin.membership.create({
-        data: { tenantId: tenantA, userId: id, rol: "viewer", portales: ["trabajador"] },
-      });
-      const persona = await e.admin.persona.create({
-        data: {
-          tenantId: tenantA,
-          nombres: nombre,
-          apellidos: "Prueba",
-          rut: "13.131.313-3",
-          estado: "activo",
-          usuarioId: id,
-        },
-      });
-      return { id, persona: persona.id };
+      await e.admin.membership.create({ data: { tenantId, userId: id, rol: "viewer", portales: ["trabajador"] } });
+      if (persona) {
+        await e.admin.persona.create({
+          data: {
+            tenantId: tenantA,
+            nombres: nombre,
+            apellidos: "Prueba",
+            rut: "13.131.313-3",
+            estado: "activo",
+            usuarioId: id,
+          },
+        });
+      }
+      return id;
     };
-    const a = await usuario("ana-nat");
-    ana = a.id;
-    const b = await usuario("beto-nat");
-    beto = b.id;
+    ana = await usuarioEn(tenantA, "ana-nat");
+    beto = await usuarioEn(tenantA, "beto-nat");
+    caro = await usuarioEn(tenantB, "caro-nat", false);
+    const personaAna = await e.admin.persona.findFirst({ where: { tenantId: tenantA, usuarioId: ana } });
     await e.admin.preferenciaNotificacion.create({
       data: {
         tenantId: tenantA,
-        personaId: a.persona,
+        personaId: personaAna!.id,
         preferencias: { pauta: { push: true, correo: false } },
       },
     });
@@ -112,6 +109,15 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
     const r = await mod.executeCapability(ctx(tenantA, beto), "core.push.quitar", { tipo: "nativa", token });
     expect(r).toMatchObject({ ok: true, data: { quitadas: 0 } });
     expect((await e.admin.suscripcionPush.findFirst({ where: { tenantId: tenantA, token } }))?.usuarioId).toBe(ana);
+  });
+
+  it("mismo token en otro tenant no mezcla filas", async () => {
+    const token = `fcm-2t-${randomUUID().slice(0, 6)}`;
+    const inNat = { tipo: "nativa" as const, token, plataforma: "android" as const };
+    await mod.executeCapability(ctx(tenantA, ana), "core.push.suscribir", inNat);
+    await mod.executeCapability(ctx(tenantB, caro), "core.push.suscribir", inNat);
+    expect(await e.admin.suscripcionPush.count({ where: { tenantId: tenantA, token } })).toBe(1);
+    expect(await e.admin.suscripcionPush.count({ where: { tenantId: tenantB, token } })).toBe(1);
   });
 
   it("mismo token en otro usuario borra la fila anterior antes de crear", async () => {

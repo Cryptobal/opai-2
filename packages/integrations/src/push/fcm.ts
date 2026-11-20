@@ -1,6 +1,7 @@
 import { rutaPushInterna } from "@opai/domain";
 
 import type { ResultadoPush } from "./index";
+import { tokenFcmVencido } from "./fcm-errores";
 import { type CuentaFirebase, firmarJwtFirebase } from "./fcm-jwt";
 
 export type { CuentaFirebase } from "./fcm-jwt";
@@ -16,10 +17,6 @@ export interface EmisorFcm {
 }
 
 type TokenOAuth = { access_token?: string; expires_in?: number };
-
-function tokenFcmVencido(status: unknown): boolean {
-  return status === "UNREGISTERED" || status === "INVALID_ARGUMENT";
-}
 
 async function accessTokenOAuth(cuenta: CuentaFirebase, f: typeof fetch, ahora: number): Promise<string> {
   const jwt = await firmarJwtFirebase(cuenta, ahora);
@@ -79,8 +76,10 @@ export function emisorFcm(cuenta: CuentaFirebase, f: typeof fetch = fetch): Emis
           }),
         });
         if (enviado.ok) return { ok: true, estado: enviado.status, vencida: false };
-        const cuerpo = (await enviado.json().catch(() => null)) as { error?: { status?: string } } | null;
-        const vencida = tokenFcmVencido(cuerpo?.error?.status);
+        const cuerpo = (await enviado.json().catch(() => null)) as {
+          error?: { status?: string; details?: { errorCode?: string }[] };
+        } | null;
+        const vencida = tokenFcmVencido(cuerpo?.error);
         return { ok: false, estado: enviado.status, vencida };
       } catch {
         return { ok: false, estado: 0, vencida: false };

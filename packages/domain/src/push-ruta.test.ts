@@ -7,9 +7,10 @@ describe("rutaPushInterna", () => {
     expect(rutaPushInterna("/trabajador/pauta")).toBe("/trabajador/pauta");
   });
 
-  it("rechaza esquema, host, doble barra y path traversal", () => {
+  it("rechaza esquema, host, doble barra, query y path traversal", () => {
     expect(rutaPushInterna("https://evil/a")).toBe("/bandeja");
     expect(rutaPushInterna("//evil")).toBe("/bandeja");
+    expect(rutaPushInterna("/trabajador?x=1")).toBe("/trabajador");
     expect(rutaPushInterna("/../admin")).toBe("/bandeja");
   });
 });
