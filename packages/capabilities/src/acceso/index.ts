@@ -8,8 +8,7 @@ import {
   prerregistrosListar,
   prerregistrosObtener,
 } from "./prerregistros-leer";
-import { listasListar, listasQuitar } from "./listas";
-import { listasAgregar } from "./listas-agregar";
+import { listasAgregar, listasListar, listasQuitar } from "./listas";
 import { portalRegistrosListar } from "./portal-cliente";
 import { portalListasAgregar, portalListasListar, portalListasQuitar } from "./portal-listas";
 import { portalVisitasCrear, portalVisitasListar } from "./portal-visitas";

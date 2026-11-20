@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Alerta, Button, Campo, Input } from "@opai/ds";
 
 import { encolarHecho } from "@/lib/terreno/cola";
+import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
 
 type Gravedad = "baja" | "media" | "alta";
 const GRAVEDADES: readonly { v: Gravedad; t: string }[] = [
@@ -14,38 +15,46 @@ const GRAVEDADES: readonly { v: Gravedad; t: string }[] = [
 ];
 
 /**
- * Reporta una novedad o incidente de la ronda (CAR-78 · E5a). Va a la cola con su clave: sin señal queda en el
- * teléfono y se envía después; solo se dice «guardada» cuando la cola la releyó. La gravedad alta es incidente.
+ * Reporta una novedad o incidente (CAR-78 · E5a): desde la ronda (`rondas.novedad`, con la ronda enlazada) o desde
+ * el libro de la instalación (`terreno.novedad`, CAR-77, sin depender de Rondas). Va a la cola con su clave: sin
+ * señal queda en el teléfono y se envía después; solo se dice «guardada» cuando la cola la releyó. La gravedad
+ * alta es incidente.
  */
 export function ReportarNovedad({
   personaId,
   ejecucionClave,
+  desdeLibro = false,
+  alGuardar,
 }: {
   personaId: string;
   ejecucionClave?: string;
+  desdeLibro?: boolean;
+  alGuardar?: () => void;
 }) {
   const [resumen, setResumen] = useState("");
   const [gravedad, setGravedad] = useState<Gravedad>("media");
   const [estado, setEstado] = useState<"libre" | "guardando" | "guardada" | "error">("libre");
+  const soloLectura = useSoloLectura();
   const enviar = async () => {
     const r = resumen.trim();
     if (r.length < 3) return;
     setEstado("guardando");
     try {
       await encolarHecho({
-        tipo: "rondas.novedad",
+        tipo: desdeLibro ? "terreno.novedad" : "rondas.novedad",
         payload: { resumen: r, gravedad, ...(ejecucionClave ? { ejecucionClave } : {}) },
         personaId,
       });
       setResumen("");
       setEstado("guardada");
+      alGuardar?.();
     } catch {
       setEstado("error");
     }
   };
   return (
     <section aria-label="Reportar novedad" className="flex flex-col gap-2">
-      <h2 className="t-heading text-fg">Reportar novedad</h2>
+      <h2 className="t-heading text-fg">{desdeLibro ? "Nueva novedad" : "Reportar novedad"}</h2>
       <Campo etiqueta="¿Qué pasó?" htmlFor="n-resumen">
         <Input
           id="n-resumen"
@@ -72,7 +81,7 @@ export function ReportarNovedad({
       </div>
       <Button
         onClick={() => void enviar()}
-        disabled={resumen.trim().length < 3 || estado === "guardando"}
+        disabled={soloLectura || resumen.trim().length < 3 || estado === "guardando"}
       >
         {estado === "guardando" ? "Guardando…" : "Enviar novedad"}
       </Button>

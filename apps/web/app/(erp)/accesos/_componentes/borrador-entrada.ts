@@ -55,6 +55,3 @@ export const minutos = (hhmm: string) => {
   const [h, m] = hhmm.split(":").map(Number);
   return (h ?? 0) * 60 + (m ?? 0);
 };
-
-/** Desde dónde se gestiona la lista: el ERP o el Portal Cliente (R12, CAR-538), cada uno con sus capacidades. */
-export type PortalListas = "erp" | "cliente";

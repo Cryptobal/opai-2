@@ -40,16 +40,10 @@ export const prerregistroSchema = z.object({
       documento: z.string(),
       empresa: z.string().nullable(),
       patente: z.string().nullable(),
-      ingresos: z.array(z.string()).describe("Días en que este visitante ya entró."),
-      proximoDia: z.string().nullable().describe("Próximo día con invitación disponible, o null."),
     }),
   ),
   dias: z.array(
-    z.object({
-      dia: z.string(),
-      estado: z.enum(["pendiente", "ingreso", "no_llego", "cancelado"]),
-      ingresos: z.number().int(),
-    }),
+    z.object({ dia: z.string(), estado: z.enum(["pendiente", "no_llego", "cancelado"]) }),
   ),
 });
 export type PrerregistroVista = z.infer<typeof prerregistroSchema>;
@@ -82,7 +76,6 @@ type Fila = {
     mascara: string;
     empresa: string | null;
     patente: string | null;
-    usos?: { dia: Date }[];
   }[];
 };
 
@@ -92,8 +85,6 @@ export function vistaPrerregistro(
   o: { instalacion: string; hoy: string; verPatente: boolean },
 ): PrerregistroVista {
   const cancelado = f.canceladoEn !== null;
-  const dias = diasPrerregistro(textoDia(f.desde), textoDia(f.hasta));
-  const ingresos = (v: Fila["visitantes"][number]) => (v.usos ?? []).map((u) => textoDia(u.dia));
   return {
     id: f.id,
     instalacionId: f.instalacionId,
@@ -114,18 +105,10 @@ export function vistaPrerregistro(
       documento: v.mascara,
       empresa: v.empresa,
       patente: o.verPatente ? v.patente : null,
-      ingresos: ingresos(v),
-      proximoDia: cancelado
-        ? null
-        : (dias.find((d) => d >= o.hoy && !ingresos(v).includes(d)) ?? null),
     })),
-    dias: dias.map((dia) => {
-      const n = f.visitantes.filter((v) => ingresos(v).includes(dia)).length;
-      return {
-        dia,
-        ingresos: n,
-        estado: estadoDiaPrerregistro({ dia, hoy: o.hoy, cancelado, ingresos: n }),
-      };
-    }),
+    dias: diasPrerregistro(textoDia(f.desde), textoDia(f.hasta)).map((dia) => ({
+      dia,
+      estado: estadoDiaPrerregistro({ dia, hoy: o.hoy, cancelado }),
+    })),
   };
 }

@@ -2,7 +2,7 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedePrerregistrar } from "@/lib/pestanas-modulos";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-export type EstadoDia = "pendiente" | "ingreso" | "no_llego" | "cancelado";
+export type EstadoDia = "pendiente" | "no_llego" | "cancelado";
 
 export type Prerregistro = {
   id: string;
@@ -24,10 +24,8 @@ export type Prerregistro = {
     documento: string;
     empresa: string | null;
     patente: string | null;
-    ingresos: string[];
-    proximoDia: string | null;
   }[];
-  dias: { dia: string; estado: EstadoDia; ingresos: number }[];
+  dias: { dia: string; estado: EstadoDia }[];
 };
 
 export type Invitacion = {

@@ -1,6 +1,8 @@
 import type { Buscador, Contexto } from "@opai/capabilities";
 
+import { dondeTexto } from "./capacidades/busqueda";
 import { PERMISO_VER, PERMISO_VER_TODOS } from "./capacidades/permisos";
+import { numeroTicket } from "./domain";
 
 const MAX = 5;
 const ESTADO: Record<string, string> = {
@@ -22,8 +24,8 @@ function alcance(ctx: Contexto): { OR?: object[] } | null {
 }
 
 /**
- * Aporte de Tickets a la búsqueda global (CAR-404, parte 2 de CAR-301): por asunto. Los tickets no tienen
- * número visible, así que no se busca por número. El detalle lleva tipo y estado, sin datos personales.
+ * Aporte de Tickets a la búsqueda global (CAR-404, CAR-622): por asunto, número y solicitante. El detalle
+ * lleva tipo y estado, sin datos personales.
  */
 export const buscadoresTickets: readonly Buscador[] = [
   {
@@ -32,10 +34,12 @@ export const buscadoresTickets: readonly Buscador[] = [
     titulo: "Tickets",
     permiso: PERMISO_VER,
     async buscar(ctx, q) {
+      if (q.trim().length < 2) return [];
       const filtro = alcance(ctx);
       if (!filtro) return [];
+      const texto = await dondeTexto(ctx, q);
       const filas = await ctx.db.ticket.findMany({
-        where: { AND: [filtro, { titulo: { contains: q, mode: "insensitive" } }] },
+        where: { AND: [filtro, texto] },
         select: { id: true, titulo: true, estado: true, tipo: { select: { nombre: true } } },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: MAX,
@@ -43,7 +47,14 @@ export const buscadoresTickets: readonly Buscador[] = [
       return filas.map((f) => ({
         id: f.id,
         titulo: f.titulo,
-        detalle: [f.tipo.nombre, ESTADO[f.estado] ?? f.estado].filter(Boolean).join(" · ") || null,
+        detalle:
+          [
+            numeroTicket(f.id),
+            f.tipo.nombre,
+            ESTADO[f.estado] ?? f.estado,
+          ]
+            .filter(Boolean)
+            .join(" · ") || null,
         href: `/tickets/${f.id}`,
       }));
     },

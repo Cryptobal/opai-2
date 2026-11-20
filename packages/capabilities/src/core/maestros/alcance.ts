@@ -6,7 +6,8 @@
 import type { Prisma } from "@opai/db";
 
 import type { Contexto } from "../../types";
-import { documentosEnAlcance } from "../documentos/alcance-doc";
+import { filtroAlcanceDocumentos } from "../documentos/alcance-doc";
+import { ticketVisible, visitaVisible } from "../documentos/entidad-externa";
 
 /** Instalaciones a cargo del actor acotado, o null si ve todo el tenant. */
 export function instalacionesEnAlcance(ctx: Contexto): readonly string[] | null {
@@ -42,6 +43,12 @@ export function dondePersona(ctx: Contexto): Prisma.PersonaWhereInput {
 
 /** Si una entidad concreta está en el alcance del actor (para fichas y actividad por entidad). */
 export async function entidadEnAlcance(ctx: Contexto, tipo: string, id: string): Promise<boolean> {
+  if (tipo === "ticket") return (await ticketVisible(ctx, id)) !== null;
+  if (tipo === "visita") return visitaVisible(ctx, id);
+  if (tipo === "documento") {
+    const alcance = await filtroAlcanceDocumentos(ctx);
+    return (await ctx.db.documento.count({ where: { id, AND: [alcance] } })) > 0;
+  }
   const ids = instalacionesEnAlcance(ctx);
   if (!ids) return true;
   if (tipo === "instalacion") return ids.includes(id);
@@ -51,12 +58,6 @@ export async function entidadEnAlcance(ctx: Contexto, tipo: string, id: string):
     return (await ctx.db.cuenta.count({ where: { id, ...dondeCuenta(ctx) } })) > 0;
   if (tipo === "puesto")
     return (await ctx.db.puesto.count({ where: { id, ...dondePuesto(ctx) } })) > 0;
-  if (tipo === "documento") {
-    // Un documento está en alcance solo si alguno de sus vínculos apunta a una entidad a cargo
-    // (instalación, su cuenta o un puesto). Los documentos de empresa y los de personas quedan fuera.
-    const permitidos = await documentosEnAlcance(ctx);
-    return permitidos === null || permitidos.includes(id);
-  }
   // El catálogo de cargos es del tenant y no se acota por instalación.
   if (tipo === "cargo") return true;
   // Empresa (tenant) y cualquier otro tipo: un actor acotado no lo ve (denegar por defecto, §16.4).

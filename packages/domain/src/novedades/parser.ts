@@ -8,6 +8,7 @@ export type EntradaNovedad = {
   ruta: string | null;
   destacada: boolean;
   car: string | null;
+  pr: number | null;
   permiso: string | null;
   imagen: string | null;
 };
@@ -19,6 +20,7 @@ export type FrontmatterNovedad = {
   titulo: string;
   destacada?: boolean;
   car?: string;
+  pr?: number;
   permiso?: string;
   ruta?: string;
   imagen?: string;
@@ -31,6 +33,7 @@ const CLAVES = new Set([
   "titulo",
   "destacada",
   "car",
+  "pr",
   "permiso",
   "ruta",
   "imagen",
@@ -73,6 +76,12 @@ export function parsearNovedadMarkdown(texto: string): EntradaNovedad {
   }
   const descripcion = cuerpo.trim();
   if (!descripcion) throw new Error(`La novedad ${id} no tiene descripción`);
+  let pr: number | null = null;
+  if (fm.pr !== undefined) {
+    const n = Number(String(fm.pr).trim());
+    if (!Number.isInteger(n) || n < 1) throw new Error(`La novedad ${id} tiene pr inválido`);
+    pr = n;
+  }
   return {
     id,
     fecha,
@@ -82,6 +91,7 @@ export function parsearNovedadMarkdown(texto: string): EntradaNovedad {
     ruta: fm.ruta ? String(fm.ruta) : null,
     destacada: fm.destacada === true,
     car: fm.car ? String(fm.car) : null,
+    pr,
     permiso: fm.permiso ? String(fm.permiso) : null,
     imagen: fm.imagen ? String(fm.imagen) : null,
   };

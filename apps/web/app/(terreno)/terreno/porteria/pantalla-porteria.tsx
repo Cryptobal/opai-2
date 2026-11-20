@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, Button, Empty, Loading } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 import { usePersonaElegida } from "@/lib/terreno/persona";
 
@@ -15,7 +16,6 @@ const FormularioEntrada = dynamic(
   () => import("./formulario-entrada").then((m) => m.FormularioEntrada),
   { ssr: false },
 );
-const Esperados = dynamic(() => import("./esperados").then((m) => m.Esperados), { ssr: false });
 const ListaEnSitio = dynamic(() => import("./lista-en-sitio").then((m) => m.ListaEnSitio), {
   ssr: false,
 });
@@ -97,11 +97,10 @@ export function PantallaPorteria() {
         </Alerta>
       ) : null}
       {!sitio || sitio.activo ? (
-        <>
-          <Esperados personaId={persona.id} alRegistrar={recargar} />
+        <DesactivarEnVista>
           <FormularioEntrada personaId={persona.id} />
           {sitio ? <ListaEnSitio items={sitio.items} personaId={persona.id} /> : null}
-        </>
+        </DesactivarEnVista>
       ) : null}
     </main>
   );

@@ -19,6 +19,7 @@ import {
 import { platformAuditoriaEstado, trabajoVerificarAuditoria } from "./auditoria";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
 import { geoAutocompletar, geoDetalle, geoGeocodificar, geoMapa, iaProbar } from "./geo-ia";
+import { regionesList } from "./regiones";
 import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
 import {
   integracionesConfigurar,
@@ -88,6 +89,7 @@ import { seguridadMetodosQuitar } from "./seguridad/quitar";
 import { appsConectadasDesconectar, appsConectadasList } from "./seguridad/apps";
 import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
 import { verComoIniciar, verComoTerminar } from "./ver-como/capacidades";
+import { verComoList } from "./ver-como/objetivos";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
 export const capacidadesDelNucleo: readonly Capacidad[] = [
@@ -109,6 +111,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   appsConectadasDesconectar,
   verComoIniciar,
   verComoTerminar,
+  verComoList,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,
@@ -155,6 +158,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   geoDetalle,
   geoGeocodificar,
   geoMapa,
+  regionesList,
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,

@@ -1,4 +1,4 @@
-import { createHmac, hkdfSync, timingSafeEqual } from "node:crypto";
+import { createHmac, hkdfSync } from "node:crypto";
 
 import { type EntradaHuella, huellaDocumento } from "@opai/domain";
 
@@ -72,12 +72,6 @@ export function huellasCandidatas(e: EntradaHuella): HuellaVersionada[] {
   return lista;
 }
 
-/** Firma HMAC del QR de un visitante para un día, con la clave de invitación de la versión `kid`. */
-function firmaInvitacion(secreto: string | undefined, kid: string, msg: string): string {
-  const k = clave(secreto, kid, "ACCESO_HUELLA_SECRET", "invitacion");
-  return createHmac("sha256", k).update(msg).digest("base64url").slice(0, 22);
-}
-
 /**
  * Código del QR de invitación de un visitante para un día (CAR-478, R14): `A1.<kid>.<visitante>.<día>.<firma>`.
  * No se guarda en la base: es una firma HMAC (clave derivada de ACCESO_HUELLA_SECRET con otro dominio) del
@@ -85,38 +79,10 @@ function firmaInvitacion(secreto: string | undefined, kid: string, msg: string):
  */
 export function codigoInvitacion(tenantId: string, visitanteId: string, dia: string): string {
   const kid = process.env["ACCESO_HUELLA_KID"] ?? "v1";
-  const f = firmaInvitacion(
-    process.env["ACCESO_HUELLA_SECRET"],
-    kid,
-    `${tenantId}.${visitanteId}.${dia}`,
-  );
-  return `A1.${kid}.${visitanteId}.${dia}.${f}`;
-}
-
-const CODIGO = /^A1\.([a-z0-9]{1,16})\.([0-9a-f-]{36})\.(\d{4}-\d{2}-\d{2})\.([A-Za-z0-9_-]{22})$/;
-
-/**
- * Verifica un QR leído en la portería (CAR-478): devuelve visitante y día si la firma es de esta empresa con la
- * clave vigente o, durante una rotación, la anterior; si no, `null`. La comparación es de tiempo constante.
- */
-export function verificarInvitacion(
-  tenantId: string,
-  codigo: string,
-): { visitanteId: string; dia: string } | null {
-  const m = CODIGO.exec(codigo.trim());
-  if (!m) return null;
-  const [, kid = "", visitanteId = "", dia = "", firma = ""] = m;
-  const vigente = process.env["ACCESO_HUELLA_KID"] ?? "v1";
-  const secreto =
-    kid === vigente
-      ? process.env["ACCESO_HUELLA_SECRET"]
-      : kid === process.env["ACCESO_HUELLA_KID_ANTERIOR"]
-        ? process.env["ACCESO_HUELLA_SECRET_ANTERIOR"]
-        : undefined;
-  if (!secreto) return null;
-  const esperada = Buffer.from(firmaInvitacion(secreto, kid, `${tenantId}.${visitanteId}.${dia}`));
-  const leida = Buffer.from(firma);
-  return esperada.length === leida.length && timingSafeEqual(esperada, leida)
-    ? { visitanteId, dia }
-    : null;
+  const k = clave(process.env["ACCESO_HUELLA_SECRET"], kid, "ACCESO_HUELLA_SECRET", "invitacion");
+  const firma = createHmac("sha256", k)
+    .update(`${tenantId}.${visitanteId}.${dia}`)
+    .digest("base64url")
+    .slice(0, 22);
+  return `A1.${kid}.${visitanteId}.${dia}.${firma}`;
 }

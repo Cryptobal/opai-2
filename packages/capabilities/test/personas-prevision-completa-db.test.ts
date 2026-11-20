@@ -36,7 +36,7 @@ describe.skipIf(omitirSuiteDb())("Personas · previsión completa CAR-276 (db)",
     tenant = (await e.admin.tenant.create({ data: { slug: `qa-c276-${randomUUID().slice(0, 8)}`, nombre: "c276", vertical: "seguridad" } })).id;
     await e.admin.user.create({ data: { id: uid, name: "RRHH", email: `${uid.slice(0, 8)}@c276.test` } });
     await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol: "owner", portales: ["erp"] } });
-    personaId = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut: "11111111-1", estado: "activa" } })).id;
+    personaId = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut: "11111111-1", estado: "activo" } })).id;
   });
   afterAll(async () => {
     if (previas.k === undefined) delete process.env["OPAI_SECRETS_KEY"];

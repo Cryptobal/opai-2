@@ -7,6 +7,7 @@ import { comprasImportar } from "./compras-importar";
 import { comprasSincronizarRcv, trabajoSincronizarRcv } from "./compras-rcv";
 import { comprasGet } from "./compras-detalle";
 import { comprasListar } from "./compras-lectura";
+import { comprasPagosProveedores } from "./compras-pagos-proveedores";
 import { dteConfigActualizar, dteConfigObtener } from "./dte-config";
 import { foliosCargarCaf, foliosListar } from "./folios";
 import { planActualizar, planCrear } from "./plan-cuentas";
@@ -64,7 +65,6 @@ import { cierreActualizar } from "./cierre-actualizar";
 import { cierreEmitirLote } from "./cierre-emitir-lote";
 
 export { ajustesFinanzas } from "./ajustes";
-export { buscadoresFinanzas } from "./buscadores";
 export { ventasProgramadasPorPeriodo } from "./ventas-programacion-netas";
 
 export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones, trabajoRecordatoriosCobranza, trabajoSincronizarRcv];
@@ -80,6 +80,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   proveedoresCrear,
   proveedoresActualizar,
   comprasListar,
+  comprasPagosProveedores,
   comprasGet,
   comprasRegistrar,
   comprasImportar,

@@ -42,7 +42,7 @@ export const personasAsignarJefe = defineCapability({
           where: {
             personaId: jefeId,
             estado: "vigente",
-            persona: { estado: "activa", anonimizadaEn: null },
+            persona: { estado: "activo", anonimizadaEn: null },
           },
           select: { cargoId: true },
         }),

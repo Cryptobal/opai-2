@@ -9,6 +9,7 @@ import { FormularioDatos } from "../_componentes/formulario-datos";
 import { FichaIdentidadTrabajador } from "../_componentes/ficha-identidad";
 import { estadoTrabajador, SIN_FICHA } from "../_componentes/estado";
 import type { MisDatos } from "../_componentes/tipos";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 export const metadata = { title: tituloPagina("trabajador", "Mis datos") };
 
@@ -37,15 +38,17 @@ export default function Pagina() {
           {datos ? (
             <div className="flex flex-col gap-4">
               <FichaIdentidadTrabajador datos={datos} />
-              <FormularioDatos
-                inicial={datos}
-                cabecera={
-                  <Cabecera
-                    titulo="Mis datos"
-                    subtitulo="Mantén tu contacto y tu dirección al día."
-                  />
-                }
-              />
+              <DesactivarEnVista>
+                <FormularioDatos
+                  inicial={datos}
+                  cabecera={
+                    <Cabecera
+                      titulo="Mis datos"
+                      subtitulo="Mantén tu contacto y tu dirección al día."
+                    />
+                  }
+                />
+              </DesactivarEnVista>
             </div>
           ) : null}
         </Estado>

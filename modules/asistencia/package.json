@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./manifest.ts",
-    "./trabajos": "./trabajos.ts"
+    "./trabajos": "./trabajos.ts",
+    "./domain/siglas": "./domain/siglas.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -16,6 +17,8 @@
     "@opai/capabilities": "workspace:*",
     "@opai/db": "workspace:*",
     "@opai/domain": "workspace:*",
+    "exceljs": "^4.4.0",
+    "pdf-lib": "1.17.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {

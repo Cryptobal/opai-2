@@ -7,7 +7,7 @@ import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
 import { filtroInstalacion } from "../_componentes/filtro-instalacion";
-import { rutaAccesos } from "../_componentes/lista-registros";
+import { rutaAccesos } from "../_componentes/ruta-accesos";
 import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 import { cargarPrerregistros, uuid } from "./_componentes/datos";
 import { ListaPrerregistros } from "./_componentes/lista-prerregistros";
@@ -34,12 +34,10 @@ export default function Prerregistros({ searchParams }: { searchParams: SearchPa
             <ListaPrerregistros
               state={estadoPantalla(d.r)}
               items={d.r.ok ? d.r.data.items : []}
-              href={(p) => `/accesos/prerregistros/${p.id}`}
               {...(d.crea && d.instalaciones.length > 0
                 ? {
                     accion: (
                       <Prerregistrar
-                        portal="erp"
                         instalaciones={d.instalaciones}
                         hoy={diaEnZona(new Date())}
                         {...(inst ? { instalacionId: inst } : {})}

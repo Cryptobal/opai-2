@@ -5,7 +5,7 @@ const DIA_MS = 86_400_000;
 /** Un prerregistro vale como máximo 30 días (§4.3). */
 export const MAX_DIAS_PRERREGISTRO = 30;
 
-export type EstadoDiaPrerregistro = "pendiente" | "ingreso" | "no_llego" | "cancelado";
+export type EstadoDiaPrerregistro = "pendiente" | "no_llego" | "cancelado";
 
 const ms = (dia: string) => Date.parse(`${dia}T00:00:00Z`);
 
@@ -27,17 +27,12 @@ export function validarRangoPrerregistro(desde: string, hasta: string, hoy: stri
   return null;
 }
 
-/**
- * Estado de un día (R15): «ingresó» si alguien del prerregistro entró ese día (aunque luego se cancelara), un día que
- * ya terminó sin ingresos queda «no llegó», sin esperar a ningún proceso.
- */
+/** Estado de un día (R15): un día que ya terminó sin usarse queda «no llegó», sin esperar a ningún proceso. */
 export function estadoDiaPrerregistro(d: {
   dia: string;
   hoy: string;
   cancelado: boolean;
-  ingresos: number;
 }): EstadoDiaPrerregistro {
-  if (d.ingresos > 0) return "ingreso";
   if (d.cancelado) return "cancelado";
   return ms(d.dia) < ms(d.hoy) ? "no_llego" : "pendiente";
 }
