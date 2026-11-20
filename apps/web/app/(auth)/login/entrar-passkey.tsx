@@ -52,18 +52,21 @@ export function EntrarConPasskey({
     const respuesta = await usarPasskey(op.opciones, condicional);
     if (mia !== ceremonia.current) return;
     setPendiente(true);
-    const r = await accionEntrarConPasskey(destino, respuesta);
-    setPendiente(false);
-    setError(r.mensaje);
+    try {
+      const r = await accionEntrarConPasskey(destino, respuesta);
+      if (mia === ceremonia.current) setError(r.mensaje);
+    } finally {
+      if (mia === ceremonia.current) setPendiente(false);
+    }
   }
 
   useEffect(() => {
     if (!autocompletar || autocompletado.current) return;
     autocompletado.current = true;
-    void soportaAutocompletado().then((si) => {
-      // Mediación condicional: espera en segundo plano a que elija la passkey en el autocompletado.
-      if (si) entrar(true).catch(() => undefined);
-    });
+    // Mediación condicional: espera en segundo plano; no interrumpe el ingreso con contraseña.
+    void soportaAutocompletado()
+      .then((si) => (si ? entrar(true) : undefined))
+      .catch(() => undefined);
     // `entrar` solo depende de props estables del montaje.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

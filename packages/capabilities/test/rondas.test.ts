@@ -329,7 +329,7 @@ describe("rondas.incidentes_tipo", () => {
     });
     expect(c.ok).toBe(true);
     const l = await executeCapability(ctx, "rondas.incidentes_tipo.listar", {});
-    expect(l.ok && (l.data as unknown[]).length).toBe(1);
+    expect(l.ok && (l.data as { items: unknown[] }).items.length).toBe(1);
   });
 });
 

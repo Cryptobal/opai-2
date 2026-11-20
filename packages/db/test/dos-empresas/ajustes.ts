@@ -25,6 +25,7 @@ export const AJUSTES: Record<string, Ajuste> = {
   "central.alertas": {
     valores: () => ({ severidad: "alta", estado: "nueva", estado_previo: null, pospuesta_hasta: null, paso_actual: 0, cadena_id: null }),
   },
+  "central.reglas": { valores: () => ({ evento: "rondas.ejecucion.atrasada", severidad: "media", activa: true }) },
   "central.cadenas": {
     valores: () => ({
       instalacion_id: null,
@@ -574,6 +575,19 @@ export const AJUSTES: Record<string, Ajuste> = {
       tipo_enlace: "flujo_fila",
       enlace_id: id(ctx, "finanzas.flujo_filas"),
       monto: 1000,
+    }),
+  },
+  // Finanzas · descartes de «Borrar por fechas» (CAR-412): CHECK de origen, rango y cantidad > 0.
+  "finanzas.movimientos_bancarios_descartes": {
+    dependencias: ["finanzas.cuentas_bancarias"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "finanzas.cuentas_bancarias"),
+      desde: "2026-01-01",
+      hasta: "2026-01-31",
+      origen: "web4leads",
+      motivo: "Prueba",
+      cantidad: 1,
+      movimientos: [],
     }),
   },
   "finanzas.reglas_conciliacion": { valores: () => ({ nombre: "Regla prueba", condiciones: {} }) },

@@ -49,7 +49,7 @@ function contexto(extra: Record<string, unknown[]> = {}) {
           userId: U4,
           rol: "admin",
           portales: ["erp"],
-          estado: "inactiva",
+          estado: "inactivo",
         },
       ],
       ...extra,

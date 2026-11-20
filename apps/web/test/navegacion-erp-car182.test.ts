@@ -149,3 +149,15 @@ describe("menú del ERP sin duplicados ni ítems fuera de su área (CAR-182)", (
     for (const n of armar().nav) expect(icono(n.icono), `${n.href} (${n.icono})`).not.toBe(generico);
   });
 });
+
+
+describe("entrada de Correcciones dentro de Asistencia (correcciones)", () => {
+  it("respeta el tope de Operaciones y conserva el permiso del acceso a Asistencia", () => {
+    const activos = [...MODULOS, "asistencia"];
+    const permitido = navegacionErp("owner", () => true, activos, vocabulario("seguridad"));
+    expect(permitido.nav.some((n) => n.href === "/asistencia")).toBe(true);
+    expect(permitido.nav.some((n) => n.href === "/asistencia/correcciones")).toBe(false);
+    const restringido = navegacionErp("owner", (p) => p !== "asistencia:ver", activos, vocabulario("seguridad"));
+    expect(restringido.nav.some((n) => n.href === "/asistencia")).toBe(false);
+  });
+});

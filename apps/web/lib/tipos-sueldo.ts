@@ -48,7 +48,7 @@ export type EstructuraVista = {
   items: ItemEstructura[];
 };
 
-export type Concepto = {
+type Concepto = {
   clave: string;
   nombre: string;
   valores: Record<Nivel, unknown>;
@@ -76,18 +76,3 @@ export type PuestoDeCargo = {
   cargoId: string;
   estado: string;
 };
-
-export const GRATIFICACION: Record<string, string> = {
-  legal_25: "25 % con tope",
-  monto_fijo: "Monto fijo",
-  ninguna: "Sin gratificación",
-};
-
-export type SueldoVigente = {
-  sueldoBase: number | null;
-  colacion: number | null;
-  movilizacion: number | null;
-  gratificacion: string | null;
-  vigenteDesde: string;
-  sensible: boolean;
-} | null;

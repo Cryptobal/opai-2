@@ -30,7 +30,7 @@ test.describe("@preview bandeja única por aprobar", () => {
         as.map((a) => a.getAttribute("href") ?? ""),
       )) {
         expect(href).toMatch(
-          /^\/(configuracion\/aprobaciones\?ver=|rendiciones\/bandeja\/|tickets\/)/,
+          /^\/(configuracion\/aprobaciones\?ver=|rendiciones\/bandeja\/|tickets\/|pauta\/turnos-extra)/,
         );
       }
     }
