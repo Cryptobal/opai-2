@@ -12,7 +12,7 @@ test.describe("@preview tickets bandeja CAR-622", () => {
   test("bandeja: estado vacío o filas, búsqueda y navegación por cursor", async ({ page }) => {
     await page.goto("/tickets");
     await expect(page.getByRole("heading", { name: "Tickets", exact: true })).toBeVisible();
-    const buscar = page.getByRole("textbox", { name: "Número, asunto o solicitante" });
+    const buscar = page.getByRole("searchbox", { name: "Número, asunto o solicitante" });
     await expect(buscar).toBeVisible();
 
     const filas = page.getByText(/^(?:[1-9]\d* tickets|\d+–\d+)$/);
