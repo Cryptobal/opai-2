@@ -15,6 +15,7 @@ const item = (leida: boolean): ItemNovedad => ({
   imagen: null,
   destacada: false,
   car: "CAR-316",
+  pr: 911,
   leida,
 });
 
@@ -68,5 +69,12 @@ describe("tarjeta de novedad (CAR-316)", () => {
     const html = renderToStaticMarkup(createElement(TarjetaNovedad, { item: item(true), onMarcar: () => {} }));
     expect(html).not.toContain("Nueva");
     expect(html).not.toContain("Marcar como leída");
+  });
+
+  it("muestra enlace al PR y el CAR junto a la fecha", () => {
+    const html = renderToStaticMarkup(createElement(TarjetaNovedad, { item: item(true) }));
+    expect(html).toContain("PR #911");
+    expect(html).toContain("https://github.com/opai-cl/opai-2/pull/911");
+    expect(html).toContain("CAR-316");
   });
 });

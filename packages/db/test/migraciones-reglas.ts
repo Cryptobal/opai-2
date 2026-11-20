@@ -48,6 +48,15 @@ export const EXENTAS = new Set([
 ]);
 
 /**
+ * Posterior al corte (CAR-47), pero con SQL ya aplicado en Neon cuyo checksum no puede cambiar.
+ * Justificación por migración; el test de plantilla las excluye sin relajar la regla al resto.
+ */
+export const EXCEPTADAS_PLANTILLA_POST_CORTE: Record<string, string> = {
+  "20271119132200_core_personas_estado_reclutamiento":
+    "Segunda transacción obligatoria: VALIDATE CONSTRAINT tras ADD … NOT VALID (ya aplicado en Neon dev/main nov-2026).",
+};
+
+/**
  * Marca de las migraciones que no pueden ir en transacción (p. ej. CREATE INDEX CONCURRENTLY), con
  * su motivo en la misma línea.
  */

@@ -14,6 +14,8 @@ export function menuCuentaShell(
   novedades?: { href: string; noLeidas: number },
   /** Con acceso a Configuración, el menú de la cuenta también lleva ahí (CAR-442). */
   configuracion = false,
+  /** Con el permiso `core:ver_como.iniciar`, «Ver como…» abre el selector (CAR-528). */
+  verComo = false,
 ): ItemMenu[] {
   const Settings2 = iconoShell("Settings2", iconos);
   const UserRound = iconoShell("UserRound", iconos);
@@ -60,6 +62,17 @@ export function menuCuentaShell(
             etiqueta: "Configuración",
             icono: Settings2,
             onSelect: () => navegar("/configuracion"),
+          },
+        ]
+      : []),
+    ...(verComo
+      ? [
+          {
+            id: "ver-como",
+            etiqueta: "Ver como…",
+            descripcion: "Mira un portal como lo ve otra persona",
+            icono: UserRound,
+            onSelect: () => navegar("/ver-como"),
           },
         ]
       : []),

@@ -72,6 +72,7 @@ export default function RemuneracionesPeriodo({ params, searchParams }: Props) {
                   gestiona={d.perm.periodos}
                   puedePagar={d.perm.pagar}
                   puedeVerNovedades={d.perm.novedadesRead}
+                  puedeArchivos={d.perm.obligaciones}
                 />
               </Suspense>
             }

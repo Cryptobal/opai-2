@@ -5,7 +5,7 @@ import type { TenantTx } from "@opai/db";
 import { definicionDesdeJson, OPERADORES_POR_CAMPO, type ReglaEvaluable } from "@opai/domain";
 
 /** Condición de una regla del banco (CAR-328): campo, operador válido para el campo y valor. */
-export const condicionReglaSchema = z
+const condicionReglaSchema = z
   .object({
     campo: z.enum(["rut", "glosa", "monto", "referencia"]),
     operador: z.enum(["igual", "contiene", "empieza", "exacto", "entre"]),

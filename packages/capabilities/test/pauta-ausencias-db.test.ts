@@ -97,7 +97,7 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     const persona = async (nombres: string, rut: string, instalacionId: string) => {
       const id = (
         await e.admin.persona.create({
-          data: { tenantId: tenantA, nombres, apellidos: "Prueba", rut, estado: "activa" },
+          data: { tenantId: tenantA, nombres, apellidos: "Prueba", rut, estado: "activo" },
         })
       ).id;
       await e.admin.vinculoLaboral.create({
@@ -175,9 +175,9 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     const lista = await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: juan });
     const g = (
       lista as Ok<{
-        grupos: { tipo: string; dias: number; instalaciones: string[]; estado: string }[];
+        items: { tipo: string; dias: number; instalaciones: string[]; estado: string }[];
       }>
-    ).data.grupos;
+    ).data.items;
     expect(g).toHaveLength(1);
     expect(g[0]).toMatchObject({ tipo: "licencia", dias: 8, estado: "activa" });
     expect(g[0]!.instalaciones.sort()).toEqual(["Bodega", "Planta"]);
@@ -269,7 +269,7 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     const lista = await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: juan });
     const g = (
       lista as Ok<{
-        grupos: {
+        items: {
           motivo: string;
           estado: string;
           registradaEn: string;
@@ -277,7 +277,7 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
           hasta: string;
         }[];
       }>
-    ).data.grupos;
+    ).data.items;
     const primero = g.find((x) => x.motivo === "Trámite A" && x.estado === "activa")!;
     const r = await run(ctx(tenantA), "pauta.ausencias.anular", {
       personaId: juan,
@@ -309,9 +309,9 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
     const turnos = await e.admin.excepcionPauta.count({ where: { ausenciaId: id } });
     expect(turnos).toBe((r as Ok<{ dias: number }>).data.dias);
     const lista = (await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: ana })) as Ok<{
-      grupos: { ausenciaId: string; dias: number; estado: string }[];
+      items: { ausenciaId: string; dias: number; estado: string }[];
     }>;
-    expect(lista.data.grupos.find((g) => g.ausenciaId === id)).toMatchObject({
+    expect(lista.data.items.find((g) => g.ausenciaId === id)).toMatchObject({
       dias: turnos,
       estado: "activa",
     });
@@ -319,9 +319,9 @@ describe.skipIf(!urlPropietario)("Pauta · permisos y licencias por persona (Pos
 
   it("anular algunos días deja el registro aprobado; anular todos lo anula (CAR-393)", async () => {
     const lista = (await run(ctx(tenantA), "pauta.ausencias.listar", { personaId: ana })) as Ok<{
-      grupos: { ausenciaId: string; tipo: string; desde: string; hasta: string }[];
+      items: { ausenciaId: string; tipo: string; desde: string; hasta: string }[];
     }>;
-    const g = lista.data.grupos.find((x) => x.tipo === "vacaciones")!;
+    const g = lista.data.items.find((x) => x.tipo === "vacaciones")!;
     const parcial = await run(ctx(tenantA), "pauta.ausencias.anular", {
       personaId: ana,
       tipo: "vacaciones",

@@ -92,8 +92,8 @@ export const costoEmpleadorPorPersona: ContratoCostoEmpleador = (entrada, juego)
     desglose: { haberes: h, basePrevisionalClp, baseCesantiaClp, sisClp, cesantiaEmpleadorClp,
       mutualClp, reformaClp, vacacionesClp, indemnizacionClp, afpClp, saludClp, saludDeducibleClp, cesantiaTrabajadorClp, impuestoUnicoClp },
     juegoDeValores: j, huellaJuegoDeValores: j.huella, capaUsada: capa, entradaUsada: e,
+    // TODO(decisión Carlos): validar bases contables y días corridos de vacaciones con contabilidad.
     advertencias: [...j.advertencias,
-      "TODO(decisión Carlos): validar bases contables y días corridos de vacaciones con contabilidad",
       ...(e.horario && horasSemanalesSugeridas(e.horario) > indicadorUsado(j, "jornada").valor
         ? [`Horario excede ${indicadorUsado(j, "jornada").valor} h semanales: ajustar horario u horas extra`] : []),
       ...(horario?.duraciones.some((m) => m > 10 * 60)

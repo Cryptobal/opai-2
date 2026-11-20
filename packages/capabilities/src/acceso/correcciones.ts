@@ -8,7 +8,11 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
 import type { Contexto } from "../types";
 import { cerrarAbiertos } from "./cierre";
-import { esUnica, PERMISO_REGISTROS, quien } from "./comun";
+import { PERMISO_REGISTROS, quien } from "./comun";
+
+/** Violación de unicidad de Prisma (P2002): otra escritura llegó primero. */
+const esUnica = (e: unknown) =>
+  typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "P2002";
 
 const motivo = z.string().trim().min(3).max(300);
 

@@ -20,7 +20,10 @@ const ESCRIBE_TICKET = /\bticket\.(create|createMany|upsert)\s*\(/;
 const INVOCA_CREAR = /["'`]tickets\.tickets\.crear["'`]/;
 const AUTORIZADOS = new Set(["modules/tickets/capacidades/escritura.ts"]);
 // Consumidores de Tickets que solo avisan en la campana (CAR-84): leen el ticket y crean notificaciones, nunca tickets.
-const SOLO_AVISAN = new Set(["modules/tickets/consumidor-avisos.ts"]);
+const SOLO_AVISAN = new Set([
+  "modules/tickets/consumidor-avisos.ts",
+  "modules/tickets/trabajo-sla.ts",
+]);
 
 function fuentes(dir: string): string[] {
   return readdirSync(dir).flatMap((nombre) => {
