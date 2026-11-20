@@ -1,7 +1,10 @@
+acceso_config_get
+acceso_config_set
 acceso_intentos_listar
 acceso_listas_agregar
 acceso_listas_listar
 acceso_listas_quitar
+acceso_portal_registros_listar
 acceso_prerregistros_cancelar
 acceso_prerregistros_crear
 acceso_prerregistros_get
@@ -694,6 +697,7 @@ portal_trabajador_privacidad_obtener
 portal_trabajador_solicitudes_cancelar
 portal_trabajador_solicitudes_crear
 portal_trabajador_solicitudes_listar
+preview_acceso_config_set
 preview_acceso_listas_agregar
 preview_acceso_listas_quitar
 preview_acceso_prerregistros_cancelar

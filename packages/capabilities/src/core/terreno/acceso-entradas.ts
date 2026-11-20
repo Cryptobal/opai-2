@@ -1,127 +1,92 @@
-import {
-  decidirAcceso,
-  type EntradaLista,
-  normalizarDocumento,
-  normalizarPatente,
-} from "@opai/domain";
+import { diaEnZona, documentoSegun, normalizarPatente } from "@opai/domain";
 
-import { huellasCandidatas } from "../../acceso/huella";
+import { configDeInstalacion } from "../../acceso/config-comun";
+import { type HuellaVersionada, huellasCandidatas } from "../../acceso/huella";
 import type { Contexto } from "../../types";
 import { tenantActual } from "../comun";
-import type { Equipo, FilaIntento, FilaRegistro, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
+import { cruzarPrerregistros, type VisitanteDia } from "./acceso-prerregistro";
+import { escribirFilas } from "./acceso-filas";
+import type {
+  Equipo,
+  FilaIntento,
+  FilaRegistro,
+  FilaUso,
+  Hecho,
+  Rechazos,
+  Tiempo,
+} from "./acceso-tipos";
 import type { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
 
-/** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
-const DIFERIDO_MS = 120_000;
-
 type Payload = ReturnType<(typeof TIPOS_HECHO_TERRENO)["acceso.entrada"]["parse"]>;
+export type Doc = { tipo: string; clave: string; mascara: string; hs: HuellaVersionada[] };
+export type Entrada = { h: Hecho; p: Payload; dia: string };
 
-/** Cruza cada entrada con las listas de la instalación: entra (registro) o se deniega (intento). */
+/** Documento y patente de la entrada (normalizados, con sus huellas); `null` y un rechazo si no sirven. */
+function documentoDe(
+  ctx: Contexto,
+  e: Entrada,
+  rechazos: Rechazos,
+  validarRut: boolean,
+): Doc | null {
+  if (e.p.patente !== undefined && normalizarPatente(e.p.patente) === null) {
+    rechazos.set(e.h.clave, "patente_invalida");
+    return null;
+  }
+  if (!e.p.documento) return null;
+  const { tipo, numero, pais } = e.p.documento;
+  const d = documentoSegun(validarRut, { tipo, numero, ...(pais === undefined ? {} : { pais }) });
+  if (!d) {
+    rechazos.set(e.h.clave, "documento_invalido");
+    return null;
+  }
+  // Falla cerrado si falta la clave: el lote entero queda en el teléfono y se reintenta.
+  const hs = huellasCandidatas({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
+  return { tipo: d.tipo, clave: d.clave, mascara: d.mascara, hs };
+}
+
+/** Sin documento, el del visitante prerregistrado (la invitación ya lo identifica: solo se guarda su huella). */
+const documentoDelVisitante = (v: VisitanteDia): Doc => ({
+  tipo: v.docTipo,
+  clave: v.huella,
+  mascara: v.mascara,
+  hs: [{ kid: v.huellaKid, huella: v.huella }],
+});
+
+/** Cruza cada entrada con los prerregistros y las listas de la instalación: entra (registro) o se deniega (intento). */
 export async function evaluarEntradas(
   ctx: Contexto,
   equipo: Equipo,
-  entradas: readonly { h: Hecho; p: Payload }[],
+  crudas: readonly { h: Hecho; p: Payload }[],
   t: Tiempo,
   rechazos: Rechazos,
-): Promise<{ registros: FilaRegistro[]; intentos: FilaIntento[] }> {
-  const base = {
-    tenantId: ctx.tenantId,
-    instalacionId: equipo.instalacionId,
-    dispositivoId: equipo.id,
-  };
-  // Días y horarios de las listas se evalúan en la zona horaria de la empresa (`core.tenants.timezone`).
-  const { timezone: zonaTenant } = await tenantActual(ctx);
-  const registros: FilaRegistro[] = [];
-  const intentos: FilaIntento[] = [];
-  const docs = entradas.flatMap((e) => {
-    const d = normalizarDocumento({
-      tipo: e.p.documento.tipo,
-      numero: e.p.documento.numero,
-      ...(e.p.documento.pais === undefined ? {} : { pais: e.p.documento.pais }),
-    });
-    const pat = e.p.patente === undefined ? undefined : normalizarPatente(e.p.patente);
-    if (!d) rechazos.set(e.h.clave, "documento_invalido");
-    else if (pat === null) rechazos.set(e.h.clave, "patente_invalida");
-    else {
-      // Falla cerrado si falta la clave: el lote entero queda en el teléfono y se reintenta.
-      const hs = huellasCandidatas({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
-      const [vigente] = hs;
-      if (vigente) return [{ ...e, d, patente: pat ?? null, hs, vigente }];
-    }
-    return [];
+): Promise<{ registros: FilaRegistro[]; intentos: FilaIntento[]; usos: FilaUso[] }> {
+  // Días, días de semana y horarios se evalúan en la zona horaria de la empresa (`core.tenants.timezone`).
+  const [{ timezone: zona }, config] = await Promise.all([
+    tenantActual(ctx),
+    configDeInstalacion(ctx, equipo.instalacionId),
+  ]);
+  const entradas = [...crudas]
+    .sort((a, b) => a.h.horaHecho.localeCompare(b.h.horaHecho))
+    .map((e) => ({ ...e, dia: diaEnZona(t.corregir(new Date(e.h.horaHecho)), zona) }));
+  const validas = entradas
+    .map((e) => ({ e, d: documentoDe(ctx, e, rechazos, config.validarRut) }))
+    .filter((x) => !rechazos.has(x.e.h.clave) && (x.d || x.e.p.invitacion));
+  const pre = await cruzarPrerregistros(
+    ctx,
+    equipo.instalacionId,
+    validas.map(({ e, d }) => ({
+      clave: e.h.clave,
+      dia: e.dia,
+      invitacion: e.p.invitacion,
+      huellas: d?.hs.map((v) => v.huella) ?? [],
+    })),
+    rechazos,
+  );
+  const listos = validas.flatMap(({ e, d }) => {
+    if (rechazos.has(e.h.clave)) return [];
+    const v = pre.get(e.h.clave);
+    const doc = d ?? (v ? documentoDelVisitante(v) : null);
+    return doc ? [{ e, d: doc, pre: v }] : [];
   });
-  if (docs.length > 0) {
-    const [lista, hayAutorizadas] = await Promise.all([
-      ctx.db.entradaLista.findMany({
-        where: {
-          instalacionId: equipo.instalacionId,
-          huella: { in: docs.flatMap((x) => x.hs.map((v) => v.huella)) },
-        },
-        include: { registros: { select: { id: true }, take: 1 } },
-      }),
-      ctx.db.entradaLista.count({
-        where: { instalacionId: equipo.instalacionId, tipo: "autorizada" },
-      }),
-    ]);
-    const consumidas = new Set<string>();
-    for (const x of docs.sort((a, b) => a.h.horaHecho.localeCompare(b.h.horaHecho))) {
-      const propias = lista.filter(
-        (l) => l.docTipo === x.d.tipo && x.hs.some((v) => v.huella === l.huella),
-      );
-      const dominio = (l: (typeof propias)[number]): EntradaLista => ({
-        tipo: l.tipo === "bloqueada" ? "bloqueada" : "autorizada",
-        clave: x.d.clave,
-        tiposRegistro: l.tiposRegistro,
-        vigenteDesde: l.vigenteDesde,
-        vigenteHasta: l.vigenteHasta,
-        dias: l.dias,
-        desdeMin: l.desdeMin,
-        hastaMin: l.hastaMin,
-        usoUnico: l.usoUnico,
-        consumida: l.registros.length > 0 || consumidas.has(l.id),
-      });
-      const hora = t.corregir(new Date(x.h.horaHecho));
-      const decision = decidirAcceso({
-        clave: x.d.clave,
-        tipoRegistro: x.p.tipoRegistro,
-        modo: hayAutorizadas ? "solo_autorizados" : "permitir_fuera_de_lista",
-        entradas: propias.map(dominio),
-        ahora: hora,
-        zona: zonaTenant,
-      });
-      const comun = {
-        ...base,
-        clave: x.h.clave,
-        personaId: x.h.personaId ?? null,
-        tipoRegistro: x.p.tipoRegistro,
-        docTipo: x.d.tipo,
-        huella: x.vigente.huella,
-        huellaKid: x.vigente.kid,
-        mascara: x.d.mascara,
-        horaCorregida: hora,
-      };
-      if (decision.resultado === "denegado") {
-        intentos.push({ ...comun, motivo: decision.motivo });
-        continue;
-      }
-      const usada = propias.find(
-        (l) => l.tipo === "autorizada" && l.usoUnico && !dominio(l).consumida,
-      );
-      if (usada) consumidas.add(usada.id);
-      registros.push({
-        ...comun,
-        nombre: x.p.nombre,
-        empresa: x.p.empresa ?? null,
-        motivoVisita: x.p.motivo ?? null,
-        patente: x.patente,
-        entradaListaId: usada?.id ?? null,
-        origen:
-          t.recibidoEn.getTime() - new Date(x.h.horaHecho).getTime() > DIFERIDO_MS
-            ? "diferido"
-            : "en_linea",
-      });
-    }
-  }
-
-  return { registros, intentos };
+  return escribirFilas(ctx, equipo, listos, t, { zona, fueraDeLista: config.permitirFueraDeLista });
 }
