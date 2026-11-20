@@ -28,3 +28,12 @@ export function queryConCambios(p: Parametros, cambios: Record<string, string | 
   const s = q.toString();
   return s ? `?${s}` : "?";
 }
+
+export const TAMANOS_PAGINA = [20, POR_PAGINA, 100] as const;
+export type TamanoPagina = (typeof TAMANOS_PAGINA)[number];
+export function tamanoPagina(
+  p: Parametros,
+  predeterminado: TamanoPagina = POR_PAGINA,
+): TamanoPagina {
+  return TAMANOS_PAGINA.find((n) => String(n) === p["limite"]) ?? predeterminado;
+}
