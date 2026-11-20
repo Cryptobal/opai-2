@@ -624,6 +624,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
@@ -846,8 +847,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/personas/[id]/turnos-extra` | `pauta.turnos_extra.listar` | `pauta_turnos_extra_listar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.obtener` | `nomina_liquidaciones_obtener` | existe |
-| erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
