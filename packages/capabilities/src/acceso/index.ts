@@ -15,6 +15,7 @@ import { puntosCambiar, puntosListar } from "./puntos";
 import { aparienciaCambiar, aparienciaGet } from "./apariencia";
 import { registrosObtener } from "./registro-get";
 import { registrosListar } from "./registros";
+import { reportesProbar } from "./reportes";
 
 export const capacidadesAcceso: readonly Capacidad[] = [
   listasListar,
@@ -38,6 +39,9 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   aparienciaGet,
   aparienciaCambiar,
   portalRegistrosListar,
+  reportesProbar,
 ];
 
 export { trabajoCierreAutomatico } from "./cierre";
+export { trabajoReportesAcceso } from "./reportes-trabajo";
+export { trabajoRetencionAcceso } from "./retencion-trabajo";

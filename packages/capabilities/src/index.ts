@@ -14,7 +14,12 @@ export { defineHecho, type HechoGestion } from "./hechos-gestion";
 export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/hechos";
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
-export { capacidadesAcceso, trabajoCierreAutomatico } from "./acceso";
+export {
+  capacidadesAcceso,
+  trabajoCierreAutomatico,
+  trabajoReportesAcceso,
+  trabajoRetencionAcceso,
+} from "./acceso";
 export { ajustesRondas, capacidadesRondas, indicadoresRondas, trabajoVigilanciaRondas } from "./rondas";
 export { ajustesNomina, buscadoresNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, ausenteSinJustificar, buscadoresPauta, capacidadesPauta, consumidorPautaCambio, consumidorPautaPublicada, diasConTurno, type DiaConTurno, fuentesAprobacionTurnosExtra, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
