@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Combobox, Input, InputFecha, Sheet } from "@opai/ds";
@@ -22,6 +23,7 @@ export function HojaTrasladar({ puestos, subtitulo, titulares }: Props) {
 }
 
 function Formulario({ puesto, subtitulo, titulares, onCerrar }: { puesto: Puesto; subtitulo: string; titulares: TitularesPuesto; onCerrar: () => void }) {
+  const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const hoy = hoyCl();
   const [destino, setDestino] = useState("");
@@ -60,6 +62,7 @@ function Formulario({ puesto, subtitulo, titulares, onCerrar }: { puesto: Puesto
   async function confirmar() {
     if (await ejecutar("pauta.titular.trasladar", input)) {
       avisar.exito("Guardia trasladado");
+      router.refresh();
       onCerrar();
     }
   }

@@ -3,15 +3,11 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, idAutor } from "@opai/capabilities";
 
 import { type BasePlantilla } from "../domain/documento/bloques";
-import {
-  basePropuestaDesdeCotizacion,
-  parseBloquesArmadorPropuesta,
-  type BloqueArmadorPropuesta,
-} from "../domain/documento/propuesta-tecnica";
-import { plantillaActivaCotizacionLectura } from "../persistencia/plantilla-documento";
-import { plantillaActivaPropuesta, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
+import { parseBloquesArmadorPropuesta } from "../domain/documento/propuesta-tecnica";
+import { textosPorDefecto } from "../persistencia/propuesta-textos-defecto";
 import {
   obtenerOCrearPropuestaTecnica,
+  propuestaInicial,
   propuestaServicioDesactualizado,
   servicioDesdeFilas,
 } from "../persistencia/propuesta-tecnica";
@@ -40,12 +36,7 @@ export const propuestaTecnicaInicializar = defineCapability({
         ? null
         : await obtenerOCrearPropuestaTecnica(ctx, c.id, pack.version.id, idAutor(ctx.actor) ?? c.creadoPorId));
     if (!prop) {
-      const plantillaCot = await plantillaActivaCotizacionLectura(ctx);
-      const plantillaProp = vistaPlantillaPropuesta(await plantillaActivaPropuesta(ctx));
-      const base = basePropuestaDesdeCotizacion(plantillaCot.base, plantillaProp.base as BasePlantilla);
-      const bloques: BloqueArmadorPropuesta[] = plantillaProp.bloques
-        .filter((b) => b.activo)
-        .map((b, i) => ({ ...b, id: `${b.tipo}-${i}` }));
+      const { base, bloques } = await propuestaInicial(ctx);
       return {
         id: "00000000-0000-0000-0000-000000000001",
         cotizacionId: c.id,
@@ -53,6 +44,7 @@ export const propuestaTecnicaInicializar = defineCapability({
         base,
         estado: "borrador" as const,
         bloques,
+        textosPorDefecto: await textosPorDefecto(ctx, bloques),
         servicioDesactualizado: false,
         editadoParaCliente: false,
         codigo: c.codigo,
@@ -60,13 +52,15 @@ export const propuestaTecnicaInicializar = defineCapability({
       };
     }
     const servicio = servicioDesdeFilas(packServicioCotizacion(c, pack));
+    const bloques = parseBloquesArmadorPropuesta(prop.bloquesJson);
     return {
       id: prop.id,
       cotizacionId: prop.cotizacionId,
       versionId: prop.versionId,
       base: prop.base as BasePlantilla,
       estado: prop.estado as "borrador" | "congelada",
-      bloques: parseBloquesArmadorPropuesta(prop.bloquesJson),
+      bloques,
+      textosPorDefecto: await textosPorDefecto(ctx, bloques),
       servicioDesactualizado: propuestaServicioDesactualizado(prop, servicio),
       editadoParaCliente: prop.editadoParaCliente,
       codigo: c.codigo,

@@ -6,6 +6,7 @@ const captura = vi.hoisted(() => ({ titulo: "", campana: null as ReactElement | 
 vi.mock("next/navigation", () => ({ usePathname: () => "/", useRouter: () => ({}) }));
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
 vi.mock("@/app/_acciones/auth", () => ({ accionSalir: vi.fn() }));
+vi.mock("@/app/_acciones/ver-como", () => ({ accionSalirVerComo: vi.fn() }));
 vi.mock("@/app/_acciones/capacidad", () => ({ cambiarTenant: vi.fn() }));
 vi.mock("@/app/_components/refresco-navegador", () => ({ useEpocaSesion: vi.fn() }));
 vi.mock("@/app/_components/link-menu", () => ({ LinkMenu: () => null }));

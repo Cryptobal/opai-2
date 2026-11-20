@@ -1,4 +1,4 @@
-import { esRol, esVertical, vocabulario } from "@opai/domain";
+import { esRol, esVertical, PERMISOS_CORE, vocabulario } from "@opai/domain";
 import { createElement } from "react";
 
 import type { Identidad } from "@/lib/actor";
@@ -53,6 +53,7 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
     puede("agente:usar")
       ? { agente: true }
       : {}),
+    ...(erp && puede(PERMISOS_CORE.verComoIniciar) ? { verComo: true } : {}),
     epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
     iconos: Object.fromEntries(
