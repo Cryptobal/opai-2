@@ -151,6 +151,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad.",
   "app/.well-known/oauth-authorization-server/api/auth/route.ts":
     "Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247).",
+  "app/.well-known/apple-app-site-association/route.ts":
+    "Apple App Site Association (webcredentials): JSON público para la app iOS, sin datos de negocio.",
   "app/api/cron/programador/route.ts":
     "Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029).",
   "app/api/cron/trabajos/route.ts": "Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029).",
