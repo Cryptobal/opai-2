@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../src/generated/prisma/client";
-import { enEtapaComprasQa as etapa } from "./compras-qa-preview-error";
+import { agregarFalloCierreComprasQa, enEtapaComprasQa as etapa } from "./compras-qa-preview-error";
 import { escribirComprasQa } from "./compras-qa-escribir";
 import { validarContextoPreview, validarDestinoPreview } from "./compras-qa-preview-validar";
 
@@ -31,8 +31,14 @@ export async function ejecutarComprasQaPreview(
   const url = await etapa("DESTINO", () => validarDestinoPreview(env, branch, endpoints));
   const db = await etapa("CONSTRUIR_CLIENTE", () => deps.conectar(url));
   try {
-    await etapa("FIXTURE", () => escribirComprasQa(db));
-  } finally {
-    await etapa("CERRAR_CLIENTE", () => db.$disconnect());
+    await etapa("FIXTURE", () => escribirComprasQa(db, etapa));
+  } catch (error) {
+    try {
+      await etapa("CERRAR_CLIENTE", () => db.$disconnect());
+    } catch {
+      throw agregarFalloCierreComprasQa(error);
+    }
+    throw error;
   }
+  await etapa("CERRAR_CLIENTE", () => db.$disconnect());
 }
