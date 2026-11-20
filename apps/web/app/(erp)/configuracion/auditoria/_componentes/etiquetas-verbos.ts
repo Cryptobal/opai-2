@@ -15,7 +15,7 @@ export const VERBOS: Record<string, string> = {
   a_evaluacion: "Pasar a evaluación", marcar_externo: "Marcar como externa",
   inactivar: "Inactivar", contratar_externo: "Contratar externa", reactivar: "Reactivar", externar: "Pasar a externa",
   bloquear_permanente: "Bloquear de forma permanente", desbloquear_permanente: "Quitar bloqueo permanente",
-  marcar_no_recontratar: "Marcar como no recontratar", quitar_no_recontratar: "Quitar no recontratar",
+  marcar_no_recontratar: "Marcar como no recontratar", marcar_revisadas: "Marcar como revisadas", quitar_no_recontratar: "Quitar no recontratar",
   prevision_ver: "Ver previsión", prevision_actualizar: "Actualizar previsión", pago_ver: "Ver datos de pago",
   pago_solicitar_cambio: "Pedir cambio de pago", pago_aprobar_cambio: "Aprobar cambio de pago",
   pago_rechazar_cambio: "Rechazar cambio de pago", laboral_ver: "Ver datos laborales",

@@ -29,11 +29,15 @@ describe("nomina · liquidación del mes", () => {
     expect(l.costoEmpresa).toBe(m.costoEmpresaMensualClp);
     expect(l.totalHaberes - l.totalDescuentosLegales).toBe(l.liquido);
     expect(l.haberes.find((h) => h.concepto === "Sueldo base")?.monto).toBe(553_553);
+    // Los aportes del empleador (para el LRE) más haberes y provisiones dan el costo empresa.
+    expect(l.aportesEmpleador.map((a) => a.concepto)).toEqual(expect.arrayContaining(["SIS", "Seguro de cesantía empleador"]));
+    expect(l.aportesEmpleador.reduce((s, a) => s + a.monto, 0) + l.totalHaberes).toBeLessThanOrEqual(l.costoEmpresa);
   });
 
   it("CA2: 10 días de licencia pagan 20/30 del sueldo base", async () => {
     const l = liquidacionDelMes(entrada({ novedades: { ...sinNovedades, diasLicencia: 10 } }), await juego());
     expect(l.diasTrabajados).toBe(20);
+    expect(l.diasLicencia).toBe(10);
     expect(l.haberes.find((h) => h.concepto === "Sueldo base")?.monto).toBe(369_035);
   });
 
