@@ -24,6 +24,8 @@ import {
   consumidorPautaPublicada,
   trabajosDelNucleo,
   trabajosFinanzas,
+  trabajoReportesAcceso,
+  trabajoRetencionAcceso,
 } from "@opai/capabilities";
 import { consumidoresAsistencia, consumidoresCentral, consumidorCpqBandeja, consumidorCpqEnlace, consumidorRendicionesAvisos, consumidorTicketsAvisos, modulos, trabajosAgente, trabajosAsistencia, trabajosCentral, trabajosCpq } from "@opai/modules";
 
@@ -52,6 +54,8 @@ export function asegurarRegistro(): void {
     ...trabajosCpq,
     ...trabajosCentral,
     trabajoCierreAutomatico,
+    trabajoReportesAcceso,
+    trabajoRetencionAcceso,
     trabajoCobrosMesAnterior,
     trabajoCobrosPruebas,
     trabajoVigilanciaRondas,
