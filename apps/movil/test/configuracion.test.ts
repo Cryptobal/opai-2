@@ -50,7 +50,7 @@ describe("app nativa OPAI (Brief 17)", () => {
     );
   });
 
-  it("firma ambos builds iOS con los dos hosts webcredentials exactos y reporta build 3", () => {
+  it("firma ambos builds iOS con los dos hosts webcredentials exactos y reporta build 4", () => {
     const leer = (ruta: string) =>
       readFileSync(new URL(`../nativo/ios/App/${ruta}`, import.meta.url), "utf8");
     const permisos = leer("App/App.entitlements");
@@ -60,7 +60,7 @@ describe("app nativa OPAI (Brief 17)", () => {
     const proyecto = leer("App.xcodeproj/project.pbxproj");
     const firmados = [
       ...proyecto.matchAll(
-        /CODE_SIGN_ENTITLEMENTS = App\/App\.entitlements;\s*CODE_SIGN_STYLE = Automatic;\s*CURRENT_PROJECT_VERSION = 3;/g,
+        /CODE_SIGN_ENTITLEMENTS = App\/App\.entitlements;\s*CODE_SIGN_STYLE = Automatic;\s*CURRENT_PROJECT_VERSION = 4;/g,
       ),
     ];
     expect(firmados).toHaveLength(2);

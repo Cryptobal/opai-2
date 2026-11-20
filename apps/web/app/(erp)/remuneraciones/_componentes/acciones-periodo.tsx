@@ -20,8 +20,18 @@ const PASOS: Record<EstadoPeriodo, Paso[]> = {
   pagado: [],
 };
 
+type TotalLiq = { personas: number; revisadas: number };
+
 /** Acciones del período según su estado: avanzar, devolver con motivo y marcar pagado (irreversible). */
-export function AccionesPeriodo({ periodo, puedePagar }: { periodo: Periodo; puedePagar: boolean }) {
+export function AccionesPeriodo({
+  periodo,
+  puedePagar,
+  liquidaciones,
+}: {
+  periodo: Periodo;
+  puedePagar: boolean;
+  liquidaciones?: TotalLiq | null;
+}) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [devolver, setDevolver] = useState<Paso | null>(null);
   const [motivo, setMotivo] = useState("");
@@ -46,8 +56,14 @@ export function AccionesPeriodo({ periodo, puedePagar }: { periodo: Periodo; pue
     }
   }
 
+  const mostrarLiq = liquidaciones && liquidaciones.personas > 0 && periodo.estado === "en_revision";
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex w-full flex-wrap items-center gap-2">
+      {mostrarLiq ? (
+        <p className="t-caption w-full">
+          Liquidaciones: {liquidaciones.revisadas} de {liquidaciones.personas} revisadas
+        </p>
+      ) : null}
       {PASOS[periodo.estado].map((paso) => {
         const sinNovedades =
           periodo.estado === "abierto" && paso.a === "en_revision" && periodo.novedades === 0;

@@ -508,6 +508,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.turnos_extra.monto_fijar` | `pauta_turnos_extra_monto_fijar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.visitas.listar` | `pauta_visitas_listar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.actualizar` | `rondas_plantillas_actualizar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.crear` | `rondas_plantillas_crear` | existe |
@@ -621,12 +622,17 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.excel` | `nomina_libro_remuneraciones_excel` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.pdf` | `nomina_libro_remuneraciones_pdf` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.generar_calendario` | `nomina_obligaciones_generar_calendario` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.abrir` | `nomina_periodos_abrir` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.cambiar_estado` | `nomina_periodos_cambiar_estado` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.listar` | `nomina_periodos_listar` | existe |
@@ -948,6 +954,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_components/firmas/acciones-sesion.ts#rechazarEnSesion` | Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634). |
 | `app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion` | Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634). |
 | `app/_components/firmas/acciones-sesion.ts#verFirmaSesion` | Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634). |
+| `app/.well-known/apple-app-site-association/route.ts` | Apple App Site Association (webcredentials): JSON público para la app iOS, sin datos de negocio. |
 | `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
@@ -1343,7 +1350,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.costo_proyectado.listar`
+- `nomina.f30_1.generar`
 - `nomina.novedades.cargar`
+- `nomina.previred.generar`
 - `pauta.ausencias.anular`
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
@@ -1351,7 +1360,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.turnos_extra.registrar`
 - `pauta.visitas.cerrar`
 - `pauta.visitas.iniciar`
-- `pauta.visitas.listar`
 - `pauta.visitas.obtener`
 - `platform.ajustes.set`
 - `platform.eventos.list`
