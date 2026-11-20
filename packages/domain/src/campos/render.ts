@@ -1,6 +1,6 @@
-import { escaparHtml } from "../plantillas";
 import { campoPorClave, coleccionPorClave } from "./catalogo";
-import { estaVacio, formatearValor } from "./formatos";
+import { estaVacio } from "./formatos";
+import { textoCampo } from "./render-campo";
 import { parsearPlantillaCampos, type Nodo } from "./plantilla";
 import type { FinalidadCampo, ProblemaCampo, ValorCampo, ValoresCampos } from "./tipos";
 import { validarPlantillaCampos } from "./validar";
@@ -36,25 +36,7 @@ export function renderizarPlantillaCampos(
     nodos
       .map((n) => {
         if (n.t === "texto") return n.v;
-        if (n.t === "campo") {
-          const campo = campoPorClave(n.clave);
-          if (!campo) return "";
-          const v = buscar(campo.clave, item);
-          if (estaVacio(v)) {
-            faltantes.add(campo.clave);
-            return "";
-          }
-          const s = formatearValor(campo.tipo, v, n.formato);
-          if (s === null) {
-            invalidos.push({
-              codigo: campo.tipo === "url" ? "url_invalida" : "formato_invalido",
-              mensaje: `El valor de «${campo.clave}» no es válido.`,
-              token: campo.clave,
-            });
-            return "";
-          }
-          return op.html ? escaparHtml(s) : s;
-        }
+        if (n.t === "campo") return textoCampo(n, buscar, item, op, faltantes, invalidos);
         if (n.t === "si") {
           const clave = campoPorClave(n.clave)?.clave ?? n.clave;
           const v = buscar(clave, item);

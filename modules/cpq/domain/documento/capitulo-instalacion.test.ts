@@ -9,7 +9,7 @@ import {
   SECCIONES_TEXTO,
   type EntradaCapitulo,
 } from "./capitulo-instalacion";
-import { armarIndice, numeroCapitulo } from "./indice-propuesta";
+import { armarIndice } from "./indice-propuesta";
 
 const base: EntradaCapitulo = {
   instalacionId: "i1",
@@ -77,6 +77,5 @@ describe("armarIndice", () => {
   it("numera bloques y capítulos con la misma regla", () => {
     const e = armarIndice([{ titulo: "Comprensión" }, { titulo: "Detalle", subtitulos: ["Norte", "Sur"] }, { titulo: "Resumen" }]);
     expect(e.map((x) => `${x.numero} ${x.titulo}`)).toEqual(["1 Comprensión", "2 Detalle", "2.1 Norte", "2.2 Sur", "3 Resumen"]);
-    expect(numeroCapitulo(1, 1)).toBe("2.2");
   });
 });

@@ -2,6 +2,7 @@
 // Las plantillas laborales se generan sobre una persona; el contrato de servicio, sobre una cuenta; el
 // acta, sobre una instalación. Reglas puras, sin Next, React ni base de datos.
 
+import { esVariableCampoCuenta, variablesCampoCuentaDesconocidas } from "./documento-plantillas-campos";
 import {
   VARIABLES_PLANTILLA,
   variablesDeDocumento,
@@ -32,8 +33,8 @@ export const ambitoDeClase = (clase: ClasePlantilla): AmbitoPlantilla => AMBITO_
 
 const GRUPOS_DE_AMBITO: Readonly<Record<AmbitoPlantilla, readonly GrupoVariable[]>> = {
   persona: ["persona", "vinculo", "instalacion", "sueldo", "contrato"],
-  cuenta: ["cuenta", "contrato"],
-  instalacion: ["instalacion", "cuenta", "contrato"],
+  cuenta: ["cuenta", "cuenta_campo", "contrato"],
+  instalacion: ["instalacion", "cuenta", "cuenta_campo", "contrato"],
 };
 
 export const gruposDeAmbito = (ambito: AmbitoPlantilla): readonly GrupoVariable[] => GRUPOS_DE_AMBITO[ambito];
@@ -43,7 +44,12 @@ export const variablesDeClase = (clase: ClasePlantilla) =>
   VARIABLES_PLANTILLA.filter((v) => gruposDeAmbito(ambitoDeClase(clase)).includes(v.grupo));
 
 /** Claves del texto que no existen o no valen para la clase (p. ej. `sueldo.base` en un acta). */
-export function variablesFueraDeClase(texto: string, clase: ClasePlantilla): string[] {
+export function variablesFueraDeClase(
+  texto: string,
+  clase: ClasePlantilla,
+  camposCuentaActivos: ReadonlySet<string> = new Set(),
+): string[] {
   const validas = new Set(variablesDeClase(clase).map((v) => v.clave));
-  return variablesDeDocumento(texto).filter((c) => !validas.has(c));
+  const fijas = variablesDeDocumento(texto).filter((c) => !validas.has(c) && !esVariableCampoCuenta(c));
+  return [...fijas, ...variablesCampoCuentaDesconocidas(texto, clase, camposCuentaActivos)];
 }

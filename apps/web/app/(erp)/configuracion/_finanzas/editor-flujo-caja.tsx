@@ -68,6 +68,11 @@ export function EditorFlujoCaja({
   return (
     <div className="flex flex-col gap-8">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
+      <p className="t-caption text-fg-muted">
+        Estos valores son solo del flujo de caja (filas, umbral y calendario). La cobranza, los
+        recordatorios y las plantillas de factura se configuran en la pestaña Ajustes del módulo
+        Finanzas.
+      </p>
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-medium text-fg">Ingresos</h2>
         <p className="text-sm text-fg-muted">

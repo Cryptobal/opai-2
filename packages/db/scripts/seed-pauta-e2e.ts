@@ -49,7 +49,7 @@ async function upsertPersonaConVinculo(
   await db.persona.upsert({
     where: { id },
     update: {},
-    create: { id, tenantId, nombres, apellidos, rut, estado: "activa" },
+    create: { id, tenantId, nombres, apellidos, rut, estado: "activo" },
   });
   await db.vinculoLaboral.upsert({
     where: { id: id.replace("0000000b00", "0000000b01") },
@@ -101,7 +101,7 @@ async function sembrarInstalacionTitular(db: TenantTx, tenantId: string, cuentaI
   await db.persona.upsert({
     where: { id: guardia },
     update: {},
-    create: { id: guardia, tenantId, nombres: "Titular", apellidos: "E2E", rut: "70.000.003-7", estado: "activa" },
+    create: { id: guardia, tenantId, nombres: "Titular", apellidos: "E2E", rut: "70.000.003-7", estado: "activo" },
   });
   const vinculoTitular = guardia.replace("0000000b00", "0000000b01");
   await db.vinculoLaboral.upsert({

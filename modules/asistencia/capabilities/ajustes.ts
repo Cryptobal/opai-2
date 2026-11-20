@@ -18,10 +18,10 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "switch",
   }),
-  geocerca_radio_m: z.number().int().min(10).max(5000).default(300).meta({
-    etiqueta: "Radio de la geocerca para alertar (m)",
+  geocerca_radio_m: z.number().int().min(10).max(5000).default(100).meta({
+    etiqueta: "Radio de geocerca en marcas de asistencia (m)",
     ayuda:
-      "Por defecto 300 m. Fuera de este radio la marca se registra igual y queda señalada: la geocerca solo alerta y el GPS nunca bloquea una marca. Una instalación puede fijar su propio radio.",
+      "Por defecto 100 m. Solo para marcas de asistencia: fuera de este radio la marca se registra igual y queda señalada; el GPS nunca bloquea una marca. En rondas el radio por defecto es otro (configuración del módulo Rondas). Una instalación puede fijar su propio radio.",
     grupo: "Marcas",
     ambito: "tenant",
     permiso: PERMISO,
@@ -66,7 +66,7 @@ export const ajustesAsistencia = z.object({
   plazo_correccion_horas: z.number().int().min(1).max(720).default(PLAZO_CORRECCION_HORAS_DEFECTO).meta({
     etiqueta: "Plazo para responder una corrección (horas)",
     ayuda:
-      "Desde el sello del servidor. Por defecto 48 horas; puedes ajustarlo si tu política interna exige otro plazo. Si el trabajador no responde a tiempo, la corrección se considera aceptada.",
+      "Desde el sello del servidor. Por defecto 48 horas; verifica el plazo que corresponda antes de cambiarlo. Si el trabajador no responde dentro del plazo configurado, el sistema registra la corrección como aceptada.",
     grupo: "Correcciones",
     ambito: "tenant",
     permiso: PERMISO,
