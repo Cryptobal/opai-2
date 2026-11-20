@@ -6,7 +6,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarIntentos } from "../_componentes/datos";
 import { OPCIONES_MOTIVO } from "../_componentes/etiquetas";
-import { rutaAccesos } from "../_componentes/lista-registros";
+import { rutaAccesos } from "../_componentes/ruta-accesos";
 import { filtroInstalacion } from "../_componentes/filtro-instalacion";
 import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 import { TablaIntentos } from "../_componentes/tabla-intentos";

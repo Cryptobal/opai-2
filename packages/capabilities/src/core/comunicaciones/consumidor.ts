@@ -95,6 +95,8 @@ export const consumidorComunicaciones = defineConsumidor({
     .filter((e) => !e.transaccional)
     .map((e) => e.evento),
   async handler(ctx, ev) {
+    const esSlaTicket = ev.tipo === "tickets.ticket.sla_vencido";
+    if (esSlaTicket && !ctx.modulosActivos.includes("tickets")) return;
     const reglas = await ctx.db.notificacionRegla.findMany({
       where: { evento: ev.tipo, activa: true },
     });
@@ -112,6 +114,11 @@ export const consumidorComunicaciones = defineConsumidor({
       });
       return;
     }
+    const responsableSla = esSlaTicket && ev.entidadTipo === "ticket" && ev.entidadId
+      ? await ctx.db.ticket.findFirst({ where: { id: ev.entidadId }, select: { responsableId: true } })
+      : null;
+    // Un aviso SLA contiene el asunto del ticket: la regla no amplía su alcance al resto del tenant.
+    if (esSlaTicket && !responsableSla) return;
     const datos = await variablesDe(ctx, ev);
     // Avisos de documentos: solo a los supervisores que tienen el documento en su alcance (ADR-022).
     const supervisoresPermitidos =
@@ -130,7 +137,10 @@ export const consumidorComunicaciones = defineConsumidor({
         r.destinatariosUsuarios,
         supervisoresPermitidos,
       );
-      const para = deAnexo ? await conAccesoAnexo(ctx, todos) : todos;
+      const permitidos = responsableSla
+        ? todos.filter((u) => u.id === responsableSla.responsableId)
+        : todos;
+      const para = deAnexo ? await conAccesoAnexo(ctx, permitidos) : permitidos;
       const silencio = await silenciados(
         ctx,
         para.map((p) => p.id),

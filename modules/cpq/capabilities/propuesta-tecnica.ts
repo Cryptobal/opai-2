@@ -4,6 +4,7 @@ export {
   plantillasPropuestaGet,
   plantillasPropuestaUpdate,
 } from "./propuesta-tecnica-biblioteca-cap";
+export { bibliotecaBloquesGuardarTextoTipo } from "./biblioteca-textos-tipo-cap";
 export {
   propuestaTecnicaGet,
   propuestaTecnicaUpdate,

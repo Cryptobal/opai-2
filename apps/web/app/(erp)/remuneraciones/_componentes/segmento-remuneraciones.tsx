@@ -46,5 +46,3 @@ export function SegmentoRemuneracionesMovil({ activa }: { activa: Activa }) {
     </div>
   );
 }
-
-export { OPCIONES, type Activa };

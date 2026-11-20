@@ -14,7 +14,7 @@ import { type CuentaPago, pagoDe } from "./lecturas-ficha";
 const TITULO = "Pago y bancos";
 
 /** «BancoEstado · 012»; lo guardado como texto libre se muestra tal cual, marcado para corregir. */
-export const banco = (c: CuentaPago) =>
+const banco = (c: CuentaPago) =>
   c.bancoNombre && /^\d{3}$/.test(c.bancoCodigo ?? "")
     ? `${c.bancoNombre} · ${c.bancoCodigo}`
     : c.bancoCodigo

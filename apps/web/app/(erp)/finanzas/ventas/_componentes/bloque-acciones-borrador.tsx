@@ -10,7 +10,8 @@ import { DescartarBorrador } from "./descartar-borrador";
 
 /**
  * Acciones de la ficha de un borrador (CAR-261), de más a menos importante: emitir (primaria, ancho completo en el teléfono),
- * revisar y editar (secundarias, juntas) y descartar (destructiva, aparte y con su confirmación).
+ * revisar y editar (secundarias, juntas) y descartar (aparte, como texto rojo sin relleno y con su confirmación; Hilo
+ * usa el rojo solo como texto en lo destructivo, CAR-370).
  */
 export function BloqueAccionesBorrador(p: {
   documentoId: string;
@@ -45,7 +46,7 @@ export function BloqueAccionesBorrador(p: {
         </div>
       </div>
       <div className="border-t border-border pt-4">
-        <DescartarBorrador documentoId={p.documentoId} etiqueta={p.etiquetaDescartar} destino="/finanzas/ventas" variante="destructive" className="w-full md:w-auto" />
+        <DescartarBorrador documentoId={p.documentoId} etiqueta={p.etiquetaDescartar} destino="/finanzas/ventas" variante="ghost" className="w-full text-danger-fg md:w-auto" />
       </div>
     </Card>
   );

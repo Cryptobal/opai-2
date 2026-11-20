@@ -49,6 +49,11 @@ export function hoyIso(zona = ZONA): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date());
 }
 
+/** Primer día del mes actual en la zona del tenant como `aaaa-mm-dd`. */
+export function inicioMesIso(zona = ZONA): string {
+  return `${hoyIso(zona).slice(0, 7)}-01`;
+}
+
 export const pesos = (n: number | null | undefined) =>
   n == null ? "—" : formatearClp(Math.round(n));
 export const rut = (r: string | null | undefined) => (r ? formatearRut(r) : "—");
