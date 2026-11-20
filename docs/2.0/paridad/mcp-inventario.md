@@ -1287,14 +1287,17 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.jornadas.fijar_tipo`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
+- `central.agente.pausar`
 - `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.proponer`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
 - `central.estado`
+- `central.propuestas.listar`
 - `central.reglas.guardar`
 - `central.reglas.listar`
+- `central.turno.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
