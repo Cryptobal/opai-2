@@ -27,6 +27,7 @@ import {
   camposSesion,
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
+  origenBaseConfiable,
   origenesConfiables,
   proveedoresSociales,
   VIGENCIA_RECUPERACION_SEGUNDOS,
@@ -41,6 +42,7 @@ const env = process.env;
  */
 export const auth = betterAuth({
   appName: "OPAI",
+  baseURL: origenBaseConfiable(env),
   basePath: "/api/auth",
   database: prismaAdapter(clienteAuth(), { provider: "postgresql" }),
   trustedOrigins: origenesConfiables(env),

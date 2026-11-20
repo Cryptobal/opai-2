@@ -60,23 +60,27 @@ export function relyingParty(env: Record<string, string | undefined>) {
   return { rpID: u.hostname, origin: u.origin };
 }
 
-/** Orígenes exactos del login de OPAI y de la URL configurada para este despliegue. */
+const ORIGEN_PRODUCCION = "https://app.opai.cl";
+const ORIGEN_TEST = "https://test.opai.cl";
+const ORIGEN_LOCAL = "http://localhost:3000";
+
+/** Orígenes exactos del login. BETTER_AUTH_URL no amplía la lista de confianza. */
 export function origenesConfiables(env: Record<string, string | undefined>): string[] {
-  const origenes = new Set(["https://app.opai.cl", "https://test.opai.cl"]);
+  const origenes = [ORIGEN_PRODUCCION, ORIGEN_TEST];
+  if (env["NODE_ENV"] !== "production") origenes.push(ORIGEN_LOCAL);
+  return origenes;
+}
+
+/** Better Auth también confía en su baseURL: selecciónala de la misma lista cerrada. */
+export function origenBaseConfiable(env: Record<string, string | undefined>): string {
   const configurada = env["BETTER_AUTH_URL"];
   if (configurada && URL.canParse(configurada)) {
     const url = new URL(configurada);
-    if (
-      ["http:", "https:"].includes(url.protocol) &&
-      !url.hostname.includes("*") &&
-      !url.username &&
-      !url.password
-    ) {
-      origenes.add(url.origin);
+    if (!url.username && !url.password && origenesConfiables(env).includes(url.origin)) {
+      return url.origin;
     }
   }
-  if (env["NODE_ENV"] !== "production") origenes.add("http://localhost:3000");
-  return [...origenes];
+  return env["NODE_ENV"] === "production" ? ORIGEN_PRODUCCION : ORIGEN_LOCAL;
 }
 
 /** Google solo si existen credenciales. Nunca crea usuarios: se entra por invitación. */
