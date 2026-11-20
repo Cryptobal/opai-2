@@ -47,6 +47,7 @@ export const ETIQUETA_OBLIGACION: Record<TipoObligacion, string> = {
   f29_retencion: "Retención de impuesto único (F29)",
   dj_sueldos: "Declaración Jurada de sueldos",
   certificado_sueldos: "Certificado de sueldos",
+  f30_1: "Certificado F30-1",
 };
 
 export const MES_CORTO = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
