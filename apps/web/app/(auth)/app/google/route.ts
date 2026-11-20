@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { esRetoValido, googleHabilitado, urlDeGoogle } from "@opai/auth";
@@ -14,12 +13,13 @@ export async function GET(request: NextRequest) {
   const reto = request.nextUrl.searchParams.get("reto") ?? "";
   const url = googleHabilitado() && esRetoValido(reto) ? await urlDeGoogle("/app/listo") : null;
   if (!url) return NextResponse.redirect(new URL("/login", request.url));
-  (await cookies()).set(COOKIE_RETO_APP, reto, {
+  const response = NextResponse.redirect(url);
+  response.cookies.set(COOKIE_RETO_APP, reto, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/app",
     maxAge: 600,
   });
-  return NextResponse.redirect(url);
+  return response;
 }
