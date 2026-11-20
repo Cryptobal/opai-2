@@ -4,7 +4,7 @@ import {
   LARGO_CODIGO_MARCACION_PUBLICA,
   normalizarCodigoMarcacionPublica,
   nuevoCodigoMarcacionPublica,
-} from "./marcacion-publica";
+} from "../src/marcacion-publica";
 
 describe("marcación pública · código", () => {
   it("genera códigos de 128 bits (22 caracteres base64url)", () => {
