@@ -16,7 +16,7 @@ describe.skipIf(!urlPropietario)("Asistencia · fiscalización DT (Postgres real
   const A = { tenant: "", rut: "76111111-1" };
   const B = { tenant: "", rut: "76222222-2" };
 
-  const ctx = (tenantId: string, email = "fiscal@dt.gob.cl") =>
+  const ctx = (tenantId: string, _email = "fiscal@dt.gob.cl") =>
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: randomUUID() },
