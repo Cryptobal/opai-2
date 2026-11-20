@@ -10,4 +10,3 @@ export function armarIndice(items: readonly ItemIndice[]): EntradaIndice[] {
     ...(it.subtitulos ?? []).map((t, k) => ({ numero: `${i + 1}.${k + 1}`, titulo: t, nivel: 2 as const })),
   ]);
 }
-export const numeroCapitulo = (i: number, k: number) => `${i + 1}.${k + 1}`;

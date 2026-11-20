@@ -55,9 +55,8 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
           panel,
           lista: panel
             ? {
-                state: "ready" as const,
+                ...(await cargarInstalaciones(p)),
                 items: panel.instalaciones.items,
-                cuentas: panel.cuentas.map((c) => ({ valor: c.id, etiqueta: c.nombre })),
               }
             : await cargarInstalaciones(p),
           voc,
@@ -81,7 +80,9 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
               <ListaInstalaciones
                 state={lista.state}
                 items={lista.items}
-                cuentas={lista.cuentas}
+                regiones={lista.regiones}
+                siguiente={lista.siguiente}
+                cuentaEtiqueta={lista.cuentaEtiqueta}
                 titulo={voc.titulo("instalacion")}
                 singular={voc.instalacion.singular}
                 seleccionada={id}

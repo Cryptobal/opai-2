@@ -44,7 +44,7 @@ export const reemplazosSugerir = defineCapability({
       throw reglaDeNegocio("Ese día no es de turno según la serie del puesto.");
     const personas = await ctx.db.persona.findMany({
       where: {
-        estado: "activa",
+        estado: "activo",
         archivadaEn: null,
         vinculos: { some: { estado: "vigente", instalacionId: puesto.instalacionId } },
       },

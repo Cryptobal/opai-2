@@ -67,7 +67,7 @@ describe.skipIf(omitirSuiteDb())("Personas · tallas por prenda CAR-408 (db)", (
       personas.push(
         (
           await e.admin.persona.create({
-            data: { tenantId, nombres: "Ana", apellidos: "Ficticia", rut: rut!, estado: "activa" },
+            data: { tenantId, nombres: "Ana", apellidos: "Ficticia", rut: rut!, estado: "activo" },
           })
         ).id,
       );

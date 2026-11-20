@@ -32,6 +32,7 @@ export { consumidorCpqBandeja } from "@opai/mod-cpq/consumidor-bandeja";
 export { consumidorCpqEnlace } from "@opai/mod-cpq/consumidor-enlace";
 export { trabajosCpq } from "@opai/mod-cpq/trabajos";
 export { consumidorTicketsAvisos } from "@opai/mod-tickets/consumidor-avisos";
+export { trabajosTickets } from "@opai/mod-tickets/trabajos";
 export { consumidorRendicionesAvisos } from "@opai/mod-rendiciones/consumidor-avisos";
 
 /**

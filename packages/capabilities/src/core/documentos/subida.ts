@@ -1,5 +1,5 @@
 import { filtroDocumentoSensible } from "./sensibles";
-import { documentosEnAlcance } from "./alcance-doc";
+import { filtroAlcanceDocumentos } from "./alcance-doc";
 import { z } from "zod";
 
 import {
@@ -81,14 +81,13 @@ export const documentosIniciarSubida = defineCapability({
       throw reglaDeNegocio(`"${tipo.nombre}" exige fecha de vencimiento.`);
     if (!dryRun && !ctx.servicios.almacenamiento.disponible)
       throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
-    const permitidos = await documentosEnAlcance(ctx);
+    const permitidos = await filtroAlcanceDocumentos(ctx);
     const duplicados = (
       await ctx.db.documento.findMany({
         where: {
-          ...filtroDocumentoSensible(ctx),
           sha256: input.sha256,
           estado: "disponible",
-          ...(permitidos ? { id: { in: [...permitidos] } } : {}),
+          AND: [filtroDocumentoSensible(ctx), permitidos],
         },
         take: 5,
       })

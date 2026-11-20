@@ -6,7 +6,15 @@ import { externo } from "../../externo";
 import { iso } from "../comun";
 import { dia } from "../maestros/comun";
 
-export const ENTIDADES = ["tenant", "cuenta", "instalacion", "persona", "puesto"] as const;
+export const ENTIDADES = [
+  "tenant",
+  "cuenta",
+  "instalacion",
+  "persona",
+  "puesto",
+  "ticket",
+  "visita",
+] as const;
 export const entidadSchema = z.object({
   tipo: z.enum(ENTIDADES).describe('"tenant" es la propia empresa (documentos legales).'),
   id: z.uuid(),

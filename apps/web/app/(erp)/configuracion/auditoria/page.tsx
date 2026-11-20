@@ -4,12 +4,11 @@ import { LinkNext } from "@/app/_components/link-next";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { estadoPantalla } from "@/lib/formato";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
+import { conCambios as con, leerParametros, type SearchParams } from "@/lib/parametros";
 
 import {
   CAPACIDADES,
   cargarAuditoria,
-  con,
   type Evento,
   RANGOS,
   rutaEntidad,

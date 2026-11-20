@@ -2,60 +2,17 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Campo, Input, SeccionTarjeta } from "@opai/ds";
+import { Alerta, avisar, Campo, Input, SeccionTarjeta, Badge } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { Marca } from "./tipos";
+import { CampoColorMarca, errorColorMarca } from "./campo-color-marca";
+import { FormularioDocumentoMarca } from "./formulario-documento";
 import { VistaPreviaMarca } from "./vista-previa-marca";
-
-const HEX = /^#[0-9a-fA-F]{6}$/;
-// Respaldo del selector nativo (exige un valor hex); no es un color de la interfaz.
-const NEGRO = `#${"0".repeat(6)}`;
-const error = (c: string) => (c && !HEX.test(c) ? 'Usa el formato "#RRGGBB"' : undefined);
-
-function CampoColor({
-  id,
-  etiqueta,
-  valor,
-  onCambiar,
-  disabled,
-}: {
-  id: string;
-  etiqueta: string;
-  valor: string;
-  onCambiar: (v: string) => void;
-  disabled: boolean;
-}) {
-  const e = error(valor);
-  return (
-    <Campo etiqueta={etiqueta} htmlFor={id} {...(e ? { error: e } : {})}>
-      <div className="flex gap-2">
-        <Input
-          type="color"
-          aria-label={`${etiqueta}: selector`}
-          className="w-14 flex-none p-1"
-          value={HEX.test(valor) ? valor : NEGRO}
-          disabled={disabled}
-          onChange={(x) => onCambiar(x.target.value)}
-        />
-        <Input
-          id={id}
-          className="t-mono"
-          placeholder="Código hex de 6 dígitos"
-          value={valor}
-          disabled={disabled}
-          aria-invalid={e ? true : undefined}
-          onChange={(x) => onCambiar(x.target.value.trim())}
-        />
-      </div>
-    </Campo>
-  );
-}
 
 type Props = { marca: Marca; puede: boolean; hoy: string };
 
-/** Colores, nombre y eslogan (22) con vista previa; "Guardar" está en la cabecera (form="form-marca"). */
 export function FormularioMarca({ marca, puede, hoy }: Props) {
   const [d, setD] = useState({
     nombreComercial: marca.nombreComercial ?? "",
@@ -63,15 +20,17 @@ export function FormularioMarca({ marca, puede, hoy }: Props) {
     colorPrimario: marca.colorPrimario ?? "",
     colorSecundario: marca.colorSecundario ?? "",
   });
+  const [doc, setDoc] = useState<Record<string, unknown>>({});
   const { ejecutar, error: falla } = useCapacidad("erp");
   const set = (k: keyof typeof d) => (v: string) => setD((x) => ({ ...x, [k]: v }));
   async function guardar() {
-    if (error(d.colorPrimario) || error(d.colorSecundario)) return;
+    if (errorColorMarca(d.colorPrimario) || errorColorMarca(d.colorSecundario)) return;
     const r = await ejecutar("core.marca.update", {
       nombreComercial: d.nombreComercial.trim() || null,
       eslogan: d.eslogan.trim() || null,
       colorPrimario: d.colorPrimario || null,
       colorSecundario: d.colorSecundario || null,
+      ...doc,
     });
     if (r) avisar.exito("Marca guardada");
   }
@@ -88,14 +47,14 @@ export function FormularioMarca({ marca, puede, hoy }: Props) {
       <div className="grid gap-4 lg:grid-cols-2">
         <SeccionTarjeta titulo="Colores de marca">
           <div className="flex flex-col gap-4">
-            <CampoColor
+            <CampoColorMarca
               id="m-primario"
               etiqueta="Primario"
               valor={d.colorPrimario}
               onCambiar={set("colorPrimario")}
               disabled={!puede}
             />
-            <CampoColor
+            <CampoColorMarca
               id="m-secundario"
               etiqueta="Secundario"
               valor={d.colorSecundario}
@@ -126,6 +85,23 @@ export function FormularioMarca({ marca, puede, hoy }: Props) {
           </div>
         </SeccionTarjeta>
       </div>
+      <SeccionTarjeta titulo="Documentos PDF">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <p className="t-caption text-fg-muted">
+            Cotizaciones y propuestas técnicas. Los logos de arriba también aplican aquí.
+          </p>
+          {marca.documentoVersion > 0 ? (
+            <Badge tono="info">Versión v{marca.documentoVersion}</Badge>
+          ) : null}
+        </div>
+        <FormularioDocumentoMarca
+          tipografia={marca.documentoTipografia}
+          piePagina={marca.documentoPiePagina}
+          condicionesDefault={marca.documentoCondicionesDefault}
+          puede={puede}
+          onCambio={(v) => setDoc((x) => ({ ...x, ...v }))}
+        />
+      </SeccionTarjeta>
       <VistaPreviaMarca
         nombre={d.nombreComercial}
         primario={d.colorPrimario}
