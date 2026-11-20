@@ -9,7 +9,7 @@ const entrada = z.object({
   q: z.string().trim().max(120),
 });
 
-export type Candidato = { id: string; etiqueta: string; detalle?: string };
+type Candidato = { id: string; etiqueta: string; detalle?: string };
 /** `hayMas`: la lista llegó al tope y puede haber más coincidencias (hay que refinar). */
 export type Candidatos =
   { ok: true; items: Candidato[]; hayMas?: true } | { ok: false; mensaje: string };

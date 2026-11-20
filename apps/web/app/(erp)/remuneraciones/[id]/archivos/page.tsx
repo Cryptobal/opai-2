@@ -13,7 +13,6 @@ export const metadata = { title: "Archivos y declaraciones" };
 
 type Props = { params: Promise<{ id: string }> };
 
-/** Archivos y declaraciones del período (diseño 06): LRE y Previred con su validación y descarga. */
 export default function ArchivosPeriodo({ params }: Props) {
   return (
     <PaginaPortal

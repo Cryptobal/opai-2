@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { abrirUnaPersona } from "./abrir-persona";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -15,12 +16,7 @@ test.describe("@preview ficha de persona · ingreso y salida", () => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
-    await page.goto("/personas");
-    const primera = page.locator('a[href^="/personas/"]:not([href*="vencimientos"])').filter({ visible: true }).first();
-    await expect(primera, "qa-e2e tiene al menos una persona ficticia").toBeVisible();
-    await primera.click();
-    await page.waitForURL(/\/personas\/[0-9a-f-]{36}/);
-    const ficha = new URL(page.url()).pathname.match(/^\/personas\/[0-9a-f-]{36}/)?.[0] ?? "";
+    const ficha = await abrirUnaPersona(page);
     await page.goto(`${ficha}/laboral`);
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     const tarjeta = page.getByText("Ingreso y salida", { exact: true }).first();

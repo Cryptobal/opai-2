@@ -295,8 +295,8 @@ model Persona {
   placeId             String?   @map("place_id")
   lat                 Decimal?  @db.Decimal(10, 7)
   lng                 Decimal?  @db.Decimal(10, 7)
-  /// "activa" | "inactiva"
-  estado              String    @default("activa")
+  /// postulante | en_evaluacion | rechazado | externo | activo | inactivo | bloqueado_permanente (ADR-083, CAR-674)
+  estado              String    @default("activo")
   bloqueada           Boolean   @default(false)
   bloqueoMotivo       String?   @map("bloqueo_motivo")
   bloqueadaEn         DateTime? @map("bloqueada_en") @db.Timestamptz(6)

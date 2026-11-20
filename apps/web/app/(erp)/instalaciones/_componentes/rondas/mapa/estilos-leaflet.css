@@ -1,0 +1,65 @@
+@import "leaflet/dist/leaflet.css";
+
+.ds-mapa-leaflet .leaflet-container {
+  z-index: 0;
+  font: inherit;
+  background: var(--color-fill);
+  border-radius: inherit;
+}
+
+.ds-mapa-leaflet .leaflet-control-attribution {
+  font-size: 10px;
+  line-height: 1.2;
+  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  color: var(--color-fg-muted);
+}
+
+.ds-mapa-leaflet .leaflet-bar a {
+  background: var(--color-surface);
+  color: var(--color-fg);
+  border-color: var(--color-border);
+}
+
+.ds-mapa-pin-instalacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-accent);
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+
+.ds-mapa-pin-numero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.35rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-fg, #fff);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.ds-mapa-pin-numero--seleccionado {
+  outline: 2px solid var(--color-fg);
+  outline-offset: 2px;
+}
+
+.ds-mapa-pin-punto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-accent);
+  background: var(--color-surface);
+}

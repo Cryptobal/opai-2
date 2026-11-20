@@ -13,14 +13,22 @@ export type RevisionHtml = {
 };
 
 /** HTML ya saneado en un marco aislado: sin scripts, sin red y sin acceso a la página. */
-export function VistaHtml({ html, titulo }: { html: string; titulo: string }) {
+export function VistaHtml({
+  html,
+  titulo,
+  alto = "h-96",
+}: {
+  html: string;
+  titulo: string;
+  alto?: string;
+}) {
   return (
     <iframe
       title={titulo}
       sandbox=""
       referrerPolicy="no-referrer"
       srcDoc={html}
-      className="h-96 w-full rounded-md border border-border bg-white"
+      className={`${alto} w-full rounded-md border border-border bg-white`}
     />
   );
 }
@@ -52,7 +60,12 @@ export function RevisionPlantillaHtml({ r }: { r: RevisionHtml }) {
           <Lista items={r.advertencias} />
         </Alerta>
       ) : null}
-      {r.sinCambios ? <Alerta tono="info" titulo={`Es igual a la versión v${r.version} en uso: no se guarda otra.`} /> : null}
+      {r.sinCambios ? (
+        <Alerta
+          tono="info"
+          titulo={`Es igual a la versión v${r.version} en uso: no se guarda otra.`}
+        />
+      ) : null}
       {r.html !== null && r.problemas.length === 0 && !r.sinCambios ? (
         <p className="t-caption text-fg-muted">
           Se guardará como v{r.version}
