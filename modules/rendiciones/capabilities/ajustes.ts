@@ -81,9 +81,9 @@ export const ajustesRendiciones = z.object({
     control: "texto",
   }),
   nomina_formato_confirmado: z.boolean().default(false).meta({
-    etiqueta: "Activar la nómina Santander (solo empresa de pruebas)",
+    etiqueta: "Generar archivo de nómina Santander",
     ayuda:
-      "Apagado por defecto. Si lo enciendes en una empresa de prueba, se puede generar y descargar la nómina en formato Santander.",
+      "Si lo enciendes, quien paga puede generar y descargar el Excel para cargarlo en el portal del banco. Requiere la cuenta de origen en Bancos y los datos bancarios de cada beneficiario en su ficha. OPAI no transmite dinero al banco.",
     grupo: "Pagos",
     ambito: "tenant",
     permiso: PERMISO_CONFIG,

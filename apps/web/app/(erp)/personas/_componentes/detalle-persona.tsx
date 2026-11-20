@@ -7,6 +7,8 @@ import type { PersonaDetalle } from "@/lib/tipos-maestros";
 import type { cargarPersona } from "./datos";
 import { HojaPersona } from "./diferidas";
 import { FichaPersona, type TabPersona } from "./ficha-persona";
+import { verPestanaTurnosExtra } from "@/lib/pestanas-modulos";
+
 import { conParametros } from "./lista-personas";
 
 type Props = {
@@ -24,7 +26,7 @@ type Props = {
  * y la lista de la izquierda ya está en pantalla.
  */
 export async function DetallePersona({ datos, p, tab, children, panel }: Props) {
-  const d = await datos;
+  const [d, turnosExtra] = await Promise.all([datos, verPestanaTurnosExtra()]);
   const contenido = d.persona ? await children(d.persona, p) : null;
   return (
     <>
@@ -34,6 +36,7 @@ export async function DetallePersona({ datos, p, tab, children, panel }: Props) 
         persona={d.persona}
         tab={tab}
         consulta={conParametros(p)}
+        turnosExtra={turnosExtra}
       >
         {contenido}
       </FichaPersona>

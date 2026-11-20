@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   # Ahorro de Actions (13-nov-2026; urgencia cola 17-nov-2026): en pull_request solo el gate rápido
-  # (typecheck/lint/test en lo tocado, secretos); test:db y build completos solo en merge_group, main o a pedido.
+  # (typecheck/lint/test en lo tocado, secretos), salvo el PR de estabilidad. El build completo no corre en PR.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
@@ -72,10 +72,16 @@ jobs:
         run: .github/scripts/ci-verificar-completo.sh
 
   test-db:
-    name: test:db
-    if: github.event_name != 'pull_request'
-    runs-on: ${{ vars.RUNNER_GATE || 'ubuntu-latest' }}
+    name: ${{ matrix.corrida == 0 && 'test:db' || format('test:db · estabilidad {0}/3', matrix.corrida) }}
+    if: github.event_name != 'pull_request' || ((github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831) && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ${{ matrix.corrida != 0 && 'ubuntu-latest' || vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 45
+    # Cada variante recibe VM y servicio Postgres nuevos; nunca comparte el clúster anterior.
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        corrida: ${{ fromJSON(((github.event_name == 'pull_request' && github.head_ref == 'ci/estabilidad-test-db' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/ci/estabilidad-test-db')) && '[1,2,3]' || '[0]') }}
     services:
       postgres:
         image: postgres:16
@@ -89,21 +95,45 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      compras-fixture:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          # Valor efímero de CI, no es una credencial de aplicación.
+          POSTGRES_PASSWORD: compras-${{ github.run_id }}-${{ github.run_attempt }}
+          POSTGRES_DB: opai_e2e_compras_template
+        ports: ["127.0.0.1:55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
-      # test:db solo en merge_group, main, cron y workflow_dispatch (17-nov-2026, cola de Actions).
+      # La rama exacta de estabilidad activa DB también en PR; el resto conserva el gate rápido.
       - uses: ./.github/actions/preparar
         if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: Migrar plantilla sintética exclusiva de compras
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        run: |
+          if ! pnpm --filter @opai/db run deploy >/dev/null 2>&1; then
+            echo "::error::No se pudo migrar la plantilla sintética de compras."
+            exit 1
+          fi
+        env:
+          DATABASE_URL_MIGRATE: postgresql://postgres:compras-${{ github.run_id }}-${{ github.run_attempt }}@127.0.0.1:55432/opai_e2e_compras_template
       - name: test:db
         if: steps.solo_docs.outputs.only_docs != 'true'
         run: .github/scripts/ci-test-db-completo.sh
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
+          COMPRAS_QA_TEMPLATE_URL: postgresql://postgres:compras-${{ github.run_id }}-${{ github.run_attempt }}@127.0.0.1:55432/opai_e2e_compras_template
 
   gate:
     name: typecheck · lint · test · test:db
@@ -116,11 +146,16 @@ jobs:
         env:
           VERIFICAR: ${{ needs.verificar.result }}
           TEST_DB: ${{ needs.test-db.result }}
+          DB_EN_PR: ${{ (github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831) && github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           echo "verificar=$VERIFICAR test-db=$TEST_DB event=$GITHUB_EVENT_NAME"
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
             test "$VERIFICAR" = success
-            test "$TEST_DB" = skipped
+            if [ "$DB_EN_PR" = true ]; then
+              test "$TEST_DB" = success
+            else
+              test "$TEST_DB" = skipped
+            fi
           else
             test "$VERIFICAR" = success && test "$TEST_DB" = success
           fi
@@ -290,6 +325,8 @@ jobs:
           pnpm --filter @opai/db seed:maestros-demo
           pnpm --filter @opai/db exec tsx scripts/fixture-vencimientos-e2e.ts
           DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/db seed:pauta-e2e
+          DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/auth seed:asistencia-e2e-usuario
+          DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/db seed:asistencia-e2e
           pnpm --filter @opai/auth seed:multiempresa-e2e
           DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/auth seed:rendiciones-r3-e2e
           SEED_OWNER_EMAIL=e2e-selector@opai.cl pnpm --filter @opai/auth seed:e2e-mfa

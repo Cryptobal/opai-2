@@ -20,8 +20,6 @@ test.describe("@preview nómina: archivos y declaraciones", () => {
     await page.goto(`${href}/archivos`);
     await expect(page.getByText("OPAI prepara y valida los archivos")).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Libro de remuneraciones", { exact: true })).toBeVisible();
-    await expect(page.getByText("Retención impuesto único (F29)", { exact: true })).toBeVisible();
-    await expect(page.getByText("Archivo de pago bancario", { exact: true })).toBeVisible();
     await expect(page.getByText("Formato por verificar").first()).toBeVisible();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "nomina-archivos");

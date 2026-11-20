@@ -58,6 +58,7 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
   // La persona puede tener otros anexos (los que genera el cambio de vínculo de vinculo-jornada):
   // se elige el sembrado por su enlace.
   const sembrado = page.locator(`a[href$="/anexos/${anexoId}"]`);
+  await sembrado.scrollIntoViewIfNeeded();
   await expect(sembrado).toBeVisible();
   await expect(sembrado).toContainText("Instalación o puesto");
   await expect(sinDesborde(page)).resolves.toBe(true);

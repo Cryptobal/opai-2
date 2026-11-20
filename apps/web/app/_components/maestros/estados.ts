@@ -22,8 +22,13 @@ export const ESTADO_INSTALACION: Record<string, EstadoVisible> = {
 };
 
 export const ESTADO_PERSONA: Record<string, EstadoVisible> = {
-  activa: e("Activa", "success"),
-  inactiva: e("Inactiva", "neutro"),
+  postulante: e("Postulante", "info"),
+  en_evaluacion: e("En evaluación", "warning"),
+  rechazado: e("Rechazado", "neutro"),
+  externo: e("Externo", "info"),
+  activo: e("Activo", "success"),
+  inactivo: e("Inactivo", "neutro"),
+  bloqueado_permanente: e("Bloqueado permanente", "danger", "Bloq. permanente"),
   bloqueada: e("Bloqueada", "danger"),
 };
 

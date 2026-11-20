@@ -31,7 +31,7 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · liquidaciones (RL
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesNomina]);
     for (const k of ["a", "b"] as const) {
       t[k] = (await e.admin.tenant.create({ data: { slug: `liq-${k}-${randomUUID().slice(0, 8)}`, nombre: k, vertical: "seguridad" } })).id;
-      pers[k] = (await e.admin.persona.create({ data: { tenantId: t[k], nombres: "P", apellidos: k, rut: `${k === "a" ? 1 : 2}1.111.111-1`, estado: "activa" } })).id;
+      pers[k] = (await e.admin.persona.create({ data: { tenantId: t[k], nombres: "P", apellidos: k, rut: `${k === "a" ? 1 : 2}1.111.111-1`, estado: "activo" } })).id;
       per[k] = (await e.admin.nominaPeriodo.create({
         data: { tenantId: t[k], anio: 2026, mes: 11, inicio: new Date("2026-11-01"), fin: new Date("2026-11-30"), cierrePrevisto: new Date("2026-11-30") },
       })).id;

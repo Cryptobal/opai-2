@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE, variablesFueraDeClase, type ClasePlantilla } from "@opai/domain";
+import { PERMISOS_CORE, type ClasePlantilla } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
@@ -12,6 +12,7 @@ import {
   nivelSchema,
   nombreSchema,
   plantillaSchema,
+  desconocidasPlantilla,
   validarNivel,
   vista,
 } from "./plantillas-comun";
@@ -34,7 +35,7 @@ export const documentoPlantillasCreate = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     validarNivel(input.clase, input.nivelFirma);
-    const desconocidas = variablesFueraDeClase(input.contenido, input.clase);
+    const { desconocidas } = await desconocidasPlantilla(ctx, input.contenido, input.clase);
     if (desconocidas.length > 0)
       throw reglaDeNegocio(`Variables que no existen o no valen para este tipo de plantilla: ${desconocidas.join(", ")}.`, {
         desconocidas,

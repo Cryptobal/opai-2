@@ -3,19 +3,12 @@ import { z } from "zod";
 import { conflicto, defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
 import { TIPOS_MARCA } from "../domain";
-import { agregarMarcaDeContingencia } from "./contingencias-aceptar";
+import { vistaContingenciaSchema } from "./contingencias-esquema";
+import { resolverContingencia } from "./contingencias-resolver";
+import { ETIQUETA_TIPO, nombreCompleto } from "./formato";
 import { uuid } from "./esquemas";
 import { personaPropia } from "./persona-propia";
 import { usuarioId } from "./usuario";
-
-const alcanceDe = (alcance: { instalaciones: readonly string[] } | null) =>
-  alcance ? { instalacionId: { in: [...alcance.instalaciones] } } : {};
-
-const vistaSchema = z.object({
-  id: z.string(), personaId: z.string(), instalacionId: z.string(), tipo: z.enum(TIPOS_MARCA),
-  horaDeclarada: z.string(), motivo: z.string(), estado: z.enum(["pendiente", "aceptada", "rechazada"]),
-  evidenciaDocumentoId: z.string().nullable(), marcaId: z.string().nullable(),
-});
 
 export const contingenciasRegistrar = defineCapability({
   id: "asistencia.contingencias.registrar",
@@ -28,19 +21,23 @@ export const contingenciasRegistrar = defineCapability({
     /** Documento del núcleo que respalda la contingencia: obligatorio (decisión de Carlos del 5-nov-2026). */
     evidenciaDocumentoId: uuid,
   }),
-  output: vistaSchema,
+  output: vistaContingenciaSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
-    const inst = await ctx.db.instalacion.findFirst({ where: { id: i.instalacionId, ...(ctx.alcance ? { id: { in: [...ctx.alcance.instalaciones] } } : {}) } });
+    const inst = await ctx.db.instalacion.findFirst({
+      where: { id: i.instalacionId, ...(ctx.alcance ? { id: { in: [...ctx.alcance.instalaciones] } } : {}) },
+    });
     const persona = await ctx.db.persona.findFirst({ where: { id: i.personaId, archivadaEn: null, anonimizadaEn: null } });
     if (!inst || !persona) throw noEncontrado("La persona o la instalación");
     if (!(await ctx.db.documento.findUnique({ where: { id: i.evidenciaDocumentoId }, select: { id: true } })))
       throw noEncontrado("El documento de evidencia");
     if (new Date(i.horaDeclarada).getTime() > Date.now()) throw reglaDeNegocio("La hora declarada no puede estar en el futuro.");
     const base = {
-      id: "", personaId: i.personaId, instalacionId: i.instalacionId, tipo: i.tipo, horaDeclarada: i.horaDeclarada,
-      motivo: i.motivo, estado: "pendiente" as const, evidenciaDocumentoId: i.evidenciaDocumentoId, marcaId: null,
+      id: "", personaId: i.personaId, personaNombre: nombreCompleto(persona), instalacionId: i.instalacionId,
+      instalacionNombre: inst.nombre, tipo: i.tipo, tipoEtiqueta: ETIQUETA_TIPO[i.tipo] ?? i.tipo,
+      horaDeclarada: i.horaDeclarada, motivo: i.motivo, estado: "pendiente" as const,
+      evidenciaDocumentoId: i.evidenciaDocumentoId, marcaId: null,
     };
     if (dryRun) return base;
     const f = await ctx.transaccion(async (tx) => {
@@ -57,23 +54,6 @@ export const contingenciasRegistrar = defineCapability({
   },
 });
 
-export const contingenciasListar = defineCapability({
-  id: "asistencia.contingencias.listar",
-  descripcion: "Lista las marcas de contingencia de las instalaciones a cargo, con su estado (pendiente, aceptada o rechazada).",
-  permiso: "asistencia:ver",
-  input: z.object({ estado: z.enum(["pendiente", "aceptada", "rechazada"]).optional() }),
-  output: z.object({ items: z.array(vistaSchema) }),
-  efecto: "lectura",
-  dryRun: false,
-  auditarLectura: (s) => s.items.map((c) => c.id),
-  async handler(ctx, i) {
-    const filas = await ctx.db.contingencia.findMany({
-      where: { ...(i.estado ? { estado: i.estado } : {}), ...alcanceDe(ctx.alcance) }, orderBy: { createdAt: "desc" }, take: 200,
-    });
-    return { items: filas.map((f) => ({ id: f.id, personaId: f.personaId, instalacionId: f.instalacionId, tipo: f.tipo as never, horaDeclarada: f.horaDeclarada.toISOString(), motivo: f.motivo, estado: f.estado as never, evidenciaDocumentoId: f.evidenciaDocumentoId, marcaId: f.marcaId })) };
-  },
-});
-
 export const contingenciasResponder = defineCapability({
   id: "asistencia.contingencias.responder",
   descripcion:
@@ -82,7 +62,7 @@ export const contingenciasResponder = defineCapability({
   portales: ["trabajador", "terreno"],
   soloPersonas: true,
   input: z.object({ contingenciaId: uuid, decision: z.enum(["aceptada", "rechazada"]), comentario: z.string().trim().max(500).optional() }),
-  output: vistaSchema,
+  output: vistaContingenciaSchema,
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
@@ -93,18 +73,26 @@ export const contingenciasResponder = defineCapability({
     const yoId = yo.usuarioId ?? "";
     if (c.autorId === yoId) throw prohibido("Quien propuso la contingencia no puede responderla.");
     if (i.decision === "rechazada" && (i.comentario?.trim().length ?? 0) < 3) throw reglaDeNegocio("Para objetar escribe un comentario.");
+    const [persona, inst] = await Promise.all([
+      ctx.db.persona.findUniqueOrThrow({ where: { id: c.personaId }, select: { nombres: true, apellidos: true } }),
+      ctx.db.instalacion.findUniqueOrThrow({ where: { id: c.instalacionId }, select: { nombre: true } }),
+    ]);
     const vista = (estado: "aceptada" | "rechazada", marcaId: string | null) => ({
-      id: c.id, personaId: c.personaId, instalacionId: c.instalacionId, tipo: c.tipo as never,
-      horaDeclarada: c.horaDeclarada.toISOString(), motivo: c.motivo, estado, evidenciaDocumentoId: c.evidenciaDocumentoId, marcaId,
+      id: c.id,
+      personaId: c.personaId,
+      personaNombre: nombreCompleto(persona),
+      instalacionId: c.instalacionId,
+      instalacionNombre: inst.nombre,
+      tipo: c.tipo as never,
+      tipoEtiqueta: ETIQUETA_TIPO[c.tipo] ?? c.tipo,
+      horaDeclarada: c.horaDeclarada.toISOString(),
+      motivo: c.motivo,
+      estado,
+      evidenciaDocumentoId: c.evidenciaDocumentoId,
+      marcaId,
     });
     if (dryRun) return vista(i.decision, null);
-    return ctx.transaccion(async (tx) => {
-      const marcaId = i.decision === "aceptada" ? await agregarMarcaDeContingencia(ctx, tx, c) : null;
-      const hecho = await tx.contingencia.updateMany({ where: { id: c.id, estado: "pendiente" }, data: { estado: i.decision, marcaId, resueltaPorId: yoId, resueltaEn: new Date(), motivoResolucion: i.comentario ?? null } });
-      if (hecho.count !== 1) throw conflicto("Esta contingencia ya fue respondida.");
-      await ctx.bitacora.registrar(tx, { tipo: "asistencia.contingencia.respondida", entidadTipo: "contingencia", entidadId: c.id, payload: { decision: i.decision, marcaId } });
-      await ctx.eventos.emitir(tx, { tipo: "asistencia.contingencia.respondida", entidadTipo: "contingencia", entidadId: c.id, payload: { contingenciaId: c.id, personaId: c.personaId, decision: i.decision } });
-      return vista(i.decision, marcaId);
-    });
+    const marcaId = await ctx.transaccion((tx) => resolverContingencia(ctx, tx, c, i.decision, i.comentario, yoId));
+    return vista(i.decision, marcaId);
   },
 });
