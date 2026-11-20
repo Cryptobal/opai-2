@@ -11,6 +11,7 @@ import { PestanasCompras } from "../../_componentes/pestanas-compras";
 import { type Compra, diaCL, NOMBRE_DTE } from "../../_componentes/tipos";
 import { EstadoPago } from "./celdas-compras";
 import { type cargarLibro, periodosRecientes } from "./datos";
+import { metaLibroCompras } from "./meta-libro-compras";
 import { conFiltrosCompras } from "./filtros-url";
 
 /** Total con signo: una nota de crédito resta del libro. */
@@ -31,12 +32,12 @@ function accionesLibro(gestiona: boolean) {
   );
 }
 
-function avisoSinCentro(resumen: ResumenLibro | undefined, gestiona: boolean) {
+function avisoSinCentro(resumen: ResumenLibro | undefined, gestiona: boolean, conSaldo: boolean) {
   if (!resumen || resumen.sinCentroCosto <= 0) return undefined;
   return (
     <Alerta
       tono="warning"
-      titulo={`${resumen.sinCentroCosto} ${resumen.sinCentroCosto === 1 ? "documento sin centro de costo" : "documentos sin centro de costo"}`}
+      titulo={`${resumen.sinCentroCosto} ${resumen.sinCentroCosto === 1 ? "documento sin centro de costo" : "documentos sin centro de costo"}${conSaldo ? " · sin filtro de saldo" : ""}`}
       {...(gestiona ? { accion: <EnlaceBotonHoja href="?lote=1" variante="secondary">Asignar en lote</EnlaceBotonHoja> } : {})}
     >
       Asígnalos para que el gasto llegue a la instalación correcta.
@@ -58,6 +59,7 @@ function vacioLibro(d: Datos) {
 export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos: Datos; seleccionada?: string; params: Parametros }) {
   const items = d.libro?.items ?? [];
   const r = d.libro?.resumen;
+  const conSaldo = params.con_saldo === "1";
   return (
     <>
       <div className="md:px-4 md:pt-3">
@@ -67,14 +69,14 @@ export function ListaComprasMaestro({ datos: d, seleccionada, params }: { datos:
         state={d.state}
         titulo="Libro de compras"
         accion={accionesLibro(d.gestiona)}
-        vista={avisoSinCentro(r, d.gestiona)}
+        vista={avisoSinCentro(r, d.gestiona, conSaldo)}
         buscar="Buscar folio o proveedor"
         filtros={[
           { param: "periodo", etiqueta: "Período", opciones: periodosRecientes() },
           { param: "sin_centro", etiqueta: "Centro", opciones: [{ valor: "1", etiqueta: "Sin centro de costo" }] },
           { param: "con_saldo", etiqueta: "Pago", opciones: [{ valor: "1", etiqueta: "Con saldo por pagar" }] },
         ]}
-        meta={{ izquierda: r ? `${r.documentos} documentos · Total ${pesos(r.total)}` : `${items.length} documentos` }}
+        meta={{ izquierda: metaLibroCompras(r, items, conSaldo, pesos) }}
         seleccionada={seleccionada}
         vacio={vacioLibro(d)}
         filas={items.map((c) => ({

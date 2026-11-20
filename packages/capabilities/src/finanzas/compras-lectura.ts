@@ -7,6 +7,7 @@ import { uuidSchema } from "../core/esquemas";
 import { aFecha, cursorDe, pagina } from "../core/maestros/comun";
 import { PERMISO_READ } from "./comun";
 import { pagadoPorCompra, vistasDeCompras } from "./compras-consulta";
+import { calcularPaginaConSaldo, TAMANO_TRAMO_COMPRAS } from "./compras-pagina-con-saldo";
 import { compraSchema } from "./vistas-compra";
 
 const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa-mm.");
@@ -14,7 +15,7 @@ const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa
 export const comprasListar = defineCapability({
   id: "finanzas.compras.listar",
   descripcion:
-    "Lista el libro de compras: documentos recibidos con folio, proveedor, montos, centro de costo, plazo para aceptar o reclamar y la sugerencia de centro de costo cuando falta. Filtra por período de recepción, proveedor, estado o solo los sin centro de costo; incluye totales del filtro. Cada documento trae su estado de pago (por pagar, parcial o pagada) y el saldo, derivados de lo conciliado con el banco.",
+    "Lista el libro de compras: documentos recibidos con folio, proveedor, montos, centro de costo, plazo para aceptar o reclamar y la sugerencia de centro de costo cuando falta. Filtra por período de recepción, proveedor, estado o solo los sin centro de costo; incluye totales del filtro. Cada documento trae su estado de pago (por pagar, parcial o pagada) y el saldo, derivados de lo conciliado con el banco. El resumen no aplica el filtro conSaldo.",
   permiso: PERMISO_READ,
   input: z.object({
     periodo: periodoSchema.optional().describe("Mes de recepción, aaaa-mm."),
@@ -35,7 +36,7 @@ export const comprasListar = defineCapability({
       neto: z.number().int().describe("Las notas de crédito restan."),
       iva: z.number().int(),
       total: z.number().int(),
-    }),
+    }).describe("Resumen del libro según los otros filtros, sin aplicar conSaldo."),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -69,33 +70,18 @@ export const comprasListar = defineCapability({
         });
         return pagina(filas, input.limite, input.cursor);
       }
-      type FilaLibro = Awaited<
-        ReturnType<typeof ctx.db.documentoRecibido.findMany<{ include: { proveedor: true } }>>
-      >[number];
-      const salidas: FilaLibro[] = [];
-      let cur = input.cursor;
-      while (salidas.length <= input.limite) {
-        const lote = await ctx.db.documentoRecibido.findMany({
+      return calcularPaginaConSaldo(
+        input.limite,
+        input.cursor,
+        (cursor) => ctx.db.documentoRecibido.findMany({
           where,
           include: { proveedor: true },
           orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
-          ...cursorDe(cur, 50),
-        });
-        if (!lote.length) break;
-        const pagado = await pagadoPorCompra(
-          ctx,
-          lote.map((f) => f.id),
-        );
-        for (const f of lote) {
-          if (f.tipoDte === 61) continue;
-          const saldo = Math.max(f.montoTotal - (pagado.get(f.id) ?? 0), 0);
-          if (saldo > 0) salidas.push(f);
-          if (salidas.length > input.limite) break;
-        }
-        cur = lote[lote.length - 1]?.id;
-        if (lote.length < 50) break;
-      }
-      return pagina(salidas, input.limite, input.cursor);
+          take: TAMANO_TRAMO_COMPRAS,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        }),
+        (ids) => pagadoPorCompra(ctx, ids),
+      );
     };
     const [{ items, siguiente }, porTipo, sinCentro] = await Promise.all([
       armarPagina(),
