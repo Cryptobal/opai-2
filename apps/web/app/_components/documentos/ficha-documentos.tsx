@@ -17,6 +17,8 @@ const CAPA = {
   instalacion: "instalacion",
   persona: "persona",
   puesto: "puesto",
+  ticket: "ticket",
+  visita: "visita",
 } as const;
 
 /** Tab Documentos de una ficha (16): resumen de vigencias, faltantes punteados y lista por tipo. */
@@ -25,14 +27,13 @@ export async function FichaDocumentos({
   consulta = "",
 }: {
   entidad: EntidadDocumento;
-  /** Continuación de la URL de la lista (`&q=…`) para que subir un documento no pierda la búsqueda. */
   consulta?: string;
 }) {
   const [r, t] = await Promise.all([
     ejecutarComoUsuario<{ items: Documento[]; faltantes: { tipoId: string; nombre: string }[] }>(
       "erp",
       "core.documentos.list",
-      { entidad },
+      { entidad, limite: 200 },
     ),
     ejecutarComoUsuario<TipoDocumento[]>("erp", "core.documento_tipos.list", {
       capa: CAPA[entidad.tipo],
@@ -40,7 +41,6 @@ export async function FichaDocumentos({
   ]);
   const docs = r.ok ? r.data.items : [];
   const faltantes = r.ok ? r.data.faltantes : [];
-  // Sin permiso para los tipos, la hoja de subir no ofrece ninguno; otro fallo cuenta como error (CAR-50).
   const tipos = t.ok ? t.data : [];
   const cargas = !t.ok && t.error.code !== "FORBIDDEN" ? [r, t] : [r];
   const cuenta = (v: Documento["vigencia"]) => docs.filter((d) => d.vigencia === v).length;
@@ -135,9 +135,7 @@ export async function FichaDocumentos({
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-base font-medium text-fg">Falta: {f.nombre}</span>
-              <span className="t-caption block">
-                Obligatorio · nunca se subió. Un documento vencido se renueva en su fila.
-              </span>
+              <span className="t-caption block">Obligatorio · nunca se subió. Un documento vencido se renueva en su fila.</span>
             </span>
             <EnlaceBotonHoja
               href={`?subir=1&tipo=${f.tipoId}${consulta}`}

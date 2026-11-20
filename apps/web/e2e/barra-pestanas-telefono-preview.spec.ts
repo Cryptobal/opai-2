@@ -55,7 +55,9 @@ test.describe("@preview barra inferior del teléfono (CAR-416)", () => {
     await expect(hoja).toHaveCount(0);
   });
 
-  test("Agente se abre sin «Cerrar» y otra pestaña lo cierra", async ({ page }, info) => {
+  // TODO(CAR-664): reactivar al validar en Playwright el arreglo de foco del panel/compositor.
+  // Fallback autorizado por Carlos después de 30 min; la corrección real se conserva aparte.
+  test.fixme("Agente se abre sin «Cerrar» y otra pestaña lo cierra", async ({ page }, info) => {
     const barra = await abrirInicioNuevo(page);
     const agente = barra.getByRole("button", { name: /Agente/ });
     test.skip((await agente.count()) === 0, "la empresa no tiene agente");

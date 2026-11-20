@@ -3,11 +3,11 @@ import { z } from "zod";
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 import { horasDeTurnoEsperado } from "@opai/domain";
 
-import { personaPropia } from "./persona-propia";
+import { cortarPagina, personaPropia, tramoPagina } from "./persona-propia";
 
 const DIAS_MAX = 62;
 /** Fecha civil que existe en el calendario (2026-02-30 o 2026-13-45 se rechazan). */
-const fechaCivil = z
+export const fechaCivil = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha va como aaaa-mm-dd.")
   .refine((d) => !Number.isNaN(Date.parse(`${d}T00:00:00Z`)) && new Date(`${d}T00:00:00Z`).toISOString().startsWith(d), {
@@ -78,11 +78,9 @@ export const misTurnosListar = defineCapability({
         fecha: { gte: new Date(`${desde}T00:00:00Z`), lte: new Date(`${hasta}T00:00:00Z`) },
       },
       orderBy: [{ inicio: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+      ...tramoPagina(input),
     });
-    const pagina = filas.slice(0, input.limite);
-    const siguiente = filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null;
+    const { pagina, siguiente } = cortarPagina(filas, input.limite);
     const [instalaciones, puestos] = await Promise.all([
       ctx.db.instalacion.findMany({
         where: { id: { in: [...new Set(pagina.map((f) => f.instalacionId))] } },

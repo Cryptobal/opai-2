@@ -9,7 +9,7 @@ import {
   saldoPendiente,
 } from "@opai/domain";
 
-import { dia, hoy } from "../core/maestros/comun";
+import { dia } from "../core/maestros/comun";
 
 export const lineaSchema = z.object({
   id: z.string(),
@@ -137,6 +137,3 @@ export function vistaVenta(
     href: `/finanzas/ventas/${d.id}`,
   };
 }
-
-/** Fecha de emisión efectiva para vistas (borrador sin fecha → hoy). */
-export const emisionVisible = (d: FilaVenta) => dia(d.fechaEmision) ?? hoy();

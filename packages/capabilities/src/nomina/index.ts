@@ -8,12 +8,10 @@ import { costoProyectadoListar } from "./costo-proyectado";
 import { liquidacionesCalcular } from "./liquidaciones-calcular";
 import { liquidacionesListar, liquidacionesObtener } from "./liquidaciones-lectura";
 import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
+import { f301Generar } from "./f30-1";
+import { libroRemuneracionesExcel, libroRemuneracionesPdf } from "./libro-remuneraciones";
 import { lreGenerar } from "./lre";
 import { previredGenerar } from "./previred";
-import { f301Generar } from "./f30-1";
-import { consumidorLiquidacionPublicada } from "./consumidor-liquidacion-publicada";
-import { libroRemuneracionesExcel, libroRemuneracionesPdf } from "./libro-remuneraciones";
-import { liquidacionesPublicar } from "./liquidaciones-publicar";
 import {
   cumplimientoDtMovimientosDatos,
   cumplimientoDtMovimientosExportar,
@@ -64,11 +62,8 @@ export const capacidadesNomina: readonly Capacidad[] = [
   f301Generar,
   libroRemuneracionesExcel,
   libroRemuneracionesPdf,
-  liquidacionesPublicar,
   cumplimientoDtMovimientosListar,
   cumplimientoDtMovimientosExportar,
   cumplimientoDtMovimientosDatos,
   cumplimientoDtMovimientosRegistrar,
 ];
-
-export const consumidoresNomina = [consumidorLiquidacionPublicada];

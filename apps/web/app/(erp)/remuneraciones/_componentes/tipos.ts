@@ -94,8 +94,6 @@ export type LiquidacionResumen = {
   descuentos: number;
   liquido: number;
   advertencias: string[];
-  publicadaEn: string | null;
-  documentoId: string | null;
 };
 export type LineaLiquidacion = { concepto: string; monto: number };
 export type LiquidacionDetalle = LiquidacionResumen & {
@@ -104,7 +102,6 @@ export type LiquidacionDetalle = LiquidacionResumen & {
   costoEmpresa: number;
   detalle: { haberes: LineaLiquidacion[]; descuentosLegales: LineaLiquidacion[]; otrosDescuentos: LineaLiquidacion[] };
   calculadaEn: string | null;
-  correoPersonal: string | null;
 };
 export type ListaLiquidaciones = {
   items: LiquidacionResumen[];

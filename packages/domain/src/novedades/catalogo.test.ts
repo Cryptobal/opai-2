@@ -20,6 +20,8 @@ modulo: core
 titulo: Título
 destacada: true
 ruta: /foo
+pr: 911
+car: CAR-528
 ---
 Descripción para el usuario.
 `);
@@ -28,6 +30,8 @@ Descripción para el usuario.
       modulo: "core",
       destacada: true,
       ruta: "/foo",
+      pr: 911,
+      car: "CAR-528",
       descripcion: "Descripción para el usuario.",
     });
   });
@@ -55,7 +59,16 @@ Descripción para el usuario.
   });
 
   it("ordena por fecha y, dentro del mismo día, pone las destacadas arriba", () => {
-    const base = { modulo: "core", titulo: "t", descripcion: "d", ruta: null, car: null, permiso: null, imagen: null };
+    const base = {
+      modulo: "core",
+      titulo: "t",
+      descripcion: "d",
+      ruta: null,
+      car: null,
+      pr: null,
+      permiso: null,
+      imagen: null,
+    };
     const a = { ...base, id: "a", fecha: "2026-11-10", destacada: false };
     const b = { ...base, id: "b", fecha: "2026-11-10", destacada: true };
     const c = { ...base, id: "c", fecha: "2026-11-11", destacada: false };

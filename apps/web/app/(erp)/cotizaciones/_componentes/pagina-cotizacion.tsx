@@ -3,7 +3,8 @@ import { type ReactNode, Suspense } from "react";
 import { Loading, SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { conBusqueda, leerParametros, type SearchParams } from "@/lib/parametros";
+import { queryConCambios } from "@/app/_components/maestros/paginacion-cursor";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 
 import { cargarCotizaciones, cargarFichaCotizacion } from "./datos";
 import { DetalleCotizacion } from "./detalle-cotizacion";
@@ -26,12 +27,19 @@ export function PaginaCotizacion({ params, searchParams, children }: Props) {
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      opciones={(d) => ({ volver: { href: conBusqueda("/cotizaciones", d.p.q), etiqueta: "Cotizaciones" } })}
+      opciones={(d) => ({
+        volver: { href: `/cotizaciones${queryConCambios(d.p, {})}`, etiqueta: "Cotizaciones" },
+      })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
         const datos = cargarFichaCotizacion(id);
         datos.catch(() => undefined);
-        const lista = await cargarCotizaciones(p["cursor"], undefined, p["ver"] === "archivadas");
+        const lista = await cargarCotizaciones(
+          p["cursor"],
+          undefined,
+          p["ver"] === "archivadas",
+          p,
+        );
         return { id, p, datos, lista };
       }}
     >
@@ -40,13 +48,7 @@ export function PaginaCotizacion({ params, searchParams, children }: Props) {
           telefono="detalle"
           unPanelHastaLg
           etiquetaLista="Lista de cotizaciones"
-          lista={
-            <ListaCotizaciones
-              datos={lista}
-              seleccionada={id}
-              {...(p.q !== undefined && p.q !== "" ? { q: p.q } : {})}
-            />
-          }
+          lista={<ListaCotizaciones datos={lista} seleccionada={id} p={p} />}
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>
               <DetalleCotizacion datos={datos}>{children}</DetalleCotizacion>

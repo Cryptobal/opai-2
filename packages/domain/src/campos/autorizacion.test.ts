@@ -12,11 +12,14 @@ import {
 const claves = (l: { clave: string }[]) => l.map((c) => c.clave);
 
 describe("clasificarCampos", () => {
-  it("con permiso de cuentas e instalaciones autoriza esas entidades y deja el resto sin resolvedor", () => {
+  it("con todos los permisos autoriza empresa, CPQ y maestros", () => {
     const r = clasificarCampos("propuesta", () => true);
     expect(claves(r.autorizados)).toContain("cuenta.nombre");
     expect(claves(r.autorizados)).toContain("instalacion.mapa_url");
-    expect(claves(r.sinResolvedor)).toContain("empresa.nombre");
+    expect(claves(r.autorizados)).toContain("empresa.nombre");
+    expect(claves(r.autorizados)).toContain("cotizacion.venta_mensual");
+    expect(claves(r.autorizados)).toContain("puesto.nombre");
+    expect(r.sinResolvedor).toEqual([]);
     expect(r.sinPermiso).toEqual([]);
   });
 

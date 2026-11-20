@@ -22,7 +22,7 @@ describe.skipIf(!urlPropietario)("sincronizar-cobertura", () => {
       const inst = await e.admin.instalacion.create({ data: { tenantId, cuentaId: cuenta.id, nombre: "Planta" } });
       const cargo = await e.admin.cargo.create({ data: { tenantId, nombre: "Guardia" } });
       const patron = await e.admin.patronTurno.create({ data: { tenantId, nombre: "4x4", diasTrabajo: 4, diasDescanso: 4 } });
-      const persona = await e.admin.persona.create({ data: { tenantId, nombres: "P", apellidos: "Q", rut: `${Math.floor(Math.random() * 9e6) + 1e6}-K`, estado: "activa" } });
+      const persona = await e.admin.persona.create({ data: { tenantId, nombres: "P", apellidos: "Q", rut: `${Math.floor(Math.random() * 9e6) + 1e6}-K`, estado: "activo" } });
       const puesto = async (nombre: string, extra: Record<string, unknown> = {}) =>
         (await e.admin.puesto.create({ data: { tenantId, instalacionId: inst.id, cargoId: cargo.id, nombre, diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00", ...extra } })).id;
       const serie = (puestoId: string, titular: string | null, desde: string, hasta: string | null) =>

@@ -12,7 +12,7 @@ export function TablaLiquidaciones({ periodoId, items }: { periodoId: string; it
   return (
     <Table aria-label="Liquidaciones del período">
       <thead>
-        <tr><Th>Persona</Th><Th className="text-right">Días</Th><Th className="text-right">Haberes</Th><Th className="text-right">Descuentos</Th><Th className="text-right">Líquido</Th><Th>Estado</Th></tr>
+        <tr><Th>Persona</Th><Th className="text-right">Días</Th><Th className="text-right">Haberes</Th><Th className="text-right">Descuentos</Th><Th className="text-right">Líquido</Th></tr>
       </thead>
       <tbody>
         {items.map((l) => (
@@ -27,7 +27,6 @@ export function TablaLiquidaciones({ periodoId, items }: { periodoId: string; it
             <Td className="t-numeric text-right">{pesos(l.haberes)}</Td>
             <Td className="t-numeric text-right">{pesos(l.descuentos)}</Td>
             <Td className="t-numeric text-right font-semibold">{pesos(l.liquido)}</Td>
-            <Td>{l.estado === "revisada" ? <Badge tono="success">Revisada</Badge> : <Badge>Calculada</Badge>}</Td>
           </tr>
         ))}
       </tbody>

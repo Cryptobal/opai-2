@@ -4,6 +4,7 @@ import { z } from "zod";
 import { defineCapability } from "../../define";
 import { noEncontrado, prohibido } from "../../errores";
 import { uuidSchema } from "../esquemas";
+import { paginaCursorLimite200 } from "../maestros/comun";
 import { dondePersona } from "../maestros/alcance";
 import { equipoDe, personaDelUsuario } from "./datos";
 
@@ -12,14 +13,13 @@ export const personasACargoList = defineCapability({
   descripcion:
     "Personas a cargo de un jefe según la jefatura de cada cargo: las que le reportan directamente y, hacia abajo, toda su línea. Sin indicar a quién, responde por quien consulta. Paginada por cursor (hasta 200 por página). Sirve para saber a quién puede ver o aprobar un jefe.",
   permiso: PERMISOS_CORE.personasRead,
-  input: z.object({
-    personaId: uuidSchema
-      .optional()
-      .describe("Jefe por el que se pregunta. Por defecto, la Persona de quien consulta."),
-    // CAR-353: contrato único de listas (cursor + limite; items + siguiente).
-    cursor: uuidSchema.optional().describe("Para seguir: el valor `siguiente` anterior."),
-    limite: z.number().int().min(1).max(200).default(200),
-  }),
+  input: z
+    .object({
+      personaId: uuidSchema
+        .optional()
+        .describe("Jefe por el que se pregunta. Por defecto, la Persona de quien consulta."),
+    })
+    .extend(paginaCursorLimite200),
   output: z.object({
     jefePersonaId: z
       .string()
