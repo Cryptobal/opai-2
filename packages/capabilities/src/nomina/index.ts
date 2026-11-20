@@ -8,6 +8,8 @@ import { costoProyectadoListar } from "./costo-proyectado";
 import { liquidacionesCalcular } from "./liquidaciones-calcular";
 import { liquidacionesListar, liquidacionesObtener } from "./liquidaciones-lectura";
 import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
+import { lreGenerar } from "./lre";
+import { previredGenerar } from "./previred";
 import { f301Generar } from "./f30-1";
 import { f29RetencionGenerar } from "./f29";
 import { consumidorLiquidacionPublicada } from "./consumidor-liquidacion-publicada";
@@ -19,8 +21,6 @@ import {
   cumplimientoDtMovimientosListar,
   cumplimientoDtMovimientosRegistrar,
 } from "./cumplimiento-dt/capacidades";
-import { lreGenerar } from "./lre";
-import { previredGenerar } from "./previred";
 import { conceptosActualizar, conceptosCrear, conceptosListar } from "./conceptos";
 import { novedadesAnular, novedadesCargar, novedadesCrear } from "./novedades-escritura";
 import { novedadesListar } from "./novedades-lectura";
