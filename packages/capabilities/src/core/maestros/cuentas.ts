@@ -15,9 +15,13 @@ export const cuentasList = defineCapability({
   auditarLectura: (s) => s.items.map((c) => c.id),
   id: "core.cuentas.list",
   descripcion:
-    "Lista las cuentas (clientes y prospectos) de la empresa, con búsqueda por nombre, razón social o RUT y filtro por estado. Cada fila dice si está lista para facturar o qué le falta (sin consultar al SII). Paginada por cursor.",
+    "Lista las cuentas (clientes y prospectos) de la empresa, con búsqueda por nombre, razón social o RUT y filtros por estado e instalaciones no archivadas en el alcance del actor. Cada fila dice si está lista para facturar o qué le falta (sin consultar al SII). Paginada por cursor.",
   permiso: PERMISOS_CORE.cuentasRead,
-  input: listaSchema.extend({ estado: z.enum(ESTADOS_CUENTA).optional(), etiquetaId: filtroEtiqueta }),
+  input: listaSchema.extend({
+    estado: z.enum(ESTADOS_CUENTA).optional(),
+    etiquetaId: filtroEtiqueta,
+    conInstalaciones: z.boolean().optional(),
+  }),
   output: z.object({
     items: z.array(
       cuentaSchema.extend({
@@ -34,11 +38,13 @@ export const cuentasList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const q = input.q;
+    const instalacionesVisibles = { archivadaEn: null, AND: [dondeInstalacion(ctx)] };
     // Instalaciones activas (conteo) y contacto principal van en la misma consulta (_count + include),
     // no en consultas por página aparte (ADR-045).
     const filas = await ctx.db.cuenta.findMany({
       where: {
         AND: [dondeCuenta(ctx)],
+        ...(input.conInstalaciones ? { instalaciones: { some: instalacionesVisibles } } : {}),
         ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
         ...(input.estado ? { estado: input.estado } : {}),
         ...conEtiqueta(input.etiquetaId),
@@ -57,7 +63,7 @@ export const cuentasList = defineCapability({
       include: {
         _count: {
           select: {
-            instalaciones: { where: { archivadaEn: null, AND: [dondeInstalacion(ctx)] } },
+            instalaciones: { where: instalacionesVisibles },
             // Destinatarios de facturación para «Lista para facturar», sin una consulta por fila.
             contactoVinculos: { where: { roles: { has: "facturacion" } } },
           },

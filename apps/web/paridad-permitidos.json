@@ -42,10 +42,6 @@
       "motivo": "Verificación pública de una marca por hash (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.marcas.verificar (interna) con el hash de 256 bits como credencial, con rate limit que falla cerrado."
     },
     {
-      "archivo": "app/correccion/[slug]/[token]/ver.ts",
-      "motivo": "Respuesta pública a una corrección de marca (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) con el token del correo personal como credencial y el RUT como confirmación, con rate limit que falla cerrado."
-    },
-    {
       "archivo": "app/_acciones/dispositivos.ts",
       "motivo": "Terreno › Emparejar ocurre antes de existir sesión o empresa: canjea el código de 6 caracteres por el token del dispositivo con la operación con nombre emparejarDispositivo (función SECURITY DEFINER); tope por origen con fallo cerrado (CAR-78 B2)."
     },
@@ -100,6 +96,10 @@
       "motivo": "Ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) para la página pública donde el trabajador acepta u objeta una corrección."
     },
     {
+      "archivo": "app/contingencia/[slug]/[token]/ver.ts",
+      "motivo": "Ejecuta asistencia.contingencias.ver_enlace y responder_enlace (internas) para la página pública donde el trabajador acepta u objeta una contingencia."
+    },
+    {
       "archivo": "app/api/integraciones/slack/eventos/route.ts",
       "motivo": "core.slack.desinstalada es interna por diseño: solo este receptor la ejecuta, con la firma de Slack como credencial, cuando la app se desinstala o su token se revoca."
     },
@@ -140,6 +140,10 @@
     {
       "archivo": "lib/dispositivo.ts",
       "motivo": "Reconoce al dispositivo de terreno por su token (HMAC) en cada petición con dispositivoPorToken; el dispositivo no tiene sesión de usuario (CAR-78 B2)."
+    },
+    {
+      "archivo": "lib/contexto-publico-asistencia.ts",
+      "motivo": "Arma el contexto de sistema para enlaces públicos de Asistencia (corrección, contingencia): tenantPorSlug, rate limit y módulo activo."
     }
   ]
 }

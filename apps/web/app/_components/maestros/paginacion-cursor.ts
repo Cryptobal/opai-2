@@ -1,3 +1,4 @@
+import { esUuid } from "@/lib/ids";
 import { estadoPantalla } from "@/lib/formato";
 import type { Parametros } from "@/lib/parametros";
 
@@ -36,4 +37,13 @@ export function tamanoPagina(
   predeterminado: TamanoPagina = POR_PAGINA,
 ): TamanoPagina {
   return TAMANOS_PAGINA.find((n) => String(n) === p["limite"]) ?? predeterminado;
+}
+
+/** Entrada paginada de una capacidad de lista CAR-585. */
+export function entradaPaginaLista(p: Parametros) {
+  const cursor = p["cursor"];
+  return {
+    limite: tamanoPagina(p, 20),
+    ...(cursor && esUuid(cursor) ? { cursor } : {}),
+  };
 }
