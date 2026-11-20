@@ -8,6 +8,10 @@ import type { EmisorFcm } from "@opai/integrations";
 
 type Capacidades = typeof ModuloCapacidades;
 
+/** RUT distinto por persona y por corrida (único por tenant: `personas_tenant_id_rut_key`). */
+const rutPrueba = () =>
+  `${parseInt(randomUUID().replace(/-/g, "").slice(0, 10), 16) % 90_000_000 + 10_000_000}-K`;
+
 describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () => {
   let e: Entorno;
   let mod: Capacidades;
@@ -63,7 +67,7 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
             tenantId: tenantA,
             nombres: nombre,
             apellidos: "Prueba",
-            rut: "13.131.313-3",
+            rut: rutPrueba(),
             estado: "activo",
             usuarioId: id,
           },
