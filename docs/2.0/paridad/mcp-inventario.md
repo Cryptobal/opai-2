@@ -1285,9 +1285,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
-- `asistencia.marcas.listar`
-- `asistencia.marcas.obtener`
-- `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.proponer`
 - `central.avisos.acusar`
@@ -1296,7 +1293,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.avisos.obtener`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
-- `central.estado`
 - `central.mensajes.cerrar`
 - `central.mensajes.enviar`
 - `central.mensajes.listar`
