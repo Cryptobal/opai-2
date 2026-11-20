@@ -204,6 +204,12 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes.",
   "central.alertas.hacerse_cargo":
     "Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala.",
+  "asistencia.fiscalizacion_ingreso.validar":
+    "Interna: el portal público `/fiscalizacion` valida correo @dt.gob.cl o clave temporal; no hay herramienta MCP para sesión anónima (CAR-594).",
+  "asistencia.fiscalizacion_empleador.buscar":
+    "Interna: búsqueda de empleador por RUT en el portal DT con cookie de fiscalización (CAR-594).",
+  "asistencia.fiscalizacion_accesos.registrar":
+    "Interna: auditoría de accesos del portal; la invoca la ruta pública, no el ERP (CAR-594).",
   "asistencia.marcas.verificar":
     "Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante.",
   "asistencia.correcciones.responder":
