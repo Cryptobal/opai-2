@@ -18,6 +18,8 @@
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@modelcontextprotocol/server": "^2.3.1",
+    "@capacitor/core": "8.6.2",
+    "@capacitor/push-notifications": "8.0.2",
     "@opai/auth": "workspace:*",
     "@opai/capabilities": "workspace:*",
     "@opai/db": "workspace:*",

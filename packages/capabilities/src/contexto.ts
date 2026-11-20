@@ -9,7 +9,12 @@ import {
   tienePermisoPlataforma,
 } from "@opai/domain";
 import { accesoPlataforma, forTenant } from "@opai/db";
-import { almacenamientoDelEntorno, emisorPushDelEntorno, mailerDelEntorno } from "@opai/integrations";
+import {
+  almacenamientoDelEntorno,
+  emisorFcmDelEntorno,
+  emisorPushDelEntorno,
+  mailerDelEntorno,
+} from "@opai/integrations";
 
 import { identidadEnDb } from "./identidad-db";
 import { idempotenciaSobre } from "./idempotencia";
@@ -192,6 +197,8 @@ export function crearContexto(params: ParametrosContexto): Contexto {
       correo: params.servicios?.correo ?? mailerDelEntorno(),
       almacenamiento: params.servicios?.almacenamiento ?? almacenamientoDelEntorno(),
       push: params.servicios?.push === undefined ? emisorPushDelEntorno() : params.servicios.push,
+      pushNativo:
+        params.servicios?.pushNativo === undefined ? emisorFcmDelEntorno() : params.servicios.pushNativo,
       urlBase:
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },

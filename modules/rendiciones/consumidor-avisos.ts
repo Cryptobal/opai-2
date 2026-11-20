@@ -1,6 +1,12 @@
 import { renderizar } from "@opai/domain";
 
-import { defineConsumidor, enviarCorreo, type Contexto, type EventoPublicado } from "@opai/capabilities";
+import {
+  avisarPushTrasCampana,
+  defineConsumidor,
+  enviarCorreo,
+  type Contexto,
+  type EventoPublicado,
+} from "@opai/capabilities";
 import { comunicableDe, plantillaVigente } from "../../packages/capabilities/src/core/comunicaciones/resolver";
 import { variablesDe } from "../../packages/capabilities/src/core/comunicaciones/variables";
 
@@ -88,6 +94,7 @@ export const consumidorRendicionesAvisos = defineConsumidor({
     await ctx.transaccion(async (tx) => {
       await entregarInApp(tx, ctx, ev, usuarioId, datos, enlace);
     });
+    await avisarPushTrasCampana(ctx, usuarioId, ev.tipo, enlace);
     await entregarCorreo(ctx, ev, user.email, datos);
   },
 });

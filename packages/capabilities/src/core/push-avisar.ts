@@ -9,11 +9,6 @@ const horaEn = (zona: string, ahora: Date) =>
     ahora,
   );
 
-/**
- * Usuarios que quieren el aviso al celular de esta categoría y no están en su horario de silencio. Las
- * preferencias son de la persona (Notificaciones del portal del trabajador); sin elección, ningún canal externo
- * está activo (ADR-020): por defecto no se toca el celular.
- */
 async function quierenPush(ctx: Contexto, usuarioIds: string[], categoria: CategoriaAviso, ahora: Date) {
   const personas = await ctx.db.persona.findMany({
     where: { usuarioId: { in: usuarioIds } },
@@ -38,10 +33,8 @@ async function quierenPush(ctx: Contexto, usuarioIds: string[], categoria: Categ
 /**
  * Toca el celular de cada usuario con sus dispositivos suscritos (CAR-356 PR 4a), si eligió el aviso al celular
  * de esa categoría y no está en su horario de silencio. Va **después** del aviso en la campana y nunca lo
- * reemplaza: sin claves VAPID, sin preferencia o sin suscripciones no hace nada. Borra las suscripciones que el
- * servicio dio por vencidas y mide cada envío en `core.consumos` (ADR-031). Nunca lanza: un fallo de red no debe
- * reintentar el consumidor; si el consumidor se reintenta por otra causa, el push de ese intento se pierde (la
- * campana ya lo tiene), nunca se duplica.
+ * reemplaza: sin claves VAPID ni cuenta Firebase, sin preferencia o sin suscripciones no hace nada. Borra las
+ * suscripciones que el servicio dio por vencidas y mide cada envío en `core.consumos` (ADR-031). Nunca lanza.
  */
 export async function avisarAlCelular(
   ctx: Contexto,
@@ -49,18 +42,28 @@ export async function avisarAlCelular(
   categoria: CategoriaAviso,
   modulo: string,
   ahora: Date = new Date(),
+  ruta: string = "/bandeja",
 ) {
-  const emisor = ctx.servicios.push;
-  if (!emisor || usuarioIds.length === 0) return;
+  const emisorWeb = ctx.servicios.push;
+  const emisorNativo = ctx.servicios.pushNativo;
+  if ((!emisorWeb && !emisorNativo) || usuarioIds.length === 0) return;
   try {
     const destino = await quierenPush(ctx, [...new Set(usuarioIds)], categoria, ahora);
     if (destino.length === 0) return;
     const suscripciones = await ctx.db.suscripcionPush.findMany({
       where: { usuarioId: { in: destino } },
-      select: { id: true, endpoint: true },
+      select: { id: true, tipo: true, endpoint: true, token: true, plataforma: true },
     });
     for (const s of suscripciones) {
-      const r = await emisor.avisar(s.endpoint).catch(() => ({ ok: false, estado: 0, vencida: false }));
+      let r: { ok: boolean; estado: number; vencida: boolean };
+      if (s.tipo === "nativa" && s.token && emisorNativo) {
+        const plataforma = s.plataforma === "ios" ? "ios" : "android";
+        r = await emisorNativo
+          .avisar(s.token, plataforma, ruta)
+          .catch(() => ({ ok: false, estado: 0, vencida: false }));
+      } else if (s.endpoint && emisorWeb) {
+        r = await emisorWeb.avisar(s.endpoint).catch(() => ({ ok: false, estado: 0, vencida: false }));
+      } else continue;
       if (r.vencida) await ctx.db.suscripcionPush.deleteMany({ where: { id: s.id } });
       else if (r.ok)
         await ctx.db.suscripcionPush.updateMany({ where: { id: s.id }, data: { ultimoAvisoEn: new Date() } });
