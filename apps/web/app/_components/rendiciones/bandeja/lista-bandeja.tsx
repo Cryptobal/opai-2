@@ -1,10 +1,7 @@
-import { Badge, Estado, FilaSeleccionable } from "@opai/ds";
+import { Estado } from "@opai/ds";
 
-import { LinkNext } from "@/app/_components/link-next";
-
-import { pesos } from "../formato";
+import { FilaBandejaRendicion } from "./fila-bandeja";
 import type { Bandeja, FiltrosBandeja } from "./tipos";
-import { hrefBandeja } from "./tipos";
 
 export function ListaBandejaRendiciones({
   filtros,
@@ -30,21 +27,7 @@ export function ListaBandejaRendiciones({
         <ul>
           {bandeja.items.map((r) => (
             <li key={r.id}>
-              <FilaSeleccionable
-                Link={LinkNext}
-                href={hrefBandeja(filtros, r.id)}
-                seleccionada={r.id === id}
-                titulo={r.codigoVisible}
-                secundario={`${r.solicitanteNombre ?? "Persona"} · ${r.descripcion}`}
-                terciario={pesos(r.montoTotal)}
-                fin={
-                  <Badge
-                    tono={r.estado === "enviada" ? "info" : r.estado === "aprobada" ? "success" : r.estado === "devuelta" ? "warning" : "danger"}
-                  >
-                    {r.estado === "enviada" ? "Por revisar" : r.estado}
-                  </Badge>
-                }
-              />
+              <FilaBandejaRendicion r={r} filtros={filtros} idActiva={id} />
             </li>
           ))}
         </ul>

@@ -121,6 +121,13 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
     supervisor: false,
     viewer: false,
   },
+  "core:personas.estado.admin": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
   "core:personas.prevision.read": {
     owner: true,
     admin: true,

@@ -14,6 +14,8 @@ import {
 } from "@opai/domain";
 
 import { reglaDeNegocio } from "../../errores";
+import type { Contexto } from "../../types";
+import { type CampoCuentaPlantilla, camposCuentaPlantilla, clavesActivasCuenta } from "./plantillas-campos-cuenta";
 
 export const claseSchema = z.enum(CLASES_PLANTILLA);
 export const nivelSchema = z
@@ -94,6 +96,9 @@ export const editorSchema = plantillaSchema.extend({
   desconocidas: z
     .array(z.string())
     .describe("Variables del borrador (o del texto vigente) fuera del catálogo: impiden publicar."),
+  camposCuenta: z
+    .array(z.object({ clave: z.string(), etiqueta: z.string() }))
+    .describe("Campos personalizados activos de la cuenta que el editor puede insertar como `cuenta.campo.*`."),
 });
 type FilaEditor = FilaPlantilla & {
   borradorContenido: string | null;
@@ -104,6 +109,7 @@ type FilaEditor = FilaPlantilla & {
 export function vistaEditor(
   p: FilaEditor,
   v: FilaVersion & { contenido: string },
+  camposCuenta: CampoCuentaPlantilla[],
 ): z.infer<typeof editorSchema> {
   const borrador =
     p.borradorContenido != null
@@ -113,10 +119,17 @@ export function vistaEditor(
           porNombre: p.borradorPorNombre,
         }
       : null;
+  const activas = clavesActivasCuenta(camposCuenta);
   return {
     ...vista(p, v),
     contenido: v.contenido,
     borrador,
-    desconocidas: variablesFueraDeClase(borrador?.contenido ?? v.contenido, p.clase as ClasePlantilla),
+    camposCuenta,
+    desconocidas: variablesFueraDeClase(borrador?.contenido ?? v.contenido, p.clase as ClasePlantilla, activas),
   };
+}
+
+export async function desconocidasPlantilla(ctx: Contexto, contenido: string, clase: ClasePlantilla) {
+  const campos = await camposCuentaPlantilla(ctx);
+  return { desconocidas: variablesFueraDeClase(contenido, clase, clavesActivasCuenta(campos)), camposCuenta: campos };
 }

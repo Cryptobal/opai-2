@@ -43,6 +43,9 @@ test.describe("@preview finanzas: cuadratura de la cartola", () => {
     await expect(hoja.getByText("La cartola cuadra")).toBeVisible({ timeout: 30_000 });
     // La empresa qa-e2e ya tiene una cartola de octubre (qa-e2e/bancos-importaciones.sql): se avisa (CAR-341).
     await expect(hoja.getByText("Esta cartola ya se importó")).toBeVisible();
+    // CAR-450: un movimiento ficticio del banco en línea de octubre sin par (qa-e2e/bancos-sobrantes.sql).
+    await expect(hoja.getByText("1 movimiento del banco en línea que la cartola no trae")).toBeVisible();
+    await expect(hoja.getByRole("checkbox", { name: "Quitar 1 movimiento al importar" })).toBeChecked();
     await capturar(page, info, "cartola-cuadra");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
   });

@@ -3,7 +3,7 @@
  * ahí queda en la empresa por defecto, y un documento de persona o puesto también vence.
  * La matriz de Personas sigue en `/personas/vencimientos`.
  */
-export const TIPOS_EN_VENCIMIENTOS = [
+const TIPOS_EN_VENCIMIENTOS = [
   "tenant",
   "cuenta",
   "instalacion",

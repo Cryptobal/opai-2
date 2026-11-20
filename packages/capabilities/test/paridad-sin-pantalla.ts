@@ -115,12 +115,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Aceptar u objetar una contingencia desde el Portal Trabajador: la pantalla entra con el diseño aprobado del portal. Mientras tanto responde por la capacidad (solo personas).",
   },
-  "asistencia.correcciones.responder": {
-    encargo: "CAR-89",
-    desde: "2026-11-10",
-    motivo:
-      "Aceptar u objetar una corrección desde el Portal Trabajador: la pantalla entra con el diseño aprobado del portal (A3). Mientras tanto responde por el enlace del correo personal (página pública, capacidad interna).",
-  },
   "core.biometria.enrolar": {
     encargo: "CAR-78",
     desde: "2026-11-10",
@@ -132,5 +126,17 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     desde: "2026-11-10",
     motivo:
       "La verificación con prueba de vida se invoca desde la marcación de Asistencia (frente «Face ID»), que aporta la cámara; B4 deja el adaptador y la capacidad.",
+  },
+  "core.personas.bloquear_permanente": {
+    encargo: "CAR-674",
+    desde: "2026-11-19",
+    motivo:
+      "Bloqueo permanente de reclutamiento: llega con las acciones de estado en la ficha de persona (mismo encargo). Mientras tanto solo sesión admin con permiso estado.admin.",
+  },
+  "core.personas.desbloquear_permanente": {
+    encargo: "CAR-674",
+    desde: "2026-11-19",
+    motivo:
+      "Quitar bloqueo permanente: llega con las acciones de estado en la ficha de persona (CAR-674). Mientras tanto solo sesión admin con permiso estado.admin.",
   },
 };

@@ -14,9 +14,15 @@
 - Ajuste `pauta.visita_lista` (lista de revisión por empresa; vacía = lista genérica).
 - Prueba `pauta-visitas-db.test.ts`: vista previa, una en curso, quién cierra, cerrada no se edita, alcance del supervisor y otra empresa.
 
+## Qué entra (PR 2a: historial en la ficha de la instalación, apilado sobre el PR 1)
+
+- Pestaña «Visitas» en la ficha de instalación del ERP (`/instalaciones/<id>/visitas`), visible con Pauta activo y `pauta:read`: lista paginada (`pauta.visitas.listar` filtrada por instalación) con llegada, supervisor, ubicación según la geocerca y resumen de la lista de revisión; el detalle abre en una hoja por `?visita=` con cada ítem, su nota y las observaciones. Solo lectura.
+- Sin diseño aprobado propio: sigue el patrón de la pestaña «Rondas» de la misma ficha (lista con tarjeta en teléfono y tabla en escritorio, hoja de detalle por URL).
+- Prueba `@preview` `instalacion-visitas-preview.spec.ts` y novedad para usuarios.
+
 ## Qué queda pendiente
 
-- PR 2: pantalla de la visita en el portal del supervisor e historial en la ficha de la instalación (después de #730, diseño nuevo).
+- PR 2b: pantalla de la visita en el portal del supervisor (iniciar y cerrar desde el teléfono), después de #730, con el diseño nuevo.
 - PR 3: fotos y firma del guardia por `core.documentos`, y «Hoy» con alertas (puestos sin cubrir, rondas atrasadas, faltas).
 - Reemplazo desde el celular con turno extra por aprobar (B8): espera CAR-96 (CAR-458).
 

@@ -45,6 +45,7 @@ export type TipoConcepto = (typeof TIPOS_CONCEPTO)[number];
 export const TIPOS_OBLIGACION = [
   "lre",
   "previred",
+  "f30_1",
   "f29_retencion",
   "dj_sueldos",
   "certificado_sueldos",

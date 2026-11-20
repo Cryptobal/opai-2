@@ -33,7 +33,10 @@ describe("core.users.*", () => {
     const r = await executeCapability(ctx, "core.users.list", {});
     expect(r).toMatchObject({
       ok: true,
-      data: [{ rol: "owner", roleId: null, rolNombre: null, ultimoAccesoEn: null }, {}],
+      data: [
+        { rol: "owner", roleId: null, rolNombre: null, ultimoAccesoEn: null, esPropio: true },
+        { esPropio: false },
+      ],
     });
   });
 
