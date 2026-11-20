@@ -216,6 +216,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial.",
   "asistencia.correcciones.responder_enlace":
     "Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada.",
+  "asistencia.contingencias.ver_enlace":
+    "Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal es la credencial.",
+  "asistencia.contingencias.responder_enlace":
+    "Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada.",
   "core.credenciales_terreno.asignar_pin":
     "Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02).",
   "core.credenciales_terreno.restablecer":

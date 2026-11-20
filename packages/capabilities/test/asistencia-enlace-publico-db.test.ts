@@ -9,6 +9,9 @@ import { prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
 
+const rutPrueba = () =>
+  `${parseInt(randomUUID().replace(/-/g, "").slice(0, 10), 16) % 90_000_000 + 10_000_000}-K`;
+
 describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () => {
   let e: Awaited<ReturnType<typeof prepararEntorno>>;
   let mod: typeof ModuloCapacidades;
@@ -51,7 +54,7 @@ describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () =
     instId = inst.id;
     const cargo = await e.admin.cargo.create({ data: { tenantId, nombre: "Guardia" } });
     const persona = await e.admin.persona.create({
-      data: { tenantId, nombres: "Ana", apellidos: "Prueba", rut: "12.345.678-9", estado: "activa" },
+      data: { tenantId, nombres: "Ana", apellidos: "Prueba", rut: rutPrueba(), estado: "activa" },
     });
     personaId = persona.id;
     await e.admin.vinculoLaboral.create({

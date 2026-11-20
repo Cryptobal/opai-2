@@ -24,6 +24,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
   "app/api/pauta/export/route.ts":
     "Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar.",
+  "app/api/asistencia/reportes-dt/export/route.ts":
+    "Descarga de asistencia.reportes.exportar (Excel/PDF) con sesión; mismo permiso y datos que la herramienta MCP asistencia_reportes_exportar (CAR-590).",
   "app/api/negocios/export/route.ts":
     "Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27).",
   "app/api/rendiciones/lotes/[id]/nomina/route.ts":
@@ -91,6 +93,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador.",
   "app/marcar/[codigo]/acciones.ts#marcarPorEnlacePublico":
     "Asistencia (CAR-606): marca pública por enlace de instalación con RUT + PIN; resuelve el código con marcacionPublicaPorCodigo y ejecuta asistencia.marcas.registrar con enlacePublicoValidado; tope por IP que falla cerrado.",
+  "app/contingencia/[slug]/[token]/accion.ts#accionResponder":
+    "Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial.",
   "app/firmar/[slug]/[token]/acciones.ts#verFirma":
     "Firma: core.firmas.ver_firmante (interna con motivo): el enlace personal es la credencial (firma.md §5).",
   "app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace":
