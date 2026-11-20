@@ -6,7 +6,8 @@ import { defineCapability } from "../../define";
 import { uuidSchema } from "../../core/esquemas";
 import { noEncontrado } from "../../errores";
 import { PERMISO_READ } from "../comun";
-import { filaCsv, movimientosMiDt } from "./movimientos";
+import { filaCsv } from "./movimientos-csv";
+import { movimientosMiDt } from "./movimientos";
 import { movimientoSchema, vistaMovimiento } from "./esquemas";
 
 async function movimientoDe(ctx: Parameters<typeof movimientosMiDt>[0], movimientoTipo: (typeof TIPOS_MOVIMIENTO_MI_DT)[number], referenciaId: string) {
