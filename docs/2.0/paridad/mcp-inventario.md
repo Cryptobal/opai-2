@@ -636,6 +636,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.aplicar_cuotas` | `nomina_prestamos_aplicar_cuotas` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.cancelar` | `nomina_prestamos_cancelar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.crear` | `nomina_prestamos_crear` | existe |
+| compartido | `app/(erp)/rondas/historial/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
+| compartido | `app/(erp)/rondas/historial/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/rondas/historial/_componentes` | `rondas.ejecuciones.leer` | `rondas_ejecuciones_leer` | existe |
+| compartido | `app/(erp)/rondas/historial/_componentes` | `rondas.ejecuciones.listar` | `rondas_ejecuciones_listar` | existe |
+| compartido | `app/(erp)/rondas/informe/_componentes` | `rondas.informes.cumplimiento` | `rondas_informes_cumplimiento` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.acciones_agente` | `comercial_solicitudes_acciones_agente` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.convertir` | `comercial_solicitudes_convertir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.create` | `comercial_solicitudes_create` | existe |
