@@ -4,7 +4,10 @@
  */
 type PluginBrowser = { open(o: { url: string }): Promise<void>; close(): Promise<void> };
 type PluginApp = {
-  addListener(evento: "appUrlOpen", f: (e: { url: string }) => void): Promise<{ remove(): void }>;
+  addListener(
+    evento: "appUrlOpen",
+    f: (e: { url: string }) => void,
+  ): Promise<{ remove(): void | Promise<void> }>;
   getLaunchUrl(): Promise<{ url: string } | undefined>;
 };
 type Capacitor = { Plugins?: { Browser?: PluginBrowser; App?: PluginApp } };
@@ -20,16 +23,35 @@ const base64url = (bytes: Uint8Array): string =>
     .replace(/\//g, "_")
     .replace(/=+$/, "");
 
-/** Abre Google en el navegador del sistema con un reto PKCE nuevo; devuelve false si no hay plugin. */
+/** Las APIs opcionales de algunos puentes nativos pueden lanzar o rechazar. */
+async function intentar<T>(fn: () => T | Promise<T>): Promise<T | undefined> {
+  try {
+    return await fn();
+  } catch {
+    return undefined;
+  }
+}
+
+/** Abre Google con un reto PKCE nuevo. Si el puente no puede abrirlo, permite volver a intentar. */
 export async function iniciarGoogleEnApp(): Promise<boolean> {
-  const browser = plugins()?.Browser;
-  if (!browser) return false;
-  const verificador = base64url(crypto.getRandomValues(new Uint8Array(32)));
-  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verificador));
-  localStorage.setItem(CLAVE, verificador);
-  const reto = base64url(new Uint8Array(hash));
-  await browser.open({ url: `${location.origin}/app/google?reto=${reto}` });
-  return true;
+  let verificador: string | undefined;
+  const abrio = await intentar(async () => {
+    const browser = plugins()?.Browser;
+    if (!browser) return false;
+    verificador = base64url(crypto.getRandomValues(new Uint8Array(32)));
+    const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verificador));
+    localStorage.setItem(CLAVE, verificador);
+    const reto = base64url(new Uint8Array(hash));
+    await browser.open({ url: `${location.origin}/app/google?reto=${reto}` });
+    return true;
+  });
+  if (!abrio && verificador) {
+    // Solo borra la credencial de este intento fallido, no la de un ingreso posterior.
+    await intentar(() => {
+      if (localStorage.getItem(CLAVE) === verificador) localStorage.removeItem(CLAVE);
+    });
+  }
+  return abrio === true;
 }
 
 /** Entrega el verificador guardado y lo borra: sirve para un solo canje. */
@@ -41,14 +63,26 @@ export function tomarVerificador(): string | null {
 
 /** Al volver de Google por `cl.opai.app://canje`, lleva la vista web a `/app/canje` con `navegar`. */
 export function escucharVueltaApp(navegar: (ruta: string) => void): () => void {
-  const p = plugins();
+  let activo = true;
   const ir = (url: string | undefined) => {
-    if (!url?.startsWith(ESQUEMA)) return;
-    const codigo = new URL(url).searchParams.get("codigo") ?? "";
-    void p?.Browser?.close().catch(() => undefined);
+    if (!activo || !url?.startsWith(ESQUEMA)) return;
+    const vuelta = new URL(url);
+    if (vuelta.protocol !== "cl.opai.app:" || vuelta.host !== "canje" || vuelta.pathname !== "")
+      return;
+    if (vuelta.username || vuelta.password) return;
+    const codigo = vuelta.searchParams.get("codigo") ?? "";
+    void intentar(() => plugins()?.Browser?.close());
     navegar(`/app/canje?codigo=${encodeURIComponent(codigo)}`);
   };
-  void p?.App?.getLaunchUrl().then((r) => ir(r?.url));
-  const suscripcion = p?.App?.addListener("appUrlOpen", (e) => ir(e.url));
-  return () => void suscripcion?.then((s) => s.remove());
+  void intentar(async () => {
+    const inicio = await plugins()?.App?.getLaunchUrl();
+    ir(inicio?.url);
+  });
+  const suscripcion = intentar(() =>
+    plugins()?.App?.addListener("appUrlOpen", (e) => void intentar(() => ir(e.url))),
+  );
+  return () => {
+    activo = false;
+    void intentar(async () => (await suscripcion)?.remove());
+  };
 }
