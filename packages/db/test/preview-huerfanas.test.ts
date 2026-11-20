@@ -1,8 +1,14 @@
 // Reglas del destrabe de la rama Neon de preview (workflow `preview`): solo ramas preview/pr-N y
 // solo registros fallidos cuya migración ya no existe en el repo.
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { fallidasHuerfanas, RAMA_PREVIEW, renombradas } from "../scripts/preview-huerfanas-reglas";
+import {
+  fallidasConSqlCorregido,
+  fallidasHuerfanas,
+  RAMA_PREVIEW,
+  renombradas,
+} from "../scripts/preview-huerfanas-reglas";
 
 const fila = (migration_name: string, terminada: boolean, revertida = false) => ({
   id: migration_name,
@@ -12,11 +18,36 @@ const fila = (migration_name: string, terminada: boolean, revertida = false) => 
 });
 
 describe("destrabe de la rama Neon de preview", () => {
+  it("protege cada reversión con transacción y lock_timeout corto", () => {
+    const fuente = readFileSync(new URL("../scripts/preview-huerfanas.ts", import.meta.url), "utf8");
+    const helper = fuente.slice(fuente.indexOf("async function marcarRevertidos"), fuente.indexOf("async function main"));
+    expect(helper).toMatch(/query\("BEGIN"\)[\s\S]*SET LOCAL lock_timeout = '5s'[\s\S]*UPDATE public\._prisma_migrations[\s\S]*query\("COMMIT"\)/);
+  });
+
   it("solo acepta ramas preview/pr-N", () => {
     expect(RAMA_PREVIEW.test("preview/pr-469")).toBe(true);
     for (const r of ["main", "dev", "preview/pr-", "preview/pr-1/x", "x/preview/pr-1", ""]) {
       expect(RAMA_PREVIEW.test(r), r).toBe(false);
     }
+  });
+
+  it("marca las fallidas cuyo SQL en el repo ya no coincide (checksum)", () => {
+    const repo = new Map([
+      ["20270123160000_comercial_negocios_probabilidad_etapa", "nuevo"],
+      ["20270122100000_tickets_instalacion", "ok"],
+    ]);
+    const con = (nombre: string, terminada: boolean, checksum: string) => ({
+      ...fila(nombre, terminada),
+      checksum,
+    });
+    const registros = [
+      con("20270123160000_comercial_negocios_probabilidad_etapa", false, "viejo"),
+      con("20270122100000_tickets_instalacion", true, "ok"),
+      con("20270122100000_tickets_instalacion", false, "ok"),
+    ];
+    expect(fallidasConSqlCorregido(registros, repo).map((r) => r.migration_name)).toEqual([
+      "20270123160000_comercial_negocios_probabilidad_etapa",
+    ]);
   });
 
   it("marca solo las fallidas que ya no están en el repo", () => {

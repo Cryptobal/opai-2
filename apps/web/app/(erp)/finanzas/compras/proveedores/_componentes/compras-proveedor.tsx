@@ -1,10 +1,11 @@
-import { Badge, Empty } from "@opai/ds";
+import { Empty } from "@opai/ds";
 
 import { pesos } from "@/lib/fechas";
 
 import { type Compra, diaCL, NOMBRE_DTE } from "../../../_componentes/tipos";
+import { EstadoPago } from "../../_componentes/celdas-compras";
 
-/** Últimas compras del proveedor; el pago se vincula cuando exista la conciliación. */
+/** Últimas compras del proveedor, con su estado de pago según la conciliación bancaria. */
 export function ComprasProveedor({ compras }: { compras: Compra[] }) {
   if (compras.length === 0)
     return <Empty titulo="Sin compras registradas" descripcion="Los documentos de este proveedor aparecerán aquí." />;
@@ -22,7 +23,7 @@ export function ComprasProveedor({ compras }: { compras: Compra[] }) {
           </span>
           <span className="flex flex-none flex-col items-end gap-1">
             <span className="t-numeric font-medium">{pesos(c.tipoDte === 61 ? -c.montoTotal : c.montoTotal)}</span>
-            <Badge>Sin conciliar</Badge>
+            <EstadoPago c={c} />
           </span>
         </li>
       ))}

@@ -34,8 +34,6 @@ export type EntradaLiquidacion = {
   /** Días del mes con vínculo vigente (1–30). */
   diasVinculo: number;
   novedades: NovedadesLiquidacion;
-  /** Días presentes del resumen de Asistencia (CAR-601); manda sobre 30 − licencia − ausencia. */
-  diasPresentesAsistencia?: number;
 };
 
 export type LineaLiquidacion = { concepto: string; monto: number };
@@ -48,8 +46,6 @@ export type Liquidacion = {
   /** Aportes del empleador (no salen del líquido): los informa el LRE (41xx). */
   aportesEmpleador: LineaLiquidacion[];
   diasLicencia: number;
-  /** Datos que pide la nómina de Previred: institución y bases con tope del mes. */
-  prevision: { afp: AdministradoraAFP; salud: "fonasa" | "isapre"; basePrevisional: number; baseCesantia: number };
   totalHaberes: number;
   imponible: number;
   totalDescuentosLegales: number;
@@ -65,10 +61,7 @@ const sumar = (l: LineaLiquidacion[]) => l.reduce((s, x) => s + x.monto, 0);
 
 export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores): Liquidacion {
   const n = e.novedades;
-  const dias =
-    e.diasPresentesAsistencia != null
-      ? Math.max(0, Math.min(e.diasPresentesAsistencia, e.diasVinculo, DIAS_MES_LIQUIDACION))
-      : Math.max(0, Math.min(e.diasVinculo, DIAS_MES_LIQUIDACION) - n.diasLicencia - n.diasAusencia);
+  const dias = Math.max(0, Math.min(e.diasVinculo, DIAS_MES_LIQUIDACION) - n.diasLicencia - n.diasAusencia);
   const imm = indicadorUsado(juego, "imm").valor;
   const jornadaLegal = indicadorUsado(juego, "jornada").valor;
   const baseCompleta = e.capa.sueldoBase ?? 0;
@@ -97,7 +90,6 @@ export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores):
   return {
     diasTrabajados: dias, haberes, descuentosLegales, otrosDescuentos, aportesEmpleador,
     diasLicencia: Math.min(n.diasLicencia, DIAS_MES_LIQUIDACION),
-    prevision: { afp: e.afp, salud: e.salud.tipo, basePrevisional: r.desglose.basePrevisionalClp, baseCesantia: r.desglose.baseCesantiaClp },
     totalHaberes: h.total, imponible: h.imponible,
     totalDescuentosLegales: sumar(descuentosLegales), totalOtrosDescuentos: totalOtros,
     liquido, costoEmpresa: r.costoEmpresaMensualClp,

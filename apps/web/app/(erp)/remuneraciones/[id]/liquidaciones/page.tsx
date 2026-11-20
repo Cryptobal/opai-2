@@ -4,9 +4,11 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { CalcularLiquidaciones } from "../../_componentes/calcular-liquidaciones";
+import { cargarPeriodos, permisosNomina } from "../../_componentes/datos";
+import { DescargarLre } from "../../_componentes/descargar-lre";
 import { pesos } from "../../_componentes/etiquetas";
 import { MarcarRevisadas } from "../../_componentes/marcar-revisadas";
-import { opcionesPeriodo, periodoDeRuta } from "../../_componentes/pagina-periodo";
+import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
 import { TablaLiquidaciones } from "../../_componentes/tabla-liquidaciones";
 import type { ListaLiquidaciones } from "../../_componentes/tipos";
 
@@ -22,13 +24,18 @@ export default function LiquidacionesPeriodo({ params }: Props) {
       titulo="Liquidaciones"
       ruta="/remuneraciones"
       cargar={async () => {
-        const { id, periodo, perm } = await periodoDeRuta(params);
+        const [{ id }, per, perm] = await Promise.all([params, cargarPeriodos(), permisosNomina()]);
+        const periodo = per.ok ? (per.data.find((p) => p.id === id) ?? null) : null;
         const lista = perm.novedadesRead
           ? await ejecutarComoUsuario<ListaLiquidaciones>("erp", "nomina.liquidaciones.listar", { periodoId: id, limite: 200 })
           : null;
         return { id, periodo, perm, lista };
       }}
-      opciones={opcionesPeriodo("Liquidaciones")}
+      opciones={(d) => ({
+        insignia: <SegmentoRemuneraciones activa="periodos" />,
+        volver: { href: `/remuneraciones/${d.id}`, etiqueta: d.periodo?.etiqueta ?? "Período" },
+        ...(d.periodo ? { titulo: `Liquidaciones · ${d.periodo.etiqueta}` } : {}),
+      })}
     >
       {(d) => {
         const abierto = d.periodo?.estado === "abierto" || d.periodo?.estado === "en_revision";
@@ -51,6 +58,7 @@ export default function LiquidacionesPeriodo({ params }: Props) {
             {!abierto && d.periodo ? (
               <p className="t-caption text-fg-muted">El período está {d.periodo.estado.replace("_", " ")}: las liquidaciones ya no se recalculan.</p>
             ) : null}
+            {d.perm.obligaciones && items.length > 0 ? <DescargarLre periodoId={d.id} /> : null}
             <TablaLiquidaciones periodoId={d.id} items={items} />
             <p className="t-caption text-fg-muted">
               Cálculo con el motor de sueldos y las novedades del período. Los montos se confirman contra las liquidaciones de referencia antes de usarlos para pagar.

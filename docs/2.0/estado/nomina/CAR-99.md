@@ -61,7 +61,7 @@
 - `nomina.liquidaciones.marcar_revisadas` (diseño 03 «Marcar revisadas»): pasa de calculada a revisada todas las liquidaciones del período, con el período abierto o en revisión y bloqueado en la transacción. Exige la vista completa (sin alcance y con sueldos sensibles), como leerlas. Con dryRun cuenta cuántas pasarían. Emite `nomina.liquidaciones.revisadas` (declarado en el manifest). Recalcular el período las devuelve a calculada (ya lo hacía `guardarLiquidaciones`).
 - `nomina.liquidaciones.listar` suma `total.revisadas`. La pantalla muestra «Revisadas N de M», el estado por fila y el estado en la liquidación de cada persona. Sin migración: la columna `estado` ya existía.
 - **Decisión:** marcar es por período completo, como el botón único del diseño 03; no hay selección por fila (ni en el diseño ni en el caso de uso de hoy). Cerrar el período no exige que estén todas revisadas: el diseño 02 lo muestra como dato («N de M revisadas»), no como bloqueo.
-- **Pendiente:** mostrar «N de M revisadas» en el paso de cierre (diseño 02).
+- **Pendiente:** mostrar «N de M revisadas» en el paso de cierre (diseño 02); publicar al Portal Trabajador y PDF (hecho en stack portal-liquidacion).
 - **Autorrevisión (subagente, sin bloqueos), a pendientes:**
   - Revisar contra lo visto: si alguien recalcula entre que otro mira la pantalla y aprieta el botón, quedan revisados montos que nadie vio. Solución simple: que el input traiga la `calculadaEn` máxima vista y rechazar con cambio concurrente si hay filas más nuevas.
   - `idempotencyKey` desde la pantalla (el efecto ya es idempotente: la segunda llamada devuelve 0).

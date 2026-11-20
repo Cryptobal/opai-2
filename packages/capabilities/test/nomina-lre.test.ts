@@ -99,7 +99,11 @@ describe("nomina.lre.generar", () => {
   it("sin RUT del empleador lo informa como error", async () => {
     const r = await generar(como("owner", null));
     if (!r.ok) throw new Error(r.error.message);
-    expect((r.data as Salida).errores[0]).toEqual({ personaId: null, personaNombre: null, mensaje: expect.stringMatching(/RUT válido de la empresa/) });
+    expect((r.data as Salida).errores[0]).toEqual({
+      personaId: null,
+      personaNombre: null,
+      mensaje: "Falta el RUT del empleador válido en Configuración → Remuneraciones.",
+    });
   });
 
   it("gerente (sin sueldos sensibles) no puede generarlo", async () => {

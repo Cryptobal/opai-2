@@ -9,6 +9,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { AccionesPrivacidadDiferidas } from "../_componentes/acciones-privacidad-diferida";
 import { estadoTrabajador, textosEstadoTrabajador } from "../_componentes/estado";
 import type { Privacidad } from "../_componentes/tipos";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 export const metadata = { title: tituloPagina("trabajador", "Privacidad") };
 
@@ -91,7 +92,9 @@ export default function Pagina() {
                   <CardTitle>Tus derechos</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                  <AccionesPrivacidadDiferidas solicitudesIniciales={p.solicitudes} />
+                  <DesactivarEnVista>
+                    <AccionesPrivacidadDiferidas solicitudesIniciales={p.solicitudes} />
+                  </DesactivarEnVista>
                 </CardContent>
               </Card>
             </div>

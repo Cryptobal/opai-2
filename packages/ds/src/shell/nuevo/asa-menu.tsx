@@ -7,7 +7,7 @@ export const ANCHO_BASE = 248;
 export const ANCHO_MIN = 200;
 export const ANCHO_MAX = 330;
 /** Soltado más a la izquierda que esto, el menú se pliega (como en Linear). */
-export const UMBRAL_PLEGAR = 140;
+const UMBRAL_PLEGAR = 140;
 const PASO_TECLADO = 16;
 
 /** Ancho dentro de los límites, en píxeles enteros. */

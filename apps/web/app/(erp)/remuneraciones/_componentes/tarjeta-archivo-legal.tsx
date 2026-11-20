@@ -82,9 +82,7 @@ export function TarjetaArchivoLegal({ periodoId, tipo, obligacion, tenantId }: P
           Descargar
         </Button>
       </div>
-      {obligacion && tenantId && (tipo === "lre" || tipo === "previred") && admiteComprobante(obligacion) ? (
-        <ComprobanteObligacion obligacion={obligacion} tenantId={tenantId} tipo={tipo} />
-      ) : null}
+      {obligacion && tenantId && admiteComprobante(obligacion) ? <ComprobanteObligacion obligacion={obligacion} tenantId={tenantId} tipo={tipo} /> : null}
     </Card>
   );
 }

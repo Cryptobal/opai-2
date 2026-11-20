@@ -1,4 +1,5 @@
 import { entidadesEnAlcance, vinculoEnAlcance } from "./alcance-doc";
+import { exigirTicket, exigirVisita } from "./entidad-externa";
 import type { z } from "zod";
 
 import { noEncontrado, reglaDeNegocio } from "../../errores";
@@ -15,24 +16,36 @@ export const CAPA_DE: Record<Entidad["tipo"], string> = {
   instalacion: "instalacion",
   persona: "persona",
   puesto: "puesto",
+  ticket: "ticket",
+  visita: "visita",
 };
 
 /** Verifica que la entidad exista en el tenant (RLS ya impide ver las de otros). */
 export async function verificarEntidad(ctx: Contexto, e: Entidad): Promise<void> {
+  if (e.tipo === "ticket") {
+    await exigirTicket(ctx, e.id);
+    return;
+  }
+  if (e.tipo === "visita") {
+    await exigirVisita(ctx, e.id);
+    return;
+  }
   const alcance = await entidadesEnAlcance(ctx);
   if (alcance && !vinculoEnAlcance(alcance, e.tipo, e.id))
     throw noEncontrado(`La entidad ${e.tipo}`);
   const db = ctx.db;
+  if (e.tipo === "tenant") {
+    if (e.id !== ctx.tenantId) throw noEncontrado(`La entidad ${e.tipo}`);
+    return;
+  }
   const existe =
-    e.tipo === "tenant"
-      ? e.id === ctx.tenantId
-      : e.tipo === "cuenta"
-        ? await db.cuenta.findUnique({ where: { id: e.id } })
-        : e.tipo === "instalacion"
-          ? await db.instalacion.findUnique({ where: { id: e.id } })
-          : e.tipo === "persona"
-            ? await db.persona.findUnique({ where: { id: e.id } })
-            : await db.puesto.findUnique({ where: { id: e.id } });
+    e.tipo === "cuenta"
+      ? await db.cuenta.findUnique({ where: { id: e.id } })
+      : e.tipo === "instalacion"
+        ? await db.instalacion.findUnique({ where: { id: e.id } })
+        : e.tipo === "persona"
+          ? await db.persona.findUnique({ where: { id: e.id } })
+          : await db.puesto.findUnique({ where: { id: e.id } });
   if (!existe) throw noEncontrado(`La entidad ${e.tipo}`);
 }
 

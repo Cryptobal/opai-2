@@ -50,6 +50,12 @@ export const listaSchema = z.object({
   incluirArchivadas: z.boolean().default(false),
 });
 
+/** CAR-353: paginación hasta 200 filas (listas de personas o candidatas). */
+export const paginaCursorLimite200 = {
+  cursor: z.uuid().optional().describe("Para seguir: el valor `siguiente` anterior."),
+  limite: z.number().int().min(1).max(200).default(200),
+};
+
 /**
  * Página por cursor (CAR-400). Sin `skip: 1`: Prisma ubica la fila del cursor aunque ya no cumpla el
  * filtro, y si dejó de cumplirlo `skip: 1` se comía la primera fila válida de la página siguiente.
@@ -68,6 +74,20 @@ export function pagina<T extends { id: string }>(
 /** Tramo de la consulta: `take` y cursor (incluida su propia fila, que `pagina` descarta). */
 export const cursorDe = (cursor: string | undefined, limite: number) =>
   cursor ? { cursor: { id: cursor }, take: limite + 2 } : { take: limite + 1 };
+
+/** Misma semántica que `pagina`, para arreglos ya materializados (p. ej. PPC o alertas). */
+export function paginaMemoria<T extends { id: string }>(
+  filas: readonly T[],
+  limite: number,
+  cursor: string | undefined,
+) {
+  if (!cursor) return pagina([...filas], limite, undefined);
+  const i = filas.findIndex((f) => f.id === cursor);
+  const ventana = i >= 0 ? filas.slice(i) : [...filas];
+  return pagina(ventana, limite, cursor);
+}
+
+export const limiteLista = z.number().int().min(1).max(200).default(50);
 
 /** Escritura con su evento de dominio en la misma transacción (outbox, ADR-029). */
 export async function escribirConEvento<T extends { id: string }>(
