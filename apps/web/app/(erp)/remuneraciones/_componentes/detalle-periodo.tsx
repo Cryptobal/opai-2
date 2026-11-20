@@ -54,6 +54,11 @@ export function DetallePeriodo({
                 Ver novedades
               </EnlaceBoton>
             ) : null}
+            {puedeVerNovedades ? (
+              <EnlaceBoton href={`/remuneraciones/${periodo.id}/liquidaciones`} variante="ghost">
+                Ver liquidaciones
+              </EnlaceBoton>
+            ) : null}
             {gestiona ? <AccionesPeriodo periodo={periodo} puedePagar={puedePagar} /> : null}
           </div>
         </div>

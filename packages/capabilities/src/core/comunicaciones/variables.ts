@@ -52,6 +52,17 @@ export async function variablesDe(
   if (ev.tipo === "core.bitacora.rota")
     return { seq: p["primeraRota"] ?? "", empresa, url: `${base}/configuracion/auditoria` };
   if (ev.tipo.startsWith("cpq.")) return variablesCpq(ctx, ev, p, base, empresa);
+  if (ev.tipo === "tickets.ticket.sla_vencido" && ev.entidadTipo === "ticket" && ev.entidadId) {
+    const ticket = await ctx.db.ticket.findFirst({
+      where: { id: ev.entidadId },
+      select: { id: true, titulo: true },
+    });
+    return {
+      ticket: { titulo: ticket?.titulo ?? "", numero: ticket?.id.slice(0, 8).toUpperCase() ?? "" },
+      empresa,
+      url: ticket ? `${base}/tickets/${ticket.id}` : "",
+    };
+  }
   if (ev.tipo.startsWith("rendiciones.rendicion."))
     return variablesRendiciones(ctx, ev, base, empresa);
   if (ev.tipo === "comercial.solicitud.creada") {

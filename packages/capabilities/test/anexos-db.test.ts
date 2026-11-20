@@ -1,7 +1,9 @@
 // Anexo de contrato (Brief 07b, PR 4) contra Postgres real: aislamiento por tenant, permisos
 // (D8/D13), gobierno de agentes (soloPersonas) y el documento final con SHA-256 y bitácora.
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
+import { digitoVerificador } from "@opai/domain";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
@@ -86,11 +88,13 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
   }
 
   beforeAll(async () => {
+    // El RUT es único en toda la base, también entre suites y corridas.
+    const cuerpoRutEmpresa = String(randomInt(10_000_000, 90_000_000));
     await e.admin.perfilEmpresa.create({
       data: {
         tenantId,
         razonSocial: "Empresa Prueba SpA",
-        rut: "76123456-7",
+        rut: `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`,
         calle: "Av. Providencia 100",
         comuna: "Santiago",
         representanteNombre: "Ana Representante",

@@ -2,13 +2,18 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
-import { cotizacionSchema, seccionSchema, uuidSchema, versionSchema } from "./esquemas";
-import { acotarNegocioLista } from "./lista-filtro-negocio";
-import { ampliarBusquedaCotizaciones } from "./lista-busqueda";
-import { inputListaCotizacionesSchema, whereListaCotizaciones } from "./lista-filtros";
+import {
+  cotizacionSchema,
+  estadoSchema,
+  listaSchema,
+  seccionSchema,
+  uuidSchema,
+  versionSchema,
+} from "./esquemas";
 import { PERMISO_COSTOS, PERMISO_READ } from "./permisos";
 import { estadosDeLista } from "../persistencia/lista-estado";
 import { margenesConfigurados } from "../persistencia/supuestos";
+import { filtroListaCotizaciones } from "./lista-busqueda";
 import { resumenListaDesdeVersion } from "./lista-resumen";
 import { cotizacionDe, vistaCotizacion, vistaVersion } from "./util";
 
@@ -35,17 +40,20 @@ export const cotizacionesList = defineCapability({
   auditarLectura: (s) => s.items.flatMap((c) => [c.id, c.negocioId]),
   id: "cpq.cotizaciones.list",
   descripcion:
-    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio, cuenta, responsable del negocio, estado, rango de envío y texto; las archivadas quedan fuera salvo que se pidan (todas o solo ellas).",
+    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio, estado y texto (código, título, negocio o cuenta); las archivadas quedan fuera salvo que se pidan (todas o solo ellas).",
   permiso: PERMISO_READ,
-  input: inputListaCotizacionesSchema,
+  input: listaSchema.extend({
+    negocioId: uuidSchema.optional(),
+    estado: estadoSchema.optional(),
+    q: z.string().trim().min(1).max(160).optional(),
+    incluirArchivadas: z.boolean().default(false),
+    soloArchivadas: z.boolean().default(false).describe("Solo las archivadas (filtro «Archivadas»)."),
+  }),
   output: z.object({ items: z.array(itemSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const filtro = whereListaCotizaciones(input);
-    if (input.q) await ampliarBusquedaCotizaciones(ctx, input.q.trim(), filtro);
-    const vacio = await acotarNegocioLista(ctx, input, filtro);
-    if (vacio) return vacio;
+    const filtro = await filtroListaCotizaciones(ctx, input);
     // Sin `skip: 1` (CAR-400): la fila del cursor viene si aún cumple el filtro y se descarta abajo.
     const crudas = await ctx.db.cpqCotizacion.findMany({
       where: filtro,

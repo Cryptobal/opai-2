@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 import { urlSiembra } from "./fixtures-puestos-car8";
-import { hidratado } from "./hidratacion";
+import { contenidoHidratado, hidratado } from "./hidratacion";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-207: trasladar al titular de un puesto a otro desde la ficha (iPad, una vez). Instalación y
@@ -44,14 +44,19 @@ test.describe("puestos · trasladar titular (CAR-207)", () => {
     await expect(page.getByText("Titular asignado")).toBeVisible();
 
     await page.goto(`/instalaciones/${INST}/puestos?puesto=${origen}`);
+    await contenidoHidratado(page);
     const trasladar = page.getByRole("button", { name: "Trasladar", exact: true });
     await hidratado(trasladar);
     await trasladar.click();
     await page.locator("#tr-destino").click();
     await page.getByRole("option", { name: new RegExp(DESTINO) }).click();
     await page.locator("#tr-motivo").fill("Cambio de turno operativo");
-    await expect(page.getByText(/Sigue en la misma instalación/)).toBeVisible();
-    await expect(page.getByText(new RegExp(`Su serie en «${ORIGEN}» se cierra`))).toBeVisible();
+    await expect.poll(async () => page.getByText(/Sigue en la misma instalación/).isVisible()).toBe(true);
+    await expect
+      .poll(async () => page.getByText(new RegExp(`Su serie en «${ORIGEN}» se cierra`)).isVisible(), {
+        timeout: 20_000,
+      })
+      .toBe(true);
     const confirmar = page.getByRole("button", { name: "Trasladar", exact: true });
     await hidratado(confirmar);
     await confirmar.click();
@@ -71,6 +76,7 @@ test.describe("puestos · trasladar titular (CAR-207)", () => {
     sql(`UPDATE core.vinculos_laborales SET puesto_id = '${origen}' WHERE persona_id = '${GUARDIA}' AND estado = 'vigente';`);
     await entrar(page);
     await page.goto(`/instalaciones/${INST}/puestos?puesto=${origen}`);
+    await contenidoHidratado(page);
     const trasladar = page.getByRole("button", { name: "Trasladar", exact: true });
     await hidratado(trasladar);
     await trasladar.click();

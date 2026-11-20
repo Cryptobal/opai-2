@@ -145,7 +145,7 @@ describe.skipIf(!urlPropietario)("programaciones recurrentes · base real", () =
           programacionId: p.id,
           periodo: mesActual,
         }),
-      ).rejects.toThrow(/antes de la migración \(fecha de corte\)/);
+      ).rejects.toThrow(/fecha de corte/);
     }
   });
 

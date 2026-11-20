@@ -135,9 +135,15 @@ export const rostroTextos = defineCapability({
     "Textos vigentes de los consentimientos de Asistencia (uso del rostro y del teléfono personal) con su versión, tal como se muestran y se aceptan. Sirve para que la persona los lea antes de consentir.",
   permiso: null,
   portales: ["erp", "terreno", "trabajador"],
-  input: z.object({}),
-  output: z.array(z.object({ proposito: z.string(), version: z.string(), texto: z.string() })),
+  input: z.object({ cursor: z.string().optional(), limite: z.number().int().min(1).max(200).default(200) }),
+  output: z.object({
+    items: z.array(z.object({ proposito: z.string(), version: z.string(), texto: z.string() })),
+    siguiente: z.null(),
+  }),
   efecto: "lectura",
   dryRun: false,
-  handler: async () => PROPOSITOS.map((p) => ({ proposito: p, version: VERSION_AVISO, texto: TEXTO_CONSENTIMIENTO[p] })),
+  handler: async () => ({
+    items: PROPOSITOS.map((p) => ({ proposito: p, version: VERSION_AVISO, texto: TEXTO_CONSENTIMIENTO[p] })),
+    siguiente: null,
+  }),
 });

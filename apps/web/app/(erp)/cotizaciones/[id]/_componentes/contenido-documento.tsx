@@ -2,9 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-import { FileText } from "lucide-react";
-
-import { Alerta } from "@opai/ds";
+import { Alerta, Button } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { avisosCpq, RUTA_CONFIRMAR_MUTUAL } from "@/lib/cpq-avisos";
@@ -13,7 +11,6 @@ import type { DatosFichaCotizacion } from "../../_componentes/datos";
 import { AccionesComerciales } from "./acciones-comerciales";
 import { HistorialVersionesCpq } from "./historial-versiones";
 import type { MetaFicha } from "./meta-ficha";
-import { TarjetaAccionDocumento } from "./tarjeta-accion-documento";
 
 const PropuestaTecnicaFicha = dynamic(
   () => import("./propuesta-tecnica-ficha").then((m) => m.PropuestaTecnicaFicha),
@@ -41,33 +38,31 @@ export function ContenidoDocumento(p: {
       <div className="space-y-2">
         <p className="t-body-sm text-fg-muted">
           {d.cotizacion.codigo} · versión {d.version.numero}
-          {enviada ? " · documento enviado al contacto" : " · vista previa con marca de borrador"}. Usa la plantilla y la marca de
-          Configuración › CPQ.
+          {enviada ? " · documento enviado al contacto" : " · vista previa con marca de borrador"}.
+          Usa la plantilla y la marca de Configuración › CPQ.
         </p>
-        <PropuestaTecnicaFicha
-          codigo={d.cotizacion.codigo}
-          cotizacionId={d.cotizacion.id}
-          gestionar={datos.gestionar}
-          accionCotizacion={
-            <TarjetaAccionDocumento
-              icono={FileText}
-              titulo="Ver cotización (PDF)"
-              descripcion="Vista previa del documento comercial con tu plantilla y marca."
-              onClick={p.onVistaPrevia}
-            />
-          }
-        />
+        <Button type="button" variant="secondary" onClick={p.onVistaPrevia}>
+          Vista previa PDF
+        </Button>
       </div>
       {mutual.map((a) => (
         <Alerta key={a.id} tono="info" titulo={a.titulo}>
           {a.detalle}
           {a.enlace ? (
-            <LinkNext href={a.enlace.href} className="ml-2 inline-flex min-h-11 items-center font-semibold underline">
+            <LinkNext
+              href={a.enlace.href}
+              className="ml-2 inline-flex min-h-11 items-center font-semibold underline"
+            >
               {a.enlace.etiqueta}
             </LinkNext>
           ) : null}
         </Alerta>
       ))}
+      <PropuestaTecnicaFicha
+        codigo={d.cotizacion.codigo}
+        cotizacionId={d.cotizacion.id}
+        gestionar={datos.gestionar}
+      />
       <AccionesComerciales
         cotizacionId={d.cotizacion.id}
         titulo={d.cotizacion.titulo}

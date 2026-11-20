@@ -106,7 +106,7 @@ describe.skipIf(!urlPropietario)("Pauta · publicar y avisar (Postgres real)", (
             nombres,
             apellidos: "Prueba",
             rut,
-            estado: "activa",
+            estado: "activo",
             usuarioId,
           },
         })

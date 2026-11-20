@@ -56,7 +56,7 @@ describe.skipIf(!urlPropietario)("Pauta · asignar titular (Postgres real)", () 
     p.inactivo = await puesto(t.A, a, "Inactivo", { estado: "inactivo" });
     p.b = await puesto(t.B, b, "Puesto B");
     const persona = async (tenantId: string, x: { inst: string; cargo: string }, nombres: string, rut: string, inst = x.inst) => {
-      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activa" } })).id;
+      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activo" } })).id;
       await e.admin.vinculoLaboral.create({ data: { tenantId, personaId: id, cargoId: x.cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
       return id;
     };
@@ -151,7 +151,7 @@ describe.skipIf(!urlPropietario)("Pauta · asignar titular (Postgres real)", () 
     const inst = (await e.admin.puesto.findUniqueOrThrow({ where: { id: p.dia } }));
     const nuevo = (await e.admin.puesto.create({ data: { tenantId: t.A, instalacionId: inst.instalacionId, cargoId: inst.cargoId, nombre: "Mismo día", diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00", patronId: inst.patronId } })).id;
     const desde = dia(40);
-    const x = (await e.admin.persona.create({ data: { tenantId: t.A, nombres: "Mismo", apellidos: "Prueba", rut: "17.171.717-1", estado: "activa" } })).id;
+    const x = (await e.admin.persona.create({ data: { tenantId: t.A, nombres: "Mismo", apellidos: "Prueba", rut: "17.171.717-1", estado: "activo" } })).id;
     await e.admin.vinculoLaboral.create({ data: { tenantId: t.A, personaId: x, cargoId: inst.cargoId, instalacionId: inst.instalacionId, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
     expect(await asignar(nuevo, x, desde)).toMatchObject({ ok: true });
     expect(await asignar(nuevo, null, desde, { inicioCiclo: undefined })).toMatchObject({ ok: true });
@@ -216,7 +216,7 @@ describe.skipIf(!urlPropietario)("Pauta · asignar titular (Postgres real)", () 
     const base = await e.admin.puesto.findUniqueOrThrow({ where: { id: p.dia } });
     const pat = await e.admin.patronTurno.create({ data: { tenantId: t.A, nombre: "6x1 viejo", diasTrabajo: 6, diasDescanso: 1 } });
     const q = (await e.admin.puesto.create({ data: { tenantId: t.A, instalacionId: base.instalacionId, cargoId: base.cargoId, nombre: "Vía serie", diasTrabajo: 6, diasDescanso: 1, horaInicio: "08:00", horaFin: "20:00", patronId: pat.id } })).id;
-    const y = (await e.admin.persona.create({ data: { tenantId: t.A, nombres: "Serie", apellidos: "Prueba", rut: "18.181.818-1", estado: "activa" } })).id;
+    const y = (await e.admin.persona.create({ data: { tenantId: t.A, nombres: "Serie", apellidos: "Prueba", rut: "18.181.818-1", estado: "activo" } })).id;
     await e.admin.vinculoLaboral.create({ data: { tenantId: t.A, personaId: y, cargoId: base.cargoId, instalacionId: base.instalacionId, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
     const f = await run(ctx(t.A), "pauta.series.fijar", { puestoId: q, patronId: pat.id, inicioCiclo: dia(60), titularPersonaId: y, desde: dia(60) });
     expect(f.ok, JSON.stringify(f)).toBe(true);
