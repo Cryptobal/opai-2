@@ -1,6 +1,11 @@
 export { aplicarModulosNuevosRegistrados, avisarAlCelular, capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
-export { consumidorAvisoPrueba, consumidorAvisoPruebaEmpresa, trabajoCobrosMesAnterior, trabajoCobrosPruebas } from "./core/plataforma/cobros";
+export {
+  consumidorAvisoPrueba,
+  consumidorAvisoPruebaEmpresa,
+  trabajoCobrosMesAnterior,
+  trabajoCobrosPruebas,
+} from "./core/plataforma/cobros";
 export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
 export { type FuenteAprobaciones, type ItemPorAprobar } from "./core/aprobaciones-fuentes";
 export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
