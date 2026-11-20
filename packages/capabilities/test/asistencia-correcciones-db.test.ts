@@ -164,7 +164,8 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(vacio.data.items).toEqual([]);
     const conVer = await run(ctx(T.a), "asistencia.contingencias.listar", {});
     expect(conVer.ok).toBe(true);
-    expect(conVer.data.items.some((c: { id: string }) => c.id === reg.data.id)).toBe(true);
+    const items = conVer.data.items as { id: string }[];
+    expect(items.some((c) => c.id === reg.data.id)).toBe(true);
   });
 
   it("enlace de contingencia: ver y responder con RUT desde el enlace personal", async () => {
