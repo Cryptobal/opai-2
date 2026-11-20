@@ -42,7 +42,7 @@ export function TarjetaMutual({
       <div className="flex flex-col gap-1">
         <p className="t-label-sm text-fg-muted">Cotización adicional de la mutual</p>
         <p className="t-body">
-          {mutual.estado === "vigente" ? mutual.resumen : "Pendiente de confirmar."}
+          {mutual.estado === "vigente" ? mutual.resumen : "Sin confirmar todavía."}
         </p>
         {mutual.estado === "vigente" && mutual.confirmadoPor ? (
           <p className="t-caption text-fg-muted">

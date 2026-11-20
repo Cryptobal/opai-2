@@ -24,6 +24,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
   "app/api/pauta/export/route.ts":
     "Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar.",
+  "app/api/asistencia/reportes-dt/export/route.ts":
+    "Descarga de asistencia.reportes.exportar (Excel/PDF) con sesión; mismo permiso y datos que la herramienta MCP asistencia_reportes_exportar (CAR-590).",
   "app/api/negocios/export/route.ts":
     "Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27).",
   "app/api/rendiciones/lotes/[id]/nomina/route.ts":
@@ -151,6 +153,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad.",
   "app/.well-known/oauth-authorization-server/api/auth/route.ts":
     "Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247).",
+  "app/.well-known/apple-app-site-association/route.ts":
+    "Apple App Site Association (webcredentials): JSON público para la app iOS, sin datos de negocio.",
   "app/api/cron/programador/route.ts":
     "Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029).",
   "app/api/cron/trabajos/route.ts": "Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029).",

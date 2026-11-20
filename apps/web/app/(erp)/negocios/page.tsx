@@ -64,6 +64,7 @@ export default function Negocios({ searchParams }: Props) {
                 <ListaNegocios
                   state={d.filas?.state ?? "error"}
                   items={d.filas?.items ?? []}
+                  siguiente={d.filas?.siguiente ?? null}
                   p={d.p}
                   etapas={d.etapas}
                   etiquetas={d.filas?.etiquetas ?? []}

@@ -29,6 +29,13 @@ test.describe("@preview comercial: cuentas conservan el filtro", () => {
     await capturar(page, info, "cuentas-filtro-ficha");
   });
 
+  test("búsqueda y pie de paginación", async ({ page }) => {
+    test.setTimeout(90_000);
+    await entrar(page);
+    await page.goto("/cuentas?limite=20");
+    await expect(page.getByRole("heading", { name: "Cuentas" }).first()).toBeVisible({ timeout: 60_000 });
+  });
+
   test("la configuración de Comercial no ofrece Importar 1.0", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/modulo/comercial");

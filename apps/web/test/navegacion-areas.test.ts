@@ -167,7 +167,18 @@ describe("armarNavegacion", () => {
     expect(grupos.map((g) => g.area)).toEqual(["inicio"]);
   });
 
-  it("D2: un área con más de 7 entradas declaradas falla en desarrollo (NODE_ENV=test)", () => {
+  it("D2: un área con más de 8 entradas declaradas falla en desarrollo (NODE_ENV=test)", () => {
+    const nueve = Array.from({ length: 9 }, (_, i) => ({
+      area: "finanzas" as const,
+      href: `/f${i}`,
+      etiqueta: `F${i}`,
+      icono: "Gauge",
+      modulo: "core",
+    }));
+    expect(() => armarNavegacion(nueve, { puede: todas, modulosActivos: [] })).toThrow(/máximo/);
+  });
+
+  it("ocho entradas en un área no falla (D2: Operaciones con Rondas, CAR-621)", () => {
     const ocho = Array.from({ length: 8 }, (_, i) => ({
       area: "finanzas" as const,
       href: `/f${i}`,
@@ -175,18 +186,7 @@ describe("armarNavegacion", () => {
       icono: "Gauge",
       modulo: "core",
     }));
-    expect(() => armarNavegacion(ocho, { puede: todas, modulosActivos: [] })).toThrow(/máximo/);
-  });
-
-  it("siete entradas en un área no falla (D2: hoy Finanzas tiene justo siete)", () => {
-    const siete = Array.from({ length: 7 }, (_, i) => ({
-      area: "finanzas" as const,
-      href: `/f${i}`,
-      etiqueta: `F${i}`,
-      icono: "Gauge",
-      modulo: "core",
-    }));
-    expect(() => armarNavegacion(siete, { puede: todas, modulosActivos: [] })).not.toThrow();
+    expect(() => armarNavegacion(ocho, { puede: todas, modulosActivos: [] })).not.toThrow();
   });
 });
 

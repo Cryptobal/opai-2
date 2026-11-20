@@ -6,6 +6,8 @@ import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etique
 
 import { monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { pesos } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 
@@ -23,6 +25,7 @@ const monto = (n: NegocioFila) => n.valorMensual ?? n.montoEstimadoMensual ?? nu
 export function ListaNegocios(p: {
   state: EstadoPantalla;
   items: NegocioFila[];
+  siguiente?: string | null;
   seleccionado?: string;
   p: Parametros;
   /** Etapas del embudo para el filtro (`?etapa=`, la misma que elige el tablero). */
@@ -38,6 +41,11 @@ export function ListaNegocios(p: {
 }) {
   const abiertos = p.items.filter((n) => n.estado === "abierto").length;
   const consulta = consultaLista(p.p);
+  const porPagina = tamanoPagina(p.p, 20);
+  const filtrando = Boolean(p.p.q || p.p.estado || p.p.etapa || p.p.etiqueta);
+  const metaConteo = filtrando
+    ? `${p.items.length}${p.siguiente ? "+" : ""} ${p.items.length === 1 ? "resultado" : "resultados"}`
+    : `${p.items.length}${p.siguiente ? "+" : ""} negocios · ${abiertos} ${abiertos === 1 ? "abierto" : "abiertos"}`;
   return (
     <ListaMaestro
       state={p.state}
@@ -66,16 +74,31 @@ export function ListaNegocios(p: {
         ...(p.etapas.length ? [{ param: "etapa", etiqueta: "Etapa", opciones: p.etapas }] : []),
         ...filtroDeEtiquetas(p.etiquetas ?? []),
       ]}
-      meta={{
-        izquierda: `${p.items.length} negocios · ${abiertos} ${abiertos === 1 ? "abierto" : "abiertos"}`,
-        derecha: "Recientes primero",
-      }}
+      meta={{ izquierda: metaConteo, derecha: "Recientes primero" }}
       seleccionada={p.seleccionado}
-      vacio={{
-        titulo: "Aún no hay negocios",
-        descripcion: "Los negocios que crees aparecerán aquí.",
-        ...(p.nuevo ? { accion: p.nuevo } : {}),
-      }}
+      vacio={
+        filtrando
+          ? {
+              titulo: "Sin resultados",
+              descripcion: "Prueba otro término o quita un filtro.",
+            }
+          : {
+              titulo: "Aún no hay negocios",
+              descripcion: "Los negocios que crees aparecerán aquí.",
+              ...(p.nuevo ? { accion: p.nuevo } : {}),
+            }
+      }
+      pie={
+        p.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={p.p}
+            rutaBase="/negocios"
+            mostrados={p.items.length}
+            siguiente={p.siguiente ?? null}
+            porPagina={porPagina}
+          />
+        ) : undefined
+      }
       filas={p.items.map((n) => ({
         id: n.id,
         href: `/negocios/${n.id}${consulta}`,

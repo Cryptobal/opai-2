@@ -23,6 +23,7 @@ export type TabInstalacion =
   | "turnos-extra"
   | "accesos"
   | "personas"
+  | "visitas"
   | "dispositivos"
   | "documentos"
   | "actividad";
@@ -44,6 +45,8 @@ export function FichaInstalacion(p: {
   accesos?: boolean;
   /** Pestaña de dotación (CAR-596): Pauta activa y permiso de lectura. */
   personas?: boolean;
+  /** Pestaña de visitas de supervisión (CAR-83): con Pauta activo y permiso de lectura. */
+  visitas?: boolean;
   children: ReactNode;
 }) {
   const i = p.instalacion;
@@ -101,6 +104,7 @@ export function FichaInstalacion(p: {
           ...(p.turnosExtra !== undefined ? { turnosExtra: p.turnosExtra } : {}),
           ...(p.accesos !== undefined ? { accesos: p.accesos } : {}),
           ...(p.personas !== undefined ? { personas: p.personas } : {}),
+          ...(p.visitas !== undefined ? { visitas: p.visitas } : {}),
           persona: p.persona,
         })}
       >
