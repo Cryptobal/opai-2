@@ -3,9 +3,9 @@ import { type ReactNode, Suspense } from "react";
 import { Loading, SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import type { SearchParams } from "@/lib/parametros";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 
-import { cargarInstalaciones, cargarTicket, cargarTickets, cargarTipos, filtrosDe } from "./datos";
+import { cargarInstalaciones, cargarTicket, cargarTickets, cargarTipos } from "./datos";
 import { DetalleTicket } from "./detalle-ticket";
 import { ListaTickets } from "./lista-tickets";
 import type { TabTicket } from "./ficha-ticket";
@@ -29,7 +29,7 @@ export function PaginaTicket({ params, searchParams, tab, children }: Props) {
       volverSoloTelefono
       volverBajoLg
       cargar={async () => {
-        const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
+        const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
         const datos = cargarTicket(id);
         datos.catch(() => undefined);
         const [lista, tipos, instalaciones] = await Promise.all([
