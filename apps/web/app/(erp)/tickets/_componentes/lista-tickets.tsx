@@ -1,13 +1,12 @@
 import { Badge } from "@opai/ds";
 
-import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { ListaMaestroSplit } from "@/app/_components/maestros/lista-maestro-split";
 import type { Parametros } from "@/lib/parametros";
 
 import { NuevoTicket } from "./nuevo-ticket";
 import {
-  type cargarTickets,
+  type cargarTicketsSplit,
   ETIQUETA_ESTADO,
   ETIQUETA_PRIORIDAD,
   TONO_ESTADO,
@@ -49,7 +48,7 @@ const vacio = {
 
 export function ListaTickets(p: {
   p: Parametros;
-  lista: Awaited<ReturnType<typeof cargarTickets>>;
+  lista: Awaited<ReturnType<typeof cargarTicketsSplit>>;
   tipos: TipoTicket[];
   instalaciones?: { id: string; nombre: string }[];
   seleccionada?: string;

@@ -19,7 +19,7 @@ describe.skipIf(omitirSuiteDb())("documentos · ticket y visita (CAR-496)", () =
   let tipoVisita = "";
   let tipoIdTicket = "";
 
-  const base = (uid: string, rol: "gerente" | "supervisor", instalaciones?: string[]) =>
+  const base = (uid: string, rol: "gerente" | "viewer" | "supervisor", instalaciones?: string[]) =>
     mod.crearContexto({
       ...(instalaciones ? { alcance: { instalaciones } } : {}),
       tenantId: t.a,
@@ -74,7 +74,7 @@ describe.skipIf(omitirSuiteDb())("documentos · ticket y visita (CAR-496)", () =
     ).id;
     for (const [id, rol] of [
       [u.ger, "gerente"],
-      [u.ajeno, "gerente"],
+      [u.ajeno, "viewer"],
       [u.sup, "supervisor"],
     ] as const) {
       await e.admin.user.create({ data: { id, name: `U ${id.slice(0, 4)}`, email: `${id.slice(0, 8)}@doc496.test` } });
@@ -126,27 +126,36 @@ describe.skipIf(omitirSuiteDb())("documentos · ticket y visita (CAR-496)", () =
         descripcion: "Sin luz",
       })
     ).id;
-    await subirA(cGer, { tipo: "ticket", id: ticketId }, tipoTicket);
+    const documentoId = await subirA(cGer, { tipo: "ticket", id: ticketId }, tipoTicket);
     const ajeno = await mod.executeCapability(
-      base(u.ajeno, "gerente"),
+      base(u.ajeno, "viewer"),
       "core.documentos.list",
       { entidad: { tipo: "ticket", id: ticketId } },
       {},
     );
-    if (!ajeno.ok) throw new Error(JSON.stringify(ajeno.error));
+    if (!ajeno.ok) throw new Error(ajeno.error.message);
     expect((ajeno.data as { items: unknown[] }).items).toEqual([]);
+    const lector = base(u.ajeno, "viewer");
+    const global = await run<{ items: { id: string }[] }>(lector, "core.documentos.explorar", {
+      entidadTipo: "ticket",
+    });
+    expect(global.items.some((d) => d.id === documentoId)).toBe(false);
+    const porId = await mod.executeCapability(lector, "core.documentos.get", { id: documentoId }, {});
+    expect(porId.ok).toBe(false);
+    const descarga = await mod.executeCapability(lector, "core.documentos.url_descarga", { id: documentoId }, {});
+    expect(descarga.ok).toBe(false);
     const propio = await run<{ items: unknown[] }>(cGer, "core.documentos.list", {
       entidad: { tipo: "ticket", id: ticketId },
     });
     expect(propio.items).toHaveLength(1);
   });
 
-  it("sube a una visita dentro del alcance del supervisor", async () => {
+  it("el supervisor puede leer los adjuntos solo en sus visitas", async () => {
     const cSup = base(u.sup, "supervisor", [inst["norte"]!]);
     const visitaId = (await run<{ visita: { id: string } }>(cSup, "pauta.visitas.iniciar", { instalacionId: inst["norte"] }))
       .visita.id;
     await run(cSup, "pauta.visitas.cerrar", { visitaId, checklist: [] });
-    await subirA(cSup, { tipo: "visita", id: visitaId }, tipoVisita);
+    await subirA(base(u.ger, "gerente"), { tipo: "visita", id: visitaId }, tipoVisita);
     const dentro = await run<{ items: unknown[] }>(cSup, "core.documentos.list", {
       entidad: { tipo: "visita", id: visitaId },
     });
@@ -157,7 +166,7 @@ describe.skipIf(omitirSuiteDb())("documentos · ticket y visita (CAR-496)", () =
       { entidad: { tipo: "visita", id: visitaId } },
       {},
     );
-    if (!fuera.ok) throw new Error(JSON.stringify(fuera.error));
+    if (!fuera.ok) throw new Error(fuera.error.message);
     expect((fuera.data as { items: unknown[] }).items).toEqual([]);
   });
 });

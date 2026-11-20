@@ -33,7 +33,7 @@ export async function FichaDocumentos({
     ejecutarComoUsuario<{ items: Documento[]; faltantes: { tipoId: string; nombre: string }[] }>(
       "erp",
       "core.documentos.list",
-      { entidad },
+      { entidad, limite: 200 },
     ),
     ejecutarComoUsuario<TipoDocumento[]>("erp", "core.documento_tipos.list", {
       capa: CAPA[entidad.tipo],

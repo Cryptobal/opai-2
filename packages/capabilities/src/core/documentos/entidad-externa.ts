@@ -2,7 +2,7 @@ import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { dondeVisita } from "../../pauta/visitas-comun";
 
-const TICKETS_VER_TODOS = "tickets:tickets.ver_todos";
+export const TICKETS_VER_TODOS = "tickets:tickets.ver_todos";
 
 /** Si el actor puede ver este ticket (solicitante, responsable o ver_todos). */
 export async function ticketVisible(

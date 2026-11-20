@@ -3,9 +3,9 @@ import { type ReactNode, Suspense } from "react";
 import { Loading, SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import type { Parametros, SearchParams } from "@/lib/parametros";
+import type { SearchParams } from "@/lib/parametros";
 
-import { cargarInstalaciones, cargarTicket, cargarTickets, cargarTipos, filtrosDe } from "./datos";
+import { cargarInstalaciones, cargarTicket, cargarTicketsSplit, cargarTipos, filtrosDe } from "./datos";
 import { DetalleTicket } from "./detalle-ticket";
 import { ListaTickets } from "./lista-tickets";
 import type { TabTicket } from "./ficha-ticket";
@@ -33,7 +33,7 @@ export function PaginaTicket({ params, searchParams, tab, children }: Props) {
         const datos = cargarTicket(id);
         datos.catch(() => undefined);
         const [lista, tipos, instalaciones] = await Promise.all([
-          cargarTickets(p),
+          cargarTicketsSplit(p),
           cargarTipos(),
           cargarInstalaciones(),
         ]);

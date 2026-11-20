@@ -86,7 +86,7 @@ export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
 }
 
 export async function cargarTickets(p: Parametros) {
-  const r = await ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
+  return ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
     "erp",
     "tickets.tickets.listar",
     {
@@ -94,8 +94,14 @@ export async function cargarTickets(p: Parametros) {
       ...(p["estado"] ? { estado: p["estado"] } : {}),
     },
   );
+}
+
+export async function cargarTicketsSplit(p: Parametros) {
+  const r = await cargarTickets(p);
   return { state: estadoPantalla(r), items: r.ok ? r.data.items : [], siguiente: r.ok ? r.data.siguiente : null };
 }
+
+export type RespuestaTicketsLista = Awaited<ReturnType<typeof cargarTickets>>;
 
 export async function cargarTicket(id: string) {
   const r = await ejecutarComoUsuario<{ ticket: Ticket; eventos: EventoTicket[] }>(
@@ -112,7 +118,8 @@ export async function cargarTicket(id: string) {
 }
 
 export async function cargarTipos() {
-  return ejecutarComoUsuario<TipoTicket[]>("erp", "tickets.tipos.listar", {});
+  const r = await ejecutarComoUsuario<{ items: TipoTicket[] }>("erp", "tickets.tipos.listar", { limite: 200 });
+  return r.ok ? { ...r, data: r.data.items } : r;
 }
 
 export type InstalacionOpcion = { id: string; nombre: string };

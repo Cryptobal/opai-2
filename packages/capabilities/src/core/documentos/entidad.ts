@@ -22,20 +22,20 @@ export const CAPA_DE: Record<Entidad["tipo"], string> = {
 
 /** Verifica que la entidad exista en el tenant (RLS ya impide ver las de otros). */
 export async function verificarEntidad(ctx: Contexto, e: Entidad): Promise<void> {
-  const alcance = await entidadesEnAlcance(ctx);
-  if (alcance && !vinculoEnAlcance(alcance, e.tipo, e.id))
-    throw noEncontrado(`La entidad ${e.tipo}`);
-  const db = ctx.db;
-  if (e.tipo === "tenant") {
-    if (e.id !== ctx.tenantId) throw noEncontrado(`La entidad ${e.tipo}`);
-    return;
-  }
   if (e.tipo === "ticket") {
     await exigirTicket(ctx, e.id);
     return;
   }
   if (e.tipo === "visita") {
     await exigirVisita(ctx, e.id);
+    return;
+  }
+  const alcance = await entidadesEnAlcance(ctx);
+  if (alcance && !vinculoEnAlcance(alcance, e.tipo, e.id))
+    throw noEncontrado(`La entidad ${e.tipo}`);
+  const db = ctx.db;
+  if (e.tipo === "tenant") {
+    if (e.id !== ctx.tenantId) throw noEncontrado(`La entidad ${e.tipo}`);
     return;
   }
   const existe =

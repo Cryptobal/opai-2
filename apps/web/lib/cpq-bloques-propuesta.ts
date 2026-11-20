@@ -1,26 +1,10 @@
-/** Nombre legible de cada bloque de la propuesta técnica (pantalla). */
-const ETIQUETAS: Record<string, string> = {
-  portada: "Portada",
-  indice: "Índice",
-  seccion_institucional: "Presentación institucional",
-  comprension_servicio: "Comprensión del servicio",
-  detalle_servicio: "Detalle del servicio",
-  resumen_economico: "Resumen económico",
-  condiciones: "Condiciones",
-  incluye_exclusiones: "Incluye y exclusiones",
-  metodologia: "Metodología",
-  contacto_ejecutivo: "Contacto ejecutivo",
-  certificaciones: "Certificaciones",
-  clientes_referencia: "Clientes de referencia",
-  texto_libre: "Texto libre",
-  salto_pagina: "Salto de página",
-};
+import { NOMBRES_BLOQUE_PROPUESTA } from "@opai/domain";
 
 /** Tipos de bloque que la pantalla sabe nombrar, en el orden del catálogo. */
-export const TIPOS_BLOQUE_ETIQUETADOS = Object.keys(ETIQUETAS);
+export const TIPOS_BLOQUE_ETIQUETADOS = Object.keys(NOMBRES_BLOQUE_PROPUESTA);
 
 export const etiquetaBloquePropuesta = (tipo: string, titulo?: string) =>
-  titulo?.trim() || ETIQUETAS[tipo] || tipo;
+  titulo?.trim() || NOMBRES_BLOQUE_PROPUESTA[tipo] || tipo;
 
 /** Bloque de la plantilla de propuesta del tenant tal como lo guarda `cpq.plantillas_propuesta.update`. */
 export type BloquePlantilla = {
@@ -29,6 +13,7 @@ export type BloquePlantilla = {
   fijo: boolean;
   opcional: boolean;
   bibliotecaClave?: string | null;
+  titulo?: string;
 };
 
 /** Intercambia el bloque `i` con su vecino; fuera de rango deja la lista igual. */
@@ -47,6 +32,20 @@ export function fijarBloque(b: BloquePlantilla, fijo: boolean): BloquePlantilla 
   return { ...b, fijo, opcional: !fijo, activo: fijo ? true : b.activo };
 }
 
-/** Tipos del catálogo que todavía no están en la plantilla (para «Agregar bloque»). */
+/** Tipos para «Agregar bloque»: los que todavía no están y «Texto libre», que se puede repetir. */
 export const tiposDisponibles = (lista: readonly BloquePlantilla[]) =>
-  TIPOS_BLOQUE_ETIQUETADOS.filter((t) => !lista.some((b) => b.tipo === t));
+  TIPOS_BLOQUE_ETIQUETADOS.filter((t) => t === "texto_libre" || !lista.some((b) => b.tipo === t));
+
+/** Bloque del armador de una cotización, tal como lo devuelve `cpq.propuestas_tecnica.get`. */
+export type BloqueArmador = BloquePlantilla & {
+  id: string;
+  contenidoOverride?: string | null;
+  editadoParaCliente?: boolean;
+};
+
+/** Cambia un bloque del armador (texto, título); los demás quedan iguales. */
+export const cambiarBloque = (
+  bloques: readonly BloqueArmador[],
+  id: string,
+  cambio: Partial<Pick<BloqueArmador, "contenidoOverride" | "titulo">>,
+): BloqueArmador[] => bloques.map((b) => (b.id === id ? { ...b, ...cambio } : b));

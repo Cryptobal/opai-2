@@ -62,7 +62,7 @@ describe.skipIf(!urlPropietario)("Pauta · trasladar guardia (Postgres real)", (
     p.otraInst = await puesto(t.A, instA2, a.cargo, a.pat, "Bodega 1");
     p.pb = await puesto(t.B, b.inst, b.cargo, b.pat, "Puesto B");
     const persona = async (tenantId: string, cargo: string, inst: string, nombres: string, rut: string) => {
-      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activa" } })).id;
+      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activo" } })).id;
       await e.admin.vinculoLaboral.create({ data: { tenantId, personaId: id, cargoId: cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), horasSemanales: 44, distribucion: "4x4", estado: "vigente" } });
       return id;
     };
@@ -155,7 +155,7 @@ describe.skipIf(!urlPropietario)("Pauta · trasladar guardia (Postgres real)", (
 
   it("a otra instalación sin jornada pactada: la vista previa se muestra con faltaJornada, la real la exige y con ella el vínculo nuevo la lleva", async () => {
     const inst = await e.admin.puesto.findUniqueOrThrow({ where: { id: p.a1 } });
-    const dora = (await e.admin.persona.create({ data: { tenantId: t.A, nombres: "Dora", apellidos: "Prueba", rut: "17.171.717-1", estado: "activa" } })).id;
+    const dora = (await e.admin.persona.create({ data: { tenantId: t.A, nombres: "Dora", apellidos: "Prueba", rut: "17.171.717-1", estado: "activo" } })).id;
     await e.admin.vinculoLaboral.create({ data: { tenantId: t.A, personaId: dora, cargoId: inst.cargoId, instalacionId: instA, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
     const previa = await trasladar(dora, p.otraInst, hoyCl(), {}, { dryRun: true });
     expect(previa, JSON.stringify(previa)).toMatchObject({ ok: true, data: { faltaJornada: true, vinculoNuevo: true } });

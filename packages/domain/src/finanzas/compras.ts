@@ -68,3 +68,14 @@ export function finDePeriodo(periodo: string): string {
 /** Plazo de pago de un proveedor: vencimiento de una compra a partir de su fecha de emisión. */
 export const vencimientoPago = (fechaEmision: string, plazoPagoDias: number): string =>
   aDia(aMs(fechaEmision) + plazoPagoDias * MS_DIA);
+
+/** Estado de pago de una compra, derivado de lo conciliado con el banco (Brief 23: nunca se marca a mano). */
+export const ESTADOS_PAGO_COMPRA = ["por_pagar", "parcial", "pagada", "no_aplica"] as const;
+export type EstadoPagoCompra = (typeof ESTADOS_PAGO_COMPRA)[number];
+
+/** La nota de crédito (61) no se paga: resta deuda. El resto queda por pagar, parcial o pagada según lo conciliado. */
+export function estadoPagoCompra(tipoDte: number, montoTotal: number, montoPagado: number): EstadoPagoCompra {
+  if (tipoDte === 61) return "no_aplica";
+  if (montoPagado <= 0) return "por_pagar";
+  return montoPagado >= montoTotal ? "pagada" : "parcial";
+}

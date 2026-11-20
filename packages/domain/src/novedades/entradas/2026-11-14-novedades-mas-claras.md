@@ -5,6 +5,7 @@ modulo: core
 titulo: Novedades más cortas y ordenadas por fecha
 car: CAR-430
 ruta: /novedades
+imagen: /changelog/novedades-mas-claras.png
 ---
 - En **Novedades**, las tarjetas quedan agrupadas en **Hoy**, **Esta semana** y **Antes**, de la más nueva a la más antigua.
 - Cada tarjeta muestra el **módulo** con su ícono (Comercial, Personas, Finanzas…), el título y una línea de resumen. El resto se abre con **Ver más**.

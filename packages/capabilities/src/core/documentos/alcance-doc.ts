@@ -1,10 +1,12 @@
+import type { Prisma } from "@opai/db";
+
 import type { Contexto } from "../../types";
 import { instalacionesEnAlcance } from "../maestros/alcance";
 import {
   documentoIdsTicket,
   documentoIdsVisitaEnInstalaciones,
 } from "./alcance-doc-ticket-visita";
-import { ticketVisible, visitaVisible } from "./entidad-externa";
+import { TICKETS_VER_TODOS, ticketVisible, visitaVisible } from "./entidad-externa";
 
 /** Entidades a cargo del actor acotado: sus instalaciones, las cuentas de esas y sus puestos. */
 export type AlcanceEntidades = {
@@ -77,15 +79,33 @@ export async function vinculoVisible(
   tipo: string,
   id: string,
 ): Promise<boolean> {
-  if (!alc) return true;
-  if (vinculoEnAlcance(alc, tipo, id)) return true;
   if (tipo === "ticket") return (await ticketVisible(ctx, id)) !== null;
   if (tipo === "visita") return visitaVisible(ctx, id);
-  return false;
+  return !alc || vinculoEnAlcance(alc, tipo, id);
 }
 
-/** Ids de documentos visibles para un actor acotado (su dueño está a cargo), o null si ve todo. */
-export async function documentosEnAlcance(
+/** El alcance de instalación y el permiso de tickets se aplican al dueño, no a referencias. */
+export async function filtroAlcanceDocumentos(
+  ctx: Contexto,
+  alc?: AlcanceEntidades | null,
+): Promise<Prisma.DocumentoWhereInput> {
+  const a = alc === undefined ? await entidadesEnAlcance(ctx) : alc;
+  if (a) {
+    const ids = await documentosEnAlcance(ctx, a);
+    return { id: { in: [...(ids ?? [])] } };
+  }
+  if (ctx.autorizar(TICKETS_VER_TODOS)) return {};
+  const permitidosTicket = await documentoIdsTicket(ctx);
+  return {
+    OR: [
+      { vinculos: { none: { rol: "propietario", entidadTipo: "ticket" } } },
+      { id: { in: permitidosTicket.map((d) => d.documentoId) } },
+    ],
+  };
+}
+
+/** Ids de documentos visibles por dueño, o null si el actor ve todos. */
+async function documentosEnAlcance(
   ctx: Contexto,
   alc?: AlcanceEntidades | null,
 ): Promise<readonly string[] | null> {

@@ -1,6 +1,6 @@
 import type { Contexto } from "../../types";
 
-const TICKETS_VER_TODOS = "tickets:tickets.ver_todos";
+import { TICKETS_VER_TODOS } from "./entidad-externa";
 
 /** Documentos cuyo dueño es una visita en instalaciones del actor. */
 export async function documentoIdsVisitaEnInstalaciones(

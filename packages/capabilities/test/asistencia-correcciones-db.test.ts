@@ -35,7 +35,7 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     const cuenta = (await e.admin.cuenta.create({ data: { tenantId: tenant, nombre: "Mandante SA", razonSocial: "Mandante SA", rut: "76111111-1" } })).id;
     const inst = (await e.admin.instalacion.create({ data: { tenantId: tenant, cuentaId: cuenta, nombre: "Planta Norte" } })).id;
     const cargo = (await e.admin.cargo.create({ data: { tenantId: tenant, nombre: "Guardia" } })).id;
-    const persona = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Pía", apellidos: "Prueba", rut: RUT, estado: "activa" } })).id;
+    const persona = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Pía", apellidos: "Prueba", rut: RUT, estado: "activo" } })).id;
     await e.admin.vinculoLaboral.create({ data: { tenantId: tenant, personaId: persona, cargoId: cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
     await e.admin.ajuste.create({ data: { tenantId: tenant, ambito: "tenant", sujetoId: tenant, modulo: "asistencia", clave: "marcas_habilitadas", valor: true } });
     return { tenant, inst, persona };
@@ -185,10 +185,10 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
   });
 
   it("el correo personal es único por empresa (no retroactivo) y distinto entre empresas", async () => {
-    const otra = (await e.admin.persona.create({ data: { tenantId: T.a, nombres: "Otro", apellidos: "Trabajador", rut: "12.222.222-2", estado: "activa" } })).id;
+    const otra = (await e.admin.persona.create({ data: { tenantId: T.a, nombres: "Otro", apellidos: "Trabajador", rut: "12.222.222-2", estado: "activo" } })).id;
     await e.admin.persona.update({ where: { id: T.persona }, data: { emailPersonal: "pia@correo.cl" } });
     await expect(e.admin.persona.update({ where: { id: otra }, data: { emailPersonal: "PIA@correo.cl" } })).rejects.toThrow(/correo personal/i);
-    const deB = await e.admin.persona.create({ data: { tenantId: T.b, nombres: "En B", apellidos: "Otra", rut: "13.333.333-3", estado: "activa", emailPersonal: "pia@correo.cl" } });
+    const deB = await e.admin.persona.create({ data: { tenantId: T.b, nombres: "En B", apellidos: "Otra", rut: "13.333.333-3", estado: "activo", emailPersonal: "pia@correo.cl" } });
     expect(deB.id).toBeTruthy();
   });
 });

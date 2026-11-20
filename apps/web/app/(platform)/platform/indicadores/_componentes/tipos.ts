@@ -8,7 +8,7 @@ export type Propuesta = {
   fuente: string;
   consultadaEl: string | null;
 };
-export type CapturaIndicador = {
+type CapturaIndicador = {
   clave: string;
   capturadoEn: string;
   resultado: string;

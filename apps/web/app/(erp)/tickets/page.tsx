@@ -1,13 +1,18 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
 
-import { ListaTickets } from "./_componentes/lista-tickets";
-import { cargarInstalaciones, cargarTickets, cargarTipos, filtrosDe } from "./_componentes/datos";
+import {
+  cargarInstalaciones,
+  cargarTickets,
+  cargarTipos,
+  filtrosDe,
+} from "./_componentes/datos";
+import { TicketsBandeja } from "./_componentes/tickets-bandeja";
 
 export const metadata = { title: "Tickets" };
 type Props = { searchParams: SearchParams };
 
-/** Bandeja de tickets: en escritorio solo la lista; la ficha abre en `/tickets/[id]`. */
+/** Bandeja de tickets (modulos/tickets.md §3): pestañas Míos, Asignados a mí y Todos. */
 export default function Tickets({ searchParams }: Props) {
   return (
     <PaginaPortal
@@ -17,16 +22,16 @@ export default function Tickets({ searchParams }: Props) {
       completo
       cargar={async () => {
         const p = await filtrosDe(searchParams);
-        const [lista, tipos, instalaciones] = await Promise.all([
+        const [r, tipos, instalaciones] = await Promise.all([
           cargarTickets(p),
           cargarTipos(),
           cargarInstalaciones(),
         ]);
-        return { p, lista, tipos: tipos.ok ? tipos.data : [], instalaciones };
+        return { p, r, tipos: tipos.ok ? tipos.data : [], instalaciones };
       }}
     >
-      {({ p, lista, tipos, instalaciones }) => (
-        <ListaTickets p={p} lista={lista} tipos={tipos} instalaciones={instalaciones} />
+      {({ r, tipos, instalaciones }) => (
+        <TicketsBandeja r={r} tipos={tipos} instalaciones={instalaciones} />
       )}
     </PaginaPortal>
   );

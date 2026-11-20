@@ -27,6 +27,13 @@ export async function puedeExportarNegocios(): Promise<boolean> {
  * Pestaña «Rondas» de la ficha de instalación (Brief 14): solo si Rondas está activo para la empresa
  * y el usuario puede leer rondas. Sin pestañas deshabilitadas (ADR-041.5).
  */
+/** Pestaña «Turnos extra» (tarifas) en la ficha de instalación (CAR-620). */
+export async function verPestanaTurnosExtra(): Promise<boolean> {
+  const identidad = await identidadActual();
+  if (!identidad?.modulosActivos.includes("pauta")) return false;
+  return puedeDeIdentidad(identidad)("pauta:read");
+}
+
 /**
  * Pestaña «Personas» (dotación) de la ficha de instalación (CAR-596): Pauta activa y lectura de pauta.
  * Sin Pauta, la pestaña no se muestra (ADR-041.5).
@@ -63,6 +70,12 @@ export async function puedeGestionarListas(): Promise<boolean> {
 export async function puedeGestionarRegistros(): Promise<boolean> {
   const identidad = await identidadActual();
   return identidad ? puedeDeIdentidad(identidad)("acceso:registros.manage") : false;
+}
+
+/** ¿Puede prerregistrar visitas (CAR-478)? Oculta «Prerregistrar» a quien solo lee. */
+export async function puedePrerregistrar(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("acceso:prerregistros.create") : false;
 }
 /** ¿Puede configurar puntos, plantillas y programación de rondas? Oculta acciones a quien solo lee. */
 export async function puedeConfigurarRondas(): Promise<boolean> {
