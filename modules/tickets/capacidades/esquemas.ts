@@ -104,6 +104,7 @@ export function vistaTipo(t: FilaTipo): z.infer<typeof tipoSchema> {
 
 export const ticketSchema = z.object({
   id: uuidSchema,
+  numero: z.string().describe("Número corto visible del ticket (prefijo del identificador)."),
   tipoId: uuidSchema,
   tipoNombre: z.string(),
   tipoRequiereAprobacion: z.boolean(),

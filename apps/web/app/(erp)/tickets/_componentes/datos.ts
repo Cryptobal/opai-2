@@ -2,11 +2,14 @@ import type { BadgeProps } from "@opai/ds";
 
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
+import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
-import type { Parametros, SearchParams } from "@/lib/parametros";
+
+export const POR_PAGINA = 50;
 
 export type Ticket = {
   id: string;
+  numero: string;
   tipoId: string;
   tipoNombre: string;
   tipoRequiereAprobacion: boolean;
@@ -80,25 +83,25 @@ export const TONO_PRIORIDAD: Record<string, NonNullable<BadgeProps["tono"]>> = {
   p4: "neutro",
 };
 
-export async function filtrosDe(sp: SearchParams): Promise<Parametros> {
-  const p = await sp;
-  return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
-}
-
 export async function cargarTickets(p: Parametros) {
-  return ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
+  const q = p["q"]?.trim().slice(0, 80);
+  const r = await ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
     "erp",
     "tickets.tickets.listar",
     {
       vista: p["vista"] ?? "mios",
+      limite: POR_PAGINA,
       ...(p["estado"] ? { estado: p["estado"] } : {}),
+      ...(q && q.length >= 2 ? { q } : {}),
+      ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
     },
   );
-}
-
-export async function cargarTicketsSplit(p: Parametros) {
-  const r = await cargarTickets(p);
-  return { state: estadoPantalla(r), items: r.ok ? r.data.items : [], siguiente: r.ok ? r.data.siguiente : null };
+  return {
+    state: estadoPantalla(r),
+    items: r.ok ? r.data.items : [],
+    siguiente: r.ok ? r.data.siguiente : null,
+    error: r,
+  };
 }
 
 export type RespuestaTicketsLista = Awaited<ReturnType<typeof cargarTickets>>;

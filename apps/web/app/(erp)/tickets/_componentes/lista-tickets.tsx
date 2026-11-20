@@ -6,7 +6,7 @@ import type { Parametros } from "@/lib/parametros";
 
 import { NuevoTicket } from "./nuevo-ticket";
 import {
-  type cargarTicketsSplit,
+  type cargarTickets,
   ETIQUETA_ESTADO,
   ETIQUETA_PRIORIDAD,
   TONO_ESTADO,
@@ -48,7 +48,7 @@ const vacio = {
 
 export function ListaTickets(p: {
   p: Parametros;
-  lista: Awaited<ReturnType<typeof cargarTicketsSplit>>;
+  lista: Awaited<ReturnType<typeof cargarTickets>>;
   tipos: TipoTicket[];
   instalaciones?: { id: string; nombre: string }[];
   seleccionada?: string;

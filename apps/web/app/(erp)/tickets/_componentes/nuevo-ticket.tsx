@@ -10,11 +10,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { InstalacionOpcion, TipoTicket } from "./datos";
 import { SIN_INSTALACION, useInstalacionesTicket } from "./instalaciones-ticket";
 import { NuevoTicketFormulario } from "./nuevo-ticket-formulario";
-
-export const CONFIG_TIPOS_TICKET = "/configuracion/modulo/tickets?seccion=tipos";
-
-export const MOTIVO_SIN_TIPOS_TICKET =
-  "Para crear un ticket hace falta un tipo disponible para tu rol. Quien administra Tickets puede crearlo en Configuración › Módulos › Tickets › Tipos.";
+import { MOTIVO_SIN_TIPOS_TICKET } from "./tickets-tipos-config";
 
 /**
  * Nuevo ticket (Sheet de la bandeja). Un ticket nace solo cuando una persona lo crea aquí o por
