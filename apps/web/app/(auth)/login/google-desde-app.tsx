@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Button } from "@opai/ds";
+import { Alerta, Button } from "@opai/ds";
 
 import { escucharVueltaApp, iniciarGoogleEnApp } from "@/lib/app-nativa-cliente";
 
@@ -13,22 +13,38 @@ import { escucharVueltaApp, iniciarGoogleEnApp } from "@/lib/app-nativa-cliente"
  */
 export function GoogleDesdeApp({ deshabilitado }: { deshabilitado: boolean }) {
   const [abriendo, setAbriendo] = useState(false);
+  const [error, setError] = useState(false);
   const router = useRouter();
   useEffect(() => escucharVueltaApp((ruta) => router.push(ruta)), [router]);
   const abrir = async () => {
     setAbriendo(true);
-    if (!(await iniciarGoogleEnApp())) setAbriendo(false);
+    setError(false);
+    try {
+      setError(!(await iniciarGoogleEnApp()));
+    } catch {
+      setError(true);
+    } finally {
+      setAbriendo(false);
+    }
   };
   return (
-    <Button
-      variant="secondary"
-      size="lg"
-      block
-      disabled={deshabilitado}
-      cargando={abriendo}
-      onClick={() => void abrir()}
-    >
-      Continuar con Google
-    </Button>
+    <div className="flex flex-col gap-3">
+      {error ? (
+        <Alerta tono="danger" titulo="No pudimos abrir Google">
+          Prueba de nuevo o entra con tu correo y contraseña.
+        </Alerta>
+      ) : null}
+      <Button
+        type="button"
+        variant="secondary"
+        size="lg"
+        block
+        disabled={deshabilitado || abriendo}
+        cargando={abriendo}
+        onClick={() => void abrir()}
+      >
+        Continuar con Google
+      </Button>
+    </div>
   );
 }
