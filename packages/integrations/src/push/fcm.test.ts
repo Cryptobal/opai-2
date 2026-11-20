@@ -47,4 +47,40 @@ describe("fcm · HTTP v1 sin SDK", () => {
       vencida: true,
     });
   });
+
+  it("no marca vencida un 404 sin código FCM de token", async () => {
+    const cuenta = await cuentaPrueba();
+    const f = vi.fn(async (url: string | URL) => {
+      const u = new URL(String(url));
+      if (u.origin === "https://oauth2.googleapis.com" && u.pathname === "/token") {
+        return new Response(JSON.stringify({ access_token: "tok", expires_in: 3600 }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ error: { status: "NOT_FOUND" } }), { status: 404 });
+    }) as typeof fetch;
+    const e = emisorFcm(cuenta, f);
+    expect((await e.avisar("token", "android", "/a")).vencida).toBe(false);
+  });
+
+  it("marca vencida INVALID_ARGUMENT y sanea ruta en el payload", async () => {
+    const cuenta = await cuentaPrueba();
+    let cuerpoFcm = "";
+    const f = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const u = new URL(String(url));
+      if (u.origin === "https://oauth2.googleapis.com" && u.pathname === "/token") {
+        return new Response(JSON.stringify({ access_token: "tok", expires_in: 3600 }), { status: 200 });
+      }
+      cuerpoFcm = String(init?.body ?? "");
+      return new Response(JSON.stringify({ error: { status: "INVALID_ARGUMENT" } }), { status: 400 });
+    }) as typeof fetch;
+    const e = emisorFcm(cuenta, f);
+    expect((await e.avisar("token", "ios", "https://malicia")).vencida).toBe(true);
+    expect(cuerpoFcm).toContain('"ruta":"/bandeja"');
+  });
+
+  it("falla si OAuth no devuelve access_token", async () => {
+    const cuenta = await cuentaPrueba();
+    const f = vi.fn(async () => new Response(JSON.stringify({ expires_in: 3600 }), { status: 200 })) as typeof fetch;
+    const e = emisorFcm(cuenta, f);
+    expect((await e.avisar("token", "android", "/x")).ok).toBe(false);
+  });
 });

@@ -274,6 +274,13 @@ enum PushSuscripcionTipo {
   @@schema("core")
 }
 
+enum PlataformaPush {
+  ios
+  android
+
+  @@schema("core")
+}
+
 /// Dispositivo suscrito a avisos al celular de un usuario en una empresa (CAR-356, ADR-044.4). Web Push
 /// (endpoint del navegador) o token nativo FCM/APNs (app Capacitor). El aviso va sin datos personales.
 model SuscripcionPush {
@@ -283,7 +290,7 @@ model SuscripcionPush {
   tipo          PushSuscripcionTipo @default(web)
   endpoint      String?
   token         String?
-  plataforma    String?
+  plataforma    PlataformaPush?
   dispositivo   String?
   ultimoAvisoEn DateTime?           @map("ultimo_aviso_en") @db.Timestamptz(6)
   createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)

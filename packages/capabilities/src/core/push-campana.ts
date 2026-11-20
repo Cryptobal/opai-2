@@ -1,4 +1,4 @@
-import type { CategoriaAviso } from "@opai/domain";
+import { type CategoriaAviso, rutaPushInterna } from "@opai/domain";
 
 import type { Contexto } from "../types";
 import { avisarAlCelular } from "./push-avisar";
@@ -23,7 +23,7 @@ export async function avisarPushTrasCampana(
   eventoTipo: string,
   enlace: string | null,
 ) {
-  const ruta = enlace?.startsWith("/") ? enlace : "/bandeja";
+  const ruta = rutaPushInterna(enlace);
   await avisarAlCelular(
     ctx,
     [usuarioId],

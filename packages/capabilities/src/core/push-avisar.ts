@@ -1,4 +1,4 @@
-import { type CategoriaAviso, enSilencio, normalizarPreferencias } from "@opai/domain";
+import { type CategoriaAviso, enSilencio, normalizarPreferencias, rutaPushInterna } from "@opai/domain";
 
 import type { Contexto } from "../types";
 import { zonaDelTenant } from "./turnos/comun";
@@ -44,6 +44,7 @@ export async function avisarAlCelular(
   ahora: Date = new Date(),
   ruta: string = "/bandeja",
 ) {
+  const rutaSegura = rutaPushInterna(ruta);
   const emisorWeb = ctx.servicios.push;
   const emisorNativo = ctx.servicios.pushNativo;
   if ((!emisorWeb && !emisorNativo) || usuarioIds.length === 0) return;
@@ -59,7 +60,7 @@ export async function avisarAlCelular(
       if (s.tipo === "nativa" && s.token && emisorNativo) {
         const plataforma = s.plataforma === "ios" ? "ios" : "android";
         r = await emisorNativo
-          .avisar(s.token, plataforma, ruta)
+          .avisar(s.token, plataforma, rutaSegura)
           .catch(() => ({ ok: false, estado: 0, vencida: false }));
       } else if (s.endpoint && emisorWeb) {
         r = await emisorWeb.avisar(s.endpoint).catch(() => ({ ok: false, estado: 0, vencida: false }));

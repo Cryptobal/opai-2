@@ -1,4 +1,3 @@
-// Suscripción push nativa y aislamiento entre empresas (misma vara que push-db.test.ts).
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -15,11 +14,13 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
   let tenantA = "";
   let tenantB = "";
   let ana = "";
+  let beto = "";
   const tocados: { token: string; ruta: string }[] = [];
+  const tokensVencidos = new Set<string>();
   const emisorNativo: EmisorFcm = {
     async avisar(token, _plataforma, ruta) {
       tocados.push({ token, ruta });
-      const vencida = token.endsWith("viejo");
+      const vencida = tokensVencidos.has(token);
       return { ok: !vencida, estado: vencida ? 404 : 200, vencida };
     },
   };
@@ -75,6 +76,8 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
     };
     const a = await usuario("ana-nat");
     ana = a.id;
+    const b = await usuario("beto-nat");
+    beto = b.id;
     await e.admin.preferenciaNotificacion.create({
       data: {
         tenantId: tenantA,
@@ -103,9 +106,30 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
     expect(ajena).toHaveLength(0);
   });
 
+  it("otro usuario no puede quitar el token ajeno", async () => {
+    const token = `fcm-ajeno-${randomUUID().slice(0, 8)}`;
+    await mod.executeCapability(ctx(tenantA, ana), "core.push.suscribir", { tipo: "nativa", token, plataforma: "ios" });
+    const r = await mod.executeCapability(ctx(tenantA, beto), "core.push.quitar", { tipo: "nativa", token });
+    expect(r).toMatchObject({ ok: true, data: { quitadas: 0 } });
+    expect((await e.admin.suscripcionPush.findFirst({ where: { tenantId: tenantA, token } }))?.usuarioId).toBe(ana);
+  });
+
+  it("mismo token en otro usuario borra la fila anterior antes de crear", async () => {
+    const token = `fcm-comp-${randomUUID().slice(0, 8)}`;
+    const inNat = { tipo: "nativa" as const, token, plataforma: "android" as const };
+    await mod.executeCapability(ctx(tenantA, ana), "core.push.suscribir", inNat);
+    await mod.executeCapability(ctx(tenantA, beto), "core.push.suscribir", inNat);
+    const filas = await e.admin.suscripcionPush.findMany({ where: { tenantId: tenantA, token } });
+    expect(filas).toHaveLength(1);
+    expect(filas[0]?.usuarioId).toBe(beto);
+  });
+
   it("avisar al celular usa FCM con la ruta y borra token vencido", async () => {
     const tokenViejo = `fcm-token-viejo-${randomUUID().slice(0, 4)}`;
     const tokenOk = `fcm-token-ok-${randomUUID().slice(0, 4)}`;
+    tokensVencidos.clear();
+    tocados.length = 0;
+    tokensVencidos.add(tokenViejo);
     await e.admin.suscripcionPush.createMany({
       data: [
         { tenantId: tenantA, usuarioId: ana, tipo: "nativa", token: tokenViejo, plataforma: "ios" },
@@ -114,7 +138,7 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
     });
     await mod.avisarAlCelular(ctx(tenantA, ana), [ana], "pauta", "pauta", new Date(), "/trabajador/pauta");
     expect(tocados.map((t) => t.token).sort()).toEqual([tokenOk, tokenViejo].sort());
-    expect(tocados[0]?.ruta).toBe("/trabajador/pauta");
+    expect(tocados.every((t) => t.ruta === "/trabajador/pauta")).toBe(true);
     const quedan = await e.admin.suscripcionPush.findMany({
       where: { tenantId: tenantA, usuarioId: ana, tipo: "nativa" },
     });

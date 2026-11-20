@@ -6,6 +6,8 @@ import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
+import { guardarSuscripcionNativa, guardarSuscripcionWeb } from "./push-suscribir-db";
+
 const PORTALES = ["erp", "supervisor", "trabajador", "terreno"] as const;
 
 const endpointSchema = z
@@ -19,7 +21,7 @@ const tokenNativoSchema = z
   .trim()
   .min(20)
   .max(4096)
-  .regex(/^[A-Za-z0-9_:\-]+$/, "Token FCM/APNs inválido.");
+  .regex(/^[A-Za-z0-9_:-]+$/, "Token FCM/APNs inválido.");
 
 function usuarioDe(ctx: Contexto): string {
   if (ctx.actor.tipo !== "user")
@@ -67,36 +69,10 @@ const pushSuscribir = defineCapability({
     const usuarioId = usuarioDe(ctx);
     if (dryRun) return { suscrito: true };
     if (input.tipo === "web") {
-      await ctx.db.suscripcionPush.upsert({
-        where: { tenantId_endpoint: { tenantId: ctx.tenantId, endpoint: input.endpoint } },
-        create: {
-          tenantId: ctx.tenantId,
-          usuarioId,
-          tipo: "web",
-          endpoint: input.endpoint,
-          dispositivo: input.dispositivo ?? null,
-        },
-        update: { usuarioId, dispositivo: input.dispositivo ?? null, tipo: "web" },
-      });
+      await guardarSuscripcionWeb(ctx, usuarioId, input);
       return { suscrito: true };
     }
-    await ctx.db.suscripcionPush.upsert({
-      where: { tenantId_token: { tenantId: ctx.tenantId, token: input.token } },
-      create: {
-        tenantId: ctx.tenantId,
-        usuarioId,
-        tipo: "nativa",
-        token: input.token,
-        plataforma: input.plataforma,
-        dispositivo: input.dispositivo ?? null,
-      },
-      update: {
-        usuarioId,
-        plataforma: input.plataforma,
-        dispositivo: input.dispositivo ?? null,
-        tipo: "nativa",
-      },
-    });
+    await guardarSuscripcionNativa(ctx, usuarioId, input);
     return { suscrito: true };
   },
 });

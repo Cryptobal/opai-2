@@ -2,7 +2,7 @@
 
 ## Qué entró
 
-- Modelo `core.suscripciones_push` con `tipo` `web | nativa`, `token`, `plataforma` (migración aditiva, RLS igual).
+- Modelo `core.suscripciones_push` con `tipo` `web | nativa`, `token`, `plataforma` enum `ios|android`; únicos completos `(tenant_id, endpoint)` y `(tenant_id, token)` (sin índices parciales).
 - Capacidad `core.push.suscribir` / `quitar` con union discriminada web/nativa.
 - Emisor FCM HTTP v1 en `@opai/integrations` (`FIREBASE_SERVICE_ACCOUNT`); sin env, inactivo.
 - `avisarAlCelular` enruta web + nativo con ruta en `data` (título genérico).

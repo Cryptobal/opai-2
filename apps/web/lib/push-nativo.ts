@@ -1,5 +1,6 @@
 "use client";
 
+import { rutaPushInterna } from "@opai/domain";
 import { Capacitor } from "@capacitor/core";
 
 /** Ejecuta una capacidad de escritura (mismo contrato que `useCapacidad`). */
@@ -47,9 +48,8 @@ export function escucharToquePushNativo(navegar: (ruta: string) => void): () => 
   void import("@capacitor/push-notifications").then(({ PushNotifications }) => {
     if (!activo) return;
     const sub = PushNotifications.addListener("pushNotificationActionPerformed", (ev) => {
-      const ruta = ev.notification.data?.["ruta"];
-      if (typeof ruta === "string" && ruta.startsWith("/")) navegar(ruta);
-      else navegar("/bandeja");
+      const cruda = ev.notification.data?.["ruta"];
+      navegar(typeof cruda === "string" ? rutaPushInterna(cruda) : "/bandeja");
     });
     void sub.then((h) => {
       remover = () => void h.remove();
