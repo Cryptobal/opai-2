@@ -1,16 +1,15 @@
 import { Badge, ListScreen } from "@opai/ds";
 
+import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { LinkNext } from "@/app/_components/link-next";
-import { estadoPantalla } from "@/lib/formato";
+import { PaginacionCursor } from "@/lib/paginacion-cursor";
+import type { Parametros } from "@/lib/parametros";
 
-import {
-  CONFIG_TIPOS_TICKET,
-  MOTIVO_SIN_TIPOS_TICKET,
-  NuevoTicket,
-} from "./nuevo-ticket";
-import { ETIQUETA_ESTADO, ETIQUETA_PRIORIDAD, TONO_ESTADO, TONO_PRIORIDAD } from "./datos";
+import { NuevoTicket } from "./nuevo-ticket";
+import { CONFIG_TIPOS_TICKET, MOTIVO_SIN_TIPOS_TICKET } from "./tickets-tipos-config";
+import { ETIQUETA_ESTADO, ETIQUETA_PRIORIDAD, POR_PAGINA, TONO_ESTADO, TONO_PRIORIDAD } from "./datos";
 import type { InstalacionOpcion, RespuestaTicketsLista, Ticket, TipoTicket } from "./datos";
 import { COLUMNAS_TICKETS } from "./tickets-columnas";
 
@@ -21,22 +20,35 @@ const OPCIONES_VISTA = [
 ];
 
 export function TicketsBandeja({
-  r,
+  p,
+  bandeja,
   tipos,
   instalaciones,
 }: {
-  r: RespuestaTicketsLista;
+  p: Parametros;
+  bandeja: RespuestaTicketsLista;
   tipos: TipoTicket[];
   instalaciones: InstalacionOpcion[];
 }) {
-  const items = r.ok ? r.data.items : [];
+  const { items } = bandeja;
   const sinTipos = tipos.length === 0;
   return (
     <ListScreen<Ticket>
-      state={estadoPantalla(r)}
+      state={bandeja.state}
       titulo="Tickets"
       accionPrincipal={<NuevoTicket tipos={tipos} instalaciones={instalaciones} />}
+      buscador={<Buscador placeholder="Número, asunto o solicitante" />}
       filtros={<ChipsFiltro filtros={[{ param: "vista", etiqueta: "Vista", opciones: OPCIONES_VISTA }]} />}
+      paginacion={
+        <PaginacionCursor
+          p={p}
+          porPagina={POR_PAGINA}
+          mostrados={items.length}
+          siguiente={bandeja.siguiente}
+          total={null}
+          etiquetaCorta={`${items.length} tickets`}
+        />
+      }
       items={items}
       clave={(t) => t.id}
       href={(t) => `/tickets/${t.id}`}
