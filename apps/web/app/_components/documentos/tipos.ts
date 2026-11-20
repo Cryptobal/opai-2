@@ -29,12 +29,18 @@ export type TipoDocumento = {
 };
 
 export type EntidadDocumento = {
-  tipo: "tenant" | "cuenta" | "instalacion" | "persona" | "puesto";
+  tipo: "tenant" | "cuenta" | "instalacion" | "persona" | "puesto" | "ticket" | "visita";
   id: string;
 };
 
 /** Entidades a las que se puede vincular un documento desde el explorador. */
-export type EntidadVinculable = "tenant" | "cuenta" | "instalacion" | "persona";
+export type EntidadVinculable =
+  | "tenant"
+  | "cuenta"
+  | "instalacion"
+  | "persona"
+  | "ticket"
+  | "visita";
 
 /**
  * Capa de tipos de documento de cada entidad vinculable: solo para OFRECER los tipos que calzan.
@@ -45,6 +51,8 @@ export const CAPA_DE_ENTIDAD: Record<EntidadVinculable, string> = {
   cuenta: "cuenta",
   instalacion: "instalacion",
   persona: "persona",
+  ticket: "ticket",
+  visita: "visita",
 };
 
 export const diasHasta = (vence: string | null) =>

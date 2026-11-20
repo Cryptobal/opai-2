@@ -6,8 +6,6 @@ import type { Contacto } from "@/lib/tipos-maestros";
 
 import { ROL_CONTACTO } from "./roles-contacto";
 
-export { ROL_CONTACTO } from "./roles-contacto";
-
 export const correoMalo = (e: string) =>
   Boolean(e.trim()) && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
 

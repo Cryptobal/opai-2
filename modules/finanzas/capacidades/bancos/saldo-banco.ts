@@ -3,7 +3,7 @@ import type { TenantTx } from "@opai/db";
 import { hoyIso } from "../util";
 
 /** Saldo conocido de una cuenta y el día (zona del negocio) al que corresponde. */
-export type SaldoCuenta = {
+type SaldoCuenta = {
   cuentaId: string;
   saldo: number;
   fecha: string;

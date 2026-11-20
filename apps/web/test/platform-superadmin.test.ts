@@ -9,6 +9,7 @@ import { datosShell } from "@/app/_components/datos-shell";
 import { fuentesFalsas, membresia, USUARIO } from "./fuentes-falsas";
 
 const estado = vi.hoisted(() => ({ identidad: null as Identidad | null }));
+vi.mock("@/lib/ver-como", () => ({ verComoDe: async () => null }));
 vi.mock("@/lib/servidor", async () => ({
   ...(await import("@/lib/acceso-portal")),
   requerirIdentidad: async () => estado.identidad,

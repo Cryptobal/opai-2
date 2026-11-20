@@ -1,6 +1,21 @@
-import { prohibido } from "../../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { hashToken } from "./comun-flujo";
+
+/** Persona activa vinculada al usuario de la sesión (portal, firma en sesión). */
+export async function personaDelUsuario(ctx: Contexto): Promise<string | null> {
+  if (ctx.actor.tipo !== "user") return null;
+  const p = await ctx.db.persona.findFirst({
+    where: {
+      tenantId: ctx.tenantId,
+      usuarioId: ctx.actor.id,
+      archivadaEn: null,
+      anonimizadaEn: null,
+    },
+    select: { id: true },
+  });
+  return p?.id ?? null;
+}
 
 type FirmanteFila = {
   id: string;
@@ -32,19 +47,36 @@ export async function resolverFirmante(
       throw prohibido("El enlace de firma venció.");
     return f;
   }
-  if (input.solicitudId && ctx.actor.tipo === "user") {
+  if (input.solicitudId) {
+    if (ctx.actor.tipo !== "user") throw reglaDeNegocio("Firma en sesión requiere un usuario.");
+    const personaId = await personaDelUsuario(ctx);
     const f = await ctx.db.firmante.findFirst({
       where: {
         tenantId: ctx.tenantId,
         solicitudId: input.solicitudId,
-        tipo: "usuario",
-        usuarioId: ctx.actor.id,
+        OR: [
+          { tipo: "usuario", usuarioId: ctx.actor.id },
+          ...(personaId ? [{ personaId }] : []),
+        ],
       },
     });
     if (!f) throw prohibido("No figuras como firmante de esta solicitud.");
     return f;
   }
   throw prohibido("Falta el enlace personal o la sesión del firmante.");
+}
+
+/** Firmante autenticado y solicitud viva del mismo tenant (ver_firmante, documento_url). */
+export async function resolverFirmanteYSolicitud(
+  ctx: Contexto,
+  input: { token?: string | undefined; solicitudId?: string | undefined },
+) {
+  const firmante = await resolverFirmante(ctx, input);
+  const solicitud = await ctx.db.solicitudFirma.findFirst({
+    where: { tenantId: ctx.tenantId, id: firmante.solicitudId },
+  });
+  if (!solicitud) throw noEncontrado("La solicitud de firma");
+  return { firmante, solicitud };
 }
 
 /**

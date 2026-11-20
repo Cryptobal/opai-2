@@ -1,5 +1,5 @@
 /** CodRef 2 de la nota de crédito: corrige solo texto, sin monto. */
-export const CODIGO_CORRIGE_TEXTO = "2";
+const CODIGO_CORRIGE_TEXTO = "2";
 
 /** Si la nota solo corrige texto, el formulario no pide monto. */
 export function corrigeSoloTexto(codigo: string): boolean {

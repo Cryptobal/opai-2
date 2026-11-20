@@ -86,6 +86,7 @@ describe("core.roles.* (crear, editar, asignar)", () => {
     const guardado = tabla("rol")[0]?.["permisos"] as string[];
     expect(guardado).toContain("core:tenant.read");
     expect(guardado).toContain("core:users.manage");
+    expect(guardado).not.toContain("core:personas.estado.admin");
     // Se guarda la lista concreta, nunca el comodín que regalaría permisos agregados después.
     expect(guardado).not.toContain("core:*");
   });

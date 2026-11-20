@@ -2,7 +2,7 @@ import type { Contexto } from "../../types";
 import { exigirEdicionVinculo, validarDestino } from "./vinculos-validacion";
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { PERMISOS_CORE, PERSONA_ESTADO_ACTIVO, PERSONA_ESTADO_POSTULANTE } from "@opai/domain";
 export { crearVinculo } from "./vinculos-crear";
 import { crearVinculo } from "./vinculos-crear";
 
@@ -40,11 +40,18 @@ export const personasCreate = defineCapability({
   descripcion:
     "Registra una persona (trabajador) con RUT obligatorio y único. Opcionalmente crea su vínculo laboral inicial (cargo, tipo de contrato e inicio).",
   permiso: PERMISOS_CORE.personasManage,
-  input: z.object({ ...camposPersona, vinculo: z.object(camposVinculo).optional() }),
+  input: z.object({
+    ...camposPersona,
+    vinculo: z.object(camposVinculo).optional(),
+    estadoInicial: z
+      .enum([PERSONA_ESTADO_POSTULANTE, PERSONA_ESTADO_ACTIVO])
+      .optional()
+      .describe("Estado al crear: «postulante» (sin vínculo) o «activo» (con vínculo inicial)."),
+  }),
   output: personaSchema,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, { vinculo, ...input }, { dryRun }) {
+  async handler(ctx, { vinculo, estadoInicial, ...input }, { dryRun }) {
     if (vinculo) {
       exigirEdicionVinculo(ctx);
       if (!ctx.autorizar(PERMISOS_CORE.vinculosManage))
@@ -69,14 +76,20 @@ export const personasCreate = defineCapability({
             termino: vinculo.termino ?? null,
           }
         : null;
-    if (dryRun) return vistaPersona({ ...data, id: "", estado: "activa" }, resumen(""));
+    const estado =
+      estadoInicial ??
+      (vinculo ? PERSONA_ESTADO_ACTIVO : PERSONA_ESTADO_POSTULANTE);
+    if (vinculo && estado !== PERSONA_ESTADO_ACTIVO) {
+      throw reglaDeNegocio("Con vínculo inicial la persona debe quedar en estado «activo».");
+    }
+    if (dryRun) return vistaPersona({ ...data, id: "", estado }, resumen(""));
     let vinculoId = "";
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.persona.creada", entidadTipo: "persona" },
       async (tx) => {
         const nueva = await sinDuplicado(
-          tx.persona.create({ data: { ...data, estado: "activa", tenantId: ctx.tenantId } }),
+          tx.persona.create({ data: { ...data, estado, tenantId: ctx.tenantId } }),
           DUPLICADO,
         );
         if (vinculo) vinculoId = (await crearVinculo(ctx, tx, nueva.id, vinculo)).id;

@@ -56,7 +56,7 @@ describe.skipIf(omitirSuiteDb())("Personas · catálogo propio de clases de ause
             nombres: "Persona",
             apellidos: "Ficticia",
             rut: "11111111-1",
-            estado: "activa",
+            estado: "activo",
           },
         })
       ).id;

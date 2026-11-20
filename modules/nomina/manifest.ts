@@ -49,6 +49,8 @@ export const manifest = defineModule({
     { id: "nomina.novedad.anulada", descripcion: "Se anuló una novedad del período." },
     { id: "nomina.prestamo.creado", descripcion: "Se creó un préstamo con su plan de cuotas." },
     { id: "nomina.prestamo.cancelado", descripcion: "Se canceló un préstamo; sus cuotas pendientes se condonaron." },
+    { id: "nomina.liquidaciones.calculadas", descripcion: "Se calcularon o recalcularon las liquidaciones de un período." },
+    { id: "nomina.liquidaciones.revisadas", descripcion: "Se marcaron como revisadas las liquidaciones calculadas de un período." },
   ],
   capacidades: capacidadesNomina,
   buscadores: buscadoresNomina,

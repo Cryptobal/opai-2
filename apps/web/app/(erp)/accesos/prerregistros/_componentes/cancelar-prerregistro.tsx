@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { avisar, Button } from "@opai/ds";
 
-import { DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
 import { useCapacidad } from "@/app/_components/use-capacidad";
+
+const DialogoConfirmar = lazy(() =>
+  import("@/app/_components/maestros/dialogo-confirmar").then((m) => ({
+    default: m.DialogoConfirmar,
+  })),
+);
 
 /** Cancelar un prerregistro: sus QR dejan de servir desde ahora. No se borra. */
 export function CancelarPrerregistro({ id }: { id: string }) {
@@ -24,22 +29,24 @@ export function CancelarPrerregistro({ id }: { id: string }) {
         Cancelar prerregistro
       </Button>
       {abierto ? (
-        <DialogoConfirmar
-          confirmacion={{
-            titulo: "Cancelar prerregistro",
-            descripcion:
-              "Las invitaciones dejan de servir desde ahora y el guardia ya no verá a estos visitantes como autorizados.",
-            boton: "Cancelar prerregistro",
-            peligro: true,
-          }}
-          pendiente={pendiente}
-          error={error}
-          onCerrar={() => {
-            limpiarError();
-            setAbierto(false);
-          }}
-          onConfirmar={() => void cancelar()}
-        />
+        <Suspense fallback={<p role="status">Cargando confirmación…</p>}>
+          <DialogoConfirmar
+            confirmacion={{
+              titulo: "Cancelar prerregistro",
+              descripcion:
+                "Las invitaciones dejan de servir desde ahora y el guardia ya no verá a estos visitantes como autorizados.",
+              boton: "Cancelar prerregistro",
+              peligro: true,
+            }}
+            pendiente={pendiente}
+            error={error}
+            onCerrar={() => {
+              limpiarError();
+              setAbierto(false);
+            }}
+            onConfirmar={() => void cancelar()}
+          />
+        </Suspense>
       ) : null}
     </>
   );
