@@ -18,10 +18,10 @@ export const contingenciasListar = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.items.map((c) => c.id),
   async handler(ctx, i) {
-    const yo =
-      ctx.portal === "trabajador" || ctx.portal === "terreno" ? await personaPropia(ctx).catch(() => null) : null;
-    if ((ctx.portal === "trabajador" || ctx.portal === "terreno") && !yo) return { items: [] };
-    if ((ctx.portal === "erp" || ctx.portal === "supervisor") && !ctx.autorizar("asistencia:ver")) return { items: [] };
+    const esPersona = ctx.portal === "trabajador" || ctx.portal === "terreno";
+    const yo = esPersona ? await personaPropia(ctx).catch(() => null) : null;
+    if (esPersona && !yo) return { items: [] };
+    if (!yo && !ctx.autorizar("asistencia:ver")) return { items: [] };
     const filas = await ctx.db.contingencia.findMany({
       where: {
         ...(i.estado ? { estado: i.estado } : {}),

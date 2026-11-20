@@ -24,8 +24,10 @@ export const contingenciasVerEnlace = defineCapability({
   descripcion: "Muestra una contingencia propuesta para aceptar u objetar desde el enlace del correo.",
   permiso: null,
   interna: true,
+  sensibles: ["token"],
   input: z.object({ token: tokenSchema }),
   output: z.object({
+    contingenciaId: z.string().uuid(),
     tipo: z.string(),
     hora: z.string(),
     motivo: z.string(),
@@ -34,9 +36,11 @@ export const contingenciasVerEnlace = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => [s.contingenciaId],
   async handler(ctx, i) {
     const { c, venceEn } = await porEnlace(ctx, i.token, undefined);
     return {
+      contingenciaId: c.id,
       tipo: ETIQUETA_TIPO[c.tipo] ?? c.tipo,
       hora: c.horaDeclarada.toISOString(),
       motivo: c.motivo,
@@ -51,6 +55,7 @@ export const contingenciasResponderEnlace = defineCapability({
   descripcion: "Acepta u objeta una contingencia desde el enlace personal, identificándose con el RUT.",
   permiso: null,
   interna: true,
+  sensibles: ["token", "rut", "comentario"],
   input: z.object({
     token: tokenSchema,
     rut: z.string().min(8).max(14),

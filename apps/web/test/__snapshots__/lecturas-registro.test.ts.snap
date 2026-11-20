@@ -4,7 +4,6 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
 [
   "agente.historial.list",
   "agente.modelos.list",
-  "asistencia.contingencias.ver_enlace",
   "asistencia.correcciones.ver_enlace",
   "asistencia.marcas.verificar",
   "asistencia.rostro.estado",

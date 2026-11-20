@@ -2,9 +2,6 @@
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
--- Preview Neon puede traer restos de intentos fallidos sin transacción (migración renumerada CAR-591).
-DROP TABLE IF EXISTS "asistencia"."contingencias_enlaces";
-
 CREATE TABLE "asistencia"."contingencias_enlaces" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
@@ -33,7 +30,7 @@ CREATE POLICY tenant_isolation ON "asistencia"."contingencias_enlaces" AS PERMIS
     USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
     WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
-CREATE TRIGGER mismo_tenant BEFORE INSERT ON "asistencia"."contingencias_enlaces"
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "asistencia"."contingencias_enlaces"
     FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('contingencia_id', 'asistencia.contingencias');
 
 COMMIT;
