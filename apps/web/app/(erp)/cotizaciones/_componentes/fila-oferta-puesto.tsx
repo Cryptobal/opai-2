@@ -23,7 +23,7 @@ export type LineaOferta = {
 export type Ajuste = { incluir: boolean; cantidad: number; nombre: string };
 
 /** Qué le falta a la línea para crear su puesto (el servidor lo vuelve a validar). */
-export function faltaDeLinea(l: LineaOferta): string | null {
+function faltaDeLinea(l: LineaOferta): string | null {
   if (!l.instalacionId) return "instalación";
   if (!l.cargoId) return "cargo";
   if (!l.patron) return "patrón de turno";

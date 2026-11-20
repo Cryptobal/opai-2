@@ -5,7 +5,7 @@ import { Loading } from "@opai/ds";
 
 import { dispositivoActual } from "@/lib/dispositivo";
 
-import { ColaPendiente } from "../_componentes/cola-pendiente";
+import { CargadorCola } from "./cargador";
 
 export const metadata = { title: "Cola sin conexión" };
 
@@ -13,7 +13,7 @@ export const metadata = { title: "Cola sin conexión" };
 async function Contenido() {
   const equipo = await dispositivoActual();
   if (equipo?.estado !== "activo") redirect("/terreno");
-  return <ColaPendiente />;
+  return <CargadorCola />;
 }
 
 export default function Pagina() {

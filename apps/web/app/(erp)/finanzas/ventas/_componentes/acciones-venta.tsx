@@ -69,7 +69,8 @@ export function AccionesVenta({ venta, enviosPrevios, montoPendiente, abrirEdita
     <div className="flex flex-col gap-3">
       {error ? <Alerta tono="danger" titulo="No se pudo completar">{error}</Alerta> : null}
       <div className="flex flex-wrap gap-2">
-        {emitido ? <Button variant="secondary" disabled={pendiente} onClick={() => void pdf()}>Descargar PDF</Button> : null}
+        {/* Un documento anulado (por nota de crédito o de débito) sigue siendo un documento legal timbrado: su PDF se descarga igual (CAR-266). */}
+        {emitido || venta.estadoDte === "anulado_nc" || venta.estadoDte === "anulado_nd" ? <Button variant="secondary" disabled={pendiente} onClick={() => void pdf()}>Descargar PDF</Button> : null}
         {porTransmitir(venta) ? <Button variant="secondary" disabled={pendiente} onClick={() => void alSii()}>Enviar al SII</Button> : null}
         {emitido ? (
           <Button disabled={pendiente} onClick={() => (enviosPrevios > 0 ? setHoja("reenviar") : void alCliente(false))}>

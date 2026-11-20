@@ -43,7 +43,7 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Nómina (RLS)", (
     tenantA = await tenant("nomina-a");
     tenantB = await tenant("nomina-b");
     const persona = async (tenantId: string, rut: string) =>
-      (await e.admin.persona.create({ data: { tenantId, nombres: "Persona", apellidos: "Prueba", rut, estado: "activa" } })).id;
+      (await e.admin.persona.create({ data: { tenantId, nombres: "Persona", apellidos: "Prueba", rut, estado: "activo" } })).id;
     personaA = await persona(tenantA, "11.111.111-1");
     personaB = await persona(tenantB, "22.222.222-2");
     const fechas = { inicio: new Date("2026-11-01"), fin: new Date("2026-11-30"), cierrePrevisto: new Date("2026-11-30") };

@@ -4,7 +4,7 @@
 // pasando el id directo. Complementa el alcance por filas en memoria (rondas.test.ts) y la cobertura
 // de RLS del núcleo en packages/db.
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
@@ -38,16 +38,20 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
       medidor,
     });
 
-  beforeAll(async () => {
+  let cerrarCaso: (() => Promise<void>) | undefined;
+  beforeEach(async () => {
+    cerrarCaso = undefined;
     e = await prepararEntorno();
+    cerrarCaso = () => e.cerrar();
     mod = await import("../src");
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesRondas]);
 
+    tenantA = tenantB = "";
     const tenant = async (slug: string) =>
       (
         await e.admin.tenant.create({
-          data: { slug: `${slug}-${randomUUID().slice(0, 8)}`, nombre: slug, vertical: "seguridad" },
+          data: { slug: `qa-${slug}-${randomUUID()}`, nombre: slug, vertical: "seguridad" },
         })
       ).id;
     tenantA = await tenant("rondas-a");
@@ -89,7 +93,7 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
     const cargoB = (await e.admin.cargo.create({ data: { tenantId: tenantB, nombre: "Guardia" } })).id;
     personaB = (
       await e.admin.persona.create({
-        data: { tenantId: tenantB, nombres: "Persona", apellidos: "B", rut: "22.222.222-2", estado: "activa" },
+        data: { tenantId: tenantB, nombres: "Persona", apellidos: "B", rut: "22.222.222-2", estado: "activo" },
       })
     ).id;
     await e.admin.vinculoLaboral.create({
@@ -97,13 +101,25 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
     });
   });
 
-  afterAll(async () => {
-    await e?.cerrar();
+  afterEach(async () => {
+    // Bitácoras y hechos son append-only: no borrar filas ni desactivar sus guardas.
+    // Cada caso usa UUID nuevos; la base local/CI efímera se descarta al terminar la corrida.
+    try {
+      await cerrarCaso?.();
+    } finally {
+      cerrarCaso = undefined;
+    }
   });
 
   it("el owner de B ve sus propios puntos (control)", async () => {
     const r = await mod.executeCapability(ctxOwner(tenantB), "rondas.puntos.listar", { instalacionId: instB });
-    expect(r.ok && (r.data as unknown[]).length).toBe(1);
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error.code);
+    // CAR-623 devuelve una página: conserva el control positivo de RLS y su identidad exacta.
+    const pagina = r.data as { items: { id: string; instalacionId: string }[]; siguiente: string | null };
+    expect(pagina.items).toHaveLength(1);
+    expect(pagina.items[0]).toMatchObject({ id: puntoB, instalacionId: instB });
+    expect(pagina.siguiente).toBeNull();
   });
 
   it("el owner de A no ve la instalación de B: listar puntos da NOT_FOUND", async () => {

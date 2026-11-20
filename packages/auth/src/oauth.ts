@@ -17,7 +17,7 @@ import {
  * Pantalla donde la persona elige la empresa con la que conecta la app (export-acceso 05). Sin query:
  * el proveedor le agrega `?<consulta firmada>`.
  */
-export const PAGINA_EMPRESA_OAUTH = "/autorizar/empresa";
+const PAGINA_EMPRESA_OAUTH = "/autorizar/empresa";
 /** Pantalla de consentimiento: qué app, qué empresa y qué podrá hacer. */
 export const PAGINA_CONSENTIMIENTO_OAUTH = "/autorizar";
 

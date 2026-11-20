@@ -76,6 +76,10 @@
       "motivo": "Flujo de firma pre-sesión (firma.md R19, §10): ver_firmante, firmar y rechazar son internas; el enlace personal es la credencial."
     },
     {
+      "archivo": "app/_components/firmas/acciones-sesion.ts",
+      "motivo": "Flujo de firma en portal con sesión (CAR-634): mismas capacidades internas; el firmante autenticado es la credencial."
+    },
+    {
       "archivo": "app/p/[slug]/[token]/ver.ts",
       "motivo": "cpq.compartir.ver es interna por diseño: solo la página pública /p/<slug>/<token> la ejecuta, con el enlace revocable y con vencimiento como credencial."
     },

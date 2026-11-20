@@ -1,12 +1,9 @@
-import { ajustesFinanzas, buscadoresFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
+import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
 
+import { buscadoresFinanzas } from "./buscador";
 import { capacidades as capacidadesFlujo } from "./capacidades";
 import { PERMISO_CONFIGURAR, PERMISO_GESTIONAR, PERMISO_VER } from "./capacidades/permisos";
-import {
-  PERMISO_BANCOS_AUTORIZAR,
-  PERMISO_BANCOS_GESTIONAR,
-  PERMISO_BANCOS_VER,
-} from "./capacidades/bancos/permisos";
+import { PERMISO_BANCOS_AUTORIZAR, PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_VER } from "./capacidades/bancos/permisos";
 
 /**
  * Manifest del módulo Finanzas (ADR-003). El núcleo deriva navegación, permisos, configuración,
@@ -123,7 +120,8 @@ export const manifest = defineModule({
     { id: "finanzas.banco.cuenta_actualizada", descripcion: "Se actualizó una cuenta bancaria." },
     { id: "finanzas.banco.cartola_importada", descripcion: "Se importó una cartola bancaria." },
     { id: "finanzas.banco.cartola_deshecha", descripcion: "Se deshizo una cartola importada: se borraron sus movimientos para volver a cargarla." },
-    { id: "finanzas.banco.movimientos_borrados", descripcion: "Se borraron movimientos de la sincronización con el banco (o manuales) de una cuenta entre dos fechas." },
+    { id: "finanzas.banco.movimientos_borrados", descripcion: "Se descartaron movimientos de la sincronización con el banco (o manuales) de una cuenta entre dos fechas; el descarte se puede restaurar." },
+    { id: "finanzas.banco.movimientos_restaurados", descripcion: "Se restauró un descarte de movimientos bancarios: volvieron a la cuenta." },
     { id: "finanzas.banco.movimientos_sincronizados", descripcion: "El banco en línea (Web4Leads) entregó movimientos." },
     { id: "finanzas.banco.conciliacion_confirmada", descripcion: "Se confirmó una conciliación bancaria." },
     { id: "finanzas.banco.conciliacion_deshecha", descripcion: "Se deshizo una conciliación bancaria." },

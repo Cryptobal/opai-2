@@ -4,7 +4,9 @@ import type { Contexto } from "@opai/capabilities";
 
 import { sinDuplicado } from "../esquemas";
 import type { AjusteFecha } from "./cartola-emparejar";
+import { sincronizarAvisosEnTx } from "../aviso";
 import { sincronizarAvisoSaldoBajo } from "./aviso-banco";
+import { quitarSobrantes, type Periodo } from "./cartola-sobrantes";
 import { aplicarReglasBanco } from "./reglas-aplicar";
 import { aFecha } from "./util";
 
@@ -26,6 +28,8 @@ export async function aplicarImportacionCartola(
     saldoInicial: number | null;
     fechaDesde: string | null;
     fechaHasta: string | null;
+    /** CAR-450: sobrantes del banco en línea que se quitan al importar (null = no se quitan). */
+    sobrantes?: { periodo: Periodo; ids: string[] } | null;
   },
 ) {
   return ctx.transaccion(async (tx) => {
@@ -87,6 +91,11 @@ export async function aplicarImportacionCartola(
       });
       ids.push(mov.id);
     }
+    const quitados = p.sobrantes
+      ? await quitarSobrantes(ctx, tx, { cuentaId: p.cuenta.id, ...p.sobrantes, archivo: p.nombreArchivo ?? null })
+      : { cantidad: 0, descarteId: null };
+    const sobrantesQuitados = quitados.cantidad;
+    if (sobrantesQuitados) await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     // Reglas del banco (ADR-074): concilian solas con monto y referencia exactos; si no, dejan sugerencia.
     const reglas = await aplicarReglasBanco(ctx, tx, { movimientoIds: ids });
 
@@ -95,8 +104,8 @@ export async function aplicarImportacionCartola(
       tipo: "finanzas.banco.cartola_importada",
       entidadTipo: "cartolaImportada",
       entidadId: cartola.id,
-      payload: { nuevos: p.nuevos.length, duplicados: p.duplicados, fechasAjustadas: p.ajustes?.length ?? 0, ...reglas },
+      payload: { nuevos: p.nuevos.length, duplicados: p.duplicados, fechasAjustadas: p.ajustes?.length ?? 0, sobrantesQuitados, descarteSobrantesId: quitados.descarteId, ...reglas },
     });
-    return { cartola, reglas };
+    return { cartola, reglas, sobrantesQuitados };
   });
 }
