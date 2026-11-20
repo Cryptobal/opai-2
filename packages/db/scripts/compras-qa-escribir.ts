@@ -8,17 +8,27 @@ type Diagnosticar = <T>(etapa: EtapaFixture, accion: () => T | Promise<T>) => Pr
 const sinDiagnostico: Diagnosticar = async (_etapa, accion) => accion();
 
 /** Compartido por wrappers que verifican el destino antes de crear el cliente. */
-export async function escribirComprasQa(db: PrismaClient, etapa: Diagnosticar = sinDiagnostico): Promise<void> {
+export async function escribirComprasQa(
+  db: PrismaClient,
+  etapa: Diagnosticar = sinDiagnostico,
+  politica: { permitirTrial: boolean } = { permitirTrial: false },
+): Promise<void> {
   await etapa("FIXTURE_TX", () =>
     db.$transaction(
       async (tx) => {
         const tenant = await etapa("FIXTURE_TENANT_CONSULTA", () =>
-          tx.tenant.findUnique({ where: { slug: "qa-e2e" } }),
+          tx.tenant.findUnique({ where: { slug: "qa-e2e" }, select: { id: true, estado: true } }),
         );
-        const tenantId = await etapa("FIXTURE_TENANT_ESTADO", () => {
-          if (!tenant || tenant.estado !== "activo") throw new Error("Falta qa-e2e activo.");
-          return tenant.id;
+        const tenantQa = await etapa("FIXTURE_TENANT_AUSENTE", () => {
+          if (!tenant) throw new Error("Falta qa-e2e activo.");
+          return tenant;
         });
+        await etapa(tenantQa.estado === "suspendido" ? "FIXTURE_TENANT_SUSPENDIDO" : "FIXTURE_TENANT_ESTADO", () => {
+          if (tenantQa.estado !== "activo" && !(politica.permitirTrial && tenantQa.estado === "trial")) {
+            throw new Error("Falta qa-e2e activo.");
+          }
+        });
+        const tenantId = tenantQa.id;
         if (await etapa("FIXTURE_INTEGRIDAD", () => fixtureComprasYaExiste(tx, tenantId))) return;
         const d = datosComprasQa(tenantId);
         await etapa("FIXTURE_INSERT_PROVEEDOR", () => tx.proveedor.create({ data: d.proveedor }));

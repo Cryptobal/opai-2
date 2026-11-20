@@ -31,7 +31,7 @@ export async function ejecutarComprasQaPreview(
   const url = await etapa("DESTINO", () => validarDestinoPreview(env, branch, endpoints));
   const db = await etapa("CONSTRUIR_CLIENTE", () => deps.conectar(url));
   try {
-    await etapa("FIXTURE", () => escribirComprasQa(db, etapa));
+    await etapa("FIXTURE", () => escribirComprasQa(db, etapa, { permitirTrial: true }));
   } catch (error) {
     try {
       await etapa("CERRAR_CLIENTE", () => db.$disconnect());
