@@ -1,6 +1,9 @@
 import type { ResultadoPush } from "./index";
 
 const TITULO_AVISO = "Tienes un aviso nuevo";
+const URL_OAUTH_GOOGLE = "https://oauth2.googleapis.com/token";
+/** Firebase project ids solo usan minúsculas, números y guiones (evita path traversal en la URL FCM). */
+const PROJECT_ID_FCM = /^[a-z][a-z0-9-]{4,62}[a-z0-9]$/;
 
 export type CuentaFirebase = {
   project_id: string;
@@ -29,7 +32,7 @@ export async function firmarJwtFirebase(
     JSON.stringify({
       iss: cuenta.client_email,
       scope: "https://www.googleapis.com/auth/firebase.messaging",
-      aud: "https://oauth2.googleapis.com/token",
+      aud: URL_OAUTH_GOOGLE,
       exp: iat + 3600,
       iat,
     }),
@@ -64,7 +67,7 @@ async function tokenOAuth(
   ahora: number,
 ): Promise<string> {
   const jwt = await firmarJwtFirebase(cuenta, ahora);
-  const r = await f("https://oauth2.googleapis.com/token", {
+  const r = await f(URL_OAUTH_GOOGLE, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -98,7 +101,10 @@ export function emisorFcm(cuenta: CuentaFirebase, f: typeof fetch = fetch): Emis
       try {
         const ahora = Date.now();
         const bearer = await oauth(ahora);
-        const url = `https://fcm.googleapis.com/v1/projects/${cuenta.project_id}/messages:send`;
+        if (!PROJECT_ID_FCM.test(cuenta.project_id)) {
+          return { ok: false, estado: 0, vencida: false };
+        }
+        const url = `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(cuenta.project_id)}/messages:send`;
         const mensaje = {
           message: {
             token,
@@ -142,7 +148,7 @@ export function emisorFcmDelEntorno(
   if (!crudo?.trim()) return null;
   try {
     const j = JSON.parse(crudo) as CuentaFirebase;
-    if (!j.project_id || !j.client_email || !j.private_key) return null;
+    if (!j.project_id || !PROJECT_ID_FCM.test(j.project_id) || !j.client_email || !j.private_key) return null;
     return emisorFcm(j);
   } catch {
     return null;

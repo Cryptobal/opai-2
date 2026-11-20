@@ -34,7 +34,8 @@ describe("fcm · HTTP v1 sin SDK", () => {
   it("marca vencida la respuesta UNREGISTERED", async () => {
     const cuenta = await cuentaPrueba();
     const f = vi.fn(async (url: string | URL) => {
-      if (String(url).includes("oauth2.googleapis.com")) {
+      const u = new URL(String(url));
+      if (u.origin === "https://oauth2.googleapis.com" && u.pathname === "/token") {
         return new Response(JSON.stringify({ access_token: "tok", expires_in: 3600 }), { status: 200 });
       }
       return new Response(JSON.stringify({ error: { status: "UNREGISTERED" } }), { status: 404 });
