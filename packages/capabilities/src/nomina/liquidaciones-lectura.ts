@@ -12,7 +12,7 @@ import { nombresDe } from "./novedades-vista";
 // Lecturas de liquidaciones (Brief 27): montos de remuneración por persona, dato sensible. Se auditan por
 // los IDs revelados (NÚCLEO-H) y quedan fuera para gerente, supervisor y viewer (bloqueo financiero).
 /** Los montos por persona exigen ver todo el personal y el permiso de sueldos sensibles (como las capas). */
-function exigirVistaCompleta(ctx: Contexto): void {
+export function exigirVistaCompleta(ctx: Contexto): void {
   if (ctx.alcance || !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
     throw prohibido("Ver liquidaciones exige el permiso de sueldos sensibles y acceso a todo el personal.");
 }

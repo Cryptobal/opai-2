@@ -7,7 +7,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { hoy } from "../maestros/comun";
-import { documentosEnAlcance } from "./alcance-doc";
+import { filtroAlcanceDocumentos } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import { auditarLecturaFilasConPersona, entidadPropietarioSchema } from "./explorar-fila";
 import { firmaDe, propietariosDe } from "./explorar-entidades";
@@ -55,11 +55,11 @@ export const documentosExplorar = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     // Alcance (ADR-022) y sensibles (cumplimiento, anexos) van en la misma consulta que lee los metadatos.
-    const permitidos = await documentosEnAlcance(ctx);
+    const permitidos = await filtroAlcanceDocumentos(ctx);
     const filtros: Prisma.DocumentoWhereInput[] = [
       filtroDocumentoSensible(ctx),
       { estado: { in: input.incluirArchivados ? ["disponible", "archivado"] : ["disponible"] } },
-      ...(permitidos ? [{ id: { in: [...permitidos] } }] : []),
+      permitidos,
       ...(input.tipoId ? [{ tipoId: input.tipoId }] : []),
       ...(input.entidadTipo
         ? [{ vinculos: { some: { rol: "propietario", entidadTipo: input.entidadTipo } } }]

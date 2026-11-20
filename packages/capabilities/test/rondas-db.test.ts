@@ -93,7 +93,7 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
     const cargoB = (await e.admin.cargo.create({ data: { tenantId: tenantB, nombre: "Guardia" } })).id;
     personaB = (
       await e.admin.persona.create({
-        data: { tenantId: tenantB, nombres: "Persona", apellidos: "B", rut: "22.222.222-2", estado: "activa" },
+        data: { tenantId: tenantB, nombres: "Persona", apellidos: "B", rut: "22.222.222-2", estado: "activo" },
       })
     ).id;
     await e.admin.vinculoLaboral.create({

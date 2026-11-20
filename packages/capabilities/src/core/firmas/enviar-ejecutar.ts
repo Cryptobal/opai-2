@@ -3,7 +3,7 @@ import { plazoVence, type ClaseFirma, type NivelFirma } from "@opai/domain";
 
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
-import { documentosEnAlcance } from "../documentos/alcance-doc";
+import { filtroAlcanceDocumentos } from "../documentos/alcance-doc";
 import { filtroDocumentoSensible } from "../documentos/sensibles";
 import { politicaEfectiva } from "./comun";
 import { crearSolicitudFirma } from "./enviar-ejecutar-crear";
@@ -20,12 +20,11 @@ export type EnvioFirmaInput = {
 };
 
 export async function ejecutarEnvioFirma(ctx: Contexto, input: EnvioFirmaInput, dryRun: boolean) {
-  const permitidos = await documentosEnAlcance(ctx);
+  const permitidos = await filtroAlcanceDocumentos(ctx);
   const doc = await ctx.db.documento.findFirst({
     where: {
-      ...filtroDocumentoSensible(ctx),
-      id: input.documentoId,
-      ...(permitidos ? { id: { in: [...permitidos].filter((id) => id === input.documentoId) } } : {}),
+            id: input.documentoId,
+      AND: [filtroDocumentoSensible(ctx), permitidos],
     },
   });
   if (!doc) throw noEncontrado("El documento");

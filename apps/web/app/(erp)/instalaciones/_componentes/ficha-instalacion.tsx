@@ -12,7 +12,7 @@ import type { Parametros } from "@/lib/parametros";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
 import { accionesInstalacion } from "./acciones-instalacion";
-import { conFiltrosInstalaciones } from "./filtros-instalaciones";
+import { pestanasInstalacion } from "./ficha-instalacion-pestanas";
 
 export type TabInstalacion =
   | "resumen"
@@ -20,6 +20,7 @@ export type TabInstalacion =
   | "sueldo"
   | "negocios"
   | "rondas"
+  | "turnos-extra"
   | "accesos"
   | "personas"
   | "visitas"
@@ -39,6 +40,7 @@ export function FichaInstalacion(p: {
   negocios?: boolean;
   /** Pestaña aportada por Rondas (Brief 14): solo con el módulo activo y permiso de lectura. */
   rondas?: boolean;
+  turnosExtra?: boolean;
   /** Pestaña «Accesos» (CAR-475): Control de acceso activo y permiso de lectura. */
   accesos?: boolean;
   /** Pestaña de dotación (CAR-596): Pauta activa y permiso de lectura. */
@@ -92,52 +94,19 @@ export function FichaInstalacion(p: {
           : {})}
         tabActiva={p.tab}
         Link={LinkNext}
-        tabs={[
-          { id: "resumen", etiqueta: "Resumen", href: conFiltrosInstalaciones(base, p.parametros) },
-          {
-            id: "puestos",
-            etiqueta: "Puestos",
-            contador: activos,
-            href: conFiltrosInstalaciones(`${base}/puestos`, p.parametros),
-          },
-          {
-            id: "sueldo",
-            etiqueta: "Sueldo",
-            href: conFiltrosInstalaciones(`${base}/sueldo`, p.parametros),
-          },
-          // Pestañas de módulo: solo si el módulo está activo y el usuario puede leerlo (ADR-041.5).
-          ...(
-            [
-              [p.negocios, "negocios", "Negocios"],
-              [p.rondas, "rondas", "Rondas"],
-              [p.accesos, "accesos", "Accesos"],
-              [p.personas, "personas", p.persona],
-              [p.visitas, "visitas", "Visitas"],
-            ] as const
-          )
-            .filter(([ver]) => ver)
-            .map(([, id, etiqueta]) => ({
-              id,
-              etiqueta,
-              href: conFiltrosInstalaciones(`${base}/${id}`, p.parametros),
-            })),
-          {
-            id: "dispositivos",
-            etiqueta: "Dispositivos",
-            href: conFiltrosInstalaciones(`${base}/dispositivos`, p.parametros),
-          },
-          {
-            id: "documentos",
-            etiqueta: "Documentos",
-            contador: i?.documentos ?? 0,
-            href: conFiltrosInstalaciones(`${base}/documentos`, p.parametros),
-          },
-          {
-            id: "actividad",
-            etiqueta: "Actividad",
-            href: conFiltrosInstalaciones(`${base}/actividad`, p.parametros),
-          },
-        ]}
+        tabs={pestanasInstalacion({
+          base,
+          parametros: p.parametros,
+          activos,
+          documentos: i?.documentos ?? 0,
+          ...(p.negocios !== undefined ? { negocios: p.negocios } : {}),
+          ...(p.rondas !== undefined ? { rondas: p.rondas } : {}),
+          ...(p.turnosExtra !== undefined ? { turnosExtra: p.turnosExtra } : {}),
+          ...(p.accesos !== undefined ? { accesos: p.accesos } : {}),
+          ...(p.personas !== undefined ? { personas: p.personas } : {}),
+          ...(p.visitas !== undefined ? { visitas: p.visitas } : {}),
+          persona: p.persona,
+        })}
       >
         {p.children}
       </DetailScreen>

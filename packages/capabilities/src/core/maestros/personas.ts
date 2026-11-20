@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { ESTADOS_PERSONA, PERMISOS_CORE } from "@opai/domain";
 
 import { noEncontrado, prohibido } from "../../errores";
 import { defineCapability } from "../../define";
@@ -15,11 +15,11 @@ export const personasList = defineCapability({
   auditarLectura: (s) => s.items.map((p) => p.id),
   id: "core.personas.list",
   descripcion:
-    "Lista las personas (trabajadores) con búsqueda por nombre o RUT y filtros por cargo, estado (activa, inactiva, bloqueada) y anexo de contrato en borrador. Incluye el vínculo laboral vigente, el total de la consulta y, con incluirFiltros, los cargos para el filtro. Paginada por cursor.",
+    "Lista las personas (trabajadores) con búsqueda por nombre o RUT y filtros por cargo, estado de reclutamiento/operación, bloqueo operativo y anexo de contrato en borrador. Incluye el vínculo laboral vigente, el total de la consulta y, con incluirFiltros, los cargos para el filtro. Paginada por cursor.",
   permiso: PERMISOS_CORE.personasRead,
   input: listaSchema.extend({
     cargoId: uuidSchema.optional(),
-    estado: z.enum(["activa", "inactiva", "bloqueada"]).optional(),
+    estado: z.enum([...ESTADOS_PERSONA, "bloqueada"]).optional(),
     anexo: z
       .enum(["borrador"])
       .optional()

@@ -49,4 +49,22 @@ describe("app nativa OPAI (Brief 17)", () => {
       /CFBundleURLSchemes<\/key>\s*<array>\s*<string>cl\.opai\.app<\/string>/,
     );
   });
+
+  it("firma ambos builds iOS con los dos hosts webcredentials exactos y reporta build 3", () => {
+    const leer = (ruta: string) =>
+      readFileSync(new URL(`../nativo/ios/App/${ruta}`, import.meta.url), "utf8");
+    const permisos = leer("App/App.entitlements");
+    expect(permisos).toMatch(
+      /com\.apple\.developer\.associated-domains<\/key>\s*<array>\s*<string>webcredentials:app\.opai\.cl<\/string>\s*<string>webcredentials:test\.opai\.cl<\/string>\s*<\/array>/,
+    );
+    const proyecto = leer("App.xcodeproj/project.pbxproj");
+    const firmados = [
+      ...proyecto.matchAll(
+        /CODE_SIGN_ENTITLEMENTS = App\/App\.entitlements;\s*CODE_SIGN_STYLE = Automatic;\s*CURRENT_PROJECT_VERSION = 3;/g,
+      ),
+    ];
+    expect(firmados).toHaveLength(2);
+    expect(proyecto).toMatch(/com\.apple\.AssociatedDomains = \{\s*enabled = 1;/);
+    expect(leer("App/Info.plist")).toMatch(/ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/);
+  });
 });

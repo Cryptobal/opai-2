@@ -31,7 +31,7 @@ const semilla = (estado = "abierto") => {
       id: `v-${i}`, indicadorId: `i-${p.indicador}`, estado: "vigente", vigenteDesde: f(p.vigenteDesde), vigenteHasta: null,
       valorJson: p.valor, fuente: p.fuente, consultadaEl: f("2026-11-01"), verificacion: "verificado",
     })),
-    persona: [P1, P2].map((id, i) => ({ id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activa" })),
+    persona: [P1, P2].map((id, i) => ({ id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activo" })),
     vinculoLaboral: [P1, P2].map((personaId, i) => ({
       id: `0192f3a0-0000-7000-8000-00000000f41${i}`, tenantId: T, personaId, cargoId: "c", tipo: "indefinido",
       inicio: f("2025-01-01"), termino: null, estado: "vigente", puestoId: null, instalacionId: null, horasSemanales: 42,

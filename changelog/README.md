@@ -13,6 +13,7 @@ modulo: core # o comercial, finanzas, cpq, documentos, pauta, tickets, plataform
 titulo: Título corto para el usuario
 destacada: false # true solo si merece un aviso al entrar (con moderación)
 car: CAR-123 # opcional, referencia Linear
+pr: 911 # obligatorio en novedades nuevas: número del PR en opai-cl/opai-2 que integró el cambio
 permiso: finanzas:cobranza.read # opcional; si falta, cualquier usuario del módulo la ve
 ruta: /finanzas/cobranza # opcional; botón «Ver en OPAI»
 imagen: /changelog/ejemplo.png # opcional; archivo en apps/web/public/changelog/
