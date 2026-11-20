@@ -944,6 +944,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_components/firmas/acciones-sesion.ts#rechazarEnSesion` | Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634). |
 | `app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion` | Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634). |
 | `app/_components/firmas/acciones-sesion.ts#verFirmaSesion` | Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634). |
+| `app/.well-known/apple-app-site-association/route.ts` | Apple App Site Association (webcredentials): JSON público para la app iOS, sin datos de negocio. |
 | `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
