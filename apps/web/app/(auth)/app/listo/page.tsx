@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Alerta, AuthCard, estilosBoton, Loading } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { LinkVolverApp } from "@/app/(auth)/_components/link-volver-app";
 import { COOKIE_RETO_APP } from "@/lib/canje-app";
 import { requerirIdentidad } from "@/lib/servidor";
 
@@ -27,13 +28,9 @@ async function Contenido({ searchParams }: Props) {
           Abre la app OPAI y vuelve a tocar «Continuar con Google».
         </Alerta>
       ) : (
-        <LinkNext
-          href="/app/volver"
-          prefetch={false}
-          className={estilosBoton({ size: "lg", block: true })}
-        >
+        <LinkVolverApp href="/app/volver" className={estilosBoton({ size: "lg", block: true })}>
           Seguir en la app OPAI
-        </LinkNext>
+        </LinkVolverApp>
       )}
     </AuthCard>
   );
