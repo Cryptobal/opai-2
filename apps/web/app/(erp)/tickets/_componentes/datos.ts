@@ -1,8 +1,9 @@
 import type { BadgeProps } from "@opai/ds";
 
-import { ejecutarComoUsuario } from "@/lib/servidor";
 import { estadoPantalla } from "@/lib/formato";
+import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 
 export const POR_PAGINA = 50;
 
@@ -106,11 +107,17 @@ export async function cargarTickets(p: Parametros) {
 export type RespuestaTicketsLista = Awaited<ReturnType<typeof cargarTickets>>;
 
 export async function cargarTicket(id: string) {
-  return ejecutarComoUsuario<{ ticket: Ticket; eventos: EventoTicket[] }>(
+  const r = await ejecutarComoUsuario<{ ticket: Ticket; eventos: EventoTicket[] }>(
     "erp",
     "tickets.tickets.obtener",
-    { id },
+    { id: requerirUuid(id) },
   );
+  requerirEncontrado(r);
+  return {
+    state: estadoPantalla(r),
+    ticket: r.ok ? r.data.ticket : null,
+    eventos: r.ok ? r.data.eventos : [],
+  };
 }
 
 export async function cargarTipos() {
