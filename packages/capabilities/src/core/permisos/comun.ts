@@ -1,6 +1,7 @@
 import {
   coincide,
   moduloDe,
+  permisoSoloExplicitoEnKey,
   permisosDe,
   permisosNoConcedibles,
   puedeAsignarRol,
@@ -56,7 +57,9 @@ function expandirPermisos(permisos: readonly string[]): string[] {
   const desconocidos: string[] = [];
   for (const p of permisos) {
     if (p.includes("*")) {
-      const coincidentes = catalogo.filter((c) => coincide(p, c));
+      const coincidentes = catalogo.filter(
+        (c) => coincide(p, c) && !permisoSoloExplicitoEnKey(c),
+      );
       if (coincidentes.length === 0) desconocidos.push(p);
       for (const c of coincidentes) salida.add(c);
     } else if (catalogo.includes(p)) {

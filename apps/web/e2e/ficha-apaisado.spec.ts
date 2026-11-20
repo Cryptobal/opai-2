@@ -93,8 +93,8 @@ test.describe("fichas con el celular en horizontal", () => {
       // Desde el #89 las columnas son «Vínculo vigente» (con instalación y capa) e «Historial de vínculos».
       const rejilla = page
         .locator("div.grid.gap-4")
-        .filter({ has: page.locator(":scope > div", { hasText: "Vínculo vigente" }) })
-        .filter({ has: page.locator(":scope > section", { hasText: "Historial de vínculos" }) })
+        .filter({ has: page.getByRole("heading", { name: "Vínculo vigente" }) })
+        .filter({ has: page.getByRole("heading", { name: "Historial de vínculos" }) })
         .first();
       await expect(rejilla).toBeVisible({ timeout: 30_000 });
       await page.waitForLoadState("networkidle");

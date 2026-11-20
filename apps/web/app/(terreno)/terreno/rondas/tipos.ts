@@ -1,6 +1,6 @@
-export type PuntoRonda = { id: string; nombre: string; obligatorio: boolean };
+type PuntoRonda = { id: string; nombre: string; obligatorio: boolean };
 export type PlantillaRonda = { id: string; nombre: string; puntos: PuntoRonda[] };
-export type RondaAbierta = {
+type RondaAbierta = {
   clave: string;
   plantillaId: string;
   inicio: string;

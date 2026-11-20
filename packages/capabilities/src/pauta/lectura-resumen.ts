@@ -4,6 +4,7 @@ import { resumirCobertura, type CeldaPauta } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+import { limiteLista, listaSchema, paginaMemoria } from "../core/maestros/comun";
 import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { cargarMes } from "./cargar";
 import { PERMISO_READ, mesSchema } from "./comun";
@@ -66,6 +67,7 @@ export const resumenLeer = defineCapability({
 });
 
 const ppcSchema = z.object({
+  id: z.string(),
   instalacionId: z.string(),
   instalacion: z.string(),
   puestoId: z.string(),
@@ -82,12 +84,16 @@ export const ppcListar = defineCapability({
   descripcion:
     "Lista los puestos por cubrir (PPC) de un mes, uno por tramo de días seguidos y motivo (sin titular, ausencia, licencia, vacaciones o permiso), de una instalación o de todas las que están a cargo.",
   permiso: PERMISO_READ,
-  input: mesSchema.extend({ instalacionId: uuidSchema.optional() }),
-  output: z.array(ppcSchema),
-  auditarLectura: (s) => [...new Set(s.map((x) => x.puestoId))],
+  input: mesSchema.extend({
+    instalacionId: uuidSchema.optional(),
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
+  }),
+  output: z.object({ items: z.array(ppcSchema), siguiente: z.string().nullable() }),
+  auditarLectura: (s) => [...new Set(s.items.map((x) => x.puestoId))],
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { anio, mes, instalacionId }) {
+  async handler(ctx, { anio, mes, instalacionId, cursor, limite }) {
     const instalaciones = await ctx.db.instalacion.findMany({
       where: { archivadaEn: null, AND: [dondeInstalacion(ctx), instalacionId ? { id: instalacionId } : {}] },
       select: { id: true, nombre: true, region: true },
@@ -104,6 +110,7 @@ export const ppcListar = defineCapability({
       if (!inst) continue;
       for (const t of tramosPpc(m.celdas.get(p.id) ?? [])) {
         salida.push({
+          id: `${p.id}:${t.desde}:${t.motivo}`,
           instalacionId: inst.id,
           instalacion: inst.nombre,
           puestoId: p.id,
@@ -112,6 +119,8 @@ export const ppcListar = defineCapability({
         });
       }
     }
-    return salida.sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0));
+    const ordenada = salida.sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0));
+    const { items, siguiente } = paginaMemoria(ordenada, limite, cursor);
+    return { items, siguiente };
   },
 });

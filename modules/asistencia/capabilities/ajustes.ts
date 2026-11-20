@@ -18,10 +18,10 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "switch",
   }),
-  geocerca_radio_m: z.number().int().min(10).max(5000).default(300).meta({
-    etiqueta: "Radio de la geocerca para alertar (m)",
+  geocerca_radio_m: z.number().int().min(10).max(5000).default(100).meta({
+    etiqueta: "Radio de geocerca en marcas de asistencia (m)",
     ayuda:
-      "Por defecto 300 m (D-13). Fuera de este radio la marca se registra igual y queda señalada: la geocerca solo alerta y el GPS nunca bloquea una marca (Res. 38, arts. 38, 53 y 58 k). Una instalación puede fijar su propio radio.",
+      "Por defecto 100 m. Solo para marcas de asistencia: fuera de este radio la marca se registra igual y queda señalada; el GPS nunca bloquea una marca. En rondas el radio por defecto es otro (configuración del módulo Rondas). Una instalación puede fijar su propio radio.",
     grupo: "Marcas",
     ambito: "tenant",
     permiso: PERMISO,
@@ -30,7 +30,7 @@ export const ajustesAsistencia = z.object({
   canales_por_instalacion: z.record(z.string().uuid(), z.array(z.enum(CANALES)).min(1)).default({}).meta({
     etiqueta: "Canales de marca por instalación",
     ayuda:
-      "Para cada instalación (por su id), los canales con que se puede marcar: «kiosco» (dispositivo emparejado) y «telefono_personal». Sin entrada, la instalación marca solo en el kiosco (D-01).",
+      "Para cada instalación (por su id), los canales con que se puede marcar: «kiosco» (dispositivo emparejado) y «telefono_personal». Sin entrada, la instalación marca solo en el kiosco.",
     grupo: "Canales",
     ambito: "tenant",
     permiso: PERMISO,
@@ -39,7 +39,7 @@ export const ajustesAsistencia = z.object({
   telefono_personal_permitido: z.boolean().default(false).meta({
     etiqueta: "Permitir marcar desde el teléfono personal",
     ayuda:
-      "Interruptor general (D-01). Además cada persona debe estar habilitada por RR. HH. y haber aceptado el uso de su teléfono (T-04), y la instalación debe incluir el canal.",
+      "Interruptor general de la empresa. Además cada persona debe estar habilitada por RR. HH., haber aceptado el uso de su teléfono y la instalación debe incluir el canal.",
     grupo: "Canales",
     ambito: "tenant",
     permiso: PERMISO,
@@ -66,7 +66,7 @@ export const ajustesAsistencia = z.object({
   plazo_correccion_horas: z.number().int().min(1).max(720).default(PLAZO_CORRECCION_HORAS_DEFECTO).meta({
     etiqueta: "Plazo para responder una corrección (horas)",
     ayuda:
-      "Desde el sello del servidor. Por defecto 48 h; está pendiente de confirmar con el texto íntegro de la Res. 38 (el ORD 626/2024 habla del «día hábil siguiente»), por eso se puede cambiar. Vencido sin respuesta, la corrección se tiene por aceptada.",
+      "Desde el sello del servidor. Por defecto 48 horas; verifica el plazo que corresponda antes de cambiarlo. Si el trabajador no responde dentro del plazo configurado, el sistema registra la corrección como aceptada.",
     grupo: "Correcciones",
     ambito: "tenant",
     permiso: PERMISO,

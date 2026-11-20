@@ -6,6 +6,7 @@ import { ConsentirTelefono } from "@/app/_components/asistencia/consentir-telefo
 import { Marcar } from "@/app/_components/asistencia/marcar";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 export const metadata = { title: tituloPagina("trabajador", "Marcar") };
 
@@ -27,7 +28,9 @@ export default function Pagina() {
                   RR. HH. debe habilitarte para este canal. Mientras tanto marca en el kiosco de tu instalación.
                 </Alerta>
               ) : !estado.consentimientoTelefono ? (
-                <ConsentirTelefono texto={textoDe(textos, "telefono_personal_asistencia")} />
+                <DesactivarEnVista>
+                  <ConsentirTelefono texto={textoDe(textos, "telefono_personal_asistencia")} />
+                </DesactivarEnVista>
               ) : (
                 <Marcar modo="telefono" nombre="" estadoInicial={estado} instalacionId={estado.instalacionId} instalacion={estado.instalacionNombre ?? undefined} textoRostro={textoDe(textos, "biometria_asistencia")} />
               )}

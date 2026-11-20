@@ -83,7 +83,7 @@ describe.skipIf(!urlPropietario)("Pauta · ausencias y cambios de titular (Postg
     const persona = async (nombres: string, rut: string) => {
       const id = (
         await e.admin.persona.create({
-          data: { tenantId: tenant, nombres, apellidos: "Ficticia", rut, estado: "activa" },
+          data: { tenantId: tenant, nombres, apellidos: "Ficticia", rut, estado: "activo" },
         })
       ).id;
       await e.admin.vinculoLaboral.create({

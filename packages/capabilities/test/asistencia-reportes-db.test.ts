@@ -47,7 +47,7 @@ describe.skipIf(!urlPropietario)("Asistencia · reportes DT (Postgres real)", ()
         },
       })).id;
       const persona = (await e.admin.persona.create({
-        data: { tenantId: tenant, nombres: "Ana", apellidos: slug, rut: `19.${slug.length}.000-1`, estado: "activa" },
+        data: { tenantId: tenant, nombres: "Ana", apellidos: slug, rut: `19.${slug.length}.000-1`, estado: "activo" },
       })).id;
       await e.admin.dia.create({
         data: {

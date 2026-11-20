@@ -14,6 +14,7 @@ const itemSchema = z.object({
   imagen: z.string().nullable(),
   destacada: z.boolean(),
   car: z.string().nullable(),
+  pr: z.number().int().positive().nullable(),
   leida: z.boolean(),
   destacadaDescartada: z.boolean(),
 });
@@ -61,6 +62,7 @@ export const novedadesList = defineCapability({
         imagen: e.imagen,
         destacada: e.destacada,
         car: e.car,
+        pr: e.pr,
         leida,
         destacadaDescartada,
       };

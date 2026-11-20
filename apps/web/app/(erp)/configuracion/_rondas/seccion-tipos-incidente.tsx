@@ -13,12 +13,13 @@ import { EditorTiposIncidente } from "./editor-tipos-incidente";
  * el núcleo monta esta pestaña junto a los ajustes del manifest. Lee y escribe solo por capacidades.
  */
 export async function SeccionTiposIncidente() {
-  const r = await ejecutarComoUsuario<TipoIncidente[]>("erp", "rondas.incidentes_tipo.listar", {
+  const r = await ejecutarComoUsuario<{ items: TipoIncidente[] }>("erp", "rondas.incidentes_tipo.listar", {
     incluirInactivos: true,
+    limite: 200,
   });
   return (
     <Estado state={r.ok ? "ready" : estadoPantalla(r)} variante="formulario">
-      {r.ok ? <EditorTiposIncidente tipos={r.data} /> : null}
+      {r.ok ? <EditorTiposIncidente tipos={r.data.items} /> : null}
     </Estado>
   );
 }

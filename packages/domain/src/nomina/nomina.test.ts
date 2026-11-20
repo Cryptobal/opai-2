@@ -130,9 +130,9 @@ describe("nomina · anticipo quincenal (B2)", () => {
 });
 
 describe("nomina · obligaciones", () => {
-  it("arma el calendario del año: 3 mensuales × 12 + 2 anuales", () => {
+  it("arma el calendario del año: 4 mensuales × 12 + 2 anuales", () => {
     const c = clavesCalendarioAnio(2026);
-    expect(c).toHaveLength(38);
+    expect(c).toHaveLength(50);
     expect(c.filter((k) => k.mes === null).map((k) => k.tipo)).toEqual(["dj_sueldos", "certificado_sueldos"]);
   });
 
