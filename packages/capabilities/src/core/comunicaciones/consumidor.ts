@@ -95,6 +95,8 @@ export const consumidorComunicaciones = defineConsumidor({
     .filter((e) => !e.transaccional)
     .map((e) => e.evento),
   async handler(ctx, ev) {
+    const esSlaTicket = ev.tipo === "tickets.ticket.sla_vencido";
+    if (esSlaTicket && !ctx.modulosActivos.includes("tickets")) return;
     const reglas = await ctx.db.notificacionRegla.findMany({
       where: { evento: ev.tipo, activa: true },
     });
@@ -112,7 +114,6 @@ export const consumidorComunicaciones = defineConsumidor({
       });
       return;
     }
-    const esSlaTicket = ev.tipo === "tickets.ticket.sla_vencido";
     const responsableSla = esSlaTicket && ev.entidadTipo === "ticket" && ev.entidadId
       ? await ctx.db.ticket.findFirst({ where: { id: ev.entidadId }, select: { responsableId: true } })
       : null;

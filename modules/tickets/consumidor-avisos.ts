@@ -49,6 +49,7 @@ export const consumidorTicketsAvisos = defineConsumidor({
   ],
   async handler(ctx, ev) {
     if (ev.entidadTipo !== "ticket" || !ev.entidadId) return;
+    if (ev.tipo === "tickets.ticket.sla_vencido" && !ctx.modulosActivos.includes("tickets")) return;
     const t = await ctx.db.ticket.findFirst({
       where: { id: ev.entidadId },
       select: { id: true, titulo: true, estado: true, solicitanteId: true, responsableId: true },

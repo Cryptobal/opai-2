@@ -66,6 +66,7 @@ export const trabajoTicketsSla = defineTrabajo({
   payload: z.object({ ahora: z.string().datetime().optional() }),
   periodicidad: "horaria",
   async handler(ctx, p, signal) {
+    if (!ctx.modulosActivos.includes("tickets")) return { avisados: 0 };
     const ahora = p.ahora ? new Date(p.ahora) : new Date();
     const avisados = await avisarSla(ctx, ahora, signal);
     return { avisados };

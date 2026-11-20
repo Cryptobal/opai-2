@@ -15,12 +15,12 @@ describe.skipIf(omitirSuiteDb())("tickets.sla.vencidos (CAR-622)", () => {
   const u = { pide: randomUUID(), atiende: randomUUID() };
   let tenantId = "";
   let ticketId = "";
-  const ctx = () =>
+  const ctx = (activo = true) =>
     mod.crearContexto({
       tenantId,
       actor: { tipo: "system" },
       rol: "owner",
-      modulosActivos: ["tickets"],
+      modulosActivos: activo ? ["tickets"] : [],
       medidor: { registrar: async () => undefined },
     });
 
@@ -66,6 +66,7 @@ describe.skipIf(omitirSuiteDb())("tickets.sla.vencidos (CAR-622)", () => {
 
   it("emite un evento y avisa al responsable una sola vez", async () => {
     const ahora = "2026-11-17T13:00:00.000Z";
+    expect(await trabajoTicketsSla.ejecutar(ctx(false), { ahora })).toEqual({ avisados: 0 });
     const respuestas = await Promise.all([
       trabajoTicketsSla.ejecutar(ctx(), { ahora }),
       trabajoTicketsSla.ejecutar(ctx(), { ahora }),
@@ -81,6 +82,8 @@ describe.skipIf(omitirSuiteDb())("tickets.sla.vencidos (CAR-622)", () => {
     expect(ev[0]).toMatchObject({ actorTipo: "system", actorId: null });
     expect(await e.admin.ticketEvento.count({ where: { ticketId, tipo: "sla_vencido" } })).toBe(0);
 
+    await consumidorTicketsAvisos.handler(ctx(false), ev[0]!);
+    expect(await e.admin.notificacion.count({ where: { tenantId, usuarioId: u.atiende } })).toBe(0);
     await consumidorTicketsAvisos.handler(ctx(), ev[0]!);
     await consumidorTicketsAvisos.handler(ctx(), ev[0]!);
     const avisos = await e.admin.notificacion.findMany({ where: { tenantId, usuarioId: u.atiende } });
