@@ -1362,7 +1362,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.costo_proyectado.listar`
 - `nomina.f30_1.generar`
-- `nomina.lre.generar`
 - `nomina.novedades.cargar`
 - `nomina.previred.generar`
 - `pauta.ausencias.anular`
