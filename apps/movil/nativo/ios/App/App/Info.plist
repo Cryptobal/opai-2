@@ -16,7 +16,7 @@
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>es</string>
 	<key>CFBundleDisplayName</key>
         <string>OPAI</string>
 	<key>CFBundleExecutable</key>
@@ -33,6 +33,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -58,9 +60,15 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSCameraUsageDescription</key>
+	<string>OPAI usa la cámara para escanear códigos QR, tomar fotos de novedades y rondas y, si lo aceptas, reconocer tu rostro al marcar asistencia.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>OPAI usa tu ubicación solo cuando marcas asistencia o un punto de ronda, como evidencia de la marca. No la sigue en segundo plano.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>OPAI accede a tus fotos solo cuando eliges adjuntar una imagen o un documento.</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

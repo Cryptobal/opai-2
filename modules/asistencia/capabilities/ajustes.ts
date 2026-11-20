@@ -30,7 +30,7 @@ export const ajustesAsistencia = z.object({
   canales_por_instalacion: z.record(z.string().uuid(), z.array(z.enum(CANALES)).min(1)).default({}).meta({
     etiqueta: "Canales de marca por instalación",
     ayuda:
-      "Para cada instalación, los canales con que se puede marcar: «kiosco», «telefono_personal» y «enlace_publico» (QR o enlace sin equipo emparejado). Sin entrada, la instalación marca solo en el kiosco (D-01).",
+      "Para cada instalación (por su id), los canales con que se puede marcar: «kiosco» (dispositivo emparejado), «telefono_personal» y «enlace_publico» (QR o enlace sin equipo emparejado). Sin entrada, la instalación marca solo en el kiosco.",
     grupo: "Canales",
     ambito: "tenant",
     permiso: PERMISO,
@@ -39,7 +39,7 @@ export const ajustesAsistencia = z.object({
   telefono_personal_permitido: z.boolean().default(false).meta({
     etiqueta: "Permitir marcar desde el teléfono personal",
     ayuda:
-      "Interruptor general (D-01). Además cada persona debe estar habilitada por RR. HH. y haber aceptado el uso de su teléfono (T-04), y la instalación debe incluir el canal.",
+      "Interruptor general de la empresa. Además cada persona debe estar habilitada por RR. HH., haber aceptado el uso de su teléfono y la instalación debe incluir el canal.",
     grupo: "Canales",
     ambito: "tenant",
     permiso: PERMISO,
@@ -66,7 +66,7 @@ export const ajustesAsistencia = z.object({
   plazo_correccion_horas: z.number().int().min(1).max(720).default(PLAZO_CORRECCION_HORAS_DEFECTO).meta({
     etiqueta: "Plazo para responder una corrección (horas)",
     ayuda:
-      "Desde el sello del servidor. Por defecto 48 h; está pendiente de confirmar con el texto íntegro de la Res. 38 (el ORD 626/2024 habla del «día hábil siguiente»), por eso se puede cambiar. Vencido sin respuesta, la corrección se tiene por aceptada.",
+      "Desde el sello del servidor. Por defecto 48 horas; verifica el plazo que corresponda antes de cambiarlo. Si el trabajador no responde dentro del plazo configurado, el sistema registra la corrección como aceptada.",
     grupo: "Correcciones",
     ambito: "tenant",
     permiso: PERMISO,

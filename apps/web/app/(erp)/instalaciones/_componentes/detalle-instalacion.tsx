@@ -8,6 +8,7 @@ import {
   verPestanaPersonas,
   verPestanaRondas,
   verPestanaTurnosExtra,
+  verPestanaVisitas,
 } from "@/lib/pestanas-modulos";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
@@ -28,13 +29,14 @@ type Props = {
 
 /** Panel derecho de una instalación: carga sus datos dentro de su Suspense (la lista no espera por él). */
 export async function DetalleInstalacion({ datos, p, tab, persona, children, panel }: Props) {
-  const [ficha, negocios, rondas, turnosExtra, accesos, personas] = await Promise.all([
+  const [ficha, negocios, rondas, turnosExtra, accesos, personas, visitas] = await Promise.all([
     datos,
     verPestanaNegocios(),
     verPestanaRondas(),
     verPestanaTurnosExtra(),
     verPestanaAccesos(),
     verPestanaPersonas(),
+    verPestanaVisitas(),
   ]);
   return (
     <>
@@ -50,6 +52,7 @@ export async function DetalleInstalacion({ datos, p, tab, persona, children, pan
         turnosExtra={turnosExtra}
         accesos={accesos}
         personas={personas}
+        visitas={visitas}
       >
         {ficha.instalacion ? children(ficha.instalacion, p) : null}
       </FichaInstalacion>

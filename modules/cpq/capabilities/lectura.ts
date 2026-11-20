@@ -13,6 +13,7 @@ import {
 import { PERMISO_COSTOS, PERMISO_READ } from "./permisos";
 import { estadosDeLista } from "../persistencia/lista-estado";
 import { margenesConfigurados } from "../persistencia/supuestos";
+import { filtroListaCotizaciones } from "./lista-busqueda";
 import { resumenListaDesdeVersion } from "./lista-resumen";
 import { cotizacionDe, vistaCotizacion, vistaVersion } from "./util";
 
@@ -39,11 +40,12 @@ export const cotizacionesList = defineCapability({
   auditarLectura: (s) => s.items.flatMap((c) => [c.id, c.negocioId]),
   id: "cpq.cotizaciones.list",
   descripcion:
-    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio y por estado; las archivadas quedan fuera salvo que se pidan (todas o solo ellas).",
+    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio, estado y texto (código, título, negocio o cuenta); las archivadas quedan fuera salvo que se pidan (todas o solo ellas).",
   permiso: PERMISO_READ,
   input: listaSchema.extend({
     negocioId: uuidSchema.optional(),
     estado: estadoSchema.optional(),
+    q: z.string().trim().min(1).max(160).optional(),
     incluirArchivadas: z.boolean().default(false),
     soloArchivadas: z.boolean().default(false).describe("Solo las archivadas (filtro «Archivadas»)."),
   }),
@@ -51,15 +53,7 @@ export const cotizacionesList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const filtro: Record<string, unknown> = {};
-    if (input.negocioId) filtro["negocioId"] = input.negocioId;
-    // Filtro relacional: no carga todas las versiones del tenant solo para filtrar la página.
-    if (input.estado) filtro["versiones"] = { some: { estado: input.estado } };
-    else if (!input.incluirArchivadas && !input.soloArchivadas)
-      filtro["versiones"] = { none: { estado: "archivada" } };
-    // Archivar (CPQ v4) es de la cotización: por defecto fuera de la lista; «Archivadas» muestra solo ellas.
-    if (input.soloArchivadas) filtro["archivadaEn"] = { not: null };
-    else if (!input.incluirArchivadas) filtro["archivadaEn"] = null;
+    const filtro = await filtroListaCotizaciones(ctx, input);
     // Sin `skip: 1` (CAR-400): la fila del cursor viene si aún cumple el filtro y se descarta abajo.
     const crudas = await ctx.db.cpqCotizacion.findMany({
       where: filtro,

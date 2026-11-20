@@ -106,5 +106,5 @@ export type LiquidacionDetalle = LiquidacionResumen & {
 export type ListaLiquidaciones = {
   items: LiquidacionResumen[];
   siguiente: string | null;
-  total: { personas: number; liquido: number; costoEmpresa: number };
+  total: { personas: number; revisadas: number; liquido: number; costoEmpresa: number };
 };
