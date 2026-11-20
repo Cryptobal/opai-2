@@ -54,6 +54,7 @@ export type ContratoCamposEnvio = {
       instalaciones: Record<string, string | number | boolean | null>[];
       /** Referencias con consentimiento vigente al enviar (CAR-138 PR 7); ausente en envíos anteriores. */
       referencias?: Record<string, string | number | boolean | null>[];
+      puestos?: Record<string, string | number | boolean | null>[];
     };
   };
   faltantes: string[];
@@ -67,6 +68,8 @@ export type SnapshotEnvioPropuesta = {
   propuestaBloquesJson: string;
   destinatarios: DestinatarioEnvio[];
   camposContrato?: ContratoCamposEnvio;
+  /** Versión de la plantilla HTML de la empresa congelada al enviar (CAR-533); ausente si no había una en uso. */
+  plantillaHtml?: { id: string; version: number; hash: string };
 };
 
 export const PLANTILLA_PROPUESTA_DEFECTO: BloquePlantillaPropuesta[] = [

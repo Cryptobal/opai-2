@@ -19,7 +19,7 @@ export type CorreccionVista = {
 };
 
 /** Resuelve la empresa por slug y arma el contexto del sistema; sin sesión, con tope por IP que falla cerrado. */
-export async function contextoPublico(slug: string, token: string) {
+async function contextoPublico(slug: string, token: string) {
   // Lectura en cada petición: ni el rate limit ni la base se evalúan durante el prerender.
   await connection();
   const ip = ipDeCabeceras(await headers());

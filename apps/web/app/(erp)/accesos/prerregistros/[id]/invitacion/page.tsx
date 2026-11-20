@@ -21,7 +21,7 @@ export default function Invitacion({ params, searchParams }: Props) {
     <PaginaPortal
       portal="erp"
       titulo="Invitación de acceso"
-      ruta="/instalaciones"
+      ruta="/accesos"
       cargando="detalle"
       cargar={async () => {
         const [{ id: crudo }, p] = await Promise.all([params, leerParametros(searchParams)]);

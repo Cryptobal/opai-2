@@ -16,7 +16,15 @@ export const MIMES_NUCLEO = [
 /** 25 MB por archivo. */
 export const TAMANO_MAXIMO_DOCUMENTO = 25 * 1024 * 1024;
 
-export const CAPAS_DOCUMENTO = ["empresa", "cuenta", "instalacion", "persona", "puesto"] as const;
+export const CAPAS_DOCUMENTO = [
+  "empresa",
+  "cuenta",
+  "instalacion",
+  "persona",
+  "puesto",
+  "ticket",
+  "visita",
+] as const;
 
 /** MIME permitido para un tipo: su lista si la tiene; si no, la del núcleo. */
 export function mimePermitido(mime: string, delTipo: readonly string[] = []): boolean {

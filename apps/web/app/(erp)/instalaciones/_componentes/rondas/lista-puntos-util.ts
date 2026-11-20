@@ -1,0 +1,1 @@
+export const formatoMetricaPunto = (v: number | null, u: string) => (v != null ? `${v} ${u}` : "—");

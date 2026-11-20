@@ -1,5 +1,9 @@
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const uuid = (v: string | undefined) => (v && UUID.test(v) ? v : undefined);
+
 export type Pagina<T> = { items: T[]; siguiente: string | null };
 
 export type Registro = {

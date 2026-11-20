@@ -6,7 +6,8 @@ import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { aFecha, cursorDe, pagina } from "../core/maestros/comun";
 import { PERMISO_READ } from "./comun";
-import { vistasDeCompras } from "./compras-consulta";
+import { pagadoPorCompra, vistasDeCompras } from "./compras-consulta";
+import { calcularPaginaConSaldo, TAMANO_TRAMO_COMPRAS } from "./compras-pagina-con-saldo";
 import { compraSchema } from "./vistas-compra";
 
 const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa-mm.");
@@ -14,7 +15,7 @@ const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa
 export const comprasListar = defineCapability({
   id: "finanzas.compras.listar",
   descripcion:
-    "Lista el libro de compras: documentos recibidos con folio, proveedor, montos, centro de costo, plazo para aceptar o reclamar y la sugerencia de centro de costo cuando falta. Filtra por período de recepción, proveedor, estado o solo los sin centro de costo; incluye totales del filtro. El estado de pago llega con la conciliación.",
+    "Lista el libro de compras: documentos recibidos con folio, proveedor, montos, centro de costo, plazo para aceptar o reclamar y la sugerencia de centro de costo cuando falta. Filtra por período de recepción, proveedor, estado o solo los sin centro de costo; incluye totales del filtro. Cada documento trae su estado de pago (por pagar, parcial o pagada) y el saldo, derivados de lo conciliado con el banco. El resumen no aplica el filtro conSaldo.",
   permiso: PERMISO_READ,
   input: z.object({
     periodo: periodoSchema.optional().describe("Mes de recepción, aaaa-mm."),
@@ -22,6 +23,7 @@ export const comprasListar = defineCapability({
     sinCentroCosto: z.boolean().optional().describe("Solo los documentos sin centro de costo asignado."),
     estadoRecepcion: z.enum(ESTADOS_RECEPCION).optional(),
     q: z.string().trim().max(120).optional().describe("Folio o nombre del proveedor."),
+    conSaldo: z.boolean().optional().describe("Solo documentos con saldo por pagar (derivado de la conciliación)."),
     cursor: uuidSchema.optional(),
     limite: z.number().int().min(1).max(100).default(50),
   }),
@@ -34,7 +36,7 @@ export const comprasListar = defineCapability({
       neto: z.number().int().describe("Las notas de crédito restan."),
       iva: z.number().int(),
       total: z.number().int(),
-    }),
+    }).describe("Resumen del libro según los otros filtros, sin aplicar conSaldo."),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -58,13 +60,31 @@ export const comprasListar = defineCapability({
           }
         : {}),
     };
-    const [filas, porTipo, sinCentro] = await Promise.all([
-      ctx.db.documentoRecibido.findMany({
-        where,
-        include: { proveedor: true },
-        orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
-        ...cursorDe(input.cursor, input.limite),
-      }),
+    const armarPagina = async () => {
+      if (!input.conSaldo) {
+        const filas = await ctx.db.documentoRecibido.findMany({
+          where,
+          include: { proveedor: true },
+          orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
+          ...cursorDe(input.cursor, input.limite),
+        });
+        return pagina(filas, input.limite, input.cursor);
+      }
+      return calcularPaginaConSaldo(
+        input.limite,
+        input.cursor,
+        (cursor) => ctx.db.documentoRecibido.findMany({
+          where,
+          include: { proveedor: true },
+          orderBy: [{ fechaRecepcion: "desc" }, { id: "desc" }],
+          take: TAMANO_TRAMO_COMPRAS,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        }),
+        (ids) => pagadoPorCompra(ctx, ids),
+      );
+    };
+    const [{ items, siguiente }, porTipo, sinCentro] = await Promise.all([
+      armarPagina(),
       ctx.db.documentoRecibido.groupBy({
         by: ["tipoDte"],
         where,
@@ -73,7 +93,6 @@ export const comprasListar = defineCapability({
       }),
       ctx.db.documentoRecibido.count({ where: { ...where, centroCostoId: null } }),
     ]);
-    const { items, siguiente } = pagina(filas, input.limite, input.cursor);
     const firmado = (pick: (g: (typeof porTipo)[number]) => number | null) =>
       porTipo.reduce((a, g) => a + signoDte(g.tipoDte as TipoDteCompra) * (pick(g) ?? 0), 0);
     return {

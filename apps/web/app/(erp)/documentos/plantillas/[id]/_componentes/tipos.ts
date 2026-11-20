@@ -16,6 +16,7 @@ export type PlantillaEditor = {
   contenido: string;
   borrador: { contenido: string; actualizadoEn: string; porNombre: string | null } | null;
   desconocidas: string[];
+  camposCuenta: { clave: string; etiqueta: string }[];
 };
 
 export const ORIGEN_PLANTILLA: Record<PlantillaEditor["origen"], string> = {

@@ -24,6 +24,8 @@ function avisoDe(ev: EventoPublicado, titulo: string, estado: string): Aviso | n
       return { para: "solicitante", titulo: "Aprobaron tu solicitud", cuerpo: `${ticket} fue aprobada.` };
     case "tickets.ticket.rechazado":
       return { para: "solicitante", titulo: "Rechazaron tu solicitud", cuerpo: `${ticket} fue rechazada. Revisa el motivo en la ficha.` };
+    case "tickets.ticket.sla_vencido":
+      return { para: "responsable", titulo: "SLA vencido en un ticket", cuerpo: `${ticket} pasó su plazo SLA. Revísalo en la bandeja.` };
     default:
       return null;
   }
@@ -43,9 +45,11 @@ export const consumidorTicketsAvisos = defineConsumidor({
     "tickets.ticket.estado_cambiado",
     "tickets.ticket.aprobado",
     "tickets.ticket.rechazado",
+    "tickets.ticket.sla_vencido",
   ],
   async handler(ctx, ev) {
     if (ev.entidadTipo !== "ticket" || !ev.entidadId) return;
+    if (ev.tipo === "tickets.ticket.sla_vencido" && !ctx.modulosActivos.includes("tickets")) return;
     const t = await ctx.db.ticket.findFirst({
       where: { id: ev.entidadId },
       select: { id: true, titulo: true, estado: true, solicitanteId: true, responsableId: true },
@@ -57,6 +61,8 @@ export const consumidorTicketsAvisos = defineConsumidor({
     if (!aviso) return;
     const responsable = typeof p.responsableId === "string" ? p.responsableId : t.responsableId;
     const usuarioId = aviso.para === "solicitante" ? t.solicitanteId : responsable;
+    // Un responsable reemplazado ya no tiene acceso a la ficha en la bandeja.
+    if (ev.tipo === "tickets.ticket.sla_vencido" && usuarioId !== t.responsableId) return;
     if (usuarioId === ev.actorId || usuarioId === ev.viaUserId) return;
     const activo = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: usuarioId, estado: "activa" }, select: { userId: true } });
     if (!activo) return;

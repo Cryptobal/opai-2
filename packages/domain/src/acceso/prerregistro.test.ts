@@ -19,31 +19,15 @@ describe("prerregistro (R14, R15)", () => {
     expect(validarRangoPrerregistro("2026-11-13", "2026-11-14", "2026-11-14")).toMatch(/pasó/);
   });
 
-  it("un día con ingresos queda «ingresó», aunque después se cancele", () => {
-    expect(
-      estadoDiaPrerregistro({ dia: "2026-11-13", hoy: "2026-11-14", cancelado: true, ingresos: 1 }),
-    ).toBe("ingreso");
-  });
-
   it("estado por día: pendiente, no llegó al terminar el día, cancelado", () => {
-    expect(
-      estadoDiaPrerregistro({
-        dia: "2026-11-14",
-        hoy: "2026-11-14",
-        cancelado: false,
-        ingresos: 0,
-      }),
-    ).toBe("pendiente");
-    expect(
-      estadoDiaPrerregistro({
-        dia: "2026-11-13",
-        hoy: "2026-11-14",
-        cancelado: false,
-        ingresos: 0,
-      }),
-    ).toBe("no_llego");
-    expect(
-      estadoDiaPrerregistro({ dia: "2026-11-20", hoy: "2026-11-14", cancelado: true, ingresos: 0 }),
-    ).toBe("cancelado");
+    expect(estadoDiaPrerregistro({ dia: "2026-11-14", hoy: "2026-11-14", cancelado: false })).toBe(
+      "pendiente",
+    );
+    expect(estadoDiaPrerregistro({ dia: "2026-11-13", hoy: "2026-11-14", cancelado: false })).toBe(
+      "no_llego",
+    );
+    expect(estadoDiaPrerregistro({ dia: "2026-11-20", hoy: "2026-11-14", cancelado: true })).toBe(
+      "cancelado",
+    );
   });
 });

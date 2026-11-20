@@ -29,6 +29,19 @@ test.describe("@preview acceso: prerregistro de visitas", () => {
       });
     }).toPass({ timeout: 60_000 });
     const hoja = page.getByRole("dialog");
+    // El formulario diferido conserva el cierre, reinicio y foco al reabrir sin guardar.
+    await hoja.getByLabel("Nombre").fill("Visita ficticia descartada");
+    await page.keyboard.press("Escape");
+    await expect(hoja).not.toBeVisible();
+    await expect(abrir).toBeFocused();
+    await abrir.press("Enter");
+    await expect(hoja).toBeVisible();
+    await expect(hoja.getByLabel("Nombre")).toHaveValue("");
+    await hoja.getByRole("button", { name: "Cerrar", exact: true }).click();
+    await expect(hoja).not.toBeVisible();
+    await expect(abrir).toBeFocused();
+    await abrir.click();
+    await expect(hoja).toBeVisible();
     const nombre = `Visita QR ${Date.now() % 100_000}`;
     await hoja.getByLabel("Nombre").fill(nombre);
     await hoja.getByLabel("RUN o pasaporte").fill("12.345.678-5");

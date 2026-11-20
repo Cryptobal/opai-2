@@ -24,7 +24,7 @@ const inv: DatosInvitacion = {
 const t = { slug: "gard", token: "muestra" };
 
 /** Variantes de las pantallas de acceso con datos ficticios (comparación con export-acceso). */
-export const VARIANTES: Record<string, () => React.ReactNode> = {
+const VARIANTES: Record<string, () => React.ReactNode> = {
   login: () => <FormularioLogin destino="/" google />,
   "login-error": () => (
     <FormularioLogin

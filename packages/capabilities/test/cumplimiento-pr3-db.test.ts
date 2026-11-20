@@ -145,7 +145,7 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
     await correrTrabajo(tA, uA);
 
     const a = await e.admin.persona.findUniqueOrThrow({ where: { id: vieja.id } });
-    expect(a).toMatchObject({ nombres: "[anonimizado]", apellidos: "", rut: `ANON-${vieja.id}`, emailLaboral: null, telefono: null, estado: "inactiva" });
+    expect(a).toMatchObject({ nombres: "[anonimizado]", apellidos: "", rut: `ANON-${vieja.id}`, emailLaboral: null, telefono: null, estado: "inactivo" });
     expect(a.anonimizadaEn).toBeInstanceOf(Date);
     // El hecho laboral queda íntegro (ADR-023): mismo vínculo, mismas fechas.
     const v = await e.admin.vinculoLaboral.findMany({ where: { personaId: vieja.id } });

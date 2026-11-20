@@ -90,6 +90,25 @@ describe("Sidebar", () => {
     expect(html).toContain("inert");
   });
 
+  it("con acordeón, deja más aire entre áreas (CAR-182 menú lateral)", () => {
+    const conAreas: NavItem[] = [
+      { href: "/cuentas", etiqueta: "Cuentas", icono: Users, grupo: "Comercial", area: "comercial" },
+      { href: "/personas", etiqueta: "Personas", icono: Users, grupo: "Personas", area: "personas" },
+    ];
+    const html = renderToStaticMarkup(
+      createElement(Sidebar, {
+        ...base,
+        items: conAreas,
+        rutaActual: "/cuentas",
+        areaAbierta: "comercial",
+        onAreaAbierta: () => undefined,
+      }),
+    );
+    expect(html).toContain('aria-label="Comercial"');
+    expect(html).toMatch(/<section[^>]*class="[^"]*mt-3 /);
+    expect(html).toContain("gap-1 pt-1 pb-2");
+  });
+
   it("sin acordeón, la entrada suelta no lleva botón y el grupo con varias entradas lleva título", () => {
     const planos: NavItem[] = [
       ...items.slice(0, 1),
