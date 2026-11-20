@@ -7,7 +7,7 @@ import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { hoy } from "../maestros/comun";
-import { documentosEnAlcance, entidadesEnAlcance, vinculoEnAlcance } from "./alcance-doc";
+import { filtroAlcanceDocumentos, entidadesEnAlcance, vinculoVisible } from "./alcance-doc";
 import { filtroDocumentoSensible } from "./sensibles";
 import { documentoSchema, vistaDocumento } from "./vista";
 
@@ -36,24 +36,24 @@ export const documentosGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    const alc = await entidadesEnAlcance(ctx);
+    const permitidos = await filtroAlcanceDocumentos(ctx, alc);
     const d = await ctx.db.documento.findFirst({
-      where: { id: input.id, ...filtroDocumentoSensible(ctx) },
+      where: { id: input.id, AND: [filtroDocumentoSensible(ctx), permitidos] },
     });
     if (!d) throw noEncontrado("El documento");
-    const alc = await entidadesEnAlcance(ctx);
-    const permitidos = await documentosEnAlcance(ctx, alc);
-    if (permitidos && !permitidos.includes(d.id)) throw noEncontrado("El documento");
     const vinculosTodos = await ctx.db.documentoVinculo.findMany({ where: { documentoId: d.id } });
-    const vinculos = alc
-      ? vinculosTodos.filter((v) => vinculoEnAlcance(alc, v.entidadTipo, v.entidadId))
-      : vinculosTodos;
+    const vinculos = [];
+    for (const v of vinculosTodos) {
+      if (await vinculoVisible(ctx, alc, v.entidadTipo, v.entidadId)) vinculos.push(v);
+    }
     const versiones = [];
     for (let previo = d.reemplazaAId, n = 0; previo && n < 50; n++) {
       const v = await ctx.db.documento.findFirst({
-        where: { id: previo, ...filtroDocumentoSensible(ctx) },
+        where: { id: previo, AND: [filtroDocumentoSensible(ctx), permitidos] },
       });
       if (!v) break;
-      if (!permitidos || permitidos.includes(v.id)) versiones.push(v);
+      versiones.push(v);
       previo = v.reemplazaAId;
     }
     const tipos = await tiposPorId(ctx, [d.tipoId, ...versiones.map((v) => v.tipoId)]);

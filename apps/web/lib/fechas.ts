@@ -49,10 +49,9 @@ export function hoyIso(zona = ZONA): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date());
 }
 
-/** Primer día del mes en la zona del tenant (`aaaa-mm-01`). */
+/** Primer día del mes actual en la zona del tenant como `aaaa-mm-dd`. */
 export function inicioMesIso(zona = ZONA): string {
-  const hoy = hoyIso(zona);
-  return `${hoy.slice(0, 7)}-01`;
+  return `${hoyIso(zona).slice(0, 7)}-01`;
 }
 
 export const pesos = (n: number | null | undefined) =>

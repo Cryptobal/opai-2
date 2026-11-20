@@ -52,6 +52,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_acciones` | `core.metodos_acceso.renombrar_passkey` | `core_metodos_acceso_renombrar_passkey` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
 | compartido | `app/_acciones` | `core.personas.list` | `core_personas_list` | existe |
+| compartido | `app/_acciones` | `core.ver_como.iniciar` | — | excepción |
+| compartido | `app/_acciones` | `core.ver_como.terminar` | — | excepción |
 | compartido | `app/_components` | `agente.conversaciones.archivar` | `agente_conversaciones_archivar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.borrar` | `agente_conversaciones_borrar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.get` | `agente_conversaciones_get` | existe |
@@ -184,6 +186,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.invitacion` | `acceso_prerregistros_invitacion` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.listar` | `acceso_prerregistros_listar` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/asistencia/_componentes` | `asistencia.correcciones.proponer` | `asistencia_correcciones_proponer` | existe |
+| compartido | `app/(erp)/asistencia/_componentes` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
+| compartido | `app/(erp)/asistencia/marcas/_componentes` | `asistencia.marcas.obtener` | `asistencia_marcas_obtener` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -382,6 +387,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.guardar_borrador` | `core_documento_plantillas_guardar_borrador` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.publicar` | `core_documento_plantillas_publicar` | existe |
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.update` | `core_documento_plantillas_update` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.candidatas` | `core_documento_plantillas_candidatas` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.enviar_masivo` | `core_documento_plantillas_enviar_masivo` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/envio-masivo/_componentes` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | compartido | `app/(erp)/documentos/vencimientos/_componentes` | `core.documentos.vencimientos` | `core_documentos_vencimientos` | existe |
 | compartido | `app/(erp)/finanzas/_hoy` | `finanzas.hoy.resumen` | `finanzas_hoy_resumen` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
@@ -420,6 +428,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.sincronizar_rcv` | `finanzas_compras_sincronizar_rcv` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/impuestos/_componentes` | `finanzas.impuestos.borrador_f29` | `finanzas_impuestos_borrador_f29` | existe |
+| compartido | `app/(erp)/finanzas/compras/pagos/_componentes` | `finanzas.compras.pagos_proveedores` | `finanzas_compras_pagos_proveedores` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.actualizar` | `finanzas_proveedores_actualizar` | existe |
@@ -475,6 +484,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
@@ -487,12 +497,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.regiones.list` | `core_regiones_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
-| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.listar` | `pauta_dotacion_listar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.dotacion.get` | `pauta_dotacion_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.turnos_extra.monto_fijar` | `pauta_turnos_extra_monto_fijar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.actualizar` | `rondas_plantillas_actualizar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.crear` | `rondas_plantillas_crear` | existe |
@@ -557,18 +569,23 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.resumen.leer` | `pauta_resumen_leer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
 | compartido | `app/(erp)/pauta/instalaciones/_componentes` | `pauta.informes.instalaciones` | `pauta_informes_instalaciones` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `core.puestos.get` | `core_puestos_get` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `pauta.turnos_extra.aprobar` | `pauta_turnos_extra_aprobar` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `pauta.turnos_extra.listar` | `pauta_turnos_extra_listar` | existe |
+| compartido | `app/(erp)/pauta/turnos-extra/_componentes` | `pauta.turnos_extra.rechazar` | `pauta_turnos_extra_rechazar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `asistencia.telefono.habilitar` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.anular` | `core_ausencias_anular` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.listar` | `core_ausencias_listar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.registrar` | `core_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.borrar` | `core_biometria_borrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.estado` | `core_biometria_estado` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.asignar_pin` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.estado` | `core_credenciales_terreno_estado` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.restablecer` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.estructuras.efectiva` | `core_estructuras_efectiva` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.archive` | `core_personas_archive` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.bloquear` | `core_personas_bloquear` | existe |
@@ -588,20 +605,21 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.periodos_registrar` | `core_personas_periodos_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.procesos_persona.listar` | `core_procesos_persona_listar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.puestos.list` | `core_puestos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.create` | `core_vinculos_create` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.vinculos.list` | `core_vinculos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
@@ -653,12 +671,17 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
+| compartido | `app/(trabajador)/trabajador/correcciones/_componentes` | `asistencia.correcciones.responder` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
-| erp | `/asistencia/certificacion` | `asistencia.certificacion.checklist` | `asistencia_certificacion_checklist` | existe |
-| erp | `/asistencia/reportes-dt` | `asistencia.reportes.catalogo` | `asistencia_reportes_catalogo` | existe |
-| erp | `/asistencia/reportes-dt` | `asistencia.reportes.vista` | `asistencia_reportes_vista` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
+| erp | `/asistencia/certificacion` | `asistencia.certificacion.checklist` | `asistencia_certificacion_checklist` | existe |
+| erp | `/asistencia/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
+| erp | `/asistencia/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/asistencia/marcas` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
+| erp | `/asistencia/reportes-dt` | `asistencia.reportes.catalogo` | `asistencia_reportes_catalogo` | existe |
+| erp | `/asistencia/reportes-dt` | `asistencia.reportes.vista` | `asistencia_reportes_vista` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
@@ -770,6 +793,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| erp | `/documentos/plantillas/[id]/envio-masivo` | `core.personas.list` | `core_personas_list` | existe |
 | erp | `/documentos/plantillas/[id]` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
@@ -793,6 +819,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/[id]/puestos` | `core.funciones.list` | `core_funciones_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.patrones.list` | `core_patrones_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `pauta.titulares.listar` | `pauta_titulares_listar` | existe |
+| erp | `/instalaciones/[id]/turnos-extra` | `pauta.turnos_extra.tarifas_leer` | `pauta_turnos_extra_tarifas_leer` | existe |
 | erp | `/instalaciones/nueva` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | erp | `/instalaciones/nueva` | `core.instalaciones.create` | `core_instalaciones_create` | existe |
 | erp | `/instalaciones/nueva` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
@@ -805,11 +832,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/personas/[id]/ausencias` | `core.ausencias.clases` | `core_ausencias_clases` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
+| erp | `/personas/[id]/turnos-extra` | `pauta.turnos_extra.listar` | `pauta_turnos_extra_listar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.obtener` | `nomina_liquidaciones_obtener` | existe |
+| erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
+| erp | `/ver-como` | `core.ver_como.list` | — | excepción |
 | platform | `/platform/ajustes/credenciales` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
 | platform | `/platform/ajustes/modelos` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes/modelos` | `platform.precios.list` | `platform_precios_list` | existe |
@@ -863,6 +894,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| trabajador | `/trabajador/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
+| trabajador | `/trabajador/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
@@ -878,6 +911,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
+| `app/_acciones/app-nativa.ts#accionCanjearApp` | Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado. |
+| `app/_acciones/app-nativa.ts#accionVolverALaApp` | Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio. |
 | `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
@@ -907,6 +942,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
+| `app/_acciones/ver-como.ts#accionIniciarVerComo` | Invoca core.ver_como.iniciar (solo personas, CAR-528) y guarda la vista en una cookie firmada de esa sesión. |
+| `app/_acciones/ver-como.ts#accionSalirVerComo` | Invoca core.ver_como.terminar (solo personas, CAR-528) y borra la cookie de la vista. |
 | `app/_components/firmas/acciones-sesion.ts#firmarEnSesion` | Firma: core.firmas.firmar (interna con motivo) con sesión del portal (CAR-634). |
 | `app/_components/firmas/acciones-sesion.ts#rechazarEnSesion` | Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634). |
 | `app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion` | Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634). |
@@ -915,6 +952,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
 | `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
+| `app/(auth)/app/google/route.ts` | Identidad: inicia el ingreso con Google de la app nativa en el navegador del sistema (CAR-516); guarda el reto PKCE en una cookie y redirige a Google. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
@@ -1028,8 +1066,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.libro_novedades_equipo.listar` | Interna: la lee el equipo de terreno emparejado sin sesión (su cookie de dispositivo es la credencial) para la pantalla «Libro»; un agente lee el mismo libro con core.libro_novedades.listar, con permiso y alcance (CAR-77). |
 | `core.metodos_acceso.quitar` | Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP. |
 | `core.personas_terreno.listar` | Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3). |
+| `core.personas.bloquear_permanente` | Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674). |
+| `core.personas.desbloquear_permanente` | Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674). |
 | `core.personas.pago_aprobar_cambio` | Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01). |
 | `core.personas.pago_rechazar_cambio` | Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01). |
+| `core.personas.quitar_no_recontratar` | Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674). |
 | `core.push.quitar` | Solo personas: apaga los avisos en el dispositivo de quien tiene la sesión (CAR-356 PR 4a). |
 | `core.push.suscribir` | Solo personas: la suscripción de Web Push es del navegador de quien tiene la sesión; un agente no tiene celular (CAR-356 PR 4a). |
 | `core.remuneraciones.confirmar` | Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034). |
@@ -1052,6 +1093,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
 | `core.ver_como.iniciar` | Solo personas: «ver como» es una vista de pantalla de quien tiene la sesión (CAR-528); un agente ya lee esos datos con sus propias capacidades. |
+| `core.ver_como.list` | Solo personas: buscador de la pantalla «Ver como…» (CAR-528); sin iniciar una vista no le sirve a un agente. |
 | `core.ver_como.terminar` | Solo personas: cierra la vista «ver como» de quien tiene la sesión (CAR-528). |
 | `core.webhooks.destino_actualizar` | Solo personas: cambiar la dirección de un destino redirige los eventos de la empresa (ADR-032). |
 | `core.webhooks.destino_crear` | Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032). |
@@ -1083,7 +1125,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
 | `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
-| `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
+| `asistencia.correcciones.responder` | `app/(trabajador)/trabajador/correcciones/_componentes` | no | reservada a personas |
 | `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.consentir` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.enrolar` | `app/_components` | no | reservada a personas |
@@ -1136,8 +1178,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.integraciones.guardar_certificado_dte` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.metodos_acceso.quitar` | `app/_acciones` | no | reservada a personas |
+| `core.personas.bloquear_permanente` | sin pantalla todavía · CAR-674 · desde 2026-11-19 | no | reservada a personas |
+| `core.personas.desbloquear_permanente` | sin pantalla todavía · CAR-674 · desde 2026-11-19 | no | reservada a personas |
 | `core.personas.pago_aprobar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.pago_rechazar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `core.personas.quitar_no_recontratar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.push.quitar` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.push.suscribir` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
@@ -1153,8 +1198,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | `/configuracion/usuarios` | no | reservada a personas |
-| `core.ver_como.iniciar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
-| `core.ver_como.terminar` | sin pantalla todavía · CAR-528 · desde 2026-11-15 | no | reservada a personas |
+| `core.ver_como.iniciar` | `app/_acciones` | no | reservada a personas |
+| `core.ver_como.list` | `/ver-como` | no | reservada a personas |
+| `core.ver_como.terminar` | `app/_acciones` | no | reservada a personas |
 | `core.webhooks.destino_actualizar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
 | `core.webhooks.destino_crear` | `/configuracion/agentes/eventos` | no | reservada a personas |
 | `core.webhooks.destino_eliminar` | `/configuracion/agentes/eventos/[id]` | no | reservada a personas |
@@ -1175,8 +1221,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
-- `asistencia.correcciones.listar`
-- `asistencia.correcciones.proponer`
 - `asistencia.dias.listar`
 - `asistencia.dias.recalcular`
 - `asistencia.dias.resumen_periodo`
@@ -1184,8 +1228,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
-- `asistencia.marcas.listar`
-- `asistencia.marcas.obtener`
 - `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.escalar`
@@ -1198,6 +1240,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
 - `central.estado`
+- `central.reglas.guardar`
+- `central.reglas.listar`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
@@ -1228,6 +1272,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.dispositivos.estado`
 - `core.documentos.desvincular`
 - `core.documentos.vincular`
+- `core.estructuras.efectiva`
 - `core.estructuras.get`
 - `core.etiquetas.delete`
 - `core.etiquetas.update`
@@ -1250,17 +1295,25 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.libro_novedades.registrar`
 - `core.novedades.descartar_destacada`
 - `core.patrones.get`
+- `core.personas.a_evaluacion`
+- `core.personas.activar`
 - `core.personas.asignar_jefe`
+- `core.personas.contratar_externo`
+- `core.personas.externar`
+- `core.personas.inactivar`
 - `core.personas.list_a_cargo`
+- `core.personas.marcar_externo`
+- `core.personas.reactivar`
+- `core.personas.rechazar`
 - `core.ping`
 - `core.procesos_persona.paso_actualizar`
-- `core.puestos.get`
 - `core.roles.adicionales_list`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
 - `core.valores_personalizados.set`
+- `core.vinculos.list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
@@ -1294,10 +1347,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `pauta.ausencias.listar`
 - `pauta.ausencias.registrar`
 - `pauta.publicaciones.listar`
-- `pauta.turnos_extra.aprobar`
-- `pauta.turnos_extra.listar`
-- `pauta.turnos_extra.monto_fijar`
-- `pauta.turnos_extra.rechazar`
 - `pauta.turnos_extra.registrar`
 - `pauta.visitas.cerrar`
 - `pauta.visitas.iniciar`

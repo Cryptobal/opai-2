@@ -11,7 +11,7 @@ export function conteosPuestos(ps: Puesto[]): ConteosPuestos {
 }
 
 /** Valor del chip de patrón para los puestos sin patrón asignado. */
-export const SIN_PATRON = "sin-patron";
+const SIN_PATRON = "sin-patron";
 
 /** Opciones del chip de patrón (review 5662449808 punto 3): solo los patrones en uso aquí. */
 export function opcionesPatron(ps: readonly Puesto[]): { valor: string; etiqueta: string }[] {

@@ -13,14 +13,15 @@ import { identidadActual } from "@/lib/servidor";
 import { personasDelEquipo } from "@/lib/terreno-servidor";
 
 import { AvisoTerrenoConSesion } from "./_componentes/aviso-sesion";
-import { PantallaEquipo } from "./_componentes/pantalla-equipo";
+import { CargadorEquipo } from "./_componentes/cargador-equipo";
 
 export const metadata = { title: "Terreno" };
 
 /** Con sesión, cómo emparejar el equipo; sin sesión y con equipo emparejado, Terreno del equipo. */
 async function Contenido() {
+  const equipo = await dispositivoActual();
   const identidad = await identidadActual();
-  if (identidad) {
+  if (identidad && !equipo?.verComo) {
     const puede = puedeDeIdentidad(identidad);
     return (
       <PaginaPortal portal="terreno" titulo="Terreno" ruta="/terreno">
@@ -32,11 +33,10 @@ async function Contenido() {
       </PaginaPortal>
     );
   }
-  const equipo = await dispositivoActual();
   if (!equipo) redirect(loginDe("/terreno"));
   if (equipo.estado !== "activo") redirect("/terreno/emparejar");
   const { instalacion, personas } = await personasDelEquipo(equipo);
-  return <PantallaEquipo instalacion={instalacion} personas={personas} />;
+  return <CargadorEquipo instalacion={instalacion} personas={personas} />;
 }
 
 export default function Pagina() {

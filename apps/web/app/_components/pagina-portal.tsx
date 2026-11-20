@@ -10,6 +10,7 @@ import { verificarMfaDe } from "@/lib/mfa";
 import { medirFase } from "@/lib/metricas-navegacion";
 import { esCuentaDeEmpresa } from "@/lib/acceso-portal";
 import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
+import { verComoDe } from "@/lib/ver-como";
 
 import { type OpcionesPagina } from "./cabecera-contexto";
 import { CuentaDeEmpresaEnPortalCliente } from "./cuenta-de-empresa";
@@ -46,14 +47,16 @@ async function Contenido<T>({
     redirect(
       `/${pendiente === "enrolar" ? "activar-mfa" : "mfa"}?next=${encodeURIComponent(ruta)}`,
     );
-  const acceso = tieneAccesoAPortal(identidad, portal);
+  // En «ver como» (CAR-528) el acceso es el de la persona vista: lo verifica cada capacidad.
+  const enVista = (await verComoDe(identidad))?.portal === portal;
+  const acceso = enVista || tieneAccesoAPortal(identidad, portal);
   // Usuario de plataforma sin empresa: su inicio es Plataforma.
   if (!acceso && portal === "erp" && !identidad.actual && tieneAccesoAPortal(identidad, "platform")) {
     redirect("/platform");
   }
   // Sesión de la empresa en el Portal Cliente: aviso propio, sin cargar datos ni caer en el `Forbidden`
   // desnudo de `ErrorCarga`, también si su membresía incluye «cliente» por error (CAR-192).
-  const empresaEnCliente = portal === "cliente" && esCuentaDeEmpresa(identidad);
+  const empresaEnCliente = !enVista && portal === "cliente" && esCuentaDeEmpresa(identidad);
   const sinEmpresa = !identidad.actual && portal !== "platform";
   const puedeElegir = identidad.membresias.some(
     (m) => m.estado === "activa" && m.tenant.estado !== "suspendido",

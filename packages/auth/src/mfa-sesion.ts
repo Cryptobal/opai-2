@@ -53,7 +53,7 @@ const RUTAS_CON_FACTOR_COMPLETO = [
  * ¿La sesión pertenece a una cuenta con segundo factor (TOTP o passkey) y aún no lo completó? Lee la
  * base (no la caché de cookie, que puede estar 60 s atrás).
  */
-async function segundoFactorPendiente(token: string): Promise<boolean> {
+export async function segundoFactorPendiente(token: string): Promise<boolean> {
   const sesion = await clienteAuth().session.findUnique({
     where: { token },
     select: {

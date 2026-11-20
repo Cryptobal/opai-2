@@ -7,7 +7,8 @@ import { capacidades } from "./capabilities";
 /**
  * Manifest del módulo Central de monitoreo (CAR-85, Brief 15b; spec docs/2.0/modulos/central.md).
  * Se vende solo y suma reglas por cada fuente activa (pregunta 13). PR 1 (CAR-461): alertas manuales,
- * estados y bitácora. PR 2 (CAR-468): cadenas de escalamiento e intentos de contacto. La entrada de navegación llega con las pantallas (PR 6, CAR-472).
+ * estados y bitácora. PR 2 (CAR-468): cadenas de escalamiento e intentos de contacto.
+ * PR 3 (CAR-469): reglas de vigilancia y señales de Asistencia y Rondas. La entrada de navegación llega con las pantallas (PR 6, CAR-472).
  */
 export const manifest = defineModule({
   id: "central",
@@ -20,7 +21,7 @@ export const manifest = defineModule({
       id: "central:alertas.atender",
       descripcion: "Abrir, resolver, cerrar como falsa alarma, reabrir, posponer, contactar y escalar alertas",
     },
-    { id: "central:config.manage", descripcion: "Configurar las cadenas de escalamiento de la central" },
+    { id: "central:config.manage", descripcion: "Configurar las reglas de vigilancia y las cadenas de escalamiento de la central" },
   ],
   navegacion: [],
   configuracion: z.object({}),

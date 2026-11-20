@@ -3,7 +3,7 @@ import type { TenantTx } from "@opai/db";
 import { emparejarMovimientos } from "@opai/domain";
 
 import { TOLERANCIA_DIAS } from "./cartola-emparejar";
-import { copiasDe, type CopiaMovimiento } from "./descartes-copia";
+import { copiasDe } from "./descartes-copia";
 import { aFecha, aIso } from "./util";
 
 type Db = Pick<TenantTx, "movimientoBancario" | "movimientoBancarioDescarte">;
@@ -35,12 +35,22 @@ export async function planRestaurar(db: Db, descarteId: string, reclamado = fals
         select: { id: true, fecha: true, monto: true, glosa: true, referencia: true, claveDedupe: true, idExterno: true },
       })
     : [];
-  const exacto = (c: CopiaMovimiento) =>
-    vivos.some((v) => v.id === c.id || v.claveDedupe === c.claveDedupe || (c.idExterno !== null && v.idExterno === c.idExterno));
-  const candidatos = copias.filter((c) => !exacto(c));
+  // Un vivo que ya representa una copia exacta no puede representar otra por parecido.
+  const usados = new Set<string>();
+  const candidatos = copias.filter((c) => {
+    const exactos = vivos.filter((v) =>
+      v.id === c.id || v.claveDedupe === c.claveDedupe || (c.idExterno !== null && v.idExterno === c.idExterno));
+    const exacto = exactos[0];
+    if (exactos.length > 1 || (exacto && usados.has(exacto.id))) {
+      throw reglaDeNegocio("No se puede restaurar: hay movimientos con identificadores contradictorios. Revisa los movimientos de la cuenta; el descarte se conserva.");
+    }
+    if (!exacto) return true;
+    usados.add(exacto.id);
+    return false;
+  });
   const pares = emparejarMovimientos(
     candidatos.map((c) => ({ fecha: aIso(c.fecha), monto: Number(c.monto), glosa: c.glosa, referencia: c.referencia })),
-    vivos.map((v) => ({ id: v.id, fecha: aIso(v.fecha), monto: Number(v.monto), glosa: v.glosa, referencia: v.referencia })),
+    vivos.filter((v) => !usados.has(v.id)).map((v) => ({ id: v.id, fecha: aIso(v.fecha), monto: Number(v.monto), glosa: v.glosa, referencia: v.referencia })),
     { toleranciaDias: TOLERANCIA_DIAS },
   );
   const nuevos = candidatos.filter((_, i) => !pares.has(i));

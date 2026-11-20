@@ -5,7 +5,7 @@ import type { Prisma } from "@opai/db";
 
 import { defineCapability } from "../../define";
 import { aFecha, hoy } from "../maestros/comun";
-import { documentosEnAlcance } from "./alcance-doc";
+import { filtroAlcanceDocumentos } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import type { ENTIDADES } from "./vista";
 import { documentoSchema, vistaDocumento } from "./vista";
@@ -47,12 +47,12 @@ export const documentosVencimientos = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const limite = new Date(aFecha(hoy()).getTime() + input.dias * 86_400_000);
-    const permitidos = await documentosEnAlcance(ctx);
+    const permitidos = await filtroAlcanceDocumentos(ctx);
     const filtros: Prisma.DocumentoWhereInput[] = [
       filtroDocumentoSensible(ctx),
       { estado: "disponible" },
       { venceEn: { lte: limite } },
-      ...(permitidos ? [{ id: { in: [...permitidos] } }] : []),
+      permitidos,
       ...(input.capa
         ? [
             {

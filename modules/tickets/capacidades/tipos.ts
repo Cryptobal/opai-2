@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 import { esRol } from "@opai/domain";
 
-import { sinDuplicado, tipoSchema, vistaTipo } from "./esquemas";
+import { listaSchema, paginaMemoria, sinDuplicado, tipoSchema, vistaTipo } from "./esquemas";
 import { PERMISO_TIPOS_MANAGE, PERMISO_VER } from "./permisos";
 import { exigirMiembroActivo, ID_VISTA_PREVIA } from "./util";
 
@@ -16,19 +16,21 @@ export const tiposListar = defineCapability({
   descripcion:
     "Lista los tipos de ticket activos que el rol actual puede usar al crear un ticket o una solicitud, con su regla de dueño, aprobación y SLA.",
   permiso: PERMISO_VER,
-  input: z.object({ incluirInactivos: z.boolean().default(false) }),
-  output: z.array(tipoSchema),
+  input: listaSchema.extend({ incluirInactivos: z.boolean().default(false) }),
+  output: z.object({ items: z.array(tipoSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.tipoTicket.findMany({
       where: { ...(input.incluirInactivos ? {} : { activo: true }) },
-      orderBy: [{ orden: "asc" }, { nombre: "asc" }],
+      orderBy: [{ orden: "asc" }, { nombre: "asc" }, { id: "asc" }],
     });
     const rol = ctx.rol;
-    return filas
-      .filter((t) => t.rolesPermitidos.length === 0 || (rol && t.rolesPermitidos.includes(rol)))
-      .map(vistaTipo);
+    const visibles = filas.filter(
+      (t) => t.rolesPermitidos.length === 0 || (rol && t.rolesPermitidos.includes(rol)),
+    );
+    const { items, siguiente } = paginaMemoria(visibles, input.limite, input.cursor);
+    return { items: items.map(vistaTipo), siguiente };
   },
 });
 

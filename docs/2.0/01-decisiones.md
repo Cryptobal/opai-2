@@ -808,6 +808,8 @@ Reglas:
 
 **Adenda 2 (CAR-495, 14-nov-2026, 15:34; decisión de Carlos).** En las tiendas se publica **solo «OPAI»** (`cl.opai.app`); «OPAI Terreno» no se publica. Vuelve a regir la decisión 13 de este ADR: una sola app para todos. La Sesión Apps quita la variante «OPAI Terreno» del código (regla «Código simple», ADR-115; se recupera desde git si hiciera falta) y prepara las fichas en `apps/fichas-tiendas.md`, sin publicar.
 
+**Adenda 3 (CAR-516, 14-nov-2026; Sesión Apps, decisión reversible bajo ADR-114).** Dentro de la app, «Continuar con Google» se hace en el navegador del sistema (Google bloquea las vistas web embebidas) y vuelve con un código de un solo uso de 2 minutos, atado a la app por PKCE S256 (RFC 8252). El canje abre una sesión nueva con `mfa_verified` en falso: el segundo factor no se hereda. La vuelta usa por ahora el esquema `cl.opai.app://canje`; antes de publicar en las tiendas se reemplaza por App Links y universal links verificados por dominio. Detalle en `briefs/BRIEF-17b-google-desde-la-app.md`.
+
 ## ADR-045 · Velocidad de navegación medida y con gate
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; contadores y caché de sesión decididos el 24-oct) · Completa ADR-037 y ADR-029 (punto 14).
@@ -1623,7 +1625,16 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 4. **Brief aprobado** (#365): pasa a Claude Design antes de cualquier código.
 5. **Un solo estado por persona** (Carlos, 15:22 Santiago): Postulante → Rechazado | Externo | Activo; Externo → Activo; Activo → Inactivo; Inactivo → Activo | Externo. Cualquier otra transición se rechaza. Solo «Activo» tiene vínculo laboral.
 
-**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`).
+**Adenda (19-nov-2026) · CAR-674: fases finales del modelo de estados.**
+
+- Valores en `core.personas.estado`: `postulante`, `en_evaluacion`, `rechazado`, `externo`, `activo`, `inactivo`, `bloqueado_permanente` (reemplaza `activa`/`inactiva` en datos).
+- **En evaluación:** Postulante → En evaluación → Activo | Rechazado | Externo.
+- **Bloqueado permanente, no recontratable:** estado distinto de la marca P1 «No recontratar» (con vencimiento); se alcanza desde cualquier estado y no puede volver a Activo; levantarlo exige `core:personas.estado.admin` (solo owner/admin).
+- **Externo** es el estado para turnos extra sin contrato vigente (ADR-083 §5).
+- Quitar la marca P1 pasa al mismo permiso admin (CAR-674).
+- Transiciones en dominio; cada arista es capacidad con `preview_`, MCP y permiso `core:personas.manage` salvo las dos acciones admin.
+
+**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`). La migración y el modelo completo de siete estados entran en CAR-674.
 
 **Adenda (8-nov-2026) · Decisiones de Operaciones II del 29-oct-2026, hasta ahora solo en Linear.** Registradas por «Operaciones · Auditoría» con su texto de Linear; ante choque manda lo más reciente de Carlos.
 
