@@ -73,7 +73,7 @@ jobs:
 
   test-db:
     name: ${{ matrix.corrida == 0 && 'test:db' || format('test:db · estabilidad {0}/3', matrix.corrida) }}
-    if: github.event_name != 'pull_request' || (github.head_ref == 'ci/estabilidad-test-db' && github.event.pull_request.head.repo.full_name == github.repository)
+    if: github.event_name != 'pull_request' || ((github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831) && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ${{ matrix.corrida != 0 && 'ubuntu-latest' || vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 45
     # Cada variante recibe VM y servicio Postgres nuevos; nunca comparte el clúster anterior.
@@ -146,7 +146,7 @@ jobs:
         env:
           VERIFICAR: ${{ needs.verificar.result }}
           TEST_DB: ${{ needs.test-db.result }}
-          DB_EN_PR: ${{ github.head_ref == 'ci/estabilidad-test-db' && github.event.pull_request.head.repo.full_name == github.repository }}
+          DB_EN_PR: ${{ (github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831) && github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           echo "verificar=$VERIFICAR test-db=$TEST_DB event=$GITHUB_EVENT_NAME"
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
