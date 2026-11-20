@@ -4,6 +4,7 @@ import type { Ticket } from "./datos";
 import { ETIQUETA_ESTADO, ETIQUETA_PRIORIDAD, TONO_ESTADO, TONO_PRIORIDAD } from "./datos";
 
 export const COLUMNAS_TICKETS = [
+  { id: "numero", etiqueta: "N.º", render: (t: Ticket) => t.numero, className: "w-24" },
   { id: "titulo", etiqueta: "Ticket", render: (t: Ticket) => t.titulo },
   { id: "tipo", etiqueta: "Tipo", render: (t: Ticket) => t.tipoNombre },
   {

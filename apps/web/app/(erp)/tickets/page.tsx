@@ -1,12 +1,7 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import type { SearchParams } from "@/lib/parametros";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 
-import {
-  cargarInstalaciones,
-  cargarTickets,
-  cargarTipos,
-  filtrosDe,
-} from "./_componentes/datos";
+import { cargarInstalaciones, cargarTickets, cargarTipos } from "./_componentes/datos";
 import { TicketsBandeja } from "./_componentes/tickets-bandeja";
 
 export const metadata = { title: "Tickets" };
@@ -21,17 +16,17 @@ export default function Tickets({ searchParams }: Props) {
       ruta="/tickets"
       completo
       cargar={async () => {
-        const p = await filtrosDe(searchParams);
-        const [r, tipos, instalaciones] = await Promise.all([
+        const p = await leerParametros(searchParams);
+        const [bandeja, tipos, instalaciones] = await Promise.all([
           cargarTickets(p),
           cargarTipos(),
           cargarInstalaciones(),
         ]);
-        return { p, r, tipos: tipos.ok ? tipos.data : [], instalaciones };
+        return { p, bandeja, tipos: tipos.ok ? tipos.data : [], instalaciones };
       }}
     >
-      {({ r, tipos, instalaciones }) => (
-        <TicketsBandeja r={r} tipos={tipos} instalaciones={instalaciones} />
+      {({ p, bandeja, tipos, instalaciones }) => (
+        <TicketsBandeja p={p} bandeja={bandeja} tipos={tipos} instalaciones={instalaciones} />
       )}
     </PaginaPortal>
   );

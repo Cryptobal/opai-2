@@ -85,8 +85,16 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Operaciones (CAR-404)
   it("con «ver todos», encuentra los tickets de la empresa por asunto, con tipo y estado, y nada de otra", async () => {
     const items = await buscar(ctx(u.ger, "gerente", t.a), "zafiro", "tickets");
     expect(items?.map((x) => x.id).sort()).toEqual([r["tPide"], r["tOtro"]].sort());
-    expect(items?.find((x) => x.id === r["tPide"])).toEqual({ id: r["tPide"], titulo: "Cambio de turno Zafiro", detalle: "Consulta · Abierto", href: `/tickets/${r["tPide"]}` });
+    expect(items?.find((x) => x.id === r["tPide"])).toEqual({ id: r["tPide"], titulo: "Cambio de turno Zafiro", detalle: `${r["tPide"]!.slice(0, 8).toUpperCase()} · Consulta · Abierto`, href: `/tickets/${r["tPide"]}` });
     expect(JSON.stringify(items)).not.toContain(r["tBeta"]!);
+  });
+
+  it("busca por número UUID o nombre del solicitante sin cruzar empresa ni permiso", async () => {
+    const propio = ctx(u.pide, "gerente", t.a, { permisosRol: ["tickets:tickets.ver"] });
+    const numero = r["tPide"]!.slice(0, 8).toUpperCase();
+    expect((await buscar(propio, numero, "tickets"))?.map((x) => x.id)).toEqual([r["tPide"]]);
+    expect((await buscar(propio, `Persona ${u.pide.slice(0, 4)}`, "tickets"))?.map((x) => x.id)).toEqual([r["tPide"]]);
+    expect(await buscar(propio, `Persona ${u.dueB.slice(0, 4)}`, "tickets")).toBeNull();
   });
 
   it("sin «ver todos», solo los tickets que pidió o tiene a cargo", async () => {
