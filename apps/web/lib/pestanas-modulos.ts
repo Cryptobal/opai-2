@@ -72,6 +72,13 @@ export async function puedeGestionarRegistros(): Promise<boolean> {
   return identidad ? puedeDeIdentidad(identidad)("acceso:registros.manage") : false;
 }
 
+/** Pestaña «Visitas» de la ficha de instalación (CAR-83): con Pauta activo y permiso de leerla. */
+export async function verPestanaVisitas(): Promise<boolean> {
+  const identidad = await identidadActual();
+  if (!identidad?.modulosActivos.includes("pauta")) return false;
+  return puedeDeIdentidad(identidad)("pauta:read");
+}
+
 /** ¿Puede prerregistrar visitas (CAR-478)? Oculta «Prerregistrar» a quien solo lee. */
 export async function puedePrerregistrar(): Promise<boolean> {
   const identidad = await identidadActual();

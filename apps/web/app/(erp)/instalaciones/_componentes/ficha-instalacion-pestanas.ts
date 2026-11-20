@@ -26,6 +26,7 @@ export function pestanasInstalacion(p: {
   turnosExtra?: boolean;
   accesos?: boolean;
   personas?: boolean;
+  visitas?: boolean;
   persona: string;
 }) {
   return [
@@ -47,6 +48,7 @@ export function pestanasInstalacion(p: {
       [p.turnosExtra, "turnos-extra", "Turnos extra"],
       [p.accesos, "accesos", "Accesos"],
       [p.personas, "personas", p.persona],
+      [p.visitas, "visitas", "Visitas"],
     ]),
     {
       id: "dispositivos" as const,

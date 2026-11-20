@@ -93,6 +93,7 @@ describe("paridad: la UI solo invoca capacidades existentes y públicas", () => 
       "app/_components/maestros/acciones-entidad.tsx",
       "app/_components/pwa/cliente-push-nativo.tsx", // ejecutor con id literal core.push.suscribir vía lib/push-nativo (CAR push nativo)
       "app/api/integraciones/slack/acciones/route.ts", // botones de Slack: lista blanca literal ACCIONES_SLACK en lib/slack-clic.ts (CAR-294)
+      "app/(erp)/remuneraciones/_componentes/tarjeta-archivo-legal.tsx", // CAP_GENERAR: ids literales lre / previred / f30_1 (CAR-99)
     ]);
     const nuevas = llamadas.filter((l) => l.ids.length === 0 && !conocidas.has(l.archivo));
     expect(

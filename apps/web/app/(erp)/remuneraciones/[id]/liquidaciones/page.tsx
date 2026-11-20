@@ -7,6 +7,7 @@ import { CalcularLiquidaciones } from "../../_componentes/calcular-liquidaciones
 import { cargarPeriodos, permisosNomina } from "../../_componentes/datos";
 import { DescargarLre } from "../../_componentes/descargar-lre";
 import { pesos } from "../../_componentes/etiquetas";
+import { MarcarRevisadas } from "../../_componentes/marcar-revisadas";
 import { SegmentoRemuneraciones } from "../../_componentes/segmento-remuneraciones";
 import { TablaLiquidaciones } from "../../_componentes/tabla-liquidaciones";
 import type { ListaLiquidaciones } from "../../_componentes/tipos";
@@ -44,11 +45,16 @@ export default function LiquidacionesPeriodo({ params }: Props) {
         return (
           <div className="flex flex-col gap-5">
             <div className={`grid grid-cols-2 gap-3 lg:grid-cols-3 ${GRILLA_KPI_HILO}`}>
-              <KpiTile etiqueta="Personas" valor={String(total.personas)} />
+              <KpiTile etiqueta="Revisadas" valor={`${total.revisadas} de ${total.personas}`} />
               <KpiTile etiqueta="Total líquido" valor={pesos(total.liquido)} />
               <KpiTile etiqueta="Costo empresa" valor={pesos(total.costoEmpresa)} />
             </div>
-            {abierto && d.perm.periodos ? <CalcularLiquidaciones periodoId={d.id} /> : null}
+            {abierto && d.perm.periodos ? (
+              <div className="flex flex-wrap items-start gap-3">
+                <CalcularLiquidaciones periodoId={d.id} />
+                {total.personas > 0 ? <MarcarRevisadas periodoId={d.id} pendientes={total.personas - total.revisadas} /> : null}
+              </div>
+            ) : null}
             {!abierto && d.periodo ? (
               <p className="t-caption text-fg-muted">El período está {d.periodo.estado.replace("_", " ")}: las liquidaciones ya no se recalculan.</p>
             ) : null}

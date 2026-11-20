@@ -1,5 +1,6 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
+import { abrirUnaPersona } from "./abrir-persona";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -8,18 +9,6 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 // de la empresa ficticia `qa-e2e`; usa la persona ficticia sembrada en esa empresa.
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
-
-const ENLACE_PERSONA = 'a[href^="/personas/"]:not([href*="vencimientos"])';
-
-/** Abre la primera persona de la lista (la empresa de pruebas `qa-e2e` tiene una persona ficticia sembrada). */
-async function abrirUnaPersona(page: Page): Promise<void> {
-  await page.goto("/personas");
-  await expect(page.getByText("Algo salió mal")).toHaveCount(0);
-  const primera = page.locator(ENLACE_PERSONA).filter({ visible: true }).first();
-  await expect(primera, "qa-e2e tiene al menos una persona ficticia").toBeVisible();
-  await primera.click();
-  await page.waitForURL(/\/personas\/[0-9a-f-]{36}/);
-}
 
 test.describe("@preview ficha de persona", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
@@ -30,8 +19,7 @@ test.describe("@preview ficha de persona", () => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
-    await abrirUnaPersona(page);
-    const ficha = new URL(page.url()).pathname.match(/^\/personas\/[0-9a-f-]{36}/)?.[0] ?? "";
+    const ficha = await abrirUnaPersona(page);
 
     // Resumen: una tarjeta por sección, cada una con su enlace a Laboral.
     for (const titulo of ["Previsión", "Pago", "Uniforme", "Jornada DT", "OS-10"])
@@ -60,8 +48,7 @@ test.describe("@preview ficha de persona", () => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
-    await abrirUnaPersona(page);
-    const ficha = new URL(page.url()).pathname.match(/^\/personas\/[0-9a-f-]{36}/)?.[0] ?? "";
+    const ficha = await abrirUnaPersona(page);
     await page.goto(`${ficha}/laboral`);
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     // La sección de pago carga aparte (Suspense): se espera su título antes de decidir si se omite.

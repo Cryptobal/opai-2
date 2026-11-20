@@ -26,6 +26,7 @@
     "@opai/domain": "workspace:*",
     "@opai/ds": "workspace:*",
     "@opai/integrations": "workspace:*",
+    "@opai/mod-asistencia": "workspace:*",
     "@opai/modules": "workspace:*",
     "@simplewebauthn/browser": "13.3.0",
     "better-auth": "^1.7.21",
