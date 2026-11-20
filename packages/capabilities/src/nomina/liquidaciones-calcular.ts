@@ -9,6 +9,7 @@ import { dia } from "../core/maestros/comun";
 import { mutualAdicionalTenant } from "../core/remuneraciones";
 import type { TenantTx } from "@opai/db";
 
+import type { Contexto } from "../types";
 import { resumenAsistenciaPeriodo } from "../../../../modules/asistencia/capabilities/dias-resumen-periodo";
 
 import { bloquearPeriodoAbierto } from "./bloqueos";
