@@ -31,6 +31,7 @@ export const CLASES_NUCLEO: Readonly<Record<string, ClaseBase>> = {
   [P.vinculosManage]: "-",
   [P.personasManage]: "G",
   [P.personasNoRecontratarManage]: "-",
+  [P.personasEstadoAdmin]: "-",
   [P.personasPrevisionRead]: "S",
   [P.personasPrevisionManage]: "-",
   [P.personasPagoRead]: "S",

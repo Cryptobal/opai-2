@@ -28,8 +28,9 @@ model NominaPeriodo {
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  novedades    NominaNovedad[]
-  obligaciones NominaObligacion[]
+  novedades     NominaNovedad[]
+  obligaciones  NominaObligacion[]
+  liquidaciones NominaLiquidacion[]
 
   @@unique([tenantId, anio, mes])
   @@index([tenantId, estado])
@@ -197,5 +198,40 @@ model NominaObligacion {
 
   @@index([tenantId, anio, mes])
   @@map("obligaciones")
+  @@schema("nomina")
+}
+
+/// Liquidación de una persona en un período (Brief 27, CAR-99). Montos en pesos enteros; el detalle son
+/// las líneas de haberes y descuentos (sin texto libre). Guarda la capa y la huella del juego de valores
+/// que rigieron (motor-sueldos.md R21). Se recalcula mientras el período está abierto o en revisión.
+model NominaLiquidacion {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  periodoId         String   @map("periodo_id") @db.Uuid
+  /// FK a core.personas en el SQL (sin @relation).
+  personaId         String   @map("persona_id") @db.Uuid
+  /// "calculada" | "revisada".
+  estado            String   @default("calculada")
+  diasTrabajados    Int      @map("dias_trabajados")
+  haberes           Int
+  imponible         Int
+  descuentosLegales Int      @map("descuentos_legales")
+  otrosDescuentos   Int      @map("otros_descuentos")
+  liquido           Int
+  costoEmpresa      Int      @map("costo_empresa")
+  detalle           Json
+  advertencias      Json     @default("[]")
+  /// FK lógica a core.estructuras_sueldo (trigger de mismo tenant en el SQL).
+  capaId            String   @map("capa_id") @db.Uuid
+  juegoHuella       String   @map("juego_huella")
+  calculadaEn       DateTime @default(now()) @map("calculada_en") @db.Timestamptz(6)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  periodo NominaPeriodo @relation(fields: [periodoId], references: [id])
+
+  @@unique([tenantId, periodoId, personaId])
+  @@index([tenantId, personaId])
+  @@map("liquidaciones")
   @@schema("nomina")
 }

@@ -1,13 +1,13 @@
 import type { Contexto } from "../types";
 
 /**
- * Personas que se pueden elegir como titular de un puesto de la instalación: activas, no archivadas
+ * Personas que se pueden elegir como titular de un puesto de la instalación: activas (`activo`), no archivadas
  * y con vínculo vigente en ella (el mismo criterio con que la pauta valida al fijar la serie).
  */
 export async function candidatosDeInstalacion(ctx: Contexto, instalacionId: string) {
   const filas = await ctx.db.persona.findMany({
     where: {
-      estado: "activa",
+      estado: "activo",
       archivadaEn: null,
       vinculos: { some: { estado: "vigente", instalacionId } },
     },

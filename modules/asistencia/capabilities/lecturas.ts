@@ -2,7 +2,8 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, prohibido, type Contexto } from "@opai/capabilities";
 
-import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
+import { ETIQUETA_GPS, ETIQUETA_METODO, ETIQUETA_TIPO, tenantBasico } from "./formato";
+import { marcaVistaDetalleSchema, uuid, vistaDeMarca } from "./esquemas";
 import { personaPropia } from "./persona-propia";
 
 const PORTALES = ["erp", "supervisor", "trabajador", "terreno"] as const;
@@ -18,46 +19,6 @@ export async function alcanceMarcas(ctx: Contexto): Promise<{ personaId?: string
   return ctx.alcance ? { instalacionId: { in: [...ctx.alcance.instalaciones] } } : {};
 }
 
-const fechaIso = z.string().datetime();
-const MAX_DIAS = 62;
-const LIMITE = 200;
-
-export const marcasListar = defineCapability({
-  id: "asistencia.marcas.listar",
-  descripcion:
-    "Lista las marcas legales de asistencia en un rango de fechas, de una persona o una instalación, con su tipo, hora del servidor, método, ubicación y si llegó diferida desde la cola sin conexión. El trabajador ve solo las suyas y el supervisor las de sus instalaciones.",
-  permiso: null,
-  portales: PORTALES,
-  input: z
-    .object({
-      personaId: uuid.optional(),
-      instalacionId: uuid.optional(),
-      desde: fechaIso,
-      hasta: fechaIso,
-      despuesDeSeq: z.number().int().min(0).default(0),
-    })
-    .refine((i) => i.hasta >= i.desde, "«hasta» no puede ser anterior a «desde».")
-    .refine((i) => Date.parse(i.hasta) - Date.parse(i.desde) <= MAX_DIAS * 86_400_000, `Como máximo ${MAX_DIAS} días.`),
-  output: z.object({ items: z.array(marcaVistaSchema), siguienteSeq: z.number().int().nullable() }),
-  efecto: "lectura",
-  dryRun: false,
-  auditarLectura: (s) => s.items.map((m) => m.id),
-  async handler(ctx, i) {
-    const alcance = await alcanceMarcas(ctx);
-    const filas = await ctx.db.marca.findMany({
-      where: {
-        seq: { gt: i.despuesDeSeq },
-        horaServidor: { gte: new Date(i.desde), lte: new Date(i.hasta) },
-        AND: [alcance, i.instalacionId ? { instalacionId: i.instalacionId } : {}, i.personaId ? { personaId: i.personaId } : {}],
-      },
-      orderBy: { seq: "asc" },
-      take: LIMITE + 1,
-    });
-    const pagina = filas.slice(0, LIMITE);
-    return { items: pagina.map(vistaDeMarca), siguienteSeq: filas.length > LIMITE ? (pagina.at(-1)?.seq ?? null) : null };
-  },
-});
-
 export const marcasObtener = defineCapability({
   id: "asistencia.marcas.obtener",
   descripcion:
@@ -65,7 +26,7 @@ export const marcasObtener = defineCapability({
   permiso: null,
   portales: PORTALES,
   input: z.object({ id: uuid }),
-  output: marcaVistaSchema,
+  output: marcaVistaDetalleSchema,
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => [s.id],
@@ -73,6 +34,23 @@ export const marcasObtener = defineCapability({
     const alcance = await alcanceMarcas(ctx);
     const f = await ctx.db.marca.findFirst({ where: { id: i.id, AND: [alcance] } });
     if (!f) throw noEncontrado("La marca");
-    return vistaDeMarca(f);
+    const [persona, instalacion, dispositivo, slug] = await Promise.all([
+      ctx.db.persona.findUnique({ where: { id: f.personaId }, select: { nombres: true, apellidos: true } }),
+      ctx.db.instalacion.findUnique({ where: { id: f.instalacionId }, select: { nombre: true } }),
+      f.dispositivoId ? ctx.db.dispositivo.findUnique({ where: { id: f.dispositivoId }, select: { nombre: true } }) : null,
+      tenantBasico(ctx),
+    ]);
+    const vista = vistaDeMarca(f);
+    return {
+      ...vista,
+      dispositivoId: f.dispositivoId ?? null,
+      dispositivoNombre: dispositivo?.nombre ?? null,
+      personaNombre: persona ? `${persona.nombres} ${persona.apellidos}`.trim() : f.personaId,
+      instalacionNombre: instalacion?.nombre ?? f.instalacionId,
+      tipoEtiqueta: ETIQUETA_TIPO[vista.tipo] ?? vista.tipo,
+      metodoEtiqueta: ETIQUETA_METODO[vista.metodo] ?? vista.metodo,
+      gpsEtiqueta: ETIQUETA_GPS[vista.gpsEstado] ?? vista.gpsEstado,
+      slugEmpresa: slug.slug,
+    };
   },
 });

@@ -35,7 +35,7 @@ export type CotizacionFila = {
     ventaMensualClp: number | null;
   } | null;
 };
-export type ListaCotizaciones = { items: CotizacionFila[]; siguiente: string | null };
+type ListaCotizaciones = { items: CotizacionFila[]; siguiente: string | null };
 export type DatosCotizaciones = ListaCotizaciones & {
   /** Lista de «Archivadas» (CPQ v4): se pide con `?ver=archivadas`. */
   archivadas?: boolean;

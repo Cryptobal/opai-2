@@ -46,7 +46,7 @@ import {
   plantillasDocumentoUpdate,
 } from "./plantillas-documento";
 import {
-  bibliotecaBloquesList,
+  bibliotecaBloquesGuardarTextoTipo, bibliotecaBloquesList,
   bibliotecaBloquesPublicar,
   enviosPropuestaAprobar,
   enviosPropuestaCancelar,
@@ -127,7 +127,7 @@ export const capacidades: readonly Capacidad[] = [
   plantillasDocumentoGet,
   plantillasDocumentoUpdate,
   bibliotecaBloquesList,
-  bibliotecaBloquesPublicar,
+  bibliotecaBloquesPublicar, bibliotecaBloquesGuardarTextoTipo,
   plantillasPropuestaGet,
   plantillasPropuestaUpdate,
   propuestaTecnicaGet,

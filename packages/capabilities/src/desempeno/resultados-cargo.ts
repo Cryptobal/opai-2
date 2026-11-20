@@ -53,7 +53,7 @@ export const resultadosCargo = defineCapability({
       mesesDe(ctx),
       visibilidadDe(ctx),
       ctx.db.vinculoLaboral.findMany({
-        where: { cargoId: input.cargoId, estado: "vigente", persona: { estado: "activa" } },
+        where: { cargoId: input.cargoId, estado: "vigente", persona: { estado: "activo" } },
         select: { personaId: true },
       }),
     ]);
