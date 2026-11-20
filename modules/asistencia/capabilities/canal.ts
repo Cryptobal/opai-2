@@ -74,8 +74,6 @@ export async function resolverCanal(
 ): Promise<Canal> {
   if (i.enlacePublicoValidado) {
     if (ctx.actor.tipo !== "system" || i.dispositivoId) throw prohibido("Marca inválida por enlace público.");
-    const v = await ctx.db.vinculoLaboral.findFirst({ where: { personaId, instalacionId, estado: "vigente" }, select: { id: true } });
-    if (!v) throw prohibido("La persona no está asignada a esta instalación.");
     await exigirCanal(ctx, instalacionId, personaId, "enlace_publico");
     return "enlace_publico";
   }

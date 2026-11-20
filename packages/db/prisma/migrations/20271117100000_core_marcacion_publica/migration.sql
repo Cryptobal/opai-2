@@ -40,8 +40,11 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
   FROM "core"."codigos_marcacion_publica" c
   JOIN "core"."instalaciones" i ON i.id = c.instalacion_id AND i.tenant_id = c.tenant_id
   WHERE c.codigo_hash = p_codigo_hash
+    AND i.estado = 'activa'
+    AND i.archivada_en IS NULL
   LIMIT 1;
 $$;
+ALTER FUNCTION "core"."marcacion_publica_por_codigo"(text) OWNER TO CURRENT_USER;
 REVOKE ALL ON FUNCTION "core"."marcacion_publica_por_codigo"(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION "core"."marcacion_publica_por_codigo"(text) TO opai_app;
 

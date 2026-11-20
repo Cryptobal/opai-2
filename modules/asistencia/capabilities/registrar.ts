@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-import { ajuste, defineCapability, reglaDeNegocio } from "@opai/capabilities";
+import { ajuste, defineCapability, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
 import { CANALES, METODOS, MOTIVOS_RESPALDO } from "../domain";
 import { armarRegistro } from "./armar-registro";
 import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
+import { MENSAJE_IDENTIDAD } from "./canal";
 import {
   cargarEntidadesMarca,
   datosArmadoMarca,
@@ -46,15 +47,22 @@ export const marcasRegistrar = defineCapability({
     if (!(await ajuste<boolean>(ctx, "asistencia", "marcas_habilitadas")))
       throw reglaDeNegocio("Las marcas de asistencia aún no están habilitadas en esta empresa.");
     const { persona, instalacion } = await cargarEntidadesMarca(ctx, entrada.personaId, entrada.instalacionId);
+    const canal = await resolverCanal(ctx, entrada, persona.id, instalacion.id);
+    const i = { ...entrada, canal };
+    const identidad = await verificarIdentidadMarca(ctx, i, persona.id, dryRun);
+    if (entrada.enlacePublicoValidado) {
+      const v = await ctx.db.vinculoLaboral.findFirst({
+        where: { personaId: persona.id, instalacionId: instalacion.id, estado: "vigente" },
+        select: { id: true },
+      });
+      if (!v) throw prohibido(MENSAJE_IDENTIDAD.credencial_invalida);
+    }
     const previa = dryRun
       ? null
       : await ctx.db.marca.findUnique({
           where: { tenantId_idempotencyKey: { tenantId: ctx.tenantId, idempotencyKey: entrada.claveDispositivo } },
         });
     if (previa?.personaId === persona.id) return { marca: vistaDeMarca(previa), repetida: true };
-    const canal = await resolverCanal(ctx, entrada, persona.id, instalacion.id);
-    const i = { ...entrada, canal };
-    const identidad = await verificarIdentidadMarca(ctx, i, persona.id, dryRun);
     const datos = await datosArmadoMarca(ctx, persona.id, instalacion, identidad);
     if (dryRun) {
       return {

@@ -2,7 +2,12 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 import { instalacionVisible } from "../../../packages/capabilities/src/core/terreno/comun";
-import { hmacDispositivo, normalizarCodigoMarcacionPublica, nuevoCodigoMarcacionPublica } from "@opai/db";
+import {
+  hmacDispositivo,
+  LARGO_CODIGO_MARCACION_PUBLICA,
+  normalizarCodigoMarcacionPublica,
+  nuevoCodigoMarcacionPublica,
+} from "@opai/db";
 
 import { uuid } from "./esquemas";
 
@@ -68,7 +73,7 @@ const enlacePublicoEstado = defineCapability({
   },
 });
 
-const codigoEntrada = z.string().min(4).max(16);
+const codigoEntrada = z.string().length(LARGO_CODIGO_MARCACION_PUBLICA);
 
 const enlacePublicoResolver = defineCapability({
   id: "asistencia.marcas.enlace_publico_resolver",

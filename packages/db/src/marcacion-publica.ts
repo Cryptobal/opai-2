@@ -1,17 +1,18 @@
-import { randomInt } from "node:crypto";
+import { randomBytes } from "node:crypto";
 
 import { clienteApp } from "./client";
-import { ALFABETO, hmacDispositivo } from "./dispositivos";
+import { hmacDispositivo } from "./dispositivos";
 
-export const LARGO_CODIGO_MARCACION_PUBLICA = 8;
+/** 16 bytes CSPRNG en base64url (128 bits). */
+export const LARGO_CODIGO_MARCACION_PUBLICA = 22;
+const RE_CODIGO = /^[A-Za-z0-9_-]{22}$/;
 
 export const normalizarCodigoMarcacionPublica = (entrada: string): string | null => {
-  const c = entrada.replace(/[\s-]/g, "").toUpperCase();
-  return c.length === LARGO_CODIGO_MARCACION_PUBLICA && [...c].every((x) => ALFABETO.includes(x)) ? c : null;
+  const c = entrada.trim();
+  return RE_CODIGO.test(c) ? c : null;
 };
 
-export const nuevoCodigoMarcacionPublica = (): string =>
-  Array.from({ length: LARGO_CODIGO_MARCACION_PUBLICA }, () => ALFABETO[randomInt(ALFABETO.length)]).join("");
+export const nuevoCodigoMarcacionPublica = (): string => randomBytes(16).toString("base64url");
 
 export type MarcacionPublicaResuelta = {
   tenantId: string;

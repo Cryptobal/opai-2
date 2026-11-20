@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { connection } from "next/server";
 
 import { executeCapability, type Resultado } from "@opai/capabilities";
-import { marcacionPublicaPorCodigo } from "@opai/db";
+import { marcacionPublicaPorCodigo, normalizarCodigoMarcacionPublica, type MarcacionPublicaResuelta } from "@opai/db";
 
 import { fuentesReales } from "@/lib/fuentes";
 import { contextoSistema } from "@/lib/medidor";
@@ -12,23 +12,38 @@ import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
 
 export type EnlaceMarcacionVista = { instalacionNombre: string; empresaNombre: string };
 
-async function topePublico(codigo: string) {
+async function topeMiss(ip: string): Promise<boolean> {
+  const { ventanaMs, maximoIp, maximoGlobal } = LIMITES.marcarPublicaMiss;
+  const [porIp, global] = await Promise.all([
+    permitir(`marcar-publica-miss-ip:${ip}`, maximoIp, ventanaMs, { fallarCerrado: true }),
+    permitir("marcar-publica-miss-global", maximoGlobal, ventanaMs, { fallarCerrado: true }),
+  ]);
+  return porIp && global;
+}
+
+async function topeIp(ip: string): Promise<boolean> {
+  const { maximo, ventanaMs } = LIMITES.marcarPublica;
+  return permitir(`marcar-publica-ip:${ip}`, maximo, ventanaMs, { fallarCerrado: true });
+}
+
+async function resolverCodigoMarcacion(
+  codigo: string,
+): Promise<"limitada" | null | MarcacionPublicaResuelta> {
   await connection();
   const ip = ipDeCabeceras(await headers());
-  const prefijo = codigo.slice(0, 8).toUpperCase();
-  const [porCodigo, porIp, porEnlace] = await Promise.all([
-    permitir(`marcar-publica:${ip}:${prefijo}`, LIMITES.marcarPublica.maximo, LIMITES.marcarPublica.ventanaMs, { fallarCerrado: true }),
-    permitir(`marcar-publica-ip:${ip}`, LIMITES.marcarPublica.maximo * 2, LIMITES.marcarPublica.ventanaMs, { fallarCerrado: true }),
-    permitir(`marcar-publica-enlace:${prefijo}`, LIMITES.marcarPublica.maximo, LIMITES.marcarPublica.ventanaMs * 10, { fallarCerrado: true }),
-  ]);
-  return porCodigo && porIp && porEnlace;
+  const norm = normalizarCodigoMarcacionPublica(codigo);
+  if (!norm) return (await topeMiss(ip)) ? null : "limitada";
+  if (!(await topeIp(ip))) return "limitada";
+  const resuelto = await marcacionPublicaPorCodigo(codigo);
+  if (!resuelto) return (await topeMiss(ip)) ? null : "limitada";
+  return resuelto;
 }
 
 export async function verEnlaceMarcacion(
   codigo: string,
 ): Promise<{ limitada: true } | { ok: true; data: EnlaceMarcacionVista } | { ok: false }> {
-  if (!(await topePublico(codigo))) return { limitada: true };
-  const resuelto = await marcacionPublicaPorCodigo(codigo);
+  const resuelto = await resolverCodigoMarcacion(codigo);
+  if (resuelto === "limitada") return { limitada: true };
   if (!resuelto) return { ok: false };
   const modulos = await fuentesReales.modulosActivos(resuelto.tenantId);
   if (!modulos.includes("asistencia")) return { ok: false };
@@ -39,8 +54,8 @@ export async function verEnlaceMarcacion(
 
 /** Contexto con tenant fijado para marcar; `null` si el código no existe o la empresa no tiene asistencia. */
 export async function contextoMarcacionPublica(codigo: string) {
-  if (!(await topePublico(codigo))) return "limitada" as const;
-  const resuelto = await marcacionPublicaPorCodigo(codigo);
+  const resuelto = await resolverCodigoMarcacion(codigo);
+  if (resuelto === "limitada") return "limitada" as const;
   if (!resuelto) return null;
   const modulos = await fuentesReales.modulosActivos(resuelto.tenantId);
   if (!modulos.includes("asistencia")) return null;

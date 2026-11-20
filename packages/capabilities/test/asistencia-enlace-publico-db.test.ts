@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { hmacDispositivo } from "@opai/db";
+import { hmacDispositivo, LARGO_CODIGO_MARCACION_PUBLICA, nuevoCodigoMarcacionPublica } from "@opai/db";
 
 import { manifest } from "../../../modules/asistencia/manifest";
 import { PIN_SIMULADO } from "../../../modules/asistencia/capabilities";
@@ -15,7 +15,7 @@ describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () =
   let tenantId = "";
   let instId = "";
   let personaId = "";
-  const codigo = "ABCD2345";
+  const codigo = nuevoCodigoMarcacionPublica();
 
   const medidor = { registrar: async () => undefined };
   const sistema = (t: string) =>
@@ -79,6 +79,21 @@ describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () =
     await e?.cerrar();
   });
 
+  it("rechaza código corto", async () => {
+    const r = await mod.executeCapability(sistema(tenantId), "asistencia.marcas.enlace_publico_resolver", {
+      codigo: "corto",
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it("rechaza código con formato válido pero inexistente", async () => {
+    const fantasma = randomBytes(16).toString("base64url");
+    const r = await mod.executeCapability(sistema(tenantId), "asistencia.marcas.enlace_publico_resolver", {
+      codigo: fantasma,
+    });
+    expect(r.ok).toBe(false);
+  });
+
   it("resuelve el enlace sin revelar personas", async () => {
     const r = await mod.executeCapability(sistema(tenantId), "asistencia.marcas.enlace_publico_resolver", { codigo });
     expect(r.ok).toBe(true);
@@ -105,7 +120,7 @@ describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () =
   it("rotar invalida el código anterior", async () => {
     const rot = await mod.executeCapability(erp(tenantId), "asistencia.marcas.enlace_publico_rotar", { instalacionId: instId });
     expect(rot.ok).toBe(true);
-    if (rot.ok) expect((rot.data as { codigo: string }).codigo).toHaveLength(8);
+    if (rot.ok) expect((rot.data as { codigo: string }).codigo).toHaveLength(LARGO_CODIGO_MARCACION_PUBLICA);
     const viejo = await mod.executeCapability(sistema(tenantId), "asistencia.marcas.enlace_publico_resolver", { codigo });
     expect(viejo.ok).toBe(false);
   });

@@ -15,6 +15,7 @@ type EntradaRegistro = EntradaMarca & {
   credencial?: string | undefined;
   motivoRespaldo?: MotivoRespaldo | undefined;
   muestra?: string | undefined;
+  enlacePublicoValidado?: boolean | undefined;
 };
 
 export async function cargarEntidadesMarca(
@@ -48,7 +49,10 @@ export async function verificarIdentidadMarca(
     : await (await verificadorDe(ctx)).verificar({
         personaId, metodo: i.metodo, credencial: i.credencial, motivoRespaldo: i.motivoRespaldo, muestra: i.muestra,
       });
-  if (!id.ok) throw prohibido(MENSAJE_IDENTIDAD[id.motivo]);
+  if (!id.ok) {
+    const motivo = i.enlacePublicoValidado && id.motivo === "bloqueado" ? "credencial_invalida" : id.motivo;
+    throw prohibido(MENSAJE_IDENTIDAD[motivo]);
+  }
   return id;
 }
 

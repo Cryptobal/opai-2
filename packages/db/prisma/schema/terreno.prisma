@@ -78,7 +78,7 @@ model CodigoEmparejamiento {
   @@schema("core")
 }
 
-/// Código persistente de 8 caracteres para marcar por enlace o QR público en una instalación (CAR-606).
+/// Código persistente de 128 bits (22 caracteres base64url) para marcar por enlace o QR público (CAR-606).
 /// Rotar reemplaza el código anterior: solo se guarda su HMAC. Una instalación tiene a lo sumo uno vigente.
 model CodigoMarcacionPublica {
   id            String   @id @default(uuid(7)) @db.Uuid
