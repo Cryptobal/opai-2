@@ -1,17 +1,10 @@
 // Tipos de lo que devuelven las capacidades de Pauta (las pantallas no importan los esquemas Zod).
 // Celda, motivo y presencia viven en @opai/domain; aquí solo la forma de las vistas de pantalla.
-import type {
-  CeldaPauta,
-  EstadoCelda,
-  EstadoPresencia,
-  MotivoPpc,
-  PresenciaCelda,
-  VarianteCelda,
-} from "@opai/domain";
+import type { CeldaPauta, MotivoPpc, VarianteCelda } from "@opai/domain";
 
 export type CeldaDia = CeldaPauta;
 export type Motivo = MotivoPpc;
-export type { EstadoCelda, EstadoPresencia, PresenciaCelda, VarianteCelda };
+export type { VarianteCelda };
 
 export type ResumenCobertura = {
   programados: number;
@@ -22,7 +15,7 @@ export type ResumenCobertura = {
   ppcPorMotivo: Record<string, number>;
 };
 
-export type SerieVista = {
+type SerieVista = {
   id: string;
   patronId: string;
   patron: string;
@@ -33,7 +26,7 @@ export type SerieVista = {
   hasta: string | null;
 };
 
-export type PuestoMes = {
+type PuestoMes = {
   id: string;
   nombre: string;
   funcion: string | null;

@@ -6,6 +6,10 @@ export { ROLES, ROLES_PLATAFORMA, type Rol, type RolPlataforma } from "./permiso
 export { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "./permisos-catalogo";
 export { PATRONES_POR_ROL } from "./permisos-patrones";
 export {
+  PERMISOS_SOLO_EXPLICITOS_EN_KEY,
+  permisoSoloExplicitoEnKey,
+} from "./permisos-explicitos-key";
+export {
   CLASES_BASE,
   PERMISOS_GERENTE,
   PERMISOS_LECTOR,

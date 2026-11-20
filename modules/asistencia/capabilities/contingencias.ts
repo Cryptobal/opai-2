@@ -61,16 +61,26 @@ export const contingenciasListar = defineCapability({
   id: "asistencia.contingencias.listar",
   descripcion: "Lista las marcas de contingencia de las instalaciones a cargo, con su estado (pendiente, aceptada o rechazada).",
   permiso: "asistencia:ver",
-  input: z.object({ estado: z.enum(["pendiente", "aceptada", "rechazada"]).optional() }),
-  output: z.object({ items: z.array(vistaSchema) }),
+  input: z.object({
+    estado: z.enum(["pendiente", "aceptada", "rechazada"]).optional(),
+    cursor: z.string().uuid().optional(), limite: z.number().int().min(1).max(200).default(50),
+  }),
+  output: z.object({ items: z.array(vistaSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => s.items.map((c) => c.id),
   async handler(ctx, i) {
     const filas = await ctx.db.contingencia.findMany({
-      where: { ...(i.estado ? { estado: i.estado } : {}), ...alcanceDe(ctx.alcance) }, orderBy: { createdAt: "desc" }, take: 200,
+      where: { ...(i.estado ? { estado: i.estado } : {}), ...alcanceDe(ctx.alcance) },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: i.limite + 1,
+      ...(i.cursor ? { cursor: { id: i.cursor }, skip: 1 } : {}),
     });
-    return { items: filas.map((f) => ({ id: f.id, personaId: f.personaId, instalacionId: f.instalacionId, tipo: f.tipo as never, horaDeclarada: f.horaDeclarada.toISOString(), motivo: f.motivo, estado: f.estado as never, evidenciaDocumentoId: f.evidenciaDocumentoId, marcaId: f.marcaId })) };
+    const items = filas.slice(0, i.limite).map((f) => ({
+      id: f.id, personaId: f.personaId, instalacionId: f.instalacionId, tipo: f.tipo as never,
+      horaDeclarada: f.horaDeclarada.toISOString(), motivo: f.motivo, estado: f.estado as never,
+      evidenciaDocumentoId: f.evidenciaDocumentoId, marcaId: f.marcaId,
+    }));
+    return { items, siguiente: filas.length > i.limite ? (items.at(-1)?.id ?? null) : null };
   },
 });
 

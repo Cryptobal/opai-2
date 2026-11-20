@@ -38,7 +38,7 @@ export function ListaCargos({
 }) {
   const activos = items.filter((c) => c.activo).length;
   const nuevo = puedeGestionar ? (
-    <EnlaceBotonHoja href="?nuevo=1" icono={Plus} variante={seleccionada ? "secondary" : "primary"}>
+    <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
       Nuevo
     </EnlaceBotonHoja>
   ) : undefined;
