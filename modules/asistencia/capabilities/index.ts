@@ -8,7 +8,9 @@ import { diasListar, diasResumenPeriodo } from "./dias-capacidades";
 import { diasRecalcular, jornadasFijarTipo } from "./dias-gestion";
 import { hoyListar } from "./dias-hoy";
 import { consumidorAvisoContingencia } from "./consumidor-contingencia";
-import { contingenciasListar, contingenciasRegistrar, contingenciasResponder } from "./contingencias";
+import { contingenciasRegistrar, contingenciasResponder } from "./contingencias";
+import { contingenciasListar } from "./contingencias-listar";
+import { contingenciasResponderEnlace, contingenciasVerEnlace } from "./contingencias-enlace";
 import { correccionesVerEnlace, correccionesResponderEnlace } from "./correcciones-enlace";
 import { correccionesListar } from "./correcciones-listar";
 import { correccionesProponer } from "./correcciones-proponer";
@@ -43,7 +45,7 @@ export const consumidoresAsistencia = [
 export const capacidades = [
   marcasRegistrar, marcasListar, marcasObtener, marcasVerificar,
   correccionesProponer, correccionesListar, correccionesResponder, correccionesVerEnlace, correccionesResponderEnlace,
-  contingenciasRegistrar, contingenciasListar, contingenciasResponder,
+  contingenciasRegistrar, contingenciasListar, contingenciasResponder, contingenciasVerEnlace, contingenciasResponderEnlace,
   incidentesRegistrar, incidentesCerrar, incidentesListar,
   rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, rostroTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,

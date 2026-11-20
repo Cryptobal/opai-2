@@ -91,6 +91,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Identidad: core.invitations.request_new (interna con motivo), sin sesión.",
   "app/correccion/[slug]/[token]/accion.ts#accionResponder":
     "Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador.",
+  "app/contingencia/[slug]/[token]/accion.ts#accionResponder":
+    "Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial.",
   "app/firmar/[slug]/[token]/acciones.ts#verFirma":
     "Firma: core.firmas.ver_firmante (interna con motivo): el enlace personal es la credencial (firma.md §5).",
   "app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace":
@@ -164,4 +166,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Portal público DT (CAR-594): asistencia.fiscalizacion_ingreso.validar con contexto sistema; sin sesión ERP.",
   "app/fiscalizacion/acciones.ts#buscarEmpleadorFiscalizacion":
     "Portal fiscalización con cookie firmada: asistencia.fiscalizacion_empleador.buscar.",
+  "app/fiscalizacion/acciones.ts#salirFiscalizacion":
+    "Portal fiscalización: borra la cookie de sesión del inspector; no toca datos de negocio ni capacidad.",
+  "app/fiscalizacion/acciones.ts#sesionFiscalizacionActual":
+    "Portal fiscalización: lee la cookie firmada de sesión del inspector; no consulta base ni invoca capacidad.",
 };

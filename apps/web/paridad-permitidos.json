@@ -108,6 +108,10 @@
       "motivo": "Ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) para la página pública donde el trabajador acepta u objeta una corrección."
     },
     {
+      "archivo": "app/contingencia/[slug]/[token]/ver.ts",
+      "motivo": "Ejecuta asistencia.contingencias.ver_enlace y responder_enlace (internas) para la página pública donde el trabajador acepta u objeta una contingencia."
+    },
+    {
       "archivo": "app/api/integraciones/slack/eventos/route.ts",
       "motivo": "core.slack.desinstalada es interna por diseño: solo este receptor la ejecuta, con la firma de Slack como credencial, cuando la app se desinstala o su token se revoca."
     },
@@ -148,6 +152,10 @@
     {
       "archivo": "lib/dispositivo.ts",
       "motivo": "Reconoce al dispositivo de terreno por su token (HMAC) en cada petición con dispositivoPorToken; el dispositivo no tiene sesión de usuario (CAR-78 B2)."
+    },
+    {
+      "archivo": "lib/contexto-publico-asistencia.ts",
+      "motivo": "Arma el contexto de sistema para enlaces públicos de Asistencia (corrección, contingencia): tenantPorSlug, rate limit y módulo activo."
     }
   ]
 }

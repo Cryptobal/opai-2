@@ -4,6 +4,7 @@ import { defineConsumidor, enviarCorreo } from "@opai/capabilities";
 
 import { alertarSinCorreo } from "./consumidores";
 import { nombreCompleto, tenantBasico } from "./formato";
+import { urlPortalMarcar } from "./urls-correo";
 
 const payload = z.object({ personaId: z.string().uuid(), tipo: z.string() }).passthrough();
 
@@ -32,7 +33,7 @@ export const consumidorAlertas = defineConsumidor({
     const enviado = await enviarCorreo(
       { db: ctx.db, tenantId: ctx.tenantId, correo: ctx.servicios.correo, urlBase: ctx.servicios.urlBase, eventoId: evento.id },
       evento.tipo, correo,
-      { ...d, trabajador: { nombre: nombreCompleto(persona) }, empresa: { nombre: t.nombre }, url: `${ctx.servicios.urlBase}/mis-marcas` },
+      { ...d, trabajador: { nombre: nombreCompleto(persona) }, empresa: { nombre: t.nombre }, url: urlPortalMarcar(ctx.servicios.urlBase) },
       { cc },
     );
     if (!enviado) throw new Error("No se pudo enviar la alerta; se reintenta.");
