@@ -9,6 +9,7 @@ export const loteResumenSchema = z.object({
   id: uuidSchema,
   codigo: z.number().int(),
   codigoVisible: z.string(),
+  esReversa: z.boolean(),
   estado: estadoLoteSchema,
   totalClp: z.number().int().describe("Suma de las rendiciones, CLP entero; la calcula el servidor y no cambia."),
   cantidad: z.number().int(),

@@ -141,9 +141,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.anular` | `rendiciones_lotes_anular` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.aplicar_reversa` | `rendiciones_lotes_aplicar_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.aprobar` | `rendiciones_lotes_aprobar` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.candidatas` | `rendiciones_lotes_candidatas` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.candidatas_reversa` | `rendiciones_lotes_candidatas_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.crear` | `rendiciones_lotes_crear` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.crear_reversa` | `rendiciones_lotes_crear_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.generar_nomina` | `rendiciones_lotes_generar_nomina` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.listar` | `rendiciones_lotes_listar` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.marcar_pagado` | `rendiciones_lotes_marcar_pagado` | existe |
