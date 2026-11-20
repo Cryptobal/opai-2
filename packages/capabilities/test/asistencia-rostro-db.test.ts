@@ -51,7 +51,7 @@ describe.skipIf(!urlPropietario)("Asistencia · Face ID sobre B4 (Postgres real)
     const cargo = (await e.admin.cargo.create({ data: { tenantId: tenant, nombre: "Guardia" } })).id;
     const usuario = (await e.admin.user.create({ data: { name: "Ana", email: `ana-${randomUUID()}@x.cl` } })).id;
     await e.admin.membership.create({ data: { tenantId: tenant, userId: usuario, rol: "member", estado: "activa", portales: ["terreno", "trabajador"] } as never });
-    const persona = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Prueba", rut: "12.345.678-5", estado: "activa", usuarioId: usuario, emailPersonal: `ana-${randomUUID().slice(0, 6)}@correo.cl` } })).id;
+    const persona = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Prueba", rut: "12.345.678-5", estado: "activo", usuarioId: usuario, emailPersonal: `ana-${randomUUID().slice(0, 6)}@correo.cl` } })).id;
     await e.admin.vinculoLaboral.create({ data: { tenantId: tenant, personaId: persona, cargoId: cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
     await e.admin.credencialTerreno.create({ data: { tenantId: tenant, personaId: persona, rut: "12345678-5", pinHash: await hashPin(PIN), debeCambiar: false } });
     const equipo = (await e.admin.dispositivo.create({ data: { tenantId: tenant, instalacionId: inst, identificador: "DSP-0001", tokenHash: randomBytes(16).toString("hex"), estado: "activo" } })).id;
@@ -237,7 +237,7 @@ describe.skipIf(!urlPropietario)("Asistencia · Face ID sobre B4 (Postgres real)
     expect((await ses({ dispositivoId: C.equipo })).ok).toBe(false);
     // Marcar por otra persona conociendo su PIN.
     const cargo = (await e.admin.cargo.findFirstOrThrow({ where: { tenantId: C.tenant } })).id;
-    const otra = (await e.admin.persona.create({ data: { tenantId: C.tenant, nombres: "Otra", apellidos: "Persona", rut: "9.999.999-3", estado: "activa" } })).id;
+    const otra = (await e.admin.persona.create({ data: { tenantId: C.tenant, nombres: "Otra", apellidos: "Persona", rut: "9.999.999-3", estado: "activo" } })).id;
     await e.admin.vinculoLaboral.create({ data: { tenantId: C.tenant, personaId: otra, cargoId: cargo, instalacionId: C.inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
     await e.admin.credencialTerreno.create({ data: { tenantId: C.tenant, personaId: otra, rut: "9999999-3", pinHash: await hashPin(PIN), debeCambiar: false } });
     const otraPersona = await run(usuarioCtx(C, "trabajador"), "asistencia.marcas.registrar", { personaId: otra, instalacionId: C.inst, metodo: "rut_pin", credencial: PIN, claveDispositivo: randomUUID() });

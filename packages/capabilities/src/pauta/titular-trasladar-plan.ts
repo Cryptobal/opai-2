@@ -22,7 +22,7 @@ const sync = (tx: TenantTx, c: Contexto, r: { puestoId: string; instalacionId: s
 
 /** Valida el traslado y arma la vista previa; con `tx` (ya con los locks tomados) además lo escribe. */
 export async function planificarTraslado(ctx: Contexto, i: Entrada, tx: TenantTx | null): Promise<Salida> {
-  const persona = await ctx.db.persona.findFirst({ where: { id: i.personaId, AND: [dondePersona(ctx)], estado: "activa", archivadaEn: null }, select: { id: true } });
+  const persona = await ctx.db.persona.findFirst({ where: { id: i.personaId, AND: [dondePersona(ctx)], estado: "activo", archivadaEn: null }, select: { id: true } });
   if (!persona) throw noEncontrado("La persona");
   const v0 = await ctx.db.vinculoLaboral.findFirst({ where: { personaId: i.personaId, estado: "vigente" } });
   if (!v0?.instalacionId) throw reglaDeNegocio("La persona no tiene un vínculo vigente con una instalación.");

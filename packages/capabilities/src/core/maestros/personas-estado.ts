@@ -9,6 +9,7 @@ import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
 import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
+import { archivarPersonaEnTx, exigirArchivoPersona } from "./personas-estado-implicito";
 
 const motivo = z.string().trim().min(5).max(500).describe("Motivo (queda en la auditoría).");
 
@@ -81,10 +82,27 @@ export const personasArchive = defineCapability({
     if ((await vinculosVigentes(ctx, [input.id])).has(input.id)) {
       throw reglaDeNegocio("La persona tiene un vínculo vigente: termínalo antes de archivarla.");
     }
-    return cambiar(ctx, input.id, dryRun, "core.persona.archivada", {
-      archivadaEn: new Date(),
-      estado: "inactiva",
-    });
+    const actual = await personaDe(ctx, input.id);
+    exigirNoAnonimizado(actual, "La persona");
+    const desde = actual.estado ?? "activo";
+    exigirArchivoPersona(desde);
+    const archivadaEn = new Date();
+    const vinculo = (await vinculosVigentes(ctx, [input.id])).get(input.id) ?? null;
+    if (dryRun) {
+      return vistaPersona({ ...actual, archivadaEn, estado: "inactivo" }, vinculo);
+    }
+    const p = await escribirConEvento(
+      ctx,
+      { tipo: "core.persona.archivada", entidadTipo: "persona", payload: () => ({ archivadaEn }) },
+      async (tx) => {
+        await bloquearNoAnonimizado(tx, "persona", input.id);
+        await archivarPersonaEnTx(tx, input.id, desde, archivadaEn);
+        const fila = await tx.persona.findFirst({ where: { id: input.id } });
+        if (!fila) throw reglaDeNegocio("No se encontró la persona.");
+        return fila;
+      },
+    );
+    return vistaPersona(p, vinculo);
   },
 });
 

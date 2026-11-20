@@ -13,7 +13,7 @@ export const SIN_FICHA = {
   descripcion: "Pídele a Recursos Humanos que vincule tu usuario a tu ficha de persona.",
 } as const;
 
-export const MODULO_INACTIVO = {
+const MODULO_INACTIVO = {
   titulo: "Portal no disponible en tu empresa",
   descripcion:
     "Tu empresa aún no tiene contratado el Portal Trabajador. Si crees que deberías tener acceso, habla con Recursos Humanos.",

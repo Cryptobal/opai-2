@@ -8,13 +8,15 @@ import { ChipVariable, InputBusqueda } from "@opai/ds";
 /** Panel «Variables» (diseño 06): buscar y tocar una variable para insertarla en el cursor. */
 export function PanelVariables({
   clase,
+  camposCuenta,
   onInsertar,
 }: {
   clase: ClasePlantilla;
+  camposCuenta: { clave: string; etiqueta: string }[];
   onInsertar: (clave: string) => void;
 }) {
   const [busqueda, setBusqueda] = useState("");
-  const grupos = gruposDeVariables(busqueda, clase);
+  const grupos = gruposDeVariables(busqueda, clase, camposCuenta);
   return (
     <div className="flex w-full min-w-0 flex-col gap-3">
       <span className="t-label">Variables</span>

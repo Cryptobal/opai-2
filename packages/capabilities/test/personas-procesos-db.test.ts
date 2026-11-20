@@ -33,7 +33,7 @@ describe.skipIf(omitirSuiteDb())("Personas · listas de ingreso y salida (db)", 
     });
   };
   const persona = async (tenantId: string, rut: string) =>
-    (await e.admin.persona.create({ data: { tenantId, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activa" } })).id;
+    (await e.admin.persona.create({ data: { tenantId, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activo" } })).id;
   const vinculo = (tenantId: string, personaId: string, d: Record<string, unknown> = {}) =>
     e.admin.vinculoLaboral.create({
       data: { tenantId, personaId, cargoId: cargo, tipo: "indefinido", inicio: new Date("2026-11-01"), estado: "vigente", ...d },

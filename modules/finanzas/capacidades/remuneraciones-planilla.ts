@@ -1,11 +1,11 @@
-import { executeCapability, hoyChile, type Contexto } from "@opai/capabilities";
+import { executeCapability, type Contexto } from "@opai/capabilities";
 import { finSemanaIso, formatearFecha } from "@opai/domain";
 
 import type { CeldaFlujo } from "../domain";
 import { agruparRemuneraciones, type ConceptoFlujo, type ItemRemuneracion } from "../domain/remuneraciones";
 import type { celdaSchema } from "./esquemas";
 import { FILA_ANTICIPO, FILA_PREVIRED, FILA_SUELDOS } from "./filas-virtuales";
-import { idEstable } from "./util";
+import { hoyIso, idEstable } from "./util";
 import type { z } from "zod";
 
 type Vista = z.infer<typeof celdaSchema>;
@@ -50,7 +50,7 @@ export async function celdasRemuneraciones(
   ctx: Contexto,
   semanas: readonly string[],
 ): Promise<{ dominio: CeldaFlujo[]; vista: Vista[] }> {
-  const hoy = hoyChile();
+  const hoy = hoyIso();
   const ultima = semanas.at(-1);
   if (!ultima || finSemanaIso(ultima) < hoy) return { dominio: [], vista: [] };
   const leido = await leerCosto(ctx, hoy, finSemanaIso(ultima));

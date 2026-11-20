@@ -45,7 +45,7 @@ const estructura = (id: string, personaId: string, sueldoBase: number | null) =>
 const semilla = (conIndicadores = true) => ({
   ...semillaTenant(),
   ...(conIndicadores ? indicadores() : { indicadorLegal: [], valorPublicado: [] }),
-  persona: [P1, P2, P3].map((id, i) => ({ id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activa" })),
+  persona: [P1, P2, P3].map((id, i) => ({ id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activo" })),
   vinculoLaboral: [
     vinculo("0192f3a0-0000-7000-8000-00000000e311", P1),
     vinculo("0192f3a0-0000-7000-8000-00000000e312", P2),

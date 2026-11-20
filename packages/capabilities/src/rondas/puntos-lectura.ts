@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+import { cursorDe, limiteLista, listaSchema, pagina } from "../core/maestros/comun";
 import { PERMISO_READ, dondeInstalacionId, instalacionEnAlcance } from "./comun";
 import { puntoSchema, vistaPunto } from "./vistas";
 
@@ -14,8 +15,10 @@ export const puntosListar = defineCapability({
   input: z.object({
     instalacionId: uuidSchema,
     incluirArchivados: z.boolean().default(false),
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
   }),
-  output: z.array(puntoSchema),
+  output: z.object({ items: z.array(puntoSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -27,8 +30,10 @@ export const puntosListar = defineCapability({
         AND: [{ instalacionId: input.instalacionId }, dondeInstalacionId(ctx)],
         ...(input.incluirArchivados ? {} : { estado: "activo" }),
       },
-      orderBy: { nombre: "asc" },
+      orderBy: [{ nombre: "asc" }, { id: "asc" }],
+      ...cursorDe(input.cursor, input.limite),
     });
-    return puntos.map(vistaPunto);
+    const { items, siguiente } = pagina(puntos, input.limite, input.cursor);
+    return { items: items.map(vistaPunto), siguiente };
   },
 });

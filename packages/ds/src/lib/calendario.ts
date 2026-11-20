@@ -20,7 +20,7 @@ const DIAS_NOMBRE = ["lunes", "martes", "miércoles", "jueves", "viernes", "sáb
 export type Dia = { iso: string; dia: number; delMes: boolean };
 
 const dos = (n: number) => String(n).padStart(2, "0");
-export const aIso = (a: number, m: number, d: number) => `${a}-${dos(m + 1)}-${dos(d)}`;
+const aIso = (a: number, m: number, d: number) => `${a}-${dos(m + 1)}-${dos(d)}`;
 
 /** Hoy en la zona del dispositivo, como ISO. */
 export function hoyIso(ahora: Date = new Date()): string {

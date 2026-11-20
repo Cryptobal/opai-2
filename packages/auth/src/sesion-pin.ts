@@ -1,7 +1,8 @@
 import type { BetterAuthPlugin } from "better-auth";
 import { APIError, createAuthEndpoint } from "better-auth/api";
-import { setSessionCookie } from "better-auth/cookies";
 import { z } from "zod";
+
+import { responderSesionAbierta } from "./sesion-cookie";
 
 type CamposPropios = { twoFactorEnabled?: boolean | null; platformRole?: string | null };
 
@@ -25,9 +26,7 @@ export const sesionPin = {
         if (!usuario || usuario.twoFactorEnabled || usuario.platformRole) {
           throw new APIError("FORBIDDEN", { message: "Credenciales inválidas." });
         }
-        const sesion = await ctx.context.internalAdapter.createSession(usuario.id);
-        await setSessionCookie(ctx, { session: sesion, user: usuario });
-        return ctx.json({ ok: true });
+        return responderSesionAbierta(ctx, usuario);
       },
     ),
   },
