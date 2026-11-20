@@ -1,3 +1,4 @@
+import { esUuid } from "@/lib/ids";
 import { estadoPantalla } from "@/lib/formato";
 import type { Parametros } from "@/lib/parametros";
 
@@ -27,4 +28,22 @@ export function queryConCambios(p: Parametros, cambios: Record<string, string | 
   for (const [k, v] of Object.entries({ ...p, ...cambios })) if (v) q.set(k, v);
   const s = q.toString();
   return s ? `?${s}` : "?";
+}
+
+export const TAMANOS_PAGINA = [20, POR_PAGINA, 100] as const;
+export type TamanoPagina = (typeof TAMANOS_PAGINA)[number];
+export function tamanoPagina(
+  p: Parametros,
+  predeterminado: TamanoPagina = POR_PAGINA,
+): TamanoPagina {
+  return TAMANOS_PAGINA.find((n) => String(n) === p["limite"]) ?? predeterminado;
+}
+
+/** Entrada paginada de una capacidad de lista CAR-585. */
+export function entradaPaginaLista(p: Parametros) {
+  const cursor = p["cursor"];
+  return {
+    limite: tamanoPagina(p, 20),
+    ...(cursor && esUuid(cursor) ? { cursor } : {}),
+  };
 }

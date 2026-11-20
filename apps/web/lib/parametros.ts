@@ -26,6 +26,8 @@ const FILTROS_DE_LISTA = [
   "con",
   "etiqueta",
   "cursor",
+  "prev",
+  "limite",
   "persona",
   "instalacion",
   "centro",
