@@ -4,6 +4,7 @@ import { COMUNICABLES_CONTINGENCIA } from "./asistencia-contingencia";
 import { COMUNICABLES_DESCANSO } from "./asistencia-descanso";
 import { COMUNICABLES_GEOCERCA } from "./asistencia-geocerca";
 import { COMUNICABLES_LIMITES } from "./asistencia-limites";
+import { COMUNICABLES_NOMINA } from "./nomina";
 import { COMUNICABLES_CUMPLIMIENTO } from "./cumplimiento";
 import { COMUNICABLES_COMERCIAL } from "./comercial";
 import { COMUNICABLES_CPQ } from "./cpq";
@@ -44,6 +45,7 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_DESEMPENO,
   ...COMUNICABLES_TICKETS,
   ...COMUNICABLES_RENDICIONES,
+  ...COMUNICABLES_NOMINA,
 ];
 
 /** Datos de ejemplo anidados a partir de las rutas declaradas ("documento.tipo" → { documento: { tipo } }). */
