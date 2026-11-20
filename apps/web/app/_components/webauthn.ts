@@ -12,7 +12,11 @@ const lib = () => import("@simplewebauthn/browser");
 
 /** El navegador soporta passkeys (WebAuthn). */
 function soportaPasskeys(): boolean {
-  return typeof window !== "undefined" && typeof window.PublicKeyCredential === "function";
+  try {
+    return typeof window !== "undefined" && typeof window.PublicKeyCredential === "function";
+  } catch {
+    return false;
+  }
 }
 
 const sinSuscripcion = () => () => undefined;
@@ -25,7 +29,12 @@ export function useSoportaPasskeys(): boolean {
 /** Autocompletado de passkeys en el campo de correo (mediación condicional), si el navegador lo trae. */
 export async function soportaAutocompletado(): Promise<boolean> {
   if (!soportaPasskeys()) return false;
-  return (await lib()).browserSupportsWebAuthnAutofill();
+  try {
+    return await (await lib()).browserSupportsWebAuthnAutofill();
+  } catch {
+    // La mediación condicional es opcional: deja disponibles el botón y la contraseña.
+    return false;
+  }
 }
 
 export async function crearPasskey(opciones: OpcionesRegistro) {

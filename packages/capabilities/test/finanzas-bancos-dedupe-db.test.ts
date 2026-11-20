@@ -117,4 +117,31 @@ describe.skipIf(omitirSuiteDb())("Finanzas · cartola y sincronización sin dupl
     expect(quedan.every((m) => m.origen === "cartola")).toBe(true);
     expect(quedan).toHaveLength(2);
   });
+
+  // CAR-412: el borrado por fechas queda como descarte y se restaura tal cual, sin duplicar lo que ya volvió.
+  it("el descarte se lista, se restaura con vista previa y no se restaura dos veces", async () => {
+    const { items } = await dato<{ items: { id: string; movimientos: number; restauradoEn: string | null }[] }>(
+      "finanzas.descartes_bancarios.list",
+      { cuentaId },
+    );
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ movimientos: 2, restauradoEn: null });
+    const id = items[0]?.id ?? "";
+    expect(await dato("finanzas.descartes_bancarios.restaurar", { descarteId: id }, true)).toMatchObject({ restaurados: 2, yaPresentes: 0, restaurado: false });
+    expect(await movimientos()).toHaveLength(2);
+    expect(await dato("finanzas.descartes_bancarios.restaurar", { descarteId: id })).toMatchObject({ restaurados: 2, restaurado: true });
+    const vuelta = await movimientos();
+    expect(vuelta).toHaveLength(4);
+    expect(vuelta.filter((m) => m.origen === "web4leads").map((m) => m.idExterno).every(Boolean)).toBe(true);
+    const r = await mod.executeCapability(ctx(), "finanzas.descartes_bancarios.restaurar", { descarteId: id }, { dryRun: false });
+    expect(r.ok).toBe(false);
+  });
+
+  it("lo que volvió por la cartola con otra huella no se duplica al restaurar", async () => {
+    const r = await dato<{ descarteId: string }>("finanzas.movimientos_bancarios.borrar_rango", { cuentaId, desde: "2026-11-01", hasta: "2026-11-30", origen: "web4leads", motivo: "Prueba sintética" });
+    expect((await importar(noviembre)).aplicados).toBeGreaterThan(0);
+    const antes = (await movimientos()).length;
+    expect(await dato("finanzas.descartes_bancarios.restaurar", { descarteId: r.descarteId })).toMatchObject({ restaurados: 0, restaurado: true });
+    expect(await movimientos()).toHaveLength(antes);
+  });
 });

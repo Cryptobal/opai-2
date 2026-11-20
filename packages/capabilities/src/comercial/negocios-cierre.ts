@@ -42,7 +42,7 @@ export const negociosPerder = defineCapability({
       competidor: input.competidor ?? null,
     };
     if (dryRun)
-      return vistaNegocio({ ...negocio, etapaId: perdida.id, estado: "perdido", ...datos });
+      return vistaNegocio({ ...negocio, etapaId: perdida.id, estado: "perdido", probabilidad: perdida.probabilidad, ...datos });
     const r = await ctx.transaccion((tx) =>
       aplicarEtapa(ctx, tx, negocio, perdida, {
         evento: "comercial.negocio.perdido",
@@ -105,7 +105,7 @@ export const negociosReabrir = defineCapability({
       reabiertoEn: new Date(),
     };
     if (dryRun)
-      return vistaNegocio({ ...negocio, etapaId: primera.id, estado: "abierto", ...datos });
+      return vistaNegocio({ ...negocio, etapaId: primera.id, estado: "abierto", probabilidad: primera.probabilidad, ...datos });
     const r = await ctx.transaccion((tx) =>
       aplicarEtapa(ctx, tx, negocio, primera, {
         evento: "comercial.negocio.etapa_cambiada",

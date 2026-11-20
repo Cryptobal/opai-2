@@ -79,7 +79,7 @@ describe("core.personas.* y core.vinculos.*", () => {
       }),
     ).toMatchObject({ estado: "terminado" });
     expect(await dato(ctx, "core.personas.get", { id })).toMatchObject({
-      estado: "inactiva",
+      estado: "inactivo",
       vinculoVigente: null,
     });
     expect(await dato(ctx, "core.personas.archive", { id })).toMatchObject({

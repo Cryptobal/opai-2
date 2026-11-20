@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { Alerta, Button } from "@opai/ds";
 
 import { encolarHecho } from "@/lib/terreno/cola";
+import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
 
 import type { PlantillaRonda } from "./tipos";
 
@@ -39,6 +40,7 @@ export function RondaActiva({
 }) {
   const [error, setError] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
+  const soloLectura = useSoloLectura();
   // El foco sigue a la pregunta («Volver a la ronda») y regresa a «Cerrar ronda» al volver.
   // (El botón del DS no recibe ref: se enfoca el primer botón del bloque de cierre.)
   const cierreRef = useRef<HTMLDivElement>(null);
@@ -110,7 +112,7 @@ export function RondaActiva({
             </div>
           </Alerta>
         ) : (
-          <Button variant="secondary" onClick={pedirCierre}>
+          <Button variant="secondary" onClick={pedirCierre} disabled={soloLectura}>
             Cerrar ronda
           </Button>
         )}

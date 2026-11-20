@@ -25,7 +25,11 @@ export function useEditorPlantilla(inicial: PlantillaEditor) {
   const [pendiente, iniciar] = useTransition();
 
   const archivada = !p.activa;
-  const desconocidas = variablesFueraDeClase(texto, inicial.clase);
+  const desconocidas = variablesFueraDeClase(
+    texto,
+    p.clase,
+    new Set(p.camposCuenta.map((c) => c.clave)),
+  );
   const firmaCambiada = nivel !== p.nivelFirma || firmantes !== p.firmantes;
   const hayCambios = !archivada && (texto !== guardado || firmaCambiada);
   const puedePublicar =
@@ -72,7 +76,7 @@ export function useEditorPlantilla(inicial: PlantillaEditor) {
       );
       if (!r.ok) return void avisar.error(r.error.message);
       const nueva = r.data as PlantillaEditor;
-      setP((x) => ({ ...x, borrador: nueva.borrador }));
+      setP((x) => ({ ...x, borrador: nueva.borrador, camposCuenta: nueva.camposCuenta }));
       setGuardado(texto);
       avisar.exito(
         nueva.borrador ? "Guardaste el borrador." : "Sin cambios frente a la versión vigente.",

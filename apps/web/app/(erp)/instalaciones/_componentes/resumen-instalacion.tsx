@@ -1,5 +1,8 @@
+import { Suspense } from "react";
+
 import { Badge, ParesGrid, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
 
+import { CamposFicha } from "@/app/_components/campos/campos-ficha";
 import { COBERTURA_PUESTO, estadoDe } from "@/app/_components/maestros/estados";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
@@ -9,7 +12,7 @@ import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
 import { SupervisoresInstalacion } from "./supervisores-instalacion";
 
-/** Resumen de una instalación (07): ubicación y vigencia con mapa, puestos activos y supervisores. */
+/** Resumen de una instalación (07): ubicación y vigencia con mapa, puestos activos, supervisores y campos de la empresa. */
 export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
   const activos = i.puestos.filter((p) => p.estado === "activo");
   const mapa = (
@@ -98,6 +101,9 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
         )}
       </SeccionTarjeta>
       <SupervisoresInstalacion instalacionId={i.id} />
+      <Suspense fallback={null}>
+        <CamposFicha tipo="instalacion" id={i.id} />
+      </Suspense>
     </div>
   );
 }

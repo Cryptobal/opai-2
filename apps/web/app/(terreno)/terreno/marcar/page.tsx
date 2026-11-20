@@ -9,7 +9,7 @@ import { dispositivoActual } from "@/lib/dispositivo";
 import { loginDe } from "@/lib/login-destino";
 import { identidadActual } from "@/lib/servidor";
 
-import { MarcarEquipo } from "../_componentes/marcar-equipo";
+import { CargadorMarcar } from "./cargador";
 
 export const metadata = { title: tituloPagina("terreno", "Marcar") };
 
@@ -23,12 +23,17 @@ async function Contenido() {
     if (await identidadActual()) redirect("/trabajador/marcar");
     redirect(loginDe("/terreno/marcar"));
   }
-  return <MarcarEquipo />;
+  return <CargadorMarcar />;
 }
 
 export default function Pagina() {
   return (
-    <PaginaPortal portal="terreno" titulo="Marcar" ruta="/terreno/marcar" volver={{ href: "/terreno", etiqueta: "Inicio" }}>
+    <PaginaPortal
+      portal="terreno"
+      titulo="Marcar"
+      ruta="/terreno/marcar"
+      volver={{ href: "/terreno", etiqueta: "Inicio" }}
+    >
       <Suspense fallback={<Loading variante="detalle" />}>
         <Contenido />
       </Suspense>

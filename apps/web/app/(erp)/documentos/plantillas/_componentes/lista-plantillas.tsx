@@ -1,4 +1,4 @@
-import { ETIQUETA_CLASE_PLANTILLA, type ClasePlantilla } from "@opai/domain";
+import { ambitoDeClase, ETIQUETA_CLASE_PLANTILLA, type ClasePlantilla } from "@opai/domain";
 import { Badge, type Columna, ListScreen, type EstadoPantalla } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
@@ -37,9 +37,14 @@ const columnas: Columna<FilaPlantilla>[] = [
     id: "nombre",
     etiqueta: "Nombre",
     render: (p) => (
-      <span className="flex min-w-0 flex-col">
+      <span className="flex min-w-0 flex-col gap-0.5">
         <span className="truncate font-medium">{p.nombre}</span>
         <span className="t-caption">{ORIGEN[p.origen]}</span>
+        {ambitoDeClase(p.clase) === "persona" ? (
+          <LinkNext href={`/documentos/plantillas/${p.id}/envio-masivo`} className="t-caption underline">
+            Envío masivo
+          </LinkNext>
+        ) : null}
       </span>
     ),
   },

@@ -1,5 +1,5 @@
-# Ramas Neon de respaldo y previews archivadas de más de 7 días (CAR-629). Nunca toca main, dev ni
-# preview/pr-N de PR abiertos. Idempotente; workflow_dispatch con solo_listar solo imprime.
+# Ramas Neon de respaldo y previews archivadas de más de N días (CAR-629). Solo **lista** candidatas
+# a limpieza manual; nunca borra. No toca main, dev ni preview/pr-N de PR abiertos.
 name: Neon · limpieza de respaldos
 
 on:
@@ -8,12 +8,8 @@ on:
     - cron: "0 9 * * *"
   workflow_dispatch:
     inputs:
-      solo_listar:
-        description: Solo listar ramas que se borrarían (sin borrar)
-        type: boolean
-        default: true
       dias:
-        description: Antigüedad mínima en días
+        description: Antigüedad mínima en días para listar
         type: number
         default: 7
 
@@ -22,8 +18,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  limpiar:
-    name: neon · limpieza respaldos
+  listar:
+    name: neon · candidatas limpieza
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 30
     env:
@@ -41,12 +37,11 @@ jobs:
           echo "ok=true" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         if: steps.listo.outputs.ok == 'true'
-      - name: Limpieza de ramas antiguas
+      - name: Listar ramas antiguas (sin borrar)
         if: steps.listo.outputs.ok == 'true'
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
           GH_TOKEN: ${{ github.token }}
-          SOLO_LISTAR: ${{ github.event_name == 'workflow_dispatch' && inputs.solo_listar || 'false' }}
           DIAS: ${{ inputs.dias || 7 }}
         run: .github/scripts/neon-limpieza-respaldos.sh

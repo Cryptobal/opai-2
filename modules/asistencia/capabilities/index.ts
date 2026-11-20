@@ -18,9 +18,13 @@ import { trabajoSuprimirBiometria } from "./biometria-trabajo";
 import { rostroConsentir, rostroEnrolar, rostroEstado, rostroIniciarVida, rostroRevocar, rostroTextos } from "./rostro";
 import { telefonoHabilitar } from "./telefono";
 import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incidentes";
-import { marcasObtener, marcasListar } from "./lecturas";
+import { marcasListar } from "./marcas-listar";
+import { marcasObtener } from "./lecturas";
 import { marcasRegistrar } from "./registrar";
 import { marcasVerificar } from "./verificar";
+import { certificacionChecklist } from "./certificacion";
+import { reportesExportar } from "./reportes/exportar";
+import { reportesCatalogo, reportesVista } from "./reportes/vista";
 
 export { ajustesAsistencia } from "./ajustes";
 export { indicadoresAsistencia } from "./indicadores";
@@ -36,4 +40,5 @@ export const capacidades = [
   incidentesRegistrar, incidentesCerrar, incidentesListar,
   rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, rostroTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
+  reportesCatalogo, reportesVista, reportesExportar, certificacionChecklist,
 ];
