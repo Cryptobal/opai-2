@@ -145,7 +145,6 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas.",
   // Infraestructura: sin datos de negocio.
   "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
-  "app/.well-known/apple-app-site-association/route.ts": "Asociación estática de iOS, sin sesión.",
   "app/.well-known/oauth-protected-resource/route.ts":
     "Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio.",
   "app/.well-known/oauth-protected-resource/api/mcp/route.ts":
