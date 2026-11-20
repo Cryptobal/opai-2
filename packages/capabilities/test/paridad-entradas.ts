@@ -101,8 +101,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9).",
   "app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace":
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
-  "app/_acciones/app-nativa.ts#accionVolverALaApp":
-    "Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio.",
+  "app/(auth)/app/volver/route.ts":
+    "Identidad: ingreso con Google desde la app nativa (CAR-516, CAR-727); emite el código atado al reto PKCE y redirige 303 al esquema de la app. Abre una sesión, no es una operación de negocio.",
   "app/_acciones/app-nativa.ts#accionCanjearApp":
     "Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado.",
   "app/(auth)/app/google/route.ts":
