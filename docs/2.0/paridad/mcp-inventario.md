@@ -630,6 +630,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.datos` | `nomina_midt_datos` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.exportar_pendientes` | `nomina_midt_exportar_pendientes` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.registrar` | `nomina_midt_registrar` | existe |
