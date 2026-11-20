@@ -7,7 +7,7 @@ import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { entidadEnAlcance } from "../maestros/alcance";
 import { hoy } from "../maestros/comun";
-import { documentosEnAlcance } from "./alcance-doc";
+import { filtroAlcanceDocumentos } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import { CAPA_DE } from "./entidad";
 import { dondeVigencia } from "./explorar-filtros";
@@ -20,7 +20,7 @@ export const documentosList = defineCapability({
   auditarLectura: (s) => s.items.map((d) => d.id),
   id: "core.documentos.list",
   descripcion:
-    "Documentos vigentes (última versión) de una entidad —empresa, cuenta, instalación, persona o puesto— o de todo el tenant, con estado de vigencia; por entidad incluye los tipos obligatorios que faltan.",
+    "Documentos vigentes (última versión) de una entidad —empresa, cuenta, instalación, persona, puesto, ticket o visita de supervisión— o de todo el tenant, con estado de vigencia; por entidad incluye los tipos obligatorios que faltan.",
   permiso: PERMISOS_CORE.documentosRead,
   portales: ["erp", "supervisor"],
   input: z.object({
@@ -40,7 +40,7 @@ export const documentosList = defineCapability({
   async handler(ctx, input) {
     if (input.entidad && !(await entidadEnAlcance(ctx, input.entidad.tipo, input.entidad.id)))
       return { items: [], siguiente: null, faltantes: [] };
-    let ids: readonly string[] | null;
+    let ids: string[] | null = null;
     if (input.entidad) {
       const vinculados = (
         await ctx.db.documentoVinculo.findMany({
@@ -48,16 +48,14 @@ export const documentosList = defineCapability({
           select: { documentoId: true },
         })
       ).map((v) => v.documentoId);
-      const permitidos = await documentosEnAlcance(ctx);
-      const enAlcance = permitidos && new Set(permitidos);
-      ids = enAlcance ? vinculados.filter((id) => enAlcance.has(id)) : vinculados;
-    } else {
-      ids = await documentosEnAlcance(ctx);
+      ids = vinculados;
     }
+    const permitidos = await filtroAlcanceDocumentos(ctx);
     const estados = input.incluirArchivados ? ["disponible", "archivado"] : ["disponible"];
     const hoyIso = hoy();
     const filtros: Prisma.DocumentoWhereInput[] = [
       filtroDocumentoSensible(ctx),
+      permitidos,
       { estado: { in: estados } },
       ...(ids ? [{ id: { in: [...ids] } }] : []),
       ...(input.tipoId ? [{ tipoId: input.tipoId }] : []),

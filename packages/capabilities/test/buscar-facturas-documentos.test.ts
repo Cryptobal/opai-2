@@ -72,7 +72,7 @@ describe("buscador facturas y documentos (CAR-526)", () => {
       {
         id: F,
         titulo: "Factura electrónica 9001",
-        detalle: "Zafiro SpA · $1.190.000",
+        detalle: "Zafiro SpA · $\u00a01.190.000",
         href: `/finanzas/ventas/${F}`,
       },
     ]);

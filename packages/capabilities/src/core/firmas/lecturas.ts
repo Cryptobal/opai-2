@@ -6,7 +6,7 @@ import type { Prisma } from "@opai/db";
 
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
-import { documentosEnAlcance } from "../documentos/alcance-doc";
+import { filtroAlcanceDocumentos } from "../documentos/alcance-doc";
 import { inputPaginaDocumentos } from "../documentos/paginacion";
 import { filtroDocumentoSensible } from "../documentos/sensibles";
 import { uuidSchema } from "../esquemas";
@@ -20,14 +20,14 @@ import { solicitudVistaSchema, vistaSolicitud } from "./vistas";
  * Una solicitud de firma no se revela si su documento no es visible para el actor.
  */
 async function idsDocumentosVisiblesEnTenant(
-  ctx: Parameters<typeof documentosEnAlcance>[0],
+  ctx: Parameters<typeof filtroAlcanceDocumentos>[0],
 ): Promise<string[]> {
-  const permitidos = await documentosEnAlcance(ctx);
+  const permitidos = await filtroAlcanceDocumentos(ctx);
   const docs = await ctx.db.documento.findMany({
     where: {
       AND: [
         filtroDocumentoSensible(ctx),
-        ...(permitidos ? [{ id: { in: [...permitidos] } }] : []),
+        permitidos,
       ],
     },
     select: { id: true },
@@ -36,7 +36,7 @@ async function idsDocumentosVisiblesEnTenant(
 }
 
 async function documentosVisibles(
-  ctx: Parameters<typeof documentosEnAlcance>[0],
+  ctx: Parameters<typeof filtroAlcanceDocumentos>[0],
   ids: readonly string[],
 ): Promise<Set<string>> {
   if (!ids.length) return new Set();

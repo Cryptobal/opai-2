@@ -1,9 +1,8 @@
 import { type Buscador, type Contexto } from "@opai/capabilities";
-import { NOMBRE_TIPO_DTE_VENTA, type TipoDteVenta } from "@opai/domain";
+import { formatearClp, NOMBRE_TIPO_DTE_VENTA, type TipoDteVenta } from "@opai/domain";
 
 const MAX = 5;
 const PERMISO_READ = "finanzas:read";
-const clp = (n: number) => `$${new Intl.NumberFormat("es-CL").format(n)}`;
 const contiene = (q: string) => ({ contains: q, mode: "insensitive" as const });
 
 /** «102» o «folio 102»: el folio buscado, o null si el texto no es un número. */
@@ -63,7 +62,7 @@ export const buscadoresFinanzas: readonly Buscador[] = [
         return {
           id: f.id,
           titulo: f.folio ? `${tipo} ${f.folio}` : `${tipo} · borrador`,
-          detalle: `${cuentas.get(f.cuentaId) ?? "Cliente"} · ${clp(f.montoTotal)}`,
+          detalle: `${cuentas.get(f.cuentaId) ?? "Cliente"} · ${formatearClp(f.montoTotal)}`,
           href: `/finanzas/ventas/${f.id}`,
         };
       });

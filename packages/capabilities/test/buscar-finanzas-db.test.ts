@@ -49,13 +49,16 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Finanzas (CAR-402)", 
     const cuenta = async (tenantId: string, nombre: string) => (await e.admin.cuenta.create({ data: { tenantId, nombre, estado: "cliente_activo" } })).id;
     const ca = await cuenta(t.a, "Cliente Zafiro Ficticio");
     const cb = await cuenta(t.b, "Cliente Zafiro Beta");
-    const doc = async (k: string, tenantId: string, cuentaId: string, tipoDte: number, folio: number | null) => {
-      d[k] = (await e.admin.documentoEmitido.create({ data: { tenantId, cuentaId, tipoDte, folio, estadoDte: folio ? "aceptado" : "borrador" } })).id;
+    const doc = async (k: string, tenantId: string, cuentaId: string, tipoDte: number, folio: number | null, montoTotal = 0) => {
+      const montoNeto = Math.round(montoTotal / 1.19);
+      d[k] = (await e.admin.documentoEmitido.create({
+        data: { tenantId, cuentaId, tipoDte, folio, montoNeto, montoIva: montoTotal - montoNeto, montoTotal, estadoDte: folio ? "aceptado" : "borrador" },
+      })).id;
     };
-    await doc("factura", t.a, ca, 33, 9402);
+    await doc("factura", t.a, ca, 33, 9402, 1_234_567);
     await doc("nc", t.a, ca, 61, 9403);
     await doc("borrador", t.a, ca, 33, null);
-    await doc("beta", t.b, cb, 33, 9402);
+    await doc("beta", t.b, cb, 33, 9402, 1_234_567);
     d["prov"] = (await e.admin.proveedor.create({ data: { tenantId: t.a, rut: "76999402-1", razonSocial: "Proveedora Ficticia Zafiro", giro: "Aseo" } })).id;
     d["provB"] = (await e.admin.proveedor.create({ data: { tenantId: t.b, rut: "76999402-1", razonSocial: "Proveedora Ficticia Zafiro" } })).id;
   });
@@ -63,9 +66,16 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Finanzas (CAR-402)", 
 
   it("encuentra la factura por folio, solo de su empresa", async () => {
     expect(await buscar(ctx(t.a, LECTOR), "9402", "facturas")).toEqual([
-      { id: d["factura"], titulo: "Factura electrónica 9402", detalle: "Cliente Zafiro Ficticio · $0", href: `/finanzas/ventas/${d["factura"]}` },
+      { id: d["factura"], titulo: "Factura electrónica 9402", detalle: "Cliente Zafiro Ficticio · $\u00a01.234.567", href: `/finanzas/ventas/${d["factura"]}` },
     ]);
     expect((await buscar(ctx(t.b, LECTOR), "9402", "facturas"))?.map((x) => x.id)).toEqual([d["beta"]]);
+  });
+
+  it("encuentra por monto en formato chileno y respeta el alcance de empresa", async () => {
+    const items = await buscar(ctx(t.a, LECTOR), "$ 1.234.567", "facturas");
+    expect(items?.map(({ id, detalle }) => ({ id, detalle }))).toEqual([
+      { id: d["factura"], detalle: "Cliente Zafiro Ficticio · $\u00a01.234.567" },
+    ]);
   });
 
   it("por nombre del cliente trae facturas, notas y borradores de esa empresa", async () => {
