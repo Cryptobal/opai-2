@@ -131,3 +131,51 @@ model AnulacionAcceso {
   @@map("anulaciones_registro")
   @@schema("acceso")
 }
+
+/// Prerregistro de una visita de uno o varios días (CAR-478, R13–R15). Se cancela, nunca se borra.
+model Prerregistro {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  instalacionId String    @map("instalacion_id") @db.Uuid
+  desde         DateTime  @db.Date
+  hasta         DateTime  @db.Date
+  desdeMin      Int?      @map("desde_min")
+  hastaMin      Int?      @map("hasta_min")
+  anfitrion     String
+  motivo        String?
+  nota          String?
+  avisarLlegada Boolean   @default(false) @map("avisar_llegada")
+  creadoPor     String?   @map("creado_por") @db.Uuid
+  canceladoEn   DateTime? @map("cancelado_en") @db.Timestamptz(6)
+  canceladoPor  String?   @map("cancelado_por") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  visitantes PrerregistroVisitante[]
+
+  @@index([tenantId, instalacionId, hasta, desde], map: "prerregistros_dias_idx")
+  @@map("prerregistros")
+  @@schema("acceso")
+}
+
+/// Visitante de un prerregistro: del documento solo huella y máscara. Solo inserción.
+model PrerregistroVisitante {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  prerregistroId String   @map("prerregistro_id") @db.Uuid
+  nombre         String
+  docTipo        String   @map("doc_tipo")
+  huella         String
+  huellaKid      String   @map("huella_kid")
+  mascara        String
+  empresa        String?
+  patente        String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  prerregistro Prerregistro @relation(fields: [prerregistroId], references: [id], onDelete: Restrict, map: "prerregistro_visitantes_prerregistro_fkey")
+
+  @@index([prerregistroId], map: "prerregistro_visitantes_prerregistro_idx")
+  @@index([tenantId, docTipo, huella], map: "prerregistro_visitantes_huella_idx")
+  @@map("prerregistro_visitantes")
+  @@schema("acceso")
+}

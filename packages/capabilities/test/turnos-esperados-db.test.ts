@@ -61,7 +61,7 @@ describe.skipIf(!urlPropietario)("Turnos esperados · núcleo (Postgres real)", 
       return { i, cargo };
     };
     const personaDe = async (tenantId: string, cargoId: string, instalacionId: string, nombres: string, rut: string, distribucion?: string, puestoId?: string) => {
-      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activa" } })).id;
+      const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activo" } })).id;
       await e.admin.vinculoLaboral.create({
         data: { tenantId, personaId: id, cargoId, instalacionId, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: distribucion ?? "5x2", ...(puestoId ? { puestoId } : {}) },
       });

@@ -80,6 +80,27 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
               (v["entidadTipo"] === "persona" && ids(4).includes(v["entidadId"]))),
         )
         .map((v) => ({ documentoId: v["documentoId"] }));
+    if (texto.includes("/* nucleo-h:propietarios-visita */"))
+      return tabla("documentoVinculo")
+        .filter((v) => v["rol"] === "propietario" && v["entidadTipo"] === "visita")
+        .filter((v) => {
+          const vis = tabla("visitaSupervision").find((x) => x["id"] === v["entidadId"]);
+          return vis && ids(1).includes(vis["instalacionId"]);
+        })
+        .map((v) => ({ documentoId: v["documentoId"] }));
+    if (texto.includes("/* nucleo-h:propietarios-ticket-todos */"))
+      return tabla("documentoVinculo")
+        .filter((v) => v["rol"] === "propietario" && v["entidadTipo"] === "ticket")
+        .map((v) => ({ documentoId: v["documentoId"] }));
+    if (texto.includes("/* nucleo-h:propietarios-ticket */"))
+      return tabla("documentoVinculo")
+        .filter((v) => v["rol"] === "propietario" && v["entidadTipo"] === "ticket")
+        .filter((v) => {
+          const t = tabla("ticket").find((x) => x["id"] === v["entidadId"]);
+          const uid = valores[1];
+          return t && (t["solicitanteId"] === uid || t["responsableId"] === uid);
+        })
+        .map((v) => ({ documentoId: v["documentoId"] }));
     throw new Error("Consulta SQL no implementada en la base de pruebas en memoria.");
   };
 }

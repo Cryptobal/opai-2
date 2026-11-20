@@ -2,6 +2,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
 
 import { FormularioCambiarPin } from "../_componentes/formulario-cambiar-pin";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 export const metadata = { title: tituloPagina("trabajador", "Cambiar PIN") };
 
@@ -20,7 +21,9 @@ export default async function Pagina({
       volver={{ href: "/trabajador/mas", etiqueta: "Más" }}
       volverSoloTelefono
     >
-      <FormularioCambiarPin primerIngreso={primero === "1"} />
+      <DesactivarEnVista>
+        <FormularioCambiarPin primerIngreso={primero === "1"} />
+      </DesactivarEnVista>
     </PaginaPortal>
   );
 }

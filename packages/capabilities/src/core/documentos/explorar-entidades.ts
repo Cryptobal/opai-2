@@ -31,7 +31,7 @@ export async function propietariosDe(
     buscar: (ids: string[]) => Promise<Nombrada[]>,
   ) => (ctx.autorizar(permiso) && ids(tipo).length ? buscar(ids(tipo)) : []);
   const select = { id: true, nombre: true } as const;
-  const [cuentas, instalaciones, puestos, personas] = await Promise.all([
+  const [cuentas, instalaciones, puestos, personas, tickets, visitas] = await Promise.all([
     leer(PERMISOS_CORE.cuentasRead, "cuenta", (id) =>
       ctx.db.cuenta.findMany({ where: { id: { in: id } }, select }),
     ),
@@ -49,9 +49,39 @@ export async function propietariosDe(
         })
       ).map((p) => ({ id: p.id, nombre: `${p.nombres} ${p.apellidos}` })),
     ),
+    ctx.autorizar("tickets:tickets.ver")
+      ? ctx.db.ticket
+          .findMany({
+            where: { id: { in: ids("ticket") } },
+            select: { id: true, titulo: true },
+          })
+          .then((f) => f.map((t) => ({ id: t.id, nombre: t.titulo })))
+      : Promise.resolve([]),
+    ctx.autorizar("pauta:read")
+      ? ctx.db.visitaSupervision
+          .findMany({
+            where: { id: { in: ids("visita") } },
+            select: { id: true, instalacionId: true, iniciadaEn: true },
+          })
+          .then(async (filas) => {
+            if (!filas.length) return [];
+            const inst = await ctx.db.instalacion.findMany({
+              where: { id: { in: [...new Set(filas.map((f) => f.instalacionId))] } },
+              select: { id: true, nombre: true },
+            });
+            const porInst = new Map(inst.map((i) => [i.id, i.nombre]));
+            return filas.map((v) => ({
+              id: v.id,
+              nombre: `${porInst.get(v.instalacionId) ?? "Instalación"} · ${v.iniciadaEn.toISOString().slice(0, 10)}`,
+            }));
+          })
+      : Promise.resolve([]),
   ]);
   const nombres = new Map(
-    [...cuentas, ...instalaciones, ...puestos, ...personas].map((e) => [e.id, e.nombre]),
+    [...cuentas, ...instalaciones, ...puestos, ...personas, ...tickets, ...visitas].map((e) => [
+      e.id,
+      e.nombre,
+    ]),
   );
   for (const v of vinculos)
     porDocumento.set(v.documentoId, {

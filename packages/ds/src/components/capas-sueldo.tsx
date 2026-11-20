@@ -2,7 +2,7 @@ import { cn } from "../cn";
 import { Badge } from "./badge";
 
 export type CapaSueldoVista = "persona" | "puesto" | "instalacion";
-export const ETIQUETA_CAPA = {
+const ETIQUETA_CAPA = {
   persona: "Sueldo por RUT",
   puesto: "Puesto",
   instalacion: "Instalación",

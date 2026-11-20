@@ -9,11 +9,11 @@ import { agruparPorBeneficiario, codigoSbif, COLUMNAS_NOMINA, HOJA_NOMINA, filas
 
 type ItemLote = { personaId: string; cuentaVersion: Date; montoClp: number };
 
-/** R3 está autorizado solo en la empresa de pruebas: sin el ajuste encendido no se genera ni se descarga nada. */
+/** Sin el ajuste encendido no se genera ni descarga el Excel (el lote igual puede pagarse a mano). */
 export async function exigirFormatoConfirmado(ctx: Contexto): Promise<void> {
   if (!(await ajuste<boolean>(ctx, "rendiciones", "nomina_formato_confirmado")))
     throw reglaDeNegocio(
-      "La nómina Santander en formato de archivo no está activa en esta empresa. El lote se puede aprobar y marcar como pagado sin archivo.",
+      "La generación del archivo de nómina Santander no está activa. Enciéndelo en Configuración › Rendiciones o marca el lote como pagado sin archivo.",
     );
 }
 

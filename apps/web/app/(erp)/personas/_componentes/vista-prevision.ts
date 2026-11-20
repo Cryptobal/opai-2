@@ -17,7 +17,7 @@ import {
 
 import type { Prevision } from "./lecturas-ficha";
 
-export type Par = { etiqueta: string; valor: string | null };
+type Par = { etiqueta: string; valor: string | null };
 export type Grupo = { titulo: string; pares: Par[] };
 
 const siNo = (b: boolean) => (b ? "Sí" : "No");

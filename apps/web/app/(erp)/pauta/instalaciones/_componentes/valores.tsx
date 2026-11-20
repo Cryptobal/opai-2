@@ -14,7 +14,7 @@ const UMBRALES = {
   atrasos: { bien: 5, alerta: 10, mayorEsMejor: false },
 } as const;
 
-export function tonoDe(campo: keyof typeof UMBRALES, v: number | null): Tono | null {
+function tonoDe(campo: keyof typeof UMBRALES, v: number | null): Tono | null {
   if (v === null) return null;
   const u = UMBRALES[campo];
   if (u.mayorEsMejor) return v >= u.bien ? "bien" : v < u.alerta ? "alerta" : "aviso";
