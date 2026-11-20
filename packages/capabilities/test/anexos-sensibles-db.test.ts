@@ -2,7 +2,7 @@
 // legítima de la persona, documento sin columnas vacías en un cambio de capa, y el documento del
 // anexo fuera de matriz, vencimientos, versiones, actividad, exportación y avisos para quien no
 // tiene `anexos.read` ni `estructuras.read_sensible`.
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { digitoVerificador } from "@opai/domain";
@@ -59,11 +59,13 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
     await e.admin.membership.create({
       data: { tenantId, userId, rol: "owner", portales: ["erp"] },
     });
+    // El RUT es único en toda la base, también entre suites y corridas.
+    const cuerpoRutEmpresa = String(randomInt(10_000_000, 90_000_000));
     await e.admin.perfilEmpresa.create({
       data: {
         tenantId,
         razonSocial: "Empresa Prueba SpA",
-        rut: "76123456-7",
+        rut: `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`,
         calle: "Av. Providencia 100",
         comuna: "Santiago",
         representanteNombre: "Ana Representante",
@@ -319,12 +321,12 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       );
       const celdas = matriz.filas.flatMap((f) => f.celdas.map((c) => c.documentoId));
       expect(celdas.includes(documentoId)).toBe(ve);
-      const vencimientos = await dato<{ id: string }[]>(
+      const vencimientos = await dato<{ items: { id: string }[] }>(
         ctx(rol),
         "core.documentos.vencimientos",
         {},
       );
-      expect(vencimientos.some((d) => d.id === documentoId)).toBe(ve);
+      expect(vencimientos.items.some((d) => d.id === documentoId)).toBe(ve);
       // CAR-512: la versión nueva (o la copia firmada) de un anexo tampoco se ve sin anexos.read.
       const get = await mod.executeCapability(ctx(rol), "core.documentos.get", { id: nueva.id });
       expect(get.ok).toBe(ve);

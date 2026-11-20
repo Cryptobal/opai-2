@@ -63,3 +63,17 @@ describe("hora, día y mes (CAR-462)", () => {
     expect(nombreMesCivil("2026-12-01")).toBe("diciembre");
   });
 });
+
+describe("fecha y hora precisa de marcas", () => {
+  it("conserva segundos y fecha larga en la zona del tenant", () => {
+    expect(formatearFechaHora("2026-11-03T01:05:09Z", "America/Santiago", { segundos: true, fechaLarga: true }))
+      .toBe("2 de noviembre de 2026 a las 22:05:09");
+    expect(formatearFechaHora("2026-11-03T01:05:09Z", "UTC", { segundos: true, fechaLarga: true }))
+      .toBe("3 de noviembre de 2026 a las 01:05:09");
+  });
+  it("no cambia el formato por defecto y admite segundos en formato corto", () => {
+    expect(formatearFechaHora("2026-11-03T15:05:09Z")).toBe("03-11-2026 12:05");
+    expect(formatearFechaHora("2026-11-03T15:05:09Z", "UTC", { segundos: true })).toBe("03-11-2026 15:05:09");
+    expect(formatearFechaHora(null, "UTC", { segundos: true, fechaLarga: true })).toBe("—");
+  });
+});

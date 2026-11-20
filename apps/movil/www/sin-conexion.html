@@ -44,7 +44,23 @@
     <main>
       <h1>No pudimos abrir OPAI</h1>
       <p>Revisa la conexión a internet del teléfono e inténtalo de nuevo.</p>
-      <button type="button" onclick="history.back()">Reintentar</button>
+      <button type="button" id="reintentar">Reintentar</button>
     </main>
+    <script>
+      /** Sin historial (primer arranque sin red), vuelve a la URL remota de Capacitor; si no, atrás. */
+      function reintentarCarga() {
+        const cap = window.Capacitor;
+        const server =
+          (typeof cap?.getServerUrl === "function" && cap.getServerUrl()) ||
+          cap?.config?.server?.url;
+        if (typeof server === "string" && server) {
+          location.replace(server);
+          return;
+        }
+        if (history.length > 1) history.back();
+        else location.reload();
+      }
+      document.getElementById("reintentar")?.addEventListener("click", reintentarCarga);
+    </script>
   </body>
 </html>

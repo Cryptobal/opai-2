@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Empty } from "@opai/ds";
+import { useSoloLectura } from "@/app/_components/ver-como/solo-lectura";
 
 import type { PlantillaRonda } from "./tipos";
 
@@ -12,6 +13,7 @@ export function ListaPlantillas({
   plantillas: PlantillaRonda[];
   alIniciar: (id: string) => void;
 }) {
+  const soloLectura = useSoloLectura();
   return (
     <section aria-label="Iniciar ronda" className="flex flex-col gap-2">
       <h2 className="t-heading text-fg">Iniciar una ronda</h2>
@@ -31,7 +33,9 @@ export function ListaPlantillas({
                 <span className="text-base text-fg">{p.nombre}</span>
                 <span className="text-sm text-fg-muted">{p.puntos.length} puntos</span>
               </span>
-              <Button onClick={() => alIniciar(p.id)}>Iniciar</Button>
+              <Button onClick={() => alIniciar(p.id)} disabled={soloLectura}>
+                Iniciar
+              </Button>
             </li>
           ))}
         </ul>

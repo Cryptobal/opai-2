@@ -1,7 +1,7 @@
 import type { EstadoObligacion, TipoObligacion } from "./tipos";
 
 /** Obligaciones que se repiten cada mes de remuneraciones. */
-export const OBLIGACIONES_MENSUALES: readonly TipoObligacion[] = ["lre", "previred", "f29_retencion"];
+export const OBLIGACIONES_MENSUALES: readonly TipoObligacion[] = ["lre", "previred", "f30_1", "f29_retencion"];
 
 /** Obligaciones anuales (año tributario siguiente a las remuneraciones). */
 export const OBLIGACIONES_ANUALES: readonly TipoObligacion[] = ["dj_sueldos", "certificado_sueldos"];
@@ -9,6 +9,7 @@ export const OBLIGACIONES_ANUALES: readonly TipoObligacion[] = ["dj_sueldos", "c
 export const ETIQUETA_OBLIGACION: Readonly<Record<TipoObligacion, string>> = {
   lre: "Libro de Remuneraciones Electrónico (LRE)",
   previred: "Previred",
+  f30_1: "Certificado F30-1",
   f29_retencion: "Retención de impuesto único (F29)",
   dj_sueldos: "Declaración Jurada de sueldos",
   certificado_sueldos: "Certificado de sueldos",

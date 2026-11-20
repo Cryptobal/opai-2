@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
+import { limiteLista, listaSchema, paginaMemoria } from "../core/maestros/comun";
 import { dondePuesto } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
@@ -27,12 +28,17 @@ export const titularesListar = defineCapability({
   descripcion:
     "Titulares de un puesto con su desde y hasta, quién los fijó y cuándo, de la serie vigente hacia atrás, más el titular de hoy y los guardias que se pueden elegir (con vínculo vigente en la instalación).",
   permiso: PERMISO_READ,
-  input: z.object({ puestoId: uuidSchema }),
+  input: z.object({
+    puestoId: uuidSchema,
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
+  }),
   output: z.object({
     puestoId: z.string(),
     patronId: z.string().nullable(),
     titularActualId: z.string().nullable(),
     items: z.array(itemSchema),
+    siguiente: z.string().nullable(),
     candidatos: z.array(z.object({ id: z.string(), nombre: z.string() })),
     /** Puestos activos con patrón a los que se puede trasladar al titular (de cualquier instalación en alcance). */
     destinos: z.array(z.object({ id: z.string(), etiqueta: z.string() })),
@@ -42,7 +48,7 @@ export const titularesListar = defineCapability({
   ],
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { puestoId }) {
+  async handler(ctx, { puestoId, cursor, limite }) {
     // También un puesto inactivo: su historial se puede consultar (no se le asigna).
     const puesto = await ctx.db.puesto.findFirst({
       where: { id: puestoId, AND: [dondePuesto(ctx)] },
@@ -100,11 +106,17 @@ export const titularesListar = defineCapability({
       };
     });
     const vigente = items.find((i) => i.desde <= hoyCivil && (i.hasta === null || i.hasta >= hoyCivil));
+    const { items: pagina, siguiente } = paginaMemoria(
+      items.map((i) => ({ ...i, id: i.serieId })),
+      limite,
+      cursor,
+    );
     return {
       puestoId,
       patronId: puesto.patronId,
       titularActualId: vigente?.titularId ?? null,
-      items,
+      items: pagina.map(({ id: _, ...rest }) => rest),
+      siguiente,
       candidatos,
       destinos: destinos.map((d) => ({ id: d.id, etiqueta: `${d.nombre} · ${d.instalacion.nombre}` })),
     };

@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE, variablesFueraDeClase, type ClasePlantilla } from "@opai/domain";
+import { PERMISOS_CORE, type ClasePlantilla } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import { contenidoSchema, editorSchema, vistaEditor } from "./plantillas-comun";
+import { contenidoSchema, desconocidasPlantilla, editorSchema, vistaEditor } from "./plantillas-comun";
+import { camposCuentaPlantilla } from "./plantillas-campos-cuenta";
 
 // CAR-127 · 06 Editor de plantillas. El texto se edita en un borrador (una columna de la plantilla) y
 // al publicarlo pasa a ser la versión siguiente, inmutable. Solo owner y admin, como el resto.
@@ -44,9 +45,10 @@ export const documentoPlantillasGuardarBorrador = defineCapability({
       borradorActualizadoEn: descarta ? null : new Date(),
       borradorPorNombre: descarta ? null : (ctx.usuario?.nombre ?? null),
     };
-    if (dryRun) return vistaEditor({ ...p, ...data }, v);
+    const campos = await camposCuentaPlantilla(ctx);
+    if (dryRun) return vistaEditor({ ...p, ...data }, v, campos);
     const nueva = await ctx.db.documentoPlantilla.update({ where: { id }, data });
-    return vistaEditor(nueva, v);
+    return vistaEditor(nueva, v, campos);
   },
 });
 
@@ -86,7 +88,11 @@ export const documentoPlantillasPublicar = defineCapability({
         `Mientras editabas se publicó la versión ${p.versionVigente}. Recarga la plantilla y vuelve a aplicar tus cambios.`,
       );
     if (!contenido.trim()) throw reglaDeNegocio("La plantilla está en blanco: escribe el texto.");
-    const desconocidas = variablesFueraDeClase(contenido, p.clase as ClasePlantilla);
+    const { desconocidas, camposCuenta } = await desconocidasPlantilla(
+      ctx,
+      contenido,
+      p.clase as ClasePlantilla,
+    );
     if (desconocidas.length > 0)
       throw reglaDeNegocio(`Variables que no existen o no valen para este tipo de plantilla: ${desconocidas.join(", ")}.`, {
         desconocidas,
@@ -101,7 +107,7 @@ export const documentoPlantillasPublicar = defineCapability({
       borradorPorNombre: null,
     };
     if (dryRun)
-      return vistaEditor({ ...p, ...limpio, versionVigente: numero }, { ...autor, contenido });
+      return vistaEditor({ ...p, ...limpio, versionVigente: numero }, { ...autor, contenido }, camposCuenta);
     const choque = () => conflicto("Otra persona publicó esta plantilla al mismo tiempo.");
     return ctx.transaccion(async (tx) => {
       // Dos publicaciones a la vez: la segunda choca con el índice único (plantilla, número).
@@ -125,7 +131,7 @@ export const documentoPlantillasPublicar = defineCapability({
         data: { ...limpio, versionVigente: numero },
       });
       if (r.count !== 1) throw choque();
-      return vistaEditor({ ...p, ...limpio, versionVigente: numero }, nueva);
+      return vistaEditor({ ...p, ...limpio, versionVigente: numero }, nueva, camposCuenta);
     });
   },
 });

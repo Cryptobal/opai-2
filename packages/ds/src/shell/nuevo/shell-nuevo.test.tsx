@@ -70,7 +70,7 @@ describe("área plegada del menú", () => {
     );
     // La caja que mide la fila no tiene relleno; el relleno vive en su hijo.
     expect(plegada).toContain(
-      '<div class="min-h-0 overflow-hidden"><div class="flex flex-col gap-0.5 pt-0.5 pb-1.5">',
+      '<div class="min-h-0 overflow-hidden"><div class="flex flex-col gap-1 pt-1 pb-2">',
     );
   });
 });
