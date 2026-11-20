@@ -1,7 +1,7 @@
 import type { TenantTx } from "@opai/db";
 import { describe, expect, it, vi } from "vitest";
 
-import { leerProveedoresPendientes, paginarProveedoresPendientes } from "./compras-pagos-agregado";
+import { leerProveedoresPendientes, paginarProveedoresPendientes } from "../src/finanzas/compras-pagos-agregado";
 
 const punto = (proveedorId: string, razonSocial: string, saldoPorPagar: number) => ({
   proveedorId, razonSocial, rut: "ficticio", documentosConSaldo: 1, saldoPorPagar, saldoVencido: 0,

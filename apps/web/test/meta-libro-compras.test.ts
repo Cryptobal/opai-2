@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { metaLibroCompras } from "./meta-libro-compras";
+import { metaLibroCompras } from "@/app/(erp)/finanzas/compras/_componentes/meta-libro-compras";
 
 const formato = String;
 describe("alcance de los totales del libro", () => {

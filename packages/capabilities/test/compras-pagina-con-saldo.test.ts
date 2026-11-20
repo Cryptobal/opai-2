@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { calcularPaginaConSaldo, TAMANO_TRAMO_COMPRAS } from "./compras-pagina-con-saldo";
+import { calcularPaginaConSaldo, TAMANO_TRAMO_COMPRAS } from "../src/finanzas/compras-pagina-con-saldo";
 
 const compra = (id: string, montoTotal = 5, tipoDte = 33) => ({ id, montoTotal, tipoDte });
 function fuente(filas: ReturnType<typeof compra>[], pagos: ReadonlyMap<string, number>) {
