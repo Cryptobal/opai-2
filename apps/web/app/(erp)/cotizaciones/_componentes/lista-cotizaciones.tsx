@@ -1,10 +1,11 @@
 import { Plus } from "lucide-react";
 
 import { Badge } from "@opai/ds";
-import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
-import { conBusqueda } from "@/lib/parametros";
+import { queryConCambios, tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import type { Parametros } from "@/lib/parametros";
 import { semaforoEtiqueta } from "@/lib/cpq-presentacion";
 
 import type { DatosCotizaciones } from "./datos";
@@ -14,19 +15,18 @@ import { estadoLista, margenLista, pideRecalcular, ventaLista } from "./lista-co
 export function ListaCotizaciones({
   datos: d,
   seleccionada,
-  q,
+  p,
   base = "/cotizaciones",
 }: {
   datos: DatosCotizaciones;
   seleccionada?: string;
-  q?: string;
+  p: Parametros;
   base?: string;
 }) {
   const nueva = d.crear ? (
     <EnlaceBotonHoja
       href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`}
       icono={Plus}
-      variante={seleccionada ? "secondary" : "primary"}
     >
       Nueva
     </EnlaceBotonHoja>
@@ -45,33 +45,33 @@ export function ListaCotizaciones({
         },
       ]}
       meta={{
-        izquierda: `${d.items.length} ${d.archivadas ? "archivadas" : "cotizaciones"}`,
+        izquierda: `${d.items.length}${d.siguiente ? "+" : ""} ${p["q"]?.trim() ? "resultados" : d.archivadas ? "archivadas" : "cotizaciones"}`,
         derecha: "Más recientes",
       }}
       seleccionada={seleccionada}
       vacio={
-        d.archivadas
-          ? {
-              titulo: "No hay cotizaciones archivadas",
-              descripcion: "Las que archives aparecen aquí y se pueden restaurar.",
-            }
-          : {
-              titulo: "Aún no hay cotizaciones",
-              descripcion: "Crea una cotización ligada a un negocio abierto.",
-              accion: nueva,
-            }
+        p["q"]?.trim()
+          ? { titulo: "Sin resultados", descripcion: "Prueba con otra búsqueda." }
+          : d.archivadas
+            ? {
+                titulo: "No hay cotizaciones archivadas",
+                descripcion: "Las que archives aparecen aquí y se pueden restaurar.",
+              }
+            : {
+                titulo: "Aún no hay cotizaciones",
+                descripcion: "Crea una cotización ligada a un negocio abierto.",
+                accion: nueva,
+              }
       }
       pie={
-        d.siguiente ? (
-          <LinkNext
-            href={conBusqueda(
-              `${base}?cursor=${d.siguiente}${d.archivadas ? "&ver=archivadas" : ""}`,
-              q,
-            )}
-            className="t-label text-accent"
-          >
-            Siguiente página
-          </LinkNext>
+        d.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={p}
+            rutaBase={base}
+            mostrados={d.items.length}
+            siguiente={d.siguiente}
+            porPagina={tamanoPagina(p, 20)}
+          />
         ) : undefined
       }
       filas={d.items.map((c) => {
@@ -79,7 +79,7 @@ export function ListaCotizaciones({
         const margen = margenLista(c, d.costos);
         return {
           id: c.id,
-          href: d.archivadas ? `${base}/${c.id}?ver=archivadas` : conBusqueda(`${base}/${c.id}`, q),
+          href: `${base}/${c.id}${queryConCambios(p, {})}`,
           titulo: (
             <>
               <span className="t-mono text-[13px]">{c.codigo}</span>

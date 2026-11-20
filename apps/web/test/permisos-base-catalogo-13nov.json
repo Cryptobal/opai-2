@@ -69,6 +69,7 @@
 "core:personas.laboral.manage",
 "core:personas.laboral.read",
 "core:personas.manage",
+"core:personas.estado.admin",
 "core:personas.no_recontratar.manage",
 "core:personas.pago.aprobar",
 "core:personas.pago.manage",

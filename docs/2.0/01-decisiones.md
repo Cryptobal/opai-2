@@ -808,6 +808,8 @@ Reglas:
 
 **Adenda 2 (CAR-495, 14-nov-2026, 15:34; decisión de Carlos).** En las tiendas se publica **solo «OPAI»** (`cl.opai.app`); «OPAI Terreno» no se publica. Vuelve a regir la decisión 13 de este ADR: una sola app para todos. La Sesión Apps quita la variante «OPAI Terreno» del código (regla «Código simple», ADR-115; se recupera desde git si hiciera falta) y prepara las fichas en `apps/fichas-tiendas.md`, sin publicar.
 
+**Adenda 3 (CAR-516, 14-nov-2026; Sesión Apps, decisión reversible bajo ADR-114).** Dentro de la app, «Continuar con Google» se hace en el navegador del sistema (Google bloquea las vistas web embebidas) y vuelve con un código de un solo uso de 2 minutos, atado a la app por PKCE S256 (RFC 8252). El canje abre una sesión nueva con `mfa_verified` en falso: el segundo factor no se hereda. La vuelta usa por ahora el esquema `cl.opai.app://canje`; antes de publicar en las tiendas se reemplaza por App Links y universal links verificados por dominio. Detalle en `briefs/BRIEF-17b-google-desde-la-app.md`.
+
 ## ADR-045 · Velocidad de navegación medida y con gate
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; contadores y caché de sesión decididos el 24-oct) · Completa ADR-037 y ADR-029 (punto 14).
@@ -1623,7 +1625,16 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 4. **Brief aprobado** (#365): pasa a Claude Design antes de cualquier código.
 5. **Un solo estado por persona** (Carlos, 15:22 Santiago): Postulante → Rechazado | Externo | Activo; Externo → Activo; Activo → Inactivo; Inactivo → Activo | Externo. Cualquier otra transición se rechaza. Solo «Activo» tiene vínculo laboral.
 
-**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`).
+**Adenda (19-nov-2026) · CAR-674: fases finales del modelo de estados.**
+
+- Valores en `core.personas.estado`: `postulante`, `en_evaluacion`, `rechazado`, `externo`, `activo`, `inactivo`, `bloqueado_permanente` (reemplaza `activa`/`inactiva` en datos).
+- **En evaluación:** Postulante → En evaluación → Activo | Rechazado | Externo.
+- **Bloqueado permanente, no recontratable:** estado distinto de la marca P1 «No recontratar» (con vencimiento); se alcanza desde cualquier estado y no puede volver a Activo; levantarlo exige `core:personas.estado.admin` (solo owner/admin).
+- **Externo** es el estado para turnos extra sin contrato vigente (ADR-083 §5).
+- Quitar la marca P1 pasa al mismo permiso admin (CAR-674).
+- Transiciones en dominio; cada arista es capacidad con `preview_`, MCP y permiso `core:personas.manage` salvo las dos acciones admin.
+
+**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`). La migración y el modelo completo de siete estados entran en CAR-674.
 
 **Adenda (8-nov-2026) · Decisiones de Operaciones II del 29-oct-2026, hasta ahora solo en Linear.** Registradas por «Operaciones · Auditoría» con su texto de Linear; ante choque manda lo más reciente de Carlos.
 
@@ -2276,6 +2287,23 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 **Decisiones de la sesión (reversibles) y por qué.** Herramientas: `knip` (sin uso) y `jscpd` (duplicados), las de uso más extendido para TypeScript en monorepos; las funciones largas se cuentan con el analizador de TypeScript que el repo ya tiene, sin dependencia nueva. El tope de función es 60 líneas, medido y no error de lint, para no bloquear lo ya escrito. El check corre en el flujo rápido de cada PR y no pasa a obligatorio del ruleset: ese cambio es de Carlos (issue «Decide Carlos»).
 
 **Consecuencias.** Un PR que agrega duplicación, un archivo o función largos o algo sin uso falla `simplicidad` hasta que lo corrija o lo justifique. Las instrucciones del proyecto en claude.ai todavía piden «Decisión tuya»; cambiarlas es de Carlos (issue «Decide Carlos»). Mientras tanto manda el repositorio.
+
+## ADR-117 · La propuesta técnica sale de la plantilla HTML en uso de la empresa (CAR-533, 15-nov-2026)
+
+**Fecha:** 15-nov-2026 · **Estado:** vigente · **Decide:** la sesión (decisión técnica reversible, ADR-114) · **Registra:** «Sesión Cursor». **Extiende** ADR-085/086 (importador y saneador de HTML).
+
+**Contexto.** La empresa ya puede importar, revisar y activar una plantilla HTML de propuesta (CAR-532), pero el PDF seguía usando el formato por bloques. Hacía falta que la vista previa y el PDF usaran esa plantilla sin abrir una vía para ejecutar código ni llamar a internet, y que lo enviado no cambiara si después se edita la plantilla.
+
+**Decisión.**
+
+1. **Una plantilla en uso por empresa**, la fila de `cpq_propuesta_html` con `estado = 'activa'`. Si no hay ninguna, la propuesta usa el formato actual por bloques, sin cambios.
+2. **Render sin navegador ni red.** Los campos `{{…}}` se reemplazan con `renderizarPlantillaCampos`, que escapa cada valor. Después el resultado se sanea otra vez con `sanearHtml`. El PDF se dibuja con pdf-lib a partir de bloques simples (títulos, párrafos, viñetas, tablas y reglas) que salen de recorrer el HTML con parse5. El CSS se ignora, salvo el `color` hexadecimal de títulos y párrafos. Tipografía, membrete, logo y pie son los de la marca documental.
+3. **Vista previa:** los valores salen del contexto autorizado de quien mira (`resolverCamposDocumento`). Lo que falta queda vacío.
+4. **Envío:** el snapshot del envío guarda `plantillaHtml: { id, version, hash }`. Los campos del HTML entran al mismo contrato de campos que los textos (`contratoCamposPropuesta`): se exigen completos y se congelan sus valores. Al generar el PDF del envío se carga esa versión por `id` y se comprueba la huella. Las filas son inmutables por trigger. Una versión nueva o un cambio de plantilla en uso no altera lo enviado.
+
+**Alternativas descartadas.** (a) Un navegador sin cabeza (Chromium/Playwright) para convertir el HTML a PDF: pesa cientos de MB en la función, suma tiempo de arranque y es una superficie de red y de ejecución que el saneador ya evita. (b) Una columna nueva en `cpq_propuesta_envio` para la plantilla: el snapshot JSON ya guarda lo congelado del envío (marca, plantilla y bloques), así que no hizo falta migración.
+
+**Consecuencias.** El PDF con plantilla HTML respeta la estructura y el texto del HTML, no su diseño CSS completo. Si se pide más fidelidad visual, el paso siguiente es ampliar los bloques (por ejemplo, fondos de celda), no cambiar de motor. La vista previa HTML de la pantalla de importación (iframe aislado) muestra el diseño completo.
 
 **Adenda de ADR-112 (17-nov-2026; encargo de Carlos a la Sesión Destrabe cola: «que los tests pasen lo más rápido posible»).** La cola de merge estuvo sin un solo verde desde que se activó (27 corridas `merge_group` entre las 01:47 y las 12:10, hora de Chile). Causas medidas: `test:db` solo corría en la cola, así que los PR llegaban verdes y caían ahí (marcador viejo de `opai_cron_sii` en los runners persistentes y el test de contadores de #1036); el gate en serie tardaba de 23 a 35 min contra un tope de 35; la caché de Turborepo nunca se actualizaba (clave fija por lockfile: 3 de 26 paquetes en caché, 15 min de `typecheck`); y los runners Spot cortaban jobs de la cola a media corrida, lo que saca al PR de la cola. Cambios: (1) el gate corre en paralelo (`typecheck` y `test` en 2 partes cada uno, `test:db` en 4) y el job `gate` conserva el nombre del check obligatorio, sin tocar el ruleset; (2) la caché de Turborepo lleva el SHA en la clave y `typecheck` usa un `tsc` por CPU y por cada 4 GB; (3) `test:db` corre en el PR cuando toca `packages/*` (salvo `ds`), `modules/*`, Prisma, migraciones, `package.json`, el lockfile o `ci.yml`; (4) los checks obligatorios usan runners de GitHub (gratis con el repositorio público), no la flota Spot, que corría 4 jobs a la vez con 40 corridas en espera; la variable `RUNNER_GATE` permite volver a runners propios sin tocar el workflow. La flota sigue sirviendo `preview`, `preview-e2e`, presupuesto, e2e y rendimiento. Costo: cada PR ocupa hasta 9 runners por pocos minutos y `test:db` corre en más PR; cambia el punto 2 de «Revisiones largas». Reversible con un revert.
 

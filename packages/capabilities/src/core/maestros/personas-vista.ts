@@ -83,7 +83,7 @@ export function vistaPersona(p: FilaPersona, vinculo: Vinculo = null) {
     direccionFormateada: p.direccionFormateada ?? null,
     lat: coordenada(p.lat),
     lng: coordenada(p.lng),
-    estado: p.estado ?? "activa",
+    estado: p.estado ?? "activo",
     bloqueada: p.bloqueada ?? false,
     bloqueoMotivo: p.bloqueoMotivo ?? null,
     usuarioId: p.usuarioId ?? null,

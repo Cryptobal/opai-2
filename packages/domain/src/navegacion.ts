@@ -31,8 +31,9 @@ export const ETIQUETA_AREA: Readonly<Record<AreaNav, string>> = {
   documentos: "Documentos",
 };
 
-/** D2: máximo de entradas por área antes de que el núcleo falle en desarrollo y en `pnpm test`. */
-export const MAXIMO_ENTRADAS_POR_AREA = 7;
+/** D2: máximo de entradas por área antes de que el núcleo falle en desarrollo y en `pnpm test`.
+ *  Ocho en Operaciones con Acceso, Pauta, Turnos extra, Rondas y asistencia (NAVEGACION.md §2, CAR-621). */
+export const MAXIMO_ENTRADAS_POR_AREA = 8;
 
 /** D3: máximo de fijados por usuario. */
 export const MAXIMO_FIJADOS = 5;

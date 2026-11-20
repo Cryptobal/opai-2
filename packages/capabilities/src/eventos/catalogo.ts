@@ -2,6 +2,7 @@ import { listarModulos, type EventoDeDominio } from "../module";
 import { EVENTOS_COBROS } from "./catalogo-cobros";
 import { EVENTOS_CRM } from "./catalogo-crm";
 import { EVENTOS_GRUPOS, EVENTOS_MEMBRESIA, EVENTOS_REGLAS_APROBACION } from "./catalogo-grupos";
+import { EVENTOS_PERSONA_MAESTROS } from "./catalogo-persona-reclutamiento";
 import { EVENTOS_PROCESOS_PERSONA } from "./catalogo-procesos-persona";
 import { EVENTOS_TERRENO } from "./catalogo-terreno";
 
@@ -31,12 +32,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.funcion.creada", descripcion: "Se creó una función de puesto del catálogo." },
   { id: "core.funcion.actualizada", descripcion: "Cambió una función de puesto (nombre o estado)." },
   ...EVENTOS_GRUPOS, ...EVENTOS_MEMBRESIA, ...EVENTOS_REGLAS_APROBACION, ...EVENTOS_PROCESOS_PERSONA,
-  { id: "core.persona.creada", descripcion: "Se registró una persona (trabajador)." },
-  { id: "core.persona.actualizada", descripcion: "Cambiaron los datos de una persona." },
-  { id: "core.persona.bloqueada", descripcion: "Se bloqueó a una persona, con motivo." },
-  { id: "core.persona.desbloqueada", descripcion: "Se desbloqueó a una persona." },
-  { id: "core.persona.archivada", descripcion: "Se archivó a una persona sin vínculo vigente." },
-  { id: "core.persona.no_recontratar_vencida", descripcion: "Venció una marca P1 «No recontratar» y se limpió." },
+  ...EVENTOS_PERSONA_MAESTROS,
   { id: "core.vinculo.actualizado", descripcion: "Cambió el contrato; snapshot para el borrador de anexo de contrato (solo si cambia la instalación)." },
   { id: "core.vinculo.creado", descripcion: "Comenzó un vínculo laboral." },
   { id: "core.vinculo.terminado", descripcion: "Terminó un vínculo laboral." },
