@@ -27,9 +27,13 @@ async function Contenido({ searchParams }: Props) {
           Abre la app OPAI y vuelve a tocar «Continuar con Google».
         </Alerta>
       ) : (
-        <a href="/app/volver" className={estilosBoton({ size: "lg", block: true })}>
+        <LinkNext
+          href="/app/volver"
+          prefetch={false}
+          className={estilosBoton({ size: "lg", block: true })}
+        >
           Seguir en la app OPAI
-        </a>
+        </LinkNext>
       )}
     </AuthCard>
   );
