@@ -185,7 +185,14 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R3 (db)", () => {
 
   it("un lote de reversa devuelve rendiciones pagadas a aprobadas con aprobación humana", async () => {
     const paga = como(u.paga, "gerente", t.a);
-    const rev = ok(await paga("rendiciones.lotes.crear_reversa", { rendicionIds: [rend["r1"]!] }));
+    const intentos = await Promise.all([
+      paga("rendiciones.lotes.crear_reversa", { rendicionIds: [rend["r1"]!] }),
+      paga("rendiciones.lotes.crear_reversa", { rendicionIds: [rend["r1"]!] }),
+    ]);
+    expect(intentos.filter((r) => r.ok)).toHaveLength(1);
+    const rev = ok(intentos.find((r) => r.ok)!);
+    const candidatas = ok(await paga("rendiciones.lotes.candidatas_reversa", { limite: 1 }));
+    expect(candidatas["rendiciones"]).toMatchObject([{ id: rend["r2"] }]);
     expect(rev).toMatchObject({ estado: "borrador", totalClp: 12_500, cantidad: 1 });
     ok(await como(u.paga2, "gerente", t.a)("rendiciones.lotes.aprobar", { id: String(rev["id"]) }));
     const keyId = (await e.admin.apiKey.create({ data: { tenantId: t.a, userId: u.paga, nombre: "Agente rev", prefijo: `opai_rev_${randomUUID().slice(0, 6)}`, hash: randomUUID(), scopes: ["*"] } })).id;

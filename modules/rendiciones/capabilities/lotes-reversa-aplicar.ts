@@ -40,7 +40,10 @@ export const lotesAplicarReversa = defineCapability({
         data: { estado: "aplicado", aplicadoPorId: yo, aplicadoEn: new Date(), motivoReversa: input.motivo },
       });
       if (n.count !== 1) throw conflicto("El lote cambió de estado mientras tanto.");
-      const libera = await tx.lotePagoItem.updateMany({ where: { rendicionId: { in: ids }, activo: true }, data: { activo: false } });
+      const libera = await tx.lotePagoItem.updateMany({
+        where: { rendicionId: { in: ids }, activo: true, lote: { estado: "pagado", esReversa: false } },
+        data: { activo: false },
+      });
       if (libera.count !== ids.length) throw conflicto("Una rendición ya no está ligada al lote pagado.");
       const p = await tx.rendicion.updateMany({ where: { id: { in: ids }, estado: "pagada" }, data: { estado: "aprobada" } });
       if (p.count !== ids.length) throw conflicto("Una rendición del lote ya no está pagada.");

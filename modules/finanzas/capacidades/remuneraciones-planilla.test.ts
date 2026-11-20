@@ -1,10 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as UtilMod from "./util";
+
 const ejecutar = vi.fn();
 vi.mock("@opai/capabilities", () => ({
   executeCapability: (...a: unknown[]) => ejecutar(...a),
-  hoyChile: () => "2026-11-18",
 }));
+vi.mock("./util", async (importOriginal) => {
+  const original = await importOriginal<typeof UtilMod>();
+  return { ...original, hoyIso: () => "2026-11-18" };
+});
 
 import { celdasRemuneraciones } from "./remuneraciones-planilla";
 import { FILA_ANTICIPO, FILA_PREVIRED, FILA_SUELDOS } from "./filas-virtuales";

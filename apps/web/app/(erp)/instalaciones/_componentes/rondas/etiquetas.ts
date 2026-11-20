@@ -7,6 +7,8 @@ export const MODO_PUNTO: Record<ModoPunto, string> = {
   qr_gps: "QR + GPS",
 };
 
+export const puntoConGps = (m: ModoPunto) => m === "gps" || m === "qr_gps";
+
 export const ORDEN_PLANTILLA: Record<OrdenPlantilla, string> = {
   sugerido: "Sugerido",
   estricto: "Estricto",

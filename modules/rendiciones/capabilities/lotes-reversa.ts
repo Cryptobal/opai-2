@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability } from "@opai/capabilities";
+import { conflicto, defineCapability } from "@opai/capabilities";
 
 import { validarSeleccionReversa } from "../domain";
 import { resumenSchema, uuidSchema } from "./esquemas";
@@ -29,19 +29,17 @@ export const lotesCandidatasReversa = defineCapability({
     const filas = await ctx.db.rendicion.findMany({
       where: {
         estado: "pagada",
-        lotes: { some: { activo: true, lote: { estado: "pagado", esReversa: false } } },
+        lotes: {
+          some: { activo: true, lote: { estado: "pagado", esReversa: false } },
+          none: { activo: false, lote: { esReversa: true, estado: { in: ["borrador", "aprobado"] } } },
+        },
       },
       orderBy: { codigo: "asc" },
       take: input.limite,
     });
-    const abiertas = await ctx.db.lotePagoItem.findMany({
-      where: { activo: false, lote: { esReversa: true, estado: { in: ["borrador", "aprobado"] } } },
-      select: { rendicionId: true },
-    });
-    const enReversa = new Set(abiertas.map((x) => x.rendicionId));
     const nombres = await nombresDe(ctx, filas.map((f) => f.solicitanteId));
     return {
-      rendiciones: filas.filter((f) => !enReversa.has(f.id)).map((f) => ({
+      rendiciones: filas.map((f) => ({
         ...resumenDe(f, nombres),
         solicitanteNombre: nombres.get(f.solicitanteId) ?? null,
       })),
@@ -49,7 +47,7 @@ export const lotesCandidatasReversa = defineCapability({
   },
 });
 
-async function datosParaReversa(ctx: Contexto, ids: string[]) {
+async function datosParaReversa(ctx: Pick<Contexto, "db">, ids: string[]) {
   const rends = await ctx.db.rendicion.findMany({
     where: { id: { in: ids } },
     select: {
@@ -100,6 +98,15 @@ export const lotesCrearReversa = defineCapability({
     const total = exigirArmadoLote(problemas, yo, datos, "Nadie arma un lote de reversa con una rendición propia.");
     const cuentas = dryRun ? new Map() : await cuentasDeSolicitantes(ctx, datos.map((r) => r.solicitanteId));
     return crearLoteBorrador(ctx, dryRun, total, datos.length, "Una de las rendiciones ya está en otro lote de reversa abierto.", async (tx, codigo) => {
+      // El contador de lotes ya bloquea por tenant en esta transacción.
+      // Releer bajo ese bloqueo evita dos borradores de reversa sobre la misma rendición.
+      const vigentes = await datosParaReversa({ db: tx }, input.rendicionIds);
+      const vigentesPorId = new Map(vigentes.map((r) => [r.id, r]));
+      if (vigentes.length !== datos.length || datos.some((r) => {
+        const v = vigentesPorId.get(r.id);
+        return !v || v.estado !== "pagada" || v.enReversaAbierta || v.lotePagadoId !== r.lotePagadoId ||
+          v.montoTotal !== r.montoTotal || v.solicitanteId !== r.solicitanteId;
+      })) throw conflicto("La rendición o su lote pagado cambió antes de crear la reversa.");
       const l = await tx.lotePago.create({
         data: {
           tenantId: ctx.tenantId,

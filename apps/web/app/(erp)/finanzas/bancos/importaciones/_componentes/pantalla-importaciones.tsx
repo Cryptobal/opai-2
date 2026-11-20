@@ -13,8 +13,8 @@ import type { CuentaBanco } from "../../_componentes/bancos-tipos";
 import { origenSaldo } from "../../_componentes/origen-saldo";
 import { BorrarSincronizacion } from "./borrar-sincronizacion";
 import { DialogDeshacerImportacion } from "./dialog-deshacer-importacion";
-import type { ImportacionCartola, VistaDeshacer } from "./tipos";
-
+import { ListaDescartes } from "./lista-descartes";
+import type { DescarteMovimientos, ImportacionCartola, VistaDeshacer } from "./tipos";
 
 const periodoDe = (i: ImportacionCartola) =>
   i.fechaDesde && i.fechaHasta ? `${fechaDdMmAaaa(i.fechaDesde)} al ${fechaDdMmAaaa(i.fechaHasta)}` : "Sin período";
@@ -25,12 +25,18 @@ export function PantallaImportaciones({
   cuentas,
   cuentaId,
   importaciones,
+  descartes,
+  descartesSiguienteHref,
+  descartesInicioHref,
   gestiona,
 }: {
   state: EstadoPantalla;
   cuentas: CuentaBanco[];
   cuentaId: string | null;
   importaciones: ImportacionCartola[];
+  descartes: DescarteMovimientos[];
+  descartesSiguienteHref: string | null;
+  descartesInicioHref: string | null;
   gestiona: boolean;
 }) {
   const router = useRouter();
@@ -124,6 +130,7 @@ export function PantallaImportaciones({
           </ul>
         )}
         {gestiona && cuentaId ? <BorrarSincronizacion cuentaId={cuentaId} /> : null}
+        <ListaDescartes descartes={descartes} gestiona={gestiona} siguienteHref={descartesSiguienteHref} inicioHref={descartesInicioHref} />
       </div>
       <DialogDeshacerImportacion
         vista={vista}

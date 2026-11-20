@@ -7,22 +7,16 @@ import type { Resultado } from "@opai/capabilities";
 import { avisar, Button } from "@opai/ds";
 
 import { pesos } from "../formato";
+import { useSeleccionIds } from "../seleccion-ids";
 import { RUTA_LOTES } from "./tipos";
 
 type FilaLote = { id: string; montoTotal: number };
 
 export function useSeleccionArmarLote() {
   const router = useRouter();
-  const [sel, setSel] = useState<ReadonlySet<string>>(new Set());
+  const { sel, alternar } = useSeleccionIds();
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const alternar = (id: string, v: boolean) =>
-    setSel((p) => {
-      const n = new Set(p);
-      if (v) n.add(id);
-      else n.delete(id);
-      return n;
-    });
   return { router, sel, ocupado, setOcupado, error, setError, alternar };
 }
 
