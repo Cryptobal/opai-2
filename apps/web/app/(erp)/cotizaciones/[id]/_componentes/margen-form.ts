@@ -16,10 +16,10 @@ export type ParametrosVersion = {
 };
 
 /** 1 % = 10.000 en la escala de porcentajes de CPQ (100.000 = 10 %). */
-export const PCT_UNO = 10_000;
+const PCT_UNO = 10_000;
 export const PASO_MARGEN = 5_000;
 export const MARGEN_MAXIMO = 999_999;
-export const MARGEN_DEFECTO = 120_000;
+const MARGEN_DEFECTO = 120_000;
 
 export const MODOS_MARGEN = [
   { id: "margen_sobre_venta", etiqueta: "Venta" },

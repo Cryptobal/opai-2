@@ -32,7 +32,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
     const m = usuario
       ? (await e.admin.membership.findFirst({ where: { tenantId: tenant, userId: uid } }))!
       : await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol, portales: ["trabajador"] } });
-    const p = await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activa", usuarioId: uid } });
+    const p = await e.admin.persona.create({ data: { tenantId: tenant, nombres: "Ana", apellidos: "Ficticia", rut, estado: "activo", usuarioId: uid } });
     const vs = [];
     for (let i = 0; i < vinculos; i++)
       vs.push(await e.admin.vinculoLaboral.create({
@@ -62,7 +62,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
     expect(r.data?.["accesos"]).toEqual({ personaInactiva: true, membresiasSuspendidas: 1, ownerConservado: false, sinSuspender: 0 });
     expect(r.data?.["corteProgramado"]).toBeNull();
     expect((await e.admin.membership.findUnique({ where: { id: x.membresia } }))?.estado).toBe("activa");
-    expect((await e.admin.persona.findUnique({ where: { id: x.persona } }))?.estado).toBe("activa");
+    expect((await e.admin.persona.findUnique({ where: { id: x.persona } }))?.estado).toBe("activo");
   });
 
   it("terminar el último vínculo deja a la persona inactiva y suspende su usuario en el mismo acto", async () => {
@@ -70,7 +70,7 @@ describe.skipIf(omitirSuiteDb())("Personas · corte de acceso al terminar el ví
     const r = await terminar(x.vinculo);
     expect(r.ok, JSON.stringify(r)).toBe(true);
     expect((await e.admin.membership.findUnique({ where: { id: x.membresia } }))?.estado).toBe("suspendida");
-    expect((await e.admin.persona.findUnique({ where: { id: x.persona } }))?.estado).toBe("inactiva");
+    expect((await e.admin.persona.findUnique({ where: { id: x.persona } }))?.estado).toBe("inactivo");
     const ev = await e.admin.evento.findFirst({ where: { tenantId: tenant, tipo: "core.vinculo.terminado", entidadId: x.vinculo } });
     expect((ev?.payload as { accesos?: { membresiasSuspendidas?: number } } | null)?.accesos?.membresiasSuspendidas).toBe(1);
   });

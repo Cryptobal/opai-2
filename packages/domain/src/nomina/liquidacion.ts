@@ -46,8 +46,6 @@ export type Liquidacion = {
   /** Aportes del empleador (no salen del líquido): los informa el LRE (41xx). */
   aportesEmpleador: LineaLiquidacion[];
   diasLicencia: number;
-  /** Datos que pide la nómina de Previred: institución y bases con tope del mes. */
-  prevision: { afp: AdministradoraAFP; salud: "fonasa" | "isapre"; basePrevisional: number; baseCesantia: number };
   totalHaberes: number;
   imponible: number;
   totalDescuentosLegales: number;
@@ -92,7 +90,6 @@ export function liquidacionDelMes(e: EntradaLiquidacion, juego: JuegoDeValores):
   return {
     diasTrabajados: dias, haberes, descuentosLegales, otrosDescuentos, aportesEmpleador,
     diasLicencia: Math.min(n.diasLicencia, DIAS_MES_LIQUIDACION),
-    prevision: { afp: e.afp, salud: e.salud.tipo, basePrevisional: r.desglose.basePrevisionalClp, baseCesantia: r.desglose.baseCesantiaClp },
     totalHaberes: h.total, imponible: h.imponible,
     totalDescuentosLegales: sumar(descuentosLegales), totalOtrosDescuentos: totalOtros,
     liquido, costoEmpresa: r.costoEmpresaMensualClp,

@@ -61,16 +61,9 @@
 - `nomina.liquidaciones.marcar_revisadas` (diseño 03 «Marcar revisadas»): pasa de calculada a revisada todas las liquidaciones del período, con el período abierto o en revisión y bloqueado en la transacción. Exige la vista completa (sin alcance y con sueldos sensibles), como leerlas. Con dryRun cuenta cuántas pasarían. Emite `nomina.liquidaciones.revisadas` (declarado en el manifest). Recalcular el período las devuelve a calculada (ya lo hacía `guardarLiquidaciones`).
 - `nomina.liquidaciones.listar` suma `total.revisadas`. La pantalla muestra «Revisadas N de M», el estado por fila y el estado en la liquidación de cada persona. Sin migración: la columna `estado` ya existía.
 - **Decisión:** marcar es por período completo, como el botón único del diseño 03; no hay selección por fila (ni en el diseño ni en el caso de uso de hoy). Cerrar el período no exige que estén todas revisadas: el diseño 02 lo muestra como dato («N de M revisadas»), no como bloqueo.
-- **Pendiente:** mostrar «N de M revisadas» en el paso de cierre (diseño 02).
+- **Pendiente:** mostrar «N de M revisadas» en el paso de cierre (diseño 02); publicar al Portal Trabajador y PDF.
 - **Autorrevisión (subagente, sin bloqueos), a pendientes:**
   - Revisar contra lo visto: si alguien recalcula entre que otro mira la pantalla y aprieta el botón, quedan revisados montos que nadie vio. Solución simple: que el input traiga la `calculadaEn` máxima vista y rechazar con cambio concurrente si hay filas más nuevas.
   - `idempotencyKey` desde la pantalla (el efecto ya es idempotente: la segunda llamada devuelve 0).
   - Permiso propio para revisar (`nomina:liquidaciones.revisar`) si se quiere separar quien calcula de quien revisa.
   - Prueba de concurrencia marcar/recalcular contra Postgres real (usa el mismo bloqueo ya probado).
-
-## Publicar liquidación al portal (PR apilado sobre #983, rama `cursor/portal-liquidacion-ab10`)
-
-- Migración `20261116210000_nomina_liquidacion_portal`: `documento_id` y `publicada_en` en `nomina.liquidaciones` (FK y trigger mismo tenant con `core.documentos`). Recalcular anula publicación.
-- `nomina.liquidaciones.publicar` (dryRun, `nomina:periodos.manage`): solo liquidación **revisada**; PDF en R2 + documento con `visibleEn: ['trabajador']`; evento `nomina.liquidacion.publicada`; comunicable transaccional (correo personal + in-app). Consumidor `nomina.liquidacion.publicada`.
-- Pantalla liquidación de persona: botón **Publicar al trabajador** (diseño 04) con vista previa y leyenda de correo personal. Lecturas exponen `publicadaEn` y correo para la leyenda.
-- **Pendiente:** Cumplimiento DT (siguiente bloque CAR-99).

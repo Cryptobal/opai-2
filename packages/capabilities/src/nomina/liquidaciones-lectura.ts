@@ -68,7 +68,12 @@ export const liquidacionesListar = defineCapability({
   output: z.object({
     items: z.array(resumenSchema),
     siguiente: z.string().nullable(),
-    total: z.object({ personas: z.number().int(), revisadas: z.number().int(), liquido: z.number().int(), costoEmpresa: z.number().int() }),
+    total: z.object({
+      personas: z.number().int(),
+      revisadas: z.number().int(),
+      liquido: z.number().int(),
+      costoEmpresa: z.number().int(),
+    }),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -82,7 +87,10 @@ export const liquidacionesListar = defineCapability({
       take: limite + 1,
     });
     const pagina = filas.slice(0, limite);
-    const todas = await ctx.db.nominaLiquidacion.findMany({ where: { periodoId }, select: { estado: true, liquido: true, costoEmpresa: true } });
+    const todas = await ctx.db.nominaLiquidacion.findMany({
+      where: { periodoId },
+      select: { liquido: true, costoEmpresa: true, estado: true },
+    });
     const nombres = await nombresDe(ctx.db, pagina.map((f) => f.personaId));
     return {
       items: pagina.map((f) => resumen(f, nombres.get(f.personaId) ?? "")),

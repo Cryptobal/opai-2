@@ -126,7 +126,7 @@ async function guardarLiquidaciones(tx: TenantTx, tenantId: string, periodoId: s
       costoEmpresa: l.costoEmpresa, capaId: l.capaId, juegoHuella: l.huellaJuego, calculadaEn: new Date(),
       documentoId: null, publicadaEn: null,
       detalle: { haberes: l.haberes, descuentosLegales: l.descuentosLegales, otrosDescuentos: l.otrosDescuentos,
-        aportesEmpleador: l.aportesEmpleador, diasLicencia: l.diasLicencia, prevision: l.prevision },
+        aportesEmpleador: l.aportesEmpleador, diasLicencia: l.diasLicencia },
       advertencias: l.advertencias,
     };
     const previa = await tx.nominaLiquidacion.findFirst({ where: { periodoId, personaId }, select: { id: true } });
