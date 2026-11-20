@@ -13,6 +13,7 @@ modulo: core # o comercial, finanzas, cpq, documentos, pauta, tickets, plataform
 titulo: Título corto para el usuario
 destacada: false # true solo si merece un aviso al entrar (con moderación)
 car: CAR-123 # opcional, referencia Linear
+pr: 911 # obligatorio en novedades nuevas: número del PR en opai-cl/opai-2 que integró el cambio
 permiso: finanzas:cobranza.read # opcional; si falta, cualquier usuario del módulo la ve
 ruta: /finanzas/cobranza # opcional; botón «Ver en OPAI»
 imagen: /changelog/ejemplo.png # opcional; archivo en apps/web/public/changelog/
@@ -34,6 +35,12 @@ En la app, cada ítem aparece como **tarjeta en la página Novedades** (fecha, m
 2. Al desplegar, las entradas aparecen solas; el estado «leído» es por usuario en base de datos.
 3. El gate de tests valida ids únicos y frontmatter mínimo. Dentro del mismo día las `destacada: true` salen arriba (la fecha no tiene hora).
 4. El CI (`.github/scripts/ci-novedad-visual.sh`) avisa, sin bloquear, si el PR toca pantallas o el DS y no agrega ni cambia un `.md` aquí. Si el cambio es solo interno, se ignora el aviso.
+
+## Imagen en «Ver más» (CAR-520)
+
+1. En la prueba `@preview` del cambio, después de armar la pantalla llama `capturarNovedad(page, info, id, escena)` (`apps/web/e2e/preview.ts`). El `id` debe coincidir con el frontmatter; el archivo queda como `novedad-{id}--{escena}-{proyecto}.png` en el artefacto `preview-e2e`.
+2. Tras `preview-e2e` en verde, corre `pnpm --filter @opai/domain novedad:imagen` (opcional `--capturas=ruta/al/artefacto`). Copia la captura de **escritorio** a `apps/web/public/changelog/{id}.png` y agrega `imagen:` al `.md` si falta.
+3. Vuelve a correr `gen:novedades-embed` si el script no lo hizo ya. Solo capturas con la empresa ficticia `qa-e2e`.
 
 El texto debe **describir el cambio visual**: qué botones, hojas o menús aparecen o cambian y dónde.
 

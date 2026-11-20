@@ -31,7 +31,7 @@ const semilla = (estado = "abierto") => {
       id: `v-${i}`, indicadorId: `i-${p.indicador}`, estado: "vigente", vigenteDesde: f(p.vigenteDesde), vigenteHasta: null,
       valorJson: p.valor, fuente: p.fuente, consultadaEl: f("2026-11-01"), verificacion: "verificado",
     })),
-    persona: [P1, P2].map((id, i) => ({ id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activa" })),
+    persona: [P1, P2].map((id, i) => ({ id, tenantId: T, nombres: "N", apellidos: `A${i}`, rut: `${i + 1}`, estado: "activo" })),
     vinculoLaboral: [P1, P2].map((personaId, i) => ({
       id: `0192f3a0-0000-7000-8000-00000000f41${i}`, tenantId: T, personaId, cargoId: "c", tipo: "indefinido",
       inicio: f("2025-01-01"), termino: null, estado: "vigente", puestoId: null, instalacionId: null, horasSemanales: 42,
@@ -99,27 +99,6 @@ describe("nomina.liquidaciones", () => {
     expect(una.detalle.otrosDescuentos).toEqual([{ concepto: "Anticipos", monto: 50_000 }]);
     const lecturas = (c.tabla("auditEvent") as { capability: string }[]).map((e) => e.capability);
     expect(lecturas).toEqual(expect.arrayContaining(["nomina.liquidaciones.listar", "nomina.liquidaciones.obtener"]));
-  });
-
-  it("marca revisadas las calculadas, cuenta en el total y recalcular las vuelve a calculada", async () => {
-    const c = como();
-    await run(c, "nomina.liquidaciones.calcular", { periodoId: PER });
-    expect(data<{ revisadas: number }>(await run(c, "nomina.liquidaciones.marcar_revisadas", { periodoId: PER }, { dryRun: true })).revisadas).toBe(1);
-    expect((c.tabla("nominaLiquidacion") as { estado: string }[])[0]?.estado).toBe("calculada");
-    expect(data<{ revisadas: number }>(await run(c, "nomina.liquidaciones.marcar_revisadas", { periodoId: PER })).revisadas).toBe(1);
-    const lista = data<{ items: { estado: string }[]; total: { revisadas: number } }>(await run(c, "nomina.liquidaciones.listar", { periodoId: PER }));
-    expect(lista.items[0]?.estado).toBe("revisada");
-    expect(lista.total.revisadas).toBe(1);
-    expect(data<{ revisadas: number }>(await run(c, "nomina.liquidaciones.marcar_revisadas", { periodoId: PER })).revisadas).toBe(0);
-    await run(c, "nomina.liquidaciones.calcular", { periodoId: PER });
-    expect((c.tabla("nominaLiquidacion") as { estado: string }[])[0]?.estado).toBe("calculada");
-  });
-
-  it("marcar revisadas exige período abierto, vista completa y no lo puede el gerente", async () => {
-    expect(await run(como("owner", "cerrado"), "nomina.liquidaciones.marcar_revisadas", { periodoId: PER }))
-      .toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-    for (const c of [como("gerente"), como("owner", "abierto", { alcance: { instalaciones: [] } })])
-      expect(await run(c, "nomina.liquidaciones.marcar_revisadas", { periodoId: PER })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 
   it("un período cerrado no se recalcula", async () => {

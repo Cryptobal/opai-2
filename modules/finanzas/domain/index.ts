@@ -89,7 +89,7 @@ export function calcularPlanilla(o: {
   });
 }
 
-export type Movimiento = { desde: string; hasta: string; monto: number };
+type Movimiento = { desde: string; hasta: string; monto: number };
 export type PlanMovimiento =
   { ok: true; movimientos: Movimiento[] } | { ok: false; motivo: string };
 

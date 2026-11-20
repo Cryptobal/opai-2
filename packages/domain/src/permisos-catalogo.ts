@@ -38,6 +38,8 @@ export const PERMISOS_CORE = {
   // el resto no ve ni que la sección existe (fuera de las listas de gerente, lector y
   // supervisor).
   personasNoRecontratarManage: "core:personas.no_recontratar.manage",
+  /** Quitar marca P1 y desbloquear «bloqueado permanente»: solo owner y admin (CAR-674). */
+  personasEstadoAdmin: "core:personas.estado.admin",
   // Personas y Cargos PR 2: previsión, pago bancario (aprobación RRHH) y ficha laboral ampliada.
   personasPrevisionRead: "core:personas.prevision.read",
   personasPrevisionManage: "core:personas.prevision.manage",

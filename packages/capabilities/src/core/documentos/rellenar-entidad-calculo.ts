@@ -21,11 +21,11 @@ export async function calcularRellenoEntidad(ctx: Contexto, input: { plantillaId
   if (ambito === "persona")
     throw reglaDeNegocio("Esta plantilla se genera sobre una persona: usa rellenar o generar con la persona.");
   const fecha = input.fecha ?? hoy();
-  const { nombre, valores, motivos } = await valoresDeEntidad(ctx, ambito, input.entidadId);
+  const { nombre, valores, motivos, etiquetasCampos } = await valoresDeEntidad(ctx, ambito, input.entidadId);
   const relleno = rellenarPlantilla(version.contenido, { ...valores, "contrato.fecha": fechaDeDocumento(fecha) });
   const faltantes = relleno.faltantes.map((clave) => ({
     clave,
-    etiqueta: etiquetaDeVariable(clave),
+    etiqueta: etiquetaDeVariable(clave, etiquetasCampos),
     motivo: motivos[clave] ?? "Falta el dato.",
   }));
   return { entidad: { tipo: ambito, id: input.entidadId, nombre, etiqueta: ETIQUETA_AMBITO_PLANTILLA[ambito] }, plantilla, version, fecha, relleno, faltantes };

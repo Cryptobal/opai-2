@@ -55,7 +55,7 @@ export function CampoVincular({
   // Estable entre renders: el Combobox vuelve a buscar cada vez que cambia esta función.
   const buscar = useCallback(
     async (q: string) => {
-      if (tipoBuscado === "tenant") return [];
+      if (tipoBuscado === "tenant" || tipoBuscado === "ticket" || tipoBuscado === "visita") return [];
       const r = await buscarCandidatosDocumento({ tipo: tipoBuscado, q }).catch(() => ({
         ok: false as const,
         mensaje: MENSAJE_FALLO,

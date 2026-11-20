@@ -4,7 +4,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { mesDeParametros } from "../../_componentes/datos";
 
-export const ORDENES = ["cobertura", "ppc", "ausentismo", "atrasos"] as const;
+const ORDENES = ["cobertura", "ppc", "ausentismo", "atrasos"] as const;
 export type Orden = (typeof ORDENES)[number];
 
 export type FilaInforme = {

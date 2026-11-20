@@ -46,8 +46,8 @@ const salidaSchema = z.object({
 });
 
 /** Dotación de una instalación en el mes: titulares, reemplazos, refuerzos y vacantes (PPC) desde la Pauta. */
-export const dotacionInstalacionListar = defineCapability({
-  id: "pauta.dotacion.listar",
+export const dotacionInstalacionGet = defineCapability({
+  id: "pauta.dotacion.get",
   descripcion:
     "Dotación de una instalación en un mes: por puesto, titular de la serie, tramos de reemplazo y refuerzo y vacantes (PPC), más las personas con vínculo vigente en la instalación.",
   permiso: PERMISO_READ,

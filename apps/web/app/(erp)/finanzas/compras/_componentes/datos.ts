@@ -35,6 +35,7 @@ export async function cargarLibro(sp: SearchParams) {
       ...(p["periodo"] ? { periodo: p["periodo"] } : {}),
       ...(p["q"] ? { q: p["q"] } : {}),
       ...(p["sin_centro"] === "1" ? { sinCentroCosto: true } : {}),
+      ...(p["con_saldo"] === "1" ? { conSaldo: true } : {}),
     }),
     ejecutarComoUsuario<Centro[]>("erp", "finanzas.centros_costo.listar", {}),
     gestiona
@@ -48,6 +49,6 @@ export async function cargarLibro(sp: SearchParams) {
     proveedores: proveedores?.ok ? proveedores.data.items : [],
     gestiona,
     puedeCrearProveedores,
-    filtrado: Boolean(p["periodo"] || p["q"] || p["sin_centro"]),
+    filtrado: Boolean(p["periodo"] || p["q"] || p["sin_centro"] || p["con_saldo"]),
   };
 }

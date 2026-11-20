@@ -21,25 +21,37 @@ export const AJUSTES_NUCLEO = defineAjustes(
       permiso: "core:comunicaciones.manage",
       control: "texto",
     }),
-    comunicaciones_cco_comercial: correoOpcional.default("").meta({
-      etiqueta: "Copia oculta · comercial",
-      grupo: "Comunicaciones",
+    notificaciones_correo_defecto: correoOpcional.default("").meta({
+      etiqueta: "Correo de notificación por defecto",
+      ayuda:
+        "Copia oculta en los avisos por correo de la empresa. No afecta invitaciones ni recuperación de clave. El correo comercial del perfil va en propuestas y documentos al cliente.",
+      grupo: "Correos de notificación",
       ambito: "tenant",
-      permiso: "core:comunicaciones.manage",
+      permiso: "core:users.manage",
       control: "texto",
     }),
-    comunicaciones_cco_operaciones: correoOpcional.default("").meta({
-      etiqueta: "Copia oculta · operaciones",
-      grupo: "Comunicaciones",
+    notificaciones_correo_comercial: correoOpcional.default("").meta({
+      etiqueta: "Correo de notificación · Comercial",
+      ayuda: "Solo avisos de Comercial y cotizaciones. Vacío: se usa el correo por defecto.",
+      grupo: "Correos de notificación",
       ambito: "tenant",
-      permiso: "core:comunicaciones.manage",
+      permiso: "core:users.manage",
       control: "texto",
     }),
-    comunicaciones_cco_finanzas: correoOpcional.default("").meta({
-      etiqueta: "Copia oculta · finanzas",
-      grupo: "Comunicaciones",
+    notificaciones_correo_operaciones: correoOpcional.default("").meta({
+      etiqueta: "Correo de notificación · Operaciones",
+      ayuda: "Avisos de asistencia, rondas y terreno. Vacío: se usa el correo por defecto.",
+      grupo: "Correos de notificación",
       ambito: "tenant",
-      permiso: "core:comunicaciones.manage",
+      permiso: "core:users.manage",
+      control: "texto",
+    }),
+    notificaciones_correo_finanzas: correoOpcional.default("").meta({
+      etiqueta: "Correo de notificación · Finanzas",
+      ayuda: "Solo avisos de Finanzas. Vacío: se usa el correo por defecto.",
+      grupo: "Correos de notificación",
+      ambito: "tenant",
+      permiso: "core:users.manage",
       control: "texto",
     }),
     documentos_tamano_maximo_mb: z

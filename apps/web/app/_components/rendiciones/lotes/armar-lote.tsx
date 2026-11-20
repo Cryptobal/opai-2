@@ -7,18 +7,18 @@ import { avisar, Badge, Button, Checkbox, Table, Td, Th, Tr } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 
+import { useSeleccionIds } from "../seleccion-ids";
 import { pesos } from "../formato";
 import { type Candidata, RUTA_LOTES } from "./tipos";
 
 /** Aprobadas listas para pagar. El total que se ve es una ayuda: el servidor lo suma al crear el lote. */
 export function ArmarLote({ candidatas }: { candidatas: readonly Candidata[] }) {
   const router = useRouter();
-  const [sel, setSel] = useState<ReadonlySet<string>>(new Set());
+  const { sel, alternar } = useSeleccionIds();
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const elegidas = candidatas.filter((c) => sel.has(c.id));
   const total = elegidas.reduce((s, c) => s + c.montoTotal, 0);
-  const alternar = (id: string, v: boolean) => setSel((p) => { const n = new Set(p); if (v) n.add(id); else n.delete(id); return n; });
   async function crear() {
     setOcupado(true);
     setError(null);

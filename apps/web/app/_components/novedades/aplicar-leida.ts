@@ -1,3 +1,31 @@
+/** Marca como leídas solo las filas indicadas (filtro activo en Novedades). */
+export function listaMarcarIds<T extends { id: string; leida: boolean; destacada?: boolean }>(
+  datos: {
+    items: T[];
+    noLeidas: number;
+    destacadaPendiente: T | null;
+  },
+  ids: readonly string[],
+): typeof datos {
+  const marcar = new Set(ids);
+  if (!marcar.size) return datos;
+  let baja = 0;
+  const items = datos.items.map((item) => {
+    if (!marcar.has(item.id) || item.leida) return item;
+    baja += 1;
+    return { ...item, leida: true };
+  });
+  const destacadaPendiente =
+    datos.destacadaPendiente && marcar.has(datos.destacadaPendiente.id)
+      ? null
+      : datos.destacadaPendiente;
+  return {
+    items,
+    noLeidas: Math.max(0, datos.noLeidas - baja),
+    destacadaPendiente,
+  };
+}
+
 /** Quita la marca de «nueva» al tiro, antes de que vuelva la lista del servidor. */
 export function listaComoLeida<T extends { leida: boolean }>(datos: {
   items: T[];
