@@ -21,10 +21,10 @@ export type Visita = {
 type Tono = NonNullable<BadgeProps["tono"]>;
 
 export const LLEGADA: Record<Visita["geocerca"], { etiqueta: string; tono: Tono }> = {
-  dentro: { etiqueta: "En la instalación", tono: "success" },
-  fuera: { etiqueta: "Fuera de la geocerca", tono: "warning" },
+  dentro: { etiqueta: "En instalación", tono: "success" },
+  fuera: { etiqueta: "Fuera de geocerca", tono: "warning" },
   sin_gps: { etiqueta: "Sin GPS", tono: "neutro" },
-  sin_ubicacion: { etiqueta: "Instalación sin ubicación", tono: "neutro" },
+  sin_ubicacion: { etiqueta: "Sin ubicación", tono: "neutro" },
 };
 
 export const RESULTADO: Record<Visita["checklist"][number]["resultado"], string> = {

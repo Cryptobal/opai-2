@@ -1,14 +1,33 @@
-import { Badge, ListScreen } from "@opai/ds";
+import { Badge, cn, estilosBoton, ListScreen } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { queryConCambios } from "@/app/_components/maestros/paginacion-cursor";
 import { cuandoCompleto } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
-import { conCambios, type Parametros } from "@/lib/parametros";
+import { type Parametros } from "@/lib/parametros";
 
 import { cargarVisitas } from "./datos";
 import { HojaVisita } from "./diferidas";
-import { PaginasVisitas } from "./paginas-visitas";
 import { LLEGADA, resumenRevision, textoLlegada, type Visita } from "./tipos";
+
+function paginacionVisitas(p: Parametros, siguiente: string | null) {
+  const clase = cn(estilosBoton({ variant: "secondary" }));
+  if (!siguiente && !p["vcursor"]) return null;
+  return (
+    <span className="flex gap-2">
+      {p["vcursor"] ? (
+        <LinkNext href={queryConCambios(p, { vcursor: null, visita: null })} className={clase}>
+          Más recientes
+        </LinkNext>
+      ) : null}
+      {siguiente ? (
+        <LinkNext href={queryConCambios(p, { vcursor: siguiente, visita: null })} className={clase}>
+          Más antiguas
+        </LinkNext>
+      ) : null}
+    </span>
+  );
+}
 
 /** Pestaña «Visitas» de la instalación (CAR-83): historial de visitas de supervisión y su detalle. */
 export async function PestanaVisitas({
@@ -28,9 +47,9 @@ export async function PestanaVisitas({
         sinCabecera
         items={items}
         clave={(v) => v.id}
-        href={(v) => conCambios(p, { visita: v.id })}
+        href={(v) => queryConCambios(p, { visita: v.id })}
         Link={LinkNext}
-        paginacion={<PaginasVisitas p={p} siguiente={r.ok ? r.data.siguiente : null} />}
+        paginacion={paginacionVisitas(p, r.ok ? r.data.siguiente : null)}
         tarjeta={(v) => (
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="truncate text-base font-medium">{cuandoCompleto(v.iniciadaEn)}</span>
@@ -60,8 +79,7 @@ export async function PestanaVisitas({
         textos={{
           vacio: {
             titulo: "Aún no hay visitas",
-            descripcion:
-              "Las visitas que registre un supervisor en esta instalación aparecerán aquí.",
+            descripcion: "Las visitas de supervisión de esta instalación aparecerán aquí.",
           },
         }}
       />
