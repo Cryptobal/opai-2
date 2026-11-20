@@ -2,25 +2,18 @@
 // legítima de la persona, documento sin columnas vacías en un cambio de capa, y el documento del
 // anexo fuera de matriz, vencimientos, versiones, actividad, exportación y avisos para quien no
 // tiene `anexos.read` ni `estructuras.read_sensible`.
-import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { randomInt, randomUUID } from "node:crypto";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { digitoVerificador } from "@opai/domain";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
-import type * as Plantilla from "../src/core/anexos/plantilla";
 import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
 import { destinoVinculo } from "./vinculo-fixture";
 
-// CAR-58: la plantilla del repositorio es de ejemplo y bloquea la aprobación (eso lo prueba
-// `anexos-plantilla-ejemplo.test.ts`). Aquí se simula el texto definitivo para seguir probando el
-// camino completo de aprobación (bloqueo, revalidación, documento con SHA-256 y bitácora).
-vi.mock("../src/core/anexos/plantilla", async (original) => ({
-  ...(await original<typeof Plantilla>()),
-  PLANTILLA_ANEXO: { version: "definitiva-de-prueba", esEjemplo: false },
-}));
+// CAR-58: aprobación con texto legal base (PDF); el guard de ejemplo en `anexos-plantilla-ejemplo.test.ts`.
 
 type Fila = { concepto: string; antes: string; despues: string };
 /** Intl usa espacio duro («$\u00a0700.000») según la versión de ICU del runner. */
@@ -38,10 +31,10 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
   let n = 0;
   const almacen = almacenamientoEnMemoria();
   /** Cuerpos subidos (el HTML del documento final), para revisar lo que quedó impreso. */
-  const cuerpos = new Map<string, string>();
+  const cuerpos = new Map<string, string | Buffer>();
   const almacenamiento = {
     ...almacen.almacenamiento,
-    subir: async (clave: string, cuerpo: string, mime: string, sha: string) => {
+    subir: async (clave: string, cuerpo: string | Buffer, mime: string, sha: string) => {
       cuerpos.set(clave, cuerpo);
       return almacen.almacenamiento.subir(clave, cuerpo, mime, sha);
     },
@@ -65,6 +58,19 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
     ).id;
     await e.admin.membership.create({
       data: { tenantId, userId, rol: "owner", portales: ["erp"] },
+    });
+    // El RUT es único en toda la base, también entre suites y corridas.
+    const cuerpoRutEmpresa = String(randomInt(10_000_000, 90_000_000));
+    await e.admin.perfilEmpresa.create({
+      data: {
+        tenantId,
+        razonSocial: "Empresa Prueba SpA",
+        rut: `${cuerpoRutEmpresa}-${digitoVerificador(cuerpoRutEmpresa)}`,
+        calle: "Av. Providencia 100",
+        comuna: "Santiago",
+        representanteNombre: "Ana Representante",
+        representanteRut: "12345678-5",
+      },
     });
     cargoId = (await dato<{ id: string }>(ctx(), "core.cargos.create", { nombre: "Guardia" })).id;
     instalacionId = (await destinoVinculo(ctx())).instalacionId;
@@ -99,6 +105,8 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       nombres: `Elena ${n}`,
       apellidos: "Ríos",
       rut: `${10_000_000 + n}-${digitoVerificador(String(10_000_000 + n))}`,
+      calle: "Los Alerces 45",
+      comuna: "Santiago",
       vinculo: {
         ...(await destinoVinculo(ctx())),
         cargoId,
@@ -169,9 +177,9 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
     );
     expect(aprobado.estado).toBe("aprobado");
     const doc = await e.admin.documento.findUniqueOrThrow({ where: { id: aprobado.documentoId } });
-    const html = cuerpos.get(doc.storageKey) ?? "";
-    expect(sinNbsp(html)).toContain("$ 700.000");
-    expect(sinNbsp(html)).toContain("$ 800.000");
+    expect(doc.mime).toBe("application/pdf");
+    const bytes = cuerpos.get(doc.storageKey);
+    expect(Buffer.isBuffer(bytes) ? bytes.subarray(0, 5).toString() : "").toBe("%PDF-");
   });
 
   it("cambio de capa sin versión previa: el «antes» es la capa que regía, no una columna de «—»", async () => {
@@ -313,12 +321,12 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       );
       const celdas = matriz.filas.flatMap((f) => f.celdas.map((c) => c.documentoId));
       expect(celdas.includes(documentoId)).toBe(ve);
-      const vencimientos = await dato<{ id: string }[]>(
+      const vencimientos = await dato<{ items: { id: string }[] }>(
         ctx(rol),
         "core.documentos.vencimientos",
         {},
       );
-      expect(vencimientos.some((d) => d.id === documentoId)).toBe(ve);
+      expect(vencimientos.items.some((d) => d.id === documentoId)).toBe(ve);
       // CAR-512: la versión nueva (o la copia firmada) de un anexo tampoco se ve sin anexos.read.
       const get = await mod.executeCapability(ctx(rol), "core.documentos.get", { id: nueva.id });
       expect(get.ok).toBe(ve);

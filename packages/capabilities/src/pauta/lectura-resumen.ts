@@ -4,9 +4,11 @@ import { resumirCobertura, type CeldaPauta } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+import { limiteLista, listaSchema, paginaMemoria } from "../core/maestros/comun";
 import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { cargarMes } from "./cargar";
 import { PERMISO_READ, mesSchema } from "./comun";
+import { tramosPpc } from "./tramos-celdas";
 import { resumenSchema } from "./vistas";
 
 const filaInstalacion = z.object({
@@ -65,6 +67,7 @@ export const resumenLeer = defineCapability({
 });
 
 const ppcSchema = z.object({
+  id: z.string(),
   instalacionId: z.string(),
   instalacion: z.string(),
   puestoId: z.string(),
@@ -81,12 +84,16 @@ export const ppcListar = defineCapability({
   descripcion:
     "Lista los puestos por cubrir (PPC) de un mes, uno por tramo de días seguidos y motivo (sin titular, ausencia, licencia, vacaciones o permiso), de una instalación o de todas las que están a cargo.",
   permiso: PERMISO_READ,
-  input: mesSchema.extend({ instalacionId: uuidSchema.optional() }),
-  output: z.array(ppcSchema),
-  auditarLectura: (s) => [...new Set(s.map((x) => x.puestoId))],
+  input: mesSchema.extend({
+    instalacionId: uuidSchema.optional(),
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
+  }),
+  output: z.object({ items: z.array(ppcSchema), siguiente: z.string().nullable() }),
+  auditarLectura: (s) => [...new Set(s.items.map((x) => x.puestoId))],
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { anio, mes, instalacionId }) {
+  async handler(ctx, { anio, mes, instalacionId, cursor, limite }) {
     const instalaciones = await ctx.db.instalacion.findMany({
       where: { archivadaEn: null, AND: [dondeInstalacion(ctx), instalacionId ? { id: instalacionId } : {}] },
       select: { id: true, nombre: true, region: true },
@@ -100,29 +107,20 @@ export const ppcListar = defineCapability({
     const salida: z.infer<typeof ppcSchema>[] = [];
     for (const p of puestos) {
       const inst = instalaciones.find((i) => i.id === p.instalacionId);
-      let actual: z.infer<typeof ppcSchema> | null = null;
-      for (const c of m.celdas.get(p.id) ?? []) {
-        if (c.estado === "libre") continue;
-        if (c.estado !== "ppc" || !c.motivo) {
-          actual = null;
-        } else if (actual && actual.motivo === c.motivo) {
-          actual.hasta = c.fecha;
-          actual.dias += 1;
-        } else if (inst) {
-          actual = {
-            instalacionId: inst.id,
-            instalacion: inst.nombre,
-            puestoId: p.id,
-            puesto: p.nombre,
-            motivo: c.motivo,
-            desde: c.fecha,
-            hasta: c.fecha,
-            dias: 1,
-          };
-          salida.push(actual);
-        }
+      if (!inst) continue;
+      for (const t of tramosPpc(m.celdas.get(p.id) ?? [])) {
+        salida.push({
+          id: `${p.id}:${t.desde}:${t.motivo}`,
+          instalacionId: inst.id,
+          instalacion: inst.nombre,
+          puestoId: p.id,
+          puesto: p.nombre,
+          ...t,
+        });
       }
     }
-    return salida.sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0));
+    const ordenada = salida.sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0));
+    const { items, siguiente } = paginaMemoria(ordenada, limite, cursor);
+    return { items, siguiente };
   },
 });

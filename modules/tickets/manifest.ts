@@ -53,6 +53,7 @@ export const manifest = defineModule({
     { id: "tickets.ticket.reasignado", descripcion: "Un ticket cambió de responsable." },
     { id: "tickets.ticket.aprobado", descripcion: "Se aprobó una solicitud." },
     { id: "tickets.ticket.rechazado", descripcion: "Se rechazó una solicitud con su motivo." },
+    { id: "tickets.ticket.sla_vencido", descripcion: "Un ticket vivo superó su plazo SLA." },
   ],
   capacidades,
   aprobaciones: fuentesAprobacionTickets,

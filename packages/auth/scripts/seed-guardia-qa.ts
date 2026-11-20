@@ -78,7 +78,7 @@ async function main(): Promise<void> {
           nombres: "Guardia QA",
           apellidos: "Auditoría",
           rut: RUT,
-          estado: "activa",
+          estado: "activo",
         },
       }));
     const vigente = await db.vinculoLaboral.findFirst({

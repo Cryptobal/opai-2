@@ -2,75 +2,59 @@ import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
 
-import { TIPOS_JORNADA } from "../domain";
-import { calcularDia, fechaDe } from "./dias-calculo";
 import { PORTALES } from "./dias-capacidades";
 import { uuid } from "./esquemas";
-import { tenantBasico, nombreCompleto } from "./formato";
-import { alcanceMarcas } from "./alcance-marcas";
-
-const LIMITE = 150;
-const ESTADOS = ["presente", "sin_marca", "ausente", "sin_turno", "incompleto"] as const;
-
-const itemSchema = z.object({
-  personaId: z.string(), nombre: z.string(), instalacionId: z.string().nullable(), instalacion: z.string().nullable(),
-  turnoInicio: z.string().nullable(), turnoFin: z.string().nullable(), entrada: z.string().nullable(), salida: z.string().nullable(),
-  estado: z.enum(ESTADOS), sigla: z.string().nullable(), atrasoMin: z.number().int(), tipoJornada: z.enum(TIPOS_JORNADA),
-  correccionPendiente: z.boolean(), descansoInsuficiente: z.boolean(), marcaFueraDeTurno: z.boolean(),
-});
+import { alcanceMarcas } from "./lecturas";
+import { ESTADOS_HOY, itemSchema } from "./dias-hoy-tipos";
+import { hoyZona, idsBusqueda, itemsResumenDia, paginaItems, resumenItems } from "./dias-hoy-helpers";
 
 /** «Asistencia de hoy»: presentes, sin marca, atrasos y correcciones pendientes de los turnos del día. */
 export const hoyListar = defineCapability({
   id: "asistencia.dias.hoy",
   descripcion:
-    "Muestra la asistencia de hoy de los turnos esperados: quién está presente, quién no marcó, atrasos al segundo, jornadas incompletas y correcciones pendientes, con el resumen del día. El supervisor ve solo sus instalaciones.",
+    "Muestra la asistencia de hoy de los turnos esperados: quién está presente, quién no marcó, atrasos al segundo, jornadas incompletas y correcciones pendientes, con el resumen del día. Busca por nombre de persona o instalación. Paginada por cursor (personaId de la fila anterior).",
   permiso: null,
   portales: PORTALES,
-  input: z.object({ instalacionId: uuid.optional(), estado: z.enum(ESTADOS).optional() }),
+  input: z.object({
+    instalacionId: uuid.optional(),
+    estado: z.enum(ESTADOS_HOY).optional(),
+    q: z.string().trim().max(100).optional(),
+    cursor: z.string().uuid().optional(),
+    limite: z.number().int().min(1).max(200).default(50),
+  }),
   output: z.object({
-    fecha: z.string(), zona: z.string(),
-    resumen: z.object({ turnos: z.number().int(), presentes: z.number().int(), sinMarca: z.number().int(), ausentes: z.number().int(), incompletos: z.number().int(), atrasos: z.number().int() }),
-    items: z.array(itemSchema), truncado: z.boolean(),
+    fecha: z.string(),
+    zona: z.string(),
+    resumen: z.object({
+      turnos: z.number().int(),
+      presentes: z.number().int(),
+      sinMarca: z.number().int(),
+      ausentes: z.number().int(),
+      incompletos: z.number().int(),
+      atrasos: z.number().int(),
+    }),
+    items: z.array(itemSchema),
+    siguiente: z.string().nullable(),
   }),
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => [...new Set(s.items.map((d) => d.personaId))],
   async handler(ctx, i) {
     const alcance = await alcanceMarcas(ctx);
-    const { zona } = await tenantBasico(ctx);
-    const ahora = new Date();
-    const hoy = fechaDe(ahora, zona);
-    const turnos = await ctx.db.turnoEsperado.findMany({
-      where: { vigente: true, fecha: new Date(`${hoy}T00:00:00Z`), AND: [alcance, i.instalacionId ? { instalacionId: i.instalacionId } : {}] },
-      orderBy: { inicio: "asc" }, take: LIMITE + 1,
-    });
-    const visibles = turnos.slice(0, LIMITE);
-    const personas = [...new Set(visibles.map((t) => t.personaId))];
-    const [nombres, insts] = await Promise.all([
-      ctx.db.persona.findMany({ where: { id: { in: personas } }, select: { id: true, nombres: true, apellidos: true } }),
-      ctx.db.instalacion.findMany({ where: { id: { in: [...new Set(visibles.map((t) => t.instalacionId))] } }, select: { id: true, nombre: true } }),
-    ]);
-    const nombre = new Map(nombres.map((p) => [p.id, nombreCompleto(p)]));
-    const instalacion = new Map(insts.map((x) => [x.id, x.nombre]));
-    const vistos = new Set<string>();
-    const items: z.infer<typeof itemSchema>[] = [];
-    for (const t of visibles) {
-      if (vistos.has(t.personaId)) continue;
-      vistos.add(t.personaId);
-      const d = await calcularDia(ctx, t.personaId, hoy, ahora, zona, ctx.alcance ? [...ctx.alcance.instalaciones] : undefined);
-      items.push({
-        personaId: t.personaId, nombre: nombre.get(t.personaId) ?? "", instalacionId: d.instalacionId, instalacion: d.instalacionId ? (instalacion.get(d.instalacionId) ?? null) : null,
-        turnoInicio: d.turno?.inicio.toISOString() ?? null, turnoFin: d.turno?.fin.toISOString() ?? null,
-        entrada: d.entrada?.toISOString() ?? null, salida: d.salida?.toISOString() ?? null, estado: d.estado, sigla: d.sigla,
-        atrasoMin: Math.floor(d.segundosAtraso / 60), tipoJornada: d.tipoJornada, correccionPendiente: d.correccionPendiente, descansoInsuficiente: d.descansoInsuficiente, marcaFueraDeTurno: d.marcaFueraDeTurno,
-      });
+    const { zona, hoy, ahora } = await hoyZona(ctx);
+    const busqueda = i.q ? await idsBusqueda(ctx, i.q, undefined) : null;
+    if (busqueda && !busqueda.personaIds.length && !busqueda.instalacionIds.length) {
+      return {
+        fecha: hoy,
+        zona,
+        resumen: { turnos: 0, presentes: 0, sinMarca: 0, ausentes: 0, incompletos: 0, atrasos: 0 },
+        items: [],
+        siguiente: null,
+      };
     }
-    const filtrados = i.estado ? items.filter((x) => x.estado === i.estado) : items;
-    const cuenta = (e: (typeof ESTADOS)[number]) => items.filter((x) => x.estado === e).length;
-    return {
-      fecha: hoy, zona,
-      resumen: { turnos: items.length, presentes: cuenta("presente"), sinMarca: cuenta("sin_marca"), ausentes: cuenta("ausente"), incompletos: cuenta("incompleto"), atrasos: items.filter((x) => x.atrasoMin > 0).length },
-      items: filtrados, truncado: turnos.length > LIMITE,
-    };
+    const resumenItems_ = await itemsResumenDia(ctx, hoy, ahora, zona, alcance, i.instalacionId, busqueda);
+    const resumen = resumenItems(resumenItems_);
+    const { items, siguiente } = paginaItems(resumenItems_, i.estado, i.cursor, i.limite);
+    return { fecha: hoy, zona, resumen, items, siguiente };
   },
 });

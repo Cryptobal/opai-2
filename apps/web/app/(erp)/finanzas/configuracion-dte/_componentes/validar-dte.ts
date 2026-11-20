@@ -2,7 +2,7 @@
 import type { ConfigDte } from "./tipos";
 import type { FormDte } from "./use-form-dte";
 
-export type CampoDte = "acteco" | "resolucionNumero" | "resolucionFecha" | "umbral" | "avisoCaf";
+type CampoDte = "acteco" | "resolucionNumero" | "resolucionFecha" | "umbral" | "avisoCaf";
 export type ErroresDte = Partial<Record<CampoDte, string>>;
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;

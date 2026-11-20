@@ -512,4 +512,53 @@ describe.skipIf(!urlPropietario)("firma · envío, firma, rechazo y verificació
     });
     expect(noValido).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
+
+  it("CAR-634: mis_pendientes y firmar por sesión con persona vinculada al usuario", async () => {
+    const doc = await documento();
+    const db = e.forTenant(t.a.tenantId);
+    const persona = await db.persona.create({
+      data: {
+        tenantId: t.a.tenantId,
+        nombres: "Ana",
+        apellidos: "Portal",
+        usuarioId: t.a.userId,
+        rut: "11111111-1",
+      },
+    });
+    const envio = await dato<{ id: string }>(owner("a"), "core.firmas.enviar", {
+      documentoId: doc.id,
+      clase: "carta_trabajador",
+      nivel: "N1",
+      firmantes: [{
+        tipo: "trabajador", personaId: persona.id, nombre: "Ana Portal", rol: "firma",
+        email: "ana-portal@example.test",
+      }],
+    });
+    const portal = mod.crearContexto({
+      tenantId: t.a.tenantId,
+      actor: { tipo: "user", id: t.a.userId },
+      rol: "owner",
+      portal: "trabajador",
+      portalesMembresia: ["erp", "trabajador"],
+      usuario: { id: t.a.userId, nombre: "Ana", email: "a@b.cl", platformRole: null },
+      medidor,
+    });
+    const lista = await dato<{ items: { solicitudId: string }[] }>(
+      portal,
+      "core.firmas.mis_pendientes",
+      {},
+    );
+    expect(lista.items.some((i) => i.solicitudId === envio.id)).toBe(true);
+    const firma = await resultado(portal, "core.firmas.firmar", {
+      solicitudId: envio.id,
+      metodo: "nombre",
+      nombreFirma: "Ana Portal",
+      aceptaMedio: true,
+      textoAceptacion: "Acepto",
+      versionAceptacion: "2026-10",
+    });
+    expect(firma).toMatchObject({ ok: true, data: { estadoFirmante: "firmado" } });
+    const vacia = await dato<{ items: unknown[] }>(portal, "core.firmas.mis_pendientes", {});
+    expect(vacia.items.some((i) => (i as { solicitudId: string }).solicitudId === envio.id)).toBe(false);
+  });
 });

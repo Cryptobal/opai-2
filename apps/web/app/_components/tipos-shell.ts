@@ -23,6 +23,10 @@ export type DatosShell = {
   empresas: { id: string; nombre: string; actual: boolean }[];
   /** El agente interno está disponible: módulo activo en la empresa y permiso `agente:usar` (ERP). */
   agente?: boolean;
+  /** Puede abrir «Ver como…» (permiso `core:ver_como.iniciar`, ERP; CAR-528). */
+  verComo?: boolean;
+  /** Shell de la persona vista en «ver como»: sin empresas ni cuenta propia (CAR-528). */
+  vista?: boolean;
   /** Quién y en qué empresa ve la página (`lib/epoca-sesion.ts`); las pestañas la comparan. */
   epoca: string;
 };

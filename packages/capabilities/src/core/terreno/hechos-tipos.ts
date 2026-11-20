@@ -52,6 +52,17 @@ export const TIPOS_HECHO_TERRENO = {
     })
     .strict(),
   /**
+   * Novedad en el libro de la instalación desde el equipo de terreno (CAR-77 parte 3), sin depender de Rondas:
+   * texto y gravedad. Va a `core.libro_novedades` con el equipo, la persona y la hora del hecho.
+   */
+  "terreno.novedad": z
+    .object({
+      resumen: z.string().trim().min(3).max(200),
+      detalle: z.string().trim().max(2000).optional(),
+      gravedad: z.enum(["baja", "media", "alta"]).optional(),
+    })
+    .strict(),
+  /**
    * Entrada a una instalación (portería, CAR-78 · E4b-2). Del documento solo se guardan su huella y su máscara:
    * el número completo no se persiste (decisión de Carlos, 7-nov-2026). El servidor cruza con las listas.
    */
@@ -73,6 +84,32 @@ export const TIPOS_HECHO_TERRENO = {
     .strict(),
   /** Salida de una entrada ya registrada: apunta a la clave del hecho `acceso.entrada`. */
   "acceso.salida": z.object({ entradaClave: z.string().uuid() }).strict(),
+  /**
+   * Marca legal de asistencia por cola (CAR-626): RUT+PIN o PIN de respaldo con motivo. El rostro no entra sin línea.
+   * La credencial viaja en el envío y no se persiste en el hecho guardado.
+   */
+  "asistencia.marca": z
+    .object({
+      metodo: z.enum(["rut_pin", "pin_respaldo"]),
+      credencial: z.string().min(4).max(64),
+      motivoRespaldo: z
+        .enum([
+          "rostro_no_coincide",
+          "vida_fallida",
+          "proveedor_caido",
+          "sin_enrolamiento",
+          "sin_camara",
+          "biometria_revocada",
+          "otro",
+        ])
+        .optional(),
+      tipo: z.enum(["inicio_colacion", "fin_colacion"]).optional(),
+      lat: z.number().min(-90).max(90).optional(),
+      lng: z.number().min(-180).max(180).optional(),
+      precisionM: z.number().min(0).max(100_000).optional(),
+    })
+    .strict()
+    .refine((p) => p.metodo !== "pin_respaldo" || p.motivoRespaldo !== undefined),
 } as const satisfies Record<string, z.ZodType>;
 
 export type TipoHechoTerreno = keyof typeof TIPOS_HECHO_TERRENO;

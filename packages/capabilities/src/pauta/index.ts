@@ -23,14 +23,17 @@ import { reemplazosSugerir } from "./reemplazos-sugerir";
 import { refuerzosAgregar } from "./refuerzos-agregar";
 import { seriesFijar } from "./series";
 import { titularAsignar } from "./titular-asignar";
+import { dotacionInstalacionGet } from "./dotacion-instalacion";
 import { titularesListar } from "./titulares-listar";
 import { titularTrasladar } from "./titular-trasladar";
 import { turnosExtraAprobar } from "./turnos-extra-aprobar";
 import { turnosExtraListar } from "./turnos-extra-listar";
 import { turnosExtraMontoFijar } from "./turnos-extra-monto";
+import { turnosExtraTarifasLeer } from "./turnos-extra-tarifas-leer";
 import { turnosExtraRechazar } from "./turnos-extra-rechazar";
 import { turnosExtraRegistrar } from "./turnos-extra-registrar";
 
+export { fuentesAprobacionTurnosExtra } from "./fuente-aprobaciones";
 export { ajustesPauta } from "./ajustes";
 export { buscadoresPauta } from "./buscadores";
 export { consumidorPautaCambio } from "./consumidor-cambio";
@@ -41,6 +44,7 @@ export const capacidadesPauta: readonly Capacidad[] = [
   mesLeer,
   resumenLeer,
   ppcListar,
+  dotacionInstalacionGet,
   informeInstalaciones,
   historialListar,
   seriesFijar,
@@ -63,6 +67,7 @@ export const capacidadesPauta: readonly Capacidad[] = [
   turnosExtraAprobar,
   turnosExtraRechazar,
   turnosExtraMontoFijar,
+  turnosExtraTarifasLeer,
   alertasListar,
   exportarPauta,
   publicacionesPublicar,
