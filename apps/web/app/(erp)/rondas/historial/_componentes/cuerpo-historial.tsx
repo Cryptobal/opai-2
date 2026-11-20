@@ -1,5 +1,6 @@
 import { Badge, Cabecera, Estado, FilaSeleccionable, KpiTile, Segmentado, SplitScreen, Table, Td, Th, Tr } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { LinkNext } from "@/app/_components/link-next";
 
 import type { cargarHistorial } from "./datos";
@@ -116,7 +117,16 @@ export function CuerpoHistorialRondas({ d }: { d: VistaHistorial }) {
   };
   return (
     <>
-      <Cabecera titulo="Historial de rondas" subtitulo="Rondas realizadas y programadas no iniciadas por instalación." />
+      <Cabecera
+        titulo="Historial de rondas"
+        subtitulo="Rondas realizadas y programadas no iniciadas por instalación."
+        acciones={
+          <EnlaceBoton variante="secondary" href="/rondas/informe">
+            Informe mensual
+          </EnlaceBoton>
+        }
+        accionesSiempre
+      />
       <BarraFiltrosHistorial d={d} filtros={filtros} />
       <SplitScreen
         contenido
