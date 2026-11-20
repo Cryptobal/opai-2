@@ -60,11 +60,23 @@ export function relyingParty(env: Record<string, string | undefined>) {
   return { rpID: u.hostname, origin: u.origin };
 }
 
-/** Orígenes de confianza: la URL pública y, fuera de producción, localhost. */
+/** Orígenes exactos del login de OPAI y de la URL configurada para este despliegue. */
 export function origenesConfiables(env: Record<string, string | undefined>): string[] {
-  const origenes = [env["BETTER_AUTH_URL"]].filter((o): o is string => Boolean(o));
-  if (env["NODE_ENV"] !== "production") origenes.push("http://localhost:3000");
-  return origenes;
+  const origenes = new Set(["https://app.opai.cl", "https://test.opai.cl"]);
+  const configurada = env["BETTER_AUTH_URL"];
+  if (configurada && URL.canParse(configurada)) {
+    const url = new URL(configurada);
+    if (
+      ["http:", "https:"].includes(url.protocol) &&
+      !url.hostname.includes("*") &&
+      !url.username &&
+      !url.password
+    ) {
+      origenes.add(url.origin);
+    }
+  }
+  if (env["NODE_ENV"] !== "production") origenes.add("http://localhost:3000");
+  return [...origenes];
 }
 
 /** Google solo si existen credenciales. Nunca crea usuarios: se entra por invitación. */
