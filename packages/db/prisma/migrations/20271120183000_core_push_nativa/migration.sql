@@ -16,3 +16,10 @@ CREATE UNIQUE INDEX "suscripciones_push_tenant_id_token_key"
   ON "core"."suscripciones_push" ("tenant_id", "token");
 
 COMMIT;
+
+-- Reversión:
+-- DROP INDEX IF EXISTS "core"."suscripciones_push_tenant_id_token_key";
+-- ALTER TABLE "core"."suscripciones_push" DROP COLUMN "plataforma", DROP COLUMN "token", DROP COLUMN "tipo";
+-- ALTER TABLE "core"."suscripciones_push" ALTER COLUMN "endpoint" SET NOT NULL;
+-- DROP TYPE "core"."PlataformaPush";
+-- DROP TYPE "core"."PushSuscripcionTipo";
