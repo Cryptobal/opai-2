@@ -63,8 +63,9 @@ describe("nomina.f29.generar", () => {
     const r = await executeCapability(c.ctx, "nomina.f29.generar", { periodoId: PER });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.data.filas).toBe(1);
-    expect(r.data.nombre).toContain("f29_retencion");
-    expect(r.data.base64.length).toBeGreaterThan(100);
+    const d = r.data as { filas: number; nombre: string; base64: string };
+    expect(d.filas).toBe(1);
+    expect(d.nombre).toContain("f29_retencion");
+    expect(d.base64.length).toBeGreaterThan(100);
   });
 });
