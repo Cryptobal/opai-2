@@ -623,7 +623,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.f29.generar` | `nomina_f29_generar` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.f30_1.generar` | `nomina_f30_1_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.excel` | `nomina_libro_remuneraciones_excel` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.pdf` | `nomina_libro_remuneraciones_pdf` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
@@ -862,6 +861,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/cumplimiento-dt/contratos` | `nomina.midt.listar` | `nomina_midt_listar` | existe |
+| erp | `/remuneraciones/cumplimiento-dt/finiquitos/[vinculoId]` | `nomina.finiquito.obtener` | `nomina_finiquito_obtener` | existe |
 | erp | `/remuneraciones/cumplimiento-dt/finiquitos` | `nomina.midt.listar` | `nomina_midt_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
@@ -1373,7 +1373,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.costo_proyectado.listar`
 - `nomina.f30_1.generar`
-- `nomina.lre.generar`
 - `nomina.novedades.cargar`
 - `nomina.previred.generar`
 - `pauta.ausencias.anular`
