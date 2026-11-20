@@ -37,7 +37,7 @@ function semilla() {
         nombres: "Ana",
         apellidos: "Ficticia",
         rut: "12345678-5",
-        estado: "activa",
+        estado: "activo",
       },
     ],
   };

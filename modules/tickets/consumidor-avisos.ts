@@ -60,6 +60,8 @@ export const consumidorTicketsAvisos = defineConsumidor({
     if (!aviso) return;
     const responsable = typeof p.responsableId === "string" ? p.responsableId : t.responsableId;
     const usuarioId = aviso.para === "solicitante" ? t.solicitanteId : responsable;
+    // Un responsable reemplazado ya no tiene acceso a la ficha en la bandeja.
+    if (ev.tipo === "tickets.ticket.sla_vencido" && usuarioId !== t.responsableId) return;
     if (usuarioId === ev.actorId || usuarioId === ev.viaUserId) return;
     const activo = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: usuarioId, estado: "activa" }, select: { userId: true } });
     if (!activo) return;

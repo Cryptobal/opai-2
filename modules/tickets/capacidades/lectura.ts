@@ -92,10 +92,11 @@ export const ticketsListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    const vista = dondeVista(ctx, input.vista);
     const texto = await dondeTexto(ctx, input.q);
     const filas = await ctx.db.ticket.findMany({
       where: {
-        ...dondeVista(ctx, input.vista),
+        ...vista,
         ...texto,
         ...(input.estado ? { estado: input.estado } : {}),
         ...(input.tipoId ? { tipoId: input.tipoId } : {}),

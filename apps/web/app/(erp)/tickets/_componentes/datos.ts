@@ -83,6 +83,7 @@ export const TONO_PRIORIDAD: Record<string, NonNullable<BadgeProps["tono"]>> = {
 };
 
 export async function cargarTickets(p: Parametros) {
+  const q = p["q"]?.trim().slice(0, 80);
   const r = await ejecutarComoUsuario<{ items: Ticket[]; siguiente: string | null }>(
     "erp",
     "tickets.tickets.listar",
@@ -90,7 +91,7 @@ export async function cargarTickets(p: Parametros) {
       vista: p["vista"] ?? "mios",
       limite: POR_PAGINA,
       ...(p["estado"] ? { estado: p["estado"] } : {}),
-      ...(p["q"] ? { q: p["q"] } : {}),
+      ...(q && q.length >= 2 ? { q } : {}),
       ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
     },
   );
@@ -101,6 +102,8 @@ export async function cargarTickets(p: Parametros) {
     error: r,
   };
 }
+
+export type RespuestaTicketsLista = Awaited<ReturnType<typeof cargarTickets>>;
 
 export async function cargarTicket(id: string) {
   return ejecutarComoUsuario<{ ticket: Ticket; eventos: EventoTicket[] }>(

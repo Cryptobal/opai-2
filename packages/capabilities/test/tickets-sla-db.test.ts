@@ -66,18 +66,20 @@ describe.skipIf(omitirSuiteDb())("tickets.sla.vencidos (CAR-622)", () => {
 
   it("emite un evento y avisa al responsable una sola vez", async () => {
     const ahora = "2026-11-17T13:00:00.000Z";
-    const r1 = await trabajoTicketsSla.ejecutar(ctx(), { ahora });
-    const r2 = await trabajoTicketsSla.ejecutar(ctx(), { ahora });
-    expect(r1).toMatchObject({ avisados: 1 });
-    expect(r2).toMatchObject({ avisados: 0 });
+    const respuestas = await Promise.all([
+      trabajoTicketsSla.ejecutar(ctx(), { ahora }),
+      trabajoTicketsSla.ejecutar(ctx(), { ahora }),
+    ]);
+    expect(respuestas).toContainEqual({ avisados: 1 });
+    expect(respuestas).toContainEqual({ avisados: 0 });
 
     const ev = await e.admin.evento.findMany({
       where: { tenantId, tipo: "tickets.ticket.sla_vencido", entidadId: ticketId },
     });
     expect(ev).toHaveLength(1);
 
-    const linea = await e.admin.ticketEvento.findMany({ where: { ticketId, tipo: "sla_vencido" } });
-    expect(linea).toHaveLength(1);
+    expect(ev[0]).toMatchObject({ actorTipo: "system", actorId: null });
+    expect(await e.admin.ticketEvento.count({ where: { ticketId, tipo: "sla_vencido" } })).toBe(0);
 
     await consumidorTicketsAvisos.handler(ctx(), ev[0]!);
     await consumidorTicketsAvisos.handler(ctx(), ev[0]!);

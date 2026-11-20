@@ -19,8 +19,9 @@ export const metadata = { title: "Terreno" };
 
 /** Con sesión, cómo emparejar el equipo; sin sesión y con equipo emparejado, Terreno del equipo. */
 async function Contenido() {
+  const equipo = await dispositivoActual();
   const identidad = await identidadActual();
-  if (identidad) {
+  if (identidad && !equipo?.verComo) {
     const puede = puedeDeIdentidad(identidad);
     return (
       <PaginaPortal portal="terreno" titulo="Terreno" ruta="/terreno">
@@ -32,7 +33,6 @@ async function Contenido() {
       </PaginaPortal>
     );
   }
-  const equipo = await dispositivoActual();
   if (!equipo) redirect(loginDe("/terreno"));
   if (equipo.estado !== "activo") redirect("/terreno/emparejar");
   const { instalacion, personas } = await personasDelEquipo(equipo);

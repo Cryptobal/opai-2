@@ -1,8 +1,11 @@
 import type { Contexto } from "@opai/capabilities";
 
-import { ESTADOS_VIVOS } from "../domain";
-
 const MIN = 2;
+
+function limiteUuid(prefijo: string, relleno: "0" | "f"): string {
+  const hex = prefijo.padEnd(32, relleno);
+  return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20)].join("-");
+}
 
 /** Filtro por texto: asunto, solicitante (nombre) y prefijo del número (UUID). */
 export async function dondeTexto(ctx: Contexto, q: string | undefined): Promise<object> {
@@ -10,28 +13,22 @@ export async function dondeTexto(ctx: Contexto, q: string | undefined): Promise<
   if (term.length < MIN) return {};
   const solicitantes = (
     await ctx.db.user.findMany({
-      where: { name: { contains: term, mode: "insensitive" } },
+      where: {
+        name: { contains: term, mode: "insensitive" },
+        memberships: { some: { tenantId: ctx.tenantId } },
+      },
       select: { id: true },
+      orderBy: { id: "asc" },
       take: 50,
     })
   ).map((u) => u.id);
   const or: object[] = [{ titulo: { contains: term, mode: "insensitive" } }];
   if (solicitantes.length) or.push({ solicitanteId: { in: solicitantes } });
-  const hex = term.replace(/-/g, "");
-  if (/^[0-9a-f]{4,}$/i.test(hex)) or.push({ id: { startsWith: hex.slice(0, 8).toLowerCase() } });
+  const hex = term.replace(/-/g, "").toLowerCase();
+  if (/^[0-9a-f]{4,32}$/.test(hex)) {
+    const prefijo = hex.slice(0, 8);
+    // El id es UUID nativo: un intervalo indexable evita LIKE sobre UUID.
+    or.push({ id: { gte: limiteUuid(prefijo, "0"), lte: limiteUuid(prefijo, "f") } });
+  }
   return { OR: or };
-}
-
-/** Tickets vivos con SLA vencido antes de `ahora` y sin evento `sla_vencido`. */
-export async function ticketsSlaVencidos(ctx: Contexto, ahora: Date) {
-  const filas = await ctx.db.ticket.findMany({
-    where: {
-      estado: { in: [...ESTADOS_VIVOS] },
-      slaVenceEn: { not: null, lt: ahora },
-      eventos: { none: { tipo: "sla_vencido" } },
-    },
-    select: { id: true, titulo: true, estado: true, responsableId: true, slaVenceEn: true },
-    take: 200,
-  });
-  return filas;
 }

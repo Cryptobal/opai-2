@@ -2,7 +2,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
 import { cargarInstalaciones, cargarTickets, cargarTipos } from "./_componentes/datos";
-import { TicketsLista } from "./_componentes/tickets-lista";
+import { TicketsBandeja } from "./_componentes/tickets-bandeja";
 
 export const metadata = { title: "Tickets" };
 type Props = { searchParams: SearchParams };
@@ -26,7 +26,7 @@ export default function Tickets({ searchParams }: Props) {
       }}
     >
       {({ p, bandeja, tipos, instalaciones }) => (
-        <TicketsLista p={p} bandeja={bandeja} tipos={tipos} instalaciones={instalaciones} />
+        <TicketsBandeja p={p} bandeja={bandeja} tipos={tipos} instalaciones={instalaciones} />
       )}
     </PaginaPortal>
   );
