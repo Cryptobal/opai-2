@@ -1,12 +1,9 @@
-import { ajustesFinanzas, buscadoresFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
+import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabilities";
 
+import { buscadoresFinanzas } from "./buscador";
 import { capacidades as capacidadesFlujo } from "./capacidades";
 import { PERMISO_CONFIGURAR, PERMISO_GESTIONAR, PERMISO_VER } from "./capacidades/permisos";
-import {
-  PERMISO_BANCOS_AUTORIZAR,
-  PERMISO_BANCOS_GESTIONAR,
-  PERMISO_BANCOS_VER,
-} from "./capacidades/bancos/permisos";
+import { PERMISO_BANCOS_AUTORIZAR, PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_VER } from "./capacidades/bancos/permisos";
 
 /**
  * Manifest del módulo Finanzas (ADR-003). El núcleo deriva navegación, permisos, configuración,

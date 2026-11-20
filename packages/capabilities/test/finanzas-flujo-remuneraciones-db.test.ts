@@ -58,7 +58,7 @@ describe.skipIf(omitirSuiteDb())("flujo · remuneraciones desde Nómina (db)", (
     await e.admin.user.create({ data: { id: usuario, email: `u-${randomUUID().slice(0, 8)}@rem.test`, name: "u" } });
     const cargo = (await e.admin.cargo.create({ data: { tenantId: tenant, nombre: "Guardia" } })).id;
     for (let i = 0; i < 2; i++) {
-      const personaId = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "P", apellidos: `${i}`, rut: `2${i}.222.222-2`, estado: "activa" } })).id;
+      const personaId = (await e.admin.persona.create({ data: { tenantId: tenant, nombres: "P", apellidos: `${i}`, rut: `2${i}.222.222-2`, estado: "activo" } })).id;
       await e.admin.vinculoLaboral.create({ data: { tenantId: tenant, personaId, cargoId: cargo, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
       await e.admin.estructuraSueldo.create({
         data: { tenantId: tenant, nivel: "persona", personaId, sueldoBase: 600_000, colacion: 0, movilizacion: 0, gratificacion: "legal_25", vigenteDesde: new Date("2026-01-01"), motivo: "prueba" },

@@ -47,7 +47,7 @@ async function evaluar(
   return enTransaccion(tenantId, async (tx) => {
     const cred = await tx.credencialTerreno.findUnique({ where: { personaId } });
     const persona = await tx.persona.findFirst({
-      where: { id: personaId, estado: "activa", archivadaEn: null, anonimizadaEn: null },
+      where: { id: personaId, estado: "activo", archivadaEn: null, anonimizadaEn: null },
       select: { rut: true, usuarioId: true },
     });
     if (!cred || !persona || persona.rut !== rut || cred.rut !== rut || !persona.usuarioId) {

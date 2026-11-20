@@ -1,4 +1,11 @@
-import { ajustesPauta, buscadoresPauta, capacidadesPauta, defineModule, indicadoresPauta } from "@opai/capabilities";
+import {
+  ajustesPauta,
+  buscadoresPauta,
+  capacidadesPauta,
+  defineModule,
+  fuentesAprobacionTurnosExtra,
+  indicadoresPauta,
+} from "@opai/capabilities";
 
 /**
  * Manifest del módulo Pauta (Operaciones, Brief 11b · PR 1). El núcleo deriva navegación, permisos,
@@ -29,6 +36,15 @@ export const manifest = defineModule({
       icono: "CalendarDays",
       area: "operaciones",
       orden: 40,
+      permiso: "pauta:read",
+    },
+    {
+      portal: "erp",
+      href: "/pauta/turnos-extra",
+      etiqueta: "Turnos extra",
+      icono: "Clock",
+      area: "operaciones",
+      orden: 41,
       permiso: "pauta:read",
     }],
   configuracion: ajustesPauta,
@@ -66,4 +82,5 @@ export const manifest = defineModule({
   indicadores: indicadoresPauta,
   // Aporte al buscador general (CAR-404): puestos por nombre o instalación.
   buscadores: buscadoresPauta,
+  aprobaciones: fuentesAprobacionTurnosExtra,
 });

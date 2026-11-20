@@ -1,3 +1,6 @@
+import { instanteLocal, sumarDias } from "@opai/domain";
+
+import { zonaDelTenant } from "../core/turnos/comun";
 import type { Contexto } from "../types";
 import { dondeInstalacionId } from "./comun";
 import { type EstadoEjecucion, iso } from "./ejecuciones-comun";
@@ -40,6 +43,7 @@ function slotsDelDia(
   programaciones: Prog[],
   ejecutadas: { plantillaId: string; horaInicio: Date }[],
   out: Awaited<ReturnType<typeof slotsNoRealizados>>,
+  zona: string,
 ) {
   const dow = new Date(`${dia}T12:00:00.000Z`).getUTCDay();
   for (const p of programaciones) {
@@ -47,7 +51,7 @@ function slotsDelDia(
     if (p.vigenciaDesde && dia < p.vigenciaDesde.toISOString().slice(0, 10)) continue;
     if (p.vigenciaHasta && dia > p.vigenciaHasta.toISOString().slice(0, 10)) continue;
     for (const hhmm of horasDeProgramacion(p.horarios)) {
-      const slot = new Date(`${dia}T${hhmm}:00.000Z`);
+      const slot = instanteLocal(dia, hhmm, zona);
       const tolMs = p.toleranciaMin * 60_000;
       const ventanaFin = slot.getTime() + tolMs + p.plantilla.tiempoMaxMin * 60_000;
       const cubierta = ejecutadas.some(
@@ -118,18 +122,19 @@ export async function slotsNoRealizados(
     },
   });
   if (programaciones.length === 0) return [];
-  const ini = new Date(`${desde}T00:00:00.000Z`);
-  const fin = new Date(`${hasta}T23:59:59.999Z`);
+  const zona = await zonaDelTenant(ctx);
+  const ini = instanteLocal(desde, "00:00", zona);
+  const fin = instanteLocal(sumarDias(hasta, 1), "00:00", zona);
   const ejecutadas = await ctx.db.ejecucionRonda.findMany({
     where: {
       ...dondeInstalacionId(ctx),
       ...(op.instalacionId ? { instalacionId: op.instalacionId } : {}),
-      horaInicio: { gte: ini, lte: fin },
+      horaInicio: { gte: ini, lt: fin },
     },
     select: { plantillaId: true, horaInicio: true },
   });
   const out: Awaited<ReturnType<typeof slotsNoRealizados>> = [];
-  for (const dia of dias) slotsDelDia(dia, programaciones, ejecutadas, out);
+  for (const dia of dias) slotsDelDia(dia, programaciones, ejecutadas, out, zona);
   out.sort((a, b) => (b.horaInicio ?? "").localeCompare(a.horaInicio ?? ""));
   return out;
 }

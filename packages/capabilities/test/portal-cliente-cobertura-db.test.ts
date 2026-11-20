@@ -48,7 +48,7 @@ describe.skipIf(!urlPropietario)("Portal Cliente · cobertura del mes (Postgres 
       const cargo = await e.admin.cargo.create({ data: { tenantId, nombre: `Guardia ${rut}` } });
       const patron = await e.admin.patronTurno.create({ data: { tenantId, nombre: `5x2 ${rut}`, clase: "semanal", diasTrabajo: 5, diasDescanso: 2, diasSemana: [1, 2, 3, 4, 5] } });
       const puesto = await e.admin.puesto.create({ data: { tenantId, instalacionId, cargoId: cargo.id, nombre: "Portería", diasTrabajo: 5, diasDescanso: 2, horaInicio: "08:00", horaFin: "17:00", patronId: patron.id } });
-      const titular = await e.admin.persona.create({ data: { tenantId, nombres: "Titular", apellidos: "Secreto", rut, estado: "activa" } });
+      const titular = await e.admin.persona.create({ data: { tenantId, nombres: "Titular", apellidos: "Secreto", rut, estado: "activo" } });
       await e.admin.seriePauta.create({ data: { tenantId, puestoId: puesto.id, patronId: patron.id, inicioCiclo: new Date("2026-10-01"), titularPersonaId: titular.id, vigenteDesde: new Date("2026-10-01") } });
       return { puesto: puesto.id, titular: titular.id };
     };

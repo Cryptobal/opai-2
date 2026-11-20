@@ -3,8 +3,7 @@
 // Todo ficticio (RUT sintéticos 31000xxx, nombres "QA"); idempotente. Mismas guardas que el seed de Finanzas
 // (seed-finanzas-qa-guardas.ts): OPAI_ENTORNO=dev, tenant `qa-*` explícito, ambas URLs a la misma base,
 // simula por defecto y escribe con `--confirmar`.
-// Estados de persona que existen hoy en el código: activa, inactiva y bloqueada. «Postulante» y «Externo»
-// (modelo de CAR-96) aún no están en el esquema: este seed NO los inventa.
+// Estados de reclutamiento (CAR-674): postulante, activo, inactivo, externo, etc. Bloqueo operativo aparte (bloqueada).
 // Uso: OPAI_ENTORNO=dev DATABASE_URL=<opai_app> DATABASE_URL_MIGRATE=<propietario de dev> \
 //      pnpm --filter @opai/capabilities seed:personas-qa --tenant qa-personas [--confirmar]
 import { randomUUID } from "node:crypto";
@@ -17,9 +16,9 @@ import { leerDestino } from "./seed-finanzas-qa-guardas";
 
 const rutQa = (base: string) => `${base}-${digitoVerificador(base)}`;
 const PERSONAS = [
-  { rut: rutQa("31000101"), nombres: "Ana", apellidos: "QA Activa", estado: "activa", anexo: true },
-  { rut: rutQa("31000102"), nombres: "Bruno", apellidos: "QA Activo", estado: "activa", anexo: true },
-  { rut: rutQa("31000103"), nombres: "Carla", apellidos: "QA Inactiva", estado: "inactiva", anexo: false },
+  { rut: rutQa("31000101"), nombres: "Ana", apellidos: "QA Activa", estado: "activo", anexo: true },
+  { rut: rutQa("31000102"), nombres: "Bruno", apellidos: "QA Activo", estado: "activo", anexo: true },
+  { rut: rutQa("31000103"), nombres: "Carla", apellidos: "QA Inactiva", estado: "inactivo", anexo: false },
 ] as const;
 
 async function main(): Promise<void> {
@@ -54,7 +53,7 @@ async function main(): Promise<void> {
             cargoId: cargo.id,
             tipo: "indefinido",
             inicio: new Date("2026-01-05"),
-            ...(p.estado === "inactiva" ? { estado: "terminado", termino: new Date("2026-09-30") } : {}),
+            ...(p.estado === "inactivo" ? { estado: "terminado", termino: new Date("2026-09-30") } : {}),
           },
         });
       }

@@ -10,3 +10,5 @@ ruta: /finanzas/bancos/importaciones
 En **Finanzas › Bancos › Importaciones**, borrar movimientos por fechas ya no es definitivo. Lo que borras aparece en la nueva sección **Movimientos borrados por fechas**, con el rango, la fecha y la cantidad. Con **Restaurar** vuelven a la cuenta tal como estaban.
 
 Mientras están borrados no cuentan en saldos, conciliación ni flujo de caja. Si alguno ya volvió por una cartola o por la sincronización con el banco, no se duplica.
+
+Con **Ver descartes anteriores** puedes buscar los borrados más antiguos y volver a los más recientes sin cambiar de cuenta.

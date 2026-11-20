@@ -91,7 +91,7 @@ export async function equipoDe(ctx: Contexto, jefeId: string): Promise<Equipo> {
     },
   });
   // Una persona inactiva no aparece ni hace de jefe: su gente sube al nivel de arriba.
-  const activos = vinculos.filter((v) => v.persona.estado === "activa" || v.personaId === jefeId);
+  const activos = vinculos.filter((v) => v.persona.estado === "activo" || v.personaId === jefeId);
   const usuarios = activos.flatMap((v) => (v.persona.usuarioId ? [v.persona.usuarioId] : []));
   const aCargo = await instalacionesPorUsuario(ctx, usuarios);
   const personas: PersonaJefatura[] = activos.map((v) => ({
