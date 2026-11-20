@@ -27,13 +27,13 @@ export async function sinDesborde(page: Page) {
 }
 
 /** Crea un negocio en Logística Andina desde la hoja; con instalaciones si se indican. */
-export async function crearNegocio(page: Page, titulo: string, instalaciones: string[] = []) {
+export async function crearNegocio(page: Page, titulo: string, instalaciones: string[] = [], cuenta = "Logística Andina SpA") {
   await page.goto("/negocios?nuevo=1");
   const crear = dialogo(page).getByRole("button", { name: "Crear negocio" });
   await expect(crear).toBeDisabled();
   await dialogo(page).getByRole("button", { name: "Cuenta" }).click();
-  await page.getByRole("combobox").last().fill("Logística");
-  await page.getByRole("option", { name: /Logística Andina/ }).click();
+  await page.getByRole("combobox").last().fill(cuenta);
+  await page.getByRole("option", { name: cuenta }).click();
   for (const nombre of instalaciones) {
     const campo = dialogo(page).getByRole("button", { name: "Instalaciones" });
     await expect(campo).toBeEnabled();

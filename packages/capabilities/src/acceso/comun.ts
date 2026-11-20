@@ -16,6 +16,19 @@ export async function nombresInstalacion(
   return new Map(filas.map((i) => [i.id, i.nombre]));
 }
 
+/** Persona responsable de una escritura: el usuario o, si actúa un agente, el usuario por el que actúa. */
+export const quien = (ctx: Contexto) =>
+  ctx.actor.tipo === "user" ? (ctx.actor.id ?? null) : (ctx.actor.viaUserId ?? null);
+
+/** Documento tal como llega (el número nunca se guarda: solo su huella y su máscara). */
+export const documentoSchema = z
+  .object({
+    tipo: z.enum(["run", "pasaporte", "otro"]),
+    numero: z.string().min(1).max(40),
+    pais: z.string().min(2).max(3).optional(),
+  })
+  .strict();
+
 export const PERMISO_READ = "acceso:read";
 export const PERMISO_LISTAS = "acceso:listas.manage";
 /** Registrar salidas desde el ERP, anular registros y cerrar en bloque (CAR-477). */

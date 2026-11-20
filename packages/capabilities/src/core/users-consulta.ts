@@ -25,6 +25,7 @@ export const usersList = defineCapability({
       ctx,
       filas.map((m) => m.userId),
     );
-    return filas.map((m) => aMiembro(m, accesos.get(m.userId) ?? null));
+    const usuarioId = ctx.usuario?.id;
+    return filas.map((m) => aMiembro(m, accesos.get(m.userId) ?? null, usuarioId));
   },
 });
