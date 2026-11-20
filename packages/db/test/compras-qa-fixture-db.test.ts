@@ -1,24 +1,40 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { exigirDestinoComprasQaLocal } from "../scripts/compras-qa-destino";
 import { sembrarComprasQa } from "../scripts/compras-qa-fixture";
 import { COMPRAS_QA } from "../../testing/src/compras-qa";
-import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
+import { crearComprasQaAislada } from "./compras-qa-aislada";
 
-// Base efímera exclusiva: no utilizar contra una base compartida o previamente sembrada.
-describe.skipIf(!urlPropietario)("fixture de compras aislada", () => {
-  let e: Entorno;
-  beforeAll(async () => {
-    exigirDestinoComprasQaLocal(urlPropietario!);
-    e = await prepararEntorno();
-    expect(await e.admin.tenant.count()).toBe(0);
+const plantilla = process.env.COMPRAS_QA_TEMPLATE_URL;
+
+// En CI la falta de servicio es un fallo, no una omisión.
+describe.skipIf(!plantilla && !process.env.CI)("fixture de compras aislada", () => {
+  let e: Awaited<ReturnType<typeof crearComprasQaAislada>>;
+  let cerrar: (() => Promise<void>) | undefined;
+  beforeEach(async () => {
+    if (!plantilla) throw new Error("Falta el servicio de CI dedicado a compras.");
+    e = await crearComprasQaAislada(plantilla);
+    cerrar = e.cerrar;
   });
-  afterAll(async () => {
-    await e?.cerrar();
+  afterEach(async () => {
+    const limpiar = cerrar;
+    cerrar = undefined;
+    await limpiar?.();
   });
+
+  async function prepararBaseline() {
+    await e.admin.tenant.create({
+      data: {
+        slug: "qa-e2e",
+        nombre: "Empresa ficticia QA compras",
+        vertical: "seguridad",
+        estado: "activo",
+      },
+    });
+    await sembrarComprasQa(e.url);
+  }
 
   it("falla cerrado, no pisa colisiones y crea solo el conjunto sintético completo", async () => {
-    const url = urlPropietario!;
+    const url = e.url;
     await expect(sembrarComprasQa(url)).rejects.toThrow("Falta qa-e2e activo");
     const tenant = await e.admin.tenant.create({
       data: {
@@ -71,19 +87,21 @@ describe.skipIf(!urlPropietario)("fixture de compras aislada", () => {
   }
 
   it("repite sin escribir ni cambiar timestamps en ninguna fila", async () => {
+    await prepararBaseline();
     const antes = await conjunto();
-    await sembrarComprasQa(urlPropietario!);
-    await sembrarComprasQa(urlPropietario!);
+    await sembrarComprasQa(e.url);
+    await sembrarComprasQa(e.url);
     expect(await conjunto()).toEqual(antes);
   });
 
   it("rechaza un conjunto alterado, sin repararlo", async () => {
+    await prepararBaseline();
     await e.admin.documentoRecibido.update({
       where: { id: COMPRAS_QA.pagada },
       data: { montoNeto: 101, montoTotal: 120 },
     });
     const antes = await conjunto();
-    await expect(sembrarComprasQa(urlPropietario!)).rejects.toThrow("Colisión");
+    await expect(sembrarComprasQa(e.url)).rejects.toThrow("Colisión");
     expect(await conjunto()).toEqual(antes);
     await e.admin.documentoRecibido.update({
       where: { id: COMPRAS_QA.pagada },
@@ -92,6 +110,7 @@ describe.skipIf(!urlPropietario)("fixture de compras aislada", () => {
   });
 
   it("rechaza enlaces adicionales y conjuntos parciales sin sobrescribir", async () => {
+    await prepararBaseline();
     const original = await e.admin.conciliacionBanco.findUniqueOrThrow({
       where: { id: COMPRAS_QA.conciliacion },
     });
@@ -105,12 +124,12 @@ describe.skipIf(!urlPropietario)("fixture de compras aislada", () => {
       },
     });
     const antes = await conjunto();
-    await expect(sembrarComprasQa(urlPropietario!)).rejects.toThrow("Colisión");
+    await expect(sembrarComprasQa(e.url)).rejects.toThrow("Colisión");
     expect(await conjunto()).toEqual(antes);
     await e.admin.conciliacionBanco.delete({ where: { id: extra.id } });
     await e.admin.conciliacionBanco.delete({ where: { id: original.id } });
     const parcial = await conjunto();
-    await expect(sembrarComprasQa(urlPropietario!)).rejects.toThrow("Colisión");
+    await expect(sembrarComprasQa(e.url)).rejects.toThrow("Colisión");
     expect(await conjunto()).toEqual(parcial);
   });
 });
