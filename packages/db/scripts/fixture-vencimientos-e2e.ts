@@ -12,7 +12,7 @@ async function main() {
     await db.documentoTipo.delete({ where: { id: existente.id } });
   }
   if (process.argv[2] === "limpiar") return;
-  const persona = await db.persona.findFirstOrThrow({ where: { tenantId: tenant.id, archivadaEn: null, estado: { not: "inactiva" } } });
+  const persona = await db.persona.findFirstOrThrow({ where: { tenantId: tenant.id, archivadaEn: null, estado: { not: "inactivo" } } });
   const tipo = await db.documentoTipo.create({ data: { tenantId: tenant.id, codigo, nombre: "Vencimiento E2E", capa: "persona", tieneVencimiento: true } });
   const documento = await db.documento.create({ data: { tenantId: tenant.id, tipoId: tipo.id, nombre: "e2e.pdf", mime: "application/pdf", tamano: 1, storageKey: crypto.randomUUID(), creadoPorTipo: "user", estado: "disponible", venceEn: new Date("2020-01-01") } });
   await db.documentoVinculo.create({ data: { tenantId: tenant.id, documentoId: documento.id, entidadTipo: "persona", entidadId: persona.id } });

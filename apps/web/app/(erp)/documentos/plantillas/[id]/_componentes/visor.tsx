@@ -14,6 +14,7 @@ type Props = {
   pendiente: boolean;
   modo: ModoEditor;
   titulo: string;
+  camposCuenta: { clave: string; etiqueta: string }[];
 };
 
 /**
@@ -21,7 +22,7 @@ type Props = {
  * `**negrita**` y `*cursiva*`; con «Vista previa» y siempre en el teléfono, la hoja con las
  * variables resaltadas. Plantilla en blanco: el vacío del diseño (importar llega con la pantalla 09).
  */
-export function Visor({ area, texto, onTexto, pendiente, modo, titulo }: Props) {
+export function Visor({ area, texto, onTexto, pendiente, modo, titulo, camposCuenta }: Props) {
   const editar = modo === "editar";
   const vacio = texto.trim() === "";
   return (
@@ -58,7 +59,7 @@ export function Visor({ area, texto, onTexto, pendiente, modo, titulo }: Props) 
             }
           />
         ) : (
-          <HojaPlantilla titulo={titulo} texto={texto} />
+          <HojaPlantilla titulo={titulo} texto={texto} camposCuenta={camposCuenta} />
         )}
       </div>
     </div>

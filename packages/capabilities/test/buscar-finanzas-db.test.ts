@@ -63,7 +63,7 @@ describe.skipIf(omitirSuiteDb())("core.buscar · aporte de Finanzas (CAR-402)", 
 
   it("encuentra la factura por folio, solo de su empresa", async () => {
     expect(await buscar(ctx(t.a, LECTOR), "9402", "facturas")).toEqual([
-      { id: d["factura"], titulo: "Factura electrónica 9402", detalle: "Cliente Zafiro Ficticio", href: `/finanzas/ventas/${d["factura"]}` },
+      { id: d["factura"], titulo: "Factura electrónica 9402", detalle: "Cliente Zafiro Ficticio · $0", href: `/finanzas/ventas/${d["factura"]}` },
     ]);
     expect((await buscar(ctx(t.b, LECTOR), "9402", "facturas"))?.map((x) => x.id)).toEqual([d["beta"]]);
   });

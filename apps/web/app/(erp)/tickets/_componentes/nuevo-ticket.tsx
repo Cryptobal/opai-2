@@ -3,20 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Campo, Combobox, Input, Select, Sheet, Textarea } from "@opai/ds";
+import { avisar, Button, Sheet, Tooltip } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { InstalacionOpcion, TipoTicket } from "./datos";
 import { SIN_INSTALACION, useInstalacionesTicket } from "./instalaciones-ticket";
+import { NuevoTicketFormulario } from "./nuevo-ticket-formulario";
 
-// Solo el tipo viene de datos.ts: sus valores arrastran código de servidor al navegador.
-const PRIORIDADES = [
-  { valor: "p1", etiqueta: "P1 · Urgente" },
-  { valor: "p2", etiqueta: "P2 · Alta" },
-  { valor: "p3", etiqueta: "P3 · Media" },
-  { valor: "p4", etiqueta: "P4 · Baja" },
-];
+export const CONFIG_TIPOS_TICKET = "/configuracion/modulo/tickets?seccion=tipos";
+
+export const MOTIVO_SIN_TIPOS_TICKET =
+  "Para crear un ticket hace falta un tipo disponible para tu rol. Quien administra Tickets puede crearlo en Configuración › Módulos › Tickets › Tipos.";
 
 /**
  * Nuevo ticket (Sheet de la bandeja). Un ticket nace solo cuando una persona lo crea aquí o por
@@ -37,6 +35,7 @@ export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: Instalacion
   const [instalacionId, setInstalacionId] = useState(SIN_INSTALACION);
   const tipo = tipos.find((t) => t.id === tipoId);
   const valido = tipoId !== "" && titulo.trim().length >= 3 && descripcion.trim().length >= 3;
+  const sinTipos = tipos.length === 0;
 
   const cerrar = () => {
     limpiarError();
@@ -60,11 +59,21 @@ export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: Instalacion
     router.push(`/tickets/${r.id}`);
   }
 
+  const boton = (
+    <Button onClick={() => setAbierto(true)} disabled={sinTipos}>
+      Nuevo ticket
+    </Button>
+  );
+
   return (
     <>
-      <Button onClick={() => setAbierto(true)} disabled={tipos.length === 0}>
-        Nuevo ticket
-      </Button>
+      {sinTipos ? (
+        <Tooltip texto={MOTIVO_SIN_TIPOS_TICKET}>
+          <span className="inline-flex">{boton}</span>
+        </Tooltip>
+      ) : (
+        boton
+      )}
       <Sheet
         abierto={abierto}
         onCerrar={cerrar}
@@ -79,54 +88,24 @@ export function NuevoTicket(p: { tipos: TipoTicket[]; instalaciones: Instalacion
           </Button>
         }
       >
-        <div className="flex flex-col gap-4">
-          <Campo etiqueta="Tipo" htmlFor="nt-tipo">
-            <Select
-              valor={tipoId}
-              opciones={tipos.map((t) => ({
-                valor: t.id,
-                etiqueta: t.nombre,
-                ...(t.descripcion ? { descripcion: t.descripcion } : {}),
-              }))}
-              onCambiar={setTipoId}
-            />
-          </Campo>
-          {tipo?.requiereAprobacion ? (
-            <p className="t-caption">Este tipo pasa por aprobación antes de resolverse.</p>
-          ) : null}
-          <Campo etiqueta="Título" htmlFor="nt-titulo" {...(error ? { error } : {})}>
-            <Input
-              id="nt-titulo"
-              value={titulo}
-              maxLength={140}
-              onChange={(e) => setTitulo(e.target.value)}
-            />
-          </Campo>
-          <Campo etiqueta="Descripción" htmlFor="nt-desc">
-            <Textarea
-              id="nt-desc"
-              rows={5}
-              maxLength={4000}
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-            />
-          </Campo>
-          {instalaciones.length > 0 ? (
-            <Campo etiqueta="Instalación (opcional)" htmlFor="nt-inst">
-              <Combobox
-                id="nt-inst"
-                valor={instalacionId}
-                onCambiar={([v]) => setInstalacionId(v ?? SIN_INSTALACION)}
-                opciones={inst.opciones}
-                onBuscar={inst.buscar}
-                placeholder="Sin instalación"
-              />
-            </Campo>
-          ) : null}
-          <Campo etiqueta="Prioridad" htmlFor="nt-prio">
-            <Select valor={prioridad} opciones={PRIORIDADES} onCambiar={setPrioridad} />
-          </Campo>
-        </div>
+        <NuevoTicketFormulario
+          tipos={tipos}
+          tipoId={tipoId}
+          onTipo={setTipoId}
+          tipo={tipo}
+          titulo={titulo}
+          onTitulo={setTitulo}
+          descripcion={descripcion}
+          onDescripcion={setDescripcion}
+          prioridad={prioridad}
+          onPrioridad={setPrioridad}
+          instalaciones={instalaciones}
+          instalacionId={instalacionId}
+          onInstalacion={setInstalacionId}
+          instOpciones={inst.opciones}
+          onBuscarInstalacion={inst.buscar}
+          {...(error ? { error } : {})}
+        />
       </Sheet>
     </>
   );

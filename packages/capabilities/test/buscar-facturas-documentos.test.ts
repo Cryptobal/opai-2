@@ -72,7 +72,7 @@ describe("buscador facturas y documentos (CAR-526)", () => {
       {
         id: F,
         titulo: "Factura electrónica 9001",
-        detalle: "Zafiro SpA",
+        detalle: "Zafiro SpA · $1.190.000",
         href: `/finanzas/ventas/${F}`,
       },
     ]);
@@ -81,6 +81,7 @@ describe("buscador facturas y documentos (CAR-526)", () => {
     expect(porCliente.find((g) => g.grupo === "documentos")?.items).toEqual([
       { id: D, titulo: "Contrato Zafiro", detalle: "contrato-zafiro.pdf", href: `/documentos?ver=${D}` },
     ]);
+    expect((await otros(como(), "76.543.210-3")).find((g) => g.grupo === "facturas")?.items.map((i) => i.id)).toEqual([F]);
     expect((await otros(como(), "1190000")).find((g) => g.grupo === "facturas")?.items.map((i) => i.id)).toEqual([F]);
   });
 

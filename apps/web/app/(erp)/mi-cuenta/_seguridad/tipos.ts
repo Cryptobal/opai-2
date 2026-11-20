@@ -1,5 +1,5 @@
 /** Salida de `core.metodos_acceso.list` (CAR-286): solo metadatos, sin secretos. */
-export type PasskeyFila = {
+type PasskeyFila = {
   id: string;
   nombre: string | null;
   creadaEn: string | null;

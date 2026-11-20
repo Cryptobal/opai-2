@@ -3,6 +3,7 @@ import { NOMBRE_TIPO_DTE_VENTA, type TipoDteVenta } from "@opai/domain";
 
 const MAX = 5;
 const PERMISO_READ = "finanzas:read";
+const clp = (n: number) => `$${new Intl.NumberFormat("es-CL").format(n)}`;
 const contiene = (q: string) => ({ contains: q, mode: "insensitive" as const });
 
 /** «102» o «folio 102»: el folio buscado, o null si el texto no es un número. */
@@ -35,7 +36,14 @@ export const buscadoresFinanzas: readonly Buscador[] = [
     async buscar(ctx, q) {
       const folio = folioDeBusqueda(q);
       const monto = montoDeBusqueda(q);
-      const cuentas = await nombresDeCuentas(ctx, { OR: [{ nombre: contiene(q) }, { razonSocial: contiene(q) }] });
+      const rut = q.replace(/[.\s]/g, "").toUpperCase();
+      const cuentas = await nombresDeCuentas(ctx, {
+        OR: [
+          { nombre: contiene(q) },
+          { razonSocial: contiene(q) },
+          ...(/^[0-9]{2,8}(?:-[0-9K]?)?$/.test(rut) ? [{ rut: { startsWith: rut } }] : []),
+        ],
+      });
       const coincide = [
         ...(folio !== null ? [{ folio }] : []),
         ...(monto !== null ? [{ montoTotal: monto }] : []),
@@ -44,7 +52,7 @@ export const buscadoresFinanzas: readonly Buscador[] = [
       if (!coincide.length) return [];
       const filas = await ctx.db.documentoEmitido.findMany({
         where: { OR: coincide },
-        select: { id: true, tipoDte: true, folio: true, cuentaId: true },
+        select: { id: true, tipoDte: true, folio: true, montoTotal: true, cuentaId: true },
         orderBy: [{ fechaEmision: { sort: "desc", nulls: "first" } }, { id: "desc" }],
         take: MAX,
       });
@@ -55,7 +63,7 @@ export const buscadoresFinanzas: readonly Buscador[] = [
         return {
           id: f.id,
           titulo: f.folio ? `${tipo} ${f.folio}` : `${tipo} · borrador`,
-          detalle: cuentas.get(f.cuentaId) ?? null,
+          detalle: `${cuentas.get(f.cuentaId) ?? "Cliente"} · ${clp(f.montoTotal)}`,
           href: `/finanzas/ventas/${f.id}`,
         };
       });
