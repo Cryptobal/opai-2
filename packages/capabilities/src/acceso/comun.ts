@@ -46,11 +46,7 @@ export { TIPOS_REGISTRO } from "@opai/domain";
 /** Una entrada de lista tal como se muestra: el documento solo enmascarado, nunca la huella ni el número. */
 export const entradaListaSchema = z.object({
   id: uuidSchema,
-  alcance: z.enum(["empresa", "cuenta", "instalacion", "grupo"]),
-  instalacionId: uuidSchema.nullable(),
-  cuentaId: uuidSchema.nullable(),
-  grupoId: uuidSchema.nullable(),
-  agregadaPor: uuidSchema.nullable(),
+  instalacionId: uuidSchema,
   tipo: z.enum(TIPOS_LISTA),
   docTipo: z.string(),
   mascara: z.string(),
@@ -68,11 +64,7 @@ export type EntradaListaVista = z.infer<typeof entradaListaSchema>;
 
 type Fila = {
   id: string;
-  alcance: string;
-  instalacionId: string | null;
-  cuentaId: string | null;
-  grupoId: string | null;
-  agregadaPor: string | null;
+  instalacionId: string;
   tipo: string;
   docTipo: string;
   mascara: string;
@@ -88,17 +80,9 @@ type Fila = {
 };
 
 export function vistaEntrada(f: Fila): EntradaListaVista {
-  const alcance = f.alcance;
   return {
     id: f.id,
-    alcance:
-      alcance === "empresa" || alcance === "cuenta" || alcance === "instalacion" || alcance === "grupo"
-        ? alcance
-        : "instalacion",
     instalacionId: f.instalacionId,
-    cuentaId: f.cuentaId,
-    grupoId: f.grupoId,
-    agregadaPor: f.agregadaPor,
     tipo: f.tipo === "bloqueada" ? "bloqueada" : "autorizada",
     docTipo: f.docTipo,
     mascara: f.mascara,

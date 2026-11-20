@@ -9,6 +9,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { FormularioAvisos } from "../_componentes/formulario-avisos";
 import { estadoTrabajador, SIN_FICHA } from "../_componentes/estado";
 import type { Preferencias } from "../_componentes/tipos";
+import { DesactivarEnVista } from "@/app/_components/ver-como/solo-lectura";
 
 export const metadata = { title: tituloPagina("trabajador", "Notificaciones") };
 
@@ -35,16 +36,18 @@ export default function Pagina() {
           textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}
         >
           {datos ? (
-            <FormularioAvisos
-              inicial={datos}
-              clavePush={clavePublicaPush()}
-              cabecera={
-                <Cabecera
-                  titulo="Notificaciones"
-                  subtitulo="Los avisos dentro de la app y los avisos legales (por ejemplo, cambios de contrato) siempre te llegan. Aquí eliges cuáles más recibes por celular y por correo."
-                />
-              }
-            />
+            <DesactivarEnVista>
+              <FormularioAvisos
+                inicial={datos}
+                clavePush={clavePublicaPush()}
+                cabecera={
+                  <Cabecera
+                    titulo="Notificaciones"
+                    subtitulo="Los avisos dentro de la app y los avisos legales (por ejemplo, cambios de contrato) siempre te llegan. Aquí eliges cuáles más recibes por celular y por correo."
+                  />
+                }
+              />
+            </DesactivarEnVista>
           ) : null}
         </Estado>
       )}

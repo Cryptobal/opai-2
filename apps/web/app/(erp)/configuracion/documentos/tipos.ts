@@ -18,6 +18,8 @@ export const CAPAS = [
   { id: "instalacion", etiqueta: "Instalación" },
   { id: "persona", etiqueta: "Persona" },
   { id: "puesto", etiqueta: "Puesto" },
+  { id: "ticket", etiqueta: "Ticket" },
+  { id: "visita", etiqueta: "Visita de supervisión" },
 ] as const;
 
 export const PORTALES = [

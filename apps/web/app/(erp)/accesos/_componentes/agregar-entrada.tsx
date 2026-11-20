@@ -1,23 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { avisar, Button, Campo, Select, Sheet } from "@opai/ds";
+import { avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { ALCANCES_LISTA, minutos, type AlcanceLista } from "./borrador-entrada";
+import { minutos } from "./borrador-entrada";
 import { BORRADOR_VACIO, type Borrador, CamposEntrada } from "./campos-entrada";
-
-type GrupoLista = { id: string; nombre: string; instalacionIds: string[] };
 
 /** Entrada de la capacidad `acceso.listas.agregar` a partir del borrador de la hoja. */
 function entradaDe(instalacionId: string, tipo: "autorizada" | "bloqueada", b: Borrador) {
   const horario = tipo === "autorizada" && b.desde && b.hastaHora;
   return {
     instalacionId,
-    alcance: b.alcance,
-    ...(b.alcance === "grupo" && b.grupoId ? { grupoId: b.grupoId } : {}),
     tipo,
     documento: {
       tipo: b.docTipo,
@@ -27,6 +23,7 @@ function entradaDe(instalacionId: string, tipo: "autorizada" | "bloqueada", b: B
     ...(b.nombre.trim().length >= 2 ? { nombre: b.nombre.trim() } : {}),
     ...(tipo === "bloqueada" ? { motivo: b.motivo.trim() } : {}),
     tiposRegistro: b.tipos,
+    // Fin del día elegido en la hora del navegador (la vigencia es un instante; la portería la cruza en su zona).
     ...(b.hasta ? { vigenteHasta: new Date(`${b.hasta}T23:59:59`).toISOString() } : {}),
     ...(tipo === "autorizada" ? { dias: b.dias, usoUnico: b.usoUnico } : {}),
     ...(horario ? { desdeMin: minutos(b.desde), hastaMin: minutos(b.hastaHora) } : {}),
@@ -42,7 +39,6 @@ function avisoBorrador(b: Borrador, bloqueada: boolean): string | null {
     return "El horario necesita desde y hasta.";
   if (!bloqueada && b.desde && b.desde >= b.hastaHora)
     return "El horario debe terminar después de empezar (un horario que cruza la medianoche aún no se admite).";
-  if (b.alcance === "grupo" && !b.grupoId) return "Elige el grupo de instalaciones.";
   return null;
 }
 
@@ -57,19 +53,9 @@ export function AgregarEntrada({
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [abierto, setAbierto] = useState(false);
   const [b, setB] = useState<Borrador>(BORRADOR_VACIO);
-  const [grupos, setGrupos] = useState<GrupoLista[]>([]);
   const bloqueada = tipo === "bloqueada";
   const aviso = avisoBorrador(b, bloqueada);
   const valido = aviso === null;
-
-  useEffect(() => {
-    if (!abierto) return;
-    void ejecutar("acceso.grupos.list", { limite: 200 }).then((g) => {
-      if (g && "items" in g && Array.isArray(g.items)) setGrupos(g.items as GrupoLista[]);
-    });
-  }, [abierto, ejecutar]);
-
-  const gruposDeInstalacion = grupos.filter((g) => g.instalacionIds.includes(instalacionId));
 
   async function guardar() {
     const r = await ejecutar("acceso.listas.agregar", entradaDe(instalacionId, tipo, b));
@@ -103,27 +89,6 @@ export function AgregarEntrada({
       >
         {error ? <p className="t-caption mb-3 text-danger-fg">{error}</p> : null}
         {aviso && b.numero.trim() ? <p className="t-caption mb-3 text-fg-muted">{aviso}</p> : null}
-        <Campo etiqueta="Alcance" htmlFor="ae-alcance">
-          <Select
-            id="ae-alcance"
-            valor={b.alcance}
-            opciones={ALCANCES_LISTA}
-            onCambiar={(v) => setB({ ...b, alcance: v as AlcanceLista, grupoId: "" })}
-          />
-        </Campo>
-        {b.alcance === "grupo" ? (
-          <Campo etiqueta="Grupo" htmlFor="ae-grupo">
-            <Select
-              id="ae-grupo"
-              valor={b.grupoId}
-              opciones={[
-                { valor: "", etiqueta: "Elige un grupo…" },
-                ...gruposDeInstalacion.map((g) => ({ valor: g.id, etiqueta: g.nombre })),
-              ]}
-              onCambiar={(v) => setB({ ...b, grupoId: v })}
-            />
-          </Campo>
-        ) : null}
         <CamposEntrada b={b} set={setB} bloqueada={bloqueada} />
       </Sheet>
     </>

@@ -10,7 +10,7 @@ import type { ContratoPeriodos, PeriodoContrato } from "./lecturas-ficha";
 
 const MAX_PLAZOS = 3;
 
-export function textoPeriodo(p: PeriodoContrato): string {
+function textoPeriodo(p: PeriodoContrato): string {
   return p.tipo === "indefinido"
     ? `Indefinido desde ${fecha(p.inicio)}`
     : `${p.numero}.º plazo fijo · ${fecha(p.inicio)} al ${p.termino ? fecha(p.termino) : "—"}`;

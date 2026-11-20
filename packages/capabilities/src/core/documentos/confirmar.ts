@@ -1,5 +1,5 @@
 import { filtroDocumentoSensible } from "./sensibles";
-import { documentosEnAlcance } from "./alcance-doc";
+import { filtroAlcanceDocumentos } from "./alcance-doc";
 import { z } from "zod";
 
 import { motivoSubidaInvalida, PERMISOS_CORE } from "@opai/domain";
@@ -25,12 +25,11 @@ export const documentosConfirmarSubida = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const permitidos = await documentosEnAlcance(ctx);
+    const permitidos = await filtroAlcanceDocumentos(ctx);
     const d = await ctx.db.documento.findFirst({
       where: {
-        ...filtroDocumentoSensible(ctx),
-        id: input.id,
-        ...(permitidos ? { id: { in: [...permitidos].filter((id) => id === input.id) } } : {}),
+                id: input.id,
+        AND: [filtroDocumentoSensible(ctx), permitidos],
       },
     });
     if (!d) throw noEncontrado("El documento");

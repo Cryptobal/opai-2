@@ -35,8 +35,10 @@ export async function ejecutarAsistenciaEquipo(
   if (!(await permitir(`asistencia-equipo:${equipo.dispositivoId}`, 60, 60_000, { fallarCerrado: true })))
     return falla("UNPROCESSABLE", "Demasiados intentos. Espera un momento.");
   const propio = id === "asistencia.marcas.registrar" ? { instalacionId: equipo.instalacionId, canal: "kiosco" } : {};
+  const ctx = contextoSistema(equipo.tenantId, ["asistencia"]);
+  if (equipo.verComo) ctx.verComo = equipo.verComo;
   const r = await executeCapability(
-    contextoSistema(equipo.tenantId, ["asistencia"]),
+    ctx,
     id,
     { ...entrada, ...propio, dispositivoId: equipo.dispositivoId },
     { dryRun },

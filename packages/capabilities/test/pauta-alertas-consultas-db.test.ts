@@ -19,7 +19,7 @@ describe.skipIf(!urlPropietario)("Alertas de pauta: consultas constantes (CAR-16
     const cargo = (await e.admin.cargo.create({ data: { tenantId, nombre: `G${n}` } })).id;
     const patron = (await e.admin.patronTurno.create({ data: { tenantId, nombre: `4x4-${n}`, diasTrabajo: 4, diasDescanso: 4 } })).id;
     for (let i = 0; i < n; i++) {
-      const persona = (await e.admin.persona.create({ data: { tenantId, nombres: `P${i}`, apellidos: "X", rut: `${10 + i}.${n}00.000-0`, estado: "activa" } })).id;
+      const persona = (await e.admin.persona.create({ data: { tenantId, nombres: `P${i}`, apellidos: "X", rut: `${10 + i}.${n}00.000-0`, estado: "activo" } })).id;
       const puesto = (await e.admin.puesto.create({ data: { tenantId, instalacionId: inst, cargoId: cargo, nombre: `Pu${i}`, diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00" } })).id;
       await e.admin.seriePauta.create({
         data: { tenantId, puestoId: puesto, patronId: patron, inicioCiclo: new Date(`${hoy}T00:00:00Z`), titularPersonaId: persona, vigenteDesde: new Date(`${hoy}T00:00:00Z`) },

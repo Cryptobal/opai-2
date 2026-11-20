@@ -1,24 +1,16 @@
 import { z } from "zod";
 
-import { ALCANCES_LISTA, normalizarDocumento } from "@opai/domain";
+import { normalizarDocumento } from "@opai/domain";
 
-import { instalacionEnAlcance } from "../rondas/comun";
+import { instalacionEnAlcance, dondeInstalacionId } from "../rondas/comun";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { reglaDeNegocio } from "../errores";
+import { noEncontrado, reglaDeNegocio } from "../errores";
 import { huellasCandidatas, huellaVigente } from "./huella";
-import {
-  clavesAlcance,
-  finVigenciaBloqueo,
-  metaListasInstalacion,
-  whereDuplicadoLista,
-  whereEntradasAplicanAInstalacion,
-} from "./listas-alcance";
 import {
   documentoSchema,
   entradaListaSchema,
   PERMISO_LISTAS,
-  quien,
   TIPOS_LISTA,
   TIPOS_REGISTRO,
   vistaEntrada,
@@ -38,11 +30,8 @@ export const listasListar = defineCapability({
   auditarLectura: (salida) => salida.map((e) => e.id),
   async handler(ctx, { instalacionId, tipo }) {
     await instalacionEnAlcance(ctx, instalacionId);
-    const meta = await metaListasInstalacion(ctx, instalacionId);
     const filas = await ctx.db.entradaLista.findMany({
-      where: {
-        AND: [whereEntradasAplicanAInstalacion(meta, instalacionId), ...(tipo ? [{ tipo }] : [])],
-      },
+      where: { AND: [{ instalacionId }, dondeInstalacionId(ctx)], ...(tipo ? { tipo } : {}) },
       orderBy: { createdAt: "desc" },
       take: 500,
     });
@@ -57,9 +46,6 @@ export const listasAgregar = defineCapability({
   permiso: PERMISO_LISTAS,
   input: z.object({
     instalacionId: uuidSchema,
-    alcance: z.enum(ALCANCES_LISTA).default("instalacion"),
-    cuentaId: uuidSchema.optional(),
-    grupoId: uuidSchema.optional(),
     tipo: z.enum(TIPOS_LISTA),
     documento: documentoSchema,
     nombre: z.string().trim().min(2).max(120).optional(),
@@ -85,16 +71,6 @@ export const listasAgregar = defineCapability({
       throw reglaDeNegocio("El horario necesita desde y hasta.");
     if (i.vigenteDesde && i.vigenteHasta && i.vigenteDesde >= i.vigenteHasta)
       throw reglaDeNegocio("La vigencia termina antes de empezar.");
-    const meta = await metaListasInstalacion(ctx, i.instalacionId);
-    const claves = clavesAlcance({
-      alcance: i.alcance,
-      instalacionId: i.instalacionId,
-      cuentaId: i.cuentaId ?? null,
-      grupoId: i.grupoId ?? null,
-      meta,
-    });
-    if (i.alcance === "grupo" && i.grupoId && !meta.grupoIds.includes(i.grupoId))
-      throw reglaDeNegocio("Este grupo no aplica a la instalación.");
     const d = normalizarDocumento({
       tipo: i.documento.tipo,
       numero: i.documento.numero,
@@ -107,21 +83,19 @@ export const listasAgregar = defineCapability({
       clave: d.clave,
     }).map((h) => h.huella);
     const ya = await ctx.db.entradaLista.findFirst({
-      where: whereDuplicadoLista(claves, i.tipo, d.tipo, candidatas),
+      where: {
+        instalacionId: i.instalacionId,
+        tipo: i.tipo,
+        docTipo: d.tipo,
+        huella: { in: candidatas },
+      },
       select: { id: true },
     });
     if (ya) throw reglaDeNegocio("Este documento ya está en la lista.");
     const h = huellaVigente({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
-    const vigenteDesde = i.vigenteDesde ? new Date(i.vigenteDesde) : null;
-    const vigenteHastaInput = i.vigenteHasta ? new Date(i.vigenteHasta) : null;
-    const vigenteHasta =
-      i.tipo === "bloqueada"
-        ? finVigenciaBloqueo(vigenteDesde, vigenteHastaInput)
-        : vigenteHastaInput;
     const data = {
       tenantId: ctx.tenantId,
-      ...claves,
-      agregadaPor: quien(ctx),
+      instalacionId: i.instalacionId,
       tipo: i.tipo,
       docTipo: d.tipo,
       huella: h.huella,
@@ -130,8 +104,8 @@ export const listasAgregar = defineCapability({
       nombre: i.nombre ?? null,
       motivo: i.motivo ?? null,
       tiposRegistro: i.tiposRegistro,
-      vigenteDesde,
-      vigenteHasta,
+      vigenteDesde: i.vigenteDesde ? new Date(i.vigenteDesde) : null,
+      vigenteHasta: i.vigenteHasta ? new Date(i.vigenteHasta) : null,
       dias: i.dias,
       desdeMin: i.desdeMin ?? null,
       hastaMin: i.hastaMin ?? null,
@@ -142,3 +116,27 @@ export const listasAgregar = defineCapability({
   },
 });
 
+export const listasQuitar = defineCapability({
+  id: "acceso.listas.quitar",
+  descripcion:
+    "Quita una entrada de la lista autorizada o bloqueada de una instalación. Si la entrada ya se usó en algún ingreso no se borra: queda vencida desde ahora, para conservar el historial.",
+  permiso: PERMISO_LISTAS,
+  input: z.object({ id: uuidSchema }),
+  output: z.object({ id: uuidSchema, accion: z.enum(["eliminada", "vencida"]) }),
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, { id }, { dryRun }) {
+    const e = await ctx.db.entradaLista.findFirst({
+      where: { AND: [{ id }, dondeInstalacionId(ctx)] },
+      include: { registros: { select: { id: true }, take: 1 } },
+    });
+    if (!e) throw noEncontrado("La entrada de lista");
+    const usada = e.registros.length > 0;
+    if (!dryRun) {
+      if (usada)
+        await ctx.db.entradaLista.update({ where: { id }, data: { vigenteHasta: new Date() } });
+      else await ctx.db.entradaLista.delete({ where: { id } });
+    }
+    return { id, accion: usada ? ("vencida" as const) : ("eliminada" as const) };
+  },
+});

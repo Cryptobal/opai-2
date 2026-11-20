@@ -17,6 +17,7 @@ export const turnosExtraListar = defineCapability({
     estado: z.enum(["por_aprobar", "aprobado", "rechazado"]).optional(),
     instalacionId: uuidSchema.optional(),
     puestoId: uuidSchema.optional(),
+    personaId: uuidSchema.optional(),
     desde: diaSchema.optional(),
     hasta: diaSchema.optional(),
     cursor: listaSchema.shape.cursor,
@@ -42,6 +43,7 @@ export const turnosExtraListar = defineCapability({
       where: {
         puestoId: { in: puestoIds },
         ...(input.estado ? { estado: input.estado } : {}),
+        ...(input.personaId ? { personaId: input.personaId } : {}),
         ...(input.desde || input.hasta
           ? {
               fecha: {

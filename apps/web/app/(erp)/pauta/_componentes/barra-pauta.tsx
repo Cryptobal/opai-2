@@ -1,12 +1,14 @@
 "use client";
 
-import { Button, ChipToggle, InputFecha, Select } from "@opai/ds";
+import { Button, ChipToggle, Select } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useParametros } from "@/app/_components/maestros/use-url";
 
-import { claveMes, mesVecino, nombreMes } from "./etiquetas";
-import { PublicarPauta } from "./publicar-pauta";
+import { BarraPautaAccionesInst } from "./barra-pauta-acciones-inst";
+import { claveMes, mesVecino } from "./etiquetas";
+import { NavegacionVistasPauta } from "./navegacion-vistas-pauta";
+import { SelectorMesPauta } from "./selector-mes-pauta";
 import type { OpcionInstalacion } from "./tipos";
 
 function urlExportar(
@@ -39,6 +41,38 @@ type Props = {
   puedeEditar: boolean;
 };
 
+function BarraPautaFiltrosInst({
+  inst,
+  anio,
+  mes,
+  diaria,
+  fecha,
+  verPpc,
+  puedeEditar,
+  fijar,
+}: {
+  inst: string;
+  anio: number;
+  mes: number;
+  diaria: boolean;
+  fecha: string;
+  verPpc: boolean;
+  puedeEditar: boolean;
+  fijar: ReturnType<typeof useParametros>["fijar"];
+}) {
+  return (
+    <BarraPautaAccionesInst
+      inst={inst}
+      anio={anio}
+      mes={mes}
+      diaria={diaria}
+      puedeEditar={puedeEditar}
+      urlExportar={(formato) => urlExportar(inst, formato, anio, mes, fecha, diaria, verPpc)}
+      onAlertas={() => fijar({ alertas: "1" })}
+    />
+  );
+}
+
 /** Selector de instalación y de mes, filtro «Sin cubrir» y acceso al historial (todo en la URL). */
 export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha, puedeEditar }: Props) {
   const { fijar } = useParametros();
@@ -48,11 +82,14 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
   };
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <nav aria-label="Vistas de pauta" className="flex w-full gap-2">
-        <Button variant={diaria ? "secondary" : "primary"} aria-current={!diaria ? "page" : undefined} onClick={() => fijar({ vista: null, ver: null, dia: null })}>Mensual</Button>
-        <Button variant={diaria ? "primary" : "secondary"} aria-current={diaria ? "page" : undefined} onClick={() => fijar({ vista: "diaria", ver: null, dia: null })}>Diaria</Button>
-        <EnlaceBoton variante="secondary" href={`/pauta/instalaciones?mes=${claveMes(anio, mes)}`}>Por instalación</EnlaceBoton>
-      </nav>
+      <NavegacionVistasPauta
+        diaria={diaria}
+        anio={anio}
+        mes={mes}
+        claveMes={claveMes(anio, mes)}
+        onMensual={() => fijar({ vista: null, ver: null, dia: null })}
+        onDiaria={() => fijar({ vista: "diaria", ver: null, dia: null })}
+      />
       <Select
         aria-label="Instalación"
         className="w-full sm:w-64"
@@ -63,17 +100,15 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
           ...instalaciones.map((i) => ({ valor: i.id, etiqueta: i.nombre })),
         ]}
       />
-      {diaria ? <InputFecha aria-label="Fecha de la pauta" className="w-48" valor={fecha} onCambiar={(v) => { if (v) fijar({ fecha: v, dia: null }); }} /> : <div className="flex items-center gap-1">
-        <Button variant="ghost" size="iconSm" aria-label="Mes anterior" onClick={() => irA(-1)}>
-          ‹
-        </Button>
-        <span className="t-label min-w-36 text-center first-letter:uppercase" aria-live="polite">
-          {nombreMes(anio, mes)}
-        </span>
-        <Button variant="ghost" size="iconSm" aria-label="Mes siguiente" onClick={() => irA(1)}>
-          ›
-        </Button>
-      </div>}
+      <SelectorMesPauta
+        diaria={diaria}
+        fecha={fecha}
+        anio={anio}
+        mes={mes}
+        onFecha={(v) => fijar({ fecha: v, dia: null })}
+        onMesAnterior={() => irA(-1)}
+        onMesSiguiente={() => irA(1)}
+      />
       <div className="flex flex-wrap items-center gap-2">
         <ChipToggle
           etiqueta="Sin cubrir"
@@ -81,18 +116,16 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
           onCambiar={(a) => fijar({ ver: a ? "ppc" : null })}
         />
         {inst ? (
-          <>
-            <EnlaceBoton variante="secondary" href={urlExportar(inst, "excel", anio, mes, fecha, diaria, verPpc)}>
-              CSV
-            </EnlaceBoton>
-            <EnlaceBoton variante="secondary" href={urlExportar(inst, "pdf", anio, mes, fecha, diaria, verPpc)}>
-              PDF
-            </EnlaceBoton>
-            <Button variant="secondary" onClick={() => fijar({ alertas: "1" })}>
-              Alertas
-            </Button>
-            {!diaria && puedeEditar ? <PublicarPauta key={`${inst}-${anio}-${mes}`} inst={inst} anio={anio} mes={mes} /> : null}
-          </>
+          <BarraPautaFiltrosInst
+            inst={inst}
+            anio={anio}
+            mes={mes}
+            diaria={diaria}
+            fecha={fecha}
+            verPpc={verPpc}
+            puedeEditar={puedeEditar}
+            fijar={fijar}
+          />
         ) : null}
       </div>
       <Button

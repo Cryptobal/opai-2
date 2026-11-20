@@ -9,14 +9,11 @@ import {
   prerregistrosListar,
   prerregistrosObtener,
 } from "./prerregistros-leer";
-import { gruposCambiar, gruposListar } from "./grupos-lista";
-import { listasAgregar, listasListar } from "./listas";
-import { listasQuitar } from "./listas-quitar";
+import { listasAgregar, listasListar, listasQuitar } from "./listas";
+import { portalRegistrosListar } from "./portal-cliente";
 import { puntosCambiar, puntosListar } from "./puntos";
 import { aparienciaCambiar, aparienciaGet } from "./apariencia";
 import { registrosObtener } from "./registro-get";
-import { privacidadCartel } from "./privacidad";
-import { reportesProbar } from "./reportes";
 import { registrosListar } from "./registros";
 
 export const capacidadesAcceso: readonly Capacidad[] = [
@@ -38,14 +35,9 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   configCambiar,
   puntosListar,
   puntosCambiar,
-  gruposListar,
-  gruposCambiar,
   aparienciaGet,
   aparienciaCambiar,
-  reportesProbar,
-  privacidadCartel,
+  portalRegistrosListar,
 ];
 
 export { trabajoCierreAutomatico } from "./cierre";
-export { trabajoReportesAcceso } from "./reportes-trabajo";
-export { trabajoRetencionAcceso } from "./retencion-trabajo";

@@ -31,6 +31,7 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.personasManage]: [true, true, true, false, false],
   // P1 "No recontratar" (Personas y Cargos PR 1): solo owner y admin ven y marcan por defecto.
   [P.personasNoRecontratarManage]: [true, true, false, false, false],
+  [P.personasEstadoAdmin]: [true, true, false, false, false],
   [P.personasPrevisionRead]: [true, true, false, true, false],
   [P.personasPrevisionManage]: [true, true, false, false, false],
   [P.personasPagoRead]: [true, true, false, true, false],
