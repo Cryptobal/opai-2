@@ -7,6 +7,12 @@ import { Alerta, Button } from "@opai/ds";
 type Detector = { detect(fuente: HTMLVideoElement): Promise<{ rawValue: string }[]> };
 type ConstructorDetector = new (o: { formats: string[] }) => Detector;
 
+/** Si el navegador puede usar BarcodeDetector y cámara (portería: esperados con QR). */
+export function lectorDisponible(): boolean {
+  if (typeof window === "undefined") return false;
+  return Boolean(Reflect.get(window, "BarcodeDetector") && navigator.mediaDevices?.getUserMedia);
+}
+
 /**
  * Escaneo del QR con la cámara (CAR-78 · E3c). Todo ocurre en el teléfono: la imagen nunca se envía ni se guarda;
  * solo sale el texto del código. Al leer uno, apaga la cámara y lo entrega.
