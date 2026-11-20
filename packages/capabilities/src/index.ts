@@ -17,8 +17,6 @@ export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/segu
 export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas, indicadoresRondas, trabajoVigilanciaRondas } from "./rondas";
 export { ajustesNomina, buscadoresNomina, capacidadesNomina, consumidoresNomina } from "./nomina";
-export { ajustesPauta, ausenteSinJustificar, buscadoresPauta, capacidadesPauta, consumidorPautaCambio, consumidorPautaPublicada, diasConTurno, type DiaConTurno, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
-export { ajustesNomina, buscadoresNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, ausenteSinJustificar, buscadoresPauta, capacidadesPauta, consumidorPautaCambio, consumidorPautaPublicada, diasConTurno, type DiaConTurno, fuentesAprobacionTurnosExtra, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
 export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
