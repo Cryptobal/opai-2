@@ -10,7 +10,7 @@ export const VERBOS: Record<string, string> = {
   acteco_get: "Ver actividad económica (ACTECO)", acteco_set: "Fijar actividad económica (ACTECO)", acteco_buscar: "Buscar actividad económica del SII",
   detalle: "Detalle", fusionar: "Fusionar", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar", otorgar: "Otorgar",
   consultar_sii: "Consultar al SII", facturable: "Ver si está lista para facturar", aplicar_sii: "Aplicar datos del SII",
-  set_representantes: "Definir representantes", set_activo: "Activar o desactivar", bloquear: "Bloquear", cargar_sugeridos: "Cargar sugeridos", movimientos: "Ver movimientos", ingresar: "Ingresar", ajustar: "Ajustar", entregar_activo: "Entregar activo", entregar_ropa: "Entregar ropa",
+  set_representantes: "Definir representantes", set_activo: "Activar o desactivar", bloquear: "Bloquear", cargar_sugeridos: "Cargar sugeridos", movimientos: "Ver movimientos", ingresar: "Ingresar", ajustar: "Ajustar", entregar_activo: "Entregar activo", entregar_ropa: "Entregar ropa", talla_persona: "Proponer talla de la persona",
   desbloquear: "Desbloquear", vincular_usuario: "Vincular usuario", no_recontratar_ver: "Ver no recontratar",
   a_evaluacion: "Pasar a evaluación", marcar_externo: "Marcar como externa",
   inactivar: "Inactivar", contratar_externo: "Contratar externa", reactivar: "Reactivar", externar: "Pasar a externa",

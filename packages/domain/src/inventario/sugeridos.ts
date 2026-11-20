@@ -1,5 +1,6 @@
-// Tipos sugeridos por vertical (CAR-235, R6): lo típico del rubro para empezar con un clic.
-// La ropa queda sin prenda del uniforme: el vínculo con las tallas de Personas (CAR-408) llega con CAR-237.
+// Tipos sugeridos por vertical (CAR-235, R6): lo típico del rubro para empezar con un clic. La ropa sale
+// del kit del uniforme de la empresa (CAR-408, CAR-504): cada tipo queda ligado a su prenda.
+import type { Prenda } from "../uniforme/prendas";
 import { claveCampo, type CampoTipo, type CategoriaTipo } from "./tipos";
 
 export type TipoSugerido = {
@@ -31,13 +32,20 @@ const LETRAS = ["XS", "S", "M", "L", "XL", "XXL"];
 const PANTALON = ["38", "40", "42", "44", "46", "48", "50", "52"];
 const CALZADO = ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"];
 
-const ropa = (nombre: string, tallas = LETRAS): TipoSugerido => ({
-  nombre,
+/** Tallas típicas según la prenda: numéricas para pantalones y calzado, por letra para lo demás. */
+function tallasDe(clave: string): string[] {
+  if (/pantal/.test(clave)) return PANTALON;
+  if (/calzado|zapat|bota/.test(clave)) return CALZADO;
+  return LETRAS;
+}
+
+const ropa = (p: Prenda): TipoSugerido => ({
+  nombre: p.nombre,
   categoria: "ropa",
   descripcion: null,
   campos: [],
-  tallas,
-  prendaClave: null,
+  tallas: tallasDe(p.clave),
+  prendaClave: p.clave,
 });
 
 const TELEFONO = activo("Teléfono", "Teléfono corporativo del puesto o de la persona.", [
@@ -50,20 +58,6 @@ const LINEA = activo("Línea telefónica", "Número de teléfono contratado con 
   campo("Operador", "texto", true),
   campo("Plan"),
 ]);
-
-const ROPA_POR_VERTICAL: Record<string, TipoSugerido[]> = {
-  seguridad: [
-    ropa("Camisa"),
-    ropa("Pantalón", PANTALON),
-    ropa("Chaqueta"),
-    ropa("Polera"),
-    ropa("Geólogo"),
-    ropa("Polar"),
-    ropa("Calzado", CALZADO),
-  ],
-  aseo: [ropa("Cotona"), ropa("Pantalón", PANTALON), ropa("Polera"), ropa("Polar"), ropa("Calzado", CALZADO)],
-  mantenimiento: [ropa("Overol"), ropa("Polera"), ropa("Chaqueta"), ropa("Calzado de seguridad", CALZADO)],
-};
 
 const ACTIVOS_POR_VERTICAL: Record<string, TipoSugerido[]> = {
   seguridad: [
@@ -78,13 +72,7 @@ const ACTIVOS_POR_VERTICAL: Record<string, TipoSugerido[]> = {
   ],
 };
 
-/** Tipos sugeridos de una vertical; una vertical sin lista propia recibe los básicos. */
-export function tiposSugeridos(vertical: string): TipoSugerido[] {
-  const activos = ACTIVOS_POR_VERTICAL[vertical] ?? [TELEFONO, LINEA];
-  const prendas = ROPA_POR_VERTICAL[vertical] ?? [
-    ropa("Camisa"),
-    ropa("Pantalón", PANTALON),
-    ropa("Calzado", CALZADO),
-  ];
-  return [...activos, ...prendas];
+/** Tipos sugeridos: los activos típicos de la vertical y una prenda de ropa por cada prenda del kit. */
+export function tiposSugeridos(vertical: string, prendas: Prenda[]): TipoSugerido[] {
+  return [...(ACTIVOS_POR_VERTICAL[vertical] ?? [TELEFONO, LINEA]), ...prendas.map(ropa)];
 }

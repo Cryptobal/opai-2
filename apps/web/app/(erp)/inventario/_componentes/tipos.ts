@@ -18,6 +18,9 @@ export type TipoInventario = {
   activo: boolean;
 };
 
+/** Prenda del uniforme de la empresa (CAR-408) a la que puede apuntar un tipo de ropa (CAR-504). */
+export type PrendaKit = { clave: string; nombre: string };
+
 export const CATEGORIAS = [
   { valor: "activo", etiqueta: "Activo" },
   { valor: "ropa", etiqueta: "Ropa" },

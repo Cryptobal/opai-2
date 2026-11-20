@@ -33,7 +33,7 @@ export default function TipoDetalle({ params, searchParams }: Props) {
       cargar={() => cargarFichaTipo(params, searchParams)}
       opciones={(d) => ({ volver: { href: conBusqueda("/inventario/tipos", d.p.q), etiqueta: "Tipos" } })}
     >
-      {({ id, p, datos, lista, puedeGestionar }) => (
+      {({ id, p, datos, lista, kit, puedeGestionar }) => (
         <>
           <DivisionFicha etiqueta="Lista de tipos" lista={<ListaTipos
                 {...lista}
@@ -41,9 +41,9 @@ export default function TipoDetalle({ params, searchParams }: Props) {
                 {...(p.q ? { q: p.q } : {})}
                 puedeGestionar={puedeGestionar}
               />}>
-            <DetalleTipo datos={datos} puedeGestionar={puedeGestionar} />
+            <DetalleTipo datos={datos} kit={kit} puedeGestionar={puedeGestionar} />
           </DivisionFicha>
-          {puedeGestionar ? <HojaTipo /> : null}
+          {puedeGestionar ? <HojaTipo kit={kit} /> : null}
         </>
       )}
     </PaginaPortal>
