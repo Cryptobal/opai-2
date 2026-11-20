@@ -11,8 +11,6 @@ import type { Contacto } from "@/lib/tipos-maestros";
 
 import { CamposContacto, correoMalo, type DatosContacto } from "./campos-contacto";
 
-export { ROL_CONTACTO } from "./campos-contacto";
-
 // Estable entre renders: un arreglo nuevo volvía a buscar cuentas con cada tecla del formulario.
 const SIN_VINCULADAS: string[] = [];
 

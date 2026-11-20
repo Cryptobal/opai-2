@@ -11,6 +11,7 @@ import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
 import { marcaMfaSesion, pluginTwoFactor } from "./mfa-sesion";
 import { proveedorOAuth } from "./oauth";
 import { marcaPasskey, pluginPasskey, RUTAS_PASSKEY_DESACTIVADAS } from "./passkey-plugin";
+import { sesionApp } from "./sesion-app";
 import { sesionPin } from "./sesion-pin";
 import { rastroLoginPausado, rastroRestablecimiento, rastroSeguridad } from "./rastro-seguridad";
 import {
@@ -26,6 +27,7 @@ import {
   camposSesion,
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
+  origenBaseConfiable,
   origenesConfiables,
   proveedoresSociales,
   VIGENCIA_RECUPERACION_SEGUNDOS,
@@ -40,6 +42,7 @@ const env = process.env;
  */
 export const auth = betterAuth({
   appName: "OPAI",
+  baseURL: origenBaseConfiable(env),
   basePath: "/api/auth",
   database: prismaAdapter(clienteAuth(), { provider: "postgresql" }),
   trustedOrigins: origenesConfiables(env),
@@ -179,6 +182,7 @@ export const auth = betterAuth({
     pluginPasskey(env),
     marcaPasskey,
     sesionPin,
+    sesionApp, // Ingreso con Google desde la app nativa (CAR-516): canje con PKCE, solo servidor.
     proveedorOAuth(), // OAuth del MCP (CAR-247, ADR-098): apps como Claude entran como la persona.
     // Después de twoFactor y de marcaMfaSesion: ve la respuesta final (p. ej. el desafío del MFA).
     rastroSeguridad,

@@ -7,16 +7,13 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
 import type { Contexto } from "../types";
-import { PERMISO_REGISTROS } from "./comun";
+import { PERMISO_REGISTROS, quien } from "./comun";
 
 /** Violación de unicidad de Prisma (P2002): otra escritura llegó primero. */
 const esUnica = (e: unknown) =>
   typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "P2002";
 
 const motivo = z.string().trim().min(3).max(300);
-/** Persona responsable de la corrección: el usuario o, si actúa un agente, el usuario por el que actúa. */
-const quien = (ctx: Contexto) =>
-  ctx.actor.tipo === "user" ? (ctx.actor.id ?? null) : (ctx.actor.viaUserId ?? null);
 
 /** Registro del alcance del actor, con su salida y su anulación (o NOT_FOUND sin revelar que existe). */
 async function registroEnAlcance(ctx: Contexto, id: string) {

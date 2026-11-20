@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   rama-neon:
-    # Sin rama Neon para PR en borrador; al cerrar siempre se limpia.
+    # Sin rama Neon para PR en borrador; al cerrar se listan candidatas a limpieza manual (no se borra Neon).
     if: github.event.action == 'closed' || github.event.pull_request.draft == false
     runs-on: ${{ vars.RUNNER_LINUX || 'ubuntu-latest' }}
     timeout-minutes: 15
@@ -77,7 +77,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - name: Borrar ramas Neon huérfanas (PR ya cerrado)
+      - name: Listar ramas Neon preview huérfanas (PR cerrado)
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
           && steps.solo_docs.outputs.only_docs != 'true'
@@ -86,33 +86,7 @@ jobs:
           NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
           GH_TOKEN: ${{ github.token }}
           PR_ACTUAL: ${{ github.event.pull_request.number }}
-        run: |
-          # Plan con tope de 10 ramas. Solo se consideran nombres exactos preview/pr-N; main, dev y
-          # pre-* nunca coinciden. Una rama se borra únicamente si GitHub confirma su PR como cerrado.
-          ramas=$(npx --yes "$NEONCTL" branches list --project-id "$NEON_PROJECT_ID" --output json | jq -r '.[].name')
-          for nombre in $ramas; do
-            [[ "$nombre" =~ ^preview/pr-([0-9]+)$ ]] || continue
-            n="${BASH_REMATCH[1]}"
-            [ "$n" != "$PR_ACTUAL" ] || continue
-            estado=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${n}" --jq .state) || { echo "No se pudo leer el PR $n; se conserva $nombre."; continue; }
-            if [ "$estado" = "closed" ]; then
-              echo "Borrando rama huérfana $nombre (PR $n cerrado)."
-              # Limpieza oportunista: otro PR pudo borrarla antes (404) o Neon fallar un momento.
-              # Nada de esto debe poner en rojo este PR; si de verdad no hay cupo, falla la creación.
-              if ! salida=$(npx --yes "$NEONCTL" branches delete "$nombre" --project-id "$NEON_PROJECT_ID" 2>&1); then
-                if echo "$salida" | grep -qiE 'not found|404'; then
-                  echo "La rama $nombre ya no existe."
-                else
-                  # El error de neonctl es texto libre: se escapa como piden los comandos de workflow
-                  # (% CR LF) para que sus saltos de línea o un "::" no inyecten otros comandos.
-                  salida=${salida//'%'/'%25'}
-                  salida=${salida//$'\r'/'%0D'}
-                  salida=${salida//$'\n'/'%0A'}
-                  echo "::warning::No se pudo borrar la rama huérfana $nombre: $salida"
-                fi
-              fi
-            fi
-          done
+        run: .github/scripts/neon-listar-previews-candidatas.sh
       - name: Crear o reutilizar la rama Neon
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
@@ -128,20 +102,50 @@ jobs:
           && steps.solo_docs.outputs.only_docs != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
         run: |
           pnpm install --frozen-lockfile
           # La rama de preview se reutiliza entre pushes: una migración renombrada después de
           # aplicarse deja un registro fallido con el nombre viejo y Prisma rechaza todo (P3009).
-          # Se marca revertido solo si su migración ya no existe en el repo; el script se niega a
-          # correr fuera de una rama preview/pr-N (nunca main ni dev). Un fallo real sigue en rojo.
+          # Se marca revertido si su migración ya no existe en el repo o si el SQL cambió (checksum);
+          # el script se niega a correr fuera de una rama preview/pr-N (nunca main ni dev). Un fallo
+          # real con el mismo SQL sigue en rojo.
           PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:huerfanas
-          DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
-      - name: Semillas ficticias qa-e2e en la rama preview
-        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
+      - name: Quitar acceso a empresas no QA en la rama de preview
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
-          PREVIEW_RAMA: ${{ env.RAMA }}
-        run: bash packages/db/scripts/qa-e2e/aplicar-en-preview.sh
+        run: PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:ocultar-tenants
+      - name: Verificar destino y preparar compras sintéticas de CAR-239
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
+          && github.event.pull_request.number == 831
+          && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
+          PREVIEW_BRANCH_ID: ${{ steps.neon.outputs.branch_id }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: pnpm --filter @opai/db exec tsx scripts/seed-compras-qa-preview.ts
+      - name: Sembrar usuarios QA de rendiciones (solo qa-e2e)
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
+        env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          QA_GERENTE_PASSWORD: ${{ secrets.QA_GERENTE_PASSWORD }}
+          QA_SUPERVISOR_PASSWORD: ${{ secrets.QA_SUPERVISOR_PASSWORD }}
+        run: |
+          # Antes de fijar opai_app en Vercel, el seed usa la URL del propietario también como DATABASE_URL
+          # para `enTransaccion` (solo esta rama preview/pr-N y empresa qa-e2e).
+          PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" DATABASE_URL="$DB_URL" \
+            pnpm --filter @opai/auth seed:qa-e2e-rendiciones --tenant qa-e2e --confirmar
       - name: Contraseña propia de opai_app y DATABASE_URL de la preview
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
@@ -239,21 +243,27 @@ jobs:
         run: |
           ep=$(npx --yes "$NEONCTL" postgres computes list --branch "$RAMA" --project-id "$NEON_PROJECT_ID" --output json | jq -r '.[0].id // empty')
           [ -z "$ep" ] || npx --yes "$NEONCTL" postgres computes suspend "$ep" --project-id "$NEON_PROJECT_ID" || true
-      - name: Borrar la rama Neon y la variable al cerrar
+      - name: Listar rama Neon de este PR como candidata a limpieza manual
         if: steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## Vista previa cerrada: rama Neon candidata"
+            echo ""
+            echo "La rama \`$RAMA\` **no se borra automáticamente**. Elija manualmente en Neon si corresponde eliminarla."
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
+          PR_ACTUAL="" .github/scripts/neon-listar-previews-candidatas.sh
+      - name: Quitar DATABASE_URL de preview en Vercel al cerrar
+        if: steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
+        env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          # Un error real se ve y falla; solo se tolera que el recurso ya no exista (404).
-          if ! salida=$(npx --yes "$NEONCTL" branches delete "$RAMA" --project-id "$NEON_PROJECT_ID" 2>&1); then
-            echo "$salida"
-            echo "$salida" | grep -qiE 'not found|404' || exit 1
-            echo "La rama Neon $RAMA ya no existe."
-          fi
           if ! salida=$(npx --yes "$VERCEL_CLI" env rm DATABASE_URL preview "$RAMA_GIT" --yes 2>&1); then
             echo "$salida"
             echo "$salida" | grep -qiE 'not found|no existing' || exit 1

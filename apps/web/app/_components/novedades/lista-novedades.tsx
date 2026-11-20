@@ -1,74 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Alerta, Empty, Skeleton } from "@opai/ds";
 
-import { Alerta, Button, Empty, Skeleton } from "@opai/ds";
-
-import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
-
-import { EncabezadoNovedades, type FiltroNovedades } from "./encabezado-novedades";
+import { EncabezadoNovedades } from "./encabezado-novedades";
+import { MODULO_TODOS } from "./filtro-novedades";
 import { GruposNovedades } from "./grupos-novedades";
-import type { ItemNovedad } from "./tarjeta-novedad";
-import { useMarcarNovedades } from "./use-marcar-novedades";
-import { useMarcarUnaNovedad } from "./use-marcar-una-novedad";
+import { useListaNovedadesEstado } from "./use-lista-novedades-estado";
+import { VacioFiltroNovedades } from "./vacio-filtro-novedades";
 
-type Respuesta = { items: ItemNovedad[]; noLeidas: number; destacadaPendiente: ItemNovedad | null };
+function textoMarcarTodas(modulo: string): string {
+  return modulo === MODULO_TODOS
+    ? "Marcar todas como leídas"
+    : `Marcar como leídas las de ${modulo}`;
+}
 
 export function ListaNovedades({ portal }: { portal: string }) {
-  const [datos, setDatos] = useState<Respuesta | null>(null);
-  const [error, setError] = useState(false);
-  const [errorMarca, setErrorMarca] = useState(false);
-  const [filtro, setFiltroEstado] = useState<FiltroNovedades>("todas");
-  // Las que se leen con «No leídas» activo siguen visibles hasta cambiar de filtro: la lista no salta.
-  const [leidasAqui, setLeidasAqui] = useState<ReadonlySet<string>>(new Set());
-  const setFiltro = (f: FiltroNovedades) => {
-    setLeidasAqui(new Set());
-    setFiltroEstado(f);
-  };
-
-  const cargar = useCallback(() => {
-    setError(false);
-    return ejecutarCapacidad(portal, "core.novedades.list", {}).then((r) => {
-      if (!r.ok) {
-        setError(true);
-        return;
-      }
-      setDatos(r.data as Respuesta);
-    });
-  }, [portal]);
-
-  useEffect(() => {
-    let activo = true;
-    void ejecutarCapacidad(portal, "core.novedades.list", {}).then((r) => {
-      if (!activo) return;
-      if (!r.ok) {
-        setError(true);
-        return;
-      }
-      setDatos(r.data as Respuesta);
-    });
-    return () => {
-      activo = false;
-    };
-  }, [portal]);
-
-  const marcarTodas = useMarcarNovedades(
-    portal,
+  const estado = useListaNovedadesEstado(portal);
+  const {
+    error,
+    errorMarca,
     datos,
-    setDatos,
-    setErrorMarca,
-    () => void cargar(),
-  );
-
-  const marcarEnLista = useMarcarUnaNovedad(portal, datos, setDatos, setErrorMarca);
-  const marcarUna = (id: string) => {
-    if (filtro === "no_leidas") setLeidasAqui((s) => new Set(s).add(id));
-    marcarEnLista(id);
-  };
-
-  const visibles = (datos?.items ?? []).filter(
-    (i) => filtro === "todas" || !i.leida || leidasAqui.has(i.id),
-  );
+    filtro,
+    setFiltro,
+    moduloActivo,
+    modulos,
+    setModulo,
+    noLeidasFiltradas,
+    visibles,
+    marcarUna,
+    marcarFiltradas,
+    verTodas,
+  } = estado;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
@@ -86,21 +48,17 @@ export function ListaNovedades({ portal }: { portal: string }) {
       ) : (
         <>
           <EncabezadoNovedades
-            noLeidas={datos.noLeidas}
+            noLeidas={noLeidasFiltradas}
             filtro={filtro}
             onFiltro={setFiltro}
-            onMarcarTodas={marcarTodas}
+            modulo={moduloActivo}
+            modulos={modulos}
+            onModulo={setModulo}
+            onMarcarFiltradas={marcarFiltradas}
+            textoMarcar={textoMarcarTodas(moduloActivo)}
           />
           {visibles.length === 0 ? (
-            <Empty
-              titulo="No tienes novedades sin leer"
-              descripcion="Las que ya leíste siguen en «Todas»."
-              accion={
-                <Button variant="secondary" onClick={() => setFiltro("todas")}>
-                  Ver todas
-                </Button>
-              }
-            />
+            <VacioFiltroNovedades filtro={filtro} modulo={moduloActivo} onVerTodas={verTodas} />
           ) : null}
           <GruposNovedades items={visibles} onMarcar={marcarUna} />
         </>

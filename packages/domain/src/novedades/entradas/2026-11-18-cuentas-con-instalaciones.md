@@ -5,6 +5,7 @@ modulo: core
 titulo: Cuentas con instalaciones, sin páginas vacías intermedias
 destacada: false
 car: CAR-662
+pr: 972
 ruta: /cuentas
 ---
 El filtro **Con instalaciones** busca las cuentas coincidentes antes de dividirlas en páginas. Así puedes avanzar por los resultados sin perder cuentas que estaban más adelante en la lista. Sólo considera instalaciones no archivadas que puedes consultar.

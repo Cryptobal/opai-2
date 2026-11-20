@@ -26,8 +26,6 @@ type Props = {
   vacio: { titulo: string; descripcion?: string; accion?: ReactNode };
   /** Vistas guardadas de esta lista (CAR-335 D4c): clave de la lista y su ruta. */
   vistas?: { lista: string; ruta: string };
-  /** Filtros extra debajo de los chips (p. ej. rango de fechas en Cotizaciones). */
-  debajoFiltros?: ReactNode;
   pie?: ReactNode;
 };
 
@@ -63,7 +61,6 @@ export function ListaMaestro(p: Props) {
             {p.vistas ? <VistasDiferidas lista={p.vistas.lista} ruta={p.vistas.ruta} /> : null}
           </div>
         ) : null}
-        {p.debajoFiltros ? <div className="w-full pt-1">{p.debajoFiltros}</div> : null}
       </HerramientasLista>
       <CuerpoListaMaestro
         state={p.state}

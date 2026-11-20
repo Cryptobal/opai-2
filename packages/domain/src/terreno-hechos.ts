@@ -50,8 +50,10 @@ export const TIPOS_ENCOLABLES_OFFLINE = [
   "rondas.inicio",
   "rondas.cierre",
   "rondas.novedad",
+  "terreno.novedad",
   "acceso.entrada",
   "acceso.salida",
+  "asistencia.marca",
 ] as const;
 
 /** Partes del nombre de un tipo que delatan una verificación de identidad en línea. */

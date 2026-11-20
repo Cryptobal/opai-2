@@ -3,7 +3,12 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { CORTE_PLANTILLA, EXENTAS, problemasDeMigracion } from "./migraciones-reglas";
+import {
+  CORTE_PLANTILLA,
+  EXCEPTADAS_PLANTILLA_POST_CORTE,
+  EXENTAS,
+  problemasDeMigracion,
+} from "./migraciones-reglas";
 
 const RAIZ = new URL("../prisma/", import.meta.url);
 const migraciones = readdirSync(new URL("migrations/", RAIZ), { withFileTypes: true })
@@ -21,8 +26,9 @@ describe("plantilla de migración (CAR-47)", () => {
   });
 
   it("toda migración posterior al corte sigue la plantilla", () => {
+    const exceptadas = new Set(Object.keys(EXCEPTADAS_PLANTILLA_POST_CORTE));
     const fallas = migraciones
-      .filter((m) => m.slice(0, 14) > CORTE_PLANTILLA)
+      .filter((m) => m.slice(0, 14) > CORTE_PLANTILLA && !exceptadas.has(m))
       .map((m) => ({ m, problemas: problemasDeMigracion(leer(m)) }))
       .filter((f) => f.problemas.length > 0);
     expect(fallas, "copia packages/db/prisma/plantilla-migracion.sql").toEqual([]);
@@ -32,6 +38,14 @@ describe("plantilla de migración (CAR-47)", () => {
     const fuera = migraciones.filter((m) => m.slice(0, 14) <= CORTE_PLANTILLA && !EXENTAS.has(m));
     expect(fuera).toEqual([]);
     for (const m of EXENTAS) expect(m.slice(0, 14) <= CORTE_PLANTILLA).toBe(true);
+  });
+
+  it("toda exceptada post-corte tiene justificación no vacía", () => {
+    for (const [m, motivo] of Object.entries(EXCEPTADAS_PLANTILLA_POST_CORTE)) {
+      expect(migraciones, m).toContain(m);
+      expect(m.slice(0, 14) > CORTE_PLANTILLA).toBe(true);
+      expect(motivo.trim().length).toBeGreaterThan(20);
+    }
   });
 
   it("toda migración trae su migration.sql", () => {

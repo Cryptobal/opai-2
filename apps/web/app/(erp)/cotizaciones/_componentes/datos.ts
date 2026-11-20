@@ -1,9 +1,10 @@
 import type { EstadoPantalla } from "@opai/ds";
 
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Parametros } from "@/lib/parametros";
-
 import { accesoCpq } from "@/lib/cpq-ui";
 import { estadoPantalla } from "@/lib/formato";
+import { esUuid } from "@/lib/ids";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import type { ParametrosVersion } from "../[id]/_componentes/margen-form";
@@ -34,22 +35,65 @@ export type CotizacionFila = {
     estado: string;
     validaHasta: string | null;
     ventaMensualClp: number | null;
-    enviadaEn: string | Date | null;
   } | null;
 };
-export type ListaCotizaciones = { items: CotizacionFila[]; siguiente: string | null };
-export { cargarListaCotizaciones as cargarCotizaciones } from "./cargar-lista";
-
+type ListaCotizaciones = { items: CotizacionFila[]; siguiente: string | null };
 export type DatosCotizaciones = ListaCotizaciones & {
   /** Lista de «Archivadas» (CPQ v4): se pide con `?ver=archivadas`. */
   archivadas?: boolean;
   state: EstadoPantalla;
   crear: boolean;
   costos: boolean;
-  cuentas: { valor: string; etiqueta: string }[];
-  responsables: { valor: string; etiqueta: string }[];
-  parametros: Parametros;
 };
+
+/** Lista paginada; costos y margen solo con `cpq:costos.ver`. */
+export async function cargarCotizaciones(
+  cursor?: string,
+  negocioId?: string,
+  archivadas = false,
+  p: Parametros = {},
+): Promise<DatosCotizaciones> {
+  const acceso = accesoCpq(await identidadActual());
+  if (!acceso.leer) {
+    return { state: "forbidden", items: [], siguiente: null, crear: false, costos: false };
+  }
+  const r = await ejecutarComoUsuario<ListaCotizaciones>("erp", "cpq.cotizaciones.list", {
+    limite: tamanoPagina(p, 20),
+    ...(p["q"]?.trim() ? { q: p["q"].trim().slice(0, 160) } : {}),
+    ...(cursor && esUuid(cursor) ? { cursor } : {}),
+    ...(negocioId ? { negocioId } : {}),
+    ...(archivadas ? { soloArchivadas: true } : {}),
+  });
+  return {
+    archivadas,
+    state: estadoPantalla(r),
+    crear: acceso.crear,
+    costos: acceso.costos,
+    siguiente: r.ok ? r.data.siguiente : null,
+    items: r.ok
+      ? r.data.items.map((c) => ({
+          id: c.id,
+          codigo: c.codigo,
+          titulo: c.titulo,
+          negocioId: c.negocioId,
+          negocioTitulo: c.negocioTitulo,
+          cuentaTitulo: c.cuentaTitulo ?? null,
+          vigente: c.vigente,
+          alternativaDeId: c.alternativaDeId,
+          resumenCalculo: c.resumenCalculo ?? undefined,
+          estadoFicha: c.estadoFicha,
+          version: c.version
+            ? {
+                numero: c.version.numero,
+                estado: c.version.estado,
+                validaHasta: c.version.validaHasta,
+                ventaMensualClp: c.version.ventaMensualClp,
+              }
+            : null,
+        }))
+      : [],
+  };
+}
 
 export type DatosFichaCotizacion = Awaited<ReturnType<typeof cargarFichaCotizacion>>;
 

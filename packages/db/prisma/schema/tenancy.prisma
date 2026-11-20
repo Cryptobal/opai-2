@@ -1,6 +1,5 @@
 // Pertenencia, invitaciones, API keys, módulos por tenant y telemetría (Brief 01).
 // Todas llevan tenant_id y RLS `tenant_isolation`; `memberships` además `user_self`.
-// CAR-585 fase 2 (#972): sin cambios de schema en este PR.
 
 model Membership {
   id        String   @id @default(uuid(7)) @db.Uuid

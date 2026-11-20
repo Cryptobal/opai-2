@@ -113,7 +113,7 @@ async function main(): Promise<void> {
         nombres: p.nombres,
         apellidos: p.apellidos,
         rut: rut(p.cuerpo),
-        estado: termino ? "inactiva" : "activa",
+        estado: termino ? "inactivo" : "activo",
         bloqueada,
         bloqueoMotivo: bloqueada ? "Ficticio: documentación OS-10 vencida" : null,
       },
