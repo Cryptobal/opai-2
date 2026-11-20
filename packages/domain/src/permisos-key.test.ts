@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { PERMISOS_CORE } from "./permisos-catalogo";
 import { permisoDeKey } from "./permisos-key";
 import { type Acceso, tienePermisoEfectivo } from "./permisos-efectivos";
 
@@ -31,6 +32,13 @@ describe("permisos finos por key", () => {
     expect(
       permisoDeKey("platform:tenants.manage", ["platform:tenants.manage"], true, () => true),
     ).toBe(false);
+  });
+  it("estado.admin no se hereda con null aunque el responsable sea admin", () => {
+    const admin = (p: string) => tienePermisoEfectivo({ rol: "admin" }, p);
+    expect(permisoDeKey(PERMISOS_CORE.personasEstadoAdmin, null, false, admin)).toBe(false);
+    expect(
+      permisoDeKey(PERMISOS_CORE.personasEstadoAdmin, [PERMISOS_CORE.personasEstadoAdmin], false, admin),
+    ).toBe(true);
   });
   it("servicio también intersecta con los efectivos actuales del responsable (H15)", () => {
     const lista = ["core:cuentas.read", "core:cuentas.manage"];

@@ -1,6 +1,6 @@
 /** A dónde se concilia un movimiento sin factura (CAR-328): filas del flujo y cuentas contables de movimiento. */
-export type FilaDestino = { id: string; seccion: "ingreso" | "egreso"; etiqueta: string };
-export type CuentaDestino = { id: string; codigo: string; nombre: string };
+type FilaDestino = { id: string; seccion: "ingreso" | "egreso"; etiqueta: string };
+type CuentaDestino = { id: string; codigo: string; nombre: string };
 export type Destinos = { filas: FilaDestino[]; cuentas: CuentaDestino[] };
 
 export type SugerenciaRegla = {
@@ -22,7 +22,7 @@ export type EleccionFila = {
 };
 
 /** Primeras palabras útiles de la glosa para proponer la condición de la regla («Compra RESEND»). */
-export function glosaSugerida(glosa: string): string {
+function glosaSugerida(glosa: string): string {
   const sinNumeros = glosa.replace(/\b\d[\d.\-kK]*\b/g, " ").replace(/\s+/g, " ").trim();
   return sinNumeros.split(" ").slice(0, 3).join(" ").slice(0, 60);
 }

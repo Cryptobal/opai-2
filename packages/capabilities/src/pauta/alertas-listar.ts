@@ -5,6 +5,7 @@ import { calcularAlertasHoras, serieVigente, trabajaEn } from "@opai/domain";
 import { vigenciasJornada } from "../core/turnos/comun";
 
 import { uuidSchema } from "../core/esquemas";
+import { limiteLista, listaSchema, paginaMemoria } from "../core/maestros/comun";
 import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
@@ -14,6 +15,7 @@ import { aFechaDb, diaSchema, PERMISO_READ, hoy } from "./comun";
 import { nombresDePersonas } from "./nombres";
 
 const alertaSchema = z.object({
+  id: z.string(),
   personaId: z.string(),
   nombre: z.string(),
   tipo: z.enum(["semanal", "mensual", "descanso"]),
@@ -26,7 +28,8 @@ const alertaSchema = z.object({
 const salidaSchema = z.object({
   instalacionId: z.string(),
   semanaDesde: z.string(),
-  alertas: z.array(alertaSchema),
+  items: z.array(alertaSchema),
+  siguiente: z.string().nullable(),
 });
 
 function inicioSemana(fecha: string): string {
@@ -42,7 +45,12 @@ export const alertasListar = defineCapability({
   descripcion:
     "Lista alertas de horas legales (semanal, mensual y descanso mínimo) para los guardias con turnos programados en una instalación, anclando la semana a una fecha opcional.",
   permiso: PERMISO_READ,
-  input: z.object({ instalacionId: uuidSchema, semana: diaSchema.optional() }),
+  input: z.object({
+    instalacionId: uuidSchema,
+    semana: diaSchema.optional(),
+    cursor: listaSchema.shape.cursor,
+    limite: limiteLista,
+  }),
   output: salidaSchema,
   efecto: "lectura",
   dryRun: false,
@@ -96,13 +104,14 @@ export const alertasListar = defineCapability({
     const [vigencias, limites] = await Promise.all([vigenciasJornada(ctx), ajustesDeHoras(ctx)]);
     const alertas = calcularAlertasHoras(turnos, anchor, { vigencias, ...limites });
     const nombres = await nombresDePersonas(ctx, alertas.map((a) => a.personaId));
-    return {
-      instalacionId: inst.id,
-      semanaDesde,
-      alertas: alertas.map((a) => ({
+    const filas = alertas
+      .map((a) => ({
         ...a,
+        id: `${a.personaId}:${a.tipo}`,
         nombre: nombres.get(a.personaId) ?? a.personaId,
-      })),
-    };
+      }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es") || a.tipo.localeCompare(b.tipo));
+    const { items, siguiente } = paginaMemoria(filas, input.limite, input.cursor);
+    return { instalacionId: inst.id, semanaDesde, items, siguiente };
   },
 });

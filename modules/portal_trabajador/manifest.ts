@@ -24,6 +24,14 @@ export const manifest = defineModule({
       id: "portal_trabajador.mis_datos.actualizados",
       descripcion: "El trabajador actualizó su contacto o su dirección desde el portal.",
     },
+    {
+      id: "portal_trabajador.solicitud.creada",
+      descripcion: "El trabajador pidió un permiso o vacaciones desde su portal; espera la respuesta de su jefatura.",
+    },
+    {
+      id: "portal_trabajador.solicitud.retirada",
+      descripcion: "El trabajador retiró un permiso o vacaciones que había pedido y seguía pendiente.",
+    },
   ],
   capacidades,
 });

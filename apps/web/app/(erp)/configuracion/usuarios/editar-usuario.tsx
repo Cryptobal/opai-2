@@ -120,8 +120,8 @@ function Formulario(p: Props & { miembro: Miembro }) {
           {miembro.rol === "supervisor" && (p.miRol === "owner" || p.miRol === "admin") ? (
             <InstalacionesACargo membershipId={miembro.id} />
           ) : null}
-          {/* CAR-54: si perdió el teléfono y sus códigos; la capacidad rechaza la ficha propia. */}
-          {p.miRol === "owner" ? <RestablecerMfa miembro={miembro} /> : null}
+          {/* CAR-54 / CAR-454: solo otros usuarios; en la propia ficha usa códigos de respaldo en Mi cuenta. */}
+          {p.miRol === "owner" && !miembro.esPropio ? <RestablecerMfa miembro={miembro} /> : null}
         </div>
       </Sheet>
       <Dialog

@@ -5,7 +5,6 @@ import { ParesGrid, SeccionTarjeta, Skeleton } from "@opai/ds";
 
 import { CamposFicha } from "@/app/_components/campos/campos-ficha";
 import { EtiquetasFicha } from "@/app/_components/etiquetas/etiquetas-ficha";
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { fecha, rut } from "@/lib/fechas";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
@@ -16,14 +15,9 @@ import { VinculosComercialCuenta } from "./vinculos-comercial-cuenta";
 export function ResumenCuenta({ c }: { c: CuentaDetalle }) {
   const principal = c.contactos.find((k) => k.esPrincipal)?.nombre ?? null;
   const direccion = [c.calle, c.comuna, c.region].filter(Boolean).join(", ") || null;
-  const editar = (
-    <EnlaceBotonHoja href="?editar=1" variante="ghost">
-      Editar
-    </EnlaceBotonHoja>
-  );
   return (
     <div className="flex flex-col gap-4">
-      <SeccionTarjeta titulo="Identificación" accion={editar}>
+      <SeccionTarjeta titulo="Identificación">
         <ParesGrid
           items={[
             { etiqueta: "Razón social", valor: c.razonSocial },

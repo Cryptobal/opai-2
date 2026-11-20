@@ -18,6 +18,7 @@ export const PREVIOS = {
       PERMISOS_CORE.estructurasManage,
       PERMISOS_CORE.estructurasReadSensible,
       PERMISOS_CORE.personasNoRecontratarManage,
+      PERMISOS_CORE.personasEstadoAdmin,
       PERMISOS_CORE.cuentasReferenciasAutorizar,
       PERMISOS_CORE.correosSinAsignar,
       PERMISOS_CORE.personasPrevisionRead,

@@ -1,20 +1,14 @@
-import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
-import { PortalLayout } from "@/app/_components/portal-layout";
+import { identidadActual } from "@/lib/servidor";
 
-// Aparte (next/dynamic): el aviso de instalar no pesa en el primer JS de la ruta de terreno (ADR-037).
-const AvisoInstalar = dynamic(() =>
-  import("@/app/_components/pwa/aviso-instalar").then((m) => m.AvisoInstalar),
-);
+import { EquipoTerrenoLayout } from "./equipo-layout";
 
-// Route group del portal "terreno": el shell persiste en el layout (ADR-045); la página solo trae su
-// contenido. El aviso de instalar (PWA) acompaña al contenido del portal.
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <PortalLayout portal="terreno">
-      {children}
-      <AvisoInstalar />
-    </PortalLayout>
-  );
+/** Equipo emparejado sin sesión: layout liviano. Con sesión: shell del portal Terreno (ADR-045/044). */
+export default async function Layout({ children }: { children: ReactNode }) {
+  if (await identidadActual()) {
+    const { SesionTerrenoLayout } = await import("./sesion-layout");
+    return <SesionTerrenoLayout>{children}</SesionTerrenoLayout>;
+  }
+  return <EquipoTerrenoLayout>{children}</EquipoTerrenoLayout>;
 }

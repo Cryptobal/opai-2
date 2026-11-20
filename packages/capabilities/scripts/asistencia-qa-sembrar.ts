@@ -43,7 +43,7 @@ export async function sembrarCasos(a: Admin, tenantId: string): Promise<{ instal
   const ahora = new Date();
   for (const [i, caso] of CASOS_QA.entries()) {
     const rut = rutQa(i + 1);
-    const persona = await a.persona.create({ data: { tenantId, nombres: `QA Caso ${caso.id.slice(3)}`, apellidos: "Sintético", rut: rut.guion, estado: "activa" } });
+    const persona = await a.persona.create({ data: { tenantId, nombres: `QA Caso ${caso.id.slice(3)}`, apellidos: "Sintético", rut: rut.guion, estado: "activo" } });
     await a.vinculoLaboral.create({ data: { tenantId, personaId: persona.id, cargoId: cargo.id, instalacionId: inst.id, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
     await a.credencialTerreno.create({ data: { tenantId, personaId: persona.id, rut: rut.sinGuion, pinHash, debeCambiar: false } });
     const inicio = new Date(ahora.getTime() + caso.inicioMin * 60_000);

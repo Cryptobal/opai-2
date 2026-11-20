@@ -4,11 +4,19 @@ import { PERMISOS_CORE } from "../permisos-catalogo";
 import { camposPara } from "./catalogo";
 import type { CampoDef, EntidadCampo, FinalidadCampo } from "./tipos";
 
+const CPQ_COTIZACIONES_READ = "cpq:cotizaciones.read";
+const COMERCIAL_NEGOCIOS_READ = "comercial:negocios.read";
+
 /** Permiso que exige leer cada entidad. Las entidades que no están aquí no se resuelven todavía. */
 export const PERMISO_POR_ENTIDAD: Readonly<Partial<Record<EntidadCampo, string>>> = {
+  empresa: PERMISOS_CORE.tenantRead,
   cuenta: PERMISOS_CORE.cuentasRead,
   contacto: PERMISOS_CORE.cuentasRead,
   instalacion: PERMISOS_CORE.instalacionesRead,
+  negocio: COMERCIAL_NEGOCIOS_READ,
+  cotizacion: CPQ_COTIZACIONES_READ,
+  puesto: CPQ_COTIZACIONES_READ,
+  bloque: CPQ_COTIZACIONES_READ,
   // Las referencias son cuentas: las lee quien lee cuentas, con su alcance (CAR-138 PR 7).
   referencia: PERMISOS_CORE.cuentasRead,
 };

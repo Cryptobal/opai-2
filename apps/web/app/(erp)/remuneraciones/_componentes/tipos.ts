@@ -83,7 +83,6 @@ export type Concepto = {
   activo: boolean;
 };
 
-
 /** Liquidación del período (Brief 27). */
 export type LiquidacionResumen = {
   id: string;
