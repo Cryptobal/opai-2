@@ -122,7 +122,7 @@ jobs:
       - name: Migrar plantilla sintética exclusiva de compras
         if: steps.solo_docs.outputs.only_docs != 'true'
         run: |
-          if ! pnpm --filter @opai/db deploy >/dev/null 2>&1; then
+          if ! pnpm --filter @opai/db run deploy >/dev/null 2>&1; then
             echo "::error::No se pudo migrar la plantilla sintética de compras."
             exit 1
           fi

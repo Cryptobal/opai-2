@@ -10,11 +10,12 @@ export async function prepararComprasQa<T>(
   } catch {
     // El error original de pg/Prisma/URL puede contener la URL o datos del servidor.
     const primaria = new Error(`Preparar fixture de compras: ${etapa}.`);
-    try {
-      await limpiar();
-    } catch (error) {
-      const limpieza = error instanceof LimpiezaComprasQaError
-        ? error : new LimpiezaComprasQaError(["limpieza no identificada"]);
+    const limpieza = await Promise.resolve().then(limpiar).then(
+      () => null,
+      (error: unknown) => error instanceof LimpiezaComprasQaError
+        ? error : new LimpiezaComprasQaError(["limpieza no identificada"]),
+    );
+    if (limpieza) {
       throw new AggregateError([primaria, limpieza], `${primaria.message} ${limpieza.message}`);
     }
     throw primaria;
