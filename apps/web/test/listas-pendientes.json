@@ -4,6 +4,7 @@
   "agente.historial.list",
   "agente.modelos.list",
   "asistencia.certificacion.checklist",
+  "asistencia.contingencias.listar",
   "asistencia.reportes.catalogo",
   "comercial.canales.get",
   "comercial.contexto.listar",
