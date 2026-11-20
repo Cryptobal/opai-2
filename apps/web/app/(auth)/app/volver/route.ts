@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { emitirCodigoApp } from "@opai/auth";
 
-import { COOKIE_RETO_APP, enlaceVueltaApp } from "@/lib/canje-app";
+import { COOKIE_RETO_APP, enlaceVueltaApp, esPrecargaVueltaApp } from "@/lib/canje-app";
 
 /** Motivos de fallo al volver a la app nativa (sin datos sensibles). */
 export type MotivoVolverApp = "sin_reto" | "emitir_rechazado";
@@ -14,6 +14,9 @@ export type MotivoVolverApp = "sin_reto" | "emitir_rechazado";
  * sigue bien SFSafariViewController.
  */
 export async function GET(request: NextRequest) {
+  if (esPrecargaVueltaApp(request.headers)) {
+    return new NextResponse(null, { status: 204 });
+  }
   const jarra = await cookies();
   const reto = jarra.get(COOKIE_RETO_APP)?.value;
   if (!reto) {

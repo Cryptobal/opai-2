@@ -13,8 +13,9 @@ vi.mock("next/headers", () => ({
     delete: vi.fn(),
   }),
 }));
+const emitirCodigoApp = vi.hoisted(() => vi.fn(async () => estado.codigo));
 vi.mock("@opai/auth", () => ({
-  emitirCodigoApp: vi.fn(async () => estado.codigo),
+  emitirCodigoApp,
 }));
 
 import { NextRequest } from "next/server";
@@ -25,6 +26,7 @@ beforeEach(() => {
   estado.reto = "reto-valido";
   estado.codigo = "codigo+1";
   estado.warn.mockReset();
+  emitirCodigoApp.mockClear();
   vi.stubGlobal("console", { ...console, warn: estado.warn });
 });
 
@@ -42,6 +44,24 @@ describe("GET /app/volver", () => {
     expect(r.status).toBe(303);
     expect(r.headers.get("location")).toBe("https://test.opai.cl/app/listo?error=1");
     expect(estado.warn).toHaveBeenCalledWith("[app-nativa] volver_fallo", { motivo: "sin_reto" });
+  });
+
+  it("la precarga de Next responde 204 sin emitir código", async () => {
+    const r = await GET(
+      new NextRequest("https://test.opai.cl/app/volver", {
+        headers: { "next-router-prefetch": "1" },
+      }),
+    );
+    expect(r.status).toBe(204);
+    expect(emitirCodigoApp).not.toHaveBeenCalled();
+  });
+
+  it("Purpose: prefetch responde 204 sin efectos", async () => {
+    const r = await GET(
+      new NextRequest("https://test.opai.cl/app/volver", { headers: { purpose: "prefetch" } }),
+    );
+    expect(r.status).toBe(204);
+    expect(emitirCodigoApp).not.toHaveBeenCalled();
   });
 
   it("si emitir rechaza, vuelve a listo con error y registra el motivo", async () => {
