@@ -36,7 +36,7 @@ export const mandanteMarcasListar = defineCapability({
         const inst = await ctx.db.instalacion.findMany({ where: { cuentaId: a.cuentaId }, select: { id: true } });
         inst.forEach((x) => instIds.add(x.id));
       } else {
-        a.instalaciones.forEach((x) => instIds.add(x.instalacionId));
+        for (const x of a.instalaciones) instIds.add(x.instalacionId);
       }
     }
     const marcas = await ctx.db.marca.findMany({

@@ -35,7 +35,7 @@ export const RECURSOS: Record<string, string> = {
   propuestas_tecnica: "Propuestas técnicas", propuestas_html: "Plantillas HTML de propuesta", envios_propuesta: "Envíos de propuesta",
   cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura migrada", impuestos: "Impuestos",
   intentos: "Intentos de acceso denegados", prerregistros: "Prerregistros de visitas", informes: "Informes", reportes: "Reportes", certificacion: "Certificación DT", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
-  fiscalizacion: "Fiscalización DT", claves: "Claves de fiscalización", accesos: "Accesos de fiscalización", mandante: "Accesos mandante", respaldos: "Respaldos de bitácora",
+  fiscalizacion_claves: "Claves de fiscalización DT", fiscalizacion_accesos: "Accesos de fiscalización", fiscalizacion_ingreso: "Ingreso al portal de fiscalización", mandante_accesos: "Accesos de mandante/EST", mandante_marcas: "Marcas para mandante", respaldos_bitacora: "Respaldos de bitácora DT",
   // Grupos o equipos de usuarios (CAR-251).
   grupos: "Grupos",
   webhooks: "Eventos salientes",
