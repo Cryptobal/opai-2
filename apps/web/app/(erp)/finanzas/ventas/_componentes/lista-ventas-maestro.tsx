@@ -4,6 +4,8 @@ import { Badge, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { fecha, pesos } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 
@@ -26,9 +28,10 @@ export type DatosLibro = {
 /** Columna izquierda del Libro de ventas (CAR-255): pestañas, búsqueda, filtros y filas seleccionables. */
 export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: DatosLibro; seleccionada?: string; params: Parametros }) {
   const items = d.libro?.items ?? [];
-  // Un solo botón principal por pantalla (CAR-370): con una ficha abierta, la principal es la de la ficha.
+  const siguiente = d.libro?.siguiente ?? null;
+  const porPagina = tamanoPagina(params);
   const emitir = d.gestiona ? (
-    <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus} variante={seleccionada ? "secondary" : "primary"}>
+    <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
       Nueva factura
     </EnlaceBoton>
   ) : undefined;
@@ -59,6 +62,17 @@ export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: 
           terciario: v.fechaEmision ? fecha(v.fechaEmision) : "Sin fecha de emisión",
           fin: <FinFila venta={v} />,
         }))}
+        pie={
+          d.state === "ready" ? (
+            <PaginacionListaMaestro
+              p={params}
+              rutaBase="/finanzas/ventas"
+              mostrados={items.length}
+              siguiente={siguiente}
+              porPagina={porPagina}
+            />
+          ) : undefined
+        }
       />
     </>
   );
