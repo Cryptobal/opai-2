@@ -138,6 +138,62 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(r.ok).toBe(false);
   });
 
+  it("listar contingencias: una API key sin asistencia:ver no ve filas (portal null)", async () => {
+    const reg = await run(ctx(T.a), "asistencia.contingencias.registrar", {
+      personaId: T.persona,
+      instalacionId: T.inst,
+      tipo: "entrada",
+      horaDeclarada: new Date(Date.now() - 120_000).toISOString(),
+      motivo: "Caída del sistema durante el turno",
+      evidenciaDocumentoId: await evidencia(T.a),
+    });
+    expect(reg.ok, JSON.stringify(reg)).toBe(true);
+    const key = mod.crearContexto({
+      tenantId: T.a,
+      actor: { tipo: "agent", id: randomUUID(), viaUserId: randomUUID() },
+      portal: null,
+      portalesMembresia: [],
+      rol: null,
+      permisosRol: ["asistencia:corregir"],
+      scopes: ["asistencia"],
+      modulosActivos: ["asistencia"],
+      medidor,
+    });
+    const vacio = await run(key, "asistencia.contingencias.listar", {});
+    expect(vacio.ok).toBe(true);
+    expect(vacio.data.items).toEqual([]);
+    const conVer = await run(ctx(T.a), "asistencia.contingencias.listar", {});
+    expect(conVer.ok).toBe(true);
+    const items = conVer.data.items as { id: string }[];
+    expect(items.some((c) => c.id === reg.data.id)).toBe(true);
+  });
+
+  it("enlace de contingencia: ver y responder con RUT desde el enlace personal", async () => {
+    const token = randomUUID().replace(/-/g, "");
+    const reg = await run(ctx(T.a), "asistencia.contingencias.registrar", {
+      personaId: T.persona,
+      instalacionId: T.inst,
+      tipo: "entrada",
+      horaDeclarada: new Date(Date.now() - 90_000).toISOString(),
+      motivo: "Sistema inaccesible en terreno durante la marcación",
+      evidenciaDocumentoId: await evidencia(T.a),
+    });
+    expect(reg.ok, JSON.stringify(reg)).toBe(true);
+    await e.admin.contingenciaEnlace.create({
+      data: { tenantId: T.a, contingenciaId: reg.data.id, tokenHash: sha(token), venceEn: new Date(Date.now() + 86_400_000) },
+    });
+    const sys = sistema(T.a);
+    const ver = await run(sys, "asistencia.contingencias.ver_enlace", { token });
+    expect(ver.data).toMatchObject({ estado: "pendiente", contingenciaId: reg.data.id });
+    const rutMal = await run(sys, "asistencia.contingencias.responder_enlace", { token, rut: "22.222.222-2", decision: "aceptada" });
+    expect(rutMal.ok).toBe(false);
+    const ok = await run(sys, "asistencia.contingencias.responder_enlace", { token, rut: RUT, decision: "aceptada" });
+    expect(ok.ok, JSON.stringify(ok)).toBe(true);
+    const actualizada = await e.admin.contingencia.findUniqueOrThrow({ where: { id: reg.data.id } });
+    expect(actualizada.marcaId).toBeTruthy();
+    expect(actualizada.estado).toBe("aceptada");
+  });
+
   it("contingencia: RR. HH. propone con evidencia; solo el trabajador la acepta y recién ahí cuenta", async () => {
     const autor = randomUUID();
     const base = { personaId: T.persona, instalacionId: T.inst, tipo: "salida", horaDeclarada: new Date(Date.now() - 600_000).toISOString(), motivo: "Caída del sistema durante el turno" };
@@ -145,7 +201,7 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(sin.ok).toBe(false);
     const reg = await run(ctx(T.a, "erp", autor), "asistencia.contingencias.registrar", { ...base, evidenciaDocumentoId: await evidencia(T.a) });
     expect(reg.ok, JSON.stringify(reg)).toBe(true);
-    expect(await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia" } })).toBe(0);
+    expect((await e.admin.contingencia.findUniqueOrThrow({ where: { id: reg.data.id } })).marcaId).toBeNull();
     // RR. HH. ya no resuelve: la capacidad no existe para ellos.
     const rrhh = await run(ctx(T.a), "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "aceptada" });
     expect(rrhh.ok).toBe(false);
@@ -157,7 +213,11 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(sinComentario.ok).toBe(false);
     const ok = await run(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "aceptada" });
     expect(ok.ok, JSON.stringify(ok)).toBe(true);
-    expect(await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia" } })).toBe(1);
+    const resuelta = await e.admin.contingencia.findUniqueOrThrow({ where: { id: reg.data.id } });
+    expect(resuelta.estado).toBe("aceptada");
+    expect(resuelta.marcaId).toBeTruthy();
+    const marca = await e.admin.marca.findUniqueOrThrow({ where: { id: resuelta.marcaId! }, select: { origen: true } });
+    expect(marca.origen).toBe("contingencia");
     const dos = await run(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "rechazada", comentario: "Ya no" });
     expect(dos.ok).toBe(false);
   });

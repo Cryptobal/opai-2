@@ -27,6 +27,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `core.correos.recibir` | — | excepción |
+| — | `/contingencia/[slug]/[token]` | `asistencia.contingencias.responder_enlace` | — | excepción |
+| — | `/contingencia/[slug]/[token]` | `asistencia.contingencias.ver_enlace` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.responder_enlace` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.ver_enlace` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
@@ -188,6 +190,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.correcciones.proponer` | `asistencia_correcciones_proponer` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
+| compartido | `app/(erp)/asistencia/contingencias/_componentes` | `asistencia.contingencias.registrar` | `asistencia_contingencias_registrar` | existe |
 | compartido | `app/(erp)/asistencia/marcas/_componentes` | `asistencia.marcas.obtener` | `asistencia_marcas_obtener` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
@@ -687,11 +690,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
+| compartido | `app/(trabajador)/trabajador/contingencias/_componentes` | `asistencia.contingencias.responder` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/correcciones/_componentes` | `asistencia.correcciones.responder` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
 | erp | `/asistencia/certificacion` | `asistencia.certificacion.checklist` | `asistencia_certificacion_checklist` | existe |
+| erp | `/asistencia/contingencias` | `asistencia.contingencias.listar` | `asistencia_contingencias_listar` | existe |
+| erp | `/asistencia/contingencias` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
@@ -912,6 +918,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| trabajador | `/trabajador/contingencias` | `asistencia.contingencias.listar` | `asistencia_contingencias_listar` | existe |
+| trabajador | `/trabajador/contingencias` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | trabajador | `/trabajador/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | trabajador | `/trabajador/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
@@ -1004,6 +1012,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas. |
+| `app/contingencia/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial. |
 | `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
@@ -1017,6 +1026,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
 | `asistencia.contingencias.responder` | Solo personas: aceptar u objetar una contingencia propuesta a su nombre es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
+| `asistencia.contingencias.responder_enlace` | Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
+| `asistencia.contingencias.ver_enlace` | Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal es la credencial. |
 | `asistencia.correcciones.responder` | Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
 | `asistencia.correcciones.ver_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial. |
@@ -1143,7 +1154,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
-| `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
+| `asistencia.contingencias.responder` | `app/(trabajador)/trabajador/contingencias/_componentes` | no | reservada a personas |
 | `asistencia.correcciones.responder` | `app/(trabajador)/trabajador/correcciones/_componentes` | no | reservada a personas |
 | `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.consentir` | `app/_components` | no | reservada a personas |
@@ -1238,8 +1249,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
-- `asistencia.contingencias.listar`
-- `asistencia.contingencias.registrar`
 - `asistencia.dias.listar`
 - `asistencia.dias.recalcular`
 - `asistencia.dias.resumen_periodo`

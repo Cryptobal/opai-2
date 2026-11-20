@@ -1,11 +1,11 @@
 "use server";
 
+import type { EstadoForm } from "@/app/_components/enlace-respuesta/formulario-rut";
+
 import { responderCorreccion } from "./ver";
 
-export type EstadoRespuesta = { estado: "inicial" } | { estado: "listo"; resultado: "aceptada" | "objetada" } | { estado: "error"; texto: string };
-
 /** Responde una corrección desde el enlace del correo personal: la identidad es el enlace más el RUT. */
-export async function accionResponder(slug: string, token: string, _: EstadoRespuesta, datos: FormData): Promise<EstadoRespuesta> {
+export async function accionResponder(slug: string, token: string, _: EstadoForm, datos: FormData): Promise<EstadoForm> {
   const resultado = datos.get("resultado") === "objetada" ? "objetada" : "aceptada";
   const rut = String(datos.get("rut") ?? "").trim();
   const comentario = String(datos.get("comentario") ?? "").trim();
