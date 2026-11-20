@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { entradaPaginaLista } from "@/app/_components/maestros/paginacion-cursor";
 import { cargarOpcionesEtiqueta, filtroEtiquetaDe } from "@/app/_components/etiquetas/opciones";
 import type { EtiquetaDeFila } from "@/lib/tipos-etiquetas";
 import { estadoPantalla } from "@/lib/formato";
@@ -61,15 +62,20 @@ type Lista = { items: NegocioFila[]; siguiente: string | null };
 export async function cargarNegocios(f: Record<string, string | undefined>) {
   const [r, etiquetas] = await Promise.all([
     ejecutarComoUsuario<Lista>("erp", "comercial.negocios.list", {
-    limite: 100,
-    ...filtroEtiquetaDe(f),
-    ...(f["q"] ? { q: f["q"] } : {}),
-    ...(f["etapa"] && esUuid(f["etapa"]) ? { etapaId: f["etapa"] } : {}),
-    ...(f["estado"] ? { estado: f["estado"] } : {}),
+      ...entradaPaginaLista(f),
+      ...filtroEtiquetaDe(f),
+      ...(f["q"] ? { q: f["q"] } : {}),
+      ...(f["etapa"] && esUuid(f["etapa"]) ? { etapaId: f["etapa"] } : {}),
+      ...(f["estado"] ? { estado: f["estado"] } : {}),
     }),
     cargarOpcionesEtiqueta(),
   ]);
-  return { state: estadoPantalla(r), items: r.ok ? r.data.items : [], etiquetas };
+  return {
+    state: estadoPantalla(r),
+    items: r.ok ? r.data.items : [],
+    siguiente: r.ok ? r.data.siguiente : null,
+    etiquetas,
+  };
 }
 
 /**
