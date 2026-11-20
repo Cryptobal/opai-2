@@ -120,6 +120,18 @@ jobs:
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
         run: PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:ocultar-tenants
+      - name: Verificar destino y preparar compras sintéticas de CAR-239
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
+          && github.event.pull_request.number == 831
+          && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
+          PREVIEW_BRANCH_ID: ${{ steps.neon.outputs.branch_id }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: pnpm --filter @opai/db exec tsx scripts/seed-compras-qa-preview.ts
       - name: Sembrar usuarios QA de rendiciones (solo qa-e2e)
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
