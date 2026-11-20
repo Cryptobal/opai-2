@@ -189,7 +189,9 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(rutMal.ok).toBe(false);
     const ok = await run(sys, "asistencia.contingencias.responder_enlace", { token, rut: RUT, decision: "aceptada" });
     expect(ok.ok, JSON.stringify(ok)).toBe(true);
-    expect(await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia", personaId: T.persona } })).toBeGreaterThanOrEqual(1);
+    const actualizada = await e.admin.contingencia.findUniqueOrThrow({ where: { id: reg.data.id } });
+    expect(actualizada.marcaId).toBeTruthy();
+    expect(actualizada.estado).toBe("aceptada");
   });
 
   it("contingencia: RR. HH. propone con evidencia; solo el trabajador la acepta y recién ahí cuenta", async () => {
@@ -199,7 +201,7 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(sin.ok).toBe(false);
     const reg = await run(ctx(T.a, "erp", autor), "asistencia.contingencias.registrar", { ...base, evidenciaDocumentoId: await evidencia(T.a) });
     expect(reg.ok, JSON.stringify(reg)).toBe(true);
-    expect(await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia" } })).toBe(0);
+    expect((await e.admin.contingencia.findUniqueOrThrow({ where: { id: reg.data.id } })).marcaId).toBeNull();
     // RR. HH. ya no resuelve: la capacidad no existe para ellos.
     const rrhh = await run(ctx(T.a), "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "aceptada" });
     expect(rrhh.ok).toBe(false);
@@ -211,7 +213,11 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(sinComentario.ok).toBe(false);
     const ok = await run(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "aceptada" });
     expect(ok.ok, JSON.stringify(ok)).toBe(true);
-    expect(await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia" } })).toBe(1);
+    const resuelta = await e.admin.contingencia.findUniqueOrThrow({ where: { id: reg.data.id } });
+    expect(resuelta.estado).toBe("aceptada");
+    expect(resuelta.marcaId).toBeTruthy();
+    const marca = await e.admin.marca.findUniqueOrThrow({ where: { id: resuelta.marcaId! }, select: { origen: true } });
+    expect(marca.origen).toBe("contingencia");
     const dos = await run(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "rechazada", comentario: "Ya no" });
     expect(dos.ok).toBe(false);
   });
