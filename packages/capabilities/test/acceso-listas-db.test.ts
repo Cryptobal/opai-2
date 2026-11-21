@@ -2,16 +2,35 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
+import { digitoVerificador, formatearRut, normalizarDocumento } from "@opai/domain";
+
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
 
 const CLAVE_PRUEBA = "clave-solo-para-pruebas-no-es-un-secreto-real-0123456789";
-const RUN = "12.345.678-5";
+
+function runDesdeCuerpo(cuerpo: number): string {
+  const s = String(cuerpo);
+  return formatearRut(`${s}-${digitoVerificador(s)}`);
+}
+
+/** RUN distinto por worker de Vitest (merge_group y estabilidad comparten el mismo Postgres efímero). */
+function runUnico(sufijo: string, base: number): string {
+  const extra = parseInt(sufijo.replace(/\D/g, "").slice(0, 6) || "0", 16) % 500_000;
+  return runDesdeCuerpo(base + extra);
+}
+
+const RUN_EMPRESA = runDesdeCuerpo(16_666_666);
+const RUN_VEHICULO = runDesdeCuerpo(10_000_000);
 
 describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR-78 E4c)", () => {
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
+  let RUN = "";
+  let RUN_AUX = "";
+  let mascaraRun = "";
+  let cuerpoRun = "";
   const t = { A: "", B: "" };
   const inst = { A: "", B: "" };
   const disp = { A: "", B: "" };
@@ -49,6 +68,12 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
     mod.registrarCapacidades(mod.capacidadesAcceso);
     const s = randomUUID().slice(0, 8);
+    RUN = runUnico(s, 12_000_000);
+    RUN_AUX = runUnico(`${s}-aux`, 11_000_000);
+    const doc = normalizarDocumento({ tipo: "run", numero: RUN });
+    if (!doc) throw new Error("RUN de prueba inválido");
+    mascaraRun = doc.mascara;
+    cuerpoRun = doc.clave.split("-")[0] ?? "";
     for (const k of ["A", "B"] as const) {
       t[k] = (
         await e.admin.tenant.create({
@@ -88,14 +113,14 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
       instalacionId: inst.A,
     });
     expect(lista).toHaveLength(1);
-    expect(lista[0]).toMatchObject({ mascara: "12.3••.•••-5", motivo: "Prueba" });
-    expect(JSON.stringify(lista)).not.toContain("12345678");
+    expect(lista[0]).toMatchObject({ mascara: mascaraRun, motivo: "Prueba" });
+    expect(JSON.stringify(lista)).not.toContain(cuerpoRun);
     const auditoria = await e.admin.auditEvent.findMany({
       where: { tenantId: t.A, capability: "acceso.listas.agregar" },
     });
     expect(auditoria.length).toBeGreaterThan(0);
-    expect(JSON.stringify(auditoria)).not.toContain("12345678");
-    expect(JSON.stringify(auditoria)).not.toContain("12.345.678");
+    expect(JSON.stringify(auditoria)).not.toContain(cuerpoRun);
+    expect(JSON.stringify(auditoria)).not.toContain(RUN);
   });
 
   it("rechaza duplicado, bloqueo sin motivo, documento inválido y horario incompleto", async () => {
@@ -103,7 +128,7 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
     expect(
       (
         await agregar("A", {
-          documento: { tipo: "run", numero: "11.111.111-1" },
+          documento: { tipo: "run", numero: RUN_AUX },
           motivo: undefined,
         })
       ).ok,
@@ -115,7 +140,7 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
       (
         await agregar("A", {
           tipo: "autorizada",
-          documento: { tipo: "run", numero: "11.111.111-1" },
+          documento: { tipo: "run", numero: RUN_AUX },
           desdeMin: 60,
         })
       ).ok,
@@ -208,8 +233,8 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
       )
     ).items;
     expect(dentro.map((x) => x.nombre)).toContain("Visita Uno");
-    expect(JSON.stringify(dentro)).not.toContain("12345678");
-    expect(dentro[0]?.documento).toBe("12.3••.•••-5");
+    expect(JSON.stringify(dentro)).not.toContain(cuerpoRun);
+    expect(dentro[0]?.documento).toBe(mascaraRun);
     expect((await run("B", "acceso.registros.listar", { instalacionId: inst.A })).ok).toBe(false);
     const deB = await ok<{ items: unknown[] }>("B", "acceso.registros.listar", {
       instalacionId: inst.B,
@@ -221,13 +246,13 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
     await ok("A", "acceso.listas.agregar", {
       instalacionId: inst.A,
       tipo: "autorizada",
-      documento: { tipo: "run", numero: "16.666.666-6" },
+      documento: { tipo: "run", numero: RUN_EMPRESA },
     });
     await ok("A", "acceso.listas.agregar", {
       instalacionId: inst.A,
       alcance: "empresa",
       tipo: "bloqueada",
-      documento: { tipo: "run", numero: "16.666.666-6" },
+      documento: { tipo: "run", numero: RUN_EMPRESA },
       motivo: "Bloqueo global",
     });
     const h = {
@@ -235,7 +260,7 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
       tipo: "acceso.entrada",
       payload: {
         tipoRegistro: "visita",
-        documento: { tipo: "run", numero: "16.666.666-6" },
+        documento: { tipo: "run", numero: RUN_EMPRESA },
         nombre: "Empresa bloqueada",
       },
       horaHecho: new Date(Date.now() - 20_000).toISOString(),
@@ -254,14 +279,14 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
     await ok("A", "acceso.listas.agregar", {
       instalacionId: inst.A,
       tipo: "autorizada",
-      documento: { tipo: "run", numero: "10.000.000-8" },
+      documento: { tipo: "run", numero: RUN_VEHICULO },
     });
     const h = {
       clave: randomUUID(),
       tipo: "acceso.entrada",
       payload: {
         tipoRegistro: "vehiculo",
-        documento: { tipo: "run", numero: "10.000.000-8" },
+        documento: { tipo: "run", numero: RUN_VEHICULO },
         nombre: "Conductor",
         patente: "bb-cc 12",
       },
