@@ -1,7 +1,7 @@
 "use client";
 
 import { estadoCpqBadge } from "@/lib/cpq-presentacion";
-import { pesos } from "@/lib/fechas";
+import { fecha, pesos } from "@/lib/fechas";
 
 export function HistorialVersionesCpq({
   versiones,
@@ -37,10 +37,7 @@ export function HistorialVersionesCpq({
                   ) : null}
                 </p>
                 {v.enviadaEn ? (
-                  <p className="t-caption text-fg-muted">
-                    Enviada{" "}
-                    {String(v.enviadaEn).slice(0, 10).split("-").reverse().join("-")}
-                  </p>
+                  <p className="t-caption text-fg-muted">Enviada {fecha(v.enviadaEn)}</p>
                 ) : (
                   <p className="t-caption text-fg-muted">Sin envío registrado</p>
                 )}

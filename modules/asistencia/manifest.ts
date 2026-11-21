@@ -21,8 +21,9 @@ export const manifest = defineModule({
   ],
   navegacion: [
     { portal: "erp", href: "/asistencia", etiqueta: "Asistencia", icono: "UserCheck", area: "operaciones", orden: 50, permiso: "asistencia:ver" },
-    { portal: "trabajador", href: "/trabajador/correcciones", etiqueta: "Correcciones", icono: "Pencil", area: "asistencia", orden: 35, permiso: null },
     { portal: "erp", href: "/asistencia/marcas", etiqueta: "Marcas", icono: "Fingerprint", area: "operaciones", orden: 51, permiso: "asistencia:ver" },
+    { portal: "trabajador", href: "/trabajador/correcciones", etiqueta: "Correcciones", icono: "Pencil", area: "asistencia", orden: 35, permiso: null },
+    { portal: "trabajador", href: "/trabajador/contingencias", etiqueta: "Contingencias", icono: "AlertTriangle", area: "asistencia", orden: 40, permiso: null },
   ],
   configuracion: ajustesAsistencia,
   eventos: [

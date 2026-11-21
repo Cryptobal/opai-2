@@ -1,4 +1,4 @@
-import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
+import { tamanoPagina, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
@@ -11,7 +11,7 @@ export async function cargarInstalaciones(p: Parametros) {
   const estado = p["estado"] ?? "activa";
   const [r, regiones, cuentaSel] = await Promise.all([
     ejecutarComoUsuario<Pagina<InstalacionFila>>("erp", "core.instalaciones.list", {
-      limite: POR_PAGINA,
+      limite: tamanoPagina(p),
       ...(p["q"] ? { q: p["q"] } : {}),
       ...(p["cuenta"] ? { cuentaId: p["cuenta"] } : {}),
       ...(estado !== "todas" ? { estado } : {}),
