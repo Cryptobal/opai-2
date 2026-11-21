@@ -1,10 +1,9 @@
 import { formatearFechaHora } from "@opai/domain";
-import { type Columna, ListScreen, Segmentado } from "@opai/ds";
+import { Badge, type Columna, ListScreen, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import type { Registro } from "@/app/(erp)/accesos/_componentes/datos";
 import { estadoRegistro, tipoDe } from "@/app/(erp)/accesos/_componentes/etiquetas";
-import { COLUMNAS } from "@/app/(erp)/accesos/_componentes/pestana-accesos";
 import { Tarjeta } from "@/app/(erp)/accesos/_componentes/tablas-instalacion";
 
 export type Instalacion = { id: string; nombre: string };
@@ -18,9 +17,19 @@ type Props = {
 };
 
 const COLUMNAS_CLIENTE: Columna<Registro>[] = [
-  ...COLUMNAS.slice(0, 1),
+  { id: "nombre", etiqueta: "Nombre", render: (x) => x.nombre },
   { id: "instalacion", etiqueta: "Instalación", render: (x) => x.instalacion },
-  ...COLUMNAS.slice(1),
+  { id: "tipo", etiqueta: "Tipo", render: (x) => tipoDe(x.tipoRegistro) },
+  { id: "entrada", etiqueta: "Entrada", render: (x) => formatearFechaHora(x.entradaEn) },
+  {
+    id: "estado",
+    etiqueta: "Estado",
+    render: (x) => (
+      <Badge tono={estadoRegistro(x).tono} punto>
+        {estadoRegistro(x).etiqueta}
+      </Badge>
+    ),
+  },
 ];
 
 const ruta = (q: Record<string, string | undefined>) => {

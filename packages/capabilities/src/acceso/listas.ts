@@ -95,7 +95,10 @@ export const listasAgregar = defineCapability({
     const h = huellaVigente({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
     const data = {
       tenantId: ctx.tenantId,
+      alcance: "instalacion",
       instalacionId: i.instalacionId,
+      cuentaId: null,
+      grupoId: null,
       tipo: i.tipo,
       docTipo: d.tipo,
       huella: h.huella,
@@ -111,7 +114,14 @@ export const listasAgregar = defineCapability({
       hastaMin: i.hastaMin ?? null,
       usoUnico: i.usoUnico,
     };
-    if (dryRun) return vistaEntrada({ ...data, id: "00000000-0000-0000-0000-000000000000" });
+    if (dryRun)
+      return vistaEntrada({
+        ...data,
+        id: "00000000-0000-0000-0000-000000000000",
+        alcance: data.alcance,
+        cuentaId: data.cuentaId,
+        grupoId: data.grupoId,
+      });
     return vistaEntrada(await ctx.db.entradaLista.create({ data }));
   },
 });

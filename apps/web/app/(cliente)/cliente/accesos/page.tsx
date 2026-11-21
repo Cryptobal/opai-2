@@ -1,6 +1,7 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
-import { type Pagina, type Registro, uuid } from "@/app/(erp)/accesos/_componentes/datos";
+import { type Pagina, type Registro } from "@/app/(erp)/accesos/_componentes/datos";
+import { uuid } from "@/app/(erp)/accesos/prerregistros/_componentes/datos";
 import { exigirDatos } from "@/lib/carga";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";

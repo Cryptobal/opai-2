@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ALCANCES_LISTA } from "@opai/domain";
+
 import { uuidSchema } from "../core/esquemas";
 import type { Contexto } from "../types";
 
@@ -46,7 +48,10 @@ export { TIPOS_REGISTRO } from "@opai/domain";
 /** Una entrada de lista tal como se muestra: el documento solo enmascarado, nunca la huella ni el número. */
 export const entradaListaSchema = z.object({
   id: uuidSchema,
-  instalacionId: uuidSchema,
+  alcance: z.enum(ALCANCES_LISTA),
+  instalacionId: uuidSchema.nullable(),
+  cuentaId: uuidSchema.nullable(),
+  grupoId: uuidSchema.nullable(),
   tipo: z.enum(TIPOS_LISTA),
   docTipo: z.string(),
   mascara: z.string(),
@@ -64,7 +69,10 @@ export type EntradaListaVista = z.infer<typeof entradaListaSchema>;
 
 type Fila = {
   id: string;
-  instalacionId: string;
+  alcance: string;
+  instalacionId: string | null;
+  cuentaId: string | null;
+  grupoId: string | null;
   tipo: string;
   docTipo: string;
   mascara: string;
@@ -80,9 +88,15 @@ type Fila = {
 };
 
 export function vistaEntrada(f: Fila): EntradaListaVista {
+  const alcance = ALCANCES_LISTA.includes(f.alcance as (typeof ALCANCES_LISTA)[number])
+    ? (f.alcance as (typeof ALCANCES_LISTA)[number])
+    : "instalacion";
   return {
     id: f.id,
+    alcance,
     instalacionId: f.instalacionId,
+    cuentaId: f.cuentaId,
+    grupoId: f.grupoId,
     tipo: f.tipo === "bloqueada" ? "bloqueada" : "autorizada",
     docTipo: f.docTipo,
     mascara: f.mascara,
