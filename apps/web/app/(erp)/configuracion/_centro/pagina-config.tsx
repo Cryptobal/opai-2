@@ -6,6 +6,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 
 import { cargarIndice, grupoDeSeccion, type Indice } from "./datos";
 import { ListaGrupo } from "./lista-grupo";
+import { ListaModulos } from "./lista-modulos";
 import { EncabezadoGrupo } from "./encabezado-grupo";
 
 type Cab = { subtitulo?: ReactNode; acciones?: ReactNode };
@@ -68,12 +69,20 @@ export function PaginaConfig<T = undefined>({
               etiquetaDetalle={t}
               lista={
                 grupo ? (
-                  <ListaGrupo
-                    etiqueta={grupo.etiqueta}
-                    entradas={entradas}
-                    aprobaciones={indice.aprobaciones}
-                    seleccionada={sel}
-                  />
+                  grupo.id === "modulos" ? (
+                    <ListaModulos
+                      entradas={entradas}
+                      aprobaciones={indice.aprobaciones}
+                      seleccionada={sel}
+                    />
+                  ) : (
+                    <ListaGrupo
+                      etiqueta={grupo.etiqueta}
+                      entradas={entradas}
+                      aprobaciones={indice.aprobaciones}
+                      seleccionada={sel}
+                    />
+                  )
                 ) : null
               }
               detalle={

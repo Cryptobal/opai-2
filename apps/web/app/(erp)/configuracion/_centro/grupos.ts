@@ -25,7 +25,7 @@ export const GRUPOS: readonly Grupo[] = [
   },
   {
     id: "operacion",
-    etiqueta: "Operación",
+    etiqueta: "Calendario y estructura",
     corta: "Feriados, patrones y documentos",
     icono: CalendarClock,
   },

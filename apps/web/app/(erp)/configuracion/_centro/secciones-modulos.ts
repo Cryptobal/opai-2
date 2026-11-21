@@ -103,7 +103,7 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
   tickets: [
     {
       id: "tipos",
-      etiqueta: "Tipos",
+      etiqueta: "Tipos de ticket",
       permiso: "tickets:tipos.manage",
       Contenido: SeccionTiposTicket,
     },
