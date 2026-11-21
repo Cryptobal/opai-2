@@ -5,6 +5,27 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { type EntradaLista, PanelListas } from "./panel-listas";
 
+type FilaLista = {
+  id: string;
+  alcance: EntradaLista["alcance"];
+  agregadaPor: string | null;
+  tipo: "autorizada" | "bloqueada";
+  mascara: string;
+  nombre: string | null;
+  motivo: string | null;
+  tiposRegistro: string[];
+  vigenteDesde: string | null;
+  vigenteHasta: string | null;
+  dias: number[];
+  desdeMin: number | null;
+  hastaMin: number | null;
+  usoUnico: boolean;
+};
+
+async function filasListas(instalacionId: string, tipo: "autorizada" | "bloqueada") {
+  return ejecutarComoUsuario<FilaLista[]>("erp", "acceso.listas.listar", { instalacionId, tipo });
+}
+
 /** Listas autorizada y bloqueada de la instalación (solo para quien gestiona listas). */
 export async function SeccionListas({
   instalacionId,
@@ -18,27 +39,7 @@ export async function SeccionListas({
   segmento: ReactNode;
 }) {
   const tipo = lista === "bloqueada" ? "bloqueada" : "autorizada";
-  const r = await ejecutarComoUsuario<
-    {
-      id: string;
-      alcance: EntradaLista["alcance"];
-      agregadaPor: string | null;
-      tipo: "autorizada" | "bloqueada";
-      mascara: string;
-      nombre: string | null;
-      motivo: string | null;
-      tiposRegistro: string[];
-      vigenteDesde: string | null;
-      vigenteHasta: string | null;
-      dias: number[];
-      desdeMin: number | null;
-      hastaMin: number | null;
-      usoUnico: boolean;
-    }[]
-  >("erp", "acceso.listas.listar", {
-    instalacionId,
-    tipo,
-  });
+  const r = await filasListas(instalacionId, tipo);
   const porId = new Map<string, string>();
   if (r.ok && r.data.some((e) => e.agregadaPor)) {
     const u = await ejecutarComoUsuario<{ userId: string; nombre: string }[]>(

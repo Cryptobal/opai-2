@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 
 import { Alerta, avisar, Button, Checkbox, Input, SeccionTarjeta } from "@opai/ds";
 
@@ -8,6 +8,14 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 export type GrupoLista = { id?: string; nombre: string; instalacionIds: string[] };
 export type InstalacionOpcion = { id: string; nombre: string };
+
+function payloadGrupos(gs: GrupoLista[]) {
+  return gs.map((g) => ({
+    ...(g.id ? { id: g.id } : {}),
+    nombre: g.nombre.trim(),
+    instalacionIds: g.instalacionIds,
+  }));
+}
 
 /** Grupos de instalaciones que comparten listas (CAR-506), en configuración de empresa. */
 export function EditorGruposLista({
@@ -21,12 +29,7 @@ export function EditorGruposLista({
   const [gs, setGs] = useState(iniciales);
 
   async function guardar() {
-    const payload = gs.map((g) => ({
-      ...(g.id ? { id: g.id } : {}),
-      nombre: g.nombre.trim(),
-      instalacionIds: g.instalacionIds,
-    }));
-    const r = await ejecutar<GrupoLista[]>("acceso.grupos.set", { grupos: payload });
+    const r = await ejecutar<GrupoLista[]>("acceso.grupos.set", { grupos: payloadGrupos(gs) });
     if (!r) return;
     setGs(
       r.map((g) => ({
@@ -45,17 +48,7 @@ export function EditorGruposLista({
         y luego elige ese alcance al agregar o importar entradas.
       </p>
       {error ? <Alerta tono="danger" titulo={error} className="mx-4 mt-3" /> : null}
-      <ul className="flex flex-col">
-        {gs.map((g, i) => (
-          <FilaGrupo
-            key={g.id ?? `n${i}`}
-            g={g}
-            instalaciones={instalaciones}
-            cambiar={(x) => setGs((v) => v.map((row, j) => (j === i ? { ...row, ...x } : row)))}
-            quitar={() => setGs((v) => v.filter((_, j) => j !== i))}
-          />
-        ))}
-      </ul>
+      <ListaGrupos gs={gs} instalaciones={instalaciones} setGs={setGs} />
       <div className="flex flex-wrap gap-2 p-4">
         <Button
           variant="secondary"
@@ -74,6 +67,30 @@ export function EditorGruposLista({
         </Button>
       </div>
     </SeccionTarjeta>
+  );
+}
+
+function ListaGrupos({
+  gs,
+  instalaciones,
+  setGs,
+}: {
+  gs: GrupoLista[];
+  instalaciones: InstalacionOpcion[];
+  setGs: Dispatch<SetStateAction<GrupoLista[]>>;
+}) {
+  return (
+    <ul className="flex flex-col">
+      {gs.map((g, i) => (
+        <FilaGrupo
+          key={g.id ?? `n${i}`}
+          g={g}
+          instalaciones={instalaciones}
+          cambiar={(x) => setGs((v) => v.map((row, j) => (j === i ? { ...row, ...x } : row)))}
+          quitar={() => setGs((v) => v.filter((_, j) => j !== i))}
+        />
+      ))}
+    </ul>
   );
 }
 
