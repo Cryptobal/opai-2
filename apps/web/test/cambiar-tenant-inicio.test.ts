@@ -23,7 +23,7 @@ beforeEach(() => {
   const m = (id: string, portalInicio: string) => ({
     id,
     tenantId: id,
-    rol: "viewer",
+    rol: "supervisor",
     estado: "activa",
     portales: ["erp", "supervisor"],
     portalInicio,
@@ -36,7 +36,8 @@ beforeEach(() => {
     actual,
     membresias: [actual, m("b", "supervisor")],
     modulosActivos: [],
-    acceso: { permisosRol: null, excepciones: [], instalaciones: null },
+    acceso: { permisosRol: null, excepciones: [], instalaciones: [] },
+    personaVinculada: false,
   };
 });
 

@@ -5,7 +5,7 @@ import { entradaSchema } from "./entrada";
 import { IDS_IMPORTADORES } from "./registro";
 import { AL_EXISTIR } from "./tipos";
 
-export const importadorId = z.enum(IDS_IMPORTADORES).describe("Qué se importa: cuentas, contactos, instalaciones, negocios, personas, contratos, documentos_venta (facturas y notas emitidas), flujo_filas (categorías de egreso del flujo de caja) o flujo_recurrentes (gastos fijos del flujo).");
+export const importadorId = z.enum(IDS_IMPORTADORES).describe("Qué se importa: cuentas, contactos, instalaciones, negocios, personas, contratos, documentos_venta (facturas y notas emitidas), flujo_filas (categorías de egreso del flujo de caja) flujo_recurrentes (gastos fijos del flujo) o acceso_listas (autorizados y bloqueados de Control de acceso).");
 const accion = z.enum(["crear", "actualizar", "sin_cambio", "error"]);
 export const conteosSchema = z.object({ crear: z.number().int(), actualizar: z.number().int(), sin_cambio: z.number().int(), error: z.number().int() });
 

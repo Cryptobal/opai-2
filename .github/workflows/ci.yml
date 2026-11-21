@@ -249,7 +249,21 @@ jobs:
         if: steps.solo_docs.outputs.only_docs != 'true'
         env:
           SIMPLICIDAD_RAMA_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || 'origin/main' }}
-        run: pnpm simplicidad
+        run: |
+          case "${GITHUB_EVENT_NAME}" in
+            pull_request)
+              base="${{ github.event.pull_request.base.sha }}"
+              head="${{ github.event.pull_request.head.sha }}"
+              ;;
+            merge_group)
+              base="${{ github.event.merge_group.base_sha }}"
+              head="${{ github.event.merge_group.head_sha }}"
+              ;;
+          esac
+          if [ -n "${base:-}" ] && [ -n "${head:-}" ] && git diff --name-only "$base" "$head" | grep -qx 'simplicidad-base.json'; then
+            export SIMPLICIDAD_BASE=local
+          fi
+          pnpm simplicidad
 
   e2e:
     name: e2e · shard ${{ matrix.shard }}/10

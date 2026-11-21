@@ -27,14 +27,20 @@ describe.skipIf(omitirSuiteDb())("Central · señales y reglas (db)", () => {
       modulosActivos: uid ? ["central"] : [],
       medidor: { registrar: async () => undefined },
     });
-  const senal = (k: "con" | "sin", tipo: string, personaId: string | null = persona[k], id = randomUUID()) =>
+  const senal = (
+    k: "con" | "sin",
+    tipo: string,
+    personaId: string | null = persona[k],
+    id = randomUUID(),
+    extra: Record<string, unknown> = {},
+  ) =>
     senales.handler(ctx(t[k]), {
       id,
       tenantId: t[k],
       tipo,
       entidadTipo: "persona",
       entidadId: personaId,
-      payload: personaId ? { personaId } : { instalacionId: inst[k] },
+      payload: { ...(personaId ? { personaId } : { instalacionId: inst[k] }), ...extra },
       actorTipo: "system",
     } as never);
   const alertas = (k: "con" | "sin") => e.admin.centralAlerta.findMany({ where: { tenantId: t[k] }, orderBy: { createdAt: "asc" } });
@@ -87,6 +93,38 @@ describe.skipIf(omitirSuiteDb())("Central · señales y reglas (db)", () => {
       payload: { instalacionId: inst.sin }, actorTipo: "system",
     } as never);
     expect(await alertas("con")).toHaveLength(antes);
+  });
+
+  it("«no marcó» abre la alerta en la instalación del turno aunque el vínculo sea otra (CAR-749)", async () => {
+    const cuenta = (await e.admin.cuenta.create({ data: { tenantId: t.con, nombre: "Cliente Sur" } })).id;
+    const instSur = (await e.admin.instalacion.create({ data: { tenantId: t.con, cuentaId: cuenta, nombre: "Planta Sur" } })).id;
+    const antes = (await alertas("con")).length;
+    await senal("con", "asistencia.alerta.sin_marca_inicio", persona.con, randomUUID(), { instalacionId: instSur });
+    const nuevas = (await alertas("con")).slice(antes);
+    expect(nuevas).toHaveLength(1);
+    expect(nuevas[0]).toMatchObject({ instalacionId: instSur, personaId: persona.con });
+  });
+
+  it("solo turnoEsperadoId en el payload usa la instalación del turno (CAR-749)", async () => {
+    const cuenta = (await e.admin.cuenta.create({ data: { tenantId: t.con, nombre: "Cliente Este" } })).id;
+    const instEste = (await e.admin.instalacion.create({ data: { tenantId: t.con, cuentaId: cuenta, nombre: "Planta Este" } })).id;
+    const turno = await e.admin.turnoEsperado.create({
+      data: {
+        tenantId: t.con,
+        personaId: persona.con,
+        fecha: new Date("2026-11-20"),
+        inicio: new Date("2026-11-20T08:00:00Z"),
+        fin: new Date("2026-11-20T20:00:00Z"),
+        instalacionId: instEste,
+        origen: "pauta",
+        vigente: true,
+      },
+    });
+    const antes = (await alertas("con")).length;
+    await senal("con", "asistencia.alerta.sin_marca_inicio", persona.con, randomUUID(), { turnoEsperadoId: turno.id });
+    const nuevas = (await alertas("con")).slice(antes);
+    expect(nuevas).toHaveLength(1);
+    expect(nuevas[0]).toMatchObject({ instalacionId: instEste, personaId: persona.con });
   });
 
   it("la regla apagada de la empresa no abre alertas; la emergencia no se puede apagar", async () => {

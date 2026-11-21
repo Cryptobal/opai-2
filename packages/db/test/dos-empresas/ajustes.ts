@@ -360,6 +360,35 @@ export const AJUSTES: Record<string, Ajuste> = {
       peaje_clp: 0,
     }),
   },
+  // Acceso (CAR-506 / CAR-632): listas con alcance, grupos, cursor de reportes.
+  "acceso.grupos_lista": { valores: () => ({ nombre: "Grupo prueba dos empresas" }) },
+  "acceso.grupos_lista_instalaciones": {
+    dependencias: ["acceso.grupos_lista", "core.instalaciones"],
+    valores: (ctx) => ({
+      grupo_id: id(ctx, "acceso.grupos_lista"),
+      instalacion_id: id(ctx, "core.instalaciones"),
+    }),
+  },
+  "acceso.reportes_cursor": {
+    dependencias: ["core.instalaciones"],
+    valores: (ctx) => ({
+      instalacion_id: id(ctx, "core.instalaciones"),
+      ultimo_hasta: new Date("2026-01-01T00:00:00.000Z"),
+    }),
+  },
+  "acceso.entradas_lista": {
+    dependencias: ["core.instalaciones"],
+    fijas: ["tipo", "doc_tipo", "alcance"],
+    valores: (ctx) => ({
+      alcance: "instalacion",
+      tipo: "autorizada",
+      doc_tipo: "run",
+      huella: "a".repeat(64),
+      huella_kid: "v1",
+      mascara: "12.345.678-9",
+      instalacion_id: id(ctx, "core.instalaciones"),
+    }),
+  },
   // Asistencia (CAR-89): CHECK de enumeraciones. Las marcas y correcciones son inmutables.
   "asistencia.marcas": {
     valores: () => ({
