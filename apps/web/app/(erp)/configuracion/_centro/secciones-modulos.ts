@@ -15,6 +15,7 @@ import { SeccionCatalogoCpq } from "@/app/(erp)/configuracion/_cpq/seccion-catal
 import { SeccionMarcaPlantillasCpq } from "@/app/(erp)/configuracion/_cpq/seccion-marca-plantillas";
 import { SeccionImportarCotizaciones } from "@/app/(erp)/configuracion/_comercial/seccion-importar-cotizaciones";
 import { SeccionSeguimiento } from "@/app/(erp)/configuracion/_comercial/seccion-seguimiento";
+import { SeccionCadenas } from "@/app/(erp)/configuracion/_central/seccion-cadenas";
 
 /**
  * Pestaña que un módulo aporta a su página de Configuración → Módulos → <módulo> (ADR-018): el
@@ -126,6 +127,14 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       etiqueta: "Centros de costo",
       permiso: "finanzas:read",
       Contenido: SeccionCentrosCosto,
+    },
+  ],
+  central: [
+    {
+      id: "cadenas",
+      etiqueta: "Cadenas de escalamiento",
+      permiso: "central:config.manage",
+      Contenido: SeccionCadenas,
     },
   ],
   cpq: [

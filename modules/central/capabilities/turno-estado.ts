@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCapability } from "@opai/capabilities";
 
 import { PERMISO_VER, uuidSchema } from "./esquemas";
-import { responsableActual } from "./humano";
+import { agenteConMando, enFranjaNocturnaTenant, responsableActual } from "./humano";
 
 const turnoSchema = z.object({
   id: uuidSchema,
@@ -26,20 +26,27 @@ export const turnoEstado = defineCapability({
     turno: turnoSchema.nullable(),
     pausadaEmpresa: z.boolean(),
     instalacionesPausadas: z.number().int(),
+    franjaNocturna: z.boolean(),
+    agenteOperativo: z.boolean(),
   }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
-    const [responsable, turno, pausas] = await Promise.all([
+    const [responsable, turno, pausas, franjaNocturna, conMando] = await Promise.all([
       responsableActual(ctx),
       ctx.db.centralTurno.findFirst({ where: { estado: { not: "cerrado" } } }),
       ctx.db.centralPausa.findMany({ where: { reanudadaEn: null }, select: { instalacionId: true } }),
+      enFranjaNocturnaTenant(ctx),
+      agenteConMando(ctx),
     ]);
+    const pausadaEmpresa = pausas.some((p) => p.instalacionId === null);
     return {
       responsable,
       turno: turno ? { ...turno, estado: turno.estado as "abierto" | "en_entrega" } : null,
-      pausadaEmpresa: pausas.some((p) => p.instalacionId === null),
+      pausadaEmpresa,
       instalacionesPausadas: pausas.filter((p) => p.instalacionId !== null).length,
+      franjaNocturna,
+      agenteOperativo: conMando && !pausadaEmpresa,
     };
   },
 });

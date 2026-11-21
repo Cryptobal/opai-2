@@ -1,6 +1,8 @@
 import { ajuste, type Contexto, reglaDeNegocio } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 
+import { enFranjaNocturna, FRANJA_NOCTURNA_FIN, FRANJA_NOCTURNA_INICIO } from "../domain/horario";
+
 export const PERMISO_GOBERNAR = "central:agente.gobernar";
 
 type Responsable = { tipo: "turno" | "respaldo"; usuarioId: string } | null;
@@ -9,6 +11,22 @@ type Responsable = { tipo: "turno" | "respaldo"; usuarioId: string } | null;
  * Quién está a cargo de la central ahora (R12): el operador del turno vivo o, sin turno, el
  * responsable de respaldo de Configuración, si es miembro activo. null = nadie a cargo.
  */
+/** Si estamos en la franja nocturna del tenant (CAR-751). */
+export async function enFranjaNocturnaTenant(ctx: Contexto, db: TenantTx = ctx.db, ahora = new Date()): Promise<boolean> {
+  const [inicio, fin, t] = await Promise.all([
+    ajuste<string>(ctx, "central", "franja_nocturna_inicio", db),
+    ajuste<string>(ctx, "central", "franja_nocturna_fin", db),
+    db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { timezone: true } }),
+  ]);
+  return enFranjaNocturna(ahora, inicio || FRANJA_NOCTURNA_INICIO, fin || FRANJA_NOCTURNA_FIN, t?.timezone ?? "America/Santiago");
+}
+
+/** El agente puede actuar: hay persona a cargo o es franja nocturna. */
+export async function agenteConMando(ctx: Contexto, db: TenantTx = ctx.db): Promise<boolean> {
+  if (await responsableActual(ctx, db)) return true;
+  return enFranjaNocturnaTenant(ctx, db);
+}
+
 export async function responsableActual(ctx: Contexto, db: TenantTx = ctx.db): Promise<Responsable> {
   const turno = await db.centralTurno.findFirst({ where: { estado: { not: "cerrado" } }, select: { operadorId: true } });
   if (turno) return { tipo: "turno", usuarioId: turno.operadorId };
@@ -39,7 +57,7 @@ export async function exigirAgenteHabilitado(
   instalacionId: string | null = a?.instalacionId ?? null,
 ) {
   if (!ctx.agente && ctx.principal?.tipo !== "servicio") return;
-  if (!(await responsableActual(ctx, db)))
+  if (!(await agenteConMando(ctx, db)))
     throw reglaDeNegocio("La central no tiene a nadie a cargo: el agente solo puede mirar.");
   if (await agentePausado(db, instalacionId)) throw reglaDeNegocio("El agente de central está en pausa aquí.");
   if (a?.tomadaPorId) throw reglaDeNegocio("Un operador tomó esta alerta: el agente no actúa en ella hasta que la devuelva.");

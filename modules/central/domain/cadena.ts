@@ -23,6 +23,8 @@ export type Paso = {
   esperaMin: number;
   /** El paso se cumple solo cuando alguien responde «me hago cargo». */
   exigeConfirmacion: boolean;
+  /** false = se omite al escalar (CAR-751); ausente cuenta como activo. */
+  activo?: boolean;
 };
 
 /**
@@ -47,6 +49,19 @@ type CadenaGuardada = { instalacionId: string | null; severidad: string | null }
  * La cadena que rige una alerta: la más específica gana (instalación y severidad, solo instalación,
  * solo severidad, empresa). Sin ninguna, la de la plantilla (null).
  */
+export function pasosActivos(pasos: readonly Paso[]): readonly Paso[] {
+  return pasos.filter((p) => p.activo !== false);
+}
+
+/** El último paso activo debe ser una persona interna, nunca el guardia (R14, CAR-751). */
+export function validarPasosCadena(pasos: readonly Paso[]): string | null {
+  const activos = pasosActivos(pasos);
+  if (!activos.length) return "Debe haber al menos un paso activo.";
+  const ultimo = activos[activos.length - 1]!;
+  if (ultimo.destinatario.tipo === "guardia") return "El último paso debe ser una persona interna, no el guardia.";
+  return null;
+}
+
 export function elegirCadena<C extends CadenaGuardada>(
   cadenas: readonly C[],
   instalacionId: string,

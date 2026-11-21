@@ -61,7 +61,11 @@ export const AJUSTES: Record<string, Ajuste> = {
       instalacion_id: null,
       severidad: null,
       plazo_atencion_min: 30,
-      pasos: JSON.stringify([{ destinatario: { tipo: "guardia" }, canales: ["campana"], esperaMin: 3, exigeConfirmacion: false }]),
+      activa: true,
+      pasos: JSON.stringify([
+        { destinatario: { tipo: "guardia" }, canales: ["campana"], esperaMin: 3, exigeConfirmacion: false },
+        { destinatario: { tipo: "rol", rol: "admin" }, canales: ["campana"], esperaMin: 5, exigeConfirmacion: true },
+      ]),
     }),
   },
   "central.intentos": {

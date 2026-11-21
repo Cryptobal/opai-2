@@ -243,6 +243,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/central/turno/_componentes` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/central/turno/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/central/turno/_componentes` | `core.users.list` | `core_users_list` | existe |
+| compartido | `app/(erp)/configuracion/_central` | `central.cadenas.eliminar` | `central_cadenas_eliminar` | existe |
+| compartido | `app/(erp)/configuracion/_central` | `central.cadenas.guardar` | `central_cadenas_guardar` | existe |
+| compartido | `app/(erp)/configuracion/_central` | `central.cadenas.listar` | `central_cadenas_listar` | existe |
+| compartido | `app/(erp)/configuracion/_central` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.schema` | `core_config_schema` | existe |
@@ -1373,8 +1377,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.avisos.crear`
 - `central.avisos.listar`
 - `central.avisos.obtener`
-- `central.cadenas.guardar`
-- `central.cadenas.listar`
 - `central.mensajes.cerrar`
 - `central.mensajes.enviar`
 - `central.mensajes.listar`
