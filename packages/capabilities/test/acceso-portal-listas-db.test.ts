@@ -24,6 +24,13 @@ describe.skipIf(!urlPropietario)("Listas del cliente en el Portal Cliente, base 
 
   beforeAll(async () => {
     x = await entornoPortalAccesos();
+    await Promise.all(
+      [
+        { tenantId: x.t.A, cuentaId: x.cuentas.X },
+        { tenantId: x.t.A, cuentaId: x.cuentas.Y },
+        { tenantId: x.t.B, cuentaId: x.cuentas.B },
+      ].map((cuenta) => x.e.admin.configPortalCuenta.create({ data: { ...cuenta, gestionaListas: true } })),
+    );
     deEmpresa = (
       await x.ok<Entrada>(x.sistema(x.t.A), "acceso.listas.agregar", {
         instalacionId: x.inst.X1,
@@ -38,7 +45,8 @@ describe.skipIf(!urlPropietario)("Listas del cliente en el Portal Cliente, base 
     await x?.e.cerrar();
   });
 
-  it("sin el interruptor de la empresa (apagado por defecto), FORBIDDEN", async () => {
+  it("con el interruptor de la empresa apagado, FORBIDDEN aunque su cuenta lo permita", async () => {
+    await interruptor(x.t.A, false);
     const r = await x.run(x.contacto("X"), "acceso.portal_listas.listar", { instalacionId: x.inst.X1 });
     expect(code(r)).toBe("FORBIDDEN");
   });
@@ -88,7 +96,10 @@ describe.skipIf(!urlPropietario)("Listas del cliente en el Portal Cliente, base 
   });
 
   it("sin «gestiona listas» en su cuenta, FORBIDDEN aunque la empresa lo permita", async () => {
-    await x.e.admin.configPortalCuenta.create({ data: { tenantId: x.t.A, cuentaId: x.cuentas.Y, gestionaListas: false } });
+    await x.e.admin.configPortalCuenta.update({
+      where: { tenantId_cuentaId: { tenantId: x.t.A, cuentaId: x.cuentas.Y } },
+      data: { gestionaListas: false },
+    });
     const r = await x.run(x.contacto("Y"), "acceso.portal_listas.listar", { instalacionId: x.inst.Y });
     expect(code(r)).toBe("FORBIDDEN");
   });
