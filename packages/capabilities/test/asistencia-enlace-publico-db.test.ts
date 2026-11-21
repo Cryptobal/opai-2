@@ -1,6 +1,8 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { digitoVerificador } from "@opai/domain";
+
 import { hmacDispositivo, LARGO_CODIGO_MARCACION_PUBLICA, nuevoCodigoMarcacionPublica } from "@opai/db";
 
 import { manifest } from "../../../modules/asistencia/manifest";
@@ -9,8 +11,12 @@ import { prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
 
-const rutPrueba = () =>
-  `${parseInt(randomUUID().replace(/-/g, "").slice(0, 10), 16) % 90_000_000 + 10_000_000}-K`;
+const rutPrueba = () => {
+  const cuerpo = String(
+    parseInt(randomUUID().replace(/-/g, "").slice(0, 8), 16) % 90_000_000 + 10_000_000,
+  );
+  return `${cuerpo}-${digitoVerificador(cuerpo)}`;
+};
 
 describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () => {
   let e: Awaited<ReturnType<typeof prepararEntorno>>;
@@ -54,7 +60,7 @@ describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () =
     instId = inst.id;
     const cargo = await e.admin.cargo.create({ data: { tenantId, nombre: "Guardia" } });
     const persona = await e.admin.persona.create({
-      data: { tenantId, nombres: "Ana", apellidos: "Prueba", rut: rutPrueba(), estado: "activa" },
+      data: { tenantId, nombres: "Ana", apellidos: "Prueba", rut: rutPrueba(), estado: "activo" },
     });
     personaId = persona.id;
     await e.admin.vinculoLaboral.create({
@@ -70,8 +76,32 @@ describe.skipIf(!urlPropietario)("Asistencia · enlace público (CAR-606)", () =
         distribucion: "5x2",
       },
     });
+    const hoy = new Date();
+    hoy.setUTCHours(0, 0, 0, 0);
+    await e.admin.turnoEsperado.create({
+      data: {
+        tenantId,
+        personaId,
+        fecha: hoy,
+        inicio: new Date(hoy.getTime() + 12 * 60 * 60_000),
+        fin: new Date(hoy.getTime() + 20 * 60 * 60_000),
+        instalacionId: instId,
+        origen: "pauta",
+        colacionMin: 0,
+      },
+    });
     await e.admin.ajuste.create({
       data: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "asistencia", clave: "marcas_habilitadas", valor: true },
+    });
+    await e.admin.ajuste.create({
+      data: {
+        tenantId,
+        ambito: "tenant",
+        sujetoId: tenantId,
+        modulo: "asistencia",
+        clave: "canales_por_instalacion",
+        valor: { [instId]: ["kiosco", "enlace_publico"] },
+      },
     });
     await e.admin.codigoMarcacionPublica.create({
       data: { tenantId, instalacionId: instId, codigoHash: hmacDispositivo(codigo) },

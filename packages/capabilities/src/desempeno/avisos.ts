@@ -4,6 +4,7 @@
 // envía, a la persona o a la jefatura, y solo si puede ver ese resultado. Nunca llevan el puntaje.
 import { accesoDeMembresia, INCLUIR_ACCESO, renderizar, tienePermisoEfectivo } from "@opai/domain";
 
+import { avisarPushTrasCampana } from "../core/push-campana";
 import { valoresEfectivos } from "../core/config";
 import { campoAjuste } from "../core/config/catalogo";
 import { equipoDe } from "../core/jefatura";
@@ -125,5 +126,6 @@ export const consumidorBajoMeta = defineConsumidor({
         enlace: datos.url,
       },
     });
+    await avisarPushTrasCampana(ctx, usuarioId, ev.tipo, datos.url);
   },
 });

@@ -6,6 +6,8 @@ import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
+import { guardarSuscripcionNativa, guardarSuscripcionWeb } from "./push-suscribir-db";
+
 const PORTALES = ["erp", "supervisor", "trabajador", "terreno"] as const;
 
 const endpointSchema = z
@@ -14,45 +16,63 @@ const endpointSchema = z
   .refine(endpointPushValido, "No es el endpoint de un servicio de push de un navegador.")
   .describe("Endpoint que entrega el navegador al suscribirse (PushSubscription.endpoint).");
 
+const tokenNativoSchema = z
+  .string()
+  .trim()
+  .min(20)
+  .max(4096)
+  .regex(/^[A-Za-z0-9_:-]+$/, "Token FCM/APNs inválido.");
+
 function usuarioDe(ctx: Contexto): string {
   if (ctx.actor.tipo !== "user")
     throw reglaDeNegocio("El aviso al celular es de usuarios con sesión.");
   return ctx.actor.id;
 }
 
+const inputSuscribir = z.discriminatedUnion("tipo", [
+  z.object({
+    tipo: z.literal("web"),
+    endpoint: endpointSchema,
+    dispositivo: z.string().trim().max(120).optional(),
+  }),
+  z.object({
+    tipo: z.literal("nativa"),
+    token: tokenNativoSchema,
+    plataforma: z.enum(["ios", "android"]),
+    dispositivo: z.string().trim().max(120).optional(),
+  }),
+]);
+
+const inputQuitar = z.discriminatedUnion("tipo", [
+  z.object({ tipo: z.literal("web"), endpoint: endpointSchema }),
+  z.object({ tipo: z.literal("nativa"), token: tokenNativoSchema }),
+]);
+
 /**
  * Suscribe el dispositivo actual del usuario a los avisos al celular (CAR-356 PR 4a, ADR-044.4). Lo pide el
  * navegador del propio usuario después de dar permiso; un agente no tiene dispositivo (solo personas).
- * Idempotente por endpoint: volver a suscribir actualiza el dueño y el nombre del dispositivo.
+ * Idempotente por endpoint o token: volver a suscribir actualiza el dueño y el nombre del dispositivo.
  */
 const pushSuscribir = defineCapability({
   id: "core.push.suscribir",
-  // Solo personas: la suscripción es del navegador de quien tiene la sesión; un agente no tiene celular.
   soloPersonas: true,
-  // El endpoint identifica el dispositivo: no se copia a la auditoría.
-  sensibles: ["endpoint"],
+  sensibles: ["endpoint", "token"],
   descripcion:
-    "Activa los avisos al celular en este dispositivo: guarda la suscripción de Web Push del navegador del usuario. Los avisos llegan sin contenido y abren el portal.",
+    "Activa los avisos al celular en este dispositivo: guarda la suscripción Web Push del navegador o el token nativo de la app.",
   permiso: null,
   portales: [...PORTALES],
-  input: z.object({ endpoint: endpointSchema, dispositivo: z.string().trim().max(120).optional() }),
+  input: inputSuscribir,
   output: z.object({ suscrito: z.boolean() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const usuarioId = usuarioDe(ctx);
-    if (!dryRun) {
-      await ctx.db.suscripcionPush.upsert({
-        where: { tenantId_endpoint: { tenantId: ctx.tenantId, endpoint: input.endpoint } },
-        create: {
-          tenantId: ctx.tenantId,
-          usuarioId,
-          endpoint: input.endpoint,
-          dispositivo: input.dispositivo ?? null,
-        },
-        update: { usuarioId, dispositivo: input.dispositivo ?? null },
-      });
+    if (dryRun) return { suscrito: true };
+    if (input.tipo === "web") {
+      await guardarSuscripcionWeb(ctx, usuarioId, input);
+      return { suscrito: true };
     }
+    await guardarSuscripcionNativa(ctx, usuarioId, input);
     return { suscrito: true };
   },
 });
@@ -60,20 +80,24 @@ const pushSuscribir = defineCapability({
 /** Quita la suscripción de este dispositivo (solo si es del propio usuario). */
 const pushQuitar = defineCapability({
   id: "core.push.quitar",
-  // Solo personas, como suscribir: el dispositivo es de quien tiene la sesión.
   soloPersonas: true,
-  // El endpoint identifica el dispositivo: no se copia a la auditoría.
-  sensibles: ["endpoint"],
-  descripcion:
-    "Apaga los avisos al celular en este dispositivo: borra la suscripción de Web Push del usuario.",
+  sensibles: ["endpoint", "token"],
+  descripcion: "Apaga los avisos al celular en este dispositivo: borra la suscripción Web Push o nativa del usuario.",
   permiso: null,
   portales: [...PORTALES],
-  input: z.object({ endpoint: endpointSchema }),
+  input: inputQuitar,
   output: z.object({ quitadas: z.number().int() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const where = { usuarioId: usuarioDe(ctx), endpoint: input.endpoint };
+    const usuarioId = usuarioDe(ctx);
+    if (input.tipo === "web") {
+      const where = { usuarioId, endpoint: input.endpoint, tipo: "web" as const };
+      if (dryRun) return { quitadas: await ctx.db.suscripcionPush.count({ where }) };
+      const r = await ctx.db.suscripcionPush.deleteMany({ where });
+      return { quitadas: r.count };
+    }
+    const where = { usuarioId, token: input.token, tipo: "nativa" as const };
     if (dryRun) return { quitadas: await ctx.db.suscripcionPush.count({ where }) };
     const r = await ctx.db.suscripcionPush.deleteMany({ where });
     return { quitadas: r.count };

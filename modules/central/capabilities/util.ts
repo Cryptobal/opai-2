@@ -33,6 +33,7 @@ export function vistaAlerta(a: FilaAlerta, ahora: Date): z.infer<typeof alertaSc
     origen: a.origen,
     pasoActual: a.pasoActual,
     atencionPorId: a.atencionPorId,
+    tomadaPorId: a.tomadaPorId,
     atencionVenceEn: a.atencionVenceEn,
     estado,
     pospuestaHasta: estado === "pospuesta" ? a.pospuestaHasta : null,
