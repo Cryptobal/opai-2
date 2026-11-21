@@ -8,6 +8,7 @@
  * con la base.
  */
 export const FK_CUENTAS_MOVIDAS = [
+  "acceso.entradas_lista",
   "comercial.negocios",
   "core.actividad_vinculos",
   "core.campo_valores",
@@ -34,6 +35,7 @@ const UNICOS: readonly [tabla: string, clave: string][] = [
 
 /** Movimientos simples de `cuenta_id` (sin índices únicos que choquen). */
 const SIMPLES = [
+  "acceso.entradas_lista",
   "comercial.negocios",
   "comercial.solicitudes",
   "core.correos_cliente",

@@ -4,12 +4,13 @@ import { lazy, Suspense, useState } from "react";
 
 import { avisar, Button } from "@opai/ds";
 
+import { useCapacidad } from "@/app/_components/use-capacidad";
+
 const DialogoConfirmar = lazy(() =>
   import("@/app/_components/maestros/dialogo-confirmar").then((m) => ({
     default: m.DialogoConfirmar,
   })),
 );
-import { useCapacidad } from "@/app/_components/use-capacidad";
 
 /** Cancelar un prerregistro: sus QR dejan de servir desde ahora. No se borra. */
 export function CancelarPrerregistro({ id }: { id: string }) {

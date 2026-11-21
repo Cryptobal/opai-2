@@ -3,14 +3,17 @@ import type { Capacidad } from "../types";
 import { configCambiar, configObtener } from "./config";
 import { registrosAnular, registrosCerrarBloque, registrosSalida } from "./correcciones";
 import { intentosListar } from "./intentos";
-import { prerregistrosCancelar, prerregistrosCrear } from "./prerregistros";
+import { listasAgregar } from "./listas-agregar";
+import { listasListar, listasQuitar } from "./listas";
+import { portalRegistrosListar } from "./portal-cliente";
+import { portalListasAgregar, portalListasListar, portalListasQuitar } from "./portal-listas";
+import { portalVisitasCrear, portalVisitasListar } from "./portal-visitas";
 import {
   prerregistrosInvitacion,
   prerregistrosListar,
   prerregistrosObtener,
 } from "./prerregistros-leer";
-import { listasAgregar, listasListar, listasQuitar } from "./listas";
-import { portalRegistrosListar } from "./portal-cliente";
+import { prerregistrosCancelar, prerregistrosCrear } from "./prerregistros";
 import { registrosObtener } from "./registro-get";
 import { registrosListar } from "./registros";
 
@@ -32,6 +35,11 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   configObtener,
   configCambiar,
   portalRegistrosListar,
+  portalListasListar,
+  portalListasAgregar,
+  portalListasQuitar,
+  portalVisitasListar,
+  portalVisitasCrear,
 ];
 
 export { trabajoCierreAutomatico } from "./cierre";
