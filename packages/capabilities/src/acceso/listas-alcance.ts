@@ -41,7 +41,7 @@ export function finVigenciaBloqueo(vigenteDesde: Date | null, vigenteHasta: Date
   return fin;
 }
 
-export type ClavesAlcance = {
+type ClavesAlcance = {
   alcance: AlcanceLista;
   instalacionId: string | null;
   cuentaId: string | null;
