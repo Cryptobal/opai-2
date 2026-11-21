@@ -39,7 +39,7 @@ describe.skipIf(!urlPropietario)("nomina.registros_mi_dt · finiquito (CAR-741)"
     const cargoId = (await e.admin.cargo.create({ data: { tenantId, nombre: "Guardia", activo: true } })).id;
     const personaId = (
       await e.admin.persona.create({
-        data: { tenantId, nombres: "Ana", apellidos: "Prueba", rut: `9${suf.slice(0, 7)}-2`, estado: "activa" },
+        data: { tenantId, nombres: "Ana", apellidos: "Prueba", rut: `9${suf.slice(0, 7)}-2`, estado: "activo" },
       })
     ).id;
     vinculoId = (
