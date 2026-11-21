@@ -7,7 +7,7 @@ function identidad(portalInicio: string | null = null): Identidad {
   const actual = {
     id: "m",
     tenantId: "t",
-    rol: "viewer",
+    rol: "supervisor",
     estado: "activa",
     portales: ["supervisor", "erp"],
     portalInicio,
@@ -19,7 +19,8 @@ function identidad(portalInicio: string | null = null): Identidad {
     actual,
     membresias: [actual],
     modulosActivos: [],
-    acceso: { permisosRol: null, excepciones: [], instalaciones: null },
+    acceso: { permisosRol: null, excepciones: [], instalaciones: [] },
+    personaVinculada: false,
   };
 }
 

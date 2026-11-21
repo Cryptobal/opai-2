@@ -8,6 +8,7 @@ import { UNIDADES_COBRO } from "./catalogo";
 import { ENTRADAS_CATALOGO } from "./catalogo-entradas";
 import {
   type EntradaCatalogo,
+  esGrupoComplemento,
   esIncluidoEnBase,
   MODULO_FINANZAS,
   PARTES_FINANZAS,
@@ -15,6 +16,22 @@ import {
 
 export const entradaCatalogo = (id: string): EntradaCatalogo | undefined =>
   ENTRADAS_CATALOGO.find((e) => e.id === id);
+
+export const esComplementoCatalogo = (id: string) => {
+  const e = entradaCatalogo(id);
+  return e != null && esGrupoComplemento(e.grupo);
+};
+
+/** Complementos pagados del catálogo (sin manifest; CAR-742). */
+export const entradasComplementoCatalogo = (): readonly EntradaCatalogo[] =>
+  ENTRADAS_CATALOGO.filter((e) => esGrupoComplemento(e.grupo));
+
+/** Primer id requerido del complemento (módulo padre habitual). */
+export const padreComplementoCatalogo = (id: string): string | null => {
+  const e = entradaCatalogo(id);
+  if (!e || !esGrupoComplemento(e.grupo)) return null;
+  return e.dependencias[0]?.[0] ?? null;
+};
 
 /** Lo incluido en el plan base no es cobrable (no tiene precio aparte). */
 export const tienePrecioAparte = (id: string) =>

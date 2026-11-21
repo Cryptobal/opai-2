@@ -1,31 +1,80 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import {
+  PERMISOS_CORE,
+  entradasComplementoCatalogo,
+  padreComplementoCatalogo,
+  tienePrecioAparte,
+} from "@opai/domain";
 import { operacionesEmpresa, type OperacionesEmpresa } from "@opai/db";
 
 import { defineCapability } from "../define";
 import { listarModulos } from "../module";
+import { areaDeModulo } from "./modulos-catalogo";
 export { auditList } from "./auditoria-lista";
 
 export const moduloEstadoSchema = z.object({
   id: z.string(),
   nombre: z.string(),
+  /** Vacío en complementos de catálogo sin manifest. */
   version: z.string(),
   dependencias: z.array(z.string()),
   /** null = no contratado en este tenant. */
   estado: z.string().nullable(),
+  complemento: z.boolean(),
+  padreId: z.string().nullable(),
+  area: z.string().nullable(),
+  /** Leyenda comercial: «Pagado» o texto del catálogo cuando aplica. */
+  etiquetaCobro: z.string().nullable(),
 });
 
-/** Manifests registrados con su estado en el tenant. */
+/** Manifests y complementos de catálogo con su estado en el tenant. */
 export function modulosConEstado(filas: readonly { moduloId: string; estado: string }[]) {
   const estado = new Map(filas.map((f) => [f.moduloId, f.estado]));
-  return listarModulos().map((m) => ({
-    id: m.id,
-    nombre: m.nombre,
-    version: m.version,
-    dependencias: [...m.dependencias],
-    estado: estado.get(m.id) ?? null,
-  }));
+  const porPadre = new Map<string, ReturnType<typeof filaComplemento>[]>();
+  for (const e of entradasComplementoCatalogo()) {
+    const padre = padreComplementoCatalogo(e.id);
+    if (!padre) continue;
+    const fila = filaComplemento(e, estado, padre);
+    const lista = porPadre.get(padre) ?? [];
+    lista.push(fila);
+    porPadre.set(padre, lista);
+  }
+  const salida: z.infer<typeof moduloEstadoSchema>[] = [];
+  for (const m of listarModulos()) {
+    salida.push({
+      id: m.id,
+      nombre: m.nombre,
+      version: m.version,
+      dependencias: [...m.dependencias],
+      estado: estado.get(m.id) ?? null,
+      complemento: false,
+      padreId: null,
+      area: areaDeModulo(m.id),
+      etiquetaCobro: null,
+    });
+    for (const c of porPadre.get(m.id) ?? []) salida.push(c);
+  }
+  return salida;
+}
+
+function filaComplemento(
+  e: ReturnType<typeof entradasComplementoCatalogo>[number],
+  estado: Map<string, string>,
+  padre: string,
+) {
+  const deps = e.dependencias.flatMap((g) => g);
+  return {
+    id: e.id,
+    nombre: e.nombre,
+    version: "",
+    dependencias: deps,
+    estado: estado.get(e.id) ?? null,
+    complemento: true,
+    padreId: padre,
+    area: areaDeModulo(padre),
+    etiquetaCobro: tienePrecioAparte(e.id) ? "Pagado" : null,
+  };
 }
 
 export const modulesList = defineCapability({

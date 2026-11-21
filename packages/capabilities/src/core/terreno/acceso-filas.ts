@@ -2,6 +2,10 @@ import { randomUUID } from "node:crypto";
 
 import { decidirAcceso, type EntradaLista, normalizarPatente } from "@opai/domain";
 
+import {
+  metaListasInstalacion,
+  whereEntradasAplicanAInstalacion,
+} from "../../acceso/listas-alcance";
 import { fechaDia } from "../../acceso/prerregistro-comun";
 import type { Contexto } from "../../types";
 import type { Doc, Entrada } from "./acceso-entradas";
@@ -10,18 +14,25 @@ import type { Equipo, FilaIntento, FilaRegistro, FilaUso, Tiempo } from "./acces
 
 /** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
 const DIFERIDO_MS = 120_000;
+
+const esDiferido = (t: Tiempo, horaHecho: string) =>
+  t.recibidoEn.getTime() - new Date(horaHecho).getTime() > DIFERIDO_MS;
 type Lista = { e: Entrada; d: Doc; pre?: VisitanteDia | undefined };
-/** Zona de la empresa y si la instalación permite ingresos fuera de lista (R2, CAR-479). */
-type Reglas = { zona: string; fueraDeLista: boolean };
+/** Zona de la empresa, si la instalación permite ingresos fuera de lista (R2) y sus puntos activos (CAR-479). */
+type Reglas = { zona: string; fueraDeLista: boolean; puntos: ReadonlySet<string> };
 
 /** Entradas de lista de la instalación que coinciden con alguna huella del lote, y si hay lista autorizada. */
 async function listasDe(ctx: Contexto, instalacionId: string, huellas: string[]) {
+  const meta = await metaListasInstalacion(ctx, instalacionId);
+  const alcance = whereEntradasAplicanAInstalacion(meta, instalacionId);
   const [lista, hayAutorizadas] = await Promise.all([
     ctx.db.entradaLista.findMany({
-      where: { instalacionId, huella: { in: huellas } },
+      where: { AND: [alcance, { huella: { in: huellas } }] },
       include: { registros: { select: { id: true }, take: 1 } },
     }),
-    ctx.db.entradaLista.count({ where: { instalacionId, tipo: "autorizada" } }),
+    ctx.db.entradaLista.count({
+      where: { AND: [alcance, { tipo: "autorizada" }] },
+    }),
   ]);
   return { lista, hayAutorizadas: hayAutorizadas > 0 };
 }
@@ -72,6 +83,7 @@ function filaRegistro(
   id: string,
   entradaListaId: string | null,
   t: Tiempo,
+  puntos: ReadonlySet<string>,
 ): FilaRegistro {
   return {
     ...comun,
@@ -82,10 +94,8 @@ function filaRegistro(
     patente: (x.e.p.patente ? normalizarPatente(x.e.p.patente) : null) ?? x.pre?.patente ?? null,
     entradaListaId,
     camposExtra: x.e.p.campos ?? [],
-    origen:
-      t.recibidoEn.getTime() - new Date(x.e.h.horaHecho).getTime() > DIFERIDO_MS
-        ? "diferido"
-        : "en_linea",
+    puntoId: x.e.p.puntoId && puntos.has(x.e.p.puntoId) ? x.e.p.puntoId : null,
+    origen: esDiferido(t, x.e.h.horaHecho) ? "diferido" : "en_linea",
   };
 }
 
@@ -96,11 +106,18 @@ export async function escribirFilas(
   listos: readonly Lista[],
   t: Tiempo,
   reglas: Reglas,
-): Promise<{ registros: FilaRegistro[]; intentos: FilaIntento[]; usos: FilaUso[] }> {
+): Promise<{
+  registros: FilaRegistro[];
+  intentos: FilaIntento[];
+  usos: FilaUso[];
+  /** Hechos de entrada diferida cuya sync reveló un bloqueo en lista (R22). */
+  bloqueadoDiferido: ReadonlySet<string>;
+}> {
   const registros: FilaRegistro[] = [];
   const intentos: FilaIntento[] = [];
   const usos: FilaUso[] = [];
-  if (listos.length === 0) return { registros, intentos, usos };
+  const bloqueadoDiferido = new Set<string>();
+  if (listos.length === 0) return { registros, intentos, usos, bloqueadoDiferido };
   const l = await listasDe(
     ctx,
     equipo.instalacionId,
@@ -125,11 +142,14 @@ export async function escribirFilas(
       horaCorregida: hora,
     };
     if (decision.resultado === "denegado") {
-      intentos.push({ ...comun, motivo: decision.motivo });
+      const id = randomUUID();
+      if (decision.motivo === "bloqueado" && esDiferido(t, x.e.h.horaHecho))
+        bloqueadoDiferido.add(x.e.h.clave);
+      intentos.push({ ...comun, id, motivo: decision.motivo });
       continue;
     }
     const id = randomUUID();
-    registros.push(filaRegistro(x, comun, id, entradaListaId, t));
+    registros.push(filaRegistro(x, comun, id, entradaListaId, t, reglas.puntos));
     if (x.pre)
       usos.push({
         tenantId: ctx.tenantId,
@@ -138,5 +158,5 @@ export async function escribirFilas(
         registroId: id,
       });
   }
-  return { registros, intentos, usos };
+  return { registros, intentos, usos, bloqueadoDiferido };
 }

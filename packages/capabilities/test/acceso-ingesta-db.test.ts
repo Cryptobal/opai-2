@@ -2,7 +2,13 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { digitoVerificador, momentoLocal, normalizarDocumento } from "@opai/domain";
+import {
+  AVISO_PRIVACIDAD_PORTERIA,
+  digitoVerificador,
+  formatearRut,
+  momentoLocal,
+  normalizarDocumento,
+} from "@opai/domain";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import { huellaVigente } from "../src/acceso/huella";
@@ -11,12 +17,20 @@ import type * as ModuloCapacidades from "../src";
 
 type Res = { clave: string; estado: string; motivo: string | null };
 const CLAVE_PRUEBA = "clave-solo-para-pruebas-no-es-un-secreto-real-0123456789";
-const RUN = "12.345.678-5";
-const RUN2 = "11.111.111-1";
+
+function runUnico(sufijo: string, base: number): string {
+  const extra = parseInt(sufijo.replace(/\D/g, "").slice(0, 6) || "0", 16) % 500_000;
+  const cuerpo = String(base + extra);
+  return formatearRut(`${cuerpo}-${digitoVerificador(cuerpo)}`);
+}
 
 describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-2)", () => {
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
+  let RUN = "";
+  let RUN2 = "";
+  let mascaraRun = "";
+  let cuerpoRun = "";
   const t = { A: "", B: "" };
   const inst = { A: "", B: "" };
   const disp = { A: "", B: "" };
@@ -84,6 +98,12 @@ describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-
     mod.limpiarRegistro();
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
     const s = randomUUID().slice(0, 8);
+    RUN = runUnico(s, 12_000_000);
+    RUN2 = runUnico(`${s}-2`, 11_000_000);
+    const doc = normalizarDocumento({ tipo: "run", numero: RUN });
+    if (!doc) throw new Error("RUN de prueba inválido");
+    mascaraRun = doc.mascara;
+    cuerpoRun = doc.clave.split("-")[0] ?? "";
     for (const k of ["A", "B"] as const) {
       t[k] = (
         await e.admin.tenant.create({
@@ -124,12 +144,12 @@ describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-
     });
     expect(f).toMatchObject({
       docTipo: "run",
-      mascara: "12.3••.•••-5",
+      mascara: mascaraRun,
       huellaKid: "v1",
       instalacionId: inst.A,
       nombre: "Visita Ficticia",
     });
-    expect(JSON.stringify(f)).not.toContain("12345678");
+    expect(JSON.stringify(f)).not.toContain(cuerpoRun);
     expect(((await recibir("A", [h])) as Res[])[0]?.estado).toBe("duplicado");
     expect(await e.admin.registroAcceso.count({ where: { clave: h.clave } })).toBe(1);
   });
@@ -143,6 +163,11 @@ describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-
       (await e.admin.intentoDenegado.findFirstOrThrow({ where: { clave: h.clave } })).motivo,
     ).toBe("bloqueado");
     expect(await e.admin.hechoTerreno.count({ where: { clave: h.clave } })).toBe(1);
+    const libro = await e.admin.libroNovedad.findFirstOrThrow({ where: { idempotencyKey: h.clave } });
+    expect(libro.modulo).toBe("acceso");
+    expect(libro.gravedad).toBe("alta");
+    expect(libro.resumen).toMatch(/Entrada denegada/);
+    expect(libro.resumen).not.toMatch(/Visita/);
   });
 
   it("la lista de una empresa no afecta a la otra (misma persona, huella distinta)", async () => {
@@ -240,11 +265,19 @@ describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-
     };
     const a = await leer("A");
     expect(a.items.map((x) => x.clave)).toContain(dentro.clave);
-    expect(JSON.stringify(a)).not.toContain("12345678");
-    expect(a.items.find((x) => x.clave === dentro.clave)?.documento).toBe("12.3••.•••-5");
+    expect(JSON.stringify(a)).not.toContain(cuerpoRun);
+    expect(a.items.find((x) => x.clave === dentro.clave)?.documento).toBe(mascaraRun);
     expect((await recibir("A", [salida(dentro.clave)])) as Res[]).toHaveLength(1);
     expect((await leer("A")).items.map((x) => x.clave)).not.toContain(dentro.clave);
     expect(JSON.stringify(await leer("B"))).not.toContain(dentro.clave);
-    expect(await leer("A", [])).toEqual({ activo: false, config: null, items: [] });
+    expect(await leer("A", [])).toEqual({
+      activo: false,
+      config: null,
+      puntos: [],
+      bienvenida: null,
+      urlPrivacidad: "",
+      avisoLinea: AVISO_PRIVACIDAD_PORTERIA,
+      items: [],
+    });
   });
 });

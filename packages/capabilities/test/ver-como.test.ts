@@ -53,6 +53,7 @@ function semilla() {
     tenantId: TENANT_DE_PRUEBA,
     nombres,
     apellidos: "Prueba",
+    estado: "activo",
     usuarioId,
     archivadaEn: null,
     anonimizadaEn: null,
@@ -122,9 +123,15 @@ describe("core.ver_como.iniciar", () => {
       ok: false,
       error: { code: "FORBIDDEN" },
     });
-    expect(
-      (await executeCapability(ctxDe().ctx, "core.ver_como.iniciar", iniciar(P_SIN_USUARIO))).ok,
-    ).toBe(false);
+    const sinUsuario = await executeCapability(
+      ctxDe().ctx,
+      "core.ver_como.iniciar",
+      iniciar(P_SIN_USUARIO),
+    );
+    expect(sinUsuario).toMatchObject({
+      ok: true,
+      data: { userId: null, personaId: P_SIN_USUARIO, nombre: "Caro Prueba" },
+    });
   });
 
   it("terminar deja el fin en la cadena de seguridad", async () => {

@@ -13,6 +13,9 @@ function esNoEncontrado(etiqueta: string): boolean {
   return etiqueta === "No encontrado" || etiqueta.startsWith("No encontrado · ");
 }
 
+/** El control de acceso se entra solo por la ficha de instalación: sus rutas no son un acceso útil. */
+const SIN_RECIENTE = /^\/accesos(\/|$)/;
+
 function clave(epoca: string): string {
   return `opai_recientes_${epoca}`;
 }
@@ -37,7 +40,8 @@ export function leerRecientes(epoca: string): Reciente[] {
           d.href.length <= 200 &&
           typeof d.etiqueta === "string" &&
           d.etiqueta.length <= 80 &&
-          !esNoEncontrado(d.etiqueta),
+          !esNoEncontrado(d.etiqueta) &&
+          !SIN_RECIENTE.test(d.href),
       )
       .slice(0, MAXIMO);
   } catch {
@@ -54,7 +58,7 @@ function escribirRecientes(epoca: string, lista: Reciente[]): void {
 }
 
 export function registrarReciente(epoca: string, entrada: Reciente): void {
-  if (esNoEncontrado(entrada.etiqueta)) return;
+  if (esNoEncontrado(entrada.etiqueta) || SIN_RECIENTE.test(entrada.href)) return;
   // Sin barra final, query ni hash: `/cotizaciones/` y `/cotizaciones` son el mismo reciente.
   const item = { ...entrada, href: normalizarHref(entrada.href) };
   const previos = leerRecientes(epoca).filter((r) => r.href !== item.href);
