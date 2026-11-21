@@ -6,7 +6,8 @@ import { accesosActualizar } from "./accesos-actualizar";
 import { accesosVincular } from "./accesos-vincular";
 import { configActualizar, configLeer } from "./config";
 import { contactosAccesoDar, contactosAccesoListar } from "./contactos-acceso";
-import { miAcceso, resumenLeer } from "./portal";
+import { miAcceso } from "./mi-acceso";
+import { resumenLeer } from "./portal";
 
 export { ajustesPortalCliente } from "./ajustes";
 

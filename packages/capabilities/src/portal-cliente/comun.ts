@@ -15,7 +15,7 @@ import { noEncontrado, prohibido } from "../errores";
 import type { Contexto } from "../types";
 
 /** Estado de cuenta que deja el portal en modo solo historial (CAR-802). */
-export const ESTADO_CUENTA_INACTIVA = "cliente_inactivo";
+const ESTADO_CUENTA_INACTIVA = "cliente_inactivo";
 
 /** Secciones que un contacto puede consultar cuando la cuenta está inactiva: datos pasados, sin operación viva. */
 export const SECCIONES_MODO_HISTORIAL: readonly SeccionPortal[] = ["documentos", "accesos"];
