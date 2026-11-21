@@ -11,6 +11,7 @@ import { correoNotificacionBcc } from "./correo-notificacion";
 import { enviarCorreo } from "./envio";
 import { comunicableDe, comunicables, plantillaVigente } from "./resolver";
 import { variablesDe } from "./variables";
+import { avisarPushTrasCampana } from "../push-campana";
 
 async function entregar(
   ctx: Contexto,
@@ -28,6 +29,8 @@ async function entregar(
     const p = await plantillaVigente(ctx.db, e, "inapp");
     if (!p) return;
     const rutas = e.variables.map((v) => v.ruta);
+    const enlace = typeof datos["url"] === "string" ? datos["url"] : null;
+    let entregado = false;
     await ctx.transaccion(async (tx) => {
       const n = await tx.notificacion.create({
         data: {
@@ -36,12 +39,13 @@ async function entregar(
           eventoId: ev.id,
           titulo: renderizar(p.asunto, datos, rutas),
           cuerpo: renderizar(p.cuerpo, datos, rutas),
-          enlace: typeof datos["url"] === "string" ? datos["url"] : null,
+          enlace,
         },
       });
-      // Slack F2 (CAR-292): si la persona está vinculada, también por mensaje directo (en cola).
       await encolarMensajeDirecto(ctx, tx, { notificacionId: n.id, usuarioId: para.id });
+      entregado = true;
     });
+    if (entregado) await avisarPushTrasCampana(ctx, para.id, ev.tipo, enlace);
     return;
   }
   if (canal !== "correo") return;

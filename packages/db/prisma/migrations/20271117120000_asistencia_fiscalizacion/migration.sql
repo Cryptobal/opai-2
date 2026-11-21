@@ -168,3 +168,13 @@ REVOKE ALL ON FUNCTION "asistencia"."fiscalizacion_resolver_clave"(text) FROM PU
 GRANT EXECUTE ON FUNCTION "asistencia"."fiscalizacion_resolver_clave"(text) TO opai_app;
 
 COMMIT;
+
+-- Reversión (manual, con el rol propietario, tras desplegar el código anterior; o restaurar snapshot de Neon):
+-- DROP FUNCTION IF EXISTS asistencia.fiscalizacion_resolver_clave(text);
+-- DROP FUNCTION IF EXISTS asistencia.empleador_por_rut(text);
+-- DROP TABLE IF EXISTS asistencia.mandante_acceso_eventos;
+-- DROP TABLE IF EXISTS asistencia.mandante_acceso_instalaciones;
+-- DROP TABLE IF EXISTS asistencia.mandante_accesos;
+-- DROP TABLE IF EXISTS asistencia.respaldos_bitacora;
+-- DROP TABLE IF EXISTS asistencia.fiscalizacion_accesos;
+-- DROP TABLE IF EXISTS asistencia.fiscalizacion_claves;

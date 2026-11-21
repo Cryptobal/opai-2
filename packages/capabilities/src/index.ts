@@ -1,4 +1,11 @@
-export { aplicarModulosNuevosRegistrados, avisarAlCelular, capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
+export {
+  aplicarModulosNuevosRegistrados,
+  avisarAlCelular,
+  avisarPushTrasCampana,
+  capacidadesDelNucleo,
+  consumidoresDelNucleo,
+  trabajosDelNucleo,
+} from "./core";
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
 export {
   consumidorAvisoPrueba,

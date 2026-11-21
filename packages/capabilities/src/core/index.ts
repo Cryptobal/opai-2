@@ -5,6 +5,7 @@ import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
 import { capacidadesPush } from "./push";
 export { avisarAlCelular } from "./push-avisar";
+export { avisarPushTrasCampana, categoriaPushDeEvento } from "./push-campana";
 export { aplicarModulosNuevosRegistrados } from "./modulos-nuevos-aplicar";
 import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";

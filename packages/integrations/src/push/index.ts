@@ -134,3 +134,5 @@ export function emisorPushDelEntorno(
   if (!publica || !privada || !sujeto) return null;
   return emisorPush({ publica, privada, sujeto });
 }
+
+export { emisorFcm, emisorFcmDelEntorno, firmarJwtFirebase, type EmisorFcm } from "./fcm";

@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { digitoVerificador } from "@opai/domain";
+
 import { hashClaveFiscalizacion } from "../../../modules/asistencia/domain/fiscalizacion";
 import { manifest } from "../../../modules/asistencia/manifest";
 import { empleadorPorRut } from "../../db/src/fiscalizacion-publica";
@@ -10,11 +12,18 @@ import type * as ModuloCapacidades from "../src";
 
 type Res<T> = { ok: true; data: T } | { ok: false };
 
+const rutPrueba = () => {
+  const cuerpo = String(
+    parseInt(randomUUID().replace(/-/g, "").slice(0, 8), 16) % 90_000_000 + 10_000_000,
+  );
+  return `${cuerpo}-${digitoVerificador(cuerpo)}`;
+};
+
 describe.skipIf(!urlPropietario)("Asistencia · fiscalización DT (Postgres real)", () => {
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
-  const A = { tenant: "", rut: "76111111-1" };
-  const B = { tenant: "", rut: "76222222-2" };
+  const A = { tenant: "", rut: rutPrueba() };
+  const B = { tenant: "", rut: rutPrueba() };
 
   const ctx = (tenantId: string, _email = "fiscal@dt.gob.cl") =>
     mod.crearContexto({

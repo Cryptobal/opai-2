@@ -92,10 +92,12 @@ export const respaldosBitacoraGenerar = defineCapability({
         creadoPorTipo: "user", ...(quien ? { creadoPorId: quien } : {}),
       },
     });
+    const desdeSeq = Math.max(manifiesto.desdeSeq, 1);
+    const hastaSeq = Math.max(manifiesto.hastaSeq, desdeSeq);
     const fila = await ctx.db.respaldoBitacora.create({
       data: {
         tenantId: ctx.tenantId, origen: i.origen, manifiestoSha256, documentoId: doc.id,
-        totalMarcas: manifiesto.totalMarcas, desdeSeq: manifiesto.desdeSeq || 0, hastaSeq: manifiesto.hastaSeq,
+        totalMarcas: manifiesto.totalMarcas, desdeSeq, hastaSeq,
         cadenaVerificadaOk: cadenaOk, ...(quien ? { generadoPorId: quien } : {}),
       },
     });
