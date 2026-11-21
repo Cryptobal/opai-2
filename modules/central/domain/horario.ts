@@ -5,10 +5,6 @@ const PATRON_HORA = /^([01]?\d|2[0-3]):([0-5]\d)$/;
 export const FRANJA_NOCTURNA_INICIO = "20:00";
 export const FRANJA_NOCTURNA_FIN = "08:00";
 
-export function esHoraValida(texto: string): boolean {
-  return PATRON_HORA.test(texto.trim());
-}
-
 export function parseHoraLocal(texto: string): number | null {
   const m = PATRON_HORA.exec(texto.trim());
   if (!m) return null;
