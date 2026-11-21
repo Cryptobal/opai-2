@@ -5,12 +5,14 @@ import { decidirAcceso, type EntradaLista, normalizarPatente } from "@opai/domai
 import { fechaDia } from "../../acceso/prerregistro-comun";
 import type { Contexto } from "../../types";
 import type { Doc, Entrada } from "./acceso-entradas";
-import type { VisitanteDia } from "./acceso-prerregistro";
+import { autorizaPrerregistro, type VisitanteDia } from "./acceso-prerregistro";
 import type { Equipo, FilaIntento, FilaRegistro, FilaUso, Tiempo } from "./acceso-tipos";
 
 /** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
 const DIFERIDO_MS = 120_000;
 type Lista = { e: Entrada; d: Doc; pre?: VisitanteDia | undefined };
+/** Zona de la empresa y si la instalación permite ingresos fuera de lista (R2, CAR-479). */
+type Reglas = { zona: string; fueraDeLista: boolean };
 
 /** Entradas de lista de la instalación que coinciden con alguna huella del lote, y si hay lista autorizada. */
 async function listasDe(ctx: Contexto, instalacionId: string, huellas: string[]) {
@@ -25,22 +27,8 @@ async function listasDe(ctx: Contexto, instalacionId: string, huellas: string[])
 }
 type Listas = Awaited<ReturnType<typeof listasDe>>;
 
-/** Un prerregistro vigente autoriza ese día como una entrada de lista sin horario (R2); el bloqueo igual gana (R7). */
-const autorizaPrerregistro = (clave: string): EntradaLista => ({
-  tipo: "autorizada",
-  clave,
-  tiposRegistro: [],
-  vigenteDesde: null,
-  vigenteHasta: null,
-  dias: [],
-  desdeMin: null,
-  hastaMin: null,
-  usoUnico: false,
-  consumida: false,
-});
-
 /** Decide una entrada con sus listas (y su prerregistro, si tiene); devuelve la decisión y la lista de uso único que consume. */
-function decidir(x: Lista, l: Listas, hora: Date, zona: string, consumidas: Set<string>) {
+function decidir(x: Lista, l: Listas, hora: Date, r: Reglas, consumidas: Set<string>) {
   const propias = l.lista.filter(
     (f) => f.docTipo === x.d.tipo && x.d.hs.some((v) => v.huella === f.huella),
   );
@@ -59,10 +47,13 @@ function decidir(x: Lista, l: Listas, hora: Date, zona: string, consumidas: Set<
   const decision = decidirAcceso({
     clave: x.d.clave,
     tipoRegistro: x.e.p.tipoRegistro,
-    modo: l.hayAutorizadas || x.pre ? "solo_autorizados" : "permitir_fuera_de_lista",
+    modo:
+      !r.fueraDeLista && (l.hayAutorizadas || x.pre)
+        ? "solo_autorizados"
+        : "permitir_fuera_de_lista",
     entradas: [...propias.map(dominio), ...(x.pre ? [autorizaPrerregistro(x.d.clave)] : [])],
     ahora: hora,
-    zona,
+    zona: r.zona,
   });
   const usada = x.pre
     ? undefined
@@ -90,6 +81,7 @@ function filaRegistro(
     motivoVisita: x.e.p.motivo ?? null,
     patente: (x.e.p.patente ? normalizarPatente(x.e.p.patente) : null) ?? x.pre?.patente ?? null,
     entradaListaId,
+    camposExtra: x.e.p.campos ?? [],
     origen:
       t.recibidoEn.getTime() - new Date(x.e.h.horaHecho).getTime() > DIFERIDO_MS
         ? "diferido"
@@ -103,7 +95,7 @@ export async function escribirFilas(
   equipo: Equipo,
   listos: readonly Lista[],
   t: Tiempo,
-  zona: string,
+  reglas: Reglas,
 ): Promise<{ registros: FilaRegistro[]; intentos: FilaIntento[]; usos: FilaUso[] }> {
   const registros: FilaRegistro[] = [];
   const intentos: FilaIntento[] = [];
@@ -117,7 +109,7 @@ export async function escribirFilas(
   const consumidas = new Set<string>();
   for (const x of listos) {
     const hora = t.corregir(new Date(x.e.h.horaHecho));
-    const { decision, entradaListaId } = decidir(x, l, hora, zona, consumidas);
+    const { decision, entradaListaId } = decidir(x, l, hora, reglas, consumidas);
     const vigente = x.d.hs[0] ?? { kid: "", huella: "" };
     const comun = {
       tenantId: ctx.tenantId,

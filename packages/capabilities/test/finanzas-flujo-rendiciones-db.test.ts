@@ -59,13 +59,17 @@ describe.skipIf(omitirSuiteDb())("flujo · rendiciones por pagar (db)", () => {
       const pago = estado === "pagado" ? { pagadoEn: new Date(), fechaPago: new Date(), referenciaPago: "NOM-QA-1" } : {};
       await e.admin.lotePago.create({ data: { tenantId: tenantA, codigo, estado, totalClp, cantidad, creadoPorId: usuario, ...pago } });
     }
+    await e.admin.lotePago.create({ data: {
+      tenantId: tenantA, codigo: 6, estado: "aprobado", totalClp: 80_000, cantidad: 1,
+      esReversa: true, creadoPorId: usuario,
+    } });
   });
 
   afterAll(async () => {
     await e?.cerrar();
   });
 
-  it("solo lo aprobado o generado y sin pagar es egreso comprometido de esta semana", async () => {
+  it("solo los pagos aprobados o generados y sin pagar comprometen egresos; no las reversas aprobadas", async () => {
     const p = await planilla(tenantA);
     const celdas = p.celdas.filter((c) => c.filaId === FILA_RENDICIONES);
     expect(celdas).toHaveLength(2);

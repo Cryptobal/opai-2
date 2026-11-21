@@ -7,10 +7,9 @@ import { Alerta, Button } from "@opai/ds";
 type Detector = { detect(fuente: HTMLVideoElement): Promise<{ rawValue: string }[]> };
 type ConstructorDetector = new (o: { formats: string[] }) => Detector;
 
-/** Si el navegador puede usar BarcodeDetector y cámara (portería: esperados con QR). */
+/** El lector de códigos del propio navegador (Chrome/Android, Safari reciente); si no existe, se escribe el código. */
 export function lectorDisponible(): boolean {
-  if (typeof window === "undefined") return false;
-  return Boolean(Reflect.get(window, "BarcodeDetector") && navigator.mediaDevices?.getUserMedia);
+  return typeof window !== "undefined" && "BarcodeDetector" in window && !!navigator.mediaDevices;
 }
 
 /**

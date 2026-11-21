@@ -1,9 +1,13 @@
+import { randomBytes } from "node:crypto";
 import { z } from "zod";
 
 import { defineConsumidor, enviarCorreo } from "@opai/capabilities";
 
+import { plazoEnlaceContingencia } from "./contingencias-enlace";
+import { hashDeToken } from "./correcciones-enlace";
 import { ETIQUETA_TIPO, fechaHora, nombreCompleto, tenantBasico } from "./formato";
 import { alertarSinCorreo } from "./consumidores";
+import { urlContingenciaEnlace } from "./urls-correo";
 
 const payload = z.object({ contingenciaId: z.string().uuid(), personaId: z.string().uuid() });
 
@@ -23,7 +27,12 @@ export const consumidorAvisoContingencia = defineConsumidor({
     if (!c || !persona) return;
     const correo = persona.emailPersonal?.trim();
     if (!correo) return alertarSinCorreo(ctx, p.data.personaId, nombreCompleto(persona), c.createdAt.toISOString().slice(0, 10));
-    if ((await ctx.db.envio.count({ where: { eventoId: evento.id, estado: "enviado" } })) > 0) return;
+    if ((await ctx.db.contingenciaEnlace.count({ where: { contingenciaId: c.id } })) > 0) return;
+    const token = randomBytes(32).toString("base64url");
+    const vence = plazoEnlaceContingencia(c.createdAt);
+    const enlace = await ctx.db.contingenciaEnlace.create({
+      data: { tenantId: ctx.tenantId, contingenciaId: c.id, tokenHash: hashDeToken(token), venceEn: vence },
+    });
     const enviado = await enviarCorreo(
       { db: ctx.db, tenantId: ctx.tenantId, correo: ctx.servicios.correo, urlBase: ctx.servicios.urlBase, eventoId: evento.id },
       "asistencia.contingencia.propuesta", correo,
@@ -31,9 +40,12 @@ export const consumidorAvisoContingencia = defineConsumidor({
         trabajador: { nombre: nombreCompleto(persona) },
         contingencia: { tipo: ETIQUETA_TIPO[c.tipo] ?? c.tipo, hora: fechaHora(c.horaDeclarada, t.zona), motivo: c.motivo },
         empresa: { nombre: t.nombre },
-        url: `${ctx.servicios.urlBase}/mis-marcas`,
+        url: urlContingenciaEnlace(ctx.servicios.urlBase, t.slug, token),
       },
     );
-    if (!enviado) throw new Error("No se pudo avisar de la contingencia; se reintenta.");
+    if (!enviado) {
+      await ctx.db.contingenciaEnlace.delete({ where: { id: enlace.id } });
+      throw new Error("No se pudo avisar de la contingencia; se reintenta.");
+    }
   },
 });

@@ -29,7 +29,8 @@ export const VERBOS: Record<string, string> = {
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
   aplicar: "Aplicar", activar: "Activar", destinos: "Ver destinos", destinos_list: "Listar destinos", destino_get: "Ver destino", destino_crear: "Crear destino", destino_actualizar: "Editar destino", destino_rotar_secreto: "Rotar secreto", destino_eliminar: "Eliminar destino", entregas_list: "Listar entregas", entrega_reenviar: "Reenviar entrega", eventos_list: "Ver catálogo de eventos", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", checklist: "Checklist", vista: "Vista previa", valores: "Valores", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
-  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", enviar_masivo: "Enviar en lote", aprobar_varias: "Aprobar varias", rechazar_varias: "Rechazar varias", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
+  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", candidatas_reversa: "Pagadas para revertir", enviar_masivo: "Enviar en lote", aprobar_varias: "Aprobar varias", rechazar_varias: "Rechazar varias", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
+  crear_reversa: "Crear lote de reversa", aplicar_reversa: "Aplicar reversa",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
   politica_set: "Definir política", firmante_empresa_set: "Definir firmante de la empresa",
   firma_automatica_autorizar: "Autorizar firma automática", firma_automatica_revocar: "Revocar firma automática",
@@ -48,7 +49,7 @@ export const VERBOS: Record<string, string> = {
   descartar_destacada: "Descartar destacada",
   set_autonomia: "Definir autonomía", set_role: "Cambiar rol", borrar: "Borrar", preparar: "Preparar",
   embudo: "Embudo", mover: "Mover", ganar: "Marcar como ganado", perder: "Marcar como perdido",
-  reabrir: "Reabrir", falsa_alarma: "Cerrar como falsa alarma", posponer: "Posponer", hacerse_cargo: "Hacerse cargo", contactar: "Registrar contacto", escalar: "Escalar", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
+  reabrir: "Reabrir", falsa_alarma: "Cerrar como falsa alarma", posponer: "Posponer", hacerse_cargo: "Hacerse cargo", contactar: "Registrar contacto", escalar: "Escalar", entregar: "Entregar", aceptar: "Aceptar", tomar: "Tomar", reanudar: "Reanudar", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
   set_contactos: "Definir contactos", actualizar_etapa: "Actualizar etapa", guardar_catalogo: "Guardar catálogo", guardar_lote: "Guardar en lote",
   reglas_list: "Ver reglas de aprobación", reglas_guardar: "Guardar regla de aprobación", reglas_desactivar: "Desactivar regla de aprobación",
   crear_etapa: "Crear etapa", reordenar_etapas: "Reordenar etapas", enriquecer: "Enriquecer",
@@ -103,7 +104,7 @@ export const VERBOS: Record<string, string> = {
   // Plataforma (CAR-323, CAR-529).
   miembros: "Ver miembros", reenviar: "Reenviar", set_modulos_nuevos: "Activar módulos nuevos",
   // Avisos de terreno en Slack (CAR-294).
-  tomar: "Tomar", pedir_refuerzo: "Pedir refuerzo", vinculado_de: "Resolver persona vinculada", efimero: "Aviso efímero",
+  pedir_refuerzo: "Pedir refuerzo", vinculado_de: "Resolver persona vinculada", efimero: "Aviso efímero",
   // Indicadores de gestión (CAR-305).
   medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",

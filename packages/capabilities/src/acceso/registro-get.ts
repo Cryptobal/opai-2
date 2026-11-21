@@ -17,6 +17,8 @@ const salida = z.object({
   nombre: z.string(),
   empresa: z.string().nullable(),
   motivoVisita: z.string().nullable(),
+  /** Campos propios del formulario de la instalación (CAR-479), con la etiqueta con que se pidieron. */
+  campos: z.array(z.object({ etiqueta: z.string(), valor: z.string() })),
   docTipo: z.string(),
   documento: z.string(),
   patente: z.string().nullable(),
@@ -27,6 +29,9 @@ const salida = z.object({
   salidaOrigen: z.string().nullable(),
   anulacion: z.object({ en: z.string(), motivo: z.string() }).nullable(),
 });
+
+const camposSchema = salida.shape.campos;
+const camposDe = (v: unknown) => camposSchema.safeParse(v).data ?? [];
 
 /** Ficha de un registro de acceso (CAR-474, diseño `AccesoDetalle`): solo dentro del alcance del actor. */
 export const registrosObtener = defineCapability({
@@ -70,6 +75,7 @@ export const registrosObtener = defineCapability({
       nombre: r.nombre,
       empresa: r.empresa,
       motivoVisita: r.motivoVisita,
+      campos: camposDe(r.camposExtra),
       docTipo: r.docTipo,
       documento: r.mascara,
       patente: ctx.autorizar(PERMISO_PATENTE) ? r.patente : null,

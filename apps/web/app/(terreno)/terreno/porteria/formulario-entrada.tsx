@@ -2,71 +2,61 @@
 
 import { useState } from "react";
 
-import { Alerta, Button, Campo, Input, Select } from "@opai/ds";
+import { Alerta, Button, Campo, Select } from "@opai/ds";
 import {
-  normalizarDocumento,
-  normalizarPatente,
-  type TipoDocumento,
-} from "@opai/domain/acceso-documento";
+  camposDelTipo,
+  CONFIG_ACCESO_DEFECTO,
+  type ConfigAcceso,
+} from "@opai/domain/acceso-config";
+import type { TipoDocumento } from "@opai/domain/acceso-documento";
 
 import { encolarHecho } from "@/lib/terreno/cola";
 
+import { MAX, Texto } from "./campo-texto";
+import { armarEntrada } from "./entrada-payload";
 import { DOCUMENTOS, TIPOS } from "./opciones";
 
 /**
- * Registrar entrada (CAR-78 · E4d). Valida el documento en el teléfono (RUN con dígito verificador) y guarda la
- * entrada en la cola; el servidor cruza con las listas y puede denegarla (se ve en «Cola»). «Guardada» se dice
- * solo cuando la cola releyó el hecho del disco. El documento «leído» no se afirma vigente (R5).
+ * Registrar entrada (CAR-78 · E4d, CAR-479). Pide lo que configuró la instalación (tipos, campos, orden y
+ * obligatorios) y valida el documento en el teléfono; sin la configuración a mano, usa la de fábrica. Guarda la
+ * entrada en la cola; el servidor cruza con las listas y puede denegarla (se ve en «Cola»). El documento «leído» no
+ * se afirma vigente (R5).
  */
-export function FormularioEntrada({ personaId }: { personaId: string }) {
-  const [tipo, setTipo] = useState("visita");
+export function FormularioEntrada({
+  personaId,
+  config,
+}: {
+  personaId: string;
+  config: ConfigAcceso | null;
+}) {
+  const c = config ?? CONFIG_ACCESO_DEFECTO;
+  const [tipo, setTipo] = useState<string>(c.tipos[0] ?? "visita");
   const [docTipo, setDocTipo] = useState<TipoDocumento>("run");
   const [numero, setNumero] = useState("");
   const [pais, setPais] = useState("");
   const [nombre, setNombre] = useState("");
-  const [empresa, setEmpresa] = useState("");
-  const [motivo, setMotivo] = useState("");
-  const [patente, setPatente] = useState("");
+  const [valores, setValores] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [estado, setEstado] = useState<"libre" | "guardando" | "guardada">("libre");
 
+  // La configuración puede llegar después y no traer el tipo elegido: entonces rige el primero habilitado.
+  const tipoActivo = c.tipos.some((t) => t === tipo) ? tipo : (c.tipos[0] ?? "visita");
   const registrar = async () => {
-    const doc = normalizarDocumento({ tipo: docTipo, numero, ...(pais ? { pais } : {}) });
-    if (!doc)
-      return setError(
-        docTipo === "run"
-          ? "El RUN no es válido. Revisa el dígito verificador."
-          : "Revisa el documento y el país.",
-      );
-    if (nombre.trim().length < 2) return setError("Escribe el nombre de la persona.");
-    if (patente && !normalizarPatente(patente)) return setError("La patente no es válida.");
+    const r = armarEntrada(c, { tipo: tipoActivo, docTipo, numero, pais, nombre, valores });
+    if ("error" in r) return setError(r.error);
     setError(null);
     setEstado("guardando");
     try {
-      await encolarHecho({
-        tipo: "acceso.entrada",
-        payload: {
-          tipoRegistro: tipo,
-          documento: { tipo: docTipo, numero, ...(pais ? { pais } : {}) },
-          nombre: nombre.trim(),
-          ...(empresa.trim() ? { empresa: empresa.trim() } : {}),
-          ...(motivo.trim() ? { motivo: motivo.trim() } : {}),
-          ...(patente.trim() ? { patente } : {}),
-        },
-        personaId,
-      });
+      await encolarHecho({ tipo: "acceso.entrada", payload: r.payload, personaId });
       setNumero("");
       setNombre("");
-      setEmpresa("");
-      setMotivo("");
-      setPatente("");
+      setValores({});
       setEstado("guardada");
     } catch {
       setError("No se pudo guardar la entrada en el teléfono. Vuelve a intentarlo.");
       setEstado("libre");
     }
   };
-
   const cambia = (f: (v: string) => void) => (v: string) => {
     f(v);
     setEstado("libre");
@@ -75,7 +65,12 @@ export function FormularioEntrada({ personaId }: { personaId: string }) {
     <section aria-label="Registrar entrada" className="flex flex-col gap-3">
       <h2 className="t-heading text-fg">Registrar entrada</h2>
       <Campo etiqueta="Tipo de registro" htmlFor="p-tipo">
-        <Select id="p-tipo" valor={tipo} opciones={TIPOS} onCambiar={cambia(setTipo)} />
+        <Select
+          id="p-tipo"
+          valor={tipoActivo}
+          opciones={TIPOS.filter((t) => c.tipos.some((x) => x === t.valor))}
+          onCambiar={cambia(setTipo)}
+        />
       </Campo>
       <Campo etiqueta="Documento" htmlFor="p-doc">
         <Select
@@ -85,64 +80,39 @@ export function FormularioEntrada({ personaId }: { personaId: string }) {
           onCambiar={(v) => setDocTipo(v as TipoDocumento)}
         />
       </Campo>
-      <Campo etiqueta="Número de documento" htmlFor="p-numero">
-        <Input
-          id="p-numero"
-          value={numero}
-          maxLength={40}
-          autoComplete="off"
-          onChange={(e) => cambia(setNumero)(e.target.value)}
-        />
-      </Campo>
+      <Texto
+        id="p-numero"
+        etiqueta="Número de documento"
+        valor={numero}
+        max={40}
+        onCambiar={cambia(setNumero)}
+      />
       {docTipo !== "run" ? (
-        <Campo etiqueta="País (código de 2 o 3 letras)" htmlFor="p-pais">
-          <Input
-            id="p-pais"
-            value={pais}
-            maxLength={3}
-            autoComplete="off"
-            onChange={(e) => cambia(setPais)(e.target.value)}
-          />
-        </Campo>
+        <Texto
+          id="p-pais"
+          etiqueta="País (código de 2 o 3 letras)"
+          valor={pais}
+          max={3}
+          onCambiar={cambia(setPais)}
+        />
       ) : null}
-      <Campo etiqueta="Nombre y apellidos" htmlFor="p-nombre">
-        <Input
-          id="p-nombre"
-          value={nombre}
-          maxLength={120}
-          autoComplete="off"
-          onChange={(e) => cambia(setNombre)(e.target.value)}
+      <Texto
+        id="p-nombre"
+        etiqueta="Nombre y apellidos"
+        valor={nombre}
+        max={120}
+        onCambiar={cambia(setNombre)}
+      />
+      {camposDelTipo(c, tipoActivo).map((f) => (
+        <Texto
+          key={f.id}
+          id={`p-${f.id}`}
+          etiqueta={f.obligatorio ? f.etiqueta : `${f.etiqueta} (opcional)`}
+          valor={valores[f.id] ?? ""}
+          max={MAX[f.id] ?? 200}
+          onCambiar={cambia((v) => setValores((x) => ({ ...x, [f.id]: v })))}
         />
-      </Campo>
-      <Campo etiqueta="Empresa (opcional)" htmlFor="p-empresa">
-        <Input
-          id="p-empresa"
-          value={empresa}
-          maxLength={120}
-          autoComplete="off"
-          onChange={(e) => cambia(setEmpresa)(e.target.value)}
-        />
-      </Campo>
-      <Campo etiqueta="Motivo (opcional)" htmlFor="p-motivo">
-        <Input
-          id="p-motivo"
-          value={motivo}
-          maxLength={200}
-          autoComplete="off"
-          onChange={(e) => cambia(setMotivo)(e.target.value)}
-        />
-      </Campo>
-      {tipo === "vehiculo" ? (
-        <Campo etiqueta="Patente" htmlFor="p-patente">
-          <Input
-            id="p-patente"
-            value={patente}
-            maxLength={12}
-            autoComplete="off"
-            onChange={(e) => cambia(setPatente)(e.target.value)}
-          />
-        </Campo>
-      ) : null}
+      ))}
       {error ? (
         <Alerta tono="danger" titulo="Revisa los datos">
           {error}

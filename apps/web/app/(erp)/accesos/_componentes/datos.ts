@@ -23,6 +23,7 @@ export type Registro = {
 export type RegistroFicha = Registro & {
   recibidoEn: string;
   motivoVisita: string | null;
+  campos: { etiqueta: string; valor: string }[];
   docTipo: string;
   lista: "autorizada" | "bloqueada" | null;
   dispositivo: string | null;

@@ -1,4 +1,6 @@
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
+import { esUuid } from "@/lib/ids";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
@@ -17,12 +19,14 @@ export async function cargarVentas(sp: SearchParams) {
   const puede = puedeDeIdentidad(identidad);
   const gestiona = puede("finanzas:ventas.manage");
   const periodo = p["periodo"] as string | undefined;
+  const limite = tamanoPagina(p);
   const [libro, resumen] = await Promise.all([
     ejecutarComoUsuario<{ items: LibroVentas["items"]; siguiente: string | null }>(
       "erp",
       "finanzas.ventas.listar",
       {
-        limite: 100,
+        limite,
+        ...(p.cursor && esUuid(p.cursor) ? { cursor: p.cursor } : {}),
         ...(periodo ? { periodo } : {}),
         ...(p["estado"] ? { estadoDte: p["estado"] } : {}),
         ...(TIPOS.has(String(p["tipo"])) ? { tipoDte: Number(p["tipo"]) } : {}),

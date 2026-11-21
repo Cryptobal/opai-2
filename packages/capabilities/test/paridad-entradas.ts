@@ -91,6 +91,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Identidad: core.invitations.request_new (interna con motivo), sin sesión.",
   "app/correccion/[slug]/[token]/accion.ts#accionResponder":
     "Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador.",
+  "app/contingencia/[slug]/[token]/accion.ts#accionResponder":
+    "Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial.",
   "app/firmar/[slug]/[token]/acciones.ts#verFirma":
     "Firma: core.firmas.ver_firmante (interna con motivo): el enlace personal es la credencial (firma.md §5).",
   "app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace":
@@ -99,8 +101,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9).",
   "app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace":
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
-  "app/_acciones/app-nativa.ts#accionVolverALaApp":
-    "Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio.",
+  "app/(auth)/app/volver/route.ts":
+    "Identidad: ingreso con Google desde la app nativa (CAR-516, CAR-727); emite el código atado al reto PKCE y redirige 303 al esquema de la app. Abre una sesión, no es una operación de negocio.",
   "app/_acciones/app-nativa.ts#accionCanjearApp":
     "Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado.",
   "app/(auth)/app/google/route.ts":
@@ -125,6 +127,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/porteria/sitio/route.ts":
     "Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
+  "app/api/terreno/porteria/esperados/route.ts":
+    "Lee los visitantes prerregistrados para hoy de la portería del equipo de terreno emparejado (CAR-478): cookie de dispositivo, sin sesión; ejecuta core.terreno.esperados (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/libro/route.ts":
     "Lee el libro de novedades de la instalación del equipo de terreno emparejado (CAR-77): cookie de dispositivo, sin sesión; ejecuta core.libro_novedades_equipo.listar (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/porteria/esperados/route.ts":

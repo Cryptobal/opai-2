@@ -15,7 +15,9 @@ import { registrosListar } from "./registros";
  * fino (patente completa, gestionar registros): lo que puede hacer lo decide la capacidad del portal. Sin la
  * sección «Accesos» en su portal, FORBIDDEN.
  */
-export async function contextoCliente(ctx: Contexto): Promise<{ ctx: Contexto; cuentaId: string }> {
+
+export export async function contextoCliente(ctx: Contexto): Promise<{ ctx: Contexto; cuentaId: string }> {
+
   const a = await accesoDelActor(ctx);
   const { config } = await configDeCuenta(ctx, a.cuentaId);
   if (!config.seccionesVisibles.includes("accesos"))

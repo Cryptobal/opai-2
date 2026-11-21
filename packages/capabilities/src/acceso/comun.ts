@@ -16,6 +16,10 @@ export async function nombresInstalacion(
   return new Map(filas.map((i) => [i.id, i.nombre]));
 }
 
+/** Violación de unicidad de Prisma (P2002): otra escritura llegó primero. */
+export const esUnica = (e: unknown) =>
+  typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "P2002";
+
 /** Persona responsable de una escritura: el usuario o, si actúa un agente, el usuario por el que actúa. */
 export const quien = (ctx: Contexto) =>
   ctx.actor.tipo === "user" ? (ctx.actor.id ?? null) : (ctx.actor.viaUserId ?? null);
@@ -37,13 +41,7 @@ export const PERMISO_REGISTROS = "acceso:registros.manage";
 export const PERMISO_PATENTE = "acceso:datos.ver_patente";
 
 export const TIPOS_LISTA = ["autorizada", "bloqueada"] as const;
-export const TIPOS_REGISTRO = [
-  "visita",
-  "contratista",
-  "proveedor",
-  "vehiculo",
-  "despacho",
-] as const;
+export { TIPOS_REGISTRO } from "@opai/domain";
 
 /** Una entrada de lista tal como se muestra: el documento solo enmascarado, nunca la huella ni el número. */
 export const entradaListaSchema = z.object({
