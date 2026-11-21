@@ -80,10 +80,15 @@ jobs:
             exit 1
           fi
           echo "ok=true" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         if: steps.listo.outputs.ok == 'true'
         with:
+          fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Detectar solo pantalla
+        id: solo_pantalla
+        if: steps.listo.outputs.ok == 'true' && github.event_name == 'pull_request'
+        run: .github/scripts/ci-solo-pantalla.sh
       - uses: pnpm/action-setup@v4
         if: steps.listo.outputs.ok == 'true'
       - uses: actions/setup-node@v4
@@ -94,7 +99,10 @@ jobs:
       - name: Esperar a que el workflow «preview» deje lista la base de la vista previa
         if: >-
           steps.listo.outputs.ok == 'true'
-          && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
+          && (
+            (github.event_name == 'pull_request' && steps.solo_pantalla.outputs.solo_pantalla != 'true')
+            || github.event_name == 'workflow_dispatch'
+          )
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -171,11 +179,11 @@ jobs:
           E2E_QA_APROBADOR_EMAIL: ${{ vars.E2E_QA_APROBADOR_EMAIL }}
         # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
         run: |
-          args=(--workers=2 --reporter=list --output=test-results/playwright)
           if [ -n "$PLAYWRIGHT_SPEC" ]; then
+            args=(--workers=2 --reporter=list --output=test-results/playwright)
             pnpm --filter @opai/web exec playwright test "$PLAYWRIGHT_SPEC" "${args[@]}"
           else
-            pnpm --filter @opai/web exec playwright test --grep @preview "${args[@]}"
+            .github/scripts/preview-e2e-ci.sh
           fi
       - name: Copiar capturas de novedad al repositorio (CAR-520)
         if: steps.listo.outputs.ok == 'true'
