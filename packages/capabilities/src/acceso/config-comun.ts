@@ -2,9 +2,11 @@ import { z } from "zod";
 
 import {
   CAMPOS_FIJOS,
+  CONFIG_ACCESO_DEFECTO,
   type ConfigAcceso,
   configEfectiva,
   esCampoPersonalizado,
+  FRECUENCIAS_REPORTE,
   MAX_CAMPOS,
   TIPOS_REGISTRO,
 } from "@opai/domain";
@@ -32,6 +34,9 @@ export const configSchema = z
     permitirFueraDeLista: z.boolean(),
     permanenciaMaxMin: z.number().int().min(15).max(1_440).nullable(),
     cierreHora: z.number().int().min(0).max(23).nullable(),
+    reporteFrecuencia: z.enum(FRECUENCIAS_REPORTE),
+    reporteDestinatarios: z.array(z.email()).max(20),
+    avisoPrivacidad: z.string().trim().min(20).max(400),
   })
   .strict()
   .refine((c) => new Set(c.tipos).size === c.tipos.length, {
@@ -49,7 +54,8 @@ export const configSchema = z
 
 /** Lo guardado se vuelve a validar al leer: una fila que ya no calza con el esquema cuenta como no configurada. */
 export const parsearConfig = (v: unknown): ConfigAcceso | null => {
-  const r = configSchema.safeParse(v);
+  const base = typeof v === "object" && v !== null ? { ...CONFIG_ACCESO_DEFECTO, ...v } : v;
+  const r = configSchema.safeParse(base);
   return r.success ? r.data : null;
 };
 

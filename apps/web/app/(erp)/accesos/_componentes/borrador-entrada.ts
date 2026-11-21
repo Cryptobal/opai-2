@@ -1,4 +1,6 @@
 // Borrador de la hoja «Agregar» de una lista de acceso (CAR-475).
+import type { AlcanceLista } from "@opai/domain";
+
 export type Borrador = {
   nombre: string;
   docTipo: string;
@@ -11,6 +13,8 @@ export type Borrador = {
   hastaHora: string;
   usoUnico: boolean;
   motivo: string;
+  alcance: AlcanceLista;
+  grupoId: string;
 };
 
 export const BORRADOR_VACIO: Borrador = {
@@ -25,6 +29,8 @@ export const BORRADOR_VACIO: Borrador = {
   hastaHora: "",
   usoUnico: false,
   motivo: "",
+  alcance: "instalacion",
+  grupoId: "",
 };
 
 export const DOCS = [

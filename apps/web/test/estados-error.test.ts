@@ -44,6 +44,19 @@ describe("estadoPantalla (CAR-50)", () => {
     expect(estadoPantalla(falla("FORBIDDEN"))).toBe("forbidden");
     expect(estadoPantalla(falla("INTERNAL"), falla("FORBIDDEN"))).toBe("forbidden");
   });
+
+  it("complemento inactivo es aviso vacío, no error de conexión (CAR-741)", () => {
+    const complemento = {
+      ok: false as const,
+      error: {
+        code: "UNPROCESSABLE",
+        message: "El complemento Cumplimiento DT no está activo para esta empresa.",
+      },
+    };
+    expect(estadoPantalla(complemento)).toBe("empty");
+    expect(estadoPantalla(ok([]), complemento)).toBe("empty");
+    expect(estadoPantalla(complemento, falla("FORBIDDEN"))).toBe("forbidden");
+  });
 });
 
 describe("exigirDatos y datosSiHayPermiso", () => {

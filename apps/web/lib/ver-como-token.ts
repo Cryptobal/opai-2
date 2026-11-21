@@ -15,6 +15,7 @@ const vistaSchema = z.object({
   objetivoId: z.string(),
   nombre: z.string(),
   userId: z.string().nullable(),
+  personaId: z.string().nullable().optional(),
   dispositivoId: z.string().nullable(),
   expira: z.number(),
 });

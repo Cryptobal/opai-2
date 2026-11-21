@@ -1,3 +1,5 @@
+import { COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT } from "./cobros/catalogo-modulos";
+
 // Áreas de navegación del ERP (Brief 05, ADR-046, NAVEGACION.md §7). Lista cerrada y en el orden de
 // R1: Inicio (suelta), Comercial, Clientes, Operaciones, Personas, Finanzas, Documentos. Desde CAR-182
 // «clientes» ya no tiene entradas (Cuentas y Contactos van en Comercial), pero sigue en la lista porque
@@ -37,3 +39,9 @@ export const MAXIMO_ENTRADAS_POR_AREA = 8;
 
 /** D3: máximo de fijados por usuario. */
 export const MAXIMO_FIJADOS = 5;
+
+/** Rutas ERP cuyo ítem de menú exige un entitlement distinto del módulo del manifest (ADR-057). */
+export const ENTITLEMENT_NAV: Readonly<Record<string, string>> = {
+  "/remuneraciones/cumplimiento-dt/contratos": COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT,
+  "/remuneraciones/cumplimiento-dt/finiquitos": COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT,
+};

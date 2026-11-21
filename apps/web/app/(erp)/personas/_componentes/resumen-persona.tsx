@@ -1,15 +1,17 @@
-import { Mail, MessageSquare, Phone, UserPlus } from "lucide-react";
+import { Suspense } from "react";
 
-import { ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { Mail, MessageSquare, Phone } from "lucide-react";
+
+import { ParesGrid, SeccionTarjeta, Skeleton } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { fecha, rut, telefono } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
 
 import { etiquetaDe, NACIONALIDADES, SEXOS } from "./opciones-persona";
 import { ResumenContactoEmergencia } from "./seccion-contacto-laboral";
+import { SeccionAccesoPortal } from "./seccion-acceso-portal";
 
 /** Años cumplidos a una fecha ISO (aaaa-mm-dd). */
 function edad(nacimiento: string, hoy: string) {
@@ -103,20 +105,14 @@ export function ResumenPersona({ p, hoy }: Props) {
           <MapaOpai lat={p.lat} lng={p.lng} {...(p.comuna ? { pie: p.comuna } : {})} />
         </div>
       </SeccionTarjeta>
-      <SeccionTarjeta titulo="Acceso">
-        <ParesGrid
-          unaColumna
-          items={[{ etiqueta: "Usuario vinculado", valor: p.usuarioId ? "Sí" : "No" }]}
+      <Suspense fallback={<Skeleton className="h-44 rounded-lg" aria-label="Cargando acceso" />}>
+        <SeccionAccesoPortal
+          personaId={p.id}
+          nombre={p.nombreCompleto}
+          tieneUsuario={Boolean(p.usuarioId)}
+          personaActiva={p.estado === "activa" && !p.bloqueada}
         />
-        {p.usuarioId ? null : (
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <EnlaceBotonHoja href="?vincular=1" variante="secondary" icono={UserPlus}>
-              Vincular usuario
-            </EnlaceBotonHoja>
-            <span className="t-caption">Le permite entrar al portal Trabajador</span>
-          </div>
-        )}
-      </SeccionTarjeta>
+      </Suspense>
     </div>
   );
 }

@@ -38,12 +38,13 @@ function hecho(
 export const verComoIniciar = defineCapability({
   id: "core.ver_como.iniciar",
   soloPersonas: true,
-  descripcion: `Solo personas: empieza a ver un portal (Terreno, trabajador o cliente) como otra persona o instalación de la empresa, en solo lectura y por ${VER_COMO_MINUTOS} minutos. Queda en la auditoría de seguridad. Acepta vista previa.`,
+  descripcion: `Solo personas: empieza a ver un portal (Terreno, trabajador, cliente o supervisor) como otra persona o instalación de la empresa, en solo lectura y por ${VER_COMO_MINUTOS} minutos. Queda en la auditoría de seguridad. Acepta vista previa.`,
   permiso: PERMISOS_CORE.verComoIniciar,
   input: vistaInput,
   output: vistaInput.extend({
     nombre: z.string(),
     userId: z.string().nullable(),
+    personaId: z.string().nullable(),
     dispositivoId: z.string().nullable(),
     expiraEn: z.string(),
   }),

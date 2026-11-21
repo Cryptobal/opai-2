@@ -1,60 +1,67 @@
 import { expect, test } from "@playwright/test";
 
+import { abrirAccesos } from "./accesos-instalacion";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// CAR-474: Accesos en el ERP (Operaciones). Registros con ficha a la derecha, En sitio e Intentos denegados.
-// La empresa de prueba puede no tener registros: entonces se revisa el estado vacío y la navegación.
-test.describe("@preview acceso: Accesos en el ERP", () => {
+// CAR-474 y CAR-567: el control de acceso se entra solo por la pestaña Accesos de la instalación. `/accesos`
+// lleva a Instalaciones, que abre en las activas. Sin registros (p. ej. la vista previa sin
+// ACCESO_HUELLA_SECRET, CAR-483) se revisa el estado vacío y la navegación.
+test.describe("@preview acceso: Accesos desde la instalación", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
-  test("registros, ficha y secciones", async ({ page }, info) => {
+  test("sin entrada propia: /accesos lleva a Instalaciones activas", async ({ page }, info) => {
     await entrar(page);
-    // Diseño oficial (ADR-109): el nuevo, no el clásico que fija por defecto playwright.config.
     await page
       .context()
       .addCookies([{ name: "opai_marco", value: "nuevo", url: new URL(page.url()).origin }]);
     await page.goto("/accesos");
-    await expect(page.getByPlaceholder("Buscar por nombre, empresa o patente")).toBeVisible({
+    await expect(page).toHaveURL(/\/instalaciones$/, { timeout: 60_000 });
+    await expect(page.getByText("Estado: Activa").filter({ visible: true }).first()).toBeVisible({
       timeout: 60_000,
     });
+    await expect(page.locator('nav a[href="/accesos"]')).toHaveCount(0);
+    await capturar(page, info, "instalaciones-activas");
+  });
 
-    // La navegación también enlaza a /accesos/prerregistros: no es una ficha.
-    const lista = page.getByRole("region", { name: "Lista de accesos", exact: true });
-    await expect(lista).toBeVisible();
-    const fila = lista.locator('a[href^="/accesos/"]').filter({ visible: true }).first();
-    const vacio = lista.getByRole("status").getByText("Aún no hay registros", { exact: true });
-    // Esperar datos o vacío real: la ausencia durante Suspense no acredita una lista vacía.
-    await expect(fila.or(vacio).first()).toBeVisible({ timeout: 60_000 });
+  test("registros, ficha, en sitio e intentos", async ({ page }, info) => {
+    await entrar(page);
+    await page
+      .context()
+      .addCookies([{ name: "opai_marco", value: "nuevo", url: new URL(page.url()).origin }]);
+    const base = await abrirAccesos(page, "registros");
+    await expect(
+      page.getByRole("link", { name: "Prerregistros" }).filter({ visible: true }).first(),
+    ).toBeVisible({ timeout: 60_000 });
     await capturar(page, info, "accesos-registros");
+
+    const fila = page.locator('a[href^="/accesos/0"]').filter({ visible: true }).first();
     if ((await fila.count()) === 0) {
-      await expect(vacio).toBeVisible();
-      // Sin registros (p. ej. test.opai.cl sin ACCESO_HUELLA_SECRET, CAR-483): la ficha no se recorre y se anota.
       test
         .info()
         .annotations.push({ type: "sin-datos", description: "Sin registros: ficha no recorrida" });
     } else {
       await fila.click();
       await expect(page.getByText("Documento enmascarado")).toBeVisible({ timeout: 60_000 });
-      await expect(page.getByText("Historial")).toBeVisible();
       await capturar(page, info, "accesos-ficha");
     }
 
-    await page.goto("/accesos?estado=en_sitio");
-    await expect(page.getByPlaceholder("Buscar por nombre, empresa o patente")).toBeVisible({
-      timeout: 60_000,
-    });
+    await page.goto(`${base}?sub=en_sitio`);
+    await expect(
+      page
+        .getByText(/Nadie en sitio|En sitio/)
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible({ timeout: 60_000 });
     await capturar(page, info, "accesos-en-sitio");
 
-    await page.goto("/accesos/intentos");
+    await page.goto(`${base}?sub=intentos`);
     await expect(
       page
         .getByText(/Sin intentos denegados|Bloqueado|Fuera de lista|Fuera de horario|Pase ya usado/)
         .filter({ visible: true })
         .first(),
-    ).toBeVisible({
-      timeout: 60_000,
-    });
+    ).toBeVisible({ timeout: 60_000 });
     await capturar(page, info, "accesos-intentos");
   });
 });

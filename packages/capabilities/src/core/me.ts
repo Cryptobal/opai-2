@@ -11,6 +11,7 @@ import {
 import { enScope } from "../autorizacion";
 import { defineCapability } from "../define";
 import { listarModulos } from "../module";
+import { personaVinculadaEn, portalesUsablesDe } from "./portales-usables";
 import { tenantSchema } from "./esquemas";
 
 /** Catálogo de permisos conocidos: núcleo + módulos registrados. */
@@ -46,6 +47,9 @@ export const me = defineCapability({
     tenant: tenantSchema.nullable(),
     rol: z.string().nullable(),
     portales: z.array(z.string()),
+    portalesUsables: z
+      .array(z.string())
+      .describe("Portales que esta cuenta puede usar en el selector."),
     portalInicio: z
       .string()
       .nullable()
@@ -96,6 +100,8 @@ export const me = defineCapability({
         tienePermisoPlataforma(ctx.usuario?.platformRole, p) &&
         ctx.autorizar(p),
     );
+    const personaVinculada = await personaVinculadaEn(ctx);
+    const portalesUsables = portalesUsablesDe(ctx, personaVinculada);
     return {
       usuario: ctx.usuario,
       actor: {
@@ -106,6 +112,7 @@ export const me = defineCapability({
       tenant,
       rol: ctx.rol,
       portales: membresia?.portales ?? [],
+      portalesUsables,
       portalInicio: membresia?.portalInicio ?? null,
       permisos: [...deTenant, ...dePlataforma],
       modulosActivos: [...ctx.modulosActivos],

@@ -3,6 +3,13 @@ name: iOS · TestFlight
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/movil/**'
+      - '.github/scripts/ios-testflight.sh'
+      - '.github/workflows/ios-testflight.yml'
 
 permissions:
   contents: read
@@ -66,4 +73,6 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
           IOS_SDK_MIN_MAJOR: ${{ env.IOS_SDK_MIN_MAJOR }}
-        run: bash .github/scripts/ios-testflight.sh
+        run: |
+          echo "::add-mask::$ASC_ISSUER_ID"
+          bash .github/scripts/ios-testflight.sh

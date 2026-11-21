@@ -2,16 +2,19 @@ import { Eye } from "lucide-react";
 
 import { Button } from "@opai/ds";
 
+import type { PortalVerComo } from "@opai/domain";
+
 import { accionSalirVerComo } from "@/app/_acciones/ver-como";
 
-const PORTAL = {
+const PORTAL: Record<PortalVerComo, string> = {
   terreno: "Terreno",
   trabajador: "Portal del trabajador",
   cliente: "Portal Cliente",
+  supervisor: "Portal Supervisor",
 };
 
 /** Banda fija de «ver como» (CAR-528): a quién se mira, que es solo lectura y la salida. */
-export function BannerVerComo({ portal, nombre }: { portal: keyof typeof PORTAL; nombre: string }) {
+export function BannerVerComo({ portal, nombre }: { portal: PortalVerComo; nombre: string }) {
   return (
     <div
       role="status"
