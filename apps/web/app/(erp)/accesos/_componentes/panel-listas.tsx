@@ -3,7 +3,8 @@ import { Badge, type Columna, type EstadoPantalla, ListScreen, Segmentado } from
 
 import { LinkNext } from "@/app/_components/link-next";
 
-import { AgregarEntrada } from "./agregar-entrada";
+import { AccionListas } from "./accion-listas";
+import type { PortalListas } from "./borrador-entrada";
 import { tipoDe } from "./etiquetas";
 import { QuitarEntrada } from "./quitar-entrada";
 
@@ -22,6 +23,7 @@ export type EntradaLista = {
   hastaMin: number | null;
   usoUnico: boolean;
   autorNombre: string | null;
+  deCliente: boolean;
 };
 
 const ETIQUETA_ALCANCE: Record<EntradaLista["alcance"], string> = {
@@ -99,10 +101,11 @@ type Props = {
   entradas: EntradaLista[];
   /** Ruta de la lista con el tipo elegido (`?lista=`), para el segmento Autorizadas · Bloqueadas. */
   href: (tipo: "autorizada" | "bloqueada") => string;
+  portal: PortalListas;
 };
 
 /** Listas autorizada y bloqueada de una instalación (diseño `Listas`). El motivo del bloqueo solo lo ve quien gestiona. */
-export function PanelListas({ state, instalacionId, tipo, entradas, href }: Props) {
+export function PanelListas({ state, instalacionId, tipo, entradas, href, portal }: Props) {
   const bloq = tipo === "bloqueada";
   return (
     <div className="flex flex-col gap-3">
@@ -118,19 +121,16 @@ export function PanelListas({ state, instalacionId, tipo, entradas, href }: Prop
       <ListScreen<EntradaLista>
         state={state}
         titulo={bloq ? "Bloqueadas" : "Autorizadas"}
-        accionPrincipal={
-          <span className="flex flex-wrap items-center gap-3">
-            <LinkNext
-              href="/configuracion/importar?importador=acceso_listas"
-              className="t-body-sm font-medium underline"
-            >
-              Importar desde Excel
-            </LinkNext>
-            <AgregarEntrada instalacionId={instalacionId} tipo={tipo} />
-          </span>
-        }
+        accionPrincipal={<AccionListas portal={portal} instalacionId={instalacionId} tipo={tipo} />}
         items={entradas}
-        acciones={(e) => <QuitarEntrada id={e.id} nombre={e.nombre ?? e.mascara} />}
+        // En el portal, el cliente solo quita lo que agregó su empresa; lo del proveedor de seguridad queda fijo.
+        acciones={(e) =>
+          portal === "erp" || e.deCliente ? (
+            <QuitarEntrada id={e.id} nombre={e.nombre ?? e.mascara} portal={portal} />
+          ) : (
+            <Badge tono="neutro">De tu proveedor</Badge>
+          )
+        }
         clave={(e) => e.id}
         tarjeta={(e) => <TarjetaEntrada e={e} />}
         columnas={columnasDe(bloq)}

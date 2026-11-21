@@ -6,6 +6,10 @@ import type { Registro } from "@/app/(erp)/accesos/_componentes/datos";
 import { estadoRegistro, tipoDe } from "@/app/(erp)/accesos/_componentes/etiquetas";
 import { Tarjeta } from "@/app/(erp)/accesos/_componentes/tablas-instalacion";
 
+import { type Listas, ListasCliente } from "./listas-cliente";
+import { ruta, type Vista } from "./ruta";
+import { type Visitas, VisitasCliente } from "./visitas-cliente";
+
 export type Instalacion = { id: string; nombre: string };
 
 type Props = {
@@ -13,7 +17,9 @@ type Props = {
   siguiente: string | null;
   instalaciones: Instalacion[];
   instalacion: string | undefined;
-  enSitio: boolean;
+  vista: Vista;
+  listas: Listas | null;
+  visitas: Visitas | null;
 };
 
 const COLUMNAS_CLIENTE: Columna<Registro>[] = [
@@ -32,41 +38,32 @@ const COLUMNAS_CLIENTE: Columna<Registro>[] = [
   },
 ];
 
-const ruta = (q: Record<string, string | undefined>) => {
-  const p = new URLSearchParams(Object.entries(q).filter((e): e is [string, string] => Boolean(e[1])));
-  return `/cliente/accesos${p.size ? `?${p}` : ""}`;
-};
-
-/** En sitio y registros de las instalaciones del cliente (CAR-481): solo lectura, documento enmascarado. */
-export function AccesosCliente({ items, siguiente, instalaciones, instalacion, enSitio }: Props) {
-  const vista = enSitio ? "en_sitio" : "registros";
+/** Elegir instalación; en listas no hay «Todas», porque cada lista es de una instalación. */
+function SegmentoInstalacion({ instalaciones, instalacion, vista }: Props) {
+  if (instalaciones.length < 2) return null;
+  const opciones = instalaciones.map((i) => ({
+    id: i.id,
+    etiqueta: i.nombre,
+    href: ruta({ instalacion: i.id, vista }),
+  }));
   return (
-    <div className="flex flex-col gap-3">
-      <Segmentado
-        etiqueta="Vista de accesos"
-        variante="plano"
-        activa={vista}
-        Link={LinkNext}
-        opciones={[
-          { id: "en_sitio", etiqueta: "En sitio", href: ruta({ instalacion }) },
-          { id: "registros", etiqueta: "Registros", href: ruta({ instalacion, vista: "registros" }) },
-        ]}
-      />
-      {instalaciones.length > 1 ? (
-        <Segmentado
-          etiqueta="Instalación"
-          activa={instalacion ?? "todas"}
-          Link={LinkNext}
-          opciones={[
-            { id: "todas", etiqueta: "Todas", href: ruta({ vista: enSitio ? undefined : vista }) },
-            ...instalaciones.map((i) => ({
-              id: i.id,
-              etiqueta: i.nombre,
-              href: ruta({ instalacion: i.id, vista: enSitio ? undefined : vista }),
-            })),
-          ]}
-        />
-      ) : null}
+    <Segmentado
+      etiqueta="Instalación"
+      activa={instalacion ?? "todas"}
+      Link={LinkNext}
+      opciones={
+        vista === "listas"
+          ? opciones
+          : [{ id: "todas", etiqueta: "Todas", href: ruta({ vista }) }, ...opciones]
+      }
+    />
+  );
+}
+
+function Registros({ items, siguiente, instalacion, vista }: Props) {
+  const enSitio = vista === "en_sitio";
+  return (
+    <>
       <ListScreen<Registro>
         state="ready"
         titulo={enSitio ? "En sitio" : "Registros"}
@@ -89,12 +86,47 @@ export function AccesosCliente({ items, siguiente, instalaciones, instalacion, e
       />
       {siguiente ? (
         <LinkNext
-          href={ruta({ instalacion, vista: enSitio ? undefined : vista, cursor: siguiente })}
+          href={ruta({ instalacion, vista, cursor: siguiente })}
           className="t-label self-start px-4 py-3 text-accent"
         >
           Siguiente página
         </LinkNext>
       ) : null}
+    </>
+  );
+}
+
+/**
+ * En sitio y registros de las instalaciones del cliente (CAR-481), de solo lectura y con el documento
+ * enmascarado, sus visitas prerregistradas (CAR-539) y sus listas autorizada y bloqueada si su empresa de
+ * seguridad se lo habilitó (CAR-538).
+ */
+export function AccesosCliente(props: Props) {
+  const { instalaciones, instalacion, vista, listas, visitas } = props;
+  return (
+    <div className="flex flex-col gap-3">
+      <Segmentado
+        etiqueta="Vista de accesos"
+        variante="plano"
+        activa={vista}
+        Link={LinkNext}
+        opciones={[
+          { id: "en_sitio", etiqueta: "En sitio", href: ruta({ instalacion }) },
+          { id: "registros", etiqueta: "Registros", href: ruta({ instalacion, vista: "registros" }) },
+          { id: "visitas", etiqueta: "Visitas", href: ruta({ instalacion, vista: "visitas" }) },
+          { id: "listas", etiqueta: "Listas", href: ruta({ instalacion, vista: "listas" }) },
+        ]}
+      />
+      <SegmentoInstalacion {...props} />
+      {vista === "visitas" && visitas ? (
+        <VisitasCliente instalaciones={instalaciones} instalacion={instalacion} visitas={visitas} />
+      ) : vista === "listas" && listas && instalacion ? (
+        <ListasCliente instalacion={instalacion} listas={listas} />
+      ) : vista === "listas" ? (
+        <p className="t-body text-fg-muted">Tu cuenta aún no tiene instalaciones.</p>
+      ) : (
+        <Registros {...props} />
+      )}
     </div>
   );
 }

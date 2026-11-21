@@ -15,7 +15,11 @@ const CamposPrerregistro = lazy(() =>
 );
 import { rango } from "./etiquetas";
 
+type Portal = "erp" | "cliente";
+
 type Props = {
+  /** El Portal Cliente prerregistra con sus capacidades (CAR-539). */
+  portal?: Portal;
   instalaciones: { id: string; nombre: string }[];
   instalacionId?: string;
   hoy: string;

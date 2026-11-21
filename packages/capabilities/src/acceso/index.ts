@@ -2,21 +2,24 @@
 import type { Capacidad } from "../types";
 import { configCambiar, configObtener } from "./config";
 import { registrosAnular, registrosCerrarBloque, registrosSalida } from "./correcciones";
+import { gruposCambiar, gruposListar } from "./grupos-lista";
 import { intentosListar } from "./intentos";
-import { prerregistrosCancelar, prerregistrosCrear } from "./prerregistros";
+import { listasAgregar } from "./listas-agregar";
+import { listasListar, listasQuitar } from "./listas";
+import { portalRegistrosListar } from "./portal-cliente";
+import { portalListasAgregar, portalListasListar, portalListasQuitar } from "./portal-listas";
+import { portalVisitasCrear, portalVisitasListar } from "./portal-visitas";
+import { aparienciaCambiar, aparienciaGet } from "./apariencia";
+import { privacidadCartel } from "./privacidad";
 import {
   prerregistrosInvitacion,
   prerregistrosListar,
   prerregistrosObtener,
 } from "./prerregistros-leer";
-import { gruposCambiar, gruposListar } from "./grupos-lista";
-import { listasAgregar, listasListar, listasQuitar } from "./listas";
-import { portalRegistrosListar } from "./portal-cliente";
+import { prerregistrosCancelar, prerregistrosCrear } from "./prerregistros";
 import { puntosCambiar, puntosListar } from "./puntos";
-import { aparienciaCambiar, aparienciaGet } from "./apariencia";
 import { registrosObtener } from "./registro-get";
 import { registrosListar } from "./registros";
-import { privacidadCartel } from "./privacidad";
 import { reportesProbar } from "./reportes";
 
 export const capacidadesAcceso: readonly Capacidad[] = [
@@ -43,6 +46,11 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   aparienciaGet,
   aparienciaCambiar,
   portalRegistrosListar,
+  portalListasListar,
+  portalListasAgregar,
+  portalListasQuitar,
+  portalVisitasListar,
+  portalVisitasCrear,
   reportesProbar,
   privacidadCartel,
 ];

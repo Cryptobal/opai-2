@@ -50,6 +50,7 @@ export async function SeccionListas({
         tipo={tipo}
         entradas={entradas}
         href={(t) => `${base}?sub=listas&lista=${t}`}
+        portal="erp"
       />
     </div>
   );

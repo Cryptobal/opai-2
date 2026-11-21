@@ -1,24 +1,10 @@
 import { z } from "zod";
 
-import { normalizarDocumento } from "@opai/domain";
-
 import { instalacionEnAlcance, dondeInstalacionId } from "../rondas/comun";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { noEncontrado, reglaDeNegocio } from "../errores";
-import { huellasCandidatas, huellaVigente } from "./huella";
-import { vigenciaLista } from "./listas-alcance";
-import {
-  documentoSchema,
-  entradaListaSchema,
-  PERMISO_LISTAS,
-  TIPOS_LISTA,
-  TIPOS_REGISTRO,
-  quien,
-  vistaEntrada,
-} from "./comun";
-
-const fecha = z.string().datetime({ offset: true });
+import { noEncontrado } from "../errores";
+import { entradaListaSchema, PERMISO_LISTAS, TIPOS_LISTA, vistaEntrada } from "./comun";
 
 export const listasListar = defineCapability({
   id: "acceso.listas.listar",
@@ -38,88 +24,6 @@ export const listasListar = defineCapability({
       take: 500,
     });
     return filas.map(vistaEntrada);
-  },
-});
-
-export const listasAgregar = defineCapability({
-  id: "acceso.listas.agregar",
-  descripcion:
-    "Agrega una persona o documento a la lista autorizada o bloqueada de una instalación, con vigencia, días, horario y tipos de registro. Se guarda solo la huella y la máscara del documento, nunca el número. Un bloqueo exige motivo y, para un agente, aprobación humana.",
-  permiso: PERMISO_LISTAS,
-  input: z.object({
-    instalacionId: uuidSchema,
-    tipo: z.enum(TIPOS_LISTA),
-    documento: documentoSchema,
-    nombre: z.string().trim().min(2).max(120).optional(),
-    motivo: z.string().trim().min(3).max(300).optional(),
-    tiposRegistro: z.array(z.enum(TIPOS_REGISTRO)).max(5).default([]),
-    vigenteDesde: fecha.optional(),
-    vigenteHasta: fecha.optional(),
-    dias: z.array(z.number().int().min(0).max(6)).max(7).default([]),
-    desdeMin: z.number().int().min(0).max(1439).optional(),
-    hastaMin: z.number().int().min(0).max(1439).optional(),
-    usoUnico: z.boolean().default(false),
-  }),
-  output: entradaListaSchema,
-  efecto: "escritura",
-  dryRun: true,
-  // El número del documento nunca queda en la auditoría ni en las aprobaciones.
-  sensibles: ["documento"],
-  exigeAprobacion: (i) => i.tipo === "bloqueada",
-  async handler(ctx, i, { dryRun }) {
-    await instalacionEnAlcance(ctx, i.instalacionId);
-    if (i.tipo === "bloqueada" && !i.motivo) throw reglaDeNegocio("Un bloqueo necesita motivo.");
-    if ((i.desdeMin === undefined) !== (i.hastaMin === undefined))
-      throw reglaDeNegocio("El horario necesita desde y hasta.");
-    if (i.vigenteDesde && i.vigenteHasta && i.vigenteDesde >= i.vigenteHasta)
-      throw reglaDeNegocio("La vigencia termina antes de empezar.");
-    const d = normalizarDocumento({
-      tipo: i.documento.tipo,
-      numero: i.documento.numero,
-      ...(i.documento.pais === undefined ? {} : { pais: i.documento.pais }),
-    });
-    if (!d) throw reglaDeNegocio("El documento no es válido.");
-    const candidatas = huellasCandidatas({
-      tenantId: ctx.tenantId,
-      tipo: d.tipo,
-      clave: d.clave,
-    }).map((h) => h.huella);
-    const ya = await ctx.db.entradaLista.findFirst({
-      where: {
-        instalacionId: i.instalacionId,
-        tipo: i.tipo,
-        docTipo: d.tipo,
-        huella: { in: candidatas },
-      },
-      select: { id: true },
-    });
-    if (ya) throw reglaDeNegocio("Este documento ya está en la lista.");
-    const h = huellaVigente({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
-    const { vigenteDesde, vigenteHasta } = vigenciaLista(i.tipo, i.vigenteDesde, i.vigenteHasta);
-    const data = {
-      tenantId: ctx.tenantId,
-      alcance: "instalacion",
-      instalacionId: i.instalacionId,
-      cuentaId: null,
-      grupoId: null,
-      tipo: i.tipo,
-      docTipo: d.tipo,
-      huella: h.huella,
-      huellaKid: h.kid,
-      mascara: d.mascara,
-      nombre: i.nombre ?? null,
-      motivo: i.motivo ?? null,
-      tiposRegistro: i.tiposRegistro,
-      vigenteDesde,
-      vigenteHasta,
-      dias: i.dias,
-      desdeMin: i.desdeMin ?? null,
-      hastaMin: i.hastaMin ?? null,
-      usoUnico: i.usoUnico,
-      agregadaPor: quien(ctx),
-    };
-    if (dryRun) return vistaEntrada({ ...data, id: "00000000-0000-0000-0000-000000000000" });
-    return vistaEntrada(await ctx.db.entradaLista.create({ data }));
   },
 });
 

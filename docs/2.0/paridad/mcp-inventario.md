@@ -44,7 +44,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/accesos` | `acceso.portal_listas.listar` | `acceso_portal_listas_listar` | existe |
 | cliente | `/cliente/accesos` | `acceso.portal_registros.listar` | `acceso_portal_registros_listar` | existe |
+| cliente | `/cliente/accesos` | `acceso.portal_visitas.listar` | `acceso_portal_visitas_listar` | existe |
 | cliente | `/cliente/accesos` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
 | cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
@@ -191,6 +193,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.quitar` | `acceso_listas_quitar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.portal_listas.agregar` | `acceso_portal_listas_agregar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.portal_listas.quitar` | `acceso_portal_listas_quitar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.privacidad.cartel` | `acceso_privacidad_cartel` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.list` | `acceso_puntos_list` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.set` | `acceso_puntos_set` | existe |
@@ -1332,6 +1336,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `acceso.portal_visitas.crear`
 - `asistencia.dias.listar`
 - `asistencia.dias.recalcular`
 - `asistencia.dias.resumen_periodo`

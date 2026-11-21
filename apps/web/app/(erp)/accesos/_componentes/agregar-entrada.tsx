@@ -6,7 +6,7 @@ import { avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { minutos } from "./borrador-entrada";
+import { minutos, type PortalListas } from "./borrador-entrada";
 import { BORRADOR_VACIO, type Borrador, CamposEntrada } from "./campos-entrada";
 
 /** Entrada de la capacidad `acceso.listas.agregar` a partir del borrador de la hoja. */
@@ -46,11 +46,13 @@ function avisoBorrador(b: Borrador, bloqueada: boolean): string | null {
 export function AgregarEntrada({
   instalacionId,
   tipo,
+  portal,
 }: {
   instalacionId: string;
   tipo: "autorizada" | "bloqueada";
+  portal: PortalListas;
 }) {
-  const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const { ejecutar, pendiente, error, limpiarError } = useCapacidad(portal);
   const [abierto, setAbierto] = useState(false);
   const [b, setB] = useState<Borrador>(BORRADOR_VACIO);
   const bloqueada = tipo === "bloqueada";
@@ -58,7 +60,11 @@ export function AgregarEntrada({
   const valido = aviso === null;
 
   async function guardar() {
-    const r = await ejecutar("acceso.listas.agregar", entradaDe(instalacionId, tipo, b));
+    const entrada = entradaDe(instalacionId, tipo, b);
+    const r =
+      portal === "cliente"
+        ? await ejecutar("acceso.portal_listas.agregar", entrada)
+        : await ejecutar("acceso.listas.agregar", entrada);
     if (!r) return;
     avisar.exito(bloqueada ? "Agregado a bloqueados" : "Agregado a autorizados");
     setB(BORRADOR_VACIO);
