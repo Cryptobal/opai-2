@@ -131,8 +131,6 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Lee los visitantes prerregistrados para hoy de la portería del equipo de terreno emparejado (CAR-478): cookie de dispositivo, sin sesión; ejecuta core.terreno.esperados (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/libro/route.ts":
     "Lee el libro de novedades de la instalación del equipo de terreno emparejado (CAR-77): cookie de dispositivo, sin sesión; ejecuta core.libro_novedades_equipo.listar (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
-  "app/api/terreno/porteria/esperados/route.ts":
-    "Lee los visitantes prerregistrados para hoy de la portería del equipo de terreno emparejado (CAR-478): cookie de dispositivo, sin sesión; ejecuta core.terreno.esperados (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/rondas/estado/route.ts":
     "Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/lote/route.ts":

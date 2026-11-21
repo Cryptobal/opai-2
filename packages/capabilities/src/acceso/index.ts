@@ -3,7 +3,8 @@ import type { Capacidad } from "../types";
 import { configCambiar, configObtener } from "./config";
 import { registrosAnular, registrosCerrarBloque, registrosSalida } from "./correcciones";
 import { intentosListar } from "./intentos";
-import { listasAgregar, listasListar, listasQuitar } from "./listas";
+import { listasAgregar } from "./listas-agregar";
+import { listasListar, listasQuitar } from "./listas";
 import { portalRegistrosListar } from "./portal-cliente";
 import { portalListasAgregar, portalListasListar, portalListasQuitar } from "./portal-listas";
 import {

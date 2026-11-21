@@ -16,7 +16,7 @@ import { registrosListar } from "./registros";
  * sección «Accesos» en su portal, FORBIDDEN.
  */
 
-export export async function contextoCliente(ctx: Contexto): Promise<{ ctx: Contexto; cuentaId: string }> {
+export async function contextoCliente(ctx: Contexto): Promise<{ ctx: Contexto; cuentaId: string }> {
 
   const a = await accesoDelActor(ctx);
   const { config } = await configDeCuenta(ctx, a.cuentaId);
