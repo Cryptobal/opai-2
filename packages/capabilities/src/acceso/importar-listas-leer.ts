@@ -52,8 +52,9 @@ export function leerFilaLista(
   inst: Inst | string,
 ): FilaLeida | string {
   if (typeof inst === "string") return inst;
-  const alcance = parseAlcanceImportado(texto(f.datos["alcance"]));
-  if (typeof alcance === "string") return alcance;
+  const alcanceRes = parseAlcanceImportado(texto(f.datos["alcance"]));
+  if (!(ALCANCES_LISTA as readonly string[]).includes(alcanceRes as string)) return alcanceRes;
+  const alcance = alcanceRes as AlcanceLista;
   const grupoNombre = texto(f.datos["grupo"]);
   if (alcance === "grupo" && !grupoNombre) return "Un alcance de grupo necesita el nombre del grupo.";
   const tipo = texto(f.datos["lista"]) ?? "";

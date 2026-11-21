@@ -1,5 +1,6 @@
 // CAR-480: importar listas de acceso desde Excel por el motor común, contra Postgres real (rol sin BYPASSRLS).
 import { escribirExcel } from "@opai/domain/importacion";
+import { digitoVerificador, formatearRut, normalizarDocumento } from "@opai/domain";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { urlPropietario } from "../../db/test/entorno";
@@ -12,8 +13,27 @@ type Resultado = {
 };
 const COLUMNAS = ["Instalación", "Lista", "RUT", "Nombre", "Motivo"];
 
+function runUnico(sufijo: string, base: number): string {
+  const extra = parseInt(sufijo.replace(/\D/g, "").slice(0, 6) || "0", 16) % 500_000;
+  const cuerpo = String(base + extra);
+  return formatearRut(`${cuerpo}-${digitoVerificador(cuerpo)}`);
+}
+
+function runMalDigito(runValido: string): string {
+  const rut = normalizarDocumento({ tipo: "run", numero: runValido });
+  if (!rut) throw new Error("RUN de prueba inválido");
+  const [cuerpo, dv] = rut.clave.split("-") as [string, string];
+  const mal = dv === "2" ? "3" : "2";
+  return formatearRut(`${cuerpo}-${mal}`);
+}
+
 describe.skipIf(!urlPropietario)("importar listas de acceso en base real (CAR-480)", () => {
   let x: Awaited<ReturnType<typeof prepararAccesoAB>>;
+  let runOk = "";
+  let runBloqueo = "";
+  let runOtraSede = "";
+  let mascaraOk = "";
+
   async function importar(k: "A" | "B", filas: string[][], dryRun = false, extra = {}) {
     const bytes = await escribirExcel("Listas", COLUMNAS, filas);
     const input = {
@@ -28,6 +48,12 @@ describe.skipIf(!urlPropietario)("importar listas de acceso en base real (CAR-48
 
   beforeAll(async () => {
     x = await prepararAccesoAB();
+    runOk = runUnico(x.sufijo, 14_000_000);
+    runBloqueo = runUnico(`${x.sufijo}-bloq`, 22_000_000);
+    runOtraSede = runUnico(`${x.sufijo}-otr`, 33_000_000);
+    const doc = normalizarDocumento({ tipo: "run", numero: runOk });
+    if (!doc) throw new Error("RUN de prueba inválido");
+    mascaraOk = doc.mascara;
   }, 120_000);
   afterAll(async () => {
     vi.unstubAllEnvs();
@@ -38,30 +64,30 @@ describe.skipIf(!urlPropietario)("importar listas de acceso en base real (CAR-48
     const r = await importar(
       "A",
       [
-        ["Portería A", "autorizada", "11.111.111-1", "Visita Uno", ""],
-        ["Portería A", "autorizada", "11.111.111-2", "Mal dígito", ""],
-        ["Portería A", "bloqueada", "22.222.222-2", "Sin motivo", ""],
-        ["No existe", "autorizada", "33.333.333-3", "Otra sede", ""],
-        ["Portería A", "autorizado", "11111111-1", "Repetida", ""],
+        ["Portería A", "autorizada", runOk, "Visita Uno", ""],
+        ["Portería A", "autorizada", runMalDigito(runOk), "Mal dígito", ""],
+        ["Portería A", "bloqueada", runBloqueo, "Sin motivo", ""],
+        ["No existe", "autorizada", runOtraSede, "Otra sede", ""],
+        ["Portería A", "autorizado", runOk.replace(/\./g, ""), "Repetida", ""],
       ],
       true,
     );
     expect(r.conteos).toMatchObject({ crear: 1, error: 4 });
     expect(r.filas.map((f) => f.accion)).toEqual(["crear", "error", "error", "error", "error"]);
-    expect(JSON.stringify(r)).not.toMatch(/11\.?111\.?111|22\.?222|33\.?333/);
+    expect(JSON.stringify(r)).not.toContain(runOk.replace(/[.-]/g, "").slice(0, 6));
     expect(await x.e.forTenant(x.t.A).entradaLista.count()).toBe(0);
   });
 
   it("guarda solo huella y máscara, no duplica al repetir y se revierte", async () => {
-    const filas = [["Portería A", "bloqueada", "11.111.111-1", "Visita Uno", "Prueba"]];
+    const filas = [["Portería A", "bloqueada", runOk, "Visita Uno", "Prueba"]];
     const r = await importar("A", filas);
     expect(r.conteos).toMatchObject({ crear: 1 });
     const [e] = await x.e.forTenant(x.t.A).entradaLista.findMany();
-    expect(e).toMatchObject({ tipo: "bloqueada", docTipo: "run", mascara: "11.1••.•••-1" });
+    expect(e).toMatchObject({ tipo: "bloqueada", docTipo: "run", mascara: mascaraOk });
     const lote = await x.e.admin.importacionFila.findMany({ where: { tenantId: x.t.A } });
-    expect(JSON.stringify(lote)).not.toMatch(/11\.?111\.?111/);
+    expect(JSON.stringify(lote)).not.toContain(runOk.replace(/[.-]/g, "").slice(0, 6));
     expect((await importar("A", filas)).conteos).toMatchObject({ sin_cambio: 1, crear: 0 });
-    const otra = [["Portería A", "bloqueada", "11.111.111-1", "Visita Uno", "Otro motivo"]];
+    const otra = [["Portería A", "bloqueada", runOk, "Visita Uno", "Otro motivo"]];
     expect((await importar("A", otra, false, { alExistir: "sobrescribir" })).conteos).toMatchObject(
       { actualizar: 1 },
     );
@@ -74,7 +100,7 @@ describe.skipIf(!urlPropietario)("importar listas de acceso en base real (CAR-48
   });
 
   it("otra empresa no ve las instalaciones de A ni escribe en sus listas", async () => {
-    const r = await importar("B", [["Portería A", "autorizada", "11.111.111-1", "X", ""]]);
+    const r = await importar("B", [["Portería A", "autorizada", runOk, "X", ""]]);
     expect(r.filas[0]?.mensajes).toEqual(["No existe la instalación «Portería A»."]);
     expect(await x.e.forTenant(x.t.B).entradaLista.count()).toBe(0);
   });

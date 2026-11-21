@@ -20,11 +20,11 @@ export async function prepararAccesoAB() {
   const t = { A: "", B: "" };
   const inst = { A: "", B: "" };
   const disp = { A: "", B: "" };
-  const s = randomUUID().slice(0, 8);
+  const sufijo = randomUUID().slice(0, 8);
   for (const k of ["A", "B"] as const) {
     t[k] = (
       await e.admin.tenant.create({
-        data: { slug: `cf-${k.toLowerCase()}-${s}`, nombre: k, vertical: "seguridad" },
+        data: { slug: `cf-${k.toLowerCase()}-${sufijo}`, nombre: k, vertical: "seguridad" },
       })
     ).id;
     const cuentaId = (await e.admin.cuenta.create({ data: { tenantId: t[k], nombre: `C ${k}` } }))
@@ -41,7 +41,7 @@ export async function prepararAccesoAB() {
           instalacionId: inst[k],
           identificador: "DSP-1",
           estado: "activo",
-          tokenHash: `h-${s}-${k}`,
+          tokenHash: `h-${sufijo}-${k}`,
         },
       })
     ).id;
@@ -80,5 +80,5 @@ export async function prepararAccesoAB() {
   }
   const registro = (clave: string) =>
     e.forTenant(t.A).registroAcceso.findFirst({ where: { clave } });
-  return { e, mod, t, inst, disp, ctx, run, ok, entrada, registro };
+  return { e, mod, t, inst, disp, sufijo, ctx, run, ok, entrada, registro };
 }
