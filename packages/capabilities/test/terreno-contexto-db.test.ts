@@ -140,18 +140,24 @@ describe.skipIf(!urlPropietario)("contexto de terreno en base real (CAR-78 E2)",
     ]);
   });
 
-  it("muestra solo los módulos de terreno que la empresa tiene activos", async () => {
-    expect((await dato(t.A, disp.A)).modulos).toEqual({
-      asistencia: false,
-      rondas: false,
-      acceso: false,
-    });
-    expect((await dato(t.A, disp.A, ["rondas", "asistencia", "tickets"])).modulos).toEqual({
-      asistencia: true,
-      rondas: true,
-      acceso: false,
-    });
-  });
+  it.each([
+    [[], { asistencia: false, rondas: false, acceso: false }],
+    [["asistencia"], { asistencia: true, rondas: false, acceso: false }],
+    [["rondas"], { asistencia: false, rondas: true, acceso: false }],
+    [["acceso"], { asistencia: false, rondas: false, acceso: true }],
+    [["asistencia", "rondas"], { asistencia: true, rondas: true, acceso: false }],
+    [["asistencia", "acceso"], { asistencia: true, rondas: false, acceso: true }],
+    [["rondas", "acceso"], { asistencia: false, rondas: true, acceso: true }],
+    [
+      ["asistencia", "rondas", "acceso"],
+      { asistencia: true, rondas: true, acceso: true },
+    ],
+  ] as const)(
+    "módulos activos %j → %j",
+    async (modulos, esperado) => {
+      expect((await dato(t.A, disp.A, [...modulos])).modulos).toEqual(esperado);
+    },
+  );
 
   it("dos empresas: cada equipo ve lo suyo y uno no puede pedir el contexto del otro", async () => {
     const b = await dato(t.B, disp.B);
