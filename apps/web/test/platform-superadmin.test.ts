@@ -45,6 +45,7 @@ function identidad(
     // NÚCLEO-F (/activar-mfa o /mfa), que tiene sus propios tests.
     mfaActiva: true,
     mfaVerificada: true,
+    personaVinculada: false,
   };
 }
 
