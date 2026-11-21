@@ -7,11 +7,8 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
 import type { Contexto } from "../types";
-import { PERMISO_REGISTROS, quien } from "./comun";
-
-/** Violación de unicidad de Prisma (P2002): otra escritura llegó primero. */
-const esUnica = (e: unknown) =>
-  typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "P2002";
+import { cerrarAbiertos } from "./cierre";
+import { esUnica, PERMISO_REGISTROS, quien } from "./comun";
 
 const motivo = z.string().trim().min(3).max(300);
 
@@ -113,28 +110,6 @@ export const registrosCerrarBloque = defineCapability({
   exigeAprobacion: () => true,
   async handler(ctx, { instalacionId, motivo: m }, { dryRun }) {
     await instalacionEnAlcance(ctx, instalacionId);
-    const abiertos = await ctx.db.registroAcceso.findMany({
-      where: { instalacionId, salida: null, anulacion: null },
-      select: { id: true },
-      take: 5_000,
-    });
-    if (dryRun || abiertos.length === 0) return { cerrados: abiertos.length };
-    const ahora = new Date();
-    const por = quien(ctx);
-    // skipDuplicates: si la portería cerró uno al mismo tiempo, su salida manda y este no se duplica.
-    const r = await ctx.db.salidaAcceso.createMany({
-      skipDuplicates: true,
-      data: abiertos.map((a) => ({
-        tenantId: ctx.tenantId,
-        instalacionId,
-        registroId: a.id,
-        clave: randomUUID(),
-        origen: "cierre",
-        registradaPor: por,
-        motivo: m,
-        horaCorregida: ahora,
-      })),
-    });
-    return { cerrados: r.count };
+    return { cerrados: await cerrarAbiertos(ctx, instalacionId, m, quien(ctx), dryRun) };
   },
 });

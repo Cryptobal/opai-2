@@ -25,10 +25,9 @@ vi.mock("@/lib/rate-limit", () => ({
 }));
 vi.mock("@opai/auth", () => ({
   canjearCodigoApp: vi.fn(async () => estado.canje),
-  emitirCodigoApp: vi.fn(async (reto: string) => (reto === "r" ? "codigo+1" : null)),
 }));
 
-import { accionCanjearApp, accionVolverALaApp } from "@/app/_acciones/app-nativa";
+import { accionCanjearApp } from "@/app/_acciones/app-nativa";
 import { permitir } from "@/lib/rate-limit";
 
 const destino = (p: Promise<unknown>) =>
@@ -58,14 +57,4 @@ describe("canje de la app nativa", () => {
     expect(await accionCanjearApp("c", "v")).toEqual({ error: true });
   });
 
-  it("volver a la app lleva el código por el esquema de la app", async () => {
-    expect(await destino(accionVolverALaApp())).toBe(
-      "REDIRECT:cl.opai.app://canje?codigo=codigo%2B1",
-    );
-  });
-
-  it("sin el reto de la app no emite código", async () => {
-    estado.reto = undefined;
-    expect(await destino(accionVolverALaApp())).toBe("REDIRECT:/app/listo?error=1");
-  });
 });

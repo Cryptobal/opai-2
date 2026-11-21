@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { esTipoSoloEnLinea } from "@opai/domain";
+import { esTipoSoloEnLinea, TIPOS_REGISTRO } from "@opai/domain";
+
+import { documentoSchema } from "../../acceso/comun";
 
 /**
  * Lista blanca de hechos que un equipo de terreno puede encolar sin conexión (CAR-78 · B3). Un tipo que no
@@ -68,20 +70,31 @@ export const TIPOS_HECHO_TERRENO = {
    */
   "acceso.entrada": z
     .object({
-      tipoRegistro: z.enum(["visita", "contratista", "proveedor", "vehiculo", "despacho"]),
-      documento: z
-        .object({
-          tipo: z.enum(["run", "pasaporte", "otro"]),
-          numero: z.string().min(1).max(40),
-          pais: z.string().min(2).max(3).optional(),
-        })
-        .strict(),
+      tipoRegistro: z.enum(TIPOS_REGISTRO),
+      documento: documentoSchema.optional(),
+      /** Código del QR de invitación de un prerregistro (CAR-478): reemplaza al documento, que ya está registrado. */
+      invitacion: z.string().min(1).max(120).optional(),
       nombre: z.string().trim().min(2).max(120),
       empresa: z.string().trim().min(1).max(120).optional(),
       motivo: z.string().trim().min(1).max(200).optional(),
       patente: z.string().min(1).max(12).optional(),
+      /** Campos personalizados del formulario de la instalación (CAR-479), con la etiqueta con que se pidieron. */
+      campos: z
+        .array(
+          z
+            .object({
+              etiqueta: z.string().trim().min(1).max(60),
+              valor: z.string().trim().min(1).max(200),
+            })
+            .strict(),
+        )
+        .max(15)
+        .optional(),
     })
-    .strict(),
+    .strict()
+    .refine((p) => p.documento !== undefined || p.invitacion !== undefined, {
+      message: "La entrada necesita el documento o la invitación.",
+    }),
   /** Salida de una entrada ya registrada: apunta a la clave del hecho `acceso.entrada`. */
   "acceso.salida": z.object({ entradaClave: z.string().uuid() }).strict(),
   /**

@@ -8,6 +8,7 @@ import { Alerta, Button } from "@opai/ds";
 import { accionEntrarConPasskey, accionOpcionesEntrarPasskey } from "@/app/_acciones/passkeys";
 import {
   cancelarCeremonia,
+  esCancelacionPasskey,
   mensajeWebAuthn,
   soportaAutocompletado,
   usarPasskey,
@@ -48,8 +49,22 @@ export function EntrarConPasskey({
     if (!condicional) await cancelarCeremonia();
     const op = await accionOpcionesEntrarPasskey();
     if (mia !== ceremonia.current) return;
-    if (!op.ok) return setError(op.mensaje);
-    const respuesta = await usarPasskey(op.opciones, condicional);
+    if (!op.ok) {
+      if (!condicional) setError(op.mensaje);
+      return;
+    }
+    let respuesta: Awaited<ReturnType<typeof usarPasskey>>;
+    try {
+      respuesta = await usarPasskey(op.opciones, condicional);
+    } catch (e: unknown) {
+      if (mia !== ceremonia.current) return;
+      if (condicional && esCancelacionPasskey(e)) return;
+      if (!condicional) {
+        const msg = mensajeWebAuthn(e);
+        if (msg) setError(msg);
+      }
+      return;
+    }
     if (mia !== ceremonia.current) return;
     setPendiente(true);
     try {

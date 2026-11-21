@@ -21,19 +21,17 @@ export function rango(p: Pick<Prerregistro, "desde" | "hasta">): string {
 
 export const ESTADO_DIA: Record<
   EstadoDia,
-  { etiqueta: string; tono: "info" | "neutro" | "warning" }
+  { etiqueta: string; tono: "info" | "success" | "neutro" | "warning" }
 > = {
   pendiente: { etiqueta: "Pendiente", tono: "info" },
+  ingreso: { etiqueta: "Ingresó", tono: "success" },
   no_llego: { etiqueta: "No llegó", tono: "warning" },
   cancelado: { etiqueta: "Cancelado", tono: "neutro" },
 };
 
-/** Estado que resume el prerregistro en la lista: cancelado, terminado o con días pendientes. */
+/** Estado que resume el prerregistro en la lista: el de hoy o el próximo día que importa. */
 export function estadoPrerregistro(p: Prerregistro) {
-  if (p.cancelado) return ESTADO_DIA.cancelado;
-  return p.dias.some((d) => d.estado === "pendiente") ? ESTADO_DIA.pendiente : ESTADO_DIA.no_llego;
+  const orden: EstadoDia[] = ["pendiente", "ingreso", "cancelado", "no_llego"];
+  const e = orden.find((x) => p.dias.some((d) => d.estado === x)) ?? "no_llego";
+  return ESTADO_DIA[p.cancelado && e === "pendiente" ? "cancelado" : e];
 }
-
-/** Primer día que aún sirve para mostrar la invitación (o null si ya no hay). */
-export const primerDiaPendiente = (p: Prerregistro) =>
-  p.dias.find((d) => d.estado === "pendiente")?.dia ?? null;
