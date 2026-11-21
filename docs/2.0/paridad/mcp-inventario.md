@@ -27,6 +27,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `core.correos.recibir` | — | excepción |
+| — | `/contingencia/[slug]/[token]` | `asistencia.contingencias.responder_enlace` | — | excepción |
+| — | `/contingencia/[slug]/[token]` | `asistencia.contingencias.ver_enlace` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.responder_enlace` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.ver_enlace` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
@@ -38,6 +40,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/accesos` | `acceso.portal_registros.listar` | `acceso_portal_registros_listar` | existe |
+| cliente | `/cliente/accesos` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
 | cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
 | cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
@@ -139,9 +143,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.anular` | `rendiciones_lotes_anular` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.aplicar_reversa` | `rendiciones_lotes_aplicar_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.aprobar` | `rendiciones_lotes_aprobar` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.candidatas` | `rendiciones_lotes_candidatas` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.candidatas_reversa` | `rendiciones_lotes_candidatas_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.crear` | `rendiciones_lotes_crear` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.crear_reversa` | `rendiciones_lotes_crear_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.generar_nomina` | `rendiciones_lotes_generar_nomina` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.listar` | `rendiciones_lotes_listar` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.marcar_pagado` | `rendiciones_lotes_marcar_pagado` | existe |
@@ -170,6 +177,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.config.get` | `acceso_config_get` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.config.set` | `acceso_config_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
@@ -188,6 +197,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.correcciones.proponer` | `asistencia_correcciones_proponer` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
+| compartido | `app/(erp)/asistencia/contingencias/_componentes` | `asistencia.contingencias.registrar` | `asistencia_contingencias_registrar` | existe |
 | compartido | `app/(erp)/asistencia/marcas/_componentes` | `asistencia.marcas.obtener` | `asistencia_marcas_obtener` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
@@ -652,6 +662,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
@@ -710,11 +721,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
+| compartido | `app/(trabajador)/trabajador/contingencias/_componentes` | `asistencia.contingencias.responder` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/correcciones/_componentes` | `asistencia.correcciones.responder` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
 | erp | `/asistencia/certificacion` | `asistencia.certificacion.checklist` | `asistencia_certificacion_checklist` | existe |
+| erp | `/asistencia/contingencias` | `asistencia.contingencias.listar` | `asistencia_contingencias_listar` | existe |
+| erp | `/asistencia/contingencias` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
@@ -934,6 +948,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
+| trabajador | `/trabajador/contingencias` | `asistencia.contingencias.listar` | `asistencia_contingencias_listar` | existe |
+| trabajador | `/trabajador/contingencias` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | trabajador | `/trabajador/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | trabajador | `/trabajador/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
@@ -952,7 +968,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
 | `app/_acciones/app-nativa.ts#accionCanjearApp` | Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado. |
-| `app/_acciones/app-nativa.ts#accionVolverALaApp` | Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio. |
 | `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
@@ -994,6 +1009,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
 | `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
 | `app/(auth)/app/google/route.ts` | Identidad: inicia el ingreso con Google de la app nativa en el navegador del sistema (CAR-516); guarda el reto PKCE en una cookie y redirige a Google. |
+| `app/(auth)/app/volver/route.ts` | Identidad: ingreso con Google desde la app nativa (CAR-516, CAR-727); emite el código atado al reto PKCE y redirige 303 al esquema de la app. Abre una sesión, no es una operación de negocio. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
@@ -1022,10 +1038,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/terreno/contexto/route.ts` | Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/libro/route.ts` | Lee el libro de novedades de la instalación del equipo de terreno emparejado (CAR-77): cookie de dispositivo, sin sesión; ejecuta core.libro_novedades_equipo.listar (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/lote/route.ts` | Recibe el lote de hechos del equipo de terreno emparejado (CAR-78 B3): cookie de dispositivo y mismo origen, sin sesión; ejecuta core.hechos_terreno.recibir (interna con motivo en EXCEPCIONES_PARIDAD). Su lectura por MCP es core.hechos_terreno.listar. |
+| `app/api/terreno/porteria/esperados/route.ts` | Lee los visitantes prerregistrados para hoy de la portería del equipo de terreno emparejado (CAR-478): cookie de dispositivo, sin sesión; ejecuta core.terreno.esperados (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/porteria/sitio/route.ts` | Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas. |
+| `app/contingencia/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial. |
 | `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
@@ -1039,6 +1057,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
 | `asistencia.contingencias.responder` | Solo personas: aceptar u objetar una contingencia propuesta a su nombre es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
+| `asistencia.contingencias.responder_enlace` | Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
+| `asistencia.contingencias.ver_enlace` | Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal es la credencial. |
 | `asistencia.correcciones.responder` | Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
 | `asistencia.correcciones.ver_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial. |
@@ -1138,6 +1158,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.slack.vinculado_de` | Interna: solo la ejecuta /api/integraciones/slack/acciones, tras verificar la firma de Slack, para saber qué persona de OPAI apretó un botón (CAR-294). |
 | `core.terreno.contexto` | Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2). |
 | `core.terreno.en_sitio` | Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d). |
+| `core.terreno.esperados` | Interna: la portería del equipo emparejado lee sin sesión los visitantes prerregistrados para hoy (su cookie de dispositivo es la credencial); un agente usa acceso.prerregistros.listar con su alcance (CAR-478). |
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
@@ -1173,7 +1194,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
-| `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
+| `asistencia.contingencias.responder` | `app/(trabajador)/trabajador/contingencias/_componentes` | no | reservada a personas |
 | `asistencia.correcciones.responder` | `app/(trabajador)/trabajador/correcciones/_componentes` | no | reservada a personas |
 | `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.consentir` | `app/_components` | no | reservada a personas |
@@ -1276,8 +1297,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
-- `asistencia.contingencias.listar`
-- `asistencia.contingencias.registrar`
 - `asistencia.dias.listar`
 - `asistencia.dias.recalcular`
 - `asistencia.dias.resumen_periodo`
@@ -1285,12 +1304,24 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
+- `central.agente.pausar`
+- `central.alertas.abrir`
 - `central.alertas.contactar`
+- `central.alertas.escalar`
+- `central.alertas.falsa_alarma`
+- `central.alertas.listar`
+- `central.alertas.obtener`
+- `central.alertas.posponer`
 - `central.alertas.proponer`
+- `central.alertas.reabrir`
+- `central.alertas.resolver`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
+- `central.estado`
+- `central.propuestas.listar`
 - `central.reglas.guardar`
 - `central.reglas.listar`
+- `central.turno.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
