@@ -27,7 +27,7 @@ const MENSAJE_COMPLEMENTO_INACTIVO =
   "El complemento Cumplimiento DT no está activo para tu empresa.";
 
 /** UNPROCESSABLE por complemento vendible no activo (nomina.cumplimiento_dt, ADR-057). */
-export function esComplementoInactivo(r: ResultadoCarga): boolean {
+function esComplementoInactivo(r: ResultadoCarga): boolean {
   return (
     !r.ok &&
     r.error?.code === "UNPROCESSABLE" &&
