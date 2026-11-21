@@ -10,6 +10,7 @@ import {
   limpiarConsumidores,
   limpiarRegistro,
   limpiarTrabajos,
+  programarCada5Min,
   programarPeriodicos,
   registrarCapacidades,
   registrarConsumidores,
@@ -121,6 +122,21 @@ describe("trabajos", () => {
     });
     Object.assign(tabla("trabajo")[0] ?? {}, { programadoPara: new Date(0) });
     expect(await ejecutarTrabajos(ctx, cola)).toMatchObject({ hechos: 1 });
+  });
+
+  it("programa trabajos cada5min una sola vez por tramo (CAR-748)", async () => {
+    registrarTrabajos([
+      defineTrabajo({
+        tipo: "core.prueba.cada5",
+        descripcion: "prueba",
+        payload: z.object({ tramo: z.string() }),
+        periodicidad: "cada5min",
+        handler: async () => ({ ok: true }),
+      }),
+    ]);
+    const { ctx } = contextoDePrueba();
+    expect(await programarCada5Min(ctx, "2026-10-23T14:25")).toEqual(["core.prueba.cada5"]);
+    expect(await programarCada5Min(ctx, "2026-10-23T14:25")).toEqual([]);
   });
 
   it("un trabajo con tiempo propio termina aunque pase el límite general (CAR-273)", async () => {

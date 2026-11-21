@@ -28,6 +28,22 @@ export function hoyEn(zona: string, ahora = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: zona, dateStyle: "short" }).format(ahora);
 }
 
+/** «aaaa-mm-ddTHH:mm» del tramo de 5 min en curso (hora local del tenant). */
+export function tramoEn(zona: string, ahora = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: zona,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(ahora);
+  const g = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  const min = String(Math.floor(Number(g("minute")) / 5) * 5).padStart(2, "0");
+  return `${g("year")}-${g("month")}-${g("day")}T${g("hour")}:${min}`;
+}
+
 /** «aaaa-mm-ddTHH» (hora calendario del tenant, UTC+0 etiqueta) para trabajos horarios. */
 export function horaEn(zona: string, ahora = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {

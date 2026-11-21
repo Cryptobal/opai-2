@@ -45,8 +45,8 @@ export {
   esperaReintento,
   programarCapturaSii,
   programarPeriodicos,
-  programarHorarios,
 } from "./trabajos/runner";
+export { programarCada5Min, programarHorarios } from "./trabajos/programar-frecuencia";
 export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./comprobantes";
 export { camposExternos, externo } from "./externo";
 export { biometriaDe, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
