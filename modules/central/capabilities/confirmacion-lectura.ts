@@ -24,6 +24,7 @@ const filaSchema = z.object({
 
 /** Confirmaciones por instalación y ventana de inicio de turno (panel «próxima hora», CAR-752+). */
 export const confirmacionListar = defineCapability({
+  auditarLectura: (s) => s.items.flatMap((f) => [f.id, f.personaId]),
   id: "central.confirmacion.listar",
   descripcion:
     "Lista confirmaciones de turno por instalación y rango de inicio del turno, de la más próxima a la más lejana.",
@@ -93,6 +94,7 @@ export const confirmacionListar = defineCapability({
 });
 
 export const confirmacionObtener = defineCapability({
+  auditarLectura: (s) => [s.id, s.personaId],
   id: "central.confirmacion.obtener",
   descripcion: "Devuelve una confirmación de turno con el inicio del turno esperado.",
   permiso: null,
@@ -134,6 +136,7 @@ export const confirmacionObtener = defineCapability({
 });
 
 export const confirmacionPoliticaObtener = defineCapability({
+  auditarLectura: (s) => [s.instalacionId],
   id: "central.confirmacion.politica_obtener",
   descripcion: "Lee la política efectiva de confirmación de turno para una instalación.",
   permiso: PERMISO_VER,
