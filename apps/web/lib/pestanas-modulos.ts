@@ -72,6 +72,12 @@ export async function puedeGestionarRegistros(): Promise<boolean> {
   return identidad ? puedeDeIdentidad(identidad)("acceso:registros.manage") : false;
 }
 
+/** ¿Puede configurar el control de acceso (CAR-479)? Oculta «Configuración» de la pestaña a quien no. */
+export async function puedeConfigurarAcceso(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("acceso:config.manage") : false;
+}
+
 /** Pestaña «Visitas» de la ficha de instalación (CAR-83): con Pauta activo y permiso de leerla. */
 export async function verPestanaVisitas(): Promise<boolean> {
   const identidad = await identidadActual();

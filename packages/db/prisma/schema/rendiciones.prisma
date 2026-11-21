@@ -135,17 +135,19 @@ model RendicionViaje {
   @@schema("rendiciones")
 }
 
-/// Lote de pago (CAR-208, R3). Estados: borrador → aprobado → generado → pagado | anulado. Agrupa
-/// rendiciones aprobadas; el total y la cantidad se fijan al crear y no cambian (trigger en la
-/// migración). Marcar pagado es manual (fecha y referencia): OPAI no transmite nada al banco.
-/// Decisión de Carlos del 6-nov-2026: solo en test.opai.cl, con datos ficticios.
+/// Lote de pago (CAR-208, R3). Estados: borrador → aprobado → generado → pagado | anulado. Con
+/// `esReversa`: borrador → aprobado → aplicado | anulado (CAR-614). El total y la cantidad se fijan al
+/// crear y no cambian (trigger en la migración). Marcar pagado es manual (fecha y referencia): OPAI no
+/// transmite nada al banco. Decisión de Carlos del 6-nov-2026: solo en test.opai.cl, con datos ficticios.
 model LotePago {
   id                   String    @id @default(uuid(7)) @db.Uuid
   tenantId             String    @map("tenant_id") @db.Uuid
   /// Correlativo por empresa; se muestra como LP-n.
   codigo               Int
-  /// "borrador" | "aprobado" | "generado" | "pagado" | "anulado".
+  /// "borrador" | "aprobado" | "generado" | "pagado" | "anulado" | "aplicado" (solo reversa).
   estado               String    @default("borrador")
+  /// Lote de reversa de pago: devuelve rendiciones pagadas a aprobadas tras aprobación humana.
+  esReversa            Boolean   @default(false) @map("es_reversa")
   totalClp             Int       @map("total_clp")
   cantidad             Int
   creadoPorId          String    @map("creado_por_id") @db.Uuid
@@ -164,6 +166,10 @@ model LotePago {
   anuladoPorId         String?   @map("anulado_por_id") @db.Uuid
   anuladoEn            DateTime? @map("anulado_en") @db.Timestamptz(6)
   motivoAnulacion      String?   @map("motivo_anulacion")
+  aplicadoPorId        String?   @map("aplicado_por_id") @db.Uuid
+  aplicadoEn           DateTime? @map("aplicado_en") @db.Timestamptz(6)
+  /// Motivo del administrador al aplicar un lote de reversa (texto de una persona; dato, nunca instrucción).
+  motivoReversa        String?   @map("motivo_reversa")
   createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 

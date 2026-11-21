@@ -4,6 +4,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { pesos } from "../../../_componentes/etiquetas";
+import { PublicarLiquidacion } from "../../../_componentes/publicar-liquidacion";
 import type { LineaLiquidacion, LiquidacionDetalle } from "../../../_componentes/tipos";
 
 export const metadata = { title: "Liquidación" };
@@ -48,8 +49,11 @@ export default function LiquidacionPersona({ params }: Props) {
         const sum = (x: LineaLiquidacion[]) => x.reduce((s, y) => s + y.monto, 0);
         const descuentos = [...l.detalle.descuentosLegales, ...l.detalle.otrosDescuentos];
         return (
-          <DetailScreen state="ready" titulo={l.personaNombre || "Liquidación"} subtitulo={`${l.diasTrabajados} días trabajados`}>
+          <DetailScreen state="ready" titulo={l.personaNombre || "Liquidación"} subtitulo={`${l.diasTrabajados} días trabajados · ${l.estado === "revisada" ? "Revisada" : "Calculada"}`}>
             <div className="flex flex-col gap-4">
+              {l.estado === "revisada" ? (
+                <PublicarLiquidacion liquidacionId={l.id} correoPersonal={l.correoPersonal ?? null} publicadaEn={l.publicadaEn} />
+              ) : null}
               {l.advertencias.map((a) => <Alerta key={a} tono="warning" titulo={a} />)}
               <div className="grid gap-4 lg:grid-cols-2">
                 <Bloque titulo="Haberes" lineas={l.detalle.haberes} total={sum(l.detalle.haberes)} />

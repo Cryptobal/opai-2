@@ -28,6 +28,7 @@ export const lotesGenerarNomina = defineCapability({
     const yo = actorId(ctx);
     await exigirFormatoConfirmado(ctx);
     const { lote, solicitantes } = await loteConSolicitantes(ctx, input.id);
+    if (lote.esReversa) throw reglaDeNegocio("Un lote de reversa no tiene nómina.");
     pasoPermitido(lote.estado, "generado");
     if (!sinRendicionPropia(yo, solicitantes)) throw prohibido("Nadie genera la nómina de un lote con una rendición propia.");
     const n = await armarNomina(ctx, lote.items, codigoLote(lote.codigo));
@@ -60,6 +61,7 @@ export const lotesDescargarNomina = defineCapability({
     await exigirFormatoConfirmado(ctx);
     const yo = actorId(ctx);
     const { lote, solicitantes } = await loteConSolicitantes(ctx, input.id);
+    if (lote.esReversa) throw reglaDeNegocio("Un lote de reversa no tiene nómina.");
     if (!sinRendicionPropia(yo, solicitantes)) throw prohibido("Nadie descarga la nómina de un lote con una rendición propia.");
     if (lote.estado !== "generado" && lote.estado !== "pagado") throw reglaDeNegocio("La nómina se descarga con el lote ya generado.");
     const n = await armarNomina(ctx, lote.items, codigoLote(lote.codigo));
@@ -92,6 +94,7 @@ export const lotesMarcarPagado = defineCapability({
     const yo = actorId(ctx);
     if (input.fechaPago > hoyChile()) throw reglaDeNegocio("La fecha de pago no puede ser futura.");
     const { lote, solicitantes } = await loteConSolicitantes(ctx, input.id);
+    if (lote.esReversa) throw reglaDeNegocio("Un lote de reversa no se marca pagado: se aplica la reversa.");
     pasoPermitido(lote.estado, "pagado");
     if (!sinRendicionPropia(yo, solicitantes)) throw prohibido("Nadie marca como pagado un lote con una rendición propia.");
     if (input.comprobanteDocumentoId && (await ctx.db.documento.count({ where: { id: input.comprobanteDocumentoId, estado: "disponible" } })) !== 1)

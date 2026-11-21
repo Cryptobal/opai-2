@@ -29,6 +29,7 @@ function paresDe(r: RegistroFicha): Par[] {
     { etiqueta: "Entrada", valor: formatearFechaHora(r.entradaEn) },
     ...(r.salidaEn ? [{ etiqueta: "Salida", valor: formatearFechaHora(r.salidaEn) }] : []),
     ...(r.motivoVisita ? [{ etiqueta: "Motivo", valor: r.motivoVisita }] : []),
+    ...r.campos,
     { etiqueta: "Lista", valor: r.lista ? LISTA[r.lista] : "Sin lista" },
     {
       etiqueta: "Origen",

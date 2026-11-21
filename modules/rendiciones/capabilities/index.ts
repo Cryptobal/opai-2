@@ -18,6 +18,8 @@ import { lotesAnular, lotesAprobar } from "./lotes-flujo";
 import { lotesCandidatas, lotesListar, lotesObtener } from "./lotes-lectura";
 import { reporteExcel, reporteObtener } from "./reporte";
 import { lotesDescargarNomina, lotesGenerarNomina, lotesMarcarPagado } from "./lotes-pago";
+import { lotesAplicarReversa } from "./lotes-reversa-aplicar";
+import { lotesCandidatasReversa, lotesCrearReversa } from "./lotes-reversa";
 
 export { ajustesRendiciones } from "./ajustes";
 
@@ -49,6 +51,9 @@ export const capacidades: readonly Capacidad[] = [
   lotesDescargarNomina,
   lotesMarcarPagado,
   lotesAnular,
+  lotesCandidatasReversa,
+  lotesCrearReversa,
+  lotesAplicarReversa,
   nominaCuentasOrigen,
   reporteObtener,
   reporteExcel,
