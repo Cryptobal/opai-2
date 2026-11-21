@@ -79,6 +79,7 @@ export * from "./capas-sueldo";
 
 export * from "./rondas";
 
+export * from "./push-ruta";
 export * from "./portal-trabajador";
 export * from "./portal-trabajador-arco";
 export * from "./nomina";

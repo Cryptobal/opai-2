@@ -116,6 +116,6 @@ export const consumidorPautaCambio = defineConsumidor({
       });
     }
     // Celular (PR 4a): solo a quien recibió el aviso ahora, si eligió push de pauta y no está en silencio.
-    await avisarAlCelular(ctx, avisados, "pauta", "pauta");
+    await avisarAlCelular(ctx, avisados, "pauta", "pauta", new Date(), "/trabajador");
   },
 });
