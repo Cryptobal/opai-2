@@ -1,4 +1,4 @@
-import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
+import { tamanoPagina, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
@@ -9,7 +9,7 @@ import type { InstalacionDetalle, InstalacionFila, Pagina } from "@/lib/tipos-ma
 export async function cargarInstalaciones(p: Parametros) {
   const [r, regiones, cuentaSel] = await Promise.all([
     ejecutarComoUsuario<Pagina<InstalacionFila>>("erp", "core.instalaciones.list", {
-      limite: POR_PAGINA,
+      limite: tamanoPagina(p),
       ...(p["q"] ? { q: p["q"] } : {}),
       ...(p["cuenta"] ? { cuentaId: p["cuenta"] } : {}),
       ...(p["estado"] ? { estado: p["estado"] } : {}),
@@ -23,7 +23,7 @@ export async function cargarInstalaciones(p: Parametros) {
   ]);
   const regionOpts = regiones.ok
     ? regiones.data.items.map((x) => ({ valor: x.nombre, etiqueta: x.nombre }))
-  : [];
+    : [];
   return {
     ...vistaPaginaCursor(r),
     regiones: regionOpts,

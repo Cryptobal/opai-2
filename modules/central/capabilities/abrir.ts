@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { PERMISO_ATENDER, severidadSchema, uuidSchema } from "./esquemas";
+import { exigirAgenteHabilitado } from "./humano";
 import { ID_VISTA_PREVIA, registrarHecho } from "./util";
 
 export const alertasAbrir = defineCapability({
@@ -29,6 +30,7 @@ export const alertasAbrir = defineCapability({
       const p = await ctx.db.persona.findFirst({ where: { id: input.personaId }, select: { id: true } });
       if (!p) throw noEncontrado("La persona");
     }
+    await exigirAgenteHabilitado(ctx, ctx.db, null, input.instalacionId);
     if (dryRun) return { id: ID_VISTA_PREVIA };
     const creada = await ctx.transaccion(async (tx) => {
       const a = await tx.centralAlerta.create({

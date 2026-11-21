@@ -19,7 +19,7 @@ export function conCambios(p: Parametros, cambios: Record<string, string | null>
 export const conBusqueda = (ruta: string, q?: string) =>
   q ? `${ruta}?q=${encodeURIComponent(q)}` : ruta;
 
-/** Filtros de una lista que sobreviven al abrir una ficha y al volver (`?q=`, `?estado=`, `?con=`, `?etiqueta=`). */
+/** Filtros de lista (y paginación CAR-585) que sobreviven al abrir una ficha y volver. */
 const FILTROS_DE_LISTA = [
   "q",
   "estado",
