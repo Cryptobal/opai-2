@@ -85,7 +85,6 @@ export {
   registrarCapacidades,
 } from "./registry";
 export type * from "./types";
-
 export {
   defineModule,
   type EntradaNavegacion,
@@ -146,7 +145,6 @@ export {
 } from "./integraciones/ia-modelos";
 export { credencialDe } from "./integraciones/resolver";
 export { MANUALES } from "./manuales";
-
 export type { PanelSueldo } from "./core/maestros/estructuras-panel-schema";
 export { noRecontratarHabilitadaAhora } from "./core/maestros/personas-no-recontratar-vigencia";
 export { clavesFaltantes, mutualAdicionalTenant, publicacionesParaFecha } from "./core/remuneraciones";
