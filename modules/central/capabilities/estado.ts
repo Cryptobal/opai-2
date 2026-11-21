@@ -4,6 +4,7 @@ import { defineCapability } from "@opai/capabilities";
 
 import { ESTADOS_ACTIVOS, estadoEfectivo, pesoSeveridad, SEVERIDADES } from "../domain";
 import { PERMISO_VER, severidadSchema, uuidSchema } from "./esquemas";
+import { nombresInstalaciones } from "./nombres";
 import { dondeAlcance } from "./util";
 
 const conteoSchema = z.object(Object.fromEntries(SEVERIDADES.map((s) => [s, z.number().int()])) as Record<
@@ -22,7 +23,12 @@ export const centralEstado = defineCapability({
     activas: conteoSchema,
     pospuestas: z.number().int(),
     instalaciones: z.array(
-      z.object({ instalacionId: uuidSchema, activas: z.number().int(), peor: severidadSchema }),
+      z.object({
+        instalacionId: uuidSchema,
+        instalacionNombre: z.string().nullable(),
+        activas: z.number().int(),
+        peor: severidadSchema,
+      }),
     ),
   }),
   efecto: "lectura",
@@ -52,6 +58,11 @@ export const centralEstado = defineCapability({
       .map(([instalacionId, v]) => ({ instalacionId, ...v }))
       .sort((a, b) => pesoSeveridad(a.peor) - pesoSeveridad(b.peor) || b.activas - a.activas)
       .slice(0, 20);
-    return { activas, pospuestas, instalaciones };
+    const nombres = await nombresInstalaciones(ctx, instalaciones.map((i) => i.instalacionId));
+    return {
+      activas,
+      pospuestas,
+      instalaciones: instalaciones.map((i) => ({ ...i, instalacionNombre: nombres.get(i.instalacionId) ?? null })),
+    };
   },
 });

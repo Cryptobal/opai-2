@@ -1,6 +1,7 @@
 "use client";
 
 import { esAppNativa } from "@/lib/app-nativa";
+import { suscribirPushNativo } from "@/lib/push-nativo";
 
 /** El `ejecutar` de `useCapacidad`: devuelve null si la capacidad falló. */
 type EjecutarCap = (
@@ -79,8 +80,10 @@ export async function activarPush(
   permisoPedido: Promise<NotificationPermission> | null,
 ): Promise<EstadoPush> {
   if (!clave) return "apagado";
-  // En la app nativa la vista web no tiene Web Push (iOS) o no es fiable (Android): push nativo, parte 2.
-  if (esAppNativa(navigator.userAgent)) return "app";
+  if (esAppNativa(navigator.userAgent)) {
+    await suscribirPushNativo(ejecutar);
+    return "activo";
+  }
   if (
     !("serviceWorker" in navigator) ||
     !("PushManager" in window) ||
@@ -106,7 +109,7 @@ export async function activarPush(
     });
     const r = await ejecutar(
       "core.push.suscribir",
-      { endpoint: sub.endpoint, dispositivo: nombreDispositivo() },
+      { tipo: "web", endpoint: sub.endpoint, dispositivo: nombreDispositivo() },
       false,
       "ninguna",
     );
@@ -123,7 +126,7 @@ export async function apagarPush(ejecutar: EjecutarCap): Promise<void> {
     const registro = await swListo();
     const sub = await registro?.pushManager.getSubscription();
     if (!sub) return;
-    await ejecutar("core.push.quitar", { endpoint: sub.endpoint }, false, "ninguna");
+    await ejecutar("core.push.quitar", { tipo: "web", endpoint: sub.endpoint }, false, "ninguna");
     await sub.unsubscribe();
   } catch {
     // Sin service worker o sin red: queda como estaba; el servidor borra las suscripciones vencidas.
@@ -135,8 +138,6 @@ export function mensajePush(e: EstadoPush): string | null {
   switch (e) {
     case "instalar":
       return "Para recibir avisos en el iPhone, agrega OPAI a tu pantalla de inicio (Compartir › Agregar a inicio) y vuelve a guardar.";
-    case "app":
-      return "Dentro de la app todavía no hay avisos en el celular. Los verás igual en la campana.";
     case "sin-soporte":
       return "Este navegador no permite avisos en el celular. Los verás igual en la campana de la app.";
     case "denegado":

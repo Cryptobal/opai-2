@@ -9,9 +9,8 @@ import {
   tienePermisoPlataforma,
 } from "@opai/domain";
 import { accesoPlataforma, forTenant } from "@opai/db";
-import { almacenamientoDelEntorno, emisorPushDelEntorno, mailerDelEntorno } from "@opai/integrations";
-
 import { identidadEnDb } from "./identidad-db";
+import { serviciosDelContexto } from "./contexto-servicios";
 import { idempotenciaSobre } from "./idempotencia";
 import { plataformaEnDb } from "./plataforma-db";
 import {
@@ -188,13 +187,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     idempotencia: idempotenciaSobre(forTenant(tenantId), tenantId, params.actor),
     diferir: params.diferir ?? diferirPorDefecto,
     despacharEventos: params.despacharEventos ?? (() => undefined),
-    servicios: {
-      correo: params.servicios?.correo ?? mailerDelEntorno(),
-      almacenamiento: params.servicios?.almacenamiento ?? almacenamientoDelEntorno(),
-      push: params.servicios?.push === undefined ? emisorPushDelEntorno() : params.servicios.push,
-      urlBase:
-        params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
-    },
+    servicios: serviciosDelContexto(params),
     identidad: identidadEnDb,
     // Para un agente, solo con una key de plataforma (ADR-055; antes nunca, H15/H del Revisor): una
     // key común no obtiene el acceso de plataforma del responsable aunque este tenga `platformRole`

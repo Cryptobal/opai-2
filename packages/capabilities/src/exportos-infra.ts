@@ -1,6 +1,7 @@
 export {
   aplicarModulosNuevosRegistrados,
   avisarAlCelular,
+  avisarPushTrasCampana,
   capacidadesDelNucleo,
   consumidoresDelNucleo,
   trabajosDelNucleo,

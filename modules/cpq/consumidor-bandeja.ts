@@ -1,6 +1,7 @@
 import { renderizar } from "@opai/domain";
 
 import {
+  avisarPushTrasCampana,
   defineConsumidor,
   type Contexto,
   type EventoPublicado,
@@ -28,9 +29,9 @@ async function crearInAppSiFalta(
   titulo: string,
   cuerpo: string,
   enlace: string | null,
-) {
-  if (!usuarioId) return;
-  if (await tx.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId } })) return;
+): Promise<boolean> {
+  if (!usuarioId) return false;
+  if (await tx.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId } })) return false;
   await tx.notificacion.create({
     data: {
       tenantId: ctx.tenantId,
@@ -41,6 +42,7 @@ async function crearInAppSiFalta(
       enlace,
     },
   });
+  return true;
 }
 
 async function entregarPlantilla(
@@ -56,9 +58,11 @@ async function entregarPlantilla(
   const titulo = renderizar(e.plantillas.inapp.asunto, datos, rutas);
   const cuerpo = renderizar(e.plantillas.inapp.cuerpo, datos, rutas);
   const enlace = typeof datos["url"] === "string" ? datos["url"] : null;
+  const entregados: string[] = [];
   for (const uid of usuarioIds) {
-    await crearInAppSiFalta(tx, ctx, ev, uid, titulo, cuerpo, enlace);
+    if (await crearInAppSiFalta(tx, ctx, ev, uid, titulo, cuerpo, enlace)) entregados.push(uid);
   }
+  return entregados;
 }
 
 /**
@@ -78,17 +82,20 @@ export const consumidorCpqBandeja = defineConsumidor({
   ],
   async handler(ctx, ev) {
     const p = (ev.payload ?? {}) as Record<string, unknown>;
+    const datosUrl = await variablesDe(ctx, ev);
+    const urlPush = typeof datosUrl["url"] === "string" ? datosUrl["url"] : null;
+    let entregados: string[] = [];
     await ctx.transaccion(async (tx) => {
       if (ev.tipo === "cpq.cotizacion.aprobacion_solicitada") {
         const solicitanteId = typeof p["solicitadaPorId"] === "string" ? p["solicitadaPorId"] : null;
         const destinos = (await idsAprobadoresMargen(ctx)).filter((id) => id !== solicitanteId);
-        await entregarPlantilla(ctx, tx, ev, destinos);
+        entregados = (await entregarPlantilla(ctx, tx, ev, destinos)) ?? [];
         return;
       }
       if (ev.tipo === "cpq.envio_propuesta.solicitado") {
         const solicitanteId = typeof p["solicitadoPorId"] === "string" ? p["solicitadoPorId"] : null;
         const destinos = (await idsAprobadoresEnvio(ctx)).filter((id) => id !== solicitanteId);
-        await entregarPlantilla(ctx, tx, ev, destinos);
+        entregados = (await entregarPlantilla(ctx, tx, ev, destinos)) ?? [];
         return;
       }
       if (ev.tipo === "cpq.cotizacion.aprobada" || ev.tipo === "cpq.cotizacion.aprobacion_rechazada") {
@@ -97,13 +104,14 @@ export const consumidorCpqBandeja = defineConsumidor({
           ? await tx.cpqAprobacion.findFirst({ where: { id: aprobacionId } })
           : null;
         const uid = pend?.solicitadaPorId;
-        if (uid) await entregarPlantilla(ctx, tx, ev, [uid]);
+        if (uid) entregados = (await entregarPlantilla(ctx, tx, ev, [uid])) ?? [];
         return;
       }
       if (ev.tipo === "cpq.envio_propuesta.aprobado" || ev.tipo === "cpq.envio_propuesta.rechazado") {
         const uid = typeof p["solicitadoPorId"] === "string" ? p["solicitadoPorId"] : null;
-        if (uid) await entregarPlantilla(ctx, tx, ev, [uid]);
+        if (uid) entregados = (await entregarPlantilla(ctx, tx, ev, [uid])) ?? [];
       }
     });
+    for (const uid of entregados) await avisarPushTrasCampana(ctx, uid, ev.tipo, urlPush);
   },
 });

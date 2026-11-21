@@ -10,7 +10,7 @@ export {
   trabajoRetencionAcceso,
 } from "./acceso";
 export { ajustesRondas, capacidadesRondas, indicadoresRondas, trabajoVigilanciaRondas } from "./rondas";
-export { ajustesNomina, buscadoresNomina, capacidadesNomina } from "./nomina";
+export { ajustesNomina, buscadoresNomina, capacidadesNomina, consumidoresNomina } from "./nomina";
 export {
   ajustesPauta,
   ausenteSinJustificar,
