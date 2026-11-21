@@ -1,4 +1,4 @@
-import { MESES_VIGENCIA_BLOQUEO, type AlcanceLista } from "@opai/domain";
+import type { AlcanceLista } from "@opai/domain";
 
 import type { Contexto } from "../types";
 
@@ -33,22 +33,10 @@ export function whereEntradasAplicanAInstalacion(meta: InstalacionMeta, instalac
   };
 }
 
-export function vigenciaLista(tipo: string, desde?: string, hasta?: string) {
+export function vigenciaLista(_tipo: string, desde?: string, hasta?: string) {
   const vigenteDesde = desde ? new Date(desde) : null;
-  const vigenteHasta = hasta
-    ? new Date(hasta)
-    : tipo === "bloqueada"
-      ? finVigenciaBloqueo(vigenteDesde, null)
-      : null;
+  const vigenteHasta = hasta ? new Date(hasta) : null;
   return { vigenteDesde, vigenteHasta };
-}
-
-function finVigenciaBloqueo(vigenteDesde: Date | null, vigenteHasta: Date | null) {
-  if (vigenteHasta) return vigenteHasta;
-  const desde = vigenteDesde ?? new Date();
-  const fin = new Date(desde);
-  fin.setMonth(fin.getMonth() + MESES_VIGENCIA_BLOQUEO);
-  return fin;
 }
 
 type ClavesAlcance = {
