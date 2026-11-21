@@ -33,21 +33,37 @@ function fila(
   return filaMovimiento(hoyCivil, registros.get(`${tipo}:${referenciaId}`), tipo, referenciaId, hechoEn, hechoTexto, base);
 }
 
+type PersonaResumen = { id: string; rut: string | null; nombres: string; apellidos: string };
+
+type VinculoMiDt = {
+  id: string;
+  tipo: string;
+  estado: string;
+  inicio: Date;
+  termino: Date | null;
+  motivoTermino: string | null;
+  persona: PersonaResumen;
+};
+
+type AnexoMiDt = {
+  id: string;
+  motivoCambio: string;
+  aprobadoEn: Date | null;
+  persona: PersonaResumen;
+};
+
 function movimientosDeVinculos(
-  vinculos: Awaited<
-    ReturnType<
-      Contexto["db"]["vinculoLaboral"]["findMany"]
-    >
-  >,
+  vinculos: VinculoMiDt[],
   registros: Map<string, { registradoEn: Date; documentoId: string | null }>,
   hoyCivil: string,
 ) {
   const items: MovimientoMiDt[] = [];
   for (const v of vinculos) {
-    if (!v.persona.rut) continue;
+    const persona = v.persona;
+    if (!persona.rut) continue;
     const hechoAlta = dia(v.inicio);
     if (!hechoAlta) continue;
-    const base = personaBase(v.persona, v.tipo);
+    const base = personaBase({ ...persona, rut: persona.rut }, v.tipo);
     items.push(
       fila(registros, hoyCivil, "alta", v.id, hechoAlta, `Ingreso el ${formatearFecha(hechoAlta)}`, base),
     );
@@ -73,13 +89,14 @@ function movimientosDeVinculos(
 }
 
 function movimientosDeAnexos(
-  anexos: Awaited<ReturnType<Contexto["db"]["anexoContrato"]["findMany"]>>,
+  anexos: AnexoMiDt[],
   registros: Map<string, { registradoEn: Date; documentoId: string | null }>,
   hoyCivil: string,
 ) {
   const items: MovimientoMiDt[] = [];
   for (const a of anexos) {
-    if (!a.persona.rut) continue;
+    const persona = a.persona;
+    if (!persona.rut) continue;
     const hecho = dia(a.aprobadoEn);
     if (!hecho) continue;
     const cambio = MOTIVO_ANEXO[a.motivoCambio] ?? a.motivoCambio;
@@ -91,7 +108,7 @@ function movimientosDeAnexos(
         a.id,
         hecho,
         `Cambio de ${cambio} · firmado el ${formatearFecha(hecho)}`,
-        personaBase(a.persona, "anexo"),
+        personaBase({ ...persona, rut: persona.rut }, "anexo"),
       ),
     );
   }

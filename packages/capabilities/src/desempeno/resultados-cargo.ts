@@ -14,8 +14,8 @@ import { visibilidadDe, visiblesEntre } from "./visibilidad";
 
 type InputCargo = {
   cargoId: string;
-  periodo?: string;
-  despuesDe?: string;
+  periodo?: string | undefined;
+  despuesDe?: string | undefined;
 };
 
 async function listarResultadosCargo(ctx: Contexto, input: InputCargo) {
@@ -107,5 +107,7 @@ export const resultadosCargo = defineCapability({
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (salida) => salida.personas.map((p) => p.personaId),
-  handler: listarResultadosCargo,
+  handler(ctx, input) {
+    return listarResultadosCargo(ctx, input);
+  },
 });
