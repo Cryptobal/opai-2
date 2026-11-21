@@ -9,6 +9,7 @@ on:
     paths:
       - 'apps/movil/**'
       - '.github/scripts/ios-testflight.sh'
+      - '.github/scripts/ios_testflight_que_probar.py'
       - '.github/workflows/ios-testflight.yml'
 
 permissions:
@@ -27,9 +28,13 @@ jobs:
   testflight:
     name: compilar y subir · TestFlight
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 60
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
 
       - name: Comprobar secretos obligatorios
         env:
@@ -73,6 +78,28 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
           IOS_SDK_MIN_MAJOR: ${{ env.IOS_SDK_MIN_MAJOR }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo "::add-mask::$ASC_ISSUER_ID"
           bash .github/scripts/ios-testflight.sh
+
+      - name: Etiqueta ios-build (si «Qué probar» OK)
+        if: success()
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          marcador="${RUNNER_TEMP}/opai-ios-testflight/que-probar-ok"
+          if [ ! -f "$marcador" ]; then
+            echo "::warning::Sin «Qué probar» en ASC; no se crea tag ios-build."
+            exit 0
+          fi
+          bn="${BUILD_NUMBER:?}"
+          tag="ios-build-${bn}"
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "Tag ${tag} ya existe; se omite."
+            exit 0
+          fi
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git tag "$tag" "$GITHUB_SHA"
+          git push origin "$tag"

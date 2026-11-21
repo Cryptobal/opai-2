@@ -216,3 +216,18 @@ xcrun altool --upload-app \
   --apiKey "$ASC_KEY_ID" \
   --apiIssuer "$ASC_ISSUER_ID"
 echo "IPA subido a App Store Connect / TestFlight (build $BUILD_NUMBER)."
+
+if [ -n "${GITHUB_ENV:-}" ]; then
+  echo "BUILD_NUMBER=$BUILD_NUMBER" >>"$GITHUB_ENV"
+fi
+
+QUE_PROBAR_OK_FILE="$WORK_DIR/que-probar-ok"
+rm -f "$QUE_PROBAR_OK_FILE"
+export BUILD_NUMBER ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_PATH
+export GITHUB_SHA="${GITHUB_SHA:-$(git rev-parse HEAD)}"
+export QUE_PROBAR_OK_FILE
+if python3 .github/scripts/ios_testflight_que_probar.py; then
+  echo "«Qué probar» actualizado en TestFlight (build $BUILD_NUMBER)."
+else
+  echo "::warning::No se pudo rellenar «Qué probar» en TestFlight; el IPA sí se subió."
+fi

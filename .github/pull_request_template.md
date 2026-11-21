@@ -22,6 +22,10 @@
 
 <!-- Máximo 5 líneas: qué se hizo, qué cambia para Gard, qué decide Carlos, qué sigue. -->
 
+## Qué probar en la app
+
+<!-- Solo si el PR toca `apps/movil/**`, login, auth o push: pasos concretos para testers de TestFlight (Face ID, Google, notificaciones, etc.). El CI iOS copia esta sección al «Qué probar» del build. -->
+
 ## Evidencia
 
 <!-- Capturas a 375 y 1280 px (viewport y tema), link de la preview. Comandos ejecutados y resultados reales. Rendimiento: medición antes y después (ADR-045). Si hay cambio visual en PR no desplegado: comentario `REVISIÓN VISUAL CARLOS:` con preview verificado, rutas y puntos de usabilidad (OPERACION-agentes.md A2.10). -->
