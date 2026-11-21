@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { Alerta, avisar, Button, Sheet } from "@opai/ds";
 
@@ -8,8 +8,11 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { avisoPrerregistro, cuantos, entradaPrerregistro, vacio } from "./borrador";
-import { CamposPrerregistro } from "./campos-prerregistro";
 import type { Prerregistro } from "./datos";
+
+const CamposPrerregistro = lazy(() =>
+  import("./campos-prerregistro").then((m) => ({ default: m.CamposPrerregistro })),
+);
 import { rango } from "./etiquetas";
 
 type Props = {
@@ -111,7 +114,9 @@ export function Prerregistrar({ instalaciones, instalacionId, hoy }: Props) {
         {hecho ? (
           <Listo p={hecho} otra={otra} />
         ) : (
-          <CamposPrerregistro b={b} set={setB} instalaciones={instalaciones} />
+          <Suspense fallback={<p role="status">Cargando formulario…</p>}>
+            <CamposPrerregistro b={b} set={setB} instalaciones={instalaciones} />
+          </Suspense>
         )}
       </Sheet>
     </>

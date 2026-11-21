@@ -22,11 +22,20 @@ export const INVENTARIO_NUCLEO: DatoPersonalDeclarado[] = [
   ...INVENTARIO_AGENTES,
   ...INVENTARIO_SII,
   ...INVENTARIO_OAUTH,
-  ...INVENTARIO_ACCESO,
 ];
+
+const inventarioAccesoEfectivo = (): DatoPersonalDeclarado[] => {
+  const declarado = listarModulos()
+    .filter((m) => m.id === "acceso")
+    .flatMap((m) => m.datosPersonales ?? []);
+  return declarado.length ? declarado : INVENTARIO_ACCESO;
+};
 
 /** Inventario consolidado: el Núcleo más lo que declara cada módulo en su manifest. */
 export const listarInventario = (): DatoPersonalDeclarado[] => [
   ...INVENTARIO_NUCLEO,
-  ...listarModulos().flatMap((m) => m.datosPersonales ?? []),
+  ...listarModulos()
+    .filter((m) => m.id !== "acceso")
+    .flatMap((m) => m.datosPersonales ?? []),
+  ...inventarioAccesoEfectivo(),
 ];

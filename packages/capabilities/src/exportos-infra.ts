@@ -87,3 +87,4 @@ export {
   obtenerCapacidad,
   registrarCapacidades,
 } from "./registry";
+export { INVENTARIO_ACCESO } from "./core/cumplimiento/inventario-acceso";
