@@ -63,10 +63,14 @@ CREATE POLICY tenant_isolation ON "acceso"."grupos_lista_instalaciones" AS PERMI
 
 DROP TRIGGER IF EXISTS mismo_tenant ON "acceso"."entradas_lista";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "acceso"."entradas_lista" FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
-  'instalacion_id', 'core.instalaciones', 'cuenta_id', 'core.cuentas', 'grupo_id', 'acceso.grupos_lista',
-  'agregada_por', 'core.users');
+  'instalacion_id', 'core.instalaciones', 'cuenta_id', 'core.cuentas', 'grupo_id', 'acceso.grupos_lista');
+-- core.users no lleva tenant_id (ADR-015): membresía con verificar_usuario_miembro (CAR-46).
+CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "agregada_por", "tenant_id" ON "acceso"."entradas_lista"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('agregada_por');
 
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "acceso"."grupos_lista_instalaciones" FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
   'grupo_id', 'acceso.grupos_lista', 'instalacion_id', 'core.instalaciones');
 
 COMMIT;
+
+-- Reversión (manual, rol propietario): revertir columnas de entradas_lista, DROP grupos y triggers añadidos.

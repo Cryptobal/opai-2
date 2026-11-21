@@ -2,6 +2,7 @@
 -- opai_app no puede hacer UPDATE en estas tablas; la aplica una función SECURITY DEFINER bajo el tenant fijado.
 
 BEGIN;
+SET LOCAL lock_timeout = '5s';
 
 ALTER TABLE "acceso"."registros_acceso" ADD COLUMN "anonimizado_en" TIMESTAMPTZ(6);
 ALTER TABLE "acceso"."intentos_denegados" ADD COLUMN "anonimizado_en" TIMESTAMPTZ(6);
