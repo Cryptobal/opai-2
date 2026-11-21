@@ -636,7 +636,9 @@ nomina_conceptos_actualizar
 nomina_conceptos_crear
 nomina_conceptos_listar
 nomina_costo_proyectado_listar
+nomina_f29_generar
 nomina_f30_1_generar
+nomina_finiquito_obtener
 nomina_libro_remuneraciones_excel
 nomina_libro_remuneraciones_pdf
 nomina_liquidaciones_calcular
@@ -645,6 +647,10 @@ nomina_liquidaciones_marcar_revisadas
 nomina_liquidaciones_obtener
 nomina_liquidaciones_publicar
 nomina_lre_generar
+nomina_midt_datos
+nomina_midt_exportar_pendientes
+nomina_midt_listar
+nomina_midt_registrar
 nomina_novedades_anular
 nomina_novedades_cargar
 nomina_novedades_crear
@@ -652,6 +658,7 @@ nomina_novedades_listar
 nomina_obligaciones_actualizar
 nomina_obligaciones_generar_calendario
 nomina_obligaciones_listar
+nomina_pago_banco_generar
 nomina_periodos_abrir
 nomina_periodos_cambiar_estado
 nomina_periodos_listar
@@ -1050,6 +1057,7 @@ preview_nomina_conceptos_crear
 preview_nomina_liquidaciones_calcular
 preview_nomina_liquidaciones_marcar_revisadas
 preview_nomina_liquidaciones_publicar
+preview_nomina_midt_registrar
 preview_nomina_novedades_anular
 preview_nomina_novedades_cargar
 preview_nomina_novedades_crear

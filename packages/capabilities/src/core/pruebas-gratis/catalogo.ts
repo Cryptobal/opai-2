@@ -28,7 +28,7 @@ const itemSchema = z.object({
     .describe("Id del cobrable: un módulo o una parte de Finanzas (`finanzas.bancos`)."),
   nombre: z.string(),
   incluye: z.string(),
-  grupo: z.enum(["modulo", "finanzas", "parte_finanzas"]),
+  grupo: z.enum(["modulo", "finanzas", "parte_finanzas", "complemento_nomina"]),
   textoPrecio: z.string().nullable().describe("Precio de lista escrito; null si aún no se fija."),
   estado: z
     .enum(["disponible", "en_prueba", "vencida", "no_disponible"])
