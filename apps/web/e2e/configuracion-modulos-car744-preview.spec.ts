@@ -6,7 +6,7 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 // La vista previa compila en frío: en portada comprobamos permisos/datos y abrimos el grupo con navegación
 // completa (el <Link> del índice puede dejar la URL sin el RSC del grupo en Vercel).
 test.use({ actionTimeout: 30_000 });
-test.setTimeout(180_000);
+test.setTimeout(240_000);
 
 const urlGrupoModulos = /\/configuracion\/grupo\/modulos$/;
 
@@ -16,13 +16,16 @@ async function abrirGrupoModulos(page: Page) {
   await expect(tarjeta, "qa-e2e debería ver la tarjeta Módulos en Configuración").toBeVisible({
     timeout: 90_000,
   });
-  await page.goto("/configuracion/grupo/modulos");
-  await expect(page).toHaveURL(urlGrupoModulos, { timeout: 60_000 });
-  await expect(page.getByText("No tienes acceso a ningún ajuste de este grupo")).toHaveCount(0);
-  await expect(page.getByText("No pudimos cargar esta página")).toHaveCount(0);
-  await expect(
-    page.getByRole("navigation", { name: "Entradas de Módulos", exact: true }),
-  ).toBeVisible({ timeout: 90_000 });
+  await expect(async () => {
+    await page.goto("/configuracion/grupo/modulos", { timeout: 60_000 });
+    await expect(page).toHaveURL(urlGrupoModulos, { timeout: 15_000 });
+    await expect(page.getByText("No tienes acceso a ningún ajuste de este grupo")).toHaveCount(0);
+    await expect(page.getByText("No pudimos cargar esta página")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "No tienes acceso a esta sección" })).toHaveCount(0);
+    await expect(
+      page.getByRole("navigation", { name: "Entradas de Módulos", exact: true }),
+    ).toBeVisible({ timeout: 15_000 });
+  }).toPass({ timeout: 180_000 });
 }
 
 test.describe("@preview CAR-744: módulos contratados en Configuración", () => {
