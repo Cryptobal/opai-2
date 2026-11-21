@@ -134,22 +134,60 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
   });
 
   it("avisar al celular usa FCM con la ruta y borra token vencido", async () => {
+    const sufijo = randomUUID().slice(0, 8);
+    const usuarioAviso = (
+      await e.admin.user.create({
+        data: {
+          name: `avisos-${sufijo}`,
+          email: `avisos-${sufijo}@prueba.cl`,
+          emailVerified: true,
+        },
+      })
+    ).id;
+    await e.admin.membership.create({
+      data: { tenantId: tenantA, userId: usuarioAviso, rol: "viewer", portales: ["trabajador"] },
+    });
+    const personaAviso = (
+      await e.admin.persona.create({
+        data: {
+          tenantId: tenantA,
+          nombres: "Aviso",
+          apellidos: sufijo,
+          rut: rutPrueba(),
+          estado: "activo",
+          usuarioId: usuarioAviso,
+        },
+      })
+    ).id;
+    await e.admin.preferenciaNotificacion.create({
+      data: { tenantId: tenantA, personaId: personaAviso, preferencias: { pauta: { push: true, correo: false } } },
+    });
+
     const tokenViejo = tokenFcmPrueba("viejo");
     const tokenOk = tokenFcmPrueba("ok");
+    const delCaso = new Set([tokenViejo, tokenOk]);
     tokensVencidos.clear();
     tocados.length = 0;
     tokensVencidos.add(tokenViejo);
     await e.admin.suscripcionPush.createMany({
       data: [
-        { tenantId: tenantA, usuarioId: ana, tipo: "nativa", token: tokenViejo, plataforma: "ios" },
-        { tenantId: tenantA, usuarioId: ana, tipo: "nativa", token: tokenOk, plataforma: "android" },
+        { tenantId: tenantA, usuarioId: usuarioAviso, tipo: "nativa", token: tokenViejo, plataforma: "ios" },
+        { tenantId: tenantA, usuarioId: usuarioAviso, tipo: "nativa", token: tokenOk, plataforma: "android" },
       ],
     });
-    await mod.avisarAlCelular(ctx(tenantA, ana), [ana], "pauta", "pauta", new Date(), "/trabajador/pauta");
-    expect(tocados.map((t) => t.token).sort()).toEqual([tokenOk, tokenViejo].sort());
-    expect(tocados.every((t) => t.ruta === "/trabajador/pauta")).toBe(true);
+    await mod.avisarAlCelular(
+      ctx(tenantA, usuarioAviso),
+      [usuarioAviso],
+      "pauta",
+      "pauta",
+      new Date(),
+      "/trabajador/pauta",
+    );
+    const tocadosCaso = tocados.filter((t) => delCaso.has(t.token));
+    expect(tocadosCaso.map((t) => t.token).sort()).toEqual([tokenOk, tokenViejo].sort());
+    expect(tocadosCaso.every((t) => t.ruta === "/trabajador/pauta")).toBe(true);
     const quedan = await e.admin.suscripcionPush.findMany({
-      where: { tenantId: tenantA, usuarioId: ana, tipo: "nativa" },
+      where: { tenantId: tenantA, usuarioId: usuarioAviso, tipo: "nativa", token: { in: [...delCaso] } },
     });
     expect(quedan.map((s) => s.token)).toEqual([tokenOk]);
   });
