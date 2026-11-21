@@ -1,7 +1,5 @@
 "use client";
 
-import { NotebookPen, UserCheck } from "lucide-react";
-
 import { Button, Empty, FilaSeleccionable } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
@@ -9,8 +7,10 @@ import { LinkNext } from "@/app/_components/link-next";
 import { elegirPersona, type PersonaElegida } from "@/lib/terreno/persona";
 
 import { BannerConexion } from "./banner-conexion";
+import { useContextoTerreno } from "./contexto-terreno";
+import { seccionesActivas } from "./secciones-terreno";
 
-/** Inicio de Terreno en el equipo (g0): saludo, estado de la conexión y cola. Los módulos suman sus tarjetas. */
+/** Inicio de Terreno en el equipo (g0): saludo, módulos activos y turno de ahora (CAR-801). */
 export function InicioEquipo({
   instalacion,
   persona,
@@ -18,6 +18,10 @@ export function InicioEquipo({
   instalacion: string;
   persona: PersonaElegida;
 }) {
+  const { datos } = useContextoTerreno();
+  const tarjetas = seccionesActivas(datos?.modulos ?? null).filter((s) => s.href !== "/terreno");
+  const nada = tarjetas.length === 0;
+
   return (
     <div className="flex flex-col gap-4">
       <header className="flex items-center justify-between gap-3">
@@ -30,26 +34,26 @@ export function InicioEquipo({
         </Button>
       </header>
       <BannerConexion />
-      <div className="overflow-hidden rounded-lg border border-border bg-surface">
-        <FilaSeleccionable
-          href="/terreno/marcar"
-          Link={LinkNext}
-          titulo="Marcar asistencia"
-          secundario="Con tu rostro o con tu RUT y PIN"
-          inicio={<UserCheck aria-hidden className="size-5 flex-none text-fg-muted" />}
+      {tarjetas.length > 0 ? (
+        <div className="overflow-hidden rounded-lg border border-border bg-surface">
+          {tarjetas.map((s) => (
+            <FilaSeleccionable
+              key={s.href}
+              href={s.href}
+              Link={LinkNext}
+              titulo={s.titulo}
+              secundario={s.secundario}
+              inicio={<s.icono aria-hidden className="size-5 flex-none text-fg-muted" />}
+            />
+          ))}
+        </div>
+      ) : null}
+      {nada ? (
+        <Empty
+          titulo="Aún no hay nada por hacer"
+          descripcion="Tus rondas y accesos aparecerán aquí cuando tu empresa los active."
         />
-        <FilaSeleccionable
-          href="/terreno/libro"
-          Link={LinkNext}
-          titulo="Libro de novedades"
-          secundario="Anota lo que pasa en la instalación"
-          inicio={<NotebookPen aria-hidden className="size-5 flex-none text-fg-muted" />}
-        />
-      </div>
-      <Empty
-        titulo="Aún no hay nada por hacer"
-        descripcion="Tus rondas y accesos aparecerán aquí cuando tu empresa los active."
-      />
+      ) : null}
     </div>
   );
 }
