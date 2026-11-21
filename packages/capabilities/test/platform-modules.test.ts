@@ -86,12 +86,15 @@ describe("platform.modules.set", () => {
         tenantModule: [{ tenantId: TENANT_DE_PRUEBA, moduloId: "crm", estado: "activo" }],
       },
     });
-    expect(await executeCapability(ctx, "core.modules.list", {})).toMatchObject({
-      ok: true,
-      data: [
-        { id: "crm", estado: "activo" },
-        { id: "cpq", estado: null },
-      ],
-    });
+    const r = await executeCapability(ctx, "core.modules.list", {});
+    expect(r).toMatchObject({ ok: true });
+    if (r.ok) {
+      expect(r.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "crm", estado: "activo", complemento: false }),
+          expect.objectContaining({ id: "cpq", estado: null, complemento: false }),
+        ]),
+      );
+    }
   });
 });

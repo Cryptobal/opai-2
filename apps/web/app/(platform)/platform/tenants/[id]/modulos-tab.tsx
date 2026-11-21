@@ -5,17 +5,15 @@ import { Empty, Switch } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { DetalleTenant } from "./tipos";
+import {
+  activoParaUso,
+  agruparModulosPorArea,
+  TEXTO_ESTADO,
+  type FilaModulo,
+  type GrupoModulos,
+} from "./modulos-vista";
 
-const ESTADO: Record<string, string> = {
-  activo: "activo",
-  trial: "en prueba",
-  solo_lectura: "solo lectura",
-  suspendido: "suspendido",
-};
-
-type Cap = ReturnType<typeof useCapacidad>;
-
-/** Módulos registrados con interruptor activo/suspendido y opción de prueba. */
+/** Módulos y complementos pagados con interruptores directos (CAR-742). */
 export function Modulos({
   detalle,
   puedeNuevos,
@@ -24,97 +22,113 @@ export function Modulos({
   puedeNuevos: boolean;
 }) {
   const { ejecutar, error, pendiente } = useCapacidad("platform");
+  const set = (moduloId: string, estado: string) =>
+    void ejecutar("platform.modules.set", {
+      tenantId: detalle.tenant.id,
+      moduloId,
+      estado,
+    });
+  const grupos = agruparModulosPorArea(detalle.modulos);
+  const padres = new Map(
+    detalle.modulos.filter((m) => !m.complemento).map((m) => [m.id, activoParaUso(m.estado)]),
+  );
   return (
-    <div className="divide-y divide-border">
-      {error ? <p className="py-2 text-sm font-medium text-danger-fg">{error}</p> : null}
-      <ModulosNuevos
-        detalle={detalle}
-        puede={puedeNuevos}
-        pendiente={pendiente}
-        ejecutar={ejecutar}
+    <div className="flex flex-col gap-4">
+      {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
+      <Switch
+        etiqueta="Activar módulos nuevos automáticamente"
+        descripcion="Los módulos que se agreguen al catálogo quedan activos en esta empresa."
+        activo={detalle.activarModulosNuevos}
+        disabled={pendiente || !puedeNuevos}
+        onCambiar={(on) =>
+          void ejecutar("platform.tenants.set_modulos_nuevos", {
+            tenantId: detalle.tenant.id,
+            activo: on,
+          })
+        }
       />
       {detalle.modulos.length === 0 ? (
         <Empty titulo="Aún no hay módulos registrados" />
       ) : (
-        <Lista detalle={detalle} pendiente={pendiente} ejecutar={ejecutar} />
+        <div className="flex flex-col gap-5">
+          {grupos.map((g) => (
+            <Grupo
+              key={g.area}
+              grupo={g}
+              padres={padres}
+              pendiente={pendiente}
+              set={set}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
 }
 
-function ModulosNuevos({
-  detalle,
-  puede,
+function Grupo({
+  grupo,
+  padres,
   pendiente,
-  ejecutar,
+  set,
 }: {
-  detalle: DetalleTenant;
-  puede: boolean;
+  grupo: GrupoModulos;
+  padres: Map<string, boolean>;
   pendiente: boolean;
-  ejecutar: Cap["ejecutar"];
+  set: (id: string, estado: string) => void;
 }) {
   return (
-    <Switch
-      etiqueta="Activar módulos nuevos automáticamente"
-      descripcion="Los módulos que se agreguen al catálogo quedan activos en esta empresa. Los que ya existían no cambian."
-      activo={detalle.activarModulosNuevos}
-      disabled={pendiente || !puede}
-      onCambiar={(on) =>
-        void ejecutar("platform.tenants.set_modulos_nuevos", {
-          tenantId: detalle.tenant.id,
-          activo: on,
-        })
-      }
-    />
+    <section>
+      <h3 className="mb-2 text-sm font-medium text-muted-fg">{grupo.titulo}</h3>
+      <div className="flex flex-col gap-1">
+        {grupo.filas.map((m) => (
+          <Fila key={m.id} fila={m} padres={padres} pendiente={pendiente} set={set} />
+        ))}
+      </div>
+    </section>
   );
 }
 
-function Lista({
-  detalle,
+function Fila({
+  fila: m,
+  padres,
   pendiente,
-  ejecutar,
+  set,
 }: {
-  detalle: DetalleTenant;
+  fila: FilaModulo;
+  padres: Map<string, boolean>;
   pendiente: boolean;
-  ejecutar: Cap["ejecutar"];
+  set: (id: string, estado: string) => void;
 }) {
-  const porId = new Map(detalle.modulos.map((m) => [m.id, m]));
-  const requiere = (ids: readonly string[]) =>
-    `Requiere ${ids
-      .map((id) => {
-        const d = porId.get(id);
-        return d ? `${d.nombre} · ${ESTADO[d.estado ?? ""] ?? "no contratado"}` : id;
-      })
-      .join(", ")}`;
-  const set = (moduloId: string, estado: string) =>
-    void ejecutar("platform.modules.set", { tenantId: detalle.tenant.id, moduloId, estado });
-  return detalle.modulos.map((m) => {
-    const activo = m.estado === "activo" || m.estado === "trial" || m.estado === "solo_lectura";
-    return (
-      <div key={m.id} className="py-1">
+  const activo = activoParaUso(m.estado);
+  const padreOk = !m.padreId || (padres.get(m.padreId) ?? false);
+  const textoEstado = m.estado ? (TEXTO_ESTADO[m.estado] ?? m.estado) : "No contratado";
+  const descripcion = m.complemento
+    ? [m.etiquetaCobro, padreOk ? textoEstado : "Requiere el módulo padre activo"]
+        .filter(Boolean)
+        .join(" · ")
+    : m.dependencias.length
+      ? `Requiere ${m.dependencias.join(", ")}`
+      : textoEstado;
+  return (
+    <div className={m.complemento ? "pl-4" : undefined}>
+      <Switch
+        etiqueta={m.nombre}
+        descripcion={descripcion}
+        activo={activo}
+        disabled={pendiente || (m.complemento && !padreOk)}
+        onCambiar={(on) => set(m.id, on ? "activo" : "suspendido")}
+      />
+      {activo && !m.complemento ? (
         <Switch
-          etiqueta={m.nombre}
-          descripcion={
-            m.dependencias.length
-              ? requiere(m.dependencias)
-              : m.estado === "solo_lectura"
-                ? "Solo lectura: se ve y se lee, no se escribe"
-                : (ESTADO[m.estado ?? ""] ?? "No contratado")
-          }
-          activo={activo}
+          etiqueta="En prueba"
+          descripcion="El módulo sigue visible; al vencer puede pasar a solo lectura o a cobro."
+          activo={m.estado === "trial"}
           disabled={pendiente}
-          onCambiar={(on) => set(m.id, on ? "activo" : "suspendido")}
+          onCambiar={(on) => set(m.id, on ? "trial" : "activo")}
+          className="pl-4"
         />
-        {activo ? (
-          <Switch
-            etiqueta="En prueba"
-            activo={m.estado === "trial"}
-            disabled={pendiente}
-            onCambiar={(on) => set(m.id, on ? "trial" : "activo")}
-            className="pl-4"
-          />
-        ) : null}
-      </div>
-    );
-  });
+      ) : null}
+    </div>
+  );
 }

@@ -1,4 +1,4 @@
-import { Badge, KpiTile, ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { KpiTile, ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
@@ -9,12 +9,7 @@ import { AtencionTenant } from "./atencion-tenant";
 import { DatosTributarios, type PerfilTributario } from "./datos-tributarios";
 import type { DetalleTenant, PanelTenant, Trabajo } from "./tipos";
 
-const ESTADO_MODULO = {
-  activo: { etiqueta: "Activo", tono: "success" },
-  trial: { etiqueta: "Trial", tono: "info" },
-  solo_lectura: { etiqueta: "Solo lectura", tono: "warning" },
-  suspendido: { etiqueta: "Suspendido", tono: "warning" },
-} as const;
+import { agruparModulosPorArea, TEXTO_ESTADO } from "./modulos-vista";
 
 type Props = {
   d: DetalleTenant;
@@ -74,29 +69,36 @@ export function ResumenTenant({ d, panel, problemas, perfil, pruebas }: Props) {
             </EnlaceBoton>
           }
         >
-          <ul>
-            <li className="flex min-h-12 items-center justify-between border-b border-border px-4 last:border-b-0">
-              <span className="text-base text-fg">Núcleo</span>
-              <Badge punto={false}>Siempre</Badge>
+          <ul className="flex flex-col gap-3 px-4 pb-2">
+            <li className="flex justify-between gap-3 text-sm">
+              <span className="text-fg">Núcleo</span>
+              <span className="text-muted-fg">Siempre activo</span>
             </li>
-            {d.modulos.map((x) => {
-              const e = x.estado ? ESTADO_MODULO[x.estado as keyof typeof ESTADO_MODULO] : null;
-              return (
-                <li
-                  key={x.id}
-                  className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 last:border-b-0"
-                >
-                  <span className="text-base text-fg">
-                    {x.nombre} · {x.version}
-                  </span>
-                  {e ? (
-                    <Badge tono={e.tono}>{e.etiqueta}</Badge>
-                  ) : (
-                    <Badge punto={false}>No contratado</Badge>
-                  )}
-                </li>
-              );
-            })}
+            {agruparModulosPorArea(d.modulos).map((g) => (
+              <li key={g.area}>
+                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-fg">
+                  {g.titulo}
+                </p>
+                <ul className="flex flex-col gap-1">
+                  {g.filas.map((x) => (
+                    <li
+                      key={x.id}
+                      className={`flex justify-between gap-3 text-sm ${x.complemento ? "pl-3" : ""}`}
+                    >
+                      <span className="text-fg">
+                        {x.nombre}
+                        {x.complemento && x.etiquetaCobro ? (
+                          <span className="text-muted-fg"> · {x.etiquetaCobro}</span>
+                        ) : null}
+                      </span>
+                      <span className="shrink-0 text-muted-fg">
+                        {x.estado ? (TEXTO_ESTADO[x.estado] ?? x.estado) : "No contratado"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
           </ul>
         </SeccionTarjeta>
         <div className="flex flex-col gap-4">
