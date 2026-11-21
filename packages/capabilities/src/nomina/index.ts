@@ -8,6 +8,8 @@ import { costoProyectadoListar } from "./costo-proyectado";
 import { liquidacionesCalcular } from "./liquidaciones-calcular";
 import { liquidacionesListar, liquidacionesObtener } from "./liquidaciones-lectura";
 import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
+import { consumidorLiquidacionPublicada } from "./consumidor-liquidacion-publicada";
+import { liquidacionesPublicar } from "./liquidaciones-publicar";
 import { f301Generar } from "./f30-1";
 import { libroRemuneracionesExcel, libroRemuneracionesPdf } from "./libro-remuneraciones";
 import { lreGenerar } from "./lre";
@@ -56,4 +58,7 @@ export const capacidadesNomina: readonly Capacidad[] = [
   f301Generar,
   libroRemuneracionesExcel,
   libroRemuneracionesPdf,
+  liquidacionesPublicar,
 ];
+
+export const consumidoresNomina = [consumidorLiquidacionPublicada];

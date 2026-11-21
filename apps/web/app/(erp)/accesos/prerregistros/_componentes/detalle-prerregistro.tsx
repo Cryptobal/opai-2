@@ -5,7 +5,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import { CancelarPrerregistro } from "./cancelar-prerregistro";
 import type { Prerregistro } from "./datos";
-import { ESTADO_DIA, estadoPrerregistro, horario, primerDiaPendiente, rango } from "./etiquetas";
+import { ESTADO_DIA, estadoPrerregistro, horario, rango } from "./etiquetas";
 
 function paresDe(p: Prerregistro): Par[] {
   return [
@@ -21,7 +21,6 @@ function paresDe(p: Prerregistro): Par[] {
 
 /** Visitantes con su documento enmascarado y el enlace a la invitación del próximo día. */
 function Visitantes({ p }: { p: Prerregistro }) {
-  const dia = primerDiaPendiente(p);
   return (
     <ul className="flex flex-col divide-y divide-border">
       {p.visitantes.map((v) => (
@@ -29,13 +28,22 @@ function Visitantes({ p }: { p: Prerregistro }) {
           <span className="flex min-w-0 flex-col">
             <span className="t-body truncate">{v.nombre}</span>
             <span className="t-caption">
-              {[v.documento, v.empresa, v.patente].filter(Boolean).join(" · ")}
+              {[
+                v.documento,
+                v.empresa,
+                v.patente,
+                v.ingresos.length
+                  ? `Ingresó ${v.ingresos.map((d) => formatearFecha(d)).join(", ")}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </span>
           </span>
-          {dia ? (
+          {v.proximoDia ? (
             <EnlaceBoton
               variante="secondary"
-              href={`/accesos/prerregistros/${p.id}/invitacion?visitante=${v.id}&dia=${dia}`}
+              href={`/accesos/prerregistros/${p.id}/invitacion?visitante=${v.id}&dia=${v.proximoDia}`}
             >
               Invitación
             </EnlaceBoton>
@@ -57,7 +65,7 @@ export function DetallePrerregistro({
   crea: boolean;
 }) {
   const e = p ? estadoPrerregistro(p) : null;
-  const cancelable = p && !p.cancelado && primerDiaPendiente(p) !== null;
+  const cancelable = p && !p.cancelado && p.visitantes.some((v) => v.proximoDia !== null);
   return (
     <DetailScreen
       state={p ? state : state === "ready" ? "error" : state}
@@ -88,6 +96,9 @@ export function DetallePrerregistro({
                 <li key={d.dia}>
                   <Badge tono={ESTADO_DIA[d.estado].tono}>
                     {formatearFecha(d.dia)} · {ESTADO_DIA[d.estado].etiqueta}
+                    {d.ingresos > 0 && p.visitantes.length > 1
+                      ? ` (${d.ingresos} de ${p.visitantes.length})`
+                      : ""}
                   </Badge>
                 </li>
               ))}

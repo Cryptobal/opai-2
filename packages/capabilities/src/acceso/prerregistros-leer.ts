@@ -54,7 +54,12 @@ export const prerregistrosListar = defineCapability({
             ],
           },
           orderBy: [{ desde: "asc" }, { id: "asc" }],
-          include: { visitantes: { orderBy: { createdAt: "asc" } } },
+          include: {
+            visitantes: {
+              orderBy: { createdAt: "asc" },
+              include: { usos: { select: { dia: true } } },
+            },
+          },
           ...cursorDe(input.cursor, input.limite),
         }),
       (p, instalacion) => vistaPrerregistro(p, { instalacion, hoy, verPatente }),
@@ -75,7 +80,9 @@ export const prerregistrosObtener = defineCapability({
   async handler(ctx, { id }) {
     const p = await ctx.db.prerregistro.findFirst({
       where: { AND: [{ id }, dondeInstalacionId(ctx)] },
-      include: { visitantes: { orderBy: { createdAt: "asc" } } },
+      include: {
+        visitantes: { orderBy: { createdAt: "asc" }, include: { usos: { select: { dia: true } } } },
+      },
     });
     if (!p) throw noEncontrado("El prerregistro");
     const [hoy, nombres] = await Promise.all([
@@ -112,9 +119,13 @@ export const prerregistrosInvitacion = defineCapability({
   async handler(ctx, { visitanteId, dia }) {
     const v = await ctx.db.prerregistroVisitante.findFirst({
       where: { id: visitanteId, prerregistro: dondeInstalacionId(ctx) },
-      include: { prerregistro: true },
+      include: {
+        prerregistro: true,
+        usos: { where: { dia: fechaDia(dia) }, select: { id: true } },
+      },
     });
     if (!v) throw noEncontrado("El visitante");
+    if (v.usos.length > 0) throw reglaDeNegocio("La invitación de ese día ya se usó.");
     const p = v.prerregistro;
     const d = fechaDia(dia);
     if (p.canceladoEn) throw reglaDeNegocio("El prerregistro está cancelado.");

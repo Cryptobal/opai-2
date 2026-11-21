@@ -22,7 +22,7 @@ const TRANSICIONES: Readonly<Record<EstadoRendicion, readonly EstadoRendicion[]>
   enviada: ["aprobada", "rechazada", "devuelta", "anulada"],
   aprobada: ["pagada"],
   rechazada: [],
-  pagada: [],
+  pagada: ["aprobada"],
   anulada: [],
 };
 

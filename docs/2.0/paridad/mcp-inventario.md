@@ -42,6 +42,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/accesos` | `acceso.portal_registros.listar` | `acceso_portal_registros_listar` | existe |
+| cliente | `/cliente/accesos` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
 | cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
 | cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
@@ -143,9 +145,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.anular` | `rendiciones_lotes_anular` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.aplicar_reversa` | `rendiciones_lotes_aplicar_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.aprobar` | `rendiciones_lotes_aprobar` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.candidatas` | `rendiciones_lotes_candidatas` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.candidatas_reversa` | `rendiciones_lotes_candidatas_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.crear` | `rendiciones_lotes_crear` | existe |
+| compartido | `app/_components` | `rendiciones.lotes.crear_reversa` | `rendiciones_lotes_crear_reversa` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.generar_nomina` | `rendiciones_lotes_generar_nomina` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.listar` | `rendiciones_lotes_listar` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.marcar_pagado` | `rendiciones_lotes_marcar_pagado` | existe |
@@ -174,6 +179,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.config.get` | `acceso_config_get` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.config.set` | `acceso_config_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
@@ -629,6 +636,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
@@ -936,7 +944,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
 | `app/_acciones/app-nativa.ts#accionCanjearApp` | Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado. |
-| `app/_acciones/app-nativa.ts#accionVolverALaApp` | Identidad: ingreso con Google desde la app nativa (CAR-516), paso en el navegador del sistema; emite un código de un solo uso atado al reto PKCE. Abre una sesión, no es una operación de negocio. |
 | `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
@@ -978,6 +985,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
 | `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
 | `app/(auth)/app/google/route.ts` | Identidad: inicia el ingreso con Google de la app nativa en el navegador del sistema (CAR-516); guarda el reto PKCE en una cookie y redirige a Google. |
+| `app/(auth)/app/volver/route.ts` | Identidad: ingreso con Google desde la app nativa (CAR-516, CAR-727); emite el código atado al reto PKCE y redirige 303 al esquema de la app. Abre una sesión, no es una operación de negocio. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
@@ -1006,6 +1014,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/terreno/contexto/route.ts` | Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/libro/route.ts` | Lee el libro de novedades de la instalación del equipo de terreno emparejado (CAR-77): cookie de dispositivo, sin sesión; ejecuta core.libro_novedades_equipo.listar (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/lote/route.ts` | Recibe el lote de hechos del equipo de terreno emparejado (CAR-78 B3): cookie de dispositivo y mismo origen, sin sesión; ejecuta core.hechos_terreno.recibir (interna con motivo en EXCEPCIONES_PARIDAD). Su lectura por MCP es core.hechos_terreno.listar. |
+| `app/api/terreno/porteria/esperados/route.ts` | Lee los visitantes prerregistrados para hoy de la portería del equipo de terreno emparejado (CAR-478): cookie de dispositivo, sin sesión; ejecuta core.terreno.esperados (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/porteria/sitio/route.ts` | Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
@@ -1042,7 +1051,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `asistencia.rostro.iniciar_vida` | Solo personas: la prueba de vida la completa la cámara de quien marca o se enrola, y cada sesión tiene costo (CAR-89). |
 | `asistencia.rostro.revocar` | Solo personas: la revocación es un derecho personal del trabajador y borra su biometría (L-14). |
 | `asistencia.telefono.habilitar` | Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes. |
+| `central.agente.reanudar` | Solo personas: reanudar al agente de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
+| `central.alertas.devolver` | Solo personas: devolver una alerta tomada garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
 | `central.alertas.hacerse_cargo` | Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala. |
+| `central.alertas.tomar` | Solo personas: tomar una alerta garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
+| `central.propuestas.resolver` | Solo personas: aceptar o rechazar una propuesta del agente es la decisión humana que la propuesta espera (spec central R10, CA3). |
+| `central.turno.abrir` | Solo personas: abrir el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
+| `central.turno.aceptar` | Solo personas: aceptar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
+| `central.turno.cerrar` | Solo personas: cerrar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
+| `central.turno.entregar` | Solo personas: entregar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15). |
 | `comercial.canales.rotar_token_formulario` | Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant. |
 | `comercial.importar_1_0` | Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25). |
 | `comercial.seguimientos.recibir_correo` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67). |
@@ -1122,6 +1139,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.slack.vinculado_de` | Interna: solo la ejecuta /api/integraciones/slack/acciones, tras verificar la firma de Slack, para saber qué persona de OPAI apretó un botón (CAR-294). |
 | `core.terreno.contexto` | Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2). |
 | `core.terreno.en_sitio` | Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d). |
+| `core.terreno.esperados` | Interna: la portería del equipo emparejado lee sin sesión los visitantes prerregistrados para hoy (su cookie de dispositivo es la credencial); un agente usa acceso.prerregistros.listar con su alcance (CAR-478). |
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
@@ -1166,7 +1184,15 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `asistencia.rostro.iniciar_vida` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `central.agente.reanudar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.alertas.devolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `central.alertas.hacerse_cargo` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.alertas.tomar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.propuestas.resolver` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.turno.abrir` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.turno.aceptar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.turno.cerrar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
+| `central.turno.entregar` | sin pantalla todavía · CAR-472 · desde 2026-11-14 | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
@@ -1268,6 +1294,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.mandante_marcas.listar`
 - `asistencia.respaldos.generar`
 - `asistencia.respaldos.verificar`
+- `central.agente.pausar`
 - `central.alertas.abrir`
 - `central.alertas.contactar`
 - `central.alertas.escalar`
@@ -1275,13 +1302,16 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.alertas.listar`
 - `central.alertas.obtener`
 - `central.alertas.posponer`
+- `central.alertas.proponer`
 - `central.alertas.reabrir`
 - `central.alertas.resolver`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
 - `central.estado`
+- `central.propuestas.listar`
 - `central.reglas.guardar`
 - `central.reglas.listar`
+- `central.turno.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`

@@ -202,6 +202,22 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: el rostro es un dato biométrico sensible (Ley 21.719); un agente nunca enrola a un trabajador. Lo hace la propia persona con prueba de vida.",
   "asistencia.telefono.habilitar":
     "Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes.",
+  "central.turno.abrir":
+    "Solo personas: abrir el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.entregar":
+    "Solo personas: entregar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.aceptar":
+    "Solo personas: aceptar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.cerrar":
+    "Solo personas: cerrar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.alertas.tomar":
+    "Solo personas: tomar una alerta garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.alertas.devolver":
+    "Solo personas: devolver una alerta tomada garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.agente.reanudar":
+    "Solo personas: reanudar al agente de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.propuestas.resolver":
+    "Solo personas: aceptar o rechazar una propuesta del agente es la decisión humana que la propuesta espera (spec central R10, CA3).",
   "central.alertas.hacerse_cargo":
     "Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala.",
   "asistencia.fiscalizacion_ingreso.validar":
@@ -244,6 +260,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2).",
   "core.terreno.en_sitio":
     "Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d).",
+  "core.terreno.esperados":
+    "Interna: la portería del equipo emparejado lee sin sesión los visitantes prerregistrados para hoy (su cookie de dispositivo es la credencial); un agente usa acceso.prerregistros.listar con su alcance (CAR-478).",
   "core.terreno.rondas":
     "Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e).",
 };
