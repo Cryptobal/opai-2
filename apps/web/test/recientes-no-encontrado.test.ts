@@ -17,7 +17,10 @@ describe("recientes y páginas no encontradas", () => {
 
   it("no registra una página no encontrada como reciente", () => {
     registrarReciente("e1", { href: "/cotizaciones/x", etiqueta: "No encontrado" });
-    registrarReciente("e1", { href: "/trabajador/x", etiqueta: "No encontrado · Portal Trabajador" });
+    registrarReciente("e1", {
+      href: "/trabajador/x",
+      etiqueta: "No encontrado · Portal Trabajador",
+    });
     registrarReciente("e1", { href: "/bancos", etiqueta: "Bancos" });
     expect(leerRecientes("e1").map((r) => r.etiqueta)).toEqual(["Bancos"]);
   });
@@ -31,5 +34,17 @@ describe("recientes y páginas no encontradas", () => {
       ]),
     );
     expect(leerRecientes("e1").map((r) => r.href)).toEqual(["/flujo"]);
+  });
+
+  it("Accesos no es reciente: ni se registra ni se muestra lo ya guardado", () => {
+    localStorage.setItem(
+      "opai_recientes_e1",
+      JSON.stringify([
+        { href: "/accesos", etiqueta: "Accesos" },
+        { href: "/accesosx", etiqueta: "Otra" },
+      ]),
+    );
+    registrarReciente("e1", { href: "/accesos/abc", etiqueta: "Registro" });
+    expect(leerRecientes("e1").map((r) => r.href)).toEqual(["/accesosx"]);
   });
 });

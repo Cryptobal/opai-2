@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { abrirAccesos } from "./accesos-instalacion";
 import { capturar, capturarHoja } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -13,13 +14,14 @@ test.describe("@preview acceso: correcciones desde la ficha", () => {
     await page
       .context()
       .addCookies([{ name: "opai_marco", value: "nuevo", url: new URL(page.url()).origin }]);
-    await page.goto("/accesos?estado=en_sitio");
-    await expect(page.getByPlaceholder("Buscar por nombre, empresa o patente")).toBeVisible({
-      timeout: 60_000,
-    });
-    const filas = page.locator(
-      'a[href^="/accesos/"]:not([href^="/accesos/intentos"]):not([href^="/accesos/listas"])',
-    );
+    const base = await abrirAccesos(page, "en_sitio");
+    await expect(
+      page
+        .getByText(/Nadie en sitio|En sitio/)
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible({ timeout: 60_000 });
+    const filas = page.locator('a[href^="/accesos/0"]').filter({ visible: true });
     if ((await filas.count()) < 2) {
       test.info().annotations.push({ type: "sin-datos", description: "Menos de 2 en sitio" });
       return;
@@ -41,7 +43,7 @@ test.describe("@preview acceso: correcciones desde la ficha", () => {
       timeout: 30_000,
     });
 
-    await page.goto("/accesos?estado=en_sitio");
+    await page.goto(`${base}?sub=en_sitio`);
     await filas.first().click();
     const anular = page.getByRole("button", { name: "Anular registro" }).filter({ visible: true });
     await expect(async () => {

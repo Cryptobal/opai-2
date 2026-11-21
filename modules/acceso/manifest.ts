@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { capacidadesAcceso, defineModule } from "@opai/capabilities";
+import { capacidadesAcceso, defineModule, INVENTARIO_ACCESO } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Control de acceso (ADR-003, CAR-78 · E4, CAR-474). Las capacidades viven en
@@ -73,4 +73,5 @@ export const manifest = defineModule({
   }),
   eventos: [],
   capacidades: capacidadesAcceso,
+  datosPersonales: INVENTARIO_ACCESO,
 });

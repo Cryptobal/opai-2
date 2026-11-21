@@ -9,7 +9,7 @@
    `resultados` en UNA transacción (sincronizado, o rechazado con su motivo); un lote mal formado (422) se
    marca rechazado «lote_invalido». Los rechazados quedan hasta que la persona los descarta. */
 importScripts("/sw-cola-bd.js");
-/* global importScripts, abrirCola, pedido, avisarCola, resolverClaves, descartarTodo */
+/* global importScripts, abrirCola, pedido, avisarCola, resolverClaves, descartarTodo, borrarEvacuacionLocal */
 const SYNC_TAG = "opai-terreno-lote";
 const LOTE_MAX = 50;
 
@@ -69,7 +69,10 @@ async function vaciarUnaVez() {
       }
       if (r.status === 401) {
         const d = await r.json().catch(() => ({}));
-        if (d.revocado) await descartarTodo(db, todos.map((h) => h.clave));
+        if (d.revocado) {
+          await descartarTodo(db, todos.map((h) => h.clave));
+          await borrarEvacuacionLocal(db);
+        }
         await avisarCola(db, { ok: false, error: d.revocado ? "revocado" : "sin_dispositivo" });
         return;
       }

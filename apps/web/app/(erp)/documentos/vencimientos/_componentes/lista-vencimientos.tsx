@@ -3,7 +3,7 @@ import { Upload } from "lucide-react";
 import { Badge, type Columna, ListScreen } from "@opai/ds";
 import { etiquetaRelativa, type GrupoVencimiento } from "@opai/domain";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { LinkNext } from "@/app/_components/link-next";
 import { fecha } from "@/lib/fechas";
 
@@ -45,14 +45,14 @@ function Entidad({ d, etiquetas }: { d: Fila; etiquetas: Record<string, string> 
 
 function Accion({ d, puedeSubir }: { d: Fila; puedeSubir: boolean }) {
   return puedeSubir ? (
-    <EnlaceBotonHoja
+    <EnlaceBoton
       href={renovar(d)}
       variante="secondary"
       icono={Upload}
       etiqueta={`Subir renovación de ${nombreDe(d)}`}
     >
       Subir renovación
-    </EnlaceBotonHoja>
+    </EnlaceBoton>
   ) : null;
 }
 

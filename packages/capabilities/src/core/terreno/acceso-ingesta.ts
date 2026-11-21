@@ -1,4 +1,11 @@
+import {
+  emitirEntrada,
+  emitirIngresoBloqueadoDiferido,
+  emitirIntentoDenegado,
+  emitirSalida,
+} from "../../acceso/eventos-acceso";
 import type { Contexto } from "../../types";
+import { registrarIntentosEnLibro } from "./acceso-libro-novedades";
 import { evaluarEntradas } from "./acceso-entradas";
 import { escribirSalidas, validarSalidas } from "./acceso-salidas";
 import type { Equipo, FilaUso, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
@@ -40,6 +47,43 @@ async function escribirUsos(tx: Contexto["db"], usos: FilaUso[]) {
   if (data.length) await tx.prerregistroUso.createMany({ skipDuplicates: true, data });
 }
 
+/** Eventos comunicables tras persistir entradas, intentos y salidas (CAR-482). */
+async function emitirEventosAcceso(
+  tx: Contexto["db"],
+  ctx: Contexto,
+  reg: Awaited<ReturnType<typeof evaluarEntradas>>["registros"],
+  int: Awaited<ReturnType<typeof evaluarEntradas>>["intentos"],
+  salidasEscritas: Awaited<ReturnType<typeof escribirSalidas>>,
+  bloqueadoDiferido: Awaited<ReturnType<typeof evaluarEntradas>>["bloqueadoDiferido"],
+) {
+  for (const r of reg) {
+    await emitirEntrada(tx, ctx, {
+      instalacionId: r.instalacionId,
+      registroId: r.id as string,
+      clave: r.clave,
+    });
+  }
+  for (const i of int) {
+    const intentoId = i.id as string;
+    await emitirIntentoDenegado(tx, ctx, {
+      instalacionId: i.instalacionId,
+      intentoId,
+      motivo: i.motivo,
+      clave: i.clave,
+    });
+    if (bloqueadoDiferido.has(i.clave)) {
+      await emitirIngresoBloqueadoDiferido(tx, ctx, {
+        instalacionId: i.instalacionId,
+        intentoId,
+        clave: i.clave,
+      });
+    }
+  }
+  for (const s of salidasEscritas) {
+    await emitirSalida(tx, ctx, { instalacionId: s.instalacionId, registroId: s.registroId });
+  }
+}
+
 /**
  * Portería (CAR-78 · E4b-2): entrada y salida por la cola. La entrada normaliza el documento, calcula su huella
  * (nunca se guarda el número) y cruza con las listas de la instalación del equipo (el bloqueo gana, R7): si entra
@@ -61,7 +105,13 @@ export async function resolverAcceso(
       rechazos.set(h.clave, "modulo_inactivo");
     return vacio;
   }
-  const { registros, intentos, usos } = await evaluarEntradas(ctx, equipo, entradas, t, rechazos);
+  const { registros, intentos, usos, bloqueadoDiferido } = await evaluarEntradas(
+    ctx,
+    equipo,
+    entradas,
+    t,
+    rechazos,
+  );
   const salidasOk = await validarSalidas(
     ctx,
     equipo,
@@ -75,18 +125,31 @@ export async function resolverAcceso(
       const reg = registros.filter((r) => aceptadas.has(r.clave));
       const int = intentos.filter((r) => aceptadas.has(r.clave));
       if (reg.length) await tx.registroAcceso.createMany({ skipDuplicates: true, data: reg });
-      await escribirUsos(
-        tx,
-        usos.filter((u) => reg.some((r) => r.id === u.registroId)),
-      );
+      await escribirUsos(tx, usos.filter((u) => reg.some((r) => r.id === u.registroId)));
       if (int.length) await tx.intentoDenegado.createMany({ skipDuplicates: true, data: int });
-      await escribirSalidas(
+      await registrarIntentosEnLibro(
+        tx,
+        ctx,
+        equipo,
+        int.map((i) => ({
+          clave: i.clave,
+          motivo: i.motivo,
+          tipoRegistro: i.tipoRegistro,
+          personaId: i.personaId ?? null,
+          horaCorregida:
+            i.horaCorregida instanceof Date
+              ? i.horaCorregida
+              : new Date(i.horaCorregida as string | Date),
+        })),
+      );
+      const salidasEscritas = await escribirSalidas(
         tx,
         ctx,
         equipo,
         salidasOk.filter((s) => aceptadas.has(s.h.clave)),
         t,
       );
+      await emitirEventosAcceso(tx, ctx, reg, int, salidasEscritas, bloqueadoDiferido);
     },
   };
 }

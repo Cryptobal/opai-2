@@ -25,6 +25,8 @@ const salida = z.object({
   origen: z.string(),
   lista: z.enum(["autorizada", "bloqueada"]).nullable(),
   dispositivo: z.string().nullable(),
+  /** Punto de acceso por el que entró (CAR-479 parte 2). */
+  punto: z.string().nullable(),
   /** Quién o qué registró la salida: el equipo, el ERP o el cierre en bloque. */
   salidaOrigen: z.string().nullable(),
   anulacion: z.object({ en: z.string(), motivo: z.string() }).nullable(),
@@ -51,6 +53,7 @@ export const registrosObtener = defineCapability({
         salida: { select: { horaCorregida: true, origen: true } },
         anulacion: { select: { createdAt: true, motivo: true } },
         entradaLista: { select: { tipo: true } },
+        punto: { select: { nombre: true } },
       },
     });
     if (!r) throw noEncontrado("El registro de acceso");
@@ -82,6 +85,7 @@ export const registrosObtener = defineCapability({
       origen: r.origen,
       lista: tipoLista,
       dispositivo: disp ? (disp.nombre ?? disp.identificador) : null,
+      punto: r.punto?.nombre ?? null,
       salidaOrigen: r.salida?.origen ?? null,
       anulacion: r.anulacion
         ? { en: r.anulacion.createdAt.toISOString(), motivo: r.anulacion.motivo }

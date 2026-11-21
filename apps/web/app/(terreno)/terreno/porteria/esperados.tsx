@@ -3,40 +3,28 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-import { Alerta, Badge, Button } from "@opai/ds";
+import { Alerta, Button } from "@opai/ds";
 
 import { encolarHecho } from "@/lib/terreno/cola";
 
 import { lectorDisponible } from "../_componentes/escanear-qr";
+import { type Esperado, ListaEsperados } from "./lista-esperados";
 
 const EscanearQr = dynamic(() => import("../_componentes/escanear-qr").then((m) => m.EscanearQr), {
   ssr: false,
 });
 
-export type Esperado = {
-  visitanteId: string;
-  nombre: string;
-  empresa: string | null;
-  documento: string;
-  desdeMin: number | null;
-  hastaMin: number | null;
-  anfitrion: string;
-  motivo: string | null;
-  nota: string | null;
-  ingreso: boolean;
-};
-
-const hhmm = (m: number) =>
-  `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-const horario = (e: Esperado) =>
-  e.desdeMin === null || e.hastaMin === null
-    ? "Todo el día"
-    : `${hhmm(e.desdeMin)} – ${hhmm(e.hastaMin)}`;
 /** Visitante del QR `A1.<kid>.<visitante>.<día>.<firma>`; el servidor verifica la firma al recibir la entrada. */
 const visitanteDe = (codigo: string) => codigo.trim().split(".")[2] ?? "";
 
 /** Visitante leído: sus datos ya vienen del prerregistro y el guardia solo confirma (R14). */
-function Confirmar(p: { e: Esperado; codigo: string; personaId: string; listo: () => void }) {
+function Confirmar(p: {
+  e: Esperado;
+  codigo: string;
+  personaId: string;
+  puntoId: string | null;
+  listo: () => void;
+}) {
   const [estado, setEstado] = useState<"libre" | "guardando" | "error">("libre");
   const registrar = async () => {
     setEstado("guardando");
@@ -48,6 +36,7 @@ function Confirmar(p: { e: Esperado; codigo: string; personaId: string; listo: (
           invitacion: p.codigo,
           nombre: p.e.nombre,
           ...(p.e.motivo ? { motivo: p.e.motivo } : {}),
+          ...(p.puntoId ? { puntoId: p.puntoId } : {}),
         },
         personaId: p.personaId,
       });
@@ -78,36 +67,17 @@ function Confirmar(p: { e: Esperado; codigo: string; personaId: string; listo: (
   );
 }
 
-/** Lista de los esperados de hoy con su horario, anfitrión y si ya entraron. */
-function ListaEsperados({ items }: { items: Esperado[] }) {
-  return (
-    <ul className="flex flex-col divide-y divide-border">
-      {items.map((e) => (
-        <li key={e.visitanteId} className="flex items-center justify-between gap-3 py-2">
-          <span className="flex min-w-0 flex-col">
-            <span className="t-body truncate text-fg">{e.nombre}</span>
-            <span className="t-caption">
-              {[e.empresa, horario(e), e.anfitrion].filter(Boolean).join(" · ")}
-            </span>
-          </span>
-          <Badge tono={e.ingreso ? "success" : "info"} punto>
-            {e.ingreso ? "Ingresó" : "Esperado"}
-          </Badge>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 /**
  * Esperados hoy (CAR-478): los prerregistrados de la instalación y la lectura de su invitación. Al leer el QR el
  * formulario llega lleno y el guardia solo confirma; sin invitación, el documento prerregistrado igual entra.
  */
 export function Esperados({
   personaId,
+  puntoId,
   alRegistrar,
 }: {
   personaId: string;
+  puntoId: string | null;
   alRegistrar: () => void;
 }) {
   const [items, setItems] = useState<Esperado[] | null>(null);
@@ -135,6 +105,7 @@ export function Esperados({
           e={leido.e}
           codigo={leido.codigo}
           personaId={personaId}
+          puntoId={puntoId}
           listo={() => {
             const id = leido.e?.visitanteId;
             setItems(
