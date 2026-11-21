@@ -3,9 +3,11 @@
 import { randomUUID } from "node:crypto";
 import { vi } from "vitest";
 
+import { manifest as manifestAcceso } from "../../../modules/acceso/manifest";
 import { type Entorno, prepararEntorno } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
+import { limpiarModulos, registrarModulos } from "../src/module";
 
 const CLAVE_PRUEBA = "clave-solo-para-pruebas-no-es-un-secreto-real-0123456789";
 type Res<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
@@ -17,7 +19,8 @@ export async function entornoPortalAccesos() {
   const mod: typeof ModuloCapacidades = await import("../src");
   mod.limpiarRegistro();
   mod.registrarCapacidades(mod.capacidadesDelNucleo);
-  mod.registrarCapacidades(mod.capacidadesAcceso);
+  limpiarModulos();
+  registrarModulos([manifestAcceso]);
   const s = randomUUID().slice(0, 8);
   const medidor = { registrar: async () => undefined };
   const tenant = async (k: string) =>
