@@ -3,7 +3,6 @@ import { MapPin, Plus } from "lucide-react";
 import { Badge, cn, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
@@ -11,15 +10,14 @@ import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionFila } from "@/lib/tipos-maestros";
 
-import { FiltroCuentaInstalaciones } from "./filtro-cuenta";
+import { REGIONES } from "./datos";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 type Props = {
   state: EstadoPantalla;
   items: InstalacionFila[];
-  regiones: { valor: string; etiqueta: string }[];
-  siguiente: string | null;
-  cuentaEtiqueta: string | null;
+  siguiente?: string | null;
+  cuentas: { valor: string; etiqueta: string }[];
   titulo: string;
   singular: string;
   seleccionada?: string;
@@ -46,41 +44,24 @@ export function ListaInstalaciones(p: Props) {
       accion={nueva}
       vistas={{ lista: "instalaciones", ruta: "/instalaciones" }}
       buscar={`Buscar ${p.singular}`}
-      vista={
-        <div className="flex flex-wrap items-center gap-2 pb-2.5 md:px-4 md:pb-0">
-          <FiltroCuentaInstalaciones cuentaInicial={p.cuentaEtiqueta} />
-          <ChipsFiltro
-            filtros={[
-              {
-                param: "estado",
-                etiqueta: "Estado",
-                opciones: Object.entries(ESTADO_INSTALACION).map(([valor, e]) => ({
-                  valor,
-                  etiqueta: e.etiqueta,
-                })),
-              },
-              { param: "region", etiqueta: "Región", opciones: p.regiones },
-            ]}
-          />
-        </div>
-      }
+      filtros={[
+        { param: "cuenta", etiqueta: "Cuenta", opciones: p.cuentas },
+        {
+          param: "estado",
+          etiqueta: "Estado",
+          opciones: Object.entries(ESTADO_INSTALACION).map(([valor, e]) => ({
+            valor,
+            etiqueta: e.etiqueta,
+          })),
+        },
+        { param: "region", etiqueta: "Región", opciones: REGIONES },
+      ]}
       meta={{
         izquierda: filtrando
           ? `${p.items.length}${p.siguiente ? "+" : ""} ${p.items.length === 1 ? "resultado" : "resultados"}`
           : `${p.items.length}${p.siguiente ? "+" : ""} ${p.titulo.toLowerCase()}`,
         derecha: personas(total),
       }}
-      pie={
-        p.state === "ready" ? (
-          <PaginacionListaMaestro
-            p={p.parametros}
-            rutaBase="/instalaciones"
-            mostrados={p.items.length}
-            siguiente={p.siguiente}
-            porPagina={porPagina}
-          />
-        ) : undefined
-      }
       seleccionada={p.seleccionada}
       vacio={
         filtrando
@@ -90,6 +71,17 @@ export function ListaInstalaciones(p: Props) {
               descripcion: "Crea la primera para definir sus puestos y documentos.",
               accion: nueva,
             }
+      }
+      pie={
+        p.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={p.parametros}
+            rutaBase="/instalaciones"
+            mostrados={p.items.length}
+            siguiente={p.siguiente ?? null}
+            porPagina={porPagina}
+          />
+        ) : undefined
       }
       filas={p.items.map((i) => {
         const e = estadoDe(ESTADO_INSTALACION, i.estado);

@@ -23,7 +23,7 @@ describe("conFiltros (CAR-255)", () => {
     expect(q.get("q")).toBe("ñandú 1");
   });
 
-  it("conserva también el tipo y el orden del libro (CAR-270)", () => {
+  it("conserva también el tipo, orden y cursor del libro (CAR-270, CAR-585)", () => {
     expect(conFiltros("/f", { tipo: "61", orden: "mayor_monto", cursor: "x" })).toBe(
       "/f?tipo=61&orden=mayor_monto&cursor=x",
     );

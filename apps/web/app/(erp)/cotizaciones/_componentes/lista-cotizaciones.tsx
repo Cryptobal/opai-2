@@ -3,30 +3,40 @@ import { Plus } from "lucide-react";
 import { Badge } from "@opai/ds";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
-import { queryConCambios, tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
-import type { Parametros } from "@/lib/parametros";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
+import { fecha } from "@/lib/fechas";
 import { semaforoEtiqueta } from "@/lib/cpq-presentacion";
 
 import type { DatosCotizaciones } from "./datos";
+import { conFiltrosCotizaciones } from "./filtros-cotizaciones";
+import { FiltrosFechaEnvio } from "./filtros-fecha-envio";
 import { estadoLista, margenLista, pideRecalcular, ventaLista } from "./lista-cotizaciones-helpers";
+import { opcionesEstadoCpq } from "./opciones-filtro-cpq";
 
 /** Columna izquierda del patrón lista y ficha (CAR-141). */
 export function ListaCotizaciones({
   datos: d,
   seleccionada,
-  p,
   base = "/cotizaciones",
 }: {
   datos: DatosCotizaciones;
   seleccionada?: string;
-  p: Parametros;
   base?: string;
 }) {
+  const p = d.parametros;
+  const porPagina = tamanoPagina(p);
+  const filtrando = Boolean(
+    p.q || p.estado || p.cuenta || p.responsable || p.desde || p.hasta || d.archivadas,
+  );
+  const metaConteo = filtrando
+    ? `${d.items.length}${d.siguiente ? "+" : ""} ${d.items.length === 1 ? "resultado" : "resultados"}`
+    : `${d.items.length}${d.siguiente ? "+" : ""} ${d.archivadas ? "archivadas" : "cotizaciones"}`;
   const nueva = d.crear ? (
     <EnlaceBotonHoja
       href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`}
       icono={Plus}
+      variante={seleccionada ? "secondary" : "primary"}
     >
       Nueva
     </EnlaceBotonHoja>
@@ -36,22 +46,31 @@ export function ListaCotizaciones({
       state={d.state}
       titulo="Cotizaciones"
       accion={nueva}
+      vistas={{ lista: "cotizaciones", ruta: base }}
       buscar="Buscar cotización"
-      filtros={[
-        {
-          param: "ver",
-          etiqueta: "Mostrar",
-          opciones: [{ valor: "archivadas", etiqueta: "Archivadas" }],
-        },
-      ]}
-      meta={{
-        izquierda: `${d.items.length}${d.siguiente ? "+" : ""} ${p["q"]?.trim() ? "resultados" : d.archivadas ? "archivadas" : "cotizaciones"}`,
-        derecha: "Más recientes",
-      }}
+      filtros={
+        d.archivadas
+          ? []
+          : [
+              { param: "estado", etiqueta: "Estado", opciones: opcionesEstadoCpq },
+              { param: "cuenta", etiqueta: "Cuenta", opciones: d.cuentas },
+              { param: "responsable", etiqueta: "Responsable", opciones: d.responsables },
+              {
+                param: "ver",
+                etiqueta: "Mostrar",
+                opciones: [{ valor: "archivadas", etiqueta: "Archivadas" }],
+              },
+            ]
+      }
+      debajoFiltros={d.archivadas ? undefined : <FiltrosFechaEnvio />}
+      meta={{ izquierda: metaConteo, derecha: "Más recientes" }}
       seleccionada={seleccionada}
       vacio={
-        p["q"]?.trim()
-          ? { titulo: "Sin resultados", descripcion: "Prueba con otra búsqueda." }
+        filtrando
+          ? {
+              titulo: "Sin resultados",
+              descripcion: "Prueba otro término: cuenta, título o número de cotización.",
+            }
           : d.archivadas
             ? {
                 titulo: "No hay cotizaciones archivadas",
@@ -70,7 +89,7 @@ export function ListaCotizaciones({
             rutaBase={base}
             mostrados={d.items.length}
             siguiente={d.siguiente}
-            porPagina={tamanoPagina(p, 20)}
+            porPagina={porPagina}
           />
         ) : undefined
       }
@@ -79,7 +98,7 @@ export function ListaCotizaciones({
         const margen = margenLista(c, d.costos);
         return {
           id: c.id,
-          href: `${base}/${c.id}${queryConCambios(p, {})}`,
+          href: conFiltrosCotizaciones(`${base}/${c.id}`, p),
           titulo: (
             <>
               <span className="t-mono text-[13px]">{c.codigo}</span>
@@ -96,6 +115,7 @@ export function ListaCotizaciones({
             <span className="t-caption">
               v{c.version?.numero ?? "—"} · {ventaLista(c)}
               {margen ? ` · Margen ${margen}` : null}
+              {c.version?.enviadaEn ? ` · Enviada ${fecha(c.version.enviadaEn)}` : null}
               {pideRecalcular(c, d.costos) ? " · Recalcular" : null}
             </span>
           ),
