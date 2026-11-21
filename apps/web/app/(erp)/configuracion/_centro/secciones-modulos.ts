@@ -144,6 +144,11 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
   ],
 };
 
+/** Indica si el módulo registra pestañas de configuración (CAR-744). */
+export function moduloTienePestanasConfig(moduloId: string): boolean {
+  return (SECCIONES_MODULO[moduloId]?.length ?? 0) > 0;
+}
+
 /** Pestañas visibles de un módulo para quien tiene `puede`, y la activa según `?seccion=`. */
 export function seccionesDe(modulo: string, puede: (permiso: string) => boolean, pedida?: string) {
   const visibles = (SECCIONES_MODULO[modulo] ?? []).filter((s) => puede(s.permiso));

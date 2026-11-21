@@ -18,8 +18,11 @@ test.describe("@preview CAR-744: módulos contratados en Configuración", () => 
     if ((await tickets.count()) > 0) {
       await expect(tickets.first()).toBeVisible();
       await tickets.first().click();
-      await page.waitForURL(/\/configuracion\/modulo\/tickets$/);
-      await expect(page.getByRole("tab", { name: "Tipos de ticket", exact: true })).toBeVisible();
+      await page.waitForURL(/\/configuracion\/modulo\/tickets(\?.*)?$/);
+      const secciones = page.getByRole("navigation", { name: "Secciones" });
+      await expect(
+        secciones.getByRole("link", { name: "Tipos de ticket", exact: true }),
+      ).toBeVisible();
     }
     await capturar(page, info, "configuracion-modulos-car744");
   });
