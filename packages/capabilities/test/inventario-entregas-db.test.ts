@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import * as mod from "../src";
 import { limpiarModulos } from "../src/module";
-import { codigo, dato } from "./maestros-ayuda";
+import { codigo, dato, sembrarContratoVigente } from "./maestros-ayuda";
 
 type Entrega = { id: string; item: string; destino: string; instalacionId: string | null; devueltaEn: string | null; cantidad: number | null };
 
@@ -18,7 +18,6 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
   let ana = "";
   let persona = "";
   let personaB = "";
-  let cargo = "";
   let instalacion = "";
   let otraInstalacion = "";
   let activo = "";
@@ -46,8 +45,9 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     return t.id;
   }
   async function sitio(tenantId: string, nombre: string) {
-    const cuenta = await e.admin.cuenta.create({ data: { tenantId, nombre: `Cuenta ${nombre}` } });
-    return (await e.admin.instalacion.create({ data: { tenantId, cuentaId: cuenta.id, nombre } })).id;
+    const db = e.forTenant(tenantId);
+    const cuenta = await db.cuenta.create({ data: { tenantId, nombre: `Cuenta ${nombre}` } });
+    return (await db.instalacion.create({ data: { tenantId, cuentaId: cuenta.id, nombre } })).id;
   }
 
   beforeAll(async () => {
@@ -62,20 +62,7 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     personaB = (await e.admin.persona.create({ data: { tenantId: b, nombres: "Bea", apellidos: "Paz", rut: "30000003-6" } })).id;
     instalacion = await sitio(a, "Planta Norte");
     otraInstalacion = await sitio(a, "Bodega Sur");
-    cargo = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Guardia" } })).id;
-    await e.admin.vinculoLaboral.create({
-      data: {
-        tenantId: a,
-        personaId: persona,
-        cargoId: cargo,
-        instalacionId: instalacion,
-        tipo: "indefinido",
-        inicio: new Date("2026-01-01"),
-        estado: "vigente",
-        horasSemanales: 44,
-        distribucion: "4x4",
-      },
-    });
+    await sembrarContratoVigente(e, a, persona, instalacion);
     const tel = await dato<{ id: string }>(ctx(a), "inventario.tipos.crear", { categoria: "activo", nombre: "Teléfono" });
     activo = (await dato<{ id: string }>(ctx(a), "inventario.activos.crear", { tipoId: tel.id, codigo: `TEL-${sufijo}` })).id;
     camisa = (await dato<{ id: string }>(ctx(a), "inventario.tipos.crear", { categoria: "ropa", nombre: "Camisa", tallas: ["M"] })).id;
