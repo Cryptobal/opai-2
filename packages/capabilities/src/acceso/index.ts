@@ -9,6 +9,7 @@ import {
   prerregistrosListar,
   prerregistrosObtener,
 } from "./prerregistros-leer";
+import { gruposCambiar, gruposListar } from "./grupos-lista";
 import { listasAgregar, listasListar, listasQuitar } from "./listas";
 import { portalRegistrosListar } from "./portal-cliente";
 import { puntosCambiar, puntosListar } from "./puntos";
@@ -22,6 +23,8 @@ export const capacidadesAcceso: readonly Capacidad[] = [
   listasListar,
   listasAgregar,
   listasQuitar,
+  gruposListar,
+  gruposCambiar,
   registrosListar,
   registrosObtener,
   intentosListar,

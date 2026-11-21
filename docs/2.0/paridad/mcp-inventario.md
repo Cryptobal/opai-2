@@ -177,24 +177,32 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.apariencia.get` | `acceso_apariencia_get` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.apariencia.set` | `acceso_apariencia_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.config.get` | `acceso_config_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.config.set` | `acceso_config_set` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.grupos.list` | — | falta |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.grupos.set` | — | falta |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.quitar` | `acceso_listas_quitar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.privacidad.cartel` | `acceso_privacidad_cartel` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.list` | `acceso_puntos_list` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.set` | `acceso_puntos_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.anular` | `acceso_registros_anular` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.cerrar_bloque` | `acceso_registros_cerrar_bloque` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.get` | `acceso_registros_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.salida` | `acceso_registros_salida` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.reportes.probar` | `acceso_reportes_probar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.cancelar` | `acceso_prerregistros_cancelar` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.crear` | `acceso_prerregistros_crear` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.get` | `acceso_prerregistros_get` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.invitacion` | `acceso_prerregistros_invitacion` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.listar` | `acceso_prerregistros_listar` | existe |
-| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.correcciones.proponer` | `asistencia_correcciones_proponer` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | compartido | `app/(erp)/asistencia/contingencias/_componentes` | `asistencia.contingencias.registrar` | `asistencia_contingencias_registrar` | existe |
@@ -938,7 +946,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
-| `app/_acciones/app-nativa.ts#accionCanjearApp` | Identidad: canje del código de la app nativa con su verificador PKCE (CAR-516); abre una sesión sin heredar el segundo factor. Tope por origen con fallo cerrado. |
 | `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
@@ -968,25 +975,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
-| `app/_acciones/ver-como.ts#accionIniciarVerComo` | Invoca core.ver_como.iniciar (solo personas, CAR-528) y guarda la vista en una cookie firmada de esa sesión. |
-| `app/_acciones/ver-como.ts#accionSalirVerComo` | Invoca core.ver_como.terminar (solo personas, CAR-528) y borra la cookie de la vista. |
-| `app/_components/firmas/acciones-sesion.ts#firmarEnSesion` | Firma: core.firmas.firmar (interna con motivo) con sesión del portal (CAR-634). |
-| `app/_components/firmas/acciones-sesion.ts#rechazarEnSesion` | Firma: core.firmas.rechazar (interna con motivo) con sesión del portal (CAR-634). |
-| `app/_components/firmas/acciones-sesion.ts#urlDocumentoEnSesion` | Firma: core.firmas.documento_url (interna con motivo) con sesión del portal (CAR-634). |
-| `app/_components/firmas/acciones-sesion.ts#verFirmaSesion` | Firma: core.firmas.ver_firmante (interna con motivo) con sesión del portal (CAR-634). |
-| `app/.well-known/apple-app-site-association/route.ts` | Apple App Site Association (webcredentials): JSON público para la app iOS, sin datos de negocio. |
 | `app/.well-known/oauth-authorization-server/api/auth/route.ts` | Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247). |
 | `app/.well-known/oauth-authorization-server/route.ts` | Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad. |
 | `app/.well-known/oauth-protected-resource/api/mcp/route.ts` | Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247). |
 | `app/.well-known/oauth-protected-resource/route.ts` | Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio. |
-| `app/(auth)/app/google/route.ts` | Identidad: inicia el ingreso con Google de la app nativa en el navegador del sistema (CAR-516); guarda el reto PKCE en una cookie y redirige a Google. |
-| `app/(auth)/app/volver/route.ts` | Identidad: ingreso con Google desde la app nativa (CAR-516, CAR-727); emite el código atado al reto PKCE y redirige 303 al esquema de la app. Abre una sesión, no es una operación de negocio. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion` | Identidad: core.invitations.accept (interna con motivo): nadie acepta invitaciones por otro. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion` | Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial. |
+| `app/(erp)/accesos/_componentes/config/cartel-accion.ts#cartelPrivacidad` | Prepara el cartel de privacidad con acceso.privacidad.cartel y el QR de la política pública (herramienta MCP existente). |
 | `app/api/agente/route.ts` | Agente interno (ADR-049): agente.turno.preparar/agente.plan.confirmar (solo personas, con motivo); un agente externo usa el MCP. |
-| `app/api/asistencia/reportes-dt/export/route.ts` | Descarga de asistencia.reportes.exportar (Excel/PDF) con sesión; mismo permiso y datos que la herramienta MCP asistencia_reportes_exportar (CAR-590). |
 | `app/api/auth/[...all]/route.ts` | Better Auth (sesión, OAuth y verificación de correo). |
 | `app/api/cron/programador/route.ts` | Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029). |
 | `app/api/cron/trabajos/route.ts` | Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029). |
@@ -1007,14 +1005,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
 | `app/api/terreno/contexto/route.ts` | Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
-| `app/api/terreno/libro/route.ts` | Lee el libro de novedades de la instalación del equipo de terreno emparejado (CAR-77): cookie de dispositivo, sin sesión; ejecuta core.libro_novedades_equipo.listar (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/lote/route.ts` | Recibe el lote de hechos del equipo de terreno emparejado (CAR-78 B3): cookie de dispositivo y mismo origen, sin sesión; ejecuta core.hechos_terreno.recibir (interna con motivo en EXCEPCIONES_PARIDAD). Su lectura por MCP es core.hechos_terreno.listar. |
 | `app/api/terreno/porteria/esperados/route.ts` | Lee los visitantes prerregistrados para hoy de la portería del equipo de terreno emparejado (CAR-478): cookie de dispositivo, sin sesión; ejecuta core.terreno.esperados (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/porteria/sitio/route.ts` | Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas. |
-| `app/contingencia/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial. |
 | `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |

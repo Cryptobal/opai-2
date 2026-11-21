@@ -34,7 +34,7 @@ export function estadoDiaPrerregistro(d: {
   cancelado: boolean;
   ingresos?: number;
 }): EstadoDiaPrerregistro {
-  if (d.cancelado) return "cancelado";
   if ((d.ingresos ?? 0) > 0) return "ingreso";
+  if (d.cancelado) return "cancelado";
   return ms(d.dia) < ms(d.hoy) ? "no_llego" : "pendiente";
 }
