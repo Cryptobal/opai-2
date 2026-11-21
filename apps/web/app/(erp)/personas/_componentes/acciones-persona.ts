@@ -6,7 +6,6 @@ import type { PersonaDetalle } from "@/lib/tipos-maestros";
 export function accionesPersona(p: PersonaDetalle): AccionEntidad[] {
   const v = p.vinculoVigente;
   return [
-    { id: "editar", etiqueta: "Editar datos", parametro: { clave: "editar", valor: "1" } },
     p.bloqueada
       ? {
           id: "desbloquear",

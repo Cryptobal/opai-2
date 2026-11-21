@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { Skeleton } from "@opai/ds";
 
+import { CamposFicha } from "@/app/_components/campos/campos-ficha";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 
@@ -35,6 +36,9 @@ export default function Persona(props: Props) {
               <TarjetasResumen personaId={p.id} hoy={hoyIso()} />
             </Suspense>
             <ResumenPersona p={p} hoy={hoyIso()} />
+            <Suspense fallback={null}>
+              <CamposFicha tipo="persona" id={p.id} />
+            </Suspense>
           </div>
           <MarcaNoRecontratar personaId={p.id} nombre={p.nombreCompleto} />
           {p.usuarioId ? null : (

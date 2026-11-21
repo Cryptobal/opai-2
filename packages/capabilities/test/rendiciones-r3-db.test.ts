@@ -183,6 +183,28 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R3 (db)", () => {
     await expect(e.admin.lotePagoItem.updateMany({ where: { loteId: rend["lote"]! }, data: { montoClp: 1 } })).rejects.toThrow();
   });
 
+  it("un lote de reversa devuelve rendiciones pagadas a aprobadas con aprobación humana", async () => {
+    const paga = como(u.paga, "gerente", t.a);
+    const intentos = await Promise.all([
+      paga("rendiciones.lotes.crear_reversa", { rendicionIds: [rend["r1"]!] }),
+      paga("rendiciones.lotes.crear_reversa", { rendicionIds: [rend["r1"]!] }),
+    ]);
+    expect(intentos.filter((r) => r.ok)).toHaveLength(1);
+    const rev = ok(intentos.find((r) => r.ok)!);
+    const candidatas = ok(await paga("rendiciones.lotes.candidatas_reversa", { limite: 1 }));
+    expect(candidatas["rendiciones"]).toMatchObject([{ id: rend["r2"] }]);
+    expect(rev).toMatchObject({ estado: "borrador", totalClp: 12_500, cantidad: 1 });
+    ok(await como(u.paga2, "gerente", t.a)("rendiciones.lotes.aprobar", { id: String(rev["id"]) }));
+    const keyId = (await e.admin.apiKey.create({ data: { tenantId: t.a, userId: u.paga, nombre: "Agente rev", prefijo: `opai_rev_${randomUUID().slice(0, 6)}`, hash: randomUUID(), scopes: ["*"] } })).id;
+    const agente = mod.crearContexto({ tenantId: t.a, actor: { tipo: "agent", id: keyId, viaUserId: u.paga }, rol: "gerente", scopes: ["*"], modulosActivos: ["rendiciones"], usuario: { id: u.paga, nombre: "Pedro", email: "p@r3.test", platformRole: null }, agente: { apiKeyId: keyId, nombre: "Agente", presupuestoMensualMicro: null, autonomia: {} }, medidor: { registrar: async () => undefined } });
+    const entrada = { id: String(rev["id"]), motivo: "Pago duplicado en prueba" };
+    expect((await mod.executeCapability(agente, "rendiciones.lotes.aplicar_reversa", entrada, {})) as R).toMatchObject({ ok: false, error: { code: "APPROVAL_REQUIRED" } });
+    ok(await paga("rendiciones.lotes.aplicar_reversa", entrada));
+    expect((await e.admin.rendicion.findUniqueOrThrow({ where: { id: rend["r1"]! } })).estado).toBe("aprobada");
+    expect(await e.admin.lotePago.findUniqueOrThrow({ where: { id: String(rev["id"]) } })).toMatchObject({ estado: "aplicado", esReversa: true });
+    expect((ok(await paga("rendiciones.lotes.candidatas"))["rendiciones"] as { id: string }[]).some((r) => r.id === rend["r1"])).toBe(true);
+  });
+
   it("otra empresa no ve ni toca los lotes", async () => {
     const b = como(u.duenoB, "owner", t.b);
     expect((ok(await b("rendiciones.lotes.listar"))["items"] as unknown[]).length).toBe(0);

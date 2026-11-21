@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { EnlaceAltaLista } from "@/app/_components/maestros/enlace-alta-lista";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
@@ -47,9 +47,9 @@ const estadoVisible = (x: PersonaFila) =>
  */
 export function ListaPersonas(x: Props) {
   const nueva = (
-    <EnlaceBotonHoja href="?nueva=1" icono={Plus} variante={x.seleccionada ? "secondary" : "primary"}>
+    <EnlaceAltaLista href="?nueva=1" icono={Plus}>
       Nueva
-    </EnlaceBotonHoja>
+    </EnlaceAltaLista>
   );
   const filtrando = Boolean(x.p["q"] || x.p["cargo"] || x.p["estado"] || x.p["anexo"]);
   const porPagina = tamanoPagina(x.p);
@@ -62,11 +62,8 @@ export function ListaPersonas(x: Props) {
       state={x.state}
       titulo={x.titulo}
       vistas={{ lista: "personas", ruta: "/personas" }}
-      accion={
-        <>
-          {nueva}
-        </>
-      }
+      accion={nueva}
+      accionFlotante
       buscar="Buscar por nombre o RUT"
       filtros={[
         { param: "cargo", etiqueta: "Cargo", opciones: x.cargos },

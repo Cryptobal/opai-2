@@ -41,8 +41,8 @@ export function ContenidoDocumento(p: {
       <div className="space-y-2">
         <p className="t-body-sm text-fg-muted">
           {d.cotizacion.codigo} · versión {d.version.numero}
-          {enviada ? " · documento enviado al contacto" : " · vista previa con marca de borrador"}. Usa la plantilla y la marca de
-          Configuración › CPQ.
+          {enviada ? " · documento enviado al contacto" : " · vista previa con marca de borrador"}.
+          Usa la plantilla y la marca de Configuración › CPQ.
         </p>
         <PropuestaTecnicaFicha
           codigo={d.cotizacion.codigo}
@@ -62,7 +62,10 @@ export function ContenidoDocumento(p: {
         <Alerta key={a.id} tono="info" titulo={a.titulo}>
           {a.detalle}
           {a.enlace ? (
-            <LinkNext href={a.enlace.href} className="ml-2 inline-flex min-h-11 items-center font-semibold underline">
+            <LinkNext
+              href={a.enlace.href}
+              className="ml-2 inline-flex min-h-11 items-center font-semibold underline"
+            >
               {a.enlace.etiqueta}
             </LinkNext>
           ) : null}

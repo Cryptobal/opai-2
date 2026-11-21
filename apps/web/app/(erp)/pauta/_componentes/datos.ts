@@ -37,16 +37,22 @@ export async function cargarPauta(p: Parametros) {
       ? ejecutarComoUsuario<MesPauta>("erp", "pauta.mes.leer", { instalacionId: inst, anio, mes })
       : ejecutarComoUsuario<ResumenTodas>("erp", "pauta.resumen.leer", { anio, mes }),
     p["ver"] === "ppc" && !diaria
-      ? ejecutarComoUsuario<Ppc[]>("erp", "pauta.ppc.listar", { anio, mes, ...filtroInst })
+      ? ejecutarComoUsuario<{ items: Ppc[] }>("erp", "pauta.ppc.listar", {
+          anio,
+          mes,
+          limite: 200,
+          ...filtroInst,
+        })
       : null,
     p["historial"] === "1"
       ? ejecutarComoUsuario<{ items: LineaHistorial[] }>("erp", "pauta.historial.listar", { ...filtroInst })
       : null,
     p["alertas"] === "1" && inst
-      ? ejecutarComoUsuario<{ semanaDesde: string; alertas: AlertaPautaFila[] }>("erp", "pauta.alertas.listar", {
-          instalacionId: inst,
-          semana: diaria ? fecha : undefined,
-        })
+      ? ejecutarComoUsuario<{ semanaDesde: string; items: AlertaPautaFila[] }>(
+          "erp",
+          "pauta.alertas.listar",
+          { instalacionId: inst, limite: 200, semana: diaria ? fecha : undefined },
+        )
       : null,
   ]);
   const instalaciones: OpcionInstalacion[] = lista.ok
@@ -60,7 +66,7 @@ export async function cargarPauta(p: Parametros) {
     instalaciones,
     mensual: inst && vista.ok ? (vista.data as MesPauta) : null,
     todas: !inst && vista.ok ? (vista.data as ResumenTodas) : null,
-    ppc: ppc?.ok ? ppc.data : null,
+    ppc: ppc?.ok ? ppc.data.items : null,
     historial: historial?.ok ? historial.data.items : null,
     alertas: alertas?.ok ? alertas.data : alertas && !alertas.ok ? null : undefined,
     verPpc: p["ver"] === "ppc",

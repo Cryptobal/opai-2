@@ -162,11 +162,16 @@ jobs:
           E2E_QA_APROBADOR_EMAIL: ${{ vars.E2E_QA_APROBADOR_EMAIL }}
         # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
         run: pnpm --filter @opai/web exec playwright test --grep @preview --workers=2 --reporter=list --output=test-results/playwright
+      - name: Copiar capturas de novedad al repositorio (CAR-520)
+        if: steps.listo.outputs.ok == 'true'
+        run: pnpm --filter @opai/domain novedad:imagen
       - name: Subir las capturas
         if: ${{ always() && steps.listo.outputs.ok == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: preview-e2e-capturas
-          path: apps/web/test-results/capturas
+          path: |
+            apps/web/test-results/capturas
+            apps/web/public/changelog/*.png
           if-no-files-found: warn
           retention-days: 14

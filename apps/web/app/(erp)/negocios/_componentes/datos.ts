@@ -26,7 +26,7 @@ export type NegocioFila = {
   seguimiento?: { texto: string; tono: "neutro" | "info" | "warning" | "danger" } | null;
 };
 
-export type Historial = {
+type Historial = {
   id: string;
   de: string | null;
   a: string;

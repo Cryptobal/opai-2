@@ -3,6 +3,7 @@ import { type ReactNode, Suspense } from "react";
 import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
+import { verComoDe } from "@/lib/ver-como";
 import { epocaDe } from "@/lib/epoca-sesion";
 import {
   anchoMenuDeLaPeticion,
@@ -13,6 +14,7 @@ import {
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
 import { MarcoPortal } from "./marco-portal";
+import { MarcoVerComo } from "./ver-como/marco-ver-como";
 
 /** Resuelve la identidad (lee cookies y sesión: dato dinámico) y monta el shell persistente. Vive
  *  dentro de un Suspense para que el acceso dinámico no bloquee el prerender del documento. */
@@ -23,6 +25,14 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   // para que el aviso «Sin permisos» viva dentro del marco, con el selector de portal y empresa y el
   // menú de usuario (Salir). El acceso se sigue verificando en servidor en la página (`servidor.ts`).
   if (!identidad) return children;
+  // «Ver como» (CAR-528): la banda fija y el portal de la persona vista, sin el shell de quien mira.
+  const vista = await verComoDe(identidad);
+  if (vista?.portal === portal)
+    return (
+      <MarcoVerComo vista={vista} portal={portal} epocaSesion={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}>
+        {children}
+      </MarcoVerComo>
+    );
   const datos = datosShell(identidad, portal);
   // Marco elegido por la persona (ADR-090): se lee de la cookie de este navegador, sin consultas, así
   // que el servidor ya pinta el marco correcto y no hay parpadeo. Sin acceso a la empresa o fuera del

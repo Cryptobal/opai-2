@@ -34,7 +34,7 @@ export async function emparejarCartola(ctx: Contexto, cuentaId: string, filas: F
   const previews: Preview[] = [];
   const nuevos: FilaCartolaParseada[] = [];
   const ajustes: AjusteFecha[] = [];
-  if (!fechas.length) return { previews, nuevos, ajustes, duplicados: 0 };
+  if (!fechas.length) return { previews, nuevos, ajustes, duplicados: 0, emparejados: new Set<string>() };
   const guardados = await ctx.db.movimientoBancario.findMany({
     where: {
       cuentaId,
@@ -77,5 +77,7 @@ export async function emparejarCartola(ctx: Contexto, cuentaId: string, filas: F
     const motivo = par.por === "exacta" ? "Ya existe con la misma huella." : `Ya entró por ${deDonde}.${porMonto}`;
     previews.push({ ...base, estado: "duplicada", motivo });
   });
-  return { previews, nuevos, ajustes, duplicados };
+  // Movimientos ya guardados que la cartola trae: el resto del banco en línea en su período es sobrante (CAR-450).
+  const emparejados = new Set([...pares.values()].map((par) => par.existenteId));
+  return { previews, nuevos, ajustes, duplicados, emparejados };
 }

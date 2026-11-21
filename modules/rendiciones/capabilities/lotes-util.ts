@@ -1,12 +1,14 @@
 import type { Contexto } from "@opai/capabilities";
-import { cifradoDeCampos, reglaDeNegocio } from "@opai/capabilities";
+import { cifradoDeCampos, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { sinRendicionPropia, totalLote } from "../domain";
 import { accesoDeMembresia, INCLUIR_ACCESO, tienePermisoEfectivo } from "@opai/domain";
+import { sinDuplicado } from "./esquemas";
 import { PERMISO_APROBAR_LOTE } from "./permisos";
 
 type Tx = Contexto["db"];
 
 /** Siguiente código LP-n de la empresa; el UPDATE bloquea la fila, así que no hay códigos repetidos. */
-export async function siguienteCodigoLote(tx: Tx, tenantId: string): Promise<number> {
+async function siguienteCodigoLote(tx: Tx, tenantId: string): Promise<number> {
   await tx.lotePagoContador.createMany({ data: [{ tenantId }], skipDuplicates: true });
   return (await tx.lotePagoContador.update({ where: { tenantId }, data: { ultimo: { increment: 1 } } })).ultimo;
 }
@@ -65,4 +67,41 @@ export async function numeroDeCuenta(ctx: Contexto, personaId: string): Promise<
   const c = await ctx.db.personaPago.findFirst({ where: { personaId, porDefecto: true }, select: { numeroCuenta: true } });
   if (!c?.numeroCuenta) throw reglaDeNegocio("Una persona del lote ya no tiene cuenta en su ficha.");
   return cifradoDeCampos(ctx).descifrar("personas_pago", "numero_cuenta", c.numeroCuenta);
+}
+
+/** Vista previa de un lote recién creado en borrador (dryRun). */
+function loteDryRunBorrador(total: number, cantidad: number) {
+  return { id: "00000000-0000-0000-0000-000000000000", estado: "borrador" as const, totalClp: total, cantidad };
+}
+
+export function exigirArmadoLote(
+  problemas: string[],
+  yo: string,
+  filas: readonly { solicitanteId: string; montoTotal: number }[],
+  mensajePropio: string,
+): number {
+  if (problemas.length > 0) throw reglaDeNegocio(problemas.join(" "));
+  if (!sinRendicionPropia(yo, filas.map((r) => r.solicitanteId))) throw prohibido(mensajePropio);
+  return totalLote(filas);
+}
+
+type LotePersistido = { id: string; totalClp: number; cantidad: number };
+
+export async function crearLoteBorrador(
+  ctx: Contexto,
+  dryRun: boolean,
+  total: number,
+  cantidad: number,
+  mensajeDuplicado: string,
+  fabricar: (tx: Tx, codigo: number) => Promise<LotePersistido>,
+) {
+  if (dryRun) return loteDryRunBorrador(total, cantidad);
+  const lote = await sinDuplicado(
+    ctx.transaccion(async (tx) => {
+      const codigo = await siguienteCodigoLote(tx, ctx.tenantId);
+      return fabricar(tx, codigo);
+    }),
+    mensajeDuplicado,
+  );
+  return { id: lote.id, estado: "borrador" as const, totalClp: lote.totalClp, cantidad: lote.cantidad };
 }

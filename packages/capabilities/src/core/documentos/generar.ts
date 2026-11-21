@@ -6,14 +6,14 @@ import { nombreSeguro, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
-import { marcaDe } from "../comunicaciones/resolver";
-import { logoDeMarca } from "../../finanzas/ventas-pdf-logo";
 import { uuidSchema } from "../esquemas";
 import { diaSchema } from "../maestros/comun";
-import { guardarPdfGenerado } from "./guardar-generado";
+import { generarPdfLaboralPersona } from "./generar-pdf-persona";
+import { calcularRelleno } from "./rellenar-calculo";
 import { documentoSchema } from "./vista";
 import { generarPdfLaboral } from "./pdf-laboral";
-import { calcularRelleno } from "./rellenar-calculo";
+import { marcaDe } from "../comunicaciones/resolver";
+import { logoDeMarca } from "../../finanzas/ventas-pdf-logo";
 
 export const documentoPlantillasGenerar = defineCapability({
   id: "core.documento_plantillas.generar",
@@ -39,18 +39,18 @@ export const documentoPlantillasGenerar = defineCapability({
       throw reglaDeNegocio(`Faltan datos para generar el documento: ${faltantes.map((f) => f.etiqueta).join(", ")}.`);
     if (!dryRun && !ctx.servicios.almacenamiento.disponible)
       throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
-    const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
-    const { bytes, paginas } = await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo: await logoDeMarca(ctx) });
     const nombre = nombreSeguro(`${plantilla.nombre}-${persona.rut}.pdf`);
-    if (dryRun) return { documento: null, nombre, paginas };
-    const documento = await guardarPdfGenerado(ctx, {
-      bytes,
-      nombre,
-      titulo: `${plantilla.nombre} · ${persona.nombres} ${persona.apellidos}`.trim(),
-      plantilla,
-      version,
-      propietario: { tipo: "persona", id: persona.id },
-    });
+    if (dryRun) {
+      const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
+      const { paginas } = await generarPdfLaboral({
+        titulo: plantilla.nombre,
+        marca,
+        parrafos: relleno.parrafos,
+        logo: await logoDeMarca(ctx),
+      });
+      return { documento: null, nombre, paginas };
+    }
+    const { documento, paginas } = await generarPdfLaboralPersona(ctx, plantilla, version, persona, relleno);
     return { documento, nombre, paginas };
   },
 });
