@@ -12,7 +12,7 @@ import { asegurarRegistro } from "@/lib/registro";
  * catálogos fuera del menú (Cargos, Folios, Configuración DTE, Plan de cuentas), Cuentas y Contactos
  * en Comercial, áreas en orden de uso y el área Documentos con el Explorador y Firmas.
  */
-const MODULOS = ["comercial", "cpq", "pauta", "tickets", "nomina", "finanzas"];
+const MODULOS = ["comercial", "cpq", "pauta", "tickets", "nomina", "nomina.cumplimiento_dt", "finanzas"];
 const CATALOGOS = ["/cargos", "/finanzas/folios", "/finanzas/configuracion-dte", "/finanzas/plan-de-cuentas"];
 
 beforeAll(() => asegurarRegistro());

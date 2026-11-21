@@ -615,6 +615,7 @@ nomina_conceptos_listar
 nomina_costo_proyectado_listar
 nomina_f29_generar
 nomina_f30_1_generar
+nomina_finiquito_obtener
 nomina_libro_remuneraciones_excel
 nomina_libro_remuneraciones_pdf
 nomina_liquidaciones_calcular
@@ -634,6 +635,7 @@ nomina_novedades_listar
 nomina_obligaciones_actualizar
 nomina_obligaciones_generar_calendario
 nomina_obligaciones_listar
+nomina_pago_banco_generar
 nomina_periodos_abrir
 nomina_periodos_cambiar_estado
 nomina_periodos_listar
