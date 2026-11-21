@@ -21,7 +21,7 @@ export const RECURSOS: Record<string, string> = {
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
   conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", liquidaciones: "Liquidaciones", libro_remuneraciones: "Libro de remuneraciones", lre: "LRE", previred: "Previred", f30_1: "F30-1", f29: "F29", pago_banco: "Pago bancario", midt: "Mi DT", finiquito: "Finiquito", mes: "Mes", dotacion: "Dotación", ppc: "Puestos por cubrir",
   series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos", turnos_extra: "Turnos extra",
-  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", agente: "Agente", propuestas: "Propuestas del agente", mensajes: "Mensajes a la central", avisos: "Avisos de la central", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
+  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", agente: "Agente", propuestas: "Propuestas del agente", mensajes: "Mensajes a la central", avisos: "Avisos de la central", confirmacion: "Confirmación de turno", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
   planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura", recurrentes: "Gastos recurrentes",

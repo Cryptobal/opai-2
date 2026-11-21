@@ -72,6 +72,25 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["central.alertas"],
     valores: (ctx) => ({ actor_tipo: "persona", alerta_id: id(ctx, "central.alertas") }),
   },
+  "central.confirmaciones_turno": {
+    dependencias: ["core.turnos_esperados"],
+    fijas: ["estado", "turno_esperado_id"],
+    valores: (ctx) => ({
+      estado: "pendiente",
+      motivo: null,
+      aviso_enviado_en: null,
+      plazo_vence_en: null,
+      respondido_en: null,
+      turno_esperado_id: id(ctx, "core.turnos_esperados"),
+    }),
+  },
+  "central.confirmacion_politicas": {
+    valores: () => ({
+      anticipacion_min: 60,
+      plazo_respuesta_min: 15,
+      franja: "ambos",
+    }),
+  },
   // Reglas de aprobación (CAR-252): CHECK de un solo aprobador (rol o grupo) y monto no negativo.
   "core.reglas_aprobacion": {
     valores: () => ({
