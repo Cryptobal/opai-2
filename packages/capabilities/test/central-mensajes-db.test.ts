@@ -52,8 +52,8 @@ describe.skipIf(omitirSuiteDb())("Central · mensajes y avisos (db)", () => {
       await e.admin.membership.create({ data: { tenantId: t, userId: id, rol, portales: [portal] } });
     }
     const cargo = (await e.admin.cargo.create({ data: { tenantId: t, nombre: "Guardia" } })).id;
-    persona = (await e.admin.persona.create({ data: { tenantId: t, usuarioId: guardia, nombres: "Gina", apellidos: "Guardia", rut: "11.111.111-1", estado: "activa" } })).id;
-    await e.admin.persona.create({ data: { tenantId: t, usuarioId: ajeno, nombres: "Otro", apellidos: "Guardia", rut: "12.222.222-2", estado: "activa" } });
+    persona = (await e.admin.persona.create({ data: { tenantId: t, usuarioId: guardia, nombres: "Gina", apellidos: "Guardia", rut: "11.111.111-1", estado: "activo" } })).id;
+    await e.admin.persona.create({ data: { tenantId: t, usuarioId: ajeno, nombres: "Otro", apellidos: "Guardia", rut: "12.222.222-2", estado: "activo" } });
     await e.admin.vinculoLaboral.create({ data: { tenantId: t, personaId: persona, cargoId: cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
   }, 120_000);
   afterAll(async () => {
