@@ -5,6 +5,7 @@ import { archivoPrevired } from "@opai/domain";
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { datosArchivoPeriodo, personasReveladas, resultadoArchivo, salidaArchivo } from "./archivos-datos";
+import { exigeComplementoCumplimientoDt } from "./complemento-dt";
 import { PERMISO_OBLIGACIONES } from "./comun";
 
 // Nómina de Previred (CAR-99): archivo de 105 campos del período para declarar y pagar cotizaciones.
@@ -25,6 +26,7 @@ export const previredGenerar = defineCapability({
   dryRun: false,
   auditarLectura: personasReveladas,
   async handler(ctx, { periodoId }) {
+    exigeComplementoCumplimientoDt(ctx);
     const datos = await datosArchivoPeriodo(ctx, periodoId, "Previred");
     const { periodo, filas, rutEmpleador } = datos;
     const a = archivoPrevired({

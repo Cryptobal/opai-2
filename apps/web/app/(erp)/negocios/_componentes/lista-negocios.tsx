@@ -41,7 +41,7 @@ export function ListaNegocios(p: {
 }) {
   const abiertos = p.items.filter((n) => n.estado === "abierto").length;
   const consulta = consultaLista(p.p);
-  const porPagina = tamanoPagina(p.p, 20);
+  const porPagina = tamanoPagina(p.p);
   const filtrando = Boolean(p.p.q || p.p.estado || p.p.etapa || p.p.etiqueta);
   const metaConteo = filtrando
     ? `${p.items.length}${p.siguiente ? "+" : ""} ${p.items.length === 1 ? "resultado" : "resultados"}`

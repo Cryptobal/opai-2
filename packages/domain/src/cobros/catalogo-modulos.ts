@@ -36,7 +36,12 @@ export const MODULOS_INCLUIDOS_EN_BASE: readonly string[] = [
 
 export const esIncluidoEnBase = (id: string) => MODULOS_INCLUIDOS_EN_BASE.includes(id);
 
-export type GrupoCatalogo = "base" | "modulo" | "finanzas" | "parte_finanzas";
+/** Complemento vendible de Nómina (ADR-057): LRE asistido, Mi DT y finiquito. */
+export const COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT = "nomina.cumplimiento_dt";
+
+export const esComplementoNomina = (id: string) => id === COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT;
+
+export type GrupoCatalogo = "base" | "modulo" | "finanzas" | "parte_finanzas" | "complemento_nomina";
 
 export type EntradaCatalogo = {
   id: string;

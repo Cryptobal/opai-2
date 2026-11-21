@@ -30,7 +30,7 @@ export const ajustesAsistencia = z.object({
   canales_por_instalacion: z.record(z.string().uuid(), z.array(z.enum(CANALES)).min(1)).default({}).meta({
     etiqueta: "Canales de marca por instalación",
     ayuda:
-      "Para cada instalación (por su id), los canales con que se puede marcar: «kiosco» (dispositivo emparejado) y «telefono_personal». Sin entrada, la instalación marca solo en el kiosco.",
+      "Para cada instalación (por su id), los canales con que se puede marcar: «kiosco» (dispositivo emparejado), «telefono_personal» y «enlace_publico» (QR o enlace sin equipo emparejado). Sin entrada, la instalación marca solo en el kiosco.",
     grupo: "Canales",
     ambito: "tenant",
     permiso: PERMISO,

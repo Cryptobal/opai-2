@@ -13,6 +13,8 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "asistencia.mandante_accesos.historial",
   "asistencia.mandante_accesos.listar",
   "asistencia.mandante_marcas.listar",
+  "asistencia.marcas.enlace_publico_estado",
+  "asistencia.marcas.enlace_publico_resolver",
   "asistencia.marcas.verificar",
   "asistencia.reportes.catalogo",
   "asistencia.respaldos.listar",

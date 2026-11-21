@@ -8,12 +8,21 @@ import { costoProyectadoListar } from "./costo-proyectado";
 import { liquidacionesCalcular } from "./liquidaciones-calcular";
 import { liquidacionesListar, liquidacionesObtener } from "./liquidaciones-lectura";
 import { liquidacionesMarcarRevisadas } from "./liquidaciones-revisar";
-import { consumidorLiquidacionPublicada } from "./consumidor-liquidacion-publicada";
-import { liquidacionesPublicar } from "./liquidaciones-publicar";
 import { f301Generar } from "./f30-1";
+import { f29RetencionGenerar } from "./f29";
 import { libroRemuneracionesExcel, libroRemuneracionesPdf } from "./libro-remuneraciones";
 import { lreGenerar } from "./lre";
+import { pagoBancoGenerar } from "./pago-banco";
 import { previredGenerar } from "./previred";
+import { consumidorLiquidacionPublicada } from "./consumidor-liquidacion-publicada";
+import { liquidacionesPublicar } from "./liquidaciones-publicar";
+import {
+  cumplimientoDtMovimientosDatos,
+  cumplimientoDtMovimientosExportar,
+  cumplimientoDtMovimientosListar,
+  cumplimientoDtMovimientosRegistrar,
+  cumplimientoDtFiniquitoObtener,
+} from "./cumplimiento-dt/capacidades";
 import { conceptosActualizar, conceptosCrear, conceptosListar } from "./conceptos";
 import { novedadesAnular, novedadesCargar, novedadesCrear } from "./novedades-escritura";
 import { novedadesListar } from "./novedades-lectura";
@@ -56,9 +65,16 @@ export const capacidadesNomina: readonly Capacidad[] = [
   lreGenerar,
   previredGenerar,
   f301Generar,
+  f29RetencionGenerar,
+  pagoBancoGenerar,
   libroRemuneracionesExcel,
   libroRemuneracionesPdf,
   liquidacionesPublicar,
+  cumplimientoDtMovimientosListar,
+  cumplimientoDtMovimientosExportar,
+  cumplimientoDtMovimientosDatos,
+  cumplimientoDtMovimientosRegistrar,
+  cumplimientoDtFiniquitoObtener,
 ];
 
 export const consumidoresNomina = [consumidorLiquidacionPublicada];

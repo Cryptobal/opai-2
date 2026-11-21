@@ -41,6 +41,13 @@ describe("catálogo comercial (CAR-204)", () => {
     expect(new Set(ENTRADAS_CATALOGO.map((e) => e.id)).size).toBe(ENTRADAS_CATALOGO.length);
   });
 
+  it("Cumplimiento DT depende de Nómina", () => {
+    const e = entradaCatalogo("nomina.cumplimiento_dt");
+    expect(e?.grupo).toBe("complemento_nomina");
+    expect(dependenciaFaltante("nomina.cumplimiento_dt", new Set())).toBe("Cumplimiento DT necesita Remuneraciones (Nómina)");
+    expect(dependenciaFaltante("nomina.cumplimiento_dt", new Set(["nomina"]))).toBeNull();
+  });
+
   it("valida las dependencias de las partes", () => {
     const con = (...ids: string[]) => new Set(ids);
     expect(dependenciaFaltante("finanzas.flujo", con())).toBe("Flujo de caja necesita Bancos");

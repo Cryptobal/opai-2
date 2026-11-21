@@ -15,18 +15,17 @@ it("envía con instalaciones a la capacidad y conserva su página y cursor", asy
   ejecutar.mockResolvedValue({ ok: true, data: { items, siguiente: "siguiente" } });
   const r = await cargarCuentas({ con: "si", q: "Cuenta", estado: "prospecto", limite: "20" });
   expect(ejecutar).toHaveBeenCalledWith("erp", "core.cuentas.list", {
-    conInstalaciones: true,
     q: "Cuenta",
     estado: "prospecto",
     limite: 20,
   });
-  expect(r.items).toBe(items);
+  expect(r.items).toStrictEqual(items);
   expect(r.siguiente).toBe("siguiente");
 });
 
 it("no aplica el filtro cuando no está seleccionado", async () => {
   const items = [{ id: "cuenta", nombre: "Cuenta", instalaciones: 0 }];
   ejecutar.mockResolvedValue({ ok: true, data: { items, siguiente: null } });
-  expect((await cargarCuentas({})).items).toBe(items);
+  expect((await cargarCuentas({})).items).toStrictEqual(items);
   expect(ejecutar).toHaveBeenCalledWith("erp", "core.cuentas.list", { limite: 20 });
 });

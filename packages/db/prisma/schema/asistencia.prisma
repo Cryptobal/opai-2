@@ -25,7 +25,7 @@ model Marca {
   confianza        Decimal? @db.Decimal(5, 4)
   pruebaVida       Boolean? @map("prueba_vida")
   dispositivoId    String?  @map("dispositivo_id") @db.Uuid
-  /// kiosco | telefono_personal
+  /// kiosco | telefono_personal | enlace_publico
   canal            String?
   instalacionId    String   @map("instalacion_id") @db.Uuid
   lat              Decimal? @db.Decimal(9, 6)
