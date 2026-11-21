@@ -77,8 +77,6 @@ function firmaInvitacion(secreto: string | undefined, kid: string, msg: string):
   const k = clave(secreto, kid, "ACCESO_HUELLA_SECRET", "invitacion");
   return createHmac("sha256", k).update(msg).digest("base64url").slice(0, 22);
 }
-D
-
 
 /**
  * Código del QR de invitación de un visitante para un día (CAR-478, R14): `A1.<kid>.<visitante>.<día>.<firma>`.
