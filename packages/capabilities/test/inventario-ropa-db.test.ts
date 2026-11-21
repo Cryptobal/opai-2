@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { manifest as manifestInventario } from "../../../modules/inventario/manifest";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import * as mod from "../src";
 import { limpiarModulos } from "../src/module";
@@ -41,6 +42,7 @@ describe.skipIf(!urlPropietario)("inventario · ropa en base real", () => {
   beforeAll(async () => {
     e = await prepararEntorno();
     limpiarModulos();
+    mod.registrarModulos([manifestInventario]);
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesInventario]);
     ana = (await e.admin.user.create({ data: { name: "Ana", email: `ana-${sufijo}@prueba.cl`, emailVerified: true } })).id;

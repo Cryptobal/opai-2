@@ -2,6 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { manifest as manifestInventario } from "../../../modules/inventario/manifest";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import * as mod from "../src";
 import { limpiarModulos } from "../src/module";
@@ -27,6 +28,7 @@ describe.skipIf(!urlPropietario)("inventario · configuración en base real", ()
   beforeAll(async () => {
     e = await prepararEntorno();
     limpiarModulos();
+    mod.registrarModulos([manifestInventario]);
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesInventario]);
     ana = (
@@ -82,7 +84,7 @@ describe.skipIf(!urlPropietario)("inventario · configuración en base real", ()
     });
     expect(tipo.categoria).toBe("uniforme");
     expect(await codigo(c, "inventario.tipos.crear", { categoria: "no_existe", nombre: "X", tallas: ["U"] })).toBe(
-      "UNPROCESSABLE",
+      "INVALID_INPUT",
     );
   });
 });

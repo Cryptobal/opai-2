@@ -7,7 +7,7 @@
 model InventarioTipo {
   id                String   @id @default(uuid(7)) @db.Uuid
   tenantId          String   @map("tenant_id") @db.Uuid
-  /// "activo" | "ropa". No cambia después de crear (R2).
+  /// Clave de categoría de la empresa (p. ej. activo, ropa, uniforme). No cambia después de crear (R2).
   categoria         String
   nombre            String
   /// Nombre sin mayúsculas, tildes ni espacios de más: único por empresa (R1).
