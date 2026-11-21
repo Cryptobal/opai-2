@@ -11,6 +11,6 @@ export function contextoPortalesDe(identidad: Identidad): ContextoPortalesVisibl
     platformRole: identidad.usuario.platformRole,
     modulosActivos: identidad.modulosActivos,
     instalaciones: identidad.acceso.instalaciones,
-    personaVinculada: identidad.personaVinculada,
+    personaVinculada: identidad.personaVinculada ?? false,
   };
 }

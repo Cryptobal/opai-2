@@ -35,7 +35,7 @@ export type Identidad = {
   totpActiva?: boolean;
   mfaVerificada?: boolean;
   /** Persona del ERP vinculada a este usuario en la empresa actual (portal Trabajador, CAR-746). */
-  personaVinculada: boolean;
+  personaVinculada?: boolean;
 };
 
 const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [], instalaciones: null };
