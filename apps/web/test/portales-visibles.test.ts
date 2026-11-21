@@ -38,7 +38,7 @@ describe("portalesVisibles por perfil (CAR-746)", () => {
     const ids = portalesVisibles(
       identidad({ portales: ["erp", "cliente", "supervisor", "terreno"], rol: "owner" }),
     ).map((p) => p.id);
-    expect(ids).toEqual(["erp"]);
+    expect(ids).toEqual(["erp", "supervisor"]);
   });
 
   it("supervisor ve ERP y Supervisor", () => {

@@ -24,11 +24,13 @@ async function miembroVisible(
   portal: string,
 ) {
   const m = await ctx.db.membership.findFirst({
-    where: { ...where, estado: "activa" },
+    where: { ...where, tenantId: ctx.tenantId, estado: "activa" },
     select: { userId: true, rol: true, portales: true },
   });
   if (!m || !m.portales.includes(portal))
     throw reglaDeNegocio("Esa persona no tiene acceso activo a ese portal.");
+  if (m.userId === ctx.usuario?.id)
+    throw reglaDeNegocio("Esa persona eres tú: abre el portal directamente.");
   if (!rolVisible(ctx, m.rol))
     throw prohibido("No puedes ver como alguien de un rol superior al tuyo.");
   return m.userId;
