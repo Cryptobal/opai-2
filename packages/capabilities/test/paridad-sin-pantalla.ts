@@ -121,10 +121,4 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Quitar bloqueo permanente: llega con las acciones de estado en la ficha de persona (CAR-674). Mientras tanto solo sesión admin con permiso estado.admin.",
   },
-  "core.credenciales_terreno.establecer_pin": {
-    encargo: "CAR-803",
-    desde: "2026-11-21",
-    motivo:
-      "Primer PIN en el portal del trabajador: la acción de pantalla «Cambiar PIN» lo invocará; mientras tanto solo RR. HH. asigna el PIN inicial.",
-  },
 };

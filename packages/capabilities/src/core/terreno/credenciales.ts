@@ -10,6 +10,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { credencialesTerrenoCambiarPin } from "./credenciales-cambiar";
 import { credencialesTerrenoEstablecerPin } from "./credenciales-establecer-pin";
+import { credencialesTerrenoMiEstado } from "./credenciales-mi-estado";
 import {
   motivoSinIngreso,
   motivoSinIngresoSchema,
@@ -150,6 +151,7 @@ const credencialesTerrenoRestablecer = defineCapability({
 export const capacidadesCredencialesTerreno = [
   credencialesTerrenoCambiarPin,
   credencialesTerrenoEstablecerPin,
+  credencialesTerrenoMiEstado,
   credencialesTerrenoEstado,
   credencialesTerrenoAsignarPin,
   credencialesTerrenoRestablecer,

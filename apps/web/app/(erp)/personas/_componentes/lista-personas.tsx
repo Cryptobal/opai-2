@@ -11,6 +11,7 @@ import { rut } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 import type { PersonaFila } from "@/lib/tipos-maestros";
 
+import { BotonAccesoMasivo } from "./boton-acceso-masivo";
 import { SemaforoDocs } from "./semaforo-docs";
 
 type Props = {
@@ -56,7 +57,11 @@ export function ListaPersonas(x: Props) {
   const total = x.total ?? x.items.length;
   const metaIzq = filtrando
     ? `${x.items.length}${x.siguiente ? "+" : ""} ${x.items.length === 1 ? "resultado" : "resultados"}`
-  : `${total}${x.siguiente ? "+" : ""} ${total === 1 ? "persona" : "personas"}`;
+    : `${total}${x.siguiente ? "+" : ""} ${total === 1 ? "persona" : "personas"}`;
+  const activasConCorreo = x.items
+    .filter((i) => i.estado === "activa" && !i.bloqueada && (i.emailPersonal || i.emailLaboral))
+    .map((i) => i.id)
+    .slice(0, 50);
   return (
     <ListaMaestro
       state={x.state}
@@ -86,7 +91,15 @@ export function ListaPersonas(x: Props) {
             ]
           : []),
       ]}
-      meta={{ izquierda: metaIzq, derecha: "Apellido A–Z" }}
+      meta={{
+        izquierda: metaIzq,
+        derecha: (
+          <span className="flex items-center gap-2">
+            <BotonAccesoMasivo personaIds={activasConCorreo} habilitado={x.p["estado"] === "activa"} />
+            <span className="t-caption text-fg-muted">Apellido A–Z</span>
+          </span>
+        ),
+      }}
       seleccionada={x.seleccionada}
       vacio={
         filtrando

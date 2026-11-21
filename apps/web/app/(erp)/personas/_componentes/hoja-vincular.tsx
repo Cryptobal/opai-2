@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+import { esMembresiaPortalTrabajador, type Rol } from "@opai/domain";
 import { Alerta, avisar, Button, Campo, Combobox, Dialog, type OpcionCombobox } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_components/ejecutar-capacidad";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-type Miembro = { userId: string; nombre: string; email: string; estado: string };
+type Miembro = { userId: string; nombre: string; email: string; estado: string; rol: string; portales: string[] };
 
 /** Vincular la persona con un usuario de OPAI (portal Trabajador); sugiere el de su mismo correo. */
 export function HojaVincularUsuario({
@@ -27,7 +28,13 @@ export function HojaVincularUsuario({
     let vigente = true;
     void ejecutarCapacidad("erp", "core.users.list", {}).then((r) => {
       if (!vigente) return;
-      const activos = r.ok ? (r.data as Miembro[]).filter((m) => m.estado === "activa") : [];
+      const activos = r.ok
+        ? (r.data as Miembro[]).filter(
+            (m) =>
+              m.estado === "activa" &&
+              (esMembresiaPortalTrabajador(m.rol as Rol, m.portales) || m.portales.length === 0),
+          )
+        : [];
       setOpciones(activos.map((m) => ({ valor: m.userId, etiqueta: m.nombre, detalle: m.email })));
       setUsuario(activos.find((m) => email && m.email === email)?.userId ?? null);
     });
