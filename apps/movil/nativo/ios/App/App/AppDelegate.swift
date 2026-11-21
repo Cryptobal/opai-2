@@ -7,7 +7,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        FirebasePushIos.configurarSiPuede()
         return true
     }
 
@@ -31,6 +31,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+
+    func application(_ application: UIApplication,
+                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        FirebasePushIos.entregarTokenFcm(apnsToken: deviceToken) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let fcmToken):
+                    NotificationCenter.default.post(
+                        name: .capacitorDidRegisterForRemoteNotifications,
+                        object: fcmToken,
+                    )
+                case .failure(let error):
+                    NotificationCenter.default.post(
+                        name: .capacitorDidFailToRegisterForRemoteNotifications,
+                        object: error,
+                    )
+                }
+            }
+        }
+    }
+
+    func application(_ application: UIApplication,
+                     didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
     }
 
     func application(_ application: UIApplication,

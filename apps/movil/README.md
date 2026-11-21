@@ -32,11 +32,13 @@ El cableado de Google está listo en Android; **no versiones** los archivos con 
 | Plataforma | Archivo (fuera del repo) | Ubicación |
 | ---------- | ------------------------ | --------- |
 | Android | `google-services.json` | `nativo/android/app/google-services.json` |
-| iOS | `GoogleService-Info.plist` | `nativo/ios/App/App/GoogleService-Info.plist` (agrégalo al target en Xcode) |
+| iOS | `GoogleService-Info.plist` | `nativo/ios/App/App/GoogleService-Info.plist` (copia local o inyección en CI) |
 
-Carlos los obtiene en la consola de Firebase para `cl.opai.app`. En el servidor, `FIREBASE_SERVICE_ACCOUNT` (JSON de cuenta de servicio) en Vercel habilita el emisor FCM HTTP v1; sin esa variable el backend no envía push nativo y no falla.
+Carlos los obtiene en la consola de Firebase para `cl.opai.app` (proyecto **opai-d194a**). En el servidor, `FIREBASE_SERVICE_ACCOUNT` (JSON de cuenta de servicio) en Vercel habilita el emisor FCM HTTP v1; sin esa variable el backend no envía push nativo y no falla.
 
-Tras colocar los archivos: `pnpm --filter @opai/movil sincronizar`.
+**iOS y FCM:** el backend envía por FCM HTTP v1, no por APNs crudo. La app enlaza `FirebaseMessaging` por SPM; `AppDelegate` reenvía el token FCM a Capacitor (`@capacitor/push-notifications`). Sin `GoogleService-Info.plist` el proyecto **compila** con un aviso (`nativo/ios/scripts/preparar-google-service-info.sh`); en runtime no crashea, pero no registra token. En CI (CAR-733) el workflow escribe el plist desde el secreto `GOOGLE_SERVICE_INFO_PLIST`.
+
+Tras colocar los archivos (o tras sync de CI): `pnpm --filter @opai/movil sincronizar`.
 
 ## Reglas
 
