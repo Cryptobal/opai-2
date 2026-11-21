@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   archivoSoloPantalla,
   diffSoloPantalla,
+  diffTieneUseServerAgregado,
 } from "./ci-solo-pantalla";
 
 describe("ci-solo-pantalla", () => {
@@ -80,6 +81,44 @@ describe("ci-solo-pantalla", () => {
         "packages/db/prisma/migrations/20260101/x/migration.sql",
       ]),
     ).toBe(false);
+  });
+
+  it("rechaza tests guardia de acceso", () => {
+    expect(
+      archivoSoloPantalla("apps/web/test/lint-acceso-db.test.ts"),
+    ).toBe(false);
+    expect(archivoSoloPantalla("apps/web/test/revalidacion-acceso.test.ts")).toBe(
+      false,
+    );
+    expect(archivoSoloPantalla("apps/web/test/permisos-ui.test.ts")).toBe(false);
+    expect(archivoSoloPantalla("apps/web/test/modulos-vista.test.ts")).toBe(
+      true,
+    );
+  });
+
+  it("rechaza .tsx con use server agregado en el diff", () => {
+    const diff = [
+      "diff --git a/apps/web/app/foo/page.tsx b/apps/web/app/foo/page.tsx",
+      "@@",
+      "+'use server'",
+      "+export async function guardar() {}",
+    ].join("\n");
+    expect(diffTieneUseServerAgregado(diff)).toBe(true);
+    expect(
+      archivoSoloPantalla("apps/web/app/foo/page.tsx", diff),
+    ).toBe(false);
+    expect(
+      diffSoloPantalla(["apps/web/app/foo/page.tsx"], {
+        "apps/web/app/foo/page.tsx": diff,
+      }),
+    ).toBe(false);
+  });
+
+  it("acepta .tsx sin use server en el diff", () => {
+    const diff = "+export function Vista() { return null }\n";
+    expect(
+      archivoSoloPantalla("apps/web/app/foo/page.tsx", diff),
+    ).toBe(true);
   });
 
   it("acepta diff solo de pantalla", () => {

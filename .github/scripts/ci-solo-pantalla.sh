@@ -17,6 +17,27 @@ archivo_bloqueado() {
   return 1
 }
 
+apps_web_test_bloqueado() {
+  local f=$1
+  case "$f" in
+    apps/web/test/lint-acceso-db.test.ts|apps/web/test/seguridad-acceso.test.ts)
+      return 0
+      ;;
+    apps/web/test/*acceso*.test.ts|apps/web/test/permisos-*)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+tsx_agrega_use_server() {
+  local f=$1 base=$2 head=$3
+  git diff --no-renames "$base" "$head" -- "$f" 2>/dev/null \
+    | grep -E '^\+' \
+    | grep -v '^\+\+\+' \
+    | grep -qE "['\"]use server['\"]"
+}
+
 apps_web_bloqueado() {
   local f=$1
   case "$f" in
@@ -41,7 +62,13 @@ archivo_solo_pantalla() {
     packages/ds/*|packages/domain/src/novedades/entradas/*)
       return 0
       ;;
-    apps/web/e2e/*|apps/web/public/*|apps/web/test/*)
+    apps/web/e2e/*|apps/web/public/*)
+      return 0
+      ;;
+    apps/web/test/*)
+      if apps_web_test_bloqueado "$f"; then
+        return 1
+      fi
       return 0
       ;;
     apps/web/playwright.config.ts|apps/web/presupuesto-js.json)
@@ -92,6 +119,14 @@ for f in "${files[@]}"; do
     solo_pantalla=false
     break
   fi
+  case "$f" in
+    *.tsx)
+      if tsx_agrega_use_server "$f" "$base" "$head"; then
+        solo_pantalla=false
+        break
+      fi
+      ;;
+  esac
 done
 
 echo "solo_pantalla=$solo_pantalla" >> "$GITHUB_OUTPUT"
