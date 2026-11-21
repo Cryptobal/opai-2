@@ -32,6 +32,11 @@ export const manifest = defineModule({
         "Prerregistrar visitas con invitación QR y cancelar los prerregistros propios (o todos, si también gestiona registros)",
     },
     {
+      id: "acceso:config.manage",
+      descripcion:
+        "Configurar el control de acceso de la empresa y de cada instalación: tipos de ingreso, formulario y reglas",
+    },
+    {
       id: "acceso:datos.ver_patente",
       descripcion: "Ver la patente completa de los vehículos registrados (acceso restringido)",
     },
@@ -47,7 +52,25 @@ export const manifest = defineModule({
       permiso: "acceso:read",
     },
   ],
-  configuracion: z.object({}),
+  configuracion: z.object({
+    cliente_gestiona_listas: z.boolean().default(true).meta({
+      etiqueta: "El cliente gestiona la lista de sus instalaciones",
+      ayuda:
+        "Los contactos con permiso del Portal Cliente agregan y quitan personas de las listas de sus instalaciones. Tu lista bloqueada siempre manda (R7, R12).",
+      grupo: "Portal Cliente",
+      ambito: "tenant",
+      permiso: "acceso:config.manage",
+      control: "switch",
+    }),
+    cliente_configura_porteria: z.boolean().default(false).meta({
+      etiqueta: "El cliente puede configurar el formulario y el fondo de la portería",
+      ayuda: "Apagado por defecto: solo tu empresa decide qué pide la portería y cómo se ve.",
+      grupo: "Portal Cliente",
+      ambito: "tenant",
+      permiso: "acceso:config.manage",
+      control: "switch",
+    }),
+  }),
   eventos: [],
   capacidades: capacidadesAcceso,
 });

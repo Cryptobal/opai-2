@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { digitoVerificador } from "@opai/domain";
 import { entrar } from "./sesion";
 import { porteriaEntradaYSalida } from "./terreno-porteria-apoyo";
+import { porteriaConPrerregistro } from "./terreno-porteria-prerregistro";
 import { rondaIniciarMarcarYCerrar } from "./terreno-rondas-apoyo";
 import { capturasDeInicioYCola, inicioSinMarcarPunto, inyectarRechazado } from "./terreno-apoyo";
 
@@ -12,7 +13,7 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   browser,
   page,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000);
   // 1) ERP: una persona con vínculo en la instalación (los datos de demostración no traen vínculos) y el
   // código de emparejamiento de esa instalación.
   await entrar(page);
@@ -130,7 +131,10 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   // CAR-451). Va antes de portería para que una falla de portería no la deje sin probar.
   expect(await rondaIniciarMarcarYCerrar(t, ["E2E-PUNTO-1", "E2E-PUNTO-2"])).toBe(true);
   // E4d · portería: entrada, «En sitio» y salida (si Control de acceso está activo en la empresa).
-  await porteriaEntradaYSalida(t);
+  if (await porteriaEntradaYSalida(t)) {
+    // CAR-478 · prerregistro: esperados de hoy en la portería y «Ingresó» en el ERP.
+    await porteriaConPrerregistro(page, t, /Planta Quilicura/);
+  }
 
   await capturasDeInicioYCola(t);
 

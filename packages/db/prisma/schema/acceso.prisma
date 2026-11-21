@@ -51,15 +51,18 @@ model RegistroAcceso {
   motivoVisita   String?  @map("motivo_visita")
   patente        String?
   entradaListaId String?  @map("entrada_lista_id") @db.Uuid
+  /// Campos personalizados del formulario (CAR-479): `[{ etiqueta, valor }]` tal como los pidió la portería.
+  camposExtra    Json     @default("[]") @map("campos_extra")
   /// "en_linea" | "diferido".
   origen         String   @default("en_linea")
   horaCorregida  DateTime @map("hora_corregida") @db.Timestamptz(6)
   recibidoEn     DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  entradaLista EntradaLista?     @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
+  entradaLista EntradaLista?    @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
   salida       SalidaAcceso?
   anulacion    AnulacionAcceso?
+  prerregistro PrerregistroUso?
 
   @@unique([tenantId, dispositivoId, clave], map: "registros_acceso_clave_key")
   @@index([tenantId, instalacionId, horaCorregida(sort: Desc)], map: "registros_acceso_sitio_idx")
@@ -172,10 +175,43 @@ model PrerregistroVisitante {
   patente        String?
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  prerregistro Prerregistro @relation(fields: [prerregistroId], references: [id], onDelete: Restrict, map: "prerregistro_visitantes_prerregistro_fkey")
+  prerregistro Prerregistro      @relation(fields: [prerregistroId], references: [id], onDelete: Restrict, map: "prerregistro_visitantes_prerregistro_fkey")
+  usos         PrerregistroUso[]
 
   @@index([prerregistroId], map: "prerregistro_visitantes_prerregistro_idx")
   @@index([tenantId, docTipo, huella], map: "prerregistro_visitantes_huella_idx")
   @@map("prerregistro_visitantes")
+  @@schema("acceso")
+}
+
+/// Uso de un prerregistro: con qué registro de entrada entró un visitante un día (CAR-478, R14). Solo inserción.
+model PrerregistroUso {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  visitanteId String   @map("visitante_id") @db.Uuid
+  dia         DateTime @db.Date
+  registroId  String   @unique(map: "prerregistro_usos_registro_key") @map("registro_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  visitante PrerregistroVisitante @relation(fields: [visitanteId], references: [id], onDelete: Restrict, map: "prerregistro_usos_visitante_fkey")
+  registro  RegistroAcceso        @relation(fields: [registroId], references: [id], onDelete: Restrict, map: "prerregistro_usos_registro_fkey")
+
+  @@unique([visitanteId, dia], map: "prerregistro_usos_dia_key")
+  @@map("prerregistro_usos")
+  @@schema("acceso")
+}
+
+/// Configuración de acceso (CAR-479, R1): la de la empresa (`instalacion_id` nulo) y, si se personaliza, la de una
+/// instalación, que la reemplaza entera. Una por ámbito: índices únicos parciales en el SQL de la migración.
+model ConfigAcceso {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  instalacionId  String?  @map("instalacion_id") @db.Uuid
+  valor          Json
+  actualizadoPor String?  @map("actualizado_por") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("configuraciones")
   @@schema("acceso")
 }
