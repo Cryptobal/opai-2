@@ -44,6 +44,7 @@ export const verComoIniciar = defineCapability({
   output: vistaInput.extend({
     nombre: z.string(),
     userId: z.string().nullable(),
+    personaId: z.string().nullable(),
     dispositivoId: z.string().nullable(),
     expiraEn: z.string(),
   }),

@@ -1152,6 +1152,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.correos.recibir` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el tenant por la dirección de registro t<token>@respuestas.opai.cl (CAR-233). |
 | `core.credenciales_terreno.asignar_pin` | Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02). |
 | `core.credenciales_terreno.cambiar_pin` | Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02). |
+| `core.credenciales_terreno.establecer_pin` | Solo personas: la propia persona fija su primer PIN; ningún agente lo hace por ella (CAR-803, portal trabajador). |
 | `core.credenciales_terreno.restablecer` | Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02). |
 | `core.cuentas_referencias.otorgar` | Solo personas: registrar el consentimiento de un cliente para ser referencia es un acto de una persona; ninguna key lo hace, ni con autonomía «directo» (CAR-138 PR 7, ADR-087). |
 | `core.cumplimiento.consentimiento_registrar` | Solo personas: registrar el consentimiento de un titular es un acto responsable del tenant (Ley 21.719, §16.2). |
@@ -1282,6 +1283,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.biometria.verificar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
+| `core.credenciales_terreno.establecer_pin` | sin pantalla todavía · CAR-803 · desde 2026-11-21 | no | reservada a personas |
 | `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.cuentas_referencias.otorgar` | sin pantalla todavía · CAR-138 · desde 2026-11-10 | no | reservada a personas |
 | `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |
@@ -1436,15 +1438,18 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.novedades.descartar_destacada`
 - `core.patrones.get`
 - `core.personas.a_evaluacion`
+- `core.personas.acceso_estado`
 - `core.personas.activar`
 - `core.personas.asignar_jefe`
 - `core.personas.contratar_externo`
+- `core.personas.dar_acceso_portal`
 - `core.personas.externar`
 - `core.personas.inactivar`
 - `core.personas.list_a_cargo`
 - `core.personas.marcar_externo`
 - `core.personas.reactivar`
 - `core.personas.rechazar`
+- `core.personas.reenviar_invitacion`
 - `core.ping`
 - `core.procesos_persona.paso_actualizar`
 - `core.regiones.list`

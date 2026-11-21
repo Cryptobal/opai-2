@@ -3,13 +3,14 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { conflicto, reglaDeNegocio } from "../../errores";
+import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
 import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
 import { archivarPersonaEnTx, exigirArchivoPersona } from "./personas-estado-implicito";
+import { esInternoParaPortalTrabajador, vincularPersonaUsuario } from "./personas-acceso-logica";
 
 const motivo = z.string().trim().min(5).max(500).describe("Motivo (queda en la auditoría).");
 
@@ -116,17 +117,10 @@ export const personasVincularUsuario = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    if (input.usuarioId) {
-      const m = await ctx.db.membership.findFirst({
-        where: { userId: input.usuarioId, estado: "activa" },
-      });
-      if (!m) throw reglaDeNegocio("El usuario no tiene una membresía activa en la empresa.");
-      const otra = await ctx.db.persona.findFirst({
-        where: { usuarioId: input.usuarioId, id: { not: input.id } },
-      });
-      if (otra)
-        throw conflicto(`El usuario ya está vinculado a ${otra.nombres} ${otra.apellidos}.`);
+    if (input.usuarioId === null) {
+      return cambiar(ctx, input.id, dryRun, "core.persona.actualizada", { usuarioId: null });
     }
+    await vincularPersonaUsuario(ctx, input.id, input.usuarioId, dryRun);
     return cambiar(ctx, input.id, dryRun, "core.persona.actualizada", {
       usuarioId: input.usuarioId,
     });

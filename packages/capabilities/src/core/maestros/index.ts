@@ -38,6 +38,8 @@ import { instalacionesCreate, instalacionesUpdate } from "./instalaciones-escrit
 import { instalacionesArchive, instalacionesSetEstado } from "./instalaciones-estado";
 import { personasGet, personasList } from "./personas";
 import { personasCreate, personasUpdate } from "./personas-escritura";
+import { personasAccesoEstado } from "./personas-acceso-estado";
+import { personasDarAccesoPortal, personasReenviarInvitacionPortal } from "./personas-acceso-escritura";
 import {
   personasArchive,
   personasBloquear,
@@ -116,6 +118,9 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasDesbloquear,
   personasArchive,
   personasVincularUsuario,
+  personasAccesoEstado,
+  personasDarAccesoPortal,
+  personasReenviarInvitacionPortal,
   personasNoRecontratarVer,
   personasMarcarNoRecontratar,
   personasQuitarNoRecontratar,

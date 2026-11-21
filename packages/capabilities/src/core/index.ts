@@ -89,6 +89,10 @@ import { seguridadMetodos, seguridadPasskeysRenombrar } from "./seguridad/metodo
 import { seguridadMetodosQuitar } from "./seguridad/quitar";
 import { appsConectadasDesconectar, appsConectadasList } from "./seguridad/apps";
 import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
+import {
+  consumidorAccesoPortalTrabajador,
+  consumidorVinculoPortalTrabajador,
+} from "./maestros/consumidor-acceso-portal";
 import { verComoIniciar, verComoTerminar } from "./ver-como/capacidades";
 import { verComoList } from "./ver-como/objetivos";
 
@@ -209,6 +213,8 @@ export const consumidoresDelNucleo = [
   consumidorRevocacionBiometria,
   ...consumidoresSlack,
   consumidorProcesosPersona,
+  consumidorAccesoPortalTrabajador,
+  consumidorVinculoPortalTrabajador,
   consumidorWebhooks,
 ];
 

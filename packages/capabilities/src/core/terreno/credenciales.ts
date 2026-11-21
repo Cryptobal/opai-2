@@ -9,6 +9,7 @@ import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { credencialesTerrenoCambiarPin } from "./credenciales-cambiar";
+import { credencialesTerrenoEstablecerPin } from "./credenciales-establecer-pin";
 import {
   motivoSinIngreso,
   motivoSinIngresoSchema,
@@ -148,6 +149,7 @@ const credencialesTerrenoRestablecer = defineCapability({
 
 export const capacidadesCredencialesTerreno = [
   credencialesTerrenoCambiarPin,
+  credencialesTerrenoEstablecerPin,
   credencialesTerrenoEstado,
   credencialesTerrenoAsignarPin,
   credencialesTerrenoRestablecer,
