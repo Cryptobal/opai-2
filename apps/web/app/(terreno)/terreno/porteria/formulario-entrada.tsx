@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
-import { Alerta, Button, Campo, Link, Select } from "@opai/ds";
+import { Alerta, Button, Campo, Select } from "@opai/ds";
 import { AVISO_PRIVACIDAD_PORTERIA } from "@opai/domain/acceso-config";
 import {
   camposDelTipo,
