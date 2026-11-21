@@ -2,7 +2,7 @@ import { idsPortalesUsables, type ContextoPortalesVisibles } from "@opai/domain"
 
 import type { Contexto } from "../types";
 
-export function contextoPortalesDeCtx(
+function contextoPortalesDeCtx(
   ctx: Contexto,
   personaVinculada: boolean,
 ): ContextoPortalesVisibles {
