@@ -4,7 +4,7 @@ import type { Contexto } from "../types";
 import { avisarAlCelular } from "./push-avisar";
 
 /** Mapea un evento de dominio a la categoría de preferencias del portal del trabajador. */
-export function categoriaPushDeEvento(tipo: string): CategoriaAviso {
+function categoriaPushDeEvento(tipo: string): CategoriaAviso {
   if (tipo.startsWith("pauta.")) return "pauta";
   if (tipo.includes("documento")) return "documentos";
   if (tipo.startsWith("comercial.solicitud") || tipo.startsWith("tickets.ticket")) return "solicitudes";

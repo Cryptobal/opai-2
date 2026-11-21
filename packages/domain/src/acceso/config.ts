@@ -17,6 +17,13 @@ export const MAX_CAMPOS = 15;
 
 export type CampoAcceso = { id: string; etiqueta: string; activo: boolean; obligatorio: boolean };
 
+export const FRECUENCIAS_REPORTE = ["desactivado", "diario", "semanal", "mensual"] as const;
+export type FrecuenciaReporte = (typeof FRECUENCIAS_REPORTE)[number];
+
+/** Línea fija en la portería (R19; diseño aprobado). */
+export const AVISO_PRIVACIDAD_PORTERIA =
+  "Tus datos se usan para la seguridad del recinto · Más información";
+
 export type ConfigAcceso = {
   /** Tipos de ingreso habilitados, en el orden en que se ofrecen. */
   tipos: TipoRegistro[];
@@ -30,6 +37,12 @@ export type ConfigAcceso = {
   permanenciaMaxMin: number | null;
   /** Hora local (0–23) en que se cierran solos los registros abiertos (R25); `null`, sin cierre automático. */
   cierreHora: number | null;
+  /** Reporte periódico por correo (R27); `desactivado` por defecto. */
+  reporteFrecuencia: FrecuenciaReporte;
+  /** Correos que reciben el reporte (también contactos cliente si se agregan aquí). */
+  reporteDestinatarios: string[];
+  /** Texto del cartel de privacidad del punto (R19); el QR apunta a la política pública. */
+  avisoPrivacidad: string;
 };
 
 export const CONFIG_ACCESO_DEFECTO: ConfigAcceso = {
@@ -43,6 +56,10 @@ export const CONFIG_ACCESO_DEFECTO: ConfigAcceso = {
   permitirFueraDeLista: false,
   permanenciaMaxMin: null,
   cierreHora: null,
+  reporteFrecuencia: "desactivado",
+  reporteDestinatarios: [],
+  avisoPrivacidad:
+    "Al registrarte, tratamos tus datos para controlar el ingreso y la seguridad de este recinto, según la Ley 21.719.",
 };
 
 export const esCampoPersonalizado = (id: string) => id.startsWith("c_");

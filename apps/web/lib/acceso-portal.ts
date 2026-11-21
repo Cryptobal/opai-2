@@ -1,19 +1,16 @@
-import { esMembresiaDeCliente, esRolPlataforma, type Rol } from "@opai/domain";
+import { esMembresiaDeCliente, esRolPlataforma, puedeUsarPortal, type Rol } from "@opai/domain";
 
 import type { Identidad } from "./actor";
+import { contextoPortalesDe } from "./contexto-portales";
 
-/** Plataforma es global: nunca se concede por la membresía ni por el rol del tenant (ADR-016). */
+/** Plataforma es global: el resto exige portal usable real, no solo el array de la membresía (CAR-746). */
 export function tieneAccesoAPortal(identidad: Identidad, portal: string): boolean {
-  if (portal === "platform") return esRolPlataforma(identidad.usuario.platformRole);
-  if (portal === "trabajador" && !identidad.modulosActivos.includes("portal_trabajador")) return false;
-  return identidad.actual?.portales.includes(portal) ?? false;
+  return puedeUsarPortal(portal, contextoPortalesDe(identidad));
 }
 
 /**
  * Sesión de la empresa (no de un contacto de cliente): cualquier membresía que no sea la de un contacto
- * (viewer con «cliente» como único portal), o un usuario de Plataforma. Vale aunque la membresía incluya
- * «cliente» por error (portales incoherentes que el runtime acepta): quien es de la empresa no entra al
- * Portal Cliente con esa cuenta, entre con el portal que entre.
+ * (viewer con «cliente» como único portal), o un usuario de Plataforma.
  */
 export function esCuentaDeEmpresa(identidad: Identidad): boolean {
   const a = identidad.actual;
