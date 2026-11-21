@@ -5,7 +5,7 @@ import { z } from "zod";
 import { ajuste } from "../core/config";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
-import { PERMISOS_INVENTARIO } from "./comun";
+import { entradaLista, paginaPor, PERMISOS_INVENTARIO, salidaLista } from "./comun";
 import { categoriasDeLaEmpresa } from "./categorias-kit";
 import { categoriaEntrada, guardarAjuste } from "./config-ajuste";
 
@@ -13,13 +13,15 @@ export const configCategoriasList = defineCapability({
   id: "inventario.config.categorias_list",
   descripcion: "Lista las categorías de tipos de inventario de la empresa.",
   permiso: PERMISOS_INVENTARIO.tiposManage,
-  input: z.object({ incluirInactivas: z.boolean().default(true) }),
-  output: z.object({ items: z.array(z.custom<CategoriaInventario>()) }),
+  input: z.object({ incluirInactivas: z.boolean().default(true), ...entradaLista(50) }),
+  output: salidaLista(z.custom<CategoriaInventario>()),
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx, { incluirInactivas }) {
+  async handler(ctx, { incluirInactivas, cursor, limite }) {
     const items = await categoriasDeLaEmpresa(ctx);
-    return { items: incluirInactivas ? items : items.filter((c) => c.activo) };
+    const filas = incluirInactivas ? items : items.filter((c) => c.activo);
+    const desde = cursor ? filas.findIndex((c) => c.clave === cursor) + 1 : 0;
+    return paginaPor(filas.slice(desde < 0 ? 0 : desde), limite, (c) => c.clave);
   },
 });
 

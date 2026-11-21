@@ -5,30 +5,27 @@ import { z } from "zod";
 import { ajuste } from "../core/config";
 import { defineCapability } from "../define";
 import { prohibido, reglaDeNegocio } from "../errores";
-import { PERMISOS_INVENTARIO } from "./comun";
+import { entradaLista, paginaPor, PERMISOS_INVENTARIO, salidaLista } from "./comun";
 import { prendasKitConfiguracion } from "./categorias-kit";
 import { guardarAjuste, prendaEntrada } from "./config-ajuste";
+
+const itemPrendaConfig = z.object({
+  clave: z.string(),
+  nombre: z.string(),
+  activo: z.boolean(),
+  orden: z.number(),
+  enUso: z.boolean(),
+});
 
 export const configPrendasList = defineCapability({
   id: "inventario.config.prendas_list",
   descripcion: "Lista las prendas del uniforme configuradas por la empresa (incluye inactivas y el respaldo del rubro).",
   permiso: PERMISOS_INVENTARIO.tiposManage,
-  input: z.object({}),
-  output: z.object({
-    heredaRubro: z.boolean(),
-    items: z.array(
-      z.object({
-        clave: z.string(),
-        nombre: z.string(),
-        activo: z.boolean(),
-        orden: z.number(),
-        enUso: z.boolean(),
-      }),
-    ),
-  }),
+  input: z.object({ ...entradaLista(50) }),
+  output: salidaLista(itemPrendaConfig).extend({ heredaRubro: z.boolean() }),
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx) {
+  async handler(ctx, { cursor, limite }) {
     const kit = await prendasKitConfiguracion(ctx);
     const usadas = new Set(
       (
@@ -47,16 +44,16 @@ export const configPrendasList = defineCapability({
         })
       ).map((r) => r.prendaClave!),
     );
-    return {
-      heredaRubro: kit.heredaRubro,
-      items: kit.prendas.map((p, i) => ({
-        clave: p.clave,
-        nombre: p.nombre,
-        activo: p.activo !== false,
-        orden: p.orden ?? i,
-        enUso: usadas.has(p.clave) || ligadas.has(p.clave),
-      })),
-    };
+    const filas = kit.prendas.map((p, i) => ({
+      clave: p.clave,
+      nombre: p.nombre,
+      activo: p.activo !== false,
+      orden: p.orden ?? i,
+      enUso: usadas.has(p.clave) || ligadas.has(p.clave),
+    }));
+    const desde = cursor ? filas.findIndex((p) => p.clave === cursor) + 1 : 0;
+    const pagina = paginaPor(filas.slice(desde < 0 ? 0 : desde), limite, (p) => p.clave);
+    return { heredaRubro: kit.heredaRubro, ...pagina };
   },
 });
 
