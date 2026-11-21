@@ -1,4 +1,8 @@
-import { puedeUsarSupervisorMembresia } from "@opai/domain";
+import {
+  alcanceSupervisorParaRegla,
+  armarContextoPortalesVisibles,
+  puedeUsarPortal,
+} from "@opai/domain";
 
 import type { Contexto } from "../../types";
 import { cursorDe } from "../maestros/comun";
@@ -34,7 +38,16 @@ export async function listarSupervisoresVerComo(
     (m) =>
       rolVisible(ctx, m.rol) &&
       m.userId !== ctx.usuario?.id &&
-      puedeUsarSupervisorMembresia(m.rol, m.portales, asignados.has(m.id)),
+      puedeUsarPortal(
+        "supervisor",
+        armarContextoPortalesVisibles({
+          portalesMembresia: m.portales,
+          rol: m.rol,
+          modulosActivos: [],
+          instalaciones: alcanceSupervisorParaRegla(m.rol, asignados.has(m.id)),
+          personaVinculada: false,
+        }),
+      ),
   );
   const usuarios = await ctx.db.user.findMany({
     where: { id: { in: visibles.map((m) => m.userId) } },
