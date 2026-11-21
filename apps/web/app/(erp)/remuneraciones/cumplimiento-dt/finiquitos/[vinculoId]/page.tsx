@@ -22,15 +22,17 @@ export default function FiniquitoVinculo({ params }: { params: Promise<{ vinculo
     >
       {(d) => (
         <EstadoMiDt r={d.r} variante="detalle">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h1 className="t-title">{d.r.data.personaNombre}</h1>
-              <EnlaceBoton href="/remuneraciones/cumplimiento-dt/finiquitos" variante="secondary">
-                Volver a finiquitos
-              </EnlaceBoton>
+          {d.r.ok ? (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h1 className="t-title">{d.r.data.personaNombre}</h1>
+                <EnlaceBoton href="/remuneraciones/cumplimiento-dt/finiquitos" variante="secondary">
+                  Volver a finiquitos
+                </EnlaceBoton>
+              </div>
+              <FiniquitoDetalle datos={d.r.data} />
             </div>
-            <FiniquitoDetalle datos={d.r.data} />
-          </div>
+          ) : null}
         </EstadoMiDt>
       )}
     </PaginaPortal>
