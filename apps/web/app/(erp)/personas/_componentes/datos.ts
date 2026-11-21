@@ -1,4 +1,4 @@
-import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
+import { tamanoPagina, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { estadoPantalla } from "@/lib/formato";
 import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
@@ -10,14 +10,9 @@ type PaginaPersonas = Pagina<PersonaFila> & {
   cargos: { id: string; nombre: string }[];
 };
 
-/**
- * Personas filtradas (texto, cargo, estado) y paginadas por cursor, con el total y los cargos del
- * filtro en la misma capacidad (ADR-045): una sola llamada, sin un contador ni una lista de cargos
- * aparte.
- */
 export async function cargarPersonas(p: Parametros) {
   const r = await ejecutarComoUsuario<PaginaPersonas>("erp", "core.personas.list", {
-    limite: POR_PAGINA,
+    limite: tamanoPagina(p),
     incluirFiltros: true,
     ...(p["q"] ? { q: p["q"] } : {}),
     ...(p["cargo"] ? { cargoId: p["cargo"] } : {}),
@@ -39,4 +34,3 @@ export async function cargarPersona(id: string) {
   requerirEncontrado(r);
   return { state: estadoPantalla(r), persona: r.ok ? r.data : null };
 }
-
