@@ -1,7 +1,11 @@
 import type { Contexto } from "@opai/capabilities";
 
-/** Predicados de texto y negocios de este tenant, aplicados antes del cursor (CAR-585). */
-async function ampliarBusquedaCotizaciones(ctx: Contexto, q: string) {
+/** Amplía `filtro.OR` con negocios cuya cuenta o título calza con `q` (lista CAR-585). */
+export async function ampliarBusquedaCotizaciones(
+  ctx: Contexto,
+  q: string,
+  filtro: Record<string, unknown>,
+) {
   const texto = { contains: q, mode: "insensitive" as const };
   const negocios = await ctx.db.negocio.findMany({
     where: {
@@ -11,31 +15,6 @@ async function ampliarBusquedaCotizaciones(ctx: Contexto, q: string) {
     select: { id: true },
   });
   const ids = negocios.map((n) => n.id);
-  return [
-    { codigo: texto },
-    { titulo: texto },
-    ...(ids.length ? [{ negocioId: { in: ids } }] : []),
-  ];
-}
-
-/** Compone la búsqueda con los filtros de negocio, archivo y estado vigentes. */
-export async function filtroListaCotizaciones(
-  ctx: Contexto,
-  input: {
-    negocioId?: string | undefined;
-    estado?: string | undefined;
-    q?: string | undefined;
-    incluirArchivadas: boolean;
-    soloArchivadas: boolean;
-  },
-) {
-  const filtro: Record<string, unknown> = {};
-  if (input.negocioId) filtro["negocioId"] = input.negocioId;
-  if (input.estado) filtro["versiones"] = { some: { estado: input.estado } };
-  else if (!input.incluirArchivadas && !input.soloArchivadas)
-    filtro["versiones"] = { none: { estado: "archivada" } };
-  if (input.soloArchivadas) filtro["archivadaEn"] = { not: null };
-  else if (!input.incluirArchivadas) filtro["archivadaEn"] = null;
-  if (input.q) filtro["OR"] = await ampliarBusquedaCotizaciones(ctx, input.q);
-  return filtro;
+  const base = Array.isArray(filtro.OR) ? (filtro.OR as Record<string, unknown>[]) : [];
+  filtro.OR = [...base, ...(ids.length ? [{ negocioId: { in: ids } }] : [])];
 }

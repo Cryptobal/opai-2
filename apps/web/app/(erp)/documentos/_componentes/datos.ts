@@ -1,5 +1,5 @@
+import { tamanoPagina, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
-import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -27,7 +27,7 @@ function entradaDe(p: Parametros) {
   const entidadTipo = dentro(p["entidad"], ENTIDADES);
   const orden = dentro(p["orden"], ORDENES);
   return {
-    limite: POR_PAGINA,
+    limite: tamanoPagina(p),
     ...(p["q"] ? { q: p["q"] } : {}),
     ...(vigencia ? { vigencia } : {}),
     ...(entidadTipo ? { entidadTipo } : {}),

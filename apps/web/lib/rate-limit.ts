@@ -24,6 +24,10 @@ export const LIMITES = {
   firma: { maximo: 30, ventanaMs: 15 * 60_000 },
   /** Verificación pública de comprobantes, por IP: 30 por minuto. */
   verificar: { maximo: 30, ventanaMs: 60_000 },
+  /** Marca pública por enlace de instalación (`/marcar/[codigo]`), por IP: 30 por minuto. */
+  marcarPublica: { maximo: 30, ventanaMs: 60_000 },
+  /** Intentos con código inválido o inexistente (anti-barrido), por IP y global. */
+  marcarPublicaMiss: { maximoIp: 20, maximoGlobal: 500, ventanaMs: 60_000 },
   /** /api/existe (proxy interno), por usuario de la sesión: 120 por minuto. */
   existe: { maximo: 120, ventanaMs: 60_000 },
   /** Formulario web público por tenant, por IP y slug (Brief 07 PR 2). */

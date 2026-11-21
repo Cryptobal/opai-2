@@ -125,6 +125,12 @@ export function accionesErp(
     .map(({ id, href, etiqueta, icono }) => ({ id, href, etiqueta, icono }));
 }
 
+/** Rutas que exigen un entitlement distinto del manifest (complementos con id de catálogo, ADR-057). */
+const ENTITLEMENT_NAV: Record<string, string> = {
+  "/remuneraciones/cumplimiento-dt/contratos": "nomina.cumplimiento_dt",
+  "/remuneraciones/cumplimiento-dt/finiquitos": "nomina.cumplimiento_dt",
+};
+
 /** Entradas de los módulos activos (manifest `navegacion`, Brief 05, §4.3). */
 export function entradasModulos(): EntradaArea[] {
   const items: EntradaArea[] = [];
@@ -136,7 +142,7 @@ export function entradasModulos(): EntradaArea[] {
         href: x.href,
         etiqueta: x.etiqueta,
         icono: x.icono,
-        modulo: m.id,
+        modulo: ENTITLEMENT_NAV[x.href] ?? m.id,
         permiso: x.permiso ?? null,
         ...(x.orden !== undefined ? { orden: x.orden } : {}),
       });

@@ -3,9 +3,19 @@ import { z } from "zod";
 import type { TenantTx } from "@opai/db";
 import { PIN_BLOQUEO_MINUTOS_DEFECTO, PIN_INTENTOS_MAXIMOS_DEFECTO } from "@opai/domain";
 
-import { dondePersona } from "../maestros/alcance";
+import { dondeInstalacion, dondePersona } from "../maestros/alcance";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
+
+/** Instalación dentro del alcance del actor, o NOT_FOUND (igual que si fuera de otra empresa). */
+export async function instalacionVisible(ctx: Contexto, instalacionId: string) {
+  const i = await ctx.db.instalacion.findFirst({
+    where: { id: instalacionId, AND: [dondeInstalacion(ctx)] },
+    select: { id: true },
+  });
+  if (!i) throw noEncontrado("La instalación");
+  return i;
+}
 
 /** Persona de la empresa dentro del alcance del actor, o NOT_FOUND (igual que si fuera de otra empresa). */
 export async function personaDeTerreno(ctx: Contexto, personaId: string, db = ctx.db) {

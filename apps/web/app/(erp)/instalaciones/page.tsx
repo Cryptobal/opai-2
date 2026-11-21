@@ -36,9 +36,8 @@ export default function Instalaciones({ searchParams }: { searchParams: SearchPa
             <ListaInstalaciones
               state={d.state}
               items={d.items}
-              regiones={d.regiones}
               siguiente={d.siguiente}
-              cuentaEtiqueta={d.cuentaEtiqueta}
+              cuentas={d.cuentas}
               titulo={d.voc.titulo("instalacion")}
               singular={d.voc.instalacion.singular}
               parametros={d.p}

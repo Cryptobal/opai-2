@@ -37,6 +37,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/firmar/[slug]/[token]` | `core.firmas.ver_firmante` | — | excepción |
 | — | `/fiscalizacion` | `asistencia.fiscalizacion_empleador.buscar` | — | excepción |
 | — | `/fiscalizacion` | `asistencia.fiscalizacion_ingreso.validar` | — | excepción |
+| — | `/marcar/[codigo]` | `asistencia.marcas.enlace_publico_resolver` | — | excepción |
+| — | `/marcar/[codigo]` | `asistencia.marcas.registrar` | — | excepción |
 | — | `/p/[slug]/[token]` | `cpq.compartir.ver` | — | excepción |
 | — | `/verificar/marca/[slug]/[hash]` | `asistencia.marcas.verificar` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
@@ -353,6 +355,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.vincular` | `core_contactos_vincular` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.responsables` | `comercial_negocios_responsables` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
@@ -528,8 +532,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.actualizar` | `finanzas_cierre_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `asistencia.marcas.enlace_publico_rotar` | `asistencia_marcas_enlace_publico_rotar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
-| compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
@@ -542,7 +546,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
-| compartido | `app/(erp)/instalaciones/_componentes` | `core.regiones.list` | `core_regiones_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
@@ -664,6 +667,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.f29.generar` | `nomina_f29_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.excel` | `nomina_libro_remuneraciones_excel` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.pdf` | `nomina_libro_remuneraciones_pdf` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
@@ -671,11 +675,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.datos` | `nomina_midt_datos` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.exportar_pendientes` | `nomina_midt_exportar_pendientes` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.registrar` | `nomina_midt_registrar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.generar_calendario` | `nomina_obligaciones_generar_calendario` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.pago_banco.generar` | `nomina_pago_banco_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.abrir` | `nomina_periodos_abrir` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.cambiar_estado` | `nomina_periodos_cambiar_estado` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.listar` | `nomina_periodos_listar` | existe |
@@ -901,6 +909,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.obtener` | `nomina_liquidaciones_obtener` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
+| erp | `/remuneraciones/cumplimiento-dt/contratos` | `nomina.midt.listar` | `nomina_midt_listar` | existe |
+| erp | `/remuneraciones/cumplimiento-dt/finiquitos/[vinculoId]` | `nomina.finiquito.obtener` | `nomina_finiquito_obtener` | existe |
+| erp | `/remuneraciones/cumplimiento-dt/finiquitos` | `nomina.midt.listar` | `nomina_midt_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
@@ -1064,6 +1075,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/fiscalizacion/acciones.ts#ingresarFiscalizacion` | Portal público DT (CAR-594): asistencia.fiscalizacion_ingreso.validar con contexto sistema; sin sesión ERP. |
 | `app/fiscalizacion/acciones.ts#salirFiscalizacion` | Portal fiscalización: borra la cookie de sesión del inspector; no toca datos de negocio ni capacidad. |
 | `app/fiscalizacion/acciones.ts#sesionFiscalizacionActual` | Portal fiscalización: lee la cookie firmada de sesión del inspector; no consulta base ni invoca capacidad. |
+| `app/marcar/[codigo]/acciones.ts#marcarPorEnlacePublico` | Asistencia (CAR-606): marca pública por enlace de instalación con RUT + PIN; resuelve el código con marcacionPublicaPorCodigo y ejecuta asistencia.marcas.registrar con enlacePublicoValidado; tope por IP que falla cerrado. |
 
 ## Excepciones justificadas (sin herramienta MCP)
 
@@ -1080,6 +1092,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `asistencia.fiscalizacion_accesos.registrar` | Interna: auditoría de accesos del portal; la invoca la ruta pública, no el ERP (CAR-594). |
 | `asistencia.fiscalizacion_empleador.buscar` | Interna: búsqueda de empleador por RUT en el portal DT con cookie de fiscalización (CAR-594). |
 | `asistencia.fiscalizacion_ingreso.validar` | Interna: el portal público `/fiscalizacion` valida correo @dt.gob.cl o clave temporal; no hay herramienta MCP para sesión anónima (CAR-594). |
+| `asistencia.marcas.enlace_publico_resolver` | Interna: la página pública `/marcar/<codigo>` la ejecuta sin sesión; el código rotativo de la instalación es la credencial (CAR-606). |
 | `asistencia.marcas.registrar` | Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador. |
 | `asistencia.marcas.verificar` | Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante. |
 | `asistencia.rostro.consentir` | Solo personas: el consentimiento expreso lo da el propio trabajador (L-13, T-04); un agente nunca consiente por él. |
@@ -1214,7 +1227,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
 | `asistencia.contingencias.responder` | `app/(trabajador)/trabajador/contingencias/_componentes` | no | reservada a personas |
 | `asistencia.correcciones.responder` | `app/(trabajador)/trabajador/correcciones/_componentes` | no | reservada a personas |
-| `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
+| `asistencia.marcas.registrar` | `/marcar/[codigo]`, `app/_components` | no | reservada a personas |
 | `asistencia.rostro.consentir` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.enrolar` | `app/_components` | no | reservada a personas |
 | `asistencia.rostro.estado` | `app/_components` | no | reservada a personas |
@@ -1329,6 +1342,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.mandante_accesos.historial`
 - `asistencia.mandante_accesos.revocar`
 - `asistencia.mandante_marcas.listar`
+- `asistencia.marcas.enlace_publico_estado`
 - `asistencia.respaldos.generar`
 - `asistencia.respaldos.verificar`
 - `central.alertas.contactar`
@@ -1411,6 +1425,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.rechazar`
 - `core.ping`
 - `core.procesos_persona.paso_actualizar`
+- `core.regiones.list`
 - `core.roles.adicionales_list`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`

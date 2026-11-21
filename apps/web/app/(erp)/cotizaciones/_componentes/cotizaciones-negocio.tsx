@@ -11,7 +11,7 @@ export async function CotizacionesNegocio({
   abierto: boolean;
   cursor?: string;
 }) {
-  const datos = await cargarCotizaciones(cursor, id);
+  const datos = await cargarCotizaciones(cursor ? { cursor } : {}, id);
   return (
     <ListaCotizacionesPantalla
       datos={datos}

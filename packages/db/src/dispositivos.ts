@@ -14,7 +14,7 @@ export const hmacDispositivo = (valor: string): string =>
   createHmac("sha256", SAL).update(`dispositivo\n${valor}`).digest("hex");
 
 /** Sin 0/O/1/I/L para que se lea bien en una pantalla de portería. */
-const ALFABETO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+export const ALFABETO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 export const LARGO_CODIGO = 6;
 export const VIGENCIA_CODIGO_MIN = 10;
 

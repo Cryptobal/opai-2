@@ -3,7 +3,7 @@ import { cn, estilosBoton } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import type { Parametros } from "@/lib/parametros";
 
-import { anteriores, queryConCambios, tamanoPagina, type TamanoPagina } from "./paginacion-cursor";
+import { anterioresDe, queryLista, tamanoPagina, type TamanoPagina } from "./paginacion-cursor";
 import { SelectorTamanoPagina } from "./selector-tamano-pagina";
 
 type Props = {
@@ -17,13 +17,12 @@ type Props = {
 /** Pie de lista maestro: «x–y de N», anterior/siguiente, tamaño 20/50/100; en móvil «Cargar más». */
 export function PaginacionListaMaestro({ p, rutaBase, mostrados, siguiente, porPagina }: Props) {
   const tam = porPagina ?? tamanoPagina(p);
-  const pila = anteriores(p).filter(Boolean);
+  const pila = anterioresDe(p);
   const desde = pila.length * tam + (mostrados ? 1 : 0);
   const hasta = pila.length * tam + mostrados;
   const previo = pila.slice(0, -1);
   const ultimo = pila.at(-1);
-  const href = (cambios: Record<string, string | null>) =>
-    `${rutaBase}${queryConCambios(p, cambios)}`;
+  const href = (cambios: Record<string, string | null>) => `${rutaBase}${queryLista(p, cambios)}`;
   const anterior =
     p.cursor != null
       ? href({
@@ -35,11 +34,7 @@ export function PaginacionListaMaestro({ p, rutaBase, mostrados, siguiente, porP
     ? href({ cursor: siguiente, prev: [...pila, p.cursor ?? "0"].join(",") })
     : null;
   const clase = (activo: boolean) =>
-    cn(
-      estilosBoton({ variant: "secondary" }),
-      "text-sm",
-      !activo && "pointer-events-none opacity-45",
-    );
+    cn(estilosBoton({ variant: "secondary" }), "text-sm", !activo && "pointer-events-none opacity-45");
   const hayNavegacion = Boolean(anterior || proxima);
 
   if (!hayNavegacion && mostrados <= tam) {
@@ -59,22 +54,14 @@ export function PaginacionListaMaestro({ p, rutaBase, mostrados, siguiente, porP
           {proxima ? "+" : ""}
         </span>
         <div className="hidden items-center gap-2 md:flex">
-          <LinkNext
-            href={anterior ?? "#"}
-            className={clase(Boolean(anterior))}
-            aria-disabled={!anterior}
-          >
+          <LinkNext href={anterior ?? "#"} className={clase(Boolean(anterior))} aria-disabled={!anterior}>
             Anterior
           </LinkNext>
-          <LinkNext
-            href={proxima ?? "#"}
-            className={clase(Boolean(proxima))}
-            aria-disabled={!proxima}
-          >
+          <LinkNext href={proxima ?? "#"} className={clase(Boolean(proxima))} aria-disabled={!proxima}>
             Siguiente
           </LinkNext>
+          <SelectorTamanoPagina actual={tam} />
         </div>
-        <SelectorTamanoPagina actual={tam} />
       </div>
       {proxima ? (
         <LinkNext href={proxima} className={cn(clase(true), "md:hidden")}>

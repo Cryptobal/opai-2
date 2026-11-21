@@ -20,6 +20,7 @@ export async function permisosNomina() {
     prestamos: puede("nomina:prestamos.manage"),
     anticipos: puede("nomina:anticipos.manage"),
     obligaciones: puede("nomina:obligaciones.manage"),
+    cumplimientoDt: puede("nomina:obligaciones.manage"),
   };
 }
 

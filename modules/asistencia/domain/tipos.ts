@@ -9,7 +9,7 @@ export type Metodo = (typeof METODOS)[number];
 export const ORIGENES_MARCA = ["en_linea", "offline_queue", "contingencia", "importacion"] as const;
 export type OrigenMarca = (typeof ORIGENES_MARCA)[number];
 
-export const CANALES = ["kiosco", "telefono_personal"] as const;
+export const CANALES = ["kiosco", "telefono_personal", "enlace_publico"] as const;
 export type Canal = (typeof CANALES)[number];
 
 export const GPS_ESTADOS = ["dentro", "fuera", "sin_gps"] as const;

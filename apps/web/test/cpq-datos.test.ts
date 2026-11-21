@@ -55,7 +55,7 @@ describe("CPQ: datos de pantalla autorizados en servidor", () => {
   });
   it("viewer lee sin creación y sin serializar margen ni datos que la lista no usa", async () => {
     mocks.identidad.mockResolvedValue(identidadCpq("viewer"));
-    const r = await cargarCotizaciones(cursor, negocioId);
+    const r = await cargarCotizaciones({ cursor }, negocioId);
     expect(r).toMatchObject({
       state: "ready",
       crear: false,

@@ -1,0 +1,1 @@
+export { exigeComplementoCumplimientoDt } from "../complemento-dt";

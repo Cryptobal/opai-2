@@ -59,7 +59,9 @@ export async function armarRegistro(db: Db, d: DatosMarca, i: EntradaMarca): Pro
       : resolverTipo(previas.map((p) => ({ tipo: p.tipo as TipoMarca, horaServidor: p.horaServidor })), ahora);
   const turnos = await db.turnoEsperado.findMany({
     where: {
-      personaId: d.personaId, vigente: true,
+      personaId: d.personaId,
+      instalacionId: d.instalacion.id,
+      vigente: true,
       inicio: { gte: new Date(ahora.getTime() - 26 * H), lte: new Date(ahora.getTime() + 12 * H) },
     },
   });
