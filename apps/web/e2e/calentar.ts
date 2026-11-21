@@ -8,13 +8,16 @@ import { E2E_PASSWORD, entrar } from "./sesion";
 // 404 del portal (navegacion-permisos, CAR-60). Sin sesión responde rápido; solo importa compilar.
 export default async function calentar() {
   const base = process.env["BASE_URL"] ?? "http://localhost:3000";
-  if (!/^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(base)) return;
-  for (const ruta of [
-    "/api/existe?ruta=%2Fpersonas%2F00000000-0000-7000-8000-000000000000",
-    "/api/health",
-  ]) {
-    await fetch(`${base}${ruta}`, { signal: AbortSignal.timeout(120_000) }).catch(() => undefined);
+  const esLocal = /^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(base);
+  if (esLocal) {
+    for (const ruta of [
+      "/api/existe?ruta=%2Fpersonas%2F00000000-0000-7000-8000-000000000000",
+      "/api/health",
+    ]) {
+      await fetch(`${base}${ruta}`, { signal: AbortSignal.timeout(120_000) }).catch(() => undefined);
+    }
   }
+  // También en preview-e2e (Vercel): evita la primera compilación en frío dentro del expect.
   await calentarConSesion(base);
 }
 
