@@ -88,6 +88,18 @@ describe.skipIf(!urlPropietario)("Núcleo · push nativa (Postgres real)", () =>
     await e?.cerrar();
   });
 
+  it("suscribe token FCM de iOS (no APNs hex) del propio usuario", async () => {
+    const token = `d${randomUUID().replace(/-/g, "").slice(0, 20)}:APA91b${randomUUID().replace(/-/g, "").slice(0, 40)}`;
+    const r = await mod.executeCapability(
+      ctx(tenantA, ana),
+      "core.push.suscribir",
+      { tipo: "nativa", token, plataforma: "ios", dispositivo: "iPhone" },
+    );
+    expect(r).toMatchObject({ ok: true });
+    const fila = await e.admin.suscripcionPush.findFirst({ where: { tenantId: tenantA, token } });
+    expect(fila).toMatchObject({ plataforma: "ios", usuarioId: ana });
+  });
+
   it("suscribe token nativo del propio usuario y otra empresa no lo ve", async () => {
     const token = tokenFcmPrueba("token");
     const r = await mod.executeCapability(
