@@ -8,7 +8,7 @@ import type { Contexto } from "../../types";
 import { cursorDe, listaSchema, pagina } from "../maestros/comun";
 import { busca, type Item, type Tramo, visibles } from "./objetivos-comun";
 import { trabajador } from "./objetivos-trabajador";
-import { rolVisible } from "./objetivo";
+import { listarSupervisoresVerComo } from "./listar-supervisores";
 
 const itemSchema = z.object({ id: z.string(), nombre: z.string(), detalle: z.string().nullable() });
 
@@ -67,41 +67,12 @@ async function terreno(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Ite
   }));
 }
 
-async function supervisor(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
-  const asignados = new Set(
-    (
-      await ctx.db.supervisorInstalacion.findMany({
-        select: { membershipId: true },
-        distinct: ["membershipId"],
-      })
-    ).map((f) => f.membershipId),
-  );
-  const filas = await ctx.db.membership.findMany({
-    where: {
-      estado: "activa",
-      portales: { has: "supervisor" },
-      OR: [{ rol: "supervisor" }, { id: { in: [...asignados] } }],
-    },
-    select: { id: true, userId: true, rol: true },
-    orderBy: { id: "asc" },
-    ...cursorDe(cursor, limite),
-  });
-  const visibles = filas.filter((m) => rolVisible(ctx, m.rol) && m.userId !== ctx.usuario?.id);
-  const usuarios = await ctx.db.user.findMany({
-    where: { id: { in: visibles.map((m) => m.userId) } },
-    select: { id: true, name: true },
-  });
-  const filtro = q.toLowerCase();
-  return visibles
-    .map((m) => ({
-      id: m.id,
-      nombre: usuarios.find((u) => u.id === m.userId)?.name ?? "Supervisor",
-      detalle: m.rol === "supervisor" ? null : "Por instalación",
-    }))
-    .filter((i) => !filtro || i.nombre.toLowerCase().includes(filtro));
-}
-
-const POR_PORTAL = { trabajador, cliente, terreno, supervisor } satisfies Record<
+const POR_PORTAL = {
+  trabajador,
+  cliente,
+  terreno,
+  supervisor: listarSupervisoresVerComo,
+} satisfies Record<
   PortalVerComo,
   (ctx: Contexto, t: Tramo) => Promise<Item[]>
 >;

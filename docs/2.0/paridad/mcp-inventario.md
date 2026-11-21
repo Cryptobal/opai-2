@@ -997,6 +997,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/existe-ruta.ts` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.personas.get` | `core_personas_get` | existe |
+| servidor | `lib/inicio-tareas-carga.ts` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
 | servidor | `lib/mcp.ts` | `core.config.schema` | `core_config_schema` | existe |
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
 | servidor | `lib/pin-trabajador.ts` | `core.credenciales_terreno.mi_estado` | — | excepción |
