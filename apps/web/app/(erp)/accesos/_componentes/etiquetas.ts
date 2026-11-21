@@ -31,14 +31,6 @@ export const tipoDe = (t: string) => TIPO_REGISTRO[t] ?? t;
 /** Hora «HH:mm» (24 h) en la zona de la empresa, con el formato común de `@opai/domain`. */
 const hora = (valor: string) => formatearFechaHora(valor).slice(11);
 
-/** Hora si es de hoy; si no, «dd-mm · HH:mm» para que una fila de otro día no se lea como de hoy. */
-export function cuando(valor: string): string {
-  const f = formatearFechaHora(valor);
-  return f.slice(0, 10) === formatearFechaHora(new Date()).slice(0, 10)
-    ? f.slice(11)
-    : `${f.slice(0, 5)} · ${f.slice(11)}`;
-}
-
 /** Estado visible de un registro (diseño `Accesos`): en sitio, salió a una hora o diferido (sin conexión). */
 export function estadoRegistro(r: Pick<Registro, "salidaEn" | "origen"> & { anulado?: boolean }): {
   etiqueta: string;
@@ -49,12 +41,3 @@ export function estadoRegistro(r: Pick<Registro, "salidaEn" | "origen"> & { anul
   if (r.origen === "diferido") return { etiqueta: "En sitio · diferido", tono: "info" };
   return { etiqueta: "En sitio", tono: "success" };
 }
-
-export const OPCIONES_TIPO = Object.entries(TIPO_REGISTRO).map(([valor, etiqueta]) => ({
-  valor,
-  etiqueta,
-}));
-export const OPCIONES_MOTIVO = Object.entries(MOTIVO_INTENTO).map(([valor, m]) => ({
-  valor,
-  etiqueta: m.etiqueta,
-}));

@@ -20,7 +20,7 @@ describe("lector QR de portería", () => {
 
   it("ofrece el lector cuando el navegador trae detector y acceso a cámara", () => {
     vi.stubGlobal("window", { BarcodeDetector: class {} });
-    vi.stubGlobal("navigator", { mediaDevices: {} });
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia: () => Promise.resolve({}) } });
     expect(lectorDisponible()).toBe(true);
   });
 });
