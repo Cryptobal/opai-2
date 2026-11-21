@@ -1,38 +1,25 @@
-import {
-  accesoDeMembresia,
-  INCLUIR_ACCESO,
-  PERMISOS_CORE,
-  tienePermisoEfectivo,
-} from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import type { EventoPublicado } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
 
-/** Usuario responsable del evento (no el ctx de sistema del despacho). */
-function usuarioIdDelEvento(ev: EventoPublicado): string | null {
-  if (ev.actorTipo === "user" && ev.actorId) return ev.actorId;
-  if (ev.actorTipo === "agent" && ev.viaUserId) return ev.viaUserId;
-  return null;
+/** Sello en el payload del evento: resultado real de ctx.autorizar(usersManage) al emitir. */
+export const CLAVE_SELLO_USERS_MANAGE = "usersManageEnOrigen";
+
+/** Solo actores usuario humano sellan; agentes y API keys nunca auto-acceso por consumidor. */
+export function selloAutoAccesoEnPayload(ctx: Contexto): Record<string, boolean> {
+  if (ctx.actor.tipo !== "user") return {};
+  return { [CLAVE_SELLO_USERS_MANAGE]: ctx.autorizar(PERMISOS_CORE.usersManage) };
 }
 
-export async function actorDelEventoTieneUsersManage(
-  ctx: Contexto,
-  ev: EventoPublicado,
-): Promise<boolean> {
-  const userId = usuarioIdDelEvento(ev);
-  if (!userId) return false;
-  const m = await ctx.db.membership.findFirst({
-    where: { userId, estado: "activa" },
-    include: INCLUIR_ACCESO,
-  });
-  if (!m) return false;
-  const conAcceso = {
-    ...m,
-    rolesAdicionales: m.rolesAdicionales ?? [],
-    gruposUsuarios: m.gruposUsuarios ?? [],
-    excepciones: m.excepciones ?? [],
-  };
-  return tienePermisoEfectivo(accesoDeMembresia(conAcceso), PERMISOS_CORE.usersManage);
+export function autoAccesoPermitidoPorEvento(ev: EventoPublicado): boolean {
+  if (ev.actorTipo !== "user") return false;
+  const p = ev.payload as Record<string, unknown> | null;
+  return p?.[CLAVE_SELLO_USERS_MANAGE] === true;
+}
+
+export function motivoOmisionAutoAcceso(ev: EventoPublicado): string {
+  return ev.actorTipo !== "user" ? "actor_no_usuario_humano" : "sin_users_manage";
 }
 
 /** Sin auto-acceso por falta de permiso del actor o condición de negocio (auditable en bitácora). */

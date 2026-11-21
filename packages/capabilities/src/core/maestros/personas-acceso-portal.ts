@@ -42,8 +42,10 @@ async function accesoConUsuarioExistente(
 
 async function invitarSiNoHayUsuario(
   ctx: Contexto,
+  personaId: string,
   email: string,
   dryRun: boolean,
+  usersManageEnOrigen: boolean,
 ): Promise<ResultadoAccesoPortalTrabajador> {
   const pendiente = await ctx.db.invitation.findFirst({
     where: { email, acceptedAt: null, revocadaEn: null, expiresAt: { gt: new Date() } },
@@ -61,6 +63,7 @@ async function invitarSiNoHayUsuario(
       portales: portalesInvitacionTrabajador(ctx),
       portalInicio: "trabajador",
       invitadoPor,
+      accesoPortal: { personaId, usersManageEnOrigen },
     },
     ctx.servicios,
     dryRun,
@@ -72,6 +75,7 @@ export async function asegurarAccesoPortalTrabajador(
   ctx: Contexto,
   personaId: string,
   dryRun: boolean,
+  usersManageEnOrigen: boolean,
 ): Promise<ResultadoAccesoPortalTrabajador> {
   if (!ctx.modulosActivos.includes("portal_trabajador")) return no("portal_trabajador_apagado");
   const persona = await ctx.db.persona.findFirst({
@@ -96,11 +100,11 @@ export async function asegurarAccesoPortalTrabajador(
   });
   const m = usuario
     ? await ctx.db.membership.findFirst({
-        where: { userId: usuario.id, estado: "activa" },
+        where: { userId: usuario.id, tenantId: ctx.tenantId, estado: "activa" },
         select: { id: true, rol: true, portales: true, userId: true },
       })
     : null;
 
   if (m) return accesoConUsuarioExistente(ctx, persona, m, dryRun);
-  return invitarSiNoHayUsuario(ctx, email, dryRun);
+  return invitarSiNoHayUsuario(ctx, personaId, email, dryRun, usersManageEnOrigen);
 }

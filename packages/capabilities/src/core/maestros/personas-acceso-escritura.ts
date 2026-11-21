@@ -11,6 +11,7 @@ import type { Contexto } from "../../types";
 import { personaDe } from "./personas-vista";
 import { asegurarAccesoPortalTrabajador, type ResultadoAccesoPortalTrabajador } from "./personas-acceso-portal";
 import { correoPortalPersona } from "./personas-acceso-logica";
+import { CLAVE_SELLO_USERS_MANAGE, selloAutoAccesoEnPayload } from "./personas-acceso-portal-actor";
 
 const resultadoSchema = z.object({
   estado: z.enum([
@@ -55,7 +56,10 @@ export const personasDarAccesoPortal = defineCapability({
     if (!ids.length) throw reglaDeNegocio("Indica al menos una persona.");
     const resultados: (ResultadoAccesoPortalTrabajador & { personaId: string })[] = [];
     for (const personaId of ids) {
-      resultados.push({ personaId, ...(await asegurarAccesoPortalTrabajador(ctx, personaId, dryRun)) });
+      resultados.push({
+        personaId,
+        ...(await asegurarAccesoPortalTrabajador(ctx, personaId, dryRun, true)),
+      });
     }
     if (ids.length === 1) {
       const uno = resultados[0]!;
@@ -114,6 +118,10 @@ export const personasReenviarInvitacionPortal = defineCapability({
         portales: ["trabajador", ...(ctx.modulosActivos.includes("terreno") ? ["terreno"] : [])],
         portalInicio: "trabajador",
         invitadoPor,
+        accesoPortal: {
+          personaId: input.personaId,
+          usersManageEnOrigen: selloAutoAccesoEnPayload(ctx)[CLAVE_SELLO_USERS_MANAGE] ?? true,
+        },
       },
       ctx.servicios,
       false,

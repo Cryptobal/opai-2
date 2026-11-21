@@ -14,6 +14,8 @@ export type DatosInvitacion = {
   portales: readonly string[];
   portalInicio?: string | null | undefined;
   invitadoPor: { id: string; nombre: string };
+  /** Invitación atada a una persona (portal trabajador, CAR-803). */
+  accesoPortal?: { personaId: string; usersManageEnOrigen: boolean };
 };
 
 type TenantInvita = { id: string; slug: string; nombre: string };
@@ -62,6 +64,12 @@ export async function crearInvitacion(
       tokenHash: sha256(token),
       invitedByUserId: datos.invitadoPor.id,
       expiresAt,
+      ...(datos.accesoPortal
+        ? {
+            personaId: datos.accesoPortal.personaId,
+            autoAccesoUsersManage: datos.accesoPortal.usersManageEnOrigen,
+          }
+        : {}),
     },
   });
   const url = `${servicios.urlBase}/invitacion/${tenant.slug}/${token}`;
