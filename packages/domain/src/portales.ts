@@ -77,16 +77,17 @@ export function puedeUsarPortal(portal: string, c: ContextoPortalesVisibles): bo
   if (portal === "trabajador") {
     return c.modulosActivos.includes("portal_trabajador") && c.personaVinculada;
   }
-  if (portal === "supervisor") {
-    if (!c.portalesMembresia.includes("supervisor")) return false;
-    if (c.rol === "supervisor") return true;
-    if (c.instalaciones !== null) return true;
-    return (
-      esRol(c.rol) &&
-      (c.rol === "owner" || c.rol === "admin" || c.rol === "gerente")
-    );
-  }
+  if (portal === "supervisor") return puedeUsarPortalSupervisor(c);
   return true;
+}
+
+function puedeUsarPortalSupervisor(c: ContextoPortalesVisibles): boolean {
+  if (!c.portalesMembresia.includes("supervisor")) return false;
+  if (c.rol === "supervisor") return true;
+  if (c.instalaciones !== null) return true;
+  return (
+    esRol(c.rol) && (c.rol === "owner" || c.rol === "admin" || c.rol === "gerente")
+  );
 }
 
 /** Alcance inferido al listar «ver como» supervisor (misma regla que la sesión, CAR-746). */
@@ -96,6 +97,23 @@ export function alcanceSupervisorParaRegla(
 ): readonly string[] | null {
   if (rol === "supervisor" || conAsignaciones) return [];
   return null;
+}
+
+/** Misma regla supervisor para listar «ver como» sin armar el contexto de sesión completo. */
+export function puedeUsarSupervisorMembresia(
+  rol: string,
+  portales: readonly string[],
+  conAsignacion: boolean,
+): boolean {
+  const rolEf = esRol(rol) ? rol : "viewer";
+  return puedeUsarPortalSupervisor({
+    portalesMembresia: portales,
+    rol: rolEf,
+    platformRole: null,
+    modulosActivos: [],
+    instalaciones: alcanceSupervisorParaRegla(rolEf, conAsignacion),
+    personaVinculada: false,
+  });
 }
 
 export function idsPortalesUsables(c: ContextoPortalesVisibles): string[] {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { portalesVisibles } from "@/app/_components/portales";
+import { tieneAccesoAPortal } from "@/lib/acceso-portal";
 import type { Identidad } from "@/lib/actor";
 import { membresia } from "./fuentes-falsas";
 
@@ -57,5 +58,17 @@ describe("portalesVisibles por perfil (CAR-746)", () => {
       identidad({ portales: ["cliente"], rol: "viewer", instalaciones: ["i1"] }),
     ).map((p) => p.id);
     expect(ids).toEqual(["cliente"]);
+  });
+
+  it("Terreno no está en el selector pero con sesión puede abrir /terreno", () => {
+    const i = identidad({ portales: ["erp", "terreno"], rol: "admin" });
+    expect(portalesVisibles(i).map((p) => p.id)).not.toContain("terreno");
+    expect(tieneAccesoAPortal(i, "terreno")).toBe(true);
+    expect(
+      tieneAccesoAPortal(
+        identidad({ portales: ["cliente"], rol: "viewer", instalaciones: ["i1"] }),
+        "terreno",
+      ),
+    ).toBe(false);
   });
 });
