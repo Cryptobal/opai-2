@@ -89,6 +89,16 @@ function Grupo({
   );
 }
 
+function descripcionModulo(m: FilaModulo, padreOk: boolean) {
+  const textoEstado = m.estado ? (TEXTO_ESTADO[m.estado] ?? m.estado) : "No contratado";
+  if (m.complemento) {
+    return [m.etiquetaCobro, padreOk ? textoEstado : "Requiere el módulo padre activo"]
+      .filter(Boolean)
+      .join(" · ");
+  }
+  return m.dependencias.length ? `Requiere ${m.dependencias.join(", ")}` : textoEstado;
+}
+
 function Fila({
   fila: m,
   padres,
@@ -102,19 +112,11 @@ function Fila({
 }) {
   const activo = activoParaUso(m.estado);
   const padreOk = !m.padreId || (padres.get(m.padreId) ?? false);
-  const textoEstado = m.estado ? (TEXTO_ESTADO[m.estado] ?? m.estado) : "No contratado";
-  const descripcion = m.complemento
-    ? [m.etiquetaCobro, padreOk ? textoEstado : "Requiere el módulo padre activo"]
-        .filter(Boolean)
-        .join(" · ")
-    : m.dependencias.length
-      ? `Requiere ${m.dependencias.join(", ")}`
-      : textoEstado;
   return (
     <div className={m.complemento ? "pl-4" : undefined}>
       <Switch
         etiqueta={m.nombre}
-        descripcion={descripcion}
+        descripcion={descripcionModulo(m, padreOk)}
         activo={activo}
         disabled={pendiente || (m.complemento && !padreOk)}
         onCambiar={(on) => set(m.id, on ? "activo" : "suspendido")}

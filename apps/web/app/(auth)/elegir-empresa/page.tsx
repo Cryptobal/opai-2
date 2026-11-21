@@ -11,6 +11,7 @@ import { destinoDeInicio } from "@/lib/portal-inicio";
 
 import { destinoSeguro } from "../destino";
 import { esContinuarOAuth } from "../oauth-consulta";
+import { empresasParaSelector } from "../empresas-selector";
 import { SelectorEmpresa } from "./selector-empresa";
 
 export const metadata = { title: "Elige una empresa" };
@@ -30,12 +31,7 @@ async function Contenido({ searchParams }: Props) {
     identidad.usuario.id,
     usables.map((m) => m.tenantId),
   );
-  const empresas = usables.map((m) => ({
-    tenantId: m.tenantId,
-    nombre: m.tenant.nombre,
-    rol: m.rol,
-    ultimoAcceso: accesos.get(m.tenantId)?.toISOString() ?? null,
-  }));
+  const empresas = empresasParaSelector(usables, accesos);
   return (
     <SelectorEmpresa empresas={empresas} destino={destino} epoca={epocaDeIdentidad(identidad)} />
   );

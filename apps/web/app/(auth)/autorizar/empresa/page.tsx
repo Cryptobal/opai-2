@@ -8,6 +8,7 @@ import { requerirIdentidad } from "@/lib/servidor";
 import { membresiasUsables } from "@/lib/tenant-actual";
 import { ultimosAccesos } from "@/lib/ultimo-acceso";
 
+import { empresasParaSelector } from "../../empresas-selector";
 import { SelectorEmpresa } from "../../elegir-empresa/selector-empresa";
 import { consultaDe } from "../../oauth-consulta";
 import { exigirSegundoFactor } from "../mfa-previo";
@@ -28,12 +29,7 @@ async function Contenido({ searchParams }: Props) {
     identidad.usuario.id,
     usables.map((m) => m.tenantId),
   );
-  const empresas = usables.map((m) => ({
-    tenantId: m.tenantId,
-    nombre: m.tenant.nombre,
-    rol: m.rol,
-    ultimoAcceso: accesos.get(m.tenantId)?.toISOString() ?? null,
-  }));
+  const empresas = empresasParaSelector(usables, accesos);
   return (
     <SelectorEmpresa
       empresas={empresas}
