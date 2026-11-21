@@ -9,7 +9,71 @@ import { estaCerrado } from "./cierre-lectura";
 import { deMesCerrado } from "./resultados-cargo-cerrado";
 import { mesesDe, periodo, PERMISOS_DESEMPENO, versionesDe } from "./comun";
 import { cobertura, MAX_PERSONAS as MAX, puntaje } from "./resultados";
+import type { Contexto } from "../types";
 import { visibilidadDe, visiblesEntre } from "./visibilidad";
+
+type InputCargo = {
+  cargoId: string;
+  periodo?: string;
+  despuesDe?: string;
+};
+
+async function listarResultadosCargo(ctx: Contexto, input: InputCargo) {
+  const cargo = await ctx.db.cargo.findUnique({
+    where: { id: input.cargoId },
+    select: { id: true },
+  });
+  if (!cargo) throw noEncontrado("El cargo");
+  const [meses, vis, vinculos] = await Promise.all([
+    mesesDe(ctx),
+    visibilidadDe(ctx),
+    ctx.db.vinculoLaboral.findMany({
+      where: { cargoId: input.cargoId, estado: "vigente", persona: { estado: "activo" } },
+      select: { personaId: true },
+    }),
+  ]);
+  const mes = input.periodo ?? meses.actual;
+  if (await estaCerrado(ctx, mes)) {
+    return {
+      ...(await deMesCerrado(ctx, input.cargoId, mes, vis, input.despuesDe)),
+      mesEnCurso: meses.actual,
+    };
+  }
+  const scorecard = versionVigente(await versionesDe(ctx, input.cargoId), mes);
+  const base = {
+    cargoId: input.cargoId,
+    periodo: mes,
+    mesEnCurso: meses.actual,
+    cerrado: false,
+    vigenteDesde: scorecard?.vigenteDesde ?? null,
+  };
+  if (!scorecard) return { ...base, personas: [], siguiente: null };
+  const delCargo = vinculos.map((v) => v.personaId);
+  const visibles = await visiblesEntre(ctx, vis, delCargo);
+  if (vis.propia && delCargo.includes(vis.propia) && (vis.todos || scorecard.personaVeResultado)) {
+    visibles.add(vis.propia);
+  }
+  const orden = [...visibles].filter((id) => !input.despuesDe || id > input.despuesDe).sort();
+  const pagina = orden.slice(0, MAX);
+  const personas = await ctx.db.persona.findMany({
+    where: { id: { in: pagina } },
+    select: { id: true, nombres: true, apellidos: true, usuarioId: true },
+  });
+  const resultados = await resultadosDe(ctx, scorecard, personas, mes, meses.zona);
+  return {
+    ...base,
+    personas: personas
+      .map((p) => ({
+        personaId: p.id,
+        nombres: p.nombres,
+        apellidos: p.apellidos,
+        puntaje: resultados.get(p.id)?.puntaje ?? null,
+        cobertura: resultados.get(p.id)?.cobertura ?? 0,
+      }))
+      .sort((a, b) => (a.personaId < b.personaId ? -1 : 1)),
+    siguiente: orden.length > MAX ? (pagina.at(-1) ?? null) : null,
+  };
+}
 
 export const resultadosCargo = defineCapability({
   id: "desempeno.resultados.ver_cargo",
@@ -43,65 +107,5 @@ export const resultadosCargo = defineCapability({
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (salida) => salida.personas.map((p) => p.personaId),
-  async handler(ctx, input) {
-    const cargo = await ctx.db.cargo.findUnique({
-      where: { id: input.cargoId },
-      select: { id: true },
-    });
-    if (!cargo) throw noEncontrado("El cargo");
-    const [meses, vis, vinculos] = await Promise.all([
-      mesesDe(ctx),
-      visibilidadDe(ctx),
-      ctx.db.vinculoLaboral.findMany({
-        where: { cargoId: input.cargoId, estado: "vigente", persona: { estado: "activo" } },
-        select: { personaId: true },
-      }),
-    ]);
-    const mes = input.periodo ?? meses.actual;
-    if (await estaCerrado(ctx, mes)) {
-      return {
-        ...(await deMesCerrado(ctx, input.cargoId, mes, vis, input.despuesDe)),
-        mesEnCurso: meses.actual,
-      };
-    }
-    const scorecard = versionVigente(await versionesDe(ctx, input.cargoId), mes);
-    const base = {
-      cargoId: input.cargoId,
-      periodo: mes,
-      mesEnCurso: meses.actual,
-      cerrado: false,
-      vigenteDesde: scorecard?.vigenteDesde ?? null,
-    };
-    if (!scorecard) return { ...base, personas: [], siguiente: null };
-    const delCargo = vinculos.map((v) => v.personaId);
-    const visibles = await visiblesEntre(ctx, vis, delCargo);
-    // Quien consulta también aparece si es de este cargo y puede ver su propio resultado.
-    if (
-      vis.propia &&
-      delCargo.includes(vis.propia) &&
-      (vis.todos || scorecard.personaVeResultado)
-    ) {
-      visibles.add(vis.propia);
-    }
-    const orden = [...visibles].filter((id) => !input.despuesDe || id > input.despuesDe).sort();
-    const pagina = orden.slice(0, MAX);
-    const personas = await ctx.db.persona.findMany({
-      where: { id: { in: pagina } },
-      select: { id: true, nombres: true, apellidos: true, usuarioId: true },
-    });
-    const resultados = await resultadosDe(ctx, scorecard, personas, mes, meses.zona);
-    return {
-      ...base,
-      personas: personas
-        .map((p) => ({
-          personaId: p.id,
-          nombres: p.nombres,
-          apellidos: p.apellidos,
-          puntaje: resultados.get(p.id)?.puntaje ?? null,
-          cobertura: resultados.get(p.id)?.cobertura ?? 0,
-        }))
-        .sort((a, b) => (a.personaId < b.personaId ? -1 : 1)),
-      siguiente: orden.length > MAX ? (pagina.at(-1) ?? null) : null,
-    };
-  },
+  handler: listarResultadosCargo,
 });
