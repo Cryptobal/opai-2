@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Sheet, Switch } from "@opai/ds";
+import { Alerta, avisar, Campo, Input, Sheet, Switch } from "@opai/ds";
 
+import { AccionesHoja } from "@/app/(erp)/inventario/_componentes/acciones-hoja";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -49,14 +50,13 @@ export function HojaPrenda({
       onCerrar={hoja.cerrar}
       titulo={prenda ? "Editar prenda" : "Nueva prenda"}
       acciones={
-        <>
-          <Button variant="secondary" onClick={hoja.cerrar}>
-            Cancelar
-          </Button>
-          <Button disabled={pendiente || nombre.trim().length < 2} onClick={() => void guardar()}>
-            {pendiente ? "Guardando…" : "Guardar"}
-          </Button>
-        </>
+        <AccionesHoja
+          onCancelar={hoja.cerrar}
+          onGuardar={() => void guardar()}
+          listo={nombre.trim().length >= 2}
+          pendiente={pendiente}
+          texto="Guardar"
+        />
       }
     >
       <div className="flex flex-col gap-4">

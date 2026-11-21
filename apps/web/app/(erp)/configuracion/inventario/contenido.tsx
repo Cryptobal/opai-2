@@ -4,6 +4,8 @@ import { Empty, Estado, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import type { Resultado } from "@opai/capabilities";
+
 import { estadoPantalla } from "@/lib/formato";
 import { construirPuede } from "@/lib/permisos-ui";
 import type { Indice } from "../_centro/datos";
@@ -17,8 +19,8 @@ const PERMISO_TIPOS = "inventario:tipos.manage";
 
 type Props = {
   tab: TabInventarioConfig;
-  prendas: Awaited<ReturnType<typeof import("@/lib/servidor").ejecutarComoUsuario<{ items: PrendaConfig[]; heredaRubro: boolean }>>>;
-  categorias: Awaited<ReturnType<typeof import("@/lib/servidor").ejecutarComoUsuario<{ items: CategoriaConfig[] }>>>;
+  prendas: Resultado<{ items: PrendaConfig[]; heredaRubro: boolean }>;
+  categorias: Resultado<{ items: CategoriaConfig[] }>;
   editar?: string | undefined;
   heredaRubro: boolean;
   indice: Indice;
