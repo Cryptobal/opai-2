@@ -19,7 +19,7 @@ it("envía con instalaciones a la capacidad y conserva su página y cursor", asy
     estado: "prospecto",
     limite: 20,
   });
-  expect(r.items).toBe(items);
+  expect(r.items).toStrictEqual(items);
   expect(r.siguiente).toBe("siguiente");
 });
 
