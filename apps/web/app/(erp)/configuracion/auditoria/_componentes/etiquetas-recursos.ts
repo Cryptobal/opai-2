@@ -21,7 +21,7 @@ export const RECURSOS: Record<string, string> = {
   periodos: "Períodos", novedades: "Novedades", prestamos: "Préstamos", anticipos: "Anticipos",
   conceptos: "Conceptos", obligaciones: "Obligaciones", costo_proyectado: "Costo proyectado", liquidaciones: "Liquidaciones", libro_remuneraciones: "Libro de remuneraciones", lre: "LRE", previred: "Previred", f30_1: "F30-1", mes: "Mes", dotacion: "Dotación", ppc: "Puestos por cubrir",
   series: "Series", titular: "Titular del puesto", titulares: "Titulares del puesto", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos", turnos_extra: "Turnos extra",
-  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", agente: "Agente", propuestas: "Propuestas del agente", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
+  alertas: "Alertas", estado: "Estado de la central", cadenas: "Cadenas de escalamiento", reglas: "Reglas de vigilancia", agente: "Agente", propuestas: "Propuestas del agente", mensajes: "Mensajes a la central", avisos: "Avisos de la central", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
   planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura", recurrentes: "Gastos recurrentes",
@@ -35,6 +35,7 @@ export const RECURSOS: Record<string, string> = {
   propuestas_tecnica: "Propuestas técnicas", propuestas_html: "Plantillas HTML de propuesta", envios_propuesta: "Envíos de propuesta",
   cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura migrada", impuestos: "Impuestos",
   intentos: "Intentos de acceso denegados", prerregistros: "Prerregistros de visitas", informes: "Informes", reportes: "Reportes", certificacion: "Certificación DT", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar", portal_registros: "Registros de acceso del portal del cliente", portal_listas: "Listas de acceso del portal del cliente", portal_visitas: "Visitas prerregistradas del portal del cliente",
+  fiscalizacion_claves: "Claves de fiscalización DT", fiscalizacion_accesos: "Accesos de fiscalización", fiscalizacion_empleador: "Búsqueda de empleador (fiscalización)", fiscalizacion_ingreso: "Ingreso al portal de fiscalización", mandante_accesos: "Accesos de mandante/EST", mandante_marcas: "Marcas para mandante", respaldos_bitacora: "Respaldos de bitácora DT",
   // Grupos o equipos de usuarios (CAR-251).
   grupos: "Grupos",
   webhooks: "Eventos salientes",

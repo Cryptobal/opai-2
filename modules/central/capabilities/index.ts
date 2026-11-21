@@ -14,6 +14,10 @@ import {
 } from "./escritura";
 import { centralEstado } from "./estado";
 import { alertasListar, alertasObtener } from "./lectura";
+import { avisosAcusar, avisosCrear } from "./avisos";
+import { avisosListar, avisosObtener } from "./avisos-lectura";
+import { mensajesCerrar, mensajesEnviar, mensajesResponder } from "./mensajes";
+import { mensajesListar, mensajesObtener } from "./mensajes-lectura";
 
 /** Capacidades de la Central. Cada una se expone igual en UI, API /api/v1 y MCP (ADR-004). */
 export const capacidades = [
@@ -44,4 +48,13 @@ export const capacidades = [
   alertasProponer,
   propuestasListar,
   propuestasResolver,
+  mensajesEnviar,
+  mensajesResponder,
+  mensajesCerrar,
+  mensajesListar,
+  mensajesObtener,
+  avisosCrear,
+  avisosAcusar,
+  avisosListar,
+  avisosObtener,
 ];
