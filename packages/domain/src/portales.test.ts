@@ -76,10 +76,16 @@ describe("portales usables en el selector (CAR-746)", () => {
       portalesMembresia: ["erp", "cliente", "supervisor", "terreno"],
       platformRole: "support",
     });
-    expect(idsPortalesUsables(c).sort()).toEqual(["erp", "platform"]);
+    expect(idsPortalesUsables(c).sort()).toEqual(["erp", "platform", "supervisor"]);
     expect(puedeUsarPortal("cliente", c)).toBe(false);
     expect(puedeUsarPortal("terreno", c)).toBe(false);
-    expect(puedeUsarPortal("supervisor", c)).toBe(false);
+    expect(puedeUsarPortal("supervisor", c)).toBe(true);
+  });
+
+  it("terreno no va en el selector aunque la membresía lo incluya", () => {
+    const c = base({ rol: "admin", portalesMembresia: ["erp", "terreno"] });
+    expect(idsPortalesUsables(c)).not.toContain("terreno");
+    expect(puedeUsarPortal("terreno", c)).toBe(false);
   });
 
   it("supervisor: ERP y Supervisor", () => {

@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-import { PERMISOS_PLATAFORMA } from "@opai/domain";
+import {
+  PERMISOS_PLATAFORMA,
+  dependenciaFaltante,
+  entradaCatalogo,
+  entradasComplementoCatalogo,
+  esComplementoCatalogo,
+  padreComplementoCatalogo,
+} from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
@@ -34,14 +41,22 @@ export const platformModulesSet = defineCapability({
   async handler(ctx, input, { dryRun }) {
     if (input.moduloId === "core") throw reglaDeNegocio("El núcleo siempre está activo.");
     const manifest = obtenerModulo(input.moduloId);
-    if (!manifest) throw noEncontrado(`El módulo "${input.moduloId}"`);
+    const complemento = !manifest && esComplementoCatalogo(input.moduloId);
+    const entrada = complemento ? entradaCatalogo(input.moduloId) : null;
+    if (!manifest && !entrada) throw noEncontrado(`El módulo "${input.moduloId}"`);
     const e = requierePlataforma(ctx).empresa(input.tenantId);
     const filas = await e.modulos();
     const estado = new Map(filas.map((f) => [f.moduloId, f.estado]));
+    const contratadas = idsActivos(estado);
 
     if (ACTIVOS.has(input.estado)) {
-      const faltan = manifest.dependencias.filter((d) => !ACTIVOS.has(estado.get(d) ?? ""));
-      if (faltan.length) throw reglaDeNegocio(`Activa antes: ${faltan.join(", ")}.`);
+      if (manifest) {
+        const faltan = manifest.dependencias.filter((d) => !ACTIVOS.has(estado.get(d) ?? ""));
+        if (faltan.length) throw reglaDeNegocio(`Activa antes: ${faltan.join(", ")}.`);
+      } else if (entrada) {
+        const falta = dependenciaFaltante(input.moduloId, contratadas);
+        if (falta) throw reglaDeNegocio(falta);
+      }
     } else {
       const dependientes = listarModulos()
         .filter(
@@ -54,11 +69,28 @@ export const platformModulesSet = defineCapability({
     const anterior = estado.get(input.moduloId) ?? null;
     if (!dryRun) {
       await e.fijarModulo(input.moduloId, input.estado);
-      if (ACTIVOS.has(input.estado)) await e.sembrarModulo(input.moduloId);
+      if (manifest && ACTIVOS.has(input.estado)) await e.sembrarModulo(input.moduloId);
+      if (manifest && !ACTIVOS.has(input.estado)) {
+        for (const c of complementosActivosDelPadre(input.moduloId, estado)) {
+          await e.fijarModulo(c, "suspendido");
+        }
+      }
     }
     return { moduloId: input.moduloId, estado: input.estado, anterior };
   },
 });
+
+function idsActivos(estado: Map<string, string>) {
+  const out = new Set<string>();
+  for (const [id, est] of estado) if (ACTIVOS.has(est)) out.add(id);
+  return out;
+}
+
+function complementosActivosDelPadre(padreId: string, estado: Map<string, string>) {
+  return entradasComplementoCatalogo()
+    .filter((c) => padreComplementoCatalogo(c.id) === padreId && ACTIVOS.has(estado.get(c.id) ?? ""))
+    .map((c) => c.id);
+}
 
 export const platformAdminsInvite = defineCapability({
   id: "platform.admins.invite",

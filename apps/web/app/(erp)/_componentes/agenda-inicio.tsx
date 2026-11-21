@@ -2,10 +2,9 @@ import { enAgenda, PERMISOS_CORE } from "@opai/domain";
 import { Empty } from "@opai/ds";
 
 import { GruposTareas } from "@/app/_components/actividad/grupos-tareas";
-import type { ListaActividades } from "@/app/_components/actividad/tipos";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { inicioTareasCarga } from "@/lib/inicio-tareas-carga";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import { esFalloReal, FalloBloque } from "./fallo-bloque";
 
@@ -17,10 +16,7 @@ const DIAS = 14;
  * que «Mis tareas», con más filas para que muchas vencidas no dejen fuera las próximas.
  */
 export async function AgendaInicio() {
-  const [identidad, r] = await Promise.all([
-    identidadActual(),
-    ejecutarComoUsuario<ListaActividades>("erp", "core.actividades.tareas", { limite: 100 }),
-  ]);
+  const { identidad, r } = await inicioTareasCarga(100);
   if (!identidad) return null;
   if (!r.ok)
     return esFalloReal(r.error.code) ? <FalloBloque titulo="No pudimos cargar tu agenda" /> : null;

@@ -1,23 +1,18 @@
-import { idsPortalesUsables, type ContextoPortalesVisibles } from "@opai/domain";
+import { armarContextoPortalesVisibles, idsPortalesUsables } from "@opai/domain";
 
 import type { Contexto } from "../types";
 
-function contextoPortalesDeCtx(
-  ctx: Contexto,
-  personaVinculada: boolean,
-): ContextoPortalesVisibles {
-  return {
-    portalesMembresia: ctx.portalesMembresia,
-    rol: ctx.rol ?? "viewer",
-    platformRole: ctx.usuario?.platformRole ?? null,
-    modulosActivos: ctx.modulosActivos,
-    instalaciones: ctx.alcance?.instalaciones ?? null,
-    personaVinculada,
-  };
-}
-
 export function portalesUsablesDe(ctx: Contexto, personaVinculada: boolean): string[] {
-  return idsPortalesUsables(contextoPortalesDeCtx(ctx, personaVinculada));
+  return idsPortalesUsables(
+    armarContextoPortalesVisibles({
+      portalesMembresia: ctx.portalesMembresia,
+      rol: ctx.rol,
+      platformRole: ctx.usuario?.platformRole ?? null,
+      modulosActivos: ctx.modulosActivos,
+      instalaciones: ctx.alcance?.instalaciones ?? null,
+      personaVinculada,
+    }),
+  );
 }
 
 export async function personaVinculadaEn(ctx: Contexto): Promise<boolean> {

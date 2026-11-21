@@ -3,10 +3,9 @@ import { Suspense } from "react";
 import { consultaOAuthValida } from "@opai/auth";
 import { Loading } from "@opai/ds";
 
+import { empresasParaSelector } from "@/lib/empresas-selector";
 import { epocaDeIdentidad } from "@/lib/epoca-sesion";
 import { requerirIdentidad } from "@/lib/servidor";
-import { membresiasUsables } from "@/lib/tenant-actual";
-import { ultimosAccesos } from "@/lib/ultimo-acceso";
 
 import { SelectorEmpresa } from "../../elegir-empresa/selector-empresa";
 import { consultaDe } from "../../oauth-consulta";
@@ -23,17 +22,7 @@ async function Contenido({ searchParams }: Props) {
   const identidad = await requerirIdentidad(ruta);
   await exigirSegundoFactor(identidad, ruta);
   if (!(await consultaOAuthValida(consulta))) return <AutorizacionVencida />;
-  const usables = membresiasUsables(identidad.membresias);
-  const accesos = await ultimosAccesos(
-    identidad.usuario.id,
-    usables.map((m) => m.tenantId),
-  );
-  const empresas = usables.map((m) => ({
-    tenantId: m.tenantId,
-    nombre: m.tenant.nombre,
-    rol: m.rol,
-    ultimoAcceso: accesos.get(m.tenantId)?.toISOString() ?? null,
-  }));
+  const empresas = await empresasParaSelector(identidad.usuario.id, identidad.membresias);
   return (
     <SelectorEmpresa
       empresas={empresas}

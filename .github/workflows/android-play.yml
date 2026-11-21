@@ -1,0 +1,149 @@
+# CAR-739 · Build Android (AAB firmado) de @opai/movil; sube a Play (interna) si existe PLAY_SERVICE_ACCOUNT_JSON.
+name: Android · Play
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/movil/**"
+      - ".github/workflows/android-play.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-play-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUNDLETOOL_VERSION: "1.17.2"
+  BUNDLETOOL_SHA256: "2d4ad908faea64047c1cc9cb747e6aa667c6ab192e09607bd16b67246a8cd6ae"
+
+jobs:
+  aab:
+    name: compilar AAB · Play
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Comprobar secretos obligatorios
+        env:
+          ANDROID_UPLOAD_KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          set -euo pipefail
+          faltan=()
+          for v in ANDROID_UPLOAD_KEYSTORE_B64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD GOOGLE_SERVICES_JSON; do
+            [ -z "${!v:-}" ] && faltan+=("$v")
+          done
+          if [ "${#faltan[@]}" -gt 0 ]; then echo "::error::Faltan secretos: ${faltan[*]}"; exit 1; fi
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+
+      - uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Sincronizar Capacitor (producción)
+        env:
+          OPAI_APP_ENTORNO: produccion
+        run: pnpm --filter @opai/movil sincronizar
+
+      - name: Inyectar google-services.json y keystore
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          ANDROID_UPLOAD_KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          d=apps/movil/nativo/android/app
+          printf '%s' "$GOOGLE_SERVICES_JSON" | tr -d '[:space:]' | base64 --decode > "$d/google-services.json"
+          grep -q '"cl.opai.app"' "$d/google-services.json" || { echo "::error::google-services.json sin package cl.opai.app"; exit 1; }
+          grep -q '"package_name": "cl.opai.app"' "$d/google-services.json" || { echo "::error::google-services.json sin package_name cl.opai.app"; exit 1; }
+          printf '%s' "$ANDROID_UPLOAD_KEYSTORE_B64" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/upload.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+
+      - name: Compilar AAB release
+        working-directory: apps/movil/nativo/android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export ANDROID_VERSION_CODE=$((GITHUB_RUN_NUMBER + 100))
+          export ANDROID_VERSION_NAME="1.0.${ANDROID_VERSION_CODE}"
+          ./gradlew --no-daemon bundleRelease
+
+      - name: Verificar AAB (firma, versión, package)
+        env:
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          aab=$(ls apps/movil/nativo/android/app/build/outputs/bundle/release/*.aab)
+          jarsigner -verify "$aab" | grep -q "jar verified" || { echo "::error::AAB sin firmar"; exit 1; }
+          bt="$RUNNER_TEMP/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          curl -fsSL "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar" -o "$bt"
+          echo "${BUNDLETOOL_SHA256}  ${bt}" | sha256sum -c -
+          vc=$((ANDROID_VERSION_CODE + 100))
+          man=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest)
+          echo "$man" | grep -q 'package="cl.opai.app"' || { echo "::error::package distinto de cl.opai.app"; exit 1; }
+          echo "$man" | grep -q "android:versionCode=\"${vc}\"" || { echo "::error::versionCode distinto de ${vc}"; exit 1; }
+          echo "$man" | grep -q 'android:versionName="1.0.'"${vc}"'"' || { echo "::error::versionName inesperado"; exit 1; }
+          sdk=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest/uses-sdk)
+          echo "$sdk" | grep -q 'android:targetSdkVersion="36"' || { echo "::error::targetSdkVersion distinto de 36"; exit 1; }
+          echo "$man" | grep -q 'android.permission.POST_NOTIFICATIONS' || { echo "::error::falta POST_NOTIFICATIONS en manifest"; exit 1; }
+
+      - name: Subir artefacto
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: opai-release-aab
+          path: apps/movil/nativo/android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30
+
+      - name: Borrar secretos del runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks" apps/movil/nativo/android/app/google-services.json
+
+  play:
+    name: subir a Play (interna)
+    needs: aab
+    runs-on: ubuntu-latest
+    env:
+      PLAY_SA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: ¿Hay secreto de Play?
+        id: gate
+        run: echo "ok=$([ -n "${PLAY_SA:-}" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - if: steps.gate.outputs.ok == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: opai-release-aab
+          path: aab
+
+      - if: steps.gate.outputs.ok == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: cl.opai.app
+          releaseFiles: aab/*.aab
+          track: internal
+          status: draft
