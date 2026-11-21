@@ -1,8 +1,9 @@
 import { formatearFechaHora } from "@opai/domain";
-import { Badge, type Columna, ListScreen, Segmentado } from "@opai/ds";
+import { type Columna, ListScreen, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import type { Registro } from "@/app/(erp)/accesos/_componentes/datos";
+import { columnaEstadoRegistro } from "@/app/(erp)/accesos/_componentes/columna-estado-registro";
 import { estadoRegistro, tipoDe } from "@/app/(erp)/accesos/_componentes/etiquetas";
 import { Tarjeta } from "@/app/(erp)/accesos/_componentes/tablas-instalacion";
 
@@ -27,15 +28,7 @@ const COLUMNAS_CLIENTE: Columna<Registro>[] = [
   { id: "instalacion", etiqueta: "Instalación", render: (x) => x.instalacion },
   { id: "tipo", etiqueta: "Tipo", render: (x) => tipoDe(x.tipoRegistro) },
   { id: "entrada", etiqueta: "Entrada", render: (x) => formatearFechaHora(x.entradaEn) },
-  {
-    id: "estado",
-    etiqueta: "Estado",
-    render: (x) => (
-      <Badge tono={estadoRegistro(x).tono} punto>
-        {estadoRegistro(x).etiqueta}
-      </Badge>
-    ),
-  },
+  columnaEstadoRegistro(),
 ];
 
 /** Elegir instalación; en listas no hay «Todas», porque cada lista es de una instalación. */

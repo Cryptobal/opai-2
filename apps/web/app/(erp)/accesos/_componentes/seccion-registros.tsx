@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { formatearFechaHora } from "@opai/domain";
-import { Badge, type Columna, ListScreen } from "@opai/ds";
+import { type Columna, ListScreen } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { estadoPantalla } from "@/lib/formato";
@@ -11,6 +11,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { uuid } from "../prerregistros/_componentes/datos";
 import { CerrarEnBloque } from "./acciones-registro";
 import type { Pagina, Registro } from "./datos";
+import { columnaEstadoRegistro } from "./columna-estado-registro";
 import { estadoRegistro, tipoDe } from "./etiquetas";
 import { paginacion } from "./paginacion";
 import { Tarjeta } from "./tablas-instalacion";
@@ -20,15 +21,7 @@ const COLUMNAS: Columna<Registro>[] = [
   { id: "tipo", etiqueta: "Tipo", render: (x) => tipoDe(x.tipoRegistro) },
   { id: "empresa", etiqueta: "Empresa", render: (x) => x.empresa ?? "—" },
   { id: "entrada", etiqueta: "Entrada", render: (x) => formatearFechaHora(x.entradaEn) },
-  {
-    id: "estado",
-    etiqueta: "Estado",
-    render: (x) => (
-      <Badge tono={estadoRegistro(x).tono} punto>
-        {estadoRegistro(x).etiqueta}
-      </Badge>
-    ),
-  },
+  columnaEstadoRegistro(),
 ];
 
 const textos = (enSitio: boolean) => ({
