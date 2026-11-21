@@ -1,7 +1,7 @@
 import { Estado } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
+import { estadoPantalla, textosComplementoInactivo } from "@/lib/formato";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import { permisosNomina } from "../../_componentes/datos";
@@ -27,8 +27,10 @@ export default function FiniquitosMiDt() {
         return { r, permisos, tenantId: identidad?.actual?.tenantId ?? "" };
       }}
     >
-      {(d) => (
-        <Estado state={estadoPantalla(d.r)} variante="lista">
+      {(d) => {
+        const textos = textosComplementoInactivo(d.r);
+        return (
+        <Estado state={estadoPantalla(d.r)} variante="lista" {...(textos ? { textos } : {})}>
           {d.r.ok ? (
             (() => {
               const items = d.r.data.items.filter((m) => m.movimientoTipo === "finiquito");
@@ -45,7 +47,8 @@ export default function FiniquitosMiDt() {
             })()
           ) : null}
         </Estado>
-      )}
+        );
+      }}
     </PaginaPortal>
   );
 }

@@ -1,5 +1,5 @@
 import { listarModulos } from "@opai/capabilities";
-import { PERMISOS_CORE, type AreaNav, type Vocabulario } from "@opai/domain";
+import { ENTITLEMENT_NAV, PERMISOS_CORE, type AreaNav, type Vocabulario } from "@opai/domain";
 
 import type { EntradaArea } from "./navegacion-areas";
 
@@ -124,12 +124,6 @@ export function accionesErp(
     .filter((a) => activos.has(a.modulo) && (a.permiso == null || puede(a.permiso)))
     .map(({ id, href, etiqueta, icono }) => ({ id, href, etiqueta, icono }));
 }
-
-/** Rutas que exigen un entitlement distinto del manifest (complementos con id de catálogo, ADR-057). */
-const ENTITLEMENT_NAV: Record<string, string> = {
-  "/remuneraciones/cumplimiento-dt/contratos": "nomina.cumplimiento_dt",
-  "/remuneraciones/cumplimiento-dt/finiquitos": "nomina.cumplimiento_dt",
-};
 
 /** Entradas de los módulos activos (manifest `navegacion`, Brief 05, §4.3). */
 export function entradasModulos(): EntradaArea[] {

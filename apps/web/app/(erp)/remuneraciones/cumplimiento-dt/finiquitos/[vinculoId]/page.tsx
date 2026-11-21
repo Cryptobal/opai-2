@@ -2,7 +2,7 @@ import { Estado } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
+import { estadoPantalla, textosComplementoInactivo } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { FiniquitoDetalle, type DatosFiniquito } from "../../../_componentes/finiquito-detalle";
@@ -22,8 +22,10 @@ export default function FiniquitoVinculo({ params }: { params: Promise<{ vinculo
         return { r, vinculoId };
       }}
     >
-      {(d) => (
-        <Estado state={estadoPantalla(d.r)} variante="detalle">
+      {(d) => {
+        const textos = textosComplementoInactivo(d.r);
+        return (
+        <Estado state={estadoPantalla(d.r)} variante="detalle" {...(textos ? { textos } : {})}>
           {d.r.ok ? (
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -36,7 +38,8 @@ export default function FiniquitoVinculo({ params }: { params: Promise<{ vinculo
             </div>
           ) : null}
         </Estado>
-      )}
+        );
+      }}
     </PaginaPortal>
   );
 }
