@@ -2,6 +2,7 @@ import { diaEnZona, documentoSegun, normalizarPatente } from "@opai/domain";
 
 import { configDeInstalacion } from "../../acceso/config-comun";
 import { type HuellaVersionada, huellasCandidatas } from "../../acceso/huella";
+import { puntosDe } from "../../acceso/puntos-comun";
 import type { Contexto } from "../../types";
 import { tenantActual } from "../comun";
 import { cruzarPrerregistros, type VisitanteDia } from "./acceso-prerregistro";
@@ -59,11 +60,17 @@ export async function evaluarEntradas(
   crudas: readonly { h: Hecho; p: Payload }[],
   t: Tiempo,
   rechazos: Rechazos,
-): Promise<{ registros: FilaRegistro[]; intentos: FilaIntento[]; usos: FilaUso[] }> {
+): Promise<{
+  registros: FilaRegistro[];
+  intentos: FilaIntento[];
+  usos: FilaUso[];
+  bloqueadoDiferido: ReadonlySet<string>;
+}> {
   // Días, días de semana y horarios se evalúan en la zona horaria de la empresa (`core.tenants.timezone`).
-  const [{ timezone: zona }, config] = await Promise.all([
+  const [{ timezone: zona }, config, puntos] = await Promise.all([
     tenantActual(ctx),
     configDeInstalacion(ctx, equipo.instalacionId),
+    puntosDe(ctx, equipo.instalacionId),
   ]);
   const entradas = [...crudas]
     .sort((a, b) => a.h.horaHecho.localeCompare(b.h.horaHecho))
@@ -88,5 +95,9 @@ export async function evaluarEntradas(
     const doc = d ?? (v ? documentoDelVisitante(v) : null);
     return doc ? [{ e, d: doc, pre: v }] : [];
   });
-  return escribirFilas(ctx, equipo, listos, t, { zona, fueraDeLista: config.permitirFueraDeLista });
+  return escribirFilas(ctx, equipo, listos, t, {
+    zona,
+    fueraDeLista: config.permitirFueraDeLista,
+    puntos: new Set(puntos.filter((p) => p.activo).map((p) => p.id)),
+  });
 }

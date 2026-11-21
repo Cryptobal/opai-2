@@ -10,6 +10,7 @@ import type { Excepcion } from "@opai/domain";
 
 import { instalacionesDeContactoCliente } from "./fuentes-cliente";
 import { INCLUIR_ROLES_ADICIONALES, permisosAdicionalesDe } from "./fuentes-roles";
+import { personaVinculadaDe } from "./persona-vinculada";
 
 /** Membresía con su tenant, tal como se lista para elegir empresa. */
 export type MembresiaConTenant = {
@@ -71,7 +72,12 @@ export type Fuentes = {
   accesoConModulos?(
     tenantId: string,
     userId: string,
-  ): Promise<{ acceso: AccesoFila; modulosActivos: string[]; modulosSoloLectura?: string[] }>;
+  ): Promise<{
+    acceso: AccesoFila;
+    modulosActivos: string[];
+    modulosSoloLectura?: string[];
+    personaVinculada: boolean;
+  }>;
   marcarUsoKey(tenantId: string, id: string): Promise<void>;
 };
 
@@ -164,9 +170,11 @@ export async function accesoConModulos(
     permisosAdicionales: m ? permisosAdicionalesDe(m) : [],
   };
   const modulos = m?.tenant.modules ?? [];
+  const personaVinculada = m ? await personaVinculadaDe(db, tenantId, userId) : false;
   return {
     acceso,
     modulosActivos: modulos.map((f) => f.moduloId),
     modulosSoloLectura: modulos.filter((f) => f.estado === SOLO_LECTURA).map((f) => f.moduloId),
+    personaVinculada,
   };
 }

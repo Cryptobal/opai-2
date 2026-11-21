@@ -172,7 +172,11 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     expect(rat.basesPropuestas).toBe(true);
     const tablas = rat.porTabla.map((a) => a.tabla);
     expect(tablas).toContain("personas");
-    expect(rat.porTabla.every((a) => a.modulo === "core")).toBe(true);
+    expect(rat.porTabla.filter((a) => a.modulo === "core").length).toBeGreaterThan(0);
+    expect(rat.porTabla.find((a) => a.tabla === "registros_acceso")).toMatchObject({
+      modulo: "acceso",
+      reguladoNoBorrable: true,
+    });
     expect(rat.porTabla.find((a) => a.tabla === "vinculos_laborales")?.reguladoNoBorrable).toBe(true);
   });
 

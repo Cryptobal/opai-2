@@ -100,7 +100,7 @@ export const invitationsAccept = defineCapability({
         tipo: "core.membresia.creada",
         entidadTipo: "membership",
         entidadId: nueva.id,
-        payload: { usuarioId },
+        payload: { usuarioId, invitationId: i.id },
       });
       return nueva;
     });

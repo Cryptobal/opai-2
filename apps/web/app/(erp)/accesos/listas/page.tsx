@@ -12,10 +12,7 @@ import { SegmentoAccesos } from "../_componentes/segmento-accesos";
 
 export const metadata = { title: "Listas de acceso" };
 
-/**
- * Listas autorizada y bloqueada (CAR-475, diseño `Listas`). Hoy viven por instalación: el alcance por empresa,
- * cuenta o grupo del diseño necesita un modelo nuevo y queda para después (anotado en el estado).
- */
+/** Listas autorizada y bloqueada por instalación (CAR-475 / CAR-506 alcance en instalación). */
 export default function ListasAcceso({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal

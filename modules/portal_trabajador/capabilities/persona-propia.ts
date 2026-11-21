@@ -33,8 +33,11 @@ export function usuarioDe(ctx: Contexto): string {
  * de persona. Una ficha archivada o anonimizada responde como inexistente.
  */
 export async function personaPropia(ctx: Contexto) {
+  const porPersona = ctx.verComo?.personaId;
   const p = await ctx.db.persona.findFirst({
-    where: { usuarioId: usuarioDe(ctx), archivadaEn: null, anonimizadaEn: null },
+    where: porPersona
+      ? { id: porPersona, archivadaEn: null, anonimizadaEn: null }
+      : { usuarioId: usuarioDe(ctx), archivadaEn: null, anonimizadaEn: null },
   });
   if (!p) throw noEncontrado("Tu ficha de persona");
   return p;
