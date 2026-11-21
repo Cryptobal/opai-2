@@ -12,7 +12,7 @@ import { uuid } from "../prerregistros/_componentes/datos";
 import { CerrarEnBloque } from "./acciones-registro";
 import type { Pagina, Registro } from "./datos";
 import { columnaEstadoRegistro } from "./columna-estado-registro";
-import { tipoDe } from "./etiquetas";
+import { estadoRegistro, tipoDe } from "./etiquetas";
 import { paginacion } from "./paginacion";
 import { Tarjeta } from "./tablas-instalacion";
 

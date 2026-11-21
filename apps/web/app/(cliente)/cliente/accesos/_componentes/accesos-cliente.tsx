@@ -4,7 +4,7 @@ import { type Columna, ListScreen, Segmentado } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import type { Registro } from "@/app/(erp)/accesos/_componentes/datos";
 import { columnaEstadoRegistro } from "@/app/(erp)/accesos/_componentes/columna-estado-registro";
-import { tipoDe } from "@/app/(erp)/accesos/_componentes/etiquetas";
+import { estadoRegistro, tipoDe } from "@/app/(erp)/accesos/_componentes/etiquetas";
 import { Tarjeta } from "@/app/(erp)/accesos/_componentes/tablas-instalacion";
 
 import { type Listas, ListasCliente } from "./listas-cliente";
