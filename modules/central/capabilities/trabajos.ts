@@ -41,6 +41,8 @@ async function revisar(ctx: Contexto, alertaId: string) {
     const sev = a.severidad as Severidad;
     const pasoVencido = ["en_contacto", "escalada"].includes(a.estado) && a.pasoVenceEn && a.pasoVenceEn <= ahora;
     const atencionVencida = a.estado === "en_atencion" && a.atencionVenceEn && a.atencionVenceEn <= ahora;
+    // Tomada por un operador: la cadena no avanza hasta que la devuelva (R13).
+    if (a.tomadaPorId) return;
     if (a.estado === "nueva" && a.pasoActual === 0) return contactarPaso(ctx, tx, a, 1);
     if (!pasoVencido && !atencionVencida) return;
     // Si la cadena se acortó a mitad de la alerta, se retoma desde su último paso.

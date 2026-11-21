@@ -6,10 +6,10 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionFila } from "@/lib/tipos-maestros";
-
-import { PaginacionEnlaces } from "@/app/_components/maestros/paginacion-enlaces";
 
 import { FiltroCuentaInstalaciones } from "./filtro-cuenta";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
@@ -32,8 +32,10 @@ const personas = (n: number) => `${n} ${n === 1 ? "persona" : "personas"}`;
 /** Columna de instalaciones (06): icono, nombre, "cuenta · comuna", estado y dotación. */
 export function ListaInstalaciones(p: Props) {
   const total = p.items.reduce((t, i) => t + i.dotacion, 0);
+  const porPagina = tamanoPagina(p.parametros);
+  const filtrando = Boolean(p.parametros.q || p.parametros.estado || p.parametros.cuenta || p.parametros.region);
   const nueva = (
-    <EnlaceBoton href="/instalaciones/nueva" icono={Plus}>
+    <EnlaceBoton href="/instalaciones/nueva" icono={Plus} variante={p.seleccionada ? "secondary" : "primary"}>
       Nueva
     </EnlaceBoton>
   );
@@ -62,21 +64,33 @@ export function ListaInstalaciones(p: Props) {
           />
         </div>
       }
-      meta={{ izquierda: `${p.items.length} en esta página`, derecha: personas(total) }}
+      meta={{
+        izquierda: filtrando
+          ? `${p.items.length}${p.siguiente ? "+" : ""} ${p.items.length === 1 ? "resultado" : "resultados"}`
+          : `${p.items.length}${p.siguiente ? "+" : ""} ${p.titulo.toLowerCase()}`,
+        derecha: personas(total),
+      }}
       pie={
-        <PaginacionEnlaces
-          p={p.parametros}
-          mostrados={p.items.length}
-          siguiente={p.siguiente}
-          etiquetaSinNav="instalaciones en esta página"
-        />
+        p.state === "ready" ? (
+          <PaginacionListaMaestro
+            p={p.parametros}
+            rutaBase="/instalaciones"
+            mostrados={p.items.length}
+            siguiente={p.siguiente}
+            porPagina={porPagina}
+          />
+        ) : undefined
       }
       seleccionada={p.seleccionada}
-      vacio={{
-        titulo: `Aún no hay ${p.titulo.toLowerCase()}`,
-        descripcion: "Crea la primera para definir sus puestos y documentos.",
-        accion: nueva,
-      }}
+      vacio={
+        filtrando
+          ? { titulo: "Sin resultados", descripcion: "Prueba otro término o quita un filtro." }
+          : {
+              titulo: `Aún no hay ${p.titulo.toLowerCase()}`,
+              descripcion: "Crea la primera para definir sus puestos y documentos.",
+              accion: nueva,
+            }
+      }
       filas={p.items.map((i) => {
         const e = estadoDe(ESTADO_INSTALACION, i.estado);
         const sel = p.seleccionada === i.id;

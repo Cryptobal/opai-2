@@ -5,6 +5,7 @@
 import type { ClaseBase } from "./permisos-base-tipos";
 
 export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
+  "acceso:config.manage": "-",
   "acceso:datos.ver_patente": "G",
   "acceso:listas.manage": "G",
   "acceso:prerregistros.create": "GS",
@@ -19,6 +20,7 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "asistencia:ver": "GS",
   "asistencia:ver_todo": "G",
   "central:alertas.atender": "GS",
+  "central:agente.gobernar": "G",
   "central:alertas.ver": "GLS",
   "central:config.manage": "-",
   "comercial:canales.manage": "-",

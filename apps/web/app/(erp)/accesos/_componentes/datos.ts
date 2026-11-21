@@ -23,6 +23,7 @@ export type Registro = {
 export type RegistroFicha = Registro & {
   recibidoEn: string;
   motivoVisita: string | null;
+  campos: { etiqueta: string; valor: string }[];
   docTipo: string;
   lista: "autorizada" | "bloqueada" | null;
   dispositivo: string | null;
@@ -42,7 +43,7 @@ export type Intento = {
 type Instalacion = { id: string; nombre: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const uuid = (v: string | undefined) => (v && UUID.test(v) ? v : undefined);
+export const uuid = (v: string | undefined) => (v && UUID.test(v) ? v : undefined);
 const TIPOS = new Set(["visita", "contratista", "proveedor", "vehiculo", "despacho"]);
 const MOTIVOS = new Set(["bloqueado", "fuera_de_lista", "fuera_de_horario", "uso_unico_consumido"]);
 
