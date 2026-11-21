@@ -13,11 +13,13 @@ AUTH_KEY_DIR="$WORK_DIR/private_keys"
 AUTH_KEY_PATH="$AUTH_KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
 ENTITLEMENTS_REL="App/App.entitlements"
 ALTOOL_KEYS="$HOME/.private_keys"
+GOOGLE_PLIST_STAGING="$WORK_DIR/GoogleService-Info.plist"
+GOOGLE_PLIST_APP="apps/movil/nativo/ios/App/App/GoogleService-Info.plist"
 
 cleanup() {
   rm -rf "$AUTH_KEY_DIR" "$EXPORT_PLIST" "$ARCHIVE_PATH" "$EXPORT_PATH" "$WORK_DIR/spm" 2>/dev/null || true
-  rm -f "$ALTOOL_KEYS/AuthKey_${ASC_KEY_ID:-}.p8" 2>/dev/null || true
-  rm -f apps/movil/nativo/ios/App/App/GoogleService-Info.plist 2>/dev/null || true
+  rm -f "$ALTOOL_KEYS/AuthKey_${ASC_KEY_ID:-}.p8" "$GOOGLE_PLIST_STAGING" 2>/dev/null || true
+  rm -f "$GOOGLE_PLIST_APP" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -40,11 +42,9 @@ if ! printf '%s' "$ASC_KEY_P8" | tr -d '[:space:]' | base64 --decode >"$AUTH_KEY
   echo "::error::ASC_KEY_P8 no es base64 válido del archivo .p8 de App Store Connect."
   exit 1
 fi
-echo "::add-mask::$(cat "$AUTH_KEY_PATH")"
 
 if [ -n "${GOOGLE_SERVICE_INFO_PLIST:-}" ]; then
-  PLIST_PATH="apps/movil/nativo/ios/App/App/GoogleService-Info.plist"
-  if ! printf '%s' "$GOOGLE_SERVICE_INFO_PLIST" | tr -d '[:space:]' | base64 --decode >"$PLIST_PATH" 2>/dev/null; then
+  if ! printf '%s' "$GOOGLE_SERVICE_INFO_PLIST" | tr -d '[:space:]' | base64 --decode >"$GOOGLE_PLIST_STAGING" 2>/dev/null; then
     echo "::error::GOOGLE_SERVICE_INFO_PLIST no es base64 válido."
     exit 1
   fi
@@ -95,6 +95,10 @@ auth_args=(
   -authenticationKeyIssuerID "$ASC_ISSUER_ID"
   -allowProvisioningUpdates
 )
+
+if [ -f "$GOOGLE_PLIST_STAGING" ]; then
+  install -m 600 "$GOOGLE_PLIST_STAGING" "$GOOGLE_PLIST_APP"
+fi
 
 echo "Build iOS $BUILD_NUMBER (cl.opai.app, team $TEAM_ID)"
 xcodebuild archive \
