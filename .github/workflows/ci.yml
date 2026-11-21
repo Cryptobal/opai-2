@@ -263,6 +263,9 @@ jobs:
           if [ -n "${base:-}" ] && [ -n "${head:-}" ] && git diff --name-only "$base" "$head" | grep -qx 'simplicidad-base.json'; then
             export SIMPLICIDAD_BASE=local
           fi
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            export SIMPLICIDAD_BASE=local
+          fi
           pnpm simplicidad
 
   e2e:
