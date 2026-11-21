@@ -945,6 +945,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/existe-ruta.ts` | `core.personas.get` | `core_personas_get` | existe |
 | servidor | `lib/mcp.ts` | `core.config.schema` | `core_config_schema` | existe |
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
+| servidor | `lib/push-nativo.ts` | `core.push.suscribir` | — | excepción |
 | supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | supervisor | `/supervisor` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
@@ -1262,7 +1263,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.personas.pago_rechazar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.quitar_no_recontratar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.push.quitar` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
-| `core.push.suscribir` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
+| `core.push.suscribir` | `app/(trabajador)/trabajador/_componentes`, `lib/push-nativo.ts` | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
 | `core.remuneraciones.confirmar_mutual` | `/configuracion/remuneraciones` | no | reservada a personas |
 | `core.roles.adicional_asignar` | sin pantalla todavía · CAR-359 · desde 2026-11-14 | no | reservada a personas |
@@ -1304,33 +1305,21 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
-- `central.agente.pausar`
-- `central.alertas.abrir`
 - `central.alertas.contactar`
-- `central.alertas.escalar`
-- `central.alertas.falsa_alarma`
-- `central.alertas.listar`
-- `central.alertas.obtener`
-- `central.alertas.posponer`
 - `central.alertas.proponer`
-- `central.alertas.reabrir`
-- `central.alertas.resolver`
 - `central.avisos.acusar`
 - `central.avisos.crear`
 - `central.avisos.listar`
 - `central.avisos.obtener`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
-- `central.estado`
 - `central.mensajes.cerrar`
 - `central.mensajes.enviar`
 - `central.mensajes.listar`
 - `central.mensajes.obtener`
 - `central.mensajes.responder`
-- `central.propuestas.listar`
 - `central.reglas.guardar`
 - `central.reglas.listar`
-- `central.turno.estado`
 - `comercial.contexto.agregar`
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
