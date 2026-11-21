@@ -1,10 +1,8 @@
-import { Estado } from "@opai/ds";
-
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla, textosComplementoInactivo } from "@/lib/formato";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import { permisosNomina } from "../../_componentes/datos";
+import { EstadoMiDt } from "../../_componentes/estado-mi-dt";
 import { ListaCumplimientoDt, type MovimientoMiDt } from "../../_componentes/lista-cumplimiento-dt";
 
 export const metadata = { title: "Contratos y anexos · Cumplimiento DT" };
@@ -28,25 +26,18 @@ export default function ContratosMiDt() {
       }}
     >
       {(d) => {
-        const textos = textosComplementoInactivo(d.r);
+        const items = d.r.ok ? d.r.data.items.filter((m) => m.movimientoTipo !== "finiquito") : [];
+        const pendientes = items.filter((m) => !m.registrado).length;
         return (
-        <Estado state={estadoPantalla(d.r)} variante="lista" {...(textos ? { textos } : {})}>
-          {d.r.ok ? (
-            (() => {
-              const items = d.r.data.items.filter((m) => m.movimientoTipo !== "finiquito");
-              const pendientes = items.filter((m) => !m.registrado).length;
-              return (
-                <ListaCumplimientoDt
-                  items={items}
-                  pendientes={pendientes}
-                  gestiona={d.permisos.cumplimientoDt}
-                  tenantId={d.tenantId}
-                  variante="contratos"
-                />
-              );
-            })()
-          ) : null}
-        </Estado>
+          <EstadoMiDt r={d.r} variante="lista">
+            <ListaCumplimientoDt
+              items={items}
+              pendientes={pendientes}
+              gestiona={d.permisos.cumplimientoDt}
+              tenantId={d.tenantId}
+              variante="contratos"
+            />
+          </EstadoMiDt>
         );
       }}
     </PaginaPortal>

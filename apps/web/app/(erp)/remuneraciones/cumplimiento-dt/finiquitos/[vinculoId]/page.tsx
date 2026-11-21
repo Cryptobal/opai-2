@@ -1,11 +1,9 @@
-import { Estado } from "@opai/ds";
-
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla, textosComplementoInactivo } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { FiniquitoDetalle, type DatosFiniquito } from "../../../_componentes/finiquito-detalle";
+import { EstadoMiDt } from "../../../_componentes/estado-mi-dt";
 
 export const metadata = { title: "Finiquito · Cumplimiento DT" };
 
@@ -22,24 +20,19 @@ export default function FiniquitoVinculo({ params }: { params: Promise<{ vinculo
         return { r, vinculoId };
       }}
     >
-      {(d) => {
-        const textos = textosComplementoInactivo(d.r);
-        return (
-        <Estado state={estadoPantalla(d.r)} variante="detalle" {...(textos ? { textos } : {})}>
-          {d.r.ok ? (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h1 className="t-title">{d.r.data.personaNombre}</h1>
-                <EnlaceBoton href="/remuneraciones/cumplimiento-dt/finiquitos" variante="secondary">
-                  Volver a finiquitos
-                </EnlaceBoton>
-              </div>
-              <FiniquitoDetalle datos={d.r.data} />
+      {(d) => (
+        <EstadoMiDt r={d.r} variante="detalle">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h1 className="t-title">{d.r.data.personaNombre}</h1>
+              <EnlaceBoton href="/remuneraciones/cumplimiento-dt/finiquitos" variante="secondary">
+                Volver a finiquitos
+              </EnlaceBoton>
             </div>
-          ) : null}
-        </Estado>
-        );
-      }}
+            <FiniquitoDetalle datos={d.r.data} />
+          </div>
+        </EstadoMiDt>
+      )}
     </PaginaPortal>
   );
 }
