@@ -265,7 +265,7 @@ describe.skipIf(!urlPropietario)("Portal Cliente · acceso y alcance en base rea
     expect(r.instalaciones.map((i) => i.id)).toEqual([instX2]);
   });
 
-  it("una cuenta inactiva suspende el portal de sus contactos y reactivarla lo restaura solo (CAR-217)", async () => {
+  it("una cuenta inactiva deja el portal en modo historial y reactivarla restaura el completo (CAR-802)", async () => {
     const o = ctxOwner(tA);
     const c = ctxCliente(tA, usuarios.limitado, "limitado");
     const estadoDe = async () =>
@@ -276,17 +276,22 @@ describe.skipIf(!urlPropietario)("Portal Cliente · acceso y alcance en base rea
     expect(await estadoDe()).toBe("activo");
     await e.admin.cuenta.update({ where: { id: cuentaX }, data: { estado: "cliente_inactivo" } });
     try {
-      expect((await ejecutar(c, "portal_cliente.mi_acceso", {})).ok).toBe(false);
+      const mi = await dato<{ alcance: string }>(c, "portal_cliente.mi_acceso", {});
+      expect(mi.alcance).toBe("historial");
       expect((await ejecutar(c, "portal_cliente.resumen.leer", {})).ok).toBe(false);
-      expect(await estadoDe()).toBe("suspendido");
-      // La fila no se tocó: el acceso sigue "activo" en la base.
+      expect(await estadoDe()).toBe("activo");
       expect((await e.admin.accesoCliente.findUnique({ where: { id: acceso.limitado } }))?.estado).toBe("activo");
-      // Todos los contactos de la cuenta quedan sin acceso.
-      expect((await ejecutar(ctxCliente(tA, usuarios.todas, "todas"), "portal_cliente.mi_acceso", {})).ok).toBe(false);
+      const completo = await dato<{ alcance: string }>(
+        ctxCliente(tA, usuarios.todas, "todas"),
+        "portal_cliente.mi_acceso",
+        {},
+      );
+      expect(completo.alcance).toBe("historial");
     } finally {
       await e.admin.cuenta.update({ where: { id: cuentaX }, data: { estado: "cliente_activo" } });
     }
-    expect((await ejecutar(c, "portal_cliente.mi_acceso", {})).ok).toBe(true);
+    const restaurado = await dato<{ alcance: string }>(c, "portal_cliente.mi_acceso", {});
+    expect(restaurado.alcance).toBe("completo");
     expect(await estadoDe()).toBe("activo");
   });
 

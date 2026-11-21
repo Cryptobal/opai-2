@@ -4,6 +4,7 @@ import { ajuste, campoAjuste } from "../core/config";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido } from "../errores";
+import { accesoDelActor, exigirPortalOperativo } from "../portal-cliente/comun";
 import { configDeCuenta } from "../portal-cliente/config-datos";
 import { cursorDe, pagina } from "../core/maestros/comun";
 import { dondeInstalacionId, instalacionEnAlcance } from "../rondas/comun";
@@ -74,6 +75,7 @@ export const portalListasAgregar = defineCapability({
   sensibles: ["documento"],
   exigeAprobacion: (i) => i.tipo === "bloqueada",
   async handler(ctx, i, { dryRun }) {
+    exigirPortalOperativo((await accesoDelActor(ctx)).alcance);
     const { ctx: c, cuentaId } = await clienteConListas(ctx);
     return agregarEntrada(c, i, dryRun, cuentaId);
   },
@@ -90,6 +92,7 @@ export const portalListasQuitar = defineCapability({
   dryRun: true,
   portales: ["cliente"],
   async handler(ctx, { id }, modo) {
+    exigirPortalOperativo((await accesoDelActor(ctx)).alcance);
     const { ctx: c, cuentaId } = await clienteConListas(ctx);
     const e = await ctx.db.entradaLista.findFirst({
       where: { AND: [{ id }, dondeInstalacionId(c)] },

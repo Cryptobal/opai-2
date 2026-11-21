@@ -420,6 +420,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_representantes` | `core_cuentas_set_representantes` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.update` | `core_cuentas_update` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `portal_cliente.contactos.dar_acceso` | `portal_cliente_contactos_dar_acceso` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `portal_cliente.contactos.listar` | `portal_cliente_contactos_listar` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `core.indicadores_gestion.catalogo` | `core_indicadores_gestion_catalogo` | existe |
 | compartido | `app/(erp)/desempeno/_componentes` | `desempeno.hechos.list` | `desempeno_hechos_list` | existe |

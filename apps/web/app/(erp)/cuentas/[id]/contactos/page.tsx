@@ -10,7 +10,7 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 export default function ContactosCuentaPagina(props: Props) {
   return (
     <PaginaCuenta {...props} tab="contactos">
-      {(c) => <ContactosCuenta cuentaId={c.id} />}
+      {(c) => <ContactosCuenta cuentaId={c.id} cuentaEstado={c.estado} />}
     </PaginaCuenta>
   );
 }

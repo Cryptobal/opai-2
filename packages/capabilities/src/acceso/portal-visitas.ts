@@ -1,4 +1,5 @@
 import { defineCapability } from "../define";
+import { accesoDelActor, exigirPortalOperativo } from "../portal-cliente/comun";
 import { contextoCliente } from "./portal-cliente";
 import { prerregistrosCrear } from "./prerregistros";
 import { prerregistrosListar } from "./prerregistros-leer";
@@ -35,6 +36,7 @@ export const portalVisitasCrear = defineCapability({
   portales: ["cliente"],
   sensibles: ["visitantes"],
   async handler(ctx, i, modo) {
+    exigirPortalOperativo((await accesoDelActor(ctx)).alcance);
     const { ctx: c } = await contextoCliente(ctx);
     return prerregistrosCrear.handler(c, i, modo);
   },

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { Parametros } from "@/lib/parametros";
-import { verPestanaNegocios } from "@/lib/pestanas-modulos";
+import { verPestanaNegocios, verPestanaPortal } from "@/lib/pestanas-modulos";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
 import type { cargarCuenta } from "./datos";
@@ -18,10 +18,10 @@ type Props = {
 
 /** Panel derecho de una cuenta: carga sus datos dentro de su Suspense (la lista no espera por él). */
 export async function DetalleCuenta({ datos, p, tab, children }: Props) {
-  const [ficha, negocios] = await Promise.all([datos, verPestanaNegocios()]);
+  const [ficha, negocios, portal] = await Promise.all([datos, verPestanaNegocios(), verPestanaPortal()]);
   return (
     <>
-      <FichaCuenta state={ficha.state} cuenta={ficha.cuenta} tab={tab} negocios={negocios} filtros={p}>
+      <FichaCuenta state={ficha.state} cuenta={ficha.cuenta} tab={tab} negocios={negocios} portal={portal} filtros={p}>
         {ficha.cuenta ? children(ficha.cuenta, p) : null}
       </FichaCuenta>
       {ficha.cuenta ? <HojaCuenta cuenta={ficha.cuenta} /> : null}

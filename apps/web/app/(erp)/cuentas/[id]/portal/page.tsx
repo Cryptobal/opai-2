@@ -1,3 +1,5 @@
+import { Alerta } from "@opai/ds";
+
 import type { SearchParams } from "@/lib/parametros";
 
 import { SeccionContactosAcceso } from "@/app/(erp)/configuracion/_portal_cliente/seccion-contactos-acceso";
@@ -13,10 +15,25 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
  */
 export default function PortalCuenta(props: Props) {
   return (
-    <PaginaCuenta {...props} tab="resumen">
+    <PaginaCuenta {...props} tab="portal">
       {(c) => (
         <div className="space-y-6">
-          <SeccionContactosAcceso cuentaId={c.id} cuentaActiva={c.estado !== "cliente_inactivo"} />
+          {c.estado === "prospecto" ? (
+            <Alerta tono="info" titulo="Prospecto con acceso limitado">
+              El contacto solo ve su propuesta en el portal hasta que la cuenta pase a cliente.
+            </Alerta>
+          ) : null}
+          {c.estado === "cliente_inactivo" ? (
+            <Alerta tono="warning" titulo="Cuenta inactiva">
+              Los contactos con acceso entran en modo solo historial: documentos, cotizaciones y registros pasados, sin datos
+              nuevos hasta que reactives la cuenta.
+            </Alerta>
+          ) : null}
+          <SeccionContactosAcceso
+            cuentaId={c.id}
+            cuentaInactiva={c.estado === "cliente_inactivo"}
+            esProspecto={c.estado === "prospecto"}
+          />
           <SeccionPortalCliente cuentaId={c.id} />
         </div>
       )}

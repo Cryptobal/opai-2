@@ -11,7 +11,19 @@ import { type ContactoAcceso, mensajeDarAcceso, type ResultadoDarAcceso, vistaEs
 type Pendiente = { tipo: "dar" | "suspender" | "revocar"; contacto: ContactoAcceso } | null;
 
 /** Contactos de la cuenta con el estado de su acceso al Portal Cliente y las acciones que corresponden (CAR-218). */
-export function TarjetaContactosAcceso({ cuentaId, contactos, puedeGestionar, cuentaActiva }: { cuentaId: string; contactos: ContactoAcceso[]; puedeGestionar: boolean; cuentaActiva: boolean }) {
+export function TarjetaContactosAcceso({
+  cuentaId,
+  contactos,
+  puedeGestionar,
+  cuentaInactiva,
+  esProspecto,
+}: {
+  cuentaId: string;
+  contactos: ContactoAcceso[];
+  puedeGestionar: boolean;
+  cuentaInactiva: boolean;
+  esProspecto: boolean;
+}) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [confirmar, setConfirmar] = useState<Pendiente>(null);
 
@@ -37,7 +49,7 @@ export function TarjetaContactosAcceso({ cuentaId, contactos, puedeGestionar, cu
       {contactos.length === 0 ? <p className="t-body-sm p-4">La cuenta no tiene contactos: agrega uno para poder darle acceso.</p> : null}
       <ul className="divide-y divide-border">
         {contactos.map((c) => {
-          const v = vistaEstado(c, cuentaActiva);
+          const v = vistaEstado(c, { cuentaInactiva, esProspecto });
           return (
             <li key={c.contactoId} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
               <span className="min-w-0">

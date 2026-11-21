@@ -8,13 +8,17 @@ import {
   SECCIONES_PORTAL,
   type AccesoBase,
   type Rol,
+  type SeccionPortal,
 } from "@opai/domain";
 
 import { noEncontrado, prohibido } from "../errores";
 import type { Contexto } from "../types";
 
-/** Estado de cuenta que suspende el Portal Cliente de sus contactos. */
-export const ESTADO_CUENTA_INACTIVA = "cliente_inactivo";
+/** Estado de cuenta que deja el portal en modo solo historial (CAR-802). */
+const ESTADO_CUENTA_INACTIVA = "cliente_inactivo";
+
+/** Secciones que un contacto puede consultar cuando la cuenta está inactiva: datos pasados, sin operación viva. */
+export const SECCIONES_MODO_HISTORIAL: readonly SeccionPortal[] = ["documentos", "accesos"];
 
 export const PERMISO_PORTAL = "portal_cliente:read";
 export const PERMISO_ACCESOS_READ = "portal_cliente:accesos.read";
@@ -72,8 +76,8 @@ export type AccesoResuelto = {
   membershipId: string;
   cuentaId: string;
   cuentaNombre: string;
-  /** «limitado» = prospecto que solo ve su propuesta (CAR-300); «completo» = el portal entero. */
-  alcance: "completo" | "limitado";
+  /** «limitado» = prospecto que solo ve su propuesta (CAR-300); «historial» = cuenta inactiva, solo lectura pasada; «completo» = el portal entero. */
+  alcance: "completo" | "limitado" | "historial";
   todasInstalaciones: boolean;
   /** Instalaciones que ve (ya filtradas: activas, sin archivar, de su cuenta). */
   instalacionIds: string[];
@@ -107,12 +111,15 @@ export async function accesoDelActor(
     where: { id: fila.cuentaId },
     select: { id: true, nombre: true, estado: true },
   });
-  // Cuenta inactiva = portal suspendido (CAR-217). No se toca la fila de acceso: al reactivar la
-  // cuenta, los contactos recuperan el acceso solos.
-  if (!cuenta || cuenta.estado === ESTADO_CUENTA_INACTIVA) throw negado();
-  // «Limitado» solo mientras la cuenta es prospecto: al ganarla (cliente activo) el acceso activo pasa a completo
-  // sin tocar la fila (se deriva al leer); uno suspendido o revocado ya quedó fuera arriba (CAR-300).
-  const alcance = fila.alcance === "limitado" && cuenta.estado === "prospecto" ? "limitado" : "completo";
+  if (!cuenta) throw negado();
+  // «Historial» mientras la cuenta es inactiva (CAR-802): solo documentos, cotizaciones y registros pasados.
+  // «Limitado» solo mientras es prospecto (CAR-300). Al reactivar o ganar la cuenta el alcance efectivo sube sin tocar la fila.
+  const alcance: AccesoResuelto["alcance"] =
+    cuenta.estado === ESTADO_CUENTA_INACTIVA
+      ? "historial"
+      : fila.alcance === "limitado" && cuenta.estado === "prospecto"
+        ? "limitado"
+        : "completo";
   if (alcance === "limitado" && !opciones.permitirLimitado) throw negado();
   const instalaciones = await instalacionesDeCuenta(ctx, cuenta.id);
   const base: AccesoBase = {
@@ -140,4 +147,10 @@ export async function accesoDelActor(
     instalacionIds: ids,
     instalaciones: instalaciones.filter((i) => ids.includes(i.id)),
   };
+}
+
+/** Operaciones en vivo del portal (resumen, listas, visitas…) no aplican en modo historial de cuenta inactiva (CAR-802). */
+export function exigirPortalOperativo(alcance: AccesoResuelto["alcance"]) {
+  if (alcance === "historial")
+    throw prohibido("Tu cuenta está inactiva: el portal es solo de consulta del historial.");
 }

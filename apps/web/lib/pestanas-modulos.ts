@@ -5,6 +5,13 @@ import { identidadActual } from "./servidor";
  * Pestaña «Negocios» de cuenta e instalación (ADR-041.5): solo si Comercial está activo para la
  * empresa y el usuario puede leer negocios. Sin pestañas deshabilitadas ni anuncios de módulos.
  */
+/** Pestaña «Portal» en la ficha de cuenta (CAR-802): módulo portal_cliente activo y permiso de leer accesos. */
+export async function verPestanaPortal(): Promise<boolean> {
+  const identidad = await identidadActual();
+  if (!identidad?.modulosActivos.includes("portal_cliente")) return false;
+  return puedeDeIdentidad(identidad)("portal_cliente:accesos.read");
+}
+
 export async function verPestanaNegocios(): Promise<boolean> {
   const identidad = await identidadActual();
   if (!identidad?.modulosActivos.includes("comercial")) return false;
