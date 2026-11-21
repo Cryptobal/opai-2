@@ -17,27 +17,69 @@ describe("ci-solo-pantalla", () => {
     ).toBe(true);
   });
 
-  it("rechaza db, capabilities, auth, módulos, workflows y prisma", () => {
-    expect(archivoSoloPantalla("packages/db/prisma/schema/core.prisma")).toBe(false);
+  it("rechaza lógica de novedades fuera de entradas", () => {
+    expect(
+      archivoSoloPantalla("packages/domain/src/novedades/acceso-ruta.ts"),
+    ).toBe(false);
+  });
+
+  it("rechaza api, route, lib, acciones y config en apps/web", () => {
+    expect(
+      archivoSoloPantalla("apps/web/app/api/v1/[...capability]/route.ts"),
+    ).toBe(false);
+    expect(archivoSoloPantalla("apps/web/lib/acceso-portal.ts")).toBe(false);
+    expect(archivoSoloPantalla("apps/web/app/_acciones/auth.ts")).toBe(false);
+    expect(archivoSoloPantalla("apps/web/app/firmar/acciones.ts")).toBe(false);
+    expect(archivoSoloPantalla("apps/web/next.config.ts")).toBe(false);
+    expect(archivoSoloPantalla("apps/web/package.json")).toBe(false);
+  });
+
+  it("rechaza db, capabilities, auth, módulos, github y prisma", () => {
+    expect(archivoSoloPantalla("packages/db/prisma/schema/core.prisma")).toBe(
+      false,
+    );
     expect(archivoSoloPantalla("packages/capabilities/src/core/foo.ts")).toBe(
       false,
     );
-    expect(archivoSoloPantalla("packages/auth/src/sesion.ts")).toBe(false);
-    expect(archivoSoloPantalla("modules/tickets/capacidades/listar.ts")).toBe(
+    expect(archivoSoloPantalla(".github/scripts/ci-solo-pantalla.sh")).toBe(
       false,
     );
-    expect(archivoSoloPantalla(".github/workflows/ci.yml")).toBe(false);
     expect(
       archivoSoloPantalla("packages/db/prisma/migrations/20260101/init.sql"),
     ).toBe(false);
   });
 
-  it("rechaza mezcla pantalla + lógica", () => {
-    const archivos = [
-      "apps/web/app/page.tsx",
-      "packages/capabilities/src/foo.ts",
-    ];
-    expect(diffSoloPantalla(archivos)).toBe(false);
+  it("rechaza rename db→web con --no-renames (ambos paths)", () => {
+    expect(
+      diffSoloPantalla([
+        "packages/db/prisma/migrations/2027_x/migration.sql",
+        "apps/web/m.sql",
+      ]),
+    ).toBe(false);
+    expect(
+      diffSoloPantalla([
+        "packages/capabilities/src/guard.ts",
+        "apps/web/guard.ts",
+      ]),
+    ).toBe(false);
+  });
+
+  it("rechaza borrado o cambio solo en ruta bloqueada", () => {
+    expect(diffSoloPantalla(["packages/capabilities/src/guard.ts"])).toBe(
+      false,
+    );
+    expect(diffSoloPantalla(["packages/db/test/rls-nucleo.test.ts"])).toBe(
+      false,
+    );
+  });
+
+  it("rechaza migración aunque haya pantalla", () => {
+    expect(
+      diffSoloPantalla([
+        "apps/web/app/page.tsx",
+        "packages/db/prisma/migrations/20260101/x/migration.sql",
+      ]),
+    ).toBe(false);
   });
 
   it("acepta diff solo de pantalla", () => {

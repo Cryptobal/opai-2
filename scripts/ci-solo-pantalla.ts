@@ -13,22 +13,50 @@ const BLOQUEA = [
   /^packages\/capabilities\//,
   /^packages\/auth\//,
   /^modules\//,
-  /^\.github\/workflows\//,
+  /^\.github\//,
   /\/prisma\//,
   /\/migrations\//,
   /^simplicidad-base\.json$/,
   /^pnpm-lock\.yaml$/,
 ];
 
-const PERMITIDO = [
-  /^apps\/web\//,
-  /^packages\/ds\//,
-  /^packages\/domain\/src\/novedades\//,
+/** Rutas de apps/web que requieren Neon, servidor o auth (no solo UI). */
+const APPS_WEB_BLOQUEA = [
+  /^apps\/web\/app\/api\//,
+  /\/route\.ts$/,
+  /^apps\/web\/middleware\.ts$/,
+  /^apps\/web\/proxy\.ts$/,
+  /^apps\/web\/lib\//,
+  /^apps\/web\/next\.config\./,
+  /^apps\/web\/package\.json$/,
+  /^apps\/web\/tsconfig/,
+  /^apps\/web\/.*\.env/,
+  /\/_acciones\//,
+  /acciones\.ts$/,
+  /\/accion\.ts$/,
 ];
+
+const PERMITIDO_OTROS = [
+  /^packages\/ds\//,
+  /^packages\/domain\/src\/novedades\/entradas\//,
+];
+
+function appsWebPermitido(ruta: string): boolean {
+  if (!ruta.startsWith("apps/web/")) return false;
+  if (APPS_WEB_BLOQUEA.some((re) => re.test(ruta))) return false;
+  if (ruta.startsWith("apps/web/e2e/")) return true;
+  if (ruta.startsWith("apps/web/public/")) return true;
+  if (ruta.startsWith("apps/web/test/")) return true;
+  if (ruta === "apps/web/playwright.config.ts") return true;
+  if (ruta === "apps/web/presupuesto-js.json") return true;
+  if (!ruta.startsWith("apps/web/app/")) return false;
+  return /\.(tsx|css|scss|md)$/.test(ruta);
+}
 
 export function archivoSoloPantalla(ruta: string): boolean {
   if (BLOQUEA.some((re) => re.test(ruta))) return false;
-  return PERMITIDO.some((re) => re.test(ruta));
+  if (appsWebPermitido(ruta)) return true;
+  return PERMITIDO_OTROS.some((re) => re.test(ruta));
 }
 
 export function diffSoloPantalla(archivos: string[]): boolean {

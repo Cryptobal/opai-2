@@ -134,11 +134,11 @@ jobs:
           )
         run: |
           if [ "${{ steps.solo_pantalla.outputs.solo_pantalla }}" = true ]; then
-            echo "Diff solo pantalla (CAR-807): test:db omitido en PR o cola."
+            echo "omitido: PR solo pantalla (CAR-807)"
           elif [ "${{ steps.solo_docs.outputs.only_docs }}" = true ]; then
-            echo "Solo documentación: test:db omitido."
+            echo "omitido: solo documentación"
           else
-            echo "Gate rápido en PR: test:db corre en merge_group (CAR-653)."
+            echo "omitido en PR: test:db corre en merge_group (CAR-653)"
           fi
       # Postgres real: merge_group con lógica, main, cron y rama de estabilidad en PR.
       - uses: ./.github/actions/preparar

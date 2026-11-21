@@ -7,9 +7,10 @@ SPEC_DIR="apps/web/e2e"
 
 RELACIONADOS=""
 if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then
-  base=$(jq -r .pull_request.base.sha "$GITHUB_EVENT_PATH")
+  pr_base=$(jq -r .pull_request.base.sha "$GITHUB_EVENT_PATH")
   head=$(jq -r .pull_request.head.sha "$GITHUB_EVENT_PATH")
-  mapfile -t files < <(git diff --name-only "$base" "$head" || true)
+  base=$(git merge-base "$pr_base" "$head")
+  mapfile -t files < <(git diff --no-renames --name-only "$base" "$head" 2>/dev/null || true)
   json=$(printf '%s\n' "${files[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')
   RELACIONADOS=$(pnpm exec tsx scripts/preview-e2e-especs-relacionados-cli.ts "$json")
   echo "Specs relacionados (bloquean si fallan): ${RELACIONADOS:-ninguno}"

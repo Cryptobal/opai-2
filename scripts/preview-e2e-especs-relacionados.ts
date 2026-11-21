@@ -6,6 +6,19 @@ import { basename, join } from "node:path";
 
 const E2E_DIR = join(import.meta.dirname, "../apps/web/e2e");
 
+export function specSiempreBloquea(nombreSpec: string): boolean {
+  const base = basename(nombreSpec, ".spec.ts").toLowerCase();
+  if (base.startsWith("portal")) return true;
+  if (base.startsWith("acceso") || base.includes("acceso")) return true;
+  if (base.startsWith("login") || base.includes("login")) return true;
+  if (base.startsWith("ver-como") || base.includes("ver-como")) return true;
+  return false;
+}
+
+export function specsSiempreBloqueantes(todosLosSpecs: string[]): string[] {
+  return todosLosSpecs.filter((f) => specSiempreBloquea(f));
+}
+
 export function segmentosApp(ruta: string): string[] {
   const m = ruta.match(/^apps\/web\/app\/(?:\([^)]+\)\/)?(.+)/);
   if (!m) return [];
@@ -55,6 +68,9 @@ export function especsRelacionados(archivos: string[]): Set<string> {
     for (const spec of especRelacionadoConArchivo(archivo, todos)) {
       out.add(spec);
     }
+  }
+  for (const spec of specsSiempreBloqueantes(todos)) {
+    out.add(spec);
   }
   return out;
 }
