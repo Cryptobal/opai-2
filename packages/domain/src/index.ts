@@ -24,6 +24,7 @@ export * from "./ver-como";
 export * from "./permisos-efectivos";
 export * from "./acceso-membresia";
 export * from "./portales";
+export * from "./portales-contexto";
 export * from "./permisos-key";
 export * from "./vocabulario";
 export * from "./canon";

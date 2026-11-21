@@ -244,6 +244,23 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(await e.admin.alerta.count({ where: { tenantId: T.b } })).toBe(0);
   });
 
+  it("«sin marca de inicio» publica instalación y turno del turno esperado (CAR-749)", async () => {
+    const cuenta = (await e.admin.cuenta.create({ data: { tenantId: T.a, nombre: "Sur SA", razonSocial: "Sur SA", rut: "76222222-2" } })).id;
+    const instSur = (await e.admin.instalacion.create({ data: { tenantId: T.a, cuentaId: cuenta, nombre: "Planta Sur" } })).id;
+    const inicio = new Date("2026-12-02T12:00:00Z");
+    const turno = await e.admin.turnoEsperado.create({
+      data: { tenantId: T.a, personaId: T.persona, fecha: new Date("2026-12-02"), inicio, fin: new Date("2026-12-02T20:00:00Z"), instalacionId: instSur, origen: "pauta" },
+    });
+    await trabajoAlertasArt45.ejecutar(sistema(T.a), { ahora: "2026-12-02T12:31:00Z" });
+    const ev = await e.admin.evento.findFirst({
+      where: { tenantId: T.a, tipo: "asistencia.alerta.sin_marca_inicio", entidadId: T.persona },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(ev?.payload).toMatchObject({ instalacionId: instSur, turnoEsperadoId: turno.id, personaId: T.persona });
+    const alerta = await e.admin.alerta.findFirst({ where: { tenantId: T.a, clave: `turno:${turno.id}` } });
+    expect(alerta?.instalacionId).toBe(instSur);
+  });
+
   it("el correo personal es único por empresa (no retroactivo) y distinto entre empresas", async () => {
     const otra = (await e.admin.persona.create({ data: { tenantId: T.a, nombres: "Otro", apellidos: "Trabajador", rut: "12.222.222-2", estado: "activo" } })).id;
     await e.admin.persona.update({ where: { id: T.persona }, data: { emailPersonal: "pia@correo.cl" } });

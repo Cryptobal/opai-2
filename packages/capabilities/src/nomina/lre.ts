@@ -5,7 +5,6 @@ import { archivoLre } from "@opai/domain";
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { datosArchivoPeriodo, montosFilaArchivo, personasReveladas, resultadoArchivo, salidaArchivo } from "./archivos-datos";
-import { exigeComplementoCumplimientoDt } from "./complemento-dt";
 import { PERMISO_OBLIGACIONES } from "./comun";
 
 // Libro de Remuneraciones Electrónico (CAR-99, ADR-057): arma el archivo del período con sus
@@ -26,7 +25,6 @@ export const lreGenerar = defineCapability({
   dryRun: false,
   auditarLectura: personasReveladas,
   async handler(ctx, { periodoId }) {
-    exigeComplementoCumplimientoDt(ctx);
     const datos = await datosArchivoPeriodo(ctx, periodoId, "LRE");
     const { periodo, filas, rutEmpleador } = datos;
     const a = archivoLre({

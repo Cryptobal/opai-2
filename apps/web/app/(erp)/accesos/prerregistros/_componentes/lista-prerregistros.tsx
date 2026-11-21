@@ -33,13 +33,11 @@ export function ListaPrerregistros({
   state,
   items,
   accion,
-  filtros,
   paginacion,
 }: {
   state: EstadoPantalla;
   items: Prerregistro[];
   accion?: ReactNode;
-  filtros?: ReactNode;
   paginacion?: ReactNode;
 }) {
   return (
@@ -66,7 +64,6 @@ export function ListaPrerregistros({
             "Prerregistra una visita y el guardia la verá como autorizada el día que llegue.",
         },
       }}
-      {...(filtros ? { filtros } : {})}
       {...(paginacion ? { paginacion } : {})}
     />
   );

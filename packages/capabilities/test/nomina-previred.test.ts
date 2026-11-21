@@ -47,7 +47,7 @@ const semilla = (rutEmpleador: string | null) => ({
   ],
 });
 const como = (rol: "owner" | "gerente" = "owner", rut: string | null = "76.543.210-3", extra: Parameters<typeof contextoDePrueba>[0] = {}) =>
-  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina", "nomina.cumplimiento_dt"], semilla: semilla(rut), ...extra });
+  contextoDePrueba({ rol, portal: "erp", modulosActivos: ["nomina"], semilla: semilla(rut), ...extra });
 type Salida = { nombre: string; contenido: string; filas: number; personaIds: string[]; errores: { personaId: string | null; mensaje: string }[]; advertencias: string[]; formatoVerificado: boolean };
 const generar = (c: ReturnType<typeof como>) => executeCapability(c.ctx, "nomina.previred.generar", { periodoId: PER });
 
@@ -86,10 +86,11 @@ describe("nomina.previred.generar", () => {
     expect((await generar(como("owner", "76.543.210-3", { alcance: { instalaciones: [] } }))).ok).toBe(false);
   });
 
-  it("rechaza sin el complemento Cumplimiento DT", async () => {
+  it("genera con solo el módulo Remuneraciones, sin el complemento Cumplimiento DT", async () => {
     const { ctx } = contextoDePrueba({ rol: "owner", portal: "erp", modulosActivos: ["nomina"], semilla: semilla("76.543.210-3") });
     const r = await executeCapability(ctx, "nomina.previred.generar", { periodoId: PER });
-    expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error.message).toContain("Cumplimiento DT");
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect((r.data as Salida).filas).toBe(2);
   });
 });

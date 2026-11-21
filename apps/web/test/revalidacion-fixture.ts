@@ -31,5 +31,6 @@ export function identidad(): Identidad {
     },
     mfaActiva: true,
     mfaVerificada: true,
+    personaVinculada: true,
   };
 }

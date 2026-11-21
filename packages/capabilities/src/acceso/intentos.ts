@@ -50,6 +50,7 @@ export const intentosListar = defineCapability({
           where: {
             AND: [
               dondeInstalacionId(ctx),
+              { anonimizadoEn: null },
               input.instalacionId ? { instalacionId: input.instalacionId } : {},
               input.motivo ? { motivo: input.motivo } : {},
             ],

@@ -12,5 +12,5 @@ capacitor-cordova-ios-plugins
 App/App/capacitor.config.json
 App/App/config.xml
 
-# Firebase (fuera del repo; CI inyecta GOOGLE_SERVICE_INFO_PLIST)
+# Firebase (secretos fuera del repo; lo escribe CI o Carlos en local)
 App/App/GoogleService-Info.plist
