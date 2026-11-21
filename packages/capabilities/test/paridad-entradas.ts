@@ -164,4 +164,12 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/api/cron/trabajos/route.ts": "Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029).",
   "app/api/csp-report/route.ts": "Reportes CSP del navegador; solo logs categóricos.",
   "app/api/health/route.ts": "Salud del despliegue, sin datos.",
+  "app/fiscalizacion/acciones.ts#ingresarFiscalizacion":
+    "Portal público DT (CAR-594): asistencia.fiscalizacion_ingreso.validar con contexto sistema; sin sesión ERP.",
+  "app/fiscalizacion/acciones.ts#buscarEmpleadorFiscalizacion":
+    "Portal fiscalización con cookie firmada: asistencia.fiscalizacion_empleador.buscar.",
+  "app/fiscalizacion/acciones.ts#salirFiscalizacion":
+    "Portal fiscalización: borra la cookie de sesión del inspector; no toca datos de negocio ni capacidad.",
+  "app/fiscalizacion/acciones.ts#sesionFiscalizacionActual":
+    "Portal fiscalización: lee la cookie firmada de sesión del inspector; no consulta base ni invoca capacidad.",
 };
