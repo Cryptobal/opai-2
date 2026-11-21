@@ -7,6 +7,7 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { huellasCandidatas, huellaVigente } from "./huella";
+import { finVigenciaBloqueo } from "./listas-alcance";
 import {
   documentoSchema,
   entradaListaSchema,
@@ -94,6 +95,12 @@ export const listasAgregar = defineCapability({
     });
     if (ya) throw reglaDeNegocio("Este documento ya está en la lista.");
     const h = huellaVigente({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
+    const vigenteDesde = i.vigenteDesde ? new Date(i.vigenteDesde) : null;
+    const vigenteHasta = i.vigenteHasta
+      ? new Date(i.vigenteHasta)
+      : i.tipo === "bloqueada"
+        ? finVigenciaBloqueo(vigenteDesde, null)
+        : null;
     const data = {
       tenantId: ctx.tenantId,
       alcance: "instalacion",
@@ -108,8 +115,8 @@ export const listasAgregar = defineCapability({
       nombre: i.nombre ?? null,
       motivo: i.motivo ?? null,
       tiposRegistro: i.tiposRegistro,
-      vigenteDesde: i.vigenteDesde ? new Date(i.vigenteDesde) : null,
-      vigenteHasta: i.vigenteHasta ? new Date(i.vigenteHasta) : null,
+      vigenteDesde,
+      vigenteHasta,
       dias: i.dias,
       desdeMin: i.desdeMin ?? null,
       hastaMin: i.hastaMin ?? null,

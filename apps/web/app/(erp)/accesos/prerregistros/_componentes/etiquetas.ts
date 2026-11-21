@@ -35,6 +35,3 @@ export function estadoPrerregistro(p: Prerregistro) {
   return p.dias.some((d) => d.estado === "pendiente") ? ESTADO_DIA.pendiente : ESTADO_DIA.no_llego;
 }
 
-/** Primer día que aún sirve para mostrar la invitación (o null si ya no hay). */
-export const primerDiaPendiente = (p: Prerregistro) =>
-  p.dias.find((d) => d.estado === "pendiente")?.dia ?? null;

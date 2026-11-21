@@ -71,7 +71,7 @@ export async function leerEvacuacion(): Promise<SnapshotEvacuacion | null> {
 }
 
 /** Borra la copia y su clave de cifrado (revocación del equipo o fin de día). */
-export async function borrarEvacuacion(): Promise<void> {
+async function borrarEvacuacion(): Promise<void> {
   const db = await abrir();
   try {
     const t = db.transaction("meta", "readwrite");

@@ -5,22 +5,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { type EntradaLista, PanelListas } from "./panel-listas";
 
-type FilaLista = {
-  id: string;
-  alcance: EntradaLista["alcance"];
-  agregadaPor: string | null;
-  tipo: "autorizada" | "bloqueada";
-  mascara: string;
-  nombre: string | null;
-  motivo: string | null;
-  tiposRegistro: string[];
-  vigenteDesde: string | null;
-  vigenteHasta: string | null;
-  dias: number[];
-  desdeMin: number | null;
-  hastaMin: number | null;
-  usoUnico: boolean;
-};
+type FilaLista = Omit<EntradaLista, "autorNombre"> & { agregadaPor: string | null };
 
 async function filasListas(instalacionId: string, tipo: "autorizada" | "bloqueada") {
   return ejecutarComoUsuario<FilaLista[]>("erp", "acceso.listas.listar", { instalacionId, tipo });

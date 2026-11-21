@@ -1,7 +1,5 @@
-import { ALCANCES_LISTA, MESES_VIGENCIA_BLOQUEO, type AlcanceLista } from "@opai/domain";
+import { MESES_VIGENCIA_BLOQUEO, type AlcanceLista } from "@opai/domain";
 
-import { instalacionesEnAlcance } from "../core/maestros/alcance";
-import { noEncontrado } from "../errores";
 import type { Contexto } from "../types";
 
 type InstalacionMeta = { cuentaId: string; grupoIds: readonly string[] };
@@ -43,13 +41,6 @@ export function finVigenciaBloqueo(vigenteDesde: Date | null, vigenteHasta: Date
   return fin;
 }
 
-const alcanceSchema = new Set<string>(ALCANCES_LISTA);
-
-export function parseAlcance(v: string): AlcanceLista {
-  if (!alcanceSchema.has(v)) throw new Error("alcance_invalido");
-  return v as AlcanceLista;
-}
-
 export type ClavesAlcance = {
   alcance: AlcanceLista;
   instalacionId: string | null;
@@ -89,49 +80,4 @@ export function clavesAlcance(p: {
       return _;
     }
   }
-}
-
-export async function assertEntradaListaEnAlcance(
-  ctx: Contexto,
-  e: {
-    alcance: string;
-    instalacionId: string | null;
-    cuentaId: string | null;
-    grupoId: string | null;
-  },
-) {
-  const ids = instalacionesEnAlcance(ctx);
-  if (!ids) return;
-  if (e.alcance === "empresa") return;
-  if (e.alcance === "instalacion" && e.instalacionId && ids.includes(e.instalacionId)) return;
-  if (e.alcance === "cuenta" && e.cuentaId) {
-    const n = await ctx.db.instalacion.count({
-      where: { cuentaId: e.cuentaId, id: { in: [...ids] } },
-    });
-    if (n > 0) return;
-  }
-  if (e.alcance === "grupo" && e.grupoId) {
-    const n = await ctx.db.grupoListaInstalacion.count({
-      where: { grupoId: e.grupoId, instalacionId: { in: [...ids] } },
-    });
-    if (n > 0) return;
-  }
-  throw noEncontrado("La entrada de lista");
-}
-
-export function whereDuplicadoLista(
-  claves: ClavesAlcance,
-  tipo: string,
-  docTipo: string,
-  huellas: string[],
-) {
-  return {
-    alcance: claves.alcance,
-    instalacionId: claves.instalacionId,
-    cuentaId: claves.cuentaId,
-    grupoId: claves.grupoId,
-    tipo,
-    docTipo,
-    huella: { in: huellas },
-  };
 }
