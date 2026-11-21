@@ -89,10 +89,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
 			buildPhases = (
-				F1A731101FED79650016851F /* Preparar GoogleService-Info */,
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				C73373301FED79650016851F /* Copy GoogleService-Info.plist */,
 			);
 			buildRules = (
 			);
@@ -168,20 +168,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		F1A731101FED79650016851F /* Preparar GoogleService-Info */ = {
+		C73373301FED79650016851F /* Copy GoogleService-Info.plist */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/App/GoogleService-Info.plist",
 			);
-			name = "Preparar GoogleService-Info";
+			name = "Copy GoogleService-Info.plist";
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
+			showEnvVarsInLog = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/../scripts/preparar-google-service-info.sh\"\n";
+			shellScript = "if [ -f \"${SRCROOT}/App/GoogleService-Info.plist\" ]; then\n  cp \"${SRCROOT}/App/GoogleService-Info.plist\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\";\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
