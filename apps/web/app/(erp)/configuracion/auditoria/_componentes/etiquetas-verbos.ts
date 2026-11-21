@@ -1,7 +1,7 @@
 /** Verbo (resto del código de la capacidad) → acción en español. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const VERBOS: Record<string, string> = {
   portal_inicio: "Portal de inicio", get: "Ver", excel: "Exportar a Excel", update: "Editar", list: "Listar", invite: "Invitar",
-  salida: "Registrar salida", cerrar_bloque: "Cerrar en bloque", remove: "Quitar", asignar_pin: "Asignar PIN", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
+  salida: "Registrar salida", cerrar_bloque: "Cerrar en bloque", remove: "Quitar", asignar_pin: "Asignar PIN", establecer_pin: "Establecer PIN", mi_estado: "Ver mi estado", generar_codigo: "Generar código de emparejamiento", cambiar_pin: "Cambiar PIN", restablecer: "Restablecer PIN", restablecer_mfa: "Restablecer segundo factor", renombrar_passkey: "Renombrar passkey", revoke: "Revocar", peek: "Revisar",
   clases: "Ver clases", accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
   summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen", instalaciones: "Por instalación",
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar",
@@ -75,6 +75,7 @@ export const VERBOS: Record<string, string> = {
   enviar_paso: "Enviar paso", recibir_correo: "Recibir correo del cliente",
   // Decisión de seguimiento al enviar la cotización (CAR-160).
   decidir_envio: "Decidir seguimiento al enviar",
+  acceso_estado: "Ver estado de acceso al portal", dar_acceso_portal: "Dar acceso al portal del trabajador", reenviar_invitacion: "Reenviar invitación al portal",
   agregar_esquema: "Agregar esquema de cobertura", cargar_predefinidos: "Cargar costos predefinidos", descargar: "Descargar", cumplir: "Cumplir", guardar: "Guardar", saldo_sugerido: "Saldo sugerido", manual: "Manual",
   comentar: "Comentar", reasignar: "Reasignar", simular: "Simular", clonar: "Clonar", calcular: "Calcular", consultar: "Consultar",
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
@@ -118,4 +119,5 @@ export const VERBOS: Record<string, string> = {
   borrar_rango: "Borrar por fechas (restaurable)",
   // Impuestos (CAR-173).
   borrador_f29: "Borrador del F29",
+  cartel: "Preparar cartel",
 };

@@ -4,11 +4,25 @@ import { ROLES } from "./permisos";
 import type { Rol } from "./permisos";
 import {
   esMembresiaDeCliente,
+  esMembresiaPortalTrabajador,
   esPortalCoherente,
+  idsPortalesUsables,
+  puedeUsarPortal,
   PORTALES_TENANT,
   portalesAdmitidos,
   portalesIncoherentes,
+  type ContextoPortalesVisibles,
 } from "./portales";
+
+const base = (extra: Partial<ContextoPortalesVisibles> = {}): ContextoPortalesVisibles => ({
+  portalesMembresia: ["erp", "supervisor", "trabajador", "terreno", "cliente"],
+  rol: "owner",
+  platformRole: null,
+  modulosActivos: ["portal_trabajador"],
+  instalaciones: null,
+  personaVinculada: true,
+  ...extra,
+});
 
 describe("coherencia rol-portal (NÚCLEO-D1)", () => {
   it("cliente nunca es coherente con un rol de membresía, exista el rol que exista", () => {
@@ -24,6 +38,13 @@ describe("coherencia rol-portal (NÚCLEO-D1)", () => {
       expect(portalesIncoherentes(rol, sinCliente)).toEqual([]);
       expect(esPortalCoherente(rol, sinCliente)).toBe(true);
     }
+  });
+
+  it("el trabajador del portal es viewer con solo trabajador o terreno (CAR-803)", () => {
+    expect(esMembresiaPortalTrabajador("viewer", ["trabajador"])).toBe(true);
+    expect(esMembresiaPortalTrabajador("viewer", ["trabajador", "terreno"])).toBe(true);
+    expect(esMembresiaPortalTrabajador("viewer", ["erp", "trabajador"])).toBe(false);
+    expect(esMembresiaPortalTrabajador("owner", ["trabajador"])).toBe(false);
   });
 
   it("el contacto de un cliente es viewer con «cliente» como único portal (CAR-88)", () => {
@@ -53,5 +74,54 @@ describe("coherencia rol-portal (NÚCLEO-D1)", () => {
       expect(portalesAdmitidos(rol, "cuenta")).toEqual(["cliente"]);
       expect(portalesAdmitidos(rol, "persona")).toEqual(["trabajador"]);
     }
+  });
+});
+
+describe("portales usables en el selector (CAR-746)", () => {
+  it("admin de empresa: ERP y Plataforma con rol global, sin Cliente ni Terreno", () => {
+    const c = base({
+      rol: "admin",
+      portalesMembresia: ["erp", "cliente", "supervisor", "terreno"],
+      platformRole: "support",
+    });
+    expect(idsPortalesUsables(c).sort()).toEqual(["erp", "platform", "supervisor"]);
+    expect(puedeUsarPortal("cliente", c)).toBe(false);
+    expect(puedeUsarPortal("terreno", c)).toBe(false);
+    expect(puedeUsarPortal("supervisor", c)).toBe(true);
+  });
+
+  it("terreno no va en el selector aunque la membresía lo incluya", () => {
+    const c = base({ rol: "admin", portalesMembresia: ["erp", "terreno"] });
+    expect(idsPortalesUsables(c)).not.toContain("terreno");
+    expect(puedeUsarPortal("terreno", c)).toBe(false);
+  });
+
+  it("supervisor: ERP y Supervisor", () => {
+    const c = base({
+      rol: "supervisor",
+      portalesMembresia: ["erp", "supervisor"],
+      instalaciones: ["inst-1"],
+    });
+    expect(idsPortalesUsables(c).sort()).toEqual(["erp", "supervisor"]);
+  });
+
+  it("contacto de cliente: solo Cliente, sin selector de empresa", () => {
+    const c = base({
+      rol: "viewer",
+      portalesMembresia: ["cliente"],
+      instalaciones: ["inst-cliente"],
+    });
+    expect(idsPortalesUsables(c)).toEqual(["cliente"]);
+  });
+
+  it("trabajador con persona vinculada: solo Trabajador", () => {
+    const c = base({
+      rol: "viewer",
+      portalesMembresia: ["trabajador"],
+      modulosActivos: ["portal_trabajador"],
+      personaVinculada: true,
+    });
+    expect(idsPortalesUsables(c)).toEqual(["trabajador"]);
+    expect(idsPortalesUsables({ ...c, personaVinculada: false })).toEqual([]);
   });
 });

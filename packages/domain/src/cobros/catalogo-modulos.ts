@@ -41,6 +41,11 @@ export const COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT = "nomina.cumplimiento_dt";
 
 export const esComplementoNomina = (id: string) => id === COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT;
 
+const GRUPOS_COMPLEMENTO = new Set<GrupoCatalogo>(["complemento_nomina"]);
+
+/** Cobrables de catálogo sin manifest propio (p. ej. Cumplimiento DT bajo Nómina). */
+export const esGrupoComplemento = (grupo: GrupoCatalogo) => GRUPOS_COMPLEMENTO.has(grupo);
+
 export type GrupoCatalogo = "base" | "modulo" | "finanzas" | "parte_finanzas" | "complemento_nomina";
 
 export type EntradaCatalogo = {

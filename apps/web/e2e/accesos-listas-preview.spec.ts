@@ -1,9 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { abrirAccesos } from "./accesos-instalacion";
 import { capturar, capturarHoja, EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// CAR-475: listas autorizada y bloqueada (`/accesos/listas`) y pestaña Accesos de la instalación.
+// CAR-475: listas autorizada y bloqueada en la pestaña Accesos de la instalación (CAR-567: única entrada).
 // En la vista previa solo se abre la hoja: agregar exige ACCESO_HUELLA_SECRET (CAR-483), que allí no existe.
 /** RUN válido al azar (dígito verificador módulo 11), para no chocar con «ya está en la lista». */
 function runAlAzar(): string {
@@ -30,7 +31,7 @@ test.describe("@preview acceso: listas y pestaña de la instalación", () => {
 
   test("listas: autorizadas, bloqueadas y hoja de agregar", async ({ page }, info) => {
     await entrarNuevo(page);
-    await page.goto("/accesos/listas");
+    await abrirAccesos(page, "listas");
     const agregar = page.getByRole("button", { name: "Agregar" }).filter({ visible: true }).first();
     await expect(agregar).toBeVisible({ timeout: 60_000 });
     await capturar(page, info, "accesos-listas-autorizadas");

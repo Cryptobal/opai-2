@@ -10,9 +10,10 @@ import { PORTALES } from "./portales";
 
 /** Preferencia personal, en la hoja existente del DS V2; no crea una pantalla nueva. */
 export function PortalInicio({ portal, onCerrar }: { portal: string; onCerrar: () => void }) {
-  const [datos, setDatos] = useState<{ portales: string[]; portalInicio: string | null } | null>(
-    null,
-  );
+  const [datos, setDatos] = useState<{
+    portalesUsables: string[];
+    portalInicio: string | null;
+  } | null>(null);
   const [valor, setValor] = useState("auto");
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -26,9 +27,11 @@ export function PortalInicio({ portal, onCerrar }: { portal: string; onCerrar: (
           setError(r.error.message);
           return;
         }
-        const d = r.data as { portales: string[]; portalInicio: string | null };
+        const d = r.data as { portalesUsables: string[]; portalInicio: string | null };
         setDatos(d);
-        setValor(d.portalInicio && d.portales.includes(d.portalInicio) ? d.portalInicio : "auto");
+        setValor(
+          d.portalInicio && d.portalesUsables.includes(d.portalInicio) ? d.portalInicio : "auto",
+        );
       })
       .catch(() => {
         if (activo) setError("Revisa tu conexión y vuelve a intentarlo.");
@@ -38,7 +41,7 @@ export function PortalInicio({ portal, onCerrar }: { portal: string; onCerrar: (
     };
   }, [portal, intento]);
   const inicial =
-    datos?.portalInicio && datos.portales.includes(datos.portalInicio)
+    datos?.portalInicio && datos.portalesUsables.includes(datos.portalInicio)
       ? datos.portalInicio
       : "auto";
   async function guardar() {
@@ -89,7 +92,9 @@ export function PortalInicio({ portal, onCerrar }: { portal: string; onCerrar: (
             disabled={!datos || guardando}
             opciones={[
               { valor: "auto", etiqueta: "Primero permitido" },
-              ...PORTALES.filter((p) => p.id !== "platform" && datos?.portales.includes(p.id)).map(
+              ...PORTALES.filter(
+                (p) => p.id !== "platform" && datos?.portalesUsables.includes(p.id),
+              ).map(
                 (p) => ({ valor: p.id, etiqueta: p.etiqueta }),
               ),
             ]}
