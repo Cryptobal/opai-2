@@ -1,0 +1,69 @@
+# CAR-733 · Build iOS de @opai/movil y subida a TestFlight (solo manual; no revisión App Store).
+name: iOS · TestFlight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-testflight-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Si Apple rechaza el SDK, sube la versión (consulta xcodebuild -version en macos-15).
+  XCODE_VERSION: latest-stable
+  IOS_SDK_MIN_MAJOR: "18"
+
+jobs:
+  testflight:
+    name: compilar y subir · TestFlight
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comprobar secretos obligatorios
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          faltan=()
+          [ -z "${ASC_KEY_ID:-}" ] && faltan+=(ASC_KEY_ID)
+          [ -z "${ASC_ISSUER_ID:-}" ] && faltan+=(ASC_ISSUER_ID)
+          [ -z "${ASC_KEY_P8:-}" ] && faltan+=(ASC_KEY_P8)
+          if [ "${#faltan[@]}" -gt 0 ]; then
+            echo "::error::Faltan secretos en GitHub Actions: ${faltan[*]}. Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Sincronizar Capacitor (producción)
+        env:
+          OPAI_APP_ENTORNO: produccion
+        run: pnpm --filter @opai/movil sincronizar
+
+      - name: Seleccionar Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Compilar, verificar entitlements y subir a TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+          IOS_SDK_MIN_MAJOR: ${{ env.IOS_SDK_MIN_MAJOR }}
+        run: bash .github/scripts/ios-testflight.sh
