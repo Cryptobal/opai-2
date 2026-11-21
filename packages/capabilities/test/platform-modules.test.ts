@@ -3,7 +3,7 @@ import { capacidadesDelNucleo } from "../src/core";
 import { executeCapability } from "../src/execute";
 import { limpiarModulos, registrarModulos } from "../src/module";
 import { limpiarRegistro, registrarCapacidades } from "../src/registry";
-import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
+import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
 import { modulo, plataforma } from "./platform-modules-helpers";
 import { semillaTenant } from "./semilla";
 const set = (moduloId: string, estado: string) => ({
