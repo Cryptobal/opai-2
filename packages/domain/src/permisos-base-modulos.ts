@@ -22,6 +22,7 @@ export const CLASES_MODULOS: Readonly<Record<string, ClaseBase>> = {
   "central:alertas.atender": "GS",
   "central:agente.gobernar": "G",
   "central:alertas.ver": "GLS",
+  "central:avisos.enviar": "GS",
   "central:config.manage": "-",
   "comercial:canales.manage": "-",
   "comercial:config.manage": "-",
