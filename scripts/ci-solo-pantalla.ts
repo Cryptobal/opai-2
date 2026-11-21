@@ -36,32 +36,73 @@ const APPS_WEB_BLOQUEA = [
   /\/accion\.ts$/,
 ];
 
+/** Tests que vigilan fronteras de acceso (no solo UI). */
+const APPS_WEB_TEST_ACCESO = [
+  /^apps\/web\/test\/lint-acceso-db\.test\.ts$/,
+  /^apps\/web\/test\/.*acceso.*\.test\.ts$/,
+  /^apps\/web\/test\/permisos-/,
+  /^apps\/web\/test\/seguridad-acceso\.test\.ts$/,
+];
+
 const PERMITIDO_OTROS = [
   /^packages\/ds\//,
   /^packages\/domain\/src\/novedades\/entradas\//,
 ];
+
+const USE_SERVER = /['"]use server['"]/;
+
+export function diffTieneUseServerAgregado(diff: string): boolean {
+  for (const line of diff.split("\n")) {
+    if (!line.startsWith("+") || line.startsWith("+++")) continue;
+    if (USE_SERVER.test(line)) return true;
+  }
+  return false;
+}
+
+function appsWebTestPermitido(ruta: string): boolean {
+  if (!ruta.startsWith("apps/web/test/")) return false;
+  if (APPS_WEB_TEST_ACCESO.some((re) => re.test(ruta))) return false;
+  return true;
+}
 
 function appsWebPermitido(ruta: string): boolean {
   if (!ruta.startsWith("apps/web/")) return false;
   if (APPS_WEB_BLOQUEA.some((re) => re.test(ruta))) return false;
   if (ruta.startsWith("apps/web/e2e/")) return true;
   if (ruta.startsWith("apps/web/public/")) return true;
-  if (ruta.startsWith("apps/web/test/")) return true;
+  if (appsWebTestPermitido(ruta)) return true;
   if (ruta === "apps/web/playwright.config.ts") return true;
   if (ruta === "apps/web/presupuesto-js.json") return true;
   if (!ruta.startsWith("apps/web/app/")) return false;
   return /\.(tsx|css|scss|md)$/.test(ruta);
 }
 
-export function archivoSoloPantalla(ruta: string): boolean {
+export function archivoSoloPantalla(
+  ruta: string,
+  diffArchivo?: string,
+): boolean {
   if (BLOQUEA.some((re) => re.test(ruta))) return false;
-  if (appsWebPermitido(ruta)) return true;
-  return PERMITIDO_OTROS.some((re) => re.test(ruta));
+  if (!appsWebPermitido(ruta) && !PERMITIDO_OTROS.some((re) => re.test(ruta))) {
+    return false;
+  }
+  if (
+    ruta.endsWith(".tsx") &&
+    diffArchivo &&
+    diffTieneUseServerAgregado(diffArchivo)
+  ) {
+    return false;
+  }
+  return true;
 }
 
-export function diffSoloPantalla(archivos: string[]): boolean {
+export function diffSoloPantalla(
+  archivos: string[],
+  diffsPorArchivo?: Record<string, string>,
+): boolean {
   if (archivos.length === 0) return false;
-  return archivos.every(archivoSoloPantalla);
+  return archivos.every((a) =>
+    archivoSoloPantalla(a, diffsPorArchivo?.[a]),
+  );
 }
 
 export function listarArchivosDiff(
