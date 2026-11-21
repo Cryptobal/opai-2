@@ -60,6 +60,19 @@ export async function entornoPortalAccesos() {
     });
   }
 
+  await Promise.all(
+    (["X", "Y", "B"] as const).map((k) =>
+      e.admin.configPortalCuenta.create({
+        data: {
+          tenantId: tenantDe(k),
+          cuentaId: cuentas[k],
+          seccionesVisibles: ["accesos"],
+          gestionaListas: true,
+        },
+      }),
+    ),
+  );
+
   const sistema = (tenantId: string) =>
     mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol: "owner", alcance: null, medidor, modulosActivos: ["acceso"] });
   const contacto = (k: Contacto, modulosActivos = ["acceso", "portal_cliente"]) =>

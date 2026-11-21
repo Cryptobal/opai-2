@@ -47,8 +47,9 @@ describe.skipIf(!urlPropietario)("Accesos en el Portal Cliente, base real (CAR-4
   });
 
   it("sin la sección Accesos en el portal de su cuenta, FORBIDDEN", async () => {
-    await x.e.admin.configPortalCuenta.create({
-      data: { tenantId: x.t.A, cuentaId: x.cuentas.Y, seccionesVisibles: ["cobertura"] },
+    await x.e.admin.configPortalCuenta.update({
+      where: { tenantId_cuentaId: { tenantId: x.t.A, cuentaId: x.cuentas.Y } },
+      data: { seccionesVisibles: ["cobertura"] },
     });
     const r = await x.run(x.contacto("Y"), ID, {});
     expect(r.ok ? "ok" : r.error.code).toBe("FORBIDDEN");

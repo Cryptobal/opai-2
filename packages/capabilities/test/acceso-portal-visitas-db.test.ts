@@ -93,8 +93,9 @@ describe.skipIf(!urlPropietario)(
     });
 
     it("sin la sección Accesos en su portal, FORBIDDEN", async () => {
-      await x.e.admin.configPortalCuenta.create({
-        data: { tenantId: x.t.A, cuentaId: x.cuentas.Y, seccionesVisibles: ["cobertura"] },
+      await x.e.admin.configPortalCuenta.update({
+        where: { tenantId_cuentaId: { tenantId: x.t.A, cuentaId: x.cuentas.Y } },
+        data: { seccionesVisibles: ["cobertura"] },
       });
       const r = await x.run(x.contacto("Y"), "acceso.portal_visitas.crear", visita(x.inst.Y));
       expect(code(r)).toBe("FORBIDDEN");
