@@ -16,6 +16,8 @@ describe("errores visibles tras autocompletado condicional", () => {
     expect(mensajeWebAuthn(new DOMException("ocupada", "InvalidStateError"))).toBe(
       "Esta passkey ya está guardada en tu cuenta.",
     );
+    expect(mensajeWebAuthn(new DOMException("origen", "SecurityError"))).toMatch(/dominio/);
+    expect(mensajeWebAuthn(new DOMException("hw", "NotSupportedError"))).toMatch(/no admite passkeys/);
     expect(mensajeWebAuthn(new Error("fallo genérico"))).toMatch(/Tu navegador no pudo/);
   });
 });

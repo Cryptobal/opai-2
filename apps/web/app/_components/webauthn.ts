@@ -64,5 +64,11 @@ export function mensajeWebAuthn(error: unknown): string | null {
   if (esCancelacionPasskey(error)) return null; // canceló o expiró
   const nombre = error instanceof Error ? error.name : "";
   if (nombre === "InvalidStateError") return "Esta passkey ya está guardada en tu cuenta.";
+  if (nombre === "SecurityError") {
+    return "El dominio de esta página no coincide con tu passkey. Entra desde el mismo sitio donde la guardaste o usa contraseña u otro método.";
+  }
+  if (nombre === "NotSupportedError") {
+    return "Tu dispositivo o navegador no admite passkeys. Usa contraseña u otro método.";
+  }
   return "Tu navegador no pudo usar la passkey. Prueba de nuevo o usa otro método.";
 }
