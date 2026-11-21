@@ -168,13 +168,16 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/App/GoogleService-Info.plist",
 			);
 			name = "Copy GoogleService-Info.plist";
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
+			showEnvVarsInLog = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -f \"${SRCROOT}/App/GoogleService-Info.plist\" ]; then\n  cp \"${SRCROOT}/App/GoogleService-Info.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\";\nfi\n";
+			shellScript = "if [ -f \"${SRCROOT}/App/GoogleService-Info.plist\" ]; then\n  cp \"${SRCROOT}/App/GoogleService-Info.plist\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\";\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

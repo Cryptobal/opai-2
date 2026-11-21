@@ -49,6 +49,7 @@ if [ -n "${GOOGLE_SERVICE_INFO_PLIST:-}" ]; then
     exit 1
   fi
 fi
+unset ASC_KEY_P8 GOOGLE_SERVICE_INFO_PLIST
 
 xcodebuild -version
 xcodebuild -showsdks | grep -E 'iphoneos|iphonesimulator' || true
@@ -65,7 +66,7 @@ if [ "$sdk_major" -lt "$min_major" ]; then
   exit 1
 fi
 
-xcodebuild -resolvePackageDependencies \
+env -u ASC_KEY_P8 -u GOOGLE_SERVICE_INFO_PLIST xcodebuild -resolvePackageDependencies \
   -project "$PROJECT" \
   -scheme "$SCHEME" \
   -clonedSourcePackagesDirPath "$WORK_DIR/spm"
@@ -101,7 +102,7 @@ if [ -f "$GOOGLE_PLIST_STAGING" ]; then
 fi
 
 echo "Build iOS $BUILD_NUMBER (cl.opai.app, team $TEAM_ID)"
-xcodebuild archive \
+env -u ASC_KEY_P8 -u GOOGLE_SERVICE_INFO_PLIST xcodebuild archive \
   -project "$PROJECT" \
   -scheme "$SCHEME" \
   -configuration Release \
@@ -112,7 +113,7 @@ xcodebuild archive \
   CODE_SIGN_ENTITLEMENTS="$ENTITLEMENTS_REL" \
   "${auth_args[@]}"
 
-xcodebuild -exportArchive \
+env -u ASC_KEY_P8 -u GOOGLE_SERVICE_INFO_PLIST xcodebuild -exportArchive \
   -archivePath "$ARCHIVE_PATH" \
   -exportPath "$EXPORT_PATH" \
   -exportOptionsPlist "$EXPORT_PLIST" \
