@@ -19,7 +19,7 @@ import {
  */
 const PAGINA_EMPRESA_OAUTH = "/autorizar/empresa";
 /** Pantalla de consentimiento: qué app, qué empresa y qué podrá hacer. */
-export const PAGINA_CONSENTIMIENTO_OAUTH = "/autorizar";
+const PAGINA_CONSENTIMIENTO_OAUTH = "/autorizar";
 
 /** URL del recurso protegido (el MCP), según `BETTER_AUTH_URL`. */
 export const recursoMcp = (base = process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000") =>
