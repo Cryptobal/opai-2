@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { renderizar } from "@opai/domain";
 
+import { avisarPushTrasCampana } from "../push-campana";
 import { defineConsumidor } from "../../eventos/consumidores";
 import { defineTrabajo } from "../../trabajos/registro";
 import { ajuste } from "../config/valores";
@@ -83,6 +84,7 @@ export const consumidorTareaVencida = defineConsumidor({
     for (const { userId } of activos) {
       if (await ctx.db.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId: userId } }))
         continue;
+      const enlace = typeof datos["url"] === "string" ? datos["url"] : null;
       await ctx.db.notificacion.create({
         data: {
           tenantId: ctx.tenantId,
@@ -90,9 +92,10 @@ export const consumidorTareaVencida = defineConsumidor({
           eventoId: ev.id,
           titulo: renderizar(plantilla.asunto, datos, rutas),
           cuerpo: renderizar(plantilla.cuerpo, datos, rutas),
-          enlace: typeof datos["url"] === "string" ? datos["url"] : null,
+          enlace,
         },
       });
+      await avisarPushTrasCampana(ctx, userId, ev.tipo, enlace);
     }
   },
 });

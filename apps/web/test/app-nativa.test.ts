@@ -20,7 +20,7 @@ describe("esAppNativa", () => {
   });
 
   it("dentro de la app no pide agregar a la pantalla de inicio", () => {
-    expect(mensajePush("app")).toMatch(/campana/);
-    expect(mensajePush("app")).not.toMatch(/pantalla de inicio/);
+    expect(mensajePush("app")).toBeNull();
+    expect(mensajePush("instalar")).toMatch(/pantalla de inicio/);
   });
 });

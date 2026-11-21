@@ -1,4 +1,4 @@
-import type { Almacenamiento, EmisorPush, Mailer } from "@opai/integrations";
+import type { Almacenamiento, EmisorFcm, EmisorPush, Mailer } from "@opai/integrations";
 
 /** Servicios del núcleo disponibles para las capacidades. Los implementa el borde. */
 export type Servicios = {
@@ -9,5 +9,7 @@ export type Servicios = {
   urlBase: string;
   /** Web Push sin contenido (CAR-356 PR 4a); `null` sin claves VAPID. */
   push?: EmisorPush | null;
+  /** FCM HTTP v1 (app nativa); `null` sin `FIREBASE_SERVICE_ACCOUNT`. */
+  pushNativo?: EmisorFcm | null;
 };
 

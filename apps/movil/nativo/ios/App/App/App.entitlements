@@ -7,5 +7,7 @@
 		<string>webcredentials:app.opai.cl</string>
 		<string>webcredentials:test.opai.cl</string>
 	</array>
+	<key>aps-environment</key>
+	<string>production</string>
 </dict>
 </plist>
