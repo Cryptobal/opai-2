@@ -29,7 +29,7 @@ describe.skipIf(!urlPropietario)("Listas del cliente en el Portal Cliente, base 
         { tenantId: x.t.A, cuentaId: x.cuentas.X },
         { tenantId: x.t.A, cuentaId: x.cuentas.Y },
         { tenantId: x.t.B, cuentaId: x.cuentas.B },
-      ].map((cuenta) => x.e.admin.configPortalCuenta.create({ data: { ...cuenta, gestionaListas: true } })),
+      ].map((cuenta) => x.e.admin.configPortalCuenta.create({ data: { ...cuenta, seccionesVisibles: ["accesos"], gestionaListas: true } })),
     );
     deEmpresa = (
       await x.ok<Entrada>(x.sistema(x.t.A), "acceso.listas.agregar", {
