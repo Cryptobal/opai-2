@@ -12,6 +12,7 @@ EXPORT_PLIST="$WORK_DIR/ExportOptions.plist"
 AUTH_KEY_DIR="$WORK_DIR/private_keys"
 AUTH_KEY_PATH="$AUTH_KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
 ENTITLEMENTS_PATH="apps/movil/nativo/ios/App/App/App.entitlements"
+CAP_CONFIG_JSON="apps/movil/nativo/ios/App/App/capacitor.config.json"
 ALTOOL_KEYS="$HOME/.private_keys"
 GOOGLE_PLIST_STAGING="$WORK_DIR/GoogleService-Info.plist"
 GOOGLE_PLIST_APP="apps/movil/nativo/ios/App/App/GoogleService-Info.plist"
@@ -34,6 +35,42 @@ require_var() {
 require_var ASC_KEY_ID "${ASC_KEY_ID:-}"
 require_var ASC_ISSUER_ID "${ASC_ISSUER_ID:-}"
 require_var ASC_KEY_P8 "${ASC_KEY_P8:-}"
+
+# Tras `cap sync` en el workflow: server.url del binario debe coincidir con el rpId del auth (CAR-809).
+verificar_server_url_y_rpid() {
+  if [ ! -f "$CAP_CONFIG_JSON" ]; then
+    echo "::error::No existe $CAP_CONFIG_JSON; corre «pnpm --filter @opai/movil sincronizar» antes de este script."
+    exit 1
+  fi
+  local server_url host rpid
+  server_url=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["server"]["url"])' "$CAP_CONFIG_JSON")
+  host=$(python3 -c 'from urllib.parse import urlparse; import sys; print(urlparse(sys.argv[1]).hostname or "")' "$server_url")
+  if [ -z "$host" ]; then
+    echo "::error::No se pudo leer el host de server.url en $CAP_CONFIG_JSON (url=$server_url)."
+    exit 1
+  fi
+  echo "Capacitor server.url=$server_url (host=$host)"
+  local http_code body
+  body=$(curl -fsS -w '\n%{http_code}' "https://${host}/api/auth/passkey/generate-authenticate-options") || {
+    echo "::error::No se pudo llamar a https://${host}/api/auth/passkey/generate-authenticate-options"
+    exit 1
+  }
+  http_code=$(printf '%s' "$body" | tail -n1)
+  body=$(printf '%s' "$body" | sed '$d')
+  if [ "$http_code" != "200" ]; then
+    echo "::error::passkey/generate-authenticate-options devolvió HTTP $http_code en $host."
+    exit 1
+  fi
+  rpid=$(printf '%s' "$body" | python3 -c 'import json,sys; print(json.load(sys.stdin)["rpId"])')
+  if [ "$rpid" != "$host" ]; then
+    echo "::error::server.url apunta a $host pero el auth responde rpId=$rpid. Revisa OPAI_APP_ENTORNO en ios-testflight.yml (debe ser test, no produccion)."
+    exit 1
+  fi
+  echo "rpId del auth coincide con server.url ($host)."
+  SERVER_URL_HOST="$host"
+}
+
+verificar_server_url_y_rpid
 
 BUILD_NUMBER=$((GITHUB_RUN_NUMBER + 100))
 mkdir -p "$AUTH_KEY_DIR" "$EXPORT_PATH"
@@ -180,7 +217,14 @@ for need in associated-domains; do
     exit 1
   }
 done
-echo "Entitlements OK en el .ipa."
+echo "com.apple.developer.associated-domains en el .ipa:"
+echo "$ent_blob" | sed -n '/com.apple.developer.associated-domains/,/\/array/p' || true
+webcred="webcredentials:${SERVER_URL_HOST}"
+if ! echo "$ent_blob" | grep -Fq "<string>${webcred}</string>"; then
+  echo "::error::Falta ${webcred} en com.apple.developer.associated-domains del .ipa (server.url host=${SERVER_URL_HOST})."
+  exit 1
+fi
+echo "Entitlements OK en el .ipa (incluye ${webcred})."
 
 INFO_PLIST="$app_path/Info.plist"
 if [ ! -f "$INFO_PLIST" ]; then
@@ -216,3 +260,18 @@ xcrun altool --upload-app \
   --apiKey "$ASC_KEY_ID" \
   --apiIssuer "$ASC_ISSUER_ID"
 echo "IPA subido a App Store Connect / TestFlight (build $BUILD_NUMBER)."
+
+if [ -n "${GITHUB_ENV:-}" ]; then
+  echo "BUILD_NUMBER=$BUILD_NUMBER" >>"$GITHUB_ENV"
+fi
+
+QUE_PROBAR_OK_FILE="$WORK_DIR/que-probar-ok"
+rm -f "$QUE_PROBAR_OK_FILE"
+export BUILD_NUMBER ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_PATH
+export GITHUB_SHA="${GITHUB_SHA:-$(git rev-parse HEAD)}"
+export QUE_PROBAR_OK_FILE
+if python3 .github/scripts/ios_testflight_que_probar.py; then
+  echo "«Qué probar» actualizado en TestFlight (build $BUILD_NUMBER)."
+else
+  echo "::warning::No se pudo rellenar «Qué probar» en TestFlight; el IPA sí se subió."
+fi
