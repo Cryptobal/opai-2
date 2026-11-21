@@ -8,11 +8,19 @@ import { type Canal, PROPOSITO_TELEFONO, type ResultadoIdentidad } from "../doma
  * Canal por el que se marca (D-01): el kiosco de la instalación es el principal; el teléfono personal solo
  * si la empresa lo permite, la instalación lo incluye, RR. HH. habilitó a la persona y esta aceptó (T-04).
  */
+async function enlacePublicoVigente(ctx: Contexto, instalacionId: string): Promise<boolean> {
+  return (await ctx.db.codigoMarcacionPublica.count({ where: { tenantId: ctx.tenantId, instalacionId } })) > 0;
+}
+
 async function exigirCanal(ctx: Contexto, instalacionId: string, personaId: string, canal: Canal | undefined): Promise<void> {
   const mapa = await ajuste<Record<string, Canal[]>>(ctx, "asistencia", "canales_por_instalacion");
   const permitidos = mapa[instalacionId] ?? ["kiosco"];
   if ((canal ?? "kiosco") === "kiosco") {
     if (!permitidos.includes("kiosco")) throw prohibido("Esta instalación no marca en el kiosco.");
+    return;
+  }
+  if (canal === "enlace_publico") {
+    if (!(await enlacePublicoVigente(ctx, instalacionId))) throw prohibido("Este enlace de marcación no está disponible.");
     return;
   }
   if (!(await ajuste<boolean>(ctx, "asistencia", "telefono_personal_permitido")) || !permitidos.includes("telefono_personal"))
@@ -62,8 +70,13 @@ export const MENSAJE_IDENTIDAD: Record<Fallo, string> = {
  *    por los controles del canal (empresa, instalación, habilitación y consentimiento).
  */
 export async function resolverCanal(
-  ctx: Contexto, i: { dispositivoId?: string | undefined }, personaId: string, instalacionId: string,
+  ctx: Contexto, i: { dispositivoId?: string | undefined; enlacePublicoValidado?: boolean | undefined }, personaId: string, instalacionId: string,
 ): Promise<Canal> {
+  if (i.enlacePublicoValidado) {
+    if (ctx.actor.tipo !== "system" || i.dispositivoId) throw prohibido("Marca inválida por enlace público.");
+    await exigirCanal(ctx, instalacionId, personaId, "enlace_publico");
+    return "enlace_publico";
+  }
   if (ctx.actor.tipo === "system") {
     await exigirEquipo(ctx, i.dispositivoId, instalacionId);
     const v = await ctx.db.vinculoLaboral.findFirst({ where: { personaId, instalacionId, estado: "vigente" }, select: { id: true } });
