@@ -1307,8 +1307,17 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.jornadas.fijar_tipo`
 - `central.alertas.contactar`
 - `central.alertas.proponer`
+- `central.avisos.acusar`
+- `central.avisos.crear`
+- `central.avisos.listar`
+- `central.avisos.obtener`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
+- `central.mensajes.cerrar`
+- `central.mensajes.enviar`
+- `central.mensajes.listar`
+- `central.mensajes.obtener`
+- `central.mensajes.responder`
 - `central.reglas.guardar`
 - `central.reglas.listar`
 - `comercial.contexto.agregar`

@@ -11,4 +11,12 @@ export const ajustesCentral = z.object({
     permiso: "central:config.manage",
     control: "texto",
   }),
+  plazo_consulta_min: z.number().int().min(5).max(240).default(15).meta({
+    etiqueta: "Plazo para responder una consulta (minutos)",
+    ayuda: "Si la central no responde una consulta de terreno en este plazo, la consulta entra a la cola como alerta.",
+    grupo: "Mensajes y avisos",
+    ambito: "tenant",
+    permiso: "central:config.manage",
+    control: "numero",
+  }),
 });
