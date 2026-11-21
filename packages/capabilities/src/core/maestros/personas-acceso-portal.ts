@@ -44,7 +44,10 @@ export async function asegurarAccesoPortalTrabajador(
   const email = correoPortalPersona(persona);
   if (!email) return { estado: "sin_correo" };
 
-  const usuario = await ctx.db.user.findUnique({ where: { email } });
+  const usuario = await ctx.db.user.findFirst({
+    where: { email: { equals: email, mode: "insensitive" }, emailVerified: true },
+    select: { id: true },
+  });
   const m = usuario
     ? await ctx.db.membership.findFirst({
         where: { userId: usuario.id, estado: "activa" },
@@ -56,9 +59,12 @@ export async function asegurarAccesoPortalTrabajador(
     if (esInternoParaPortalTrabajador(m.rol, m.portales)) return no("usuario_interno");
     if (persona.usuarioId && persona.usuarioId !== m.userId) return no("persona_ya_vinculada");
     const ya = persona.usuarioId === m.userId;
-    if (!m.portales.includes("trabajador")) await ampliarPortalesTrabajador(ctx, m.id, dryRun);
-    if (!ya) await vincularPersonaUsuario(ctx, persona.id, m.userId, dryRun);
-    return { estado: ya ? "ya_tiene_acceso" : "vinculado" };
+    if (ya) {
+      if (!m.portales.includes("trabajador")) await ampliarPortalesTrabajador(ctx, m.id, dryRun);
+      return { estado: "ya_tiene_acceso" };
+    }
+    await vincularPersonaUsuario(ctx, persona.id, m.userId, dryRun);
+    return { estado: "vinculado" };
   }
 
   const pendiente = await ctx.db.invitation.findFirst({

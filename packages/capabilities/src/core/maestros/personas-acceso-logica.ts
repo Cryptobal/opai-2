@@ -85,15 +85,28 @@ export async function vincularPersonaUsuario(
     throw conflicto("La persona ya está vinculada a otro usuario.");
   }
   if (actual?.usuarioId === usuarioId) return;
-  await ampliarPortalesTrabajador(ctx, m.id, dryRun);
   if (dryRun) return;
-  const r = await ctx.transaccion((tx) =>
-    tx.persona.updateMany({
+  const portales = portalesInvitacionTrabajador(ctx);
+  await ctx.transaccion(async (tx) => {
+    const memb = await tx.membership.findFirst({
+      where: { id: m.id, estado: "activa" },
+      select: { portales: true },
+    });
+    if (memb) {
+      const falta = portales.filter((p) => !memb.portales.includes(p));
+      if (falta.length) {
+        await tx.membership.update({
+          where: { id: m.id },
+          data: { portales: [...memb.portales, ...falta] },
+        });
+      }
+    }
+    const r = await tx.persona.updateMany({
       where: { id: personaId, archivadaEn: null, anonimizadaEn: null, usuarioId: null },
       data: { usuarioId },
-    }),
-  );
-  if (r.count === 0) throw conflicto("La persona ya está vinculada a otro usuario.");
+    });
+    if (r.count === 0) throw conflicto("La persona ya está vinculada a otro usuario.");
+  });
 }
 
 export async function invitadorDe(ctx: Contexto) {
