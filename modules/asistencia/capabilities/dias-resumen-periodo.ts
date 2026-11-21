@@ -5,7 +5,7 @@ import { alcanceMarcas } from "./alcance-marcas";
 const dia = (f: string) => new Date(`${f}T00:00:00Z`);
 const MAX_FILAS = 20_000;
 
-export type ItemResumenAsistencia = {
+type ItemResumenAsistencia = {
   personaId: string;
   dias: number;
   presentes: number;
@@ -26,7 +26,7 @@ export type ResumenAsistenciaPersona = Pick<
 >;
 
 /** Filas consolidadas por persona en el rango (fuente de Nómina y de `asistencia.dias.resumen_periodo`). */
-export async function itemsResumenAsistenciaPeriodo(
+async function itemsResumenAsistenciaPeriodo(
   ctx: Contexto,
   desde: string,
   hasta: string,
