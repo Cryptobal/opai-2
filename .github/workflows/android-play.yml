@@ -101,13 +101,17 @@ jobs:
           curl -fsSL "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar" -o "$bt"
           echo "${BUNDLETOOL_SHA256}  ${bt}" | sha256sum -c -
           vc=$((ANDROID_VERSION_CODE + 100))
-          man=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest)
-          echo "$man" | grep -q 'package="cl.opai.app"' || { echo "::error::package distinto de cl.opai.app"; exit 1; }
-          echo "$man" | grep -q "android:versionCode=\"${vc}\"" || { echo "::error::versionCode distinto de ${vc}"; exit 1; }
-          echo "$man" | grep -q 'android:versionName="1.0.'"${vc}"'"' || { echo "::error::versionName inesperado"; exit 1; }
-          sdk=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest/uses-sdk)
-          echo "$sdk" | grep -q 'android:targetSdkVersion="36"' || { echo "::error::targetSdkVersion distinto de 36"; exit 1; }
-          echo "$man" | grep -q 'android.permission.POST_NOTIFICATIONS' || { echo "::error::falta POST_NOTIFICATIONS en manifest"; exit 1; }
+          vn="1.0.${vc}"
+          pkg=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest/@package)
+          [ "$pkg" = "cl.opai.app" ] || { echo "::error::package distinto de cl.opai.app (obtenido: ${pkg:-vacío})"; exit 1; }
+          code=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest/@android:versionCode)
+          [ "$code" = "${vc}" ] || { echo "::error::versionCode distinto de ${vc} (obtenido: ${code:-vacío})"; exit 1; }
+          name=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest/@android:versionName)
+          [ "$name" = "$vn" ] || { echo "::error::versionName distinto de ${vn} (obtenido: ${name:-vacío})"; exit 1; }
+          sdk=$(java -jar "$bt" dump manifest --bundle="$aab" --xpath /manifest/uses-sdk/@android:targetSdkVersion)
+          [ "$sdk" = "36" ] || { echo "::error::targetSdkVersion distinto de 36 (obtenido: ${sdk:-vacío})"; exit 1; }
+          java -jar "$bt" dump manifest --bundle="$aab" | grep -q 'android:name="android.permission.POST_NOTIFICATIONS"' \
+            || { echo "::error::falta POST_NOTIFICATIONS en manifest"; exit 1; }
 
       - name: Subir artefacto
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
