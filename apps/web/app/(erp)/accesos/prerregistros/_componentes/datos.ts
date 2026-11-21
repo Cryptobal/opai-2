@@ -1,4 +1,3 @@
-import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedePrerregistrar } from "@/lib/pestanas-modulos";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -47,22 +46,16 @@ const DIA = /^\d{4}-\d{2}-\d{2}$/;
 export const uuid = (v: string | undefined) => (v && UUID.test(v) ? v : undefined);
 export const dia = (v: string | undefined) => (v && DIA.test(v) ? v : undefined);
 
-/** Prerregistros vigentes y próximos (o los de un día), con las instalaciones a cargo para filtrar y crear. */
-export async function cargarPrerregistros(sp: SearchParams) {
-  const p = await leerParametros(sp);
-  const [r, inst, crea] = await Promise.all([
+/** Prerregistros vigentes y próximos de una instalación, y si quien mira puede prerregistrar. */
+export async function cargarPrerregistros(instalacionId: string, cursor: string | undefined) {
+  const [r, crea] = await Promise.all([
     ejecutarComoUsuario<Pagina<Prerregistro>>("erp", "acceso.prerregistros.listar", {
-      ...(uuid(p["instalacion"]) ? { instalacionId: p["instalacion"] } : {}),
-      ...(dia(p["dia"]) ? { dia: p["dia"] } : {}),
-      ...(uuid(p["cursor"]) ? { cursor: p["cursor"] } : {}),
-    }),
-    ejecutarComoUsuario<Pagina<{ id: string; nombre: string }>>("erp", "core.instalaciones.list", {
-      limite: 100,
+      instalacionId,
+      ...(uuid(cursor) ? { cursor } : {}),
     }),
     puedePrerregistrar(),
   ]);
-  const instalaciones = inst.ok ? inst.data.items.map((i) => ({ id: i.id, nombre: i.nombre })) : [];
-  return { p, r, instalaciones, crea };
+  return { r, crea };
 }
 
 export const cargarPrerregistro = (id: string) =>

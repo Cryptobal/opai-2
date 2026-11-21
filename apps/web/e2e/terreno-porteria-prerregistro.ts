@@ -1,6 +1,8 @@
 import { expect, type Page } from "@playwright/test";
 import { digitoVerificador } from "@opai/domain";
 
+import { abrirAccesos } from "./accesos-instalacion";
+
 /**
  * CAR-478 · Prerregistro de punta a punta: en el ERP se prerregistra una visita para hoy en la instalación del
  * equipo; la portería la ve en «Esperados hoy», registra su entrada con el documento y la ficha del ERP queda
@@ -14,7 +16,7 @@ export async function porteriaConPrerregistro(
   const cuerpo = String(16_000_000 + (Date.now() % 3_000_000));
   const run = `${cuerpo}-${digitoVerificador(cuerpo)}`;
   const nombre = `Esperada ${Date.now() % 100_000}`;
-  await erp.goto("/accesos/prerregistros");
+  const base = await abrirAccesos(erp, "prerregistros", instalacion);
   const abrir = erp
     .getByRole("button", { name: "Prerregistrar" })
     .filter({ visible: true })
@@ -26,8 +28,6 @@ export async function porteriaConPrerregistro(
     });
   }).toPass({ timeout: 60_000 });
   const hoja = erp.getByRole("dialog");
-  await hoja.getByLabel("Instalación").click();
-  await erp.getByRole("option", { name: instalacion }).first().click();
   await hoja.getByLabel("Nombre").fill(nombre);
   await hoja.getByLabel("RUN o pasaporte").fill(run);
   await hoja.getByLabel("Anfitrión").fill("Anfitriona E2E");
@@ -47,7 +47,7 @@ export async function porteriaConPrerregistro(
   await formulario.getByRole("button", { name: "Registrar entrada" }).click();
   await expect(formulario.getByText("Entrada guardada en el teléfono")).toBeVisible();
 
-  await erp.goto("/accesos/prerregistros");
+  await erp.goto(`${base}?sub=prerregistros`);
   await expect(async () => {
     await erp.reload();
     await expect(

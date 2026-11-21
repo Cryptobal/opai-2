@@ -8,6 +8,7 @@ import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { AccionesHoja } from "./acciones-hoja";
+import { AvisoSinEntregar } from "./aviso-sin-entregar";
 import type { Opcion, Prenda } from "./tipos";
 
 type Opciones = { activos: Opcion[]; ropa: Prenda[]; destinos: Opcion[] };
@@ -52,10 +53,14 @@ export function HojaEntrega({ opciones }: { opciones: Opciones }) {
   // La propuesta nunca pisa una talla que la persona ya eligió.
   const proponer = useCallback((talla: string) => setE((x) => (x.talla ? x : { ...x, talla })), []);
   const deFicha = useTallaDeFicha(e, opciones.ropa, proponer);
+  const sinActivos = opciones.activos.length === 0;
+  const sinRopa = opciones.ropa.length === 0;
+  const sinNada = sinActivos && sinRopa;
   const prenda = opciones.ropa.find((p) => p.tipoId === e.tipoId);
   const stock = prenda?.existencias.find((x) => x.talla === e.talla)?.cantidad ?? 0;
   const cantidad = Number(e.cantidad);
   const itemListo = e.clase === "activo" ? e.activoId !== "" : e.talla !== "" && cantidad > 0 && cantidad <= stock;
+  const listo = !sinNada && itemListo && e.destino !== "";
 
   async function guardar() {
     const r =
@@ -72,10 +77,11 @@ export function HojaEntrega({ opciones }: { opciones: Opciones }) {
       abierto={hoja.abierta}
       onCerrar={hoja.cerrar}
       titulo="Nueva entrega"
-      acciones={<AccionesHoja onCancelar={hoja.cerrar} onGuardar={() => void guardar()} listo={itemListo && e.destino !== ""} pendiente={pendiente} texto="Entregar" />}
+      acciones={<AccionesHoja onCancelar={hoja.cerrar} onGuardar={() => void guardar()} listo={listo} pendiente={pendiente} texto="Entregar" />}
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
+        {sinNada ? <AvisoSinEntregar /> : null}
         <Segmentado
           etiqueta="Qué se entrega"
           activa={e.clase}
@@ -85,9 +91,15 @@ export function HojaEntrega({ opciones }: { opciones: Opciones }) {
           ]}
         />
         {e.clase === "activo" ? (
-          <Campo etiqueta="Activo disponible" htmlFor="en-activo">
-            <Combobox id="en-activo" opciones={opciones.activos} valor={e.activoId} onCambiar={(v) => fijar({ activoId: v[0] ?? "" })} placeholder="Buscar por código" />
-          </Campo>
+          sinActivos ? (
+            <AvisoSinEntregar parcial="activo" />
+          ) : (
+            <Campo etiqueta="Activo disponible" htmlFor="en-activo">
+              <Combobox id="en-activo" opciones={opciones.activos} valor={e.activoId} onCambiar={(v) => fijar({ activoId: v[0] ?? "" })} placeholder="Buscar por código" />
+            </Campo>
+          )
+        ) : sinRopa ? (
+          <AvisoSinEntregar parcial="ropa" />
         ) : (
           <CamposRopa e={e} fijar={fijar} ropa={opciones.ropa} stock={stock} deFicha={deFicha} />
         )}

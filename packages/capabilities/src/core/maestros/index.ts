@@ -148,3 +148,5 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   buscar,
 ];
 
+export { trabajosMaestros } from "./trabajos";
+

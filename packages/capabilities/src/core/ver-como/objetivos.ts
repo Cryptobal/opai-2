@@ -109,7 +109,8 @@ const POR_PORTAL = { trabajador, cliente, terreno, supervisor } satisfies Record
 export const verComoList = defineCapability({
   id: "core.ver_como.list",
   soloPersonas: true,
-  descripcion: "Solo personas: lista paginada de objetivos de «ver como» (Terreno, trabajador, cliente, supervisor).",
+  descripcion:
+    "Solo personas: a quién se puede ver en «ver como» en la empresa actual (Terreno, trabajador, cliente o supervisor), paginado.",
   permiso: PERMISOS_CORE.verComoIniciar,
   input: listaSchema
     .pick({ cursor: true, limite: true })

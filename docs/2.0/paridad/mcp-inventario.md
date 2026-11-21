@@ -183,27 +183,34 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.por_aprobar.list` | `core_por_aprobar_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.apariencia.get` | `acceso_apariencia_get` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.apariencia.set` | `acceso_apariencia_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.config.get` | `acceso_config_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.config.set` | `acceso_config_set` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.grupos.list` | `acceso_grupos_list` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.grupos.set` | `acceso_grupos_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.intentos.listar` | `acceso_intentos_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.agregar` | `acceso_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.listar` | `acceso_listas_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.listas.quitar` | `acceso_listas_quitar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.portal_listas.agregar` | `acceso_portal_listas_agregar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.portal_listas.quitar` | `acceso_portal_listas_quitar` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.privacidad.cartel` | `acceso_privacidad_cartel` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.list` | `acceso_puntos_list` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.puntos.set` | `acceso_puntos_set` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.anular` | `acceso_registros_anular` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.cerrar_bloque` | `acceso_registros_cerrar_bloque` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.get` | `acceso_registros_get` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.listar` | `acceso_registros_listar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `acceso.registros.salida` | `acceso_registros_salida` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `acceso.reportes.probar` | `acceso_reportes_probar` | existe |
 | compartido | `app/(erp)/accesos/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
-| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.portal_visitas.crear` | `acceso_portal_visitas_crear` | existe |
+| compartido | `app/(erp)/accesos/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.cancelar` | `acceso_prerregistros_cancelar` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.crear` | `acceso_prerregistros_crear` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.get` | `acceso_prerregistros_get` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.invitacion` | `acceso_prerregistros_invitacion` | existe |
 | compartido | `app/(erp)/accesos/prerregistros/_componentes` | `acceso.prerregistros.listar` | `acceso_prerregistros_listar` | existe |
-| compartido | `app/(erp)/accesos/prerregistros/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.correcciones.proponer` | `asistencia_correcciones_proponer` | existe |
 | compartido | `app/(erp)/asistencia/_componentes` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | compartido | `app/(erp)/asistencia/contingencias/_componentes` | `asistencia.contingencias.registrar` | `asistencia_contingencias_registrar` | existe |
@@ -1064,6 +1071,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion` | Identidad: core.invitations.request_new (interna con motivo), sin sesión. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion` | Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial. |
+| `app/(erp)/accesos/_componentes/config/cartel-accion.ts#cartelPrivacidad` | Prepara el cartel de privacidad con acceso.privacidad.cartel y el QR de la política pública (herramienta MCP existente). |
 | `app/api/agente/route.ts` | Agente interno (ADR-049): agente.turno.preparar/agente.plan.confirmar (solo personas, con motivo); un agente externo usa el MCP. |
 | `app/api/asistencia/reportes-dt/export/route.ts` | Descarga de asistencia.reportes.exportar (Excel/PDF) con sesión; mismo permiso y datos que la herramienta MCP asistencia_reportes_exportar (CAR-590). |
 | `app/api/auth/[...all]/route.ts` | Better Auth (sesión, OAuth y verificación de correo). |
@@ -1360,6 +1368,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `acceso.portal_visitas.crear`
 - `asistencia.dias.listar`
 - `asistencia.dias.recalcular`
 - `asistencia.dias.resumen_periodo`
