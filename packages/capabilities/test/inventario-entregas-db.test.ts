@@ -9,7 +9,7 @@ import * as mod from "../src";
 import { limpiarModulos } from "../src/module";
 import { codigo, dato } from "./maestros-ayuda";
 
-type Entrega = { id: string; item: string; destino: string; devueltaEn: string | null; cantidad: number | null };
+type Entrega = { id: string; item: string; destino: string; instalacionId: string | null; devueltaEn: string | null; cantidad: number | null };
 
 describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
   let e: Entorno;
@@ -99,7 +99,8 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     const r = await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1 });
     expect(r).toBe("UNPROCESSABLE");
     const ambos = { tipoId: camisa, talla: "M", cantidad: 1, personaId: persona, instalacionId: instalacion };
-    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", ambos)).toBe("OK");
+    await dato(ctx(a), "inventario.entregas.entregar_ropa", ambos, { dryRun: true });
+    expect(await existencia("M")).toBe(5);
     expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, personaId: personaB })).toBe("NOT_FOUND");
     const instalacionB = await sitio(b, "Otra empresa");
     expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: instalacionB })).toBe("NOT_FOUND");
@@ -109,7 +110,8 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     const r = await dato<Entrega>(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "m", cantidad: 3, instalacionId: instalacion });
     expect(r).toMatchObject({ item: "Camisa talla M", destino: "Planta Norte", cantidad: 3 });
     expect(await existencia("M")).toBe(2);
-    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, personaId: persona })).toBe("OK");
+    expect(await codigo(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 3, personaId: persona })).toBe("UNPROCESSABLE");
+    expect(await existencia("M")).toBe(2);
     await dato(ctx(a), "inventario.entregas.devolver", { id: r.id, nota: "Cierre del servicio" });
     expect(await existencia("M")).toBe(5);
     expect(await codigo(ctx(a), "inventario.entregas.devolver", { id: r.id })).toBe("CONFLICT");
@@ -121,18 +123,20 @@ describe.skipIf(!urlPropietario)("inventario · entregas en base real", () => {
     await dato(ctx(a), "inventario.entregas.devolver", { id: abierta.id, estadoActivo: "en_reparacion" });
     expect((await e.admin.inventarioActivo.findFirst({ where: { id: activo } }))?.estado).toBe("en_reparacion");
     const devueltas = await dato<{ items: Entrega[] }>(ctx(a), "inventario.entregas.list", { estado: "devueltas" });
-    expect(devueltas.items).toHaveLength(2);
+    expect(devueltas.items).toContainEqual(expect.objectContaining({ id: abierta.id, devueltaEn: expect.any(String) }));
   });
 
   it("R23: el supervisor solo ve entregas de sus instalaciones; otra empresa no ve nada", async () => {
-    await dato(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: otraInstalacion });
+    const dentro = await dato<Entrega>(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: instalacion });
+    const fuera = await dato<Entrega>(ctx(a), "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: otraInstalacion });
     const supervisor = await dato<{ items: Entrega[] }>(ctx(a, [instalacion]), "inventario.entregas.list", { estado: "todas" });
-    expect(supervisor.items.length).toBeGreaterThan(0);
-    expect(supervisor.items.every((x) => x.destino === "Planta Norte")).toBe(true);
+    const visibles = supervisor.items.map((x) => x.id);
+    expect(visibles).toContain(dentro.id);
+    expect(visibles).not.toContain(fuera.id);
+    expect(supervisor.items.every((x) => x.instalacionId === instalacion)).toBe(true);
     // Con permiso de gestionar pero acotado: no entrega ni devuelve fuera de sus instalaciones.
     const acotado = ctx(a, [instalacion], "owner");
-    const fuera = await dato<{ items: Entrega[] }>(ctx(a), "inventario.entregas.list", { instalacionId: otraInstalacion });
-    expect(await codigo(acotado, "inventario.entregas.devolver", { id: fuera.items[0]?.id })).toBe("NOT_FOUND");
+    expect(await codigo(acotado, "inventario.entregas.devolver", { id: fuera.id })).toBe("NOT_FOUND");
     expect(await codigo(acotado, "inventario.entregas.entregar_ropa", { tipoId: camisa, talla: "M", cantidad: 1, instalacionId: otraInstalacion })).toBe("NOT_FOUND");
     expect((await dato<{ items: Entrega[] }>(ctx(b), "inventario.entregas.list", { estado: "todas" })).items).toEqual([]);
   });
