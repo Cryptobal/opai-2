@@ -92,7 +92,9 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - name: Esperar a que el workflow «preview» deje lista la base de la vista previa
-        if: steps.listo.outputs.ok == 'true' && github.event_name == 'pull_request'
+        if: >-
+          steps.listo.outputs.ok == 'true'
+          && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

@@ -54,6 +54,7 @@ const RUTAS_CON_SESION = [
   "/configuracion/preferencias",
   "/configuracion",
   "/configuracion/grupo/operacion",
+  "/configuracion/grupo/modulos",
   "/configuracion/empresa",
   "/configuracion/modulo/agente",
   "/configuracion/api-keys",
