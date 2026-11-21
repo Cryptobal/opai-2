@@ -670,6 +670,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.f29.generar` | `nomina_f29_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.excel` | `nomina_libro_remuneraciones_excel` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.libro_remuneraciones.pdf` | `nomina_libro_remuneraciones_pdf` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.calcular` | `nomina_liquidaciones_calcular` | existe |
@@ -677,11 +678,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.marcar_revisadas` | `nomina_liquidaciones_marcar_revisadas` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.liquidaciones.publicar` | `nomina_liquidaciones_publicar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.lre.generar` | `nomina_lre_generar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.datos` | `nomina_midt_datos` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.exportar_pendientes` | `nomina_midt_exportar_pendientes` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.midt.registrar` | `nomina_midt_registrar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.generar_calendario` | `nomina_obligaciones_generar_calendario` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
+| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.pago_banco.generar` | `nomina_pago_banco_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.abrir` | `nomina_periodos_abrir` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.cambiar_estado` | `nomina_periodos_cambiar_estado` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.listar` | `nomina_periodos_listar` | existe |
@@ -907,6 +912,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/[id]/liquidaciones/[liq]` | `nomina.liquidaciones.obtener` | `nomina_liquidaciones_obtener` | existe |
 | erp | `/remuneraciones/[id]/liquidaciones` | `nomina.liquidaciones.listar` | `nomina_liquidaciones_listar` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
+| erp | `/remuneraciones/cumplimiento-dt/contratos` | `nomina.midt.listar` | `nomina_midt_listar` | existe |
+| erp | `/remuneraciones/cumplimiento-dt/finiquitos/[vinculoId]` | `nomina.finiquito.obtener` | `nomina_finiquito_obtener` | existe |
+| erp | `/remuneraciones/cumplimiento-dt/finiquitos` | `nomina.midt.listar` | `nomina_midt_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |

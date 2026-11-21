@@ -61,9 +61,56 @@
 - `nomina.liquidaciones.marcar_revisadas` (diseño 03 «Marcar revisadas»): pasa de calculada a revisada todas las liquidaciones del período, con el período abierto o en revisión y bloqueado en la transacción. Exige la vista completa (sin alcance y con sueldos sensibles), como leerlas. Con dryRun cuenta cuántas pasarían. Emite `nomina.liquidaciones.revisadas` (declarado en el manifest). Recalcular el período las devuelve a calculada (ya lo hacía `guardarLiquidaciones`).
 - `nomina.liquidaciones.listar` suma `total.revisadas`. La pantalla muestra «Revisadas N de M», el estado por fila y el estado en la liquidación de cada persona. Sin migración: la columna `estado` ya existía.
 - **Decisión:** marcar es por período completo, como el botón único del diseño 03; no hay selección por fila (ni en el diseño ni en el caso de uso de hoy). Cerrar el período no exige que estén todas revisadas: el diseño 02 lo muestra como dato («N de M revisadas»), no como bloqueo.
-- **Pendiente:** mostrar «N de M revisadas» en el paso de cierre (diseño 02); publicar al Portal Trabajador y PDF.
+- **Pendiente:** mostrar «N de M revisadas» en el paso de cierre (diseño 02); publicar al Portal Trabajador y PDF (hecho en stack portal-liquidacion).
 - **Autorrevisión (subagente, sin bloqueos), a pendientes:**
   - Revisar contra lo visto: si alguien recalcula entre que otro mira la pantalla y aprieta el botón, quedan revisados montos que nadie vio. Solución simple: que el input traiga la `calculadaEn` máxima vista y rechazar con cambio concurrente si hay filas más nuevas.
   - `idempotencyKey` desde la pantalla (el efecto ya es idempotente: la segunda llamada devuelve 0).
   - Permiso propio para revisar (`nomina:liquidaciones.revisar`) si se quiere separar quien calcula de quien revisa.
   - Prueba de concurrencia marcar/recalcular contra Postgres real (usa el mismo bloqueo ya probado).
+
+## Publicar liquidación al portal (PR apilado sobre #983, rama `cursor/portal-liquidacion-ab10`)
+
+- Migración `20261116210000_nomina_liquidacion_portal`: `documento_id` y `publicada_en` en `nomina.liquidaciones` (FK y trigger mismo tenant con `core.documentos`). Recalcular anula publicación.
+- `nomina.liquidaciones.publicar` (dryRun, `nomina:periodos.manage`): solo liquidación **revisada**; PDF en R2 + documento con `visibleEn: ['trabajador']`; evento `nomina.liquidacion.publicada`; comunicable transaccional (correo personal + in-app). Consumidor `nomina.liquidacion.publicada`.
+- Pantalla liquidación de persona: botón **Publicar al trabajador** (diseño 04) con vista previa y leyenda de correo personal. Lecturas exponen `publicadaEn` y correo para la leyenda.
+## Cumplimiento DT contratos (PR apilado sobre #989, rama `cursor/cumplimiento-dt-ab10`)
+
+- Migración `20261116220000_nomina_registros_mi_dt`: seguimiento de registro en Mi DT (comprobante y fecha) por alta, baja o anexo.
+- Capacidades MCP: `nomina.midt.listar`, `nomina.midt.exportar_pendientes`, `nomina.midt.datos` y `nomina.midt.registrar` (marca con comprobante; lecturas auditadas).
+- Pantalla `/remuneraciones/cumplimiento-dt/contratos` (diseño 07): segmento Por registrar / Registrados, descarga CSV, datos por fila y diálogo Marcar registrado. Navegación «Cumplimiento DT». Sin API Mi DT.
+
+- *(Cubierto en PR apilado `cursor/finiquito-completo-ab10` sobre gate LRE.)*
+
+### Pago banco (PR apilado sobre F29)
+
+- `nomina.pago_banco.generar`: CSV de transferencias (período cerrado o pagado); tarjeta en Archivos.
+
+### F29 retención (PR apilado sobre finiquitos)
+
+- `nomina.f29.generar`: Excel con retenciones de impuesto único del período; tarjeta en Archivos. Formato por verificar.
+
+### LRE y Previred bajo complemento (PR apilado sobre #1012)
+
+- `nomina.lre.generar` y `nomina.previred.generar` exigen `nomina.cumplimiento_dt` (helper `complemento-dt.ts`).
+
+### Finiquito · feriado, carta y preview (PR apilado sobre gate LRE)
+
+- Feriado proporcional estimado (`vacaciones-proporcional.ts` + ausencias tipo vacaciones).
+- Ficha diseño 08: tarjetas carta art. 162 (solicitud `carta_trabajador`) y comprobante Mi DT.
+- Semilla `qa-e2e/nomina-finiquito-cumplimiento-dt.sql` y e2e `@preview` de la ficha.
+
+### Complemento Cumplimiento DT · entitlements (PR apilado sobre #1007)
+
+- Catálogo `nomina.cumplimiento_dt` (ADR-057, CAR-204): cobro por trabajador, depende de `nomina`.
+- Navegación y capacidades Mi DT exigen el complemento activo; semilla `gard` lo activa junto a nómina.
+
+### Finiquito diseño 08 · propuesta (PR apilado sobre entitlements)
+
+- Dominio `propuestaFiniquito`, capacidad `nomina.finiquito.obtener`, ficha `/remuneraciones/cumplimiento-dt/finiquitos/[vinculoId]`.
+- Feriado y documentos ampliados en PR `cursor/finiquito-completo-ab10` (ver sección anterior).
+
+### Finiquitos Mi DT (PR apilado sobre #1004)
+
+- Tipo `finiquito` en movimientos Mi DT (un pendiente por vínculo terminado, distinto de la baja).
+- Pantalla `/remuneraciones/cumplimiento-dt/finiquitos` y enlace «Finiquitos Mi DT» en el menú.
+- Sin migración (el tipo ya era texto libre en `registros_mi_dt`).

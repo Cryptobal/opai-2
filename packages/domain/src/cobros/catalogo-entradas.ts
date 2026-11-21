@@ -1,44 +1,11 @@
 /** Entradas del catálogo comercial (CAR-204): una por cobrable. Ver `catalogo-modulos.ts`. */
 import {
+  COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT,
   type EntradaCatalogo,
-  esIncluidoEnBase,
-  MODULO_FINANZAS,
-  type ParteFinanzas,
 } from "./catalogo-modulos";
-import { PLAN_BASE, type FormaCobro, type UnidadCobro } from "./catalogo";
-
-const modulo = (
-  id: string,
-  nombre: string,
-  incluye: string,
-  forma: FormaCobro,
-  unidad: UnidadCobro | null,
-): EntradaCatalogo => ({
-  id,
-  nombre,
-  incluye,
-  grupo: "modulo",
-  incluidoEnBase: esIncluidoEnBase(id),
-  formaSugerida: esIncluidoEnBase(id) ? null : forma,
-  unidadSugerida: esIncluidoEnBase(id) ? null : unidad,
-  dependencias: [],
-});
-
-const parte = (
-  id: ParteFinanzas,
-  nombre: string,
-  incluye: string,
-  dependencias: readonly (readonly string[])[] = [],
-): EntradaCatalogo => ({
-  id,
-  nombre,
-  incluye,
-  grupo: "parte_finanzas",
-  incluidoEnBase: false,
-  formaSugerida: "fijo",
-  unidadSugerida: null,
-  dependencias,
-});
+import { PLAN_BASE } from "./catalogo";
+import { ENTRADAS_FINANZAS } from "./catalogo-entradas-finanzas";
+import { modulo } from "./catalogo-entradas-helpers";
 
 export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
   {
@@ -88,6 +55,16 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "por_unidad",
     "trabajador_activo",
   ),
+  {
+    id: COMPLEMENTO_NOMINA_CUMPLIMIENTO_DT,
+    nombre: "Cumplimiento DT",
+    incluye: "LRE asistido, registro en Mi DT (contratos, anexos y finiquitos) y propuesta de finiquito.",
+    grupo: "complemento_nomina",
+    incluidoEnBase: false,
+    formaSugerida: "por_unidad",
+    unidadSugerida: "trabajador_activo",
+    dependencias: [["nomina"]],
+  },
   modulo(
     "pauta",
     "Operaciones",
@@ -132,23 +109,5 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "por_unidad",
     "usuario_licencia",
   ),
-  {
-    id: MODULO_FINANZAS,
-    nombre: "Finanzas",
-    incluye: "Las siete partes juntas, a un precio mensual fijo.",
-    grupo: "finanzas",
-    incluidoEnBase: false,
-    formaSugerida: "fijo",
-    unidadSugerida: null,
-    dependencias: [],
-  },
-  parte("finanzas.bancos", "Bancos", "Cuentas, cartolas y conciliación."),
-  parte("finanzas.flujo", "Flujo de caja", "Planilla semanal y proyección.", [["finanzas.bancos"]]),
-  parte("finanzas.ventas", "Ventas y facturación", "Facturas, notas y clientes."),
-  parte("finanzas.cobranza", "Cobranza", "Seguimiento de cobros.", [["finanzas.ventas"]]),
-  parte("finanzas.factoring", "Factoring", "Cesión de facturas.", [["finanzas.ventas"]]),
-  parte("finanzas.compras", "Compras", "Facturas recibidas y proveedores."),
-  parte("finanzas.contabilidad", "Contabilidad e informes", "Balance, resultados e informes.", [
-    ["finanzas.ventas", "finanzas.compras"],
-  ]),
+  ...ENTRADAS_FINANZAS,
 ];

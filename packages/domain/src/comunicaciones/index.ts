@@ -45,9 +45,9 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_GEOCERCA,
   ...COMUNICABLES_LIMITES,
   ...COMUNICABLES_DESEMPENO,
+  ...COMUNICABLES_NOMINA,
   ...COMUNICABLES_TICKETS,
   ...COMUNICABLES_RENDICIONES,
-  ...COMUNICABLES_NOMINA,
 ];
 
 /** Datos de ejemplo anidados a partir de las rutas declaradas ("documento.tipo" → { documento: { tipo } }). */
