@@ -3,9 +3,9 @@ import { Suspense } from "react";
 
 import { Loading } from "@opai/ds";
 
+import { empresasParaSelector } from "@/lib/empresas-selector";
 import { epocaDeIdentidad } from "@/lib/epoca-sesion";
 import { requerirIdentidad } from "@/lib/servidor";
-import { empresasParaSelector } from "@/lib/empresas-selector";
 import { membresiasUsables } from "@/lib/tenant-actual";
 import { destinoDeInicio } from "@/lib/portal-inicio";
 

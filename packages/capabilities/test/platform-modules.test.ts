@@ -1,27 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { z } from "zod";
-
 import { capacidadesDelNucleo } from "../src/core";
 import { executeCapability } from "../src/execute";
-import { defineModule, limpiarModulos, registrarModulos } from "../src/module";
+import { limpiarModulos, registrarModulos } from "../src/module";
 import { limpiarRegistro, registrarCapacidades } from "../src/registry";
-import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
+import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
+import { modulo, plataforma } from "./platform-modules-helpers";
 import { semillaTenant } from "./semilla";
-
-const modulo = (id: string, dependencias: string[] = []) =>
-  defineModule({
-    id,
-    nombre: id.toUpperCase(),
-    version: "0.1.0",
-    dependencias,
-    permisos: [],
-    navegacion: [],
-    configuracion: z.object({}),
-    eventos: [],
-    capacidades: [],
-  });
-
-const plataforma = { ...USUARIO_DE_PRUEBA, platformRole: "owner" as const };
 const set = (moduloId: string, estado: string) => ({
   tenantId: TENANT_DE_PRUEBA,
   moduloId,
@@ -86,12 +70,15 @@ describe("platform.modules.set", () => {
         tenantModule: [{ tenantId: TENANT_DE_PRUEBA, moduloId: "crm", estado: "activo" }],
       },
     });
-    expect(await executeCapability(ctx, "core.modules.list", {})).toMatchObject({
-      ok: true,
-      data: [
-        { id: "crm", estado: "activo" },
-        { id: "cpq", estado: null },
-      ],
-    });
+    const r = await executeCapability(ctx, "core.modules.list", {});
+    expect(r).toMatchObject({ ok: true });
+    if (r.ok) {
+      expect(r.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "crm", estado: "activo", complemento: false }),
+          expect.objectContaining({ id: "cpq", estado: null, complemento: false }),
+        ]),
+      );
+    }
   });
 });
