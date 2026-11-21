@@ -1,6 +1,6 @@
 import {
-  CATEGORIAS_TIPO,
   camposConClave,
+  CLAVE_CATEGORIA,
   entregaAPersonaPorDefecto,
   errorDeTipo,
   LIMITES_TIPO,
@@ -24,6 +24,7 @@ import {
   tipoSchema,
   vistaTipo,
 } from "./comun";
+import { categoriasDeLaEmpresa, comportamientoDeCategoria, exigirCategoriaActiva } from "./categorias-kit";
 import { exigirPrendaDelKit } from "./prendas";
 
 
@@ -33,7 +34,7 @@ export const tiposCrear = defineCapability({
     "Crea un tipo de inventario de la empresa. Un «activo» (teléfono, radio) se controla por unidad y puede pedir campos propios como IMEI o número; una «ropa» (camisa, calzado) se controla por talla y puede apuntar a una prenda del uniforme.",
   permiso: PERMISOS_INVENTARIO.tiposManage,
   input: z.object({
-    categoria: z.enum(CATEGORIAS_TIPO),
+    categoria: z.string().regex(CLAVE_CATEGORIA),
     nombre: nombreSchema,
     descripcion: descripcionSchema.optional(),
     campos: z.array(campoEntradaSchema).max(LIMITES_TIPO.campos).default([]),
@@ -45,11 +46,15 @@ export const tiposCrear = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    const cats = await categoriasDeLaEmpresa(ctx);
+    await exigirCategoriaActiva(ctx, input.categoria);
+    const comportamiento = await comportamientoDeCategoria(ctx, input.categoria);
+    if (!comportamiento) throw reglaDeNegocio("La categoría no tiene un comportamiento válido.");
     const campos = camposConClave(input.campos.map((c) => ({ ...c, clave: undefined })));
     const tallas = input.tallas.map(normalizarTalla);
-    const error = errorDeTipo({ categoria: input.categoria, campos, tallas });
+    const error = errorDeTipo({ comportamiento, campos, tallas });
     if (error) throw reglaDeNegocio(error);
-    if (input.categoria === "activo" && input.prendaClave)
+    if (comportamiento === "activo" && input.prendaClave)
       throw reglaDeNegocio("La prenda del uniforme es solo para tipos de ropa.");
     if (input.prendaClave) await exigirPrendaDelKit(ctx, input.prendaClave);
     const normal = nombreNormalizado(input.nombre);
@@ -63,9 +68,9 @@ export const tiposCrear = defineCapability({
       campos,
       tallas,
       prendaClave: input.prendaClave ?? null,
-      entregaAPersona: input.entregaAPersona ?? entregaAPersonaPorDefecto(input.categoria),
+      entregaAPersona: input.entregaAPersona ?? entregaAPersonaPorDefecto(comportamiento),
     };
-    if (dryRun) return vistaTipo({ id: ID_VISTA_PREVIA, activo: true, ...data });
+    if (dryRun) return vistaTipo({ id: ID_VISTA_PREVIA, activo: true, ...data }, cats);
     const creado = await ctx.transaccion(async (tx) => {
       const t = await sinDuplicado(
         tx.inventarioTipo.create({ data: { ...data, tenantId: ctx.tenantId } }),
@@ -79,6 +84,6 @@ export const tiposCrear = defineCapability({
       });
       return t;
     });
-    return vistaTipo(creado);
+    return vistaTipo(creado, cats);
   },
 });

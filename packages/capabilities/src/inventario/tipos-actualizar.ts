@@ -17,6 +17,7 @@ import {
   tipoSchema,
   vistaTipo,
 } from "./comun";
+import { categoriasDeLaEmpresa, comportamientoDeCategoria } from "./categorias-kit";
 import { exigirPrendaDelKit } from "./prendas";
 
 export const tiposActualizar = defineCapability({
@@ -38,7 +39,10 @@ export const tiposActualizar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const actual = await ctx.db.inventarioTipo.findFirst({ where: { id: input.id } });
+    const [actual, cats] = await Promise.all([
+      ctx.db.inventarioTipo.findFirst({ where: { id: input.id } }),
+      categoriasDeLaEmpresa(ctx),
+    ]);
     if (!actual) throw noEncontrado("El tipo de inventario");
     const guardados = camposGuardados(actual.campos);
     const existentes = new Set(guardados.map((c) => c.clave));
@@ -56,10 +60,10 @@ export const tiposActualizar = defineCapability({
       entregaAPersona: input.entregaAPersona ?? actual.entregaAPersona,
       activo: input.activo ?? actual.activo,
     };
-    const categoria = actual.categoria === "ropa" ? "ropa" : "activo";
-    const error = errorDeTipo({ categoria, campos: f.campos, tallas: f.tallas });
+    const comportamiento = (await comportamientoDeCategoria(ctx, actual.categoria)) ?? "activo";
+    const error = errorDeTipo({ comportamiento, campos: f.campos, tallas: f.tallas });
     if (error) throw reglaDeNegocio(error);
-    if (categoria === "activo" && f.prendaClave)
+    if (comportamiento === "activo" && f.prendaClave)
       throw reglaDeNegocio("La prenda del uniforme es solo para tipos de ropa.");
     if (f.prendaClave && f.prendaClave !== actual.prendaClave) await exigirPrendaDelKit(ctx, f.prendaClave);
     if (f.nombreNormalizado !== actual.nombreNormalizado) {
@@ -68,8 +72,9 @@ export const tiposActualizar = defineCapability({
       });
       if (otro) throw conflicto(duplicado(nombre));
     }
-    const sinCambios = JSON.stringify(vistaTipo(f)) === JSON.stringify(vistaTipo(actual));
-    if (dryRun || sinCambios) return vistaTipo(f);
+    const sinCambios =
+      JSON.stringify(vistaTipo(f, cats)) === JSON.stringify(vistaTipo(actual, cats));
+    if (dryRun || sinCambios) return vistaTipo(f, cats);
     const guardado = await ctx.transaccion(async (tx) => {
       const t = await sinDuplicado(
         tx.inventarioTipo.update({
@@ -95,6 +100,6 @@ export const tiposActualizar = defineCapability({
       });
       return t;
     });
-    return vistaTipo(guardado);
+    return vistaTipo(guardado, cats);
   },
 });

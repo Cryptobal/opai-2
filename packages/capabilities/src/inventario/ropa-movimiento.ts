@@ -5,12 +5,13 @@ import { LIMITES_ROPA, type MotivoMovimiento } from "@opai/domain";
 
 import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+import { comportamientoDeCategoria } from "./categorias-kit";
 
 /** Tipo de ropa de la empresa; un activo se controla por unidad, no por talla. */
 export async function tipoDeRopa(ctx: Contexto, tipoId: string) {
   const tipo = await ctx.db.inventarioTipo.findFirst({ where: { id: tipoId } });
   if (!tipo) throw noEncontrado("El tipo de ropa");
-  if (tipo.categoria !== "ropa")
+  if ((await comportamientoDeCategoria(ctx, tipo.categoria)) !== "ropa")
     throw reglaDeNegocio("Los activos se controlan uno por uno, no por talla.");
   return tipo;
 }

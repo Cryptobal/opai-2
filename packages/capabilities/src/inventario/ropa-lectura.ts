@@ -4,7 +4,15 @@ import { z } from "zod";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
-import { entradaLista, paginaPor, PERMISOS_INVENTARIO, salidaLista, tiposPorNombre } from "./comun";
+import {
+  clavesPorComportamiento,
+  entradaLista,
+  paginaPor,
+  PERMISOS_INVENTARIO,
+  salidaLista,
+  tiposPorNombre,
+} from "./comun";
+import { categoriasDeLaEmpresa, comportamientoDeCategoria } from "./categorias-kit";
 
 const prendaSchema = z.object({
   tipoId: z.string(),
@@ -27,7 +35,11 @@ export const ropaList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { incluirInactivos, cursor, limite }) {
-    const filtro = { categoria: "ropa", ...(incluirInactivos ? {} : { activo: true }) };
+    const cats = await categoriasDeLaEmpresa(ctx);
+    const filtro = {
+      categoria: { in: clavesPorComportamiento(cats, "ropa") },
+      ...(incluirInactivos ? {} : { activo: true }),
+    };
     const { items: pagina, siguiente } = await tiposPorNombre(ctx, filtro, cursor, limite);
     const filas = await ctx.db.inventarioExistencia.findMany({
       where: { tipoId: { in: pagina.map((t) => t.id) } },
@@ -83,10 +95,10 @@ export const ropaMovimientos = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { tipoId, cursor, limite }) {
-    const tipo = await ctx.db.inventarioTipo.findFirst({
-      where: { id: tipoId, categoria: "ropa" },
-    });
+    const tipo = await ctx.db.inventarioTipo.findFirst({ where: { id: tipoId } });
     if (!tipo) throw noEncontrado("El tipo de ropa");
+    const comp = await comportamientoDeCategoria(ctx, tipo.categoria);
+    if (comp !== "ropa") throw noEncontrado("El tipo de ropa");
     const filas = await ctx.db.inventarioMovimiento.findMany({
       where: { tipoId, ...(cursor ? { id: { lt: cursor } } : {}) },
       orderBy: { id: "desc" },

@@ -2,6 +2,9 @@
 // Dos categorías: «activo» se controla por unidad y lleva campos propios; «ropa» se controla por
 // existencias y talla. Reglas R1 a R4 de docs/2.0/modulos/inventario.md.
 
+import type { ComportamientoCategoria } from "./categorias";
+
+/** Claves por defecto de categoría (CAR-743 sigue aceptándolas sin ajuste). */
 export const CATEGORIAS_TIPO = ["activo", "ropa"] as const;
 export type CategoriaTipo = (typeof CATEGORIAS_TIPO)[number];
 
@@ -12,8 +15,8 @@ export type TipoCampoInventario = (typeof TIPOS_CAMPO_INVENTARIO)[number];
 export type CampoTipo = { clave: string; etiqueta: string; tipo: TipoCampoInventario; obligatorio: boolean };
 
 /** CAR-487: por defecto la ropa se entrega a personas; los activos solo si se marca en configuración. */
-export function entregaAPersonaPorDefecto(categoria: CategoriaTipo): boolean {
-  return categoria === "ropa";
+export function entregaAPersonaPorDefecto(comportamiento: ComportamientoCategoria): boolean {
+  return comportamiento === "ropa";
 }
 
 export const LIMITES_TIPO = {
@@ -53,7 +56,7 @@ export function claveCampo(etiqueta: string): string {
 }
 
 type Definicion = {
-  categoria: CategoriaTipo;
+  comportamiento: ComportamientoCategoria;
   campos: readonly CampoTipo[];
   tallas: readonly string[];
 };
@@ -64,8 +67,8 @@ export function normalizarTalla(talla: string): string {
 }
 
 /** R3 y R4: el error de negocio del tipo, o null si es válido. */
-export function errorDeTipo({ categoria, campos, tallas }: Definicion): string | null {
-  if (categoria === "ropa") {
+export function errorDeTipo({ comportamiento, campos, tallas }: Definicion): string | null {
+  if (comportamiento === "ropa") {
     if (campos.length > 0) return "Los campos propios son solo para tipos de activo.";
     if (tallas.length === 0) return "Un tipo de ropa necesita al menos una talla.";
     if (tallas.length > LIMITES_TIPO.tallas) return `Hasta ${LIMITES_TIPO.tallas} tallas por tipo.`;
