@@ -2306,3 +2306,20 @@ Decisiones de Carlos del 14-nov-2026 (00:13, chat de la Sesión Finanzas) sobre 
 **Consecuencias.** El PDF con plantilla HTML respeta la estructura y el texto del HTML, no su diseño CSS completo. Si se pide más fidelidad visual, el paso siguiente es ampliar los bloques (por ejemplo, fondos de celda), no cambiar de motor. La vista previa HTML de la pantalla de importación (iframe aislado) muestra el diseño completo.
 
 **Adenda de ADR-112 (17-nov-2026; encargo de Carlos a la Sesión Destrabe cola: «que los tests pasen lo más rápido posible»).** La cola de merge estuvo sin un solo verde desde que se activó (27 corridas `merge_group` entre las 01:47 y las 12:10, hora de Chile). Causas medidas: `test:db` solo corría en la cola, así que los PR llegaban verdes y caían ahí (marcador viejo de `opai_cron_sii` en los runners persistentes y el test de contadores de #1036); el gate en serie tardaba de 23 a 35 min contra un tope de 35; la caché de Turborepo nunca se actualizaba (clave fija por lockfile: 3 de 26 paquetes en caché, 15 min de `typecheck`); y los runners Spot cortaban jobs de la cola a media corrida, lo que saca al PR de la cola. Cambios: (1) el gate corre en paralelo (`typecheck` y `test` en 2 partes cada uno, `test:db` en 4) y el job `gate` conserva el nombre del check obligatorio, sin tocar el ruleset; (2) la caché de Turborepo lleva el SHA en la clave y `typecheck` usa un `tsc` por CPU y por cada 4 GB; (3) `test:db` corre en el PR cuando toca `packages/*` (salvo `ds`), `modules/*`, Prisma, migraciones, `package.json`, el lockfile o `ci.yml`; (4) los checks obligatorios usan runners de GitHub (gratis con el repositorio público), no la flota Spot, que corría 4 jobs a la vez con 40 corridas en espera; la variable `RUNNER_GATE` permite volver a runners propios sin tocar el workflow. La flota sigue sirviendo `preview`, `preview-e2e`, presupuesto, e2e y rendimiento. Costo: cada PR ocupa hasta 9 runners por pocos minutos y `test:db` corre en más PR; cambia el punto 2 de «Revisiones largas». Reversible con un revert.
+
+## ADR-116 · Inventario sale del backlog como módulo vendible (CAR-235, 14-nov-2026)
+
+**Fecha:** 14-nov-2026 · **Estado:** vigente · **Decide:** Carlos, al crear el proyecto Linear «07 · Inventario» (10-nov-2026) con CAR-235 a CAR-238 para la Versión 1.0 · **Registra:** Claude («Sesión Inventario»). **Modifica** ADR-030 (backlog) y la lista «No se portan de 1.0» de `CONTEXTO-agentes.md`.
+
+**Contexto.** ADR-030 dejó Inventario en el backlog y la línea base de paridad lo marcó «no copiar». Carlos lo pidió después como módulo de la Versión 1.0: activos (teléfonos y otros), ropa con tipos configurables para uniformes, asignación a persona o instalación, vendible aparte.
+
+**Decisión.** Inventario es un módulo vendible (`inventario`), sin dependencias de otros módulos, en el área Operaciones del ERP. Alcance en [`modulos/inventario.md`](modulos/inventario.md). CAR-487 quedó **aprobado (opción 1, 16-nov-2026)** con regla de entrega a persona + instalación de imputación (costo fijo al snapshot). Lo decidido antes por la sesión (ADR-114):
+
+1. Catálogo de tipos por empresa en dos categorías: **activo** (por unidad, con campos propios) y **ropa** (por existencias y talla, ligada a las prendas del uniforme de Personas, CAR-408).
+2. La línea telefónica de 1.0 es un tipo de activo más; no se portan los datos técnicos de MDM.
+3. Se asigna a **personas o instalaciones** del núcleo, nunca a usuarios.
+4. Forma de cobro: **en espera** (issue hijo de CAR-487). La propuesta es por instalación activa; Inventario no tiene entrada en el catálogo de cobro en esta pila.
+
+**Decisión, 16-nov-2026 (Carlos, CAR-487):** alcance aprobado. Los tipos que se entregan a personas se marcan en configuración; cada entrega o retiro a persona registra **persona** e **instalación de imputación** (donde estaba la persona al entregar); el costo no se mueve si cambia de instalación.
+
+**Referente.** Rippling (equipos asignados al empleado, con devolución al salir) y Snipe-IT (categorías con campos propios, activos por unidad y artículos por existencias). Se aparta en la ropa por talla, por regla del rubro.

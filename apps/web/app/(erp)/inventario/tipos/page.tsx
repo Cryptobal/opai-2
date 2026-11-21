@@ -1,0 +1,60 @@
+import { Package } from "lucide-react";
+
+import { SplitScreen } from "@opai/ds";
+
+import { PaginaPortal } from "@/app/_components/pagina-portal";
+import type { SearchParams } from "@/lib/parametros";
+
+import { cargarKit, cargarTipos } from "../_componentes/datos";
+import { HojaTipo } from "../_componentes/diferidas";
+import { ListaTipos } from "../_componentes/lista-tipos";
+import { contextoPagina } from "../_componentes/paginas";
+
+export const metadata = { title: "Tipos de inventario" };
+
+/** Inventario › Tipos (CAR-235): vista dividida con «Elige un tipo»; lista en teléfono. */
+export default function TiposInventario({ searchParams }: { searchParams: SearchParams }) {
+  return (
+    <PaginaPortal
+      portal="erp"
+      titulo="Inventario"
+      ruta="/inventario"
+      completo
+      cargar={async () => {
+        const { p, puede } = await contextoPagina(
+          searchParams,
+          "/inventario/tipos",
+          "inventario:tipos.manage",
+        );
+        const [tipos, kit] = await Promise.all([cargarTipos(p), cargarKit()]);
+        return {
+          ...tipos,
+          kit,
+          q: p.q,
+          puedeGestionar: puede,
+        };
+      }}
+    >
+      {(d) => (
+        <>
+          <SplitScreen
+            telefono="lista"
+            unPanelHastaLg
+            etiquetaLista="Lista de tipos"
+            vacio={{ texto: "Elige un tipo", icono: Package }}
+            lista={
+              <ListaTipos
+                state={d.state}
+                items={d.items}
+                total={d.total}
+                {...(d.q ? { q: d.q } : {})}
+                puedeGestionar={d.puedeGestionar}
+              />
+            }
+          />
+          {d.puedeGestionar ? <HojaTipo kit={d.kit} /> : null}
+        </>
+      )}
+    </PaginaPortal>
+  );
+}

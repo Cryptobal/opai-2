@@ -43,6 +43,17 @@ const SALIDA_BASE: PasoPlantilla[] = [
   P("Registrar el término en la Dirección del Trabajo", 10),
 ];
 
+/** Paso de la lista de salida cuando el módulo Inventario está activo (CAR-503). */
+export const TITULO_PASO_DEVOLVER_INVENTARIO = "Devolver inventario";
+
+/** Inserta el paso de devolución de inventario tras la devolución de uniforme, si aplica y aún no está. */
+export function conPasoDevolverInventario(pasos: PasoPlantilla[], incluir: boolean): PasoPlantilla[] {
+  if (!incluir || pasos.some((p) => p.titulo === TITULO_PASO_DEVOLVER_INVENTARIO)) return pasos;
+  const trasUniforme = pasos.findIndex((p) => /devoluci[oó]n de uniforme/i.test(p.titulo));
+  const pos = trasUniforme >= 0 ? trasUniforme + 1 : 0;
+  return [...pasos.slice(0, pos), P(TITULO_PASO_DEVOLVER_INVENTARIO, 0), ...pasos.slice(pos)];
+}
+
 const POR_VERTICAL: Record<string, { ingreso: PasoPlantilla[]; salida: PasoPlantilla[] }> = {
   seguridad: {
     ingreso: [

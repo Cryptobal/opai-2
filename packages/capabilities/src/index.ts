@@ -25,6 +25,7 @@ export { capacidadesAcceso, trabajoCierreAutomatico } from "./acceso";
 export { ajustesRondas, capacidadesRondas, indicadoresRondas, trabajoVigilanciaRondas } from "./rondas";
 export { ajustesNomina, buscadoresNomina, capacidadesNomina, consumidoresNomina } from "./nomina";
 export { ajustesPauta, ausenteSinJustificar, buscadoresPauta, capacidadesPauta, consumidorPautaCambio, consumidorPautaPublicada, diasConTurno, type DiaConTurno, fuentesAprobacionTurnosExtra, indicadoresPauta, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./pauta";
+export { capacidadesInventario, PERMISOS_INVENTARIO } from "./inventario";
 export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
@@ -142,8 +143,7 @@ export {
   modelosDelAgente,
   type ModeloAgente,
 } from "./integraciones/ia-modelos";
-export { credencialDe } from "./integraciones/resolver";
-export { MANUALES } from "./manuales";
+export { credencialDe } from "./integraciones/resolver"; export { MANUALES } from "./manuales";
 export type { PanelSueldo } from "./core/maestros/estructuras-panel-schema";
 export { noRecontratarHabilitadaAhora } from "./core/maestros/personas-no-recontratar-vigencia";
 export { clavesFaltantes, mutualAdicionalTenant, publicacionesParaFecha } from "./core/remuneraciones";

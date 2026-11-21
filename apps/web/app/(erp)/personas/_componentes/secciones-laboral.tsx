@@ -1,5 +1,6 @@
 import { Ancla } from "./estado-seccion";
 import { SeccionContactoLaboral } from "./seccion-contacto-laboral";
+import { SeccionInventario } from "./seccion-inventario";
 import { SeccionJornadaDt } from "./seccion-jornada-dt";
 import { SeccionOs10 } from "./seccion-os10";
 import { SeccionPago } from "./seccion-pago";
@@ -20,6 +21,9 @@ export function SeccionesLaboral({ personaId, nombre }: { personaId: string; nom
       </Ancla>
       <Ancla id="uniforme">
         <SeccionUniforme personaId={personaId} />
+      </Ancla>
+      <Ancla id="inventario">
+        <SeccionInventario personaId={personaId} />
       </Ancla>
       <Ancla id="jornada-dt">
         <SeccionJornadaDt personaId={personaId} />
