@@ -230,6 +230,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial.",
   "asistencia.correcciones.responder_enlace":
     "Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada.",
+  "asistencia.contingencias.ver_enlace":
+    "Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal es la credencial.",
+  "asistencia.contingencias.responder_enlace":
+    "Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada.",
   "core.credenciales_terreno.asignar_pin":
     "Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02).",
   "core.credenciales_terreno.restablecer":
@@ -250,6 +254,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2).",
   "core.terreno.en_sitio":
     "Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d).",
+  "core.terreno.esperados":
+    "Interna: la portería del equipo emparejado lee sin sesión los visitantes prerregistrados para hoy (su cookie de dispositivo es la credencial); un agente usa acceso.prerregistros.listar con su alcance (CAR-478).",
   "core.terreno.rondas":
     "Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e).",
 };

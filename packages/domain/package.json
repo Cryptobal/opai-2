@@ -9,6 +9,7 @@
     "./dinero": "./src/dinero.ts",
     "./ventas-lineas": "./src/finanzas/ventas-lineas.ts",
     "./terreno-hechos": "./src/terreno-hechos.ts",
+    "./acceso-config": "./src/acceso/config.ts",
     "./acceso-documento": "./src/acceso/documento.ts",
     "./acteco-catalogo": "./src/acteco-catalogo.ts",
     "./correos": "./src/correos/index.ts",

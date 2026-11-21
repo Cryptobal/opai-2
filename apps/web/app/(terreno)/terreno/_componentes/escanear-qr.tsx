@@ -7,11 +7,23 @@ import { Alerta, Button } from "@opai/ds";
 type Detector = { detect(fuente: HTMLVideoElement): Promise<{ rawValue: string }[]> };
 type ConstructorDetector = new (o: { formats: string[] }) => Detector;
 
+/** El lector de códigos del propio navegador (Chrome/Android, Safari reciente); si no existe, se escribe el código. */
+export function lectorDisponible(): boolean {
+  return typeof window !== "undefined" && "BarcodeDetector" in window && !!navigator.mediaDevices;
+}
+
 /**
  * Escaneo del QR con la cámara (CAR-78 · E3c). Todo ocurre en el teléfono: la imagen nunca se envía ni se guarda;
  * solo sale el texto del código. Al leer uno, apaga la cámara y lo entrega.
  */
-export function EscanearQr({ alLeer }: { alLeer: (codigo: string) => void }) {
+export function EscanearQr({
+  alLeer,
+  sinCamara = "No se pudo abrir la cámara. Escribe el código del punto.",
+}: {
+  alLeer: (codigo: string) => void;
+  /** Qué hacer si la cámara no abre (rondas: escribir el código; portería: registrar con el documento). */
+  sinCamara?: string;
+}) {
   const [activo, setActivo] = useState(false);
   const [falla, setFalla] = useState<string | null>(null);
   const video = useRef<HTMLVideoElement>(null);
@@ -48,7 +60,7 @@ export function EscanearQr({ alLeer }: { alLeer: (codigo: string) => void }) {
         }, 300);
       })
       .catch(() => {
-        setFalla("No se pudo abrir la cámara. Escribe el código del punto.");
+        setFalla(sinCamara);
         setActivo(false);
       });
     return () => {
@@ -56,7 +68,7 @@ export function EscanearQr({ alLeer }: { alLeer: (codigo: string) => void }) {
       window.clearInterval(reloj);
       flujo?.getTracks().forEach((t) => t.stop());
     };
-  }, [activo, alLeer]);
+  }, [activo, alLeer, sinCamara]);
 
   return (
     <div className="flex flex-col gap-2">
