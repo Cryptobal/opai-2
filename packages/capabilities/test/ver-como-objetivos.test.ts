@@ -21,11 +21,12 @@ beforeEach(() => {
 
 function semilla() {
   const s = semillaTenant("admin");
-  const persona = (id: string, usuarioId: string, nombres: string) => ({
+  const persona = (id: string, usuarioId: string | null, nombres: string) => ({
     id,
     tenantId: T,
     nombres,
     apellidos: "Prueba",
+    estado: "activo",
     usuarioId,
     archivadaEn: null,
     anonimizadaEn: null,
@@ -36,6 +37,7 @@ function semilla() {
     persona: [
       persona("0192f3a0-0000-7000-8000-00000000c001", U2, "Beto"),
       persona("0192f3a0-0000-7000-8000-00000000c002", USUARIO_DE_PRUEBA.id, "Ana"),
+      persona("0192f3a0-0000-7000-8000-00000000c003", null, "Caro"),
     ],
     instalacion: [
       { id: INST_CON_EQUIPO, tenantId: T, nombre: "Bodega Norte", archivadaEn: null },
@@ -72,7 +74,11 @@ describe("core.ver_como.list", () => {
   it("Trabajador: busca por nombre y nunca lista a quien mira", async () => {
     const { ctx } = contextoDePrueba({ semilla: semilla() });
     const r = await buscar(ctx, "trabajador");
-    expect(r).toMatchObject({ ok: true, data: { items: [{ nombre: "Beto Prueba" }] } });
+    expect(r.ok).toBe(true);
+    const nombres = r.ok
+      ? (r.data as { items: { nombre: string }[] }).items.map((i) => i.nombre).sort()
+      : [];
+    expect(nombres).toEqual(["Beto Prueba", "Caro Prueba"]);
     expect(await buscar(ctx, "trabajador", "zzz")).toMatchObject({ ok: true, data: { items: [] } });
   });
 
@@ -83,7 +89,10 @@ describe("core.ver_como.list", () => {
       data: { items: [{ id: ACCESO, nombre: "Cliente QA", detalle: "Beto" }] },
     });
     const admin = contextoDePrueba({ semilla: semilla(), rol: "admin", usuario: BETO });
-    expect(await buscar(admin.ctx, "trabajador")).toMatchObject({ ok: true, data: { items: [] } });
+    expect(await buscar(admin.ctx, "trabajador")).toMatchObject({
+      ok: true,
+      data: { items: [{ nombre: "Caro Prueba" }] },
+    });
   });
 
   it("un no-admin no puede buscar", async () => {

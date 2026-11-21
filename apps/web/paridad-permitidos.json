@@ -18,6 +18,10 @@
       "motivo": "Verificación pública de un documento por su token (sin sesión). DEUDA: debería ser una capacidad pública de lectura; queda permitida hasta ese brief."
     },
     {
+      "archivo": "app/acceso/[slug]/privacidad/page.tsx",
+      "motivo": "Aviso de privacidad del Control de acceso (R19): lectura pública sin sesión; resuelve el tenant por slug y muestra el texto configurado y la marca del tenant."
+    },
+    {
       "archivo": "app/firmar/[slug]/[token]/acciones.ts",
       "motivo": "Firmar por enlace personal ocurre antes de existir sesión (firma.md §5, §10): resuelve el tenant por slug con tenantPorSlug() y luego ejecuta capacidades internas con el enlace como credencial."
     },
@@ -136,6 +140,10 @@
     {
       "archivo": "lib/fuentes-cliente.ts",
       "motivo": "Borde de ejecución: resuelve el alcance por filas del contacto de un cliente (instalaciones de su acceso) para el contexto de capacidades; es el cableado de fuentes.ts, no una pantalla."
+    },
+    {
+      "archivo": "lib/persona-vinculada.ts",
+      "motivo": "Borde de identidad (CAR-746): consulta mínima si el usuario tiene persona vinculada para el portal Trabajador; usada solo desde fuentes.ts."
     },
     {
       "archivo": "lib/cron.ts",

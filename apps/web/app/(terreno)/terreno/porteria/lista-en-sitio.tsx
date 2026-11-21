@@ -6,16 +6,9 @@ import { Alerta, Badge, Button, Empty } from "@opai/ds";
 import { excedePermanencia } from "@opai/domain/acceso-config";
 
 import { encolarHecho } from "@/lib/terreno/cola";
+import type { FilaEvacuacion } from "@/lib/terreno/evacuacion";
 
-export type EnSitio = {
-  id: string;
-  clave: string;
-  nombre: string;
-  empresa: string | null;
-  tipoRegistro: string;
-  documento: string;
-  entradaEn: string;
-};
+export type EnSitio = FilaEvacuacion;
 
 const hora = (iso: string) =>
   new Date(iso).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });

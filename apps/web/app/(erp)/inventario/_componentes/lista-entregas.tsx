@@ -3,7 +3,7 @@ import { Package, Plus, Shirt } from "lucide-react";
 import { Badge, type EstadoPantalla } from "@opai/ds";
 import { formatearFecha } from "@opai/domain";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { conteo } from "@/lib/plural";
 
@@ -39,9 +39,9 @@ export function ListaEntregas({
   puedeGestionar: boolean;
 }) {
   const nueva = puedeGestionar ? (
-    <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
+    <EnlaceBoton href="?nueva=1" icono={Plus}>
       Nueva entrega
-    </EnlaceBotonHoja>
+    </EnlaceBoton>
   ) : undefined;
   return (
     <ListaMaestro

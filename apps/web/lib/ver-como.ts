@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
 
-import type { Contexto } from "@opai/capabilities";
+import { crearContexto, type Contexto } from "@opai/capabilities";
 import { getSession } from "@opai/auth";
 import { esRol, PERMISOS_CORE, puedeAsignarRol } from "@opai/domain";
 
@@ -9,6 +9,7 @@ import { tieneAccesoAPortal } from "./acceso-portal";
 import { contextoDeIdentidad, identidadDe, type Identidad } from "./actor";
 import { fuentesReales } from "./fuentes";
 import { COOKIE_VER_COMO, leerVerComo, type VerComo } from "./ver-como-token";
+import { despacharDiferido, medidorDiferido, diferirConAfter } from "./medidor";
 
 /** Vista vigente con el rol actual de quien mira, para volver a comparar jerarquías en cada petición. */
 export type VistaVigente = VerComo & { rolQuienMira: string };
@@ -53,10 +54,35 @@ export const identidadDeLaVista = (v: VistaVigente): Promise<Identidad | null> =
  * y las lecturas auditadas registran a quien mira. Sin revalidación de sesión (no es la suya).
  */
 export async function contextoVerComo(v: VistaVigente, portal: string): Promise<Contexto | null> {
-  if (!v.userId || v.portal !== portal) return null;
-  const vista = await identidadVista(v.userId, v.tenantId, v.rolQuienMira);
-  if (!vista || !tieneAccesoAPortal(vista, portal)) return null;
-  const ctx = contextoDeIdentidad(vista, portal, { obtenerSesion: async () => null });
-  ctx.verComo = { porUserId: v.porUserId };
-  return ctx;
+  if (v.portal !== portal) return null;
+  const verComo = {
+    porUserId: v.porUserId,
+    ...(v.personaId ? { personaId: v.personaId } : {}),
+  };
+  if (v.userId) {
+    const vista = await identidadVista(v.userId, v.tenantId, v.rolQuienMira);
+    if (!vista || !tieneAccesoAPortal(vista, portal)) return null;
+    const ctx = contextoDeIdentidad(vista, portal, { obtenerSesion: async () => null });
+    ctx.verComo = verComo;
+    return ctx;
+  }
+  if (portal === "trabajador" && v.personaId) {
+    const modulos = await fuentesReales.modulosActivos(v.tenantId);
+    if (!modulos.includes("portal_trabajador")) return null;
+    const ctx = crearContexto({
+      tenantId: v.tenantId,
+      actor: { tipo: "user", id: v.porUserId },
+      usuario: null,
+      rol: "viewer",
+      portal,
+      portalesMembresia: ["trabajador"],
+      modulosActivos: modulos,
+      medidor: medidorDiferido,
+      diferir: diferirConAfter,
+      despacharEventos: despacharDiferido(v.tenantId),
+    });
+    ctx.verComo = verComo;
+    return ctx;
+  }
+  return null;
 }

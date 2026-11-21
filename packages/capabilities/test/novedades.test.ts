@@ -28,6 +28,18 @@ describe("core.novedades", () => {
     expect(data.noLeidas).toBe(data.items.length);
   });
 
+  it("esconde la novedad de Cumplimiento DT sin el complemento (CAR-741)", async () => {
+    const ids = async (modulos: string[]) => {
+      const { ctx } = contextoDePrueba({ modulosActivos: ["core", ...modulos] });
+      const r = ok<{ items: { id: string }[] }>(await executeCapability(ctx, "core.novedades.list", {}));
+      return r.items.map((i) => i.id);
+    };
+    const sinComplemento = await ids(["nomina"]);
+    const conComplemento = await ids(["nomina", "nomina.cumplimiento_dt"]);
+    expect(sinComplemento).not.toContain("nomina-cumplimiento-dt-entitlement");
+    expect(conComplemento).toContain("nomina-cumplimiento-dt-entitlement");
+  });
+
   it("recorta las novedades por las pantallas que la persona ve (CAR-430)", async () => {
     const lista = async (permisosRol: readonly string[]) => {
       const { ctx } = contextoDePrueba({ modulosActivos: ["core", "comercial"], permisosRol });

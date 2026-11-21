@@ -34,6 +34,8 @@ export type Identidad = {
   mfaActiva: boolean;
   totpActiva?: boolean;
   mfaVerificada?: boolean;
+  /** Persona del ERP vinculada a este usuario en la empresa actual (portal Trabajador, CAR-746). */
+  personaVinculada?: boolean;
 };
 
 const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [], instalaciones: null };
@@ -50,19 +52,25 @@ export async function identidadDe(
 ): Promise<Identidad> {
   const membresias = await fuentes.membresiasDe(user.id);
   const actual = elegirMembresia(membresias, cookieTenant);
-  type Modulos = { modulosActivos: string[]; modulosSoloLectura?: string[]; acceso: AccesoFila };
+  type Modulos = {
+    modulosActivos: string[];
+    modulosSoloLectura?: string[];
+    acceso: AccesoFila;
+    personaVinculada: boolean;
+  };
   const {
     modulosActivos,
     modulosSoloLectura = [],
     acceso,
+    personaVinculada,
   }: Modulos = actual
     ? fuentes.accesoConModulos
       ? await fuentes.accesoConModulos(actual.tenantId, user.id)
       : await Promise.all([
           fuentes.modulosActivos(actual.tenantId),
           fuentes.acceso(actual.tenantId, user.id),
-        ]).then(([modulosActivos, acceso]) => ({ modulosActivos, acceso }))
-    : { modulosActivos: [], acceso: SIN_ACCESO };
+        ]).then(([modulosActivos, acceso]) => ({ modulosActivos, acceso, personaVinculada: false }))
+    : { modulosActivos: [], acceso: SIN_ACCESO, personaVinculada: false };
   const platformRole = esRolPlataforma(user.platformRole) ? user.platformRole : null;
   return {
     usuario: { id: user.id, nombre: user.name, email: user.email, platformRole },
@@ -71,6 +79,7 @@ export async function identidadDe(
     modulosActivos,
     modulosSoloLectura,
     acceso,
+    personaVinculada,
     mfaActiva: user.twoFactorEnabled === true || user.passkeyEnabled === true,
     totpActiva: user.twoFactorEnabled === true,
   };

@@ -9,6 +9,7 @@ import type { Capacidad } from "../../types";
 import { reglaDeNegocio } from "../../errores";
 import { escribirConEvento } from "./comun";
 import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
+import { selloAutoAccesoEnPayload } from "./personas-acceso-portal-actor";
 import { personaDe, vinculosVigentes, vistaPersona } from "./personas-vista";
 
 export async function aplicarEstadoPersona(
@@ -44,7 +45,7 @@ export async function aplicarEstadoPersona(
     {
       tipo: tipoEvento,
       entidadTipo: "persona",
-      payload: () => ({ desde, hacia }),
+      payload: () => ({ desde, hacia, ...selloAutoAccesoEnPayload(ctx) }),
     },
     async (tx) => {
       await bloquearNoAnonimizado(tx, "persona", id);
