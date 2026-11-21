@@ -130,6 +130,7 @@ export {
   ejecutarTrabajos,
   esperaReintento,
   programarCapturaSii,
+  programarCada5Min,
   programarPeriodicos,
   programarHorarios,
 } from "./trabajos/runner";

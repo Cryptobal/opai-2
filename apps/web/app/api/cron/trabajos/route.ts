@@ -1,7 +1,7 @@
-import { despacharPendientes, ejecutarTrabajos } from "@opai/capabilities";
+import { despacharPendientes, ejecutarTrabajos, programarCada5Min } from "@opai/capabilities";
 import { colaDeTrabajos } from "@opai/db";
 
-import { autorizarCron, porTenant } from "@/lib/cron";
+import { autorizarCron, porTenant, tramoEn } from "@/lib/cron";
 import { contextoSistemaDelTenant } from "@/lib/medidor";
 
 export const maxDuration = 60;
@@ -15,9 +15,10 @@ export async function GET(req: Request): Promise<Response> {
   const resultados = await porTenant(async (t) => {
     if (Date.now() >= hasta) return { omitido: "sin tiempo en esta vuelta" };
     const ctx = await contextoSistemaDelTenant(t.id);
+    const encolados = await programarCada5Min(ctx, tramoEn(t.timezone));
     const eventos = await despacharPendientes(ctx);
     const trabajos = await ejecutarTrabajos(ctx, colaDeTrabajos(t.id), { hasta });
-    return { eventos, trabajos };
+    return { encolados, eventos, trabajos };
   });
   return Response.json({ ok: true, resultados });
 }

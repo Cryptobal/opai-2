@@ -7,7 +7,8 @@ import { defineTrabajo } from "../trabajos/registro";
 import type { Contexto } from "../types";
 import { noRealizadas, rondasRecientes, type Senal } from "./vigilancia-consultas";
 
-const HORA_MS = 3_600_000;
+const MIN_MS = 60_000;
+const TRAMO_MS = 5 * MIN_MS;
 const TIPOS: Senal["tipo"][] = [
   "rondas.ejecucion.no_realizada",
   "rondas.ejecucion.atrasada",
@@ -47,36 +48,35 @@ async function atrasosYTramos(ctx: Contexto, desde: Date, hasta: Date): Promise<
 }
 
 /**
- * Vigilancia horaria de Rondas (CAR-501): emite las señales que la Central convierte en alertas. Revisa la hora
- * anterior a `hora` («aaaa-mm-ddTHH» en la hora local del tenant, la que encola el programador): rondas programadas que no se
- * iniciaron, rondas que superaron su tiempo máximo y tramos vencidos con puntos obligatorios pendientes. La
- * ventana es fija por hora, el trabajo es único por hora y las señales llevan la `hora`: un reintento de la misma
- * hora no las repite, y todas van en una transacción.
+ * Vigilancia cada 5 min de Rondas (CAR-501, CAR-748): emite las señales que la Central convierte en alertas. Revisa el
+ * tramo anterior a `tramo` («aaaa-mm-ddTHH:mm» en la hora local del tenant, el que encola el cron de trabajos): rondas
+ * programadas que no se iniciaron, rondas que superaron su tiempo máximo y tramos vencidos con puntos obligatorios
+ * pendientes. La ventana es fija por tramo de 5 min, el trabajo es único por tramo y las señales llevan la `tramo`: un
+ * reintento del mismo tramo no las repite, y todas van en una transacción.
  */
 export const trabajoVigilanciaRondas = defineTrabajo({
   tipo: "rondas.vigilancia.revisar",
   descripcion:
-    "Emite las señales de Rondas de la última hora: rondas programadas no iniciadas, rondas atrasadas y puntos obligatorios con el tramo vencido.",
-  periodicidad: "horaria",
-  payload: z.object({ hora: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}$/) }),
-  async handler(ctx, { hora }) {
+    "Emite las señales de Rondas del tramo de 5 min anterior: rondas programadas no iniciadas, rondas atrasadas y puntos obligatorios con el tramo vencido.",
+  periodicidad: "cada5min",
+  payload: z.object({ tramo: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/) }),
+  async handler(ctx, { tramo }) {
     if (!(await rondasActivo(ctx))) return { senales: 0 };
     const zona = await zonaDelTenant(ctx);
-    const hasta = instanteLocal(hora.slice(0, 10), `${hora.slice(11, 13)}:00`, zona);
-    const desde = new Date(hasta.getTime() - HORA_MS);
+    const hasta = instanteLocal(tramo.slice(0, 10), tramo.slice(11), zona);
+    const desde = new Date(hasta.getTime() - TRAMO_MS);
     const senales = [
       ...(await noRealizadas(ctx, desde, hasta, zona)),
       ...(await atrasosYTramos(ctx, desde, hasta)),
     ];
     if (senales.length === 0) return { senales: 0 };
     return ctx.transaccion(async (tx) => {
-      // Un reintento de la misma hora (p. ej. si falló al cerrar el trabajo) no repite las señales.
       const ya = await tx.evento.count({
-        where: { tipo: { in: TIPOS }, payload: { path: ["hora"], equals: hora } },
+        where: { tipo: { in: TIPOS }, payload: { path: ["tramo"], equals: tramo } },
       });
       if (ya > 0) return { senales: 0 };
       for (const s of senales)
-        await ctx.eventos.emitir(tx, { ...s, payload: { ...s.payload, hora } });
+        await ctx.eventos.emitir(tx, { ...s, payload: { ...s.payload, tramo } });
       return { senales: senales.length };
     });
   },

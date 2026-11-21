@@ -6,8 +6,8 @@ export type DefinicionTrabajo<P> = {
   tipo: string;
   descripcion: string;
   payload: z.ZodType<P>;
-  /** "diaria": el programador lo encola una vez al día por tenant. "horaria": una vez por hora. */
-  periodicidad?: "diaria" | "horaria";
+  /** "diaria": una vez al día. "horaria": una vez por hora. "cada5min": cada 5 min (cron `/api/cron/trabajos`). */
+  periodicidad?: "diaria" | "horaria" | "cada5min";
   /** Tiempo máximo propio (ms), si necesita más que el general de 20 s; tope `TIEMPO_MAXIMO_TRABAJO_MS`. */
   tiempoMaximoMs?: number;
   handler(ctx: Contexto, payload: P, signal: AbortSignal): Promise<unknown>;
@@ -20,7 +20,7 @@ const TIEMPO_MAXIMO_TRABAJO_MS = 40_000;
 export type Trabajo = {
   tipo: string;
   descripcion: string;
-  periodicidad?: "diaria" | "horaria";
+  periodicidad?: "diaria" | "horaria" | "cada5min";
   tiempoMaximoMs?: number;
   ejecutar(ctx: Contexto, payload: unknown, signal?: AbortSignal): Promise<unknown>;
 };

@@ -51,7 +51,7 @@ export const trabajoAlertasArt45 = defineTrabajo({
   tipo: "asistencia.alertas.art45",
   descripcion: "Alerta la falta de marca de inicio y de término de los turnos (art. 45 de la Res. 38).",
   payload: z.object({ ahora: z.string().datetime().optional() }),
-  periodicidad: "horaria",
+  periodicidad: "cada5min",
   async handler(ctx, p) {
     const ahora = p.ahora ? new Date(p.ahora) : new Date();
     const [minutos, terminoActiva, t] = await Promise.all([
