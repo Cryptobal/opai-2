@@ -19,9 +19,12 @@ export function SelectorTamanoPagina({ actual }: { actual: TamanoPagina }) {
         id: String(n),
         etiqueta: `${n} por página`,
         marcado: n === actual,
-        onSelect: () => {
-          if (n !== actual) fijar({ limite: String(n), cursor: null, prev: null });
-        },
+        onSelect: () =>
+          fijar({
+            limite: n === actual ? null : String(n),
+            cursor: null,
+            prev: null,
+          }),
       }))}
     />
   );

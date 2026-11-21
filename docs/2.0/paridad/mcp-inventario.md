@@ -358,6 +358,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.vincular` | `core_contactos_vincular` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.responsables` | `comercial_negocios_responsables` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
@@ -535,7 +537,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `asistencia.marcas.enlace_publico_rotar` | `asistencia_marcas_enlace_publico_rotar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
-| compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
@@ -548,7 +549,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
-| compartido | `app/(erp)/instalaciones/_componentes` | `core.regiones.list` | `core_regiones_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
@@ -1421,6 +1421,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.rechazar`
 - `core.ping`
 - `core.procesos_persona.paso_actualizar`
+- `core.regiones.list`
 - `core.roles.adicionales_list`
 - `core.slack.canales`
 - `core.turnos_esperados.listar`

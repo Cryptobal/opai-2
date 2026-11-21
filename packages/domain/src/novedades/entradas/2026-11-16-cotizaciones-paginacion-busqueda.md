@@ -4,7 +4,6 @@ fecha: 2026-11-16
 modulo: cpq
 titulo: Cotizaciones busca de verdad y pagina en la lista
 car: CAR-585
-pr: 961
 ruta: /cotizaciones
 ---
 

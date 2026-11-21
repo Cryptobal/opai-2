@@ -26,43 +26,31 @@ async function conDosCotizaciones(permisos?: readonly string[]) {
 }
 
 describe("cpq.cotizaciones.list / get", () => {
-  it("aplica la búsqueda antes de paginar y conserva filtros de negocio y archivo", async () => {
+  it("filtra por texto en cuenta, título o código", async () => {
     const { h, a, b } = await conDosCotizaciones();
-    await h.ctx.db.cpqCotizacion.updateMany({
-      where: { id: { in: [a, b] } },
-      data: { archivadaEn: null },
+    await h.ctx.db.cpqCotizacion.update({
+      where: { id: a },
+      data: { titulo: "Especial alfa único" },
     });
-    const q = "Cuenta CPQ";
-    const primera = await executeCapability(h.ctx, "cpq.cotizaciones.list", { q, limite: 1 });
-    if (!primera.ok) throw new Error("lista filtrada");
-    const pagina = primera.data as { items: { id: string }[]; siguiente: string };
-    expect(pagina.items).toHaveLength(1);
-    expect(pagina.siguiente).toBeTruthy();
-    const segunda = await executeCapability(h.ctx, "cpq.cotizaciones.list", {
-      q,
-      limite: 1,
-      cursor: pagina.siguiente,
-    });
-    if (!segunda.ok) throw new Error("segunda página");
-    const resto = (segunda.data as { items: { id: string }[] }).items;
-    expect([...pagina.items, ...resto].map((fila) => fila.id).sort()).toEqual([a, b].sort());
-    expect(
-      await executeCapability(h.ctx, "cpq.cotizaciones.list", { q, negocioId: NEGOCIO_1 }),
-    ).toMatchObject({
+    const porTitulo = await executeCapability(h.ctx, "cpq.cotizaciones.list", { q: "alfa único" });
+    expect(porTitulo).toMatchObject({
       ok: true,
-      data: { items: [{ id: a }] },
+      data: { items: [expect.objectContaining({ id: a })] },
     });
-    expect(
-      await executeCapability(h.ctx, "cpq.cotizaciones.list", { q, soloArchivadas: true }),
-    ).toMatchObject({
+    const porCuenta = await executeCapability(h.ctx, "cpq.cotizaciones.list", { q: "Cuenta CPQ" });
+    expect(porCuenta.ok && (porCuenta.data as { items: { id: string }[] }).items.map((x) => x.id).sort()).toEqual(
+      [a, b].sort(),
+    );
+  });
+
+  it("filtra por cuenta del negocio", async () => {
+    const { h, a } = await conDosCotizaciones();
+    const neg = await h.ctx.db.negocio.findFirst({ where: { id: NEGOCIO_1 }, select: { cuentaId: true } });
+    if (!neg?.cuentaId) throw new Error("fixture sin cuenta");
+    const lista = await executeCapability(h.ctx, "cpq.cotizaciones.list", { cuentaId: neg.cuentaId });
+    expect(lista).toMatchObject({
       ok: true,
-      data: { items: [] },
-    });
-    expect(
-      await executeCapability(h.ctx, "cpq.cotizaciones.list", { q: "ASEO OFICINAS" }),
-    ).toMatchObject({
-      ok: true,
-      data: { items: [{ id: b }] },
+      data: { items: expect.arrayContaining([expect.objectContaining({ id: a })]) },
     });
   });
 

@@ -19,22 +19,16 @@ export default function Cotizaciones({ searchParams }: { searchParams: SearchPar
       completo
       cargar={async () => {
         const p = await leerParametros(searchParams);
-        const datos = await cargarCotizaciones(
-          p["cursor"],
-          undefined,
-          p["ver"] === "archivadas",
-          p,
-        );
-        return { datos, p };
+        return cargarCotizaciones(p);
       }}
     >
-      {({ datos, p }) => (
+      {(l) => (
         <SplitScreen
           telefono="lista"
           unPanelHastaLg
           etiquetaLista="Lista de cotizaciones"
           vacio={{ texto: "Elige una cotización", icono: FileText }}
-          lista={<ListaCotizaciones datos={datos} p={p} />}
+          lista={<ListaCotizaciones datos={l} />}
         />
       )}
     </PaginaPortal>

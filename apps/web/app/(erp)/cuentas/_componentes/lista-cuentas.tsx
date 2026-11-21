@@ -5,7 +5,7 @@ import { Badge, ChipsEtiquetas, type EstadoPantalla, MonoAv } from "@opai/ds";
 
 import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etiquetas/opciones";
 
-import { EnlaceAltaLista } from "@/app/_components/maestros/enlace-alta-lista";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_CUENTA, estadoDe, monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
@@ -46,22 +46,21 @@ export function ListaCuentas(p: {
 }) {
   const activas = p.items.filter((c) => c.estado === "cliente_activo").length;
   const f = p.filtros ?? {};
-  const porPagina = tamanoPagina(f, 20);
+  const porPagina = tamanoPagina(f);
   const filtrando = Boolean(f.q || f.estado || f.con || f.etiqueta);
   const metaConteo = filtrando
     ? `${p.items.length}${p.siguiente ? "+" : ""} ${p.items.length === 1 ? "resultado" : "resultados"}`
     : `${p.items.length}${p.siguiente ? "+" : ""} cuentas · ${activas} ${activas === 1 ? "cliente activo" : "clientes activos"}`;
   const nueva = (
-    <EnlaceAltaLista href="/cuentas?nueva=1" icono={Plus}>
+    <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus} variante={p.seleccionada ? "secondary" : "primary"}>
       Nueva
-    </EnlaceAltaLista>
+    </EnlaceBotonHoja>
   );
   return (
     <ListaMaestro
       state={p.state}
       titulo="Cuentas"
       accion={nueva}
-      accionFlotante
       vistas={{ lista: "cuentas", ruta: "/cuentas" }}
       buscar="Buscar por nombre o RUT"
       filtros={[
