@@ -617,12 +617,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.ausencias.registrar` | `core_ausencias_registrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.borrar` | `core_biometria_borrar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.biometria.estado` | `core_biometria_estado` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.asignar_pin` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.estado` | `core_credenciales_terreno_estado` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.restablecer` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.estructuras.efectiva` | `core_estructuras_efectiva` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.archive` | `core_personas_archive` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.bloquear` | `core_personas_bloquear` | existe |
@@ -649,7 +647,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.puestos.list` | `core_puestos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.create` | `core_vinculos_create` | existe |
-| compartido | `app/(erp)/personas/_componentes` | `core.vinculos.list` | `core_vinculos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
@@ -1340,6 +1337,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.dispositivos.estado`
 - `core.documentos.desvincular`
 - `core.documentos.vincular`
+- `core.estructuras.efectiva`
 - `core.estructuras.get`
 - `core.etiquetas.delete`
 - `core.etiquetas.update`
@@ -1381,6 +1379,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
 - `core.valores_personalizados.set`
+- `core.vinculos.list`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
