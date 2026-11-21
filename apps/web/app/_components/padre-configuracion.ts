@@ -2,7 +2,7 @@ import type { Volver } from "@opai/ds";
 
 const GRUPOS: Record<string, string> = {
   empresa: "Empresa",
-  operacion: "Operación",
+  operacion: "Calendario y estructura",
   "personas-acceso": "Personas y acceso",
   agentes: "Agentes",
   modulos: "Módulos",

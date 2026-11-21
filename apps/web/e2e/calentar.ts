@@ -1,6 +1,13 @@
 import { chromium, type Page } from "@playwright/test";
 
+import { EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
+
+const RUTAS_PREVIEW_CONFIG = [
+  "/configuracion",
+  "/configuracion/grupo/operacion",
+  "/configuracion/grupo/modulos",
+] as const;
 
 // Precalienta, antes de cada corrida (y de cada shard de CI), las rutas que el proxy consulta con un
 // tope de 4 s: en `next dev` la primera visita compila la ruta y, si `/api/existe` tarda más que eso,
@@ -8,13 +15,16 @@ import { E2E_PASSWORD, entrar } from "./sesion";
 // 404 del portal (navegacion-permisos, CAR-60). Sin sesión responde rápido; solo importa compilar.
 export default async function calentar() {
   const base = process.env["BASE_URL"] ?? "http://localhost:3000";
-  if (!/^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(base)) return;
-  for (const ruta of [
-    "/api/existe?ruta=%2Fpersonas%2F00000000-0000-7000-8000-000000000000",
-    "/api/health",
-  ]) {
-    await fetch(`${base}${ruta}`, { signal: AbortSignal.timeout(120_000) }).catch(() => undefined);
+  const esLocal = /^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(base);
+  if (esLocal) {
+    for (const ruta of [
+      "/api/existe?ruta=%2Fpersonas%2F00000000-0000-7000-8000-000000000000",
+      "/api/health",
+    ]) {
+      await fetch(`${base}${ruta}`, { signal: AbortSignal.timeout(120_000) }).catch(() => undefined);
+    }
   }
+  // También en preview-e2e (Vercel): evita la primera compilación en frío dentro del expect.
   await calentarConSesion(base);
 }
 
@@ -54,6 +64,7 @@ const RUTAS_CON_SESION = [
   "/configuracion/preferencias",
   "/configuracion",
   "/configuracion/grupo/operacion",
+  "/configuracion/grupo/modulos",
   "/configuracion/empresa",
   "/configuracion/modulo/agente",
   "/configuracion/api-keys",
@@ -68,6 +79,18 @@ async function calentarConSesion(base: string) {
     const contexto = await navegador.newContext({ baseURL: base });
     const page = await contexto.newPage();
     await entrar(page);
+    if (EN_PREVIEW) {
+      for (const ruta of RUTAS_PREVIEW_CONFIG) {
+        await page.goto(ruta, { timeout: 180_000 }).catch(() => undefined);
+        if (ruta === "/configuracion/grupo/modulos") {
+          await page
+            .getByRole("navigation", { name: "Entradas de Módulos", exact: true })
+            .waitFor({ state: "visible", timeout: 180_000 })
+            .catch(() => undefined);
+        }
+      }
+      return;
+    }
     for (const ruta of RUTAS_CON_SESION) await page.goto(ruta, { timeout: 120_000 }).catch(() => undefined);
     // La API genérica (`/api/v1`) carga todo el registro de capacidades: su primera compilación es la más pesada
     // y colgaba los `POST` de las pruebas más de 90 s. Se calienta con una llamada autenticada de propio origen.

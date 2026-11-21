@@ -10,7 +10,7 @@ export function NotaModulos({ entradas }: { entradas: readonly Seccion[] }) {
   if (entradas.some((s) => s.id.startsWith("modulo-"))) return null;
   return (
     <div className="flex flex-col items-start gap-2 px-4 pt-4">
-      <p className="text-base text-fg-muted">Aún no tienes módulos con ajustes.</p>
+      <p className="text-base text-fg-muted">Aún no tienes módulos contratados en esta empresa.</p>
       <EnlaceBoton href="/configuracion/modulos" variante="secondary">
         Ver catálogo
       </EnlaceBoton>

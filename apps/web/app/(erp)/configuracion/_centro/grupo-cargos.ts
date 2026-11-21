@@ -9,5 +9,5 @@ export const GRUPO_CARGOS = grupoPorId("operacion");
 
 export const VOLVER_CARGOS = {
   href: "/configuracion/grupo/operacion",
-  etiqueta: GRUPO_CARGOS?.etiqueta ?? "Operación",
+  etiqueta: GRUPO_CARGOS?.etiqueta ?? "Calendario y estructura",
 };

@@ -13,13 +13,10 @@ case "${GITHUB_EVENT_NAME}" in
     head=$(jq -r .merge_group.head_sha "$GITHUB_EVENT_PATH")
     ;;
   push)
-    before=$(jq -r .before "$GITHUB_EVENT_PATH")
-    if [ -z "$before" ] || [ "$before" = "null" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
-      echo "only_docs=false" >> "$GITHUB_OUTPUT"
-      exit 0
-    fi
-    base="$before"
-    head="$GITHUB_SHA"
+    # Push a main: sin fast path (CAR-805). El diff puede ser solo .github/** y aun así
+    # hay que validar que simplicidad-base.json cuadre con la medición del árbol.
+    echo "only_docs=false" >> "$GITHUB_OUTPUT"
+    exit 0
     ;;
   *)
     echo "only_docs=false" >> "$GITHUB_OUTPUT"
