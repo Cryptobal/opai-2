@@ -48,7 +48,7 @@ test("tarjetas abren grupos y el teléfono vuelve por la jerarquía", async ({ p
     page.locator('main a[href="/configuracion/grupo/operacion"]').filter({ visible: true }),
     /\/configuracion\/grupo\/operacion$/,
   );
-  await expect(page.getByRole("heading", { name: "Operación", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Calendario y estructura", exact: true })).toBeVisible();
   await pulsarYLlegar(
     page,
     page.getByRole("link", { name: /Calendario/ }).first(),
@@ -56,7 +56,7 @@ test("tarjetas abren grupos y el teléfono vuelve por la jerarquía", async ({ p
   );
   if (info.project.name === "telefono") {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.getByRole("link", { name: "Volver a Operación", exact: true }).click();
+    await page.getByRole("link", { name: "Volver a Calendario y estructura", exact: true }).click();
     await expect(page).toHaveURL(/\/configuracion\/grupo\/operacion$/);
     await page.getByRole("link", { name: "Volver a Configuración", exact: true }).click();
     await expect(page).toHaveURL(/\/configuracion$/);

@@ -8,7 +8,7 @@ import { abrirMenuUsuario } from "./menu-usuario";
 
 const GRUPOS = [
   "Empresa",
-  "Operación",
+  "Calendario y estructura",
   "Personas y acceso",
   "Agentes",
   "Módulos",

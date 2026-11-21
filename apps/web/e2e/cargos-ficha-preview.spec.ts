@@ -16,16 +16,16 @@ test.describe("@preview cargos: ficha del cargo", () => {
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
     await page.goto("/cargos");
-    // Catálogo de Configuración › Operación (CAR-319): en iPad y escritorio, las migas del grupo.
+    // Catálogo de Configuración › Calendario y estructura (CAR-319): en iPad y escritorio, las migas del grupo.
     const migas = page.getByRole("navigation", { name: "Ruta de configuración" });
     if ((page.viewportSize()?.width ?? 0) >= 768) {
-      await expect(migas.getByRole("link", { name: "Operación" })).toBeVisible();
+      await expect(migas.getByRole("link", { name: "Calendario y estructura" })).toBeVisible();
       // El catálogo conserva su nombre bajo las migas, aunque el shell diga «Configuración».
       await expect(
         page.getByRole("heading", { name: "Cargos", exact: true }).filter({ visible: true }),
       ).toBeVisible();
     } else {
-      // En teléfono, el «atrás» de la barra superior vuelve a Configuración › Operación.
+      // En teléfono, el «atrás» de la barra superior vuelve a Configuración › Calendario y estructura.
       await expect(page.locator('a[href="/configuracion/grupo/operacion"]').first()).toBeVisible();
     }
     await capturar(page, info, "cargos-lista");
