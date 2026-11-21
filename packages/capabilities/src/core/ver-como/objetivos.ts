@@ -6,39 +6,11 @@ import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import { cursorDe, listaSchema, pagina } from "../maestros/comun";
-import { rolVisible } from "./objetivo";
+import { busca, type Item, type Tramo, visibles } from "./objetivos-comun";
+import { trabajador } from "./objetivos-trabajador";
+import { listarSupervisoresVerComo } from "./listar-supervisores";
 
 const itemSchema = z.object({ id: z.string(), nombre: z.string(), detalle: z.string().nullable() });
-type Item = z.infer<typeof itemSchema>;
-type Tramo = { q: string; cursor: string | undefined; limite: number };
-
-/** Con `q` vacío, `contains: ""` calza con todos. */
-const busca = (q: string) => ({ contains: q, mode: "insensitive" as const });
-
-/** Membresías activas en el portal, de rol visible y que no son de quien mira (mismo filtro que iniciar). */
-async function visibles(ctx: Contexto, portal: string) {
-  const filas = await ctx.db.membership.findMany({
-    where: { estado: "activa", portales: { has: portal } },
-    select: { id: true, userId: true, rol: true },
-  });
-  return filas.filter((m) => rolVisible(ctx, m.rol) && m.userId !== ctx.usuario?.id);
-}
-
-async function trabajador(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
-  const usuarios = (await visibles(ctx, "trabajador")).map((m) => m.userId);
-  const personas = await ctx.db.persona.findMany({
-    where: {
-      usuarioId: { in: usuarios },
-      archivadaEn: null,
-      anonimizadaEn: null,
-      OR: [{ nombres: busca(q) }, { apellidos: busca(q) }],
-    },
-    select: { id: true, nombres: true, apellidos: true },
-    orderBy: { id: "asc" },
-    ...cursorDe(cursor, limite),
-  });
-  return personas.map((p) => ({ id: p.id, nombre: `${p.nombres} ${p.apellidos}`, detalle: null }));
-}
 
 /** Un contacto por fila: cada uno ve sus propias instalaciones. */
 async function cliente(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
@@ -95,7 +67,12 @@ async function terreno(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Ite
   }));
 }
 
-const POR_PORTAL = { trabajador, cliente, terreno } satisfies Record<
+const POR_PORTAL = {
+  trabajador,
+  cliente,
+  terreno,
+  supervisor: listarSupervisoresVerComo,
+} satisfies Record<
   PortalVerComo,
   (ctx: Contexto, t: Tramo) => Promise<Item[]>
 >;
@@ -104,7 +81,7 @@ export const verComoList = defineCapability({
   id: "core.ver_como.list",
   soloPersonas: true,
   descripcion:
-    "Solo personas: a quién se puede ver en «ver como» en la empresa actual (instalaciones con equipo de Terreno, personas con portal del trabajador o contactos del portal del cliente), paginado.",
+    "Solo personas: a quién se puede ver en «ver como» en la empresa actual (Terreno, trabajador, cliente o supervisor), paginado.",
   permiso: PERMISOS_CORE.verComoIniciar,
   input: listaSchema
     .pick({ cursor: true, limite: true })

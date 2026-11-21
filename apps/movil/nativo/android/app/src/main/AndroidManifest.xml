@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -8,6 +17,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="opai_default" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_opai" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
 
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
@@ -30,6 +49,39 @@
                 <data android:scheme="cl.opai.app" android:host="canje" />
             </intent-filter>
 
+            <!-- App Links (CAR-739): rutas que abre el push nativo vía data.ruta (CAR-731 / packages/domain push-ruta). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/bandeja" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/trabajador" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/tickets" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/rendiciones" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/desempeno" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/solicitudes" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/tareas" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/negocios" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/cotizaciones" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/configuracion" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/personas" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/cuentas" />
+                <data android:scheme="https" android:host="app.opai.cl" android:pathPrefix="/instalaciones" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/bandeja" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/trabajador" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/tickets" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/rendiciones" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/desempeno" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/solicitudes" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/tareas" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/negocios" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/cotizaciones" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/configuracion" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/personas" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/cuentas" />
+                <data android:scheme="https" android:host="test.opai.cl" android:pathPrefix="/instalaciones" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -42,8 +94,4 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
     </application>
-
-    <!-- Permissions -->
-
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

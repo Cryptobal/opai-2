@@ -664,9 +664,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.restablecer` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.acceso_estado` | `core_personas_acceso_estado` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.archive` | `core_personas_archive` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.bloquear` | `core_personas_bloquear` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.create` | `core_personas_create` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.dar_acceso_portal` | `core_personas_dar_acceso_portal` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.desbloquear` | `core_personas_desbloquear` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.get` | `core_personas_get` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.laboral_actualizar` | `core_personas_laboral_actualizar` | existe |
@@ -683,6 +685,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | — | excepción |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.reenviar_invitacion` | `core_personas_reenviar_invitacion` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.procesos_persona.listar` | `core_procesos_persona_listar` | existe |
@@ -759,6 +762,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.personas.get` | `core_personas_get` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `core.credenciales_terreno.cambiar_pin` | — | excepción |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `core.credenciales_terreno.establecer_pin` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `core.push.quitar` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `core.push.suscribir` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.arco.solicitar` | `portal_trabajador_arco_solicitar` | existe |
@@ -993,8 +997,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | servidor | `lib/existe-ruta.ts` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.personas.get` | `core_personas_get` | existe |
+| servidor | `lib/inicio-tareas-carga.ts` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
 | servidor | `lib/mcp.ts` | `core.config.schema` | `core_config_schema` | existe |
 | servidor | `lib/panel-sueldo.ts` | `core.estructuras.panel` | `core_estructuras_panel` | existe |
+| servidor | `lib/pin-trabajador.ts` | `core.credenciales_terreno.mi_estado` | — | excepción |
 | servidor | `lib/push-nativo.ts` | `core.push.suscribir` | — | excepción |
 | supervisor | `/supervisor/firmas` | `core.firmas.mis_pendientes` | — | excepción |
 | supervisor | `/supervisor/personas/[id]` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
@@ -1003,6 +1009,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | trabajador | `/trabajador/contingencias` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | trabajador | `/trabajador/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | trabajador | `/trabajador/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| trabajador | `/trabajador/crear-pin` | `core.credenciales_terreno.mi_estado` | — | excepción |
 | trabajador | `/trabajador/mi-pauta` | `portal_trabajador.mis_turnos.listar` | `portal_trabajador_mis_turnos_listar` | existe |
 | trabajador | `/trabajador/mis-datos` | `portal_trabajador.mis_datos.obtener` | `portal_trabajador_mis_datos_obtener` | existe |
 | trabajador | `/trabajador/mis-documentos` | `portal_trabajador.mis_documentos.listar` | `portal_trabajador_mis_documentos_listar` | existe |
@@ -1160,6 +1167,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.correos.recibir` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el tenant por la dirección de registro t<token>@respuestas.opai.cl (CAR-233). |
 | `core.credenciales_terreno.asignar_pin` | Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02). |
 | `core.credenciales_terreno.cambiar_pin` | Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02). |
+| `core.credenciales_terreno.establecer_pin` | Solo personas: la propia persona fija su primer PIN; ningún agente lo hace por ella (CAR-803, portal trabajador). |
+| `core.credenciales_terreno.mi_estado` | Solo personas: lectura de sesión para saber si falta crear o cambiar el PIN en el portal del trabajador (CAR-803). |
 | `core.credenciales_terreno.restablecer` | Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02). |
 | `core.cuentas_referencias.otorgar` | Solo personas: registrar el consentimiento de un cliente para ser referencia es un acto de una persona; ninguna key lo hace, ni con autonomía «directo» (CAR-138 PR 7, ADR-087). |
 | `core.cumplimiento.consentimiento_registrar` | Solo personas: registrar el consentimiento de un titular es un acto responsable del tenant (Ley 21.719, §16.2). |
@@ -1290,6 +1299,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.biometria.verificar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
+| `core.credenciales_terreno.establecer_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
+| `core.credenciales_terreno.mi_estado` | `lib/pin-trabajador.ts`, `/trabajador/crear-pin` | no | reservada a personas |
 | `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.cuentas_referencias.otorgar` | sin pantalla todavía · CAR-138 · desde 2026-11-10 | no | reservada a personas |
 | `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |

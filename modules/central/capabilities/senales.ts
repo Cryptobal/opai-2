@@ -10,6 +10,7 @@ import { registrarHecho } from "./util";
 const payloadSchema = z.looseObject({
   instalacionId: z.uuid().optional(),
   personaId: z.uuid().optional(),
+  turnoEsperadoId: z.uuid().optional(),
 });
 
 async function centralActiva(ctx: Contexto) {
@@ -21,11 +22,29 @@ async function centralActiva(ctx: Contexto) {
   return m !== null;
 }
 
-/** Instalación de la señal: la del evento o, si no viene, la del vínculo vigente de la persona. */
-async function instalacionDe(ctx: Contexto, instalacionId: string | undefined, personaId: string | null) {
+/**
+ * Instalación de la señal: la del payload (CAR-749), la del turno esperado si solo viene su id, o la del
+ * vínculo vigente más reciente de la persona (eventos viejos sin instalación).
+ */
+async function instalacionDe(
+  ctx: Contexto,
+  instalacionId: string | undefined,
+  personaId: string | null,
+  turnoEsperadoId: string | undefined,
+) {
   if (instalacionId) {
     const i = await ctx.db.instalacion.findFirst({ where: { id: instalacionId }, select: { id: true } });
     return i?.id ?? null;
+  }
+  if (turnoEsperadoId) {
+    const turno = await ctx.db.turnoEsperado.findFirst({
+      where: { id: turnoEsperadoId },
+      select: { instalacionId: true },
+    });
+    if (turno?.instalacionId) {
+      const i = await ctx.db.instalacion.findFirst({ where: { id: turno.instalacionId }, select: { id: true } });
+      return i?.id ?? null;
+    }
   }
   if (!personaId) return null;
   const v = await ctx.db.vinculoLaboral.findFirst({
@@ -58,7 +77,7 @@ export const consumidorSenales = defineConsumidor({
       : null;
     const personaId = persona?.id ?? null;
     // La instalación y la persona se validan en la empresa: un id ajeno no abre nada.
-    const instalacionId = await instalacionDe(ctx, p.data.instalacionId, personaId);
+    const instalacionId = await instalacionDe(ctx, p.data.instalacionId, personaId, p.data.turnoEsperadoId);
     if (!instalacionId) return;
     await ctx.transaccion(async (tx) => {
       if (await tx.centralAlertaEvento.findFirst({ where: { tipo: "senal", nota: { startsWith: `${ev.id} ` } } })) return;

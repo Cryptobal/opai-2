@@ -111,6 +111,8 @@ describe("core.personas.* y core.vinculos.*", () => {
       id: "m",
       tenantId: ctx.tenantId,
       userId: usuarioId,
+      rol: "viewer",
+      portales: ["trabajador"],
       estado: "activa",
     });
     await dato(ctx, "core.personas.vincular_usuario", { id, usuarioId });

@@ -65,6 +65,12 @@ export function fuentesFalsas(
     keyPorHash: async (_t, h) => (h === hash ? fila : null),
     membresia: async (t, u) => membresias.find((m) => m.tenantId === t && u === USUARIO.id) ?? null,
     acceso: async () => o.acceso ?? { permisosRol: null, excepciones: [], instalaciones: null },
+    accesoConModulos: async () => ({
+      acceso: o.acceso ?? { permisosRol: null, excepciones: [], instalaciones: null },
+      modulosActivos: o.modulosActivos ?? ["crm"],
+      modulosSoloLectura: o.modulosSoloLectura ?? [],
+      personaVinculada: false,
+    }),
     marcarUsoKey: async (_t, id) => void usos.push(id),
   };
   return { fuentes, secreto, usos };

@@ -5,6 +5,7 @@ import { escribirConEvento } from "./maestros/comun";
 import { usuarioResponsable } from "./comun";
 import { defineCapability } from "../define";
 import { portalSchema } from "./esquemas";
+import { personaVinculadaEn, portalesUsablesDe } from "./portales-usables";
 
 /**
  * Portal donde la persona entra al abrir esta empresa o cambiarse a ella (NÚCLEO-D1). Cada uno elige
@@ -30,7 +31,8 @@ export const mePortalInicio = defineCapability({
     });
     if (!membresia || membresia.estado !== "activa")
       throw noEncontrado("Tu membresía en esta empresa");
-    if (input.portal && !membresia.portales.includes(input.portal)) {
+    const portalesUsables = portalesUsablesDe(ctx, await personaVinculadaEn(ctx));
+    if (input.portal && !portalesUsables.includes(input.portal)) {
       throw reglaDeNegocio(`No tienes el portal "${input.portal}" en esta empresa.`);
     }
     if (!dryRun) {
