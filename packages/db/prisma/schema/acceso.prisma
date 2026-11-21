@@ -35,6 +35,7 @@ model EntradaLista {
   /// "empresa" | "cuenta" | "instalacion" | "grupo" (CAR-506).
   alcance       String    @default("instalacion")
   instalacionId String?   @map("instalacion_id") @db.Uuid
+  /// Alcance «cuenta» (CAR-506) o entrada agregada por el portal cliente (CAR-538); null = empresa.
   cuentaId      String?   @map("cuenta_id") @db.Uuid
   grupoId       String?   @map("grupo_id") @db.Uuid
   agregadaPor   String?   @map("agregada_por") @db.Uuid
@@ -54,8 +55,6 @@ model EntradaLista {
   desdeMin      Int?      @map("desde_min")
   hastaMin      Int?      @map("hasta_min")
   usoUnico      Boolean   @default(false) @map("uso_unico")
-  /// Si la agregó un contacto del Portal Cliente (CAR-538); null = la empresa.
-  cuentaId      String?   @map("cuenta_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
