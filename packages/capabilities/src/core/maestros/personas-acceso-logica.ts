@@ -77,14 +77,23 @@ export async function vincularPersonaUsuario(
     select: { id: true },
   });
   if (otra) throw conflicto("Ese usuario ya está vinculado a otra persona.");
+  const actual = await ctx.db.persona.findFirst({
+    where: { id: personaId, archivadaEn: null, anonimizadaEn: null },
+    select: { usuarioId: true },
+  });
+  if (actual?.usuarioId && actual.usuarioId !== usuarioId) {
+    throw conflicto("La persona ya está vinculada a otro usuario.");
+  }
+  if (actual?.usuarioId === usuarioId) return;
   await ampliarPortalesTrabajador(ctx, m.id, dryRun);
   if (dryRun) return;
-  await ctx.transaccion((tx) =>
+  const r = await ctx.transaccion((tx) =>
     tx.persona.updateMany({
-      where: { id: personaId, archivadaEn: null, anonimizadaEn: null },
+      where: { id: personaId, archivadaEn: null, anonimizadaEn: null, usuarioId: null },
       data: { usuarioId },
     }),
   );
+  if (r.count === 0) throw conflicto("La persona ya está vinculada a otro usuario.");
 }
 
 export async function invitadorDe(ctx: Contexto) {

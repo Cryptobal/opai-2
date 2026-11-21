@@ -10,7 +10,7 @@ const RUTAS_SIN_PIN = ["/trabajador/crear-pin", "/trabajador/cambiar-pin"];
 export async function obligarPinTrabajador(ruta: string) {
   if (RUTAS_SIN_PIN.some((p) => ruta === p || ruta.startsWith(`${p}?`))) return;
   const r = await ejecutarComoUsuario<MiPin>("trabajador", "core.credenciales_terreno.mi_estado", {});
-  if (!r.ok) return;
+  if (!r.ok) redirect("/trabajador/crear-pin");
   if (!r.data.tienePin) redirect("/trabajador/crear-pin");
   if (r.data.debeCambiar) redirect("/trabajador/cambiar-pin?primero=1");
 }

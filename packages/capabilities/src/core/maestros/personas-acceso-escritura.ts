@@ -30,6 +30,9 @@ function exigeUsuarios(ctx: Contexto) {
   }
 }
 
+/** Evita reenvíos forzados en ráfaga (mismo correo). */
+const COOLDOWN_REENVIO_FORZADO_MS = 15 * 60 * 1000;
+
 export const personasDarAccesoPortal = defineCapability({
   id: "core.personas.dar_acceso_portal",
   descripcion:
@@ -85,6 +88,16 @@ export const personasReenviarInvitacionPortal = defineCapability({
     });
     if (pendiente && !input.forzar) {
       return { reenviada: false, estado: "invitacion_pendiente" as const };
+    }
+    if (input.forzar) {
+      const ultima = await ctx.db.invitation.findFirst({
+        where: { email },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      });
+      if (ultima && Date.now() - ultima.createdAt.getTime() < COOLDOWN_REENVIO_FORZADO_MS) {
+        throw reglaDeNegocio("Espera unos minutos antes de forzar otro reenvío.");
+      }
     }
     if (dryRun) return { reenviada: Boolean(pendiente), estado: "invitado" as const };
     if (pendiente) {

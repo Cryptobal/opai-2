@@ -54,6 +54,7 @@ export async function asegurarAccesoPortalTrabajador(
 
   if (m) {
     if (esInternoParaPortalTrabajador(m.rol, m.portales)) return no("usuario_interno");
+    if (persona.usuarioId && persona.usuarioId !== m.userId) return no("persona_ya_vinculada");
     const ya = persona.usuarioId === m.userId;
     if (!m.portales.includes("trabajador")) await ampliarPortalesTrabajador(ctx, m.id, dryRun);
     if (!ya) await vincularPersonaUsuario(ctx, persona.id, m.userId, dryRun);

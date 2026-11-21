@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { esMembresiaPortalTrabajador, type Rol } from "@opai/domain";
+import { esMembresiaPortalTrabajador, PERMISOS_CORE, type Rol } from "@opai/domain";
 
 import { defineConsumidor } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
@@ -14,21 +14,25 @@ async function vincularPorEmail(ctx: Contexto, usuarioId: string) {
     select: { rol: true, portales: true },
   });
   if (!m || !esMembresiaPortalTrabajador(m.rol as Rol, m.portales)) return;
+  if (!ctx.autorizar(PERMISOS_CORE.usersManage)) return;
   const email = usuario.email.toLowerCase();
-  const persona = await ctx.db.persona.findFirst({
+  const candidatas = await ctx.db.persona.findMany({
     where: {
       archivadaEn: null,
       anonimizadaEn: null,
+      usuarioId: null,
       OR: [
         { emailLaboral: { equals: email, mode: "insensitive" } },
         { emailPersonal: { equals: email, mode: "insensitive" } },
       ],
     },
-    select: { id: true, usuarioId: true },
+    select: { id: true },
+    take: 2,
   });
-  if (!persona || persona.usuarioId) return;
+  if (candidatas.length !== 1) return;
+  const personaId = candidatas[0]!.id;
   await ctx.transaccion((tx) =>
-    tx.persona.updateMany({ where: { id: persona.id, usuarioId: null }, data: { usuarioId } }),
+    tx.persona.updateMany({ where: { id: personaId, usuarioId: null }, data: { usuarioId } }),
   );
 }
 
@@ -40,6 +44,7 @@ export const consumidorAccesoPortalTrabajador = defineConsumidor({
   async handler(ctx, ev) {
     const p = ev.payload as { hacia?: unknown } | null;
     if (p?.hacia !== "activo" || !ev.entidadId) return;
+    if (!ctx.autorizar(PERMISOS_CORE.usersManage)) return;
     await asegurarAccesoPortalTrabajador(ctx, ev.entidadId, false);
   },
 });
