@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { esTipoSoloEnLinea } from "@opai/domain";
+import { esTipoSoloEnLinea, TIPOS_REGISTRO } from "@opai/domain";
+
+import { documentoSchema } from "../../acceso/comun";
 
 /**
  * Lista blanca de hechos que un equipo de terreno puede encolar sin conexión (CAR-78 · B3). Un tipo que no
@@ -52,27 +54,75 @@ export const TIPOS_HECHO_TERRENO = {
     })
     .strict(),
   /**
+   * Novedad en el libro de la instalación desde el equipo de terreno (CAR-77 parte 3), sin depender de Rondas:
+   * texto y gravedad. Va a `core.libro_novedades` con el equipo, la persona y la hora del hecho.
+   */
+  "terreno.novedad": z
+    .object({
+      resumen: z.string().trim().min(3).max(200),
+      detalle: z.string().trim().max(2000).optional(),
+      gravedad: z.enum(["baja", "media", "alta"]).optional(),
+    })
+    .strict(),
+  /**
    * Entrada a una instalación (portería, CAR-78 · E4b-2). Del documento solo se guardan su huella y su máscara:
    * el número completo no se persiste (decisión de Carlos, 7-nov-2026). El servidor cruza con las listas.
    */
   "acceso.entrada": z
     .object({
-      tipoRegistro: z.enum(["visita", "contratista", "proveedor", "vehiculo", "despacho"]),
-      documento: z
-        .object({
-          tipo: z.enum(["run", "pasaporte", "otro"]),
-          numero: z.string().min(1).max(40),
-          pais: z.string().min(2).max(3).optional(),
-        })
-        .strict(),
+      tipoRegistro: z.enum(TIPOS_REGISTRO),
+      documento: documentoSchema.optional(),
+      /** Código del QR de invitación de un prerregistro (CAR-478): reemplaza al documento, que ya está registrado. */
+      invitacion: z.string().min(1).max(120).optional(),
       nombre: z.string().trim().min(2).max(120),
       empresa: z.string().trim().min(1).max(120).optional(),
       motivo: z.string().trim().min(1).max(200).optional(),
       patente: z.string().min(1).max(12).optional(),
+      /** Campos personalizados del formulario de la instalación (CAR-479), con la etiqueta con que se pidieron. */
+      campos: z
+        .array(
+          z
+            .object({
+              etiqueta: z.string().trim().min(1).max(60),
+              valor: z.string().trim().min(1).max(200),
+            })
+            .strict(),
+        )
+        .max(15)
+        .optional(),
     })
-    .strict(),
+    .strict()
+    .refine((p) => p.documento !== undefined || p.invitacion !== undefined, {
+      message: "La entrada necesita el documento o la invitación.",
+    }),
   /** Salida de una entrada ya registrada: apunta a la clave del hecho `acceso.entrada`. */
   "acceso.salida": z.object({ entradaClave: z.string().uuid() }).strict(),
+  /**
+   * Marca legal de asistencia por cola (CAR-626): RUT+PIN o PIN de respaldo con motivo. El rostro no entra sin línea.
+   * La credencial viaja en el envío y no se persiste en el hecho guardado.
+   */
+  "asistencia.marca": z
+    .object({
+      metodo: z.enum(["rut_pin", "pin_respaldo"]),
+      credencial: z.string().min(4).max(64),
+      motivoRespaldo: z
+        .enum([
+          "rostro_no_coincide",
+          "vida_fallida",
+          "proveedor_caido",
+          "sin_enrolamiento",
+          "sin_camara",
+          "biometria_revocada",
+          "otro",
+        ])
+        .optional(),
+      tipo: z.enum(["inicio_colacion", "fin_colacion"]).optional(),
+      lat: z.number().min(-90).max(90).optional(),
+      lng: z.number().min(-180).max(180).optional(),
+      precisionM: z.number().min(0).max(100_000).optional(),
+    })
+    .strict()
+    .refine((p) => p.metodo !== "pin_respaldo" || p.motivoRespaldo !== undefined),
 } as const satisfies Record<string, z.ZodType>;
 
 export type TipoHechoTerreno = keyof typeof TIPOS_HECHO_TERRENO;

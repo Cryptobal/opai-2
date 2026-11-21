@@ -1,6 +1,6 @@
 import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
-import { estadoPantalla } from "@/lib/formato";
+import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
@@ -17,13 +17,13 @@ export type FilaExplorador = Documento & {
 type PaginaExplorador = { items: FilaExplorador[]; siguiente: string | null; total: number };
 
 const VIGENCIAS = ["vigente", "por_vencer", "vencido", "sin_fecha"];
-const ENTIDADES = ["tenant", "cuenta", "instalacion", "persona", "puesto"];
+const ENTIDADES = ["tenant", "cuenta", "instalacion", "persona", "puesto", "ticket", "visita"];
 const ORDENES = ["recientes", "nombre", "vence"];
 const dentro = (v: string | undefined, validos: string[]) =>
   v && validos.includes(v) ? v : undefined;
 
 /** Parámetros de la URL → entrada de la capacidad; lo que no es válido se ignora (la URL es del usuario). */
-export function entradaDe(p: Parametros) {
+function entradaDe(p: Parametros) {
   const vigencia = dentro(p["estado"], VIGENCIAS);
   const entidadTipo = dentro(p["entidad"], ENTIDADES);
   const orden = dentro(p["orden"], ORDENES);
@@ -59,9 +59,7 @@ export async function cargarExplorador(p: Parametros) {
     identidad.acceso.instalaciones !== null,
   );
   return {
-    state: estadoPantalla(r),
-    items: r.ok ? r.data.items : [],
-    siguiente: r.ok ? r.data.siguiente : null,
+    ...vistaPaginaCursor(r),
     total: r.ok ? r.data.total : null,
     tipos,
     ...subida,

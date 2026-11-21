@@ -10,10 +10,14 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import type { LoteDetalle, PermisosLote } from "./tipos";
 
-type Modal = "pagar" | "anular" | null;
+type Modal = "pagar" | "anular" | "reversa" | null;
 
 /** Hoy en hora de Chile (aaaa-mm-dd) sin cargar el formateador de dominio en el navegador. */
 const hoyIso = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
+
+function ErrorDialogo({ error }: { error: string | null }) {
+  return error ? <p role="alert" className="text-base font-medium text-danger-fg">{error}</p> : null;
+}
 
 /** Acciones del lote según su estado y los permisos de la persona; cada una vuelve a autorizarse en servidor. */
 export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: PermisosLote }) {
@@ -34,7 +38,7 @@ export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: 
     setModal(null);
     router.refresh();
   }
-  const { estado } = lote;
+  const { estado, esReversa } = lote;
   const base = { id: lote.id };
   return (
     <div className="flex flex-col gap-3">
@@ -43,16 +47,19 @@ export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: 
         {estado === "borrador" && permisos.aprobar ? (
           <Button disabled={ocupado} onClick={() => void correr(() => ejecutarCapacidad("erp", "rendiciones.lotes.aprobar", base), `${lote.codigoVisible} aprobado`)}>Aprobar lote</Button>
         ) : null}
-        {estado === "aprobado" && permisos.pagar ? (
+        {esReversa && estado === "aprobado" && permisos.pagar ? (
+          <Button disabled={ocupado} onClick={() => { setError(null); setModal("reversa"); }}>Aplicar reversa</Button>
+        ) : null}
+        {!esReversa && estado === "aprobado" && permisos.pagar ? (
           <Button variant="secondary" disabled={ocupado} onClick={() => void correr(() => ejecutarCapacidad("erp", "rendiciones.lotes.generar_nomina", base), "Nómina generada")}>Generar nómina Santander</Button>
         ) : null}
-        {(estado === "generado" || estado === "pagado") && permisos.pagar ? (
+        {!esReversa && (estado === "generado" || estado === "pagado") && permisos.pagar ? (
           <EnlaceBoton href={`/api/rendiciones/lotes/${lote.id}/nomina`} variante="secondary">Descargar nómina Santander</EnlaceBoton>
         ) : null}
-        {(estado === "aprobado" || estado === "generado") && permisos.pagar ? (
+        {!esReversa && (estado === "aprobado" || estado === "generado") && permisos.pagar ? (
           <Button disabled={ocupado} onClick={() => { setError(null); setModal("pagar"); }}>Marcar como pagado</Button>
         ) : null}
-        {(estado === "borrador" || estado === "aprobado" || estado === "generado") && permisos.pagar ? (
+        {(estado === "borrador" || estado === "aprobado" || (!esReversa && estado === "generado")) && permisos.pagar ? (
           <Button variant="secondary" disabled={ocupado} onClick={() => { setError(null); setModal("anular"); }}>Anular lote</Button>
         ) : null}
       </div>
@@ -71,7 +78,24 @@ export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: 
         <div className="flex flex-col gap-3">
           <Campo etiqueta="Fecha de pago" htmlFor="fecha-pago" error={fecha > hoyIso() ? "La fecha de pago no puede ser futura." : undefined}><InputFecha id="fecha-pago" valor={fecha} onCambiar={setFecha} invalido={fecha > hoyIso()} /></Campo>
           <Campo etiqueta="Referencia (número de nómina o comprobante)" htmlFor="ref-pago"><Input id="ref-pago" value={referencia} maxLength={80} onChange={(e) => setReferencia(e.target.value)} /></Campo>
-          {error ? <p role="alert" className="text-base font-medium text-danger-fg">{error}</p> : null}
+          <ErrorDialogo error={error} />
+        </div>
+      </Dialog>
+      <Dialog
+        abierto={modal === "reversa"}
+        onCerrar={() => setModal(null)}
+        titulo={`Aplicar reversa en ${lote.codigoVisible}`}
+        descripcion="Las rendiciones vuelven a Aprobada y podrán pagarse en un lote nuevo. Es irreversible: confirma el motivo."
+        acciones={
+          <>
+            <Button variant="secondary" onClick={() => setModal(null)} disabled={ocupado}>Volver</Button>
+            <Button disabled={ocupado || motivo.trim().length < 3} onClick={() => void correr(() => ejecutarCapacidad("erp", "rendiciones.lotes.aplicar_reversa", { ...base, motivo: motivo.trim() }), "Reversa aplicada")}>{ocupado ? "Aplicando…" : "Aplicar reversa"}</Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <Campo etiqueta="Motivo" htmlFor="motivo-reversa"><Textarea id="motivo-reversa" value={motivo} maxLength={300} onChange={(e) => setMotivo(e.target.value)} /></Campo>
+          <ErrorDialogo error={error} />
         </div>
       </Dialog>
       <Dialog
@@ -88,7 +112,7 @@ export function AccionesLote({ lote, permisos }: { lote: LoteDetalle; permisos: 
       >
         <div className="flex flex-col gap-3">
           <Campo etiqueta="Motivo" htmlFor="motivo-anular"><Textarea id="motivo-anular" value={motivo} maxLength={300} onChange={(e) => setMotivo(e.target.value)} /></Campo>
-          {error ? <p role="alert" className="text-base font-medium text-danger-fg">{error}</p> : null}
+          <ErrorDialogo error={error} />
         </div>
       </Dialog>
     </div>

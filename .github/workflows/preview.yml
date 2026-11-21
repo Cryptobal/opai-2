@@ -108,8 +108,9 @@ jobs:
           pnpm install --frozen-lockfile
           # La rama de preview se reutiliza entre pushes: una migración renombrada después de
           # aplicarse deja un registro fallido con el nombre viejo y Prisma rechaza todo (P3009).
-          # Se marca revertido solo si su migración ya no existe en el repo; el script se niega a
-          # correr fuera de una rama preview/pr-N (nunca main ni dev). Un fallo real sigue en rojo.
+          # Se marca revertido si su migración ya no existe en el repo o si el SQL cambió (checksum);
+          # el script se niega a correr fuera de una rama preview/pr-N (nunca main ni dev). Un fallo
+          # real con el mismo SQL sigue en rojo.
           PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:huerfanas
           PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
       - name: Quitar acceso a empresas no QA en la rama de preview
@@ -119,6 +120,18 @@ jobs:
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
         run: PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:ocultar-tenants
+      - name: Verificar destino y preparar compras sintéticas de CAR-239
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_docs.outputs.only_docs != 'true'
+          && github.event.pull_request.number == 831
+          && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
+          PREVIEW_BRANCH_ID: ${{ steps.neon.outputs.branch_id }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: pnpm --filter @opai/db exec tsx scripts/seed-compras-qa-preview.ts
       - name: Sembrar usuarios QA de rendiciones (solo qa-e2e)
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'

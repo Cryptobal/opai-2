@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@opai/capabilities": "workspace:*",
+    "@opai/domain": "workspace:*",
     "@opai/integrations": "workspace:*",
     "zod": "^4.6.7"
   },

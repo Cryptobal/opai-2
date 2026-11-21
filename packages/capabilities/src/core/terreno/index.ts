@@ -2,6 +2,7 @@ import { capacidadesBiometria } from "../biometria";
 import { capacidadesDispositivos } from "./dispositivos";
 import { capacidadesCredencialesTerreno } from "./credenciales";
 import { hechosRecibir } from "./hechos";
+import { accesoEsperadosTerreno } from "./acceso-esperados";
 import { accesoEnSitioTerreno } from "./acceso-sitio";
 import { terrenoContexto } from "./contexto";
 import { rondasEstadoTerreno } from "./rondas-estado";
@@ -9,6 +10,7 @@ import { hechosListar, personasListarTerreno } from "./hechos-lectura";
 import { libroNovedadesListar } from "./libro-novedades";
 import { libroNovedadesCambiarEstado, libroNovedadesObtener } from "./libro-novedades-estado";
 import { libroNovedadesRegistrar } from "./libro-novedades-registrar";
+import { libroNovedadesEquipo } from "./libro-novedades-equipo";
 
 export const capacidadesTerreno = [
   ...capacidadesCredencialesTerreno,
@@ -19,9 +21,11 @@ export const capacidadesTerreno = [
   hechosListar,
   terrenoContexto,
   accesoEnSitioTerreno,
+  accesoEsperadosTerreno,
   rondasEstadoTerreno,
   libroNovedadesListar,
   libroNovedadesObtener,
   libroNovedadesRegistrar,
   libroNovedadesCambiarEstado,
+  libroNovedadesEquipo,
 ];

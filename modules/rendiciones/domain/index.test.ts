@@ -23,6 +23,7 @@ describe("estados", () => {
     expect(puedeTransitar("rechazada", "enviada")).toBe(false);
     expect(puedeTransitar("anulada", "borrador")).toBe(false);
     expect(puedeTransitar("aprobada", "pagada")).toBe(true);
+    expect(puedeTransitar("pagada", "aprobada")).toBe(true);
     expect(puedeTransitar("enviada", "pagada")).toBe(false);
   });
   it("solo borrador y devuelta se editan", () => {

@@ -7,7 +7,6 @@ export type EstadoTicket = (typeof ESTADOS_TICKET)[number];
 
 /** p1 (más urgente) a p4 (extracción de 1.0, rondas-y-tickets.md §2). */
 export const PRIORIDADES_TICKET = ["p1", "p2", "p3", "p4"] as const;
-export type PrioridadTicket = (typeof PRIORIDADES_TICKET)[number];
 
 /** Estados desde los que el ticket sigue vivo (acepta comentarios y cambios de dueño). */
 export const ESTADOS_VIVOS: readonly EstadoTicket[] = ["abierto", "en_curso", "resuelto"];
@@ -37,3 +36,5 @@ export function esEstadoTerminal(estado: EstadoTicket): boolean {
 export function puedeAprobarse(estado: EstadoTicket): boolean {
   return estado === "abierto" || estado === "en_curso";
 }
+
+export { debeAvisarSlaVencido, numeroTicket, slaVenceEnDesde } from "./sla";

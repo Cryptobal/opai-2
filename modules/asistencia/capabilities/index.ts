@@ -8,7 +8,9 @@ import { diasListar, diasResumenPeriodo } from "./dias-capacidades";
 import { diasRecalcular, jornadasFijarTipo } from "./dias-gestion";
 import { hoyListar } from "./dias-hoy";
 import { consumidorAvisoContingencia } from "./consumidor-contingencia";
-import { contingenciasListar, contingenciasRegistrar, contingenciasResponder } from "./contingencias";
+import { contingenciasRegistrar, contingenciasResponder } from "./contingencias";
+import { contingenciasListar } from "./contingencias-listar";
+import { contingenciasResponderEnlace, contingenciasVerEnlace } from "./contingencias-enlace";
 import { correccionesVerEnlace, correccionesResponderEnlace } from "./correcciones-enlace";
 import { correccionesListar } from "./correcciones-listar";
 import { correccionesProponer } from "./correcciones-proponer";
@@ -18,9 +20,13 @@ import { trabajoSuprimirBiometria } from "./biometria-trabajo";
 import { rostroConsentir, rostroEnrolar, rostroEstado, rostroIniciarVida, rostroRevocar, rostroTextos } from "./rostro";
 import { telefonoHabilitar } from "./telefono";
 import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incidentes";
-import { marcasObtener, marcasListar } from "./lecturas";
+import { marcasListar } from "./marcas-listar";
+import { marcasObtener } from "./lecturas";
 import { marcasRegistrar } from "./registrar";
 import { marcasVerificar } from "./verificar";
+import { certificacionChecklist } from "./certificacion";
+import { reportesExportar } from "./reportes/exportar";
+import { reportesCatalogo, reportesVista } from "./reportes/vista";
 
 export { ajustesAsistencia } from "./ajustes";
 export { indicadoresAsistencia } from "./indicadores";
@@ -32,8 +38,9 @@ export const consumidoresAsistencia = [
 export const capacidades = [
   marcasRegistrar, marcasListar, marcasObtener, marcasVerificar,
   correccionesProponer, correccionesListar, correccionesResponder, correccionesVerEnlace, correccionesResponderEnlace,
-  contingenciasRegistrar, contingenciasListar, contingenciasResponder,
+  contingenciasRegistrar, contingenciasListar, contingenciasResponder, contingenciasVerEnlace, contingenciasResponderEnlace,
   incidentesRegistrar, incidentesCerrar, incidentesListar,
   rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, rostroTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
+  reportesCatalogo, reportesVista, reportesExportar, certificacionChecklist,
 ];

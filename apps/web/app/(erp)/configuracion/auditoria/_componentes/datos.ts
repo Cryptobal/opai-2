@@ -58,13 +58,7 @@ export async function cargarAuditoria(p: Parametros) {
   );
 }
 
-/** Query string con cambios (null borra la clave). */
-export function con(p: Parametros, cambios: Record<string, string | null>) {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries({ ...p, ...cambios })) if (v) q.set(k, v);
-  const s = q.toString();
-  return s ? `?${s}` : "?";
-}
+export { queryConCambios as con } from "@/app/_components/maestros/paginacion-cursor";
 
 const RUTA: Record<string, string> = {
   cuenta: "/cuentas",

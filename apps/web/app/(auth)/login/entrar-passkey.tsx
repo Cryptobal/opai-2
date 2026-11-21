@@ -8,6 +8,7 @@ import { Alerta, Button } from "@opai/ds";
 import { accionEntrarConPasskey, accionOpcionesEntrarPasskey } from "@/app/_acciones/passkeys";
 import {
   cancelarCeremonia,
+  esCancelacionPasskey,
   mensajeWebAuthn,
   soportaAutocompletado,
   usarPasskey,
@@ -48,22 +49,39 @@ export function EntrarConPasskey({
     if (!condicional) await cancelarCeremonia();
     const op = await accionOpcionesEntrarPasskey();
     if (mia !== ceremonia.current) return;
-    if (!op.ok) return setError(op.mensaje);
-    const respuesta = await usarPasskey(op.opciones, condicional);
+    if (!op.ok) {
+      if (!condicional) setError(op.mensaje);
+      return;
+    }
+    let respuesta: Awaited<ReturnType<typeof usarPasskey>>;
+    try {
+      respuesta = await usarPasskey(op.opciones, condicional);
+    } catch (e: unknown) {
+      if (mia !== ceremonia.current) return;
+      if (condicional && esCancelacionPasskey(e)) return;
+      if (!condicional) {
+        const msg = mensajeWebAuthn(e);
+        if (msg) setError(msg);
+      }
+      return;
+    }
     if (mia !== ceremonia.current) return;
     setPendiente(true);
-    const r = await accionEntrarConPasskey(destino, respuesta);
-    setPendiente(false);
-    setError(r.mensaje);
+    try {
+      const r = await accionEntrarConPasskey(destino, respuesta);
+      if (mia === ceremonia.current) setError(r.mensaje);
+    } finally {
+      if (mia === ceremonia.current) setPendiente(false);
+    }
   }
 
   useEffect(() => {
     if (!autocompletar || autocompletado.current) return;
     autocompletado.current = true;
-    void soportaAutocompletado().then((si) => {
-      // Mediación condicional: espera en segundo plano a que elija la passkey en el autocompletado.
-      if (si) entrar(true).catch(() => undefined);
-    });
+    // Mediación condicional: espera en segundo plano; no interrumpe el ingreso con contraseña.
+    void soportaAutocompletado()
+      .then((si) => (si ? entrar(true) : undefined))
+      .catch(() => undefined);
     // `entrar` solo depende de props estables del montaje.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

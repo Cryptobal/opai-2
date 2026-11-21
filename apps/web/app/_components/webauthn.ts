@@ -12,7 +12,11 @@ const lib = () => import("@simplewebauthn/browser");
 
 /** El navegador soporta passkeys (WebAuthn). */
 function soportaPasskeys(): boolean {
-  return typeof window !== "undefined" && typeof window.PublicKeyCredential === "function";
+  try {
+    return typeof window !== "undefined" && typeof window.PublicKeyCredential === "function";
+  } catch {
+    return false;
+  }
 }
 
 const sinSuscripcion = () => () => undefined;
@@ -25,7 +29,12 @@ export function useSoportaPasskeys(): boolean {
 /** Autocompletado de passkeys en el campo de correo (mediación condicional), si el navegador lo trae. */
 export async function soportaAutocompletado(): Promise<boolean> {
   if (!soportaPasskeys()) return false;
-  return (await lib()).browserSupportsWebAuthnAutofill();
+  try {
+    return await (await lib()).browserSupportsWebAuthnAutofill();
+  } catch {
+    // La mediación condicional es opcional: deja disponibles el botón y la contraseña.
+    return false;
+  }
 }
 
 export async function crearPasskey(opciones: OpcionesRegistro) {
@@ -44,10 +53,16 @@ export async function cancelarCeremonia(): Promise<void> {
   (await lib()).WebAuthnAbortService.cancelCeremony();
 }
 
+/** Cancelación del autocompletado condicional (CAR-728): no es un fallo que deba mostrarse en pantalla. */
+export function esCancelacionPasskey(error: unknown): boolean {
+  const nombre = error instanceof Error ? error.name : "";
+  return nombre === "NotAllowedError" || nombre === "AbortError";
+}
+
 /** Mensaje para una ceremonia cancelada o rechazada por el navegador (sin detalles técnicos). */
 export function mensajeWebAuthn(error: unknown): string | null {
+  if (esCancelacionPasskey(error)) return null; // canceló o expiró
   const nombre = error instanceof Error ? error.name : "";
-  if (nombre === "NotAllowedError" || nombre === "AbortError") return null; // canceló o expiró
   if (nombre === "InvalidStateError") return "Esta passkey ya está guardada en tu cuenta.";
   return "Tu navegador no pudo usar la passkey. Prueba de nuevo o usa otro método.";
 }

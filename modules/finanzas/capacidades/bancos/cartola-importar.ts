@@ -9,6 +9,7 @@ import {
 } from "@opai/domain";
 
 import { emparejarCartola } from "./cartola-emparejar";
+import { sobranteSchema, sobrantesEnLinea } from "./cartola-sobrantes";
 import { cuadraturaSchema, filaPreviewSchema } from "./esquemas";
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { cuentaDe } from "./util";
@@ -38,6 +39,8 @@ export const bancosCartolaImportar = defineCapability({
       })
       .optional(),
     idempotencyKey: z.string().min(8).max(120),
+    /** CAR-450: quitar (como descarte restaurable) lo del banco en línea del período que la cartola no trae. */
+    quitarSobrantesEnLinea: z.boolean().default(false),
   }),
   output: z.object({
     aplicados: z.number().int(),
@@ -53,6 +56,11 @@ export const bancosCartolaImportar = defineCapability({
     yaImportada: z.object({ nombreArchivo: z.string().nullable(), creadaEn: z.string() }).nullable().optional(),
     /** Movimientos que las reglas del banco conciliaron solas o dejaron sugeridos (no en vista previa). */
     reglas: z.object({ conciliados: z.number().int(), sugeridos: z.number().int() }).optional(),
+    /** CAR-450: del banco en línea, en el período de una cartola que cuadra, sin par en ella (vacío si no cuadra). */
+    sobrantesEnLinea: z.array(sobranteSchema).max(500),
+    /** Total de sobrantes (la lista se corta en 500; al quitar se quitan todos). */
+    sobrantesTotal: z.number().int(),
+    sobrantesQuitados: z.number().int(),
   }),
   efecto: "escritura",
   dryRun: true,
@@ -71,7 +79,10 @@ export const bancosCartolaImportar = defineCapability({
     );
 
     // CAR-341: lo que ya entró por la sincronización u otra cartola (aunque con otra fecha) no se duplica.
-    const { previews, nuevos, ajustes, duplicados } = await emparejarCartola(ctx, cuenta.id, parsedFilas);
+    const { previews, nuevos, ajustes, duplicados, emparejados } = await emparejarCartola(ctx, cuenta.id, parsedFilas);
+    const fechas = parsedFilas.map((f) => f.fecha).sort();
+    const periodo = { desde: fechaDesde ?? fechas[0] ?? "", hasta: fechaHasta ?? fechas.at(-1) ?? "" };
+    const sobrantes = cuadratura?.cuadra && periodo.desde && periodo.hasta ? await sobrantesEnLinea(ctx, cuenta.id, periodo, emparejados) : [];
     for (const r of rechazadas) {
       previews.push({ indice: r.indice, estado: "rechazada", motivo: r.motivo, fecha: null, monto: null, glosa: null });
     }
@@ -85,13 +96,16 @@ export const bancosCartolaImportar = defineCapability({
       filas: previews,
       cuadratura,
       yaImportada: dryRun ? await cartolaRepetida(ctx, cuenta.id, fechaDesde, fechaHasta) : null,
+      sobrantesEnLinea: sobrantes.slice(0, 500),
+      sobrantesTotal: sobrantes.length,
+      sobrantesQuitados: 0,
     };
 
     if (dryRun) return resumen;
     // CAR-341: una cartola que no cuadra (saldo inicial + detalle ≠ saldo final) está mal leída o incompleta.
     if (cuadratura && !cuadratura.cuadra) throw reglaDeNegocio(mensajeDescuadre(cuadratura.diferencia));
 
-    const { reglas } = await aplicarImportacionCartola(ctx, {
+    const { reglas, sobrantesQuitados } = await aplicarImportacionCartola(ctx, {
       cuenta,
       formato: input.formato,
       ...(input.nombreArchivo !== undefined ? { nombreArchivo: input.nombreArchivo } : {}),
@@ -104,8 +118,9 @@ export const bancosCartolaImportar = defineCapability({
       saldoInicial: cuadratura?.saldoInicial ?? null,
       fechaDesde,
       fechaHasta,
+      sobrantes: input.quitarSobrantesEnLinea ? { periodo, ids: sobrantes.map((x) => x.id) } : null,
     });
 
-    return { ...resumen, reglas };
+    return { ...resumen, reglas, sobrantesQuitados };
   },
 });

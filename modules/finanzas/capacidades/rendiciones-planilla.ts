@@ -14,7 +14,8 @@ const POR_PAGAR = ["aprobado", "generado"];
 /**
  * Rendiciones por pagar como egreso comprometido (ADR-113 punto 3): cada lote de pago aprobado o con la nómina generada
  * cuenta en la semana en curso hasta que se marca pagado (desde ahí lo trae la cartola) o se anula (se retira). Las
- * semanas pasadas se leen de la cartola, así que un lote atrasado no se cuenta dos veces. Solo lectura; con
+ * semanas pasadas se leen de la cartola, así que un lote atrasado no se cuenta dos veces. Una reversa no ordena
+ * un pago, aunque esté aprobada. Solo lectura; con
  * Rendiciones apagado no hay lotes y la fila no aparece.
  */
 export async function celdasRendiciones(
@@ -25,7 +26,7 @@ export async function celdasRendiciones(
 ): Promise<{ dominio: CeldaFlujo[]; vista: Vista[] }> {
   if (!semanas.includes(hoy)) return { dominio: [], vista: [] };
   const lotes = await (tx ?? ctx.db).lotePago.findMany({
-    where: { estado: { in: POR_PAGAR } },
+    where: { esReversa: false, estado: { in: POR_PAGAR } },
     select: { id: true, codigo: true, estado: true, totalClp: true, cantidad: true },
     orderBy: { codigo: "asc" },
   });

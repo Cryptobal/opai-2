@@ -82,3 +82,32 @@ export type Concepto = {
   lreVerificado: boolean;
   activo: boolean;
 };
+
+/** Liquidación del período (Brief 27). */
+export type LiquidacionResumen = {
+  id: string;
+  personaId: string;
+  personaNombre: string;
+  estado: "calculada" | "revisada";
+  diasTrabajados: number;
+  haberes: number;
+  descuentos: number;
+  liquido: number;
+  advertencias: string[];
+  publicadaEn: string | null;
+  documentoId: string | null;
+};
+export type LineaLiquidacion = { concepto: string; monto: number };
+export type LiquidacionDetalle = LiquidacionResumen & {
+  periodoId: string;
+  imponible: number;
+  costoEmpresa: number;
+  detalle: { haberes: LineaLiquidacion[]; descuentosLegales: LineaLiquidacion[]; otrosDescuentos: LineaLiquidacion[] };
+  calculadaEn: string | null;
+  correoPersonal: string | null;
+};
+export type ListaLiquidaciones = {
+  items: LiquidacionResumen[];
+  siguiente: string | null;
+  total: { personas: number; revisadas: number; liquido: number; costoEmpresa: number };
+};

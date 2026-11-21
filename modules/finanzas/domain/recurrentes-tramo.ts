@@ -8,8 +8,8 @@ export const diaAntes = (iso: string, dias = 1): string => new Date(Date.parse(`
 const masDias = (iso: string, dias: number): string => new Date(Date.parse(`${iso}T00:00:00Z`) + dias * DIA_MS).toISOString().slice(0, 10);
 
 /** Cuántas cuotas muestra la vista previa y hasta cuántos días adelante mira. */
-export const CUOTAS_VISTA = 12;
-export const DIAS_VISTA = 366;
+const CUOTAS_VISTA = 12;
+const DIAS_VISTA = 366;
 
 export type Tramos =
   | { tipo: "en_lugar"; nuevo: Recurrente }

@@ -12,12 +12,13 @@ import { EditorTipos } from "./editor-tipos";
  * defecto, aprobación, SLA opcional y activo/inactivo. Lee y escribe solo por capacidades.
  */
 export async function SeccionTiposTicket() {
-  const r = await ejecutarComoUsuario<TipoTicket[]>("erp", "tickets.tipos.listar", {
+  const r = await ejecutarComoUsuario<{ items: TipoTicket[] }>("erp", "tickets.tipos.listar", {
     incluirInactivos: true,
+    limite: 200,
   });
   return (
     <Estado state={r.ok ? "ready" : estadoPantalla(r)} variante="formulario">
-      {r.ok ? <EditorTipos tipos={r.data} /> : null}
+      {r.ok ? <EditorTipos tipos={r.data.items} /> : null}
     </Estado>
   );
 }

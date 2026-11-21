@@ -1,4 +1,4 @@
-import { Badge, Cabecera, SeccionTarjeta } from "@opai/ds";
+import { Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -17,7 +17,7 @@ import {
   TONO_ESTADO,
 } from "./tipos";
 
-/** Ficha de una rendición propia: estado, motivo de la devolución, gastos o viaje, y las acciones que permite su estado. */
+/** Ficha de una rendición propia: patrón DetailScreen (CAR-545/589). */
 export function PaginaDetalle({
   portal,
   params,
@@ -40,18 +40,31 @@ export function PaginaDetalle({
     >
       {({ r, o }) => {
         const editable = r.estado === "borrador" || r.estado === "devuelta";
+        const acciones =
+          editable || r.estado === "enviada" ? (
+            <div className="flex flex-col gap-2 md:flex-row md:justify-end">
+              {r.estado !== "enviada" ? (
+                <BotonAnular portal={portal} id={r.id} codigo={r.codigoVisible} />
+              ) : null}
+              {editable ? (
+                <EnlaceBoton href={`${base}/${r.id}/corregir`}>
+                  {r.estado === "devuelta" ? "Corregir y reenviar" : "Editar y enviar"}
+                </EnlaceBoton>
+              ) : null}
+            </div>
+          ) : undefined;
         return (
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-            <Cabecera
-              titulo={r.codigoVisible}
-              subtitulo={r.descripcion}
-              tituloSiempre
-              sobre={<Badge tono={TONO_ESTADO[r.estado]}>{ETIQUETA_ESTADO[r.estado]}</Badge>}
-            />
+          <DetailScreen
+            state="ready"
+            titulo={r.codigoVisible}
+            subtitulo={r.descripcion}
+            estado={<Badge tono={TONO_ESTADO[r.estado]}>{ETIQUETA_ESTADO[r.estado]}</Badge>}
+            {...(acciones ? { acciones, accionesDebajoEnTelefono: true } : {})}
+          >
             {r.motivoDecision && (r.estado === "devuelta" || r.estado === "rechazada") ? (
               <p
                 role="note"
-                className="rounded-md bg-warning-muted px-3 py-2 text-base text-warning-fg"
+                className="mb-4 rounded-md bg-warning-muted px-3 py-2 text-base text-warning-fg"
               >
                 <span className="font-semibold">
                   {r.estado === "devuelta" ? "Devuelta" : "Rechazada"}
@@ -117,19 +130,7 @@ export function PaginaDetalle({
                 </ul>
               </SeccionTarjeta>
             )}
-            {editable || r.estado === "enviada" ? (
-              <div className="flex flex-col gap-2 md:flex-row md:justify-end">
-                {r.estado !== "enviada" ? (
-                  <BotonAnular portal={portal} id={r.id} codigo={r.codigoVisible} />
-                ) : null}
-                {editable ? (
-                  <EnlaceBoton href={`${base}/${r.id}/corregir`}>
-                    {r.estado === "devuelta" ? "Corregir y reenviar" : "Editar y enviar"}
-                  </EnlaceBoton>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
+          </DetailScreen>
         );
       }}
     </PaginaPortal>

@@ -34,6 +34,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: «ver como» es una vista de pantalla de quien tiene la sesión (CAR-528); un agente ya lee esos datos con sus propias capacidades.",
   "core.ver_como.terminar":
     "Solo personas: cierra la vista «ver como» de quien tiene la sesión (CAR-528).",
+  "core.ver_como.list":
+    "Solo personas: buscador de la pantalla «Ver como…» (CAR-528); sin iniciar una vista no le sirve a un agente.",
   // CAR-352: un destino saca eventos de la empresa hacia afuera y lleva un secreto de firma.
   "core.webhooks.destino_crear":
     "Solo personas: un destino saca eventos de la empresa y entrega un secreto (ADR-032).",
@@ -72,6 +74,12 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01).",
   "core.personas.pago_rechazar_cambio":
     "Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01).",
+  "core.personas.bloquear_permanente":
+    "Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674).",
+  "core.personas.desbloquear_permanente":
+    "Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674).",
+  "core.personas.quitar_no_recontratar":
+    "Solo personas con permiso explícito core:personas.estado.admin: una key con scope «*» no lo hereda (CAR-674).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.reglas_guardar":
     "Solo personas: decide quién aprueba lo irreversible; un agente no puede cambiar la regla que lo frena (ADR-032, CAR-252).",
@@ -146,6 +154,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: se mira antes de existir sesión con el enlace personal como credencial, igual que core.invitations.peek (firma.md §5).",
   "core.firmas.documento_url":
     "Interna: igual que ver_firmante, el enlace personal es la credencial antes de existir sesión (firma.md R5, A2 de la corrección PR 2).",
+  "core.firmas.mis_pendientes":
+    "Solo personas: son firmas pendientes del propio usuario en su portal, no de un agente ni de una key (firma.md R19, CAR-634).",
   "core.anexos.aprobar":
     "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
   "core.anexos.rechazar":
@@ -192,6 +202,22 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: el rostro es un dato biométrico sensible (Ley 21.719); un agente nunca enrola a un trabajador. Lo hace la propia persona con prueba de vida.",
   "asistencia.telefono.habilitar":
     "Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes.",
+  "central.turno.abrir":
+    "Solo personas: abrir el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.entregar":
+    "Solo personas: entregar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.aceptar":
+    "Solo personas: aceptar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.turno.cerrar":
+    "Solo personas: cerrar el turno de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.alertas.tomar":
+    "Solo personas: tomar una alerta garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.alertas.devolver":
+    "Solo personas: devolver una alerta tomada garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.agente.reanudar":
+    "Solo personas: reanudar al agente de central garantiza que quien está a cargo de la central es una persona (spec central R12, R13 y R15).",
+  "central.propuestas.resolver":
+    "Solo personas: aceptar o rechazar una propuesta del agente es la decisión humana que la propuesta espera (spec central R10, CA3).",
   "central.alertas.hacerse_cargo":
     "Solo personas: «me hago cargo» garantiza que quien responde por la alerta es una persona (spec central R8 y R13); el agente solo contacta y escala.",
   "asistencia.marcas.verificar":
@@ -204,6 +230,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial.",
   "asistencia.correcciones.responder_enlace":
     "Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada.",
+  "asistencia.contingencias.ver_enlace":
+    "Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal es la credencial.",
+  "asistencia.contingencias.responder_enlace":
+    "Interna: la página pública `/contingencia/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada.",
   "core.credenciales_terreno.asignar_pin":
     "Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02).",
   "core.credenciales_terreno.restablecer":
@@ -212,6 +242,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02).",
   "core.hechos_terreno.recibir":
     "Interna: el equipo de terreno emparejado la ejecuta sin sesión (su cookie de dispositivo es la credencial) al enviar su cola; un agente no registra hechos de terreno por el equipo. Su lectura es core.hechos_terreno.listar (CAR-78 B3).",
+  "core.libro_novedades_equipo.listar":
+    "Interna: la lee el equipo de terreno emparejado sin sesión (su cookie de dispositivo es la credencial) para la pantalla «Libro»; un agente lee el mismo libro con core.libro_novedades.listar, con permiso y alcance (CAR-77).",
   "core.personas_terreno.listar":
     "Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3).",
   "core.biometria.enrolar":
@@ -222,6 +254,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2).",
   "core.terreno.en_sitio":
     "Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d).",
+  "core.terreno.esperados":
+    "Interna: la portería del equipo emparejado lee sin sesión los visitantes prerregistrados para hoy (su cookie de dispositivo es la credencial); un agente usa acceso.prerregistros.listar con su alcance (CAR-478).",
   "core.terreno.rondas":
     "Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e).",
 };
