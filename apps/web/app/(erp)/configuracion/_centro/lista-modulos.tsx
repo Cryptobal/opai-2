@@ -38,26 +38,6 @@ function armarFilas(entradas: readonly Seccion[], aprobaciones: number, seleccio
   return filas;
 }
 
-function sinEncabezadosHuerfanos(filas: FilaLista[]): FilaLista[] {
-  const out: FilaLista[] = [];
-  for (let i = 0; i < filas.length; i++) {
-    const f = filas[i]!;
-    if (!f.encabezado) {
-      out.push(f);
-      continue;
-    }
-    let hayModulo = false;
-    for (let j = i + 1; j < filas.length; j++) {
-      const g = filas[j]!;
-      if (g.encabezado) break;
-      hayModulo = true;
-      break;
-    }
-    if (hayModulo) out.push(f);
-  }
-  return out;
-}
-
 /**
  * Lista del grupo Módulos: catálogo fijo y módulos contratados agrupados por área del menú (CAR-744).
  */
@@ -76,11 +56,7 @@ export function ListaModulos({ entradas, aprobaciones, seleccionada }: Props) {
   return (
     <nav aria-label="Entradas de Módulos" className="flex flex-col pb-4">
       {conBuscador ? (
-        <FiltroLista
-          filas={filas}
-          placeholder="Buscar un módulo"
-          limpiarEncabezados={sinEncabezadosHuerfanos}
-        />
+        <FiltroLista filas={filas} placeholder="Buscar un módulo" quitarEncabezadosAreaVacios />
       ) : (
         lista
       )}
