@@ -48,6 +48,24 @@ describe.skipIf(!urlPropietario)("inventario · ropa ligada al uniforme en base 
     persona = (await e.admin.persona.create({ data: { tenantId: a, nombres: "Pedro", apellidos: "Soto", rut: "30000004-4" } })).id;
     personaB = (await e.admin.persona.create({ data: { tenantId: b, nombres: "Bea", apellidos: "Paz", rut: "30000005-2" } })).id;
     await e.admin.personaTalla.create({ data: { tenantId: a, personaId: persona, prenda: "camisa", talla: " l " } });
+    const cuenta = await e.admin.cuenta.create({ data: { tenantId: a, nombre: "Cuenta uniforme" } });
+    const instalacion = await e.admin.instalacion.create({
+      data: { tenantId: a, cuentaId: cuenta.id, nombre: "Instalación uniforme" },
+    });
+    const cargo = await e.admin.cargo.create({ data: { tenantId: a, nombre: "Guardia" } });
+    await e.admin.vinculoLaboral.create({
+      data: {
+        tenantId: a,
+        personaId: persona,
+        cargoId: cargo.id,
+        instalacionId: instalacion.id,
+        tipo: "indefinido",
+        inicio: new Date("2026-01-01"),
+        estado: "vigente",
+        horasSemanales: 44,
+        distribucion: "4x4",
+      },
+    });
   });
   afterAll(async () => {
     limpiarModulos();
