@@ -571,6 +571,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.crear` | `inventario_activos_crear` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.get` | `inventario_activos_get` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.activos.list` | `inventario_activos_list` | existe |
+| compartido | `app/(erp)/inventario/_componentes` | `inventario.config.categorias_list` | `inventario_config_categorias_list` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.devolver` | `inventario_entregas_devolver` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_activo` | `inventario_entregas_entregar_activo` | existe |
 | compartido | `app/(erp)/inventario/_componentes` | `inventario.entregas.entregar_ropa` | `inventario_entregas_entregar_ropa` | existe |
@@ -843,6 +844,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/integraciones/slack` | `core.slack.estado` | `core_slack_estado` | existe |
 | erp | `/configuracion/integraciones/slack` | `core.slack.usuarios` | `core_slack_usuarios` | existe |
 | erp | `/configuracion/integraciones` | `core.integraciones.list` | `core_integraciones_list` | existe |
+| erp | `/configuracion/inventario` | `inventario.config.categorias_guardar` | `inventario_config_categorias_guardar` | existe |
+| erp | `/configuracion/inventario` | `inventario.config.categorias_list` | `inventario_config_categorias_list` | existe |
+| erp | `/configuracion/inventario` | `inventario.config.prendas_guardar` | `inventario_config_prendas_guardar` | existe |
+| erp | `/configuracion/inventario` | `inventario.config.prendas_list` | `inventario_config_prendas_list` | existe |
 | erp | `/configuracion/marca` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/marca` | `core.marca.get` | `core_marca_get` | existe |
 | erp | `/configuracion/marca` | `core.marca.update` | `core_marca_update` | existe |

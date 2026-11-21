@@ -9,7 +9,9 @@ export type CampoTipo = {
 
 export type TipoInventario = {
   id: string;
-  categoria: "activo" | "ropa";
+  categoria: string;
+  categoriaNombre?: string;
+  comportamiento: "activo" | "ropa";
   nombre: string;
   descripcion: string | null;
   campos: CampoTipo[];
@@ -26,7 +28,8 @@ export const CATEGORIAS = [
   { valor: "ropa", etiqueta: "Ropa" },
 ];
 
-export const etiquetaCategoria = (v: string) => CATEGORIAS.find((c) => c.valor === v)?.etiqueta ?? v;
+export const etiquetaCategoria = (v: string, nombre?: string) =>
+  nombre ?? CATEGORIAS.find((c) => c.valor === v)?.etiqueta ?? v;
 
 export type EstadoActivo = "disponible" | "asignado" | "en_reparacion" | "de_baja";
 

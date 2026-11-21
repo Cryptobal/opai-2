@@ -10,7 +10,7 @@ import { HojaTipo } from "./diferidas";
 const TIPO_CAMPO = { texto: "Texto", numero: "Número", fecha: "Fecha" } as const;
 
 function Contenido({ t, kit }: { t: TipoInventario; kit: PrendaKit[] }) {
-  if (t.categoria === "ropa") {
+  if (t.comportamiento === "ropa") {
     return (
       <SeccionTarjeta titulo="Tallas">
         <div className="flex flex-wrap gap-2">
@@ -52,10 +52,12 @@ function Contenido({ t, kit }: { t: TipoInventario; kit: PrendaKit[] }) {
 export async function DetalleTipo({
   datos,
   kit,
+  categorias,
   puedeGestionar,
 }: {
   datos: ReturnType<typeof cargarTipo>;
   kit: PrendaKit[];
+  categorias: { valor: string; etiqueta: string; comportamiento: "activo" | "ropa" }[];
   puedeGestionar: boolean;
 }) {
   const { state, tipo: t } = await datos;
@@ -66,8 +68,10 @@ export async function DetalleTipo({
       {...(t
         ? {
             estado: <Badge tono={t.activo ? "success" : "neutro"}>{t.activo ? "Activo" : "Inactivo"}</Badge>,
-            subtitulo: `${etiquetaCategoria(t.categoria)} · ${
-              t.categoria === "ropa" ? conteo(t.tallas.length, "talla") : conteo(t.campos.length, "campo propio", "campos propios")
+            subtitulo: `${etiquetaCategoria(t.categoria, t.categoriaNombre)} · ${
+              t.comportamiento === "ropa"
+                ? conteo(t.tallas.length, "talla")
+                : conteo(t.campos.length, "campo propio", "campos propios")
             }`,
             acciones: (
               <AccionesEntidad
@@ -98,7 +102,7 @@ export async function DetalleTipo({
         <div className="flex flex-col gap-4">
           {t.descripcion ? <p className="text-fg-muted">{t.descripcion}</p> : null}
           <Contenido t={t} kit={kit} />
-          {puedeGestionar ? <HojaTipo tipo={t} kit={kit} /> : null}
+          {puedeGestionar ? <HojaTipo tipo={t} kit={kit} categorias={categorias} /> : null}
         </div>
       ) : null}
     </DetailScreen>
