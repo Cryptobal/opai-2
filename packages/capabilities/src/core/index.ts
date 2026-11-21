@@ -5,7 +5,7 @@ import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { capacidadesCampos } from "./campos";
 import { capacidadesPush } from "./push";
 export { avisarAlCelular } from "./push-avisar";
-export { avisarPushTrasCampana, categoriaPushDeEvento } from "./push-campana";
+export { avisarPushTrasCampana } from "./push-campana";
 export { aplicarModulosNuevosRegistrados } from "./modulos-nuevos-aplicar";
 import { capacidadesProcesosPersona, consumidorProcesosPersona } from "./procesos-persona";
 import { consumidorRevocacionBiometria } from "./biometria";
@@ -54,7 +54,8 @@ import { consumidorPropuestaAlAceptar } from "../portal-cliente/propuesta-al-ace
 import { capacidadesCorreos } from "./correos";
 import { capacidadesImportar } from "./importar";
 import { capacidadesCrm } from "./crm";
-import { capacidadesMaestros, trabajosMaestros } from "./maestros";
+import { capacidadesMaestros } from "./maestros";
+import { trabajosMaestros } from "./maestros/trabajos";
 import { capacidadesAusencias } from "./maestros/personas-ausencias";
 import { capacidadesPanel } from "./panel";
 import { capacidadesReglasAprobacion } from "./aprobaciones-reglas/capacidades";

@@ -5,8 +5,9 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import { BotonesPinTerreno } from "./botones-pin-terreno";
-import { type AccesoPersona } from "./acceso-portal-persona";
 import { TarjetaAccesoPortal } from "./tarjeta-acceso-portal";
+
+type AccesoPersona = { estado: string; motivo?: string };
 
 type Props = {
   personaId: string;
@@ -37,7 +38,6 @@ export async function SeccionAccesoPortal(p: Props) {
       : null;
 
   if (!puedePersonas || !acceso?.ok) return null;
-  const e = acceso.data;
 
   return (
     <SeccionTarjeta
@@ -50,7 +50,7 @@ export async function SeccionAccesoPortal(p: Props) {
     >
       <TarjetaAccesoPortal
         personaId={p.personaId}
-        acceso={e}
+        acceso={acceso.data}
         puedeGestionar={puedeGestionar}
         tieneUsuario={p.tieneUsuario}
         personaActiva={p.personaActiva}

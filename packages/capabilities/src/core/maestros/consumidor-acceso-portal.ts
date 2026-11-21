@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { esMembresiaPortalTrabajador, type Rol } from "@opai/domain";
 
-import { defineConsumidor, type EventoPublicado } from "../../eventos/consumidores";
+import { defineConsumidor } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
 import { asegurarAccesoPortalTrabajador } from "./personas-acceso-portal";
 

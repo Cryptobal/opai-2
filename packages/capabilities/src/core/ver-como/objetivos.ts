@@ -6,48 +6,11 @@ import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import { cursorDe, listaSchema, pagina } from "../maestros/comun";
+import { busca, type Item, type Tramo, visibles } from "./objetivos-comun";
+import { trabajador } from "./objetivos-trabajador";
 import { rolVisible } from "./objetivo";
 
 const itemSchema = z.object({ id: z.string(), nombre: z.string(), detalle: z.string().nullable() });
-type Item = z.infer<typeof itemSchema>;
-type Tramo = { q: string; cursor: string | undefined; limite: number };
-
-/** Con `q` vacío, `contains: ""` calza con todos. */
-const busca = (q: string) => ({ contains: q, mode: "insensitive" as const });
-
-/** Membresías activas en el portal, de rol visible y que no son de quien mira (mismo filtro que iniciar). */
-async function visibles(ctx: Contexto, portal: string) {
-  const filas = await ctx.db.membership.findMany({
-    where: { estado: "activa", portales: { has: portal } },
-    select: { id: true, userId: true, rol: true },
-  });
-  return filas.filter((m) => rolVisible(ctx, m.rol) && m.userId !== ctx.usuario?.id);
-}
-
-async function trabajador(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
-  const visiblesMembresia = await visibles(ctx, "trabajador");
-  const usuariosVisibles = new Set(visiblesMembresia.map((m) => m.userId));
-  const filas = await ctx.db.persona.findMany({
-    where: {
-      estado: "activo",
-      archivadaEn: null,
-      anonimizadaEn: null,
-      OR: [{ nombres: busca(q) }, { apellidos: busca(q) }],
-    },
-    select: { id: true, nombres: true, apellidos: true, usuarioId: true },
-    orderBy: { id: "asc" },
-    take: limite + 50,
-    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-  });
-  const items: Item[] = [];
-  for (const p of filas) {
-    if (p.usuarioId === ctx.usuario?.id) continue;
-    if (p.usuarioId && !usuariosVisibles.has(p.usuarioId)) continue;
-    items.push({ id: p.id, nombre: `${p.nombres} ${p.apellidos}`, detalle: null });
-    if (items.length > limite) break;
-  }
-  return items.slice(0, limite + 1);
-}
 
 /** Un contacto por fila: cada uno ve sus propias instalaciones. */
 async function cliente(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
@@ -146,8 +109,7 @@ const POR_PORTAL = { trabajador, cliente, terreno, supervisor } satisfies Record
 export const verComoList = defineCapability({
   id: "core.ver_como.list",
   soloPersonas: true,
-  descripcion:
-    "Solo personas: a quién se puede ver en «ver como» en la empresa actual (Terreno, trabajador, cliente o supervisor), paginado.",
+  descripcion: "Solo personas: lista paginada de objetivos de «ver como» (Terreno, trabajador, cliente, supervisor).",
   permiso: PERMISOS_CORE.verComoIniciar,
   input: listaSchema
     .pick({ cursor: true, limite: true })

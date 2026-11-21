@@ -38,8 +38,7 @@ import { instalacionesCreate, instalacionesUpdate } from "./instalaciones-escrit
 import { instalacionesArchive, instalacionesSetEstado } from "./instalaciones-estado";
 import { personasGet, personasList } from "./personas";
 import { personasCreate, personasUpdate } from "./personas-escritura";
-import { personasAccesoEstado } from "./personas-acceso-estado";
-import { personasDarAccesoPortal, personasReenviarInvitacionPortal } from "./personas-acceso-escritura";
+import { capacidadesPersonasAcceso } from "./personas-acceso-registro";
 import {
   personasArchive,
   personasBloquear,
@@ -69,7 +68,6 @@ import { capacidadesTerreno } from "../terreno";
 import { puestosGet, puestosList } from "./puestos";
 import { vinculosCreate, vinculosList, vinculosTerminar, vinculosUpdate } from "./vinculos";
 
-/** Maestros del núcleo (Brief 02, sesión B, bloque 6): una sola declaración para UI, API y MCP. */
 export const capacidadesMaestros: readonly Capacidad[] = [
   ...capacidadesTerreno,
   cuentasList,
@@ -118,12 +116,8 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasDesbloquear,
   personasArchive,
   personasVincularUsuario,
-  personasAccesoEstado,
-  personasDarAccesoPortal,
-  personasReenviarInvitacionPortal,
-  personasNoRecontratarVer,
-  personasMarcarNoRecontratar,
-  personasQuitarNoRecontratar,
+  ...capacidadesPersonasAcceso,
+  personasNoRecontratarVer, personasMarcarNoRecontratar, personasQuitarNoRecontratar,
   ...capacidadesPersonasEstado,
   personasPrevisionVer,
   personasPrevisionActualizar,
@@ -154,4 +148,3 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   buscar,
 ];
 
-export { trabajosMaestros } from "./trabajos";

@@ -10,7 +10,7 @@ import {
   vincularPersonaUsuario,
 } from "./personas-acceso-logica";
 
-export type EstadoAccesoPortalTrabajador =
+type EstadoAccesoPortalTrabajador =
   | "ya_tiene_acceso"
   | "vinculado"
   | "invitado"

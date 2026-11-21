@@ -10,7 +10,7 @@ import { escribirConEvento } from "./comun";
 import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
 import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
 import { archivarPersonaEnTx, exigirArchivoPersona } from "./personas-estado-implicito";
-import { esInternoParaPortalTrabajador, vincularPersonaUsuario } from "./personas-acceso-logica";
+import { vincularPersonaUsuario } from "./personas-acceso-logica";
 
 const motivo = z.string().trim().min(5).max(500).describe("Motivo (queda en la auditoría).");
 
