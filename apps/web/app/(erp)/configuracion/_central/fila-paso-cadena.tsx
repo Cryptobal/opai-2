@@ -21,10 +21,10 @@ export function FilaPasoCadena({ paso, indice, total, pendiente, opcionesDest, o
       <div className="flex flex-wrap items-center gap-2">
         <span className="t-label w-6">{indice + 1}</span>
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" disabled={pendiente || indice === 0} onClick={() => onMover(-1)} aria-label="Subir">
+          <Button variant="ghost" size="iconSm" disabled={pendiente || indice === 0} onClick={() => onMover(-1)} aria-label="Subir">
             ↑
           </Button>
-          <Button variant="ghost" size="sm" disabled={pendiente || indice >= total - 1} onClick={() => onMover(1)} aria-label="Bajar">
+          <Button variant="ghost" size="iconSm" disabled={pendiente || indice >= total - 1} onClick={() => onMover(1)} aria-label="Bajar">
             ↓
           </Button>
         </div>
