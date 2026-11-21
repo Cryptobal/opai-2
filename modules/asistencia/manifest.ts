@@ -21,8 +21,7 @@ export const manifest = defineModule({
   ],
   navegacion: [
     { portal: "erp", href: "/asistencia", etiqueta: "Asistencia", icono: "UserCheck", area: "operaciones", orden: 50, permiso: "asistencia:ver" },
-    { portal: "erp", href: "/asistencia/marcas", etiqueta: "Marcas", icono: "Fingerprint", area: "operaciones", orden: 51, permiso: "asistencia:ver" },
-    { portal: "erp", href: "/asistencia/reportes-dt", etiqueta: "Reportes DT", icono: "FileText", area: "operaciones", orden: 52, permiso: "asistencia:reportes" },
+    { portal: "erp", href: "/asistencia/reportes-dt", etiqueta: "Reportes DT", icono: "FileText", area: "operaciones", orden: 51, permiso: "asistencia:reportes" },
     { portal: "trabajador", href: "/trabajador/correcciones", etiqueta: "Correcciones", icono: "Pencil", area: "asistencia", orden: 35, permiso: null },
     { portal: "trabajador", href: "/trabajador/contingencias", etiqueta: "Contingencias", icono: "AlertTriangle", area: "asistencia", orden: 40, permiso: null },
   ],

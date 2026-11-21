@@ -42,10 +42,6 @@
       "motivo": "Verificación pública de una marca por hash (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.marcas.verificar (interna) con el hash de 256 bits como credencial, con rate limit que falla cerrado."
     },
     {
-      "archivo": "app/correccion/[slug]/[token]/ver.ts",
-      "motivo": "Respuesta pública a una corrección de marca (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) con el token del correo personal como credencial y el RUT como confirmación, con rate limit que falla cerrado."
-    },
-    {
       "archivo": "app/fiscalizacion/acciones.ts",
       "motivo": "Portal DT público (CAR-594): resuelve empleador con empleadorPorRut (SECURITY DEFINER) antes de validar la sesión del inspector."
     },
