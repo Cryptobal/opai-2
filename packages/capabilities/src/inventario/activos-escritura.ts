@@ -8,6 +8,7 @@ import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { activoSchema, vistaActivo } from "./activos-comun";
 import { camposGuardados, ID_VISTA_PREVIA, PERMISOS_INVENTARIO } from "./comun";
+import { comportamientoDeCategoria } from "./categorias-kit";
 
 const codigoSchema = z.string().trim().min(LIMITES_ACTIVO.codigoMin).max(LIMITES_ACTIVO.codigoMax);
 const serieSchema = z.string().trim().max(LIMITES_ACTIVO.serieMax);
@@ -21,7 +22,8 @@ const duplicado = (codigo: string) => `Ya existe un activo con el código «${co
 async function tipoDeActivo(ctx: Contexto, tipoId: string) {
   const tipo = await ctx.db.inventarioTipo.findFirst({ where: { id: tipoId } });
   if (!tipo) throw noEncontrado("El tipo de inventario");
-  if (tipo.categoria !== "activo") throw reglaDeNegocio("La ropa se registra por existencias, no como activo.");
+  if ((await comportamientoDeCategoria(ctx, tipo.categoria)) !== "activo")
+    throw reglaDeNegocio("La ropa se registra por existencias, no como activo.");
   return tipo;
 }
 

@@ -7,6 +7,8 @@ import { Alerta, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
 import { AccionesHoja } from "./acciones-hoja";
 import { type CampoEditable, EditorCampos } from "./editor-campos";
 import { CATEGORIAS, type PrendaKit, type TipoInventario } from "./tipos";
+
+type OpcionCategoria = { valor: string; etiqueta: string; comportamiento: "activo" | "ropa" };
 import { useHojaEntidad } from "./use-hoja-entidad";
 
 const aTallas = (texto: string) =>
@@ -29,11 +31,16 @@ const inicial = (t?: TipoInventario): Estado => ({
 });
 
 /** Lo que se envía a crear o actualizar: tallas en la ropa, campos propios en el activo. */
-function datosDe(e: Estado, editando: boolean) {
+function comportamientoDe(categoria: string, opciones: OpcionCategoria[]) {
+  return opciones.find((c) => c.valor === categoria)?.comportamiento ?? (categoria === "ropa" ? "ropa" : "activo");
+}
+
+function datosDe(e: Estado, editando: boolean, opciones: OpcionCategoria[]) {
+  const comp = comportamientoDe(e.categoria, opciones);
   return {
     nombre: e.nombre.trim(),
     descripcion: e.descripcion.trim() || (editando ? null : undefined),
-    ...(e.categoria === "ropa"
+    ...(comp === "ropa"
       ? { tallas: aTallas(e.tallas), prendaClave: e.prenda === SIN_PRENDA ? (editando ? null : undefined) : e.prenda }
       : {
           campos: e.campos.map((c) => ({
@@ -47,16 +54,25 @@ function datosDe(e: Estado, editando: boolean) {
 }
 
 /** Nuevo tipo de inventario o editar uno (la categoría solo se elige al crear, R2). */
-export function HojaTipo({ tipo, kit }: { tipo?: TipoInventario; kit: PrendaKit[] }) {
+export function HojaTipo({
+  tipo,
+  kit,
+  categorias = CATEGORIAS.map((c) => ({ ...c, comportamiento: c.valor as "activo" | "ropa" })),
+}: {
+  tipo?: TipoInventario;
+  kit: PrendaKit[];
+  categorias?: OpcionCategoria[];
+}) {
   const { hoja, ejecutar, pendiente, error, terminar } = useHojaEntidad(Boolean(tipo), "/inventario/tipos");
   const [e, setE] = useState<Estado>(() => inicial(tipo));
   const fijar = (parcial: Partial<Estado>) => setE((x) => ({ ...x, ...parcial }));
-  const esRopa = e.categoria === "ropa";
+  const comp = comportamientoDe(e.categoria, categorias);
+  const esRopa = comp === "ropa";
   const camposListos = e.campos.every((c) => c.etiqueta.trim().length >= 2);
   const listo = e.nombre.trim().length >= 2 && (esRopa ? tallasValidas(aTallas(e.tallas)) : camposListos);
 
   async function guardar() {
-    const datos = datosDe(e, Boolean(tipo));
+    const datos = datosDe(e, Boolean(tipo), categorias);
     const r = await ejecutar<{ id: string }>(
       tipo ? "inventario.tipos.actualizar" : "inventario.tipos.crear",
       tipo ? { id: tipo.id, ...datos } : { categoria: e.categoria, ...datos },
@@ -81,7 +97,7 @@ export function HojaTipo({ tipo, kit }: { tipo?: TipoInventario; kit: PrendaKit[
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <CamposTipo e={e} fijar={fijar} creando={!tipo} kit={kit} />
+        <CamposTipo e={e} fijar={fijar} creando={!tipo} kit={kit} categorias={categorias} comp={comp} />
       </div>
     </Sheet>
   );
@@ -93,9 +109,16 @@ function opcionesPrenda(kit: PrendaKit[], actual: string) {
   return [{ valor: SIN_PRENDA, etiqueta: "Ninguna" }, ...kit.map((p) => ({ valor: p.clave, etiqueta: p.nombre })), ...fuera];
 }
 
-type PropsCampos = { e: Estado; fijar: (p: Partial<Estado>) => void; creando: boolean; kit: PrendaKit[] };
+type PropsCampos = {
+  e: Estado;
+  fijar: (p: Partial<Estado>) => void;
+  creando: boolean;
+  kit: PrendaKit[];
+  categorias: OpcionCategoria[];
+  comp: "activo" | "ropa";
+};
 
-function CamposTipo({ e, fijar, creando, kit }: PropsCampos) {
+function CamposTipo({ e, fijar, creando, kit, categorias, comp }: PropsCampos) {
   return (
     <>
       {creando ? (
@@ -104,7 +127,12 @@ function CamposTipo({ e, fijar, creando, kit }: PropsCampos) {
           htmlFor="it-categoria"
           ayuda="Un activo se controla uno por uno; la ropa, por cantidad y talla. No se cambia después."
         >
-          <Select id="it-categoria" valor={e.categoria} onCambiar={(v) => fijar({ categoria: v })} opciones={CATEGORIAS} />
+          <Select
+            id="it-categoria"
+            valor={e.categoria}
+            onCambiar={(v) => fijar({ categoria: v })}
+            opciones={categorias.map((c) => ({ valor: c.valor, etiqueta: c.etiqueta }))}
+          />
         </Campo>
       ) : null}
       <Campo etiqueta="Nombre" htmlFor="it-nombre">
@@ -113,7 +141,7 @@ function CamposTipo({ e, fijar, creando, kit }: PropsCampos) {
       <Campo etiqueta="Descripción" htmlFor="it-desc">
         <Textarea id="it-desc" rows={2} value={e.descripcion} onChange={(x) => fijar({ descripcion: x.target.value })} />
       </Campo>
-      {e.categoria === "ropa" ? (
+      {comp === "ropa" ? (
         <>
           <Campo etiqueta="Tallas" htmlFor="it-tallas" ayuda="Separadas por coma, por ejemplo: S, M, L, XL. Hasta 20 tallas de 10 caracteres.">
             <Input id="it-tallas" value={e.tallas} onChange={(x) => fijar({ tallas: x.target.value })} />

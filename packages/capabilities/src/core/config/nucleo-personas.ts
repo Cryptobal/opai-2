@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE, prendasValidas, TIPOS_AUSENCIA_BASE } from "@opai/domain";
+import { CLAVE_PRENDA, LIMITES_PRENDAS, PERMISOS_CORE, prendasValidas, TIPOS_AUSENCIA_BASE } from "@opai/domain";
 
+import { PERMISOS_INVENTARIO } from "../../inventario/comun";
 import { defineAjustes } from "./registro";
 
 /**
@@ -63,23 +64,25 @@ export const AJUSTES_PERSONAS = defineAjustes(
         soloPersonas: true,
         control: "json",
       }),
-    // CAR-408: prendas del uniforme cuyas tallas guarda la ficha. Vacío = las de la vertical (@opai/domain).
+    // CAR-408 / CAR-743: prendas del uniforme; se editan en Configuración › Inventario (clave estable al renombrar).
     personas_prendas_uniforme: z
-      .array(z.object({ nombre: z.string().trim().min(2).max(60) }))
-      .max(30)
-      // Dos nombres con la misma clave («Pantalón» y «pantalon») harían que la ficha volviera en silencio al rubro.
-      .refine(
-        (xs) => prendasValidas(xs) !== null,
-        "Hay prendas repetidas (mismo nombre sin tildes ni mayúsculas).",
+      .array(
+        z.object({
+          clave: z.string().regex(CLAVE_PRENDA).optional(),
+          nombre: z.string().trim().min(LIMITES_PRENDAS.nombreMin).max(LIMITES_PRENDAS.nombreMax),
+          activo: z.boolean().default(true),
+          orden: z.number().int().min(0).max(99).optional(),
+        }),
       )
+      .max(LIMITES_PRENDAS.prendas)
+      .refine((xs) => prendasValidas(xs) !== null, "Hay prendas repetidas o con datos inválidos.")
       .default([])
       .meta({
         etiqueta: "Prendas del uniforme",
-        ayuda:
-          'La ficha pide la talla de cada prenda. Vacío: las de tu rubro. Ej.: [{ "nombre": "Cotona" }, { "nombre": "Calzado" }]. Cambiar el nombre de una prenda la cuenta como nueva.',
-        grupo: "Personas",
+        ayuda: "Configúralas en Configuración › Inventario. Vacío: las de tu rubro.",
+        grupo: "Inventario",
         ambito: "tenant",
-        permiso: PERMISOS_CORE.personasLaboralManage,
+        permiso: PERMISOS_INVENTARIO.tiposManage,
         soloPersonas: true,
         control: "json",
       }),

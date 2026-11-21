@@ -28,6 +28,21 @@ export async function cargarTipos(p: Parametros) {
 }
 
 /** Prendas del uniforme de la empresa (caben en una página: el kit tiene hasta 30). */
+export async function cargarCategoriasTipos() {
+  const r = await ejecutarComoUsuario<{
+    items: { clave: string; nombre: string; comportamiento: "activo" | "ropa"; activo: boolean }[];
+  }>("erp", "inventario.config.categorias_list", { incluirInactivas: false });
+  const defecto = [
+    { valor: "activo", etiqueta: "Activo", comportamiento: "activo" as const },
+    { valor: "ropa", etiqueta: "Ropa", comportamiento: "ropa" as const },
+  ];
+  return r.ok
+    ? r.data.items
+        .filter((c) => c.activo)
+        .map((c) => ({ valor: c.clave, etiqueta: c.nombre, comportamiento: c.comportamiento }))
+    : defecto;
+}
+
 export async function cargarKit(): Promise<PrendaKit[]> {
   const r = await ejecutarComoUsuario<{ items: PrendaKit[] }>("erp", "inventario.prendas.list", {
     limite: 50,
@@ -50,6 +65,10 @@ export async function cargarFichaTipo(params: Promise<{ id: string }>, searchPar
   ]);
   const datos = cargarTipo(id);
   datos.catch(() => undefined);
-  const [lista, kit] = await Promise.all([cargarTipos(p), cargarKit()]);
-  return { id, p, datos, lista, kit, puedeGestionar: puede };
+  const [lista, kit, categorias] = await Promise.all([
+    cargarTipos(p),
+    cargarKit(),
+    cargarCategoriasTipos(),
+  ]);
+  return { id, p, datos, lista, kit, categorias, puedeGestionar: puede };
 }

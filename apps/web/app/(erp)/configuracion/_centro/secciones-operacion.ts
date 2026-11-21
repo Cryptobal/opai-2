@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarDays, FileText, IdCard, Wallet } from "lucide-react";
+import { Boxes, CalendarClock, CalendarDays, FileText, IdCard, Wallet } from "lucide-react";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
@@ -42,6 +42,16 @@ export const SECCIONES_OPERACION: readonly Seccion[] = [
     icono: CalendarDays,
     grupo: "operacion",
     permiso: PERMISOS_CORE.calendarioRead,
+  }),
+  s({
+    id: "inventario",
+    titulo: "Inventario",
+    descripcion: "Prendas del uniforme y categorías de los tipos de inventario",
+    corta: "Uniforme y categorías",
+    icono: Boxes,
+    grupo: "operacion",
+    permiso: "inventario:tipos.manage",
+    modulo: "inventario",
   }),
   s({
     id: "documentos",

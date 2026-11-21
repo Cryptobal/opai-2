@@ -1,13 +1,12 @@
-import { camposConClave, errorDeTipo, LIMITES_TIPO, nombreNormalizado, normalizarTalla } from "@opai/domain";
+import { LIMITES_TIPO } from "@opai/domain";
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { sinDuplicado } from "../core/maestros/comun";
 import { defineCapability } from "../define";
-import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
+import { noEncontrado } from "../errores";
 import {
   campoEntradaSchema,
-  camposGuardados,
   descripcionSchema,
   duplicado,
   nombreSchema,
@@ -17,7 +16,8 @@ import {
   tipoSchema,
   vistaTipo,
 } from "./comun";
-import { exigirPrendaDelKit } from "./prendas";
+import { categoriasDeLaEmpresa } from "./categorias-kit";
+import { prepararActualizacionTipo } from "./tipos-actualizar-preparar";
 
 export const tiposActualizar = defineCapability({
   id: "inventario.tipos.actualizar",
@@ -38,38 +38,16 @@ export const tiposActualizar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const actual = await ctx.db.inventarioTipo.findFirst({ where: { id: input.id } });
+    const [actual, cats] = await Promise.all([
+      ctx.db.inventarioTipo.findFirst({ where: { id: input.id } }),
+      categoriasDeLaEmpresa(ctx),
+    ]);
     if (!actual) throw noEncontrado("El tipo de inventario");
-    const guardados = camposGuardados(actual.campos);
-    const existentes = new Set(guardados.map((c) => c.clave));
-    const desconocida = input.campos?.find((c) => c.clave && !existentes.has(c.clave));
-    if (desconocida) throw reglaDeNegocio(`El campo «${desconocida.etiqueta}» no es de este tipo.`);
-    const nombre = input.nombre ?? actual.nombre;
-    const f = {
-      ...actual,
-      nombre,
-      nombreNormalizado: nombreNormalizado(nombre),
-      descripcion: input.descripcion !== undefined ? input.descripcion || null : actual.descripcion,
-      campos: input.campos ? camposConClave(input.campos, [...existentes]) : guardados,
-      tallas: input.tallas ? input.tallas.map(normalizarTalla) : actual.tallas,
-      prendaClave: input.prendaClave !== undefined ? input.prendaClave : actual.prendaClave,
-      entregaAPersona: input.entregaAPersona ?? actual.entregaAPersona,
-      activo: input.activo ?? actual.activo,
-    };
-    const categoria = actual.categoria === "ropa" ? "ropa" : "activo";
-    const error = errorDeTipo({ categoria, campos: f.campos, tallas: f.tallas });
-    if (error) throw reglaDeNegocio(error);
-    if (categoria === "activo" && f.prendaClave)
-      throw reglaDeNegocio("La prenda del uniforme es solo para tipos de ropa.");
-    if (f.prendaClave && f.prendaClave !== actual.prendaClave) await exigirPrendaDelKit(ctx, f.prendaClave);
-    if (f.nombreNormalizado !== actual.nombreNormalizado) {
-      const otro = await ctx.db.inventarioTipo.findFirst({
-        where: { nombreNormalizado: f.nombreNormalizado, id: { not: actual.id } },
-      });
-      if (otro) throw conflicto(duplicado(nombre));
-    }
-    const sinCambios = JSON.stringify(vistaTipo(f)) === JSON.stringify(vistaTipo(actual));
-    if (dryRun || sinCambios) return vistaTipo(f);
+    const f = await prepararActualizacionTipo(ctx, input, actual);
+    const nombre = f.nombre;
+    const sinCambios =
+      JSON.stringify(vistaTipo(f, cats)) === JSON.stringify(vistaTipo(actual, cats));
+    if (dryRun || sinCambios) return vistaTipo(f, cats);
     const guardado = await ctx.transaccion(async (tx) => {
       const t = await sinDuplicado(
         tx.inventarioTipo.update({
@@ -95,6 +73,6 @@ export const tiposActualizar = defineCapability({
       });
       return t;
     });
-    return vistaTipo(guardado);
+    return vistaTipo(guardado, cats);
   },
 });

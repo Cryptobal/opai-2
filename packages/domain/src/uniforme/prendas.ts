@@ -3,7 +3,7 @@
 // definir sus prendas; sin lista propia rige la de su vertical.
 
 /** Una prenda del kit: la clave estable con que se guarda la talla y el nombre que ve el usuario. */
-export type Prenda = { clave: string; nombre: string };
+export type Prenda = { clave: string; nombre: string; activo?: boolean; orden?: number };
 
 export const LIMITES_PRENDAS = { prendas: 30, nombreMin: 2, nombreMax: 60, tallaMax: 20 } as const;
 
@@ -22,7 +22,7 @@ export function clavePrenda(nombre: string): string {
   return /^[a-z]/.test(base) ? base : `p_${base}`.slice(0, 40);
 }
 
-const P = (nombre: string, clave = clavePrenda(nombre)): Prenda => ({ clave, nombre });
+const P = (nombre: string, clave = clavePrenda(nombre)): Prenda => ({ clave, nombre, activo: true });
 
 const BASE: Prenda[] = [P("Camisa"), P("Pantalón"), P("Calzado")];
 
@@ -46,28 +46,64 @@ export function prendasPorVertical(vertical: string): Prenda[] {
   return POR_VERTICAL[vertical] ?? BASE;
 }
 
-/** Valida la lista guardada por la empresa (nombres). Null si no sirve; nombres o claves repetidas tampoco. */
-export function prendasValidas(valor: unknown): Prenda[] | null {
-  if (!Array.isArray(valor) || valor.length > LIMITES_PRENDAS.prendas) return null;
-  const prendas: Prenda[] = [];
-  const claves = new Set<string>();
-  for (const x of valor as unknown[]) {
-    const nombre =
-      typeof (x as { nombre?: unknown } | null)?.nombre === "string"
-        ? (x as { nombre: string }).nombre.trim()
-        : "";
-    if (nombre.length < LIMITES_PRENDAS.nombreMin || nombre.length > LIMITES_PRENDAS.nombreMax)
-      return null;
-    const clave = clavePrenda(nombre);
-    if (!CLAVE_PRENDA.test(clave) || claves.has(clave)) return null;
-    claves.add(clave);
-    prendas.push({ clave, nombre });
-  }
-  return prendas;
+type EntradaPrenda = { clave?: string; nombre: string; activo?: boolean; orden?: number };
+
+function igualPrenda(a: EntradaPrenda, b: EntradaPrenda) {
+  const ca = typeof a.clave === "string" ? a.clave : clavePrenda(a.nombre);
+  const cb = typeof b.clave === "string" ? b.clave : clavePrenda(b.nombre);
+  return ca === cb;
 }
 
-/** Kit efectivo: el de la empresa si es válido y no está vacío; si no, el de su vertical. */
+/**
+ * Conserva la clave al renombrar: si la entrada trae clave, mantiene esa clave aunque cambie el nombre.
+ * Al agregar sin clave, deriva una nueva que no choque con las existentes.
+ */
+export function prendasNormalizadas(
+  entrada: readonly EntradaPrenda[],
+  previo: readonly EntradaPrenda[] = [],
+): Prenda[] | null {
+  if (entrada.length > LIMITES_PRENDAS.prendas) return null;
+  const clavesTomadas = new Set<string>();
+  const salida: Prenda[] = [];
+  for (let i = 0; i < entrada.length; i++) {
+    const x = entrada[i]!;
+    const nombre = x.nombre.trim();
+    if (nombre.length < LIMITES_PRENDAS.nombreMin || nombre.length > LIMITES_PRENDAS.nombreMax)
+      return null;
+    let clave = typeof x.clave === "string" && CLAVE_PRENDA.test(x.clave) ? x.clave : "";
+    if (!clave) {
+      const anterior = previo.find((p) => p.nombre.trim().toLocaleLowerCase("es") === nombre.toLocaleLowerCase("es"));
+      clave = anterior && typeof anterior.clave === "string" ? anterior.clave : clavePrenda(nombre);
+    }
+    if (!CLAVE_PRENDA.test(clave) || clavesTomadas.has(clave)) return null;
+  /** No renombrar dos entradas distintas a la misma clave por colisión de nombre. */
+    const otra = entrada.findIndex((p, j) => j !== i && igualPrenda({ clave, nombre }, p));
+    if (otra >= 0) return null;
+    clavesTomadas.add(clave);
+    const orden = typeof x.orden === "number" && Number.isInteger(x.orden) ? x.orden : i;
+    salida.push({ clave, nombre, activo: x.activo !== false, orden });
+  }
+  const porNombre = new Set(entrada.map((p) => p.nombre.trim().toLocaleLowerCase("es")));
+  if (porNombre.size !== entrada.length) return null;
+  return salida.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+}
+
+/** Valida la lista guardada por la empresa (nombres y claves). Null si no sirve. */
+export function prendasValidas(valor: unknown): Prenda[] | null {
+  if (!Array.isArray(valor)) return null;
+  return prendasNormalizadas(valor as EntradaPrenda[]);
+}
+
+/** Kit efectivo activo: el de la empresa si es válido y no está vacío; si no, el de su vertical. */
 export function prendasEfectivas(propio: unknown, vertical: string): Prenda[] {
   const r = prendasValidas(propio);
-  return r?.length ? r : prendasPorVertical(vertical);
+  const lista = r?.length ? r : prendasPorVertical(vertical);
+  return lista.filter((p) => p.activo !== false);
+}
+
+/** Todas las prendas del ajuste propio, incluidas inactivas, para la pantalla de configuración. */
+export function prendasConfiguracion(propio: unknown, vertical: string): Prenda[] {
+  const r = prendasValidas(propio);
+  if (r?.length) return r;
+  return prendasPorVertical(vertical).map((p, orden) => ({ ...p, orden }));
 }

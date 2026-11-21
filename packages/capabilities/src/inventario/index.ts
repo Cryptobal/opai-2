@@ -14,6 +14,12 @@ import { tiposActualizar } from "./tipos-actualizar";
 import { tiposCrear } from "./tipos-escritura";
 import { tiposGet, tiposList } from "./tipos-lectura";
 import { tiposCargarSugeridos } from "./tipos-sugeridos";
+import {
+  configCategoriasGuardar,
+  configCategoriasList,
+  configPrendasGuardar,
+  configPrendasList,
+} from "./config";
 
 export { PERMISOS_INVENTARIO } from "./comun";
 
@@ -38,4 +44,8 @@ export const capacidadesInventario: readonly Capacidad[] = [
   entregarRopa,
   entregasDevolver,
   tallaDePersona,
+  configPrendasList,
+  configPrendasGuardar,
+  configCategoriasList,
+  configCategoriasGuardar,
 ];

@@ -1,4 +1,5 @@
 export * from "./activos";
+export * from "./categorias";
 export * from "./entregas";
 export * from "./ropa";
 export * from "./sugeridos";

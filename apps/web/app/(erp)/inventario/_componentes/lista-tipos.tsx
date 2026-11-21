@@ -12,10 +12,12 @@ import { CargarSugeridos } from "./diferidas";
 import { PestanasInventario } from "./pestanas";
 
 const detalle = (t: TipoInventario) =>
-  t.categoria === "ropa" ? conteo(t.tallas.length, "talla") : conteo(t.campos.length, "campo propio", "campos propios");
+  t.comportamiento === "ropa"
+    ? conteo(t.tallas.length, "talla")
+    : conteo(t.campos.length, "campo propio", "campos propios");
 
 function filaTipo(t: TipoInventario, q?: string) {
-  const Icono = t.categoria === "ropa" ? Shirt : Package;
+  const Icono = t.comportamiento === "ropa" ? Shirt : Package;
   return {
     id: t.id,
     href: conBusqueda(`/inventario/tipos/${t.id}`, q),
@@ -27,7 +29,7 @@ function filaTipo(t: TipoInventario, q?: string) {
     titulo: <span className="font-medium">{t.nombre}</span>,
     secundario: (
       <>
-        {etiquetaCategoria(t.categoria)} · {detalle(t)}
+        {etiquetaCategoria(t.categoria, t.categoriaNombre)} · {detalle(t)}
         <span className="md:hidden"> · {t.activo ? "Activo" : "Inactivo"}</span>
       </>
     ),

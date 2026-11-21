@@ -1,9 +1,13 @@
 // Módulo Inventario (CAR-235, ADR-116): piezas compartidas por sus capacidades.
 import {
-  CATEGORIAS_TIPO,
+  COMPORTAMIENTOS_CATEGORIA,
   LIMITES_TIPO,
   TIPOS_CAMPO_INVENTARIO,
+  comportamientoDe,
+  nombreCategoria,
   type CampoTipo,
+  type CategoriaInventario,
+  type ComportamientoCategoria,
 } from "@opai/domain";
 import { z } from "zod";
 
@@ -42,7 +46,9 @@ export const tallaSchema = z.string().trim().min(1).max(LIMITES_TIPO.tallaMax);
 
 export const tipoSchema = z.object({
   id: z.string(),
-  categoria: z.enum(CATEGORIAS_TIPO),
+  categoria: z.string(),
+  categoriaNombre: z.string(),
+  comportamiento: z.enum(COMPORTAMIENTOS_CATEGORIA),
   nombre: z.string(),
   descripcion: z.string().nullable(),
   campos: z.array(campoSchema),
@@ -71,10 +77,14 @@ export function camposGuardados(valor: unknown): CampoTipo[] {
   return r.success ? r.data : [];
 }
 
-export function vistaTipo(f: FilaTipo): VistaTipo {
+export function vistaTipo(f: FilaTipo, categorias: readonly CategoriaInventario[]): VistaTipo {
+  const comportamiento: ComportamientoCategoria =
+    comportamientoDe(f.categoria, categorias) ?? (f.categoria === "ropa" ? "ropa" : "activo");
   return {
     id: f.id,
-    categoria: f.categoria === "ropa" ? "ropa" : "activo",
+    categoria: f.categoria,
+    categoriaNombre: nombreCategoria(f.categoria, categorias),
+    comportamiento,
     nombre: f.nombre,
     descripcion: f.descripcion,
     campos: camposGuardados(f.campos),
@@ -83,6 +93,15 @@ export function vistaTipo(f: FilaTipo): VistaTipo {
     entregaAPersona: f.entregaAPersona,
     activo: f.activo,
   };
+}
+
+/** Claves de categorías activas con un comportamiento dado. */
+export function clavesPorComportamiento(
+  categorias: readonly CategoriaInventario[],
+  comportamiento: ComportamientoCategoria,
+) {
+  const claves = categorias.filter((c) => c.activo && c.comportamiento === comportamiento).map((c) => c.clave);
+  return claves.length ? claves : [comportamiento];
 }
 
 export const nombreSchema = z
@@ -119,7 +138,7 @@ export function paginaPor<T>(filas: T[], limite: number, clave: (f: T) => string
 /** Página de tipos ordenados por nombre (catálogo y existencias de ropa). */
 export async function tiposPorNombre(
   ctx: Contexto,
-  filtro: { categoria?: string; activo?: boolean },
+  filtro: { categoria?: string | { in: string[] }; activo?: boolean },
   cursor: string | undefined,
   limite: number,
 ) {

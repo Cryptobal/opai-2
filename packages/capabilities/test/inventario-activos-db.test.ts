@@ -4,6 +4,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { manifest as manifestInventario } from "../../../modules/inventario/manifest";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import * as mod from "../src";
 import { activosCambiarEstado } from "../src/inventario/activos-estado";
@@ -44,6 +45,7 @@ describe.skipIf(!urlPropietario)("inventario · activos en base real", () => {
   beforeAll(async () => {
     e = await prepararEntorno();
     limpiarModulos();
+    mod.registrarModulos([manifestInventario]);
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesInventario]);
     ana = (

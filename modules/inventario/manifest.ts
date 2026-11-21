@@ -30,7 +30,32 @@ export const manifest = defineModule({
       permiso: PERMISOS_INVENTARIO.read,
     },
   ],
-  configuracion: z.object({}),
+  configuracion: z.object({
+    inventario_categorias: z
+      .array(
+        z.object({
+          clave: z
+            .string()
+            .regex(/^[a-z][a-z0-9_]{0,39}$/)
+            .optional(),
+          nombre: z.string().trim().min(2).max(40),
+          comportamiento: z.enum(["activo", "ropa"]),
+          activo: z.boolean().default(true),
+          orden: z.number().int().min(0).max(99).optional(),
+        }),
+      )
+      .max(20)
+      .default([])
+      .meta({
+        etiqueta: "Categorías de inventario",
+        ayuda:
+          "Vacío: Activo y Ropa. Cada categoría define si los tipos se controlan por unidad o por talla.",
+        grupo: "Catálogo",
+        ambito: "tenant",
+        permiso: PERMISOS_INVENTARIO.tiposManage,
+        control: "json",
+      }),
+  }),
   eventos: [
     { id: "inventario.tipo.creado", descripcion: "Se creó un tipo de inventario." },
     { id: "inventario.tipo.actualizado", descripcion: "Se modificó o desactivó un tipo de inventario." },

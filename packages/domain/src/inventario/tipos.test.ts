@@ -20,18 +20,18 @@ describe("inventario · tipos (CAR-235)", () => {
   });
 
   it("R3: la ropa necesita tallas, sin repetir y sin campos propios", () => {
-    expect(errorDeTipo({ categoria: "ropa", campos: [], tallas: [] })).toMatch(/al menos una talla/);
-    expect(errorDeTipo({ categoria: "ropa", campos: [], tallas: ["M", "m"] })).toMatch(/repetidas/);
+    expect(errorDeTipo({ comportamiento: "ropa", campos: [], tallas: [] })).toMatch(/al menos una talla/);
+    expect(errorDeTipo({ comportamiento: "ropa", campos: [], tallas: ["M", "m"] })).toMatch(/repetidas/);
     const campo = { clave: "x", etiqueta: "X", tipo: "texto" as const, obligatorio: false };
-    expect(errorDeTipo({ categoria: "ropa", campos: [campo], tallas: ["M"] })).toMatch(/solo para tipos de activo/);
-    expect(errorDeTipo({ categoria: "ropa", campos: [], tallas: ["S", "M"] })).toBeNull();
+    expect(errorDeTipo({ comportamiento: "ropa", campos: [campo], tallas: ["M"] })).toMatch(/solo para tipos de activo/);
+    expect(errorDeTipo({ comportamiento: "ropa", campos: [], tallas: ["S", "M"] })).toBeNull();
   });
 
   it("R3 y R4: el activo no lleva tallas ni campos repetidos", () => {
-    expect(errorDeTipo({ categoria: "activo", campos: [], tallas: ["M"] })).toMatch(/solo para tipos de ropa/);
+    expect(errorDeTipo({ comportamiento: "activo", campos: [], tallas: ["M"] })).toMatch(/solo para tipos de ropa/);
     const c = { clave: "imei", etiqueta: "IMEI", tipo: "texto" as const, obligatorio: true };
-    expect(errorDeTipo({ categoria: "activo", campos: [c, c], tallas: [] })).toMatch(/mismo nombre/);
-    expect(errorDeTipo({ categoria: "activo", campos: [c], tallas: [] })).toBeNull();
+    expect(errorDeTipo({ comportamiento: "activo", campos: [c, c], tallas: [] })).toMatch(/mismo nombre/);
+    expect(errorDeTipo({ comportamiento: "activo", campos: [c], tallas: [] })).toBeNull();
   });
 
   it("R6: los sugeridos son válidos y sus nombres no se repiten", () => {
@@ -41,7 +41,10 @@ describe("inventario · tipos (CAR-235)", () => {
       const ropa = lista.filter((t) => t.categoria === "ropa");
       expect(ropa.map((t) => t.prendaClave)).toEqual(prendasPorVertical(vertical).map((p) => p.clave));
       expect(new Set(lista.map((t) => nombreNormalizado(t.nombre))).size).toBe(lista.length);
-      for (const t of lista) expect(errorDeTipo(t)).toBeNull();
+      for (const t of lista)
+        expect(
+          errorDeTipo({ comportamiento: t.categoria, campos: t.campos, tallas: t.tallas }),
+        ).toBeNull();
     }
   });
 
@@ -61,7 +64,7 @@ describe("inventario · tipos (CAR-235)", () => {
 
   it("normaliza tallas y no repite claves de campo", () => {
     expect(normalizarTalla(" x l ")).toBe("XL");
-    expect(errorDeTipo({ categoria: "ropa", campos: [], tallas: ["XL", "x l"] })).toMatch(/repetidas/);
+    expect(errorDeTipo({ comportamiento: "ropa", campos: [], tallas: ["XL", "x l"] })).toMatch(/repetidas/);
     const campos = camposConClave(
       [
         { clave: "modelo", etiqueta: "Marca", tipo: "texto", obligatorio: false },
@@ -70,8 +73,8 @@ describe("inventario · tipos (CAR-235)", () => {
       ["modelo"],
     );
     expect(campos.map((c) => c.clave)).toEqual(["modelo", "modelo_2"]);
-    expect(errorDeTipo({ categoria: "activo", campos, tallas: [] })).toBeNull();
+    expect(errorDeTipo({ comportamiento: "activo", campos, tallas: [] })).toBeNull();
     const signo = { clave: "c_", etiqueta: "##", tipo: "texto" as const, obligatorio: false };
-    expect(errorDeTipo({ categoria: "activo", campos: [signo], tallas: [] })).toMatch(/letras o números/);
+    expect(errorDeTipo({ comportamiento: "activo", campos: [signo], tallas: [] })).toMatch(/letras o números/);
   });
 });

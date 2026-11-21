@@ -9,6 +9,7 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { entradaLista, PERMISOS_INVENTARIO, salidaLista } from "./comun";
+import { comportamientoDeCategoria } from "./categorias-kit";
 import { exigirDestino } from "./entregas-comun";
 
 /** Error si la prenda no es del kit del uniforme de la empresa. */
@@ -57,7 +58,8 @@ export const tallaDePersona = defineCapability({
       where: { id: tipoId },
       select: { categoria: true, prendaClave: true },
     });
-    if (!tipo || tipo.categoria !== "ropa") throw noEncontrado("El tipo de ropa");
+    if (!tipo || (await comportamientoDeCategoria(ctx, tipo.categoria)) !== "ropa")
+      throw noEncontrado("El tipo de ropa");
     if (!tipo.prendaClave) return { personaId, talla: null };
     const fila = await ctx.db.personaTalla.findFirst({
       where: { personaId, prenda: tipo.prendaClave },

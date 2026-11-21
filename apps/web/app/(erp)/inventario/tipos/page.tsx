@@ -5,7 +5,7 @@ import { SplitScreen } from "@opai/ds";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
 
-import { cargarKit, cargarTipos } from "../_componentes/datos";
+import { cargarCategoriasTipos, cargarKit, cargarTipos } from "../_componentes/datos";
 import { HojaTipo } from "../_componentes/diferidas";
 import { ListaTipos } from "../_componentes/lista-tipos";
 import { contextoPagina } from "../_componentes/paginas";
@@ -26,10 +26,15 @@ export default function TiposInventario({ searchParams }: { searchParams: Search
           "/inventario/tipos",
           "inventario:tipos.manage",
         );
-        const [tipos, kit] = await Promise.all([cargarTipos(p), cargarKit()]);
+        const [tipos, kit, categorias] = await Promise.all([
+          cargarTipos(p),
+          cargarKit(),
+          cargarCategoriasTipos(),
+        ]);
         return {
           ...tipos,
           kit,
+          categorias,
           q: p.q,
           puedeGestionar: puede,
         };
@@ -52,7 +57,7 @@ export default function TiposInventario({ searchParams }: { searchParams: Search
               />
             }
           />
-          {d.puedeGestionar ? <HojaTipo kit={d.kit} /> : null}
+          {d.puedeGestionar ? <HojaTipo kit={d.kit} categorias={d.categorias} /> : null}
         </>
       )}
     </PaginaPortal>
