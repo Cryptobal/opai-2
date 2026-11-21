@@ -9,6 +9,7 @@ import {
   CANALES_ACTIVOS,
   elegirCadena,
   type Paso,
+  pasosActivos,
   pasosSimultaneos,
   PLAZO_ATENCION_POR_DEFECTO_MIN,
 } from "../domain/cadena";
@@ -25,6 +26,7 @@ export const pasoSchema = z.object({
   canales: z.array(z.enum(CANALES)).min(1).max(CANALES.length),
   esperaMin: z.number().int().min(1).max(240),
   exigeConfirmacion: z.boolean(),
+  activo: z.boolean().default(true),
 });
 
 export const TRABAJO_REVISAR = "central.alertas.revisar";
@@ -34,13 +36,15 @@ type Alerta = { id: string; instalacionId: string; personaId: string | null; sev
 /** Pasos y plazo de la cadena que rige la alerta (la más específica, o la plantilla). */
 export async function cadenaDe(tx: TenantTx, a: Alerta) {
   const cadenas = await tx.centralCadena.findMany({
-    where: { OR: [{ instalacionId: null }, { instalacionId: a.instalacionId }] },
+    where: { activa: true, OR: [{ instalacionId: null }, { instalacionId: a.instalacionId }] },
   });
   const c = elegirCadena(cadenas, a.instalacionId, a.severidad as Severidad);
   const pasos = c ? z.array(pasoSchema).safeParse(c.pasos) : null;
+  const raw = (c && pasos?.success ? pasos.data : CADENA_POR_DEFECTO) as readonly Paso[];
+  const activos = pasosActivos(raw);
   return {
-    cadenaId: c && pasos?.success ? c.id : null,
-    pasos: (c && pasos?.success ? pasos.data : CADENA_POR_DEFECTO) as readonly Paso[],
+    cadenaId: c && pasos?.success && activos.length ? c.id : null,
+    pasos: (activos.length ? activos : CADENA_POR_DEFECTO) as readonly Paso[],
     plazoMin: c?.plazoAtencionMin ?? PLAZO_ATENCION_POR_DEFECTO_MIN,
   };
 }

@@ -1,8 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import { elegirCadena, pasosSimultaneos, siguientePaso } from "./cadena";
+import { CADENA_POR_DEFECTO, elegirCadena, pasosActivos, pasosSimultaneos, siguientePaso, validarPasosCadena } from "./cadena";
 
 const I = "inst-1";
+
+describe("validarPasosCadena", () => {
+  it("la plantilla por defecto termina en admin", () => {
+    expect(validarPasosCadena(CADENA_POR_DEFECTO)).toBeNull();
+    expect(pasosActivos(CADENA_POR_DEFECTO).length).toBe(4);
+  });
+  it("rechaza si el único paso activo es el guardia", () => {
+    expect(validarPasosCadena([{ ...CADENA_POR_DEFECTO[0]!, activo: true }])).toMatch(/último paso/);
+  });
+  it("omite pasos inactivos", () => {
+    const pasos = [
+      { ...CADENA_POR_DEFECTO[0]!, activo: false },
+      { ...CADENA_POR_DEFECTO[3]!, activo: true },
+    ];
+    expect(validarPasosCadena(pasos)).toBeNull();
+    expect(pasosActivos(pasos)).toHaveLength(1);
+  });
+});
 
 describe("elegirCadena", () => {
   const cadenas = [

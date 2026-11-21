@@ -85,6 +85,8 @@ model CentralCadena {
   severidad        String?
   pasos            Json
   plazoAtencionMin Int      @default(30) @map("plazo_atencion_min")
+  /// false = la cadena no se usa al escalar (CAR-751).
+  activa           Boolean  @default(true)
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

@@ -111,6 +111,19 @@ describe.skipIf(omitirSuiteDb())("Central · cadenas de escalamiento (db)", () =
     await expect(e.admin.centralIntento.deleteMany({ where: { alertaId: id } })).rejects.toThrow(/append-only/);
   });
 
+  it("rechaza una cadena cuyo último paso activo es el guardia", async () => {
+    const r = await mod.executeCapability(
+      ctx(admin),
+      "central.cadenas.guardar",
+      {
+        instalacionId: inst,
+        pasos: [{ destinatario: { tipo: "guardia" }, canales: ["campana"], esperaMin: 2, exigeConfirmacion: false }],
+      },
+      {},
+    );
+    expect(r.ok).toBe(false);
+  });
+
   it("una cadena propia de la instalación reemplaza a la plantilla", async () => {
     await ok(ctx(admin), "central.cadenas.guardar", {
       instalacionId: inst,

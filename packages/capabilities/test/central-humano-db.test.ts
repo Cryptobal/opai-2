@@ -57,7 +57,19 @@ describe.skipIf(omitirSuiteDb())("Central · humano a cargo (db)", () => {
     await e?.cerrar();
   });
 
+  it("en franja nocturna amplia el agente opera sin turno", async () => {
+    await ok(ctx(ana), "core.config.set", { modulo: "central", clave: "franja_nocturna_inicio", valor: "00:00" });
+    await ok(ctx(ana), "core.config.set", { modulo: "central", clave: "franja_nocturna_fin", valor: "23:59" });
+    expect(await abrir(ctx(ana, true))).toMatchObject({ ok: true });
+    expect(await ok<{ franjaNocturna: boolean; agenteOperativo: boolean }>(ctx(ana), "central.turno.estado", {})).toMatchObject({
+      franjaNocturna: true,
+      agenteOperativo: true,
+    });
+  });
+
   it("sin nadie a cargo el agente no abre alertas; con turno abierto sí", async () => {
+    await ok(ctx(ana), "core.config.set", { modulo: "central", clave: "franja_nocturna_inicio", valor: "20:00" });
+    await ok(ctx(ana), "core.config.set", { modulo: "central", clave: "franja_nocturna_fin", valor: "08:00" });
     expect(await abrir(ctx(ana, true))).toMatchObject({ ok: false });
     expect(await ok<{ responsable: unknown }>(ctx(ana), "central.turno.estado", {})).toMatchObject({ responsable: null });
     await ok(ctx(ana), "central.turno.abrir", {});
