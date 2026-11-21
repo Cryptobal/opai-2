@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { instalacionesEnAlcance } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import { instalacionEnAlcance } from "../rondas/comun";
@@ -39,7 +40,12 @@ async function instalacionObjetivo(ctx: Parameters<typeof instalacionEnAlcance>[
     await instalacionEnAlcance(ctx, id);
     return id;
   }
-  const inst = await ctx.db.instalacion.findFirst({ where: {}, select: { id: true }, orderBy: { createdAt: "asc" } });
+  const ids = instalacionesEnAlcance(ctx);
+  const inst = await ctx.db.instalacion.findFirst({
+    where: ids ? { id: { in: [...ids] } } : {},
+    select: { id: true },
+    orderBy: { createdAt: "asc" },
+  });
   if (!inst) throw reglaDeNegocio("No hay instalaciones en el alcance.");
   return inst.id;
 }

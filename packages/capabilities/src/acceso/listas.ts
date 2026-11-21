@@ -13,6 +13,7 @@ import {
   PERMISO_LISTAS,
   TIPOS_LISTA,
   TIPOS_REGISTRO,
+  quien,
   vistaEntrada,
 } from "./comun";
 
@@ -113,6 +114,7 @@ export const listasAgregar = defineCapability({
       desdeMin: i.desdeMin ?? null,
       hastaMin: i.hastaMin ?? null,
       usoUnico: i.usoUnico,
+      agregadaPor: quien(ctx),
     };
     if (dryRun)
       return vistaEntrada({

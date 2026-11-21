@@ -4,7 +4,7 @@
 
 ## Qué entró
 
-- **Migración aditiva `20270124110000_acceso_puntos`:** tabla `acceso.puntos` (nombre, tipo peatonal, vehicular o mixto, activo y orden; RLS FORCE con `tenant_isolation`, trigger `mismo_tenant`; `opai_app` sin `DELETE`) y columna opcional `registros_acceso.punto_id` con su FK y trigger de mismo tenant.
+- **Migración aditiva `20271121090000_acceso_puntos`:** tabla `acceso.puntos` (nombre, tipo peatonal, vehicular o mixto, activo y orden; RLS FORCE con `tenant_isolation`, trigger `mismo_tenant`; `opai_app` sin `DELETE`) y columna opcional `registros_acceso.punto_id` con su FK y trigger de mismo tenant.
 - **Capacidades** (UI, API y MCP, como pide la especificación §9): `acceso.puntos.list` (`acceso:read`, lectura auditada) y `acceso.puntos.set` (`acceso:config.manage`, vista previa, aprobación humana para agentes). Un punto que no viene en la lista queda inactivo; no se borra.
 - **Portería:** «en sitio» trae los puntos activos; con más de uno, el teléfono elige y recuerda desde cuál registra (también las entradas por QR de prerregistro). El servidor guarda el punto solo si es activo de la instalación del equipo; si no, la entrada entra igual, sin punto.
 - **ERP:** tarjeta «Puntos de acceso» en Accesos › Configuración de la instalación y «Punto de acceso» en la ficha del registro.

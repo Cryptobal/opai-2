@@ -19,7 +19,7 @@ RETURNS INT
 LANGUAGE plpgsql
 VOLATILE
 SECURITY DEFINER
-SET search_path = pg_catalog, acceso, core, pg_temp
+SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
   v_tenant UUID;
@@ -28,6 +28,12 @@ BEGIN
   v_tenant := NULLIF(current_setting('app.tenant_id', true), '')::uuid;
   IF v_tenant IS NULL THEN
     RAISE EXCEPTION 'Falta app.tenant_id';
+  END IF;
+  IF p_tope IS NULL OR p_tope < 1 OR p_tope > 1000 THEN
+    RAISE EXCEPTION 'p_tope debe estar entre 1 y 1000';
+  END IF;
+  IF p_corte > NOW() - INTERVAL '90 days' THEN
+    RAISE EXCEPTION 'p_corte no puede ser más reciente que hace 90 días';
   END IF;
   WITH sel AS (
     SELECT id FROM acceso.registros_acceso
@@ -57,7 +63,7 @@ RETURNS INT
 LANGUAGE plpgsql
 VOLATILE
 SECURITY DEFINER
-SET search_path = pg_catalog, acceso, core, pg_temp
+SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
   v_tenant UUID;
@@ -66,6 +72,12 @@ BEGIN
   v_tenant := NULLIF(current_setting('app.tenant_id', true), '')::uuid;
   IF v_tenant IS NULL THEN
     RAISE EXCEPTION 'Falta app.tenant_id';
+  END IF;
+  IF p_tope IS NULL OR p_tope < 1 OR p_tope > 1000 THEN
+    RAISE EXCEPTION 'p_tope debe estar entre 1 y 1000';
+  END IF;
+  IF p_corte > NOW() - INTERVAL '180 days' THEN
+    RAISE EXCEPTION 'p_corte no puede ser más reciente que hace 180 días';
   END IF;
   WITH sel AS (
     SELECT id FROM acceso.intentos_denegados

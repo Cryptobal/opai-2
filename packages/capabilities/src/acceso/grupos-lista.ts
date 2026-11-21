@@ -5,7 +5,7 @@ import { cursorDe, pagina } from "../core/maestros/comun";
 import { defineCapability } from "../define";
 import { instalacionEnAlcance } from "../rondas/comun";
 import { inputPaginaAcceso } from "./pagina-alcance";
-import { reglaDeNegocio } from "../errores";
+import { prohibido, reglaDeNegocio } from "../errores";
 import { PERMISO_READ } from "./comun";
 import { PERMISO_CONFIG } from "./config-comun";
 
@@ -60,6 +60,7 @@ export const gruposCambiar = defineCapability({
   dryRun: true,
   exigeAprobacion: () => true,
   async handler(ctx, { grupos }, { dryRun }) {
+    if (ctx.alcance) throw prohibido("Los grupos de instalaciones son de toda la empresa.");
     for (const ids of grupos.map((g) => g.instalacionIds)) {
       for (const instalacionId of ids) await instalacionEnAlcance(ctx, instalacionId);
     }
