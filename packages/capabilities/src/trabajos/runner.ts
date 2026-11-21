@@ -135,34 +135,3 @@ export async function programarCapturaSii(ctx: Contexto, hoy: string): Promise<b
   return sii;
 }
 
-/** Encola trabajos horarios (`hora` = «aaaa-mm-ddTHH» en la hora local del tenant, ver `horaEn`). */
-export async function programarHorarios(ctx: Contexto, hora: string): Promise<string[]> {
-  const encolados: string[] = [];
-  for (const t of listarTrabajos().filter((x) => x.periodicidad === "horaria")) {
-    const nuevo = await ctx.transaccion((tx) =>
-      ctx.trabajos.encolar(tx, {
-        tipo: t.tipo,
-        payload: { hora },
-        claveUnica: `${t.tipo}:${hora}`,
-      }),
-    );
-    if (nuevo) encolados.push(t.tipo);
-  }
-  return encolados;
-}
-
-/** Encola trabajos cada 5 min (`tramo` = «aaaa-mm-ddTHH:mm» en la hora local del tenant, ver `tramoEn`). */
-export async function programarCada5Min(ctx: Contexto, tramo: string): Promise<string[]> {
-  const encolados: string[] = [];
-  for (const t of listarTrabajos().filter((x) => x.periodicidad === "cada5min")) {
-    const nuevo = await ctx.transaccion((tx) =>
-      ctx.trabajos.encolar(tx, {
-        tipo: t.tipo,
-        payload: { tramo },
-        claveUnica: `${t.tipo}:${tramo}`,
-      }),
-    );
-    if (nuevo) encolados.push(t.tipo);
-  }
-  return encolados;
-}
