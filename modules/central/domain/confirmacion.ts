@@ -15,7 +15,7 @@ export type RespuestaGuardia = (typeof RESPUESTAS_GUARDIA)[number];
 export const FRANJAS_CONFIRMACION = ["noche", "dia", "ambos"] as const;
 export type FranjaConfirmacion = (typeof FRANJAS_CONFIRMACION)[number];
 
-export const MOTIVO_PROBLEMA_MAX = 200;
+const MOTIVO_PROBLEMA_MAX = 200;
 export const ANTICIPACION_MIN = 15;
 export const ANTICIPACION_MAX = 180;
 export const ANTICIPACION_DEFECTO = 60;
