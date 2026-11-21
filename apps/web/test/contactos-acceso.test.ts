@@ -16,19 +16,22 @@ describe("acceso de contactos al portal", () => {
     expect(vistaEstado({ estado: "activo" })).toMatchObject({ suspender: true, revocar: true });
     expect(vistaEstado({ estado: "suspendido" })).toMatchObject({ suspender: false, revocar: true });
   });
-  it("una cuenta inactiva no permite dar acceso y explica por qué", () => {
-    const v = vistaEstado({ estado: "sin_acceso" }, false);
-    expect(v.darAcceso).toBe(false);
-    expect(v.nota).toMatch(/inactiva/);
+  it("con cuenta inactiva igual puede dar acceso en modo historial", () => {
+    const v = vistaEstado({ estado: "sin_acceso" }, { cuentaInactiva: true });
+    expect(v.darAcceso).toBe(true);
+    expect(v.nota).toMatch(/historial/);
   });
   it("explica el motivo de «No disponible»", () => {
     expect(vistaEstado({ estado: "no_disponible", motivo: "usuario_interno" }).nota).toMatch(/interno/);
     expect(vistaEstado({ estado: "no_disponible", motivo: "vinculado_a_otra_cuenta" }).nota).toMatch(/otra cuenta/);
   });
-  it("con la cuenta inactiva un acceso activo se ve pausado, no «Activo»", () => {
-    const v = vistaEstado({ estado: "activo" }, false);
-    expect(v.etiqueta).toMatch(/Pausado/);
+  it("con la cuenta inactiva un acceso activo se ve en solo historial", () => {
+    const v = vistaEstado({ estado: "activo" }, { cuentaInactiva: true });
+    expect(v.etiqueta).toMatch(/historial/i);
     expect(v.suspender).toBe(false);
+  });
+  it("en prospecto recuerda el alcance limitado", () => {
+    expect(vistaEstado({ estado: "activo" }, { esProspecto: true }).nota).toMatch(/propuesta/);
   });
   it("solo anuncia «Invitación enviada» si se envió una invitación", () => {
     expect(mensajeDarAcceso({ estado: "invitado" })).toEqual({ exito: true, texto: "Invitación enviada" });

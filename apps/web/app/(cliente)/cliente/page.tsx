@@ -28,7 +28,8 @@ export default function Pagina({ searchParams }: { searchParams: SearchParams })
         // Un prospecto (acceso «limitado», CAR-300) no tiene Resumen: entra directo a sus Cotizaciones.
         if (!r.ok && r.error.code === "FORBIDDEN") {
           const yo = await ejecutarComoUsuario<{ alcance: string }>("cliente", "portal_cliente.mi_acceso", {});
-          if (yo.ok && yo.data.alcance === "limitado") redirect("/cliente/cotizaciones");
+          if (yo.ok && (yo.data.alcance === "limitado" || yo.data.alcance === "historial"))
+            redirect("/cliente/cotizaciones");
         }
         return exigirDatos(r);
       }}

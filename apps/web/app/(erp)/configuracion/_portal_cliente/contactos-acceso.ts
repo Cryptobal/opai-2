@@ -39,18 +39,48 @@ const MOTIVOS: Record<string, string> = {
  * «Dar acceso» solo existe para quien no tiene vínculo: un suspendido o revocado NO se reactiva desde
  * aquí (se hace desde Accesos) y una invitación vigente no se repite.
  */
-export function vistaEstado(c: Pick<ContactoAcceso, "estado" | "motivo">, cuentaActiva = true): VistaEstado {
+export function vistaEstado(
+  c: Pick<ContactoAcceso, "estado" | "motivo">,
+  opciones: { cuentaInactiva?: boolean; esProspecto?: boolean } = {},
+): VistaEstado {
+  const { cuentaInactiva = false, esProspecto = false } = opciones;
   const base = { darAcceso: false, suspender: false, revocar: false };
+  const notaProspecto = esProspecto ? "El contacto solo ve su propuesta hasta que la cuenta sea cliente." : "";
   switch (c.estado) {
     case "sin_acceso":
-      return { ...base, etiqueta: "Sin acceso", tono: "neutro", nota: cuentaActiva ? "" : "La cuenta está inactiva: no se puede dar acceso.", darAcceso: cuentaActiva };
+      return {
+        ...base,
+        etiqueta: "Sin acceso",
+        tono: "neutro",
+        nota: [notaProspecto, cuentaInactiva ? "Entrará en modo solo historial hasta que reactives la cuenta." : ""]
+          .filter(Boolean)
+          .join(" "),
+        darAcceso: true,
+      };
     case "invitacion_pendiente":
-      return { ...base, etiqueta: "Invitación pendiente", tono: "warning", nota: "Ya se envió una invitación; no se repite." };
+      return {
+        ...base,
+        etiqueta: "Invitación pendiente",
+        tono: "warning",
+        nota: ["Ya se envió una invitación; no se repite.", notaProspecto].filter(Boolean).join(" "),
+      };
     case "activo":
-      // Con la cuenta inactiva el portal rechaza el ingreso: se muestra la pausa efectiva, no «Activo».
-      if (!cuentaActiva)
-        return { ...base, etiqueta: "Pausado · cuenta inactiva", tono: "warning", nota: "No entra mientras la cuenta esté inactiva; recupera el acceso al reactivarla.", revocar: true };
-      return { ...base, etiqueta: "Activo", tono: "success", nota: "", suspender: true, revocar: true };
+      if (cuentaInactiva)
+        return {
+          ...base,
+          etiqueta: "Activo · solo historial",
+          tono: "warning",
+          nota: "Entra solo a documentos, cotizaciones y registros pasados; al reactivar la cuenta recupera el alcance normal.",
+          revocar: true,
+        };
+      return {
+        ...base,
+        etiqueta: "Activo",
+        tono: "success",
+        nota: notaProspecto,
+        suspender: true,
+        revocar: true,
+      };
     case "suspendido":
       return { ...base, etiqueta: "Suspendido", tono: "warning", nota: "Reactívalo desde Accesos.", revocar: true };
     case "revocado":
@@ -59,6 +89,10 @@ export function vistaEstado(c: Pick<ContactoAcceso, "estado" | "motivo">, cuenta
       return { ...base, etiqueta: "Sin correo", tono: "neutro", nota: "Agrega un correo al contacto para invitarlo." };
     case "no_disponible":
       return { ...base, etiqueta: "No disponible", tono: "neutro", nota: (c.motivo && MOTIVOS[c.motivo]) || "No se puede dar acceso a este contacto." };
+    default: {
+      const _agotado: never = c.estado;
+      return _agotado;
+    }
   }
 }
 

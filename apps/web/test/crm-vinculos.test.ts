@@ -17,6 +17,9 @@ vi.mock("@/app/_components/maestros/enlace-boton-hoja", () => ({
 vi.mock("@/app/(erp)/cuentas/_componentes/diferidas", () => ({
   HojaContacto: () => "Formulario nuevo",
 }));
+vi.mock("@/app/(erp)/cuentas/_componentes/acceso-portal-fila", () => ({
+  AccesoPortalFila: () => null,
+}));
 vi.mock("@/app/(erp)/contactos/_componentes/lista-vinculos-diferida", async () => {
   const { ListaVinculos } = await import("@/app/(erp)/contactos/_componentes/lista-vinculos");
   return {
@@ -115,7 +118,7 @@ describe("CRM PR 2b-1 · permisos calculados en servidor", () => {
         },
       ],
     });
-    const html = renderToStaticMarkup(await ContactosCuenta({ cuentaId: "cu2" }));
+    const html = renderToStaticMarkup(await ContactosCuenta({ cuentaId: "cu2", cuentaEstado: "cliente_activo" }));
     expect(estado.ejecutar).toHaveBeenCalledWith("erp", "core.cuentas.contactos", {
       cuentaId: "cu2",
     });

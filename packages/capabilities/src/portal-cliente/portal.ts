@@ -8,7 +8,7 @@ import { configDeCuenta } from "./config-datos";
 import { novedadesSchema } from "./novedades";
 import { rondasSchema } from "./rondas";
 import { seccionesDelResumen } from "./secciones";
-import { PERMISO_PORTAL, accesoDelActor, seccionSchema } from "./comun";
+import { PERMISO_PORTAL, SECCIONES_MODO_HISTORIAL, accesoDelActor, exigirPortalOperativo, seccionSchema } from "./comun";
 
 const MES = /^\d{4}-(0[1-9]|1[0-2])$/;
 
@@ -23,8 +23,8 @@ function mesActual(timezone: string, ahora: Date): string {
 const perfilSchema = z.object({
   cuentaId: z.string(),
   cuentaNombre: z.string(),
-  /** «limitado»: prospecto que solo ve su propuesta (CAR-300); «completo»: el portal entero. */
-  alcance: z.enum(["completo", "limitado"]),
+  /** «limitado»: prospecto que solo ve su propuesta (CAR-300); «historial»: cuenta inactiva; «completo»: el portal entero. */
+  alcance: z.enum(["completo", "limitado", "historial"]),
   /** true si el contacto ve solo algunas de las instalaciones de su cuenta. */
   limitado: z.boolean(),
   instalaciones: z.array(z.object({ id: z.string(), nombre: z.string(), direccion: z.string().nullable() })),
@@ -55,6 +55,25 @@ export const miAcceso = defineCapability({
         limitado: true,
         instalaciones: [],
         seccionesVisibles: [],
+        muestraFotoGuardias: false,
+        muestraRutGuardias: false,
+        gestionaListas: false,
+      };
+    }
+    if (a.alcance === "historial") {
+      const { config } = await configDeCuenta(ctx, a.cuentaId);
+      const secciones = config.seccionesVisibles.filter((s) => SECCIONES_MODO_HISTORIAL.includes(s));
+      return {
+        cuentaId: a.cuentaId,
+        cuentaNombre: a.cuentaNombre,
+        alcance: a.alcance,
+        limitado: true,
+        instalaciones: a.instalaciones.map((i) => ({
+          id: i.id,
+          nombre: i.nombre,
+          direccion: i.direccionFormateada ?? i.comuna ?? null,
+        })),
+        seccionesVisibles: [...secciones],
         muestraFotoGuardias: false,
         muestraRutGuardias: false,
         gestionaListas: false,
@@ -118,6 +137,7 @@ export const resumenLeer = defineCapability({
   portales: ["cliente"],
   async handler(ctx, input) {
     const [a, tenant] = await Promise.all([accesoDelActor(ctx), tenantActual(ctx)]);
+    exigirPortalOperativo(a.alcance);
     const actual = mesActual(tenant.timezone, new Date());
     const mes = input.mes ?? actual;
     if (mes > actual) throw reglaDeNegocio("El informe de un mes futuro aún no existe.");

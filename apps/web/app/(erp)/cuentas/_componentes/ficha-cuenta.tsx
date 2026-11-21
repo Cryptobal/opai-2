@@ -46,7 +46,7 @@ function accionesCuenta(c: CuentaDetalle): AccionEntidad[] {
 }
 
 export type TabCuenta =
-  "resumen" | "contactos" | "instalaciones" | "negocios" | "documentos" | "actividad";
+  "resumen" | "contactos" | "portal" | "instalaciones" | "negocios" | "documentos" | "actividad";
 
 /** Ficha de una cuenta (03/04): estado, nombre, razón social y RUT; tabs por ruta. */
 export function FichaCuenta(p: {
@@ -55,6 +55,8 @@ export function FichaCuenta(p: {
   tab: TabCuenta;
   /** Pestaña aportada por Comercial (ADR-041.5): solo con el módulo activo y permiso. */
   negocios?: boolean;
+  /** Pestaña Portal Cliente (CAR-802): módulo activo y permiso de leer accesos. */
+  portal?: boolean;
   /** Filtros de la lista: las pestañas los conservan para que la lista de la izquierda no vuelva a «todos». */
   filtros?: Parametros;
   children: ReactNode;
@@ -115,6 +117,7 @@ export function FichaCuenta(p: {
             etiqueta: "Contactos",
             href: ir(`${base}/contactos`),
           },
+          ...(p.portal ? [{ id: "portal", etiqueta: "Portal", href: ir(`${base}/portal`) }] : []),
           {
             id: "instalaciones",
             etiqueta: "Instalaciones",

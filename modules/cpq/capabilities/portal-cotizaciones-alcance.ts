@@ -1,6 +1,11 @@
 import type { Contexto } from "@opai/capabilities";
 
-type Entrada = { cuentaId: string; alcance: "completo" | "limitado"; accesoId: string; cotizacionId?: string | undefined };
+type Entrada = {
+  cuentaId: string;
+  alcance: "completo" | "limitado" | "historial";
+  accesoId: string;
+  cotizacionId?: string | undefined;
+};
 
 /**
  * Cotizaciones de la cuenta del contacto que el portal puede mostrar (ADR-022: el alcance va en la consulta).
