@@ -21,7 +21,7 @@ export function portalesUsablesDe(ctx: Contexto, personaVinculada: boolean): str
 }
 
 export async function personaVinculadaEn(ctx: Contexto): Promise<boolean> {
-  if (!ctx.usuario) return false;
+  if (!ctx.usuario || !ctx.conTenant) return false;
   const p = await ctx.db.persona.findFirst({
     where: {
       tenantId: ctx.tenantId,
