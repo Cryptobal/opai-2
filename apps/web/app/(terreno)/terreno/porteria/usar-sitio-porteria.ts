@@ -32,7 +32,7 @@ const sitioDeCopia = (items: EnSitio[]): SitioPorteria => ({
 });
 
 /** Carga «en sitio» del servidor, copia cifrada offline (R26) y estado de conexión. */
-export function usarSitioPorteria() {
+export function useSitioPorteria() {
   const [sitio, setSitio] = useState<SitioPorteria | null>(null);
   const [copia, setCopia] = useState<SnapshotEvacuacion | null>(null);
   const [sinRed, setSinRed] = useState(false);

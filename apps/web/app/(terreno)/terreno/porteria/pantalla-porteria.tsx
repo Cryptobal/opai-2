@@ -10,7 +10,7 @@ import { usePersonaElegida } from "@/lib/terreno/persona";
 
 import { BienvenidaPorteria } from "./bienvenida-porteria";
 import { SelectorPunto, usePunto } from "./punto-porteria";
-import { usarSitioPorteria } from "./usar-sitio-porteria";
+import { useSitioPorteria } from "./usar-sitio-porteria";
 
 const FormularioEntrada = dynamic(
   () => import("./formulario-entrada").then((m) => m.FormularioEntrada),
@@ -30,7 +30,7 @@ const ExportarEvacuacion = dynamic(
  */
 export function PantallaPorteria() {
   const persona = usePersonaElegida();
-  const { sitio, copia, sinRed, falla, enLinea, recargar } = usarSitioPorteria();
+  const { sitio, copia, sinRed, falla, enLinea, recargar } = useSitioPorteria();
   const punto = usePunto(sitio?.puntos ?? []);
 
   if (persona === undefined) return null;
