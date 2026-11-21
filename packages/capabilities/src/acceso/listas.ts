@@ -7,7 +7,7 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { huellasCandidatas, huellaVigente } from "./huella";
-import { finVigenciaBloqueo } from "./listas-alcance";
+import { vigenciaLista } from "./listas-alcance";
 import {
   documentoSchema,
   entradaListaSchema,
@@ -95,12 +95,7 @@ export const listasAgregar = defineCapability({
     });
     if (ya) throw reglaDeNegocio("Este documento ya está en la lista.");
     const h = huellaVigente({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
-    const vigenteDesde = i.vigenteDesde ? new Date(i.vigenteDesde) : null;
-    const vigenteHasta = i.vigenteHasta
-      ? new Date(i.vigenteHasta)
-      : i.tipo === "bloqueada"
-        ? finVigenciaBloqueo(vigenteDesde, null)
-        : null;
+    const { vigenteDesde, vigenteHasta } = vigenciaLista(i.tipo, i.vigenteDesde, i.vigenteHasta);
     const data = {
       tenantId: ctx.tenantId,
       alcance: "instalacion",
@@ -123,14 +118,7 @@ export const listasAgregar = defineCapability({
       usoUnico: i.usoUnico,
       agregadaPor: quien(ctx),
     };
-    if (dryRun)
-      return vistaEntrada({
-        ...data,
-        id: "00000000-0000-0000-0000-000000000000",
-        alcance: data.alcance,
-        cuentaId: data.cuentaId,
-        grupoId: data.grupoId,
-      });
+    if (dryRun) return vistaEntrada({ ...data, id: "00000000-0000-0000-0000-000000000000" });
     return vistaEntrada(await ctx.db.entradaLista.create({ data }));
   },
 });

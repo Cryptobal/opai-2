@@ -33,7 +33,17 @@ export function whereEntradasAplicanAInstalacion(meta: InstalacionMeta, instalac
   };
 }
 
-export function finVigenciaBloqueo(vigenteDesde: Date | null, vigenteHasta: Date | null) {
+export function vigenciaLista(tipo: string, desde?: string, hasta?: string) {
+  const vigenteDesde = desde ? new Date(desde) : null;
+  const vigenteHasta = hasta
+    ? new Date(hasta)
+    : tipo === "bloqueada"
+      ? finVigenciaBloqueo(vigenteDesde, null)
+      : null;
+  return { vigenteDesde, vigenteHasta };
+}
+
+function finVigenciaBloqueo(vigenteDesde: Date | null, vigenteHasta: Date | null) {
   if (vigenteHasta) return vigenteHasta;
   const desde = vigenteDesde ?? new Date();
   const fin = new Date(desde);
