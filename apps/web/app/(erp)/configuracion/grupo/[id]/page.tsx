@@ -8,6 +8,7 @@ import { cargarIndice } from "../../_centro/datos";
 import { grupoPorId } from "../../_centro/grupos";
 import { EncabezadoGrupo } from "../../_centro/encabezado-grupo";
 import { ListaGrupo } from "../../_centro/lista-grupo";
+import { ListaModulos } from "../../_centro/lista-modulos";
 import { NotaModulos } from "../../_centro/nota-modulos";
 
 export const metadata = { title: "Configuración" };
@@ -51,11 +52,15 @@ export default async function GrupoConfig({ params }: Props) {
               vacio={{ texto: `Elige un ajuste de ${grupo.etiqueta}`, icono: grupo.icono }}
               lista={
                 <>
-                  <ListaGrupo
-                    etiqueta={grupo.etiqueta}
-                    entradas={entradas}
-                    aprobaciones={indice.aprobaciones}
-                  />
+                  {grupo.id === "modulos" ? (
+                    <ListaModulos entradas={entradas} aprobaciones={indice.aprobaciones} />
+                  ) : (
+                    <ListaGrupo
+                      etiqueta={grupo.etiqueta}
+                      entradas={entradas}
+                      aprobaciones={indice.aprobaciones}
+                    />
+                  )}
                   {grupo.id === "modulos" ? <NotaModulos entradas={entradas} /> : null}
                 </>
               }

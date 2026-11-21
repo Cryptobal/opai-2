@@ -19,6 +19,12 @@ on:
     # 03:30 America/Santiago (UTC−3) ≈ 06:30 UTC
     - cron: "30 6 * * *"
   workflow_dispatch:
+    inputs:
+      playwright_spec:
+        description: Archivo en apps/web/e2e (vacío = todos los @preview)
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -46,6 +52,7 @@ jobs:
       ES_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
       VERCEL_CLI: vercel@65.3.1
       NEXT_TELEMETRY_DISABLED: "1"
+      PLAYWRIGHT_SPEC: ${{ github.event.inputs.playwright_spec || '' }}
     steps:
       - name: ¿Hay secretos?
         id: listo
@@ -92,8 +99,10 @@ jobs:
       - name: Esperar a que el workflow «preview» deje lista la base de la vista previa
         if: >-
           steps.listo.outputs.ok == 'true'
-          && github.event_name == 'pull_request'
-          && steps.solo_pantalla.outputs.solo_pantalla != 'true'
+          && (
+            (github.event_name == 'pull_request' && steps.solo_pantalla.outputs.solo_pantalla != 'true')
+            || github.event_name == 'workflow_dispatch'
+          )
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -169,7 +178,13 @@ jobs:
           E2E_QA_GERENTE_EMAIL: ${{ vars.E2E_QA_GERENTE_EMAIL }}
           E2E_QA_APROBADOR_EMAIL: ${{ vars.E2E_QA_APROBADOR_EMAIL }}
         # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
-        run: .github/scripts/preview-e2e-ci.sh
+        run: |
+          if [ -n "$PLAYWRIGHT_SPEC" ]; then
+            args=(--workers=2 --reporter=list --output=test-results/playwright)
+            pnpm --filter @opai/web exec playwright test "$PLAYWRIGHT_SPEC" "${args[@]}"
+          else
+            .github/scripts/preview-e2e-ci.sh
+          fi
       - name: Copiar capturas de novedad al repositorio (CAR-520)
         if: steps.listo.outputs.ok == 'true'
         run: pnpm --filter @opai/domain novedad:imagen

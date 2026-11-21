@@ -6,6 +6,7 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { type Grupo, GRUPOS, grupoPorId } from "./grupos";
+import { ordenarEntradasModulosContratados } from "./modulo-area";
 import { seccionModulo } from "./seccion-modulo";
 import { SECCIONES, type Seccion } from "./secciones";
 
@@ -52,22 +53,22 @@ export async function cargarIndice() {
   const conAjustes = new Set(datosSiHayPermiso(esquema, []).map((c) => c.modulo));
   const idsActivos = new Set(identidad.modulosActivos);
   const activos = listarModulos().filter((m) => idsActivos.has(m.id));
-  const modulos = activos
-    .filter((m) => conAjustes.has(m.id))
-    .map((m) =>
-      m.id === "agente"
-        ? {
-            ...seccionModulo(m.id, m.nombre),
-            grupo: "agentes" as const,
-            titulo: "Agente interno",
-            descripcion: "El asistente de OPAI dentro del ERP: modelo, límites y sugerencias",
-            href: "/configuracion/grupo/agentes/agente-interno",
-          }
-        : seccionModulo(m.id, m.nombre),
-    );
+  const modulos = activos.map((m) =>
+    m.id === "agente"
+      ? {
+          ...seccionModulo(m, conAjustes),
+          grupo: "agentes" as const,
+          titulo: "Agente interno",
+          descripcion: "El asistente de OPAI dentro del ERP: modelo, límites y sugerencias",
+          href: "/configuracion/grupo/agentes/agente-interno",
+        }
+      : seccionModulo(m, conAjustes),
+  );
   // Las entradas de un módulo (CAR-182: Facturación electrónica y Folios) piden el módulo activo.
-  const secciones: Seccion[] = [...SECCIONES, ...modulos].filter(
-    (x) => puede(x.permiso) && (x.modulo === undefined || idsActivos.has(x.modulo)),
+  const secciones: Seccion[] = ordenarEntradasModulosContratados(
+    [...SECCIONES, ...modulos].filter(
+      (x) => puede(x.permiso) && (x.modulo === undefined || idsActivos.has(x.modulo)),
+    ),
   );
   return {
     secciones,

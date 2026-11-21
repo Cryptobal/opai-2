@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
+import type { AreaMenuModulo } from "./modulo-area";
 import type { GrupoId } from "./grupos";
 
 export type Seccion = {
@@ -16,6 +17,8 @@ export type Seccion = {
   permiso: string;
   /** Módulo que debe estar activo (o en trial) para mostrarla; ausente: núcleo, siempre. */
   modulo?: string;
+  /** Área del menú ERP (solo entradas `modulo-*`; agrupa la lista de Módulos). */
+  areaMenu?: AreaMenuModulo;
 };
 
 /** Sección con su ruta por defecto (`/configuracion/<id>`). */
