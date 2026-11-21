@@ -5,20 +5,16 @@ import { SeccionTarjeta } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { accesoCpq } from "@/lib/cpq-ui";
 import { verPestanaNegocios } from "@/lib/pestanas-modulos";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import type { NegocioFila } from "../../negocios/_componentes/datos";
 
 import { TarjetaNegocioCuenta, type CotizacionCuenta } from "./tarjeta-negocio-cuenta";
 
-/** Negocios de la cuenta con cotizaciones, propuesta técnica y agente interno (CAR-150). */
+/** Negocios de la cuenta con cotizaciones y propuesta técnica. */
 export async function VinculosComercialCuenta({ cuentaId }: { cuentaId: string }) {
   const [negociosModulo, identidad] = await Promise.all([verPestanaNegocios(), identidadActual()]);
   const cpq = accesoCpq(identidad);
-  const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
-  const agente =
-    Boolean(identidad?.modulosActivos.includes("agente")) && puede("core:apikeys.manage");
 
   let negocios: NegocioFila[] = [];
   if (negociosModulo) {
@@ -43,9 +39,9 @@ export async function VinculosComercialCuenta({ cuentaId }: { cuentaId: string }
     );
   }
 
-  if (!negociosModulo && !cpq.leer && !agente) {
+  if (!negociosModulo && !cpq.leer) {
     return (
-      <SeccionTarjeta titulo="Comercial, cotizaciones y agente">
+      <SeccionTarjeta titulo="Comercial y cotizaciones">
         <p className="t-body-sm text-fg-muted">
           Activa Comercial o CPQ en Configuración › Módulos para vincular negocios y cotizaciones a
           esta cuenta.
@@ -55,13 +51,8 @@ export async function VinculosComercialCuenta({ cuentaId }: { cuentaId: string }
   }
 
   return (
-    <SeccionTarjeta titulo="Comercial, cotizaciones y agente">
+    <SeccionTarjeta titulo="Comercial y cotizaciones">
       <div className="flex flex-col gap-4 t-body-sm">
-        {agente ? (
-          <EnlaceBoton href="/configuracion/grupo/agentes/agente-interno" variante="secondary">
-            Agente interno
-          </EnlaceBoton>
-        ) : null}
         {negociosModulo ? (
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
