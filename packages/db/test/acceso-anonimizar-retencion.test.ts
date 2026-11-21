@@ -21,7 +21,9 @@ describe.skipIf(!urlPropietario)("acceso.anonimizar_*_vencidos (CAR-482)", () =>
     await e?.cerrar();
   });
 
-  async function enTenant<T>(fn: (tx: typeof e.appSinTenant) => Promise<T>): Promise<T> {
+  type ClienteRaw = Pick<Entorno["appSinTenant"], "$executeRaw" | "$queryRaw">;
+
+  async function enTenant<T>(fn: (tx: ClienteRaw) => Promise<T>): Promise<T> {
     return e.appSinTenant.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT set_config('app.tenant_id', ${tenantId}, true)`;
       return fn(tx);
