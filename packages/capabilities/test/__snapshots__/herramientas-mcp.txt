@@ -4,13 +4,12 @@ acceso_intentos_listar
 acceso_listas_agregar
 acceso_listas_listar
 acceso_listas_quitar
-
 acceso_portal_listas_agregar
 acceso_portal_listas_listar
 acceso_portal_listas_quitar
-
-
 acceso_portal_registros_listar
+acceso_portal_visitas_crear
+acceso_portal_visitas_listar
 acceso_prerregistros_cancelar
 acceso_prerregistros_crear
 acceso_prerregistros_get
@@ -708,6 +707,7 @@ preview_acceso_listas_agregar
 preview_acceso_listas_quitar
 preview_acceso_portal_listas_agregar
 preview_acceso_portal_listas_quitar
+preview_acceso_portal_visitas_crear
 preview_acceso_prerregistros_cancelar
 preview_acceso_prerregistros_crear
 preview_acceso_registros_anular
