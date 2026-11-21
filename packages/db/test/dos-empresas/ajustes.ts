@@ -343,6 +343,67 @@ export const AJUSTES: Record<string, Ajuste> = {
   "asistencia.incidentes_tecnicos": {
     valores: () => ({ tipo: "otro", severidad: "baja", origen: "manual" }),
   },
+  // Asistencia · fiscalización DT y mandantes (CAR-594): CHECKs de enumeración y FK mismo_tenant.
+  "asistencia.fiscalizacion_claves": {
+    valores: (ctx) => ({
+      correo: "fiscal@dt.gob.cl",
+      clave_hash: ctx.tenant.replace(/-/g, "").padEnd(64, "a").slice(0, 64),
+      vence_en: "2027-01-01T00:00:00Z",
+      creado_por_id: ctx.usuario,
+    }),
+  },
+  "asistencia.fiscalizacion_accesos": {
+    fijas: ["via"],
+    valores: () => ({ via: "correo", empleador_rut: "76111111-1", detalle: "acceso prueba" }),
+  },
+  "asistencia.mandante_accesos": {
+    dependencias: ["core.cuentas"],
+    fijas: ["tipo", "estado"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "core.cuentas"),
+      tipo: "mandante",
+      correo: "mandante@prueba.cl",
+      creado_por_id: ctx.usuario,
+    }),
+  },
+  "asistencia.mandante_acceso_instalaciones": {
+    dependencias: ["asistencia.mandante_accesos", "core.instalaciones"],
+    valores: (ctx) => ({
+      acceso_id: id(ctx, "asistencia.mandante_accesos"),
+      instalacion_id: id(ctx, "core.instalaciones"),
+    }),
+  },
+  "asistencia.mandante_acceso_eventos": {
+    dependencias: ["asistencia.mandante_accesos"],
+    valores: (ctx) => ({
+      acceso_id: id(ctx, "asistencia.mandante_accesos"),
+      tipo: "creado",
+      detalle: "acceso prueba",
+    }),
+  },
+  "asistencia.respaldos_bitacora": {
+    dependencias: ["core.documentos"],
+    fijas: ["origen"],
+    valores: (ctx) => ({
+      origen: "manual",
+      manifiesto_sha256: "b".repeat(64),
+      documento_id: id(ctx, "core.documentos"),
+      total_marcas: 0,
+      desde_seq: 1,
+      hasta_seq: 1,
+      cadena_verificada_ok: true,
+    }),
+  },
+  "core.documentos": {
+    valores: (ctx) => ({
+      nombre: "respaldo.bin",
+      mime: "application/octet-stream",
+      tamano: 1,
+      storage_key: `dos-empresas/${ctx.tenant}/respaldo`,
+      creado_por_tipo: "user",
+      estado: "disponible",
+    }),
+  },
   // Núcleo · turnos esperados (CAR-201): CHECK de origen y de intervalo (fin > inicio).
   "core.turnos_esperados": {
     valores: () => ({
