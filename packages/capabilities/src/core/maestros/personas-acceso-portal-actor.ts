@@ -9,7 +9,7 @@ import type { EventoPublicado } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
 
 /** Usuario responsable del evento (no el ctx de sistema del despacho). */
-export function usuarioIdDelEvento(ev: EventoPublicado): string | null {
+function usuarioIdDelEvento(ev: EventoPublicado): string | null {
   if (ev.actorTipo === "user" && ev.actorId) return ev.actorId;
   if (ev.actorTipo === "agent" && ev.viaUserId) return ev.viaUserId;
   return null;
