@@ -89,6 +89,7 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				C73373301FED79650016851F /* Copy GoogleService-Info.plist */,
 			);
 			buildRules = (
 			);
@@ -159,6 +160,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C73373301FED79650016851F /* Copy GoogleService-Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/App/GoogleService-Info.plist",
+			);
+			name = "Copy GoogleService-Info.plist";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			showEnvVarsInLog = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -f \"${SRCROOT}/App/GoogleService-Info.plist\" ]; then\n  cp \"${SRCROOT}/App/GoogleService-Info.plist\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\";\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		504EC3001FED79650016851F /* Sources */ = {
