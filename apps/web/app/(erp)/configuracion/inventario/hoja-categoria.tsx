@@ -7,6 +7,7 @@ import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Switch } from "@op
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { proximasCategorias } from "./guardar-listas";
 import type { CategoriaConfig } from "./tipos";
 
 const COMPORTAMIENTOS = [
@@ -31,17 +32,7 @@ export function HojaCategoria({
   const bloqueada = categoria?.clave === "activo" || categoria?.clave === "ropa";
 
   async function guardar() {
-    const n = nombre.trim();
-    const proximas = categoria
-      ? todas.map((c) =>
-          c.clave === categoria.clave
-            ? { ...c, nombre: n, activo, ...(bloqueada ? {} : { comportamiento }) }
-            : c,
-        )
-      : [
-          ...todas,
-          { clave: "", nombre: n, comportamiento, activo, orden: todas.length },
-        ];
+    const proximas = proximasCategorias(todas, categoria ?? null, { nombre, comportamiento, activo });
     const r = await ejecutar("inventario.config.categorias_guardar", {
       categorias: proximas.map((c, orden) => ({
         clave: c.clave || undefined,

@@ -7,6 +7,7 @@ import { Alerta, avisar, Button, Campo, Input, Sheet, Switch } from "@opai/ds";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { proximasPrendas } from "./guardar-listas";
 import type { PrendaConfig } from "./tipos";
 
 /** Edita una prenda del uniforme y guarda la lista completa (clave estable al renombrar). */
@@ -23,13 +24,12 @@ export function HojaPrenda({
   const [activo, setActivo] = useState(prenda?.activo ?? true);
 
   async function guardar() {
-    const n = nombre.trim();
-    const proximas = prenda
-      ? todas.map((p) => (p.clave === prenda.clave ? { ...p, nombre: n, activo } : p))
-      : [
-          ...todas,
-          { clave: "", nombre: n, activo, orden: todas.length, enUso: false },
-        ];
+    const proximas = proximasPrendas(
+      todas,
+      prenda ? { clave: prenda.clave, nombre: prenda.nombre, activo: prenda.activo } : null,
+      nombre,
+      activo,
+    );
     const r = await ejecutar("inventario.config.prendas_guardar", {
       prendas: proximas.map((p, orden) => ({
         clave: p.clave || undefined,
