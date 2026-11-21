@@ -8,7 +8,7 @@ export const busca = (q: string) => ({ contains: q, mode: "insensitive" as const
 
 export async function visibles(ctx: Contexto, portal: string) {
   const filas = await ctx.db.membership.findMany({
-    where: { estado: "activa", portales: { has: portal } },
+    where: { tenantId: ctx.tenantId, estado: "activa", portales: { has: portal } },
     select: { id: true, userId: true, rol: true },
   });
   return filas.filter((m) => rolVisible(ctx, m.rol) && m.userId !== ctx.usuario?.id);

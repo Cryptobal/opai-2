@@ -120,7 +120,7 @@ export const personasReenviarInvitacionPortal = defineCapability({
         invitadoPor,
         accesoPortal: {
           personaId: input.personaId,
-          usersManageEnOrigen: selloAutoAccesoEnPayload(ctx)[CLAVE_SELLO_USERS_MANAGE] ?? true,
+          usersManageEnOrigen: selloAutoAccesoEnPayload(ctx)[CLAVE_SELLO_USERS_MANAGE] === true,
         },
       },
       ctx.servicios,

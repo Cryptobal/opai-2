@@ -64,7 +64,7 @@ export async function vincularPersonaUsuario(
   dryRun: boolean,
 ) {
   const m = await ctx.db.membership.findFirst({
-    where: { userId: usuarioId, estado: "activa" },
+    where: { userId: usuarioId, tenantId: ctx.tenantId, estado: "activa" },
     select: { id: true, rol: true, portales: true },
   });
   if (!m) throw reglaDeNegocio("El usuario no tiene una membresía activa en la empresa.");

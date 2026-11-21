@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { esMembresiaPortalTrabajador, type Rol } from "@opai/domain";
 
+import { ErrorCapacidad } from "../../errores";
 import { defineConsumidor, type EventoPublicado } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
 import { vincularPersonaUsuario } from "./personas-acceso-logica";
@@ -37,7 +38,8 @@ async function vincularTrasAceptarInvitacion(ctx: Contexto, ev: EventoPublicado,
   if (!m || !esMembresiaPortalTrabajador(m.rol as Rol, m.portales)) return;
   try {
     await vincularPersonaUsuario(ctx, inv.personaId, usuarioId, false);
-  } catch {
+  } catch (e) {
+    if (!(e instanceof ErrorCapacidad && e.code === "CONFLICT")) throw e;
     await registrarOmisionAccesoPortal(ctx, ev, "persona_ya_vinculada", {
       personaId: inv.personaId,
       usuarioId,
