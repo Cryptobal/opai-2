@@ -197,3 +197,115 @@ model CentralPropuesta {
   @@map("propuestas")
   @@schema("central")
 }
+
+/// Hilo «Mensaje a la central» (R16): lo abre el guardia con un tipo y la central responde en el
+/// mismo hilo. No es chat (ADR-025): sin hilos entre guardias ni sin tipo; se cierra al resolver.
+model CentralHilo {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  instalacionId   String    @map("instalacion_id") @db.Uuid
+  /// Guardia que lo abrió (la persona del portal Trabajador).
+  personaId       String    @map("persona_id") @db.Uuid
+  /// "novedad" | "consulta" | "urgencia".
+  tipo            String
+  /// "enviado" | "recibido" | "respondido" | "cerrado".
+  estado          String    @default("enviado")
+  /// Alerta que abrió la urgencia o la consulta vencida, si la hay.
+  alertaId        String?   @map("alerta_id") @db.Uuid
+  /// Plazo de respuesta de una consulta (R16); vencido sin respuesta, entra a la cola.
+  consultaVenceEn DateTime? @map("consulta_vence_en") @db.Timestamptz(6)
+  cerradoPorId    String?   @map("cerrado_por_id") @db.Uuid
+  cerradoEn       DateTime? @map("cerrado_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mensajes CentralHiloMensaje[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, estado])
+  @@index([tenantId, personaId])
+  @@map("hilos")
+  @@schema("central")
+}
+
+/// Mensaje dentro de un hilo (R16, R18): append-only, con hora de servidor. El texto del guardia es
+/// externo: un dato, nunca una instrucción (R19).
+model CentralHiloMensaje {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  hiloId    String   @map("hilo_id") @db.Uuid
+  /// "persona" (el guardia) | "central" (operador o supervisor) | "agente".
+  autorTipo String   @map("autor_tipo")
+  autorId   String?  @map("autor_id") @db.Uuid
+  texto     String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  hilo CentralHilo @relation(fields: [tenantId, hiloId], references: [tenantId, id], onDelete: Restrict)
+
+  @@index([tenantId, hiloId])
+  @@map("hilo_mensajes")
+  @@schema("central")
+}
+
+/// Aviso de la central (R17): consigna, cambio de turno o instrucción. Enviado no se edita: se
+/// reemplaza por otro. Un cambio de turno avisa, no cambia la pauta.
+model CentralAviso {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  /// "consigna" | "cambio_turno" | "instruccion".
+  tipo             String
+  texto            String
+  acuseObligatorio Boolean   @map("acuse_obligatorio")
+  /// Minutos para acusar (solo con acuse obligatorio).
+  plazoMin         Int?      @map("plazo_min")
+  vigenteDesde     DateTime? @map("vigente_desde") @db.Timestamptz(6)
+  vigenteHasta     DateTime? @map("vigente_hasta") @db.Timestamptz(6)
+  enviadoPorId     String?   @map("enviado_por_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  destinatarios CentralAvisoDestinatario[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@map("avisos")
+  @@schema("central")
+}
+
+/// Persona que recibe un aviso, con la instalación por la que le llegó y el plazo de su acuse.
+model CentralAvisoDestinatario {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  avisoId       String    @map("aviso_id") @db.Uuid
+  personaId     String    @map("persona_id") @db.Uuid
+  instalacionId String?   @map("instalacion_id") @db.Uuid
+  venceEn       DateTime? @map("vence_en") @db.Timestamptz(6)
+  /// Alerta que abrió la falta de acuse (R17), si la hubo.
+  alertaId      String?   @map("alerta_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  aviso CentralAviso @relation(fields: [tenantId, avisoId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, avisoId, personaId])
+  @@index([tenantId, personaId])
+  @@map("aviso_destinatarios")
+  @@schema("central")
+}
+
+/// Acuse de recibo (R17, CA7): hecho inmutable «leído y entendido» con hora de servidor.
+model CentralAcuse {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  avisoId   String   @map("aviso_id") @db.Uuid
+  personaId String   @map("persona_id") @db.Uuid
+  /// Acusado después del plazo (cuenta, pero queda marcado).
+  tarde     Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, avisoId, personaId])
+  @@map("acuses")
+  @@schema("central")
+}

@@ -35,6 +35,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/firmar/[slug]/[token]` | `core.firmas.firmar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.rechazar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.ver_firmante` | — | excepción |
+| — | `/fiscalizacion` | `asistencia.fiscalizacion_empleador.buscar` | — | excepción |
+| — | `/fiscalizacion` | `asistencia.fiscalizacion_ingreso.validar` | — | excepción |
 | — | `/marcar/[codigo]` | `asistencia.marcas.enlace_publico_resolver` | — | excepción |
 | — | `/marcar/[codigo]` | `asistencia.marcas.registrar` | — | excepción |
 | — | `/p/[slug]/[token]` | `cpq.compartir.ver` | — | excepción |
@@ -729,15 +731,18 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/mis-documentos/_componentes` | `portal_trabajador.mis_documentos.descargar` | `portal_trabajador_mis_documentos_descargar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.cancelar` | `portal_trabajador_solicitudes_cancelar` | existe |
 | compartido | `app/(trabajador)/trabajador/solicitudes/_componentes` | `portal_trabajador.solicitudes.crear` | `portal_trabajador_solicitudes_crear` | existe |
+| erp | `/asistencia/auditoria-fiscalizador` | `asistencia.fiscalizacion_accesos.listar` | `asistencia_fiscalizacion_accesos_listar` | existe |
 | erp | `/asistencia/certificacion` | `asistencia.certificacion.checklist` | `asistencia_certificacion_checklist` | existe |
 | erp | `/asistencia/contingencias` | `asistencia.contingencias.listar` | `asistencia_contingencias_listar` | existe |
 | erp | `/asistencia/contingencias` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.correcciones.listar` | `asistencia_correcciones_listar` | existe |
 | erp | `/asistencia/correcciones` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
+| erp | `/asistencia/mandantes` | `asistencia.mandante_accesos.listar` | `asistencia_mandante_accesos_listar` | existe |
 | erp | `/asistencia/marcas` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/asistencia/marcas` | `asistencia.marcas.listar` | `asistencia_marcas_listar` | existe |
 | erp | `/asistencia/reportes-dt` | `asistencia.reportes.catalogo` | `asistencia_reportes_catalogo` | existe |
 | erp | `/asistencia/reportes-dt` | `asistencia.reportes.vista` | `asistencia_reportes_vista` | existe |
+| erp | `/asistencia/respaldos` | `asistencia.respaldos.listar` | `asistencia_respaldos_listar` | existe |
 | erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/central` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
@@ -1053,6 +1058,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
 | `app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace` | Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5). |
 | `app/firmar/[slug]/[token]/acciones.ts#verFirma` | Firma: core.firmas.ver_firmante (interna con motivo): el enlace personal es la credencial (firma.md §5). |
+| `app/fiscalizacion/acciones.ts#buscarEmpleadorFiscalizacion` | Portal fiscalización con cookie firmada: asistencia.fiscalizacion_empleador.buscar. |
+| `app/fiscalizacion/acciones.ts#ingresarFiscalizacion` | Portal público DT (CAR-594): asistencia.fiscalizacion_ingreso.validar con contexto sistema; sin sesión ERP. |
+| `app/fiscalizacion/acciones.ts#salirFiscalizacion` | Portal fiscalización: borra la cookie de sesión del inspector; no toca datos de negocio ni capacidad. |
+| `app/fiscalizacion/acciones.ts#sesionFiscalizacionActual` | Portal fiscalización: lee la cookie firmada de sesión del inspector; no consulta base ni invoca capacidad. |
 | `app/marcar/[codigo]/acciones.ts#marcarPorEnlacePublico` | Asistencia (CAR-606): marca pública por enlace de instalación con RUT + PIN; resuelve el código con marcacionPublicaPorCodigo y ejecuta asistencia.marcas.registrar con enlacePublicoValidado; tope por IP que falla cerrado. |
 
 ## Excepciones justificadas (sin herramienta MCP)
@@ -1067,6 +1076,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `asistencia.correcciones.responder` | Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
 | `asistencia.correcciones.ver_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial. |
+| `asistencia.fiscalizacion_accesos.registrar` | Interna: auditoría de accesos del portal; la invoca la ruta pública, no el ERP (CAR-594). |
+| `asistencia.fiscalizacion_empleador.buscar` | Interna: búsqueda de empleador por RUT en el portal DT con cookie de fiscalización (CAR-594). |
+| `asistencia.fiscalizacion_ingreso.validar` | Interna: el portal público `/fiscalizacion` valida correo @dt.gob.cl o clave temporal; no hay herramienta MCP para sesión anónima (CAR-594). |
 | `asistencia.marcas.enlace_publico_resolver` | Interna: la página pública `/marcar/<codigo>` la ejecuta sin sesión; el código rotativo de la instalación es la credencial (CAR-606). |
 | `asistencia.marcas.registrar` | Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador. |
 | `asistencia.marcas.verificar` | Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante. |
@@ -1306,15 +1318,33 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.dias.listar`
 - `asistencia.dias.recalcular`
 - `asistencia.dias.resumen_periodo`
+- `asistencia.fiscalizacion_claves.generar`
+- `asistencia.fiscalizacion_claves.listar`
+- `asistencia.fiscalizacion_claves.revocar`
 - `asistencia.incidentes.cerrar`
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
 - `asistencia.jornadas.fijar_tipo`
+- `asistencia.mandante_accesos.dar`
+- `asistencia.mandante_accesos.historial`
+- `asistencia.mandante_accesos.revocar`
+- `asistencia.mandante_marcas.listar`
 - `asistencia.marcas.enlace_publico_estado`
+- `asistencia.respaldos.generar`
+- `asistencia.respaldos.verificar`
 - `central.alertas.contactar`
 - `central.alertas.proponer`
+- `central.avisos.acusar`
+- `central.avisos.crear`
+- `central.avisos.listar`
+- `central.avisos.obtener`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
+- `central.mensajes.cerrar`
+- `central.mensajes.enviar`
+- `central.mensajes.listar`
+- `central.mensajes.obtener`
+- `central.mensajes.responder`
 - `central.reglas.guardar`
 - `central.reglas.listar`
 - `comercial.contexto.agregar`

@@ -12,3 +12,4 @@ export * from "./consolidar";
 export * from "./limites-jornada";
 export * from "./biometria";
 export * from "./reportes";
+export * from "./fiscalizacion";

@@ -5,11 +5,12 @@ import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 import { EnlaceAltaLista } from "@/app/_components/maestros/enlace-alta-lista";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { PaginacionListaMaestro } from "@/app/_components/maestros/paginacion-lista-maestro";
+import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
 import { rut } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 import type { PersonaFila } from "@/lib/tipos-maestros";
 
-import { Paginacion } from "./paginacion";
 import { SemaforoDocs } from "./semaforo-docs";
 
 type Props = {
@@ -26,7 +27,7 @@ type Props = {
 /** Conserva búsqueda, filtros y página al abrir una ficha (la lista no se pierde al elegir). */
 export const conParametros = (p: Parametros) => {
   const q = new URLSearchParams();
-  for (const k of ["q", "cargo", "estado", "anexo", "cursor", "prev"]) if (p[k]) q.set(k, p[k]);
+  for (const k of ["q", "cargo", "estado", "anexo", "cursor", "prev", "limite"]) if (p[k]) q.set(k, p[k]);
   const t = q.toString();
   return t ? `?${t}` : "";
 };
@@ -51,7 +52,11 @@ export function ListaPersonas(x: Props) {
     </EnlaceAltaLista>
   );
   const filtrando = Boolean(x.p["q"] || x.p["cargo"] || x.p["estado"] || x.p["anexo"]);
+  const porPagina = tamanoPagina(x.p);
   const total = x.total ?? x.items.length;
+  const metaIzq = filtrando
+    ? `${x.items.length}${x.siguiente ? "+" : ""} ${x.items.length === 1 ? "resultado" : "resultados"}`
+  : `${total}${x.siguiente ? "+" : ""} ${total === 1 ? "persona" : "personas"}`;
   return (
     <ListaMaestro
       state={x.state}
@@ -81,10 +86,7 @@ export function ListaPersonas(x: Props) {
             ]
           : []),
       ]}
-      meta={{
-        izquierda: `${total} ${total === 1 ? "persona" : "personas"}`,
-        derecha: "Apellido A–Z",
-      }}
+      meta={{ izquierda: metaIzq, derecha: "Apellido A–Z" }}
       seleccionada={x.seleccionada}
       vacio={
         filtrando
@@ -125,14 +127,15 @@ export function ListaPersonas(x: Props) {
         };
       })}
       pie={
-        <div className="flex items-center justify-between gap-2 border-t border-border px-4 py-3">
-          <Paginacion
+        x.state === "ready" ? (
+          <PaginacionListaMaestro
             p={x.p}
+            rutaBase="/personas"
             mostrados={x.items.length}
             siguiente={x.siguiente}
-            total={filtrando ? null : x.total}
+            porPagina={porPagina}
           />
-        </div>
+        ) : undefined
       }
     />
   );
