@@ -34,13 +34,21 @@ export function nombreNormalizado(nombre: string): string {
   return sinTildes(nombre).toLowerCase().trim().replace(/\s+/g, " ");
 }
 
+function sinGuionesBorde(s: string): string {
+  let i = 0;
+  let j = s.length;
+  while (i < j && s[i] === "_") i++;
+  while (j > i && s[j - 1] === "_") j--;
+  return s.slice(i, j);
+}
+
 /** R4: clave estable de un campo a partir de su etiqueta («Número de serie» → «numero_de_serie»). */
 export function claveCampo(etiqueta: string): string {
-  const base = sinTildes(etiqueta)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 40);
+  const base = sinGuionesBorde(
+    sinTildes(etiqueta)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_"),
+  ).slice(0, 40);
   return /^[a-z]/.test(base) ? base : `c_${base}`.slice(0, 40);
 }
 
