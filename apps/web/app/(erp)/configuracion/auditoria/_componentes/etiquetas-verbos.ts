@@ -117,4 +117,5 @@ export const VERBOS: Record<string, string> = {
   borrar_rango: "Borrar por fechas (restaurable)",
   // Impuestos (CAR-173).
   borrador_f29: "Borrador del F29",
+  cartel: "Preparar cartel",
 };

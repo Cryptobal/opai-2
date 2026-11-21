@@ -6,20 +6,21 @@ import { describe, expect, it } from "vitest";
 
 import { listarAjustes } from "../src/core/config/catalogo";
 import { claveAjusteRetencion } from "../src/core/config/nucleo-retencion";
-import { INVENTARIO_NUCLEO } from "../src/core/cumplimiento/inventario";
+import { listarInventario } from "../src/core/cumplimiento/inventario";
 import { trabajosCumplimiento } from "../src/core/cumplimiento";
 import { obtenerCapacidad, limpiarRegistro, registrarCapacidades } from "../src";
 import { capacidadesDelNucleo } from "../src";
 
 describe("catálogo de retención frente al inventario", () => {
-  const tablasInventario = INVENTARIO_NUCLEO.map((d) => d.tabla).sort();
+  const inventario = listarInventario();
+  const tablasInventario = inventario.map((d) => d.tabla).sort();
 
   it("cada tabla del inventario del Núcleo tiene su regla y viceversa", () => {
     expect(POLITICA_RETENCION.map((r) => r.tabla).sort()).toEqual(tablasInventario);
   });
 
   it("un hecho regulado (ADR-023) nunca se elimina: se conserva o, a lo más, se anonimiza", () => {
-    for (const d of INVENTARIO_NUCLEO.filter((x) => x.reguladoNoBorrable)) {
+    for (const d of inventario.filter((x) => x.reguladoNoBorrable)) {
       const r = POLITICA_RETENCION.find((x) => x.tabla === d.tabla);
       expect(r?.accion, d.tabla).not.toBe("eliminar");
     }
@@ -29,7 +30,7 @@ describe("catálogo de retención frente al inventario", () => {
 
   it("la categoría de la regla es una de las declaradas para esa tabla", () => {
     for (const r of POLITICA_RETENCION) {
-      const d = INVENTARIO_NUCLEO.find((x) => x.tabla === r.tabla);
+      const d = inventario.find((x) => x.tabla === r.tabla);
       expect(d?.categorias, r.tabla).toContain(r.categoria);
     }
   });

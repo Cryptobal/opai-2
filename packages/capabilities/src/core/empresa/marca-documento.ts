@@ -1,11 +1,7 @@
-import { z } from "zod";
-
 import type { Contexto } from "../../types";
 
 const TIPOGRAFIAS_DOCUMENTO = ["inter", "helvetica", "times"] as const;
 export type TipografiaDocumento = (typeof TIPOGRAFIAS_DOCUMENTO)[number];
-
-export const tipografiaDocumento = z.enum(TIPOGRAFIAS_DOCUMENTO);
 
 export type MarcaDocumentoCampos = {
   documentoTipografia: TipografiaDocumento;
@@ -23,14 +19,6 @@ export function marcaDocumentoDe(perfil: {
     documentoTipografia: TIPOGRAFIAS_DOCUMENTO.includes(tipografia) ? tipografia : "inter",
     documentoPiePagina: perfil?.documentoPiePagina ?? null,
     documentoCondicionesDefault: perfil?.documentoCondicionesDefault ?? null,
-  };
-}
-
-export function marcaDocumentoInputSchema() {
-  return {
-    documentoTipografia: tipografiaDocumento.optional(),
-    documentoPiePagina: z.string().trim().max(2000).nullable().optional(),
-    documentoCondicionesDefault: z.string().trim().max(8000).nullable().optional(),
   };
 }
 
@@ -61,7 +49,7 @@ type DocInput = Partial<{
   documentoCondicionesDefault: string | null;
 }>;
 
-export function fusionarMarcaDocumento(
+function fusionarMarcaDocumento(
   perfil: Parameters<typeof marcaDocumentoDe>[0],
   data: DocInput,
 ): MarcaDocumentoCampos {
@@ -77,7 +65,7 @@ export function fusionarMarcaDocumento(
   };
 }
 
-export async function persistirMarcaDocumento(ctx: Contexto, merged: MarcaDocumentoCampos) {
+async function persistirMarcaDocumento(ctx: Contexto, merged: MarcaDocumentoCampos) {
   const db = ctx.db;
   let cpq = await db.cpqMarcaDocumento.findUnique({ where: { tenantId: ctx.tenantId } });
   if (!cpq) {

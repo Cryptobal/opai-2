@@ -2,11 +2,43 @@
 // la clave de plataforma ACCESO_HUELLA_SECRET, versionada por `huellaKid`) y su MÁSCARA; nunca el número completo
 // (decisión de Carlos del 7-nov-2026, Ley 21.719). El tenant_id no lleva @relation: la FK va en el SQL.
 
+/// Grupo de instalaciones que comparten listas (CAR-506).
+model GrupoLista {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  nombre    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  miembros GrupoListaInstalacion[]
+  entradas EntradaLista[]
+
+  @@map("grupos_lista")
+  @@schema("acceso")
+}
+
+model GrupoListaInstalacion {
+  tenantId      String     @map("tenant_id") @db.Uuid
+  grupoId       String     @map("grupo_id") @db.Uuid
+  instalacionId String     @map("instalacion_id") @db.Uuid
+  grupo         GrupoLista @relation(fields: [grupoId], references: [id], onDelete: Cascade, map: "grupos_lista_instalaciones_grupo_fkey")
+
+  @@id([grupoId, instalacionId])
+  @@map("grupos_lista_instalaciones")
+  @@schema("acceso")
+}
+
 /// Entrada de lista autorizada o bloqueada (editable). El motivo de un bloqueo solo lo ve quien gestiona listas.
 model EntradaLista {
   id            String    @id @default(uuid(7)) @db.Uuid
   tenantId      String    @map("tenant_id") @db.Uuid
-  instalacionId String    @map("instalacion_id") @db.Uuid
+  /// "empresa" | "cuenta" | "instalacion" | "grupo" (CAR-506).
+  alcance       String    @default("instalacion")
+  instalacionId String?   @map("instalacion_id") @db.Uuid
+  /// Alcance «cuenta» (CAR-506) o entrada agregada por el portal cliente (CAR-538); null = empresa.
+  cuentaId      String?   @map("cuenta_id") @db.Uuid
+  grupoId       String?   @map("grupo_id") @db.Uuid
+  agregadaPor   String?   @map("agregada_por") @db.Uuid
   /// "autorizada" | "bloqueada".
   tipo          String
   /// "run" | "pasaporte" | "otro" | "patente".
@@ -23,14 +55,15 @@ model EntradaLista {
   desdeMin      Int?      @map("desde_min")
   hastaMin      Int?      @map("hasta_min")
   usoUnico      Boolean   @default(false) @map("uso_unico")
-  /// Si la agregó un contacto del Portal Cliente (CAR-538); null = la empresa.
-  cuentaId      String?   @map("cuenta_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  grupo     GrupoLista?      @relation(fields: [grupoId], references: [id], onDelete: Restrict, map: "entradas_lista_grupo_fkey")
   registros RegistroAcceso[]
 
   @@index([tenantId, instalacionId, docTipo, huella], map: "entradas_lista_busqueda_idx")
+  @@index([tenantId, cuentaId, docTipo, huella], map: "entradas_lista_cuenta_idx")
+  @@index([tenantId, docTipo, huella], map: "entradas_lista_empresa_idx")
   @@map("entradas_lista")
   @@schema("acceso")
 }
@@ -55,13 +88,18 @@ model RegistroAcceso {
   entradaListaId String?  @map("entrada_lista_id") @db.Uuid
   /// Campos personalizados del formulario (CAR-479): `[{ etiqueta, valor }]` tal como los pidió la portería.
   camposExtra    Json     @default("[]") @map("campos_extra")
+  /// Punto de acceso por el que entró (CAR-479 parte 2); nulo si la instalación no tiene puntos o es anterior.
+  puntoId        String?  @map("punto_id") @db.Uuid
   /// "en_linea" | "diferido".
   origen         String   @default("en_linea")
   horaCorregida  DateTime @map("hora_corregida") @db.Timestamptz(6)
   recibidoEn     DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  /// Anonimización por retención (R18): la fila se conserva, pero deja de identificar al visitante.
+  anonimizadoEn  DateTime? @map("anonimizado_en") @db.Timestamptz(6)
 
   entradaLista EntradaLista?    @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
+  punto        PuntoAcceso?     @relation(fields: [puntoId], references: [id], onDelete: Restrict, map: "registros_acceso_punto_fkey")
   salida       SalidaAcceso?
   anulacion    AnulacionAcceso?
   prerregistro PrerregistroUso?
@@ -115,6 +153,7 @@ model IntentoDenegado {
   motivo        String
   horaCorregida DateTime @map("hora_corregida") @db.Timestamptz(6)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  anonimizadoEn DateTime? @map("anonimizado_en") @db.Timestamptz(6)
 
   @@unique([tenantId, dispositivoId, clave], map: "intentos_denegados_clave_key")
   @@map("intentos_denegados")
@@ -215,5 +254,56 @@ model ConfigAcceso {
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("configuraciones")
+  @@schema("acceso")
+}
+
+/// Punto de acceso de una instalación (CAR-479 parte 2): portería principal, acceso vehicular, etc. No se borra:
+/// se desactiva, porque los registros lo referencian.
+model PuntoAcceso {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  nombre        String
+  /// "peatonal" | "vehicular" | "mixto".
+  tipo          String   @default("peatonal")
+  activo        Boolean  @default(true)
+  orden         Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  registros RegistroAcceso[]
+
+  @@index([tenantId, instalacionId, orden], map: "puntos_instalacion_idx")
+  @@map("puntos")
+  @@schema("acceso")
+}
+
+/// Fondo y mensaje de bienvenida de la portería de una instalación (CAR-553). Sin fila, la portería usa la marca
+/// de la empresa. El fondo es un documento de imagen de la instalación (FK en el SQL).
+/// Hasta cuándo ya se reportaron los registros de una instalación (R27): evita duplicar envíos.
+model ReporteAccesoCursor {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  ultimoHasta   DateTime @map("ultimo_hasta") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, instalacionId], map: "reportes_cursor_instalacion_key")
+  @@map("reportes_cursor")
+  @@schema("acceso")
+}
+
+model AparienciaAcceso {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  instalacionId    String   @map("instalacion_id") @db.Uuid
+  mensaje          String?
+  fondoDocumentoId String?  @map("fondo_documento_id") @db.Uuid
+  actualizadoPor   String?  @map("actualizado_por") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, instalacionId], map: "apariencias_instalacion_key")
+  @@map("apariencias")
   @@schema("acceso")
 }

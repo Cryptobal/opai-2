@@ -60,6 +60,7 @@ const identidad = (id: string, portales: string[]): Identidad => ({
   membresias: [],
   modulosActivos: ["portal_trabajador"],
   acceso: { permisosRol: null, excepciones: [], instalaciones: null },
+  personaVinculada: true,
 });
 
 const vigente: VerComo = {

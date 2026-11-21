@@ -2,17 +2,23 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button } from "@opai/ds";
+import { Alerta, avisar } from "@opai/ds";
 import type { ConfigAcceso } from "@opai/domain/acceso-config";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { AccionesEditorConfig } from "./acciones-editor-config";
+import { AvisoConfigEmpresa } from "./aviso-config-empresa";
 import { CamposConfig } from "./campos-config";
+import { EditorPrivacidad } from "./editor-privacidad";
+import type { Punto } from "./editor-puntos";
+import { EditorReportes } from "./editor-reportes";
 import { ReglasConfig, TiposConfig } from "./reglas-config";
 
 type Props = {
   /** Sin instalación, edita la de la empresa. */
   instalacionId?: string;
+  puntos?: Punto[];
   efectiva: ConfigAcceso;
   personalizada: boolean;
 };
@@ -21,7 +27,7 @@ type Props = {
  * Configuración de acceso (CAR-479, diseño `ConfigAcceso`): la de la empresa en Configuración y, en la ficha, la de
  * la instalación, que hereda la de la empresa hasta que se personaliza y entonces la reemplaza entera.
  */
-export function EditorConfig({ instalacionId, efectiva, personalizada }: Props) {
+export function EditorConfig({ instalacionId, puntos = [], efectiva, personalizada }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [c, setC] = useState(efectiva);
   const [propia, setPropia] = useState(personalizada || !instalacionId);
@@ -45,14 +51,7 @@ export function EditorConfig({ instalacionId, efectiva, personalizada }: Props) 
 
   return (
     <div className="flex flex-col gap-4">
-      {instalacionId && !propia ? (
-        <Alerta tono="info" titulo="Usa la configuración de la empresa">
-          <p>Lo que cambies en Configuración › Módulos › Control de acceso rige también aquí.</p>
-          <Button variant="secondary" className="mt-2" onClick={() => setPropia(true)}>
-            Personalizar para esta instalación
-          </Button>
-        </Alerta>
-      ) : null}
+      {instalacionId && !propia ? <AvisoConfigEmpresa onPersonalizar={() => setPropia(true)} /> : null}
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       <TiposConfig config={c} onCambiar={cambiar} disabled={pendiente || !propia} />
       <ReglasConfig config={c} onCambiar={cambiar} disabled={pendiente || !propia} />
@@ -61,17 +60,29 @@ export function EditorConfig({ instalacionId, efectiva, personalizada }: Props) 
         onCambiar={(campos) => cambiar({ campos })}
         disabled={pendiente || !propia}
       />
+      <EditorReportes
+        {...(instalacionId ? { instalacionId } : {})}
+        config={c}
+        onCambiar={cambiar}
+        disabled={pendiente || !propia}
+      />
+      {instalacionId ? (
+        <EditorPrivacidad
+          instalacionId={instalacionId}
+          puntos={puntos}
+          config={c}
+          onCambiar={cambiar}
+          disabled={pendiente || !propia}
+        />
+      ) : null}
       {propia ? (
-        <div className="flex flex-wrap justify-end gap-2">
-          {instalacionId && personalizada ? (
-            <Button variant="ghost" disabled={pendiente} onClick={() => void heredar()}>
-              Volver a la de la empresa
-            </Button>
-          ) : null}
-          <Button disabled={pendiente} onClick={() => void guardar()}>
-            {pendiente ? "Guardando…" : "Guardar configuración"}
-          </Button>
-        </div>
+        <AccionesEditorConfig
+          {...(instalacionId ? { instalacionId } : {})}
+          personalizada={personalizada}
+          pendiente={pendiente}
+          onHeredar={() => void heredar()}
+          onGuardar={() => void guardar()}
+        />
       ) : null}
     </div>
   );

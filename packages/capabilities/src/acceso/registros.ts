@@ -54,6 +54,7 @@ export const registrosListar = defineCapability({
           where: {
             AND: [
               dondeInstalacionId(ctx),
+              { anonimizadoEn: null },
               input.instalacionId ? { instalacionId: input.instalacionId } : {},
               input.soloEnSitio ? { salida: null, anulacion: null } : {},
               input.tipoRegistro ? { tipoRegistro: input.tipoRegistro } : {},

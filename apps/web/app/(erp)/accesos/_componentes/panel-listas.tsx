@@ -3,13 +3,14 @@ import { Badge, type Columna, type EstadoPantalla, ListScreen, Segmentado } from
 
 import { LinkNext } from "@/app/_components/link-next";
 
-import { AgregarEntrada } from "./agregar-entrada";
+import { AccionListas } from "./accion-listas";
 import type { PortalListas } from "./borrador-entrada";
 import { tipoDe } from "./etiquetas";
 import { QuitarEntrada } from "./quitar-entrada";
 
 export type EntradaLista = {
   id: string;
+  alcance: "empresa" | "cuenta" | "instalacion" | "grupo";
   tipo: "autorizada" | "bloqueada";
   mascara: string;
   nombre: string | null;
@@ -21,7 +22,15 @@ export type EntradaLista = {
   desdeMin: number | null;
   hastaMin: number | null;
   usoUnico: boolean;
+  autorNombre: string | null;
   deCliente: boolean;
+};
+
+const ETIQUETA_ALCANCE: Record<EntradaLista["alcance"], string> = {
+  empresa: "Empresa",
+  cuenta: "Cuenta cliente",
+  instalacion: "Instalación",
+  grupo: "Grupo",
 };
 
 const DIA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -52,6 +61,8 @@ function columnasDe(bloq: boolean): Columna<EntradaLista>[] {
       render: (e) => <span className="t-numeric">{e.mascara}</span>,
     },
     { id: "tipos", etiqueta: "Tipos", render: tipos },
+    { id: "alcance", etiqueta: "Alcance", render: (e) => ETIQUETA_ALCANCE[e.alcance] ?? e.alcance },
+    { id: "autor", etiqueta: "Autor", render: (e) => e.autorNombre ?? "—" },
     { id: "vig", etiqueta: "Vigencia", render: vigencia },
     bloq
       ? { id: "motivo", etiqueta: "Motivo", render: (e) => e.motivo ?? "—" }
@@ -110,7 +121,7 @@ export function PanelListas({ state, instalacionId, tipo, entradas, href, portal
       <ListScreen<EntradaLista>
         state={state}
         titulo={bloq ? "Bloqueadas" : "Autorizadas"}
-        accionPrincipal={<AgregarEntrada instalacionId={instalacionId} tipo={tipo} portal={portal} />}
+        accionPrincipal={<AccionListas portal={portal} instalacionId={instalacionId} tipo={tipo} />}
         items={entradas}
         // En el portal, el cliente solo quita lo que agregó su empresa; lo del proveedor de seguridad queda fijo.
         acciones={(e) =>

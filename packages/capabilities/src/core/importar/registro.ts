@@ -1,3 +1,4 @@
+import { importadorListas } from "../../acceso/importar-listas";
 import { noEncontrado } from "../../errores";
 import { importadorContactos } from "./contactos";
 import { importadorContratos } from "./contratos";
@@ -42,9 +43,10 @@ export const IMPORTADORES: readonly Importador<Datos>[] = [
   generico(importadorDocumentosVenta),
   generico(importadorFlujoFilas),
   generico(importadorFlujoRecurrentes),
+  generico(importadorListas),
 ];
 
-export const IDS_IMPORTADORES = ["cuentas", "contactos", "instalaciones", "negocios", "personas", "contratos", "documentos_venta", "flujo_filas", "flujo_recurrentes"] as const;
+export const IDS_IMPORTADORES = ["cuentas", "contactos", "instalaciones", "negocios", "personas", "contratos", "documentos_venta", "flujo_filas", "flujo_recurrentes", "acceso_listas"] as const;
 
 export function importadorDe(id: string): Importador<Datos> {
   const i = IMPORTADORES.find((x) => x.def.id === id);
