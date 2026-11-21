@@ -9,6 +9,7 @@ import { epocaDeIdentidad, marcaGenerado } from "@/lib/epoca-sesion";
 import { verificarMfaDe } from "@/lib/mfa";
 import { medirFase } from "@/lib/metricas-navegacion";
 import { esCuentaDeEmpresa } from "@/lib/acceso-portal";
+import { obligarPinTrabajador } from "@/lib/pin-trabajador";
 import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 import { verComoDe } from "@/lib/ver-como";
 
@@ -50,6 +51,7 @@ async function Contenido<T>({
   // En «ver como» (CAR-528) el acceso es el de la persona vista: lo verifica cada capacidad.
   const enVista = (await verComoDe(identidad))?.portal === portal;
   const acceso = enVista || tieneAccesoAPortal(identidad, portal);
+  if (acceso && portal === "trabajador" && !enVista) await obligarPinTrabajador(ruta);
   // Usuario de plataforma sin empresa: su inicio es Plataforma.
   if (!acceso && portal === "erp" && !identidad.actual && tieneAccesoAPortal(identidad, "platform")) {
     redirect("/platform");

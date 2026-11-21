@@ -13,6 +13,10 @@ import { consumidorProcesosPersona } from "./procesos-persona";
 import { consumidoresSlack } from "./slack";
 import { consumidorWebhooks } from "./webhooks";
 import { consumidorTurnosEsperados } from "./turnos";
+import {
+  consumidorAccesoPortalTrabajador,
+  consumidorVinculoPortalTrabajador,
+} from "./maestros/consumidor-acceso-portal";
 
 /** Consumidores de eventos del núcleo que registra el borde. */
 export const consumidoresDelNucleo = [
@@ -30,5 +34,7 @@ export const consumidoresDelNucleo = [
   consumidorRevocacionBiometria,
   ...consumidoresSlack,
   consumidorProcesosPersona,
+  consumidorAccesoPortalTrabajador,
+  consumidorVinculoPortalTrabajador,
   consumidorWebhooks,
 ];

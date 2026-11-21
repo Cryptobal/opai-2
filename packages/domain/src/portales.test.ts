@@ -4,6 +4,7 @@ import { ROLES } from "./permisos";
 import type { Rol } from "./permisos";
 import {
   esMembresiaDeCliente,
+  esMembresiaPortalTrabajador,
   esPortalCoherente,
   idsPortalesUsables,
   puedeUsarPortal,
@@ -37,6 +38,13 @@ describe("coherencia rol-portal (NÚCLEO-D1)", () => {
       expect(portalesIncoherentes(rol, sinCliente)).toEqual([]);
       expect(esPortalCoherente(rol, sinCliente)).toBe(true);
     }
+  });
+
+  it("el trabajador del portal es viewer con solo trabajador o terreno (CAR-803)", () => {
+    expect(esMembresiaPortalTrabajador("viewer", ["trabajador"])).toBe(true);
+    expect(esMembresiaPortalTrabajador("viewer", ["trabajador", "terreno"])).toBe(true);
+    expect(esMembresiaPortalTrabajador("viewer", ["erp", "trabajador"])).toBe(false);
+    expect(esMembresiaPortalTrabajador("owner", ["trabajador"])).toBe(false);
   });
 
   it("el contacto de un cliente es viewer con «cliente» como único portal (CAR-88)", () => {

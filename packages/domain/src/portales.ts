@@ -50,6 +50,14 @@ export function esMembresiaDeCliente(rolBase: Rol, portales: readonly string[]):
   return rolBase === "viewer" && portales.length === 1 && portales[0] === "cliente";
 }
 
+const PORTALES_TRABAJADOR_MEMBRESIA = ["trabajador", "terreno"] as const;
+
+/** Trabajador del portal: viewer cuyos portales son solo «trabajador» y, si aplica, «terreno» (CAR-803). */
+export function esMembresiaPortalTrabajador(rolBase: Rol, portales: readonly string[]): boolean {
+  if (rolBase !== "viewer" || portales.length === 0 || !portales.includes("trabajador")) return false;
+  return portales.every((p) => (PORTALES_TRABAJADOR_MEMBRESIA as readonly string[]).includes(p));
+}
+
 export function esPortalCoherente(rolBase: Rol, portales: readonly string[]): boolean {
   return portalesIncoherentes(rolBase, portales).length === 0;
 }

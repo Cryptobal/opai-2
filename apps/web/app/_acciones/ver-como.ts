@@ -15,7 +15,10 @@ import { COOKIE_VER_COMO, firmarVerComo, type VerComo } from "@/lib/ver-como-tok
 export type ResultadoVerComo = { ok: false; error: string };
 
 const entrada = z.object({ portal: z.enum(PORTALES_VER_COMO), objetivoId: z.uuid() });
-type Vista = Pick<VerComo, "portal" | "objetivoId" | "nombre" | "userId" | "dispositivoId"> & {
+type Vista = Pick<
+  VerComo,
+  "portal" | "objetivoId" | "nombre" | "userId" | "personaId" | "dispositivoId"
+> & {
   expiraEn: string;
 };
 
