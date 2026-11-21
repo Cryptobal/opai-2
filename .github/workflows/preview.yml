@@ -61,26 +61,35 @@ jobs:
         id: solo_docs
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         run: .github/scripts/ci-solo-documentacion.sh
+      - name: Detectar solo pantalla
+        id: solo_pantalla
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        run: .github/scripts/ci-solo-pantalla.sh
       - name: Solo documentación
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
           && steps.solo_docs.outputs.only_docs == 'true'
         run: echo "PR de solo *.md o docs/** — preview Neon/Vercel omitida (CAR-640)."
+      - name: Solo pantalla
+        if: >-
+          steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+          && steps.solo_pantalla.outputs.solo_pantalla == 'true'
+        run: echo "PR solo pantalla (apps/web, DS, e2e) — rama Neon y migraciones omitidas (CAR-807)."
       - uses: pnpm/action-setup@v4
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
       - uses: actions/setup-node@v4
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - name: Listar ramas Neon preview huérfanas (PR cerrado)
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
@@ -90,7 +99,7 @@ jobs:
       - name: Crear o reutilizar la rama Neon
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         id: neon
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
@@ -99,7 +108,7 @@ jobs:
       - name: Migrar la rama
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
@@ -116,14 +125,14 @@ jobs:
       - name: Quitar acceso a empresas no QA en la rama de preview
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
         run: PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:ocultar-tenants
       - name: Verificar destino y preparar compras sintéticas de CAR-239
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
           && github.event.pull_request.number == 831
           && github.event.pull_request.head.repo.full_name == github.repository
         env:
@@ -135,7 +144,7 @@ jobs:
       - name: Sembrar usuarios QA de rendiciones (solo qa-e2e)
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
@@ -149,7 +158,7 @@ jobs:
       - name: Contraseña propia de opai_app y DATABASE_URL de la preview
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
           DB_URL_POOLED: ${{ steps.neon.outputs.db_url_pooled }}
@@ -210,7 +219,7 @@ jobs:
       - name: Redesplegar la preview con la base de su rama
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         # El despliegue automático de Vercel pudo partir antes de fijar la variable: se repite. Se
         # redespliega el despliegue de Git de ESTE commit (vercel redeploy conserva su rama), para
         # que tome la DATABASE_URL de la rama del PR. Un `vercel deploy` desde el checkout (merge
@@ -236,7 +245,7 @@ jobs:
       - name: Suspender compute al terminar la preview
         if: >-
           steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-          && steps.solo_docs.outputs.only_docs != 'true'
+          && steps.solo_docs.outputs.only_docs != 'true' && steps.solo_pantalla.outputs.solo_pantalla != 'true'
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}

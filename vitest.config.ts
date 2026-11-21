@@ -50,6 +50,14 @@ export default defineConfig({
         },
       },
       "modules/*/vitest.config.ts",
+      {
+        extends: false,
+        root: "./scripts",
+        test: {
+          name: "scripts-ci",
+          include: ["**/*.test.ts"],
+        },
+      },
     ],
   },
 });

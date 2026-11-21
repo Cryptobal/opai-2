@@ -73,7 +73,9 @@ jobs:
 
   test-db:
     name: ${{ matrix.corrida == 0 && 'test:db' || format('test:db · estabilidad {0}/3', matrix.corrida) }}
-    if: github.event_name != 'pull_request' || ((github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831) && github.event.pull_request.head.repo.full_name == github.repository)
+    # En PR el job siempre corre (SUCCESS, sin Postgres) salvo estabilidad o solo pantalla documentado;
+    # evita `skipped` en checks obligatorios (CAR-807). merge_group y main siguen con Postgres real.
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ${{ matrix.corrida != 0 && 'ubuntu-latest' || vars.RUNNER_GATE || 'ubuntu-latest' }}
     timeout-minutes: 45
     # Cada variante recibe VM y servicio Postgres nuevos; nunca comparte el clúster anterior.
@@ -116,11 +118,55 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
-      # La rama exacta de estabilidad activa DB también en PR; el resto conserva el gate rápido.
+      - name: Detectar solo pantalla
+        id: solo_pantalla
+        run: .github/scripts/ci-solo-pantalla.sh
+      - name: test:db omitido (sin Postgres)
+        if: >-
+          steps.solo_docs.outputs.only_docs == 'true'
+          || (
+            github.event_name == 'pull_request'
+            && !(github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831)
+          )
+          || (
+            github.event_name == 'merge_group'
+            && steps.solo_pantalla.outputs.solo_pantalla == 'true'
+          )
+        run: |
+          if [ "${{ steps.solo_pantalla.outputs.solo_pantalla }}" = true ]; then
+            echo "omitido: PR solo pantalla (CAR-807)"
+          elif [ "${{ steps.solo_docs.outputs.only_docs }}" = true ]; then
+            echo "omitido: solo documentación"
+          else
+            echo "omitido en PR: test:db corre en merge_group (CAR-653)"
+          fi
+      # Postgres real: merge_group con lógica, main, cron y rama de estabilidad en PR.
       - uses: ./.github/actions/preparar
-        if: steps.solo_docs.outputs.only_docs != 'true'
+        if: >-
+          steps.solo_docs.outputs.only_docs != 'true'
+          && !(
+            (
+              github.event_name == 'pull_request'
+              && !(github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831)
+            )
+            || (
+              github.event_name == 'merge_group'
+              && steps.solo_pantalla.outputs.solo_pantalla == 'true'
+            )
+          )
       - name: Migrar plantilla sintética exclusiva de compras
-        if: steps.solo_docs.outputs.only_docs != 'true'
+        if: >-
+          steps.solo_docs.outputs.only_docs != 'true'
+          && !(
+            (
+              github.event_name == 'pull_request'
+              && !(github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831)
+            )
+            || (
+              github.event_name == 'merge_group'
+              && steps.solo_pantalla.outputs.solo_pantalla == 'true'
+            )
+          )
         run: |
           if ! pnpm --filter @opai/db run deploy >/dev/null 2>&1; then
             echo "::error::No se pudo migrar la plantilla sintética de compras."
@@ -129,7 +175,18 @@ jobs:
         env:
           DATABASE_URL_MIGRATE: postgresql://postgres:compras-${{ github.run_id }}-${{ github.run_attempt }}@127.0.0.1:55432/opai_e2e_compras_template
       - name: test:db
-        if: steps.solo_docs.outputs.only_docs != 'true'
+        if: >-
+          steps.solo_docs.outputs.only_docs != 'true'
+          && !(
+            (
+              github.event_name == 'pull_request'
+              && !(github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831)
+            )
+            || (
+              github.event_name == 'merge_group'
+              && steps.solo_pantalla.outputs.solo_pantalla == 'true'
+            )
+          )
         run: .github/scripts/ci-test-db-completo.sh
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
@@ -146,19 +203,10 @@ jobs:
         env:
           VERIFICAR: ${{ needs.verificar.result }}
           TEST_DB: ${{ needs.test-db.result }}
-          DB_EN_PR: ${{ (github.head_ref == 'ci/estabilidad-test-db' || github.event.pull_request.number == 831) && github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           echo "verificar=$VERIFICAR test-db=$TEST_DB event=$GITHUB_EVENT_NAME"
-          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
-            test "$VERIFICAR" = success
-            if [ "$DB_EN_PR" = true ]; then
-              test "$TEST_DB" = success
-            else
-              test "$TEST_DB" = skipped
-            fi
-          else
-            test "$VERIFICAR" = success && test "$TEST_DB" = success
-          fi
+          test "$VERIFICAR" = success
+          test "$TEST_DB" = success
 
   presupuesto:
     name: build · presupuesto de JS
