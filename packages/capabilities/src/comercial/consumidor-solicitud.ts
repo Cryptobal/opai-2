@@ -1,5 +1,6 @@
 import { renderizar } from "@opai/domain";
 
+import { avisarPushTrasCampana } from "../core/push-campana";
 import { defineConsumidor } from "../eventos/consumidores";
 import { comunicableDe, plantillaVigente } from "../core/comunicaciones/resolver";
 import { variablesDe } from "../core/comunicaciones/variables";
@@ -25,6 +26,7 @@ export const consumidorSolicitudCreada = defineConsumidor({
     if (!plantilla) return;
     const datos = await variablesDe(ctx, ev);
     const rutas = e.variables.map((v) => v.ruta);
+    const enlace = typeof datos["url"] === "string" ? datos["url"] : null;
     await ctx.db.notificacion.create({
       data: {
         tenantId: ctx.tenantId,
@@ -32,8 +34,9 @@ export const consumidorSolicitudCreada = defineConsumidor({
         eventoId: ev.id,
         titulo: renderizar(plantilla.asunto, datos, rutas),
         cuerpo: renderizar(plantilla.cuerpo, datos, rutas),
-        enlace: typeof datos["url"] === "string" ? datos["url"] : null,
+        enlace,
       },
     });
+    await avisarPushTrasCampana(ctx, responsableId, ev.tipo, enlace);
   },
 });

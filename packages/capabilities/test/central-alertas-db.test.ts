@@ -76,8 +76,11 @@ describe.skipIf(omitirSuiteDb())("Central · alertas (db)", () => {
 
   it("abre una alerta nueva, con su hecho en la línea de tiempo y en la bitácora encadenada", async () => {
     const { id } = await abrir(adminA(), inst.A1);
-    const r = await ok<{ alerta: Alerta; eventos: { tipo: string; actorTipo: string }[] }>(adminA(), "central.alertas.obtener", { id });
+    const r = await ok<{ alerta: Alerta & { instalacionNombre: string | null }; eventos: { tipo: string; actorTipo: string }[] }>(adminA(), "central.alertas.obtener", { id });
     expect(r.alerta.estado).toBe("nueva");
+    expect(r.alerta.instalacionNombre).toBe("Bodega");
+    const cola = await ok<{ items: (Alerta & { instalacionNombre: string | null })[] }>(adminA(), "central.alertas.listar", {});
+    expect(cola.items.find((a) => a.id === id)?.instalacionNombre).toBe("Bodega");
     expect(r.eventos).toMatchObject([{ tipo: "abierta", actorTipo: "persona" }]);
     const hechos = await e.admin.bitacora.findMany({ where: { tenantId: t.A, entidadId: id } });
     expect(hechos.map((h) => h.tipo)).toEqual(["central.alerta.abierta"]);

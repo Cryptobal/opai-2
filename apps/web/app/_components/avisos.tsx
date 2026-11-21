@@ -2,6 +2,7 @@
 
 import { Toaster } from "@opai/ds";
 
+import { ClientePushNativo } from "./pwa/cliente-push-nativo";
 import { ClientePwa } from "./pwa/cliente-pwa";
 
 /**
@@ -15,6 +16,7 @@ export function Avisos() {
     <>
       <Toaster />
       <ClientePwa />
+      <ClientePushNativo />
     </>
   );
 }
