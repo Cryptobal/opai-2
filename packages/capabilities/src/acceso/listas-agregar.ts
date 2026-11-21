@@ -8,12 +8,14 @@ import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { huellasCandidatas, huellaVigente } from "./huella";
+import { vigenciaLista } from "./listas-alcance";
 import {
   documentoSchema,
   entradaListaSchema,
   PERMISO_LISTAS,
   TIPOS_LISTA,
   TIPOS_REGISTRO,
+  quien,
   vistaEntrada,
 } from "./comun";
 
@@ -69,9 +71,12 @@ export async function agregarEntrada(
   });
   if (ya) throw reglaDeNegocio("Este documento ya está en la lista.");
   const h = huellaVigente({ tenantId: ctx.tenantId, tipo: d.tipo, clave: d.clave });
+  const { vigenteDesde, vigenteHasta } = vigenciaLista(i.tipo, i.vigenteDesde, i.vigenteHasta);
   const data = {
     tenantId: ctx.tenantId,
+    alcance: "instalacion" as const,
     instalacionId: i.instalacionId,
+    grupoId: null,
     tipo: i.tipo,
     docTipo: d.tipo,
     huella: h.huella,
@@ -80,13 +85,14 @@ export async function agregarEntrada(
     nombre: i.nombre ?? null,
     motivo: i.motivo ?? null,
     tiposRegistro: i.tiposRegistro,
-    vigenteDesde: i.vigenteDesde ? new Date(i.vigenteDesde) : null,
-    vigenteHasta: i.vigenteHasta ? new Date(i.vigenteHasta) : null,
+    vigenteDesde,
+    vigenteHasta,
     dias: i.dias,
     desdeMin: i.desdeMin ?? null,
     hastaMin: i.hastaMin ?? null,
     usoUnico: i.usoUnico,
     cuentaId,
+    agregadaPor: cuentaId ? null : quien(ctx),
   };
   if (dryRun) return vistaEntrada({ ...data, id: "00000000-0000-0000-0000-000000000000" });
   return vistaEntrada(await ctx.db.entradaLista.create({ data }));

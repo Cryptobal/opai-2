@@ -1,10 +1,8 @@
-import { Estado } from "@opai/ds";
-
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import { permisosNomina } from "../../_componentes/datos";
+import { EstadoMiDt } from "../../_componentes/estado-mi-dt";
 import { ListaCumplimientoDt, type MovimientoMiDt } from "../../_componentes/lista-cumplimiento-dt";
 
 export const metadata = { title: "Finiquitos · Cumplimiento DT" };
@@ -27,25 +25,21 @@ export default function FiniquitosMiDt() {
         return { r, permisos, tenantId: identidad?.actual?.tenantId ?? "" };
       }}
     >
-      {(d) => (
-        <Estado state={estadoPantalla(d.r)} variante="lista">
-          {d.r.ok ? (
-            (() => {
-              const items = d.r.data.items.filter((m) => m.movimientoTipo === "finiquito");
-              const pendientes = items.filter((m) => !m.registrado).length;
-              return (
-                <ListaCumplimientoDt
-                  items={items}
-                  pendientes={pendientes}
-                  gestiona={d.permisos.cumplimientoDt}
-                  tenantId={d.tenantId}
-                  variante="finiquitos"
-                />
-              );
-            })()
-          ) : null}
-        </Estado>
-      )}
+      {(d) => {
+        const items = d.r.ok ? d.r.data.items.filter((m) => m.movimientoTipo === "finiquito") : [];
+        const pendientes = items.filter((m) => !m.registrado).length;
+        return (
+          <EstadoMiDt r={d.r} variante="lista">
+            <ListaCumplimientoDt
+              items={items}
+              pendientes={pendientes}
+              gestiona={d.permisos.cumplimientoDt}
+              tenantId={d.tenantId}
+              variante="finiquitos"
+            />
+          </EstadoMiDt>
+        );
+      }}
     </PaginaPortal>
   );
 }

@@ -1,6 +1,6 @@
 import { Upload } from "lucide-react";
 
-import { ListScreen } from "@opai/ds";
+import { ListScreen, type EstadoPantalla } from "@opai/ds";
 import type { Vocabulario } from "@opai/domain";
 
 import { MenuDocumento } from "@/app/_components/documentos/menu-documento-diferido";
@@ -17,7 +17,7 @@ import { etiquetasEntidad, OPCIONES_ESTADO, OPCIONES_ORDEN } from "./etiquetas";
 import { columnasDe, TarjetaDocumento } from "./filas";
 
 type Props = {
-  state: "ready" | "error" | "forbidden";
+  state: EstadoPantalla;
   items: FilaExplorador[];
   siguiente: string | null;
   total: number | null;

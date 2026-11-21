@@ -31,6 +31,7 @@ function identidad(): Identidad {
     membresias: [actual],
     modulosActivos: [],
     acceso: { permisosRol: null, excepciones: [], instalaciones: null },
+    personaVinculada: false,
   };
 }
 
@@ -130,7 +131,8 @@ describe("seguimiento del shell", () => {
 
   it("Hoy solo se activa en /supervisor, Instalaciones incluye sus fichas", () => {
     const i = identidad();
-    i.actual = membresia({ portales: ["supervisor"] });
+    i.actual = membresia({ portales: ["supervisor"], rol: "supervisor" });
+    i.acceso.instalaciones = [];
     const [hoy, instalaciones] = datosShell(i, "supervisor").nav;
     expect(hoy).toBeDefined();
     expect(instalaciones).toBeDefined();

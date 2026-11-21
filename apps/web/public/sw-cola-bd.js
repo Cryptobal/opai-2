@@ -88,3 +88,15 @@ async function descartarTodo(db, claves) {
     t.onerror = () => mal(t.error);
   });
 }
+
+/** Copia cifrada de evacuación (CAR-631 · R26): se borra al revocar el dispositivo. */
+async function borrarEvacuacionLocal(db) {
+  const t = db.transaction("meta", "readwrite");
+  const meta = t.objectStore("meta");
+  meta.delete("evacuacion-cifrado");
+  meta.delete("evacuacion-dek");
+  await new Promise((ok, mal) => {
+    t.oncomplete = () => ok();
+    t.onerror = () => mal(t.error);
+  });
+}

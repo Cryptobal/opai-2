@@ -20,6 +20,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP.",
   "app/_acciones/candidatos-documento.ts#buscarCandidatosDocumento":
     "Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre.",
+  "app/(erp)/accesos/_componentes/config/cartel-accion.ts#cartelPrivacidad":
+    "Prepara el cartel de privacidad con acceso.privacidad.cartel y el QR de la política pública (herramienta MCP existente).",
   "app/api/geo/mapa/route.ts":
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
   "app/api/pauta/export/route.ts":

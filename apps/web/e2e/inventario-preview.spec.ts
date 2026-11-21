@@ -79,7 +79,8 @@ test.describe("@preview inventario", () => {
     await page.goto("/inventario/entregas");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "inventario-entregas");
-    await page.goto("/inventario/entregas?nueva=1");
+    await page.getByRole("link", { name: "Nueva entrega" }).click();
+    await expect(page).toHaveURL(/\/inventario\/entregas\?nueva=1/);
     await expect(page.getByRole("dialog")).toBeVisible();
     await capturar(page, info, "inventario-entrega-nueva");
     expect(errores).toEqual([]);

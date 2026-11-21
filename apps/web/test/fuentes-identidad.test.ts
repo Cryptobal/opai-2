@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   tenant: vi.fn(),
   acceso: vi.fn(),
   instalacion: vi.fn(),
+  persona: vi.fn(),
 }));
 vi.mock("@opai/db", () => ({
   forTenant: (id: string) => {
@@ -15,6 +16,7 @@ vi.mock("@opai/db", () => ({
       supervisorInstalacion: { findMany: mocks.instalaciones },
       accesoCliente: { findUnique: mocks.acceso },
       instalacion: { findMany: mocks.instalacion },
+      persona: { findFirst: mocks.persona },
     };
   },
   forUser: vi.fn(),
@@ -27,6 +29,7 @@ const SIN_ROLES_EXTRA = { rolesAdicionales: [], gruposUsuarios: [] };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.persona.mockResolvedValue(null);
 });
 it("carga módulos y acceso del tenant/usuario elegido con una sola consulta", async () => {
   mocks.membership.mockResolvedValue({
@@ -41,6 +44,7 @@ it("carga módulos y acceso del tenant/usuario elegido con una sola consulta", a
   expect(await fuentesReales.accesoConModulos!("tenant-propio", "usuario")).toEqual({
     modulosActivos: ["comercial"],
     modulosSoloLectura: [],
+    personaVinculada: false,
     acceso: {
       permisosRol: ["core:cuentas.read"],
       excepciones: [{ permiso: "core:personas.read", conceder: false }],

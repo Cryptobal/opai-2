@@ -17,11 +17,7 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const { usuario, actual, membresias } = identidad;
   const vertical = actual?.tenant.vertical ?? "";
   const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
-  const visibles = portalesVisibles(
-    actual?.portales ?? [],
-    tieneAccesoAPortal(identidad, "platform"),
-    identidad.modulosActivos,
-  );
+  const visibles = portalesVisibles(identidad);
   // Acceso efectivo al portal actual, calculado igual que `tieneAccesoAPortal` del servidor
   // (plataforma por `platformRole`, los demás por la membresía). Lo usa el shell para no ofrecer
   // búsqueda, ⌘K ni Preferencias sin acceso (`marco-shell.tsx`), y aquí para la navegación.
