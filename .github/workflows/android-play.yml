@@ -61,9 +61,7 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
-      - name: Sincronizar Capacitor (producción)
-        env:
-          OPAI_APP_ENTORNO: produccion
+      - name: Sincronizar Capacitor (test)
         run: pnpm --filter @opai/movil sincronizar
 
       - name: Inyectar google-services.json y keystore
