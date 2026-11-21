@@ -1,7 +1,13 @@
 // Apertura de la lista de ingreso o de salida de un vínculo (CAR-355). La llama el consumidor de
 // eventos; es idempotente (índice único por vínculo y tipo) y nunca falla por la plantilla: una
 // plantilla inválida cae a la de la vertical de la empresa.
-import { esContinuidad, plantillaEfectiva, venceDe, type TipoProcesoPersona } from "@opai/domain";
+import {
+  conPasoDevolverInventario,
+  esContinuidad,
+  plantillaEfectiva,
+  venceDe,
+  type TipoProcesoPersona,
+} from "@opai/domain";
 
 import { ajuste } from "../config";
 import type { Contexto } from "../../types";
@@ -49,7 +55,10 @@ export async function abrirProceso(
       ? ctx.db.membership.findFirst({ where: { userId: responsableId, estado: "activa" }, select: { userId: true } })
       : null,
   ]);
-  const pasos = plantillaEfectiva(propia, tenant?.vertical ?? "", tipo);
+  let pasos = plantillaEfectiva(propia, tenant?.vertical ?? "", tipo);
+  if (tipo === "salida" && ctx.modulosActivos.includes("inventario")) {
+    pasos = conPasoDevolverInventario(pasos, true);
+  }
   if (!pasos.length || !persona) return null;
   const base = dia(tipo === "ingreso" ? v.inicio : (v.termino ?? new Date()));
   const nombre = `${persona.nombres} ${persona.apellidos}`.trim();

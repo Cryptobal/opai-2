@@ -25,6 +25,7 @@ export {
   SIGLAS_NEUTRAS,
   toleranciaAtrasoS,
 } from "./pauta";
+export { capacidadesInventario, PERMISOS_INVENTARIO } from "./inventario";
 export {
   ajustesDesempeno,
   capacidadesDesempeno,
