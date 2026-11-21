@@ -102,6 +102,7 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "usuario_licencia",
   ),
   modulo("cpq", "CPQ", "Cotizaciones y propuestas.", "por_unidad", "usuario_licencia"),
+  modulo("inventario", "Inventario", "Activos, ropa y entregas con devolución.", "fijo", null),
   modulo(
     "desempeno",
     "Desempeño",
