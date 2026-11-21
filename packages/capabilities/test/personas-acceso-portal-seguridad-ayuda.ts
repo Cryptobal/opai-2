@@ -29,7 +29,7 @@ export async function personaActiva(
       rut: o.rut,
       estado: "activo",
       emailLaboral: o.email ?? null,
-      usuarioId: o.usuarioId ?? undefined,
+      ...(o.usuarioId !== undefined ? { usuarioId: o.usuarioId } : {}),
     },
   });
   return id;
