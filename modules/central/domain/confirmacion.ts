@@ -23,8 +23,10 @@ export const PLAZO_RESPUESTA_MIN = 5;
 export const PLAZO_RESPUESTA_MAX = 60;
 export const PLAZO_RESPUESTA_DEFECTO = 15;
 
-/** El guardia puede cambiar de respuesta hasta que marque; «sin respuesta» también acepta una llegada tarde. */
-export function puedeResponder(_estado: EstadoConfirmacion): boolean {
+/** El guardia puede cambiar de respuesta hasta el inicio del turno; no después de «sin respuesta». */
+export function puedeResponder(estado: EstadoConfirmacion, turnoInicio: Date, ahora = new Date()): boolean {
+  if (estado === "sin_respuesta") return false;
+  if (ahora.getTime() >= turnoInicio.getTime()) return false;
   return true;
 }
 

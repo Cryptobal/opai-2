@@ -16,6 +16,7 @@ import {
   PLAZO_RESPUESTA_MIN,
 } from "../domain/confirmacion";
 import { PERMISO_ATENDER, uuidSchema } from "./esquemas";
+import { dondeAlcance } from "./util";
 
 const PERMISO_CONFIG = "central:config.manage";
 
@@ -56,7 +57,7 @@ export const confirmacionMarcarSinRespuesta = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
-    const fila = await ctx.db.centralConfirmacionTurno.findFirst({ where: { id: i.id } });
+    const fila = await ctx.db.centralConfirmacionTurno.findFirst({ where: { id: i.id, ...dondeAlcance(ctx) } });
     if (!fila) throw noEncontrado("La confirmación");
     if (!puedeMarcarSinRespuesta(fila.estado as EstadoConfirmacion))
       throw reglaDeNegocio("Solo un aviso pendiente puede quedar sin respuesta.");

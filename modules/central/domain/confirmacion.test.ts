@@ -21,12 +21,21 @@ describe("confirmación de turno · dominio", () => {
     expect(estadoPorRespuesta("con_problema", "x".repeat(201))).toBeNull();
   });
 
-  it("solo pendiente pasa a sin respuesta; el guardia puede responder en cualquier estado", () => {
+  it("solo pendiente pasa a sin respuesta", () => {
     expect(puedeMarcarSinRespuesta("pendiente")).toBe(true);
     expect(puedeMarcarSinRespuesta("confirmado")).toBe(false);
-    for (const e of ["pendiente", "confirmado", "sin_respuesta"] as const) {
-      expect(puedeResponder(e)).toBe(true);
-    }
+  });
+
+  it("no admite respuesta tras sin respuesta o si el turno ya empezó", () => {
+    const inicio = new Date("2026-06-01T08:00:00Z");
+    const antes = new Date("2026-06-01T07:30:00Z");
+    const despues = new Date("2026-06-01T08:30:00Z");
+    expect(puedeResponder("pendiente", inicio, antes)).toBe(true);
+    expect(puedeResponder("confirmado", inicio, antes)).toBe(true);
+    expect(puedeResponder("en_camino", inicio, antes)).toBe(true);
+    expect(puedeResponder("con_problema", inicio, antes)).toBe(true);
+    expect(puedeResponder("pendiente", inicio, despues)).toBe(false);
+    expect(puedeResponder("sin_respuesta", inicio, antes)).toBe(false);
   });
 
   it("expone valores por defecto de la política", () => {

@@ -5,9 +5,9 @@ import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabiliti
 import { type EstadoConfirmacion, estadoPorRespuesta, puedeResponder, RESPUESTAS_GUARDIA } from "../domain/confirmacion";
 import { politicaConfirmacion } from "./confirmacion-politica";
 import { uuidSchema } from "./esquemas";
-import { PERMISO_ATENDER, PERMISO_VER } from "./esquemas";
+import { PERMISO_ATENDER } from "./esquemas";
 import { esTrabajador, personaPropia } from "./mensajes-util";
-import { ID_VISTA_PREVIA } from "./util";
+import { dondeAlcance, ID_VISTA_PREVIA } from "./util";
 
 /** Registra (o reutiliza) la confirmación de un turno esperado y marca el aviso enviado (CAR-752). */
 export const confirmacionRegistrar = defineCapability({
@@ -25,7 +25,7 @@ export const confirmacionRegistrar = defineCapability({
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
     const turno = await ctx.db.turnoEsperado.findFirst({
-      where: { id: i.turnoEsperadoId, vigente: true },
+      where: { id: i.turnoEsperadoId, vigente: true, ...dondeAlcance(ctx) },
       select: { id: true, personaId: true, instalacionId: true, inicio: true },
     });
     if (!turno?.personaId) throw noEncontrado("El turno esperado");
@@ -76,13 +76,20 @@ export const confirmacionResponder = defineCapability({
   async handler(ctx, i, { dryRun }) {
     if (!i.id && !i.turnoEsperadoId) throw reglaDeNegocio("Indica la confirmación o el turno esperado.");
     const filtro = i.id ? { id: i.id } : { turnoEsperadoId: i.turnoEsperadoId! };
-    const fila = await ctx.db.centralConfirmacionTurno.findFirst({ where: filtro });
+    const fila = await ctx.db.centralConfirmacionTurno.findFirst({ where: { ...filtro, ...dondeAlcance(ctx) } });
     if (!fila) throw noEncontrado("La confirmación");
     if (esTrabajador(ctx)) {
       const propia = await personaPropia(ctx);
       if (fila.personaId !== propia.id) throw noEncontrado("La confirmación");
-    } else if (!ctx.autorizar(PERMISO_VER)) throw reglaDeNegocio("No tienes permiso para responder por otro guardia.");
-    if (!puedeResponder(fila.estado as EstadoConfirmacion)) {
+    } else if (!ctx.autorizar(PERMISO_ATENDER)) {
+      throw reglaDeNegocio("Responder por otro guardia exige el permiso central:alertas.atender.");
+    }
+    const turno = await ctx.db.turnoEsperado.findFirst({
+      where: { id: fila.turnoEsperadoId, vigente: true },
+      select: { inicio: true },
+    });
+    if (!turno) throw noEncontrado("El turno esperado");
+    if (!puedeResponder(fila.estado as EstadoConfirmacion, turno.inicio)) {
       throw reglaDeNegocio("Esta confirmación ya no admite respuesta.");
     }
     const estado = estadoPorRespuesta(i.respuesta, i.motivo);
