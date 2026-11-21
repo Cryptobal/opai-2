@@ -17,12 +17,7 @@ import { SelectorPortal } from "./selector";
 export async function ContenidoEntrar() {
   const identidad = await identidadActual();
   if (!identidad) redirect(destinoSinSesion(await dispositivoActual()));
-  const plataforma = identidad.usuario.platformRole !== null;
-  const portales = portalesVisibles(
-    identidad.actual?.portales ?? [],
-    plataforma,
-    identidad.modulosActivos,
-  );
+  const portales = portalesVisibles(identidad);
   const destino = destinoConSesion(portales, (await cookies()).get(COOKIE_PORTAL)?.value);
   if (destino) redirect(destino);
   return <SelectorPortal portales={portales} />;

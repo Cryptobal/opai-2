@@ -138,6 +138,10 @@
       "motivo": "Borde de ejecución: resuelve el alcance por filas del contacto de un cliente (instalaciones de su acceso) para el contexto de capacidades; es el cableado de fuentes.ts, no una pantalla."
     },
     {
+      "archivo": "lib/persona-vinculada.ts",
+      "motivo": "Borde de identidad (CAR-746): consulta mínima si el usuario tiene persona vinculada para el portal Trabajador; usada solo desde fuentes.ts."
+    },
+    {
       "archivo": "lib/cron.ts",
       "motivo": "Autenticación y despacho de los crons de Vercel (ADR-029)."
     },

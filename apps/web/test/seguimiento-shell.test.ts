@@ -31,6 +31,7 @@ function identidad(): Identidad {
     membresias: [actual],
     modulosActivos: [],
     acceso: { permisosRol: null, excepciones: [], instalaciones: null },
+    personaVinculada: false,
   };
 }
 

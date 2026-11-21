@@ -21,6 +21,11 @@ const PORTALES: { id: PortalVerComo; etiqueta: string; vacio: string }[] = [
     vacio: "No hay personas con acceso al portal del trabajador.",
   },
   { id: "cliente", etiqueta: "Cliente", vacio: "No hay contactos con acceso al Portal Cliente." },
+  {
+    id: "supervisor",
+    etiqueta: "Supervisor",
+    vacio: "No hay supervisores con acceso a instalaciones.",
+  },
 ];
 
 function Buscador({ portal, q }: { portal: PortalVerComo; q: string }) {
