@@ -105,7 +105,7 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
     const previo = await run(
       ctx(tenantA, ana),
       "core.push.suscribir",
-      { endpoint: "https://fcm.googleapis.com/fcm/send/ana" },
+      { tipo: "web", endpoint: "https://fcm.googleapis.com/fcm/send/ana" },
       { dryRun: true },
     );
     expect(previo).toMatchObject({ ok: true, data: { suscrito: true } });
@@ -114,7 +114,7 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
       "https://fcm.googleapis.com/fcm/send/ana",
       "https://fcm.googleapis.com/fcm/send/vieja",
     ]) {
-      expect(await run(ctx(tenantA, ana), "core.push.suscribir", { endpoint })).toMatchObject({
+      expect(await run(ctx(tenantA, ana), "core.push.suscribir", { tipo: "web", endpoint })).toMatchObject({
         ok: true,
       });
     }
@@ -122,6 +122,7 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
       await e.admin.suscripcionPush.count({ where: { tenantId: tenantA, usuarioId: ana } }),
     ).toBe(2);
     const ajeno = await run(ctx(tenantA, ana), "core.push.suscribir", {
+      tipo: "web",
       endpoint: "https://ejemplo.cl/x",
     });
     expect(ajeno).toMatchObject({ ok: false });
@@ -129,10 +130,12 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
 
   it("otro usuario no quita una suscripción ajena y otra empresa no la ve", async () => {
     const ajeno = await run(ctx(tenantA, beto), "core.push.quitar", {
+      tipo: "web",
       endpoint: "https://fcm.googleapis.com/fcm/send/ana",
     });
     expect(ajeno).toMatchObject({ ok: true, data: { quitadas: 0 } });
     const otra = await run(ctx(tenantB, ana), "core.push.quitar", {
+      tipo: "web",
       endpoint: "https://fcm.googleapis.com/fcm/send/ana",
     });
     expect(otra).toMatchObject({ ok: true, data: { quitadas: 0 } });
@@ -147,6 +150,7 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
       data: {
         tenantId: tenantA,
         usuarioId: beto,
+        tipo: "web",
         endpoint: "https://fcm.googleapis.com/fcm/send/beto",
       },
     });
@@ -173,6 +177,7 @@ describe.skipIf(!urlPropietario)("Núcleo · avisos al celular (Postgres real)",
 
   it("quitar borra la suscripción propia", async () => {
     const r = await run(ctx(tenantA, ana), "core.push.quitar", {
+      tipo: "web",
       endpoint: "https://fcm.googleapis.com/fcm/send/ana",
     });
     expect(r).toMatchObject({ ok: true, data: { quitadas: 1 } });

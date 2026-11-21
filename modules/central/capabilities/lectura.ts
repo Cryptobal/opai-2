@@ -15,7 +15,10 @@ import {
   severidadSchema,
   uuidSchema,
 } from "./esquemas";
+import { nombreInstalacion, nombresInstalaciones, nombrePersona } from "./nombres";
 import { alertaVisible, dondeAlcance, vistaAlerta } from "./util";
+
+const alertaConNombreSchema = alertaSchema.extend({ instalacionNombre: z.string().nullable() });
 
 /** Activas = en la cola (incluye las pospuestas cuyo plazo ya venció, R4a). */
 function dondeVista(vista: "activas" | "pospuestas" | "cerradas" | "todas", ahora: Date) {
@@ -45,7 +48,7 @@ export const alertasListar = defineCapability({
     estado: estadoSchema.optional(),
     instalacionId: uuidSchema.optional(),
   }),
-  output: z.object({ items: z.array(alertaSchema), siguiente: z.string().nullable() }),
+  output: z.object({ items: z.array(alertaConNombreSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -64,7 +67,11 @@ export const alertasListar = defineCapability({
       ...cursorDe(input.cursor, input.limite),
     });
     const p = pagina(filas, input.limite, input.cursor);
-    return { items: p.items.map((a) => vistaAlerta(a, ahora)), siguiente: p.siguiente };
+    const nombres = await nombresInstalaciones(ctx, p.items.map((a) => a.instalacionId));
+    return {
+      items: p.items.map((a) => ({ ...vistaAlerta(a, ahora), instalacionNombre: nombres.get(a.instalacionId) ?? null })),
+      siguiente: p.siguiente,
+    };
   },
 });
 
@@ -75,18 +82,24 @@ export const alertasObtener = defineCapability({
     "Obtiene una alerta de la central con su línea de tiempo completa: quién la abrió, cada cambio de estado, notas y cierre.",
   permiso: PERMISO_VER,
   input: z.object({ id: uuidSchema }),
-  output: z.object({ alerta: alertaSchema, eventos: z.array(eventoSchema), intentos: z.array(intentoSchema) }),
+  output: z.object({
+    alerta: alertaConNombreSchema.extend({ personaNombre: z.string().nullable() }),
+    eventos: z.array(eventoSchema),
+    intentos: z.array(intentoSchema),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const a = await alertaVisible(ctx, input.id);
     const orden = [{ createdAt: "asc" as const }, { id: "asc" as const }];
-    const [eventos, intentos] = await Promise.all([
+    const [eventos, intentos, instalacionNombre, personaNombre] = await Promise.all([
       ctx.db.centralAlertaEvento.findMany({ where: { alertaId: a.id }, orderBy: orden }),
       ctx.db.centralIntento.findMany({ where: { alertaId: a.id }, orderBy: orden, take: 200 }),
+      nombreInstalacion(ctx, a.instalacionId),
+      nombrePersona(ctx, a.personaId),
     ]);
     return {
-      alerta: vistaAlerta(a, new Date()),
+      alerta: { ...vistaAlerta(a, new Date()), instalacionNombre, personaNombre },
       eventos: eventos.map((e) => ({ ...e, actorTipo: e.actorTipo as "persona" | "agente" | "sistema" })),
       intentos,
     };

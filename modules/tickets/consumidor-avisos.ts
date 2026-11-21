@@ -1,4 +1,4 @@
-import { defineConsumidor, type EventoPublicado } from "@opai/capabilities";
+import { avisarPushTrasCampana, defineConsumidor, type EventoPublicado } from "@opai/capabilities";
 
 const ESTADO: Record<string, string> = {
   abierto: "abierto",
@@ -67,8 +67,10 @@ export const consumidorTicketsAvisos = defineConsumidor({
     const activo = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: usuarioId, estado: "activa" }, select: { userId: true } });
     if (!activo) return;
     if (await ctx.db.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId } })) return;
+    const enlace = `/tickets/${t.id}`;
     await ctx.db.notificacion.create({
-      data: { tenantId: ctx.tenantId, usuarioId, eventoId: ev.id, titulo: aviso.titulo, cuerpo: aviso.cuerpo, enlace: `/tickets/${t.id}` },
+      data: { tenantId: ctx.tenantId, usuarioId, eventoId: ev.id, titulo: aviso.titulo, cuerpo: aviso.cuerpo, enlace },
     });
+    await avisarPushTrasCampana(ctx, usuarioId, ev.tipo, enlace);
   },
 });
