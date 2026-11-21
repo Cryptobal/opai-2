@@ -1,6 +1,5 @@
-import { tamanoPagina } from "@/app/_components/maestros/paginacion-cursor";
+import { tamanoPagina, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
-import { POR_PAGINA, vistaPaginaCursor } from "@/app/_components/maestros/paginacion-cursor";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
