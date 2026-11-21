@@ -15,7 +15,7 @@ export type SeccionTerreno = {
   modulo?: keyof ModulosTerreno;
 };
 
-export const SECCIONES_TERRENO: readonly SeccionTerreno[] = [
+const SECCIONES_TERRENO: readonly SeccionTerreno[] = [
   {
     href: "/terreno",
     exacta: true,
