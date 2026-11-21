@@ -8,10 +8,11 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { AccesosCliente, type Instalacion } from "./_componentes/accesos-cliente";
 import type { Vista } from "./_componentes/ruta";
+import type { Visitas } from "./_componentes/visitas-cliente";
 
 export const metadata = { title: tituloPagina("cliente", "Accesos") };
 
-const VISTAS: Vista[] = ["en_sitio", "registros", "listas"];
+const VISTAS: Vista[] = ["en_sitio", "registros", "visitas", "listas"];
 
 /** Listas de una instalación; sin el interruptor de la empresa (FORBIDDEN) quedan en null y la vista lo explica. */
 async function cargarListas(instalacionId: string, lista: string | undefined, cursor: string | undefined) {
@@ -26,7 +27,7 @@ async function cargarListas(instalacionId: string, lista: string | undefined, cu
 
 /**
  * Accesos del Portal Cliente (diseño `ClienteAccesos`): quién está en sitio y los registros de las
- * instalaciones de su cuenta (CAR-481) y sus listas (CAR-538). El alcance lo aplica la capacidad (ADR-022).
+ * instalaciones de su cuenta (CAR-481), sus visitas prerregistradas (CAR-539) y sus listas (CAR-538). El alcance lo aplica la capacidad (ADR-022).
  */
 export default function Accesos({ searchParams }: { searchParams: SearchParams }) {
   return (
@@ -49,14 +50,19 @@ export default function Accesos({ searchParams }: { searchParams: SearchParams }
         if (vista === "listas") {
           const instalacion = elegida ?? instalaciones[0]?.id;
           const listas = instalacion ? await cargarListas(instalacion, p["lista"], cursor) : null;
-          return { items: [], siguiente: null, instalaciones, instalacion, vista, listas };
+          return { items: [], siguiente: null, instalaciones, instalacion, vista, listas, visitas: null };
+        }
+        const filtro = { ...(elegida ? { instalacionId: elegida } : {}), ...(cursor ? { cursor } : {}) };
+        if (vista === "visitas") {
+          const v = await ejecutarComoUsuario<Visitas>("cliente", "acceso.portal_visitas.listar", filtro);
+          const visitas = exigirDatos(v);
+          return { items: [], siguiente: null, instalaciones, instalacion: elegida, vista, listas: null, visitas };
         }
         const r = await ejecutarComoUsuario<Pagina<Registro>>("cliente", "acceso.portal_registros.listar", {
           soloEnSitio: vista === "en_sitio",
-          ...(elegida ? { instalacionId: elegida } : {}),
-          ...(cursor ? { cursor } : {}),
+          ...filtro,
         });
-        return { ...exigirDatos(r), instalaciones, instalacion: elegida, vista, listas: null };
+        return { ...exigirDatos(r), instalaciones, instalacion: elegida, vista, listas: null, visitas: null };
       }}
     >
       {(d) => <AccesosCliente {...d} />}

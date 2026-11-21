@@ -1,4 +1,4 @@
-export type Vista = "en_sitio" | "registros" | "listas";
+export type Vista = "en_sitio" | "registros" | "visitas" | "listas";
 
 /** Ruta de Accesos del Portal Cliente; «En sitio» es la vista por defecto y no va en la URL. */
 export function ruta(q: {

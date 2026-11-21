@@ -12,17 +12,21 @@ import { CamposPrerregistro } from "./campos-prerregistro";
 import type { Prerregistro } from "./datos";
 import { rango } from "./etiquetas";
 
+type Portal = "erp" | "cliente";
+
 type Props = {
   abierto: boolean;
   onCerrar: () => void;
   onRestaurarFoco: () => void;
+  /** ERP usa invitación por visitante; el Portal Cliente no la expone (CAR-539). */
+  portal?: Portal;
   instalaciones: { id: string; nombre: string }[];
   instalacionId?: string;
   hoy: string;
 };
 
 /** Éxito: un enlace a la invitación de cada visitante (primer día) y «Prerregistrar otra». */
-function Listo({ p, otra }: { p: Prerregistro; otra: () => void }) {
+function Listo({ p, otra, portal }: { p: Prerregistro; otra: () => void; portal: Portal }) {
   return (
     <div className="flex flex-col gap-4">
       <Alerta tono="success" titulo="Visita prerregistrada">
@@ -34,12 +38,14 @@ function Listo({ p, otra }: { p: Prerregistro; otra: () => void }) {
         {p.visitantes.map((v) => (
           <li key={v.id} className="flex items-center justify-between gap-3">
             <span className="t-body truncate">{v.nombre}</span>
-            <EnlaceBoton
-              variante="secondary"
-              href={`/accesos/prerregistros/${p.id}/invitacion?visitante=${v.id}&dia=${v.proximoDia ?? p.desde}`}
-            >
-              Ver invitación
-            </EnlaceBoton>
+            {portal === "erp" ? (
+              <EnlaceBoton
+                variante="secondary"
+                href={`/accesos/prerregistros/${p.id}/invitacion?visitante=${v.id}&dia=${p.desde}`}
+              >
+                Ver invitación
+              </EnlaceBoton>
+            ) : null}
           </li>
         ))}
       </ul>
@@ -64,6 +70,7 @@ function Pie(p: { texto: string; listo: boolean; pendiente: boolean; guardar: ()
 
 /** «Prerregistrar» (diseño `Prerregistrar`): hoja a la derecha, a pantalla completa en teléfono. */
 export function HojaPrerregistro({
+  portal = "erp",
   instalaciones,
   instalacionId,
   hoy,
@@ -72,13 +79,15 @@ export function HojaPrerregistro({
   onRestaurarFoco,
 }: Props) {
   const inicial = () => vacio(instalacionId ?? instalaciones[0]?.id ?? "", hoy);
-  const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const { ejecutar, pendiente, error, limpiarError } = useCapacidad(portal);
   const [b, setB] = useState(inicial);
   const [hecho, setHecho] = useState<Prerregistro | null>(null);
   const aviso = avisoPrerregistro(b);
 
   async function guardar() {
-    const r = await ejecutar<Prerregistro>("acceso.prerregistros.crear", entradaPrerregistro(b));
+    const r = await (portal === "cliente"
+      ? ejecutar<Prerregistro>("acceso.portal_visitas.crear", entradaPrerregistro(b))
+      : ejecutar<Prerregistro>("acceso.prerregistros.crear", entradaPrerregistro(b)));
     if (!r) return;
     avisar.exito("Visita prerregistrada");
     setHecho(r);
@@ -118,7 +127,7 @@ export function HojaPrerregistro({
           </Alerta>
         ) : null}
         {hecho ? (
-          <Listo p={hecho} otra={otra} />
+          <Listo p={hecho} otra={otra} portal={portal} />
         ) : (
           <CamposPrerregistro b={b} set={setB} instalaciones={instalaciones} />
         )}
