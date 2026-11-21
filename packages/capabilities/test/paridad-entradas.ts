@@ -93,6 +93,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Identidad: core.invitations.request_new (interna con motivo), sin sesión.",
   "app/correccion/[slug]/[token]/accion.ts#accionResponder":
     "Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador.",
+  "app/marcar/[codigo]/acciones.ts#marcarPorEnlacePublico":
+    "Asistencia (CAR-606): marca pública por enlace de instalación con RUT + PIN; resuelve el código con marcacionPublicaPorCodigo y ejecuta asistencia.marcas.registrar con enlacePublicoValidado; tope por IP que falla cerrado.",
   "app/contingencia/[slug]/[token]/accion.ts#accionResponder":
     "Asistencia: asistencia.contingencias.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial.",
   "app/firmar/[slug]/[token]/acciones.ts#verFirma":
