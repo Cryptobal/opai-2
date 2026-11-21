@@ -1,4 +1,8 @@
+import { idsPortalesUsables } from "@opai/domain";
 import type { Portal } from "@opai/ds";
+
+import type { Identidad } from "@/lib/actor";
+import { contextoPortalesDe } from "@/lib/contexto-portales";
 
 /** Portales de OPAI 2.0. Cada uno tiene su route group; el acceso es por membresía (ADR-016). */
 export const PORTALES: readonly Portal[] = [
@@ -18,19 +22,10 @@ export const ETIQUETA_ROL: Record<string, string> = {
   viewer: "Solo lectura",
 };
 
-/** Portales visibles: los de la membresía actual y Plataforma solo con `platformRole`. */
-export function portalesVisibles(
-  portalesMembresia: readonly string[],
-  plataforma: boolean,
-  modulosActivos: readonly string[] = [],
-): Portal[] {
-  return PORTALES.filter((p) => {
-    if (p.id === "platform") return plataforma;
-    if (p.id === "trabajador") {
-      return portalesMembresia.includes(p.id) && modulosActivos.includes("portal_trabajador");
-    }
-    return portalesMembresia.includes(p.id);
-  });
+/** Portales que la cuenta puede usar de verdad (CAR-746); Terreno nunca aparece aquí. */
+export function portalesVisibles(identidad: Identidad): Portal[] {
+  const ids = new Set(idsPortalesUsables(contextoPortalesDe(identidad)));
+  return PORTALES.filter((p) => ids.has(p.id));
 }
 
 /**

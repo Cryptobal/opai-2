@@ -83,7 +83,13 @@ async function terreno(ctx: Contexto, id: string): Promise<ObjetivoVerComo> {
   return { nombre: i.nombre, userId: null, dispositivoId: d.id };
 }
 
-const POR_PORTAL = { trabajador, cliente, terreno } satisfies Record<
+async function supervisor(ctx: Contexto, id: string): Promise<ObjetivoVerComo> {
+  const userId = await miembroVisible(ctx, { id }, "supervisor");
+  const u = await ctx.db.user.findUnique({ where: { id: userId }, select: { name: true } });
+  return { nombre: u?.name ?? "Supervisor", userId, dispositivoId: null };
+}
+
+const POR_PORTAL = { trabajador, cliente, terreno, supervisor } satisfies Record<
   PortalVerComo,
   (ctx: Contexto, id: string) => Promise<ObjetivoVerComo>
 >;

@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { Identidad } from "@/lib/actor";
+import { membresia } from "./fuentes-falsas";
+
 // Brief 17: la página `/entrar` conecta la sesión y el equipo emparejado con su destino.
 const estado = vi.hoisted(() => ({
-  identidad: null as unknown,
-  equipo: null as unknown,
+  identidad: null as Identidad | null,
+  equipo: null as { estado: string } | null,
   portal: undefined as string | undefined,
 }));
 
@@ -23,8 +26,34 @@ vi.mock("@/app/(entrada)/entrar/selector", () => ({ SelectorPortal: () => null }
 
 import { ContenidoEntrar } from "@/app/(entrada)/entrar/contenido";
 
-function persona(portales: string[]) {
-  return { usuario: { platformRole: null }, actual: { portales }, modulosActivos: [] };
+function identidad(
+  portales: string[],
+  extra: {
+    rol?: string;
+    instalaciones?: string[] | null;
+    personaVinculada?: boolean;
+    modulosActivos?: string[];
+  } = {},
+): Identidad {
+  const actual = membresia({ portales, rol: extra.rol ?? "owner" });
+  return {
+    usuario: {
+      id: "u1",
+      nombre: "U",
+      email: "u@example.test",
+      platformRole: null,
+    },
+    mfaActiva: false,
+    actual,
+    membresias: [actual],
+    modulosActivos: extra.modulosActivos ?? ["portal_trabajador"],
+    acceso: {
+      permisosRol: null,
+      excepciones: [],
+      instalaciones: extra.instalaciones ?? null,
+    },
+    personaVinculada: extra.personaVinculada ?? portales.includes("trabajador"),
+  };
 }
 
 async function destino(): Promise<string> {
@@ -58,15 +87,20 @@ describe("/entrar (página)", () => {
   });
 
   it("con sesión manda la sesión aunque haya equipo", async () => {
-    estado.identidad = persona(["supervisor"]);
+    estado.identidad = identidad(["supervisor"], { rol: "supervisor", instalaciones: [] });
     estado.equipo = { estado: "activo" };
     expect(await destino()).toBe("/supervisor");
   });
 
   it("con varios portales usa el guardado o muestra el selector", async () => {
-    estado.identidad = persona(["erp", "cliente"]);
+    estado.identidad = identidad(["erp", "supervisor"], { rol: "supervisor", instalaciones: [] });
     expect(await destino()).toBe("selector");
-    estado.portal = "cliente";
+    estado.portal = "supervisor";
+    expect(await destino()).toBe("/supervisor");
+  });
+
+  it("contacto de cliente entra directo al Portal Cliente", async () => {
+    estado.identidad = identidad(["cliente"], { rol: "viewer", instalaciones: ["i1"] });
     expect(await destino()).toBe("/cliente");
   });
 });

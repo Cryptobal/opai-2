@@ -1,6 +1,6 @@
 // Coherencia rol-portal de una membresía (ADR-016/033, NÚCLEO-D1). Lógica pura.
 
-import { type Rol } from "./permisos";
+import { esRol, esRolPlataforma, type Rol } from "./permisos";
 
 /** Portales del tenant a los que una membresía puede dar acceso. */
 export const PORTALES_TENANT = ["erp", "supervisor", "trabajador", "terreno", "cliente"] as const;
@@ -52,4 +52,39 @@ export function esMembresiaDeCliente(rolBase: Rol, portales: readonly string[]):
 
 export function esPortalCoherente(rolBase: Rol, portales: readonly string[]): boolean {
   return portalesIncoherentes(rolBase, portales).length === 0;
+}
+
+/** Entrada compartida para saber qué portales puede usar la cuenta (CAR-746). */
+export type ContextoPortalesVisibles = {
+  portalesMembresia: readonly string[];
+  rol: string;
+  platformRole: string | null | undefined;
+  modulosActivos: readonly string[];
+  /** null = ve toda la empresa; array = acotado por instalación (supervisor o cliente). */
+  instalaciones: readonly string[] | null;
+  personaVinculada: boolean;
+};
+
+/** Un portal aparece en el selector solo si la cuenta puede usarlo de verdad (CAR-746). */
+export function puedeUsarPortal(portal: string, c: ContextoPortalesVisibles): boolean {
+  if (portal === "platform") return esRolPlataforma(c.platformRole);
+  if (portal === "terreno") return false;
+  const rol = esRol(c.rol) ? c.rol : null;
+  const soloCliente = rol !== null && esMembresiaDeCliente(rol, c.portalesMembresia);
+  if (portal === "cliente") return soloCliente;
+  if (soloCliente) return false;
+  if (!c.portalesMembresia.includes(portal)) return false;
+  if (portal === "trabajador") {
+    return c.modulosActivos.includes("portal_trabajador") && c.personaVinculada;
+  }
+  if (portal === "supervisor") {
+    return c.rol === "supervisor" || c.instalaciones !== null;
+  }
+  return true;
+}
+
+export function idsPortalesUsables(c: ContextoPortalesVisibles): string[] {
+  const ids: string[] = PORTALES_TENANT.filter((id) => puedeUsarPortal(id, c));
+  if (puedeUsarPortal("platform", c)) ids.push("platform");
+  return ids;
 }
