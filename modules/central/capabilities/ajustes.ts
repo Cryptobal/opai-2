@@ -19,4 +19,29 @@ export const ajustesCentral = z.object({
     permiso: "central:config.manage",
     control: "numero",
   }),
+  confirmacion_anticipacion_min: z.number().int().min(15).max(180).default(60).meta({
+    etiqueta: "Anticipación del aviso de turno (minutos)",
+    ayuda:
+      "Cuántos minutos antes del inicio del turno se envía el aviso con Confirmo, Voy en camino y Tengo un problema. Por defecto 60 (T−60).",
+    grupo: "Confirmación de turno",
+    ambito: "tenant",
+    permiso: "central:config.manage",
+    control: "numero",
+  }),
+  confirmacion_plazo_respuesta_min: z.number().int().min(5).max(60).default(15).meta({
+    etiqueta: "Plazo para responder la confirmación (minutos)",
+    ayuda: "Si el guardia no responde en este plazo, la central trata el turno como sin confirmar.",
+    grupo: "Confirmación de turno",
+    ambito: "tenant",
+    permiso: "central:config.manage",
+    control: "numero",
+  }),
+  confirmacion_franja: z.enum(["noche", "dia", "ambos"]).default("ambos").meta({
+    etiqueta: "Cuándo pedir confirmación",
+    ayuda: "Solo de noche (20:00–08:00), solo de día, o en ambos horarios.",
+    grupo: "Confirmación de turno",
+    ambito: "tenant",
+    permiso: "central:config.manage",
+    control: "seleccion",
+  }),
 });

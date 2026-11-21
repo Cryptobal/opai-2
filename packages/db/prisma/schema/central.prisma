@@ -294,6 +294,48 @@ model CentralAvisoDestinatario {
   @@schema("central")
 }
 
+/// Confirmación previa al turno (CAR-750, fase agéntica F1): un registro por turno esperado del
+/// núcleo. El trabajo T−60 abre el aviso; el guardia responde desde el portal o Terreno.
+model CentralConfirmacionTurno {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  turnoEsperadoId String    @map("turno_esperado_id") @db.Uuid
+  personaId       String    @map("persona_id") @db.Uuid
+  instalacionId   String    @map("instalacion_id") @db.Uuid
+  /// "pendiente" | "confirmado" | "en_camino" | "con_problema" | "sin_respuesta".
+  estado          String    @default("pendiente")
+  /// Motivo corto si respondió «Tengo un problema» (enfermo, transporte, otro).
+  motivo          String?
+  avisoEnviadoEn  DateTime? @map("aviso_enviado_en") @db.Timestamptz(6)
+  plazoVenceEn    DateTime? @map("plazo_vence_en") @db.Timestamptz(6)
+  respondidoEn    DateTime? @map("respondido_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, turnoEsperadoId])
+  @@index([tenantId, instalacionId, plazoVenceEn])
+  @@index([tenantId, personaId])
+  @@map("confirmaciones_turno")
+  @@schema("central")
+}
+
+/// Política de confirmación por instalación (CAR-750): si no hay fila, rigen los ajustes del tenant.
+model CentralConfirmacionPolitica {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  instalacionId       String   @map("instalacion_id") @db.Uuid
+  anticipacionMin     Int      @map("anticipacion_min")
+  plazoRespuestaMin   Int      @map("plazo_respuesta_min")
+  /// "noche" | "dia" | "ambos".
+  franja              String
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, instalacionId])
+  @@map("confirmacion_politicas")
+  @@schema("central")
+}
+
 /// Acuse de recibo (R17, CA7): hecho inmutable «leído y entendido» con hora de servidor.
 model CentralAcuse {
   id        String   @id @default(uuid(7)) @db.Uuid

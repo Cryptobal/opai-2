@@ -1395,6 +1395,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `central.avisos.obtener`
 - `central.cadenas.guardar`
 - `central.cadenas.listar`
+- `central.confirmacion.listar`
+- `central.confirmacion.marcar_sin_respuesta`
+- `central.confirmacion.obtener`
+- `central.confirmacion.politica_guardar`
+- `central.confirmacion.politica_obtener`
+- `central.confirmacion.registrar`
+- `central.confirmacion.responder`
 - `central.mensajes.cerrar`
 - `central.mensajes.enviar`
 - `central.mensajes.listar`
