@@ -18,7 +18,7 @@ const PORTALES: { id: PortalVerComo; etiqueta: string; vacio: string }[] = [
   {
     id: "trabajador",
     etiqueta: "Trabajador",
-    vacio: "No hay personas con acceso al portal del trabajador.",
+    vacio: "No hay personas activas para previsualizar el portal del trabajador.",
   },
   { id: "cliente", etiqueta: "Cliente", vacio: "No hay contactos con acceso al Portal Cliente." },
   {

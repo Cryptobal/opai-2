@@ -50,6 +50,14 @@ export function esMembresiaDeCliente(rolBase: Rol, portales: readonly string[]):
   return rolBase === "viewer" && portales.length === 1 && portales[0] === "cliente";
 }
 
+const PORTALES_TRABAJADOR_MEMBRESIA = ["trabajador", "terreno"] as const;
+
+/** Trabajador del portal: viewer cuyos portales son solo «trabajador» y, si aplica, «terreno» (CAR-803). */
+export function esMembresiaPortalTrabajador(rolBase: Rol, portales: readonly string[]): boolean {
+  if (rolBase !== "viewer" || portales.length === 0 || !portales.includes("trabajador")) return false;
+  return portales.every((p) => (PORTALES_TRABAJADOR_MEMBRESIA as readonly string[]).includes(p));
+}
+
 export function esPortalCoherente(rolBase: Rol, portales: readonly string[]): boolean {
   return portalesIncoherentes(rolBase, portales).length === 0;
 }
@@ -78,9 +86,23 @@ export function puedeUsarPortal(portal: string, c: ContextoPortalesVisibles): bo
     return c.modulosActivos.includes("portal_trabajador") && c.personaVinculada;
   }
   if (portal === "supervisor") {
-    return c.rol === "supervisor" || c.instalaciones !== null;
+    if (!c.portalesMembresia.includes("supervisor")) return false;
+    if (c.rol === "supervisor") return true;
+    if (c.instalaciones !== null) return true;
+    return (
+      esRol(c.rol) && (c.rol === "owner" || c.rol === "admin" || c.rol === "gerente")
+    );
   }
   return true;
+}
+
+/** Alcance inferido al listar «ver como» supervisor (misma regla que la sesión, CAR-746). */
+export function alcanceSupervisorParaRegla(
+  rol: string,
+  conAsignaciones: boolean,
+): readonly string[] | null {
+  if (rol === "supervisor" || conAsignaciones) return [];
+  return null;
 }
 
 export function idsPortalesUsables(c: ContextoPortalesVisibles): string[] {

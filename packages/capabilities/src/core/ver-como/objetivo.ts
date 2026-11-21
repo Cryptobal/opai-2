@@ -7,6 +7,7 @@ import type { Contexto } from "../../types";
 export type ObjetivoVerComo = {
   nombre: string;
   userId: string | null;
+  personaId: string | null;
   dispositivoId: string | null;
 };
 
@@ -24,11 +25,13 @@ async function miembroVisible(
   portal: string,
 ) {
   const m = await ctx.db.membership.findFirst({
-    where: { ...where, estado: "activa" },
+    where: { ...where, tenantId: ctx.tenantId, estado: "activa" },
     select: { userId: true, rol: true, portales: true },
   });
   if (!m || !m.portales.includes(portal))
     throw reglaDeNegocio("Esa persona no tiene acceso activo a ese portal.");
+  if (m.userId === ctx.usuario?.id)
+    throw reglaDeNegocio("Esa persona eres tú: abre el portal directamente.");
   if (!rolVisible(ctx, m.rol))
     throw prohibido("No puedes ver como alguien de un rol superior al tuyo.");
   return m.userId;
@@ -38,14 +41,14 @@ async function trabajador(ctx: Contexto, id: string): Promise<ObjetivoVerComo> {
   if (!ctx.modulosActivos.includes("portal_trabajador"))
     throw reglaDeNegocio("El portal del trabajador no está activo en la empresa.");
   const p = await ctx.db.persona.findFirst({
-    where: { id, archivadaEn: null, anonimizadaEn: null },
-    select: { nombres: true, apellidos: true, usuarioId: true },
+    where: { id, estado: "activo", archivadaEn: null, anonimizadaEn: null },
+    select: { id: true, nombres: true, apellidos: true, usuarioId: true },
   });
   if (!p) throw noEncontrado("La persona");
-  if (!p.usuarioId)
-    throw reglaDeNegocio("Esa persona aún no tiene acceso al portal del trabajador.");
+  const nombre = `${p.nombres} ${p.apellidos}`;
+  if (!p.usuarioId) return { nombre, userId: null, personaId: p.id, dispositivoId: null };
   const userId = await miembroVisible(ctx, { userId: p.usuarioId }, "trabajador");
-  return { nombre: `${p.nombres} ${p.apellidos}`, userId, dispositivoId: null };
+  return { nombre, userId, personaId: p.id, dispositivoId: null };
 }
 
 /** Por contacto: cada contacto del cliente ve sus propias instalaciones. */
@@ -63,6 +66,7 @@ async function cliente(ctx: Contexto, id: string): Promise<ObjetivoVerComo> {
   return {
     nombre: `${cuenta?.nombre ?? "Cliente"} · ${usuario?.name ?? "Contacto"}`,
     userId,
+    personaId: null,
     dispositivoId: null,
   };
 }
@@ -80,13 +84,13 @@ async function terreno(ctx: Contexto, id: string): Promise<ObjetivoVerComo> {
     select: { id: true },
   });
   if (!d) throw reglaDeNegocio("Esa instalación no tiene un equipo de Terreno emparejado.");
-  return { nombre: i.nombre, userId: null, dispositivoId: d.id };
+  return { nombre: i.nombre, userId: null, personaId: null, dispositivoId: d.id };
 }
 
 async function supervisor(ctx: Contexto, id: string): Promise<ObjetivoVerComo> {
   const userId = await miembroVisible(ctx, { id }, "supervisor");
   const u = await ctx.db.user.findUnique({ where: { id: userId }, select: { name: true } });
-  return { nombre: u?.name ?? "Supervisor", userId, dispositivoId: null };
+  return { nombre: u?.name ?? "Supervisor", userId, personaId: null, dispositivoId: null };
 }
 
 const POR_PORTAL = { trabajador, cliente, terreno, supervisor } satisfies Record<
@@ -103,7 +107,7 @@ export async function objetivoVerComo(
 ): Promise<ObjetivoVerComo> {
   if (ctx.alcance) throw prohibido("«Ver como» es para quien ve toda la empresa.");
   const o = await POR_PORTAL[portal](ctx, id);
-  if (o.userId === porUserId)
+  if (o.userId !== null && o.userId === porUserId)
     throw reglaDeNegocio("Esa persona eres tú: abre el portal directamente.");
   return o;
 }

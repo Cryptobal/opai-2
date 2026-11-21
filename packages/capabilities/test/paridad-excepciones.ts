@@ -248,6 +248,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02).",
   "core.credenciales_terreno.cambiar_pin":
     "Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02).",
+  "core.credenciales_terreno.establecer_pin":
+    "Solo personas: la propia persona fija su primer PIN; ningún agente lo hace por ella (CAR-803, portal trabajador).",
+  "core.credenciales_terreno.mi_estado":
+    "Solo personas: lectura de sesión para saber si falta crear o cambiar el PIN en el portal del trabajador (CAR-803).",
   "core.hechos_terreno.recibir":
     "Interna: el equipo de terreno emparejado la ejecuta sin sesión (su cookie de dispositivo es la credencial) al enviar su cola; un agente no registra hechos de terreno por el equipo. Su lectura es core.hechos_terreno.listar (CAR-78 B3).",
   "core.libro_novedades_equipo.listar":

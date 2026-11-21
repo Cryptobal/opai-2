@@ -6,39 +6,11 @@ import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import { cursorDe, listaSchema, pagina } from "../maestros/comun";
-import { rolVisible } from "./objetivo";
+import { busca, type Item, type Tramo, visibles } from "./objetivos-comun";
+import { trabajador } from "./objetivos-trabajador";
+import { listarSupervisoresVerComo } from "./listar-supervisores";
 
 const itemSchema = z.object({ id: z.string(), nombre: z.string(), detalle: z.string().nullable() });
-type Item = z.infer<typeof itemSchema>;
-type Tramo = { q: string; cursor: string | undefined; limite: number };
-
-/** Con `q` vacío, `contains: ""` calza con todos. */
-const busca = (q: string) => ({ contains: q, mode: "insensitive" as const });
-
-/** Membresías activas en el portal, de rol visible y que no son de quien mira (mismo filtro que iniciar). */
-async function visibles(ctx: Contexto, portal: string) {
-  const filas = await ctx.db.membership.findMany({
-    where: { estado: "activa", portales: { has: portal } },
-    select: { id: true, userId: true, rol: true },
-  });
-  return filas.filter((m) => rolVisible(ctx, m.rol) && m.userId !== ctx.usuario?.id);
-}
-
-async function trabajador(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
-  const usuarios = (await visibles(ctx, "trabajador")).map((m) => m.userId);
-  const personas = await ctx.db.persona.findMany({
-    where: {
-      usuarioId: { in: usuarios },
-      archivadaEn: null,
-      anonimizadaEn: null,
-      OR: [{ nombres: busca(q) }, { apellidos: busca(q) }],
-    },
-    select: { id: true, nombres: true, apellidos: true },
-    orderBy: { id: "asc" },
-    ...cursorDe(cursor, limite),
-  });
-  return personas.map((p) => ({ id: p.id, nombre: `${p.nombres} ${p.apellidos}`, detalle: null }));
-}
 
 /** Un contacto por fila: cada uno ve sus propias instalaciones. */
 async function cliente(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
@@ -95,41 +67,12 @@ async function terreno(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Ite
   }));
 }
 
-async function supervisor(ctx: Contexto, { q, cursor, limite }: Tramo): Promise<Item[]> {
-  const asignados = new Set(
-    (
-      await ctx.db.supervisorInstalacion.findMany({
-        select: { membershipId: true },
-        distinct: ["membershipId"],
-      })
-    ).map((f) => f.membershipId),
-  );
-  const filas = await ctx.db.membership.findMany({
-    where: {
-      estado: "activa",
-      portales: { has: "supervisor" },
-      OR: [{ rol: "supervisor" }, { id: { in: [...asignados] } }],
-    },
-    select: { id: true, userId: true, rol: true },
-    orderBy: { id: "asc" },
-    ...cursorDe(cursor, limite),
-  });
-  const visibles = filas.filter((m) => rolVisible(ctx, m.rol) && m.userId !== ctx.usuario?.id);
-  const usuarios = await ctx.db.user.findMany({
-    where: { id: { in: visibles.map((m) => m.userId) } },
-    select: { id: true, name: true },
-  });
-  const filtro = q.toLowerCase();
-  return visibles
-    .map((m) => ({
-      id: m.id,
-      nombre: usuarios.find((u) => u.id === m.userId)?.name ?? "Supervisor",
-      detalle: m.rol === "supervisor" ? null : "Por instalación",
-    }))
-    .filter((i) => !filtro || i.nombre.toLowerCase().includes(filtro));
-}
-
-const POR_PORTAL = { trabajador, cliente, terreno, supervisor } satisfies Record<
+const POR_PORTAL = {
+  trabajador,
+  cliente,
+  terreno,
+  supervisor: listarSupervisoresVerComo,
+} satisfies Record<
   PortalVerComo,
   (ctx: Contexto, t: Tramo) => Promise<Item[]>
 >;

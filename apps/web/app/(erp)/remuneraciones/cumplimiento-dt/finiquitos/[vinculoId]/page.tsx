@@ -1,11 +1,9 @@
-import { Estado } from "@opai/ds";
-
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { FiniquitoDetalle, type DatosFiniquito } from "../../../_componentes/finiquito-detalle";
+import { EstadoMiDt } from "../../../_componentes/estado-mi-dt";
 
 export const metadata = { title: "Finiquito · Cumplimiento DT" };
 
@@ -23,7 +21,7 @@ export default function FiniquitoVinculo({ params }: { params: Promise<{ vinculo
       }}
     >
       {(d) => (
-        <Estado state={estadoPantalla(d.r)} variante="detalle">
+        <EstadoMiDt r={d.r} variante="detalle">
           {d.r.ok ? (
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -35,7 +33,7 @@ export default function FiniquitoVinculo({ params }: { params: Promise<{ vinculo
               <FiniquitoDetalle datos={d.r.data} />
             </div>
           ) : null}
-        </Estado>
+        </EstadoMiDt>
       )}
     </PaginaPortal>
   );

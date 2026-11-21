@@ -17,6 +17,10 @@ export type DetalleTenant = {
     version: string;
     dependencias: string[];
     estado: string | null;
+    complemento: boolean;
+    padreId: string | null;
+    area: string | null;
+    etiquetaCobro: string | null;
   }[];
   administradores: {
     membershipId: string;
