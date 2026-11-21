@@ -59,6 +59,18 @@ async function cerrarPanel(page: Page, panel: ReturnType<Page["locator"]>) {
 test.describe("@preview agente: panel único con contexto de ficha (CAR-547)", () => {
   test.skip(!password, "Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
 
+  test("el bloque comercial no enlaza a Configuración › Agentes (CAR-799)", async ({ page }, info) => {
+    await entrar(page);
+    await marcoNuevo(page);
+    await abrirPrimeraCuenta(page);
+    await expect(
+      page.getByRole("heading", { name: "Comercial y cotizaciones", exact: true }),
+    ).toBeVisible();
+    await expect(page.locator('main a[href*="/configuracion/grupo/agentes"]')).toHaveCount(0);
+    await expect(page.locator("main").getByRole("link", { name: "Agente interno" })).toHaveCount(0);
+    await capturar(page, info, "cuenta-ficha-comercial-sin-agente");
+  });
+
   test("desde la ficha y desde la barra se ve el mismo contexto", async ({ page }, info) => {
     await entrar(page);
     await marcoNuevo(page);
