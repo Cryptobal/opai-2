@@ -10,6 +10,7 @@ import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { fecha } from "@/lib/fechas";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
+import { AvisoTurnosTerreno } from "./aviso-turnos-terreno";
 import { SupervisoresInstalacion } from "./supervisores-instalacion";
 
 /** Resumen de una instalación (07): ubicación y vigencia con mapa, puestos activos, supervisores y campos de la empresa. */
@@ -20,6 +21,9 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
   );
   return (
     <div className="flex flex-col gap-4">
+      <Suspense fallback={null}>
+        <AvisoTurnosTerreno i={i} />
+      </Suspense>
       <SeccionTarjeta
         titulo="Ubicación y vigencia"
         accion={
