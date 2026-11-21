@@ -25,6 +25,19 @@ El APK queda en `nativo/android/app/build/outputs/apk/debug/app-debug.apk`.
 
 Fuentes en `assets/`: el logo actual de OPAI, el monograma de `scripts/generar-iconos-pwa.ts` (decisión de Carlos, 14-nov-2026). Los archivos de `nativo/android/app/src/main/res` y de `nativo/ios/App/App/Assets.xcassets` salen de esas fuentes. Si cambia el logo, se reemplazan las fuentes y se regeneran esos archivos.
 
+## Push nativo (FCM / APNs)
+
+El cableado de Google está listo en Android; **no versiones** los archivos con claves del proyecto Firebase:
+
+| Plataforma | Archivo (fuera del repo) | Ubicación |
+| ---------- | ------------------------ | --------- |
+| Android | `google-services.json` | `nativo/android/app/google-services.json` |
+| iOS | `GoogleService-Info.plist` | `nativo/ios/App/App/GoogleService-Info.plist` (agrégalo al target en Xcode) |
+
+Carlos los obtiene en la consola de Firebase para `cl.opai.app`. En el servidor, `FIREBASE_SERVICE_ACCOUNT` (JSON de cuenta de servicio) en Vercel habilita el emisor FCM HTTP v1; sin esa variable el backend no envía push nativo y no falla.
+
+Tras colocar los archivos: `pnpm --filter @opai/movil sincronizar`.
+
 ## Reglas
 
 - Nada de secretos aquí: la firma para tiendas usa llaves que guarda Carlos fuera del repositorio.
